@@ -195,10 +195,61 @@ test.describe("admin assistant — a sent question leaves the box", () => {
   });
 });
 
-test.describe("admin assistant — the microphone speaks the panel's language", () => {
+/* Renat, 13.09.2026: «When in the assistant it seems to want to show me a
+   "subject" instead it shows [Object object]». The confirm card's heading is
+   `a.title` — and three of the actions the assistant may propose carry a
+   TRILINGUAL `title` ({RU,ET,EN}: the set's name, the article's name), because
+   that is what the prompt asks them for. esc() stringified the object.
+   «Предложи набор…» is the everyday path into it. */
+test.describe("admin assistant — the card names what it is proposing", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(139) });
+
+  const SET_TITLE = "Набор для бороды — масло и бальзам";
+
+  test("a set the assistant proposes is named in the card, never printed as a raw object", async ({ page }) => {
+    await page.route("**/api/assistant/**", async (route) => {
+      if (route.request().method() === "GET") {
+        return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          reply: "Собрал набор для бороды из двух товаров. Подтвердите — откроется редактор наборов.",
+          product_ids: [],
+          tab: "goods",
+          action: {
+            type: "propose_bundle",
+            // exactly the shape sanitizeAction() builds (actions.ts, triText)
+            title: { RU: SET_TITLE, ET: "Habemekomplekt — õli ja palsam", EN: "Beard set — oil and balm" },
+            desc: { RU: "Масло и бальзам в одном наборе.", ET: "Õli ja palsam ühes komplektis.", EN: "Oil and balm in one set." },
+            cat: "beard",
+            items: [
+              { id: "proraso-wood-spice-beard-balm-100ml", variant: 0, qty: 1 },
+              { id: "captain-fawcett-beard-oil-cf-332-private-stock", variant: 0, qty: 1 },
+            ],
+          },
+        }),
+      });
+    });
+    await loginAsAdmin(page);
+    const panel = await openAssistant(page);
+    await panel.locator("[data-admq]").fill("предложи набор для бороды");
+    await panel.locator("[data-admsend]").click();
+
+    const card = page.locator("[data-aians] .adm-propose");
+    await expect(card).toBeVisible();
+    // the heading is the set's Russian name — the whole card, not just it,
+    // must be free of a stringified object
+    await expect(card.locator(".adm-propose__t")).toHaveText(SET_TITLE);
+    expect(await card.innerText()).not.toMatch(/\[object /i);
+  });
+});
+
+test.describe("admin assistant — the microphone starts on the panel's language", () => {
   test.use({ extraHTTPHeaders: ipHeaders(132) });
 
-  test("an Estonian panel asks for Estonian, and the button is named in it", async ({ page }) => {
+  test("an Estonian panel asks for Estonian, says so on the button, and the mic is named in it", async ({ page }) => {
     await stubSpeech(page, "");
     await loginAsAdmin(page);
     await adminLang(page, "ET");
@@ -206,11 +257,57 @@ test.describe("admin assistant — the microphone speaks the panel's language", 
 
     const mic = panel.locator("[data-admvoice]");
     await expect(mic).toHaveAttribute("aria-label", "Häälsisestus");
+    // …and the language it will listen for is on screen before he taps it
+    await expect(panel.locator("[data-admvoicelang]")).toHaveText("ET");
     await mic.click();
     expect(await page.evaluate(() => (window as unknown as W).__rec.lang)).toBe("et-EE");
     await expect(panel.locator("[data-admq]")).toHaveAttribute("placeholder", "Kuulan…");
     await mic.click();
     await expect(mic).toHaveAttribute("aria-pressed", "false");
+  });
+});
+
+/* Renat, 13.09.2026: «when I ask in russian, but my admin is in English — it
+   tries to find english words for what I am saying in russian.» The panel's
+   language was the language the recogniser was told to listen for; now that is
+   only where the button starts, and one tap moves it. */
+test.describe("admin assistant — the microphone listens in the language he chose", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(140) });
+
+  test("one tap on the language button, and an English panel hears Russian — and remembers", async ({ page }) => {
+    await stubSpeech(page, "");
+    await loginAsAdmin(page);
+    await adminLang(page, "EN");
+    const panel = await openAssistant(page);
+
+    const lang = panel.locator("[data-admvoicelang]");
+    const mic = panel.locator("[data-admvoice]");
+    // it starts where it always did — the panel's language
+    await expect(lang).toHaveText("EN");
+    await expect(lang).toHaveAttribute("title", "Voice input language");
+
+    // one tap: the next of the three, and the button says which
+    await lang.click();
+    await expect(lang).toHaveText("RU");
+    await mic.click();
+    expect(await page.evaluate(() => (window as unknown as W).__rec.lang)).toBe("ru-RU");
+    await page.evaluate(() => (window as unknown as W).__rec.say("какие заказы ждут отправки", true));
+    await expect(panel.locator("[data-admq]")).toHaveValue("какие заказы ждут отправки");
+    await mic.click();
+    await expect(mic).toHaveAttribute("aria-pressed", "false");
+
+    // …and it is still Russian after a reload, without following the panel back
+    // (the pane's own open/closed state is remembered too, so it may be back
+    // on screen already — admPanesSave)
+    await page.reload();
+    if (!(await page.locator(".adm-asst").isVisible())) await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-asst")).toBeVisible();
+    const again = page.locator("[data-admvoicelang]");
+    await expect(again).toHaveText("RU");
+    await again.click();
+    await expect(again).toHaveText("ET");   // three of them, in a ring
+    await again.click();
+    await expect(again).toHaveText("EN");
   });
 });
 
@@ -292,10 +389,10 @@ async function visual(page: Page): Promise<{ top: number; height: number; scale:
 
 /** An element's box in layout px — getBoundingClientRect(), which a pinch-zoom
  *  does not change, where Playwright's own boundingBox() may follow the zoom. */
-async function rect(page: Page, sel: string): Promise<{ top: number; bottom: number; height: number; width: number }> {
+async function rect(page: Page, sel: string): Promise<{ top: number; bottom: number; left: number; height: number; width: number }> {
   return page.evaluate((s: string) => {
     const r = document.querySelector(s)!.getBoundingClientRect();
-    return { top: r.top, bottom: r.bottom, height: r.height, width: r.width };
+    return { top: r.top, bottom: r.bottom, left: r.left, height: r.height, width: r.width };
   }, sel);
 }
 
@@ -329,12 +426,22 @@ test.describe("admin assistant — the sheet above the keyboard", () => {
     const foot = await rect(page, ".adm-asst__foot");
     expect(foot.bottom).toBeLessThanOrEqual(sheet.bottom + 0.5);
     expect(foot.bottom).toBeLessThanOrEqual(500);
-    for (const sel of ["[data-admq]", "[data-admsend]", "[data-admattach]"]) {
+    for (const sel of ["[data-admq]", "[data-admsend]", "[data-admattach]", "[data-admvoice]", "[data-admvoicelang]"]) {
       await expect(panel.locator(sel)).toBeVisible();
       const r = await rect(page, sel);
       expect(r.bottom, sel).toBeLessThanOrEqual(500);
       expect(r.top, sel).toBeGreaterThanOrEqual(foot.top - 0.5);
+      // …and inside the screen sideways: the compose row gained the language
+      // button, and 375 px is the width it has to fit in
+      expect(r.left, sel).toBeGreaterThanOrEqual(-0.5);
+      expect(r.left + r.width, sel).toBeLessThanOrEqual(375.5);
+      // a thumb's target on a phone (README § Constraints)
+      expect(Math.round(r.width), sel).toBeGreaterThanOrEqual(44);
+      expect(Math.round(r.height), sel).toBeGreaterThanOrEqual(44);
     }
+    // nothing spilling sideways off the page either
+    const spill = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(spill, "the assistant's sheet scrolls sideways at 375 px").toBeLessThanOrEqual(1);
     // the messages are the part that scrolls, between the head and the compose row
     const body = panel.locator(".adm-asst__body");
     expect(await body.evaluate((el) => getComputedStyle(el).overflowY)).toBe("auto");

@@ -2189,6 +2189,7 @@
       "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Häälsisestus", "Слушаю…": "Kuulan…",
+      "Язык голосового ввода": "Häälsisestuse keel",
       "Микрофон запрещён — разрешите его в настройках браузера для этого сайта":
         "Mikrofon on keelatud — lubage see brauseri seadetes selle saidi jaoks",
       "Микрофон здесь недоступен": "Mikrofon pole siin saadaval",
@@ -4718,6 +4719,7 @@
       "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Voice input", "Слушаю…": "Listening…",
+      "Язык голосового ввода": "Voice input language",
       "Микрофон запрещён — разрешите его в настройках браузера для этого сайта":
         "The microphone is blocked — allow it in the browser's settings for this site",
       "Микрофон здесь недоступен": "The microphone is not available here",
@@ -7179,6 +7181,10 @@
     mailLang: "",    // letter language; "" = never chosen here → Russian. admPanesLoad() brings back the last one
     mailTo: "",      // address typed into «отправить тест на…»
     mailDraft: null, // unsaved subject/intro/signature edits, by letter+language
+    /* The language the assistant's microphone listens in: "" = never chosen
+       here → the panel's. admPanesLoad() brings back the last one, and once it
+       is set it stops following the panel — see admVoiceLang(). */
+    voiceLang: "",
     admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded
     /* The assistant is a floating button now, not a permanent third column —
        so it starts closed, and admPanesSave() remembers it per machine. */
@@ -7810,6 +7816,38 @@
      double-quoted today, but one single-quoted attribute would silently make
      this wrong, and the e-mail templates already escape all five. */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  /* One line of readable text out of whatever the assistant's model actually
+     sent (Renat, 13.09.2026: «it seems to want to show me a "subject" instead
+     it shows [Object object]»).
+
+     The model writes JSON, and half the fields the panel prints are asked for
+     in three languages — a set's name, an article's name, the banner's
+     words — so what arrives under `title` is very often {RU,ET,EN} and not a
+     sentence. String() and esc() are happy to stringify that object, and
+     «[object Object]» is what the owner reads. Every place that puts a
+     model-written value into a sentence goes through here instead:
+
+       · a string stays itself;
+       · a trilingual object becomes its Russian (then Estonian, then English)
+         — the owner reads Russian, and a name is a name in any of the three;
+       · anything else — a number, an array, a nested object, null — becomes
+         "", so the caller's own fallback («Предпросмотр изменения», the slug,
+         «—») is what shows. A missing word is a small bug; a word that says
+         "[object Object]" is the panel telling the owner it is broken.
+
+     Not folded into esc() on purpose: esc() is the HTML escaper and is called
+     on hundreds of the panel's OWN strings, where an object really is a
+     programming mistake worth seeing. This is the door for text that came
+     from the model. */
+  function txt(v) {
+    if (typeof v === "string") return v;
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      var one = v.RU || v.ET || v.EN;
+      return typeof one === "string" ? one : "";
+    }
+    return "";
+  }
 
   /* ---------- analytics agent: first-party events, privacy-first ----------
      One helper, called from the handful of places named in docs/analytics.md
@@ -9661,7 +9699,17 @@
     if (/^\/(?!\/)[^\s<>"']*$/.test(v)) return v;
     return null;
   }
-  /** The inline card the «Товар» button's marker turns into on the storefront. */
+  /** The inline card the «Товар» button's marker turns into on the storefront.
+   *
+   *  In the language the article is being read in (Renat, 13.09.2026: «The
+   *  products added into the text of the blog post are in russian»). The
+   *  catalogue is written in Russian — «Bio Botanical Shampoo — шампунь», «от
+   *  12,90 €» — and this card was the one product name on the page that never
+   *  went through the shop's own name translation: `.blog__prodname` is not in
+   *  NAME_CTX, so translateTree() walked past it with allowName=false and
+   *  handed an English reader a Russian tail. Translating here rather than
+   *  adding a selector to NAME_CTX keeps the card right on the server-rendered
+   *  article too, where there is no translateTree at all. */
   function blogProductHTML(id) {
     var p = productsById([id])[0];
     if (!p) return "";
@@ -9669,10 +9717,22 @@
     return '<button class="blog__prod" data-go-product="' + esc(p.id) + '">' +
         media(p, 0, "ph blog__prodimg") +
         '<span class="blog__prodtx">' +
-          '<span class="blog__prodname">' + esc(p.brand) + " " + esc(p.name) + "</span>" +
-          '<span class="blog__prodprice num">' + (p.priceFrom ? "от " : "") +
-            eur(pro != null ? pro : p.price) + "</span>" +
+          '<span class="blog__prodname">' + esc(blogProductName(p, S.lang)) + "</span>" +
+          '<span class="blog__prodprice num">' + esc(blogProductPrice(p, S.lang)) + "</span>" +
         "</span></button>";
+  }
+  /** «Kevin.Murphy PLUMPING.WASH — шампунь» → «… — shampoo» for an EN reader.
+   *  trText with allowName is exactly what a catalogue card's own name gets
+   *  (NAME_CTX / trName); RU gets its own words back untouched. */
+  function blogProductName(p, L) {
+    return trText(p.brand + " " + p.name, L || "RU", true);
+  }
+  /** «от 12,90 €» → «alates 12,90 €» / «from 12,90 €» — the one Russian word
+   *  in a price line, and the same UI_RX rule the catalogue's prices use. */
+  function blogProductPrice(p, L) {
+    var pro = proPrice(p, 0);
+    var money = eur(pro != null ? pro : p.price);
+    return p.priceFrom ? trText("от " + money, L || "RU", false) : money;
   }
   function blogCleanNodes(parent, depth, cards) {
     var out = "", kids = parent.childNodes, i;
@@ -11003,39 +11063,39 @@
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       });
   }
-  /**
-   * The row the owner has just published or hidden, moved in the list that is
-   * already on screen.
-   *
-   * Renat, 13.09.2026: «publishing a review takes time». It did, and not
-   * because of the write: the tap threw the WHOLE list away (`S.admReviews =
-   * null`), which is the same value as «never asked», so the screen fell back
-   * to its grey skeleton and stayed there until GET /api/admin/reviews had
-   * answered — a round trip spent asking the server something the panel had
-   * just told it. The list is not wrong after a tap; it is one row out of
-   * date, and this is that row. The fetch still follows, underneath, and has
-   * the last word.
-   */
-  function admReviewLocal(id, status) {
+  /* One review's new state written straight onto the list the screen is
+     already drawing, instead of throwing that list away (Renat, 13.09.2026:
+     publishing a review «works but takes time»).
+
+     Until now a publish set S.admReviews = null. That blanked the whole queue
+     to a skeleton and all three counters to zero, made admCustomersScreen()
+     fire a GET of up to 100 full review rows in the same tick as the PATCH,
+     and made the PATCH's own `loadAdminReviews(true)` fire a second one — two
+     or three round trips, a skeleton the owner watches, and a race where the
+     first GET can read the table before the update commits while the second is
+     swallowed by the _busy guard and never corrects it.
+
+     None of it was needed: the panel has the row in its hands, the counts move
+     by exactly one, and a row whose status changed has left the tab it was
+     listed under (the list is one status' worth — loadAdminReviews sends
+     S.admRevFilter to the server). The customer card next door has always done
+     precisely this (moderateCustReview). Answers false when it cannot — an
+     undo of a row that has already left the list — and the caller then falls
+     back to dropping the cache, exactly as before. */
+  function admReviewApplyLocal(id, status) {
     var data = S.admReviews;
-    if (!data || !Array.isArray(data.reviews)) return;
+    if (!data || !data.reviews || data.error) return false;
+    var list = data.reviews, at = -1, i;
+    for (i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) { at = i; break; }
+    if (at < 0) return false;
+    var was = list[at].status || "pending";
+    if (was === status) return false;
     var counts = data.counts || (data.counts = { pending: 0, approved: 0, rejected: 0 });
-    for (var i = 0; i < data.reviews.length; i++) {
-      var r = data.reviews[i];
-      if (String(r.id) !== String(id)) continue;
-      var was = r.status || "pending";
-      if (was !== status) {
-        if (counts[was] > 0) counts[was] -= 1;
-        counts[status] = (counts[status] || 0) + 1;
-      }
-      r.status = status;
-      /* The list is one of three queues («Новые» · «Опубликованные» ·
-         «Отклонённые»), and the row has just left the one being shown — so it
-         leaves the list too, which is exactly what the server's own answer
-         will say a moment later. */
-      if (S.admRevFilter && S.admRevFilter !== status) data.reviews.splice(i, 1);
-      return;
-    }
+    counts[was] = Math.max(0, (counts[was] || 0) - 1);
+    counts[status] = (counts[status] || 0) + 1;
+    list[at].status = status;
+    if (S.admRevFilter && S.admRevFilter !== status) list.splice(at, 1);
+    return true;
   }
   /* Publishing or hiding a review is a quick, reversible edit: it applies at
      once and the toast offers to take it back (README § State). That is why it
@@ -11523,11 +11583,15 @@
   function blogProductLinkHTML(id, L) {
     var p = productsById([id])[0];
     if (!p) return "";
-    var pro = proPrice(p, 0);
-    var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
     var href = "/shop2" + (SEG_OF_LANG[L] || "") + "/p/" + encodeURIComponent(p.id) + "/";
+    /* The words, in the language the text around them is written in — the
+       same two helpers the storefront card uses, so a card in the Estonian
+       article reads Estonian in the editor, in the saved HTML, for a crawler
+       and for a reader without JS, not only after the storefront has swapped
+       it (Renat, 13.09.2026). The link already pointed at the right language's
+       product page; only its words did not follow. */
     return '<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
-      esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>";
+      esc(blogProductName(p, L)) + " — " + esc(blogProductPrice(p, L)) + "</a>";
   }
   function blogInsertProduct(id) {
     var rd = richDraft();
@@ -11928,8 +11992,8 @@
     langs.forEach(function (L) {
       apiSend("/api/admin/ai/text/", "POST", { task: "seo", lang: L, input: blogSeoInput(d, L) }).then(function (r) {
         if (r.status === 200 && r.body.ok && r.body.text) {
-          if (r.body.text.title) d.seoTitle[L] = String(r.body.text.title).slice(0, 70);
-          if (r.body.text.description) d.seoDesc[L] = String(r.body.text.description).slice(0, 170);
+          if (txt(r.body.text.title)) d.seoTitle[L] = txt(r.body.text.title).slice(0, 70);
+          if (txt(r.body.text.description)) d.seoDesc[L] = txt(r.body.text.description).slice(0, 170);
           if (S.adminBlogEdit === d && L === (S.adminBlogLang || "RU")) blogSeoPatch(d, L);
           okN++;
         } else if (r.status === 401) { SRV.admin = false; render(); }
@@ -11978,8 +12042,8 @@
       products whose cards now stand in the text, in their order — what the
       toast under admBlogWriteFull() names. */
   function blogGenApplyFull(d, tx) {
-    d.title.RU = String(tx.title || "").slice(0, 200);
-    d.excerpt.RU = String(tx.excerpt || "").slice(0, 500);
+    d.title.RU = txt(tx.title).slice(0, 200);
+    d.excerpt.RU = txt(tx.excerpt).slice(0, 500);
     /* The article places its own product cards now (src/lib/ai-prompts.ts,
        the count and the places held by src/lib/blog-cards.ts), and all the
        model was given is an id: the marker it wrote is bare, so the picture,
@@ -11989,7 +12053,7 @@
        a card: an id this panel does not know rebuilds to nothing at all,
        which is the second door in front of an invented product (the route
        filtered against its own slice first). */
-    var wrote = blogCardsOut(String(tx.body || ""));
+    var wrote = blogCardsOut(txt(tx.body));
     d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
     if (Array.isArray(tx.tags) && tx.tags.length) d.tagsText = tx.tags.map(String).join(", ");
     // the ids it listed, plus the ids it put a card next to — a card standing
@@ -11998,8 +12062,8 @@
       // only a product this panel knows — the route filtered against its slice, this is the second door
       if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
     });
-    if (tx.seo && tx.seo.title) d.seoTitle.RU = String(tx.seo.title).slice(0, 70);
-    if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
+    if (tx.seo && txt(tx.seo.title)) d.seoTitle.RU = txt(tx.seo.title).slice(0, 70);
+    if (tx.seo && txt(tx.seo.description)) d.seoDesc.RU = txt(tx.seo.description).slice(0, 170);
     if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);
     // once each: productsById() skips an id the panel does not know, i.e. a card that rebuilt to nothing
     return productsById(wrote.cards.filter(function (id, i) { return wrote.cards.indexOf(id) === i; }));
@@ -12018,11 +12082,11 @@
     }).then(function (r) {
       var tx = r.status === 200 && r.body.ok && r.body.text;
       if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
-      if (tx.title) d.title[L] = String(tx.title).slice(0, 200);
-      if (tx.excerpt) d.excerpt[L] = String(tx.excerpt).slice(0, 500);
-      if (tx.body) d.body[L] = blogCleanHtml(blogCardsIn(String(tx.body), src.cards, L));
-      if (tx.seo && tx.seo.title) d.seoTitle[L] = String(tx.seo.title).slice(0, 70);
-      if (tx.seo && tx.seo.description) d.seoDesc[L] = String(tx.seo.description).slice(0, 170);
+      if (txt(tx.title)) d.title[L] = txt(tx.title).slice(0, 200);
+      if (txt(tx.excerpt)) d.excerpt[L] = txt(tx.excerpt).slice(0, 500);
+      if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(txt(tx.body), src.cards, L));
+      if (tx.seo && txt(tx.seo.title)) d.seoTitle[L] = txt(tx.seo.title).slice(0, 70);
+      if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
     });
   }
   function admBlogWriteFull(d, topic, hint) {
@@ -14197,12 +14261,14 @@
         if (typeof p.ai === "boolean") S.admAi = p.ai;
         // one of the three, spelled out: anything else and mailLang() keeps Russian
         if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
+        // …and the microphone's, the same shape and for the same reason
+        if (["RU", "ET", "EN"].indexOf(p.voicelang) >= 0) S.voiceLang = p.voicelang;
       }
     } catch (e) {}
   }
   function admPanesSave() {
     try {
-      localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang }));
+      localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang, voicelang: S.voiceLang }));
     } catch (e) {}
   }
   admPanesLoad();
@@ -16053,29 +16119,72 @@
      iPhone since iOS 14.5 — so there is no server, no key and no cost. A
      browser without it (Firefox) simply gets no button. One tap listens, a
      second tap or a pause stops; what was heard is left in the box for the
-     owner to read, fix and send himself — it is never sent on its own. The
-     language follows the panel's: a Russian panel hears Russian.
+     owner to read, fix and send himself — it is never sent on its own.
+
+     WHICH LANGUAGE IT LISTENS FOR (Renat, 13.09.2026: «when I ask in russian,
+     but my admin is in English — it tries to find english words for what I am
+     saying in russian»). It used to follow S.lang, the panel's own language,
+     and that is the wrong thing to follow: the panel's language is a setting
+     about labels, chosen once; the language he is speaking is a fact about
+     this sentence. Speech recognition cannot guess — `rec.lang` is an input,
+     not an output — so somebody has to say, and it has to be him.
+
+     So there is a second, tiny button beside the microphone showing RU, ET or
+     EN, and that is the language it listens in. One tap moves to the next of
+     the three (so any language is at most two taps away, and the common case —
+     leave it alone — is nought), and the button itself is the answer to «which
+     language is it listening for», visible without opening anything, before he
+     taps the microphone and not after. Until he touches it, it shows the
+     panel's language, so nothing changes for someone who never needs it; once
+     he has chosen, the choice sticks and stops following the panel, because he
+     has now said something the panel's setting cannot say. Remembered in the
+     panel's own preferences key, beside «Письма»'s language.
 
      The running recognition and what the box held when it started live
      here, not in the DOM: a render in between (a probe landing, the products
      list arriving) rebuilds the box, and the rebuilt box is drawn from them. */
   var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
   var ADM_VOICE_LANG = { RU: "ru-RU", ET: "et-EE", EN: "en-GB" };
+  var ADM_VOICE_ORDER = ["RU", "ET", "EN"];
   var admVoice = null, admVoiceBase = "";
+  /** The language the microphone listens in: his own choice, else the panel's. */
+  function admVoiceLang() {
+    return ADM_VOICE_ORDER.indexOf(S.voiceLang) >= 0 ? S.voiceLang : (ADM_VOICE_LANG[S.lang] ? S.lang : "RU");
+  }
+  /** One tap: the next of the three, and from now on it is his choice, not the panel's. */
+  function admVoiceLangNext() {
+    var i = ADM_VOICE_ORDER.indexOf(admVoiceLang());
+    S.voiceLang = ADM_VOICE_ORDER[(i + 1) % ADM_VOICE_ORDER.length];
+    admPanesSave();
+    /* A language changed mid-sentence is a new sentence: the browser reads
+       `lang` once, at start(), so the running recognition would keep the old
+       one and the button would be lying. Stop, and let him tap again. */
+    if (admVoice) admVoiceStop();
+    admVoicePaint();
+  }
   function admVoiceMicHTML() {
     if (!SpeechRec) return "";
-    return '<button class="adm-asst__mic' + (admVoice ? " is-on" : "") + '" data-admvoice aria-pressed="' +
+    /* No aria-label on the language button on purpose: its own text (RU / ET /
+       EN) is its accessible name, which is the one thing a screen reader has
+       to read out here. `title` carries the explanation, and translateTree
+       translates it like any other. */
+    return '<span class="adm-asst__mics">' +
+      '<button class="adm-asst__mic' + (admVoice ? " is-on" : "") + '" data-admvoice aria-pressed="' +
       (admVoice ? "true" : "false") + '" aria-label="Голосовой ввод" title="Голосовой ввод">' +
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-      '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>';
+      '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>' +
+      '<button class="adm-asst__miclang" data-admvoicelang title="Язык голосового ввода">' +
+      esc(admVoiceLang()) + "</button></span>";
   }
   function admVoicePlaceholder() { return admVoice ? "Слушаю…" : "Спросите обычными словами"; }
   /* the button and the placeholder, patched in place — a full render would
      take the caret out of the box the owner is about to edit */
   function admVoicePaint() {
     var b = document.querySelector("[data-admvoice]"), q = document.querySelector("[data-admq]");
+    var l = document.querySelector("[data-admvoicelang]");
     if (b) { b.classList.toggle("is-on", !!admVoice); b.setAttribute("aria-pressed", admVoice ? "true" : "false"); }
+    if (l) l.textContent = admVoiceLang();
     if (q) q.placeholder = trText(admVoicePlaceholder(), S.lang);
   }
   /* what was heard so far — interim words included, so the box moves while
@@ -16123,7 +16232,8 @@
     try { rec = new SpeechRec(); } catch (e) { toast("Микрофон здесь недоступен"); return; }
     var q = document.querySelector("[data-admq]");
     admVoiceBase = ((q && q.value) || S.adminQ || "").replace(/\s+$/, "");
-    rec.lang = ADM_VOICE_LANG[S.lang] || "ru-RU";
+    // the language the button beside it shows — his choice, not the panel's
+    rec.lang = ADM_VOICE_LANG[admVoiceLang()] || "ru-RU";
     rec.interimResults = true;
     rec.continuous = false;     // a pause ends it, like a sentence does
     rec.maxAlternatives = 1;
@@ -16220,8 +16330,10 @@
     // goes back to the control that opened it (settleModalFocus / keydown)
     return '<div class="adm-confirm" role="dialog" aria-modal="true" aria-label="Подтвердите изменение">' +
       '<div class="adm-confirm__card">' +
-        '<div class="adm-confirm__t">' + esc(a.title || "Подтвердите изменение") + "</div>" +
-        '<div class="adm-confirm__d">' + esc(a.detail || actionText(a)) + "</div>" +
+        // txt(): the overlay twin of confirmCard()'s heading — the same card
+        // lifted onto a scrim, so the same door in front of a model's object
+        '<div class="adm-confirm__t">' + esc(txt(a.title) || "Подтвердите изменение") + "</div>" +
+        '<div class="adm-confirm__d">' + esc(txt(a.detail) || actionText(a)) + "</div>" +
         /* One action needs a number before it happens: «Вернуть деньги» may
            send back part of the order. The field is prefilled with everything
            that is left, so the common case is still one tap. */
@@ -17831,8 +17943,8 @@
   }
   /** The Russian letter into the draft — the cards rebuilt by the same two functions an article's are. */
   function newsApplyWritten(d, tx) {
-    if (tx.subject) d.subject.RU = String(tx.subject).slice(0, 200);
-    var wrote = blogCardsOut(String(tx.body || ""));
+    if (txt(tx.subject)) d.subject.RU = txt(tx.subject).slice(0, 200);
+    var wrote = blogCardsOut(txt(tx.body));
     d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
     if (!d.title && d.subject.RU) d.title = d.subject.RU.slice(0, 120);
   }
@@ -17845,8 +17957,8 @@
     }).then(function (r) {
       var tx = r.status === 200 && r.body.ok && r.body.text;
       if (!tx || !(tx.title || tx.body)) throw new Error(newsGenErrText(r));
-      if (tx.title) d.subject[L] = String(tx.title).slice(0, 200);
-      if (tx.body) d.body[L] = blogCleanHtml(blogCardsIn(String(tx.body), src.cards, L));
+      if (txt(tx.title)) d.subject[L] = txt(tx.title).slice(0, 200);
+      if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(txt(tx.body), src.cards, L));
     });
   }
   function newsWrite(d, brief) {
@@ -22645,8 +22757,8 @@
         if (r.status === 200 && r.body.ok && r.body.text) {
           var hooks = SEO_HOOKS[L] || SEO_HOOKS.RU;
           var ti = document.querySelector(hooks[0]), de = document.querySelector(hooks[1]);
-          if (ti && r.body.text.title) ti.value = r.body.text.title;
-          if (de && r.body.text.description) de.value = r.body.text.description;
+          if (ti && txt(r.body.text.title)) ti.value = txt(r.body.text.title);
+          if (de && txt(r.body.text.description)) de.value = txt(r.body.text.description);
           okN++;
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else failed = (r.body && r.body.error) || "error";
@@ -26761,9 +26873,12 @@
        previous status when the toast's «Отменить» sends the entry back. */
     else if (a.type === "moderate_review") {
       apiSend("/api/admin/reviews/", "PATCH", { id: a.id, status: a.value }).then(function (r) {
-        if (!(r.status === 200 && r.body.ok)) toast("Не получилось сохранить отзыв");
+        // it went through and the screen already shows exactly this — the list
+        // is only worth fetching again when the server disagreed with it
+        if (r.status === 200 && r.body.ok) return;
+        toast("Не получилось сохранить отзыв");
         loadAdminReviews(true);
-      }).catch(noop);
+      }).catch(function () { loadAdminReviews(true); });
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
     else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
@@ -27492,10 +27607,10 @@
        lines list what is in the set, because that is the whole of what the
        owner is being asked to look at. */
     if (a.type === "propose_bundle") {
-      return "Набор «" + ((a.title && a.title.RU) || "") + "»: " + bundlePartsText(a.items);
+      return "Набор «" + txt(a.title) + "»: " + bundlePartsText(a.items);
     }
     if (a.type === "set_bundle") {
-      var sbName = (a.title && a.title.RU) || a.id;
+      var sbName = txt(a.title) || a.id;
       return "Набор «" + sbName + "»: " + bundlePartsText(a.items) +
         (a.price != null ? " · " + eur(a.price) : "");
     }
@@ -27543,7 +27658,7 @@
         "\nФото появится на странице товара" + (a.main ? ", в каталоге, в поиске и в письмах" : "") + ". Отменить можно в журнале.";
     }
     if (a.type === "set_post_cover") {
-      return "Обложка статьи «" + (a.title || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
+      return "Обложка статьи «" + (txt(a.title) || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
     }
     // assistant-work
     if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
@@ -27572,11 +27687,13 @@
     // shows — there is no undo entry to read it back from later
     // the short form — the model named a topic, the panel writes the article
     if (a.type === "draft_post" && a.topic && !a.title) {
-      return "Статья целиком на тему «" + a.topic + "»" + (a.hint ? " · " + a.hint : "") +
+      // txt(): the model is asked for one Russian line and sometimes sends
+      // {RU,ET,EN} — «на тему «[object Object]»» is not a topic
+      return "Статья целиком на тему «" + txt(a.topic) + "»" + (txt(a.hint) ? " · " + txt(a.hint) : "") +
         "\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.";
     }
     if (a.type === "draft_post") {
-      var bTitle = (a.title && (a.title.RU || a.title.ET || a.title.EN)) || "—";
+      var bTitle = txt(a.title) || "—";
       return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
         (a.seo ? " · заголовок и описание для Google" : "");
     }
@@ -27931,9 +28048,9 @@
        opposite call are the whole of it, and srvPush() carries both ways. */
     else if (a.type === "moderate_review") {
       entry.prev = { type: "moderate_review", id: a.id, name: a.name, value: a.prev, prev: a.value };
-      // the row moves now, the list confirms itself underneath (admReviewLocal)
-      admReviewLocal(a.id, a.value);
-      loadAdminReviews(true);
+      // the row moves on the list the screen is drawing; only a row that is
+      // not on it any more costs a refetch (admReviewApplyLocal)
+      if (!admReviewApplyLocal(a.id, a.value)) S.admReviews = null;
     }
     /* «Маркетинг → Подарочные карты»: the denominations on sale. The whole
        list travels, so undo re-sends the previous one — same reasoning as the
@@ -28051,7 +28168,7 @@
     else if (a.type === "toggle_promo") { admPromoLocal(a.code, a.value); loadAdminPromos(true); }
     // phase 3: a review has no demo copy either — srvPush() below is the undo.
     // `a` is entry.prev here, so a.value is the status being restored.
-    else if (a.type === "moderate_review") { admReviewLocal(a.id, a.value); loadAdminReviews(true); }
+    else if (a.type === "moderate_review") { if (!admReviewApplyLocal(a.id, a.value)) S.admReviews = null; }
     else if (a.type === "set_gift_amounts") { DEMO.giftAmounts = a.value.slice(); }
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
@@ -28078,9 +28195,15 @@
      `overlay: true` and screenAdmin() lifts the very same card onto a scrim —
      a card over the page on a desktop, a sheet at the bottom on a phone. */
   function confirmCard(a) {
+    /* txt(), not esc() straight: this card is the one the ASSISTANT renders,
+       so `a` is whatever the model proposed — and `title` on three of its
+       actions (propose_bundle, set_bundle, draft_post) is the trilingual name
+       the prompt asks for, not this card's heading. It printed as «[object
+       Object]» (Renat, 13.09.2026). Same for `detail`, which nothing sets on
+       an assistant action today and which would land in the same place. */
     return '<div class="adm-propose">' +
-      '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
-      '<div class="adm-propose__d">' + esc(a.detail || actionText(a) || "Изменений нет") + "</div>" +
+      '<div class="adm-propose__t">' + esc(txt(a.title) || "Предпросмотр изменения") + "</div>" +
+      '<div class="adm-propose__d">' + esc(txt(a.detail) || actionText(a) || "Изменений нет") + "</div>" +
       /* What is about to leave, in the owner's own words — «Написать клиенту»
          is the one action whose whole content he typed himself, and a
          «Отправить?» with the letter out of sight is a question he cannot
@@ -28327,7 +28450,7 @@
      «Написать статью целиком» runs, and opens in that editor as it is
      written — the owner watches it fill in, reads it and publishes. */
   function startArticleFromAssistant(a) {
-    var topic = String(a.topic || "").trim();
+    var topic = txt(a.topic).trim();
     if (!topic) return;
     S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
     S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
@@ -30322,7 +30445,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -31105,9 +31228,9 @@
         descBtn.disabled = false; descBtn.textContent = descLabel;
         if (r.status === 200 && r.body.ok && r.body.text) {
           var ru = document.querySelector("[data-eddescru]");
-          var body = r.body.text.description || "";
+          var body = txt(r.body.text.description);
           var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
-          if (ru) ru.value = bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + b; }).join("\n") : body;
+          if (ru) ru.value = bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body;
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -31178,8 +31301,8 @@
         return { brand: nbEl ? nbEl.value.trim() : "", name: typedName, category: CAT_NAMES[ncEl ? ncEl.value : ""] || "" };
       }, function (L, tx) {
         if (!tx.name) return;
-        if (nnEl) nnEl.value = String(tx.name).slice(0, 120);
-        edNameHintPaint(String(tx.name));
+        if (nnEl) nnEl.value = txt(tx.name).slice(0, 120);
+        edNameHintPaint(txt(tx.name));
       });
       return;
     }
@@ -32097,10 +32220,10 @@
       bundleDescSnapshot();
       admSpark(t, [S.bundleForm.lang || "RU"], "bundle", bundleDescInput, function (L, tx) {
         if (!tx.text) return;
-        S.bundleForm.desc[L] = tx.text;
+        S.bundleForm.desc[L] = txt(tx.text);
         if (L === (S.bundleForm.lang || "RU")) {
           var dEl = document.querySelector('[data-bundlef="desc"]');
-          if (dEl) dEl.value = tx.text;
+          if (dEl) dEl.value = txt(tx.text);
         }
       });
       return;
@@ -32164,6 +32287,7 @@
       return;
     }
     if (d.admvoice !== undefined) { admVoiceToggle(); return; }
+    if (d.admvoicelang !== undefined) { admVoiceLangNext(); return; }
     if (d.admretry !== undefined) { askAdminAgain(); return; }
     // photos through the assistant: the clip opens the picker, × removes one
     if (d.admattach !== undefined) {
@@ -32344,17 +32468,17 @@
         obtn.disabled = false; obtn.textContent = olabel;
         if (r.status === 200 && r.body.ok && r.body.text) {
           var tx = r.body.text;
-          if (tx.title) bdOut.title[bl] = tx.title;
+          if (txt(tx.title)) bdOut.title[bl] = txt(tx.title);
           /* The model answers with headings, the box holds HTML — so the
              skeleton is written as headings with an empty paragraph after
              each one, which is a place to start typing rather than a line
              of «## » the owner would have to know about. */
           if (Array.isArray(tx.h2) && tx.h2.length) {
-            bdOut.body[bl] = tx.h2.map(function (h) { return "<h2>" + esc(String(h)) + "</h2><p><br></p>"; }).join("");
+            bdOut.body[bl] = tx.h2.map(function (h) { return "<h2>" + esc(txt(h)) + "</h2><p><br></p>"; }).join("");
           }
-          if (tx.meta && tx.meta.title) bdOut.seoTitle[bl] = tx.meta.title;
-          if (tx.meta && tx.meta.description) bdOut.seoDesc[bl] = tx.meta.description;
-          if (bl === "RU" && bdOut.slugAuto && tx.title) bdOut.slug = blogSlugify(tx.title);
+          if (tx.meta && txt(tx.meta.title)) bdOut.seoTitle[bl] = txt(tx.meta.title);
+          if (tx.meta && txt(tx.meta.description)) bdOut.seoDesc[bl] = txt(tx.meta.description);
+          if (bl === "RU" && bdOut.slugAuto && txt(tx.title)) bdOut.slug = blogSlugify(txt(tx.title));
           toast("Черновик готов — проверьте и сохраните");
           render();
         } else if (r.status === 401) { SRV.admin = false; render(); }
@@ -32398,7 +32522,7 @@
           if (res.r.body && res.r.body.error === "rate_limited") limited2 = true;
           if (res.r.status === 200 && res.r.body.ok && res.r.body.texts) {
             targets.forEach(function (l) {
-              var v = res.r.body.texts[l];
+              var v = txt(res.r.body.texts[l]);
               if (!v) return;
               bdTr[res.field][l] = res.field === "body"
                 ? blogCleanHtml(blogCardsIn(blogTextToHtml(v), trCards.cards, l))

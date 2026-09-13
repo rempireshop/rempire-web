@@ -318,10 +318,17 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
         wait.remove();
-        convo.push({ role: "assistant", content: j.reply || "" });
+        /* A reply that is not a sentence is not a reply. The route already
+           answers "" for anything that is not a string, and the admin side
+           checks again on arrival (app.js askAdminAI) — this is the same door
+           on this side, so a model that answered with an object can never put
+           «[object Object]» in a shopper's chat the way it did in the owner's
+           confirm card (Renat, 13.09.2026). */
+        var text = typeof j.reply === "string" ? j.reply : "";
+        convo.push({ role: "assistant", content: text });
         var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
           .filter(Boolean).map(productRow).join("");
-        bubble("bot", esc(j.reply || "") + cards);
+        bubble("bot", esc(text) + cards);
         runAction(j.action);
       })
       .catch(function () { wait.remove(); rulesReply(q); });

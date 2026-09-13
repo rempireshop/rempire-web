@@ -914,6 +914,30 @@ test.describe("blog — the sample posts", () => {
     expect(overflow, "the article scrolls sideways on a 375 px screen").toBeLessThanOrEqual(1);
     await assertClean(page, w, "a sample article on a phone");
   });
+
+  /* Renat, 13.09.2026: «The products added into the text of the blog post are
+     in russian.» The card the storefront draws in place of the «Товар» marker
+     (app.js blogProductHTML) is built from the catalogue, and the catalogue is
+     written in Russian — «Private Stock — масло для бороды», «от 24,90 €». It
+     was the one product name on the page that never went through the shop's
+     own name translation: `.blog__prodname` is not in NAME_CTX, so
+     translateTree walked past it. */
+  test("the product cards inside an article are written in the language the article is read in", async ({ page }) => {
+    test.setTimeout(150_000);
+    for (const { code, seg, word } of [
+      { code: "EN", seg: "/en", word: "oil" },          // «Private Stock — масло для бороды»
+      { code: "ET", seg: "/et", word: "õli" },
+    ]) {
+      await page.goto(shopUrl(seg, `/blog/${SLUGS[0]}/`));
+      await waitForScreen(page, "blogpost");
+      const card = page.locator(".blog__body:not(.blog__sk) .blog__prod").first();
+      await expect(card, `no product card in the ${code} article`).toBeVisible();
+      const words = (await card.innerText()).trim();
+      expect(words.toLowerCase(), `the ${code} card is missing «${word}»: ${words}`).toContain(word);
+      // not one Cyrillic letter left in it — name, type tail and price alike
+      expect(words, `the ${code} card still has Russian in it: ${words}`).not.toMatch(/[А-Яа-яЁё]/);
+    }
+  });
 });
 
 /**
@@ -1261,6 +1285,17 @@ test.describe("blog — the product cards survive a translation", () => {
     await expect(cards.nth(0)).toHaveAttribute("data-product", PRODUCT.id);
     await expect(cards.nth(0)).toHaveAttribute("href", `/shop2/et/p/${PRODUCT.id}/`);
     await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
+    /* …and it READS Estonian (Renat, 13.09.2026: «The products added into the
+       text of the blog post are in russian»). The catalogue is written in
+       Russian — «Bio Botanical Shampoo — шампунь», «от 9,00 €» — and the card
+       rebuilt for the Estonian text used to carry that Russian straight into
+       the Estonian article: the link followed the language, its words did
+       not. */
+    const etCard = (await cards.nth(0).innerText()).trim();
+    expect(etCard, `the Estonian card is still Russian: ${etCard}`).toContain("šampoon");
+    expect(etCard).toContain("alates");
+    expect(etCard).not.toContain("шампунь");
+    expect(etCard).not.toMatch(/(^|\s)от\s/);
     await expect(langState(page, "data-admbloglang", "ET"), "the Estonian tab still says it has no products").toContainText("с товарами");
     const placed = await box.innerHTML();
     expect(placed.indexOf(PRODUCT.id), "the first card did not stay in the first paragraph")

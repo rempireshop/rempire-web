@@ -175,6 +175,59 @@ test.describe("admin sections — Клиенты", () => {
   });
 });
 
+/* Renat, 13.09.2026: publishing a review «works but takes time». The panel
+   knew everything the change did — the row was in its hands and the counts
+   move by one — and threw the whole list away anyway: a skeleton over the
+   queue, all three counters to zero, and a re-read of up to a hundred full
+   review rows plus a count(*), fired twice in a race. The row moves on the
+   list now (app.js admReviewApplyLocal), and the PATCH is the only call. */
+test.describe("admin sections — Клиенты: publishing a review costs one call", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(186) });
+
+  test("the row leaves «Новые», the counts move, and nothing is re-fetched", async ({ page }) => {
+    const name = `E2E fast ${Date.now().toString().slice(-6)}`;
+    const filed = await page.request.post("/api/reviews/", {
+      data: { product: PRODUCT.id, rating: 5, name, text: "Публикация не должна перерисовывать весь список.", lang: "RU", consent: true },
+      headers: ipHeaders(187),
+    });
+    expect(filed.ok(), "the review could not be filed").toBe(true);
+
+    let reviewId = "";
+    try {
+      await loginAsAdmin(page);
+      await waitForScreen(page, "admin");
+      await adminSection(page, "people", "reviews");
+      const row = page.locator(".adm-row", { hasText: name }).first();
+      await expect(row).toBeVisible();
+      const approvedChip = page.locator('[data-admrevfilter="approved"]');
+      const before = Number((((await approvedChip.textContent()) || "").match(/(\d+)\s*$/) || [])[1] || 0);
+
+      const calls: string[] = [];
+      page.on("request", (req) => {
+        if (req.url().includes("/api/admin/reviews")) calls.push(req.method());
+      });
+      await row.locator("[data-admrev]").first().click();
+
+      // the row is gone from «Новые» — and the queue was never blanked to a
+      // skeleton, which is what the re-fetch used to put there
+      await expect(page.locator(".adm-row", { hasText: name })).toHaveCount(0);
+      await expect(page.locator(".adm-skel")).toHaveCount(0);
+      // …the «Опубликованные» count moved by exactly one, without asking
+      await expect(approvedChip).toHaveText(new RegExp(`\\b${before + 1}\\s*$`));
+      // …and the change really reached the server
+      await expect.poll(async () => {
+        const res = await page.request.get("/api/admin/reviews/?status=approved");
+        const hit = ((await res.json()).reviews as Array<{ id: string; name: string }>).find((r) => r.name === name);
+        if (hit) reviewId = hit.id;
+        return !!hit;
+      }, { timeout: 10_000, message: "«Опубликовать» never reached the server" }).toBe(true);
+      expect(calls, "publishing a review should be the PATCH and nothing else").toEqual(["PATCH"]);
+    } finally {
+      if (reviewId) await page.request.patch("/api/admin/reviews/", { data: { id: reviewId, status: "rejected" } });
+    }
+  });
+});
+
 test.describe("admin sections — Маркетинг", () => {
   test.use({ extraHTTPHeaders: ipHeaders(182) });
 

@@ -740,6 +740,19 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 }
 @keyframes adm-listen { 0% { opacity: .55; transform: scale(.92); } 100% { opacity: 0; transform: scale(1.18); } }
 @media (prefers-reduced-motion: reduce) { .adm-asst__mic.is-on::after { animation: none; } }
+/* the microphone and the language it listens in, as one control: glued (no
+   gap, one shared rule between them) so the pair reads as one thing and the
+   question box loses 36 px and not 44 + a gap. The language is the whole point
+   of the second button, so it is its own text — RU / ET / EN — and not an icon
+   (Renat, 13.09.2026: «it tries to find english words for what I am saying in
+   russian»). One tap cycles; app.js admVoiceLangNext. */
+.adm-asst__mics { display: inline-flex; flex: none; }
+.adm-asst__miclang {
+  width: 36px; height: 48px; flex: none; border: 1px solid var(--a-rule); border-left: 0;
+  background: var(--a-paper); color: var(--a-ink); padding: 0;
+  font: inherit; font-size: 12px; letter-spacing: .04em;
+  display: inline-flex; align-items: center; justify-content: center;
+}
 .adm-asst.is-over { outline: 2px dashed var(--a-ink); outline-offset: -6px; }
 .adm-att { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .adm-att__i { position: relative; width: 64px; height: 64px; flex: none; border: 1px solid var(--a-rule); }
@@ -818,6 +831,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-tab { flex: none; min-height: 44px; min-width: 44px; padding: 11px 0; text-align: left; }
   .adm-link { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .adm-asst__chips button { min-height: 44px; }
+  /* a thumb, on the one control that is narrower than the rest of the row —
+     44 wide here too, and the question box keeps 136 px at 375 */
+  .adm-asst__miclang { width: 44px; }
   .adm-step { padding: 10px 10px; }
 }
 

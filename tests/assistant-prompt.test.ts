@@ -12,7 +12,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createCustomProduct } from "@/lib/custom-products";
-import { exec } from "@/lib/db";
+import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 const ORIGIN = "https://rempireshop.com";
@@ -68,7 +68,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(20);
+    expect(body.v).toBe(21);
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
@@ -221,6 +221,74 @@ describe("the admin prompt tells the truth about the panel", () => {
       });
       expect(body.action).toMatchObject({ type: "set_price", value: 9 });
       expect(body.ask).toBeUndefined();
+    });
+  });
+
+  /* Renat's acceptance run, 13.09.2026. Two faults in one sentence: «I am
+     asking in english which orders are waiting to be shipped and get russian
+     answer that such information is not loaded.» */
+  describe("the language of the question, and the parcels waiting to go out", () => {
+    let nth = 200;
+    function askReq(message: string, panelLang?: string) {
+      nth += 1;
+      return new NextRequest(`${ORIGIN}/api/assistant/`, {
+        method: "POST",
+        headers: { "content-type": "application/json", host: HOST, origin: ORIGIN, cookie: admin, "x-real-ip": `10.0.1.${nth - 200}` },
+        body: JSON.stringify({ mode: "admin", lang: panelLang, messages: [{ role: "user", content: message }] }),
+      });
+    }
+    async function promptFor(message: string, panelLang?: string) {
+      const sent = stubOpenAI({ reply: "ok", product_ids: [], tab: "", action: null });
+      const { POST } = await import("@/app/api/assistant/route");
+      await POST(askReq(message, panelLang));
+      return sent[0].messages[0].content;
+    }
+
+    it("is told to answer in the language of the owner's message, not the panel's", async () => {
+      // his own case: English question, Russian panel
+      const en = await promptFor("which orders are waiting to be shipped?", "RU");
+      expect(en).toContain("ANSWER IN ENGLISH");
+      expect(en).not.toMatch(/ANSWER IN RUSSIAN/);
+      vi.unstubAllGlobals();
+
+      // and the other way round: Russian question, English panel
+      const ru = await promptFor("какие заказы ждут отправки?", "EN");
+      expect(ru).toContain("ANSWER IN RUSSIAN");
+      vi.unstubAllGlobals();
+
+      // nothing in the words to go on → the panel's language, as before
+      const bare = await promptFor("Proraso 30 ml", "ET");
+      expect(bare).toContain("ANSWER IN ESTONIAN");
+    });
+
+    it("carries the queue «Обзор» counts, by name, and no longer says it is not loaded", async () => {
+      /* A paid web order is a parcel waiting to go out — the same predicate
+         qAttention()'s `to_ship` uses (tests/overview.test.ts covers it). */
+      const { createOrder } = await import("@/lib/orders");
+      const order = await createOrder({
+        lang: "ru",
+        items: [{ id: "kevin-muprhy-plumping-wash", qty: 1 }],
+        customer: { name: "Мария Тамм", email: "maria-toship@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "parcel", country: "EE" },
+      });
+      await query("update orders set status = 'paid' where id = $1", [order.id]);
+      try {
+        const prompt = await promptFor("какие заказы ждут отправки?");
+        expect(prompt).toContain("ORDERS WAITING TO BE SHIPPED");
+        expect(prompt).toContain(order.number);
+        expect(prompt).toContain("Мария Тамм");
+        // the sentence that told the model to deny it, gone
+        expect(prompt).not.toMatch(/orders waiting to be shipped are not in this prompt/);
+        expect(prompt).toContain("never say it is not loaded");
+      } finally {
+        await query("delete from orders where id = $1", [order.id]);
+      }
+    });
+
+    it("says the queue is empty rather than inventing one", async () => {
+      const prompt = await promptFor("what do I have to ship?");
+      expect(prompt).toContain("ORDERS WAITING TO BE SHIPPED");
+      expect(prompt).toContain("nothing is waiting to go out right now");
     });
   });
 });
