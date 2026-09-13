@@ -959,8 +959,9 @@
       "Самовывоз": "Järeletulek", "Страна": "Riik",
       "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
       "Другие страны Европы": "Muud Euroopa riigid", "Остальные страны": "Ülejäänud riigid",
-      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
-        "Neid hindu pood nii näitab kui ka arvestab tellimuse vormistamisel. Tühi — võetakse rida „Ülejäänud riigid“. „нет“ veerus „Tasuta alates“ — sinna riiki ei ole tarne kunagi tasuta.",
+      // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
+      "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
+        "„Tasuta alates“: 0 — tarne on alati tasuta, tühi — sellesse riiki tasuta tarnet ei ole.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "Kui vedajal on oma hind, kirjuta see siia — see on tugevam kui ülemine tabel. Tühi — hind võetakse tabelist.",
       // per-country prices, 07.09.2026 — «real per-country prices»
@@ -3360,8 +3361,9 @@
       "Самовывоз": "Pickup", "Страна": "Country",
       "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
       "Другие страны Европы": "Other European countries", "Остальные страны": "All other countries",
-      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
-        "These are the prices the shop shows and the prices it charges at checkout. Empty — the «All other countries» row applies. «нет» in the «Free from» column means delivery to that country is never free.",
+      // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
+      "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
+        "«Free from»: 0 means delivery is always free, empty means there is no free delivery to that country.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "If a carrier has its own price, put it here — it beats the table above. Empty — the price comes from the table.",
       // per-country prices, 07.09.2026 — «real per-country prices»
@@ -17451,6 +17453,12 @@
           // one table and not as two screens
           (r[0] === "EU" ? admShipEuropeHTML() : "");
       }).join("") +
+      /* The one thing the column could not say for itself: an empty box here
+         is an answer, not a blank. Renat cleared it and the shop went on
+         giving delivery away from 59 € — shipFreeCell() draws the real
+         threshold now, and this sentence says what happens if he empties it. */
+      '<p class="adm-hint" style="margin-top:10px">«Бесплатно от»: 0 — доставка бесплатна всегда, ' +
+        "пусто — бесплатной доставки в эту страну нет.</p>" +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       // «Сохранить» is the page's bar (admSetBarHTML) — the fill button stays with its hint
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -19377,11 +19385,39 @@
     var t = shipDraft().methods[m] || {};
     return shipShow(Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
   }
+  /**
+   * The «Бесплатно от» box of one row — the threshold that row **actually**
+   * bills with, never an empty box under free delivery the shop is giving
+   * away anyway.
+   *
+   * Renat, 13.09.2026: «„Бесплатно от“ пусто, а доставка всё равно
+   * бесплатная». It was: the four home rows and the twenty-one countries
+   * behind «Другие страны Европы» carry no key of their own, so the box drew
+   * `undefined` — empty — while quoteFromRules() walked on to the zone's
+   * threshold and then to `freeFrom`, and billed Estonia free from 59 € all
+   * the same. A box that says nothing while the till gives delivery away is
+   * the one thing this table exists to prevent.
+   *
+   * So the box shows the value that applies, found the same three ways the
+   * server finds it (src/lib/shipping.ts, quoteFromRules): the row's own key,
+   * then its zone's — «EU» for the folded-out countries — then the shop-wide
+   * `freeFrom` that the «Остальные страны» row edits. Nothing is written into
+   * the draft by drawing it: a row that inherits goes on inheriting, and
+   * follows the row above when that one changes.
+   *
+   * Which leaves the box with exactly three readings, and setShipDraftField()
+   * below stores all three: a number is a threshold, 0 is «всегда бесплатно»,
+   * and empty is «нет» — no free delivery to this country at all.
+   */
   function shipFreeCell(c) {
     var d = shipDraft();
-    if (c === "default") return shipShow(d.freeFrom);
-    var by = d.freeFromByCountry;
-    return shipShow(by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : undefined);
+    if (c === "default") return shipShow(d.freeFrom === undefined ? null : d.freeFrom);
+    var by = d.freeFromByCountry, zone = SHIP_EU_COUNTRIES.indexOf(c) >= 0 ? "EU" : c;
+    var v;
+    if (by && Object.prototype.hasOwnProperty.call(by, c)) v = by[c];
+    else if (by && Object.prototype.hasOwnProperty.call(by, zone)) v = by[zone];
+    else v = d.freeFrom;
+    return shipShow(v === undefined ? null : v);
   }
   function shipCarrierCell(k, c) {
     var by = shipDraft().carriers;
@@ -19418,13 +19454,23 @@
       else d.methods[parts[1]][parts[2]] = v;
       return;
     }
+    /* «Бесплатно от», the one column where an empty box is an answer and not
+       a blank. A price left empty means «возьмите строку ниже» and always
+       has; a threshold left empty means **no free delivery here**, and is
+       stored as an explicit null rather than as a missing key.
+       Before 13.09.2026 it deleted the key, which put the row straight back
+       on the shop-wide 59 € — so the one thing the box could not say was the
+       thing the owner was trying to say with it, and on the «Другие страны
+       Европы» row clearing it dropped Europe from 200 € to 59 € and shipped a
+       59 € basket to Greece free against a 43,19 € courier.
+       «Остальные страны» is the same rule one level up: its own empty box has
+       meant `freeFrom = null` — «нигде не бесплатно» — since the box existed. */
     if (parts[0] === "free") {
       var f = shipNum(raw, 10000);
       if (f !== f) return;
       if (parts[1] === "default") { d.freeFrom = f === undefined ? null : f; return; }
       if (!d.freeFromByCountry) d.freeFromByCountry = {};
-      if (f === undefined) delete d.freeFromByCountry[parts[1]];
-      else d.freeFromByCountry[parts[1]] = f;
+      d.freeFromByCountry[parts[1]] = f === undefined ? null : f;
       return;
     }
     if (parts[0] === "c") {
@@ -26526,15 +26572,23 @@
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
-      (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
-        '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr) : "");
+      /* No bar where there is no free delivery to walk towards: threshold()
+         is Infinity when the country's «Бесплатно от» is empty, and «До
+         бесплатной доставки (Эстония, от Infinity €)» is not a sentence —
+         nor is the upsell's «Добавьте — и доставка бесплатно» a promise the
+         till would keep. */
+      (S.cart.length && isFinite(thr)
+        ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
+          '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr)
+        : "");
   }
 
   /* The free-shipping bar states the gap; this closes it. One product that
      bridges the gap in a single add, one cheaper alternative — both real,
      in stock, not already in the cart. */
   function upsellHTML(sum, thr) {
-    if (sum >= thr || !S.cart.length) return "";
+    // …and nothing to add towards when the country has no free delivery at all
+    if (sum >= thr || !isFinite(thr) || !S.cart.length) return "";
     var gap = thr - sum;
     var inCart = {};
     S.cart.forEach(function (l) { inCart[l.id] = true; });
@@ -27334,10 +27388,18 @@
       }
     });
     var sum = cartSum(), thr = threshold();
-    var fill = d.querySelector(".freebar__fill");
-    if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
-    var note = d.querySelector(".freebar p");
-    if (note) note.textContent = trText(freebarText(sum, thr), S.lang);
+    /* The bar is drawn only where there is a threshold to reach (cartBody);
+       if the rules landed since, the whole block goes rather than being
+       patched with «от Infinity €». */
+    var bar = d.querySelector(".freebar");
+    if (bar && !isFinite(thr)) bar.hidden = true;
+    else if (bar) {
+      bar.hidden = false;
+      var fill = bar.querySelector(".freebar__fill");
+      if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
+      var note = bar.querySelector("p");
+      if (note) note.textContent = trText(freebarText(sum, thr), S.lang);
+    }
     var tot = d.querySelector(".drawer__tot .num");
     if (tot) tot.textContent = eur(sum);
     patchHeader(); patchNav();
