@@ -246,7 +246,12 @@ for (const lang of LANGS) {
           const hammer = index === 0 || index === picks.length - 1;
           const presses = hammer ? 12 : 3;
           for (let i = 0; i < presses; i++) await plus.click();
-          await expect(qtyNum, `${label(ctx)} qty did not follow «+»`).toHaveText(hammer ? "9" : "4");
+          /* 13, not 9: the stepper used to stop at nine, which was seven
+             copies of a literal and not a decision — the order route has
+             always accepted 99 (Renat, 13.09.2026: «Cannot put more than 9
+             items to the cart»). Twelve presses from one now simply arrive
+             at thirteen. */
+          await expect(qtyNum, `${label(ctx)} qty did not follow «+»`).toHaveText(hammer ? "13" : "4");
           for (let i = 0; i < presses; i++) await minus.click();
           await expect(qtyNum, `${label(ctx)} qty must clamp at 1, never 0 or below`).toHaveText("1");
         }
