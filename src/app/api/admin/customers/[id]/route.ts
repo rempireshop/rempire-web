@@ -9,10 +9,14 @@
  *         stats    firstOrderAt, lastOrderAt, avgOrder, topBrands[≤3]
  *                  over every purchase (cancelled and failed left out)
  *         reviews  this person's reviews — id, productId, product,
- *                  rating, text, status, createdAt, name. The reviews
- *                  table has no e-mail column, so they are matched by
- *                  name: the account's and the ones on their orders
- *                  (reviewsByAuthor in src/lib/reviews.ts).
+ *                  rating, text, status, createdAt, name. Matched by the
+ *                  address the review was written from and by nothing else
+ *                  (reviewsByCustomer in src/lib/reviews.ts). Until
+ *                  13.09.2026 they were matched by the signed NAME, so two
+ *                  customers called the same thing read each other's
+ *                  reviews — Dim hit it with two of his own mailboxes. A
+ *                  review written signed out carries no address and is on
+ *                  nobody's card; it is still in «Отзывы», the queue.
  * PATCH /api/admin/customers/<id> — any of:
  *   {"action":"approve"}                 «Одобрить» a pending pro request
  *   {"action":"reject"}                  «Отклонить» — clears the request, tier stays retail
@@ -36,7 +40,7 @@ import { isEmail, productsForAlerts } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
 import { sendPartnerWelcome } from "@/lib/partner-mail";
-import { reviewsByAuthor } from "@/lib/reviews";
+import { reviewsByCustomer } from "@/lib/reviews";
 import {
   adjustLoyaltyPoints,
   approveProCustomer,
@@ -67,11 +71,12 @@ export async function GET(req: Request, ctx: Ctx) {
     const customer = await resolveCustomer(id);
     if (!customer) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
     const [history, bought] = await Promise.all([getLoyaltyHistory(customer.id, 50), customerOrdersAdmin(customer.email)]);
-    /* The reviews signed with any name this person is known by, each with
-       its product named the way the panel names one («Brand — title»); a
+    /* The reviews written from THIS address — the customer's own, proven by
+       the session they were written in, not by the name under them. Each is
+       given its product the way the panel names one («Brand — title»); a
        product the catalogue no longer has keeps its id and the panel shows
        that. */
-    const found = await reviewsByAuthor([customer.name, ...bought.names]);
+    const found = await reviewsByCustomer(customer.email);
     const products = await productsForAlerts(found.map((r) => r.productId));
     const reviews = found.map((r) => {
       const p = products.get(r.productId);

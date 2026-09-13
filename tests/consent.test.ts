@@ -587,14 +587,15 @@ describe("the admin customers API", () => {
     const csv = await list.GET(req(`${BASE}/api/admin/customers/?format=csv`, { headers: { cookie: admin } }));
     const text = await csv.text();
     const [head, ...lines] = text.trim().split(/\r\n/);
-    expect(head).toContain("tier,marketing,marketing_at,marketing_source,company");
+    // `;`, not `,` — Excel on an Estonian/Russian Windows splits on that one
+    expect(head).toContain("tier;marketing;marketing_at;marketing_source;company");
     const line = lines.find((l) => l.startsWith(EMAIL))!;
-    const cells = line.split(",");
-    const at = head.split(",").indexOf("marketing_at");
+    const cells = line.split(";");
+    const at = head.split(";").indexOf("marketing_at");
     expect(cells[at]).toBe(yes.marketingAt);
     expect(cells[at + 1]).toBe("checkout");
     // the "no" row has the columns, blank
-    const other = lines.find((l) => l.startsWith(OTHER))!.split(",");
+    const other = lines.find((l) => l.startsWith(OTHER))!.split(";");
     expect(other[at]).toBe("");
     expect(other[at + 1]).toBe("");
   });

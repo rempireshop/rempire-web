@@ -12,6 +12,7 @@
  *   - admin routes require the admin cookie; customer routes require the
  *     customer cookie
  */
+import { inflateRawSync } from "node:zlib";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
@@ -63,6 +64,28 @@ async function makeProCustomer(email = customer.email): Promise<string> {
   const row = await recordLogin(email, "RU");
   await approveProCustomer(row.id);
   return row.id;
+}
+
+/** Walks the local file headers the repo's own zip writer produces and
+    inflates each entry — the same reader tests/reports.test.ts uses on the
+    accountant's workbook, so «Клиенты» → XLSX is checked for real and not
+    just for "it did not throw". */
+function readZipEntries(buf: Buffer): Record<string, string> {
+  const out: Record<string, string> = {};
+  let offset = 0;
+  while (offset < buf.length && buf.readUInt32LE(offset) === 0x04034b50) {
+    const method = buf.readUInt16LE(offset + 8);
+    const compSize = buf.readUInt32LE(offset + 18);
+    const nameLen = buf.readUInt16LE(offset + 26);
+    const extraLen = buf.readUInt16LE(offset + 28);
+    const nameStart = offset + 30;
+    const name = buf.toString("utf8", nameStart, nameStart + nameLen);
+    const dataStart = nameStart + nameLen + extraLen;
+    const raw = buf.subarray(dataStart, dataStart + compSize);
+    out[name] = (method === 0 ? raw : inflateRawSync(raw)).toString("utf8");
+    offset = dataStart + compSize;
+  }
+  return out;
 }
 
 function adminReq(url: string, opts: { method?: string; body?: unknown; cookie?: string } = {}) {
@@ -462,6 +485,51 @@ describe("GET /api/admin/customers — auth and shape", () => {
     expect(csv.headers.get("content-type")).toContain("text/csv");
     const text = await csv.text();
     expect(text).toContain("csv-pro@example.com");
+  });
+
+  /**
+   * Dim, 13.09.2026: «An excel would be better, CSV hard to read» — he was
+   * looking at a comma-separated file in an Excel that splits on `;`, so
+   * every column landed in cell A. Both halves of the answer are checked
+   * here: the CSV now uses the separator that Excel expects, and there is a
+   * real .xlsx beside it for when nothing should have to be guessed.
+   */
+  it("exports a table Excel can open: `;` in the CSV, and an .xlsx beside it", async () => {
+    await makeProCustomer("excel-pro@example.com");
+    await recordLogin("excel-retail@example.com", "RU");
+    const { GET } = await import("@/app/api/admin/customers/route");
+
+    const csv = await GET(adminReq("https://x/api/admin/customers/?format=csv"));
+    const bytes = Buffer.from(await csv.clone().arrayBuffer());
+    const text = await csv.text();
+    expect(csv.headers.get("content-disposition")).toContain("customers.csv");
+    /* The BOM Excel needs before it will read Cyrillic — checked on the bytes,
+       because Response.text() eats a leading BOM while decoding and the file
+       Renat double-clicks is the bytes. */
+    expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    const head = text.split("\r\n")[0];
+    expect(head.split(";")).toContain("pointsBalance");
+    expect(head).not.toContain(",");
+    // one row per customer, every row as wide as the header
+    const rows = text.trim().split("\r\n").slice(1);
+    expect(rows.length).toBeGreaterThanOrEqual(2);
+    for (const row of rows) expect(row.split(";")).toHaveLength(head.split(";").length);
+
+    const xlsx = await GET(adminReq("https://x/api/admin/customers/?format=xlsx"));
+    expect(xlsx.status).toBe(200);
+    expect(xlsx.headers.get("content-type")).toContain("spreadsheetml.sheet");
+    expect(xlsx.headers.get("content-disposition")).toContain("customers.xlsx");
+    const book = Buffer.from(await xlsx.arrayBuffer());
+    // a real OOXML package, not a renamed CSV: a zip whose sheet carries the rows
+    expect(book.subarray(0, 2).toString("latin1")).toBe("PK");
+    const entries = readZipEntries(book);
+    expect(Object.keys(entries)).toEqual(expect.arrayContaining(["xl/workbook.xml", "xl/worksheets/sheet1.xml"]));
+    const sheet = entries["xl/worksheets/sheet1.xml"];
+    expect(sheet).toContain("excel-pro@example.com");
+    expect(sheet).toContain("excel-retail@example.com");
+    expect(sheet).toContain("pointsBalance");
+    // the tab is named in the owner’s own language
+    expect(entries["xl/workbook.xml"]).toContain("Клиенты");
   });
 });
 

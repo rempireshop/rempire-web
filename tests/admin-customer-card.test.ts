@@ -5,22 +5,22 @@
  * no analytics, nothing else. GET /api/admin/customers/<id> now carries the
  * orders under that e-mail, four facts drawn from them and the customer's
  * reviews (src/lib/loyalty.ts customerOrdersAdmin, src/lib/reviews.ts
- * reviewsByAuthor). Runs on PGlite, no server needed.
+ * reviewsByCustomer). Runs on PGlite, no server needed.
  *
  * What this file exists to catch: a guest order that does not show on the
  * account it belongs to; a cancelled order counted as a purchase; a first
- * order that is really the last; a namesake matched by a half of a name; a
- * review lost because it was signed in lower case; an e-mail id that answers
- * differently from the uuid one.
+ * order that is really the last; a namesake reading another customer's
+ * reviews off their card (13.09.2026, the block at the end of this file); an
+ * e-mail id that answers differently from the uuid one.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
-import { recordLogin, updateCustomer } from "@/lib/customers";
+import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin, updateCustomer } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
 import { customerOrdersAdmin } from "@/lib/loyalty";
 import { createOrder, setOrderStatus } from "@/lib/orders";
-import { addReview, reviewsByAuthor, setReviewStatus } from "@/lib/reviews";
+import { addReview, reviewsByCustomer, setReviewStatus } from "@/lib/reviews";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -92,15 +92,13 @@ describe("customerOrdersAdmin — the orders behind the card", () => {
     const fresh = await order("MARIA.TAMM@example.com", "Maria Tamm", [{ id: first.id, qty: 1 }, { id: second.id, qty: 1 }], 1);
     await order("someone.else@example.com", "Кто-то другой", [{ id: first.id, qty: 1 }], 2);
 
-    const { orders, names } = await customerOrdersAdmin(EMAIL);
+    const { orders } = await customerOrdersAdmin(EMAIL);
     expect(orders.map((o) => o.number)).toEqual([fresh.number, mid.number, old.number]);
     expect(orders[0]).toMatchObject({
       id: fresh.id, status: "new", channel: "web", labeled: false, invoice: null, itemsCount: 2,
       firstItem: `${first.b} — ${first.n}`, total: fresh.total,
     });
     expect(orders[2].itemsCount).toBe(2);
-    // the names this person signed with — what the review match is keyed on
-    expect(names.sort()).toEqual(["Maria Tamm", NAME].sort());
   });
 
   it("draws the facts from purchases only — cancelled and failed do not count, and the dates are the right way round", async () => {
@@ -133,33 +131,40 @@ describe("customerOrdersAdmin — the orders behind the card", () => {
     expect(await customerOrdersAdmin("nobody@example.com")).toEqual({
       orders: [],
       stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] },
-      names: [],
     });
   });
 });
 
-describe("reviewsByAuthor — the customer's reviews, by name", () => {
-  it("matches the whole name case-blind, across the names given, and never a part of one", async () => {
-    const mine = await addReview({ productId: first.id, name: NAME, rating: 5, text: "Беру третий раз, пенится хорошо и запах не бьёт в нос.", lang: "RU" });
-    const lower = await addReview({ productId: second.id, name: "мария тамм", rating: 4, text: "Хороший продукт, но флакон маловат для такой цены.", lang: "RU" });
-    const latin = await addReview({ productId: first.id, name: "Maria Tamm", rating: 3, text: "Normaalne toode, aga lõhn on minu jaoks liiga tugev.", lang: "ET" });
-    await addReview({ productId: first.id, name: "Мария", rating: 1, text: "Совсем не подошло, кожа головы чесалась неделю.", lang: "RU" });
-    await addReview({ productId: first.id, name: "Мария Тамм-Саар", rating: 2, text: "Ожидала большего от этого бренда, честно говоря.", lang: "RU" });
+describe("reviewsByCustomer — the customer's reviews, by the address that wrote them", () => {
+  const MINE = "Беру третий раз, пенится хорошо и запах не бьёт в нос.";
+
+  it("finds every review written from the address, newest first, whatever each was signed", async () => {
+    // one mailbox, three signatures — hers all the same
+    const one = await addReview({ productId: first.id, name: NAME, rating: 5, text: MINE, lang: "RU" }, null, EMAIL);
+    const two = await addReview({ productId: second.id, name: "мария тамм", rating: 4, text: "Хороший продукт, но флакон маловат для такой цены.", lang: "RU" }, null, "MARIA.TAMM@Example.com ");
+    const three = await addReview({ productId: first.id, name: "Maria Tamm", rating: 3, text: "Normaalne toode, aga lõhn on minu jaoks liiga tugev.", lang: "ET" }, null, EMAIL);
+    // a namesake with her own mailbox, and a stranger signed the same way with none
+    await addReview({ productId: first.id, name: NAME, rating: 1, text: "Совсем не подошло, кожа головы чесалась неделю.", lang: "RU" }, null, "maria.tamm@elsewhere.example.com");
+    await addReview({ productId: first.id, name: NAME, rating: 2, text: "Ожидала большего от этого бренда, честно говоря.", lang: "RU" });
     // three inserts in one millisecond tie on created_at — date them apart, oldest first
-    for (const [i, r] of [mine, lower, latin].entries()) {
+    for (const [i, r] of [one, two, three].entries()) {
       await query("update reviews set created_at = $2 where id = $1", [r.id, new Date(Date.now() - (3 - i) * 86_400_000).toISOString()]);
     }
 
-    const found = await reviewsByAuthor([NAME, "Maria Tamm", "", null, " "]);
-    expect(found.map((r) => r.id).sort()).toEqual([mine.id, lower.id, latin.id].sort());
-    // newest first, like the queue
-    expect(found.map((r) => r.id)).toEqual([latin.id, lower.id, mine.id]);
+    const found = await reviewsByCustomer(EMAIL);
+    expect(found.map((r) => r.id)).toEqual([three.id, two.id, one.id]);
+    // the address is keyed the way customers.email is stored — case and spaces are not an identity
+    expect((await reviewsByCustomer("  Maria.Tamm@EXAMPLE.com ")).map((r) => r.id)).toEqual(found.map((r) => r.id));
   });
 
-  it("finds nothing for no name at all", async () => {
-    await addReview({ productId: first.id, name: NAME, rating: 5, text: "Беру третий раз, пенится хорошо и запах не бьёт в нос.", lang: "RU" });
-    expect(await reviewsByAuthor([])).toEqual([]);
-    expect(await reviewsByAuthor(["", null, undefined, "x"])).toEqual([]);
+  it("finds nothing for no address, and never reaches a review that has none", async () => {
+    await addReview({ productId: first.id, name: NAME, rating: 5, text: MINE, lang: "RU" });
+    expect(await reviewsByCustomer(EMAIL)).toEqual([]);
+    expect(await reviewsByCustomer("")).toEqual([]);
+    expect(await reviewsByCustomer(null)).toEqual([]);
+    expect(await reviewsByCustomer(undefined)).toEqual([]);
+    // not an address, and above all not a name
+    expect(await reviewsByCustomer(NAME)).toEqual([]);
   });
 });
 
@@ -169,11 +174,11 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     await updateCustomer(EMAIL, { name: NAME });
     const paid = await order(EMAIL, NAME, [{ id: first.id, qty: 1 }], 12, me.id);
     await setOrderStatus(paid.id, "paid");
-    // a guest order, signed a little differently — still hers, and its name still counts for the reviews
+    // a guest order, signed a little differently — still hers: the tiles key on the address
     const guest = await order(EMAIL, "Maria Tamm", [{ id: second.id, qty: 2 }], 3);
-    const review = await addReview({ productId: second.id, name: "Maria Tamm", rating: 5, text: "Отличный продукт, проверено на себе не один раз.", lang: "RU" });
+    const review = await addReview({ productId: second.id, name: "Maria Tamm", rating: 5, text: "Отличный продукт, проверено на себе не один раз.", lang: "RU" }, null, EMAIL);
     await setReviewStatus(review.id, "approved");
-    await addReview({ productId: first.id, name: "Кто-то другой", rating: 1, text: "Мне не понравилось, отправлю обратно как только смогу.", lang: "RU" });
+    await addReview({ productId: first.id, name: "Кто-то другой", rating: 1, text: "Мне не понравилось, отправлю обратно как только смогу.", lang: "RU" }, null, "странник@example.com");
 
     const byId = await card(me.id);
     expect(byId.status).toBe(200);
@@ -216,5 +221,73 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     const route = await import("@/app/api/admin/customers/[id]/route");
     const res = await route.GET(new Request(`${BASE}/api/admin/customers/${EMAIL}/`), { params: Promise.resolve({ id: EMAIL }) });
     expect(res.status).toBe(401);
+  });
+});
+
+/**
+ * Dim, 13.09.2026 — the leak this file was reopened for: «dim.novare@gmail.com
+ * and info@diipsolutions.eu seem to be able to see same reviews». Two of his
+ * own addresses, one display name on both, and each card showed the other's
+ * reviews.
+ *
+ * The reproduction goes through the real write path, POST /api/reviews/, with
+ * each address's own signed `rmp_cust` cookie on the request — proof that the
+ * shop knew who was writing and the card matched on the name anyway.
+ */
+describe("a review belongs to the person who wrote it, not to a namesake", () => {
+  const MINE = "dim.novare@example.com";
+  const THEIRS = "info@diipsolutions.example.com";
+  /* one name, two mailboxes — what the shop owner had, and what any two
+     «Мария Тамм» in a real customer list have */
+  const SHARED = "Dim Novare";
+
+  const MINE_TEXT = "Мой отзыв: беру третий раз, пенится хорошо и запах не бьёт в нос.";
+  const THEIRS_TEXT = "Чужой отзыв: флакон маловат для такой цены, но продукт хороший.";
+  const GUEST_TEXT = "Отзыв гостя: заказывал без кабинета, доставили быстро и целым.";
+
+  /** Files a review the way the storefront does; `email` null = a guest, no session. */
+  async function file(email: string | null, productId: string, text: string, ip: string) {
+    const route = await import("@/app/api/reviews/route");
+    const headers: Record<string, string> = { "content-type": "application/json", "x-forwarded-for": ip };
+    if (email) headers.cookie = `${CUSTOMER_COOKIE}=${makeCustomerToken(email)}`;
+    const res = await route.POST(
+      new Request(`${BASE}/api/reviews/`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ product: productId, name: SHARED, rating: 5, text, lang: "RU", consent: true }),
+      }),
+    );
+    const body = (await res.json()) as { ok: boolean; id?: string };
+    expect(body.ok, `the review from ${email ?? "a guest"} was refused`).toBe(true);
+    return body.id ?? "";
+  }
+
+  async function twoCustomersOneName() {
+    const mine = await recordLogin(MINE, "RU");
+    const theirs = await recordLogin(THEIRS, "RU");
+    await updateCustomer(MINE, { name: SHARED });
+    await updateCustomer(THEIRS, { name: SHARED });
+    return { mine, theirs };
+  }
+
+  it("does not put one customer's review on another customer's card", async () => {
+    const { mine, theirs } = await twoCustomersOneName();
+    await file(MINE, first.id, MINE_TEXT, "203.0.113.21");
+    await file(THEIRS, second.id, THEIRS_TEXT, "203.0.113.22");
+
+    const ours = await card(mine.id);
+    expect(ours.status).toBe(200);
+    expect(ours.body.reviews.map((r) => r.text)).toEqual([MINE_TEXT]);
+
+    const other = await card(theirs.id);
+    expect(other.body.reviews.map((r) => r.text)).toEqual([THEIRS_TEXT]);
+  });
+
+  it("keeps a guest review off every card that shares its name", async () => {
+    const { mine, theirs } = await twoCustomersOneName();
+    await file(null, first.id, GUEST_TEXT, "203.0.113.23");
+
+    expect((await card(mine.id)).body.reviews).toEqual([]);
+    expect((await card(theirs.id)).body.reviews).toEqual([]);
   });
 });

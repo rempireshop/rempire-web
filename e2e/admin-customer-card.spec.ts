@@ -23,6 +23,13 @@ import {
  * «← К клиенту» and the browser's Back land on THIS customer again — never
  * on «Заказы» (app.js: the data-admorder handler keeps the tab, admLayers
  * closes the order first).
+ *
+ * 13.09.2026: the review below is filed from the shopper's OWN signed-in
+ * session, because that is now the only thing that puts a review on a card.
+ * It used to be matched by the name under it, and two customers who share a
+ * display name then read each other's reviews («dim.novare@gmail.com and
+ * info@diipsolutions.eu seem to be able to see same reviews»). A review left
+ * signed out belongs to nobody and stays in the «Отзывы» queue.
  */
 test.describe("admin — the customer card", () => {
   /* One address per project (and per repeat), not one for the file:
@@ -35,7 +42,7 @@ test.describe("admin — the customer card", () => {
     },
   });
 
-  test("orders, facts and reviews are on the card; an order opens over it and Back returns to it", async ({ page }) => {
+  test("orders, facts and reviews are on the card; an order opens over it and Back returns to it", async ({ context, page }) => {
     test.setTimeout(180_000);
 
     // ---- a paid order under a fresh address — the checkout signs it «E2E Buyer»
@@ -55,12 +62,32 @@ test.describe("admin — the customer card", () => {
     const made = await page.request.post("/api/admin/customers/", { data: { email, tier: "retail" } });
     expect(made.ok(), "POST /api/admin/customers/ refused the retail row").toBe(true);
 
-    // ---- a review, signed the way the checkout was signed — pending
+    /* ---- a review from that customer, signed in as himself --------------
+       The session is what ties the review to the card (reviews.email,
+       db/migrations/022_reviews_author.sql), so it is filed from the
+       shopper's own page, code and all, the way a customer files one. The
+       name under it is deliberately NOT the name on the order: what puts it
+       on this card is the address, and nothing else. */
     const reviewText = `Отличный шампунь, беру уже не первый раз ${Date.now()}.`;
-    const filed = await page.request.post("/api/reviews/", {
-      data: { product: PRODUCT.id, rating: 5, name: "E2E Buyer", text: reviewText, lang: "RU", consent: true },
-    });
-    expect(filed.ok(), "the review could not be filed").toBe(true);
+    const shopper = await context.newPage();
+    try {
+      await shopper.goto(shopUrl("", "/account/"));
+      await waitForScreen(shopper, "account");
+      await shopper.locator("[data-email]").fill(email);
+      const codeRes = shopper.waitForResponse((r) => r.url().includes("/api/account/code/"));
+      await shopper.locator("[data-login]").click();
+      const code = (await (await codeRes).json()).code as string;
+      expect(code, "the e2e login-code hook did not answer").toMatch(/^\d{6}$/);
+      await shopper.locator("[data-acctcode]").fill(code);
+      await shopper.locator("[data-logincode]").click();
+      await expect(shopper.locator("[data-logout]")).toBeVisible();
+      const filed = await shopper.request.post("/api/reviews/", {
+        data: { product: PRODUCT.id, rating: 5, name: "Не то имя, что в заказе", text: reviewText, lang: "RU", consent: true },
+      });
+      expect(filed.ok(), "the review could not be filed").toBe(true);
+    } finally {
+      await shopper.close();
+    }
 
     let reviewId = "";
     try {
@@ -87,10 +114,10 @@ test.describe("admin — the customer card", () => {
       await expect(brands).toBeVisible();
       await expect(brands).toContainText(PRODUCT.brand);
 
-      // ---- the review, matched by the name it was signed with -------------
+      // ---- the review, matched by the address that wrote it --------------
       await expect(page.getByText("Отзывы клиента")).toBeVisible();
       const reviewRow = page.locator(".adm-row", { hasText: reviewText }).first();
-      await expect(reviewRow, "the review signed with the checkout's name is not on the card").toBeVisible();
+      await expect(reviewRow, "the review this customer wrote is not on his card").toBeVisible();
       await expect(reviewRow.locator(".adm-badge")).toHaveText("Новый");
 
       // ---- the order card opens over the customer's; Back returns to that
