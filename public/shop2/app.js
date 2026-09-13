@@ -32818,17 +32818,23 @@
   document.addEventListener("focusout", function () { setTimeout(admTypingSync, 0); });
 
   /* ---------- a strip that scrolls sideways says which way -----------------
-     One place for every chip row and every tab row in the panel: which ends
-     still have something behind them (`data-sx`, read by the mask in
-     admin.css), and — the first time a strip is drawn — the pane the owner
-     is actually on brought into view. That second half is what makes
-     «Рассылка», the fourth of four tabs on «Маркетинг», findable at all on a
-     375-px screen: it used to sit past the right edge with nothing saying so.
+     One place for every chip row and every tab row in the panel. Two jobs:
 
-     Only on a strip we have not seen before (`__admsx`). The panel is
-     morph-patched, so a strip that survives a render is the same element and
-     keeps the flag — a background fetch landing can therefore never yank a
-     strip back from where the owner's thumb left it. */
+     · which ends still have something behind them — `data-sx`, which the mask
+       in admin.css reads. Measured, never written into the markup, which is
+       why admMorphAttrs is told to leave it alone;
+     · and the pane the owner is on is IN the strip rather than past its edge.
+       That second one is what makes «Рассылка», the fourth of four tabs on
+       «Маркетинг», findable at all on a 375-px screen: it used to sit past
+       the right edge with nothing saying so.
+
+     The strip is moved only when the thing that is current CHANGES (`__admsx`
+     remembers which), so a background fetch landing — and on this screen one
+     lands every few seconds — can never yank a strip back from where the
+     owner's thumb left it. And it is moved the least it can be: just far
+     enough to bring the current pane wholly inside, plus 12 px so a neighbour
+     still shows. Parking it at a fixed offset instead would scroll strips
+     that were already showing everything they needed to. */
   function admEdges(el) {
     var l = el.scrollLeft > 1;
     var r = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
@@ -32839,17 +32845,18 @@
     var els = document.querySelectorAll(".adm2 .adm-chips, .adm2 .adm-tabs");
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
-      if (!el.__admsx) {
-        el.__admsx = 1;
+      if (!el.__admsxOn) {
+        el.__admsxOn = 1;
         el.addEventListener("scroll", function () { admEdges(this); }, { passive: true });
-        var on = el.querySelector('[aria-current="true"]');
+      }
+      var on = el.querySelector('[aria-current="true"]');
+      var key = on ? (on.textContent || "").trim() : "";
+      if (el.__admsx !== key) {
+        el.__admsx = key;
         if (on) {
           var box = el.getBoundingClientRect(), item = on.getBoundingClientRect();
-          // 12 px of the neighbour stays in view, so it reads as a row and
-          // not as the first thing on the screen
-          if (item.left < box.left + 1 || item.right > box.right - 1) {
-            el.scrollLeft += Math.round(item.left - box.left) - 12;
-          }
+          if (item.right > box.right - 0.5) el.scrollLeft += Math.ceil(item.right - box.right) + 12;
+          else if (item.left < box.left + 0.5) el.scrollLeft += Math.floor(item.left - box.left) - 12;
         }
       }
       admEdges(el);

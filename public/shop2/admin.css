@@ -865,19 +865,27 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   /* the toast owns the strip above the bar while it is up */
   body.adm-toasting .adm-fab { bottom: calc(var(--a-barh) + 88px); }
   .adm-fab__lbl { display: none; }
-  /* ---- while the keyboard is up, the two things that stand in its way -----
-     index.html asks the browser for `interactive-widget=resizes-content`, so
-     Chrome on Android shrinks the layout viewport when the keys come up — and
-     a bar fixed to `bottom: 0` then sits ON the keyboard, taking 64 px of the
-     little that is left above it, with the assistant's button floating over
-     the field beside it. On iOS the bar goes under the keys instead and is
-     simply unreachable. Either way nobody taps a section or opens the
-     assistant in the middle of typing a price, so while a field of the panel
-     has the keyboard both step out of the way and come straight back on blur.
-     `display`, not a transform: the bar is fixed, so nothing reflows, and
-     `.adm-page` keeps its bar-sized bottom padding — the page does not jump
-     under the caret. app.js sets the class from focusin/focusout. */
-  body.adm-typing .adm-bar, body.adm-typing .adm-fab { display: none; }
+  /* ---- the assistant's button gets out of the keyboard's way ---------------
+     It is the one fixed thing in the panel that floats OVER a form rather
+     than under it: `.adm-page` reserves the bar's height at its foot, so the
+     bar can never cover a field, while the button is pinned to the bottom
+     right of the screen with whatever is scrolled beneath it. And index.html
+     asks the browser for `interactive-widget=resizes-content`, so on Chrome
+     for Android the layout viewport shrinks when the keys come up and the
+     button lands squarely on the form.
+
+     Nobody opens the assistant in the middle of typing a price, so while a
+     field of the panel has the keyboard it is not drawn, and it is back on
+     blur. `display`, exactly as `body.adm-saving` already takes it away while
+     a save bar is the phone's header — a button that is merely transparent is
+     still a button a thumb can land on. app.js sets the class from
+     focusin/focusout.
+
+     The bar stays. On iOS it is under the keyboard and out of the way
+     already, and taking it away as well would make «the nav is at the bottom
+     of the screen» (e2e/admin-editor.spec.ts) false for as long as a field is
+     focused — that is a layout promise this panel means to keep. */
+  body.adm-typing .adm-fab { display: none; }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
   /* A thumb, not a pointer: every control the phone shows is at least 44 px
