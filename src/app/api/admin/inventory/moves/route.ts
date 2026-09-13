@@ -11,7 +11,7 @@
  * actions write "assistant" instead, straight through src/lib/inventory.ts.
  */
 import { requireAdmin } from "@/lib/auth";
-import { InventoryError, MOVE_REASONS, listMoves, move, setQty, type MoveReason } from "@/lib/inventory";
+import { InventoryError, LEDGER_REASONS, MOVE_REASONS, listMoves, move, setQty, type LedgerReason, type MoveReason } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,7 +22,10 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const reasonRaw = url.searchParams.get("reason");
-  const reason = reasonRaw && (MOVE_REASONS as readonly string[]).includes(reasonRaw) ? (reasonRaw as MoveReason) : undefined;
+  /* Reading allows 'edit' — the card corrections setLevel() records — while
+     writing below still only allows MOVE_REASONS: a change to a barcode or a
+     threshold is not something a caller may post as a movement of goods. */
+  const reason = reasonRaw && (LEDGER_REASONS as readonly string[]).includes(reasonRaw) ? (reasonRaw as LedgerReason) : undefined;
 
   try {
     const moves = await listMoves({

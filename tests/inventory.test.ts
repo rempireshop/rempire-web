@@ -7,12 +7,14 @@ import {
   getLevel,
   getLevels,
   InventoryError,
+  isTracked,
   listMoves,
   move,
   productStockStates,
   setLevel,
   setQty,
 } from "@/lib/inventory";
+import { createCustomProduct } from "@/lib/custom-products";
 import { createOrder, getOverrides, setOrderStatus, upsertOverride } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type OrderLike } from "@/lib/payments/apply";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
@@ -135,6 +137,29 @@ describe("inventory", () => {
       await setLevel(plain.id, "", { ean: "12345678" });
       expect((await byEan(" 12345678 "))?.productId).toBe(plain.id);
     });
+
+    /* The owner's own products are rows in custom_products, never entries in
+       the catalogue FILE that BY_ID is built from — so a code bound to one of
+       them came back with `product: null`, and the scanner reads that as «Код
+       не привязан». On «Салон» that is worse than a wrong label: scanToCart()
+       (public/shop2/app.js) needs a product and silently does nothing without
+       one, which is «I had a product with scanned code, then I went to salon
+       -> scan, scanned the same product and it did not find it» (Renat,
+       acceptance run 13.09.2026). */
+    it("names the owner's OWN product behind a code, not just the catalogue's", async () => {
+      const own = await createCustomProduct({ brand: "Kevin.Murphy", name: "Beard balm", cat: "beard", price: 24 });
+      await setLevel(own.id, "", { ean: "4820000000017" });
+      const hit = await byEan("4820000000017");
+      expect(hit?.productId).toBe(own.id);
+      expect(hit?.product).toMatchObject({ id: own.id, brand: "Kevin.Murphy", name: "Beard balm", price: 24 });
+    });
+
+    it("the history names the owner's own product too, instead of printing its id", async () => {
+      const own = await createCustomProduct({ brand: "Kevin.Murphy", name: "Beard balm", cat: "beard", price: 24 });
+      await move({ productId: own.id, delta: 5, reason: "goods_in", actor: "test" });
+      const moves = await listMoves({ productId: own.id });
+      expect(moves[0]).toMatchObject({ brand: "Kevin.Murphy", name: "Beard balm" });
+    });
   });
 
   describe("setLevel — EAN and threshold, never qty", () => {
@@ -177,6 +202,50 @@ describe("inventory", () => {
       expect(row.lowThreshold).toBe(2);
       expect(deriveState(3, row.lowThreshold)).toBe("in");
       expect(deriveState(2, row.lowThreshold)).toBe("low");
+    });
+
+    /* «Причина (видна в истории)» is what the box under it promises, and a
+       card change used to write no ledger row at all — so the sentence typed
+       beside a corrected «мало» threshold was read, sent nowhere and lost
+       under a «Сохранено ✓»: «Reason is not stored» (Renat). Migration 092
+       gave it a line of its own. */
+    it("keeps the reason typed beside a threshold change, as an 'edit' line", async () => {
+      await setLevel(plain.id, "", { lowThreshold: 6 }, { note: "порог поднял, зима", actor: "admin" });
+      const moves = await listMoves({ productId: plain.id });
+      expect(moves).toHaveLength(1);
+      expect(moves[0]).toMatchObject({ reason: "edit", delta: 0, ref: "порог поднял, зима", actor: "admin" });
+      expect((await getLevel(plain.id, ""))?.lowThreshold).toBe(6);
+    });
+
+    it("writes nothing when no reason was typed — seeding hundreds of barcodes is not a history", async () => {
+      await setLevel(plain.id, "", { ean: "12341234" });
+      expect(await listMoves({ productId: plain.id })).toHaveLength(0);
+    });
+
+    it("…and nothing when a reason is given but the patch changes nothing", async () => {
+      await setLevel(plain.id, "", {}, { note: "передумал" });
+      expect(await listMoves({ productId: plain.id })).toHaveLength(0);
+    });
+
+    /* The load-bearing half. An 'edit' row must never count as "somebody has
+       counted this shelf": binding a barcode is not a stocktake, and a
+       variant turned tracked at 0 by it would tell the shop «нет в наличии»
+       about a product the owner has a box of — the same trap the module doc
+       explains for a sale. */
+    it("an 'edit' line never makes a variant tracked", async () => {
+      await setLevel(plain.id, "", { ean: "43214321", lowThreshold: 4 }, { note: "наклеил свой код" });
+      expect(await isTracked(plain.id, "")).toBe(false);
+      expect((await productStockStates([plain.id]))[plain.id]).toBeUndefined();
+      const row = (await getLevels({ q: plain.b })).find((r) => r.productId === plain.id && r.variant === "");
+      expect(row?.tracked).toBe(false);
+    });
+
+    it("the ledger's own filter can ask for card changes alone", async () => {
+      await move({ productId: plain.id, delta: 3, reason: "goods_in" });
+      await setLevel(plain.id, "", { lowThreshold: 9 }, { note: "зима" });
+      expect(await listMoves({ productId: plain.id, reason: "edit" })).toHaveLength(1);
+      expect(await listMoves({ productId: plain.id, reason: "goods_in" })).toHaveLength(1);
+      expect(await listMoves({ productId: plain.id })).toHaveLength(2);
     });
   });
 
