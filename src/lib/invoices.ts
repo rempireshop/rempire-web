@@ -34,6 +34,7 @@
  */
 import { jsonbParam, query } from "@/lib/db";
 import { mergeContent, type ShopContent } from "@/lib/content";
+import { addShopDays, shopDay } from "@/lib/day";
 import { getSettings, OrderError, writeAuditSafe, type Order } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome } from "@/lib/payments/apply";
 import { notifyOrderPaid } from "@/lib/payments/mail-hook";
@@ -169,22 +170,16 @@ function safeParse(s: string): unknown {
 
 /* ---------- dates ---------------------------------------------------------- */
 
-const TZ = "Europe/Tallinn";
-
-/** The calendar date in Tallinn, `YYYY-MM-DD` — an invoice is dated where the shop is. */
+/** The calendar date in Tallinn, `YYYY-MM-DD` — an invoice is dated where the
+ *  shop is. This file said it first; src/lib/day.ts now says it for everyone,
+ *  and this is the same function under the name the invoices already use. */
 export function tallinnDate(d: Date = new Date()): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  } catch {
-    return d.toISOString().slice(0, 10);
-  }
+  return shopDay(d);
 }
 
 /** `YYYY-MM-DD` + n days, on the calendar (no daylight-saving arithmetic). */
 export function addDays(ymd: string, days: number): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
-  if (!m) return ymd;
-  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + days)).toISOString().slice(0, 10);
+  return addShopDays(ymd, days) || ymd;
 }
 
 function dayNumber(ymd: string): number {

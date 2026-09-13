@@ -9,7 +9,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { getOverviewSummary, startOfUtcDay } from "@/lib/analytics";
+import { getOverviewSummary, startOfShopDay } from "@/lib/analytics";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { exec, query } from "@/lib/db";
 import { move } from "@/lib/inventory";
@@ -88,9 +88,9 @@ describe("getOverviewSummary", () => {
   /* ---------- orders today / yesterday ------------------------------------- */
 
   it("counts paid orders by the day they were placed, today apart from yesterday", async () => {
-    await orderAt(at("2026-06-15T09:00:00Z"));               // today
-    await orderAt(at("2026-06-15T00:00:01Z"));               // today, just after UTC midnight
-    await orderAt(at("2026-06-14T23:59:59Z"));               // yesterday, one second earlier
+    await orderAt(at("2026-06-15T09:00:00Z"));               // 12:00 Tallinn — today
+    await orderAt(at("2026-06-14T21:00:01Z"));               // 00:00:01 Tallinn — today, one second in
+    await orderAt(at("2026-06-14T20:59:59Z"));               // 23:59:59 Tallinn — yesterday, one second earlier
     await orderAt(at("2026-06-13T12:00:00Z"));               // the day before — neither
     await orderAt(at("2026-06-15T10:00:00Z"), "new");        // never paid — not an order yet
     await orderAt(at("2026-06-15T10:00:00Z"), "cancelled");  // money left again
@@ -109,8 +109,11 @@ describe("getOverviewSummary", () => {
     expect(o.revenue7d.total).toBeGreaterThan(0);
   });
 
-  it("puts the day boundary at UTC midnight, the same place rangeBounds(\"today\") does", () => {
-    expect(startOfUtcDay(NOW).toISOString()).toBe("2026-06-15T00:00:00.000Z");
+  it("puts the day boundary at TALLINN midnight, the same place rangeBounds(\"today\") does", () => {
+    // 21:00 UTC on the 14th is midnight on the 15th where the shop is. It used
+    // to be UTC midnight, which handed the shop's last three evening hours to
+    // the day before — see tests/shop-day.test.ts for the whole rule.
+    expect(startOfShopDay(NOW).toISOString()).toBe("2026-06-14T21:00:00.000Z");
   });
 
   /* ---------- revenue over the last seven days ------------------------------ */

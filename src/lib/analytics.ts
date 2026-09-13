@@ -21,6 +21,10 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import { query } from "@/lib/db";
+/* Which day an instant belongs to — the Tallinn calendar, said out loud in the
+   SQL and in the JS alike, so the database's own timezone setting cannot move
+   a figure. See src/lib/day.ts for the rule and for why it is not date_trunc. */
+import { shopDay, shopDaySql, startOfShopDay } from "@/lib/day";
 /* The Overview's «Заканчиваются» reads the same merged in/low/out the shop
    itself renders — numeric stock over the manual override — instead of
    re-deriving it here. See getOverviewSummary() at the bottom of this file. */
@@ -111,7 +115,8 @@ const PAID_SQL = PAID_STATUSES.map((s) => `'${s}'`).join(", ");
  * Trailing windows, not calendar-aligned ("30d" = the last 30×24h, not the
  * calendar month) — simplest to reason about and to compare against the
  * immediately preceding window of the same length for the KPI deltas.
- * "today" is the one calendar exception: since UTC midnight. */
+ * "today" is the one calendar exception: since Tallinn midnight — the day the
+ * owner is having, not the day UTC is having (src/lib/day.ts). */
 
 export const ANALYTICS_RANGES = ["today", "7d", "30d", "90d"] as const;
 export type AnalyticsRange = (typeof ANALYTICS_RANGES)[number];
@@ -123,16 +128,9 @@ export type RangeBounds = { from: Date; to: Date; prevFrom: Date; prevTo: Date }
 export function rangeBounds(range: AnalyticsRange, now: Date = new Date()): RangeBounds {
   const to = now;
   const from =
-    range === "today"
-      ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-      : new Date(to.getTime() - RANGE_DAYS[range] * 86_400_000);
+    range === "today" ? startOfShopDay(now) : new Date(to.getTime() - RANGE_DAYS[range] * 86_400_000);
   const spanMs = Math.max(1, to.getTime() - from.getTime());
   return { from, to, prevFrom: new Date(from.getTime() - spanMs), prevTo: from };
-}
-
-function isoDay(v: unknown): string {
-  const d = v instanceof Date ? v : new Date(String(v));
-  return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
 }
 
 /* ---------- KPI cards with a delta vs. the previous period ---------------- */
@@ -191,15 +189,26 @@ async function qOrdersSummary(from: Date, to: Date, prevFrom: Date) {
   };
 }
 
+/**
+ * Takings per day, named on the Tallinn calendar.
+ *
+ * Not `date_trunc('day', created_at)`: that cuts the day in whatever zone the
+ * database session is set to and hands back an instant, which then has to be
+ * re-read in the SAME zone to mean anything. It was not — isoDay() formatted
+ * it in UTC — so on a database at UTC+3 an order placed at 21:02 was reported
+ * under the previous day, silently, with nothing on screen to say so. The
+ * group key is the Tallinn day as TEXT instead: the zone is written into the
+ * statement, and no driver can parse a string back into a Date and shift it.
+ */
 async function qRevenueByDay(from: Date, to: Date) {
-  const rows = await query<{ day: string | Date; revenue: string; orders: string }>(
-    `select date_trunc('day', created_at) as day, sum(total) as revenue, count(*) as orders
+  const rows = await query<{ day: string; revenue: string; orders: string }>(
+    `select ${shopDaySql("created_at")} as day, sum(total) as revenue, count(*) as orders
      from orders
      where status in (${PAID_SQL}) and created_at >= $1 and created_at < $2
      group by 1 order by 1`,
     [from, to],
   );
-  return rows.map((r) => ({ day: isoDay(r.day), revenue: money(r.revenue), orders: int(r.orders) }));
+  return rows.map((r) => ({ day: String(r.day ?? ""), revenue: money(r.revenue), orders: int(r.orders) }));
 }
 
 async function qTopProductsByRevenue(from: Date, to: Date) {
@@ -494,16 +503,23 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
  *   makes «Заканчиваются» agree with the badge in the shop, by construction.
  * ========================================================================== */
 
-/** UTC midnight of the day `now` falls in — the same convention rangeBounds("today") uses. */
-export function startOfUtcDay(now: Date): Date {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-}
+/**
+ * Tallinn midnight of the day `now` falls in — the same convention
+ * rangeBounds("today") uses, and the same one qRevenueByDay names its rows by.
+ * Re-exported rather than re-implemented: one rule, one definition.
+ *
+ * It was UTC midnight (startOfUtcDay) until 13.09.2026, which meant «заказы
+ * сегодня» ignored everything the shop sold after 21:00 until the clock passed
+ * midnight in Greenwich — three hours of an Estonian evening, every evening,
+ * counted under yesterday.
+ */
+export { startOfShopDay } from "@/lib/day";
 
 export type OverviewLowStockItem = { id: string; name: string; brand: string; stock: "low" | "out" };
 
 export type OverviewSummary = {
   now: string;
-  /** Paid orders placed in each calendar day (UTC). */
+  /** Paid orders placed in each calendar day, Tallinn (src/lib/day.ts). */
   orders: { today: number; yesterday: number };
   /** Paid orders of the last 7×24 hours. `perDay` is total ÷ 7, not ÷ days-with-a-sale. */
   revenue7d: { total: number; perDay: number; orders: number };
@@ -707,7 +723,7 @@ export async function toShipOrders(limit = 10): Promise<{ total: number; rows: T
     rows: rows.map((r) => ({
       number: String(r.number || ""),
       who: String(r.name || r.email || "").trim(),
-      at: new Date(r.created_at).toISOString().slice(0, 10),
+      at: shopDay(r.created_at),
       total: Number(r.total) || 0,
       labeled: r.labeled === true,
     })),
@@ -715,7 +731,7 @@ export async function toShipOrders(limit = 10): Promise<{ total: number; rows: T
 }
 
 export async function getOverviewSummary(now: Date = new Date()): Promise<OverviewSummary> {
-  const dayStart = startOfUtcDay(now);
+  const dayStart = startOfShopDay(now);
   const prevStart = new Date(dayStart.getTime() - 86_400_000);
   const weekFrom = new Date(now.getTime() - 7 * 86_400_000);
 

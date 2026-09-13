@@ -15,6 +15,10 @@
  */
 import { deflateRawSync } from "node:zlib";
 import { query } from "@/lib/db";
+/* Which day — and therefore which MONTH — an order belongs to: the Tallinn
+   calendar, because the month this file exports is the month the accountant
+   files. See src/lib/day.ts. */
+import { shopDay, shopDayStart } from "@/lib/day";
 
 /* ---------- VAT ------------------------------------------------------------
  * Estonia's standard VAT rate has been 24% since 1 July 2025 (raised from
@@ -54,7 +58,20 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-/** "YYYY-MM" → the UTC half-open range [first of month, first of next month). */
+/**
+ * "YYYY-MM" → the half-open range [first of month, first of next month), as
+ * two `YYYY-MM-DD` days on the ESTONIAN calendar — listReportOrders() below
+ * turns each into the instant Tallinn midnight happened.
+ *
+ * The two bounds used to reach Postgres as `$2::timestamptz`, which resolves
+ * in whatever zone the database session is set to. On the UTC deployment that
+ * put every month's window three hours late at both ends (two in winter), so
+ * the first three hours of each month were filed under the month before: an
+ * order placed at 01:00 on 1 September, Tallinn time, came out in AUGUST's
+ * export, and one placed at 01:00 on 1 October came out in September's. The
+ * row's own `date` column agreed with it, so nothing on the sheet said the
+ * month had been cut anywhere but on the Estonian calendar.
+ */
 /* Years a shop's accounting export can plausibly ask for. Outside this the
    value is a typo or a probe, and Postgres would refuse it anyway. */
 const MIN_YEAR = 1970;
@@ -206,7 +223,9 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
   const { net, vat } = vatSplit(total, vatRate);
   return {
     number: r.number,
-    date: new Date(r.created_at as string).toISOString().slice(0, 10),
+    // the day the shop had, not the day Greenwich had — an evening order must
+    // not be dated to the day before on the accountant's line
+    date: shopDay(r.created_at),
     customerName: r.name ?? "",
     customerEmail: r.email ?? "",
     country: shipping.country ?? "",
@@ -243,14 +262,22 @@ export function reportOrderColumns(hasChannel: boolean): string {
   return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}`;
 }
 
-/** `to` is an exclusive upper bound (YYYY-MM-DD) — see monthRange/explicitRange. */
+/**
+ * `to` is an exclusive upper bound (YYYY-MM-DD) — see monthRange/explicitRange.
+ *
+ * Both bounds are bound as the INSTANT Tallinn midnight of that day happened,
+ * not as a bare date string for `::timestamptz` to resolve against the
+ * session's zone. That is what makes the window the owner's month whatever the
+ * database is set to, and what makes `>= from` and `< to` mean the same thing
+ * as the `date` column each row is reported under (shopDay, above).
+ */
 export async function listReportOrders(from: string, to: string, vatRate: number): Promise<ReportOrderRow[]> {
   const hasChannel = await ordersHasChannelColumn();
   const rows = await query<RawRow>(
     `select ${reportOrderColumns(hasChannel)} from orders
-     where status = any($1) and created_at >= $2::timestamptz and created_at < $3::timestamptz
+     where status = any($1) and created_at >= $2 and created_at < $3
      order by created_at asc, number asc`,
-    [REPORTABLE_STATUSES, from, to],
+    [REPORTABLE_STATUSES, shopDayStart(from), shopDayStart(to)],
   );
   return rows.map((r) => toReportRow(r, vatRate));
 }

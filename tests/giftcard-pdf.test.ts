@@ -212,6 +212,20 @@ describe("gift-card validity", () => {
     expect(giftValidUntil(null)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(giftValidUntil("not a date")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
+
+  it("counts the year from the day the card was sold in TALLINN", () => {
+    /* The card is bought in a shop in Tallinn and the date is printed on it,
+       so the day it is counted from is the shop's, not Greenwich's. 21:30 UTC
+       on 4 September is half past midnight on the 5th where the till is: the
+       card is good until 5 September, not the 4th. This used to be counted in
+       UTC «so a card bought at 23:30 in Tallinn does not print a date one day
+       short» — which had the shift the wrong way round, since UTC is BEHIND
+       Tallinn and it is the small hours that move, not the late evening.
+       src/lib/day.ts has the rule; tests/shop-day.test.ts has it whole. */
+    expect(giftValidUntil("2026-09-04T21:30:00.000Z")).toBe("2027-09-05");
+    // 23:30 in Tallinn on the 4th (20:30 UTC) is still the 4th, as before
+    expect(giftValidUntil("2026-09-04T20:30:00.000Z")).toBe("2027-09-04");
+  });
 });
 
 /* ---------- the page ------------------------------------------------------ */
@@ -246,6 +260,26 @@ describe("gift-card PDF — the page", () => {
     expect(text).toContain("Промокод или подарочная карта");
     // no glyph came out as .notdef anywhere on the card
     expect(text).not.toContain("�");
+  });
+
+  it("prints the SAME validity date the shop's own giftValidUntil() computes", async () => {
+    /* The PDF works the date out for itself (isoPlusYear, src/lib/giftcard-pdf.ts
+       — it must not pull in the db-backed module to draw a card), so the two
+       can drift. Both count from the Tallinn day the card was sold: 21:30 UTC
+       is half past midnight the NEXT day where the till is, and that is the
+       case that used to come out a day short. */
+    for (const createdAt of [
+      "2026-09-04T10:00:00.000Z", // midday, the two zones agree
+      "2026-09-04T21:30:00.000Z", // 00:30 Tallinn on the 5th
+      "2026-09-04T20:30:00.000Z", // 23:30 Tallinn on the 4th
+      "2026-01-31T22:30:00.000Z", // 00:30 Tallinn on 1 February, winter
+    ]) {
+      const want = giftValidUntil(createdAt).split("-").reverse().join(".");
+      // `validUntil: ""` so the card works it out rather than printing a
+      // stored one — that fallback is the code under test here
+      const text = extractText(await render({ createdAt, validUntil: "" })).join("\n");
+      expect(text).toContain(`Действует до ${want}`);
+    }
   });
 
   it("prints the personal message and who it is from — and omits them when absent", async () => {

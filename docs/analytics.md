@@ -51,10 +51,25 @@ three written down in the block comment above `getOverviewSummary()`:
   «Заканчиваются» agree with the badge in the shop by construction, instead
   of being a second opinion about the same thing.
 
-Day boundaries are **UTC**, the same convention `rangeBounds("today")` already
-uses for the «Сегодня» pill. Estonia is one or two hours ahead, so a sale made
-after 22:00/23:00 local counts towards tomorrow — worth knowing, and better
-than two different definitions of «сегодня» in one panel.
+Day boundaries are **Europe/Tallinn** — `src/lib/day.ts`, the one rule every
+day- and month-shaped figure here goes through, `rangeBounds("today")` behind
+the «Сегодня» pill included. A day is the day the shop had: the owner reads the
+numbers in Tallinn, and the accountant's month has to match the Estonian
+calendar month.
+
+They were **UTC** until 13.09.2026, and that cost real figures. A sale made
+between midnight and 02:00 (03:00 in summer) local counted towards *yesterday*,
+and the accountant's month filter put the first two or three hours of every
+month into the month before. The seven-day bars had a second fault on top:
+`date_trunc('day', created_at)` cut the day in whatever zone the **database
+session** was set to and the JS then printed that instant in UTC, so on a
+database anywhere east of Greenwich an evening order was reported a day early.
+Both are gone: the zone is named in the SQL (`shopDaySql`) and in the JS
+(`shopDay`), never inherited — so the database's own `timezone =` setting no
+longer changes any figure. Move the database, or restore a dump onto a server
+set to something else, and the numbers are the same. `tests/shop-day.test.ts`
+holds every figure to that, running each one against a session at UTC, at
+Europe/Tallinn and at Pacific/Kiritimati.
 
 Without a backend behind it (the standalone prototype, or a browser that is
 not signed in) the Overview keeps the demo numbers it always had, and the
@@ -398,7 +413,7 @@ Turning it on is purely additive, never a regression.
   and the retention cron route's auth.
 - `tests/overview.test.ts` — `getOverviewSummary()` and its route: a fresh
   database is all zeros (no invented «вчера — 5»); today apart from yesterday
-  across the UTC boundary; an order still counted after it is marked
+  across the Tallinn midnight boundary; an order still counted after it is marked
   «Отправлен»; the seven-day sum and its ÷ 7 average; low stock from a real
   count where there is one and from the manual override elsewhere, with the
   count winning for the same product; an override for a product the catalogue

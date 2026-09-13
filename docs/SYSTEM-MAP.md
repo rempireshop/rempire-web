@@ -1167,7 +1167,8 @@ accountant; the assistant (30-day summary in its prompt).
 1-in-2000 sweep), `POST /api/track/` (60/min, ≤1 KB, bots dropped, `sid` in
 `sessionStorage`, no cookie), storefront `track()` :5172 (view, product,
 search, add_to_cart, checkout, purchase, chat); `src/lib/analytics.ts`
-(`PAID_STATUSES paid|shipped|delivered`, UTC days, `getOverviewSummary`,
+(`PAID_STATUSES paid|shipped|delivered`, Tallinn days via `src/lib/day.ts`,
+`getOverviewSummary`,
 `getAnalyticsSummary`), routes `GET /api/admin/overview/`, `GET
 /api/admin/analytics/?range=today|7d|30d|90d`, `GET /api/admin/analytics/gsc/`
 (`src/lib/gsc.ts`, RS256 service-account JWT, 24 h cache in `settings.gsc_cache`);
@@ -1184,7 +1185,9 @@ beacon: placeholder in `index.html` :95.
 
 **How to test it.** `tests/track.test.ts`, `tests/events.test.ts`,
 `tests/overview.test.ts`, `tests/analytics.test.ts`, `tests/gsc.test.ts`,
-`tests/reports.test.ts`, `tests/payments-apply.test.ts` (purchase row); e2e
+`tests/reports.test.ts`, `tests/shop-day.test.ts` (which day a figure belongs
+to, with the database session set to three different zones),
+`tests/payments-apply.test.ts` (purchase row); e2e
 `admin-shell.spec.ts` («Сделать сегодня» counts a paid order), `sweep-admin.
 spec.ts` (reports download), `admin-sections.spec.ts`. Manual: «Ещё» →
 «Аналитика» → «7 дней».
@@ -1194,7 +1197,9 @@ but under-count: POS sales never write a purchase event; ad blockers can drop
 `/api/track`; `track("purchase")` can fire again on re-render of the receipt
 (agent finding, `doneState` :17136 vs `S.done` only set in demo). GSC: **not
 configured** (service account exists, key + env pending). Cloudflare beacon:
-placeholder. Day boundaries are UTC.
+placeholder. Day boundaries are **Europe/Tallinn** (`src/lib/day.ts`, since
+13.09.2026 — they were UTC, which dated an order placed in the small hours to
+the day before and filed the first hours of a month under the month before).
 
 **Simplification candidates.** Q56 (which numbers), Q57 (GSC block), Q36
 (beacon), Q51 (reports CSV vs XLSX).

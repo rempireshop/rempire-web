@@ -34,6 +34,9 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import fontkit from "@pdf-lib/fontkit";
+/* Not db-backed and not heavy: the day rule itself, so the date printed on the
+   card is the one giftValidUntil() computes rather than a second opinion. */
+import { shopDay, ymdParts } from "@/lib/day";
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 
 /* ---------- the URL and its token ---------------------------------------- */
@@ -466,11 +469,16 @@ export async function renderGiftCardPdf(
   return doc.save();
 }
 
-/** createdAt + GIFT_VALID_MONTHS, without importing the db-backed module. */
+/** createdAt + GIFT_VALID_MONTHS, without importing the db-backed module —
+ *  the same arithmetic as giftValidUntil() in src/lib/giftcards.ts, off the
+ *  Tallinn day the card was bought (tests/giftcard-pdf.test.ts pins them equal). */
 function isoPlusYear(createdAt: GiftPdfCard["createdAt"]): string {
-  const base = createdAt ? new Date(createdAt) : new Date();
-  const d = Number.isNaN(base.getTime()) ? new Date() : new Date(base.getTime());
-  d.setUTCMonth(d.getUTCMonth() + 12);
+  const day = shopDay(createdAt ?? new Date()) || shopDay(new Date());
+  const p = ymdParts(day);
+  if (!p) return day;
+  const d = new Date(0);
+  d.setUTCFullYear(p.year, p.month - 1 + 12, p.day);
+  d.setUTCHours(0, 0, 0, 0);
   return d.toISOString().slice(0, 10);
 }
 

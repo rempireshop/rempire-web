@@ -14784,6 +14784,35 @@
     try { d = new Date().toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long" }); } catch (e) { d = ""; }
     return d ? d.charAt(0).toUpperCase() + d.slice(1) : "";
   }
+  /* ---------- which day — the shop's, not the browser's and not UTC --------
+     The server names every day-shaped figure on the Tallinn calendar
+     (src/lib/day.ts, shopDaySql). The panel has to name them the same way or
+     its own slots do not line up with the server's rows — and the owner's
+     phone abroad must still show the shop's week, not his hotel's. */
+
+  /** «2026-09-13» — the Tallinn calendar day an instant falls in. Falls back to
+      the browser's own calendar where Intl has no time-zone data. */
+  function admShopDay(d) {
+    try {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/Tallinn", year: "numeric", month: "2-digit", day: "2-digit"
+      }).format(d);
+    } catch (e) {
+      var p = function (n) { return (n < 10 ? "0" : "") + n; };
+      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+    }
+  }
+  /** «2026-09-13» + n CALENDAR days. Not n×864e5: the last Sunday of October
+      is a 25-hour day in Tallinn, and stepping by hours would name it twice
+      and skip the day after it — one bar of the week drawn over another. */
+  function admShopDayAdd(ymd, n) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
+    if (!m) return "";
+    var d = new Date(0);
+    d.setUTCFullYear(+m[1], +m[2] - 1, +m[3] + (n | 0));
+    d.setUTCHours(0, 0, 0, 0);
+    return d.toISOString().slice(0, 10);
+  }
   /** The marker on a row whose body is a button and whose right half is not
       (`.adm-row--open`): a tap on the row's own blank — the chip line, the
       sum, the space beside the actions — is passed to the body button, which
@@ -14920,21 +14949,21 @@
        from six days ago to today, and the rows are dropped into the slot that
        matches their day; a day with no order keeps its 2-px floor, which is
        what «nothing came in on Tuesday» is supposed to look like. The slot
-       keys are UTC calendar days (toISOString), which is how the server names
-       its own — as long as the database runs on UTC, as the deployment does.
-       On a machine whose database session is an hour zone east of UTC (a dev
-       box in Tallinn) the server's `isoDay` prints local midnight as a UTC
-       instant and so names today «yesterday»: the bar is then one slot to the
-       left. That is a fault in isoDay, not here, and a row can never fall off
-       the strip because of it. */
+       keys are TALLINN calendar days (admShopDay), which is how the server
+       names its own rows — shopDaySql() in src/lib/day.ts. The shop's day,
+       the same one on the owner's phone as in the database, whatever zone
+       either of them runs in. Both halves used to say UTC instead, and the
+       server's half was wrong with it: it cut the day in the database's own
+       zone and then printed the result in UTC, so on anything but a UTC
+       database an evening's takings landed on yesterday's bar. */
     var byDay = {};
     series.forEach(function (r) { byDay[String(r.day).slice(0, 10)] = r.revenue; });
     /* still nothing at all (the summary has not landed): no strip, as before —
        seven flat bars would be an answer the panel does not have yet */
-    var bars = "", d0 = Date.now();
+    var bars = "", admToday = admShopDay(new Date());
     if (series.length) {
       for (var bi = 6; bi >= 0; bi--) {
-        var key = new Date(d0 - bi * 864e5).toISOString().slice(0, 10);
+        var key = admShopDayAdd(admToday, -bi);
         var rev = byDay[key] || 0;
         bars += '<i class="' + (bi === 0 ? "is-today" : "") + '" style="height:' +
           Math.max(2, Math.round((rev / top) * 100)) + '%"></i>';

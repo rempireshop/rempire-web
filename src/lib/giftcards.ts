@@ -1,5 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { jsonbParam, query } from "@/lib/db";
+/* «Действует до …» is a date on a printed card — the shop's calendar day, not
+   the server's (src/lib/day.ts). */
+import { shopDay, ymdParts } from "@/lib/day";
 
 /**
  * Gift cards — issue, check, apply, redeem.
@@ -81,15 +84,23 @@ export async function giftAmountsOnSale(): Promise<number[]> {
 export const GIFT_VALID_MONTHS = 12;
 
 /**
- * The last day the card is good for, as `YYYY-MM-DD`. UTC throughout — a card
- * bought at 23:30 in Tallinn must not print a date one day short in the PDF
- * because the server renders it in another zone.
+ * The last day the card is good for, as `YYYY-MM-DD`.
+ *
+ * Counted from the TALLINN day the card was bought, then twelve months on the
+ * calendar. It used to be counted in UTC "so that a card bought at 23:30 in
+ * Tallinn does not print a date one day short" — which had the shift the wrong
+ * way round: UTC is behind Tallinn, so it is a card bought in the small hours
+ * (00:30 on the 13th is 21:30Z on the 12th) that printed the day before. Now
+ * the day is named where the card was sold and the month arithmetic runs on
+ * plain calendar fields, so no hour of the day can move it.
  */
 export function giftValidUntil(createdAt: Date | string | null | undefined): string {
-  const from = createdAt ? new Date(createdAt) : new Date();
-  const base = Number.isNaN(from.getTime()) ? new Date() : from;
-  const d = new Date(base.getTime());
-  d.setUTCMonth(d.getUTCMonth() + GIFT_VALID_MONTHS);
+  const day = shopDay(createdAt ?? new Date()) || shopDay(new Date());
+  const p = ymdParts(day);
+  if (!p) return day;
+  const d = new Date(0);
+  d.setUTCFullYear(p.year, p.month - 1 + GIFT_VALID_MONTHS, p.day);
+  d.setUTCHours(0, 0, 0, 0);
   return d.toISOString().slice(0, 10);
 }
 

@@ -115,6 +115,37 @@ describe("birthdayWindow()", () => {
     expect(days.map((d) => [d.mmdd, d.year])).toEqual([[1230, 2026], [1231, 2026], [101, 2027], [102, 2027]]);
   });
 
+  it("counts «today» on the Tallinn calendar, not the UTC one", () => {
+    /* A birthday is a date somebody typed on an Estonian form, so the «today»
+       it is compared against has to be an Estonian day. The daily job runs at
+       07:00, where the two zones agree; a run started by hand from the panel
+       late in the evening did not, and used to look at yesterday.
+       See tests/shop-day.test.ts for the whole rule.
+
+       March is still EET (UTC+2) — the clocks go forward on the last Sunday —
+       so it takes 22:30 UTC to be half past midnight on the 14th in Tallinn.
+       That the offset is two hours here and three in July is the reason this
+       goes through Intl rather than through a constant. */
+    expect(birthdayWindow(Date.parse("2026-03-13T22:30:00Z"), 0)).toEqual([{ mmdd: 314, year: 2026, ahead: 0 }]);
+    // 23:30 in Tallinn on the 13th (21:30 UTC, winter) is still the 13th
+    expect(birthdayWindow(Date.parse("2026-03-13T21:30:00Z"), 0)).toEqual([{ mmdd: 313, year: 2026, ahead: 0 }]);
+    // and in July, when Tallinn is UTC+3, the same turn happens an hour earlier
+    expect(birthdayWindow(Date.parse("2026-07-13T21:30:00Z"), 0)).toEqual([{ mmdd: 714, year: 2026, ahead: 0 }]);
+    expect(birthdayWindow(Date.parse("2026-07-13T20:30:00Z"), 0)).toEqual([{ mmdd: 713, year: 2026, ahead: 0 }]);
+  });
+
+  it("steps by calendar days, so the 25-hour October Sunday is named once", () => {
+    /* Tallinn's clocks go back on 25 October 2026, making that day 25 hours
+       long. Stepping by 24×60×60×1000 from the 24th would name the 25th twice
+       and never reach the 27th — a letter sent twice, or a birthday the window
+       never opens on. */
+    const days = birthdayWindow(Date.parse("2026-10-24T07:00:00Z"), 3);
+    expect(days.map((d) => d.mmdd)).toEqual([1024, 1025, 1026, 1027]);
+    // and the same over the March switch-over, when a day is 23 hours long
+    const march = birthdayWindow(Date.parse("2026-03-28T07:00:00Z"), 2);
+    expect(march.map((d) => d.mmdd)).toEqual([328, 329, 330]);
+  });
+
   it("puts 29 February on the 28th in a year that has no 29th, and nowhere else", () => {
     // 2027 is not a leap year: the 28th stands in for the 29th
     const plain = birthdayWindow(Date.UTC(2027, 1, 27, 9, 0, 0), 2);

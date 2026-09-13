@@ -31,6 +31,11 @@ import { baseUrl, normalizeLang } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
 import { optedOutSet, unsubscribeHeaders, unsubscribeUrl } from "@/lib/consent";
 import { query } from "@/lib/db";
+/* A birthday is a calendar date, so the "today" it is compared against has to
+   be a calendar day too — Tallinn's, not Greenwich's (src/lib/day.ts). The
+   daily run fires at 07:00 Tallinn, but a hand-started run at half past
+   midnight would otherwise still be looking at yesterday's date. */
+import { addShopDays, shopDay, ymdParts } from "@/lib/day";
 import { sendRendered } from "@/lib/mail";
 import {
   markStockAlertSent,
@@ -693,15 +698,24 @@ function isLeapYear(y: number): boolean {
  * the 28th's line whenever that 28th is in a non-leap year — the customer
  * born on the 29th gets the letter the day before the 1st of March, and the
  * customer born on the 28th gets theirs as always.
+ *
+ * «Today» is the Tallinn calendar day, and the steps after it are CALENDAR
+ * days, not 24-hour hops. Both matter: the day stamped on a customer's
+ * birthday is a date somebody typed on an Estonian form, and a 24-hour hop
+ * across the last Sunday of October (a 25-hour Tallinn day) would name the
+ * same date twice and skip the one after it — a letter sent twice, or a
+ * birthday the window never reaches.
  */
 export function birthdayWindow(now: number, birthdayDays: number): WindowDay[] {
   const out: WindowDay[] = [];
   const span = Math.max(0, Math.min(BIRTHDAY_MAX_DAYS, Math.trunc(birthdayDays) || 0));
+  // a caller that hands in a broken `now` still gets span+1 days, so the
+  // placeholder list below can never come out shorter than its parameters
+  const today = shopDay(new Date(now)) || shopDay(new Date());
   for (let i = 0; i <= span; i += 1) {
-    const d = new Date(now + i * 24 * 60 * 60 * 1000);
-    const month = d.getUTCMonth() + 1;
-    const day = d.getUTCDate();
-    const year = d.getUTCFullYear();
+    const parts = ymdParts(addShopDays(today, i));
+    if (!parts) continue;
+    const { year, month, day } = parts;
     out.push({ mmdd: month * 100 + day, year, ahead: i });
     if (month === 2 && day === 28 && !isLeapYear(year)) out.push({ mmdd: 229, year, ahead: i });
   }
@@ -1292,11 +1306,14 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
   }
   try {
     // Seven days including today, wrapping across the New Year without a
-    // calendar library: compare the month/day pair as a number.
+    // calendar library: compare the month/day pair as a number. Tallinn's
+    // calendar and Tallinn's steps, the same as birthdayWindow() above — this
+    // counter and that queue must not disagree about which day it is.
     const days: number[] = [];
+    const from = shopDay(new Date(now)) || shopDay(new Date());
     for (let i = 0; i < 7; i += 1) {
-      const d = new Date(now + i * 24 * 60 * 60 * 1000);
-      days.push((d.getUTCMonth() + 1) * 100 + d.getUTCDate());
+      const p = ymdParts(addShopDays(from, i));
+      if (p) days.push(p.month * 100 + p.day);
     }
     // Placeholders rather than an array parameter: the two drivers disagree
     // about how a JS array becomes a Postgres one, and seven holes cost nothing.
