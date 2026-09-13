@@ -552,6 +552,20 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
         await waitForScreen(shopper, "product");
         await expect(shopper.locator(".pdp .chip", { hasText: "Цена для салонов" }).first(),
           "the partner does not see the salon price on the product page").toBeVisible();
+
+        /* …and the status taken away again reaches that OPEN page. Until
+           13.09.2026 the partner prices were fetched once and never dropped,
+           so a demoted partner went on being shown salon prices — prices the
+           order would not be billed at — until they reloaded (Renat). The
+           shop re-asks who they are when it comes back to the front
+           (acctRefresh in app.js), and a profile that is no longer 'pro'
+           clears S.pro. No reload here, on purpose: that is the bug. */
+        await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
+        // past acctRefresh's three-second guard, then the shop comes back to the front
+        await shopper.waitForTimeout(3_200);
+        await shopper.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+        await expect(shopper.locator(".pdp .chip", { hasText: "Цена для салонов" }),
+          "the salon price survived the partner status being taken away").toHaveCount(0);
       } finally {
         await ctx.close();
       }

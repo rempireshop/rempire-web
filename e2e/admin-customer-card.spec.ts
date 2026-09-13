@@ -140,4 +140,72 @@ test.describe("admin — the customer card", () => {
       if (reviewId) await page.request.patch("/api/admin/reviews/", { data: { id: reviewId, status: "rejected" } });
     }
   });
+
+  /**
+   * «Розница ⇄ Партнёр» moves under the finger, not a second later.
+   *
+   * Renat, 13.09.2026: «marking a customer as партнёр takes one to two
+   * seconds before the switch reflects it». It did — confirming the card threw
+   * the customer card and the 500-row list away and drew a skeleton until two
+   * fresh requests came back. The switch is one field, so it moves at once and
+   * the PATCH either confirms it or puts it back with the toast the panel has
+   * always shown (app.js: admTierLocal / srvPush's set_tier).
+   *
+   * Both halves are driven here with the answer deliberately held back, so the
+   * "moved already" and the "put back" are each unambiguous.
+   */
+  test("the partner switch moves at once, and comes back if the server refuses", async ({ page }) => {
+    test.setTimeout(120_000);
+    const email = freshEmail("custtier");
+    await loginAsAdmin(page);
+    const made = await page.request.post("/api/admin/customers/", { data: { email, tier: "retail" } });
+    expect(made.ok(), "POST /api/admin/customers/ refused the retail row").toBe(true);
+
+    await adminSection(page, "people");
+    await page.locator("[data-admcustq]").fill(email);
+    await page.locator(".adm-row", { hasText: email }).first().locator("[data-admcustopen]").click();
+    const pro = page.locator('[data-admcusttierset="pro"]');
+    const retail = page.locator('[data-admcusttierset="retail"]');
+    await expect(retail).toHaveAttribute("aria-current", "true");
+
+    /* ---- it moves before the server has answered ------------------------- */
+    let release: (() => void) | null = null;
+    await page.route(
+      (u) => u.pathname.startsWith("/api/admin/customers/") && u.pathname.length > "/api/admin/customers/".length,
+      async (route) => {
+        if (route.request().method() !== "PATCH") return route.fallback();
+        await new Promise<void>((done) => { release = done; });
+        await route.continue();
+      },
+    );
+    await pro.click();
+    await expect(page.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
+    await page.locator("[data-admapply]").click();
+    // the PATCH is still held; the switch, the badge and the card are already there
+    await expect(pro, "the switch waited for the server").toHaveAttribute("aria-current", "true");
+    await expect(page.locator(".adm-skel"), "the card blanked instead of moving the switch").toHaveCount(0);
+    await expect(page.locator(".adm-badge--big")).toHaveText("Pro");
+    await expect.poll(() => !!release, { timeout: 10_000 }).toBe(true);
+    release!();
+    await expect(pro).toHaveAttribute("aria-current", "true");
+    await page.unroute((u) => u.pathname.startsWith("/api/admin/customers/"));
+
+    /* ---- and it comes back when the answer is «нет» ---------------------- */
+    await page.route(
+      (u) => u.pathname.startsWith("/api/admin/customers/") && u.pathname.length > "/api/admin/customers/".length,
+      async (route) => {
+        if (route.request().method() !== "PATCH") return route.fallback();
+        await route.fulfill({ status: 503, json: { ok: false, error: "db_unavailable" } });
+      },
+    );
+    await retail.click();
+    await page.locator("[data-admapply]").click();
+    await expect(page.getByRole("status")).toContainText("Не получилось изменить статус");
+    await expect(pro, "a refused change left the switch on the wrong side").toHaveAttribute("aria-current", "true");
+    await page.unroute((u) => u.pathname.startsWith("/api/admin/customers/"));
+    // the server never moved either — the row is still a partner
+    const row = await (await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`)).json();
+    expect(row.customer.tier).toBe("pro");
+    await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
+  });
 });

@@ -419,10 +419,14 @@ export interface AccountLoyalty {
  * `customerId` null (no row yet) is an empty, well-formed answer, not an error.
  */
 export async function accountLoyaltySummary(customerId: string | null): Promise<AccountLoyalty> {
-  const settings = await getPricingSettings();
-  const [balance, history] = customerId
-    ? await Promise.all([getLoyaltyBalance(customerId), getLoyaltyHistory(customerId, 30)])
-    : [0, [] as LedgerEntry[]];
+  /* All three at once. The settings row decides how the balance is PRESENTED,
+     never what it is, so waiting for it before asking for the ledger only ever
+     added a round trip to a route the checkout blocks on. */
+  const [settings, balance, history] = await Promise.all([
+    getPricingSettings(),
+    customerId ? getLoyaltyBalance(customerId) : Promise.resolve(0),
+    customerId ? getLoyaltyHistory(customerId, 30) : Promise.resolve([] as LedgerEntry[]),
+  ]);
   return {
     balance,
     history,

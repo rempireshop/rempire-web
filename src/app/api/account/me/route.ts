@@ -29,8 +29,23 @@ export async function GET(req: Request) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401, headers: NO_STORE });
   }
   try {
-    const [customer, orders] = await Promise.all([getCustomer(email), listCustomerOrders(email)]);
-    const loyalty = await accountLoyaltySummary(customer?.id ?? null);
+    /* Two waits, not three. The points summary needs the customer's id, so it
+       cannot start before getCustomer() answers — but it never needed to wait
+       for the ORDERS too, and awaiting the pair together is what made it.
+       The caller that feels this is the checkout: a signed-in shopper's name,
+       phone and address stay empty on screen until this route answers
+       (acctLoad in public/shop2/app.js), so every round trip left on the
+       critical path here is a second of empty fields on a phone.
+       The orders read is started first and awaited last; the `catch` on it is
+       only so a failure in getCustomer() below cannot leave it an unhandled
+       rejection on the way to the catch block — awaiting it still throws. */
+    const ordersPending = listCustomerOrders(email);
+    ordersPending.catch(() => {});
+    const customer = await getCustomer(email);
+    const [orders, loyalty] = await Promise.all([
+      ordersPending,
+      accountLoyaltySummary(customer?.id ?? null),
+    ]);
     return Response.json(
       {
         ok: true,

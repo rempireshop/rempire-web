@@ -813,7 +813,20 @@ body:has(.stickybar) .ftr {
   transition: border-color .18s var(--ease), background .18s var(--ease);
 }
 .bank:hover { border-color: var(--ink); }
-.bank[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+/* Pressed and picked used to fill the tile with --ink and flip the text to
+   --paper. That works for the five built-in names, and it destroys the half
+   of the real list whose logo is black artwork on nothing — SEB and LHV went
+   completely black the moment they were tapped (Renat, 13.09.2026), because
+   the mark the tile carries is the same colour as the fill under it. The pick
+   is marked the way a chosen product thumbnail is marked instead
+   (.pdp__thumb below): the ink ring, drawn as an inset shadow so nothing
+   moves by a pixel, over the tile's own light ground — which every logo,
+   black or coloured, stays readable on. The unpicked tile is untouched. */
+.bank:active { background: var(--hover); }
+.bank[aria-current="true"] {
+  border-color: var(--ink); background: var(--hover); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
 /* UX fix 9: real bank logo, GET /api/payments/methods — height:24 as briefed,
    width left to the image's own ratio; a 404/timeout swaps it for the bank
    name (the "error" listener near the bottom of app.js) */
