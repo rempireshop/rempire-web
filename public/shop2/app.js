@@ -689,6 +689,20 @@
       "Ещё не запускалось": "Pole veel käivitatud", "Последний запуск:": "Viimane käivitus:",
       "отправлено": "saadetud", "пропущено": "vahele jäetud", "письмо было выключено": "kiri oli välja lülitatud",
       "почта не подключена": "post pole ühendatud",
+      /* why a run sent nothing — FLOW_SKIP_WORDS, one phrase per code the server counts */
+      "нет адреса": "aadressi pole", "запуск не удался": "käivitamine ebaõnnestus",
+      "отписались от писем": "kirjadest on loobutud",
+      "в корзине не осталось товаров": "korvis ei ole enam tooteid",
+      "нет промокода для поздравления": "õnnitluse jaoks pole sooduskoodi",
+      "почта не приняла письмо": "post ei võtnud kirja vastu",
+      "корзине ещё нет трёх часов": "korv on alla kolme tunni vana",
+      "письмо уже уходило": "kiri on juba läinud",
+      "после корзины уже был заказ": "pärast korvi tuli juba tellimus",
+      "корзина стала заказом": "korvist sai tellimus",
+      "дата рождения не указана": "sünnikuupäev puudub",
+      "нет согласия на письма": "kirjade nõusolek puudub",
+      "дата не попадает в это окно": "kuupäev ei jää sellesse aknasse",
+      "в списке никого нет": "nimekirjas pole kedagi",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "Kiri on välja lülitatud — lülitage lüliti sisse ja käivitage uuesti.",
       "Почта не подключена — письма не отправлены.": "Post pole ühendatud — kirju ei saadetud.",
       "Не удалось запустить — попробуйте ещё раз.": "Käivitamine ei õnnestunud — proovige uuesti.",
@@ -824,6 +838,7 @@
       "Предпросмотр": "Eelvaade", "Баннер: стандартный": "Bänner: tavaline",
       "Ничего не нашлось — попробуйте другое слово.": "Midagi ei leitud — proovi teist sõna.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“.",
+      "Текст письма сохранён ✓": "Kirja tekst salvestatud ✓",
       /* r12: the save bars and the small forms' own state lines */
       "Есть несохранённые изменения": "Salvestamata muudatused", "Ещё не сохранено": "Veel salvestamata",
       "Не сохранено": "Salvestamata", "Данные магазина": "Poe andmed", "Тарифы доставки": "Tarnetariifid",
@@ -1791,6 +1806,9 @@
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "Arvega", "тестовый банк": "testpank", "отмечено вручную": "märgitud käsitsi",
+      "продажа в салоне": "müük salongis",
+      /* the order card's own language line — admOrderLangHTML */
+      "Язык писем:": "Kirjade keel:", "русский": "vene keel",
       /* «Вернуть деньги» — the button, the card with the amount in it, and
          the ledger the order card shows underneath (docs/payments.md § 11) */
       "Возвращаем…": "Tagastame…", "Сумма возврата, €": "Tagastatav summa, €",
@@ -1821,6 +1839,8 @@
       "Деньги возвращены": "Raha tagastatud",
       "когда заказ отменён — вами или по сроку": "kui tellimus tühistatakse — teie poolt või tähtaja tõttu",
       "когда вы вернули деньги": "kui olete raha tagastanud",
+      "Чек о продаже в салоне": "Salongimüügi kviitung",
+      "сразу после продажи в салоне, если указали почту клиента": "kohe pärast salongimüüki, kui kliendi e-post on sisestatud",
       "Ждут оплаты:": "Ootavad tasumist:",
       "Неоплаченные заказы": "Maksmata tellimused",
       "Неоплаченные заказы: сохранено ✓": "Maksmata tellimused: salvestatud ✓",
@@ -3137,6 +3157,20 @@
       "Ещё не запускалось": "Never run yet", "Последний запуск:": "Last run:",
       "отправлено": "sent", "пропущено": "skipped", "письмо было выключено": "the letter was off",
       "почта не подключена": "mail not connected",
+      /* why a run sent nothing — FLOW_SKIP_WORDS, one phrase per code the server counts */
+      "нет адреса": "no address", "запуск не удался": "the run failed",
+      "отписались от писем": "unsubscribed from the letters",
+      "в корзине не осталось товаров": "nothing left in the basket",
+      "нет промокода для поздравления": "no promo code for the greeting",
+      "почта не приняла письмо": "the mail server refused the letter",
+      "корзине ещё нет трёх часов": "the basket is under three hours old",
+      "письмо уже уходило": "the letter has already gone",
+      "после корзины уже был заказ": "an order came after the basket",
+      "корзина стала заказом": "the basket became an order",
+      "дата рождения не указана": "no date of birth",
+      "нет согласия на письма": "no consent to letters",
+      "дата не попадает в это окно": "the date is not in this window",
+      "в списке никого нет": "there is nobody on the list",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "The letter is off — turn the switch on and run it again.",
       "Почта не подключена — письма не отправлены.": "Mail is not connected — no letters were sent.",
       "Не удалось запустить — попробуйте ещё раз.": "Could not run it — try again.",
@@ -3268,6 +3302,7 @@
       "Предпросмотр": "Preview", "Баннер: стандартный": "Banner: default",
       "Ничего не нашлось — попробуйте другое слово.": "Nothing found — try another word.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”.",
+      "Текст письма сохранён ✓": "The letter's text is saved ✓",
       /* r12: the save bars and the small forms' own state lines */
       "Есть несохранённые изменения": "There are unsaved changes", "Ещё не сохранено": "Not saved yet",
       "Не сохранено": "Not saved", "Данные магазина": "Shop details", "Тарифы доставки": "Delivery tariffs",
@@ -4222,6 +4257,9 @@
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "By invoice", "тестовый банк": "test bank", "отмечено вручную": "marked by hand",
+      "продажа в салоне": "salon sale",
+      /* the order card's own language line — admOrderLangHTML */
+      "Язык писем:": "Letter language:", "русский": "Russian",
       // see the ET table above for what these belong to
       "Возвращаем…": "Refunding…", "Сумма возврата, €": "Refund amount, €",
       "Вернуть деньги?": "Refund the money?",
@@ -4250,6 +4288,8 @@
       "Деньги возвращены": "Money refunded",
       "когда заказ отменён — вами или по сроку": "when an order is cancelled — by you or by the clock",
       "когда вы вернули деньги": "when you have refunded the money",
+      "Чек о продаже в салоне": "Salon sale receipt",
+      "сразу после продажи в салоне, если указали почту клиента": "right after a salon sale, when the customer's e-mail was typed in",
       "Ждут оплаты:": "Awaiting payment:",
       "Неоплаченные заказы": "Unpaid orders",
       "Неоплаченные заказы: сохранено ✓": "Unpaid orders: saved ✓",
@@ -5191,6 +5231,9 @@
     [/^использовано (.+)$/, { ET: "kasutatud $1", EN: "$1 used" }],
     // «Запустить сейчас»: what the run did, and its line in the journal
     [/^Отправлено (\d+) · пропущено (\d+)$/, { ET: "Saadetud $1 · vahele jäetud $2", EN: "Sent $1 · skipped $2" }],
+    /* «Никому не отправлено: корзине ещё нет трёх часов» — the reason is a
+       dictionary key of its own, and trText() translates $1 through it. */
+    [/^Никому не отправлено: (.+)$/, { ET: "Kellelegi ei saadetud: $1", EN: "Nothing went to anybody: $1" }],
     [/^Письмо «(.+)»: запущено вручную, отправлено (\d+)$/,
       { ET: "Kiri «$1»: käivitatud käsitsi, saadetud $2", EN: "Letter «$1»: run by hand, sent $2" }],
     [/^Неоплаченные заказы: напоминание через (\d+), отмена через (\d+)$/,
@@ -14708,7 +14751,11 @@
     var lines = o ? (o.items || []).map(function (l) {
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) + "</span>" +
-        '<span class="adm-row__sub">' + (l.variant ? esc(l.variant) + " · " : "") + admItemsLabel(l.qty) + "</span></span>" +
+        // the volume and the count are two text nodes, not one: glued, «75 мл ·
+        // 1 товар» is a string no dictionary has and an English panel read it
+        // in Russian (the same glue as admPaymentHTML's, found beside it)
+        '<span class="adm-row__sub">' + (l.variant ? "<span>" + esc(l.variant) + "</span> · " : "") +
+          "<span>" + admItemsLabel(l.qty) + "</span></span></span>" +
         '<span class="adm-row__amt">' + eur(l.sum) + "</span></div>";
     }).join("") : '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
       admItemsLabel(v.items) + '</span></span><span class="adm-row__amt">' + eur(v.sum) + "</span></div>";
@@ -14738,7 +14785,8 @@
         "</div></div>" +
       '<div class="adm-stack adm-stack--tight">' +
         '<div><div class="adm-sec__t">Покупатель</div><div class="adm-kv">' + esc(v.who) + "<br>" +
-          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span></div>" +
+          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span>" +
+          admOrderLangHTML(o) + "</div>" +
           admCompanyHTML(v.company) + "</div>" +
         '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
           // features: an electronic order has no address — where the card
@@ -14766,9 +14814,27 @@
      button: the money is settled by the provider, never from this card. */
   var PAY_METHOD_NAMES = {
     bank: "Банковская ссылка", card: "Банковская карта", wallet: "Apple Pay / Google Pay",
-    giftcard: "Подарочная карта", points: "Баллы", promo: "Промокод", invoice: "По счёту"
+    giftcard: "Подарочная карта", points: "Баллы", promo: "Промокод", invoice: "По счёту",
+    // the till's two (POST /api/admin/pos-orders): without them the card
+    // printed the raw key, «cash», at a Russian owner
+    cash: "наличные", terminal: "терминал"
   };
-  var PAY_PROVIDER_NAMES = { montonio: "Montonio", mock: "тестовый банк", manual: "отмечено вручную", none: "без оплаты — к оплате было 0 €" };
+  var PAY_PROVIDER_NAMES = {
+    montonio: "Montonio", mock: "тестовый банк", manual: "отмечено вручную",
+    none: "без оплаты — к оплате было 0 €", pos: "продажа в салоне"
+  };
+  /* Renat, 13.09.2026, on a Latvian and a Lithuanian order: «in panel the
+     payment method and "paid" are written in russian». Neither string was
+     ever missing from the dictionary — they were GLUED: «Банковская ссылка ·
+     Swedbank» and «Montonio · оплачен» reached the DOM as one text node
+     each, and translateTree() only rewrites a node whose whole value is a
+     key. One <span> per piece, the separator outside them, and the panel
+     reads its own language again. Same idiom as flowCountLine(). */
+  function payPiecesHTML(list) {
+    var out = [];
+    for (var i = 0; i < list.length; i++) if (list[i]) out.push("<span>" + esc(String(list[i])) + "</span>");
+    return out.join(" · ");
+  }
   /** The bank behind a BIC: the live Montonio list when it loaded, else ours. */
   function bankNameOf(code) {
     var real = PAYMETHODS.banks || [];
@@ -14780,10 +14846,13 @@
     var p = o && o.payment;
     if (!p || typeof p !== "object") return "";
     var method = PAY_METHOD_NAMES[p.method] || (p.method ? String(p.method) : "");
-    if (p.method === "bank" && p.bank) method += " · " + bankNameOf(String(p.bank));
+    // the bank's own name is a proper noun and travels beside the method, never inside it
+    var bank = p.method === "bank" && p.bank ? bankNameOf(String(p.bank)) : "";
     var state = p.status === "paid" ? "оплачен" : p.status === "failed" ? "не оплачен" : p.status === "pending" ? "ждёт оплаты" : "";
-    var sub = [PAY_PROVIDER_NAMES[p.provider] || (p.provider ? String(p.provider) : ""), state].filter(Boolean).join(" · ");
-    if (!method && !sub) return "";
+    var provider = PAY_PROVIDER_NAMES[p.provider] || (p.provider ? String(p.provider) : "");
+    var head = payPiecesHTML([method || "—", bank]);
+    var sub = payPiecesHTML([provider, state]);
+    if (!method && !provider && !state) return "";
     /* Two things a human must look at: the bank paid a different amount, or
        said «не оплачен» after the order was already paid — both kept on the
        order by src/lib/payments/apply.ts, never acted on automatically. */
@@ -14809,8 +14878,8 @@
       // …and the part that went back onto the gift card that paid, as balance
       else if (r.to === "giftcard") notes += '<br><span>На подарочную карту ' + esc(admRefundCode(r)) + " вернулось " + eur(r.amount) + "</span>";
     });
-    return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + esc(method || "—") + "<br>" +
-      "<span>" + esc(sub) + "</span>" + notes + "</div>" + admPayRefHTML(p) + "</div>";
+    return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + head + "<br>" +
+      "<span>" + sub + "</span>" + notes + "</div>" + admPayRefHTML(p) + "</div>";
   }
   /* ---- the payment's own number -------------------------------------------
      Renat, 13.09.2026: «There is no link to that payment at the bank — just an
@@ -14893,6 +14962,22 @@
   function admOverdueText(n) {
     // one literal per plural form, the number inside — see invoiceHint()
     return pl(n, "Просрочен на " + n + " день.", "Просрочен на " + n + " дня.", "Просрочен на " + n + " дней.");
+  }
+  /* The three language words the panel writes out — one map, so the letter
+     preview's caption and the order card cannot drift apart. */
+  var LANG_WORDS = { RU: "русский", ET: "eesti", EN: "English" };
+  /* Which language THIS order's letters are written in. Renat, 13.09.2026,
+     about R-100015: «I got the letter in russian, although I think everything
+     was in English … can you confirm that everything was correct there». The
+     card could not answer him: the order carries the language it was placed
+     in (orders.lang, stamped by the checkout from the page the customer was
+     on) and every letter about it renders from that and from nothing else
+     (langOf, src/lib/mail-hooks.ts) — so the card now says it out loud, and
+     the next such question is one look away. */
+  function admOrderLangHTML(o) {
+    var word = LANG_WORDS[String((o && o.lang) || "").toUpperCase().slice(0, 2)];
+    if (!word) return "";
+    return "<br><span>Язык писем:</span> <span>" + esc(word) + "</span>";
   }
   /** The company an invoice order was placed by — under the buyer's own lines. */
   function admCompanyHTML(c) {
@@ -15850,9 +15935,11 @@
      switch off «Заказ принят» would be a shop that takes money silently.
 
      The editor is the mail_texts flow that was already here: the same three
-     fields, the same placeholder chips, the same «Сохранить» → confirm card →
-     one set_mail_texts action. New is the layout — fields left, the letter
-     right, redrawn from the draft as it is typed. */
+     fields, the same placeholder chips, one set_mail_texts action. «Сохранить»
+     is now the whole of it — it used to arm a confirm card whose «Применить»
+     did the saving, which is two save-shaped buttons for one edit and no
+     draft anywhere to tell them apart (Renat, 13.09.2026). The layout is
+     fields left, the letter right, redrawn from the draft as it is typed. */
   /* Each row says what the letter really does AND when it really fires (Dim,
      07.09.2026: «keep and make them work … need a switch and be manageble»).
      The three switchable ones all start off — the same FLOW_DEFAULTS the
@@ -15871,6 +15958,11 @@
     ["order-unpaid", "Заказ ждёт оплаты", "через несколько дней без оплаты", "unpaid"],
     ["order-cancelled", "Заказ отменён", "когда заказ отменён — вами или по сроку", ""],
     ["order-refunded", "Деньги возвращены", "когда вы вернули деньги", ""],
+    /* «Продажа в салоне» sends the printable slip as a letter now, instead of
+       «Заказ принят» — which promised to write again about goods the customer
+       had already taken home (Renat, 13.09.2026). Always: a sale with an
+       address typed at the till is a customer waiting for their receipt. */
+    ["pos-receipt", "Чек о продаже в салоне", "сразу после продажи в салоне, если указали почту клиента", ""],
     ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше 3 часов, если заказа так и не было", "abandoned"],
     ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
@@ -15944,11 +16036,49 @@
     var p = function (n) { return (n < 10 ? "0" : "") + n; };
     return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
   }
+  /* Why a run did not send — one phrase per code the server counts
+     (SKIP_REASONS, src/lib/flows.ts). Renat, 13.09.2026: he left a basket,
+     pressed «Запустить сейчас» and read «отправлено 0 · пропущено 0», which is
+     what a broken sender looks like. It was a cart five minutes old. Each
+     phrase is its own dictionary key and goes out as its own text node, so the
+     number beside it never glues itself into the sentence. */
+  var FLOW_SKIP_WORDS = {
+    disabled: "письмо было выключено",
+    no_api_key: "почта не подключена",
+    no_email: "нет адреса",
+    error: "запуск не удался",
+    opted_out: "отписались от писем",
+    empty_cart: "в корзине не осталось товаров",
+    no_promo_code: "нет промокода для поздравления",
+    send_failed: "почта не приняла письмо",
+    too_fresh: "корзине ещё нет трёх часов",
+    already_sent: "письмо уже уходило",
+    ordered_since: "после корзины уже был заказ",
+    recovered: "корзина стала заказом",
+    no_birthday: "дата рождения не указана",
+    no_marketing: "нет согласия на письма",
+    not_in_window: "дата не попадает в это окно",
+    nobody: "в списке никого нет"
+  };
+  /** « · корзине ещё нет трёх часов 2» — every reason the run counted. */
+  function flowSkipsHTML(skips) {
+    var out = "";
+    for (var k in skips) {
+      if (!FLOW_SKIP_WORDS[k]) continue;
+      var n = Number(skips[k]) || 0;
+      if (n <= 0) continue;
+      out += ' · <span>' + FLOW_SKIP_WORDS[k] + "</span>" + (n > 1 ? " " + n : "");
+    }
+    return out;
+  }
   function flowLastRunHTML(flow) {
     var r = FLOW_RUNS && FLOW_RUNS[flow];
     if (!r || !r.at) return "<span>Ещё не запускалось</span>";
     var line = "<span>Последний запуск:</span> " + esc(flowRunWhen(r.at)) + " — <span>отправлено</span> " + (Number(r.sent) || 0);
     if (Number(r.skipped) > 0) line += " · <span>пропущено</span> " + Number(r.skipped);
+    var why = flowSkipsHTML(r.skips);
+    if (why) return line + why;
+    // a run recorded before the shop counted its reasons — the two it knew
     if (r.reason === "disabled") line += " · <span>письмо было выключено</span>";
     else if (r.reason === "no_api_key") line += " · <span>почта не подключена</span>";
     return line;
@@ -15972,6 +16102,10 @@
         journalNote("Письмо «" + flowName + "»: запущено вручную, отправлено " + sentN);
         if (r.body.reason === "disabled") toast("Письмо выключено — включите переключатель и запустите ещё раз.");
         else if (r.body.reason === "no_api_key") toast("Почта не подключена — письма не отправлены.");
+        /* Nothing went out and the server said why: the reason in words, not
+           a pair of zeroes. The phrase is a dictionary key of its own, so the
+           rule /^Никому не отправлено: (.+)$/ translates both halves. */
+        else if (!sentN && FLOW_SKIP_WORDS[r.body.reason]) toast("Никому не отправлено: " + FLOW_SKIP_WORDS[r.body.reason]);
         else toast("Отправлено " + (Number(r.body.sent) || 0) + " · пропущено " + (Number(r.body.skipped) || 0));
         loadFlowCounts(true);
         render();
@@ -15987,7 +16121,18 @@
     return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
-      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
+      /* What this letter's switch opens when it is on. Renat, 13.09.2026, on
+         his phone: «in e-mails when turning something on, a subsection opens -
+         it's really hard to understand for which section the subsection is.»
+         They were siblings of the row in one flat list, at the same weight and
+         the same left edge. They are a group now — indented behind the row's
+         own ink bar, with the list's hairline moved to the bottom of the group
+         instead of splitting it (.adm-sub, admin.css). */
+      var subs =
+        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
+        (FLOW_RUNNABLE[flow] && on && SRV.admin === true ? admFlowRunHTML(flow) : "");
+      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines' +
+        (subs ? " adm-row--hassub" : "") + '"' + ADM_ROW_OPEN + ">" +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
@@ -15998,10 +16143,9 @@
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button></span>' +
         "</div>" +
-        // the one letter with a setting of its own, right under its own row
-        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
-        // …and the two that can be started by hand, once they are on
-        (FLOW_RUNNABLE[flow] && on && SRV.admin === true ? admFlowRunHTML(flow) : "");
+        // the letter's own settings, and the button that runs it now — one
+        // bracketed group under the switch that opened them
+        (subs ? '<div class="adm-sub">' + subs + "</div>" : "");
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
@@ -16108,15 +16252,13 @@
         '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
     var tpl = mailTpl(), lang = mailLang();
-    var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
     var left =
       '<div class="adm-sec__t">' + admMailName(tpl) + "</div>" +
       admLangBarHTML("data-maillang", LANGS, lang, "Язык письма", function (code) {
         return mailLangWords(tpl, code);
       }, LANG_BAR_NOTE) +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
-      pending +
-      '<p class="adm-hint" data-maildirty' + (mailDirty() && !pending ? "" : " hidden") + ">" +
+      '<p class="adm-hint" data-maildirty' + (mailDirty() ? "" : " hidden") + ">" +
         "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
       MAIL_FIELDS.map(function (f) { return admMailFieldHTML(tpl, lang, f); }).join("") +
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</p>' +
@@ -16165,23 +16307,43 @@
       owner watches it change while typing. The iframe below it is the real
       render; this is the shape, and it is the one that answers instantly. */
   function admMailPreviewHTML(tpl, lang) {
-    var langName = { RU: "русский", ET: "eesti", EN: "English" }[lang] || lang;
+    var langName = LANG_WORDS[lang] || lang;
     return '<div class="adm-prev"><div class="adm-prev__l">Так увидит клиент · ' + langName + "</div>" +
       '<div class="adm-prev__card"><div class="adm-prev__mark">REMPIRE</div>' +
         '<div class="adm-prev__s" data-mailprev="subject">' + esc(admMailPreviewText(tpl, lang, "subject")) + "</div>" +
         '<div class="adm-prev__body" data-mailprev="intro">' + esc(admMailPreviewText(tpl, lang, "intro")) + "</div>" +
-        '<div class="adm-prev__ord">System 4 — Bio Botanical Shampoo · 250 мл × 2<br>Итого 28,84 €</div>' +
+        '<div class="adm-prev__ord">' + admMailPreviewOrderHTML(tpl) + "</div>" +
         '<div class="adm-prev__sign" data-mailprev="signature">' + esc(admMailPreviewText(tpl, lang, "signature")) + "</div>" +
       "</div></div>";
+  }
+  /* The sample values the tokens stand for — the server's, from the very demo
+     data the letter beside this preview is rendered with (demoValues(),
+     src/emails/index.ts, handed over in the `samples` field of
+     ?format=texts). Renat, 13.09.2026: «Name also in preview is "Mart" in
+     e-mail it's "Renat".» The panel used to carry a list of its own — a
+     different name, a different order total, a different product — so one
+     screen said two things. The fallback below is the letter's own demo
+     customer, for the breath before the feed lands. */
+  var MAIL_SAMPLE_FALLBACK = { name: "Renat", order: "R-100042", total: "95 €", track: "CE123456789EE", code: "REM-BDAY-2417", product: "Kevin.Murphy Fresh.Hair", shop: "Rempire", percent: "15" };
+  function mailSample(tpl) {
+    var s = MAIL_TEXTS && MAIL_TEXTS.samples && MAIL_TEXTS.samples[tpl];
+    return s && typeof s === "object" ? s : MAIL_SAMPLE_FALLBACK;
   }
   /** The field with its placeholders filled in the way the letter fills them,
       so the preview reads as a letter and not as a template. */
   function admMailPreviewText(tpl, lang, field) {
-    return mailValue(tpl, lang, field)
-      .replace(/\{order\}/g, "R-100042").replace(/\{name\}/g, "Mart")
-      .replace(/\{total\}/g, "28,84 €").replace(/\{track\}/g, "CC123456789EE")
-      .replace(/\{shop\}/g, "Rempire").replace(/\{code\}/g, "SUVI10")
-      .replace(/\{product\}/g, "Bio Botanical Shampoo");
+    var s = mailSample(tpl);
+    return mailValue(tpl, lang, field).replace(/\{([a-z]+)\}/g, function (whole, key) {
+      // a token this letter never fills disappears, exactly as it does in the
+      // real render (fillPlaceholders, src/emails/texts.ts)
+      return typeof s[key] === "string" ? s[key] : whole;
+    });
+  }
+  /** The order line under the preview's body — the demo letter's own basket. */
+  function admMailPreviewOrderHTML(tpl) {
+    var s = mailSample(tpl);
+    var total = s.total || MAIL_SAMPLE_FALLBACK.total;
+    return "Kevin.Murphy Fresh.Hair · 250 ml × 2<br><span>Итого</span> " + esc(total);
   }
   /* Typing must not cost the caret, so the preview and the save button repaint
      on their own instead of through render() — the same idiom the old card
@@ -18480,9 +18642,9 @@
      never be two different texts.
 
      Everything is edited on a copy (S.mailDraft); nothing reaches a customer
-     until «Сохранить» → the confirm card, as one set_mail_texts action
-     carrying the whole map. Same door, same undo as the banner. */
-  var MAIL_TEXTS = null;          // { templates, placeholders, limits, defaults, texts }
+     until «Сохранить», which is one set_mail_texts action carrying the whole
+     map. Same door, same undo as the banner. */
+  var MAIL_TEXTS = null;          // { templates, placeholders, limits, defaults, texts, samples }
   var mailTextsAsked = false;
   var mailPreviewV = 0;           // bumped on apply so the iframe refetches
   /* The apply bumps the version and render() gives the iframe its new src at
@@ -18602,7 +18764,7 @@
     var acts = document.getElementById("mailacts");
     if (acts) { acts.innerHTML = admMailActsHTML(); translateTree(acts); }
     var dirty = document.querySelector("[data-maildirty]");
-    if (dirty) dirty.hidden = !mailDirty() || !!(pendingAction && pendingAction.type === "set_mail_texts");
+    if (dirty) dirty.hidden = !mailDirty();
     paintMailPreview();
   }
 
@@ -24714,7 +24876,14 @@
       items: S.posCart.map(function (l) { return { id: l.id, variant: l.variant || undefined, qty: l.qty }; }),
       customer: { email: S.posEmail || undefined, phone: S.posPhone || undefined },
       payment: { method: S.posPayment === "terminal" ? "terminal" : "cash" },
-      discountPercent: Number(S.posDiscount) || 0
+      discountPercent: Number(S.posDiscount) || 0,
+      /* The language the sale was rung up in. Renat, 13.09.2026: «I did a
+         salon sale in English, but e-mail arrived in russian» — the till sent
+         no language at all, so every sale in the room was stamped RU and the
+         receipt followed. The server prefers the customer's own card when the
+         typed address has one; this is what a walk-in gets, and at the till
+         it is what they were actually served in (receiptLang, the route). */
+      lang: S.lang
     }).then(function (r) {
       S.posBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
@@ -30096,10 +30265,17 @@
       render(); return;
     }
     if (d.mailrevert !== undefined) { S.mailDraft = null; render(); return; }
+    /* «Сохранить» saves. Renat, 13.09.2026: «I have currently "save" on top
+       and I have also, after when I save an "apply" button. Needs to be
+       better.» It was two save-shaped actions for one edit: the button armed
+       a confirm card and the card did the saving, so nothing was saved until
+       the second press — and neither half was a draft, so there was no
+       difference to name. One press now, journalled like every other settings
+       change, with «Отменить» on the toast for the way back. */
     if (d.mailsave !== undefined) {
       if (!mailDirty()) { toast("Изменений нет"); return; }
-      pendingAction = { type: "set_mail_texts", value: mailClean(mailDraft()) };
-      render(); refocus("[data-admapply]"); return;
+      var mailEntry = demoApply({ type: "set_mail_texts", value: mailClean(mailDraft()) });
+      render(); toast("Текст письма сохранён ✓", mailEntry); return;
     }
     if (d.admchatbot !== undefined) {
       demoApply({ type: "toggle_chatbot", value: !DEMO.chatbot });

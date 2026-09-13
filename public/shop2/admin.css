@@ -1463,6 +1463,36 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   background: var(--a-paper); color: var(--a-ink); text-align: left; font-size: 15px;
 }
 
+/* ---------- a switch and the rows it opens --------------------------------
+   Renat, 13.09.2026, on his phone: «in e-mails when turning something on, a
+   subsection opens - it's really hard to understand for which section the
+   subsection is.» Turning «Скидка ко дню рождения» on revealed «Когда
+   поздравлять», «Скидка в поздравлении» and «Не ждать расписания» as plain
+   siblings in the same flat list — same weight, same left edge, a hairline
+   between them and the row that opened them. Nothing said whose they were.
+
+   No new shape: the ink bar is the one `.adm-row--open::before` already draws
+   on hover, standing permanently down the left of the group, and the list's
+   own hairline moves to the bottom of the group instead of splitting it. The
+   rows themselves keep the 56 px target and the full width inside the
+   indent, so nothing moves sideways off a 375 px screen. */
+.adm-row--hassub { border-bottom: 0; }
+.adm-sub { position: relative; padding-left: 14px; border-bottom: 1px solid var(--a-rule); }
+.adm-sub::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 8px; width: 4px;
+  background: var(--a-ink);
+}
+/* the group's own rule closes it — the last row inside must not draw a second */
+.adm-sub > .adm-swrow:last-child { border-bottom: 0; }
+/* …and the band the row lights up under a finger or a Tab runs over its own
+   group too, so what is highlighted is the letter AND its settings, not a row
+   with three strangers under it */
+.adm-row--hassub:hover + .adm-sub,
+.adm-row--hassub:focus-within + .adm-sub {
+  background: var(--a-tint);
+  box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint);
+}
+
 /* ---------- Клиенты ------------------------------------------------------- */
 
 .adm-stars { color: var(--a-warn); letter-spacing: 1px; }

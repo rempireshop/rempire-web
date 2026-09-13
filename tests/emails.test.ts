@@ -11,7 +11,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   ALL_LANGS,
+  MAIL_TEXT_TEMPLATES,
   TEMPLATE_IDS,
+  demoValues,
+  setMailTextsOverride,
   renderAbandonedCart,
   renderBackInStock,
   renderBirthday,
@@ -83,6 +86,40 @@ describe("all templates render in all three languages", () => {
         expect(mail.html).not.toContain("class=\"em-px\" onclick");
       });
     }
+  }
+});
+
+/* ---------- the preview's sample values are the letter's ------------------
+   Renat, 13.09.2026: «Name also in preview is "Mart" in e-mail it's "Renat".»
+   The admin's live preview fills the owner's tokens itself; demoValues() is
+   the one list it may fill them from. This renders every template with an
+   owner text that is nothing but the tokens, and checks the letter came out
+   saying exactly what demoValues() promises. */
+describe("demoValues() is what the demo letter really substitutes", () => {
+  const TOKENS = ["name", "order", "total", "track", "code", "product", "shop", "percent"] as const;
+  const MARK = "§";
+  // marks at both ends too: the letter glues its own greeting in front of the
+  // intro, and the closing brace of the last token is the end of the line
+  const intro = MARK + TOKENS.map((t) => `{${t}}`).join(MARK) + MARK;
+
+  for (const template of MAIL_TEXT_TEMPLATES) {
+    it(template, () => {
+      setMailTextsOverride({
+        [template]: { ru: { intro }, et: { intro }, en: { intro } },
+      } as never);
+      try {
+        const values = demoValues(template, "ru");
+        // the letter's own plain-text copy carries the intro verbatim
+        const line = renderDemo(template, "ru").text.split("\n").find((l) => l.includes(MARK)) ?? "";
+        const got = line.split(MARK).slice(1, 1 + TOKENS.length);
+        expect(got, `${template}: the intro did not reach the letter`).toHaveLength(TOKENS.length);
+        TOKENS.forEach((token, i) => {
+          expect(got[i], `${template}/{${token}}`).toBe(values[token] ?? "");
+        });
+      } finally {
+        setMailTextsOverride(null);
+      }
+    });
   }
 });
 

@@ -253,10 +253,96 @@ function productUrl(lang: LangCode, id: string): string {
 
 /* ---------- «Брошенная корзина» ------------------------------------------- */
 
+/**
+ * Every reason a row did not get its letter, and how many rows each one cost.
+ *
+ * Renat, 13.09.2026: «I filled out e-mail and left cart, tried to send now but
+ * nothing arrived» — and the run reported «отправлено 0 · пропущено 0», which
+ * is the report of a job that did nothing AND of a job that found nothing.
+ * The two are different answers to the only question he was asking, so a run
+ * now names what it walked past. Keys are the stable codes below; the panel
+ * turns them into words.
+ */
+export type SkipCounts = Record<string, number>;
+
 export interface FlowRun {
   sent: number;
   skipped: number;
+  /** The single reason worth printing on one line — the biggest of `skips`, or a run-wide refusal. */
   reason?: string;
+  /** Every reason, counted. Empty when a run sent everything it found. */
+  skips?: SkipCounts;
+}
+
+/* The vocabulary. Nothing outside this list is ever written to
+   `settings.flow_runs`, so the panel's dictionary can be complete. */
+export const SKIP_REASONS = [
+  /* the switch, the key, the address — nothing was even attempted */
+  "disabled",
+  "no_api_key",
+  "no_email",
+  "error",
+  /* rows the run walked past */
+  "opted_out",
+  "empty_cart",
+  "no_promo_code",
+  "send_failed",
+  /* rows the query never selected — why the queue looked empty */
+  "too_fresh",
+  "already_sent",
+  "ordered_since",
+  "recovered",
+  "no_birthday",
+  "no_marketing",
+  "not_in_window",
+  /* …and when not one of the counts above is anything but zero: there is
+     nobody this letter could go to at all. Said out loud, because «отправлено
+     0» with nothing beside it is what «the sender is broken» looks like. */
+  "nobody",
+] as const;
+
+export type SkipReason = (typeof SKIP_REASONS)[number];
+
+export function isSkipReason(v: unknown): v is SkipReason {
+  return (SKIP_REASONS as readonly string[]).includes(String(v));
+}
+
+/** A counter that also keeps the running total — the two used to drift apart. */
+function counter() {
+  const skips: SkipCounts = {};
+  let total = 0;
+  return {
+    /** One row skipped for this reason. */
+    add(reason: SkipReason, n = 1): void {
+      if (n <= 0) return;
+      skips[reason] = (skips[reason] ?? 0) + n;
+      total += n;
+    },
+    /** A reason that explains an empty queue — counted, but not a skipped send. */
+    note(reason: SkipReason, n: number): void {
+      if (n > 0) skips[reason] = (skips[reason] ?? 0) + n;
+    },
+    get skipped(): number {
+      return total;
+    },
+    /** The biggest reason — what the one-line «Последний запуск» says. */
+    get top(): string | undefined {
+      let best: string | undefined;
+      let n = 0;
+      for (const [k, v] of Object.entries(skips)) if (v > n) { best = k; n = v; }
+      return best;
+    },
+    get map(): SkipCounts | undefined {
+      return Object.keys(skips).length ? skips : undefined;
+    },
+  };
+}
+
+/** Whatever the mail layer refused with, mapped onto the vocabulary above. */
+function sendSkip(res: { ok: boolean; skipped?: boolean; error?: string }): SkipReason {
+  if (res.error === "no_api_key") return "no_api_key";
+  if (res.error === "no_recipient" || res.error === "bad_email") return "no_email";
+  return "send_failed";
 }
 
 const ABANDONED_AFTER_MS = 3 * 60 * 60 * 1000;
@@ -278,7 +364,7 @@ const BATCH = 100;
  */
 export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
-  if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled" };
+  if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
 
   const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
@@ -309,19 +395,17 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
   const blocked = await optedOutSet(rows.map((r) => r.email));
 
   let sent = 0;
-  let skipped = 0;
-  let reason: string | undefined;
+  const skips = counter();
   for (const row of rows) {
     const items = parseItems(row.items);
     if (!items.length) {
       await query("update carts set reminded_at = now() where id = $1", [row.id]);
-      skipped += 1;
+      skips.add("empty_cart");
       continue;
     }
     await query("update carts set reminded_at = now() where id = $1", [row.id]);
     if (blocked.has(row.email)) {
-      skipped += 1;
-      reason = "opted_out";
+      skips.add("opted_out");
       continue;
     }
     const lang = normalizeLangCode(row.lang);
@@ -342,9 +426,50 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
       headers: unsubscribeHeaders(row.email, lang, "marketing"),
     });
     if (res.ok && !res.skipped) sent += 1;
-    else skipped += 1;
+    else skips.add(sendSkip(res));
   }
-  return { sent, skipped, reason };
+  /* The queue was empty: say what it was full of instead of reporting a bare
+     zero. This is the one question «Запустить сейчас» exists to answer — Renat
+     pressed it two minutes after leaving a basket and the panel said
+     «отправлено 0 · пропущено 0», which reads as «the sender is broken». Only
+     when nothing was walked at all: a run that already has real reasons must
+     not count the same cart twice, once as skipped and once as stamped. */
+  if (!sent && !skips.skipped) await explainEmptyCartQueue(skips, cutoff);
+  return { sent, skipped: skips.skipped, reason: skips.top, skips: skips.map };
+}
+
+/**
+ * Why the cart queue was empty — the same four conditions the query above
+ * applies, counted rather than silently subtracted.
+ *
+ * Best effort, like every other diagnostic here: a shop with no `carts` table
+ * yet must not turn a quiet run into a failed one.
+ */
+async function explainEmptyCartQueue(skips: ReturnType<typeof counter>, cutoff: string): Promise<void> {
+  try {
+    const [row] = await query<Record<string, string | number>>(
+      `select
+         count(*) filter (where c.reminded_at is not null)::int as already_sent,
+         count(*) filter (where c.reminded_at is null and c.recovered_at is not null)::int as recovered,
+         count(*) filter (where c.reminded_at is null and c.recovered_at is null
+                            and c.updated_at > $1)::int as too_fresh,
+         count(*) filter (where c.reminded_at is null and c.recovered_at is null
+                            and c.updated_at <= $1
+                            and exists (select 1 from orders o
+                                         where lower(o.email) = c.email
+                                           and o.created_at >= c.updated_at))::int as ordered_since
+       from carts c`,
+      [cutoff],
+    );
+    if (!row) return;
+    skips.note("already_sent", Number(row.already_sent) || 0);
+    skips.note("recovered", Number(row.recovered) || 0);
+    skips.note("too_fresh", Number(row.too_fresh) || 0);
+    skips.note("ordered_since", Number(row.ordered_since) || 0);
+    if (!skips.map) skips.note("nobody", 1); // not one cart in the table
+  } catch (err) {
+    console.warn("[flows] cart queue could not be explained:", (err as Error)?.message);
+  }
 }
 
 function parseItems(v: unknown): CartLine[] {
@@ -382,7 +507,7 @@ function safeJson(s: string): unknown {
  */
 export async function runBackInStock(productId: string): Promise<FlowRun> {
   const flows = await getFlows();
-  if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled" };
+  if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   const alerts = await pendingStockAlerts(productId);
   return sendStockAlerts(alerts);
 }
@@ -394,7 +519,7 @@ export async function runBackInStock(productId: string): Promise<FlowRun> {
  */
 export async function sweepBackInStock(): Promise<FlowRun> {
   const flows = await getFlows();
-  if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled" };
+  if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
 
   const alerts = await pendingStockAlerts();
@@ -610,7 +735,7 @@ export function birthdayWindow(now: number, birthdayDays: number): WindowDay[] {
  */
 export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
-  if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled" };
+  if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
 
   const window = birthdayWindow(now, flows.birthdayDays);
@@ -643,7 +768,15 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
       limit ${BATCH}`,
     [...window.map((d) => d.mmdd), maxYear],
   );
-  if (!rows.length) return { sent: 0, skipped: 0 };
+  if (!rows.length) {
+    /* «Put birthday, but no e-mail.» — the query found nobody, and the three
+       things that can hide a customer from it are a date nobody typed, the
+       marketing tick, and this year's letter already gone. Counted, so the
+       panel can say which. */
+    const empty = counter();
+    await explainEmptyBirthdayQueue(empty, window, maxYear);
+    return { sent: 0, skipped: 0, reason: empty.top, skips: empty.map };
+  }
 
   /* `marketing = true` above is the tick; this is the stop list. The link
      turns the tick off on a row it finds, so the two rarely disagree — but a
@@ -653,17 +786,18 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const blocked = await optedOutSet(rows.map((r) => r.email));
 
   let sent = 0;
-  let skipped = 0;
-  let reason: string | undefined;
+  const skips = counter();
   for (const row of rows) {
     const day = byDay.get(Number(row.mmdd));
     if (!day) continue;
     const year = day.year;
     const stamped = row.birthday_sent_year == null ? null : Number(row.birthday_sent_year);
-    if (stamped === year) continue; // this birthday's letter has gone
+    if (stamped === year) {
+      skips.note("already_sent", 1); // this birthday's letter has gone
+      continue;
+    }
     if (blocked.has(row.email)) {
-      skipped += 1;
-      reason = "opted_out";
+      skips.add("opted_out");
       continue;
     }
     const promo = await promoForBirthday(flows, now, day.ahead);
@@ -671,8 +805,7 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
       /* No promo module and no settings.flows.birthdayCode: a birthday letter
          whose code does nothing is worse than no letter. The row is left
          unstamped so it goes out as soon as a code exists. */
-      reason = "no_promo_code";
-      skipped += 1;
+      skips.add("no_promo_code");
       continue;
     }
     // Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
@@ -692,19 +825,54 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
     if (res.ok && !res.skipped) {
       sent += 1;
     } else {
-      skipped += 1;
+      skips.add(sendSkip(res));
       /* Skipped, not failed: the mail layer did not even try (no key, no
          address). Nothing reached anybody, so the stamp comes off — a shop
          that gets its Resend key next week must still greet this customer
          this year. A real failure keeps the stamp: Resend was asked, and a
          retry from here would be the double letter the stamp exists to stop. */
       if (res.skipped) {
-        reason = reason ?? res.error;
         await query("update customers set birthday_sent_year = null where id = $1 and birthday_sent_year = $2", [row.id, year]);
       }
     }
   }
-  return { sent, skipped, reason };
+  return { sent, skipped: skips.skipped, reason: skips.top, skips: skips.map };
+}
+
+/**
+ * Why nobody was due — the three conditions the birthday query applies, each
+ * counted over the whole customer table. Best effort.
+ */
+async function explainEmptyBirthdayQueue(
+  skips: ReturnType<typeof counter>,
+  window: WindowDay[],
+  maxYear: number,
+): Promise<void> {
+  try {
+    const holes = window.map((_, i) => `$${i + 1}`).join(",");
+    const mmdd = "(extract(month from c.birthday) * 100 + extract(day from c.birthday))";
+    const [row] = await query<Record<string, string | number>>(
+      `select
+         count(*) filter (where c.birthday is null)::int as no_birthday,
+         count(*) filter (where c.birthday is not null and c.marketing is distinct from true)::int as no_marketing,
+         count(*) filter (where c.birthday is not null and c.marketing = true
+                            and ${mmdd} not in (${holes}))::int as not_in_window,
+         count(*) filter (where c.birthday is not null and c.marketing = true
+                            and ${mmdd} in (${holes})
+                            and c.birthday_sent_year is not null
+                            and c.birthday_sent_year >= $${window.length + 1})::int as already_sent
+       from customers c`,
+      [...window.map((d) => d.mmdd), maxYear],
+    );
+    if (!row) return;
+    skips.note("no_birthday", Number(row.no_birthday) || 0);
+    skips.note("no_marketing", Number(row.no_marketing) || 0);
+    skips.note("not_in_window", Number(row.not_in_window) || 0);
+    skips.note("already_sent", Number(row.already_sent) || 0);
+    if (!skips.map) skips.note("nobody", 1); // not one customer in the table
+  } catch (err) {
+    console.warn("[flows] birthday queue could not be explained:", (err as Error)?.message);
+  }
 }
 
 /* ---------- «Заказ ждёт оплаты» → отмена ---------------------------------- */
@@ -797,7 +965,7 @@ function payAgainUrl(lang: LangCode, row: UnpaidRow): string {
 
 export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidRun> {
   const flows = await getFlows();
-  if (!flows.unpaid) return { sent: 0, skipped: 0, cancelled: 0, reason: "disabled" };
+  if (!flows.unpaid) return { sent: 0, skipped: 0, cancelled: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
 
   const day = 24 * 60 * 60 * 1000;
@@ -916,8 +1084,22 @@ export interface FlowRunRecord {
   sent: number;
   skipped: number;
   reason?: string;
+  /** Every reason the run did not send, counted — see SKIP_REASONS. */
+  skips?: SkipCounts;
   /** `cron` — the daily job; `admin` — «Запустить сейчас» in the panel. */
   by: "cron" | "admin";
+}
+
+/** Only the vocabulary, only whole positive numbers — what a settings blob may hold. */
+function cleanSkips(raw: unknown): SkipCounts | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: SkipCounts = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!isSkipReason(k)) continue;
+    const n = Math.trunc(Number(v) || 0);
+    if (n > 0) out[k] = n;
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 
 /**
@@ -930,12 +1112,14 @@ export interface FlowRunRecord {
  * settings write must never be the reason a run counts as failed.
  */
 export async function recordFlowRun(flow: RunnableFlow, run: FlowRun, by: FlowRunRecord["by"], now: number = Date.now()): Promise<FlowRunRecord> {
+  const skips = cleanSkips(run.skips);
   const record: FlowRunRecord = {
     at: new Date(now).toISOString(),
     sent: Math.max(0, Math.trunc(Number(run.sent) || 0)),
     skipped: Math.max(0, Math.trunc(Number(run.skipped) || 0)),
     by,
     ...(run.reason ? { reason: String(run.reason).slice(0, 40) } : {}),
+    ...(skips ? { skips } : {}),
   };
   try {
     await query(
@@ -974,12 +1158,14 @@ export async function getFlowRuns(): Promise<Partial<Record<RunnableFlow, FlowRu
     const r = v as Record<string, unknown>;
     const at = typeof r.at === "string" && !Number.isNaN(new Date(r.at).getTime()) ? r.at : "";
     if (!at) continue;
+    const skips = cleanSkips(r.skips);
     out[flow] = {
       at,
       sent: Math.max(0, Math.trunc(Number(r.sent) || 0)),
       skipped: Math.max(0, Math.trunc(Number(r.skipped) || 0)),
       by: r.by === "admin" ? "admin" : "cron",
       ...(typeof r.reason === "string" && r.reason ? { reason: r.reason.slice(0, 40) } : {}),
+      ...(skips ? { skips } : {}),
     };
   }
   return out;
@@ -1020,7 +1206,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
       out[key] = await fn(now);
     } catch (err) {
       console.error(`[flows] ${key} failed:`, err);
-      out[key] = { sent: 0, skipped: 0, reason: "error" };
+      out[key] = { sent: 0, skipped: 0, reason: "error", skips: { error: 1 } };
     }
     await recordFlowRun(key, out[key], "cron", now);
   }

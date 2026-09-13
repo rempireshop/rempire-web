@@ -39,6 +39,7 @@ export const MAIL_TEXT_TEMPLATES = [
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
+  "pos-receipt",
   "abandoned-cart",
   "back-in-stock",
   "birthday",
@@ -211,6 +212,26 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       subject: "Refund for order {order} — Rempire",
       intro: "We have refunded order no. {order} — the amount is below. The money travels back the way it came.",
       signature: "If it has not arrived within five business days, reply to this e-mail and we will check.",
+    },
+  },
+  /* The sum is deliberately NOT in the default intro: a price in a letter's
+     HTML must never break between the number and the sign, and the totals row
+     below already carries it non-breaking (tests/emails-compat.test.ts). */
+  "pos-receipt": {
+    ru: {
+      subject: "Чек {order} — Rempire",
+      intro: "Спасибо за покупку! Это чек по продаже № {order} в салоне — всё, что вы взяли, ниже.",
+      signature: "Вопрос по покупке? Просто ответьте на это письмо — мы на связи.",
+    },
+    et: {
+      subject: "Kviitung {order} — Rempire",
+      intro: "Aitäh ostu eest! See on kviitung salongis tehtud müügi nr {order} kohta — kõik ostetu on allpool.",
+      signature: "Küsimus ostu kohta? Vastake lihtsalt sellele kirjale — oleme olemas.",
+    },
+    en: {
+      subject: "Receipt {order} — Rempire",
+      intro: "Thank you for your purchase! This is the receipt for sale no. {order} at the salon — everything you took is below.",
+      signature: "A question about the purchase? Just reply to this e-mail — we read it.",
     },
   },
   "abandoned-cart": {

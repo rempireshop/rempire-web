@@ -6,7 +6,7 @@
  * preview in the admin looks like the design files Renat already signed off.
  */
 
-import { baseUrl, normalizeLang } from "./layout";
+import { BRAND, baseUrl, money, normalizeLang } from "./layout";
 import { renderAbandonedCart } from "./abandoned-cart";
 import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
@@ -17,6 +17,7 @@ import { renderInvoiceReminder, type InvoiceReminderData } from "./invoice-remin
 import { renderLoginCode } from "./login-code";
 import { renderOrderCancelled } from "./order-cancelled";
 import { renderOrderConfirmed } from "./order-confirmed";
+import { renderPosReceipt } from "./pos-receipt";
 import { renderOrderShipped } from "./order-shipped";
 import { renderOrderUnpaid } from "./order-unpaid";
 import { renderPartnerWelcome } from "./partner-welcome";
@@ -36,6 +37,8 @@ export { renderOrderCancelled } from "./order-cancelled";
 export type { ClosedKind, ClosedOptions } from "./order-cancelled";
 export { renderOrderUnpaid } from "./order-unpaid";
 export type { UnpaidOptions } from "./order-unpaid";
+export { renderPosReceipt } from "./pos-receipt";
+export type { PosReceiptOptions } from "./pos-receipt";
 export { renderAbandonedCart } from "./abandoned-cart";
 export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
@@ -82,6 +85,7 @@ export const TEMPLATE_IDS = [
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
+  "pos-receipt",
   "abandoned-cart",
   "back-in-stock",
   "gift-card",
@@ -106,6 +110,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "order-unpaid": "Заказ ждёт оплаты",
   "order-cancelled": "Заказ отменён",
   "order-refunded": "Деньги возвращены",
+  "pos-receipt": "Чек о продаже в салоне",
   "abandoned-cart": "Брошенная корзина",
   "back-in-stock": "Товар снова в наличии",
   "gift-card": "Подарочная карта",
@@ -288,6 +293,63 @@ export function demoInvoiceCancelled(total = 95): InvoiceCancelledData {
   return { invoice: { number: d.invoice.number, dueAt: d.invoice.dueAt }, totals: { total: d.totals.total } };
 }
 
+/* ---------- the sample values behind the tokens -------------------------- */
+
+/**
+ * What `{name}`, `{order}`, `{total}` … become in the demo letter — the very
+ * values renderDemo() below feeds to fillPlaceholders().
+ *
+ * Renat, 13.09.2026: «Name also in preview is "Mart" in e-mail it's "Renat".»
+ * The admin's live preview (the card that redraws as he types, beside the
+ * iframe) filled the tokens from a private list of its own, so the two halves
+ * of one screen disagreed about who the sample customer was, what the basket
+ * came to and which product was back in stock. The panel reads this map now
+ * (GET /api/admin/mail/preview/?format=texts → `samples`), so the preview
+ * cannot drift from the letter again — tests/emails.test.ts renders every
+ * template through every token and checks the two agree.
+ *
+ * A token the template never fills is "" here, exactly as fillPlaceholders()
+ * leaves it.
+ */
+export function demoValues(template: TemplateId, lang: Lang | string = "ru"): Record<string, string> {
+  const L = normalizeLang(lang);
+  const order = demoOrder(L);
+  const none: Record<string, string> = {
+    name: "", order: "", total: "", track: "", code: "", product: "", shop: "", percent: "",
+  };
+  const shop = { ...none, shop: BRAND.name };
+  const withOrder = { ...shop, name: "Renat", order: order.number ?? "", total: money(order.total) };
+  switch (template) {
+    case "order-shipped":
+      return { ...withOrder, total: "", track: "CE123456789EE" };
+    case "order-refunded":
+    case "order-cancelled":
+    case "order-unpaid":
+    case "pos-receipt":
+    case "invoice":
+    case "invoice-reminder":
+    case "invoice-cancelled":
+    case "order-confirmed":
+      return withOrder;
+    case "abandoned-cart":
+      return { ...shop, name: "Renat", total: money(demoCart(L).total) };
+    case "back-in-stock": {
+      const p = demoProduct(L);
+      return { ...shop, product: `${p.brand ?? ""} ${p.title ?? ""}`.trim(), total: money(p.price) };
+    }
+    case "birthday":
+      return { ...shop, name: "Renat", code: "REM-BDAY-2417", percent: "15" };
+    case "login-code":
+      return { ...shop, code: "482915" };
+    case "partner-welcome":
+      return { ...shop, name: "Renat", percent: "20" };
+    case "gift-card":
+      return { ...shop, code: "RMP-DEMO-CARD", total: money(50) };
+    default:
+      return withOrder;
+  }
+}
+
 /* ---------- demo render ------------------------------------------------- */
 
 /**
@@ -312,6 +374,12 @@ export function renderDemo(
       });
     case "order-cancelled":
       return renderOrderCancelled({ ...demoOrder(L), status: "cancelled" }, L, { kind: "cancelled" });
+    case "pos-receipt":
+      return renderPosReceipt(
+        { ...demoOrder(L), shipping: { method: "pickup", country: "EE" }, shipping_price: 0 },
+        L,
+        { method: "terminal" },
+      );
     case "order-refunded":
       return renderOrderCancelled({ ...demoOrder(L), status: "refunded" }, L, {
         kind: "refunded",

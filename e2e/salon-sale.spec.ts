@@ -55,14 +55,18 @@ test.describe("the salon till", () => {
     await expect(page.locator(".adm-receipt")).toContainText("чек ушёл на почту");
     await assertClean(page, w, "salon receipt");
 
-    /* The letter itself, in the e2e mail sink: «Заказ принят» to the address
-       the cashier typed, exactly once. This is the whole point — the old path
-       sent nothing, and nothing on screen said so. */
+    /* The letter itself, in the e2e mail sink: the RECEIPT, to the address the
+       cashier typed, exactly once. This is the whole point — the old path sent
+       nothing at all, and then (07.09.2026) sent «Заказ принят», which
+       promises to write again when the order is ready about goods the customer
+       carried out of the room. Renat, 13.09.2026: «The receipt should also
+       land in the users e-mail.» */
     const sink = async (template: string, to: string) =>
       (await (await page.request.get(`/api/e2e/mail/?template=${template}&to=${encodeURIComponent(to)}`)).json())
         .mails as Array<{ subject: string }>;
-    await expect.poll(async () => (await sink("order-confirmed", email)).length).toBe(1);
-    expect((await sink("order-confirmed", email))[0].subject).toContain(number);
+    await expect.poll(async () => (await sink("pos-receipt", email)).length).toBe(1);
+    expect((await sink("pos-receipt", email))[0].subject).toContain(number);
+    expect(await sink("order-confirmed", email)).toHaveLength(0);
 
     /* …and the order behind it is a paid order like any other: the salon chip
        finds it, the card says «Оплачен», and the payment blob still carries

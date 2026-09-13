@@ -95,6 +95,16 @@ export interface OrderLike {
   phone?: string | null;
   created_at?: string | Date | null;
   /**
+   * "web" | "pos" — where the order was taken (091_pos_channel.sql). A till
+   * sale's letter is the receipt, not «Заказ принят»: the goods left with the
+   * customer, so a promise to write when the order is ready is wrong twice
+   * over (Renat, 13.09.2026 — «The receipt should also land in the users
+   * e-mail»). src/lib/mail-hooks.ts onOrderPaid() reads it.
+   */
+  channel?: string | null;
+  /** `orders.payment` — the receipt names how the money came in at the till. */
+  payment?: Record<string, unknown> | null;
+  /**
    * Loyalty points credited on this order's paid transition (100_tiers_
    * loyalty) — set by src/app/api/payments/return|notify on the first
    * arrival only, undefined otherwise. order-confirmed.ts prints one line

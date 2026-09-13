@@ -237,12 +237,12 @@ test.describe("admin sections — Маркетинг", () => {
     // the preview beside the fields is live — it shows the letter, not the template
     await expect(page.locator('[data-mailprev="subject"]')).toContainText("R-100042");
     try {
-      await page.locator("[data-mailsave]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
+      // one press, not «Сохранить» arming an «Применить» (Renat, 13.09.2026)
       const write = page.waitForResponse(
         (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
+      await page.locator("[data-mailsave]").click();
       expect((await write).ok()).toBe(true);
+      await expect(page.locator("[data-admapply]")).toHaveCount(0);
 
       const saved = await (await page.request.get("/api/admin/settings/")).json();
       expect(saved.settings.mail_texts["order-shipped"].ru.subject,

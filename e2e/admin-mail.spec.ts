@@ -41,15 +41,22 @@ async function openMailTab(page: Page): Promise<void> {
   await expect(page.locator('[data-mailtxt="subject"]')).toBeVisible();
 }
 
-/** «Сохранить» → the confirm card → «Применить», and the write it triggers. */
-async function saveAndApply(page: Page): Promise<void> {
-  await page.locator("[data-mailsave]").click();
-  await expect(page.locator("[data-admapply]")).toBeVisible();
+/**
+ * «Сохранить», and the write it triggers.
+ *
+ * One press — not «Сохранить» arming a card whose «Применить» did the saving
+ * (Renat, 13.09.2026: «I have currently "save" on top and I have also, after
+ * when I save an "apply" button. Needs to be better.»). The absence of the
+ * second button is asserted here rather than in a test of its own: every save
+ * in this file goes through this helper.
+ */
+async function save(page: Page): Promise<void> {
   const put = page.waitForResponse(
     (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT",
   );
-  await page.locator("[data-admapply]").click();
+  await page.locator("[data-mailsave]").click();
   expect((await put).ok()).toBe(true);
+  await expect(page.locator("[data-admapply]"), "a second, apply-shaped button for one edit").toHaveCount(0);
 }
 
 /** The rendered ET «Заказ принят», straight from the route the iframe reads. */
@@ -76,7 +83,7 @@ test.describe("admin — letter texts", () => {
 
       await page.locator('[data-mailtxt="subject"]').fill(SUBJECT);
       await page.locator('[data-mailtxt="intro"]').fill(INTRO);
-      await saveAndApply(page);
+      await save(page);
 
       // 1) The preview — both the iframe the owner is looking at and the
       //    route behind it — shows the new text with {order} filled in.
@@ -117,7 +124,7 @@ test.describe("admin — letter texts", () => {
       await expect(page.locator('[data-mailtxt="subject"]')).toHaveValue(
         "Tellimus {order} on vastu võetud — Rempire",
       );
-      await saveAndApply(page);
+      await save(page);
 
       const back = await previewJson(page);
       expect(back.subject).toBe("Tellimus R-100042 on vastu võetud — Rempire");
@@ -177,7 +184,7 @@ test.describe("admin — letter texts", () => {
     try {
       await openMailTab(page);
       await page.locator('[data-mailtxt="intro"]').fill('<b>paks</b> & "jutumärgid"');
-      await saveAndApply(page);
+      await save(page);
 
       const preview = await previewJson(page);
       expect(preview.html).not.toContain("<b>paks</b>");

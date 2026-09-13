@@ -15,6 +15,7 @@ import { renderOrderCancelled, type ClosedKind } from "@/emails/order-cancelled"
 import { renderOrderConfirmed } from "@/emails/order-confirmed";
 import { renderOrderShipped } from "@/emails/order-shipped";
 import { renderOrderUnpaid } from "@/emails/order-unpaid";
+import { renderPosReceipt } from "@/emails/pos-receipt";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
 import { money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
@@ -46,8 +47,22 @@ function customerEmail(order: OrderLike): string {
   return pick(order.email, order.shipping?.email);
 }
 
+/**
+ * The one rule for every letter in this shop: **the language is the row's,
+ * never the panel's.** `orders.lang` is stamped when the row is written — by
+ * the checkout from the page the shopper was on, by the till from the
+ * customer's own card (or, for a walk-in with no card, the language the sale
+ * was rung up in). Nothing downstream may reach for a shop default or for
+ * whatever language the owner happens to have the admin in.
+ */
 function langOf(order: OrderLike) {
   return normalizeLang(order.lang);
+}
+
+/** How a till sale was paid — `cash` / `terminal`, off the order's payment blob. */
+function posMethod(order: OrderLike): string {
+  const m = order.payment && typeof order.payment === "object" ? order.payment.method : null;
+  return typeof m === "string" ? m : "";
 }
 
 function truthy(v: string | undefined | null): boolean {
@@ -204,10 +219,19 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
     let skipped: boolean | undefined;
 
     if (to) {
-      const mail = renderOrderConfirmed(order, lang);
+      /* «Продажа в салоне» gets the receipt, everything else gets «Заказ
+         принят». Renat, 13.09.2026: «The receipt should also land in the users
+         e-mail.» The till already had an address box and a printable slip
+         beside each other, and what went to that address was the web letter —
+         «мы напишем, когда заказ можно будет забрать», about goods the person
+         was holding. One door, two letters (src/emails/pos-receipt.ts). */
+      const pos = String(order.channel ?? "") === "pos";
+      const mail = pos
+        ? renderPosReceipt(order, lang, { method: posMethod(order) })
+        : renderOrderConfirmed(order, lang);
       const res = await sendRendered(to, mail, {
-        tags: { template: "order-confirmed", stage: "paid" },
-        idempotencyKey: `confirmed:${orderNumber(order)}`,
+        tags: { template: pos ? "pos-receipt" : "order-confirmed", stage: "paid" },
+        idempotencyKey: `${pos ? "receipt" : "confirmed"}:${orderNumber(order)}`,
       });
       ok = res.ok;
       id = res.id;

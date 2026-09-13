@@ -107,7 +107,7 @@ await onOrderPaid(order);           // returns, never throws
 | Hook | When | What it does |
 |---|---|---|
 | `onOrderCreated(order, { sendPending? })` | order row written, payment not confirmed | **nothing**, unless `MAIL_PENDING_PAYMENT` is on or the caller passes `sendPending: true`. An unpaid order abandoned two minutes later should not have produced a letter. Turn it on for bank-link flows, where the customer leaves the site to pay. `createOrder` now passes `sendPending` from `settings.flows.pending`; with no such key, `MAIL_PENDING_PAYMENT` decides as before. |
-| `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language, plus the shop's own Telegram + e-mail ping through `notify.ts`, plus the gift cards bought in the order (below). |
+| `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language — or «Чек о продаже в салоне» when `order.channel === "pos"`, because a till sale is finished and the goods left with the customer — plus the shop's own Telegram + e-mail ping through `notify.ts`, plus the gift cards bought in the order (below). |
 | `issueOrderGiftCards(order)` | the payment routes see "paid" for an order that is already paid — a webhook retry, the shopper's return after the webhook | the gift-card half of `onOrderPaid` on its own: mint the cards bought in the order (idempotent — existing cards win) and mail each to its recipient, Resend key `gift:<code>`. No customer letter, no ping. Exists so a crash between the status write and the hook cannot leave a paid order without its cards. |
 | `onOrderShipped(order, tracking)` | parcel handed to the carrier | «Заказ отправлен» with the tracking code and a carrier link. `tracking` is a bare code string, or `{ code, url?, carrier? }`. |
 | `onOrderClosed(order, { kind, amount? })` | the order is cancelled, or money went back | «Заказ отменён» (`kind: "cancelled"`) or «Деньги возвращены» (`kind: "refunded"`, `amount` = what actually left). One renderer, two openings. Called from «Отменить заказ» and «Изменить статус вручную» in the admin (`PATCH /api/admin/orders/<id>`), from «Вернуть деньги» and the refund webhook (`settleRefund()`), and from the cron when an unpaid order runs out of time. Until 07.09.2026 none of those said anything at all to the customer. |
@@ -120,10 +120,28 @@ webhook delivered twice does not send the letter twice.
 **A salon sale is one of these too** (07.09.2026). `POST /api/admin/pos-orders/`
 used to mark the order paid by hand and therefore never reached `onOrderPaid`;
 it now settles through `settlePayment()` like a card payment, so a till sale
-with an e-mail in the box gets «Заказ принят» — and the register screen says
-«чек ушёл на почту» only when the server really sent it. A walk-in with no
-address is `{ skipped: true, reason: "no_customer_email" }`, exactly as it was.
+with an e-mail in the box gets a letter — and the register screen says «чек
+ушёл на почту» only when the server really sent it. A walk-in with no address
+is `{ skipped: true, reason: "no_customer_email" }`, exactly as it was.
 See docs/inventory.md and `tests/pos-orders.test.ts`.
+
+**And the letter it gets is the receipt, in the customer's language**
+(13.09.2026 — Renat: «The receipt should also land in the users e-mail» and
+«I did a salon sale in English, but e-mail arrived in russian»). Two things
+were wrong and both are fixed at the row:
+
+- the letter was «Заказ принят», which promises to write again when the order
+  is ready and explains how to collect it — about goods the person carried out
+  of the room. `onOrderPaid()` now branches on `order.channel` and sends
+  `pos-receipt` (`src/emails/pos-receipt.ts`): what was bought, the discount
+  the cashier typed, the total, and how it was paid;
+- the route sent no `lang` at all, so `createOrder()` stamped its RU default on
+  every sale in the room and the letter followed the order, as every letter
+  does. It now writes the customer's own language — the card the typed address
+  belongs to, or, for a walk-in who has no card, the language the register was
+  in when the sale was rung up (`receiptLang()` in the route). That is the
+  **only** place the panel's language reaches a letter, and only because at the
+  till it is the language the person in front of the cashier was served in.
 
 The order shape is `db/migrations/001_core.sql` / `mapOrder()` in
 `src/lib/orders.ts`. Both the snake_case row and the camelCase mapped object
@@ -131,7 +149,7 @@ are accepted, and every field is optional: a guest checkout with no name, no
 variant and a jsonb address still renders a correct letter.
 
 ## The letters
-## The ten letters
+## The letters, one by one
 
 | id | Renderer | Kind |
 |---|---|---|
@@ -140,6 +158,7 @@ variant and a jsonb address still renders a correct letter.
 | `order-unpaid` | `renderOrderUnpaid(order, lang, {daysLeft, payUrl})` | service — the reminder before an unpaid order is let go |
 | `order-cancelled` | `renderOrderCancelled(order, lang, {kind:"cancelled"})` | service |
 | `order-refunded` | `renderOrderCancelled(order, lang, {kind:"refunded", amount})` | service — same renderer, the other opening |
+| `pos-receipt` | `renderPosReceipt(order, lang, {method})` | service — «Чек о продаже в салоне», what `onOrderPaid()` sends instead of `order-confirmed` for a `channel:"pos"` order |
 | `abandoned-cart` | `renderAbandonedCart(cart, lang, resumeUrl)` | marketing — unsubscribe link |
 | `back-in-stock` | `renderBackInStock(product, lang)` | marketing — unsubscribe link |
 | `birthday` | `renderBirthday(customer, lang, code)` | marketing — unsubscribe link |
@@ -268,8 +287,8 @@ Storage is one settings row, written through the ordinary
 { "mail_texts": { "order-confirmed": { "et": { "subject": "…", "intro": "…", "signature": "…" } } } }
 ```
 
-Ten letters are editable — `order-confirmed`, `order-shipped`,
-`order-unpaid`, `order-cancelled`, `order-refunded`, `abandoned-cart`,
+Eleven letters are editable — `order-confirmed`, `order-shipped`,
+`order-unpaid`, `order-cancelled`, `order-refunded`, `pos-receipt`, `abandoned-cart`,
 `back-in-stock`, `birthday`, `login-code`,
 `partner-welcome` — in `ru`, `et`,
 `en`. `gift-card` is not: its wording is bound up with the amount and the
