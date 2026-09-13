@@ -332,7 +332,24 @@
       "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»": "Ettevõte ootab arvet, aga tasuda pole kuhu: «Ettevõttest → Ettevõtte andmed»",
       "Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».": "Arve on saatmata: «Ettevõtte andmetes» pole IBAN-i. Täitke see jaotises «Seaded → Ettevõttest» ja vajutage «Saada arve uuesti».",
       "Без IBAN счёт не уходит вообще.": "Ilma IBAN-ita arve üldse välja ei lähe.",
-      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Täitke IBAN ülal olevas plokis «Ettevõtte andmed» — ilma pangakonto numbrita pole arvet kuhugi tasuda, seepärast pood sellist kirja välja ei saada. Täitke ja vajutage tellimuses «Saada arve uuesti».",
+      /* r16 — the IBAN warnings that follow the settings rather than a stored
+         refusal, and the «Реквизиты» row that carries its own gap */
+      "нет IBAN": "IBAN puudub",
+      "Счета компаниям не уходят, пока здесь нет IBAN.": "Ettevõtetele arveid ei saadeta, kuni siin pole IBAN-i.",
+      "Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.": "See ei näe IBAN-i moodi: kaks riigi tähte ja seejärel 10–40 numbrit ja tähte, näiteks EE38 2200 2210 2014 5685. Pood salvestab välja tühjana.",
+      "В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым и письмо со счётом не отправит.": "Ülal plokis «Ettevõtte andmed» on IBAN-i asemel midagi muud — pood salvestab välja tühjana ja arvet välja ei saada.",
+      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Täitke IBAN ülal olevas plokis «Ettevõtte andmed» — ilma pangakonto numbrita pole arvet kuhugi tasuda, seepärast pood sellist kirja välja ei saada.",
+      "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Täitke ja vajutage tellimuses «Saada arve uuesti».",
+      "Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».": "Arve on saatmata: tookord polnud «Ettevõtte andmetes» IBAN-i. Nüüd on see täidetud — vajutage «Saada arve uuesti».",
+      /* r16 — «Заказы»: the returns chip, its row badge and its one line */
+      "Возвраты": "Tagastused", "Просит возврат": "Soovib tagastada",
+      "Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.": "Kõik tellimused, mille kohta on tagastust palutud. Loenduris on need, millele te pole veel vastanud.",
+      /* r16 — the payment's own number on the order card */
+      "Номер платежа в Montonio": "Makse number Montonios",
+      "Скопировать номер платежа": "Kopeeri makse number",
+      "Номер платежа скопирован ✓": "Makse number kopeeritud ✓",
+      "Скопировано ✓": "Kopeeritud ✓",
+      "Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.": "Leidke makse Montonio töölaual selle numbri või tellimuse numbri järgi — otselinki pank sellele ei anna.",
       "Банк": "Pank", "банк": "pank", "Печатается в счёте рядом с IBAN.": "Trükitakse arvele IBAN-i kõrvale.",
       "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "Need andmed lähevad poe jalusesse, lehele «Kontakt», õigustekstidesse — müügitingimused, tagastamine, privaatsus — ja ettevõtete arvetele.",
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
@@ -2762,7 +2779,24 @@
       "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»": "A company is waiting for an invoice with nowhere to pay it: «About the company → Details»",
       "Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».": "The invoice was not sent: there is no IBAN in «Details». Fill it in under «Settings → About the company» and press “Send the invoice again”.",
       "Без IBAN счёт не уходит вообще.": "Without an IBAN the invoice does not go out at all.",
-      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Fill in the IBAN in the «Details» block above — an invoice with no bank account number on it cannot be paid, so the shop does not send that letter. Fill it in, then press “Send the invoice again” on the order.",
+      /* r16 — the IBAN warnings that follow the settings rather than a stored
+         refusal, and the «Реквизиты» row that carries its own gap */
+      "нет IBAN": "no IBAN",
+      "Счета компаниям не уходят, пока здесь нет IBAN.": "Invoices to companies do not go out while there is no IBAN here.",
+      "Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.": "That does not look like an IBAN: two country letters, then 10–40 digits and letters — for example EE38 2200 2210 2014 5685. The shop will store the field empty.",
+      "В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым и письмо со счётом не отправит.": "The «Details» block above holds something other than an IBAN — the shop will store the field empty and will not send the invoice.",
+      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Fill in the IBAN in the «Details» block above — an invoice with no bank account number on it cannot be paid, so the shop does not send that letter.",
+      "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Fill it in, then press “Send the invoice again” on the order.",
+      "Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».": "The invoice was not sent: there was no IBAN in «Details» at the time. It is filled in now — press “Send the invoice again”.",
+      /* r16 — «Заказы»: the returns chip, its row badge and its one line */
+      "Возвраты": "Returns", "Просит возврат": "Return asked for",
+      "Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.": "Every order a return has been asked for. The count is the ones you have not answered yet.",
+      /* r16 — the payment's own number on the order card */
+      "Номер платежа в Montonio": "The payment's number in Montonio",
+      "Скопировать номер платежа": "Copy the payment number",
+      "Номер платежа скопирован ✓": "Payment number copied ✓",
+      "Скопировано ✓": "Copied ✓",
+      "Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.": "Find the payment in the Montonio dashboard by this number or by the order number — the bank gives no link straight to it.",
       "Банк": "Bank", "банк": "bank", "Печатается в счёте рядом с IBAN.": "Printed on the invoice next to the IBAN.",
       "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "These details go into the shop's footer, the “Contacts” page, the legal texts — terms of sale, returns, privacy — and the company invoices.",
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
@@ -6704,7 +6738,9 @@
     adminOrder: 0,   // opened order id (0 = list)
     // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
     admMore: false,        // the phone «Ещё» sheet
-    admOrderFilter: "new", // «Заказы» chips: new | label | shipped | delivered | salon | all
+    // «Заказы» chips: all (where the screen opens, r16) | new | shipped | invoice | returns.
+    // label / delivered / salon are older keys the overview and the suite still press.
+    admOrderFilter: "all",
     admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
@@ -14000,6 +14036,15 @@
     if (v.status === "refunded") return '<span class="' + c + ' adm-badge--quiet">Возврат</span>';
     return '<span class="' + c + '">Ждёт оплаты</span>';
   }
+  /** returns: the second chip on a row whose customer has asked to send the
+      order back. The order's own badge still says where the parcel is; this
+      says what is being asked about it, so a request is findable in «Все» and
+      not only behind its own chip. Gone once the money has gone back — the
+      «Возврат» badge is the whole story then. */
+  function admReturnBadge(v) {
+    return v.returnAskedAt && v.status !== "refunded"
+      ? '<span class="adm-badge adm-badge--warn">Просит возврат</span>' : "";
+  }
   function admItemsLabel(n) { return n + " " + pl(n, "товар", "товара", "товаров"); }
   /** «2 заказа» — the same word the queue rows use, in one place. */
   function admOrdersLabel(n) { return n + " " + pl(n, "заказ", "заказа", "заказов"); }
@@ -14077,7 +14122,8 @@
        invoice cannot be sent at all (src/lib/invoices.ts invoiceSendBlock), so
        the moment a company is actually waiting for one, this belongs on the
        first screen of the panel and not only inside «О компании». */
-    var noIban = waiting.length > 0 && !contentConf().company.iban;
+    // the same rule the server keeps an IBAN by (ibanOk), not «is it empty»
+    var noIban = waiting.length > 0 && !companyIban();
     var taskN = shipN + lowN + revN + proN + retN + overN + (noIban ? 1 : 0);
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
@@ -14107,12 +14153,13 @@
     /* returns: the tick from «Кабинет → Мои заказы» arrives here, in the same
        queue a new review and a partner request arrive in — the shop has one
        way of telling Renat that somebody is waiting for him, and this is it.
-       The row leads to «В пути», which is where a delivered order lives; the
-       names under it are how he finds the right card. */
+       Since r16 the row leads to «Возвраты» — its own chip on «Заказы», which
+       holds nothing else — instead of dropping him into «В пути» among every
+       parcel that ever left. The names under it still say whose. */
     if (retN) tasks += admTaskRow(retN,
       pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
       names(retList, function (v) { return v.who; }),
-      'data-admtab="orders" data-admfilter="shipped"', true);
+      'data-admtab="orders" data-admfilter="returns"', true);
     if (!tasks) tasks = '<div class="adm-empty"><div class="adm-empty__t">Всё в порядке</div>' +
       '<div class="adm-empty__s">Отправлять нечего, остатки в норме, отзывы проверены</div></div>';
 
@@ -14189,11 +14236,26 @@
      overview's «Отправить N» button, the assistant's «Открыть заказы» and the
      e2e suite have always pressed. Only the labels and what each key MATCHES
      changed. */
+  /* r16 — Renat, 13.09.2026: «in orders section we should initially show "all"
+     and then the user/admin can switch from each which needs to be done», and,
+     about a customer's return request, «probably something like this needs a
+     separate category as it's quite hard to find that order where a return has
+     been requested».
+
+     So «Все» leads and is where the screen opens (admOrdersHTML), the three
+     steps stay one tap away in the order they happen, and «Возвраты» joins
+     them: the tick a customer puts on a delivered order in «Мои заказы» was
+     visible on «Обзор» for a day and nowhere else afterwards. Its number
+     counts the ones still waiting for an answer — the same question «Сделать
+     сегодня» asks — while the list itself keeps every order a return was ever
+     asked for, so one being dealt with does not vanish mid-way. */
   var ADM_ORDER_FILTERS = [
-    ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["all", "Все"]
+    ["all", "Все"], ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["returns", "Возвраты"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
+    // returns: every order somebody asked to send back, answered or not
+    if (f === "returns") return !!v.returnAskedAt;
     // everything paid that has not left yet — a sticker is not a hand-over
     // «Отправить» is the parcel queue: a digital order has no parcel and is
     // found under «Все» (v.toShip, admOrderVM)
@@ -14218,18 +14280,30 @@
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
       .filter(function (v) { return v.delivered && v.returnAskedAt; });
   }
+  /** Which chip is lit. «Все» is where the screen opens (r16); a key from an
+      older session that no longer names a chip falls back to it too. */
+  function admOrderFilter() {
+    var f = S.admOrderFilter || "all";
+    for (var i = 0; i < ADM_ORDER_FILTERS.length; i++) if (ADM_ORDER_FILTERS[i][0] === f) return f;
+    // «label», «delivered» and «salon» are still understood by admOrderMatches
+    // — the overview, the assistant and the suite have always pressed them
+    return f === "label" || f === "delivered" || f === "salon" ? f : "all";
+  }
   /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
   var ORDERS_PAGE = 40;
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
-    var f = S.admOrderFilter || "new";
+    var f = admOrderFilter();
     var split = admWaitingSplit();
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          // «Отправить N» counts everything still on the shelf, labelled or not
-          var n = x[0] === "new" ? split.fresh + split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
+          // «Отправить N» counts everything still on the shelf, labelled or not;
+          // «Возвраты N» the requests nobody has answered yet (admReturnsAsked)
+          var n = x[0] === "new" ? split.fresh + split.labeled
+            : x[0] === "invoice" ? admInvoicesWaiting().length
+            : x[0] === "returns" ? admReturnsAsked().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
@@ -14248,7 +14322,7 @@
       a number from a customer's letter should not have to guess which step
       that order is at. */
   function admOrderRows() {
-    var f = S.admOrderFilter || "new";
+    var f = admOrderFilter();
     var q = (S.admOrderQ || "").toLowerCase().trim();
     var list = admOrders().map(admOrderVM)
       .filter(function (v) { return q ? true : admOrderMatches(v, f); })
@@ -14268,7 +14342,12 @@
        «Новые» over a list of shipped orders, with nothing to explain it. */
     var over = q && f !== "all"
       ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
-      : "";
+      /* returns: the chip counts what is still waiting, the list keeps every
+         request — so an order being dealt with does not disappear from under
+         the owner's thumb. One line, only on this chip, says so. */
+      : f === "returns" && !q
+        ? '<div class="adm-hint" style="margin:0 0 8px">Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.</div>'
+        : "";
     /* Speed, 07.09.2026. «Все» was the one list in the panel that drew
        everything it had: «Товары» pages at 40 and «Склад» at 60, but 100 orders
        meant 100 rows — 1 500 elements — rebuilt as a string, parsed and diffed
@@ -14290,12 +14369,22 @@
   function admOrderStepBtn(v, row) {
     var cls = "adm-btn" + (row ? " adm-btn--row" : "");
     var busy = SRV.shipBusy ? " disabled" : "";
+    /* Renat, 13.09.2026, on «Выдан клиенту» in a list row: «Worked only on
+       second click.» It worked on the first — but a status has no local copy
+       (demoApply's comment: the order row lives on the server), so the row
+       went on saying «Выдан клиенту» over «Оплачен» until a PATCH and a
+       reload had both come back. On his phone that is a second or two of a
+       screen that says nothing happened, and the second tap sent the whole
+       thing again. The button now says what it is doing and refuses a second
+       tap until the list comes back with the new status (SRV.stepBusy,
+       cleared in loadSrvOrders). */
     /* An all-gift-card order has no parcel and no hand-over: the card is in
        the customer's inbox the moment the payment lands. The card already
        hides every step for it (showSteps below); the row did not, so a paid
        digital order offered «Отправлен» — one tap and the shop mailed «Заказ
        отправлен», with a tracking number it does not have, about nothing. */
     if (v.digital) return "";
+    if (SRV.stepBusy === v.id) return '<button class="' + cls + '" disabled>Сохраняем…</button>';
     if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
     if (v.paid && !v.labeled && !v.digital) {
       return '<button class="' + cls + '" data-admlabel="' + esc(v.id) + '"' + busy + ">" +
@@ -14313,7 +14402,9 @@
   }
   function admOrderRowHTML(v) {
     var acts = "";
-    if (v.pos) acts = admReceiptLink(v, true);
+    // a step in flight owns the whole line: «Сохраняем…» and nothing beside it
+    if (SRV.stepBusy === v.id) acts = admOrderStepBtn(v, true);
+    else if (v.pos) acts = admReceiptLink(v, true);
     else if (v.paid && !v.labeled && !v.pickup && !v.digital) acts =
       // no label yet: the label leads, «Отправлен» stays a quiet second (a courier collecting, a hand-over)
       admOrderStepBtn(v, true) +
@@ -14334,7 +14425,7 @@
        the blank beside the actions were dead until round 15. */
     return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
       '<button class="adm-row__body adm-row--click" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
-      '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
+      '<span class="adm-row__line">' + admOrderBadge(v) + admReturnBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span>" +
       (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
     "</div>";
@@ -14540,7 +14631,8 @@
       (code
         ? '<div class="adm-ship__row adm-ship__row--code"><span><span class="adm-hint">Трек-номер</span><br>' +
             '<span class="adm-ship__code" data-trackingcode>' + esc(code) + "</span></span>" +
-            '<button class="adm-copy" data-admcopy="' + esc(code) + '" aria-label="Скопировать трек-номер">Скопировать</button></div>'
+            '<button class="adm-copy" data-admcopy="' + esc(code) + '" data-admcopymsg="Трек-номер скопирован ✓"' +
+              ' aria-label="Скопировать трек-номер">Скопировать</button></div>'
         : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
       (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
       '<div class="adm-ship__links">' +
@@ -14718,8 +14810,32 @@
       else if (r.to === "giftcard") notes += '<br><span>На подарочную карту ' + esc(admRefundCode(r)) + " вернулось " + eur(r.amount) + "</span>";
     });
     return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + esc(method || "—") + "<br>" +
-      "<span>" + esc(sub) + (p.ref ? (sub ? " · " : "") + '<span class="adm-mono">' + esc(String(p.ref)) + "</span>" : "") + "</span>" +
-      notes + "</div></div>";
+      "<span>" + esc(sub) + "</span>" + notes + "</div>" + admPayRefHTML(p) + "</div>";
+  }
+  /* ---- the payment's own number -------------------------------------------
+     Renat, 13.09.2026: «There is no link to that payment at the bank — just an
+     id.» Montonio publishes no address for one payment: its partner portal
+     (partner.montonio.com, docs/payments.md) has a search and no per-order
+     page, and the two hosts in the API reference are the API's, not a page a
+     browser can open. Inventing `…/orders/<uuid>` would be a link that leads
+     nowhere, so the number is made to travel instead: one tap copies it, the
+     line says where to paste it, and it is selectable by tap-and-hold as
+     well (.adm-ship__code, user-select: all).
+
+     Only a number that means something outside the shop is offered: Montonio
+     and the test bank issue one, «отмечено вручную» writes the literal
+     «manual», and a salon sale or an order a gift card covered has none. */
+  function admPayRefHTML(p) {
+    var ref = String((p && p.ref) || "");
+    if (!ref || ref === "manual") return "";
+    var provider = String(p.provider || "");
+    if (provider !== "montonio" && provider !== "mock") return "";
+    return '<div class="adm-ship__row adm-ship__row--code" style="margin-top:12px">' +
+      '<span><span class="adm-hint">Номер платежа в Montonio</span><br>' +
+        '<span class="adm-ship__code" data-payref>' + esc(ref) + "</span></span>" +
+      '<button class="adm-copy" data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓"' +
+        ' aria-label="Скопировать номер платежа">Скопировать</button></div>' +
+      '<p class="adm-hint" style="margin:6px 0 0">Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.</p>';
   }
   /* ---------- returns: «Покупатель просит вернуть заказ» -------------------
      The tick from «Кабинет → Мои заказы», with the day it was put there, at
@@ -14760,8 +14876,17 @@
        only one the owner can fix in a minute: without an IBAN the invoice is
        unpayable, so the shop does not send it at all (src/lib/invoices.ts
        invoiceSendBlock). Said in words, with the way out, rather than as the
-       bare code the generic line below prints. */
-    else if (inv.sendError === "no_iban") out += '<br><span class="adm-hint--warn">Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».</span>';
+       bare code the generic line below prints.
+
+       `sendError` is what the server stored the day the letter was refused,
+       and only «Отправить счёт ещё раз» ever rewrites it. Renat, 13.09.2026:
+       «After I added IBAN, the warning was still there, but invoice was sent
+       and the warning disappeared.» So the line is read against the settings
+       as they are NOW: the refusal is still true, but with an IBAN in place
+       what it asks for is one press, not a trip to «Настройки». */
+    else if (inv.sendError === "no_iban") out += companyIban()
+      ? '<br><span class="adm-hint--warn">Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».</span>'
+      : '<br><span class="adm-hint--warn">Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».</span>';
     else if (inv.sendError) out += '<br><span class="adm-hint--warn">Письмо со счётом не ушло (' + esc(inv.sendError) + ") — нажмите «Отправить счёт ещё раз».</span>";
     return '<div class="adm-hint" data-adminvstate>' + out + "</div>";
   }
@@ -18029,12 +18154,29 @@
     }
     return S.invDraft;
   }
+  /* ---- the IBAN, judged the way the server judges it ----------------------
+     `iban()` in src/lib/content.ts keeps a value only when it matches this
+     exactly, and stores "" for anything else — silently. The panel used to
+     call any non-empty string an IBAN, so a value with a dash or a digit
+     missing cleared the warning here, was thrown away on the way in, and the
+     warning came back after the next reload with nothing on screen to explain
+     it (Renat, 13.09.2026: «These things and updates need to happen
+     quicker»). One rule, spelled the same in both places. */
+  var IBAN_RE = /^[A-Z]{2}[0-9A-Z ]{10,40}$/;
+  function ibanOk(v) { return IBAN_RE.test(String(v || "").trim().toUpperCase()); }
+  /** The IBAN the shop can actually print on an invoice — "" when there is
+      none, and "" when what is typed is not an IBAN the server will keep. */
+  function companyIban() {
+    var v = String(contentConf().company.iban || "");
+    return ibanOk(v) ? v : "";
+  }
   function invoiceSettingsCard() {
     var d = invoiceDraft();
     var co = contentConf().company;
     var year = new Date().getFullYear();
+    /* IBAN is not on this list: it has its own paragraph right above, and the
+       same word twice in two red lines is a wall, not a warning. */
     var gaps = [];
-    if (!co.iban) gaps.push("IBAN");
     if (!co.bankName) gaps.push("банк");
     if (!co.regCode) gaps.push("рег. номер");
     if (!co.vatNumber) gaps.push("номер KMKR");
@@ -18042,11 +18184,15 @@
       '<div class="adm-form" style="margin-top:8px" data-adminvsettings>' +
         '<p class="adm-hint" style="margin:0">Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. ' +
           "Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».</p>" +
-        (co.iban
+        (ibanOk(co.iban)
           ? ""
           : '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0"><span>Без IBAN счёт не уходит вообще.</span> ' +
-              "<span>Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, " +
-              "поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».</span></p>") +
+              (co.iban
+                ? "<span>В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым " +
+                  "и письмо со счётом не отправит.</span> "
+                : "<span>Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, " +
+                  "поэтому магазин не отправляет такое письмо.</span> ") +
+              "<span>Заполните и нажмите в заказе «Отправить счёт ещё раз».</span></p>") +
         (gaps.length
           ? '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0">' +
               "<span>В блоке «Реквизиты» выше не заполнено:</span> " + gaps.map(function (g) { return "<span>" + esc(g) + "</span>"; }).join(", ") + ". " +
@@ -18938,7 +19084,21 @@
       // no dirty line here: the page's save bar names this card while it differs (admSetBarHTML)
       '<div style="margin-top:12px">' + cLangPills() + "</div>" +
       '<div class="adm-list">' +
-        (!show("company") ? "" : cBlock("company", "Реквизиты",
+        /* «hard to spot» (Renat, 13.09.2026): the red paragraph about a missing
+           IBAN was printed under the «Счета для компаний» card, pointing at a
+           field inside a block that is CLOSED until «Изменить» is pressed — so
+           the screen said «fill it in» over a row that showed no such field.
+           The row itself now carries it: one filled badge on the block's name
+           and one sentence where its address line goes. That is the whole of
+           the red on this page — the field's own hint appears only once the
+           block is open, and only when what is typed is not an IBAN. */
+        (!show("company") ? "" : cBlock("company",
+          ibanOk(co.iban)
+            ? "Реквизиты"
+            : 'Реквизиты <span class="adm-badge adm-badge--warnfill adm-badge--sm">нет IBAN</span>',
+          (ibanOk(co.iban)
+            ? ""
+            : '<span class="adm-row__sub--warn">Счета компаниям не уходят, пока здесь нет IBAN.</span><br>') +
           esc(co.legalName) + (co.regCode ? " · <span>рег. " + esc(co.regCode) + "</span>" : "") + (co.address ? " · " + esc(co.address) : ""),
           cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
           '<div class="adm-edpair">' +
@@ -18949,7 +19109,14 @@
             cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
             cInput("company.phone", "Телефон", "+372 5623 7237", 30) + "</div>" +
           '<div class="adm-edpair">' +
-            cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42) +
+            /* The field says what the server will do with what is typed —
+               a value that is not an IBAN is stored as an empty one, and
+               the owner deserves to hear that here rather than from a
+               warning that comes back after the next reload. */
+            cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42,
+              co.iban && !ibanOk(co.iban)
+                ? '<span class="adm-hint--warn">Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.</span>'
+                : "") +
             cInput("company.bankName", "Банк", "Swedbank", 60, "Печатается в счёте рядом с IBAN.") + "</div>" +
           '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — ' +
             "условия продажи, возврат, конфиденциальность — и в счета для компаний.</p>")) +
@@ -25048,7 +25215,12 @@
      as an offline cache. And when the owner is signed in, every change the
      panel applies is written through to the server as well — including undo,
      which re-sends the previous value. */
-  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false };
+  /* `stepBusy` is the id of the order whose «Отправлен» / «Доставлен» /
+     «Выдан клиенту» is on its way to the server — the one thing the panel
+     cannot show from a local copy, because an order's status has none
+     (demoApply). Set when the step is taken, cleared by the reload that
+     brings the new status back (loadSrvOrders). */
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false, stepBusy: "" };
   function noop() {}
   /* product creation: true while the very first paint waits for
      /api/overrides/ — a direct visit to a product only the server knows
@@ -25276,11 +25448,16 @@
     }
     // «Заказы»: the status the card moved, and the status undo moves back
     else if (a.type === "order_status") {
+      /* The row has no local copy of a status to change, so until the reload
+         comes back it would go on offering the very step just taken — which
+         is how «Выдан клиенту» looked like it had done nothing (r16). The
+         step says «Сохраняем…» in the meantime; loadSrvOrders clears it. */
+      SRV.stepBusy = String(a.id);
       apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
         .then(function (r) {
           if (!(r.status === 200 && r.body.ok)) toast("Не удалось сохранить статус");
           admOrdersChanged();
-        }).catch(noop);
+        }).catch(function () { SRV.stepBusy = ""; render(); });
     }
     /* «Создать этикетку» and its undo. The forward line is written AFTER the
        server registered the parcel (`done`, see srvCreateShipment), so there
@@ -25483,11 +25660,13 @@
   function loadSrvOrders(force) {
     if (!SRV.admin || (SRV.orders && !force)) return;
     apiJson("/api/admin/orders/?limit=100").then(function (r) {
-      if (r.status === 401) { SRV.admin = false; SRV.orders = null; render(); return; }
+      if (r.status === 401) { SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       SRV.orders = SRV.ordersErr ? null : (r.body.orders || []).map(srvRow);
+      // the list is the new status: whatever step was in flight has landed
+      SRV.stepBusy = "";
       render();
-    }).catch(function () { SRV.ordersErr = true; render(); });
+    }).catch(function () { SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
   }
   /** After anything that moves an order's status — shipped, cancelled, marked
       paid, a salon sale, an undo — both copies of the count are refreshed:
@@ -25764,13 +25943,17 @@
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
-  /** The tracking code into the clipboard — Renat pastes it into a chat
-      more often than anywhere else. Where the clipboard is not reachable
-      the toast shows the code itself, so it can still be read out. */
-  function admCopyText(text) {
+  /** A code into the clipboard — Renat pastes the tracking number into a chat
+      and the payment id into Montonio's own search, more often than anywhere
+      else. Where the clipboard is not reachable the toast shows the code
+      itself, so it can still be read out. `msg` is what the toast says on
+      success; the two callers name their own thing, because «Скопировано» on
+      a screen with two codes on it says nothing. */
+  function admCopyText(text, msg) {
+    var said = msg || "Скопировано ✓";
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () {
-        toast("Трек-номер скопирован ✓");
+        toast(said);
       }).catch(function () { toast(text); });
       return;
     }
@@ -29014,7 +29197,7 @@
       toast(dRow.pickup ? dRow.number + " выдан клиенту" : dRow.number + " доставлен", dEntry);
       return;
     }
-    if (d.admcopy) { admCopyText(d.admcopy); return; }
+    if (d.admcopy) { admCopyText(d.admcopy, t.getAttribute("data-admcopymsg") || ""); return; }
     if (d.admwrite) {
       S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true;
       S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";

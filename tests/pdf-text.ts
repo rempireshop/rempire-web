@@ -48,9 +48,18 @@ function cmapOf(text: string): Map<string, string> {
   return map;
 }
 
-/** BaseFont family (suffix stripped) → its ToUnicode CMap, for every embedded font. */
-function families(blobs: Map<number, string>): Map<string, Map<string, string>> {
-  const all = [...blobs.values()].join("\n");
+/**
+ * BaseFont family (suffix stripped) → its ToUnicode CMap, for every embedded
+ * font.
+ *
+ * Both places a font dictionary can live are searched: inside a compressed
+ * object stream (what `doc.save()` writes by default, and what the invoice and
+ * the gift card produce) and as a plain object in the file itself (what
+ * `save({ useObjectStreams: false })` writes — the shipping label, which is a
+ * *loaded* document rewritten in place).
+ */
+function families(blobs: Map<number, string>, raw: string): Map<string, Map<string, string>> {
+  const all = [...blobs.values()].join("\n") + "\n" + raw;
   const family = new Map<string, Map<string, string>>();
   const fontRe = /\/BaseFont\s*\/([A-Za-z0-9+._-]+)[\s\S]{0,400}?\/ToUnicode\s+(\d+)\s+0\s+R/g;
   let f: RegExpExecArray | null;
@@ -94,7 +103,7 @@ export interface PdfRun {
  */
 export function pdfRuns(bytes: Uint8Array): PdfRun[] {
   const blobs = pdfStreams(bytes);
-  const family = families(blobs);
+  const family = families(blobs, Buffer.from(bytes).toString("latin1"));
   const out: PdfRun[] = [];
   for (const [num, stream] of blobs) {
     if (!stream.includes("BT") || !stream.includes("Tj")) continue;
