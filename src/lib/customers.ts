@@ -474,30 +474,38 @@ export interface CustomerOrder {
  * mailbox.
  */
 export async function listCustomerOrders(email: string, limit = 20): Promise<CustomerOrder[]> {
-  const rows = await query<{
-    id: string;
-    number: string;
-    status: string;
-    total: string | number;
-    currency: string | null;
-    created_at: string | Date;
-    updated_at: string | Date;
-    items: unknown;
-    payment: unknown;
-    shipping: unknown;
-    invoice: unknown;
-  }>(
-    `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice
-       from orders where lower(email) = $1 order by created_at desc limit $2`,
-    [normalizeEmail(email), Math.min(Math.max(Number(limit) || 20, 1), 50)],
-  );
-
-  /* The cards these orders issued, in one query rather than one per order.
-     Loaded through a dynamic import for the same reason src/lib/orders.ts
-     loads its neighbours that way: a deployment without the PDF fonts, or a
-     gift_cards table an older migration has not created yet, must cost the
-     account screen its cards and not its orders. */
-  const cardsByOrder = await giftCardsForOrders(rows.map((r) => r.id));
+  const addr = normalizeEmail(email);
+  const n = Math.min(Math.max(Number(limit) || 20, 1), 50);
+  /* Both at once, and the cards asked for by the ADDRESS rather than by the
+     ids the orders query is about to return. Renat, 13.09.2026: «the loading
+     of the user data when you go to checkout» — the checkout waits on
+     /api/account/me, and this pair used to be two waits: the orders, and then
+     the cards those orders issued. On an in-memory database that is a
+     millisecond; on the shop's real Postgres, in another data centre, it is a
+     whole extra network hop in the one request a signed-in shopper's empty
+     fields are waiting for. The sub-select is the same `where`/`order by`/
+     `limit` as the query beside it, so the two cannot disagree about which
+     twenty orders they are talking about. */
+  const [rows, cardsByOrder] = await Promise.all([
+    query<{
+      id: string;
+      number: string;
+      status: string;
+      total: string | number;
+      currency: string | null;
+      created_at: string | Date;
+      updated_at: string | Date;
+      items: unknown;
+      payment: unknown;
+      shipping: unknown;
+      invoice: unknown;
+    }>(
+      `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice
+         from orders where lower(email) = $1 order by created_at desc limit $2`,
+      [addr, n],
+    ),
+    giftCardsForEmail(addr, n),
+  ]);
 
   /* invoiceOf() is the one reader of the invoice record, and it lives in
      src/lib/invoices.ts with the payments and mail modules behind it. Loaded
@@ -555,23 +563,31 @@ export function accountInvoicePath(orderNumber: string): string {
 }
 
 /**
- * `order_id → [{code, amount, pdfUrl}]` for a batch of orders. Empty for every
- * order when anything at all goes wrong — a customer's order list must not
- * fail because a card could not be looked up.
+ * `order_id → [{code, amount, pdfUrl}]` for the same orders listCustomerOrders
+ * is about to return — named by the address and the limit rather than by their
+ * ids, so the two queries leave together instead of one waiting for the other.
+ * Empty for every order when anything at all goes wrong: a customer's order
+ * list must not fail because a card could not be looked up.
  */
-async function giftCardsForOrders(
-  orderIds: string[],
+async function giftCardsForEmail(
+  addr: string,
+  limit: number,
 ): Promise<Map<string, Array<{ code: string; amount: number; pdfUrl: string }>>> {
   const out = new Map<string, Array<{ code: string; amount: number; pdfUrl: string }>>();
-  const ids = orderIds.filter((id) => typeof id === "string" && id);
-  if (!ids.length) return out;
   try {
-    const { giftPdfPath } = await import("@/lib/giftcard-pdf");
-    const rows = await query<{ code: string; amount: string | number; order_id: string }>(
+    /* The query first, the module after it: `giftPdfPath` is behind a dynamic
+       import (see the caller's note for why) and on a cold instance that import
+       is disk work this query has no reason to wait for. */
+    const pending = query<{ code: string; amount: string | number; order_id: string }>(
       `select code, amount, order_id from gift_cards
-        where order_id = any($1::uuid[]) order by created_at asc`,
-      [ids],
+        where order_id in (select id from orders where lower(email) = $1
+                            order by created_at desc limit $2)
+        order by created_at asc`,
+      [addr, limit],
     );
+    pending.catch(() => {});   // the await below still throws; this only stops an unhandled one
+    const { giftPdfPath } = await import("@/lib/giftcard-pdf");
+    const rows = await pending;
     for (const row of rows) {
       const url = giftPdfPath(row.code);
       // no SESSION_SECRET, no token, no honest link — better none than a 404

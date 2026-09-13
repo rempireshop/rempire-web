@@ -169,18 +169,23 @@ describe("retokenise()", () => {
 /* ---------- the real index.html ------------------------------------------- */
 
 describe("public/shop2/index.html", () => {
-  it("versions thirteen tags with one token, and the token covers chat.js too", async () => {
+  it("versions fourteen tags with one token, and the token covers chat.js too", async () => {
     const real = (await readFile(path.join(process.cwd(), "public", "shop2", "index.html"), "utf8"))
       .replace(/\r\n?/g, "\n");
     const token = currentToken(real);
     expect(token).not.toBe("");
-    expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(13);
+    expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(14);
     const urls = versionedAssets(real);
-    expect(urls).toHaveLength(14); // the thirteen tags + the untagged chat.js
+    expect(urls).toHaveLength(15); // the fourteen tags + the untagged chat.js
     // the shell links the built file, not the source it is stripped from
     expect(urls).toContain("/shop2/app.min.js");
     expect(urls).not.toContain("/shop2/app.js");
     expect(urls).toContain("/shop2/chat.js");
+    /* The fourteenth, added 13.09.2026: the <head>'s async boot script, which
+       asks /api/account/me before the rest of the shop has arrived. It joins
+       the versioned set by wearing the shared token and nothing else — which
+       is the property this suite is really guarding. */
+    expect(urls).toContain("/shop2/boot.js");
   });
 
   it("carries the token its own assets hash to — the same check check-prerender.mjs makes", async () => {

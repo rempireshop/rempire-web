@@ -427,6 +427,65 @@ export async function accountLoyaltySummary(customerId: string | null): Promise<
     customerId ? getLoyaltyBalance(customerId) : Promise.resolve(0),
     customerId ? getLoyaltyHistory(customerId, 30) : Promise.resolve([] as LedgerEntry[]),
   ]);
+  return loyaltyAnswer(settings, balance, history);
+}
+
+/**
+ * The same answer for a shopper named by ADDRESS rather than by id — so
+ * GET /api/account/me can ask for it in the same breath as the profile
+ * instead of after it.
+ *
+ * Renat, 13.09.2026: «the loading of the user data when you go to checkout».
+ * The checkout's fields stay empty until that route answers, and the route
+ * used to be two waits deep: read the customer row, and only then — because
+ * the ledger is keyed on the row's id — ask what that customer's points are.
+ * On the in-memory database the tests run against that is a millisecond; on
+ * the shop's real Postgres it is a second trip across the network, inside the
+ * one request a shopper is watching an empty form for. The id the ledger
+ * needs is a sub-select away, and a sub-select costs the database nothing it
+ * was not already going to do — so all four queries now leave at once and the
+ * route is one wait deep.
+ *
+ * An address with no customer row is an empty, well-formed answer, exactly as
+ * `customerId` null is above: the sub-select yields nothing, nothing matches.
+ */
+export async function accountLoyaltyByEmail(email: string): Promise<AccountLoyalty> {
+  const addr = String(email || "").trim().toLowerCase();
+  const [settings, balance, history] = await Promise.all([
+    getPricingSettings(),
+    balanceForEmail(addr),
+    historyForEmail(addr, 30),
+  ]);
+  return loyaltyAnswer(settings, balance, history);
+}
+
+async function balanceForEmail(addr: string): Promise<number> {
+  if (!addr) return 0;
+  const rows = await query<{ sum: string | number | null }>(
+    `select coalesce(sum(delta), 0) as sum from loyalty_ledger
+      where customer_id = (select id from customers where email = $1)`,
+    [addr],
+  );
+  return Math.trunc(num(rows[0]?.sum, 0));
+}
+
+async function historyForEmail(addr: string, limit: number): Promise<LedgerEntry[]> {
+  if (!addr) return [];
+  const rows = await query<LedgerDbRow>(
+    `select id, at, delta, reason, order_id, note from loyalty_ledger
+      where customer_id = (select id from customers where email = $1)
+      order by at desc, id desc limit $2`,
+    [addr, Math.min(Math.max(Math.trunc(Number(limit)) || 20, 1), 100)],
+  );
+  return rows.map(toEntry);
+}
+
+/** One shape for both readers above. */
+function loyaltyAnswer(
+  settings: Awaited<ReturnType<typeof getPricingSettings>>,
+  balance: number,
+  history: LedgerEntry[],
+): AccountLoyalty {
   return {
     balance,
     history,
