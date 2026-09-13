@@ -119,7 +119,14 @@ async function handle(req: Request, params: URLSearchParams) {
   return done(base, order.number, state, {
     total: state === "paid" ? Number(order.total) : undefined,
     gift,
-    // a cancelled payment keeps the order: «Оплатить ещё раз» posts this id back
+    /* A payment that did not go through keeps the order: «Оплатить ещё раз»
+       posts this id back. It rides on a `pending` receipt as well as a
+       `failed` one, because that is what Montonio's token says when the
+       shopper pressed «Отменить» at the bank — the payment was started and
+       never completed, so the order is still PENDING and will only become
+       ABANDONED when it expires. Renat's acceptance run landed exactly there:
+       «Платёж обрабатывается», empty basket, nothing to press.
+       receiptUrl() drops it on a paid receipt. */
     orderId: order.id,
     // …and the method it was sent out with, so the retry screen starts on the
     // way the shopper already chose rather than proposing a different one

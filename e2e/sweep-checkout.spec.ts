@@ -558,7 +558,9 @@ for (let scenario = 0; scenario < 10; scenario++) {
 
       await page.locator(".co__pay[data-pay]").click();
       await page.waitForURL(/\/api\/payments\/mock\//);
-      await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Отменить" }).click();
+      // the refusal, not the cancel: cancelling leaves the payment PENDING at
+      // a real bank, and the mock says so too (the mock route's own comment)
+      await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Банк отклонил платёж" }).click();
       await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
 
       const doneCtx: Ctx = { ...ctx, screen: `${ctx.screen}:receipt` };

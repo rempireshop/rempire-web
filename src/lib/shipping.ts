@@ -1,5 +1,5 @@
 import { query } from "@/lib/db";
-import { countryPriceTable, MONTONIO_NOT_SERVED } from "@/lib/shipping/country-prices";
+import { countryPriceTable, MONTONIO_NOT_SERVED, SHOP_CARRIERS } from "@/lib/shipping/country-prices";
 
 /**
  * What a delivery costs.
@@ -105,12 +105,14 @@ export interface ShippingQuote {
  *
  * **The audit's cost column was optimistic and this table is not.** It quoted
  * the cheapest carrier Montonio prices for each route — which for Germany,
- * Italy, Poland and half the others is **Nova Post** (Montonio International
- * Shipping): a product the shop has not activated, has no carrier row for,
- * never names in the storefront, and which supports no returns at all. Against
- * the carriers the shop can actually put a parcel on, the cheapest courier to
- * Poland is 20.66 €, not 8.51 €. So 9.90 € covered the courier in **no**
- * European country — not even the one the audit found it covered.
+ * Italy, Poland and half the others was **Nova Post** (Montonio International
+ * Shipping): a product the shop never activated, had no carrier row for, never
+ * named in the storefront, and which supports no returns at all. Renat asked
+ * for it to be gone on 13.09.2026 and it is: no rows in the mirror, no name in
+ * the code. Against the carriers the shop can actually put a parcel on, the
+ * cheapest courier to Poland is 20.66 €, not 8.51 €. So 9.90 € covered the
+ * courier in **no** European country — not even the one the audit found it
+ * covered.
  *
  * What is kept deliberately:
  *   · **EE 5.47 / 10.84 and the LV, LT courier at 9.90.** All three sit above
@@ -302,12 +304,23 @@ export function parseShippingRules(value: unknown): ShippingRules {
     }
   }
 
+  /* Only carriers the shop can actually put a parcel on survive the read.
+     Nova Post was removed on 13.09.2026 (Ренат, «Remove "Nova Post"»), but the
+     live shop's settings row already carries a `carriers.novapost` table from
+     the days the fill button wrote one, and a row written once outlives the
+     code that wrote it. A carrier the checkout can never send would only ever
+     be a price nobody can reach — and quoteFromRules() below reads
+     `rules.carriers?.[carrier]` before the method's own table, so a stale
+     entry is not inert, it is a trapdoor. Dropped here, at the one door every
+     reader comes through, rather than trusted to stay unused. */
   const carriers = raw.carriers;
   if (typeof carriers === "object" && carriers !== null && !Array.isArray(carriers)) {
     const out: Record<string, Record<string, number>> = {};
     for (const [name, table] of Object.entries(carriers as Record<string, unknown>)) {
+      const key = name.toLowerCase();
+      if (!SHOP_CARRIERS.includes(key)) continue;
       const parsed = toPriceTable(table);
-      if (parsed) out[name.toLowerCase()] = parsed;
+      if (parsed) out[key] = parsed;
     }
     if (Object.keys(out).length) rules.carriers = out;
   }

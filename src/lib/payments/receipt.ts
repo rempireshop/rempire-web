@@ -31,21 +31,33 @@ export interface ReceiptParams {
    */
   gift?: string;
   /**
-   * `o` — the order's id, and only on a failed receipt: it is what
-   * «Оплатить ещё раз» posts back to POST /api/payments/create/, which then
-   * re-creates the payment for the same order with the method chosen the
-   * first time. The shopper's own browser already held this id (POST
-   * /api/orders/ answered with it), so the URL gives away nothing new; a
-   * paid or pending receipt has no use for it and does not carry it.
+   * `o` — the order's id, on any receipt for an order that is **not paid**:
+   * it is what «Оплатить ещё раз» posts back to POST /api/payments/create/,
+   * which then re-creates the payment for the same order with the method
+   * chosen the first time. The shopper's own browser already held this id
+   * (POST /api/orders/ answered with it), so the URL gives away nothing new.
+   *
+   * Until 13.09.2026 it rode on a `failed` receipt only, and that stranded
+   * the shopper Renat was: Montonio's order token says **PENDING** when a
+   * payment was started and never completed — pressing «Отменить» at the bank
+   * does not make it ABANDONED, that comes later when the order expires. So a
+   * cancelled card payment came back `s=pending`, the screen said «Платёж
+   * обрабатывается», and with no `o` there was no way to pay at all
+   * («…cart is empty and I do not have option to pay again»). A pending
+   * receipt that names an order now carries it too. It cannot cause a double
+   * payment: POST /api/payments/create/ answers 409 `already_paid` for an
+   * order that settled in the meantime.
+   *
+   * A **paid** receipt still never carries it — there is nothing left to pay.
    */
   orderId?: string;
   /**
    * `m` — bank | card | wallet, the method this order was last sent out with,
-   * and only on a failed receipt beside `o`. The screen offers all three so a
-   * customer whose card was refused can switch to a bank link without going
-   * back through the basket (Dim, 07.09.2026); this is what makes the one they
-   * already chose the one that starts selected, rather than the shop quietly
-   * proposing a different way to pay.
+   * and only ever beside `o`. The screen offers all three so a customer whose
+   * card was refused can switch to a bank link without going back through the
+   * basket (Dim, 07.09.2026); this is what makes the one they already chose
+   * the one that starts selected, rather than the shop quietly proposing a
+   * different way to pay.
    */
   method?: string;
   /**
@@ -68,9 +80,13 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   params.set("s", p.state);
   if (p.state === "paid" && p.total != null && Number.isFinite(p.total)) params.set("t", p.total.toFixed(2));
   if (p.state === "paid" && p.gift) params.set("g", p.gift);
-  if (p.state === "failed" && p.orderId) params.set("o", p.orderId);
-  if (p.state === "failed" && p.method && METHODS.includes(p.method)) params.set("m", p.method);
-  if (p.state === "failed" && p.method === "bank" && p.bank && BIC_RE.test(p.bank)) params.set("b", p.bank);
+  /* Everything below is the "this order still owes money" payload — a paid
+     receipt carries none of it, and the caller only passes an order id when it
+     actually looked the order up and found it unpaid. */
+  const owing = p.state === "failed" || p.state === "pending";
+  if (owing && p.orderId) params.set("o", p.orderId);
+  if (owing && p.orderId && p.method && METHODS.includes(p.method)) params.set("m", p.method);
+  if (owing && p.orderId && p.method === "bank" && p.bank && BIC_RE.test(p.bank)) params.set("b", p.bank);
   return `${base}/shop2/done/?${params.toString()}`;
 }
 

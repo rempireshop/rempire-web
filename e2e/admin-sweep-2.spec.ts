@@ -7,8 +7,9 @@ import { ceilingCost, customerPrice } from "@/lib/shipping/country-prices";
 /* What «Заполнить по тарифам Montonio» must write into the Latvian
    parcel-machine box: for the four countries whose checkout lets the shopper
    choose the carrier, the fill takes the DEAREST carrier the shop can post
-   with, so one price covers whichever machine is picked, and Nova Post — a
-   quote the shop cannot use — is left out. Read from the shop's own tariff
+   with, so one price covers whichever machine is picked. (A quote the shop
+   cannot use is left out — that used to mean Nova Post, which was removed
+   altogether on 13.09.2026.) Read from the shop's own tariff
    table, never typed here: the price list is re-cut every season, and a
    number written into a test goes stale silently, which is what happened to
    the one this replaces. */

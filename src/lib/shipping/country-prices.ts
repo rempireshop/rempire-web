@@ -26,21 +26,22 @@
  *     that carrier's name beside it so he knows which one the price assumed.
  *     That is `cheapestCost()`.
  *
- * ## Nova Post is not one of the carriers the shop can pick
+ * ## Nova Post is gone (Ренат, 13.09.2026)
  *
  * docs/audit/2026-09-07-shipping-returns.md quotes «Германия 12,91 €,
- * Италия 18,43 €, Польша 8,51 €». Those are **Nova Post** prices — Montonio
- * International Shipping, a separate product that is not in MONTONIO_CARRIERS,
- * has no carrier row in the admin, is never named by the storefront, and
- * supports no returns at all (help.montonio.com/en/articles/431075). The shop
- * cannot put a parcel on it today, so pricing off it would sell every European
- * order below cost.
+ * Италия 18,43 €, Польша 8,51 €». Those were **Nova Post** prices — Montonio
+ * International Shipping, a separate product the shop never offered: not in
+ * MONTONIO_CARRIERS, no carrier row in the admin, never named by the
+ * storefront, and no returns at all (help.montonio.com/en/articles/431075).
+ * Pricing off it would have sold every European order below cost, so it was
+ * filtered out everywhere it was read — and then Renat asked for it to be
+ * gone outright. Its rows are no longer in the mirror and
+ * tools/fetch-montonio-tariffs.mjs no longer asks Montonio for them, so a
+ * rebuild cannot put them back.
  *
  * Against the carriers the shop *can* use, the cheapest courier to Germany is
  * 22.23 € (SmartPosti) and to Poland 20.66 € — so 9.90 € covers the courier in
  * **no** European country, not even the one the audit found it covered.
- * `cheapestCostAnyCarrier()` keeps the Nova Post view so the admin and the
- * docs can say what would change if it were switched on.
  *
  * Every price here includes Estonian VAT, like the shelf prices they are
  * compared against; `src/data/montonio-tariffs.json` keeps the ex-VAT original.
@@ -98,10 +99,19 @@ export interface CountryCost {
   carrier: string;
 }
 
-function rowsFor(country: string, method: CostMethod, all: boolean): StaticRateRow[] {
+/**
+ * The mirror's rows for one route, minus any carrier the shop cannot pick.
+ *
+ * The filter no longer removes anything from today's mirror — Nova Post was
+ * the only carrier in it the shop could not use, and it is gone. It stays
+ * because tools/fetch-montonio-tariffs.mjs still asks Montonio for
+ * `latvian_post`, `inpost` and `orlen`: the day one of those starts answering,
+ * a price the checkout cannot offer must not become the basis of a shelf price.
+ */
+function rowsFor(country: string, method: CostMethod): StaticRateRow[] {
   const cc = String(country || "").toUpperCase();
   return RATES.filter(
-    (r) => r.country.toUpperCase() === cc && r.method === method && (all || SHOP_CARRIERS.includes(r.carrier)),
+    (r) => r.country.toUpperCase() === cc && r.method === method && SHOP_CARRIERS.includes(r.carrier),
   );
 }
 
@@ -115,23 +125,20 @@ function pick(rows: StaticRateRow[], dearest: boolean): CountryCost | null {
 
 /** The cheapest carrier the shop can actually pick for this route, or null. */
 export function cheapestCost(country: string, method: CostMethod): CountryCost | null {
-  return pick(rowsFor(country, method, false), false);
+  return pick(rowsFor(country, method), false);
 }
 
 /** The dearest carrier the shop can pick — what a shopper-chosen carrier may cost. */
 export function ceilingCost(country: string, method: CostMethod): CountryCost | null {
-  return pick(rowsFor(country, method, false), true);
+  return pick(rowsFor(country, method), true);
 }
 
-/**
- * The cheapest of *every* carrier Montonio quotes, Nova Post included. Not a
- * price the shop can charge against today — it is the "what if we switched
- * Montonio International Shipping on" number, and the only reason it exists is
- * so the admin and the audit can show the difference honestly.
- */
-export function cheapestCostAnyCarrier(country: string, method: CostMethod): CountryCost | null {
-  return pick(rowsFor(country, method, true), false);
-}
+/* `cheapestCostAnyCarrier()` lived here until 13.09.2026. It was the one
+   function whose whole purpose was the Nova Post view — "what the route would
+   cost if Montonio International Shipping were switched on" — and with those
+   rows out of the mirror it answered exactly what cheapestCost() answers. No
+   production code ever called it; only the test that checked the two differed.
+   It is in git at e9f20c8. */
 
 /**
  * The cost a shelf price for this country has to cover: the dearest carrier
@@ -154,7 +161,7 @@ export function costBasis(country: string, method: CostMethod): CountryCost | nu
 
 /** What Montonio charges the merchant for the return leg, cheapest carrier first. */
 export function returnCost(country: string, method: CostMethod): number | null {
-  const rows = rowsFor(country, method, false)
+  const rows = rowsFor(country, method)
     .filter((r) => typeof r.returnPrice === "number")
     .sort((a, b) => (a.returnPrice as number) - (b.returnPrice as number));
   return rows.length ? (rows[0].returnPrice as number) : null;

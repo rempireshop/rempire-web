@@ -46,7 +46,6 @@ export {
   applyMarkup,
   ceilingCost,
   cheapestCost,
-  cheapestCostAnyCarrier,
   costBasis,
   countryPriceTable,
   customerPrice,
@@ -83,8 +82,8 @@ export interface TariffQuote {
    * What Montonio charges the merchant when the customer sends this parcel
    * back — «Same pricing applies to return parcels», Omniva by Montonio,
    * help.montonio.com/en/articles/143643. `null` where Montonio prices no
-   * return on that route (every Nova Post row, every SmartPosti row, and some
-   * DPD ones), `undefined` on a live quote, which does not carry the field.
+   * return on that route (every SmartPosti row and some DPD ones),
+   * `undefined` on a live quote, which does not carry the field.
    * Nothing prices a basket from this — it is what the admin and the docs
    * quote when someone asks what a return costs.
    */
@@ -296,12 +295,15 @@ export function tariffCountries(): string[] {
  *     cheapest carrier he can actually pick, and the admin prints that
  *     carrier's name beside the number so the assumption is visible.
  *
- * "Can actually pick" excludes Nova Post (Montonio International Shipping): no
- * carrier row in the admin, never named by the storefront, no returns at all.
- * Its prices are the low ones in docs/audit/2026-09-07-shipping-returns.md,
- * and pricing off a carrier the shop cannot use would sell every European
- * order below cost — Poland's cheapest reachable courier is 20.66 €, not the
- * 8.51 € the audit quoted.
+ * "Can actually pick" is MONTONIO_CARRIERS, and the filter is what keeps a
+ * live quote for something the checkout cannot offer out of the basis. It used
+ * to be what excluded Nova Post (Montonio International Shipping), whose
+ * prices are the low ones in docs/audit/2026-09-07-shipping-returns.md:
+ * pricing off a carrier the shop cannot use would have sold every European
+ * order below cost, Poland's cheapest reachable courier being 20.66 € and not
+ * the 8.51 € the audit quoted. Nova Post is gone entirely since 13.09.2026
+ * (Ренат, «Remove "Nova Post"»); the filter stands for whatever Montonio
+ * starts quoting next.
  */
 function methodBasis(rows: TariffQuote[], method: ShipMethod, country: string): TariffQuote | null {
   const dearest = method === "parcel" && (CARRIER_COUNTRIES as readonly string[]).includes(country);
@@ -355,10 +357,10 @@ export async function suggestShippingRulesFromTariffs(
     if (!carrierCountries.has(country)) continue;
     for (const row of rows) {
       if (row.method !== "parcel") continue; // checkout only ever tags a carrier for the parcel method
-      // …and only for a carrier the checkout can actually name. Nova Post is
-      // Montonio International Shipping, a product with no carrier row in the
-      // admin's table and no `carrier` the storefront ever sends, so a price
-      // under it would be a cell nobody can see and nobody can reach.
+      // …and only for a carrier the checkout can actually name: a price under
+      // anything else would be a cell nobody can see and nobody can reach.
+      // This is what used to keep Nova Post out of the rate table; Nova Post
+      // itself is gone since 13.09.2026, the guard is not.
       if (!(MONTONIO_CARRIERS as readonly string[]).includes(row.carrier)) continue;
       patch.carriers[row.carrier] = patch.carriers[row.carrier] ?? {};
       patch.carriers[row.carrier][country] = customerPrice(row.price, markup);

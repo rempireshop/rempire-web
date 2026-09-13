@@ -64,8 +64,17 @@ const SOURCE_COUNTRY = "EE";
 /** Estonian VAT, as in src/data/montonio-tariffs.json's own `vatRateEE`. */
 const VAT_EE = 0.24;
 
-/** Montonio's `carrierCode` values, from the calculator bundle's own enum. */
-const CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend", "novaPost", "latvian_post", "inpost", "orlen"];
+/**
+ * Montonio's `carrierCode` values, from the calculator bundle's own enum —
+ * minus `novaPost`, which is deliberately not asked for.
+ *
+ * Nova Post (Montonio International Shipping) is a carrier the shop does not
+ * offer and Renat asked to have gone («Remove "Nova Post"», 13.09.2026). It
+ * used to be fetched into the mirror and then filtered out again at every
+ * place that reads it, which is one filter too many to trust: leaving it out
+ * of the *fetch* is what makes a rebuild of this file unable to bring it back.
+ */
+const CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend", "latvian_post", "inpost", "orlen"];
 
 /**
  * Everywhere the checkout can send a parcel: the four countries with a row of

@@ -124,7 +124,43 @@ for (const [i, lang] of LANGS.entries()) {
       await expect(page.locator(".done__num")).toContainText(/R-\d+/);
     });
 
-    test("mock-cancel leads to a failed receipt", async ({ page }) => {
+    /* Ренат, 13.09.2026: «I chose card payment and cancelled — it brought me
+       back to page that "payment is being processed", cart is empty and I do
+       not have option to pay again.»
+
+       Cancelling at a bank is not a failed payment: Montonio's order token
+       still says PENDING, so the shop landed on «Платёж обрабатывается» — a
+       screen with one button, and it went home. This walks exactly that, in
+       all three languages: the receipt has to say the order is not paid, offer
+       «Оплатить ещё раз», and have the basket back. */
+    test("cancelling at the bank leaves an unpaid order that can still be paid", async ({ page }) => {
+      await addProductAndGoToCheckout(page, lang.seg);
+      await fillContactStep(page, freshEmail(`cancel-${lang.code}`));
+
+      await page.locator('input[data-dm="courier"]').check();
+      await page.locator('[data-shipf="name"]').fill("E2E Buyer");
+      await page.locator('[data-shipf="addr"]').fill("Testitänav 1");
+      await page.locator('[data-shipf="zip"]').fill("10111");
+      await page.locator('[data-shipf="city"]').fill("Tallinn");
+      await page.locator('[data-shipf="phone"]').fill("+372 5550000");
+      await continueButton(page, 3).click();
+      await page.locator('input[data-paym="1"]').check();
+
+      await payButton(page).click();
+      await page.waitForURL(/\/api\/payments\/mock\//);
+      await page.getByRole("link", { name: "Отменить" }).click();
+
+      await page.waitForURL(/\/shop2.*\/done\/\?.*s=pending/);
+      await waitForScreen(page, "done");
+      await expect(page.locator("h1")).toHaveText(tr("Заказ не оплачен", lang.code));
+      // the order travels on the receipt, so there is something to press
+      expect(new URL(page.url()).searchParams.get("o")).toMatch(/^[0-9a-f-]{36}$/);
+      await expect(page.locator("[data-payagain]")).toBeVisible();
+      // …and the basket the order was made from is back
+      await expect(page.locator("[data-cartbadge]")).toHaveText("1");
+    });
+
+    test("a payment the bank refuses leads to a failed receipt", async ({ page }) => {
       await addProductAndGoToCheckout(page, lang.seg);
       await fillContactStep(page, freshEmail(`fail-${lang.code}`));
 
@@ -139,7 +175,7 @@ for (const [i, lang] of LANGS.entries()) {
 
       await payButton(page).click();
       await page.waitForURL(/\/api\/payments\/mock\//);
-      await page.getByRole("link", { name: "Отменить" }).click();
+      await page.getByRole("link", { name: "Банк отклонил платёж" }).click();
 
       await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
       await waitForScreen(page, "done");

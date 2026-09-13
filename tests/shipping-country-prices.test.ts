@@ -2,8 +2,7 @@
  * The table behind «real per-country prices» (Dim, 07.09.2026).
  *
  * Three things have to hold, and the money leaks the moment one of them stops:
- *   1. the cost basis is a carrier the shop can actually put a parcel on —
- *      Nova Post is not one, and it is the cheapest quote on half these routes;
+ *   1. the cost basis is a carrier the shop can actually put a parcel on;
  *   2. who picks the carrier decides which end of the range the price covers;
  *   3. the shelf price is never below the cost it was computed from.
  *
@@ -18,7 +17,6 @@ import {
   CARRIER_CHOICE_COUNTRIES,
   ceilingCost,
   cheapestCost,
-  cheapestCostAnyCarrier,
   costBasis,
   countryPriceTable,
   customerPrice,
@@ -32,6 +30,8 @@ import {
 
 const RATES = (montonioTariffsData as { rates: { carrier: string; country: string; method: string; price: number }[] })
   .rates;
+/** The per-carrier reachability index the fetch tool writes beside the rates. */
+const COVERAGE = (montonioTariffsData as { coverage: Record<string, unknown> }).coverage;
 
 describe("which carriers count", () => {
   /* The list is restated in country-prices.ts to keep that module a leaf (no
@@ -41,10 +41,21 @@ describe("which carriers count", () => {
     expect([...SHOP_CARRIERS].sort()).toEqual([...MONTONIO_CARRIERS].sort());
   });
 
-  it("does not include Nova Post, which the shop cannot put a parcel on", () => {
+  /* Ренат, 13.09.2026: «Remove "Nova Post"». It used to be in the mirror and
+     filtered out at every place that read it; now it is not in the mirror at
+     all, and tools/fetch-montonio-tariffs.mjs does not ask Montonio for it,
+     so a rebuild of the table cannot bring it back. Both halves are asserted
+     because either one alone would let it return. */
+  it("has no Nova Post anywhere — not in the list, not in the table", () => {
     expect(SHOP_CARRIERS).not.toContain("novapost");
-    // …and it really is in the tariff table, so excluding it is a decision
-    expect(RATES.some((r) => r.carrier === "novapost")).toBe(true);
+    expect(RATES.some((r) => r.carrier === "novapost")).toBe(false);
+    expect(Object.keys(COVERAGE)).not.toContain("novapost");
+  });
+
+  it("every carrier left in the table is one the shop can pick", () => {
+    const carriers = [...new Set(RATES.map((r) => r.carrier))].sort();
+    expect(carriers).toEqual(["dpd", "omniva", "smartpost", "unisend"]);
+    for (const c of carriers) expect(SHOP_CARRIERS).toContain(c);
   });
 });
 
@@ -60,13 +71,15 @@ describe("cost: cheapest, dearest, and the one the audit quoted", () => {
     expect(ceilingCost("EE", "parcel")).toEqual({ price: 3.1, carrier: "omniva" });
   });
 
-  /* The audit's headline numbers — «Германия 12,91 €, Польша 8,51 €» — are
-     Nova Post's. Keeping the view is how the shop can show what activating
-     Montonio International Shipping would be worth. */
-  it("keeps the Nova Post view separate, and it is much cheaper", () => {
-    expect(cheapestCostAnyCarrier("DE", "courier")).toEqual({ price: 12.91, carrier: "novapost" });
-    expect(cheapestCostAnyCarrier("PL", "courier")).toEqual({ price: 8.51, carrier: "novapost" });
-    expect(cheapestCostAnyCarrier("DE", "courier")!.price).toBeLessThan(cheapestCost("DE", "courier")!.price);
+  /* The audit's headline numbers — «Германия 12,91 €, Польша 8,51 €» — were
+     Nova Post's, and `cheapestCostAnyCarrier()` existed only to show them.
+     With those rows gone there is no second view left to keep: the cheapest
+     carrier in the table IS the cheapest the shop can pick. This is the
+     assertion that catches a mirror rebuild quietly putting them back. */
+  it("the audit's cheap numbers are not reachable from the table any more", () => {
+    expect(cheapestCost("DE", "courier")!.price).toBeGreaterThan(12.91);
+    expect(cheapestCost("PL", "courier")!.price).toBeGreaterThan(8.51);
+    expect(RATES.some((r) => r.price === 12.91 || r.price === 8.51)).toBe(false);
   });
 
   it("knows what a return costs where Montonio prices one", () => {
@@ -143,8 +156,8 @@ describe("the shelf table", () => {
 
   it("leaves out a country/method with no reachable carrier rather than inventing one", () => {
     expect(table.parcel.GR).toBeUndefined(); // no parcel machine at all
-    expect(table.parcel.HU).toBeUndefined(); // Nova Post only
-    expect(table.parcel.RO).toBeUndefined(); // Nova Post only
+    expect(table.parcel.HU).toBeUndefined(); // no reachable parcel machine
+    expect(table.parcel.RO).toBeUndefined(); // no reachable parcel machine
     expect(table.courier.HU).toBeDefined();
   });
 });

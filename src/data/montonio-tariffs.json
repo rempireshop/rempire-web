@@ -40,34 +40,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "AT",
-      "method": "courier",
-      "price": 15.72,
-      "priceExVat": 12.68,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "AT",
-      "method": "parcel",
-      "price": 12.31,
-      "priceExVat": 9.93,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "AT",
       "method": "courier",
@@ -194,34 +166,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "CZ",
-      "method": "courier",
-      "price": 10.92,
-      "priceExVat": 8.81,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "CZ",
-      "method": "parcel",
-      "price": 9.28,
-      "priceExVat": 7.48,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "CZ",
       "method": "courier",
@@ -262,34 +206,6 @@
       "size": "L",
       "maxWeightKg": null,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "DE",
-      "method": "courier",
-      "price": 12.91,
-      "priceExVat": 10.41,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "DE",
-      "method": "parcel",
-      "price": 12.56,
-      "priceExVat": 10.13,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
     },
     {
       "carrier": "smartpost",
@@ -374,34 +290,6 @@
       "size": null,
       "maxWeightKg": null,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "EE",
-      "method": "courier",
-      "price": 4.76,
-      "priceExVat": 3.84,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
-    },
-    {
-      "carrier": "novapost",
-      "country": "EE",
-      "method": "parcel",
-      "price": 2.33,
-      "priceExVat": 1.88,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
     },
     {
       "carrier": "omniva",
@@ -502,34 +390,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "ES",
-      "method": "courier",
-      "price": 20.16,
-      "priceExVat": 16.26,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "ES",
-      "method": "parcel",
-      "price": 17.34,
-      "priceExVat": 13.98,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "ES",
       "method": "courier",
@@ -626,20 +486,6 @@
       "size": "L",
       "maxWeightKg": null,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "FR",
-      "method": "courier",
-      "price": 18.08,
-      "priceExVat": 14.58,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
     },
     {
       "carrier": "smartpost",
@@ -740,34 +586,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "HU",
-      "method": "courier",
-      "price": 11.17,
-      "priceExVat": 9.01,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "HU",
-      "method": "parcel",
-      "price": 10.24,
-      "priceExVat": 8.26,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "HU",
       "method": "courier",
@@ -852,34 +670,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "IT",
-      "method": "courier",
-      "price": 18.43,
-      "priceExVat": 14.86,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "IT",
-      "method": "parcel",
-      "price": 13.97,
-      "priceExVat": 11.27,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "IT",
       "method": "courier",
@@ -920,34 +710,6 @@
       "size": null,
       "maxWeightKg": null,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "LT",
-      "method": "courier",
-      "price": 7.14,
-      "priceExVat": 5.76,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
-    },
-    {
-      "carrier": "novapost",
-      "country": "LT",
-      "method": "parcel",
-      "price": 4.09,
-      "priceExVat": 3.3,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
     },
     {
       "carrier": "omniva",
@@ -1090,34 +852,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "LV",
-      "method": "courier",
-      "price": 5.96,
-      "priceExVat": 4.81,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
-    },
-    {
-      "carrier": "novapost",
-      "country": "LV",
-      "method": "parcel",
-      "price": 4.76,
-      "priceExVat": 3.84,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2025-10-15"
-    },
-    {
       "carrier": "omniva",
       "country": "LV",
       "method": "courier",
@@ -1216,20 +950,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "NL",
-      "method": "courier",
-      "price": 23.7,
-      "priceExVat": 19.11,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "NL",
       "method": "courier",
@@ -1270,34 +990,6 @@
       "size": "L",
       "maxWeightKg": null,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "PL",
-      "method": "courier",
-      "price": 8.51,
-      "priceExVat": 6.86,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "PL",
-      "method": "parcel",
-      "price": 7.85,
-      "priceExVat": 6.33,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
     },
     {
       "carrier": "smartpost",
@@ -1368,34 +1060,6 @@
       "size": null,
       "maxWeightKg": 10,
       "effectiveDate": "2026-07-01"
-    },
-    {
-      "carrier": "novapost",
-      "country": "RO",
-      "method": "courier",
-      "price": 19.08,
-      "priceExVat": 15.39,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "RO",
-      "method": "parcel",
-      "price": 19.08,
-      "priceExVat": 15.39,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
     },
     {
       "carrier": "smartpost",
@@ -1524,34 +1188,6 @@
       "effectiveDate": "2026-07-01"
     },
     {
-      "carrier": "novapost",
-      "country": "SK",
-      "method": "courier",
-      "price": 13.37,
-      "priceExVat": 10.78,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
-      "carrier": "novapost",
-      "country": "SK",
-      "method": "parcel",
-      "price": 12.61,
-      "priceExVat": 10.17,
-      "currency": "EUR",
-      "vatIncluded": true,
-      "returnPrice": null,
-      "pricingStrategy": "weightBased",
-      "size": null,
-      "maxWeightKg": 5,
-      "effectiveDate": "2026-04-30"
-    },
-    {
       "carrier": "smartpost",
       "country": "SK",
       "method": "courier",
@@ -1626,38 +1262,6 @@
         "RO",
         "SE",
         "SI",
-        "SK"
-      ]
-    },
-    "novapost": {
-      "parcel": [
-        "AT",
-        "CZ",
-        "DE",
-        "EE",
-        "ES",
-        "HU",
-        "IT",
-        "LT",
-        "LV",
-        "PL",
-        "RO",
-        "SK"
-      ],
-      "courier": [
-        "AT",
-        "CZ",
-        "DE",
-        "EE",
-        "ES",
-        "FR",
-        "HU",
-        "IT",
-        "LT",
-        "LV",
-        "NL",
-        "PL",
-        "RO",
         "SK"
       ]
     },

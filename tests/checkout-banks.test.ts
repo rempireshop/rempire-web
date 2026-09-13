@@ -76,8 +76,34 @@ describe("the bank chips follow the delivery country", () => {
     expect(out.code).toBe("HABALV22");
   });
 
-  it("a country with no banks in the list gets the whole list, as before", () => {
-    const out = run(LIST, "EU", "DE", 0);
+  /* Ренат, 13.09.2026: «For Denmark, the list of "bank link" is very large.
+     Seems like almost all are suggested.» Montonio's pay-by-bank covers EE,
+     LV, LT, FI and PL — the keys of `paymentInitiation.setup`, the only place
+     a bank's country is named — and a country that is not one of them used to
+     be shown the whole cross-country array. A Dane was offered every Estonian,
+     Latvian, Lithuanian, Finnish and Polish bank, and whichever chip he tapped
+     travelled to Montonio as `preferredProvider`: a bank he has no account
+     with. No chips and no `preferredProvider` is the honest answer — Montonio
+     asks on its own page, which is the only place that knows what Denmark
+     really has. */
+  it("a country Montonio has no bank links for gets no chips and no preferred bank", () => {
+    const out = run(LIST, "EU", "DK", 0);
+    expect(out.banks).toEqual([]);
+    expect(out.code).toBe("");
+  });
+
+  it("still narrows to a country that IS in the list, whichever way it was picked", () => {
+    // Poland arrives through «Другая страна Европы» + the ISO select
+    const pl = [...LIST, { code: "PKOPPLPW", name: "PKO", country: "PL", logoUrl: "" }];
+    const out = run(pl, "EU", "PL", 0);
+    expect(out.banks?.map((b) => b.code)).toEqual(["PKOPPLPW"]);
+    expect(out.code).toBe("PKOPPLPW");
+  });
+
+  it("shows the whole list while no country has been picked yet", () => {
+    // «Другая страна Европы» chosen, the second select still empty: nothing is
+    // known, so nothing is narrowed — and the built-in fallback is not used
+    const out = run(LIST, "EU", "", 0);
     expect(out.banks?.length).toBe(LIST.length);
     expect(out.code).toBe("HABAEE2X");
   });
@@ -153,5 +179,94 @@ describe("filterBanks — the same chips, fewer of them", () => {
   it("never leaves the checkout with no chip at all", () => {
     expect(filterBanks(LIST, ["NOPE"]).length).toBe(LIST.length);
     expect(filterBanks([], ["HABAEE2X"])).toEqual([]);
+  });
+});
+
+/* ---------- the panel's own switches must agree with that rule ------------ */
+
+/**
+ * Ренат, 13.09.2026: «I can switch off all in Estonia and also I can switch of
+ * some, but they are still displayed in checkout.»
+ *
+ * He could, and they were. The server's rule is **per country** — filterBanks()
+ * above gives a country whose banks are all switched off its whole group back,
+ * so an owner trimming the Estonian list cannot take every Latvian bank away
+ * from a shopper in Riga. The panel did not know about it: its own guard was
+ * «нельзя выключить все» counted across every country at once, which fires only
+ * when the very last switch in the whole list goes off. Five Estonian switches
+ * could therefore read «off» while the checkout drew all five.
+ *
+ * admBankLastOn() is the panel enforcing the same rule the server does, and
+ * these run it against filterBanks() so the two can never drift apart again.
+ */
+function panel(list: Bank[]) {
+  const body = `
+    ${slice("admBankToggle")}
+    ${slice("admBankOn")}
+    ${slice("admBankCountry")}
+    ${slice("admBankLastOn")}
+    var PAYMETHODS = { all: LIST_IN, banks: LIST_IN };
+    var S = { banksLoaded: [] };
+    function bankFilter() { return Array.isArray(S.banksLoaded) ? S.banksLoaded : []; }
+    function admBankList() { return (PAYMETHODS.all || PAYMETHODS.banks || []); }
+    return {
+      /** One thumb on one switch: refused, or the new stored filter. */
+      tap: function (code) {
+        if (admBankLastOn(code)) return "refused";
+        S.banksLoaded = admBankToggle(code);
+        return S.banksLoaded;
+      },
+      on: function (code) { return admBankOn(code); },
+      filter: function () { return S.banksLoaded; }
+    };
+  `;
+  return new Function("LIST_IN", body)(list) as {
+    tap: (c: string) => string[] | "refused";
+    on: (c: string) => boolean;
+    filter: () => string[];
+  };
+}
+
+describe("«Какие банки показывать» — the switches tell the truth", () => {
+  it("refuses to switch off the last bank of a country", () => {
+    const p = panel(LIST);
+    expect(p.tap("HABAEE2X")).not.toBe("refused");
+    expect(p.tap("EEUHEE2X")).not.toBe("refused");
+    // LHV is the only Estonian bank still on — it has to stay
+    expect(p.tap("LHVBEE22")).toBe("refused");
+    expect(p.on("LHVBEE22")).toBe(true);
+  });
+
+  it("…so what the panel shows is exactly what the checkout draws", () => {
+    const p = panel(LIST);
+    p.tap("HABAEE2X");
+    p.tap("EEUHEE2X");
+    p.tap("LHVBEE22");   // refused
+    const shown = filterBanks(LIST, p.filter() as string[]).map((b) => b.code);
+    expect(shown).toEqual(["LHVBEE22", "HABALV22", "UNLALV2X", "CBVILT2X"]);
+    for (const b of LIST) expect(p.on(b.code), b.code).toBe(shown.includes(b.code));
+  });
+
+  it("a country with one bank cannot be switched off at all", () => {
+    const p = panel(LIST);
+    expect(p.tap("CBVILT2X")).toBe("refused");   // the only Lithuanian one
+  });
+
+  it("switching a hidden bank back on is never refused, and the last one clears the filter", () => {
+    const p = panel(LIST);
+    p.tap("HABAEE2X");
+    expect(p.on("HABAEE2X")).toBe(false);
+    expect(p.tap("HABAEE2X")).toEqual([]);   // all on again ⇒ «показывать все»
+    expect(p.on("HABAEE2X")).toBe(true);
+  });
+
+  /* The guard has to read the *live* filter, not just the full list: after
+     two Estonian banks are off, the third is the last one on even though the
+     country still has three banks in Montonio's answer. */
+  it("counts what is still on, not how many the country has", () => {
+    const p = panel(LIST);
+    p.tap("EEUHEE2X");
+    expect(p.tap("HABAEE2X")).not.toBe("refused");   // LHV still on
+    expect(p.tap("LHVBEE22")).toBe("refused");
   });
 });

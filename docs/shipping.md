@@ -106,17 +106,30 @@
   перевозчика; выбирает **Ренат**, когда создаёт этикетку. Цена покрывает
   **самого дешёвого**, а его имя админка печатает рядом с числом.
 
-**Nova Post в расчёт не берётся.** Это Montonio International Shipping:
-отдельный продукт, у него нет строки в «Ценах по перевозчикам», витрина его
-никогда не называет, и возвратов у него нет вообще
-(`help.montonio.com/en/articles/431075`). Именно его цены — самые низкие в
-`montonio-tariffs.json` и именно они попали в таблицу
+**Nova Post удалён — 13.09.2026, «Remove "Nova Post"» (Ренат).** Это был
+Montonio International Shipping: отдельный продукт, строки в «Ценах по
+перевозчикам» у него не было, витрина его никогда не называла, возвратов у
+него нет вообще (`help.montonio.com/en/articles/431075`). Именно его цены —
+самые низкие в `montonio-tariffs.json` и именно они попали в таблицу
 `docs/audit/2026-09-07-shipping-returns.md`: Германия 12,91 €, Польша 8,51 €.
 По перевозчикам, которыми магазин реально может отправить, самый дешёвый
 курьер в Польшу стоит 20,66 €. То есть 9,90 € не покрывали курьера **ни в
 одной** европейской стране — даже в той единственной, где по аудиту покрывали.
-`cheapestCostAnyCarrier()` оставлен, чтобы можно было честно показать, что
-изменится, если Nova Post включить.
+
+Что сделано, чтобы он не вернулся:
+
+- 26 строк `carrier: "novapost"` и блок `coverage.novapost` вынуты из
+  `src/data/montonio-tariffs.json` — ни одной цены это не изменило, потому что
+  все расчётные пути его и так отфильтровывали;
+- `tools/fetch-montonio-tariffs.mjs` больше не спрашивает у Montonio
+  `novaPost`, так что пересборка таблицы его не вернёт;
+- `parseShippingRules()` (`src/lib/shipping.ts`) выбрасывает `carriers.*` для
+  любого перевозчика не из `SHOP_CARRIERS` — в настройках боевого магазина
+  строка `carriers.novapost` уже лежит, а `quoteFromRules()` читает таблицу
+  перевозчика **раньше** таблицы способа;
+- `cheapestCostAnyCarrier()` удалён: он существовал только ради «а сколько
+  было бы с Nova Post» и без этих строк отвечал ровно то же, что
+  `cheapestCost()`.
 
 ### Цены по умолчанию и цены перевозчиков — это разные числа
 
@@ -268,13 +281,14 @@ GET https://shipping.montonio.com/api/v2/contract-prices
 | Unisend | EE, LV, LT | — |
 | SmartPosti | EE, LV, LT, FI | EE + все 25 стран |
 | DPD | EE, LV, LT, FI + 18 стран европейской зоны | EE + все 25 стран |
-| Nova Post (Montonio International Shipping) | 9 стран европейской зоны (+EE/LV/LT) | 11 стран европейской зоны (+EE/LV/LT) |
 | Venipak | нет цены по контракту Montonio (только прямой договор) | то же |
 
-Nova Post — это и есть «Montonio International Shipping»: дешевле всех по
-Европе, но **возвратов у него нет вообще** («Returns are currently not
-supported for Montonio International Shipping»,
-<https://help.montonio.com/en/articles/431075-montonio-international-shipping>).
+В таблице выше больше нет Nova Post («Montonio International Shipping»):
+дешевле всех по Европе, но **возвратов у него нет вообще** («Returns are
+currently not supported for Montonio International Shipping»,
+<https://help.montonio.com/en/articles/431075-montonio-international-shipping>),
+и 13.09.2026 Ренат попросил его убрать — строк в `montonio-tariffs.json` у
+него больше нет.
 
 #### Резервная таблица — `src/data/montonio-tariffs.json`
 
@@ -1046,7 +1060,7 @@ seed-файла, DPD и Venipak не предлагаются, «Создать 
 | `tests/shipping-montonio.test.ts` | Тесты: нормализация, слияние, тело отправления, этикетка без смены статуса, «Отправлен» с письмом и отмены, `labelStep`, заглушка `mock`, `fetchMontonioRates()`, `fetchMontonioCarriers()` и маршрут логотипов |
 | `tests/shipping-webhook.test.ts` | Тесты: подпись верная и чужая, чужой `accessKey`, незнакомый статус, повтор события, возврат посылки, магазин без ключей |
 | `tests/shipping-tariffs.test.ts` | Тесты: округление до «…,X9», наценка, резервная таблица, живой→резервный откат, «Заполнить» по всем 25 странам |
-| `tests/shipping-country-prices.test.ts` | Тесты: себестоимость и её перевозчик, правило «кто выбирает», ни одна цена не ниже себестоимости, Nova Post исключён |
+| `tests/shipping-country-prices.test.ts` | Тесты: себестоимость и её перевозчик, правило «кто выбирает», ни одна цена не ниже себестоимости, Nova Post нет ни в списке, ни в таблице |
 | `tests/shipping-admin-mirror.test.ts` | Тесты: `MONTONIO_COST`, `SHIP_EU_COUNTRIES` и `SHIP_UNSERVED` в `app.js` не разошлись с `montonio-tariffs.json` |
 | `tests/shipping-migration.test.ts` | Тесты: 031 — свежая база, замена только брифовых EE-клеток, чужие правки целы, идемпотентность; 148 — цены по странам, ответ владельца сильнее, порог не тронут; 149 — пакомат LV/LT 5,59 € и порог `EU` 200 €, клетка и порог владельца целы |
 
@@ -1151,7 +1165,6 @@ Latvian Post by Montonio и прямых договоров Venipak.
 | --- | --- | --- | --- |
 | Omniva, Unisend, DPD (через Montonio) | код приходит **в том же SMS**, что и уведомление о прибытии; действует 14 дней; кладёт в любой пакомат | обратный адрес магазина у Montonio | магазин |
 | SmartPosti | SMS-кодов нет. Покупатель сам идёт в самообслуживание перевозчика, вводит трек-номер исходной посылки и получает код возврата | то же | магазин, счёт приходит потом |
-| Nova Post (Montonio International Shipping) | **возвратов нет вообще** | — | — |
 | Venipak | только по прямому договору с Venipak | — | — |
 
 Адреса самообслуживания SmartPosti, дословно из статьи Montonio: Эстония —

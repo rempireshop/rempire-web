@@ -177,6 +177,30 @@ describe("the rules the shop actually bills on", () => {
     expect(rules.methods.parcel.LV).toBe(DEFAULT_SHIPPING_RULES.methods.parcel.LV);
   });
 
+  /* Ренат, 13.09.2026: «Remove "Nova Post"». The live shop's settings row
+     already carries a `carriers.novapost` table written by the fill button
+     back when the mirror had Nova Post rows, and a row written once outlives
+     the code that wrote it. quoteFromRules() reads `rules.carriers?.[carrier]`
+     *before* the method's own table, so a stale entry is not inert — it is a
+     price nobody can reach that would win if an order ever carried that
+     carrier. parseShippingRules() is the one door every reader comes through,
+     so it is where the row is dropped. */
+  it("ignores a carrier the shop cannot ship with, Nova Post included", () => {
+    const rules = parseShippingRules({
+      carriers: { novapost: { EE: 0.01, default: 0.01 }, omniva: { EE: 3.29 } },
+    });
+    expect(rules.carriers?.novapost).toBeUndefined();
+    expect(rules.carriers?.omniva).toEqual({ EE: 3.29 });
+    // …and a parcel tagged with it is billed the method's price, not 0.01 €
+    expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "novapost", subtotal: 10 }).price)
+      .toBe(DEFAULT_SHIPPING_RULES.methods.parcel.EE);
+  });
+
+  it("drops a carriers map that holds nothing the shop can use", () => {
+    expect(parseShippingRules({ carriers: { novapost: { EE: 0.01 } } }).carriers)
+      .toEqual(DEFAULT_SHIPPING_RULES.carriers);
+  });
+
   it("lets a country never have free delivery", () => {
     const rules = parseShippingRules({ freeFrom: 59, freeFromByCountry: { LV: null } });
     expect(quoteFromRules(rules, { country: "LV", method: "parcel", subtotal: 500 }).price).toBe(5.59);

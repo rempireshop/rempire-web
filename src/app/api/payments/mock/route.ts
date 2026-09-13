@@ -5,14 +5,25 @@ import { mockMethodLabel, mockSecret, readMockTicket, signMockTicket } from "@/l
 /**
  * The stand-in bank page.
  *
- * /api/payments/mock/?t=<ticket>            → two buttons
- * /api/payments/mock/?t=<ticket>&do=paid    → back to the return URL, paid
- * /api/payments/mock/?t=<ticket>&do=failed  → back to the return URL, failed
+ * /api/payments/mock/?t=<ticket>             → three buttons
+ * /api/payments/mock/?t=<ticket>&do=paid     → back to the return URL, paid
+ * /api/payments/mock/?t=<ticket>&do=pending  → back to the return URL, unpaid
+ * /api/payments/mock/?t=<ticket>&do=failed   → back to the return URL, failed
  *
  * It exists so the whole flow — order, redirect, payment, webhook-shaped
  * return, receipt — can be walked on a laptop with no Montonio account. The
  * ticket is a signed JWT, so this page cannot be used to mark someone else's
  * order paid without the secret.
+ *
+ * **Cancelling is not failing, and this page is where that stopped being
+ * modelled wrongly (13.09.2026).** «Отменить» used to answer `failed`, and a
+ * real bank does not: Montonio's order token still says PENDING when a payment
+ * was started and never completed — ABANDONED comes later, when the order
+ * expires. So the shop was tested against an outcome the provider never
+ * produces, and the one it does produce stranded the shopper on «Платёж
+ * обрабатывается» with an empty basket and nothing to press (Ренат). The three
+ * buttons below are now the three things that can really happen at a bank:
+ * pay, back out (PENDING), be refused (FAILED).
  */
 
 export const runtime = "nodejs";
@@ -54,7 +65,7 @@ export async function GET(req: Request) {
   }
 
   const decision = url.searchParams.get("do");
-  if (decision === "paid" || decision === "failed") {
+  if (decision === "paid" || decision === "failed" || decision === "pending") {
     const settled = signMockTicket({ ...ticket, status: decision }, secret);
     /* The ticket names where to send the shopper, so this page could be used
        to bounce anyone anywhere from the shop's own domain (audit M7). It
@@ -81,6 +92,7 @@ export async function GET(req: Request) {
   }
 
   const payHref = `?t=${encodeURIComponent(token)}&do=paid`;
+  const cancelHref = `?t=${encodeURIComponent(token)}&do=pending`;
   const failHref = `?t=${encodeURIComponent(token)}&do=failed`;
 
   /* Which of Montonio's two pages this stands in for: the bank list for a
@@ -116,7 +128,7 @@ export async function GET(req: Request) {
   a.btn { display:block; padding:15px 18px; border-radius:10px; min-height:44px;
           font-size:16px; font-weight:600; text-decoration:none; box-sizing:border-box }
   .pay { background:#14110f; color:#fff; margin-bottom:10px }
-  .cancel { background:transparent; color:#14110f; border:1px solid #d8d2c8 }
+  .cancel { background:transparent; color:#14110f; border:1px solid #d8d2c8; margin-bottom:10px }
   .note { margin:20px 0 0; font-size:13px; color:#8a8177 }
 </style></head>
 <body>
@@ -126,7 +138,8 @@ export async function GET(req: Request) {
     <div class="ref">Заказ ${esc(ticket.orderRef)}</div>
     <div class="ref" data-mock-method>${esc(how)}</div>
     <a class="btn pay" href="${esc(payHref)}">Оплатить</a>
-    <a class="btn cancel" href="${esc(failHref)}">Отменить</a>
+    <a class="btn cancel" href="${esc(cancelHref)}">Отменить</a>
+    <a class="btn cancel" href="${esc(failHref)}">Банк отклонил платёж</a>
     <p class="note">${esc(where)} Настоящие деньги не списываются. Эта страница
       заменяет банк, пока магазин не подключён к Montonio.</p>
   </main>

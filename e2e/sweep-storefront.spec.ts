@@ -455,12 +455,13 @@ for (const lang of LANGS) {
       await expect(page.locator('input[data-paym="1"]')).toBeVisible();
       await check(page, w, { screen: "checkout:step3", lang: L });
 
-      /* All three receipt states. `paid` and `failed` are walked for real
-         through the mock bank in sweep-checkout.spec.ts; `pending` is the one
-         the mock provider cannot produce (its two links are do=paid and
-         do=failed — src/app/api/payments/mock/route.ts) and a real bank
-         certainly can, so it is reached the way the bank would reach it: by
-         landing on the receipt URL with that status. */
+      /* All three receipt states. Each is walked for real through the mock
+         bank elsewhere — sweep-checkout.spec.ts for `paid`/`failed`, and
+         checkout.spec.ts for the cancel that leaves a payment `pending`.
+         Here they are reached by landing on the receipt URL directly and
+         **without** an order id, which is the thinner receipt a shopper gets
+         when the return route could not name the order (a rate limit, a
+         database it could not reach): no retry, just the state. */
       for (const status of ["paid", "failed", "pending"]) {
         const ctx: Ctx = { screen: `done:${status}`, lang: L };
         await coldVisit(page, shopUrl(lang.seg, `/done/?n=R-100000&s=${status}`), "done");
