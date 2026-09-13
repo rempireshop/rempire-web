@@ -51,12 +51,17 @@ const CAPS_ON_WHITE = [
   "paul-mitchell-super-smooth-conditioner-0",
   "paul-mitchell-super-smooth-shampoo-0"
 ];
-/* Three more were damaged and are restored from the rembg-era blobs in git
-   (6a9a649); this dict cannot protect them, because the sweep already picks 3
-   there and tolerance is not the problem — clear-essential-shampoo-0 and
-   clear-jelly-mask-0 are shot on a grey gradient a 3% flood cannot clear, and
+/* DO NOT re-cut these four with this script, and do not add them to OVERRIDE:
+   the sweep already picks 3% for all four, so an entry would be a no-op that
+   reads like a fix, and what ships for them is not this script's output.
+   clear-essential-shampoo-0 and clear-essential-conditioner-0 are compositions
+   — a tall textured glass vase beside the bottle on a grey gradient, both
+   standing on a mirror; clear-jelly-mask-0 is on the same grey gradient; and
    curl-twirl-around-cream-serum-0 has a transparent cap the flood walks
-   through at any tolerance. Re-running this would break those three again. */
+   straight through. Three are cut with rembg (isnet-general-use for the jar,
+   u2net for the two /clear bottles), keeping only the largest alpha blob to
+   drop the vase and cutting the reflection at the contact line (y=901); the
+   serum keeps its earlier rembg cut. */
 const OVERRIDE = {
   "creed-creed-aventus-cologne-50ml-0": 9,
   "handmade-soap-666-0": 9,

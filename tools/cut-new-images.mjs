@@ -27,12 +27,17 @@ const STEP_COST = 0.985;
    (what shipped) 0.56-0.61 · fuzz 3 0.78-0.86 · source ~0.87. Every slug below
    is shot on pure white, where a 3% flood still clears the paper.
 
-   Three further Paul Mitchell photographs were damaged too and are restored
-   from the rembg-era blobs in git (6a9a649). They are deliberately NOT here:
-   the sweep already picks 3 for all three, so no tolerance saves them —
-   clear-essential-shampoo-0 and clear-jelly-mask-0 are shot on a grey gradient
-   a 3% flood cannot clear, and curl-twirl-around-cream-serum-0 has a
-   transparent cap the flood walks through at any tolerance. */
+   Four further Paul Mitchell photographs are deliberately NOT here, and must
+   not be re-cut by this script: the sweep already picks 3% for all four, so an
+   entry would be a no-op that reads like a fix. clear-essential-shampoo-0 and
+   clear-essential-conditioner-0 are compositions — a tall textured glass vase
+   beside the bottle on a grey gradient, both standing on a mirror;
+   clear-jelly-mask-0 is on the same grey gradient; curl-twirl-around-cream-
+   serum-0 has a transparent cap the flood walks straight through. Three are
+   cut with rembg (isnet-general-use for the jar, u2net for the two /clear
+   bottles), keeping only the largest alpha blob to drop the vase and cutting
+   the reflection at the contact line (y=901); the serum keeps its earlier
+   rembg cut. */
 const OVERRIDE = Object.fromEntries([
   "paul-mitchell-awapuhi-conditioner-0",
   "paul-mitchell-awapuhi-shampoo-0",

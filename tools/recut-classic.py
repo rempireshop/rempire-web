@@ -52,17 +52,22 @@ OVERRIDE.update({k: 3 for k in [
     "paul-mitchell-super-smooth-shampoo-0",
 ]})
 
-# Three more Paul Mitchell photographs were damaged and have been restored from
-# the rembg-era blobs in git (6a9a649), but they are NOT in the dict above and
-# this dict cannot protect them: the sweep already picks 3 for all three, so the
-# tolerance is not what is wrong.
-#   clear-essential-shampoo-0, clear-jelly-mask-0 — shot on a grey gradient,
-#     corner srgb(205,210,214) / srgb(211,211,211); a 3% flood cannot clear it
-#     and the whole backdrop survives into the cutout.
+# DO NOT re-cut these four with this script — no tolerance saves them, and the
+# versions in public/shop/img are not this script's output:
+#   clear-essential-shampoo-0, clear-essential-conditioner-0 — compositions,
+#     a tall textured glass vase beside the bottle on a grey gradient
+#     (corner srgb(205,210,214) / srgb(206,208,220)) and both standing on a
+#     mirror. A corner flood has one tolerance and the backdrop has many, so
+#     the whole scene survives into the cutout.
+#   clear-jelly-mask-0 — grey gradient again, srgb(211,211,211).
 #   curl-twirl-around-cream-serum-0 — clear plastic cap on white; the flood
-#     walks through the transparent cap at any tolerance.
-# Re-running this script would break those three again. They need a different
-# mask (rembg, or a hand cut), not a different number.
+#     walks straight through the transparent cap at any tolerance.
+# Three of them are cut with rembg instead (isnet-general-use for the jar,
+# u2net for the two /clear bottles), keeping only the largest alpha blob to
+# drop the vase and cutting the mirror reflection at the contact line — the
+# narrowest row near the base, y=901 for both bottles. The serum keeps its
+# earlier rembg cut. The sweep already picks 3% for all four, so putting them
+# in OVERRIDE above would be a no-op that reads like a fix.
 
 merch = set((SP / "merch-ids.txt").read_text().split())
 
