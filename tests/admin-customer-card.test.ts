@@ -16,7 +16,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
-import { recordLogin, updateCustomer } from "@/lib/customers";
+import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin, updateCustomer } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
 import { customerOrdersAdmin } from "@/lib/loyalty";
 import { createOrder, setOrderStatus } from "@/lib/orders";
@@ -216,5 +216,73 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     const route = await import("@/app/api/admin/customers/[id]/route");
     const res = await route.GET(new Request(`${BASE}/api/admin/customers/${EMAIL}/`), { params: Promise.resolve({ id: EMAIL }) });
     expect(res.status).toBe(401);
+  });
+});
+
+/**
+ * Dim, 13.09.2026 — the leak this file was reopened for: «dim.novare@gmail.com
+ * and info@diipsolutions.eu seem to be able to see same reviews». Two of his
+ * own addresses, one display name on both, and each card showed the other's
+ * reviews.
+ *
+ * The reproduction goes through the real write path, POST /api/reviews/, with
+ * each address's own signed `rmp_cust` cookie on the request — proof that the
+ * shop knew who was writing and the card matched on the name anyway.
+ */
+describe("a review belongs to the person who wrote it, not to a namesake", () => {
+  const MINE = "dim.novare@example.com";
+  const THEIRS = "info@diipsolutions.example.com";
+  /* one name, two mailboxes — what the shop owner had, and what any two
+     «Мария Тамм» in a real customer list have */
+  const SHARED = "Dim Novare";
+
+  const MINE_TEXT = "Мой отзыв: беру третий раз, пенится хорошо и запах не бьёт в нос.";
+  const THEIRS_TEXT = "Чужой отзыв: флакон маловат для такой цены, но продукт хороший.";
+  const GUEST_TEXT = "Отзыв гостя: заказывал без кабинета, доставили быстро и целым.";
+
+  /** Files a review the way the storefront does; `email` null = a guest, no session. */
+  async function file(email: string | null, productId: string, text: string, ip: string) {
+    const route = await import("@/app/api/reviews/route");
+    const headers: Record<string, string> = { "content-type": "application/json", "x-forwarded-for": ip };
+    if (email) headers.cookie = `${CUSTOMER_COOKIE}=${makeCustomerToken(email)}`;
+    const res = await route.POST(
+      new Request(`${BASE}/api/reviews/`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ product: productId, name: SHARED, rating: 5, text, lang: "RU", consent: true }),
+      }),
+    );
+    const body = (await res.json()) as { ok: boolean; id?: string };
+    expect(body.ok, `the review from ${email ?? "a guest"} was refused`).toBe(true);
+    return body.id ?? "";
+  }
+
+  async function twoCustomersOneName() {
+    const mine = await recordLogin(MINE, "RU");
+    const theirs = await recordLogin(THEIRS, "RU");
+    await updateCustomer(MINE, { name: SHARED });
+    await updateCustomer(THEIRS, { name: SHARED });
+    return { mine, theirs };
+  }
+
+  it("does not put one customer's review on another customer's card", async () => {
+    const { mine, theirs } = await twoCustomersOneName();
+    await file(MINE, first.id, MINE_TEXT, "203.0.113.21");
+    await file(THEIRS, second.id, THEIRS_TEXT, "203.0.113.22");
+
+    const ours = await card(mine.id);
+    expect(ours.status).toBe(200);
+    expect(ours.body.reviews.map((r) => r.text)).toEqual([MINE_TEXT]);
+
+    const other = await card(theirs.id);
+    expect(other.body.reviews.map((r) => r.text)).toEqual([THEIRS_TEXT]);
+  });
+
+  it("keeps a guest review off every card that shares its name", async () => {
+    const { mine, theirs } = await twoCustomersOneName();
+    await file(null, first.id, GUEST_TEXT, "203.0.113.23");
+
+    expect((await card(mine.id)).body.reviews).toEqual([]);
+    expect((await card(theirs.id)).body.reviews).toEqual([]);
   });
 });
