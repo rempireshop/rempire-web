@@ -601,7 +601,13 @@ test.describe("admin — the small forms say when they are saved", () => {
     await expect(btn).toBeEnabled();
     await expect(page.locator("[data-admnoteacts]")).toContainText("Не сохранено");
 
-    // a background render must not wipe the draft — force one through the assistant pane
+    /* A background render must not wipe the draft — force one through the
+       assistant pane. The note box has to give up focus first: since the
+       mobile pass, `body.adm-typing` takes the assistant's button off the
+       screen while a field is focused, so that it stops landing on the form
+       the owner is filling in. The draft is what is being tested, and it
+       survives a blur as much as a render. */
+    await box.blur();
     await page.locator(".adm-fab").click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     await page.locator(".adm-asst__fold").click();
