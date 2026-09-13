@@ -8302,6 +8302,35 @@
     var b = bundleById(id);
     return b && setsOn() && b.active !== false ? b : null;
   }
+  /* ---- what a set's parts are worth right now -----------------------------
+     `it.stock` and `b.stock` are a SNAPSHOT: the server computes them when
+     /api/bundles/ is asked, and this file asks exactly once, at boot. The
+     live per-product stock arrives on the other feed (/api/overrides/ →
+     DEMO.stock → applyDemoOverrides() → CATALOGUE), which every product card
+     and product page already reads. So a product taken off sale in the admin
+     showed «нет в наличии» on its own page and «В корзину» on the set that
+     contains it, until the whole page was reloaded — Renat, 13.09.2026.
+     Reading the catalogue here instead of the snapshot makes the two agree on
+     every screen and on every navigation, with no extra request. The snapshot
+     is still the fallback, for a part the catalogue does not carry (a set
+     built from a product that has since been hidden). */
+  function bundleItemStock(it) {
+    var p = bundleItemProduct(it);
+    return (p && p.stock) || it.stock || "in";
+  }
+  /** The worst of them — the same rule the server applies (worstStock() in
+      src/lib/bundles.ts): one part missing and the set cannot be assembled. */
+  function bundleStock(b) {
+    var items = (b && b.items) || [];
+    if (!items.length) return b && b.stock ? b.stock : "out";
+    var worst = "in";
+    for (var i = 0; i < items.length; i++) {
+      var s = bundleItemStock(items[i]);
+      if (s === "out") return "out";
+      if (s === "low") worst = "low";
+    }
+    return worst;
+  }
   /* The API knows what a set costs; only the browser knows what it looks
      like — photos live in the catalogue, not on the server. So every set that
      arrives is topped up here with the fields the shop draws from: the photo
@@ -8332,7 +8361,7 @@
      shop on the shopper's next load. A 503/404/offline answer leaves S.bundles
      null and the static file in charge — never an empty «Наборы». */
   function loadBundles() {
-    return apiJson("/api/bundles/").then(function (r) {
+    return apiJson("/api/bundles/", FEED_FETCH).then(function (r) {
       if (r.status !== 200 || r.body.ok !== true || !Array.isArray(r.body.bundles)) return;
       var fresh = hydrateBundles(r.body.bundles);
       /* The route answers with the sets ON SALE. A set missing from it — the
@@ -8390,7 +8419,7 @@
     }).join("") + "</span>";
   }
   function bundleCardHTML(b) {
-    var out = b.stock === "out";
+    var out = bundleStock(b) === "out";
     // the same two rows as a product card (cardFootInnerHTML): the price —
     // here with the crossed-out sum of the parts — and «В корзину» under it,
     // so a grid that mixes sets and products keeps one rhythm
@@ -8421,7 +8450,7 @@
   function bundlesForCatalog() {
     if (S.brand || S.subcat || S.brandFilter.length || S.onlyInStock) return [];
     return allBundles().filter(function (b) {
-      return b.stock !== "out" && (S.cat === "all" || b.cat === S.cat);
+      return bundleStock(b) !== "out" && (S.cat === "all" || b.cat === S.cat);
     }).slice(0, 4);
   }
   function bundleGridHTML(list, title) {
@@ -8474,7 +8503,7 @@
         '<p class="muted">Возможно, его больше нет в продаже.</p>' +
         '<p><button class="link" data-go="bundles">Все наборы</button></p></section></div>';
     }
-    var out = b.stock === "out";
+    var out = bundleStock(b) === "out";
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / ' +
         esc(bundleTitle(b)) + "</div>" +
@@ -8491,10 +8520,18 @@
           '<div class="sec__head sec__head--sub"><h2 class="sec__title">Что внутри</h2></div>' +
           '<div class="bitems">' + b.items.map(function (it) {
             var p = bundleItemProduct(it);
+            /* Which one is missing, on its own line. The sentence under the
+               list says a part is gone; it never said WHICH, so the shopper
+               had to open all three products to find out — Renat, 13.09.2026.
+               The word is the same chip the product card and the product page
+               use, so it needs no new dictionary key and reads the same
+               everywhere. */
+            var gone = bundleItemStock(it) === "out";
             return '<div class="bitem"><span class="bitem__ph">' +
                 '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
               '<button class="bitem__nm" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
                 (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") + "</button>" +
+              (gone ? '<span class="chip chip--out bitem__out" data-bitemout="' + esc(it.id) + '">нет в наличии</span>' : "") +
               '<span class="num bitem__pr">' + eur(it.price) + "</span></div>";
           }).join("") + "</div>" +
           (out
@@ -9583,7 +9620,7 @@
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
 
         // features: sets sit between the two product rails and the categories
-        bundleGridHTML(allBundles().filter(function (b) { return b.stock !== "out"; }).slice(0, 4), "Наборы") +
+        bundleGridHTML(allBundles().filter(function (b) { return bundleStock(b) !== "out"; }).slice(0, 4), "Наборы") +
 
         /* The gift card is not a set, and «Наборы» was the only place it was
            reachable from — which is the last place someone shopping for a
@@ -11555,24 +11592,30 @@
     q = String(q || "");
     return q.length > 60 ? q.slice(0, 60) + "…" : q;
   }
-  function screenSearch() {
+  /* Everything on the search screen EXCEPT its input. Its own function, and
+     its own box in the markup, because the input must outlive every keystroke
+     — see patchSearch() below. */
+  function searchResultsHTML() {
     var res = searchResults();
+    return !S.query.trim()
+      // every chip must actually return something — «воск» returned nothing
+      // because the catalogue has no wax
+      ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
+      : res.length
+        ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
+        : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
+          '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
+          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
+          // content: the contact line follows «Настройки → Контент» like the
+          // footer does — this was the last place still printing the Gmail
+          '<p class="muted">Напишите нам — поможем подобрать замену: ' +
+            [cPhoneHTML("link"), cMailHTML("link")].filter(Boolean).join(" · ") + "</p></div>";
+  }
+  function screenSearch() {
     return '<div class="wrap"><section class="sec">' +
       '<h1 class="display h1">Поиск</h1>' +
       '<input class="input input--box searchbox" data-search2 value="' + esc(S.query) + '" placeholder="Что ищете?" aria-label="Поиск">' +
-      (!S.query.trim()
-        // every chip must actually return something — «воск» returned nothing
-        // because the catalogue has no wax
-        ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
-        : res.length
-          ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
-          : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
-            '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
-            '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
-            // content: the contact line follows «Настройки → Контент» like the
-            // footer does — this was the last place still printing the Gmail
-            '<p class="muted">Напишите нам — поможем подобрать замену: ' +
-              [cPhoneHTML("link"), cMailHTML("link")].filter(Boolean).join(" · ") + "</p></div>") +
+      '<div data-searchres>' + searchResultsHTML() + "</div>" +
       "</section></div>";
   }
 
@@ -24596,6 +24639,19 @@
      (see the boot at the end of the file). */
   var bootHeld = false;
 
+  /* The two public feeds — /api/overrides/ and /api/bundles/ — are sent with
+     `public, s-maxage=30, stale-while-revalidate=120`. s-maxage is for the
+     edge; what that leaves the BROWSER is a response with no freshness
+     lifetime of its own and a 120-second stale-while-revalidate window, so
+     Chrome hands the page its saved copy and revalidates behind it. A normal
+     visit could therefore open the shop on prices and stock up to two minutes
+     old, and only a hard reload — which sends `cache-control: no-cache` —
+     showed the truth. That is exactly what the owner saw: a set whose product
+     he had just taken off sale kept its «В корзину» until Ctrl+R (13.09.2026).
+     `no-store` is on the REQUEST only: the edge cache still answers most of
+     these, so a burst of shoppers still costs one query — only this browser's
+     own stale copy is taken out of the path. */
+  var FEED_FETCH = { cache: "no-store" };
   function apiJson(url, opts) {
     return fetch(url, opts || {}).then(function (res) {
       var ct = res.headers.get("content-type") || "";
@@ -24719,7 +24775,7 @@
   }
 
   function loadServerOverrides() {
-    return apiJson("/api/overrides/").then(function (r) {
+    return apiJson("/api/overrides/", FEED_FETCH).then(function (r) {
       SRV.on = r.status !== 404;
       if (r.status !== 200 || r.body.ok !== true) return;
       adoptServer(r.body);
@@ -25351,6 +25407,33 @@
      and the shop has a perfectly good static copy to draw until this lands
      (see allBundlesRaw()). */
   loadBundles();
+
+  /* ---- …and again when the shopper comes back ------------------------------
+     Both feeds above are read once, at boot, and a phone keeps a tab alive
+     for days. The shop the owner had open while he switched a product off in
+     the panel went on offering it — and the set built from it went on
+     offering «В корзину» — until the page was loaded again by hand. A tab
+     that becomes visible again, and a page restored from the back/forward
+     cache (which is a live page with its old memory, not a new load), re-ask.
+
+     Not oftener than every 30 seconds: that is exactly how long both answers
+     are cached at the edge anyway, so flicking between two tabs costs
+     nothing. And not on the admin or the scanner: those screens carry
+     half-typed forms, and they have loaders of their own. */
+  var feedsAt = Date.now();
+  var FEEDS_TTL = 30000;
+  function refreshFeeds() {
+    if (S.screen === "admin" || S.screen === "scan") return;
+    var now = Date.now();
+    if (now - feedsAt < FEEDS_TTL) return;
+    feedsAt = now;
+    loadServerOverrides();
+    loadBundles();
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") refreshFeeds();
+  });
+  window.addEventListener("pageshow", function (e) { if (e.persisted) refreshFeeds(); });
 
   /* ---- features: mirror one editor change to the server ---------------------
      The demo layer is what the prototype shows; product_overrides is what the
@@ -27041,6 +27124,11 @@
            redraws the account screen too, and a field that saves itself when
            it is left has to be left by the shopper, not by the rebuild */
         : af.hasAttribute("data-acctf") ? '[data-acctf="' + af.getAttribute("data-acctf") + '"]'
+        /* The search screen's box. Typing in it no longer renders at all
+           (patchSearch), but a background answer landing mid-word still
+           does — and that one must not leave the shopper's caret on the
+           floor either. */
+        : af.hasAttribute("data-search2") ? "[data-search2]"
         : null;
       if (!sel) return;
       refocusSel = sel;
@@ -27483,6 +27571,32 @@
     patchBlock("[data-co-summary]", summaryBlockHTML(), was);
   }
 
+  /* The search screen's own box, typed into on a phone. The same problem as
+     the checkout's fields above, with the worst ending of the three: every
+     keystroke used to rebuild the whole screen, which destroyed the very
+     <input> the shopper was typing into, and the focus() that followed put
+     the caret back on a BRAND-NEW node. A browser only raises the on-screen
+     keyboard for an element that asks for it during the tap that focused it —
+     hand focus to a replacement node and the keyboard folds away. Renat,
+     13.09.2026: typing «rasvased » (the space is the keystroke that did it)
+     and clearing the field both put the keyboard away mid-search.
+
+     So the input is never rewritten: it sits outside [data-searchres], and
+     typing repaints only the results underneath it. Nothing is focused,
+     blurred or re-created here at all, which is the whole point — the caret,
+     the selection, the composition state of an IME and the keyboard are all
+     simply left alone. setHead() because the title carries the query, and
+     patchHeader() because the header's own search box mirrors it. */
+  function patchSearch() {
+    if (S.screen !== "search") { render(); return; }
+    var box = bodySlot.querySelector("[data-searchres]");
+    if (!box) { render(); return; }
+    box.innerHTML = searchResultsHTML();
+    translateTree(box);
+    patchHeader();
+    setHead();
+  }
+
   function patchCatalog() {
     // The drawer footer must update on every path, including the ones that
     // fall through to a full render — otherwise it freezes at a stale count.
@@ -27920,7 +28034,7 @@
     // cart is a different question — see bundleById()'s note.
     var b = shownBundleById(bid);
     if (!b) return;
-    if (b.stock === "out") { toast("Набор сейчас не собрать — товар закончился"); return; }
+    if (bundleStock(b) === "out") { toast("Набор сейчас не собрать — товар закончился"); return; }
     var id = "bundle:" + b.id, line = null;
     S.cart.forEach(function (l) { if (l.type === "bundle" && l.id === id) line = l; });
     if (line) line.qty = Math.min(9, line.qty + 1);
@@ -28117,7 +28231,19 @@
       // «Сбросить» inside the drawer keeps the drawer open so you can keep
       // filtering; the chip row's version closes nothing because none is open.
       if (d.clearfilter !== "keep") S.filterOpen = false;
-      if (S.filterOpen) { ovlKey = ""; render(); } else render();
+      /* The pane stays open, so it must stay PUT. `ovlKey = ""` used to be
+         here to force the overlay to be rebuilt with the boxes unticked —
+         and a rebuilt .drawer replays `animation: slideIn` (styles.css), so
+         every «Сбросить» looked like the pane had closed and opened itself
+         (Renat, 13.09.2026). The boxes are unticked in place instead; that
+         is all the rebuild was ever for. patchCatalog() does the rest — the
+         «Показать N товаров» label and the grid behind — exactly as it does
+         when a brand box is ticked by hand. */
+      if (S.filterOpen) {
+        var boxes = ovl.querySelectorAll("[data-brand],[data-instock]");
+        for (var bx = 0; bx < boxes.length; bx++) boxes[bx].checked = false;
+        patchCatalog();
+      } else render();
       return;
     }
     if (d.unbrand !== undefined) {
@@ -30114,12 +30240,12 @@
       render();
       scheduleSearchTrack();   // analytics agent — debounced, see near esc()
     } else if (t.matches("[data-search2]")) {
+      /* No render(), no focus(), no setSelectionRange(): patchSearch() leaves
+         this very input node standing, so the caret and the phone's keyboard
+         stay where the shopper put them. See patchSearch()'s own comment. */
       S.query = t.value;
-      var pos = t.selectionStart;
       navTo(true);
-      render();
-      var n = document.querySelector("[data-search2]");
-      if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+      patchSearch();
       scheduleSearchTrack();   // analytics agent
     } else if (t.matches("[data-email]")) {
       S.email = t.value;
