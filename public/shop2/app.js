@@ -1567,8 +1567,8 @@
       "Салон": "Salong",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Tegelikud jäägid — mitu tükki on tegelikult laos. Skaneerige triipkood, et võtta kaup vastu või kanda maha müük.",
-      "📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
-        "📱 Avage /shop2/admin/ telefonis ja lisage avakuvale — tekib eraldi ikoon «Админка» (pood paigaldub oma ikooniga «Rempire»): Safaris — «Jaga» → «Lisa avakuvale»; Chrome’is — menüü (⋮) → «Installi rakendus».",
+      "Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "Avage /shop2/admin/ telefonis ja lisage avakuvale — tekib eraldi ikoon «Админка» (pood paigaldub oma ikooniga «Rempire»): Safaris — «Jaga» → «Lisa avakuvale»; Chrome’is — menüü (⋮) → «Installi rakendus».",
       "Войдите в панель, чтобы видеть склад.": "Logige paneeli sisse, et näha laoseisu.",
       "Сканировать": "Skaneeri",
       "Найти товар, бренд, EAN…": "Otsi toodet, brändi, EAN…",
@@ -4100,8 +4100,8 @@
       "Салон": "Salon",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Real stock levels — how many units are actually on the shelf. Scan a barcode to receive goods or log a sale.",
-      "📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
-        "📱 Open /shop2/admin/ on your phone and add it to the home screen — you get a separate «Админка» icon (the shop installs with its own «Rempire» icon): in Safari — Share → Add to Home Screen; in Chrome — menu (⋮) → Install app.",
+      "Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "Open /shop2/admin/ on your phone and add it to the home screen — you get a separate «Админка» icon (the shop installs with its own «Rempire» icon): in Safari — Share → Add to Home Screen; in Chrome — menu (⋮) → Install app.",
       "Войдите в панель, чтобы видеть склад.": "Sign in to the panel to see the stock.",
       "Сканировать": "Scan",
       "Найти товар, бренд, EAN…": "Find a product, brand, EAN…",
@@ -14911,10 +14911,35 @@
     var series = (o && o.revenueByDay) ||
       (ANALYTICS["7d"] && ANALYTICS["7d"].data && ANALYTICS["7d"].data.revenueByDay) || [];
     var top = series.reduce(function (a, r) { return Math.max(a, r.revenue); }, 0) || 1;
-    var bars = series.slice(-7).map(function (r, i, all) {
-      return '<i class="' + (i === all.length - 1 ? "is-today" : "") + '" style="height:' +
-        Math.max(2, Math.round((r.revenue / top) * 100)) + '%"></i>';
-    }).join("");
+    /* Seven bars, always. The server's query groups by day and therefore
+       returns ONLY the days that had an order (src/lib/analytics.ts,
+       qRevenueByDay) — so with Renat's three or four orders a month the strip
+       was two or three bars stretched by `flex: 1` across the whole column,
+       and with one order it was a single black slab an inch wide. That is not
+       a week: it is the shape of the query. Seven slots are laid out here,
+       from six days ago to today, and the rows are dropped into the slot that
+       matches their day; a day with no order keeps its 2-px floor, which is
+       what «nothing came in on Tuesday» is supposed to look like. The slot
+       keys are UTC calendar days (toISOString), which is how the server names
+       its own — as long as the database runs on UTC, as the deployment does.
+       On a machine whose database session is an hour zone east of UTC (a dev
+       box in Tallinn) the server's `isoDay` prints local midnight as a UTC
+       instant and so names today «yesterday»: the bar is then one slot to the
+       left. That is a fault in isoDay, not here, and a row can never fall off
+       the strip because of it. */
+    var byDay = {};
+    series.forEach(function (r) { byDay[String(r.day).slice(0, 10)] = r.revenue; });
+    /* still nothing at all (the summary has not landed): no strip, as before —
+       seven flat bars would be an answer the panel does not have yet */
+    var bars = "", d0 = Date.now();
+    if (series.length) {
+      for (var bi = 6; bi >= 0; bi--) {
+        var key = new Date(d0 - bi * 864e5).toISOString().slice(0, 10);
+        var rev = byDay[key] || 0;
+        bars += '<i class="' + (bi === 0 ? "is-today" : "") + '" style="height:' +
+          Math.max(2, Math.round((rev / top) * 100)) + '%"></i>';
+      }
+    }
 
     return '<div class="adm-screen">' +
       admHead(admDateLine(), "Обзор", shipN
@@ -17693,7 +17718,16 @@
       }, NEWS_LANG_NOTE[L] || NEWS_LANG_NOTE.RU) +
       '<p class="adm-hint adm-hint--warn" data-newsdirty' + (newsDirty() ? "" : " hidden") + ">" +
         "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
-      '<input class="adm-title-in" data-newsf="title" maxlength="120" placeholder="Название — для вас, покупатель его не увидит" value="' + esc(d.title) + '">' +
+      /* The word in the box, the sentence under it. `.adm-title-in` is 24 px
+         Oswald on a phone, so «Название — для вас, покупатель его не увидит»
+         fitted as far as «покупатель е» and stopped — and a placeholder is
+         gone the moment the first letter is typed, which is exactly when the
+         owner still wants to know whose name this is. The blog's editor has
+         carried the short word and the same shape all along; this is the
+         sentence moved to where every other explanation in the panel lives. */
+      '<input class="adm-title-in" data-newsf="title" maxlength="120" placeholder="Название" ' +
+        'aria-label="Название" value="' + esc(d.title) + '">' +
+      '<p class="adm-hint">Название — для вас, покупатель его не увидит</p>' +
       '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
         '<input class="adm-input" data-newsf="subject" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
@@ -18520,14 +18554,21 @@
     if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadAnalytics("7d"); }
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Подключения", "") +
+      /* `--lines`, like every other list in the panel (admin.css § «one shape
+         for every list»). It was a bare `.adm-row`, which on a phone puts the
+         name and «Написать Диму» in one wrapping line — and the name is what
+         gave way: «Приём оплат · Mont…», «Google Search Cons…», and by 33 px
+         in Estonian. Which service is broken is the one thing this screen
+         exists to say. As a `--lines` row the name owns the full width and
+         the button takes the row under it, exactly as an order's actions do. */
       '<div class="adm-list">' + admIntegrationRows().map(function (r) {
-        return '<div class="adm-row adm-row--tall">' +
+        return '<div class="adm-row adm-row--tall adm-row--lines">' +
           // three states, not two: green = working, grey = known to be off but
           // not broken (the assistant with no model), red = something is wrong
           '<span class="adm-dot' + (r.ok ? (r.quiet ? " adm-dot--off" : "") : " adm-dot--warn") + '" aria-hidden="true"></span>' +
           '<span class="adm-row__body"><span class="adm-row__nm">' + r.name + "</span>" +
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
-          r.act + "</div>";
+          (r.act ? '<span class="adm-acts">' + r.act + "</span>" : "") + "</div>";
       }).join("") + "</div>" +
       '<p class="adm-hint">Если что-то красное и непонятно — напишите Диму. ' +
         "Ссылка на эту страницу уже в письме.</p>" +
@@ -22360,10 +22401,13 @@
         /* Two files, the same rows. XLSX first because it is the one that
            just opens — Dim, 13.09.2026: «An excel would be better, CSV hard to
            read»; the CSV stays for anything that reads a file rather than
-           opens it. Both words are already in the dictionary («Отчёты»
-           downloads the same pair). */
-        '<a class="adm-link" href="/api/admin/customers/?format=xlsx" target="_blank" rel="noopener">Скачать XLSX</a>' +
-        '<a class="adm-link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
+           opens it. «Отчёты» downloads the very same pair and now draws it the
+           very same way — filled XLSX, ghost CSV, in that order (r16: it had
+           the pair as two underlined words here and as two buttons in the
+           other order there). A download is an action, and `.adm-link` in this
+           panel means a word: a way back, or a quiet second thought. */
+        '<a class="adm-btn adm-btn--row" href="/api/admin/customers/?format=xlsx" target="_blank" rel="noopener">Скачать XLSX</a>' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
         '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">' +
@@ -24410,7 +24454,7 @@
       if (window.navigator && window.navigator.standalone) return "";
       if (localStorage.getItem("rmp-pwa-hint-dismissed") === "1") return "";
     } catch (e) {}
-    return '<div class="adm-note" data-pwahint><span>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
+    return '<div class="adm-note" data-pwahint><span>Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
       '<button class="adm-link adm-link--muted" data-pwahintclose>Скрыть</button></div>';
   }
   /* «привязано 12 из 348» — where the first pass over the shelves has got to.
@@ -27523,9 +27567,13 @@
                 admPlainKpi("Выручка", eur(sum.revenue)) + admPlainKpi("НДС", eur(sum.vat)) + "</div>"
               : '<div class="adm-empty" style="margin:0">За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.</div>')
           : SRV.admin === true ? '<div class="adm-skel" style="margin:0"><i></i><i></i></div>' : "") +
+        /* The same pair as «Клиенты», drawn the same way and in the same
+           order: XLSX filled and first because it is the one that just opens
+           (Dim, 13.09.2026), CSV ghost behind it. It used to be CSV first and
+           a size larger than every other button that sits in a row. */
         '<div class="adm-acts">' +
-          '<button class="adm-btn" data-admreportdl="csv">Скачать CSV</button>' +
-          '<button class="adm-btn adm-btn--ghost" data-admreportdl="xlsx">Скачать XLSX</button></div>' +
+          '<button class="adm-btn adm-btn--row" data-admreportdl="xlsx">Скачать XLSX</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreportdl="csv">Скачать CSV</button></div>' +
       "</div>";
   }
   /* «Клиенты → Отзывы»: what the journal line calls each of the three states.
@@ -29209,6 +29257,11 @@
       // a <details> the owner opened by hand stays open across renders — the
       // markup never carries `open`, so removing it here would snap it shut
       if (a.name === "open" && from.tagName === "DETAILS") continue;
+      /* data-sx is measured, not written: admScrollers() puts it on a chip
+         row or a tab row to say which ends still have something behind them,
+         and it is never in the markup — so stripping it here would take the
+         fade off on every render and put it back a tick later. */
+      if (a.name === "data-sx") continue;
       if (!to.hasAttribute(a.name)) from.removeAttribute(a.name);
     }
     for (i = 0; i < to.attributes.length; i++) {
@@ -29503,6 +29556,13 @@
        (admVvFollow, beside admBarTouch). Run here because the sheet
        opening or closing is a render, not a viewport event. */
     if (S.screen === "admin" || admVvH) admVvFollow();
+    /* …and the root says the panel is what is on screen, because that is
+       where `scroll-padding` lives: what the browser scrolls a focused field
+       to has to clear the PANEL's header and the PANEL's bar, not the shop's
+       (admin.css § «what the browser scrolls a focused field to»). */
+    document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
+    if (S.screen === "admin") admScrollers();   // which way each strip scrolls
+    else document.body.classList.remove("adm-typing");
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
     // …and, if this is the first screen that wants the assistant at all, the
     // widget's <script> is fetched now rather than at boot (mountChat above)
@@ -33625,6 +33685,93 @@
     window.visualViewport.addEventListener("resize", admVvFollow);
     window.visualViewport.addEventListener("scroll", admVvFollow);
   }
+
+  /* ---------- the keyboard, and what stands in front of it -----------------
+     The assistant's sheet has been sized to the visual viewport since r14
+     (admVvFollow above), and the scanner's manual field since the scanner
+     was written (scanFitViewport). Every OTHER field in the panel — and that
+     is every field in the editor, on the six settings pages, in the promo
+     form, the letters, the warehouse — is on an ordinary scrolling page, and
+     two things sit over the bottom of that page while the keys are up: the
+     bar and the assistant's button. `body.adm-typing` takes both away for as
+     long as a field has the keyboard; admin.css (≤ 899) is where they go.
+
+     A blur straight into the next field fires focusout BEFORE that field's
+     focusin, so the decision waits a tick — otherwise the bar flashes back
+     between two fields of the same form. */
+  function admTyping(el) {
+    if (S.screen !== "admin" || !el || el.nodeType !== 1) return false;
+    if (el.isContentEditable) return true;
+    var tag = el.tagName;
+    if (tag === "TEXTAREA" || tag === "SELECT") return true;
+    if (tag !== "INPUT") return false;
+    /* checkbox, radio, button, file and colour open no keyboard; everything
+       else does (date/month open iOS's wheel, which covers the bar too). */
+    return !/^(checkbox|radio|button|submit|reset|file|color|image|range|hidden)$/
+      .test((el.getAttribute("type") || "text").toLowerCase());
+  }
+  function admTypingSync() {
+    document.body.classList.toggle("adm-typing", admTyping(document.activeElement));
+  }
+  document.addEventListener("focusin", admTypingSync);
+  document.addEventListener("focusout", function () { setTimeout(admTypingSync, 0); });
+
+  /* ---------- a strip that scrolls sideways says which way -----------------
+     One place for every chip row and every tab row in the panel. Two jobs:
+
+     · which ends still have something behind them — `data-sx`, which the mask
+       in admin.css reads. Measured, never written into the markup, which is
+       why admMorphAttrs is told to leave it alone;
+     · and the pane the owner is on is IN the strip rather than past its edge.
+       That second one is what makes «Рассылка», the fourth of four tabs on
+       «Маркетинг», findable at all on a 375-px screen: it used to sit past
+       the right edge with nothing saying so.
+
+     The strip is moved only when the thing that is current CHANGES (`__admsx`
+     remembers which), so a background fetch landing — and on this screen one
+     lands every few seconds — can never yank a strip back from where the
+     owner's thumb left it. And it is moved the least it can be: just far
+     enough to bring the current pane wholly inside, plus 12 px so a neighbour
+     still shows. Parking it at a fixed offset instead would scroll strips
+     that were already showing everything they needed to. */
+  function admEdges(el) {
+    var l = el.scrollLeft > 1;
+    var r = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    var v = (l ? "l" : "") + (l && r ? " " : "") + (r ? "r" : "");
+    if (el.getAttribute("data-sx") !== v) el.setAttribute("data-sx", v);
+  }
+  function admScrollers() {
+    var els = document.querySelectorAll(".adm2 .adm-chips, .adm2 .adm-tabs");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (!el.__admsxOn) {
+        el.__admsxOn = 1;
+        el.addEventListener("scroll", function () { admEdges(this); }, { passive: true });
+      }
+      var on = el.querySelector('[aria-current="true"]');
+      var key = on ? (on.textContent || "").trim() : "";
+      if (el.__admsx !== key) {
+        el.__admsx = key;
+        if (on) {
+          var box = el.getBoundingClientRect(), item = on.getBoundingClientRect();
+          /* Where the current pane sits inside the strip, not on the screen —
+             so the answer does not depend on where the strip happens to be
+             scrolled. If it fits with the strip at its head, put it back
+             there: the row then reads from the first pane, and a scroll
+             position inherited from the screen before (the panel is
+             morph-patched, so a tab row and a chip row can be the same
+             element) cannot leave «Аналитика» opened 15 px in. */
+          var from = item.left - box.left + el.scrollLeft;
+          if (from + item.width <= el.clientWidth) el.scrollLeft = 0;
+          else if (item.right > box.right - 0.5) el.scrollLeft += Math.ceil(item.right - box.right) + 12;
+          else if (item.left < box.left + 0.5) el.scrollLeft += Math.floor(item.left - box.left) - 12;
+        }
+      }
+      admEdges(el);
+    }
+  }
+  window.addEventListener("resize", function () { if (S.screen === "admin") admScrollers(); });
+
   /* Enter in a one-line box of the panel's small forms presses that form's
      own button. None of them is a <form>, so Enter used to do nothing — which
      on a phone keyboard reads as «не сохранилось». Each row: the boxes, and

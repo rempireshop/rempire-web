@@ -271,6 +271,63 @@
 .adm-tab[aria-current="true"] { font-weight: 600; color: var(--a-ink); border-bottom-color: var(--a-ink); }
 .adm-tab__warn { color: var(--a-warn); }
 
+/* ---------- a strip that scrolls sideways says which way -------------------
+   Renat, 13.09.2026, on his phone. Both strips above scroll, and neither said
+   so: the cut fell on the text column's own edge, 20 px inside the screen, so
+   it read as a broken box rather than as «there is more». Measured at 375 px:
+   the five chips of «Заказы» need 112 px more than there is, «Клиенты» 148,
+   the four tabs of «Маркетинг» 92 — which hides «Рассылка» outright — and the
+   editor's five tabs 178, so with «Google» open «Основное» has gone off the
+   LEFT. The fade therefore has to be able to sit on either end, which is the
+   one thing the shop's own scrolling row does not need.
+
+   Otherwise this IS the shop's answer, borrowed whole: `.hdr__nav` in
+   styles.css fades its right edge with a mask so the scroll reads. app.js
+   (admScrollers) measures each strip after every paint and writes
+   `data-sx="l" | "r" | "lr"` — the ends that still have something behind
+   them — so a strip that fits keeps a hard edge and is left alone. `lr` is
+   last on purpose: same specificity as the two single-sided rules, so the
+   later one wins when both would match.
+
+   Phone only. A desktop has room for every chip and every tab. */
+@media (max-width: 899px) {
+  .adm2 .adm-chips[data-sx~="r"], .adm2 .adm-tabs[data-sx~="r"] {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .adm2 .adm-chips[data-sx~="l"], .adm2 .adm-tabs[data-sx~="l"] {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px);
+    mask-image: linear-gradient(90deg, transparent, #000 28px);
+  }
+  .adm2 .adm-chips[data-sx="l r"], .adm2 .adm-tabs[data-sx="l r"] {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  }
+}
+
+/* ---------- what the browser scrolls a focused field to ---------------------
+   styles.css sets `html { scroll-padding: … }` from the SHOP's header and the
+   SHOP's bottom nav, and the panel is the same document, so it inherited
+   them: 168 px above a 59-px header, and 66 px below a bar that is 64 px plus
+   the phone's home-indicator inset — 98 px on an iPhone 14. Measured on the
+   running panel: the last field of the editor's «Google» and «Описание» tabs
+   comes to rest 2 px above the bar on a runner whose inset is zero, which is
+   32 px UNDER it on the owner's phone. That is «the keyboard covers what I am
+   typing into», and it is one rule, not a screen's worth of them: every form
+   in the panel is scrolled by the same root.
+
+   The panel's own two numbers, on the panel's own root class (app.js writes
+   `html.adm2-on` beside the `html.adm-saving` it already wrote). 899, not
+   767: that is where the bottom bar appears. The `html.adm-saving` rule far
+   below overrides the top half while a save bar is the phone's header — same
+   specificity, later in the file, which is what makes it win. */
+@media (max-width: 899px) {
+  html.adm2-on {
+    scroll-padding-top: calc(var(--cohdrh, 62px) + 12px);
+    scroll-padding-bottom: calc(var(--a-barh) + 16px);
+  }
+}
+
 /* ---------- badges -------------------------------------------------------- */
 
 .adm-badge {
@@ -395,7 +452,11 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas: "thumb body amt" "thumb line line";
   }
-  .adm-row--lines > .adm-thumb { grid-area: thumb; margin-right: 12px; }
+  /* «Подключения» has a 10-px state dot where a list with pictures has its
+     thumbnail — same column, same job: the mark the eye reads first. Named
+     here too, because a child of a grid with named areas and no area of its
+     own is auto-placed into a row of its own below them. */
+  .adm-row--lines > .adm-thumb, .adm-row--lines > .adm-dot { grid-area: thumb; margin-right: 12px; }
   .adm-row--lines > .adm-row__body { grid-area: body; }
   .adm-row--lines > .adm-row__amt { grid-area: amt; margin-left: 12px; line-height: 20px; }
   .adm-row--lines > .adm-row__line { grid-area: line; }
@@ -817,6 +878,27 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   /* the toast owns the strip above the bar while it is up */
   body.adm-toasting .adm-fab { bottom: calc(var(--a-barh) + 88px); }
   .adm-fab__lbl { display: none; }
+  /* ---- the assistant's button gets out of the keyboard's way ---------------
+     It is the one fixed thing in the panel that floats OVER a form rather
+     than under it: `.adm-page` reserves the bar's height at its foot, so the
+     bar can never cover a field, while the button is pinned to the bottom
+     right of the screen with whatever is scrolled beneath it. And index.html
+     asks the browser for `interactive-widget=resizes-content`, so on Chrome
+     for Android the layout viewport shrinks when the keys come up and the
+     button lands squarely on the form.
+
+     Nobody opens the assistant in the middle of typing a price, so while a
+     field of the panel has the keyboard it is not drawn, and it is back on
+     blur. `display`, exactly as `body.adm-saving` already takes it away while
+     a save bar is the phone's header — a button that is merely transparent is
+     still a button a thumb can land on. app.js sets the class from
+     focusin/focusout.
+
+     The bar stays. On iOS it is under the keyboard and out of the way
+     already, and taking it away as well would make «the nav is at the bottom
+     of the screen» (e2e/admin-editor.spec.ts) false for as long as a field is
+     focused — that is a layout promise this panel means to keep. */
+  body.adm-typing .adm-fab { display: none; }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
   /* A thumb, not a pointer: every control the phone shows is at least 44 px
