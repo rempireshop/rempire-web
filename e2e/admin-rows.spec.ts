@@ -269,3 +269,89 @@ test.describe("admin — one shape per list on the phone", () => {
     }
   });
 });
+
+/**
+ * The whole row opens, except the controls on it.
+ *
+ * Renat, 12.09.2026, on «Заказы»: only the words of a row opened the order.
+ * The row also carries a «Доставлен» (or «Создать этикетку · Отправлен»), and
+ * everything from that button to the right edge answered nothing at all — on a
+ * phone that is half of what a thumb lands on. Since round 15 the opener sits
+ * on the row itself (`data-admrowopen`, app.js admRowOpenAttr) and the click
+ * delegate hands a real button, link or field its own tap first.
+ *
+ * Phone only, because the dead patch is the phone's: on a desktop the same DOM
+ * is one line and the actions end where the row does.
+ */
+test.describe("admin — a list row opens from anywhere but its buttons", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(232) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the dead patch is under the actions line, which only a phone draws");
+  });
+
+  test("«Заказы»: the chip, the sum and the blank beside «Отправлен» all open the order", async ({ page }) => {
+    test.setTimeout(180_000);
+
+    // one paid order, so the row has both its actions and something to open
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    const number = await payOrder(page, freshEmail("rowtap"), "paid");
+
+    await loginAsAdmin(page);
+    await adminSection(page, "orders");
+    await page.locator('[data-admfilter="all"]').click();
+    const row = page.locator("#orderlist .adm-row--lines").filter({ hasText: number }).first();
+    await expect(row).toBeVisible();
+    const card = page.locator('[data-admorder=""]');
+
+    /** Opens the card from `where`, then shuts it again with its own «←». */
+    async function opensFrom(where: Locator, what: string, position?: { x: number; y: number }) {
+      await where.click(position ? { position } : undefined);
+      await expect(card, `${what} did not open the order`).toBeVisible();
+      await card.click();                       // «← Заказы»
+      await expect(card).toHaveCount(0);
+      await expect(row).toBeVisible();
+    }
+
+    await opensFrom(row.locator(".adm-row__line"), "the chip line");
+    await opensFrom(row.locator(".adm-row__amt"), "the sum");
+
+    // the blank after the last action — the patch the owner reported
+    const acts = row.locator(".adm-acts");
+    await expect(acts).toBeVisible();
+    const box = (await acts.boundingBox())!;
+    await opensFrom(acts, "the blank beside the actions", { x: box.width - 6, y: box.height / 2 });
+
+    // …and the action itself is still the action, not a way into the card
+    await row.locator("[data-admshipnow]").click();
+    await expect(page.locator(".adm-confirm"), "«Отправлен» stopped asking").toBeVisible();
+    await expect(card, "«Отправлен» opened the order card as well").toHaveCount(0);
+    await page.locator("[data-admcancel]").click();
+    await expect(page.locator(".adm-confirm")).toHaveCount(0);
+  });
+
+  test("«Письма»: the gap between the switch and «Изменить» opens the letter", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "promos", "mail");
+
+    const sw = page.locator('[data-admflow="backstock"]');
+    const row = page.locator(".adm-row--lines").filter({ has: sw }).first();
+    await expect(row).toBeVisible();
+    const was = await sw.getAttribute("aria-checked");
+    const line = row.locator(".adm-row__line--split");
+    const box = (await line.boundingBox())!;
+    // dead centre of the split line: the switch is at its left end, «Изменить»
+    // at its right, and what is between them belonged to nobody
+    await line.click({ position: { x: box.width / 2, y: box.height / 2 } });
+    await expect(page.locator("[data-mailback]"), "the gap on the letter's row opened nothing").toBeVisible();
+    await page.locator("[data-mailback]").click();
+    // …and the letter itself was not switched on the way in
+    await expect(sw).toBeVisible();
+    await expect(sw, "the gap flipped the letter's switch").toHaveAttribute("aria-checked", was ?? "false");
+  });
+});

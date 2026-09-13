@@ -171,6 +171,17 @@
 .adm-cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
 .adm-cols--wide { grid-template-columns: minmax(0, 1fr) 360px; }
 @media (max-width: 1180px) { .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
+/* Two fields that belong together — «Скидка, €» and «Минимальный заказ» on the
+   promo form. It used to be `.adm-cols` with the two columns written into a
+   style attribute, which beats any media query: on a phone that left each
+   field 140 px, where one label wrapped to two lines and the other did not, so
+   the two boxes started at different heights and the pair read as two
+   different fields (Renat, 12.09.2026, iPhone 14). Side by side while there is
+   room for the words above the boxes; under 768 px they stack, full width,
+   exactly like every other pair in the panel. (`--formpair`, not `--pair`:
+   `.adm-pair` down in the order card is the flex «name · value» line.) */
+.adm-formpair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+@media (max-width: 767px) { .adm-formpair { grid-template-columns: minmax(0, 1fr); } }
 .adm-stack { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
 .adm-stack--tight { gap: 16px; }
 

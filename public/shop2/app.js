@@ -482,6 +482,8 @@
         "Sooduskood salvestatud",
       "Промокод включён или выключен":
         "Sooduskood sisse või välja lülitatud",
+      "Промокод удалён":
+        "Sooduskood kustutatud",
       "Набор сохранён":
         "Komplekt salvestatud",
       "Набор показан или скрыт":
@@ -942,7 +944,11 @@
       "Промокод сохранён ✓": "Sooduskood salvestatud ✓",
       "Промокод включён ✓": "Sooduskood sisse lülitatud ✓",
       "Промокод выключен ✓": "Sooduskood välja lülitatud ✓",
+      "Промокод удалён ✓": "Sooduskood kustutatud ✓",
       "Не получилось сохранить промокод.": "Sooduskoodi ei õnnestunud salvestada.",
+      "Не получилось удалить промокод": "Sooduskoodi ei õnnestunud kustutada",
+      "Код уже использован — его можно только выключить":
+        "Koodi on juba kasutatud — selle saab ainult välja lülitada",
       "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
         "Kood võib sisaldada ainult ladina tähti, numbreid ja sidekriipsu — kuni 24 märki.",
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
@@ -2282,6 +2288,9 @@
       "Промокодов пока нет": "Sooduskoode veel pole",
       "«Использован» считается только после оплаты — брошенная корзина код не тратит.":
         "«Kasutatud» loetakse alles pärast tasumist — pooleli jäänud ostukorv koodi ei kuluta.",
+      "Удалить можно только код, которым ещё не пользовались: использованный остаётся в истории заказов, его можно выключить.":
+        "Kustutada saab ainult koodi, mida keegi pole veel kasutanud: kasutatud kood jääb tellimuste ajalukku, selle saab välja lülitada.",
+      "Удалить промокод?": "Kas kustutada sooduskood?",
       "Что даёт промокод": "Mida sooduskood annab",
       "Скидка не нужна — код просто делает доставку бесплатной.":
         "Soodustust pole vaja — kood teeb tarne lihtsalt tasuta.",
@@ -2886,6 +2895,8 @@
         "Promo code saved",
       "Промокод включён или выключен":
         "Promo code switched on or off",
+      "Промокод удалён":
+        "Promo code deleted",
       "Набор сохранён":
         "Set saved",
       "Набор показан или скрыт":
@@ -3343,7 +3354,11 @@
       "Промокод сохранён ✓": "Promo code saved ✓",
       "Промокод включён ✓": "Promo code switched on ✓",
       "Промокод выключен ✓": "Promo code switched off ✓",
+      "Промокод удалён ✓": "Promo code deleted ✓",
       "Не получилось сохранить промокод.": "The promo code could not be saved.",
+      "Не получилось удалить промокод": "The promo code could not be deleted",
+      "Код уже использован — его можно только выключить":
+        "The code has already been used — it can only be switched off",
       "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
         "A code may contain only Latin letters, digits and a hyphen — up to 24 characters.",
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
@@ -4668,6 +4683,9 @@
       "Промокодов пока нет": "No promo codes yet",
       "«Использован» считается только после оплаты — брошенная корзина код не тратит.":
         "“Used” counts only after payment — an abandoned cart does not spend the code.",
+      "Удалить можно только код, которым ещё не пользовались: использованный остаётся в истории заказов, его можно выключить.":
+        "Only a code nobody has used yet can be deleted: a used one stays in the order history and can be switched off.",
+      "Удалить промокод?": "Delete the promo code?",
       "Что даёт промокод": "What the code gives",
       "Скидка не нужна — код просто делает доставку бесплатной.":
         "No discount needed — the code simply makes delivery free.",
@@ -5018,6 +5036,11 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
+    /* «Удалить промокод?» — the code on its own line, then the one fact that
+       makes the answer easy. One text node, like every other confirm card. */
+    [/^([^\n]+)\nИм ещё никто не пользовался — код просто исчезнет\.$/,
+      { ET: "$1\nKeegi pole seda veel kasutanud — kood lihtsalt kaob.",
+        EN: "$1\nNobody has used it yet — the code simply goes." }],
     /* «Написать клиенту» → «Отправить»: the confirm card's own two lines —
        the order and the address, then the warning. One text node either way,
        and the letter itself is drawn in the card's preview box below it. */
@@ -13818,6 +13841,13 @@
     try { d = new Date().toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long" }); } catch (e) { d = ""; }
     return d ? d.charAt(0).toUpperCase() + d.slice(1) : "";
   }
+  /** The marker on a row whose body is a button and whose right half is not
+      (`.adm-row--open`): a tap on the row's own blank — the chip line, the
+      sum, the space beside the actions — is passed to the body button, which
+      stays the one element carrying the opener. The row's real controls keep
+      their tap. Renat, 12.09.2026 — see «a list row that opens» in the click
+      delegate, which is where all of that happens. */
+  var ADM_ROW_OPEN = " data-admrowopen";
   /** The screen's own header: a muted kicker, the Oswald title, and whatever
       one action belongs at the top right. */
   function admHead(kicker, title, right, kickerMono) {
@@ -14118,8 +14148,10 @@
        card), the chip has the third line, the sum the top right, and the
        actions a full-width line under everything on a phone — the same
        place on every row, whether the row offers «Создать этикетку» and
-       «Отправлен», one «Чек ↗» or nothing (admin.css, .adm-row--lines). */
-    return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+       «Отправлен», one «Чек ↗» or nothing (admin.css, .adm-row--lines).
+       The wrapper opens the card too (ADM_ROW_OPEN): the chip, the sum and
+       the blank beside the actions were dead until round 15. */
+    return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
       '<button class="adm-row__body adm-row--click" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
       '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span>" +
@@ -15649,7 +15681,7 @@
     return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
-      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
@@ -17899,6 +17931,7 @@
     "mail.send": "Письмо клиенту отправлено",
     "setting.set": "Настройка изменена",
     "promo.set": "Промокод сохранён", "promo.active": "Промокод включён или выключен",
+    "promo.delete": "Промокод удалён",
     "bundle.set": "Набор сохранён", "bundle.active": "Набор показан или скрыт",
     "bundle.delete": "Набор удалён", "bundle.reorder": "Порядок наборов изменён",
     "customer.created": "Новый клиент", "customer.partner_added": "Добавлен партнёр",
@@ -19494,7 +19527,9 @@
         return '<button class="adm-chip" data-promokind="' + k[0] + '" aria-current="' + (f.kind === k[0]) + '">' +
           k[1] + "</button>";
       }).join("") + "</div>" +
-      '<div class="adm-cols" style="grid-template-columns:1fr 1fr;gap:12px">' +
+      // one pair of fields, side by side on a desk and stacked on a phone —
+      // see .adm-formpair in admin.css for the 140-px columns it replaces
+      '<div class="adm-formpair">' +
         (f.kind === "free_shipping"
           ? '<div class="adm-hint">Скидка не нужна — код просто делает доставку бесплатной.</div>'
           : '<label class="adm-field">' + (f.kind === "fixed" ? "Скидка, € — до 200" : "Скидка, % — от 1 до 90") +
@@ -19532,17 +19567,32 @@
       (list.length
         ? '<div class="adm-list">' + list.map(function (p) {
             var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
-            return '<div class="adm-row adm-row--tall adm-row--open">' +
+            /* The same three lines as «Письма» (admin.css, .adm-row--lines):
+               the code, the grey line of conditions, and a third line with the
+               switch on the left and «Удалить» on the right. The row itself
+               opens the form, edge to edge (ADM_ROW_OPEN). */
+            return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
               '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
                 '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
-              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
-              "</div>";
+              '<span class="adm-row__line adm-row__line--split">' +
+                admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
+                /* A used code has no «Удалить»: it is on somebody's order, and
+                   the line under the list says so. The server holds the same
+                   rule whatever this row believes (deletePromo). */
+                (admPromoUsed(p)
+                  ? ""
+                  : '<button class="adm-link adm-link--muted" data-admpromodel="' + esc(p.code) + '">Удалить</button>') +
+              "</span></div>";
           }).join("") + "</div>"
         : (S.admPromos ? '<div class="adm-empty">Промокодов пока нет</div>' : '<div class="adm-skel"><i></i><i></i></div>')) +
       '<p class="adm-hint" style="margin-top:12px">«Использован» считается только после оплаты — ' +
-        "брошенная корзина код не тратит.</p>";
+        "брошенная корзина код не тратит.</p>" +
+      '<p class="adm-hint">Удалить можно только код, которым ещё не пользовались: использованный ' +
+        "остаётся в истории заказов, его можно выключить.</p>";
   }
+  /** Has anybody paid with this code? The one question «Удалить» turns on. */
+  function admPromoUsed(p) { return Number(p.used) > 0; }
   /** «использован 14» / «использован 14 из 50» — one string for the i18n check. */
   function admPromoUsedLine(p) {
     return "использован " + p.used + (p.maxUses ? " из " + p.maxUses : "");
@@ -19583,12 +19633,61 @@
       render();
     }).catch(function () { savePromo._busy = false; S.promoFormErr = "Сервер не отвечает."; render(); });
   }
+  /** One code in the loaded list, by its code — the list is replaced whole by
+      every reload, so a row held across a request would go stale. */
+  function admPromoByCode(code) {
+    return (S.admPromos || []).filter(function (x) { return x.code === code; })[0] || null;
+  }
+  /* The switch answers the thumb, not the network. Renat, 12.09.2026:
+     «включаю промокод — переключатель доходит через секунду-две». It was two
+     round trips — the PATCH, and then a full reload of the list before
+     anything moved. The row is flipped here and now, the PATCH follows it, and
+     a refusal puts the switch back where it was and says so with the toast
+     that was always there. */
   function togglePromoActive(code, active) {
+    var row = admPromoByCode(code);
+    var was = row ? row.active : !active;
+    if (row) { row.active = !!active; render(); }
+    function undo() {
+      var back = admPromoByCode(code);
+      if (back) { back.active = was; render(); }
+    }
     apiSend("/api/admin/promos/", "PATCH", { code: code, active: active }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; undo(); render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        // the server's own word, in case it knows something the row did not
+        var srv = admPromoByCode(code);
+        if (srv && r.body.promo && srv.active !== (r.body.promo.active !== false)) {
+          srv.active = r.body.promo.active !== false; render();
+        }
+        toast(active ? "Промокод включён ✓" : "Промокод выключен ✓");
+        return;
+      }
+      undo(); toast("Не получилось изменить промокод");
+    }).catch(function () { undo(); toast("Сервер не отвечает"); });
+  }
+  /* «Удалить» — for a code nobody has used. The rule itself lives on the
+     server (src/lib/promos.ts deletePromo): a used code is part of an order's
+     history, so 409 comes back instead, and the row keeps its switch. */
+  function deletePromoByCode(code) {
+    if (deletePromoByCode._busy) return;   // «Да, удалить» twice is one deletion
+    deletePromoByCode._busy = true;
+    apiJson("/api/admin/promos/?code=" + encodeURIComponent(code), { method: "DELETE" }).then(function (r) {
+      deletePromoByCode._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) { toast(active ? "Промокод включён ✓" : "Промокод выключен ✓"); loadAdminPromos(true); return; }
-      toast("Не получилось изменить промокод");
-    }).catch(function () { toast("Сервер не отвечает"); });
+      if (r.status === 200 && r.body.ok) {
+        S.admPromos = (S.admPromos || []).filter(function (x) { return x.code !== code; });
+        if (S.promoForm && S.promoForm.code === code) { S.promoForm = null; S.promoFormErr = ""; }
+        journalNote("Промокод удалён: " + code);
+        toast("Промокод удалён ✓"); render(); return;
+      }
+      if (r.status === 409) {
+        // it was paid with between the list loading and this tap
+        loadAdminPromos(true);
+        toast("Код уже использован — его можно только выключить"); return;
+      }
+      toast("Не получилось удалить промокод"); render();
+    }).catch(function () { deletePromoByCode._busy = false; toast("Сервер не отвечает"); render(); });
   }
 
   /* ---------- admin: «Товары → Наборы» ------------------------------------
@@ -20266,7 +20365,7 @@
     return '<div class="adm-list">' + list.map(function (c) {
       var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
-      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '">' +
           '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
           '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
@@ -27634,6 +27733,45 @@
      layer. Closing with a button («← Заказы», «Отмена») spends the parked
      entry itself, so the next Back is never a press that does nothing. */
   var ADM_POP = false;
+  /* ---------- …and «Назад» at the top level of it -------------------------
+     Renat, 12.09.2026: cards close the way they should now, but the floor
+     they stand on does not. From «Клиенты» or «Настройки» one press left the
+     panel outright — out to the shop in a browser tab, and out of the app
+     altogether on the phone with the panel on its home screen, because a
+     standalone window opens on ONE entry and there is nothing behind it.
+
+     The thirteen sections share one address, so the browser has no history of
+     them to offer: the trail below IS that history. It is a layer like any
+     other (admLayers), so the single parked entry keeps it honest for free —
+     Back walks back through the sections the owner actually came through,
+     stops at «Обзор», the panel's own front door, and only then leaves. */
+  var ADM_TRAIL = [];   // the sections behind this one, oldest first
+  var ADM_SEEN = "";    // the section the last render drew, "" off the panel
+  /** Notices where the owner has moved to, from inside render(): S.adminTab is
+      set in two dozen places (the nav, «Обзор»'s queue rows, the assistant's
+      «Открыть …», the scanner) and none of them has to know about the trail. */
+  function admTrailSync() {
+    if (S.screen !== "admin") { ADM_SEEN = ""; return; }
+    var now = admSection();
+    if (ADM_SEEN && ADM_SEEN !== now) {
+      /* A section the trail already holds is not a step forward — it IS the
+         step being gone back to, so the trail is cut there. Otherwise «Обзор»
+         → «Клиенты» → «Обзор» would leave «Клиенты» in front of Back, and the
+         press that should leave the panel would walk into the section just
+         left instead. */
+      var at = ADM_TRAIL.indexOf(now);
+      if (at >= 0) ADM_TRAIL.length = at;
+      else ADM_TRAIL.push(ADM_SEEN);
+    }
+    ADM_SEEN = now;
+  }
+  /** One step back through the trail. ADM_SEEN is moved with it, so the
+      render that follows sees no move of its own to record. */
+  function admTrailBack() {
+    S.adminTab = ADM_TRAIL.pop() || "over";
+    ADM_SEEN = admSection();
+    window.scrollTo({ top: 0 });
+  }
   /** Is an entry parked right now? Asked of the history stack itself, because
       a flag beside it and the stack drifted apart and every drift ended the
       same way — one «Назад» too many, out of the panel. The stack loses the
@@ -27653,6 +27791,9 @@
   function admLayers() {
     if (S.screen !== "admin") return [];
     var l = [];
+    /* The floor first, so it is the last thing Back takes: a card opened
+       inside «Клиенты» closes before «Клиенты» itself gives way to «Обзор». */
+    if (ADM_TRAIL.length) l.push("section");
     if (S.adminEdit) l.push("edit");
     else if (S.adminOrder) l.push("order");
     else if (S.admCustOpen) l.push("customer");
@@ -27676,7 +27817,8 @@
   function admCloseTop() {
     var top = admLayers().pop();
     if (!top) return false;
-    if (top === "scan") closeScannerState();
+    if (top === "section") admTrailBack();
+    else if (top === "scan") closeScannerState();
     else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
     else if (top === "blog") { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; }
@@ -27694,6 +27836,10 @@
   /** One parked entry while anything is open, none while nothing is. Called
       from every render(), so no opener has to remember to call it. */
   function admSyncHistory() {
+    /* Where the owner is, before anything is decided about the stack — a
+       section he has just moved to is a layer, and the lines below are the
+       only ones that park and spend entries for layers. */
+    admTrailSync();
     /* A history.back() of our own is still on its way. history.back() is
        asynchronous: until its popstate arrives the stack has not moved, so
        everything below would read the entry we are already spending and spend
@@ -28063,9 +28209,32 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
+      return;
+    }
+    /* ---- a list row that opens: the whole tile, minus its controls --------
+       Renat, 12.09.2026, on «Заказы»: only the words of a row opened the
+       order. The row also carries a «Доставлен», and everything from that
+       button to the right edge answered nothing at all — on a phone that is
+       half of what the thumb lands on.
+
+       A tap on the row's own blank — the chip line, the sum, the space beside
+       the actions — is handed to the row's body button, which stays the ONE
+       element carrying the opener: repeating `data-admorder` on the wrapper
+       would have made every `[data-admorder="…"]` in the panel and in the
+       suite match two elements.
+
+       The controls on the row keep their own tap and their own target. One
+       with an attribute of its own is already what `closest` hands back — it
+       is nearer than the row — and the check below is for the ones that carry
+       none: «Чек ↗» is a plain link, and a field or a label is neither. */
+    if (t.hasAttribute("data-admrowopen")) {
+      var rowCtl = e.target.closest("button,a,input,label,select,textarea");
+      if (rowCtl && rowCtl !== t && t.contains(rowCtl)) return;
+      var rowBody = t.querySelector(".adm-row__body");
+      if (rowBody) rowBody.click();
       return;
     }
     var d = t.dataset;
@@ -29086,6 +29255,8 @@
         if (pa.type === "set_bundle") { applySetBundle(pa); return; }
         // …and a set deleted: the same DELETE the editor's «Да, удалить» sends
         if (pa.type === "delete_bundle") { applyDeleteBundle(pa); return; }
+        // a promo code nobody has used: the server keeps the rule, not this card
+        if (pa.type === "delete_promo") { deletePromoByCode(pa.code); return; }
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
@@ -29644,6 +29815,20 @@
     }
     if (d.admpromosave !== undefined) { savePromo(); return; }
     if (d.admpromocancel !== undefined) { S.promoForm = null; S.promoFormErr = ""; render(); return; }
+    /* «Удалить» — the one thing on this screen that cannot be taken back, so
+       it asks first, like every other irreversible action in the panel. The
+       card names the code, because a list of codes all look alike. */
+    if (d.admpromodel) {
+      var delP = admPromoByCode(d.admpromodel);
+      if (!delP || admPromoUsed(delP)) return;
+      pendingAction = {
+        type: "delete_promo", overlay: true, danger: true, code: delP.code,
+        title: "Удалить промокод?",
+        detail: delP.code + "\nИм ещё никто не пользовался — код просто исчезнет.",
+        ok: "Да, удалить"
+      };
+      render(); refocus("[data-admapply]"); return;
+    }
     if (d.admpromotoggle) {
       var cur = (S.admPromos || []).filter(function (x) { return x.code === d.admpromotoggle; })[0];
       togglePromoActive(d.admpromotoggle, !(cur && cur.active));

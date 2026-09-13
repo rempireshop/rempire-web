@@ -292,9 +292,11 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
        The panel is one URL, and Back used to leave it altogether with the
        editor still open. Dim answered «yes, make Back close the card»
        (docs/audit/2026-09-07-admin.md), so the first Back now closes the
-       editor and stays in «Товары»; the second really does leave. What has to
-       hold either way is that nothing breaks and that the half-typed price
-       never reached the shop. */
+       editor and stays in «Товары»; the presses after it walk back out
+       through the sections this test came in through (round 15, app.js
+       ADM_TRAIL) and the last of them leaves. What has to hold either way is
+       that nothing breaks and that the half-typed price never reached the
+       shop. */
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     // «Сохранить» carries the open product's id — it is on both editors, the
@@ -306,7 +308,14 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel too").toBeVisible();
     await assertClean(page, w, "goods: Back closes an open editor");
-    // …and the next one leaves the panel for the shop it came from
+    /* …and the next ones hand «Товары» back to «Заказы», «Заказы» back to
+       «Обзор», and only then leave the panel for the shop it came from */
+    await page.goBack();
+    await expect(page.locator("[data-admorderq]"),
+      "Back did not hand «Товары» back to «Заказы»").toBeVisible();
+    await page.goBack();
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "Back did not hand «Заказы» back to «Обзор»").toBeVisible();
     await page.goBack();
     await waitForScreen(page, "home");
     await assertClean(page, w, "goods: Back out of the panel");

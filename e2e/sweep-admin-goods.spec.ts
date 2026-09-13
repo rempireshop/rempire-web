@@ -500,8 +500,10 @@ test.describe("sweep — promo codes", () => {
     await assertClean(shopper, sw, "checkout refused the disabled code");
     await shopper.close();
 
-    // Leave nothing switched on behind us — there is no DELETE for promos by
-    // design (src/app/api/admin/promos), so «выключен» is the clean-up.
+    /* Leave nothing switched on behind us. DELETE exists since round 15, but
+       only for a code nobody has used (src/app/api/admin/promos, deletePromo)
+       — and this pair was offered at a checkout, so «выключен» stays the
+       clean-up here. e2e/admin-promos.spec.ts is where the delete is tested. */
     await page.locator(`[data-admpromotoggle="${expired}"]`).click();
     await clearToast(page);
     await assertClean(page, w, "promos left disabled");
