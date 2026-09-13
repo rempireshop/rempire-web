@@ -929,7 +929,7 @@ export async function upsertPartner(input: PartnerInput): Promise<PartnerResult 
   };
 }
 
-/* ---------- admin: CSV export ----------------------------------------------- */
+/* ---------- admin: the «Клиенты» export ------------------------------------- */
 
 /**
  * Excel and LibreOffice treat a cell that opens with =, +, @, a tab or a CR as
@@ -952,6 +952,9 @@ function csvCell(v: unknown): string {
   return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
+/** The numbers, as numbers — the three columns Excel should be able to sum. */
+const NUMERIC_HEADS = new Set(["ordersCount", "revenue", "pointsBalance"]);
+
 const CSV_HEAD = [
   "email",
   "name",
@@ -971,30 +974,69 @@ const CSV_HEAD = [
   "lastLoginAt",
 ];
 
-/** \r\n line endings and a leading BOM — Excel opens this correctly on the first try. */
+/** One customer as one row, in CSV_HEAD's order — both exports read this. */
+function customerCells(r: AdminCustomerRow): Array<string | number> {
+  return [
+    r.email,
+    r.name,
+    r.phone,
+    r.tier,
+    r.marketing ? "yes" : "no",
+    r.marketingAt ?? "",
+    r.marketingSource ?? "",
+    r.company ?? "",
+    r.regCode ?? "",
+    r.ordersCount,
+    r.revenue,
+    r.pointsBalance,
+    r.createdAt ?? "",
+    r.lastLoginAt ?? "",
+  ];
+}
+
+/**
+ * `;` between the cells, not `,`: Excel on an Estonian or Russian Windows —
+ * this shop's own admin — splits a double-clicked .csv on the regional «list
+ * separator», which is `;` in both, so a comma-separated file put every
+ * column into cell A and read as one long line. Dim, 13.09.2026: «An excel
+ * would be better, CSV hard to read» — that is what he was looking at. The
+ * accountant's export next door has been `;` all along (ordersToCsv in
+ * src/lib/reports.ts) and opens properly, which is what says this was the
+ * difference.
+ *
+ * BOM first so Cyrillic names are not mojibake, \r\n line endings. Nothing
+ * here is Excel-only: `;` is a legal delimiter, every other reader that is
+ * told the separator (LibreOffice and Numbers ask on open, pandas/csv take a
+ * `delimiter=";"`) reads the same file.
+ */
 export function customersToCsv(rows: AdminCustomerRow[]): string {
-  const lines = [CSV_HEAD.join(",")];
-  for (const r of rows) {
-    lines.push(
-      [
-        r.email,
-        r.name,
-        r.phone,
-        r.tier,
-        r.marketing ? "yes" : "no",
-        r.marketingAt ?? "",
-        r.marketingSource ?? "",
-        r.company ?? "",
-        r.regCode ?? "",
-        r.ordersCount,
-        r.revenue,
-        r.pointsBalance,
-        r.createdAt ?? "",
-        r.lastLoginAt ?? "",
-      ]
-        .map(csvCell)
-        .join(","),
-    );
-  }
+  const lines = [CSV_HEAD.map(csvCell).join(";")];
+  for (const r of rows) lines.push(customerCells(r).map(csvCell).join(";"));
   return "﻿" + lines.join("\r\n") + "\r\n";
+}
+
+/**
+ * The same table as a real .xlsx — «An excel would be better» (Dim,
+ * 13.09.2026). No separator to get wrong, no locale to guess, Cyrillic by
+ * construction, and the three number columns arrive as numbers so a sum works
+ * without re-typing the column.
+ *
+ * No new dependency: the OOXML writer is the repo's own, the one the
+ * accountant's report already uses (buildXlsx in src/lib/reports.ts). The CSV
+ * above stays exactly where it was for anything that reads files rather than
+ * opens them.
+ */
+export async function customersToXlsx(rows: AdminCustomerRow[]): Promise<Buffer> {
+  /* Dynamic, like the other optional neighbours in this file: the pricing and
+     loyalty maths is imported on hot paths (every basket priced) and has no
+     business pulling node:zlib in with it for an export nobody asked for yet. */
+  const { buildXlsx } = await import("@/lib/reports");
+  const cells = rows.map((r) =>
+    customerCells(r).map((v, i) => {
+      if (!NUMERIC_HEADS.has(CSV_HEAD[i])) return defuseFormula(String(v ?? ""));
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    }),
+  );
+  return buildXlsx("Клиенты", CSV_HEAD, cells);
 }

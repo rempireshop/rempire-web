@@ -480,8 +480,12 @@ const CONTENT_TYPES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"
 const ROOT_RELS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
 
-const WORKBOOK_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Orders" sheetId="1" r:id="rId1"/></sheets></workbook>`;
+/** Excel's own rules for a tab name: at most 31 characters, none of []*?/\ */
+function workbookXml(sheetName: string): string {
+  const name = xmlEscape(String(sheetName || "Sheet1").replace(/[[\]*?/\\:]/g, " ").trim().slice(0, 31) || "Sheet1");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${name}" sheetId="1" r:id="rId1"/></sheets></workbook>`;
+}
 
 const WORKBOOK_RELS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
@@ -489,18 +493,32 @@ const WORKBOOK_RELS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"
 const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>`;
 
+/**
+ * One sheet, a header row and the rows under it, as a real .xlsx — the whole
+ * OOXML package, still without a dependency. Any export that has a flat table
+ * can use it: the accountant's orders below, and «Клиенты» (customersToXlsx
+ * in src/lib/loyalty.ts), which is what Dim asked for on 13.09.2026 — «an
+ * excel would be better, CSV hard to read».
+ *
+ * A number in a cell is written as a number, so Excel sums it without anyone
+ * re-typing the column; a string stays a string, which is why an order number
+ * or a phone keeps its leading zero.
+ */
+export function buildXlsx(sheetName: string, headers: string[], rows: Array<Array<string | number>>): Buffer {
+  return buildZip([
+    { name: "[Content_Types].xml", data: Buffer.from(CONTENT_TYPES_XML, "utf8") },
+    { name: "_rels/.rels", data: Buffer.from(ROOT_RELS_XML, "utf8") },
+    { name: "xl/workbook.xml", data: Buffer.from(workbookXml(sheetName), "utf8") },
+    { name: "xl/_rels/workbook.xml.rels", data: Buffer.from(WORKBOOK_RELS_XML, "utf8") },
+    { name: "xl/styles.xml", data: Buffer.from(STYLES_XML, "utf8") },
+    { name: "xl/worksheets/sheet1.xml", data: Buffer.from(sheetXml(headers, rows), "utf8") },
+  ]);
+}
+
 export function ordersToXlsx(rows: ReportOrderRow[]): Buffer {
   const headers = REPORT_COLUMNS.map(([, h]) => h);
   const dataRows = rows.map((r) =>
     REPORT_COLUMNS.map(([key]) => (NUMERIC_COLUMNS.has(key) ? Number(r[key]) : String(r[key] ?? ""))),
   );
-  const sheet = sheetXml(headers, dataRows);
-  return buildZip([
-    { name: "[Content_Types].xml", data: Buffer.from(CONTENT_TYPES_XML, "utf8") },
-    { name: "_rels/.rels", data: Buffer.from(ROOT_RELS_XML, "utf8") },
-    { name: "xl/workbook.xml", data: Buffer.from(WORKBOOK_XML, "utf8") },
-    { name: "xl/_rels/workbook.xml.rels", data: Buffer.from(WORKBOOK_RELS_XML, "utf8") },
-    { name: "xl/styles.xml", data: Buffer.from(STYLES_XML, "utf8") },
-    { name: "xl/worksheets/sheet1.xml", data: Buffer.from(sheet, "utf8") },
-  ]);
+  return buildXlsx("Orders", headers, dataRows);
 }

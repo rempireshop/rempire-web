@@ -21055,6 +21055,12 @@
               (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
           }).join("") + "</div>";
         })() +
+        /* Two files, the same rows. XLSX first because it is the one that
+           just opens — Dim, 13.09.2026: «An excel would be better, CSV hard to
+           read»; the CSV stays for anything that reads a file rather than
+           opens it. Both words are already in the dictionary («Отчёты»
+           downloads the same pair). */
+        '<a class="adm-link" href="/api/admin/customers/?format=xlsx" target="_blank" rel="noopener">Скачать XLSX</a>' +
         '<a class="adm-link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +

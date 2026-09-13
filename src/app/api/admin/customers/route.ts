@@ -5,8 +5,12 @@
  * not yet decided — customers.pro_requested_at is not null and tier is
  * still 'retail'). `q` matches e-mail, name, phone or company.
  *
- * `?format=csv` answers the same rows as a CSV download instead of JSON —
- * see customersToCsv() in src/lib/loyalty.ts.
+ * `?format=csv` answers the same rows as a download instead of JSON, and
+ * `?format=xlsx` the same table as a real spreadsheet — Dim, 13.09.2026: «An
+ * excel would be better, CSV hard to read». See customersToCsv() and
+ * customersToXlsx() in src/lib/loyalty.ts; the .xlsx is written by the repo's
+ * own OOXML writer, the accountant's report's, so neither format costs a
+ * dependency.
  *
  * POST /api/admin/customers — «+ Партнёр»: create-or-promote by e-mail.
  *
@@ -25,7 +29,7 @@
 import { isEmail, normalizeEmail } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
-import { customersToCsv, listCustomersAdmin, upsertPartner } from "@/lib/loyalty";
+import { customersToCsv, customersToXlsx, listCustomersAdmin, upsertPartner } from "@/lib/loyalty";
 import { sendPartnerWelcome } from "@/lib/partner-mail";
 
 export const runtime = "nodejs";
@@ -49,7 +53,18 @@ export async function GET(req: Request) {
       limit: Number(url.searchParams.get("limit")) || undefined,
     });
 
-    if (url.searchParams.get("format") === "csv") {
+    const format = url.searchParams.get("format");
+    if (format === "xlsx") {
+      const book = await customersToXlsx(customers);
+      return new Response(new Uint8Array(book), {
+        headers: {
+          "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "content-disposition": 'attachment; filename="customers.xlsx"',
+          "cache-control": "no-store",
+        },
+      });
+    }
+    if (format === "csv") {
       return new Response(customersToCsv(customers), {
         headers: {
           "content-type": "text/csv; charset=utf-8",
