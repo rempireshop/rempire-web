@@ -28,10 +28,11 @@ Status of the policy pages in `public/shop/legal.{ru,et,en}.js`
 
 The RU and ET terms are an AI translation of the EN draft, and the EN draft is
 itself marked «DRAFT, LAWYER REVIEW BEFORE LAUNCH» at the top of `legal.en.js`.
-Nobody with an Estonian law licence has read any of the three. The page keeps
-showing the «Текст перенесён с текущего сайта; перед запуском пройдёт проверку
-юристом» note under the body (`screenInfo()` in app.js) — leave it there until
-the lawyer pass is done.
+Nobody with an Estonian law licence has read any of the three. The page used to
+carry a «Текст перенесён с текущего сайта; перед запуском пройдёт проверку
+юристом» note under the body; it is gone (13.09.2026) — Renat read it on the
+staging shop as a line addressed to the customer. The reminder that the lawyer
+pass is still owed lives here, and nowhere the shopper can see.
 
 ## Terminology used (so the lawyer can flip a term once, consistently)
 

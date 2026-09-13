@@ -227,7 +227,6 @@
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
       "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
-      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Tekst on üle toodud praeguselt saidilt; enne poe avamist vaatab selle üle jurist.",
       "Европа": "Euroopa", "Таллинн": "Tallinn",
       "Профессиональный уход": "Professionaalne hooldus",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — sellega töötab Rempire'i meeskond salongis.",
@@ -252,7 +251,10 @@
       "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, viimistlus, habe, nägu, keha, parfüümid ja merch.",
       "Под эти фильтры ничего не подошло.": "Nende filtritega ei leidnud ühtegi toodet.",
       "Сначала дешевле": "Soodsamad ees", "Сначала дороже": "Kallimad ees",
-      "Поделиться": "Jaga", "Купить через": "Osta kohe —", "Другие способы оплаты": "Teised makseviisid",
+      /* «Купить через» is followed by the Google Pay mark, not by words, so it
+         takes no dash: with one the button read «Osta kohe — [G Pay]» where RU
+         and EN read «Купить через [G Pay]» / «Buy now with [G Pay]». */
+      "Поделиться": "Jaga", "Купить через": "Osta kohe", "Другие способы оплаты": "Teised makseviisid",
       "С этим покупают": "Sellega ostetakse koos",
       "Реквизиты": "Ettevõtte andmed", "Связаться": "Võta ühendust",
       // content: footer «Часы работы» and the rebuilt «Контакты» page
@@ -704,6 +706,8 @@
       "Короткое поздравление": "Lühike õnnesoov", "С днём рождения!": "Palju õnne sünnipäevaks!",
       "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.":
         "Kaart kehtib aasta ostupäevast. Jääk säilib: seda saab kulutada mitme tellimusega.",
+      // the short form of the same promise, under the gift-card line in the cart
+      "Действует год со дня покупки": "Kehtib aasta ostupäevast",
       "Подарочная карта в корзине ✓": "Kinkekaart on ostukorvis ✓",
       "Проверьте e-mail получателя": "Kontrolli saaja e-posti aadressi",
       /* features: an all-gift-card checkout — step 2 is «Получатель», there is
@@ -2639,7 +2643,6 @@
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Delivery is calculated at checkout.",
       "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
-      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Text carried over from the current site; a lawyer reviews it before launch.",
       "Европа": "Europe", "Таллинн": "Tallinn",
       "Профессиональный уход": "Professional care",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — what the Rempire team works with in the salon.",
@@ -3105,6 +3108,8 @@
       "Короткое поздравление": "A short message", "С днём рождения!": "Happy birthday!",
       "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.":
         "The card is valid for a year from purchase. The balance is kept: it can be spent over several orders.",
+      // the short form of the same promise, under the gift-card line in the cart
+      "Действует год со дня покупки": "Valid for a year from purchase",
       "Подарочная карта в корзине ✓": "Gift card added to your cart ✓",
       "Проверьте e-mail получателя": "Check the recipient's e-mail",
       /* features: an all-gift-card checkout — step 2 is «Получатель», there is
@@ -6019,10 +6024,13 @@
     if (ctx.hoursHTML) contactRows.push("<p><b>" + t("Часы работы") + "</b><br>" + ctx.hoursHTML + "</p>");
     var contact = '<div class="dlv__contact">' + contactRows.join("") +
       "<p>" + ctx.link("contact", tr("Все контакты")) + "</p></div>";
+    /* No «текст перенесён с текущего сайта, юрист ещё посмотрит» note under
+       the policy: it was an internal reminder to ourselves, and the shop owner
+       read it on the live staging shop as a line addressed to the customer
+       (Renat, 13.09.2026). The reminder lives in docs/legal-review.md. */
     var legal = ctx.legalHtml
       ? '<details class="dlv__legal"><summary>' + tr("Полные условия доставки") + "</summary>" +
         '<div class="legal">' + ctx.legalHtml + "</div>" +
-        (ctx.legalNote ? '<p class="note">' + tr("Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.") + "</p>" : "") +
         "</details>"
       : "";
     return '<h1 class="display h1">' + esc(ctx.title) + "</h1>" +
@@ -9160,9 +9168,15 @@
       }).join("<br>") + "</span>";
     }
     if (l.type === "gift") {
+      /* The gift page promises «карта действует год со дня покупки», and the
+         cart is where the shopper actually decides — so the promise travels
+         with the line (Renat, 13.09.2026). It is its own text node, inside its
+         own <span>: translateTree() rewrites whole nodes, and the recipient
+         line above it is the shopper's own typing, not ours. */
       var m = l.meta || {};
       var who = [m.name, m.email].filter(Boolean).join(" · ");
-      return who ? '<span class="cline__parts">' + esc(who) + "</span>" : "";
+      return '<span class="cline__parts">' + (who ? esc(who) + "<br>" : "") +
+        "<span>Действует год со дня покупки</span></span>";
     }
     return "";
   }
@@ -9726,7 +9740,6 @@
       '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
       // …and on the returns page, the one paragraph that is the shop's own
       (S.infoSlug === "returns" ? returnsAskHTML(function (s) { return s; }) : "") +
-      (ownText ? "" : '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>') +
       "</section></div>";
   }
 
@@ -9759,7 +9772,7 @@
         logos: typeof PAYLOGOS !== "undefined" ? PAYLOGOS : {}, banks: PAYMETHODS.banks,
         loyalty: LOYALTY_PUBLIC,
         link: function (slug, label) { return '<button class="link" data-page="' + slug + '">' + label + "</button>"; },
-        legalHtml: legalHtml, legalNote: !ownText
+        legalHtml: legalHtml
       }) +
       "</section></div>";
   }

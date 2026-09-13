@@ -1082,7 +1082,7 @@ function infoPage(slug, lang) {
       address: c.address, hoursHTML: contactHours(code), phoneHTML, mailHTML,
       logos: PAYLOGOS, banks: null, loyalty: LOYALTY_LIVE,
       link: (s, label) => '<a href="' + href(seg, infoRest(s)) + '">' + esc(label) + "</a>",
-      legalHtml: body, legalNote: true
+      legalHtml: body
     });
     return {
       file: path.join(SHOP2, seg, "info", slug, "index.html"),
@@ -1108,9 +1108,7 @@ function infoPage(slug, lang) {
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       (isContact ? body : '<div class="legal">' + body + "</div>" +
         // …and on the returns page, the one paragraph that is the shop's own
-        (slug === "returns" && RETURNS_ASK ? RETURNS_ASK(s => tr(s, code, false)) : "") +
-        '<p class="note" style="margin-top:22px">' +
-          esc(tr("Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.", code, false)) + "</p>") +
+        (slug === "returns" && RETURNS_ASK ? RETURNS_ASK(s => tr(s, code, false)) : "")) +
     "</section>" +
     '<ul class="pre__list">' + others + "</ul>" +
     langNav(seg, rest, t) +

@@ -1678,7 +1678,7 @@ button, a, summary, label { touch-action: manipulation; }
   font-size: 16px; color: var(--muted);
 }
 .dlv__legal[open] summary::after { content: "−"; }
-.dlv__legal > .legal, .dlv__legal > .note { padding-bottom: 16px; }
+.dlv__legal > .legal { padding-bottom: 16px; }
 @media (min-width: 768px) {
   .dlv__scroll { margin: 0; padding: 0; }
 }
@@ -1868,7 +1868,10 @@ button, a, summary, label { touch-action: manipulation; }
 .sec .sec--bundles { padding-top: 0; }
 
 .bdesc { font-size: 14.5px; line-height: 1.6; margin: 14px 0 4px; }
-.bitems { border-top: 1px solid var(--rule); margin-bottom: 20px; }
+/* No rule of its own: «Что внутри» above it is a .sec__head, which already
+   draws a full-width line under the heading. The two together read as a thick
+   black rule with a grey one stuck to it (Renat, 13.09.2026). */
+.bitems { margin-bottom: 20px; }
 .bitem {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 0; border-bottom: 1px solid var(--rule-soft);
