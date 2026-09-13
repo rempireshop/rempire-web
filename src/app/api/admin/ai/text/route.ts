@@ -113,6 +113,30 @@ function buildSignature(content: ShopContent, lang: Lang3): string {
   return lines.join("\n");
 }
 
+/**
+ * Is this tag written in the language the article is being written in?
+ *
+ * The prompt asks for the tags in that language and gets them *mostly* — a
+ * Russian article came back with «борода, зимой, beard care, balm», which is
+ * what the owner saw offered under a Russian text: «the keywords (tags)
+ * offered are in English and russian» (Renat, 12.09.2026). A tag is a
+ * reader's own search word, so a word in the wrong alphabet is not a tag for
+ * this article's reader — it is a tag for someone else's.
+ *
+ * Script, not vocabulary: a Russian tag has to carry Cyrillic, an Estonian or
+ * English one must carry none. That is a test a model cannot argue with and
+ * it never throws away a good tag — «proraso», «wood & spice» and any other
+ * Latin-script brand name stay for ET/EN and are dropped only from a Russian
+ * set, which is exactly the mixture he was shown. A tag with no letters in it
+ * at all (a number, an emoji) belongs to nobody and goes.
+ */
+const CYRILLIC = /[Ѐ-ӿ]/;
+const LATIN = /[A-Za-zÀ-ÿŠšŽžÕõÄäÖöÜü]/;
+function tagInLang(tag: string, lang: Lang3): boolean {
+  if (lang === "RU") return CYRILLIC.test(tag);
+  return LATIN.test(tag) && !CYRILLIC.test(tag);
+}
+
 /** Model JSON → the shape this task promises, nothing the model wrote left unbounded. */
 function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unknown; texts?: unknown } {
   const p = (parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}) as Record<string, unknown>;
@@ -142,7 +166,7 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
   }
   if (task === "post_full" || task === "post_translate") {
     const tags = Array.isArray(p.tags)
-      ? p.tags.map((t) => str(t, 30).toLowerCase()).filter(Boolean).slice(0, 5)
+      ? p.tags.map((t) => str(t, 30).toLowerCase()).filter(Boolean).filter((t) => tagInLang(t, lang)).slice(0, 5)
       : [];
     const out: Record<string, unknown> = {
       title: str(p.title, 200),

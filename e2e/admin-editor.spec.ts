@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { eur, ipHeaders, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { eur, ipHeaders, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -655,5 +655,287 @@ test.describe("admin — the product editor", () => {
     expect(photos[0].tag?.text, "the first photo does not say «главное»").toBe("главное");
     expect(photos[0].tag!.size, "the «главное» tag is too small to read").toBeGreaterThanOrEqual(12);
     await assertClean(page, w, "desktop photo tiles");
+  });
+});
+
+/* ==========================================================================
+   The acceptance run, 12.09.2026 — five things the owner found on his phone,
+   and what each of them turned out to be. His words are quoted on the test
+   they belong to.
+   ========================================================================== */
+
+/** A photo in the bucket, and the cut-out of it the server answers with. */
+const CUT_SRC = "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5";
+const CUT_OUT = "/shop/img/system-4-bio-botanical-serum-0.webp?v=5";
+
+/**
+ * No bucket in this suite (playwright.config.ts), so the media routes answer
+ * from here. `hold: true` keeps the cut-out in flight until release() is
+ * called — which is the whole point: on the real server a cut-out is a model
+ * round trip the route allows up to 90 seconds (src/lib/photo-cutout.ts), and
+ * what this pins is everything the owner can do to the gallery in that time.
+ */
+async function stubCutout(page: Page, opts: { hold: boolean }) {
+  const asked: string[] = [];
+  let release: (() => void) | null = null;
+  const gate = new Promise<void>((r) => { release = r; });
+  await page.route("**/api/admin/upload/**", async (route) => {
+    const r = route.request();
+    if (r.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, cutout: true, maxBytes: 12 * 1024 * 1024, maxVideoBytes: 60 * 1024 * 1024 }) });
+      return;
+    }
+    if (r.url().includes("/cutout/")) {
+      asked.push(String((r.postDataJSON() as { url?: string }).url || ""));
+      if (opts.hold) await gate;
+      await route.fulfill({ status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, key: "products/e2e/cut.png", url: CUT_OUT, thumbUrl: CUT_OUT, bytes: 10 }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json",
+      body: JSON.stringify({ ok: true, key: "products/e2e/1.webp", url: CUT_SRC, thumbUrl: CUT_SRC, width: 1, height: 1, bytes: 10, alt: "" }) });
+  });
+  return { asked, release: () => release && release() };
+}
+
+/** Every photo tile as the owner sees it: its picture, its label, and whether it says it is busy. */
+function photoState(page: Page) {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll(".adm-photo:not(.adm-photo--add)")).map((t) => ({
+      img: ((t.querySelector(".adm-photo__img") as HTMLElement | null)?.style.backgroundImage || "").replace(/^url\(['"]?|['"]?\)$/g, ""),
+      tag: (t.querySelector(".adm-photo__tag")?.textContent || "").trim(),
+      busy: t.classList.contains("adm-photo--busy"),
+    })),
+  );
+}
+
+test.describe("admin — what the acceptance run found", () => {
+  /**
+   * Renat, 12.09.2026: «Photo is loaded. When I click "remove background" and
+   * move it to main, then actually the photo which it replaced is lost — the
+   * one that I moved to main has still the background, after some time the
+   * one where the background is removed — the background is removed and it
+   * appears.»
+   *
+   * Two faults in one sentence. The cut-out was written back to the INDEX the
+   * ✂ had been pressed on, so a ★ in the meantime shifted the list under the
+   * answer: it landed on whatever photo had moved into that slot and replaced
+   * it outright — a photo gone, with nothing said. And the only sign that
+   * anything was happening at all was the ✂ buttons going grey, so the
+   * picture simply changed under him a minute later.
+   */
+  test("a cut-out that lands after the photo has been moved replaces that photo and no other, and the tile says it is being worked on", async ({ page }, ti) => {
+    test.skip(ti.project.name !== "desktop", "one gallery, one engine — the phone layout is the test below");
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const cut = await stubCutout(page, { hold: true });
+    await openAdmin(page);
+    await openEditor(page, PRODUCT_2.id);
+    await edTab(page, "media");
+    const before = await photoState(page);
+    expect(before.length, "this product needs two photos for the test to mean anything").toBeGreaterThanOrEqual(2);
+
+    // ✂ on the second photo — and, while the server works, ★ to make it the main one
+    await page.locator('[data-galcut="1"]').click();
+    await expect.poll(async () => (await photoState(page))[1].busy,
+      { message: "nothing on the tile says this photo is still being worked on" }).toBe(true);
+    expect((await photoState(page))[1].tag).toContain("Убираем фон");
+    await page.locator('[data-galmain="1"]').click();
+    const moved = await photoState(page);
+    expect(moved[0].busy, "«Убираем фон…» stayed behind on the slot instead of following the photo").toBe(true);
+    expect(moved[1].busy).toBe(false);
+
+    cut.release();
+    await expect.poll(async () => (await photoState(page))[0].img, { timeout: 20_000 }).toContain(CUT_OUT);
+    const after = await photoState(page);
+    expect(after.length, "a photo went missing while a background was being removed").toBe(before.length);
+    expect(after[1].img, "the cut-out landed on the wrong photo and replaced it").toContain(before[0].img.split("?")[0]);
+    expect(after.some((p) => p.busy), "a tile is still marked busy after the answer").toBe(false);
+    expect(cut.asked[0], "the wrong photo was sent to be cut out")
+      .toContain(before[1].img.split("?")[0].replace(/^https?:\/\/[^/]+/, ""));
+    await clearToast(page);
+    await assertClean(page, w, "a cut-out while the gallery is being reordered");
+  });
+
+  /**
+   * Renat, 12.09.2026: «The buttons and each photo have a square around them,
+   * but the buttons are overflowing there.»
+   *
+   * Five 44-px buttons and their four gaps are 236 px; the column they stand
+   * in is 235 px wide at 375. The row could neither wrap (no flex-wrap) nor
+   * shrink (flex: none), so it ran out of its own tile — and .adm2's
+   * overflow-x: clip hid the evidence instead of showing a scrollbar. The
+   * phone test further up never saw it because it does not stub the media
+   * probe, so MEDIA.cutout is false there and a tile carries four buttons.
+   */
+  test("phone: all five photo buttons stay inside their own tile, at 375 and at 360", async ({ page }, ti) => {
+    test.skip(ti.project.name !== "mobile", "the phone layout");
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await stubCutout(page, { hold: false });
+    await openAdmin(page);
+    await openEditor(page, PRODUCT_2.id);
+    await edTab(page, "media");
+
+    for (const width of [375, 360]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.waitForTimeout(150);
+      const shot = await page.evaluate(() => {
+        const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
+        return {
+          docW: document.documentElement.scrollWidth, winW: window.innerWidth,
+          tiles: Array.from(document.querySelectorAll(".adm-photo:not(.adm-photo--add)")).map((t) => {
+            const cs = getComputedStyle(t), b = t.getBoundingClientRect();
+            return {
+              // the tile's own paper, inside its padding — where its buttons belong
+              pad: { r: b.right - parseFloat(cs.paddingRight), b: b.bottom - parseFloat(cs.paddingBottom) },
+              ops: Array.from(t.querySelectorAll(".adm-photo__op")).map((o) => ({ name: o.getAttribute("aria-label") || "", ...box(o) })),
+            };
+          }),
+        };
+      });
+      expect(shot.docW, `${width}px: the panel scrolls sideways`).toBeLessThanOrEqual(shot.winW + 0.5);
+      shot.tiles.forEach((t, i) => {
+        expect(t.ops.length, `${width}px: photo ${i + 1} lost its buttons`).toBeGreaterThanOrEqual(4);
+        for (const op of t.ops) {
+          expect(op.r, `${width}px: photo ${i + 1}: «${op.name}» sticks out of its own tile`).toBeLessThanOrEqual(t.pad.r + 0.5);
+          expect(op.b, `${width}px: photo ${i + 1}: «${op.name}» hangs out of the bottom of its own tile`).toBeLessThanOrEqual(t.pad.b + 0.5);
+          expect(Math.min(op.r - op.l, op.b - op.t), `${width}px: «${op.name}» is under a thumb's size`).toBeGreaterThanOrEqual(43.5);
+        }
+      });
+      expect(shot.tiles[1].ops.length, `${width}px: a photo that is not the main one carries all five buttons`).toBe(5);
+    }
+    await page.setViewportSize({ width: 375, height: 812 });
+    await assertClean(page, w, "the photo tiles at 375 and at 360");
+  });
+
+  /**
+   * Renat, 12.09.2026, on removing a size: «The deletion does not trigger or
+   * inform that it needs to be saved.»
+   *
+   * The bar's «Не сохранено» is set by an `input` or a `change` event, and a
+   * button press is neither. «+ Размер» got away with it because it ends by
+   * putting the caret in the new box, so the owner's next keystroke marked
+   * the form; «×» types nothing, so a real change that «Сохранить» would
+   * write went unannounced and could be walked away from.
+   *
+   * Nothing here is saved — the shortened ladder lives in S.goodsSizes until
+   * «Сохранить», and this test presses «Отмена» — so PRODUCT's three sizes,
+   * which half this suite reads, are not touched.
+   */
+  test("phone: a size removed with «×» says the form is not saved", async ({ page }, ti) => {
+    test.skip(ti.project.name !== "mobile", "the «Не сохранено» note is the phone bar's");
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await openEditor(page, PRODUCT.id);
+    const note = page.locator("[data-barnote]");
+    await edTab(page, "sizes");
+    await expect(note, "a form nobody has touched already says it is unsaved").toHaveText("");
+    const rows = page.locator("[data-edsizedel]");
+    const n = await rows.count();
+    expect(n, "this product needs two sizes for «×» to be pressable").toBeGreaterThanOrEqual(2);
+    await rows.nth(n - 1).click();
+    await expect(page.locator("[data-edsizedel]")).toHaveCount(n - 1);
+    await expect(note, "a deleted size is a real change and nobody was told").toHaveText("Не сохранено");
+    await page.locator(".adm-savebar [data-admclose]").click();
+    await expect(page.locator("#goodslist")).toBeVisible();
+    await assertClean(page, w, "a deleted size");
+  });
+
+  /**
+   * Renat, 12.09.2026, twice: «After the save, in the list I am somehow put
+   * almost to the bottom of the page» and «after each save, when I am put
+   * back into the list, I am put back to the bottom of the list.»
+   *
+   * Nothing decided the scroll at all. The panel is morph-patched rather than
+   * rebuilt, so the depth the editor was scrolled to — and on a phone its
+   * «Сохранить» is a fixed bar he can press from any depth — was simply
+   * applied to the list that took its place.
+   */
+  test("saving a product puts the list back on the row it came from", async ({ page }, ti) => {
+    test.skip(ti.project.name !== "desktop", "one list, one rule — measured where the list is longest");
+    test.setTimeout(150_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "goods");
+    await page.locator("[data-goodsq]").fill("");
+    const more = page.locator("[data-admgoodsmore]");
+    if (await more.count()) await more.click();
+    const rows = page.locator("#goodslist [data-admgoods]");
+    const n = await rows.count();
+    expect(n, "the list is too short for this to mean anything").toBeGreaterThan(12);
+    const target = rows.nth(Math.min(25, n - 1));
+    const id = await target.getAttribute("data-admgoods");
+    await target.scrollIntoViewIfNeeded();
+    await target.click();
+    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    // he reads down the editor and presses the bar's «Сохранить» from where he is
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.locator("[data-admsavegoods]").first().click();
+    await expect(page.locator("#goodslist")).toBeVisible();
+    await page.waitForTimeout(600);
+    const where = await page.evaluate((pid) => {
+      const row = document.querySelector(`#goodslist [data-admgoods="${pid}"]`);
+      if (!row) return null;
+      const b = row.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, vh: window.innerHeight };
+    }, id);
+    expect(where, "the row is gone from the list").not.toBeNull();
+    expect(where!.bottom, "the row of the product just saved is above the screen").toBeGreaterThan(0);
+    expect(where!.top, "the row of the product just saved is below the screen — «I am put back to the bottom of the list»")
+      .toBeLessThan(where!.vh);
+    await clearToast(page);
+    await assertClean(page, w, "back to the row it came from");
+  });
+
+  /**
+   * Renat, 12.09.2026: «it lands somewhere at the end of the list, so it's
+   * hard to find it again. Maybe some sort of a filter would be good for such
+   * products and other statuses.»
+   *
+   * A product taken off sale leaves CATALOGUE altogether and comes back into
+   * the panel's list only through its two trailing buckets — after every
+   * product still on sale, and usually past the 40-row cap. The chips are the
+   * same ones «Заказы» and «Склад» carry.
+   */
+  test("the products list filters by status, and a product taken off sale is two taps away", async ({ page }, ti) => {
+    test.skip(ti.project.name !== "desktop", "the chips are the same at both widths; driven once");
+    test.setTimeout(150_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "goods");
+    await expect(page.locator("[data-goodsfilter]"), "the products list has no status chips").toHaveCount(4);
+    await expect(page.locator('[data-goodsfilter="all"]')).toHaveAttribute("aria-current", "true");
+
+    /* A catalogue product no other spec names — the same one
+       admin-products.spec.ts picked for its own hide test, and for the same
+       reason. Switched off here, switched back on in `finally`. */
+    const HIDE_ID = "system-4-hydro-care-conditioner-h";
+    await openEditor(page, HIDE_ID);
+    await page.locator("[data-edhidden]").click();
+    expect(await toastText(page)).toMatch(/убран из магазина/);
+    await clearToast(page);
+    try {
+      await tab(page, "goods");
+      await page.locator("[data-goodsq]").fill("");
+      await page.locator('[data-goodsfilter="off"]').click();
+      await expect(page.locator('[data-goodsfilter="off"]')).toHaveAttribute("aria-current", "true");
+      await expect(page.locator(`[data-admgoods="${HIDE_ID}"]`),
+        "the product taken off sale is not under «Скрытые»").toBeVisible();
+      await expect(page.locator(`[data-admgoods="${HIDE_ID}"] .adm-badge`).first()).toHaveText("Скрыт");
+      await page.locator('[data-goodsfilter="on"]').click();
+      await expect(page.locator(`[data-admgoods="${HIDE_ID}"]`),
+        "a product that is off sale is still listed under «В продаже»").toHaveCount(0);
+      await assertClean(page, w, "the status chips");
+    } finally {
+      await page.locator('[data-goodsfilter="all"]').click();
+      await openEditor(page, HIDE_ID);
+      await page.locator("[data-edhidden]").click();
+      await page.waitForTimeout(800);
+      await clearToast(page);
+      await page.locator(".adm-savebar [data-admclose]").click();
+    }
   });
 });

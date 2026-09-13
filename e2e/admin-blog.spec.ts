@@ -1280,4 +1280,156 @@ test.describe("blog — the product cards survive a translation", () => {
     expect(appended.indexOf(PRODUCT.id)).toBeGreaterThan(appended.indexOf("Второй абзац"));
     await assertClean(page, w, "the translation a flattening model answered");
   });
+
+  /**
+   * Renat, 12.09.2026: «I wrote for russian text "hello" in beginning and in
+   * english text "goodbye" then saved — saving jumped me to the textbox where
+   * text editing was happening. When checking then russian language was
+   * updated, but english text remained the same.»
+   *
+   * Four separate faults stand behind that one sentence, and all four are
+   * asserted here because any one of them alone loses the owner an article:
+   *
+   *   1. The caret carried across the language bar. The offset was measured
+   *      in the box being left and put back into the box being entered, so
+   *      words typed straight after the switch landed in the middle of the
+   *      other language's text (blogKeepCaret).
+   *   2. «Сохранить» scrolled the page to the body box, every time, because
+   *      the same restore called a bare focus().
+   *   3. S one frame ahead of the markup. render() folds a second call in the
+   *      same animation frame into that frame's callback, so between the tap
+   *      on the language bar and the repaint it asks for, S.adminBlogLang is
+   *      already the new language while the text on screen is still the old
+   *      one — and an `input` landing in that gap copied one article straight
+   *      over another (blogSync, now keyed on the box's own stamp).
+   *   4. The draft was sent, never the screen. Every edit that does not reach
+   *      app.js as an `input` event — iOS commits dictation and an accepted
+   *      autocorrection without one — was on screen, in the box, and not in
+   *      what «Сохранить» sent (blogReadForm).
+   */
+  test("two languages written in one sitting both survive the save, and saving leaves the page where it stands", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "blog");
+    const box = page.locator("[data-blogbody]");
+    const dirty = page.locator("[data-blogdirty]");
+
+    /* ---- an article that already has both texts, saved and reopened ------ */
+    await page.locator("[data-admblognew]").click();
+    await expect(box).toBeVisible();
+    const marker = `Две версии ${Date.now().toString().slice(-6)}`;
+    await page.locator('[data-blogf="title"]').fill(marker);
+    await box.click();
+    await page.keyboard.type("Русский исходный текст.");
+    await page.locator('[data-admbloglang="EN"]').click();
+    await box.click();
+    await page.keyboard.type("English original text.");
+    await page.locator('[data-admbloglang="RU"]').click();
+    await page.locator("[data-admblogsave]").click();
+    await expect(dirty).toBeHidden();
+    await clearToast(page);
+    const id = await page.evaluate(async () => {
+      const r = await fetch("/api/admin/blog/");
+      return (await r.json()).posts[0].id;
+    });
+    const stored = () =>
+      page.evaluate(async (pid) => {
+        const r = await fetch("/api/admin/blog/?id=" + pid);
+        return (await r.json()).post;
+      }, id);
+    await page.locator("[data-admblogback]").click();
+    await page.locator(`[data-admblogedit="${id}"]`).click();
+    await expect(box).toBeVisible();
+
+    /* ---- 0. the form is read at the door, and reading it changes nothing --
+       «Сохранить» now reads the screen rather than only the draft behind it
+       (blogReadForm), and so does the way out. A post fetched from the server
+       and put straight back therefore has to come out byte for byte, or every
+       article would ask «Правки не сохранены» on the way out of a visit in
+       which nothing at all was typed. */
+    await page.locator("[data-admblogback]").click();
+    await expect(page.locator("[data-admblogbackyes]"),
+      "opening an article and leaving it asks about edits nobody made").toHaveCount(0);
+    await expect(page.locator("[data-admblognew]")).toBeVisible();
+    await page.locator(`[data-admblogedit="${id}"]`).click();
+    await expect(box).toBeVisible();
+
+    /* ---- 1. the Russian text, at the top, then straight into English ----- */
+    await box.click();
+    await page.keyboard.press("Home");
+    await page.keyboard.type("привет ");
+    await page.locator('[data-admbloglang="EN"]').click();
+    /* Another language is another text, so the switch takes neither the
+       caret nor the keyboard with it. It used to take both: the offset was
+       measured in the Russian box and put back into the English one, and the
+       next words went seven characters into the English article. */
+    await page.keyboard.type("goodbye ");
+    await expect(box, "the caret from the Russian box was carried into the English one")
+      .toHaveText("English original text.");
+    // …and now where he means it, which is the top, as in Russian
+    await box.click();
+    await page.keyboard.press("Home");
+    await page.keyboard.type("goodbye ");
+    await expect(box).toHaveText("goodbye English original text.");
+
+    /* ---- 2. the save must not move the page ----------------------------- */
+    const before = await page.evaluate(() => {
+      window.scrollTo(0, 0);
+      window.scrollBy(0, 140);
+      return window.scrollY;
+    });
+    expect(before, "the editor does not scroll — this step measures nothing").toBeGreaterThan(0);
+    // clicked from the page, not through Playwright, which scrolls first
+    await page.evaluate(() => (document.querySelector("[data-admblogsave]") as HTMLElement).click());
+    await expect(dirty).toBeHidden();
+    const after = await page.evaluate(() => window.scrollY);
+    expect(Math.abs(after - before), "«Сохранить» threw the page at the text box").toBeLessThanOrEqual(4);
+    await clearToast(page);
+
+    /* ---- both languages reached the server ------------------------------ */
+    let post = await stored();
+    expect(post.body.RU, "the Russian edit was lost").toContain("привет");
+    expect(post.body.EN, "the English edit was lost — one sitting, two languages").toContain("goodbye");
+
+    /* ---- 3. S a frame ahead of the markup -------------------------------
+       Two taps on the language bar inside one frame is how this is reached
+       without a stopwatch: the first render is synchronous, the second is
+       folded into the animation frame, so the box on screen is still the
+       Estonian one while S already says English. The `input` is what iOS
+       sends when the box loses the keyboard with an autocorrection pending. */
+    await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement;
+      q('[data-admbloglang="ET"]').click();
+      q('[data-admbloglang="EN"]').click();
+      q("[data-blogbody]").dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await expect(box, "the Estonian box was copied over the English article")
+      .toContainText("goodbye");
+    await page.locator("[data-admblogsave]").click();
+    await expect(dirty).toBeHidden();
+    post = await stored();
+    expect(post.body.EN, "a repaint one frame behind wiped the English article").toContain("goodbye");
+    await clearToast(page);
+
+    /* ---- 4. an edit app.js was never handed an `input` for --------------- */
+    await page.evaluate(() => {
+      const b = document.querySelector("[data-blogbody]") as HTMLElement;
+      b.insertBefore(document.createElement("p"), b.firstChild).textContent = "надиктовано";
+    });
+    await page.locator("[data-admblogsave]").click();
+    await expect(dirty).toBeHidden();
+    post = await stored();
+    expect(post.body.EN, "«Сохранить» sent the draft and not what was on screen").toContain("надиктовано");
+
+    /* ---- and the author field, which is one name and not three ---------- */
+    await page.locator("[data-blogmore]").click();
+    await page.locator('[data-blogf="author"]').fill("Ренат");
+    await page.locator("[data-admblogsave]").click();
+    await expect(dirty).toBeHidden();
+    post = await stored();
+    expect(post.author, "«Автор» is a single name, not one of the three texts").toBe("Ренат");
+
+    await assertClean(page, w, "two languages in one sitting");
+  });
 });
