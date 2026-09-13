@@ -354,7 +354,24 @@ function mergeShipRules(defaults, raw) {
       }
     }
   }
-  if (raw.carriers && typeof raw.carriers === "object") out.carriers = raw.carriers;
+  /* Cell by cell, exactly as parseShippingRules() on the server and
+     applyShipRules() in app.js do it. Since 13.09.2026 the defaults hold one
+     price per carrier from Montonio's own tariffs, so an absent cell means
+     «charge what Montonio charges for this carrier» — replacing the whole
+     table with the owner's partial one would put this page back on a single
+     «Пакомат» number per country while the checkout billed per carrier. */
+  if (raw.carriers && typeof raw.carriers === "object") {
+    out.carriers = out.carriers || {};
+    for (const k of Object.keys(raw.carriers)) {
+      const row = raw.carriers[k];
+      if (!row || typeof row !== "object") continue;
+      out.carriers[k] = out.carriers[k] || {};
+      for (const c of Object.keys(row)) {
+        const v = Number(row[c]);
+        if (Number.isFinite(v) && v >= 0) out.carriers[k][c] = v;
+      }
+    }
+  }
   return out;
 }
 const SHIP_RULES_LIVE = DELIVERY ? mergeShipRules(DELIVERY.rules, LIVE_SETTINGS.shipping_rules) : null;

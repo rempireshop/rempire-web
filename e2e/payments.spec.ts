@@ -433,16 +433,25 @@ test.describe("payments — cancelled at the bank", () => {
     const bankLine = (await page.locator("[data-mock-method]").textContent()) || "";
     expect(bankLine).toMatch(/банковская ссылка · [A-Z0-9]{8,11}/);
 
+    /* «Отменить» — the thing Ренат actually did, and the mock bank answers it
+       the way Montonio does: the payment was started and never completed, so
+       the order token still says PENDING and the receipt is `pending`, not
+       `failed`. That receipt used to carry nothing but «Вернуться в магазин». */
     await page.getByRole("link", { name: "Отменить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=pending/);
     await waitForScreen(page, "done");
-    await expect(page.locator("h1")).toHaveText(tr("Оплата не прошла", "RU"));
+    await expect(page.locator("h1")).toHaveText(tr("Заказ не оплачен", "RU"));
     const number = receiptNumber(page);
     const orderId = new URL(page.url()).searchParams.get("o") || "";
     expect(orderId).toMatch(/^[0-9a-f-]{36}$/);
-    expect((await adminOrder(browser, number)).status).toBe("failed");
-    // the basket was emptied on the way to the bank — the order is what a second try is about
-    await expect(page.locator("[data-cartbadge]")).toHaveText("");
+    // a cancelled payment does not move the order: it is still waiting to be paid
+    expect((await adminOrder(browser, number)).status).toBe("new");
+    /* The basket is emptied on the way to the bank — a shopper who paid and
+       closed that tab must not find the goods still in it — but it is parked
+       against the order, not thrown away, and a receipt that says the order
+       was not paid hands it back. Until 13.09.2026 it did not: «cart is empty
+       and I do not have option to pay again» (Ренат). */
+    await expect(page.locator("[data-cartbadge]")).toHaveText("1");
 
     await page.locator("[data-payagain]").click();
     await page.waitForURL(/\/api\/payments\/mock\//);
@@ -458,6 +467,8 @@ test.describe("payments — cancelled at the bank", () => {
     const order = await adminOrder(browser, number);
     expect(order.status).toBe("paid");
     expect(order.payment?.method).toBe("bank");
+    // …and now that it IS paid the basket goes for good: the goods are bought
+    await expect(page.locator("[data-cartbadge]")).toHaveText("");
     // the paid receipt carries no order id, and a paid order cannot be sent to the bank again
     expect(new URL(page.url()).searchParams.get("o")).toBeNull();
     const again = await page.request.post("/api/payments/create/", { data: { orderId } });
@@ -476,7 +487,8 @@ test.describe("payments — cancelled at the bank", () => {
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
     await expect(page.locator("[data-mock-page]")).toHaveAttribute("data-mock-page", "bank");
-    await page.getByRole("link", { name: "Отменить" }).click();
+    // a refusal, not a cancel — this test is about the `failed` receipt
+    await page.getByRole("link", { name: "Банк отклонил платёж" }).click();
     await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
     await waitForScreen(page, "done");
     const number = receiptNumber(page);

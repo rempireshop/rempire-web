@@ -253,7 +253,11 @@ export async function payOrder(page: Page, email: string, outcome: "paid" | "fai
   await page.locator('input[data-paym="1"]').check();
   await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
-  await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Отменить" }).click();
+  /* «Банк отклонил платёж», not «Отменить»: the mock bank tells the two apart
+     the way a real one does — cancelling leaves the payment PENDING and only a
+     refusal is `failed` (src/app/api/payments/mock/route.ts). This helper's
+     callers want a finished, failed order. */
+  await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Банк отклонил платёж" }).click();
   await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
   const number = new URL(page.url()).searchParams.get("n");
   if (!number) throw new Error("payOrder: no order number (?n=) in the receipt URL");
@@ -289,6 +293,9 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   "Выбор пакомата": { ET: "Pakiautomaadi valik", EN: "Parcel locker picker" },
   "Заказ оплачен": { ET: "Tellimus makstud", EN: "Order paid" },
   "Оплата не прошла": { ET: "Makse ebaõnnestus", EN: "Payment did not go through" },
+  // the receipt a cancelled payment lands on — «Платёж обрабатывается» is
+  // what a `pending` receipt with no order id still says
+  "Заказ не оплачен": { ET: "Tellimus on maksmata", EN: "The order is not paid" },
   "Платёж обрабатывается": { ET: "Makset töödeldakse", EN: "Payment is being processed" },
   // ET is «Blogi», not «Ajaveeb» — the owner's own word for the section,
   // settled 07.09.2026 so the label matches the sentences that decline it.

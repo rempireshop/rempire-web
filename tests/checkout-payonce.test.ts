@@ -45,11 +45,18 @@ interface Answer {
   status?: number;
 }
 
+interface Held {
+  order: string;
+  cart: Array<{ id: string; qty: number }>;
+}
+
 interface Rig {
   /** Press «Оплатить». Resolves once the whole chain has settled. */
   tap(): Promise<void>;
   calls: Call[];
   toasts: string[];
+  /** Every basket parked on the way to the bank, newest last. */
+  held: Held[];
   /** Where the browser was sent, if anywhere. */
   href: string;
   /** Change the basket between taps — a different body, a different order. */
@@ -65,7 +72,7 @@ interface Rig {
  */
 function rig(answers: Answer[]): Rig {
   const body = `
-    var calls = [], toasts = [], href = "", cart = [{ id: "p1", qty: 1 }];
+    var calls = [], toasts = [], held = [], href = "", cart = [{ id: "p1", qty: 1 }];
     var script = ANSWERS.slice();
     var pendingOrder = null;
     var S = {
@@ -101,6 +108,12 @@ function rig(answers: Answer[]): Rig {
     function payErrText(c) { return "pay:" + c; }
     function finishDemo() { toasts.push("demo"); }
     function clearOrderState() { pendingOrder = null; S.cart = []; }
+    /* The basket is parked against the order it became just before it is
+       emptied, so a receipt that says the order was not paid can give it back
+       (Ренат, 13.09.2026: «cart is empty and I do not have option to pay
+       again»). Recorded with the basket as it stood at that moment, so a test
+       can see that the order *and* the goods were both kept. */
+    function holdCart(orderId) { held.push({ order: orderId, cart: S.cart.slice() }); }
     // the body payNow() signs its remembered order with — the real one is
     // orderPayload(), whose only relevant property here is that it changes
     // when the basket does
@@ -118,6 +131,7 @@ function rig(answers: Answer[]): Rig {
       tap: function () { payNow(); return Promise.resolve().then(function () {}).then(function () {}).then(function () {}).then(function () {}); },
       calls: calls,
       toasts: toasts,
+      held: held,
       href: function () { return href; },
       setCart: function (lines) { S.cart = lines; },
       // the button locks for the length of the page: payNow() never unlocks on
@@ -129,6 +143,7 @@ function rig(answers: Answer[]): Rig {
     tap(): Promise<void>;
     calls: Call[];
     toasts: string[];
+    held: Held[];
     href(): string;
     setCart(l: Array<{ id: string; qty: number }>): void;
     reload(): void;
@@ -137,6 +152,7 @@ function rig(answers: Answer[]): Rig {
     tap: made.tap,
     calls: made.calls,
     toasts: made.toasts,
+    held: made.held,
     get href() {
       return made.href();
     },
@@ -214,6 +230,27 @@ describe("payNow(): a failed payment does not cost the shop a second order", () 
       "/api/payments/create/",
     ]);
     expect(r.href).toBe("https://bank.example/pay/1");
+  });
+
+  /* Ренат, 13.09.2026: «I chose card payment and cancelled — … cart is empty
+     and I do not have option to pay again.» Emptying the basket before the
+     bank is right (a shopper who paid and closed that tab must not find the
+     goods still in it), but it must not be *thrown away*: it is parked
+     against the order it became, and doneState() gives it back on a receipt
+     that says the order was not paid. Held before cleared, or there would be
+     nothing left to park. */
+  it("parks the basket against the order on the way to the bank", async () => {
+    const r = rig([ORDER_OK, PAY_OK]);
+    await r.tap();
+    expect(r.href).toBe("https://bank.example/pay/1");
+    expect(r.held).toEqual([{ order: "order-1", cart: [{ id: "p1", qty: 1 }] }]);
+  });
+
+  it("parks nothing when the payment never happened — there is still a basket", async () => {
+    const r = rig([ORDER_OK, PAY_DEAD]);
+    await r.tap();
+    expect(r.href).toBe("");
+    expect(r.held).toEqual([]);
   });
 
   it("an order that reached the bank leaves nothing behind for the next basket", async () => {

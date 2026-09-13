@@ -598,6 +598,8 @@
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui pakk läheb vedajale, saadame jälgimisnumbri.",
       "Оплата не прошла": "Makse ebaõnnestus",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "Raha ei võetud. Tellimus on alles — proovi uuesti maksta või vali teine makseviis.",
+      "Заказ не оплачен": "Tellimus on maksmata",
+      "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.": "Pank ei kinnitanud makset — raha ei võetud. Tellimus on alles: maksa uuesti või vali teine makseviis.",
       "Платёж обрабатывается": "Makset töödeldakse",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
       "Вернуться в магазин": "Tagasi poodi",
@@ -1006,10 +1008,10 @@
         "„Tasuta alates“: 0 — tarne on alati tasuta, tühi — sellesse riiki tasuta tarnet ei ole.",
       /* what is actually charged, what is only reference — the three labels
          and the «Что увидит покупатель» preview, 13.09.2026 */
-      "Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит её, а не ту, что в таблице.":
-        "Veerg „Pakiautomaat“ on varuhind. Kui allpool, jaotises „Vedajate hinnad“, on Omnival, DPD-l, SmartPostil või Unisendil oma hind, maksab ostja selle, mitte tabelis oleva.",
-      "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
-        "Vedaja hind on tugevam kui ülemise tabeli veerg „Pakiautomaat“: kui siin on number, maksab ostja selle.",
+      "Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там пустое — тариф Montonio за этого перевозчика.":
+        "Veerg „Pakiautomaat“ on varuhind. Pakiautomaadi eest maksab ostja oma vedaja hinda: seda, mis on all jaotises „Vedajate hinnad“, ja kui see väli on tühi — selle vedaja Montonio tariifi.",
+      "Пустое поле — тариф Montonio за этого перевозчика, он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.":
+        "Tühi väli tähendab selle vedaja Montonio tariifi, see on välja all kirjas. Kui kirjutad numbri, maksab ostja selle; tariifist odavamat salvestada ei saa.",
       "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
         "Juurdehindlus iseenesest ei muuda midagi: selle liidab ainult nupp „Täida Montonio tariifide järgi“, kui kirjutab hinnad tabelisse.",
       "Что увидит покупатель": "Mida ostja näeb",
@@ -1313,6 +1315,10 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
+      /* Shown instead of the bank chips for a country Montonio has no bank
+         links in — Denmark and the rest of Europe (Ренат, 13.09.2026). */
+      "Банк для вашей страны выберете на странице Montonio — там будут все доступные.":
+        "Oma riigi panga valid Montonio lehel — seal on kõik saadaolevad.",
       /* The wallet is offered on every browser (Dim, 07.09.2026), so its hint
          says where the buttons live and what is there instead of promising
          them; and a basket a card or points already cover has no payment to
@@ -2328,8 +2334,10 @@
       "Показываются только включённые.": "Näidatakse ainult sisselülitatuid.",
       "Включены все — покупатель видит весь список Montonio.":
         "Kõik on sees — ostja näeb Montonio kogu nimekirja.",
-      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.":
-        "Väljalülitatud pank kaob kassa nuppude hulgast; Montonio enda lehele ta ikkagi jääb. Kõiki korraga välja lülitada ei saa — siis näidatakse jälle kõiki.",
+      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. В каждой стране хотя бы один банк должен остаться включённым.":
+        "Väljalülitatud pank kaob kassa nuppude hulgast; Montonio enda lehele ta ikkagi jääb. Igas riigis peab vähemalt üks pank sisse jääma.",
+      "Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все":
+        "Vähemalt üks pank riigi kohta peab jääma — muidu näidatakse kassas jälle kõiki",
       "Скрыть банк": "Peida pank",
       "Показать банк": "Näita panka",
       "Показывать наборы": "Näita komplekte",
@@ -3071,6 +3079,8 @@
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Thank you. The confirmation and receipt are on their way to your inbox; you will get a tracking number when the parcel is handed to the carrier.",
       "Оплата не прошла": "Payment did not go through",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "No money was taken. The order is saved — try paying again or choose another method.",
+      "Заказ не оплачен": "The order is not paid",
+      "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.": "The bank did not confirm the payment — no money was taken. The order is saved: pay for it again or choose another method.",
       "Платёж обрабатывается": "Payment is being processed",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
       "Вернуться в магазин": "Back to the shop",
@@ -3476,10 +3486,10 @@
         "«Free from»: 0 means delivery is always free, empty means there is no free delivery to that country.",
       /* what is actually charged, what is only reference — the three labels
          and the «Что увидит покупатель» preview, 13.09.2026 */
-      "Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит её, а не ту, что в таблице.":
-        "The «Parcel locker» column is only a fallback price. If Omniva, DPD, SmartPosti or Unisend has a price of its own below, under «Prices per carrier», that is what the customer pays — not the one in the table.",
-      "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
-        "A carrier's price beats the «Parcel locker» column in the table above: if there is a number here, that is what the customer pays.",
+      "Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там пустое — тариф Montonio за этого перевозчика.":
+        "The «Parcel locker» column is only a fallback price. For a parcel locker the customer pays their own carrier's price: the one set below, under «Prices per carrier», or — if that box is empty — Montonio's own tariff for that carrier.",
+      "Пустое поле — тариф Montonio за этого перевозчика, он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.":
+        "An empty box means Montonio's own tariff for that carrier — it is written under the box. Type a number and that is what the customer pays; below the tariff it cannot be saved.",
       "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
         "The markup changes nothing on its own: only the «Fill from Montonio tariffs» button adds it, when it writes prices into the table.",
       "Что увидит покупатель": "What the customer sees",
@@ -3783,6 +3793,9 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
+      // see the ET table above
+      "Банк для вашей страны выберете на странице Montonio — там будут все доступные.":
+        "You will choose your country's bank on Montonio's page — all the available ones are there.",
       // see the ET table above for why these three exist
       "Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.":
         "The Apple Pay and Google Pay buttons open on Montonio's page — if your browser does not support them, you can pay by card there instead.",
@@ -4783,8 +4796,10 @@
       "Показываются только включённые.": "Only the ones switched on are shown.",
       "Включены все — покупатель видит весь список Montonio.":
         "All are on — the shopper sees Montonio's whole list.",
-      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.":
-        "A bank switched off disappears from the checkout's chips; it is still there on Montonio's own page. They cannot all be switched off at once — that shows them all again.",
+      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. В каждой стране хотя бы один банк должен остаться включённым.":
+        "A bank switched off disappears from the checkout's chips; it is still there on Montonio's own page. At least one bank per country has to stay on.",
+      "Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все":
+        "At least one bank per country has to stay — otherwise the checkout shows them all again",
       "Скрыть банк": "Hide the bank",
       "Показать банк": "Show the bank",
       "Показывать наборы": "Show sets",
@@ -5986,7 +6001,27 @@
        to at all — an order there could be paid for and never posted. Renat can
        switch any of them back on in Настройки → Доставка. */
     countriesOff: ["CH", "CY", "GB", "IS", "LI", "MT", "NO"],
-    carriers: null,
+    /* One price per carrier, because that is how Montonio bills a parcel
+       machine and the shopper is the one who picks the chip.
+       Ренат, 13.09.2026: «we get prices from Montonio and we should use
+       those, we do not need to make them up.» This used to be `null`, and an
+       empty carrier cell fell through to the country's «Пакомат» number — so
+       Finland charged 7,89 € for a DPD locker that costs 12,39 € and 7,89 €
+       for a SmartPosti one that costs 9,30 €, one price for two different
+       bills. Nine of the fourteen pairs the checkout can produce went out
+       below cost, and the shopper chose which.
+       Mirrors carrierPriceTable() in src/lib/shipping/country-prices.ts —
+       Montonio's own contract price plus the shop's markup, rounded up to
+       «…,X9» — for the four countries whose checkout draws carrier chips
+       (CARRIERS_BY_COUNTRY below); a courier and every other country have no
+       carrier the shopper picks, so they stay on the method table.
+       tests/shipping-admin-mirror.test.ts fails if a cent here drifts. */
+    carriers: {
+      omniva: { EE: 3.19, LV: 4.99, LT: 4.99 },
+      smartpost: { EE: 2.59, LV: 4.99, LT: 4.99, FI: 9.39 },
+      dpd: { EE: 2.59, LV: 5.59, LT: 5.59, FI: 12.39 },
+      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 }
+    },
     markup: { percent: 0, fixed: 0 }
   };
   /* The seeded values, kept whole: «Вернуть значения по умолчанию» in the
@@ -6247,7 +6282,22 @@
         }
       });
     }
-    if (raw.carriers && typeof raw.carriers === "object") SHIP_RULES.carriers = raw.carriers;
+    /* Cell by cell over the Montonio defaults, exactly as parseShippingRules()
+       merges it on the server — a patch that names one Estonian DPD price must
+       not blank DPD in Latvia, and an absent cell has to keep meaning «charge
+       what Montonio charges for this carrier». */
+    if (raw.carriers && typeof raw.carriers === "object") {
+      if (!SHIP_RULES.carriers) SHIP_RULES.carriers = {};
+      Object.keys(raw.carriers).forEach(function (k) {
+        var row = raw.carriers[k];
+        if (!row || typeof row !== "object") return;
+        if (!SHIP_RULES.carriers[k]) SHIP_RULES.carriers[k] = {};
+        Object.keys(row).forEach(function (c) {
+          var v = Number(row[c]);
+          if (isFinite(v) && v >= 0) SHIP_RULES.carriers[k][c] = v;
+        });
+      });
+    }
     /* An array is authoritative, empty included: «доставляем везде» is a real
        answer and must survive the merge. Anything else keeps the default seven. */
     if (Array.isArray(raw.countriesOff)) {
@@ -6274,7 +6324,12 @@
        Europe the 59 € floor back on every whole-table save. */
     SHIP_RULES.freeFromByCountry = cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry);
     SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
-    SHIP_RULES.carriers = null;
+    /* Back to the default TABLE, not to null — same reasoning as the
+       free-delivery map above. Since 13.09.2026 the defaults carry one price
+       per carrier from Montonio's own tariffs, and nulling this would put a
+       whole-table save back on «одна цена на страну для всех перевозчиков»,
+       which is the shape Ренат asked to be rid of. */
+    SHIP_RULES.carriers = cloneRules(SHIP_RULES_DEFAULT.carriers);
     SHIP_RULES.countriesOff = cloneRules(SHIP_RULES_DEFAULT.countriesOff);
     SHIP_RULES.markup = cloneRules(SHIP_RULES_DEFAULT.markup);
     applyShipRules(raw);
@@ -6598,10 +6653,17 @@
      Montonio is configured). Until it answers — or if it never does — the
      chips fall back to the plain BANKS/BANK_CODES pair above, unchanged. */
   var PAYMETHODS = { banks: null, all: null, asked: false };
-  function loadPayMethods() {
-    if (PAYMETHODS.asked) return;
+  function loadPayMethods(fresh) {
+    if (PAYMETHODS.asked && !fresh) return;
     PAYMETHODS.asked = true;
-    fetch("/api/payments/methods/").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    /* A forced reload skips the shared cache. The route answers with
+       `s-maxage=300, stale-while-revalidate=86400`, which is right for
+       shoppers and wrong for the owner who has just flipped a switch: he
+       would be shown the list from before the change for minutes, and told by
+       a stale-while-revalidate hit for longer. A one-off query string is a
+       miss at the CDN, so the answer is the one his own setting produces. */
+    var url = "/api/payments/methods/" + (fresh ? "?r=" + Date.now() : "");
+    fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.ok || !j.banks || !j.banks.length) return;
       apiSeen(true);
       PAYMETHODS.banks = j.banks;
@@ -6620,19 +6682,38 @@
       if (S.screen === "info" || S.screen === "admin") render();
     }).catch(function () { apiSeen(false); });
   }
+  /** Ask Montonio's list again, past every cache — the owner has just changed
+      which of them the checkout may draw. */
+  function reloadPayMethods() { loadPayMethods(true); }
   /* The banks to offer: Montonio's list comes for every country the store
      has switched on (EE, LV, LT, FI, PL — src/lib/payments/methods.ts), and
      an Estonian shopper must not be handed twenty chips with Latvian banks
-     among them. The delivery country picks its own banks; a country with
-     none in the list (Germany) sees the whole list, as before, and Montonio
-     asks again on its own page anyway. Null when the real list never came —
-     the caller falls back to the five built-in names. */
+     among them. The delivery country picks its own banks.
+
+     Three answers, not two:
+       · a list — this country's own banks;
+       · `null` — the real list never came, and the caller falls back to the
+         five built-in Estonian names;
+       · `[]` — the list came and this country has **no** bank links at all.
+
+     That last one is Denmark, and it is Ренат's «For Denmark, the list of
+     "bank link" is very large. Seems like almost all are suggested»
+     (13.09.2026). Montonio's pay-by-bank covers EE, LV, LT, FI and PL — the
+     keys of `paymentInitiation.setup`, which is the only place a bank's
+     country is named. Denmark is not among them, and until now a country
+     that was not among them was shown the **whole cross-country array**:
+     every Estonian, Latvian, Lithuanian, Finnish and Polish bank at once, one
+     of which was then sent to Montonio as `preferredProvider` — a bank the
+     Dane has no account with. Montonio's own page asks properly, so the
+     honest answer is no chips and a line saying where the bank is chosen. */
   function banksForCountry() {
     var real = PAYMETHODS.banks;
     if (!real || !real.length) return null;
     var c = String(orderCountry() || "").toUpperCase();
-    var own = real.filter(function (b) { return String(b.country || "").toUpperCase() === c; });
-    return own.length ? own : real;
+    // no country picked yet («Другая страна Европы» before the second select):
+    // nothing is known, so nothing is narrowed
+    if (!c || c === "EU") return real;
+    return real.filter(function (b) { return String(b.country || "").toUpperCase() === c; });
   }
   function bankChipsHTML() {
     var real = banksForCountry();
@@ -6647,15 +6728,25 @@
           "</button>";
       }).join("");
     }
+    /* Montonio's list is here and this country has no bank links in it. No
+       chips to draw, and the five Estonian names below would be worse than
+       none — the shopper would pick one and be sent to a bank they have no
+       account with. Montonio's own page offers what it really has. */
+    if (real) return '<p class="hint">Банк для вашей страны выберете на странице Montonio — там будут все доступные.</p>';
     return BANKS.map(function (b, i) {
       return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
     }).join("");
   }
   /** The BIC `preferredProvider` Montonio wants, from whichever bank list is
-      currently on screen — the real one when it loaded, BANK_CODES otherwise. */
+      currently on screen — the real one when it loaded, BANK_CODES otherwise.
+      Nothing at all when the list is here and this country has no banks in
+      it: `preferredProvider` says which bank to *send* the shopper to, and
+      naming a foreign one is worse than letting Montonio ask (createPayment()
+      in src/lib/payments/montonio.ts omits the field when it is empty). */
   function selectedBankCode() {
     var real = banksForCountry();
     if (real && real.length) return real[S.bank] ? real[S.bank].code : real[0].code;
+    if (real) return "";
     return BANK_CODES[BANKS[S.bank]];
   }
   /* features: the gift-card amounts the shop is ALLOWED to sell — the same
@@ -6669,6 +6760,18 @@
      saved-cart filter below runs at load and needs it, and a `var` assigned
      further down is still undefined by then (which silently emptied the cart
      on every reload). */
+  /* How many of one thing may go in the basket.
+     Ренат, 13.09.2026: «Cannot put more than 9 items to the cart.» It was
+     a literal nine, written out seven times — the drawer's stepper, the
+     product page's stepper, add-to-cart, add-a-set, and twice in the resume
+     link — so a salon buying ten of a shampoo could not, from any of them.
+     Nothing ever chose nine: the server's own limit is 99 (`bad_qty` in
+     src/lib/orders.ts), the abandoned-cart token already carried up to 99
+     (src/lib/flows.ts) and resumeCart() then threw the tail away, and the
+     admin's till has always allowed 99. This is that one number, named once,
+     and it is the server's — a basket the shop refuses to price is a worse
+     answer than a stepper that stops. */
+  var CART_MAX_QTY = 99;
   var GIFT_AMOUNTS = [25, 50, 75, 100];
   var GIFT_AMOUNTS_DEFAULT = [25, 50, 100];
 
@@ -7248,6 +7351,17 @@
       ? (byCarrier[iso] !== undefined ? byCarrier[iso]
         : byCarrier[zone] !== undefined ? byCarrier[zone] : byCarrier["default"])
       : undefined;
+    /* No cell for this carrier ⇒ Montonio's own price for it, not the
+       country's «Пакомат» number (Ренат, 13.09.2026: «we get prices from
+       Montonio and we should use those»). SHIP_RULES_DEFAULT is that table,
+       mirrored from carrierPriceTable() on the server, and this is the same
+       step quoteFromRules() takes between the carrier cells and the method
+       column — without it the screen would show one Finnish price where the
+       bill charges DPD 12,39 € and SmartPosti 9,39 €. */
+    if ((v === undefined || v === null) && m === "parcel" && SHIP_RULES_DEFAULT.carriers) {
+      var fallback = SHIP_RULES_DEFAULT.carriers[carrier];
+      if (fallback && fallback[iso] !== undefined) v = fallback[iso];
+    }
     if (v === undefined || v === null) {
       var table = SHIP_RULES.methods[m] || {};
       v = table[iso] !== undefined ? table[iso]
@@ -12717,7 +12831,7 @@
 
   /* ---------- ?resume=… from the abandoned-cart letter --------------------
      The token is signed by the server, but nothing here trusts it: only
-     catalogue ids survive, quantity is capped at nine, and the lines are
+     catalogue ids survive, quantity is capped at CART_MAX_QTY, and the lines are
      merged into whatever is already in the basket. The worst a forged link
      can do is put products in its own reader's cart. */
   function resumeCart() {
@@ -12740,10 +12854,10 @@
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = true; break; }
       if (!known) return;
       var size = Number(l.s) || 0;
-      var qty = Math.max(1, Math.min(9, Math.round(Number(l.q) || 1)));
+      var qty = Math.max(1, Math.min(CART_MAX_QTY, Math.round(Number(l.q) || 1)));
       var line = null;
       S.cart.forEach(function (x) { if (x.id === id && x.size === size) line = x; });
-      if (line) line.qty = Math.min(9, Math.max(line.qty, qty));
+      if (line) line.qty = Math.min(CART_MAX_QTY, Math.max(line.qty, qty));
       else S.cart.push({ id: id, size: size, qty: qty });
       added += 1;
     });
@@ -13246,10 +13360,15 @@
   function payErrText(code) {
     return PAY_ERRS[code] || "Оплата пока недоступна — попробуйте позже";
   }
-  /* «Оплатить ещё раз» on the failed receipt. The basket is gone (payNow()
-     empties it before leaving for the bank), but the order is still there:
-     the payment is re-created for it and the shopper goes back to the bank.
-     Same lock as payNow(): one tap, one payment.
+  /* «Оплатить ещё раз» on a receipt for an order that was not paid — the card
+     was refused, or the shopper pressed «Отменить» at the bank. The order is
+     still there, so the payment is re-created for it and the shopper goes
+     back to the bank. Same lock as payNow(): one tap, one payment.
+
+     The basket is in the cart again by now (restoreHeldCart()), so it is
+     parked and emptied on the way out exactly as payNow() does it — otherwise
+     a second try that succeeded would land on a paid receipt with the goods
+     still in the basket.
 
      The method travels with it now. The screen's own sentence has always
      said «или выберите другой способ», and until 07.09.2026 it was not
@@ -13263,12 +13382,14 @@
     postJSON("/api/payments/create/", {
       orderId: orderId,
       method: PAYS[pick] ? PAYS[pick].k : "bank",
-      bank: pick === 0 ? selectedBankCode() : undefined,
+      bank: (pick === 0 && selectedBankCode()) || undefined,
       lang: S.lang
     }).then(function (pay) {
       if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
         throw new Error(payErrText(pay.body && pay.body.error));
       }
+      holdCart(orderId);
+      if (S.cart.length) clearOrderState();
       location.href = pay.body.redirectUrl;
     }).catch(function (err) {
       S.paying = false; render();
@@ -13372,7 +13493,7 @@
         // the radio's own key — a wallet is "wallet", never the bank list it
         // used to be folded into (the server asks Montonio for its card page)
         method: PAYS[S.pay] && (PAYS[S.pay].k === "card" || PAYS[S.pay].k === "wallet") ? PAYS[S.pay].k : "bank",
-        bank: S.pay === 0 ? selectedBankCode() : undefined,
+        bank: (S.pay === 0 && selectedBankCode()) || undefined,
         lang: S.lang
       }).then(function (pay) {
         if (pay.offline) return finishDemo();
@@ -13384,8 +13505,13 @@
           if (code === "already_paid" || code === "order_closed" || code === "not_found") pendingOrder = null;
           throw new Error(payErrText(code));
         }
-        // the basket is cleared before leaving: coming back from the bank must
-        // not find the same order still sitting in the cart
+        /* The basket is cleared before leaving: coming back from the bank
+           must not find the same order still sitting in the cart. It is not
+           thrown away, though — holdCart() parks it against this order, and
+           a receipt that says the order was not paid gives it back
+           (restoreHeldCart(), by doneState()). Held first: clearOrderState()
+           is what empties S.cart. */
+        holdCart(res.body.orderId);
         clearOrderState();
         location.href = pay.body.redirectUrl;
       });
@@ -18267,9 +18393,9 @@
          (quoteFromRules(): carriers[carrier][country] is read first), and on
          this shop every carrier cell is filled — so the column he reads as
          «цена пакомата» is the one number in it nobody pays. */
-      '<p class="adm-notice">Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по ' +
-        "перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит " +
-        "её, а не ту, что в таблице.</p>" +
+      '<p class="adm-notice">Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит ' +
+        "цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там " +
+        "пустое — тариф Montonio за этого перевозчика.</p>" +
       admShipPreviewHTML() +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       // «Сохранить» is the page's bar (admSetBarHTML) — the fill button stays with its hint
@@ -18291,8 +18417,12 @@
            part of their shape, and an old row that carries a number under it
            goes on being ignored exactly as before. */
         '<summary class="adm-link">Перевозчики и наценка</summary><div style="padding-top:12px">' +
-          '<p class="adm-notice" style="margin-top:0">Цена перевозчика сильнее колонки «Пакомат» ' +
-            "в таблице выше: если тут стоит число, покупатель платит его.</p>" +
+          /* Ренат, 13.09.2026: пустое поле больше не проваливается в колонку —
+             оно означает тариф Montonio за этого перевозчика, тот самый,
+             который написан серым под полем (montonioCarrierHint). Одна
+             фраза, потому что это весь смысл экрана. */
+          '<p class="adm-notice" style="margin-top:0">Пустое поле — тариф Montonio за этого перевозчика, ' +
+            "он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.</p>" +
           SHIP_CARRIER_ROWS.map(function (c) {
             return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
               c[2].map(function (cc) {
@@ -18349,6 +18479,45 @@
     var f = bankFilter();
     return !f.length || f.indexOf(String(code).toUpperCase()) >= 0;
   }
+  /** Which country Montonio filed this bank under, uppercased. */
+  function admBankCountry(code) {
+    var c = String(code).toUpperCase();
+    var list = admBankList();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].code).toUpperCase() === c) return String(list[i].country || "").toUpperCase();
+    }
+    return "";
+  }
+  /* Would switching this one off leave its country with no bank at all?
+     Then it must not be switched off, and this is what says so.
+
+     Ренат, 13.09.2026: «I can switch off all in Estonia and also I can switch
+     of some, but they are still displayed in checkout.» The panel let him do
+     it and then the checkout ignored him — because the server's rule is **per
+     country**: filterBanks() (src/lib/payments/methods.ts) gives a country
+     whose banks are all switched off its whole group back, so that an owner
+     trimming the Estonian list cannot take every Latvian bank away from a
+     shopper in Riga. Sound rule; the panel simply did not know about it. Its
+     own guard was «нельзя выключить все» counted across every country at
+     once, which fires only when the very last switch in the whole list goes
+     off — so five Estonian switches could read «off» while the checkout drew
+     all five.
+
+     Now the panel enforces the same rule the server does, and the switches
+     tell the truth again. */
+  function admBankLastOn(code) {
+    if (!admBankOn(code)) return false;   // switching one back ON is always fine
+    var country = admBankCountry(code);
+    var c = String(code).toUpperCase();
+    var list = admBankList();
+    for (var i = 0; i < list.length; i++) {
+      var b = list[i];
+      if (String(b.code).toUpperCase() === c) continue;
+      if (String(b.country || "").toUpperCase() !== country) continue;
+      if (admBankOn(b.code)) return false;
+    }
+    return true;
+  }
   /** The list this switch would leave behind. Empty means «показывать все»,
       so the first «off» has to materialise every other code first, and
       turning the last one back on collapses to empty again. */
@@ -18377,11 +18546,22 @@
         (f.length ? "Показываются только включённые." : "Включены все — покупатель видит весь список Montonio.") +
       "</p>" +
       '<p class="adm-hint" style="margin:0 0 10px">Выключенный банк пропадает из фишек в кассе; ' +
-        "на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.</p>" +
-      '<div class="adm-list">' + list.map(function (b) {
+        "на странице Montonio он всё равно остаётся. В каждой стране хотя бы один банк должен остаться включённым.</p>" +
+      /* Grouped by country, because the rule is per country: the flat list
+         made «выключить все эстонские» look like an ordinary five taps, and
+         the checkout then showed all five back (filterBanks на сервере).
+         Montonio's own array already comes country by country
+         (mapBanks() walks `paymentInitiation.setup`), so this only puts a
+         heading where the country changes. */
+      '<div class="adm-list">' + list.map(function (b, i) {
         var on = admBankOn(b.code);
-        return '<div class="adm-swrow"><span>' + esc(String(b.name || b.code)) +
-          '<span class="adm-row__sub">' + esc(String(b.country || "")) + " · " + esc(String(b.code)) + "</span></span>" +
+        var country = String(b.country || "").toUpperCase();
+        var same = i && country === String(list[i - 1].country || "").toUpperCase();
+        var head = !country || same
+          ? ""
+          : '<div class="adm-row__sub" style="margin:10px 0 2px">' + esc(countryName(country)) + "</div>";
+        return head + '<div class="adm-swrow"><span>' + esc(String(b.name || b.code)) +
+          '<span class="adm-row__sub">' + esc(String(b.code)) + "</span></span>" +
           admSwitch('data-admbank="' + esc(String(b.code)) + '"', on,
             on ? "Скрыть банк" : "Показать банк") + "</div>";
       }).join("") + "</div>";
@@ -20004,11 +20184,11 @@
      none, because Montonio quotes none for it (direct contract only), and no
      invented number takes its place.
 
-     Two deliberate differences from the server table, both to keep this panel
-     honest about what it shows: Nova Post is left out (Montonio
-     International Shipping — the admin has no carrier row for it, and it is
-     never the ceiling in these four countries anyway), and so is every
-     country outside EE/LV/LT/FI. tariffs.ts prices all twenty-five
+     One deliberate difference from the server table, to keep this panel
+     honest about what it shows: every country outside EE/LV/LT/FI is left
+     out. (Nova Post was the other one — Montonio International Shipping, a
+     carrier the admin had no row for; Ренат asked for it to go on 13.09.2026
+     and it is no longer in the mirror at all.) tariffs.ts prices all twenty-five
      destinations Montonio serves and quoteFromRules() reads a country cell in
      preference to its zone, but this table has six rows, and a fill that
      wrote twenty-one cells nobody can see here would be hidden state. See
@@ -20038,13 +20218,15 @@
          couriers at home included, because nobody can choose a courier's
          carrier; Renat does, when he makes the label. Its name is printed
          beside the number so he knows which carrier the price assumed.
-     «Can actually use» excludes Nova Post (Montonio International Shipping):
-     no carrier row here, never named by the storefront, no returns at all.
-     Its prices are the low ones in docs/audit/2026-09-07-shipping-returns.md
-     — Germany 12,91 €, Poland 8,51 € — and the shop cannot reach them today.
+     «Can actually use» is SHIP_CARRIER_ROWS — the five this panel has a row
+     for. It used to have to exclude Nova Post (Montonio International
+     Shipping), whose prices are the low ones in
+     docs/audit/2026-09-07-shipping-returns.md — Germany 12,91 €, Poland
+     8,51 € — and which the shop could never reach; Ренат asked for it to go
+     on 13.09.2026 and it is out of the mirror entirely.
      A missing method means Montonio quotes no carrier the shop can use:
-     Greece has no parcel machine from Estonia at all, Hungary and Romania have
-     only a Nova Post one.
+     Greece has no parcel machine from Estonia at all, and Hungary and Romania
+     have none either now that Nova Post is gone.
      tests/shipping-admin-mirror.test.ts fails if a cent here drifts from
      src/data/montonio-tariffs.json. */
   var MONTONIO_COST = {
@@ -20138,13 +20320,13 @@
       what makes the live answer the better one. */
   function montonioCost(method, country) {
     /* Only carriers «Цены по перевозчикам» has a row for. tariffRowsFor()
-       serves whatever the server merged, and the static half of that carries
-       Nova Post — Montonio International Shipping, which the shop has no row
-       for, never names, and cannot put a parcel on. Left in, it becomes the
-       cheapest quote on half these routes and the panel would print a
-       себестоимость nobody can reach: Estonia's courier read «4,76 € · Nova
-       Post» instead of DPD's 6,82 €, which is the number that has to be
-       covered. Same guard as computeMontonioFillPatch() below and as
+       serves whatever the server merged, and a live quote can name a carrier
+       this panel has no row for. Left in, such a row becomes the cheapest
+       quote on half these routes and the panel prints a себестоимость nobody
+       can reach — which is exactly what Nova Post did until 13.09.2026:
+       Estonia's courier read «4,76 € · Nova Post» instead of DPD's 6,82 €,
+       the number that actually has to be covered. Nova Post is gone (Ренат);
+       the guard stays, and matches computeMontonioFillPatch() below and
        SHOP_CARRIERS in src/lib/shipping/country-prices.ts. */
     var rows = tariffRowsFor(country).filter(function (r) {
       return r.method === method && SHIP_CARRIER_ROWS.some(function (c) { return c[0] === r.carrier; });
@@ -20170,10 +20352,14 @@
     return source === "live" ? "тариф Montonio (live): " : "тариф Montonio (прайс-лист): ";
   }
   /** «· SmartPosti» — which carrier the cost belongs to, so «22,23 €» is not
-      a number out of nowhere. Never translated: they are proper nouns. */
+      a number out of nowhere. Never translated: they are proper nouns.
+      Nova Post used to have a name of its own here; it was the only carrier
+      this panel could be handed without a row in CARRIER_NAMES, and it is
+      gone (Ренат, 13.09.2026). Anything unknown now prints its bare code,
+      which is what an unexpected carrier should look like. */
   function montonioCarrierTag(carrier) {
     if (!carrier) return "";
-    return " · " + (CARRIER_NAMES[carrier] || (carrier === "novapost" ? "Nova Post" : carrier));
+    return " · " + (CARRIER_NAMES[carrier] || carrier);
   }
   /**
    * The provider's own price beside the owner's, quietly — Dim, 07.09.2026:
@@ -20226,10 +20412,16 @@
     var markup = shipDraft().markup || { percent: 0, fixed: 0 };
     var draft = shipDraft();
     var methods = { parcel: {}, courier: {} };
-    // applyShipRules() merges `methods` key by key but REPLACES `carriers`
-    // wholesale — so a Venipak/Unisend price the owner typed by hand (or any
-    // carrier this table has no tariff for) would vanish under the fill
-    // unless the patch already carries it forward. Start from what is there.
+    /* Start from what is there, so a Venipak price the owner typed by hand —
+       or any carrier this table has no tariff for — is carried forward rather
+       than dropped by the fill. (Both halves are merged key by key now, on the
+       storefront and on the server; carriers used to be replaced wholesale,
+       which is what made this line load-bearing rather than merely tidy.)
+       Since 13.09.2026 the fill is no longer the only way to get Montonio's
+       per-carrier price: an EMPTY carrier cell already means exactly that
+       (quoteFromRules in src/lib/shipping.ts). What the button still buys is
+       raising a cell the owner typed *below* cost — `Math.max` below — which
+       is the one thing an empty cell cannot do for him. */
     var carriers = draft.carriers ? cloneRules(draft.carriers) : {};
     /* Every country Montonio serves, not just the four the checkout names —
        Dim, 07.09.2026: «"Заполнить по тарифам Montonio" should fill every
@@ -26017,6 +26209,14 @@
   function srvSaved(p) {
     return p.then(function (r) {
       if (r.status === 401) { SRV.admin = false; toast("Нужен вход в админку — изменение не сохранилось"); render(); return r; }
+      /* A refusal the owner can act on, and the only one so far: a delivery
+         price under what Montonio charges for that very delivery. The server
+         writes the sentence (belowCostMessage() in src/lib/shipping.ts) because
+         it is the side that knows the tariff — carrier, country and both
+         numbers, so there is nothing to go and look up. Shown as it came
+         rather than folded into «Не удалось сохранить», which would hide the
+         one thing that needs fixing (Ренат, 13.09.2026). */
+      if (r.body && r.body.detail && r.body.error === "below_cost") { toast(r.body.detail); render(); return r; }
       if (!(r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить на сервере — попробуйте ещё раз");
       return r;
     }, function () { toast("Сервер не отвечает — изменение не сохранилось"); });
@@ -26115,8 +26315,17 @@
     else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
     // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
     else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
-    // «Какие банки показывать» — the whole array of codes, so undo re-sends it
-    else if (a.type === "set_banks") srvSaved(apiSend(st, "PUT", { payment_banks: bankFilter() }));
+    /* «Какие банки показывать» — the whole array of codes, so undo re-sends it.
+       …and the checkout is then asked for the list again: it draws
+       PAYMETHODS.banks, which is fetched once per page load, and the panel and
+       the checkout are the same page. Without this the owner flipped a switch,
+       walked to the checkout and saw the list from before he touched it —
+       «I can switch off … but they are still displayed in checkout» (Ренат,
+       13.09.2026). After the PUT, never before it: the route reads the setting
+       to build its answer. The undo path comes through here too. */
+    else if (a.type === "set_banks") srvSaved(apiSend(st, "PUT", { payment_banks: bankFilter() })).then(function (r) {
+      if (r && r.status === 200 && r.body && r.body.ok) reloadPayMethods();
+    });
     else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
     else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
     else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
@@ -27748,25 +27957,91 @@
        paid order, and a language switch on the receipt made a fourth. The
        receipt is filled in below and kept; go() still drops it when the
        shopper leaves, so the next one reads its own query. */
+    /* `o`, `m` and `b` ride on any receipt for an order that still owes money
+       — `failed` AND `pending` (src/lib/payments/receipt.ts). Pending is the
+       one Renat hit: Montonio's token says PENDING when a payment was started
+       and never finished, which is what pressing «Отменить» at the bank
+       leaves behind, so a cancelled payment comes back here and not as
+       `failed`. A paid receipt never carries them. */
+    var owing = s === "failed" || s === "pending";
     S.done = {
       status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g),
-      /* `o` — the order's id, only on a failed receipt (src/lib/payments/
-         receipt.ts): what «Оплатить ещё раз» sends back to re-create the
-         payment. The basket is empty by now (payNow() clears it before the
-         bank), so the order is the only thing a second try can be about. */
-      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
+      /* `o` — the order's id: what «Оплатить ещё раз» sends back to re-create
+         the payment for the same order. */
+      order: owing && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
       /* `m` — the method the order went out with, `b` — the BIC of the bank
          it was sent to (src/lib/payments/receipt.ts). The retry screen offers
          all three methods and all the chips, and these two are which of them
          start selected: the shopper's own choice, not one the shop proposes. */
-      method: s === "failed" && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : "",
-      bank: s === "failed" && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : ""
+      method: owing && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : "",
+      bank: owing && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : ""
     };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
       track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
     }
+    /* …and the basket that was held on the way to the bank (holdCart() in
+       payNow()) is settled here, once, on the same one-shot as the beacon
+       above: given back when this receipt says the order was not paid, let go
+       when it says it was. */
+    if (s === "paid" || s === "invoice") doneDropHeld();
+    else if (S.done.order) restoreHeldCart(S.done.order);
     return S.done;
+  }
+  /* ---------- the basket that went to the bank ------------------------------
+     payNow() empties the cart *before* the redirect, and that is right: a
+     shopper who paid and closed the bank's tab must not find the goods still
+     in the basket on the next visit. The price of it used to be paid by the
+     one who pressed «Отменить» — «cart is empty and I do not have option to
+     pay again» (Ренат, 13.09.2026).
+
+     So the basket is not thrown away, it is parked here against the order it
+     became, and handed back the moment a receipt says that order was not
+     paid. One slot, overwritten by the next order; a day old and it is
+     ignored, so a basket nobody came back for cannot surface weeks later. */
+  var HELD_LS = "rmp-held-cart";
+  var HELD_MAX_AGE_MS = 864e5;   // a day
+  function holdCart(orderId) {
+    if (!orderId || !S.cart.length) return;
+    try {
+      localStorage.setItem(HELD_LS, JSON.stringify({
+        order: String(orderId), at: Date.now(), cart: S.cart, promo: S.promo
+      }));
+    } catch (e) {}
+  }
+  function dropHeldCart() { try { localStorage.removeItem(HELD_LS); } catch (e) {} }
+  /** A paid (or invoiced) order: the basket really is spent — let it go, and
+      clear whatever a restore on an earlier visit to this receipt put back. */
+  function doneDropHeld() {
+    dropHeldCart();
+    if (S.cart.length) clearOrderState();
+  }
+  /** Put the basket back, but only the one this very order was made from. */
+  function restoreHeldCart(orderId) {
+    if (S.cart.length) return;   // they have already started a new basket
+    var h = null;
+    try { h = JSON.parse(localStorage.getItem(HELD_LS) || "null"); } catch (e) {}
+    if (!h || h.order !== String(orderId)) return;
+    if (!Array.isArray(h.cart) || !h.cart.length) return;
+    if (!(Date.now() - Number(h.at || 0) < HELD_MAX_AGE_MS)) { dropHeldCart(); return; }
+    /* Same guard the saved cart gets at boot: a line whose product has gone
+       from the catalogue in the meantime is dropped rather than restored,
+       because byId() falls back to the first product and would show the wrong
+       item at the wrong price. Sets and the owner's own products are kept —
+       the lists that could disprove them arrive from the server, and they
+       have by now. */
+    var back = [];
+    for (var i = 0; i < h.cart.length; i++) {
+      var l = h.cart[i];
+      if (!l || typeof l !== "object") continue;
+      if (l.type === "bundle" || (typeof l.id === "string" && l.id.indexOf("c-") === 0)) { back.push(l); continue; }
+      if (l.type === "gift") { if (GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0) back.push(l); continue; }
+      for (var k = 0; k < CATALOGUE.length; k++) if (CATALOGUE[k].id === l.id) { back.push(l); break; }
+    }
+    if (!back.length) { dropHeldCart(); return; }
+    S.cart = back;
+    S.promo = typeof h.promo === "string" ? h.promo : "";
+    persist();
   }
   /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
      (src/app/api/payments/return/route.ts). The token is an HMAC of the code
@@ -27832,29 +28107,39 @@
         (many ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
     }).join("") + "</div>";
   }
+  /* The screen an order that still owes money gets: the same picker and the
+     same «Оплатить ещё раз» for both ways a payment can not happen. Only the
+     mark and the two sentences differ, because the two are not the same
+     news — a refused card is a failure, a cancelled one is just unfinished. */
+  function doneUnpaidHTML(d, num, bad, head, line) {
+    // the real bank logos, if Montonio's list is reachable — one-shot and
+    // silent, exactly as the checkout asks for them
+    if (d.order) loadPayMethods();
+    var tick = bad
+      ? '<div class="done__tick done__tick--bad">✕</div>'
+      : '<div class="done__tick done__tick--wait">…</div>';
+    return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' + tick +
+      '<h1 class="display h1">' + head + "</h1>" + num +
+      '<p class="muted" style="margin-bottom:22px">' + line + "</p>" +
+      /* The sentence above promises another way to pay; until 07.09.2026 it
+         did not exist — «Оплатить ещё раз» sent the order back to the same
+         method every time. The picker below is that promise kept: the same
+         order, a different way. */
+      (d.order
+        ? donePayPickerHTML(d) +
+          '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
+            (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
+            '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
+        : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
+      "</section></div>";
+  }
   function screenDone() {
     var d = doneState();
     // one text node, so the «Заказ R-100042» dictionary rule can rewrite it
     var num = d.number ? '<p class="done__num">Заказ ' + esc(d.number) + "</p>" : "";
     if (d.status === "failed") {
-      // the real bank logos, if Montonio's list is reachable — one-shot and
-      // silent, exactly as the checkout asks for them
-      if (d.order) loadPayMethods();
-      return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
-        '<div class="done__tick done__tick--bad">✕</div>' +
-        '<h1 class="display h1">Оплата не прошла</h1>' + num +
-        '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
-        /* The sentence above promises another way to pay; until 07.09.2026 it
-           did not exist — «Оплатить ещё раз» sent the order back to the same
-           method every time. The picker below is that promise kept: the same
-           order, a different way. */
-        (d.order
-          ? donePayPickerHTML(d) +
-            '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
-              (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
-              '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
-          : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
-        "</section></div>";
+      return doneUnpaidHTML(d, num, true, "Оплата не прошла",
+        "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.");
     }
     /* «По счёту — для компаний»: the order is placed, the invoice is in the
        mail, nothing is paid yet. The address is its own text node so the two
@@ -27882,7 +28167,27 @@
           "<span>" + invoiceDoneNote(dn) + "</span></p>" +
         '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
     }
+    /* «Платёж обрабатывается» with no way forward is what Ренат hit on
+       13.09.2026: he chose the card, pressed «Отменить» at the bank, and came
+       back to this screen with an empty basket and one button that went home.
+       Montonio's token says PENDING for a payment that was started and never
+       finished — «Отменить» does not make it ABANDONED, that comes later when
+       the order expires — so this, not «Оплата не прошла», is where a
+       cancelled payment lands.
+
+       When the return route could name the order (it read it, and it is not
+       paid), the screen says so and offers the same retry the failed one
+       does. Pressing it cannot pay twice: POST /api/payments/create/ answers
+       409 «Этот заказ уже оплачен» for an order that settled meanwhile.
+
+       Without an order id nothing is known — the rate limiter or a database
+       the return route could not reach — and the old, honest sentence stands:
+       wait for the letter. */
     if (d.status === "pending") {
+      if (d.order) {
+        return doneUnpaidHTML(d, num, false, "Заказ не оплачен",
+          "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.");
+      }
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
         '<div class="done__tick done__tick--wait">…</div>' +
         '<h1 class="display h1">Платёж обрабатывается</h1>' + num +
@@ -27909,13 +28214,25 @@
   function cartBody() {
     var sum = cartSum(), thr = threshold(), pct = Math.min(100, sum / thr * 100);
     return (S.cart.length ? S.cart.map(function (l, li) {
-      // a line is a product, a set or a gift card — lineTitle/lineImageHTML/
-      // lineNoteHTML resolve which, so this markup stays one shape
+      /* A line is a product, a set or a gift card — lineTitle/lineImageHTML/
+         lineNoteHTML resolve which, so this markup stays one shape.
+
+         Ренат, 13.09.2026: «the "remove" button is sometimes behind the "+"
+         and sometimes on second row — this should remain same for all and be
+         inline if possible». It was both, and neither was decided by the kind
+         of line: the stepper and «Убрать» were loose inline boxes inside
+         `.cline__mid`, a plain block, so they shared an anonymous line box and
+         wrapped or collided purely on how much width the name and the price
+         had left them. A set's «Убрать» wrapped and a short product's did not,
+         on the same screen. `.cline__acts` below is that row made explicit —
+         one flex line, same gap, same alignment, every kind of line, every
+         width and every language. */
       return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + lineImageHTML(l) + "</span>" +
         '<span class="cline__mid"><span class="cline__nm">' + esc(lineTitle(l)) + lineLabelHTML(l) + "</span>" +
         lineNoteHTML(l) +
+        '<span class="cline__acts">' +
         '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше"' + (l.qty <= 1 ? ' aria-disabled="true"' : "") + '>−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
-        '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
+        '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
       /* No bar where there is no free delivery to walk towards: threshold()
@@ -29383,8 +29700,8 @@
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
     S.cart.forEach(function (l) { if (l.id === id && l.size === si) line = l; });
-    if (line) line.qty = Math.min(9, line.qty + qty);
-    else S.cart.push({ id: id, size: si, qty: Math.min(9, qty) });
+    if (line) line.qty = Math.min(CART_MAX_QTY, line.qty + qty);
+    else S.cart.push({ id: id, size: si, qty: Math.min(CART_MAX_QTY, qty) });
     persist();
     /* A new basket after a placed order is a new basket: payNow() switched the
        snapshot off for the order it was making, and an invoice order never
@@ -29419,7 +29736,7 @@
     if (bundleStock(b) === "out") { toast("Набор сейчас не собрать — товар закончился"); return; }
     var id = "bundle:" + b.id, line = null;
     S.cart.forEach(function (l) { if (l.type === "bundle" && l.id === id) line = l; });
-    if (line) line.qty = Math.min(9, line.qty + 1);
+    if (line) line.qty = Math.min(CART_MAX_QTY, line.qty + 1);
     else S.cart.push({
       type: "bundle", id: id, qty: 1, price: b.price,
       components: b.items.map(function (it) { return { id: it.id, size: it.size || 0, qty: 1 }; })
@@ -29709,7 +30026,7 @@
       // «−» is disabled at qty 1 (aria-disabled in cartBody()) — removal is
       // only ever through the explicit «Убрать» control, never the stepper.
       if (Number(d.d) < 0 && cln.qty <= 1) return;
-      cln.qty = Math.max(1, Math.min(9, cln.qty + Number(d.d)));
+      cln.qty = Math.max(1, Math.min(CART_MAX_QTY, cln.qty + Number(d.d)));
       persist(); patchCart(); return;
     }
     if (d.remove !== undefined) {
@@ -30754,6 +31071,16 @@
     }
     // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks
     if (d.admbank !== undefined) {
+      /* The last bank of a country stays on — the server would hand that
+         country's whole list back anyway (filterBanks), and a switch that
+         says «off» while the checkout shows the bank is worse than a switch
+         that refuses. render() puts the checkbox back where it was. */
+      if (admBankLastOn(d.admbank)) {
+        render();
+        toast("Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все");
+        return;
+      }
+      // the checkout is asked for the fresh list once the PUT lands (demoApply)
       var bkEntry = demoApply({ type: "set_banks", value: admBankToggle(d.admbank) });
       render(); toast("Сохранено ✓", bkEntry); return;
     }
@@ -31419,7 +31746,7 @@
     }
     if (d.notifysend !== undefined) { notifySend(d.notifysend || S.productId); return; }
     if (d.share) { shareProduct(d.share); return; }
-    if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); patchPdp(); return; }
+    if (d.qty) { S.qty = Math.max(1, Math.min(CART_MAX_QTY, S.qty + Number(d.qty))); patchPdp(); return; }
     if (d.gal !== undefined) { S.gallery = Number(d.gal); patchPdp(); return; }
     if (d.login !== undefined) { acctSendCode(); return; }
     if (d.logincode !== undefined) { acctVerify(); return; }

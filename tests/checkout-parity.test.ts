@@ -61,6 +61,7 @@ function client(
   rules: ShippingRules,
   country = "EE",
   method = "parcel",
+  carrier = "",
   countryIso = "",
 ): ClientOut {
   /* threshold() and orderCountry() are sliced out of app.js too rather than
@@ -83,10 +84,17 @@ function client(
   `;
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", body) as (
-    s: unknown, n: number, r: ShippingRules, m: string,
+  /* SHIP_RULES_DEFAULT is the storefront's own copy of the Montonio carrier
+     table — what shipRulePrice() falls back to when a carrier has no cell of
+     its own, the same step quoteFromRules() takes on the server. Read out of
+     app.js rather than restated, so the two cannot drift. */
+  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "SHIP_RULES_DEFAULT", body) as (
+    s: unknown, n: number, r: ShippingRules, m: string, d: ShippingRules,
   ) => ClientOut;
-  return run({ promoInfo, country, countryIso, ship: { carrier: "" } }, cartSum, rules, method);
+  return run(
+    { promoInfo, country, countryIso, ship: { carrier } },
+    cartSum, rules, method, literal<ShippingRules>("SHIP_RULES"),
+  );
 }
 
 const RULES: ShippingRules = {
@@ -121,15 +129,22 @@ const cases: Array<[string, Promo | null, number]> = [
    much to keep in step by eye, and a single wrong cent is a shopper shown one
    price and billed another. */
 describe("the storefront's copy of the default rules is the server's", () => {
-  /* Omit, not intersect: `ShippingRules` declares `carriers` optional with an
-     object type, so `& { carriers: null }` has no inhabitant and TypeScript
-     collapses the whole thing to `never` — every property read then fails. The
-     storefront's mirror really does carry an explicit null there, which is what
-     this states. */
-  const mirror = literal<Omit<ShippingRules, "carriers"> & { carriers: null }>("SHIP_RULES");
+  const mirror = literal<ShippingRules>("SHIP_RULES");
 
   it("has the same price in every cell", () => {
     expect(mirror.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
+  });
+
+  /* Ренат, 13.09.2026: «we get prices from Montonio and we should use those,
+     we do not need to make them up.» This used to be an explicit `null`, and
+     an empty carrier cell fell through to the country's «Пакомат» number — so
+     Finland charged one price for a DPD locker that costs 12.39 € and a
+     SmartPosti one that costs 9.30 €. Both halves now carry a price per
+     carrier, and they have to be the same table or the shopper reads one
+     number and is billed another. */
+  it("has the same carrier price in every cell", () => {
+    expect(mirror.carriers).toEqual(DEFAULT_SHIPPING_RULES.carriers);
+    expect(mirror.carriers?.dpd?.FI).not.toBe(mirror.carriers?.smartpost?.FI);
   });
 
   it("has the same free-delivery floors and the same countries switched off", () => {
@@ -181,7 +196,7 @@ describe("the checkout total on screen equals the one the server bills", () => {
   it("agrees about every country behind «Другая страна Европы»", () => {
     for (const iso of Object.keys(DEFAULT_SHIPPING_RULES.methods.courier)) {
       if (iso === "default") continue;
-      const c = client(null, 40, DEFAULT_SHIPPING_RULES, "EU", "courier", iso);
+      const c = client(null, 40, DEFAULT_SHIPPING_RULES, "EU", "courier", "", iso);
       const server = quoteFromRules(DEFAULT_SHIPPING_RULES, {
         country: iso, method: "courier", subtotal: 40,
       });
@@ -195,7 +210,7 @@ describe("the checkout total on screen equals the one the server bills", () => {
      the shop — so it is the one worth pinning on both sides. */
   it("agrees about the default floors: 59 € at home, 200 € for the rest of Europe", () => {
     const at = (country: string, zone: string, sum: number, iso = "") => {
-      const c = client(null, sum, DEFAULT_SHIPPING_RULES, zone, "courier", iso);
+      const c = client(null, sum, DEFAULT_SHIPPING_RULES, zone, "courier", "", iso);
       const server = quoteFromRules(DEFAULT_SHIPPING_RULES, { country, method: "courier", subtotal: sum });
       expect([country, sum, c.ship]).toEqual([country, sum, server.price]);
       return server;
@@ -213,7 +228,7 @@ describe("the checkout total on screen equals the one the server bills", () => {
       freeFromByCountry: { EU: 150, GR: null },
     };
     for (const [iso, sum] of [["DE", 100], ["DE", 150], ["GR", 10_000]] as const) {
-      const c = client(null, sum, rules, "EU", "courier", iso);
+      const c = client(null, sum, rules, "EU", "courier", "", iso);
       const server = quoteFromRules(rules, { country: iso, method: "courier", subtotal: sum });
       expect([iso, sum, c.ship]).toEqual([iso, sum, server.price]);
     }
@@ -230,5 +245,19 @@ describe("the checkout total on screen equals the one the server bills", () => {
     });
     expect(c.ship).toBe(server.price);
     expect(c.ship).toBe(5.99);
+  });
+
+  /* …and the other half of the same rule: an EMPTY carrier cell is Montonio's
+     own price for that carrier, not the country's «Пакомат» number. The
+     screen has to say so too — this is the pair Renat found, one Finnish
+     price for two different bills. */
+  it("agrees that an empty carrier cell is priced per carrier", () => {
+    const rules: ShippingRules = { ...RULES, methods: { ...RULES.methods, parcel: { ...RULES.methods.parcel, FI: 7.89 } } };
+    for (const [carrier, expected] of [["dpd", 12.39], ["smartpost", 9.39]] as const) {
+      const c = client(null, 40, rules, "FI", "parcel", carrier);
+      const server = quoteFromRules(rules, { country: "FI", method: "parcel", subtotal: 40, carrier });
+      expect(c.ship, carrier).toBe(server.price);
+      expect(c.ship, carrier).toBe(expected);
+    }
   });
 });

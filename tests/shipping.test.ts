@@ -240,8 +240,13 @@ describe("carrier overrides", () => {
     expect(quote("EE", "parcel", 10, "omniva", withCarriers).price).toBe(2.99);
     expect(quote("EE", "parcel", 10, "OMNIVA", withCarriers).price).toBe(2.99);
     expect(quote("LV", "parcel", 10, "dpd", withCarriers).price).toBe(6.5);
-    // a carrier with no entry falls back to the method table
-    expect(quote("EE", "parcel", 10, "smartpost", withCarriers).price).toBe(5.47);
+    /* A carrier with no entry used to fall back to the method table — one
+       Estonian price for every chip, while Montonio bills SmartPosti 2.54 and
+       Omniva 3.10. Since 13.09.2026 (Ренат: «we get prices from Montonio and
+       we should use those») it falls back to that carrier's own tariff. */
+    expect(quote("EE", "parcel", 10, "smartpost", withCarriers).price).toBe(2.59);
+    // …and only a route Montonio prices no carrier for reaches the column
+    expect(quote("EE", "parcel", 10, "", withCarriers).price).toBe(5.47);
   });
 
   /* A carrier cell is a parcel-machine price — the fill button writes no

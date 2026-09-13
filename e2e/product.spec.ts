@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { eur, functionalProject, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import { BUNDLE, eur, functionalProject, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /** Gallery, size switch → price, add to cart, cart drawer count, reviews.
  *  Desktop only — see docs/testing.md "Why most specs run on desktop only". */
@@ -140,5 +140,126 @@ test.describe("cart drawer — quantity stepper", () => {
     // Only the explicit control actually removes the line.
     await line.locator("[data-remove]").click();
     await expect(dialog.locator(".cline")).toHaveCount(0);
+  });
+
+  /* Ренат, 13.09.2026: «Cannot put more than 9 items to the cart.» Seven
+     literal `Math.min(9, …)` in app.js — one per way a quantity can change —
+     and nothing ever chose nine: the order route's own limit is 99. A salon
+     buying ten of a shampoo could not. */
+  test("the stepper goes past nine, all the way to the order route's own limit", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.locator("[data-cart]").first().click();
+    const dialog = page.getByRole("dialog", { name: /Корзина|Ostukorv|Cart/ });
+    const line = dialog.locator(".cline").first();
+    const plus = line.locator('[data-d="1"]');
+    const qty = line.locator("[data-qtyval]");
+
+    for (let i = 1; i < 10; i++) await plus.click();
+    await expect(qty).toHaveText("10");
+    // the badge counts the goods, not the lines
+    await expect(page.locator("[data-cartbadge]")).toHaveText("10");
+
+    // …and it does stop somewhere: 99, the number src/lib/orders.ts refuses
+    // above. A basket the shop will not price is worse than a stepper that ends.
+    for (let i = 10; i < 105; i++) await plus.click();
+    await expect(qty).toHaveText("99");
+  });
+});
+
+/* Ренат, 13.09.2026: «the "remove" button is sometimes behind the "+" and
+   sometimes on second row — this should remain same for all and be inline if
+   possible (seems to be)».
+ *
+ * Both happened, and neither was decided by the kind of line: the stepper and
+ * «Убрать» sat loose in `.cline__mid`, a plain block, so they shared one
+ * anonymous line box and wrapped — or collided with the price column — purely
+ * on how much width the name and the price left them. `.cline__acts` is that
+ * row made explicit. Measured rather than eyeballed, on the narrow viewport
+ * where it actually broke, with a product, a set and a gift card in the same
+ * basket so "the same for all" is what is asserted.
+ */
+test.describe("cart drawer — every line lays its controls out the same way", () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  test("stepper and «Убрать» stay inline on a product, a set and a gift card", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    // a set and a gift card, so all three kinds of line are in one basket
+    await page.goto(shopUrl("", "/sets/"));
+    await waitForScreen(page, "bundles");
+    await page.locator(`[data-addbundle="${BUNDLE.id}"]`).first().click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/gift/"));
+    await waitForScreen(page, "gift");
+    await page.locator('[data-giftamt="25"]').click();
+    await page.locator('[data-giftf="name"]').fill("Mari");
+    await page.locator('[data-addgift="25"]').click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.locator("[data-cart]").first().click();
+    const dialog = page.getByRole("dialog", { name: /Корзина|Ostukorv|Cart/ });
+    await expect(dialog).toBeVisible();
+    const lines = dialog.locator(".cline");
+    expect(await lines.count()).toBeGreaterThanOrEqual(3);
+
+    /* The drawer really is the narrow one. Without this the whole test would
+       quietly pass at the project's own 1280px, where it never broke — and the
+       viewport is what this test is about. `min(390px, 92vw)` = 345 at 375. */
+    const drawerWidth = await dialog.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    expect(drawerWidth, "the viewport override did not take — this is not a phone").toBeLessThanOrEqual(345);
+
+    const rows = await lines.evaluateAll((els) =>
+      els.map((el) => {
+        const acts = el.querySelector(".cline__acts") as HTMLElement;
+        const step = el.querySelector(".stepper") as HTMLElement;
+        const rm = el.querySelector(".cline__rm") as HTMLElement;
+        const a = acts.getBoundingClientRect();
+        const s = step.getBoundingClientRect();
+        const r = rm.getBoundingClientRect();
+        return {
+          // one line box: the acts row is no taller than the tallest control
+          wrapped: Math.round(a.height) > Math.round(Math.max(s.height, r.height)) + 1,
+          // «Убрать» is to the RIGHT of «+», never on top of it
+          overlaps: r.left < s.right - 1,
+          // the same vertical centre, whatever the line is
+          centre: Math.round(s.top + s.height / 2) - Math.round(r.top + r.height / 2),
+          // …and neither escapes the drawer
+          escapes: Math.round(r.right) > Math.round(el.getBoundingClientRect().right) + 1,
+        };
+      }),
+    );
+    for (const [i, row] of rows.entries()) {
+      expect(row.wrapped, `line ${i}: «Убрать» wrapped to a second row`).toBe(false);
+      expect(row.overlaps, `line ${i}: «Убрать» sits on top of the «+»`).toBe(false);
+      expect(Math.abs(row.centre), `line ${i}: the controls are not on one baseline`).toBeLessThanOrEqual(1);
+      expect(row.escapes, `line ${i}: the controls run out of the line`).toBe(false);
+    }
+
+    // no sideways scrolling on a 375px phone, which is where it used to break
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, "the cart drawer scrolls sideways at 375px").toBeLessThanOrEqual(0);
+
+    // …and the same on the narrowest phone anyone still carries
+    await page.setViewportSize({ width: 320, height: 568 });
+    const narrow = await lines.evaluateAll((els) =>
+      els.map((el) => {
+        const step = (el.querySelector(".stepper") as HTMLElement).getBoundingClientRect();
+        const rm = (el.querySelector(".cline__rm") as HTMLElement).getBoundingClientRect();
+        return { overlaps: rm.left < step.right - 1, escapes: Math.round(rm.right) > Math.round(el.getBoundingClientRect().right) + 1 };
+      }),
+    );
+    for (const [i, row] of narrow.entries()) {
+      expect(row.overlaps, `line ${i} at 320px: «Убрать» sits on top of the «+»`).toBe(false);
+      expect(row.escapes, `line ${i} at 320px: the controls run out of the line`).toBe(false);
+    }
   });
 });

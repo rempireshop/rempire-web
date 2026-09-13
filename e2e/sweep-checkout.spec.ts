@@ -290,12 +290,18 @@ test.describe("sweep checkout — quantities", () => {
     const minus = line.locator('[data-d="-1"]');
     const qty = line.locator("[data-qtyval]");
 
-    // Up: the app's own ceiling, whatever a shopper does with the button.
-    // There is no free-text quantity field anywhere in this storefront — the
-    // stepper is the only way in, so "0 / -1 / 1000 / abc" cannot be typed;
-    // what has to hold is that the stepper itself cannot leave the range.
+    /* Up: the app's own ceiling, whatever a shopper does with the button.
+       There is no free-text quantity field anywhere in this storefront — the
+       stepper is the only way in, so "0 / -1 / 1000 / abc" cannot be typed;
+       what has to hold is that the stepper itself cannot leave the range.
+       That ceiling was 9 until 13.09.2026 — «Cannot put more than 9 items to
+       the cart» (Ренат) — and is now CART_MAX_QTY = 99, the same number the
+       order route refuses above (`bad_qty`, src/lib/orders.ts). Twenty presses
+       therefore land on 21, not on the ceiling; the ceiling itself is walked
+       in e2e/product.spec.ts, which is the cheaper place to press a button a
+       hundred times. */
     for (let i = 0; i < 20; i++) await plus.click();
-    await expect(qty, `${label(ctx)} quantity ran past the app's ceiling`).toHaveText("9");
+    await expect(qty, `${label(ctx)} quantity did not follow the stepper`).toHaveText("21");
 
     // Down: floors at 1, and «−» is aria-disabled there. force: true because
     // CSS (pointer-events) is what blocks the pointer — this proves the
@@ -558,7 +564,9 @@ for (let scenario = 0; scenario < 10; scenario++) {
 
       await page.locator(".co__pay[data-pay]").click();
       await page.waitForURL(/\/api\/payments\/mock\//);
-      await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Отменить" }).click();
+      // the refusal, not the cancel: cancelling leaves the payment PENDING at
+      // a real bank, and the mock says so too (the mock route's own comment)
+      await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Банк отклонил платёж" }).click();
       await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
 
       const doneCtx: Ctx = { ...ctx, screen: `${ctx.screen}:receipt` };

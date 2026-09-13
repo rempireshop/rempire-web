@@ -17,6 +17,8 @@ import { exec } from "@/lib/db";
 import { createOrder, setSetting } from "@/lib/orders";
 import {
   DEFAULT_SHIPPING_RULES,
+  belowCostCells,
+  belowCostMessage,
   computeShipping,
   parseShippingRules,
   quoteFromRules,
@@ -177,6 +179,129 @@ describe("the rules the shop actually bills on", () => {
     expect(rules.methods.parcel.LV).toBe(DEFAULT_SHIPPING_RULES.methods.parcel.LV);
   });
 
+  /* Ренат, 13.09.2026: «Remove "Nova Post"». The live shop's settings row
+     already carries a `carriers.novapost` table written by the fill button
+     back when the mirror had Nova Post rows, and a row written once outlives
+     the code that wrote it. quoteFromRules() reads `rules.carriers?.[carrier]`
+     *before* the method's own table, so a stale entry is not inert — it is a
+     price nobody can reach that would win if an order ever carried that
+     carrier. parseShippingRules() is the one door every reader comes through,
+     so it is where the row is dropped. */
+  it("ignores a carrier the shop cannot ship with, Nova Post included", () => {
+    const rules = parseShippingRules({
+      carriers: { novapost: { EE: 0.01, default: 0.01 }, omniva: { EE: 3.29 } },
+    });
+    expect(rules.carriers?.novapost).toBeUndefined();
+    // the typed Estonian cell wins; the rest of Omniva stays on the mirror
+    expect(rules.carriers?.omniva?.EE).toBe(3.29);
+    expect(rules.carriers?.omniva?.LV).toBe(DEFAULT_SHIPPING_RULES.carriers?.omniva?.LV);
+    // …and a parcel tagged with Nova Post is billed the method's price, not 0.01 €
+    expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "novapost", subtotal: 10 }).price)
+      .toBe(DEFAULT_SHIPPING_RULES.methods.parcel.EE);
+  });
+
+  it("drops a carriers map that holds nothing the shop can use", () => {
+    expect(parseShippingRules({ carriers: { novapost: { EE: 0.01 } } }).carriers)
+      .toEqual(DEFAULT_SHIPPING_RULES.carriers);
+  });
+
+  /* Ренат, 13.09.2026: «we get prices from Montonio and we should use those,
+     we do not need to make them up.» An empty carrier cell used to fall
+     through to the country's «Пакомат» number, so one price covered every
+     chip while Montonio billed a different one per carrier. Now the empty
+     cell IS Montonio's price for that carrier, and a typed one still wins. */
+  it("prices an empty carrier cell from Montonio, not from the «Пакомат» column", () => {
+    const rules = parseShippingRules({ methods: { parcel: { FI: 7.89 } }, freeFrom: 10_000 });
+    const at = (carrier: string) =>
+      quoteFromRules(rules, { country: "FI", method: "parcel", carrier, subtotal: 20 }).price;
+    // DPD costs 12.39 in Finland, SmartPosti 9.30 — two carriers, two prices
+    expect(at("dpd")).toBe(12.39);
+    expect(at("smartpost")).toBe(9.39);
+    expect(at("dpd")).toBeGreaterThan(7.89);
+    // …and with no carrier at all the column is still what prices it
+    expect(quoteFromRules(rules, { country: "FI", method: "parcel", subtotal: 20 }).price).toBe(7.89);
+  });
+
+  it("a typed carrier cell still wins over Montonio's own price", () => {
+    const rules = parseShippingRules({ carriers: { dpd: { FI: 14.9 } }, freeFrom: 10_000 });
+    expect(quoteFromRules(rules, { country: "FI", method: "parcel", carrier: "dpd", subtotal: 20 }).price)
+      .toBe(14.9);
+  });
+
+  /* A carrier cell is a parcel-machine price and nothing writes a courier one,
+     so the Montonio fallback must not price a courier off a parcel tariff
+     either — the same hole the carrier lookup itself had. */
+  it("never prices a courier from a parcel carrier's tariff", () => {
+    const rules = parseShippingRules({ freeFrom: 10_000 });
+    expect(quoteFromRules(rules, { country: "EE", method: "courier", carrier: "dpd", subtotal: 20 }).price)
+      .toBe(DEFAULT_SHIPPING_RULES.methods.courier.EE);
+  });
+
+  /* Ренат, 13.09.2026. The panel already printed the cost under each box and
+     reddened it when the price was under; nine of fourteen carrier-country
+     pairs still went out below cost. What belowCostCells() answers is what the
+     save now refuses. */
+  describe("what may never be saved: a price below Montonio's own tariff", () => {
+    it("catches a carrier cell under that carrier's price, and names both numbers", () => {
+      const rules = parseShippingRules({ carriers: { dpd: { FI: 7.89 } } });
+      const bad = belowCostCells(rules);
+      expect(bad).toEqual([{ carrier: "dpd", country: "FI", method: "parcel", charged: 7.89, cost: 12.39 }]);
+      const said = belowCostMessage(bad);
+      expect(said).toContain("Пакомат DPD, Финляндия");
+      expect(said).toContain("7,89 €");
+      expect(said).toContain("12,39 €");
+    });
+
+    it("lets the price stand at the tariff exactly — cost covered is not a loss", () => {
+      expect(belowCostCells(parseShippingRules({ carriers: { dpd: { FI: 12.39 } } }))).toEqual([]);
+      expect(belowCostCells(parseShippingRules({ carriers: { dpd: { FI: 12.4 } } }))).toEqual([]);
+    });
+
+    it("catches the courier column too", () => {
+      // SmartPosti is the cheapest courier to Germany at 22.23 — Renat picks it
+      const bad = belowCostCells(parseShippingRules({ methods: { courier: { DE: 9.9 } } }));
+      expect(bad).toEqual([{ carrier: "", country: "DE", method: "courier", charged: 9.9, cost: 22.23 }]);
+      expect(belowCostMessage(bad)).toContain("Курьер, Германия");
+    });
+
+    /* A courier's carrier is Renat's choice when he makes the label, so the
+       floor is the cheapest he can pick, not the dearest. Finland's 16.29 €
+       courier covers SmartPosti's 15.62 € even though DPD would cost 20.09 €:
+       a thin margin, not a hole, and refusing the save over it would refuse a
+       price that makes money. */
+    it("prices a courier against the cheapest carrier, because nobody else picks it", () => {
+      expect(belowCostCells(parseShippingRules({ methods: { courier: { FI: 16.29 } } }))).toEqual([]);
+      expect(belowCostCells(parseShippingRules({ methods: { courier: { FI: 15.5 } } }))).toHaveLength(1);
+    });
+
+    /* Inside EE/LV/LT/FI the shopper always picks a chip, so the carrier cell
+       is what bills and the «Пакомат» column is a fallback nobody reaches.
+       Flagging it would refuse a save over a number that charges no one. */
+    it("leaves the parcel column alone where the shopper picks the carrier", () => {
+      expect(belowCostCells(parseShippingRules({ methods: { parcel: { FI: 7.89 } } }))).toEqual([]);
+      // …but not outside those four, where the column IS the price
+      expect(belowCostCells(parseShippingRules({ methods: { parcel: { PL: 9.9 } } }))).toHaveLength(1);
+    });
+
+    it("says nothing about a zone row, a default or the free-delivery floor", () => {
+      expect(belowCostCells(parseShippingRules({ methods: { courier: { default: 1, EU: 1 } } }))).toEqual([]);
+      expect(belowCostCells(parseShippingRules({ freeFrom: 0 }))).toEqual([]);
+    });
+
+    it("passes the shop's own defaults, which is the point of them", () => {
+      expect(belowCostCells(DEFAULT_SHIPPING_RULES)).toEqual([]);
+      expect(belowCostCells(parseShippingRules({}))).toEqual([]);
+    });
+
+    it("lists several at once and stops naming them after six", () => {
+      const many = belowCostCells(parseShippingRules({
+        carriers: { dpd: { EE: 0.5, LV: 0.5, LT: 0.5, FI: 0.5 }, omniva: { EE: 0.5, LV: 0.5, LT: 0.5 } },
+      }));
+      expect(many).toHaveLength(7);
+      expect(belowCostMessage(many)).toContain("и ещё 1");
+    });
+  });
+
   it("lets a country never have free delivery", () => {
     const rules = parseShippingRules({ freeFrom: 59, freeFromByCountry: { LV: null } });
     expect(quoteFromRules(rules, { country: "LV", method: "parcel", subtotal: 500 }).price).toBe(5.59);
@@ -221,6 +346,12 @@ describe("the rules the shop actually bills on", () => {
     });
     resetShippingRulesCache();
     expect((await computeShipping({ country: "EE", method: "parcel", subtotal: 20, carrier: "omniva" })).price).toBe(3.29);
-    expect((await computeShipping({ country: "EE", method: "parcel", subtotal: 20, carrier: "dpd" })).price).toBe(4.5);
+    /* DPD has no cell of its own here, and since 13.09.2026 that does NOT
+       mean «charge 4,50 like everything else in Estonia» — it means «charge
+       what DPD costs», 2.59. The whole point: one price per country was the
+       wrong shape, because Montonio bills per carrier and the shopper picks. */
+    expect((await computeShipping({ country: "EE", method: "parcel", subtotal: 20, carrier: "dpd" })).price).toBe(2.59);
+    // …and with no carrier at all the method column still prices it
+    expect((await computeShipping({ country: "EE", method: "parcel", subtotal: 20 })).price).toBe(4.5);
   });
 });

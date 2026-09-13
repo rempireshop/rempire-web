@@ -707,8 +707,21 @@ body:has(.stickybar) .ftr {
 .cline__ph { position: relative; width: 62px; height: 62px; flex-shrink: 0; }
 .cline__mid { flex: 1; min-width: 0; }
 .cline__nm { display: block; font-size: 13.5px; margin-bottom: 7px; }
-.cline__rm { font-size: 12px; margin-left: 8px; padding: 14px 4px; }
-.cline__pr { font-weight: 600; font-size: 13.5px; }
+/* Renat, 13.09.2026: «the "remove" button is sometimes behind the "+" and
+   sometimes on second row — this should remain same for all and be inline if
+   possible». Both happened, and neither was about the kind of line: the
+   stepper (inline-flex, 124px and unshrinkable) and «Убрать» (inline-block)
+   used to sit loose in .cline__mid, a plain block, so they shared one
+   anonymous line box. On a 390px drawer they fitted; on a phone, or under a
+   long set name, or beside a four-digit price — .cline__pr had no
+   flex-shrink — the button dropped to a second line, and where .cline__mid
+   was squeezed past its min-content width the stepper overflowed into the
+   price column and the button painted on top of the «+».
+   One explicit flex row fixes all of it: nothing wraps, nothing overlaps, and
+   a product, a set and a gift card lay out identically. */
+.cline__acts { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.cline__rm { font-size: 12px; padding: 14px 4px; flex: 0 0 auto; white-space: nowrap; }
+.cline__pr { font-weight: 600; font-size: 13.5px; flex-shrink: 0; }
 
 .freebar { margin-top: 6px; }
 .freebar__track { height: 3px; background: var(--shell); }
