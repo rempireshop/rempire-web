@@ -17,7 +17,7 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
-import { birthdayWindow, getFlowRuns, runBirthdays, runFlows } from "@/lib/flows";
+import { birthdayWindow, getFlowRuns, runAbandonedCarts, runBirthdays, runFlows } from "@/lib/flows";
 import { setSetting } from "@/lib/orders";
 import { adminCookieHeader, makeRequest, setFuzzEnv } from "./fuzz-harness";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
@@ -49,6 +49,18 @@ async function customer(birthday: string, stampedYear: number | null = null): Pr
   );
   return rows[0].id;
 }
+/** One abandoned cart, last touched `ageMs` ago. */
+async function cart(email: string, ageMs: number, now: number = Date.now()): Promise<void> {
+  await query(
+    `insert into carts (email, lang, items, total, updated_at)
+     values ($1, 'EN', '[{"id":"demo-1","title":"Demo","qty":1,"price":10}]'::jsonb, 10, $2)
+     on conflict (email) do update
+       set items = excluded.items, total = excluded.total, updated_at = excluded.updated_at,
+           reminded_at = null, recovered_at = null`,
+    [email, new Date(now - ageMs).toISOString()],
+  );
+}
+
 async function sentYear(id: string): Promise<number | null> {
   const rows = await query<{ y: number | string | null }>("select birthday_sent_year as y from customers where id = $1", [id]);
   return rows[0].y == null ? null : Number(rows[0].y);
@@ -75,6 +87,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await truncateAll();
   await query("delete from customers");
+  await query("delete from carts");
   await query("delete from promo_codes");
   await query("delete from mail_optouts");
   sent.length = 0;
@@ -230,6 +243,96 @@ describe("runBirthdays() — the tolerant window", () => {
 
 /* ---------- «Запустить сейчас» ------------------------------------------- */
 
+/* ---------- why nothing went out ------------------------------------------
+   Renat, 13.09.2026: «I filled out e-mail and left cart, tried to send now but
+   nothing arrived», and «Put birthday, but no e-mail.» Both runs answered
+   «отправлено 0 · пропущено 0» — a zero that means «found nothing» read as a
+   zero that means «broken». Each condition that hides a row now has a name. */
+describe("runAbandonedCarts() — the skip says why", () => {
+  const NOON = Date.UTC(2026, 8, 13, 12, 0, 0);
+
+  it("names a cart that is simply younger than three hours", async () => {
+    await setSetting("flows", { abandoned: true });
+    await cart("dim@example.com", 5 * 60_000, NOON);
+    const run = await runAbandonedCarts(NOON);
+    expect(run.sent).toBe(0);
+    expect(run.reason).toBe("too_fresh");
+    expect(run.skips).toEqual({ too_fresh: 1 });
+    expect(sent).toHaveLength(0);
+  });
+
+  it("names an address that ordered after leaving the basket", async () => {
+    await setSetting("flows", { abandoned: true });
+    await cart("dim@example.com", 4 * 60 * 60_000, NOON);
+    await query(
+      `insert into orders (number, lang, email, name, status, items, subtotal, total, created_at)
+       values ('R-900001', 'EN', 'dim@example.com', 'Dim', 'paid', '[]'::jsonb, 10, 10, $1)`,
+      [new Date(NOON - 60 * 60_000).toISOString()],
+    );
+    const run = await runAbandonedCarts(NOON);
+    expect(run.sent).toBe(0);
+    expect(run.skips).toEqual({ ordered_since: 1 });
+  });
+
+  it("names a cart whose reminder has already gone, and does not count it as a send", async () => {
+    await setSetting("flows", { abandoned: true });
+    await cart("dim@example.com", 4 * 60 * 60_000, NOON);
+    expect((await runAbandonedCarts(NOON)).sent).toBe(1);
+    const again = await runAbandonedCarts(NOON);
+    expect(again.sent).toBe(0);
+    expect(again.reason).toBe("already_sent");
+    expect(again.skips).toEqual({ already_sent: 1 });
+  });
+
+  it("says «opted_out» for a cart whose address pressed «Отписаться»", async () => {
+    await setSetting("flows", { abandoned: true });
+    await cart("dim@example.com", 4 * 60 * 60_000, NOON);
+    await query("insert into mail_optouts (email, kind) values ('dim@example.com', 'marketing')");
+    const run = await runAbandonedCarts(NOON);
+    expect(run.sent).toBe(0);
+    expect(run.skipped).toBe(1);
+    expect(run.skips).toEqual({ opted_out: 1 });
+  });
+});
+
+describe("runBirthdays() — the skip says why", () => {
+  const today = new Date();
+  const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+
+  it("names a date typed without the «хочу письма» tick", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 0 });
+    await query(
+      `insert into customers (email, name, lang, birthday, marketing) values ($1, 'Dim', 'EN', $2, false)`,
+      ["nobox@example.com", iso],
+    );
+    const run = await runBirthdays();
+    expect(run.sent).toBe(0);
+    expect(run.reason).toBe("no_marketing");
+    expect(run.skips).toMatchObject({ no_marketing: 1 });
+    expect(sent).toHaveLength(0);
+  });
+
+  it("names a birthday that is not in this run's window", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 0 });
+    const far = new Date(today.getTime() + 40 * DAY);
+    await query(
+      `insert into customers (email, name, lang, birthday, marketing) values ($1, 'Dim', 'EN', $2, true)`,
+      ["far@example.com", `1990-${String(far.getUTCMonth() + 1).padStart(2, "0")}-${String(far.getUTCDate()).padStart(2, "0")}`],
+    );
+    const run = await runBirthdays();
+    expect(run.sent).toBe(0);
+    expect(run.skips).toMatchObject({ not_in_window: 1 });
+  });
+
+  it("names this year's letter that has already gone", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 0 });
+    await customer(iso, today.getUTCFullYear());
+    const run = await runBirthdays();
+    expect(run.sent).toBe(0);
+    expect(run.skips).toMatchObject({ already_sent: 1 });
+  });
+});
+
 describe("POST /api/admin/flows/run/", () => {
   async function run(body: unknown, cookie: string | null = adminCookieHeader()) {
     const { POST } = await import("@/app/api/admin/flows/run/route");
@@ -277,6 +380,15 @@ describe("POST /api/admin/flows/run/", () => {
     const runs = await getFlowRuns();
     expect(runs.birthday).toMatchObject({ by: "admin", sent: 0 });
     expect(runs.abandoned).toBeUndefined();
+  });
+
+  it("carries the skip reasons through to settings.flow_runs", async () => {
+    await setSetting("flows", { abandoned: true });
+    await cart("fresh-run@example.com", 5 * 60_000);
+    const res = await run({ flow: "abandoned" });
+    expect(res.body).toMatchObject({ sent: 0, reason: "too_fresh" });
+    expect(res.body.skips).toMatchObject({ too_fresh: 1 });
+    expect((await getFlowRuns()).abandoned).toMatchObject({ by: "admin", reason: "too_fresh", skips: { too_fresh: 1 } });
   });
 
   it("the cron records its own runs on the same line", async () => {

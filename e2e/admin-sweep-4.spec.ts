@@ -800,8 +800,15 @@ test.describe("admin — «Письма» can be run without waiting for the sch
       await page.locator('[data-admflow="abandoned"]').click();
       await clearToast(page);
       await page.locator('[data-admflowrun="abandoned"]').click();
-      await expect(page.getByRole("status")).toContainText("Отправлено 0 · пропущено 0");
+      /* Renat, 13.09.2026: «I filled out e-mail and left cart, tried to send
+         now but nothing arrived.» It was a cart five minutes old — the sender
+         waits three hours — and the panel said «Отправлено 0 · пропущено 0»,
+         which is what a broken sender looks like. A run that sends nothing now
+         says what it walked past, both in the toast and on the row. */
+      await expect(page.getByRole("status")).toContainText("Никому не отправлено:");
       await expect(page.locator('[data-admflowlast="abandoned"]')).toContainText("Последний запуск:");
+      // …and the count is never the end of that line: a reason follows it
+      await expect(page.locator('[data-admflowlast="abandoned"]')).toContainText(/отправлено 0 · \S/);
       await clearToast(page);
       await assertClean(page, w, "run now");
     } finally {

@@ -25,6 +25,7 @@ import {
   renderInvoiceReminder,
   renderLoginCode,
   renderOrderCancelled,
+  renderPosReceipt,
   renderOrderConfirmed,
   renderOrderShipped,
   renderOrderUnpaid,
@@ -266,6 +267,14 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
           kind: "refunded",
           amount: 42,
         });
+      /* «Чек о продаже в салоне»: the sale is over and nothing ships, so the
+         sample carries a discount the cashier typed and no delivery at all. */
+      case "pos-receipt":
+        return renderPosReceipt(
+          { ...sampleOrder(lang), shipping: { method: "pickup", country: "EE" }, shipping_price: 0 },
+          lang,
+          { method: "cash" },
+        );
       case "abandoned-cart":
         return renderAbandonedCart(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7");
       case "back-in-stock":

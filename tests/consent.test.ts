@@ -475,14 +475,21 @@ describe("the stop list and the three letters", () => {
     await optOut(EMAIL, "marketing", "link");
 
     const run = await runAbandonedCarts();
-    expect(run).toEqual({ sent: 1, skipped: 1, reason: "opted_out" });
+    // «пропущено 1» and, since 13.09.2026, what it was skipped FOR
+    expect(run).toEqual({ sent: 1, skipped: 1, reason: "opted_out", skips: { opted_out: 1 } });
     expect(sent).toHaveLength(1);
     expect(sent[0].to).toEqual([OTHER]);
 
     // the refused cart is stamped like a sent one: never re-selected, never re-counted
     const carts = await query<{ email: string; reminded_at: string | null }>("select email, reminded_at from carts order by email");
     expect(carts.every((c) => c.reminded_at !== null)).toBe(true);
-    expect(await runAbandonedCarts()).toEqual({ sent: 0, skipped: 0, reason: undefined });
+    // …and the next run says as much out loud instead of reporting a bare zero
+    expect(await runAbandonedCarts()).toEqual({
+      sent: 0,
+      skipped: 0,
+      reason: "already_sent",
+      skips: { already_sent: 2 },
+    });
 
     // the letter that did go out: the footer link and the one-click headers, both for this mailbox
     const url = unsubscribeUrl(OTHER, "RU", "marketing");

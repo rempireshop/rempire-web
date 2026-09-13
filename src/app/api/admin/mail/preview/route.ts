@@ -1,5 +1,5 @@
 import { clientIp, rateLimit } from "@/lib/auth";
-import { renderDemo, isTemplateId, TEMPLATE_IDS } from "@/emails";
+import { demoValues, renderDemo, isTemplateId, TEMPLATE_IDS } from "@/emails";
 import { normalizeLang } from "@/emails/layout";
 import {
   MAIL_PLACEHOLDERS,
@@ -71,6 +71,12 @@ export async function GET(req: Request): Promise<Response> {
         limits: MAIL_TEXT_LIMITS,
         defaults: MAIL_TEXT_DEFAULTS,
         texts: mailTextsOverride(),
+        /* What the tokens become in the sample letter this same route renders
+           — so the panel's live preview shows the name, the number and the sum
+           the iframe beside it shows (Renat, 13.09.2026: «Name also in preview
+           is "Mart" in e-mail it's "Renat"»). Keyed by template; the demo data
+           is the same in all three languages. */
+        samples: Object.fromEntries(TEMPLATE_IDS.map((id) => [id, demoValues(id, lang)])),
       },
       { headers: { "cache-control": "no-store", "X-Robots-Tag": "noindex, nofollow" } },
     );

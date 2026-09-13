@@ -27,7 +27,7 @@
  * failure.
  */
 import { requireAdmin } from "@/lib/auth";
-import { getCustomer, isEmail, normalizeEmail } from "@/lib/customers";
+import { getCustomer, isEmail, normalizeEmail, type Customer } from "@/lib/customers";
 import { query } from "@/lib/db";
 import { createOrder, OrderError, setOrderPayment, type Order } from "@/lib/orders";
 import { settlePayment } from "@/lib/payments/settle";
@@ -70,8 +70,51 @@ async function decrementPosStock(order: {
 }
 
 /**
- * Tie the sale to the customer card the typed address already belongs to, so
- * the points land somewhere and the sale shows up in «Клиенты».
+ * The customer card the typed address already belongs to, or null. Looked up
+ * ONCE per sale, before the order is written: its language decides the
+ * receipt (see `receiptLang`) and its id ties the sale to the card afterwards.
+ */
+async function findCustomer(email: unknown): Promise<Customer | null> {
+  const clean = normalizeEmail(email);
+  if (!clean || !isEmail(clean)) return null;
+  try {
+    return await getCustomer(clean);
+  } catch (err) {
+    console.error("[api/admin/pos-orders] customer lookup failed, settling as a walk-in:", err);
+    return null;
+  }
+}
+
+/**
+ * What language the receipt is written in.
+ *
+ * Renat, 13.09.2026: «I did a salon sale in English, but e-mail arrived in
+ * russian.» This route never sent a language at all, so createOrder() stamped
+ * its default — RU — on every sale in the room, and the letter followed the
+ * order like every other letter does. The rule everywhere in this shop is
+ * that the row's language is the customer's, so:
+ *
+ *   1. the customer's own card, when the address at the till matches one —
+ *      it is the language they chose for themselves in the shop;
+ *   2. otherwise the language the sale was rung up in, which the register
+ *      sends with the body: for a walk-in with no card it is the only thing
+ *      anybody knows about the person standing there, and the cashier chose
+ *      it while looking at them;
+ *   3. RU, the shop's own.
+ *
+ * The panel's language reaches a letter here and only here, and only because
+ * at the till it IS what the customer was served in.
+ */
+function receiptLang(customer: Customer | null, body: Body): string {
+  const own = String(customer?.lang ?? "").trim().toUpperCase();
+  if (own === "RU" || own === "ET" || own === "EN") return own;
+  const till = String(body.lang ?? "").trim().toUpperCase().slice(0, 2);
+  return till === "ET" || till === "EN" || till === "RU" ? till : "RU";
+}
+
+/**
+ * Tie the sale to the customer card, so the points land somewhere and the sale
+ * shows up in «Клиенты».
  *
  * Deliberately NOT done by handing `customerId` to createOrder(): that would
  * also switch the basket to pro pricing, and the register charges what its
@@ -80,19 +123,16 @@ async function decrementPosStock(order: {
  * therefore stamped 'retail', which is the honest record of what was charged.
  * Never creates a customer: an address typed at the till is not a sign-up.
  */
-async function attachCustomer(order: Order): Promise<Order> {
-  const email = normalizeEmail(order.email);
-  if (!email || !isEmail(email)) return order;
+async function attachCustomer(order: Order, customer: Customer | null): Promise<Order> {
+  if (!customer) return order;
   try {
-    const customer = await getCustomer(email);
-    if (!customer) return order;
     await query("update orders set customer_id = $2, pricing_tier = 'retail' where id = $1 and customer_id is null", [
       order.id,
       customer.id,
     ]);
     return { ...order, customerId: customer.id, pricingTier: "retail" };
   } catch (err) {
-    console.error("[api/admin/pos-orders] customer lookup failed, settling as a walk-in:", err);
+    console.error("[api/admin/pos-orders] customer not attached, settling as a walk-in:", err);
     return order;
   }
 }
@@ -102,6 +142,8 @@ type Body = {
   customer?: { email?: unknown; phone?: unknown; name?: unknown };
   payment?: { method?: unknown };
   discountPercent?: unknown;
+  /** The language the register was in when the sale was rung up — see receiptLang(). */
+  lang?: unknown;
 };
 
 export async function POST(req: Request) {
@@ -147,8 +189,13 @@ export async function POST(req: Request) {
   const customer = body.customer ?? {};
 
   try {
+    /* Before the row is written, not after: `orders.lang` is what every letter
+       about this sale renders from, and it cannot be corrected once the
+       receipt has gone (receiptLang above). */
+    const card = await findCustomer(customer.email);
     const order = await createOrder({
       channel: "pos",
+      lang: receiptLang(card, body),
       items: cleanItems,
       customer: {
         name: typeof customer.name === "string" ? customer.name : undefined,
@@ -166,7 +213,7 @@ export async function POST(req: Request) {
     const paidAt = new Date().toISOString();
     await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
 
-    const settled = await attachCustomer(order);
+    const settled = await attachCustomer(order, card);
     let mailed = false;
     try {
       await settlePayment(

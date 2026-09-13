@@ -241,9 +241,15 @@ describe("a salon sale is settled, not just marked paid", () => {
     // the three things the old path skipped
     expect(await getLoyaltyBalance(customer.id)).toBeGreaterThan(0);
     expect(await purchaseEvents(order.id)).toHaveLength(1);
-    const letters = capturedMail().filter((m) => m.template === "order-confirmed");
+    /* The receipt, not «Заказ принят»: the goods left with the customer, so
+       the letter that promises to write when the order is ready is the wrong
+       one (Renat, 13.09.2026 — «The receipt should also land in the users
+       e-mail»). This card is Russian, so the receipt is. */
+    const letters = capturedMail().filter((m) => m.template === "pos-receipt");
     expect(letters).toHaveLength(1);
     expect(letters[0].to).toEqual([email]);
+    expect(letters[0].subject).toMatch(/^Чек R-1\d{5} — Rempire$/);
+    expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(0);
 
     // and the one thing that must not change: the shelf reason
     expect((await getLevel(product.id, ""))?.qty).toBe(8);
@@ -264,7 +270,7 @@ describe("a salon sale is settled, not just marked paid", () => {
     expect(order.customerId).toBeNull();
     // the revenue row is written for a walk-in too — it is the shop's takings
     expect(await purchaseEvents(order.id)).toHaveLength(1);
-    expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(0);
+    expect(capturedMail()).toHaveLength(0);
     expect((await getLevel(product.id, ""))?.qty).toBe(4);
   });
 
@@ -279,6 +285,47 @@ describe("a salon sale is settled, not just marked paid", () => {
     expect(await query("select id from customers where email = 'never-seen-before@example.com'")).toHaveLength(0);
     // the letter still goes — the address was typed for exactly that
     expect(body.mailed).toBe(true);
-    expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(1);
+    expect(capturedMail().filter((m) => m.template === "pos-receipt")).toHaveLength(1);
+  });
+
+  /* ---------- whose language the receipt is in ---------------------------
+     Renat, 13.09.2026: «I did a salon sale in English, but e-mail arrived in
+     russian.» The till sent no language at all, so createOrder() stamped its
+     RU default on every sale in the room. The rule now: the customer's own
+     card first, the language the sale was rung up in for a walk-in who has
+     none — and the panel's language reaches a letter nowhere else. */
+  it("writes the receipt in the language the sale was rung up in", async () => {
+    const body = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      customer: { email: "english-walkin@example.com" },
+      payment: { method: "cash" },
+      lang: "EN",
+    });
+    expect((await getOrder(body.orderId))?.lang).toBe("EN");
+    const [letter] = capturedMail().filter((m) => m.template === "pos-receipt");
+    expect(letter.subject).toMatch(/^Receipt R-1\d{5} — Rempire$/);
+  });
+
+  it("prefers the customer's own language over the register's", async () => {
+    const email = "eesti-klient@example.com";
+    await recordLogin(email, "ET");
+    const body = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      customer: { email },
+      payment: { method: "terminal" },
+      lang: "EN",
+    });
+    expect((await getOrder(body.orderId))?.lang).toBe("ET");
+    const [letter] = capturedMail().filter((m) => m.template === "pos-receipt");
+    expect(letter.subject).toMatch(/^Kviitung R-1\d{5} — Rempire$/);
+  });
+
+  it("falls back to Russian when nobody said anything about a language", async () => {
+    const body = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      customer: { email: "quiet@example.com" },
+      payment: { method: "cash" },
+    });
+    expect((await getOrder(body.orderId))?.lang).toBe("RU");
   });
 });

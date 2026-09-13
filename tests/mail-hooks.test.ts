@@ -6,7 +6,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { onOrderCreated, onOrderPaid, onOrderShipped } from "@/lib/mail-hooks";
+import { onOrderClosed, onOrderCreated, onOrderPaid, onOrderShipped } from "@/lib/mail-hooks";
 import type { OrderLike } from "@/emails";
 
 const ENV_KEYS = [
@@ -157,6 +157,21 @@ describe("onOrderPaid", () => {
     await onOrderPaid({ ...ORDER, lang: "ET" });
 
     expect(String(payloadOf(calls.resend[0]).subject)).toContain("Tellimus");
+  });
+
+  /* Renat, 13.09.2026, about R-100015: «I got the letter in russian, although
+     I think everything was in English … can you confirm that everything was
+     correct there». One rule, and it is the row's: every letter about an order
+     renders from `orders.lang` and from nothing else — the cancellation like
+     the confirmation, whichever door sent it. */
+  it("every letter about an order follows that order's language, cancellation included", async () => {
+    for (const [lang, needle] of [["EN", "cancelled"], ["ET", "tühistatud"], ["RU", "отменён"]] as const) {
+      const { fn, calls } = makeFetch();
+      vi.stubGlobal("fetch", fn);
+      await onOrderClosed({ ...ORDER, lang, status: "cancelled" }, { kind: "cancelled" });
+      expect(String(payloadOf(calls.resend[0]).subject).toLowerCase(), `${lang} cancellation`).toContain(needle);
+      vi.unstubAllGlobals();
+    }
   });
 
   it("still pings the shop when the order has no customer address", async () => {
