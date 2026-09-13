@@ -252,7 +252,8 @@
         "Число рядом с «Фильтры» совпадает с числом карточек.",
         "Фильтр оставляет только выбранный бренд.",
         "Сброс возвращает весь раздел.",
-        "Квадратик «Подарочная карта» внизу списка в счёт не идёт."
+        "Квадратик «Подарочная карта» внизу списка в счёт не идёт.",
+        "Панель фильтров при сбросе не закрывается и не открывается заново."
       ],
       "why": "Врущий фильтр прячет товар, который у вас есть.",
       "risk": "low",
@@ -272,7 +273,8 @@
           "The number beside «Фильтры» matches the cards on screen.",
           "The filter leaves only the brand you picked.",
           "Clearing it brings the whole section back.",
-          "The «Подарочная карта» square at the end is not counted."
+          "The «Подарочная карта» square at the end is not counted.",
+          "Clearing does not close the filter pane or re-open it."
         ],
         "why": "A filter that lies hides a product you actually have."
       }
@@ -608,13 +610,15 @@
       "title": "В наборе кончился один товар",
       "steps": [
         "В панели снять с продажи один товар из набора.",
-        "Открыть этот набор в магазине.",
+        "Открыть этот набор в магазине, ничего не перезагружая.",
         "Вернуть товар в продажу."
       ],
       "expect": [
         "Набор по-прежнему виден в магазине.",
         "Кнопки «В корзину» у него нет.",
-        "Вместо неё строчка, что одного товара сейчас нет."
+        "Вместо неё строчка, что одного товара сейчас нет.",
+        "В списке «Что внутри» на строке того товара стоит «нет в наличии».",
+        "Всё это видно без перезагрузки страницы."
       ],
       "why": "Проданный набор без одной баночки — это заказ, который вы не соберёте.",
       "risk": "med",
@@ -623,13 +627,15 @@
         "title": "One product in a set has run out",
         "steps": [
           "In the panel take one of the set's products off sale.",
-          "Open that set in the shop.",
+          "Open that set in the shop, reloading nothing.",
           "Put the product back on sale."
         ],
         "expect": [
           "The set is still visible in the shop.",
           "It has no «В корзину» button.",
-          "In its place, a line saying one product is missing."
+          "In its place, a line saying one product is missing.",
+          "In the «Что внутри» list that product's own line says «нет в наличии».",
+          "All of this shows without reloading the page."
         ],
         "why": "A set sold without one of its bottles is an order you cannot pack."
       }
@@ -765,8 +771,8 @@
       ],
       "expect": [
         "Эстония: 5,47 € пакомат, 10,84 € курьер.",
-        "Латвия и Литва: 5,59 € и 9,90 €.",
-        "Финляндия: 12,39 € и 15,69 €.",
+        "Латвия и Литва: 5,59 € пакомат, курьер 16,29 € и 17,79 €.",
+        "Финляндия: 7,89 € и 16,29 €.",
         "Бесплатно от 59 €: Эстония, Латвия, Литва, Финляндия.",
         "Для остальной Европы бесплатно от 200 €.",
         "На кассе всё то же самое, до цента."
@@ -783,8 +789,8 @@
         ],
         "expect": [
           "Estonia: 5.47 € parcel locker, 10.84 € courier.",
-          "Latvia and Lithuania: 5.59 € and 9.90 €.",
-          "Finland: 12.39 € and 15.69 €.",
+          "Latvia and Lithuania: 5.59 € locker, courier 16.29 € and 17.79 €.",
+          "Finland: 7.89 € and 16.29 €.",
           "Free from 59 €: Estonia, Latvia, Lithuania, Finland.",
           "The rest of Europe: free from 200 €.",
           "The checkout shows the same, to the cent."
@@ -840,12 +846,14 @@
         "Ввести в поиск «перхоть» и подождать пару секунд.",
         "Стереть и ввести «жирные волосы».",
         "Стереть и ввести «секущиеся кончики».",
-        "Стереть и ввести по-эстонски «rasvased juuksed»."
+        "Стереть и ввести по-эстонски «rasvased juuksed».",
+        "Напечатать «rasvased » с пробелом в конце, потом стереть всё поле."
       ],
       "expect": [
         "На каждую из четырёх фраз находятся товары.",
         "У найденных товаров это написано в описании.",
-        "Пустого ответа нет ни на одну фразу."
+        "Пустого ответа нет ни на одну фразу.",
+        "Клавиатура не пропадает, пока печатаешь и когда стираешь всё поле."
       ],
       "why": "Пустой ответ на «перхоть» — это покупатель, ушедший в аптеку.",
       "risk": "med",
@@ -856,12 +864,14 @@
           "Type «перхоть» (dandruff) into the search and wait a couple of seconds.",
           "Clear it and type «жирные волосы» (oily hair).",
           "Clear it and type «секущиеся кончики» (split ends).",
-          "Clear it and type the Estonian «rasvased juuksed»."
+          "Clear it and type the Estonian «rasvased juuksed».",
+          "Type «rasvased » with a trailing space, then clear the whole field."
         ],
         "expect": [
           "All four phrases find products.",
           "The products found say so in their description.",
-          "None of the four comes back empty."
+          "None of the four comes back empty.",
+          "The keyboard stays up while you type and when you clear the field."
         ],
         "why": "An empty answer to «перхоть» is a buyer who walks off to the pharmacy."
       }
@@ -1208,14 +1218,15 @@
         "В «Товарах» открыть товар на правку и нажать «Назад».",
         "Нажать «Ещё», потом «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
-        "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад»."
+        "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад».",
+        "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется."
       ],
       "expect": [
         "Карточка заказа закрывается, а панель остаётся.",
         "Первое «Назад» убирает вопрос, второе — карточку.",
         "Редактор товара и «Ещё» закрываются так же.",
         "Сканер закрывается, камера гаснет, панель на месте.",
-        "После «← Товары» одно «Назад» уводит из панели.",
+        "«Назад» возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
         "Ни одно нажатие не проходит впустую."
       ],
       "why": "Ренат жаловался, что «Назад» иногда выкидывало его из панели в магазин, а обратно приходилось идти через меню.",
@@ -1229,14 +1240,15 @@
           "In «Товары» open a product for editing and press back.",
           "Press «Ещё», then back.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
-          "Open a product for editing again, close it with «← Товары», then press back."
+          "Open a product for editing again, close it with «← Товары», then press back.",
+          "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes."
         ],
         "expect": [
           "The order card closes and the panel stays.",
           "The first back clears the question, the second the card.",
           "The product editor and «Ещё» close the same way.",
           "The scanner closes, the camera goes out, the panel stays.",
-          "After «← Товары» one back leaves the panel.",
+          "Back returns to the previous section; only «Обзор» leaves the panel.",
           "No press does nothing at all."
         ],
         "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu."
@@ -1339,7 +1351,7 @@
         "TEST10 стоит в списке.",
         "TESTSHIP стоит в списке.",
         "У обоих переключатель стоит на «включён».",
-        "Кнопки удаления нет — код можно только выключить.",
+        "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто."
       ],
       "why": "Неработающий код в рассылке выглядит как обман.",
@@ -1357,7 +1369,7 @@
           "TEST10 is in the list.",
           "TESTSHIP is in the list.",
           "Both stand at «включён» (on).",
-          "There is no delete button — a code can only be switched off.",
+          "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered."
         ],
         "why": "A code that does not work in a mailing looks like a swindle."
@@ -1453,11 +1465,11 @@
         "Найти блок с перечнем стран, куда не возим."
       ],
       "expect": [
-        "Эстония 5,47 / 10,84, Латвия и Литва 5,59 / 9,90.",
-        "Финляндия 12,39 / 15,69.",
-        "«Бесплатно от» — 59 € у четырёх домашних стран.",
-        "У остальной Европы — 200 €.",
+        "Эстония 5,47 / 10,84 €, Латвия 5,59 / 16,29 €, Литва 5,59 / 17,79 €.",
+        "Финляндия 7,89 / 16,29 €.",
+        "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
         "Германия 22,29 €, Польша 20,69 €, Греция 43,19 €.",
+        "На кассе перевозчики дешевле: 2,59 € в Эстонии, 4,09 € в Латвии и Литве.",
         "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
@@ -1472,11 +1484,11 @@
           "Find the block listing the countries we do not ship to."
         ],
         "expect": [
-          "Estonia 5.47 / 10.84, Latvia and Lithuania 5.59 / 9.90.",
-          "Finland 12.39 / 15.69.",
-          "«Free from» is 59 € in the four home countries.",
-          "For the rest of Europe it is 200 €.",
+          "Estonia 5.47 / 10.84 €, Latvia 5.59 / 16.29 €, Lithuania 5.59 / 17.79 €.",
+          "Finland 7.89 / 16.29 €.",
+          "«Бесплатно от»: 59 € in the four home countries, 200 € in the rest of Europe.",
           "Germany 22.29 €, Poland 20.69 €, Greece 43.19 €.",
+          "At the checkout carriers are cheaper: 2.59 € in Estonia, 4.09 € in Latvia and Lithuania.",
           "Not shipped to: Norway, Switzerland, the United Kingdom, Iceland, Cyprus, Malta, Liechtenstein."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
@@ -5478,6 +5490,47 @@
           "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
+      }
+    },
+    {
+      "id": "people-remove-partner",
+      "area": "people",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Снять с клиента статус партнёра",
+      "steps": [
+        "В «Клиентах» открыть партнёра и выключить у него статус партнёра.",
+        "Не перезагружая магазин, открыть в нём любой товар этого партнёра.",
+        "Положить товар в корзину и дойти до кассы.",
+        "Снова включить статус и посмотреть на цены ещё раз."
+      ],
+      "expect": [
+        "Переключатель встаёт сразу, без ожидания.",
+        "Салонных цен в магазине больше нет — ни на карточке, ни в корзине.",
+        "Ничего перезагружать не нужно.",
+        "На кассе считают обычную цену.",
+        "Включили обратно — салонные цены вернулись."
+      ],
+      "why": "Бывший партнёр, которому магазин всё ещё показывает салонную цену, купит по ней, а счёт выставят по другой.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "Taking partner status off a customer",
+        "steps": [
+          "In «Клиенты» open a partner and switch their partner status off.",
+          "Without reloading the shop, open any product as that partner.",
+          "Put it in the cart and go through to the checkout.",
+          "Switch the status back on and look at the prices again."
+        ],
+        "expect": [
+          "The switch moves at once, with no wait.",
+          "Salon prices are gone from the shop — the card and the cart both.",
+          "Nothing needs reloading.",
+          "The checkout charges the ordinary price.",
+          "Switched back on, the salon prices return."
+        ],
+        "why": "A former partner still shown a salon price will buy at it, and the invoice will say something else."
       }
     },
     {
