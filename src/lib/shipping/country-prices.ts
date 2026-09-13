@@ -237,3 +237,82 @@ export function countryPriceTable(markup: Partial<ShippingMarkup> = {}): Country
   }
   return out;
 }
+
+/* ---------- one price per carrier, which is how Montonio actually bills ----
+ *
+ * Ренат, 13.09.2026: «we get prices from Montonio and we should use those, we
+ * do not need to make them up.»
+ *
+ * The table above is one price per country, and that is the wrong *shape* for
+ * a parcel machine: the shopper picks the carrier from the chips under
+ * «Пакомат», and Montonio charges a different price for each of them. Finland
+ * is 9.30 € with SmartPosti and 12.39 € with DPD; the shop charged 7.89 € for
+ * both, because an empty carrier cell fell through to the country's own
+ * «Пакомат» number. Nine of the fourteen carrier-country pairs the checkout
+ * can actually produce were sold below cost, and the shopper chose which.
+ *
+ * So an empty carrier cell now means «charge what Montonio charges for THIS
+ * carrier» — that is `carrierCost()` below, resolved in quoteFromRules(). A
+ * number the owner typed still wins: this is the floor the table falls back
+ * to, not a ceiling over him.
+ */
+
+/**
+ * What Montonio charges for one carrier on one route, or null if it has no
+ * price — and null, too, wherever a carrier is not the *shopper's* to choose.
+ *
+ * A carrier price only means anything under «Пакомат» in EE, LV, LT and FI:
+ * those are the only chips the checkout draws (CARRIERS_BY_COUNTRY in
+ * public/shop2/app.js). Everywhere else — and for every courier — Renat picks
+ * the carrier when he makes the label, so the country's own cell is the price
+ * and a per-carrier one would be a number nobody can reach. Narrowing it here
+ * is also what keeps the storefront's mirror of this table small enough to
+ * state literally, and therefore checkable against this one.
+ */
+export function carrierCost(carrier: string, country: string, method: CostMethod): number | null {
+  const c = String(carrier || "").toLowerCase();
+  if (!c || !SHOP_CARRIERS.includes(c)) return null;
+  if (method !== "parcel") return null;
+  const cc = String(country || "").toUpperCase();
+  if (!CARRIER_CHOICE_COUNTRIES.includes(cc)) return null;
+  let best: number | null = null;
+  for (const r of RATES) {
+    if (r.carrier !== c || r.method !== method || r.country.toUpperCase() !== cc) continue;
+    if (best === null || r.price < best) best = r.price;
+  }
+  return best;
+}
+
+/** The shelf price for one carrier on one route — cost plus markup — or null. */
+export function carrierPrice(
+  carrier: string,
+  country: string,
+  method: CostMethod,
+  markup: Partial<ShippingMarkup> = {},
+): number | null {
+  const cost = carrierCost(carrier, country, method);
+  return cost === null ? null : customerPrice(cost, markup);
+}
+
+/**
+ * `{ dpd: { FI: 12.49, … }, … }` — every carrier-country pair Montonio prices
+ * for a parcel machine, at the shop's own markup. What DEFAULT_SHIPPING_RULES
+ * carries, so a shop that has never touched the panel already bills what the
+ * carrier costs rather than one flat number per country.
+ *
+ * Parcel machines only, deliberately: the checkout shows carrier chips under
+ * «Пакомат» and nowhere else (CARRIERS_BY_COUNTRY in public/shop2/app.js), so
+ * a courier never carries a carrier the shopper chose — Renat picks that one
+ * when he makes the label, and the country's own courier cell prices it.
+ */
+export function carrierPriceTable(markup: Partial<ShippingMarkup> = {}): Record<string, Record<string, number>> {
+  const out: Record<string, Record<string, number>> = {};
+  for (const carrier of SHOP_CARRIERS) {
+    for (const country of CARRIER_CHOICE_COUNTRIES) {
+      const cost = carrierCost(carrier, country, "parcel");
+      if (cost === null) continue;
+      (out[carrier] ??= {})[country] = customerPrice(cost, markup);
+    }
+  }
+  return out;
+}

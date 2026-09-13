@@ -14,10 +14,13 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   CARRIER_CHOICE_COUNTRIES,
+  carrierCost,
+  carrierPriceTable,
   costBasis,
   MONTONIO_COUNTRIES,
   MONTONIO_NOT_SERVED,
 } from "@/lib/shipping/country-prices";
+import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
 
 const src = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
 
@@ -75,6 +78,55 @@ describe("the admin's copy of what a delivery costs", () => {
     for (const row of Object.values(cost)) {
       for (const cell of Object.values(row)) expect(cell[1]).not.toBe("novapost");
     }
+  });
+});
+
+/**
+ * Ренат, 13.09.2026: «we get prices from Montonio and we should use those, we
+ * do not need to make them up.»
+ *
+ * The storefront carries its own copy of the default rules (SHIP_RULES) so it
+ * can price a basket before /api/overrides answers, and since 13.09.2026 those
+ * defaults hold one price per carrier rather than one per country. If this copy
+ * and DEFAULT_SHIPPING_RULES ever disagree, the summary the shopper watches
+ * stops being the total the server bills — which is the whole reason both exist
+ * in the same shape.
+ */
+describe("the storefront's copy of the default carrier prices", () => {
+  const rules = literal<{ carriers: Record<string, Record<string, number>> }>("SHIP_RULES");
+
+  it("is the same table the server computes from the tariff mirror", () => {
+    expect(rules.carriers).toEqual(DEFAULT_SHIPPING_RULES.carriers);
+    expect(rules.carriers).toEqual(carrierPriceTable());
+  });
+
+  it("prices a parcel machine per carrier, which is how Montonio bills it", () => {
+    // the pair that started this: one Finnish price for two different costs
+    expect(rules.carriers.dpd.FI).toBe(12.39);
+    expect(rules.carriers.smartpost.FI).toBe(9.39);
+    expect(rules.carriers.dpd.FI).not.toBe(rules.carriers.smartpost.FI);
+  });
+
+  it("covers only the four countries whose checkout lets the shopper pick", () => {
+    for (const [carrier, row] of Object.entries(rules.carriers)) {
+      for (const country of Object.keys(row)) {
+        expect(CARRIER_CHOICE_COUNTRIES, `${carrier}/${country}`).toContain(country);
+      }
+    }
+  });
+
+  it("never sells a carrier below what that carrier costs", () => {
+    for (const [carrier, row] of Object.entries(rules.carriers)) {
+      for (const [country, price] of Object.entries(row)) {
+        const cost = carrierCost(carrier, country, "parcel");
+        expect(cost, `${carrier}/${country}`).not.toBeNull();
+        expect(price, `${carrier}/${country}`).toBeGreaterThanOrEqual(cost!);
+      }
+    }
+  });
+
+  it("has no Nova Post row at all", () => {
+    expect(Object.keys(rules.carriers)).not.toContain("novapost");
   });
 });
 

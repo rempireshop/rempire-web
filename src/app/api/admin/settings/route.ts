@@ -12,7 +12,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
-import { parseShippingRules } from "@/lib/shipping";
+import { belowCostCells, belowCostMessage, parseShippingRules, type ShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
@@ -84,7 +84,24 @@ export async function PUT(req: Request) {
       if (key === "pricing") value = cleanPricing(value);
       // the same parser the checkout reads with — a rule the storefront would
       // ignore (NaN, 1e9, a negative) is normalised here instead of stored raw
-      if (key === "shipping_rules") value = parseShippingRules(value);
+      if (key === "shipping_rules") {
+        value = parseShippingRules(value);
+        /* …and a price under what Montonio charges for that very delivery is
+           refused outright (Ренат, 13.09.2026: «we get prices from Montonio
+           and we should use those»). The panel has printed the cost under each
+           box and reddened it for weeks; nine of the fourteen carrier-country
+           pairs the checkout can produce still went out below cost, with the
+           *shopper* choosing which. A red hint is a suggestion, this is the
+           rule. The message names the carrier, the country and both numbers,
+           so there is nothing to look up. */
+        const bad = belowCostCells(value as ShippingRules);
+        if (bad.length) {
+          return Response.json(
+            { ok: false, error: "below_cost", detail: belowCostMessage(bad), cells: bad },
+            { status: 400 },
+          );
+        }
+      }
       /* «Письма»: the owner's subject / intro / signature per letter and
          language. Unknown template or language keys are dropped, control
          characters stripped and every string clamped (200/1500/300) before

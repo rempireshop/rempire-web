@@ -1,6 +1,6 @@
 {
   "_comment": "What a delivery COSTS Rempire — Montonio's own published contract prices, not the carriers' list prices and not the shop's shelf prices. Rebuild with tools/fetch-montonio-tariffs.mjs, which reads GET https://shipping.montonio.com/api/v2/contract-prices (public, no auth — the endpoint behind Montonio's own calculator at https://shipping-calculator.montonio.com, linked from help.montonio.com/en/articles/219852-shipping-with-montonio-contracts). Every row is a route OUT OF ESTONIA for the referenceParcel below. Montonio answers ex-VAT (its calculator prints '+VAT'); `price` here is the same number with Estonian VAT added, because the shelf price it is compared against includes VAT too, and `priceExVat` keeps the original. `returnPrice` is what Montonio charges the merchant for the return leg of that same route — null where Montonio prices no return on it. These are the STANDARD Montonio-contract prices (the endpoint answers with storeId '' and contractId null): Renat's own account may pay less or more, and src/lib/shipping/tariffs.ts prefers a live per-store POST /shipping-methods/rates quote whenever MONTONIO_ACCESS_KEY/SECRET_KEY are set. Until then this table is what the admin's «Заполнить по тарифам Montonio» button prices from. See docs/shipping.md § «Тарифы Montonio» and docs/audit/2026-09-07-shipping-returns.md.",
-  "compiledDate": "2026-09-07",
+  "compiledDate": "2026-09-13",
   "priceSource": "GET https://shipping.montonio.com/api/v2/contract-prices (public, no auth), source=EE",
   "referenceParcel": {
     "weightKg": 5,

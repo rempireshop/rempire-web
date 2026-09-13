@@ -1,5 +1,14 @@
 import { query } from "@/lib/db";
-import { countryPriceTable, MONTONIO_NOT_SERVED, SHOP_CARRIERS } from "@/lib/shipping/country-prices";
+import {
+  carrierCost,
+  carrierPrice,
+  carrierPriceTable,
+  CARRIER_CHOICE_COUNTRIES,
+  costBasis,
+  countryPriceTable,
+  MONTONIO_NOT_SERVED,
+  SHOP_CARRIERS,
+} from "@/lib/shipping/country-prices";
 
 /**
  * What a delivery costs.
@@ -171,6 +180,13 @@ export const DEFAULT_SHIPPING_RULES: ShippingRules = {
     courier: { default: 9.9, ...COUNTRY_PRICES.courier, EE: 10.84, LV: 9.9, LT: 9.9 },
     pickup: { default: 0 },
   },
+  /* One cell per carrier per country, straight off the tariff mirror — a
+     fresh shop bills what the carrier costs from its first order, instead of
+     repeating the country's «Пакомат» number for every chip. Computed, never
+     typed: it follows src/data/montonio-tariffs.json the way the method table
+     above already does, and `quoteFromRules()` resolves the same numbers for
+     a shop whose settings row has these cells empty. */
+  carriers: carrierPriceTable(),
   /* Off by default because an order to one of them cannot be posted at all —
      Montonio answers `contract_prices_no_applicable_tier` for every carrier.
      Renat can switch any of them back on in Настройки → Доставка, which is
@@ -304,26 +320,34 @@ export function parseShippingRules(value: unknown): ShippingRules {
     }
   }
 
-  /* Only carriers the shop can actually put a parcel on survive the read.
-     Nova Post was removed on 13.09.2026 (Ренат, «Remove "Nova Post"»), but the
-     live shop's settings row already carries a `carriers.novapost` table from
-     the days the fill button wrote one, and a row written once outlives the
-     code that wrote it. A carrier the checkout can never send would only ever
-     be a price nobody can reach — and quoteFromRules() below reads
-     `rules.carriers?.[carrier]` before the method's own table, so a stale
-     entry is not inert, it is a trapdoor. Dropped here, at the one door every
-     reader comes through, rather than trusted to stay unused. */
+  /* Merged **cell by cell** over the Montonio defaults, not carrier by carrier.
+     An absent cell is the whole point (Ренат, 13.09.2026): a box the owner has
+     not filled — or has cleared — charges what Montonio charges for that
+     carrier, and only a number he typed replaces it. Replacing a whole carrier
+     would mean one typed Estonian DPD price silently blanked DPD everywhere
+     else, and the shop would be back to one number per country.
+
+     Only carriers the shop can actually put a parcel on survive the read. Nova
+     Post was removed on 13.09.2026 («Remove "Nova Post"»), but the live shop's
+     settings row already carries a `carriers.novapost` table from the days the
+     fill button wrote one, and a row written once outlives the code that wrote
+     it. A carrier the checkout can never send would only ever be a price nobody
+     can reach — and quoteFromRules() reads `rules.carriers?.[carrier]` before
+     the method's own table, so a stale entry is not inert, it is a trapdoor. */
   const carriers = raw.carriers;
+  const out: Record<string, Record<string, number>> = {};
+  for (const [name, table] of Object.entries(DEFAULT_SHIPPING_RULES.carriers ?? {})) {
+    out[name] = { ...table };
+  }
   if (typeof carriers === "object" && carriers !== null && !Array.isArray(carriers)) {
-    const out: Record<string, Record<string, number>> = {};
     for (const [name, table] of Object.entries(carriers as Record<string, unknown>)) {
       const key = name.toLowerCase();
       if (!SHOP_CARRIERS.includes(key)) continue;
       const parsed = toPriceTable(table);
-      if (parsed) out[key] = parsed;
+      if (parsed) out[key] = { ...(out[key] ?? {}), ...parsed };
     }
-    if (Object.keys(out).length) rules.carriers = out;
   }
+  if (Object.keys(out).length) rules.carriers = out;
 
   /* An array, and an *authoritative* one: [] means «deliver everywhere», which
      is a real answer Renat can give and must survive the merge. Only a missing
@@ -398,6 +422,108 @@ export function shippingZone(country: string): string {
   return EUROPE.has(c) ? "EU" : "default";
 }
 
+/* ---------- selling below what Montonio charges --------------------------- */
+
+/** One cell of the rules table that would be sold at a loss. */
+export interface BelowCostCell {
+  /** The carrier the cell belongs to, "" for a cell in the method column. */
+  carrier: string;
+  country: string;
+  method: ShipMethod;
+  /** What the owner typed. */
+  charged: number;
+  /** What Montonio charges for that delivery, VAT in. */
+  cost: number;
+}
+
+/** «Пакомат Omniva, Эстония» / «Курьер, Финляндия» — one cell, in the owner's own words. */
+function cellName(cell: BelowCostCell): string {
+  const where = COUNTRY_RU[cell.country] ?? cell.country;
+  const what = cell.method === "courier" ? "Курьер" : "Пакомат";
+  const who = cell.carrier ? ` ${CARRIER_RU[cell.carrier] ?? cell.carrier}` : "";
+  return `${what}${who}, ${where}`;
+}
+
+const COUNTRY_RU: Record<string, string> = {
+  EE: "Эстония", LV: "Латвия", LT: "Литва", FI: "Финляндия", PL: "Польша", DE: "Германия",
+  AT: "Австрия", BE: "Бельгия", BG: "Болгария", HR: "Хорватия", CZ: "Чехия", DK: "Дания",
+  ES: "Испания", FR: "Франция", GR: "Греция", HU: "Венгрия", IE: "Ирландия", IT: "Италия",
+  LU: "Люксембург", NL: "Нидерланды", PT: "Португалия", RO: "Румыния", SE: "Швеция",
+  SI: "Словения", SK: "Словакия",
+};
+
+const CARRIER_RU: Record<string, string> = {
+  omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend",
+};
+
+/** `7,89 €` — the panel's own spelling, so the sentence reads like the screen. */
+function eur(n: number): string {
+  return `${n.toFixed(2).replace(".", ",")} €`;
+}
+
+/**
+ * Every cell in these rules that sells below what Montonio charges for it.
+ *
+ * Ренат, 13.09.2026, «Update prices» → «we get prices from Montonio and we
+ * should use those, we do not need to make them up». The panel already prints
+ * the cost under each box and reddens it when the price is under; that was not
+ * enough to stop nine of fourteen carrier-country pairs going out below cost,
+ * so the save now refuses.
+ *
+ * What is checked, and what deliberately is not:
+ *
+ *   · **every carrier cell**, against that carrier's own Montonio price. This
+ *     is the one that actually bills a parcel machine, because the shopper
+ *     picks the chip.
+ *   · **the courier column**, against `costBasis()` — which for a courier is
+ *     the cheapest carrier the shop can use, because nobody *chooses* that
+ *     one: Renat does, when he makes the label. So Finland's 16.29 € courier
+ *     is not a loss (SmartPosti costs 15.62 €) even though DPD would cost
+ *     20.09 €; it is a thin margin, not a hole, and refusing the save over it
+ *     would be refusing a price that makes money.
+ *   · **the parcel column outside EE/LV/LT/FI**, same rule. Inside those four
+ *     the shopper always picks a chip and the carrier cell is what bills, so
+ *     the column there is a fallback and flagging it would refuse a save over
+ *     a number that charges nobody.
+ *   · not `default`, not a zone row (`EU`), not `freeFrom`. Those are not one
+ *     route and have no one cost to compare against; giving delivery away over
+ *     a threshold is the owner's own decision and always was.
+ */
+export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
+  const out: BelowCostCell[] = [];
+
+  for (const [carrier, table] of Object.entries(rules.carriers ?? {})) {
+    for (const [country, charged] of Object.entries(table)) {
+      if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
+      const cost = carrierCost(carrier, country, "parcel");
+      if (cost !== null && charged < cost) out.push({ carrier, country, method: "parcel", charged, cost });
+    }
+  }
+
+  for (const method of ["parcel", "courier"] as const) {
+    for (const [country, charged] of Object.entries(rules.methods[method] ?? {})) {
+      if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
+      if (method === "parcel" && CARRIER_CHOICE_COUNTRIES.includes(country)) continue;
+      const basis = costBasis(country, method);
+      if (basis && charged < basis.price) {
+        out.push({ carrier: "", country, method, charged, cost: basis.price });
+      }
+    }
+  }
+
+  return out;
+}
+
+/** The sentence the panel shows when a save is refused — plain Russian, with both numbers. */
+export function belowCostMessage(cells: BelowCostCell[]): string {
+  const listed = cells
+    .slice(0, 6)
+    .map((c) => `${cellName(c)} — ${eur(c.charged)} при тарифе ${eur(c.cost)}`)
+    .join("; ");
+  const more = cells.length > 6 ? ` и ещё ${cells.length - 6}` : "";
+  return `Цена ниже тарифа Montonio: ${listed}${more}. Поднимите цену или очистите поле — пустое поле берёт тариф Montonio само.`;
+}
+
 /**
  * Is this country switched off in the shop? The checkout's country list asks
  * this before it draws an option; nothing else does, on purpose — see
@@ -443,10 +569,30 @@ export function quoteFromRules(
    * ignore the carrier unless the method is one a carrier was picked for.
    */
   const carrierTable = carrier && method === "parcel" ? rules.carriers?.[carrier] : undefined;
+  /*
+   * …and an EMPTY carrier cell means «charge what Montonio charges for this
+   * carrier», not «take the country's own «Пакомат» number».
+   *
+   * Renat, 13.09.2026: «we get prices from Montonio and we should use those,
+   * we do not need to make them up.» The defect was the shape, not a digit:
+   * the settings row holds one price per country and the checkout repeats it
+   * for every chip, while Montonio bills per carrier. Finland was 7.89 € for
+   * a DPD machine that costs 12.39 €, Estonia 2.59 € for an Omniva one that
+   * costs 3.10 €; nine of the fourteen pairs the checkout can produce were
+   * below cost, and the *shopper* picked which. Falling back to
+   * carrierPrice() instead makes the empty cell the truth rather than a
+   * guess, and it follows the mirror when Montonio re-cuts its price list.
+   *
+   * A typed number still wins — the three lookups above come first — so the
+   * owner keeps control; this is the floor under him, not a ceiling over him.
+   */
+  const fromMontonio =
+    carrier && method === "parcel" ? carrierPrice(carrier, country, "parcel", rules.markup) : null;
   const base =
     carrierTable?.[country] ??
     carrierTable?.[zone] ??
     carrierTable?.default ??
+    fromMontonio ??
     table[country] ??
     table[zone] ??
     table.default ??

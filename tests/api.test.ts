@@ -185,6 +185,47 @@ describe("api routes", () => {
     expect(all.settings.payment_banks).toEqual([]);
   });
 
+  /* Ренат, 13.09.2026: «we get prices from Montonio and we should use those,
+     we do not need to make them up.» The panel has printed the cost under each
+     box and reddened it for weeks, and nine of the fourteen carrier-country
+     pairs the checkout can produce still went out below cost — with the
+     *shopper* choosing which. A red hint is a suggestion; this is the rule. */
+  it("PUT /api/admin/settings refuses a delivery price below Montonio's own tariff", async () => {
+    const { PUT, GET } = await import("@/app/api/admin/settings/route");
+    const before = await (await GET(get("/api/admin/settings/", admin))).json();
+
+    const res = await PUT(
+      put("/api/admin/settings/", { shipping_rules: { carriers: { dpd: { FI: 7.89 } } } }, admin),
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("below_cost");
+    // the carrier, the country and both numbers — nothing left to look up
+    expect(body.detail).toContain("DPD");
+    expect(body.detail).toContain("Финляндия");
+    expect(body.detail).toContain("7,89 €");
+    expect(body.detail).toContain("12,39 €");
+    expect(body.cells).toEqual([
+      { carrier: "dpd", country: "FI", method: "parcel", charged: 7.89, cost: 12.39 },
+    ]);
+
+    // …and nothing was stored: a refused save leaves the row exactly as it was
+    const after = await (await GET(get("/api/admin/settings/", admin))).json();
+    expect(after.settings.shipping_rules).toEqual(before.settings.shipping_rules);
+  });
+
+  it("PUT /api/admin/settings takes the same price at or above the tariff", async () => {
+    const { PUT, GET } = await import("@/app/api/admin/settings/route");
+    const res = await PUT(
+      put("/api/admin/settings/", { shipping_rules: { carriers: { dpd: { FI: 12.39 } } } }, admin),
+    );
+    expect(res.status).toBe(200);
+    const back = await (await GET(get("/api/admin/settings/", admin))).json();
+    expect(back.settings.shipping_rules.carriers.dpd.FI).toBe(12.39);
+    // the cells the owner did not touch are still Montonio's own
+    expect(back.settings.shipping_rules.carriers.smartpost.FI).toBe(9.39);
+  });
+
   it("PUT /api/admin/settings still refuses a body that is not a JSON object", async () => {
     const { PUT } = await import("@/app/api/admin/settings/route");
     for (const body of ["null", "5", "[]", '"x"', "не json"]) {

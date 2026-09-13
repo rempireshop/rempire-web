@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { carrierPriceTable } from "@/lib/shipping/country-prices";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 import { eur, ipHeaders, LANGS, type LangCode, shopUrl, tr, waitForScreen } from "./fixtures";
 
@@ -113,7 +114,25 @@ test.describe("«Доставка и оплата» — the customer page", () =
       test.skip(testInfo.project.name !== "desktop", "content is checked once, on desktop");
       // what the checkout bills with — the page must print these very numbers
       const rules = (await (await request.get("/api/overrides/")).json()).settings.shipping_rules;
-      const eeParcel = Number(rules.methods.parcel.EE);
+      /* The «Пакомат» column is no longer what an Estonian shopper pays: since
+         13.09.2026 a carrier with no cell of its own is charged Montonio's own
+         price for that carrier (Ренат, «we get prices from Montonio»), and the
+         page prints «от <the cheapest of them>» when the chips differ. So the
+         number to look for is the cheapest carrier price, resolved the way the
+         page resolves it — the owner's cells over the tariff table, cell by
+         cell. /api/overrides/ passes the stored row through raw, so a shop that
+         has typed none carries no `carriers` key at all and every chip is on
+         the tariff. */
+      const stored = (rules.carriers ?? {}) as Record<string, Record<string, number>>;
+      const resolved = carrierPriceTable();
+      for (const [carrier, row] of Object.entries(stored)) {
+        resolved[carrier] = { ...(resolved[carrier] ?? {}), ...row };
+      }
+      const eeCarriers = Object.values(resolved)
+        .map((row) => row.EE)
+        .filter((v): v is number => typeof v === "number");
+      expect(eeCarriers.length, "no Estonian carrier price anywhere").toBeGreaterThan(1);
+      const eeParcel = Math.min(...eeCarriers);
       const eeCourier = Number(rules.methods.courier.EE);
       const freeFrom = Number(rules.freeFrom);
       expect(eeParcel).toBeGreaterThan(0);
@@ -180,11 +199,22 @@ test.describe("«Доставка и оплата» — the customer page", () =
     expect(login.ok()).toBe(true);
     const before = (await (await page.request.get("/api/admin/settings/")).json()).settings.shipping_rules ?? null;
     try {
+      /* Every Latvian carrier, not the «Пакомат» column: a Latvian shopper
+         picks a chip, and since 13.09.2026 a carrier's own cell — or, empty,
+         Montonio's price for it — is what bills. Setting them all to one
+         number is also what makes the row print a single price rather than
+         «от …», which is what this test is really about: what the owner saved
+         is what the customer reads. 6,66 € is above every Latvian tariff, so
+         the below-cost guard has nothing to say about it. */
       const patched = JSON.parse(JSON.stringify(before ?? {}));
+      patched.carriers = patched.carriers ?? {};
+      for (const carrier of ["omniva", "smartpost", "dpd", "venipak", "unisend"]) {
+        patched.carriers[carrier] = { ...(patched.carriers[carrier] ?? {}), LV: 6.66 };
+      }
       patched.methods = patched.methods ?? {};
       patched.methods.parcel = { ...(patched.methods.parcel ?? {}), LV: 6.66 };
       const put = await page.request.put("/api/admin/settings/", { data: { shipping_rules: patched } });
-      expect(put.ok()).toBe(true);
+      expect(put.ok(), await put.text()).toBe(true);
 
       /* Its own browser context: /api/overrides/ answers with s-maxage and a
          page in the admin's context could keep the old rules from its HTTP

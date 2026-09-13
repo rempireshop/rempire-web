@@ -158,6 +158,23 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await openSettings(page, "delivery");
       const lv = page.locator('[data-shiprule="m:parcel:LV"]');
       await expect(lv).toBeVisible();
+
+      /* The fill has to have something to raise, and on a standard table it no
+         longer does. Since 08.09.2026 the Latvian and Lithuanian locker sits at
+         the 5,59 € the tariff itself computes, and since 13.09.2026 the carrier
+         cells carry Montonio's own price by default too (Ренат: «we get prices
+         from Montonio and we should use those») — so every cell already equals
+         what «Заполнить» would write and the button moves nothing at all. The
+         box is put out of step by hand first, which is also the case that
+         matters now: the fill is what raises a price the owner typed below
+         cost. */
+      await lv.fill("3,49");
+      await page.locator("[data-admshipsave]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await page.locator("[data-closetoast]").click();
+      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
       const before = JSON.stringify(await rules());
 
       /* «Заполнить по тарифам Montonio»: the sentence under the button says
@@ -177,11 +194,7 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator("[data-closetoast]").click();
       await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
 
-      /* The reset needs a price to put back, and since 08.09.2026 the fill
-         above no longer leaves one: Dim raised the Latvian and Lithuanian
-         locker to the 5,59 € the tariff itself computes, so every default cell
-         now equals what «Заполнить» would write and the button moves nothing
-         on a standard table. The box is therefore put out of step by hand. */
+      // …and the reset below needs a price to put back, so out of step again
       await lv.fill("3,49");
       await page.locator("[data-admshipsave]").click();
       await page.locator("[data-admapply]").click();
