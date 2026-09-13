@@ -1723,6 +1723,23 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* the shop's price is under what the delivery costs — the one thing this hint
    exists to make visible before an order is taken, not after */
 .adm-hint--loss { color: var(--a-warn); font-weight: 600; }
+/* A sentence that must not be scrolled past — «цена перевозчика сильнее
+   колонки „Пакомат“», the misunderstanding the delivery screen turns on.
+   Louder than .adm-hint (which is grey 13px and reads as a footnote) and
+   quieter than .adm-err, which is for something that has gone wrong. */
+.adm-notice {
+  margin: 12px 0 0; padding: 10px 12px;
+  border-left: 3px solid var(--a-warn); background: var(--a-tint);
+  color: var(--a-ink); font-size: 13.5px; line-height: 19px;
+}
+/* «Что увидит покупатель»: the customer page's own table, inside a panel
+   card. Its .dlv__scroll bleeds to the storefront's page gutter with a
+   negative margin — right on /info/shipping/, a sideways-scrolling settings
+   screen here — so inside the fold it keeps the scrolling strip and drops
+   the bleed. .dlv__table's own min-width is what makes the strip scroll on a
+   375 px phone instead of the page. */
+.adm-preview .dlv__scroll { margin: 0; padding: 0; }
+.adm-preview .dlv__table { min-width: 460px; }
 /* appearance:none takes the native arrow away with the native chrome — a
    select with no arrow reads as a text box the owner cannot type into */
 .adm2 select.adm-input {
