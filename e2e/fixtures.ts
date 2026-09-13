@@ -271,6 +271,9 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   "Корзина": { ET: "Ostukorv", EN: "Cart" },
   "В корзину": { ET: "Lisa ostukorvi", EN: "Add to cart" },
   "Наборы": { ET: "Komplektid", EN: "Sets" },
+  // the stock chip — on a product card, on a product page, and (13.09.2026)
+  // on the one line of «Что внутри» whose product is the missing one
+  "нет в наличии": { ET: "otsas", EN: "out of stock" },
   "Наборы сейчас недоступны": { ET: "Komplektid pole praegu saadaval", EN: "Sets are not available right now" },
   "Оставить отзыв": { ET: "Jäta arvustus", EN: "Write a review" },
   "Отзывы": { ET: "Arvustused", EN: "Reviews" },

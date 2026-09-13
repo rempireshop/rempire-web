@@ -27,6 +27,17 @@
  *  - «Бренды» is the one shopper page with no prerendered head, so its ET and
  *    EN versions carried the Russian description of the home page.
  *
+ * …and the three Renat found on his own phone on 13.09.2026, at the bottom
+ * of this file:
+ *
+ *  - a set went on offering «В корзину» after its product was taken off sale,
+ *    because the set's availability was a snapshot the shop asked for once at
+ *    boot — and the list of what is inside never said WHICH part was missing;
+ *  - typing in the search screen's own box rebuilt the screen, and the
+ *    replacement input took the phone's keyboard down with it;
+ *  - «Сбросить» in the filter pane rebuilt the overlay, so the pane replayed
+ *    its slide-in as though it had closed and opened again.
+ *
  * Desktop + mobile-safari like the other functional specs; the lost-tap
  * test also runs on the Chromium phone project, because it is about a
  * finger on a 360-px screen.
@@ -40,6 +51,7 @@ import {
   functionalProject,
   ipHeaders,
   LANGS,
+  loginAsAdmin,
   payOrder,
   PRODUCT,
   shopUrl,
@@ -896,5 +908,216 @@ test.describe("the consent banner", () => {
     await page.goto("/shop2/done/?n=R-100099&s=paid&t=9.00");
     await waitForScreen(page, "done");
     await expect(page.locator(".cbanner__box")).toHaveCount(0);
+  });
+});
+
+/* ------------------------------------------------------------------------
+   `shop-set-out` — Renat, 13.09.2026, on his phone.
+
+   A set's «нет в наличии» used to come from ONE place: the `stock` field
+   /api/bundles/ computes server-side, which app.js asks for once, at boot.
+   The live per-product stock rides on the other feed (/api/overrides/) and
+   already reaches every product card — so the product's own page said «нет в
+   наличии» while the set containing it still offered «В корзину», until the
+   whole page was loaded again by hand.
+
+   The set page reads its parts out of the live catalogue now
+   (bundleStock()/bundleItemStock() in app.js), so the stale half of the first
+   test below is the sharp one: it serves the shop a DELIBERATELY STALE
+   /api/bundles/ — the exact body the route answered before the change, which
+   is what a browser's stale-while-revalidate window and the edge can both go
+   on handing out for a couple of minutes — and the page still has to be
+   right.
+------------------------------------------------------------------------ */
+test.describe("sets — a part taken off sale", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(223) });
+
+  /** One of BUNDLE's three parts (tools/bundles.config.mjs). Single volume,
+   *  and no other spec needs it in stock — and it is put back in a `finally`
+   *  either way, the same rule e2e/sets.spec.ts follows for the shop-wide
+   *  switch it flips. */
+  const PART = { id: "handmade-soap-666", name: "Чёрное мыло 666" };
+
+  /** The owner's edit, and the public feed carrying it before any shop page
+   *  is opened — the same guard, for the same reason, as the switch test in
+   *  e2e/sets.spec.ts. */
+  async function takePartOffSale(page: import("@playwright/test").Page): Promise<void> {
+    expect((await page.request.put("/api/admin/overrides/", { data: { id: PART.id, stock: "out" } })).status()).toBe(200);
+    await expect
+      .poll(
+        async () => {
+          const body = await (await page.request.get("/api/overrides/", { headers: { "cache-control": "no-cache" } })).json();
+          return body.overrides && body.overrides[PART.id] ? body.overrides[PART.id].stock : null;
+        },
+        { timeout: 10_000, message: "the overrides feed still has the part in stock" },
+      )
+      .toBe("out");
+  }
+
+  test("the set stops selling itself and names the part that is missing", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+
+    /* The snapshot as it was BEFORE the edit — what a browser that has
+       already asked for /api/bundles/ is still holding. */
+    const staleBundles = await (await page.request.get("/api/bundles/")).text();
+    expect(staleBundles).toContain(BUNDLE.id);
+
+    try {
+      await takePartOffSale(page);
+
+      for (const stale of [false, true]) {
+        const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(223) });
+        const shop = await ctx.newPage();
+        if (stale) {
+          await shop.route("**/api/bundles/", (route) =>
+            route.fulfill({ status: 200, contentType: "application/json", body: staleBundles }));
+        }
+        const why = stale ? "with a stale /api/bundles/" : "on a plain visit";
+
+        /* Arrive on the landing and walk to the set the way a shopper does:
+           one page load, then a client-side navigation. */
+        await shop.goto(shopUrl("", "/sets/"));
+        await waitForScreen(shop, "bundles");
+        await shop.locator(`[data-go-bundle="${BUNDLE.id}"]`).first().click();
+        await waitForScreen(shop, "bundle");
+
+        // nothing on the page sells it: not the wide button, not the sticky bar
+        await expect(shop.locator("[data-addbundle]"), why).toHaveCount(0);
+        await expect(shop.locator(".pdp__price"), why).toContainText("нет в наличии");
+        // the sentence that was always there stays there
+        await expect(shop.locator(".pdp"), why).toContainText("Одного из товаров сейчас нет");
+        // …and the line of the part that is actually missing says so — that
+        // one line, and no other
+        await expect(shop.locator("[data-bitemout]"), why).toHaveCount(1);
+        const marked = shop.locator(`[data-bitemout="${PART.id}"]`);
+        await expect(marked, why).toHaveText("нет в наличии");
+        await expect(marked.locator("xpath=.."), why).toContainText(PART.name);
+
+        await ctx.close();
+      }
+    } finally {
+      await page.request.put("/api/admin/overrides/", { data: { id: PART.id, stock: null } });
+    }
+  });
+
+  test("ET and EN get the same per-line marker out of the dictionary", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    try {
+      await takePartOffSale(page);
+      for (const lang of LANGS) {
+        const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(223) });
+        const shop = await ctx.newPage();
+        await shop.goto(shopUrl(lang.seg, `/set/${BUNDLE.id}/`));
+        await waitForScreen(shop, "bundle");
+        await expect(shop.locator(`[data-bitemout="${PART.id}"]`), lang.code).toHaveText(tr("нет в наличии", lang.code));
+        await ctx.close();
+      }
+    } finally {
+      await page.request.put("/api/admin/overrides/", { data: { id: PART.id, stock: null } });
+    }
+  });
+});
+
+/* ------------------------------------------------------------------------
+   `shop-search-phrase` — Renat, 13.09.2026, on his phone: typing «rasvased »
+   (the trailing space is the keystroke that did it) put the on-screen
+   keyboard away, and so did clearing the box.
+
+   Why: every keystroke in [data-search2] called render(), which rewrites the
+   whole body — destroying the very <input> being typed into — and then
+   focused the REPLACEMENT node. A browser raises the keyboard for an element
+   that took focus from a tap, not for one handed focus by a script after the
+   original was removed, so the keyboard folded away.
+
+   A headless browser has no keyboard to lose, so what is pinned here is the
+   cause: the input must be the SAME node afterwards (tagged in the page and
+   checked for that tag), and it must still hold the focus.
+------------------------------------------------------------------------ */
+test.describe("search — the box survives its own results", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(224) });
+
+  /** Is the box on screen the one we tagged, and is it the focused element? */
+  async function boxState(page: import("@playwright/test").Page) {
+    return page.evaluate(() => {
+      const el = document.querySelector("[data-search2]") as (HTMLInputElement & { __e2eTag?: string }) | null;
+      return {
+        present: !!el,
+        sameNode: el ? el.__e2eTag === "renat" : false,
+        focused: !!el && document.activeElement === el,
+        value: el ? el.value : null,
+      };
+    });
+  }
+
+  test("typing and clearing keep the very same input focused", async ({ page }) => {
+    // the Estonian shop, where he hit it
+    await page.goto(shopUrl("/et", "/search/"));
+    await waitForScreen(page, "search");
+    const box = page.locator("[data-search2]");
+    await expect(box).toBeVisible();
+    await box.evaluate((el) => { (el as HTMLInputElement & { __e2eTag?: string }).__e2eTag = "renat"; });
+
+    // real keystrokes, trailing space and all
+    await box.pressSequentially("rasvased ", { delay: 20 });
+    expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "rasvased " });
+    // the results underneath really did repaint — the popular-query chips of
+    // the empty state are gone
+    await expect(page.locator("[data-searchres] [data-q]")).toHaveCount(0);
+    // …and the query still rides on the address, as it did before
+    await expect(page).toHaveURL(/\/search\/\?q=rasvased/);
+
+    // clearing the field, the other half of the finding
+    await page.keyboard.press("ControlOrMeta+a");
+    await page.keyboard.press("Backspace");
+    expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "" });
+    // an empty box is back to the popular queries
+    await expect(page.locator("[data-searchres] [data-q]").first()).toBeVisible();
+  });
+});
+
+/* ------------------------------------------------------------------------
+   `shop-category` — Renat, 13.09.2026: «Сбросить» inside the filter pane made
+   the pane play its opening animation again, as though it had closed and
+   re-opened. The overlay was rebuilt on purpose (`ovlKey = ""`) just to untick
+   the boxes, and a rebuilt .drawer replays `animation: slideIn` (styles.css).
+------------------------------------------------------------------------ */
+test.describe("filters — «Сбросить» clears without re-opening the pane", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(225) });
+
+  test("the pane is the same element afterwards, and nothing animates", async ({ page }) => {
+    await page.goto(shopUrl("", "/c/hair/"));
+    await waitForScreen(page, "catalog");
+    await page.locator("[data-filter]").click();
+
+    const pane = page.getByRole("dialog", { name: "Фильтры" });
+    await expect(pane).toBeVisible();
+    // let the real slide-in finish before anything is measured
+    await expect
+      .poll(() => pane.evaluate((el) => el.getAnimations().length), { message: "the pane never settled after opening" })
+      .toBe(0);
+    await pane.evaluate((el) => { (el as HTMLElement & { __e2eTag?: string }).__e2eTag = "renat"; });
+
+    const show = page.locator("[data-showbtn]");
+    const whole = (await show.textContent()) ?? "";
+    await page.locator("[data-brand]").first().check();
+    await page.locator("[data-instock]").check();
+    await expect(show).not.toHaveText(whole);
+
+    await page.locator('[data-clearfilter="keep"]').click();
+
+    // the pane did not close, was not rebuilt, and is not animating
+    await expect(pane).toBeVisible();
+    expect(
+      await pane.evaluate((el) => ({
+        sameNode: (el as HTMLElement & { __e2eTag?: string }).__e2eTag === "renat",
+        animating: el.getAnimations().length,
+      })),
+    ).toEqual({ sameNode: true, animating: 0 });
+    // …and it really did clear: boxes off, the count back to the whole listing
+    await expect(page.locator("[data-brand]:checked")).toHaveCount(0);
+    await expect(page.locator("[data-instock]")).not.toBeChecked();
+    await expect(show).toHaveText(whole);
   });
 });
