@@ -62,6 +62,9 @@ import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+// наборы: the set prices the owner edits in the admin, which nothing
+// regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
+import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
    number somebody remembers to raise. tools/lib/asset-token.mjs says why the
@@ -225,11 +228,20 @@ function legalFor(slug, code) {
   return LEGAL[slug] || null;
 }
 
-const BUNDLES = await (async () => {
-  try {
-    return new Function(await readFile(path.join(SHOP, "bundles.js"), "utf8") + "\nreturn BUNDLES;")() || [];
-  } catch { return []; }
-})();
+/* The sets, from the generated file — and then, when there is a database to
+   ask, with the price the owner has since set in «Товары → Наборы» on them.
+   Nothing regenerates public/shop/bundles.js after an admin edit, so without
+   this the <title>, the meta description and the schema.org Offer of every
+   /set/ page kept the price of the last deploy while the shop charged the new
+   one. See tools/lib/bundles-export.mjs. */
+const BUNDLES = applyBundlePrices(
+  await (async () => {
+    try {
+      return new Function(await readFile(path.join(SHOP, "bundles.js"), "utf8") + "\nreturn BUNDLES;")() || [];
+    } catch { return []; }
+  })(),
+  await fetchBundlePrices(),
+);
 const bundleText = (b, field, code) => (b[field] && (b[field][code] || b[field].RU)) || "";
 
 /* blog: [] silently when DATABASE_URL is not set, or when the database could

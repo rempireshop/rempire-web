@@ -216,10 +216,16 @@ full reasoning — read it before changing any of the derivation logic.
 ## `src/lib/inventory.ts`
 
 - `getLevel(productId, variant?)`, `getLevels({q, filter, limit})` — the admin
-  table: every catalogue product×variant (from `catalogue.min.json` +
-  `catalogue.variants.json`), left-joined onto whatever `stock_levels` rows
-  exist, computed in JS (the catalogue is a few hundred rows — not worth a
-  query of its own).
+  table: every catalogue product×variant, left-joined onto whatever
+  `stock_levels` rows exist, computed in JS (the catalogue is a few hundred
+  rows — not worth a query of its own). A product's volumes are the ladder the
+  owner saved in the editor (`product_overrides.sizes`, migration 147) where
+  there is one, and `catalogue.variants.json`'s otherwise — a size «+ Размер»
+  added had no row at all before 14.09.2026, so it could not be counted in,
+  which left it untracked, which made every sale of it a sale on an uncounted
+  variant that `move()` skips in silence. A `stock_levels` row whose variant
+  the ladder no longer names (a volume the owner RENAMED) is listed too: its
+  count is goods on the shelf, and dropping the row would hide them.
 - `setLevel(productId, variant, {ean?, lowThreshold?})` — upserts the STATIC
   fields only. Never touches qty, never writes a ledger row. Rejects a
   duplicate EAN (`InventoryError("ean_taken", otherProductId)`).
@@ -271,17 +277,27 @@ full reasoning — read it before changing any of the derivation logic.
   `codeDiscount()` — the two are mutually exclusive by construction. The
   percent is folded into `discount_code` as `"POS -15%"` so the existing
   admin order screen and the receipt show it with no extra rendering code.
+  It also takes `posRef?` — the id the register minted for the basket in front
+  of it — and writes it to `orders.pos_ref` in the same INSERT
+  (db/migrations/093_pos_sale_ref.sql, unique where not null). The route
+  answers a repeat of an id it already has with the order it already wrote, so
+  a cashier tapping «Терминал» again over a request that timed out gets the
+  first sale's receipt instead of a second paid order, a second lot of points,
+  a second write-off and a second letter. The id belongs to the BASKET, not to
+  the tap: `posSaleRef()` in public/shop2/app.js keys it on the lines, the
+  method, the percent and the customer, so an edited basket is a new sale.
 - **`src/lib/orders.ts` `setOrderStatus()`** — when the status was `'paid'` or
   `'shipped'` and moves to `'refunded'` or `'cancelled'`, walks the order's
-  `kind:'product'` lines and issues a `'return'` move for each (variant-aware,
-  `ref` = the order number). Bundle lines (`id` = `"bundle:<id>"`) and gift
-  lines are skipped — a bundle id is not a catalogue product, and its parts
-  are not resolved here; that is a deliberate scope boundary, not an
-  oversight, matching the same boundary on the decrement below.
+  lines through `stockUnitsOf()` and issues a `'return'` move for each shelf
+  row it names (variant-aware, `ref` = the order number). A gift line names
+  none; a set line names the parts it was SOLD as, which the line itself
+  carries (`items[].parts`, written by `priceItems()`), so a refund puts back
+  exactly what the sale took even if the set has been edited since.
 - **`src/lib/payments/apply.ts`** — `ApplyDeps.decrementStock` (optional,
   same injection pattern as `recordPurchaseEvent`/`earnLoyaltyPoints`): on the
-  single transition into `paid`, decrements every `kind:'product'` line with
-  reason `'sale_web'` — tracked variants only; an uncounted one is skipped by
+  single transition into `paid`, decrements every shelf row the order's lines
+  name (`stockUnitsOf()` — a product line is itself, a set line is its
+  `parts`) with reason `'sale_web'` — tracked variants only; an uncounted one is skipped by
   `move()` (see "tracked" above). When the dep is not injected (production), a local
   `decrementStock()` dynamically imports `@/lib/inventory` and loops the
   lines itself. `move()`'s own negative-clamp means a shortfall can never be
@@ -702,8 +718,10 @@ drift apart.
   tracked-aggregation rules, `getLevels()`'s full-universe + filters, the
   `setOrderStatus()` return-move hook (paid→refunded/cancelled puts stock
   back; a never-paid cancel returns nothing), and `applyPaymentResult()`'s
-  real (non-injected) paid-transition decrement — including that gift/bundle
-  lines never trigger a lookup and a webhook retry never decrements twice.
+  real (non-injected) paid-transition decrement — including that a gift line
+  and a set line with no `parts` never trigger a lookup, that a paid set takes
+  each of its parts off the shelf at its own size and quantity (and a refund
+  puts them back), and that a webhook retry never decrements twice.
   Also the sentence the product editor now says out loud: a size nobody has
   set a threshold on warns at 2, so 3 is `in` and 2 is `low`.
 - `tests/inventory-bind-route.test.ts` — the bind/lookup HTTP contract: both
@@ -741,11 +759,11 @@ drift apart.
 
 ## What is intentionally out of scope
 
-- Bundle components are not decremented/returned individually — a bundle
-  line's id is not a catalogue product id. Resolving `bundle:<id>` back into
-  its parts would need the same `bundleDefs()`/`bundleParts()` logic
-  `src/lib/orders.ts` already has privately; a future pass could export and
-  reuse it.
+- Bundle components on an order written BEFORE 14.09.2026 are still not
+  decremented or returned: those lines carry no `parts`, and resolving
+  `bundle:<id>` back into products from today's `bundles` table would write
+  off whatever the set holds now rather than what was sold. Everything priced
+  since carries its parts and moves the shelf like any other line.
 - The scanner's continuous-decode loop does not attempt multi-code batching
   (scan several items in a row without lifting the phone) — each hit shows
   its own card and waits for the next explicit action.

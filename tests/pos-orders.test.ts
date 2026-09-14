@@ -1,4 +1,6 @@
 /** POST /api/admin/pos-orders/ and its receipt — the in-salon quick sale. */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
@@ -7,7 +9,7 @@ import { query } from "@/lib/db";
 import { getLevel, listMoves, move } from "@/lib/inventory";
 import { getLoyaltyBalance } from "@/lib/loyalty";
 import { capturedMail } from "@/lib/mail";
-import { getOrder } from "@/lib/orders";
+import { cleanPosRef, getOrder } from "@/lib/orders";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; p: number; s: string };
@@ -259,6 +261,106 @@ describe("a salon sale is settled, not just marked paid", () => {
     expect(await listMoves({ productId: product.id, reason: "sale_web" })).toHaveLength(0);
   });
 
+  /* The route creates the order, takes the money and settles it in one
+     request, and the register leaves the basket and both pay buttons alive
+     when the answer does not come back. A phone that drops the salon's wi-fi
+     mid-request therefore shows «Сервер не отвечает» over a sale that HAS gone
+     through, and the cashier — with a customer standing there — taps again.
+     The basket's own id (migration 093) is what makes the second tap the first
+     sale's receipt instead of a second sale. */
+  it("a sale sent twice with the same basket id is one order, one letter, one write-off", async () => {
+    await query(
+      `insert into settings (key, value) values ('pricing', $1::jsonb)
+       on conflict (key) do update set value = $1::jsonb`,
+      [JSON.stringify({ partnersOn: true })],
+    );
+    const email = "salon-regular@example.com";
+    const customer = await recordLogin(email, "RU");
+    await move({ productId: product.id, delta: 10, reason: "goods_in" });
+
+    const sale = {
+      items: [{ id: product.id, qty: 2 }],
+      customer: { email },
+      payment: { method: "terminal" },
+      ref: "basket-0001-abcd",
+    };
+    const first = await sell(sale);
+    const again = await sell(sale);
+
+    expect(again.orderId).toBe(first.orderId);
+    expect(again.number).toBe(first.number);
+    expect(again.total).toBe(first.total);
+    expect(await query("select id from orders")).toHaveLength(1);
+    expect((await getLevel(product.id, ""))?.qty).toBe(8); // 10 − 2, once
+    expect(await listMoves({ productId: product.id, reason: "sale_pos" })).toHaveLength(1);
+    expect(capturedMail().filter((m) => m.template === "pos-receipt")).toHaveLength(1);
+    expect(
+      await query("select id from loyalty_ledger where customer_id = $1 and order_id = $2", [
+        customer.id,
+        first.orderId,
+      ]),
+    ).toHaveLength(1);
+  });
+
+  /* The first attempt can also die between the INSERT and the settlement —
+     the order row exists and nothing else does. The repeat must FINISH that
+     sale, not report it as done: «Продажа оформлена» over an unpaid order
+     with no write-off and no receipt is the one answer worse than a second
+     order. */
+  it("finishes a sale whose first attempt wrote the order and then died", async () => {
+    await move({ productId: product.id, delta: 10, reason: "goods_in" });
+    const ref = "basket-half-done-01";
+    // exactly what a killed request leaves behind: the row, nothing else
+    const { createOrder } = await import("@/lib/orders");
+    const half = await createOrder({
+      channel: "pos",
+      lang: "RU",
+      items: [{ id: product.id, qty: 2 }],
+      customer: {},
+      shipping: { method: "pickup", country: "EE" },
+      posRef: ref,
+    });
+    expect(half.status).toBe("new");
+
+    const again = await sell({
+      items: [{ id: product.id, qty: 2 }],
+      payment: { method: "cash" },
+      ref,
+    });
+    expect(again.orderId).toBe(half.id);
+    expect(await query("select id from orders")).toHaveLength(1);
+    const order = (await getOrder(half.id))!;
+    expect(order.status).toBe("paid");
+    expect(order.payment).toMatchObject({ provider: "pos", method: "cash", status: "paid" });
+    expect((await getLevel(product.id, ""))?.qty).toBe(8);
+  });
+
+  it("a basket the cashier changed mints a new id and is a new sale", async () => {
+    await move({ productId: product.id, delta: 10, reason: "goods_in" });
+    const one = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      payment: { method: "cash" },
+      ref: "basket-aaaa-0001",
+    });
+    const two = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      payment: { method: "cash" },
+      ref: "basket-bbbb-0002",
+    });
+    expect(two.orderId).not.toBe(one.orderId);
+    expect((await getLevel(product.id, ""))?.qty).toBe(8);
+  });
+
+  /* An old register (a tab open since before the deploy) sends no id at all,
+     and must go on selling — it simply gets no protection. */
+  it("still sells a sale that carries no basket id", async () => {
+    await move({ productId: product.id, delta: 10, reason: "goods_in" });
+    const one = await sell({ items: [{ id: product.id, qty: 1 }], payment: { method: "cash" } });
+    const two = await sell({ items: [{ id: product.id, qty: 1 }], payment: { method: "cash" } });
+    expect(two.orderId).not.toBe(one.orderId);
+    expect((await getLevel(product.id, ""))?.qty).toBe(8);
+  });
+
   it("settles a walk-in with no e-mail and no customer card just the same", async () => {
     await move({ productId: product.id, delta: 5, reason: "goods_in" });
     const body = await sell({ items: [{ id: product.id, qty: 1 }], payment: { method: "cash" } });
@@ -327,5 +429,69 @@ describe("a salon sale is settled, not just marked paid", () => {
       payment: { method: "cash" },
     });
     expect((await getOrder(body.orderId))?.lang).toBe("RU");
+  });
+});
+
+/**
+ * The register's half of the same promise. The route can only recognise a
+ * repeated sale if the till sends the same id for the same basket — and only
+ * if that id is one the route will accept at all (cleanPosRef). Both functions
+ * are sliced out of public/shop2/app.js by source text rather than retyped,
+ * the way tests/checkout-parity.test.ts does it, so a rename or a rewrite
+ * fails here instead of quietly turning the guard off.
+ */
+describe("the basket id the register mints", () => {
+  const src = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+
+  function slice(name: string): string {
+    const start = src.indexOf(`function ${name}(`);
+    if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+    let depth = 0;
+    for (let i = src.indexOf("{", start); i < src.length; i++) {
+      if (src[i] === "{") depth++;
+      else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1);
+    }
+    throw new Error(`unbalanced braces around ${name}() in app.js`);
+  }
+
+  const basket = (over: Record<string, unknown> = {}) => ({
+    items: [{ id: "night-rider", qty: 1 }],
+    customer: { email: "", phone: "" },
+    payment: { method: "cash" },
+    discountPercent: 0,
+    ...over,
+  });
+
+  /** posSaleRef() over a list of baskets, in order, on one register. */
+  function refs(...baskets: unknown[]): string[] {
+    const body = `
+      var window = {};
+      var POS_SALE = { key: "", ref: "" };
+      ${slice("posNewRef")}
+      ${slice("posSaleRef")}
+      return BASKETS.map(posSaleRef);
+    `;
+    // app.js's own source plus fixed stub text — nothing is interpolated in.
+    return (new Function("BASKETS", body) as (b: unknown[]) => string[])(baskets);
+  }
+
+  it("is the same id for the same basket sent again", () => {
+    const [a, b] = refs(basket(), basket());
+    expect(a).toBe(b);
+  });
+
+  it("is a new id once anything about the sale changes", () => {
+    const [a, b, c, d] = refs(
+      basket(),
+      basket({ items: [{ id: "night-rider", qty: 2 }] }),
+      basket({ discountPercent: 10 }),
+      basket({ customer: { email: "someone@example.com", phone: "" } }),
+    );
+    expect(new Set([a, b, c, d]).size).toBe(4);
+  });
+
+  it("is an id the route will accept", () => {
+    const [a] = refs(basket());
+    expect(cleanPosRef(a)).toBe(a);
   });
 });

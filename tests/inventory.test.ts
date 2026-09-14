@@ -26,6 +26,33 @@ const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number
 const plain = CATALOGUE.find((p) => !VARIANTS[p.id])!;
 const sized = CATALOGUE.find((p) => VARIANTS[p.id] && VARIANTS[p.id].sizes.length > 1)!;
 
+/* A set made of two real products — one with no volumes, one bought at its
+   second volume, two of it — for the «a paid set moves its parts» tests.
+   `bundles` is seeded by the migration and survives truncateAll(), so this
+   one is written fresh by each test that needs it and never leaks a price. */
+const SET_ID = "test-stock-set";
+const setPartA = CATALOGUE.find((p) => p.s === "in" && !VARIANTS[p.id])!;
+const setPartB = CATALOGUE.find((p) => p.s === "in" && (VARIANTS[p.id]?.sizes.length ?? 0) > 1)!;
+const setPartBSize = VARIANTS[setPartB.id].sizes[1];
+async function seedTestSet() {
+  const { upsertBundle } = await import("@/lib/bundles");
+  await upsertBundle({
+    id: SET_ID,
+    cat: "beard",
+    title: { RU: "Тестовый набор", ET: "", EN: "" },
+    desc: { RU: "", ET: "", EN: "" },
+    items: [
+      { productId: setPartA.id, variant: 0, qty: 1 },
+      { productId: setPartB.id, variant: 1, qty: 2 },
+    ],
+    price: 5,
+    discountPct: null,
+    image: null,
+    active: true,
+    sort: 900,
+  });
+}
+
 describe("inventory", () => {
   beforeAll(setupDb);
   afterAll(teardownDb);
@@ -369,6 +396,23 @@ describe("inventory", () => {
       }
     });
 
+    /* A set's parts left the shop when it was paid, so a refund brings the
+       same parts back — and only the ones the sale actually took. */
+    it("refunding an order with a set in it returns each of its parts", async () => {
+      await seedTestSet();
+      await move({ productId: setPartA.id, delta: 10, reason: "goods_in" });
+      await move({ productId: setPartB.id, variant: setPartBSize, delta: 10, reason: "goods_in" });
+      const order = await createOrder({
+        items: [{ id: `bundle:${SET_ID}`, qty: 2 }],
+        customer: { name: "Т", email: "set@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await setOrderStatus(order.id, "paid", "test");
+      await setOrderStatus(order.id, "refunded", "test");
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(12); // 10 + 1×2
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(14); // 10 + 2×2
+    });
+
     it("cancelling a NEW order (never paid) returns nothing — it never took stock", async () => {
       const order = await createOrder({
         items: [{ id: plain.id, qty: 2 }],
@@ -410,7 +454,37 @@ describe("inventory", () => {
       expect(moves[0].delta).toBe(-4);
     });
 
-    it("skips gift and bundle lines — no product to decrement", async () => {
+    /* A set is real goods leaving the room: three bottles off the shelf, not
+       one line the decrement skips because «bundle:<id>» is not a catalogue
+       id. The parts ride on the order line (priceItems), so what is written
+       off is what was sold, whatever the set holds by now. */
+    it("takes a paid set's parts off the shelf, each at its own size and quantity", async () => {
+      await seedTestSet();
+      await move({ productId: setPartA.id, delta: 10, reason: "goods_in" });
+      await move({ productId: setPartB.id, variant: setPartBSize, delta: 10, reason: "goods_in" });
+      const order = await createOrder({
+        items: [{ id: `bundle:${SET_ID}`, qty: 2 }],
+        customer: { name: "Т", email: "set@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await applyPaymentResult(
+        { id: order.id, number: order.number, status: "new", total: order.total, items: order.items },
+        { orderRef: order.number, status: "paid", providerRef: "x", amount: Number(order.total), currency: "EUR" },
+        "mock",
+        deps(),
+      );
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(8); // 10 − 1×2
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(6); // 10 − 2×2
+      const moves = await listMoves({ productId: setPartB.id, reason: "sale_web" });
+      expect(moves).toHaveLength(1);
+      expect(moves[0].delta).toBe(-4);
+      expect(moves[0].ref).toBe(order.number);
+    });
+
+    /* A gift card is not goods, and a set line from before the parts were
+       recorded on it has nothing to resolve — both move nothing rather than
+       trying to write off a product id that does not exist. */
+    it("skips a gift line, and a set line that carries no parts", async () => {
       const order: OrderLike = {
         id: "3f7c0d3e-2222-4444-8888-aaaaaaaaaaaa",
         number: "R-900002",

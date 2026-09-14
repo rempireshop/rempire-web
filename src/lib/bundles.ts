@@ -221,7 +221,13 @@ function expand(row: BundleRow, overrides: Record<string, Override>): Bundle {
       name: p?.n ?? it.productId,
       sizeLabel: v.label,
       price: unit,
-      stock: (o?.stock ?? (p?.s as StockState | undefined) ?? "in") as StockState,
+      /* «Показывать в магазине» off (product_overrides.hidden, migration 147)
+         takes the product off the shelf everywhere — the storefront drops it
+         from the catalogue and src/lib/orders.ts refuses a line of it with
+         «нет в наличии». A set holding it has to say the same thing, or the
+         one product the owner took off sale goes on being shown and sold
+         inside every set that carries it. */
+      stock: (o?.hidden ? "out" : (o?.stock ?? (p?.s as StockState | undefined) ?? "in")) as StockState,
     });
   }
 

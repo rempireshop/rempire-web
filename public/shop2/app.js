@@ -9070,6 +9070,13 @@
      built from a product that has since been hidden). */
   function bundleItemStock(it) {
     var p = bundleItemProduct(it);
+    /* «Показывать в магазине» off removes the product from CATALOGUE outright
+       (rebuildCatalogue), so there is no p.stock to read and the snapshot
+       underneath still says «in» until the next load — which left the set
+       offering «В корзину» for a bottle the owner had just taken off sale.
+       The server refuses that order (priceItems), and this is the same answer
+       on the screen, without waiting for a reload. */
+    if (!p && shopHidden(it.id)) return "out";
     return (p && p.stock) || it.stock || "in";
   }
   /** The worst of them — the same rule the server applies (worstStock() in
@@ -26283,17 +26290,51 @@
         "</div>" +
       "</div></div>";
   }
+  /* ---- one sale, one order, however many taps -----------------------------
+     The route creates the order, takes the money and settles it (points, the
+     letter, the shelf) in one request, and everything below leaves the basket
+     and both pay buttons alive when the answer does not come back. A phone
+     that drops the salon's wi-fi mid-request therefore shows «Сервер не
+     отвечает» over a sale that HAS gone through — and the cashier, with a
+     customer standing there, taps again.
+
+     So the basket gets an id, and the route answers a repeat of an id it
+     already has with the order it already wrote (migration 093). The id
+     belongs to the BASKET, not to the tap: the same sale sent twice is one
+     sale, while a basket the cashier has changed since mints a new one and is
+     a new sale. Cleared on success, so the next customer buying exactly the
+     same thing is rung up properly. */
+  var POS_SALE = { key: "", ref: "" };
+  function posNewRef() {
+    try {
+      if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID().replace(/-/g, "");
+    } catch (e) { /* an old WebView: the fallback below is plenty */ }
+    return "pos" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+  function posSaleRef(body) {
+    var key = JSON.stringify([body.items, body.payment.method, body.discountPercent,
+      body.customer.email || "", body.customer.phone || ""]);
+    if (POS_SALE.key !== key) POS_SALE = { key: key, ref: posNewRef() };
+    return POS_SALE.ref;
+  }
   function posSend() {
     if (S.posBusy || !S.posCart.length) return;
     // the receipt says «N поз. · терминал», and both are gone from S the
     // moment the sale lands — read them while the cart is still here
     var nLines = S.posCart.length, how = S.posPayment === "terminal" ? "terminal" : "cash";
     S.posBusy = true; S.posErr = ""; render();
-    apiSend("/api/admin/pos-orders/", "POST", {
+    var sale = {
       items: S.posCart.map(function (l) { return { id: l.id, variant: l.variant || undefined, qty: l.qty }; }),
       customer: { email: S.posEmail || undefined, phone: S.posPhone || undefined },
       payment: { method: S.posPayment === "terminal" ? "terminal" : "cash" },
-      discountPercent: Number(S.posDiscount) || 0,
+      discountPercent: Number(S.posDiscount) || 0
+    };
+    apiSend("/api/admin/pos-orders/", "POST", {
+      items: sale.items,
+      customer: sale.customer,
+      payment: sale.payment,
+      discountPercent: sale.discountPercent,
+      ref: posSaleRef(sale),
       /* The language the sale was rung up in. Renat, 13.09.2026: «I did a
          salon sale in English, but e-mail arrived in russian» — the till sent
          no language at all, so every sale in the room was stamped RU and the
@@ -26307,6 +26348,7 @@
       if (r.status === 201 && r.body.ok) {
         S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how, mailed: !!r.body.mailed };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
+        POS_SALE = { key: "", ref: "" };   // the next basket is a different sale
         journalNote(admPosJournalLine(r.body.number, r.body.total));
         admOrdersChanged();
       } else {
@@ -26768,8 +26810,27 @@
         }
       }
       if (DEMO.price[p.id] != null) {
+        /* The server prices a volume as «the override plus what that volume
+           costs over the base» (priceItems() in src/lib/orders.ts), so the
+           same shift has to reach every rung here. Patching only the first
+           one left «500 мл» showing the file's price and billed at the
+           shifted one — the chip and the bill disagreeing by exactly the
+           override, on every size but the smallest.
+           An owner-saved ladder is the exception: its rungs are prices he
+           typed himself and only the first of them is what this override is,
+           which is what the server charges for it too. */
+        var wasBase = p.price;
         p.price = DEMO.price[p.id];
-        if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
+        if (p.prices && p.prices.length) {
+          if (lad && lad.length) {
+            p.prices[0] = DEMO.price[p.id];
+          } else {
+            var shift = DEMO.price[p.id] - wasBase;
+            for (var pi = 0; pi < p.prices.length; pi++) {
+              p.prices[pi] = Math.round((p.prices[pi] + shift) * 100) / 100;
+            }
+          }
+        }
       }
       // wholesale/loyalty: salon/pro price override — null means "computed
       // from the global discount", same convention as product_overrides.pro_price
