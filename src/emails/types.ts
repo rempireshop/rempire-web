@@ -55,6 +55,15 @@ export interface OrderShipping {
   point?: string | null;
   pointName?: string | null;
   pointId?: string | number | null;
+  /**
+   * Which of the two that point is: "parcel_machine" | "pickup_point" |
+   * "post_office" (orders.ts SHIP_POINT_TYPES). Montonio's pickup-point lists
+   * mix manned counters in with the machines — 1 295 of the 10 432 points it
+   * returns for our four countries — and the letter has to name the one the
+   * parcel actually went to. Missing on orders placed before 14.09.2026;
+   * those read as a machine.
+   */
+  pointType?: string | null;
   name?: string | null;
   email?: string | null;
   phone?: string | null;

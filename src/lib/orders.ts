@@ -80,6 +80,16 @@ export type OrderShipping = {
   carrier?: string | null;
   pointId?: string | null;
   pointName?: string | null;
+  /**
+   * What that point actually is: `parcel_machine` | `pickup_point` |
+   * `post_office`, Montonio's own kind as mapMontonioPickupPoints() folds it.
+   * Stored with the order because the live list is the only other place it
+   * exists, and the letter that says where the parcel went is written weeks
+   * later. Null on every order placed before 14.09.2026 and on any order
+   * whose point came from a feed that has no kind — those read as a machine,
+   * which is what the shop called all of them until then.
+   */
+  pointType?: string | null;
   address?: Record<string, unknown> | null;
   price: number;
 };
@@ -133,6 +143,7 @@ export type CreateOrderInput = {
     carrier?: string | null;
     pointId?: string | null;
     pointName?: string | null;
+    pointType?: string | null;
     address?: Record<string, unknown> | null;
   };
   discountCode?: string | null;
@@ -1168,6 +1179,20 @@ export function shipCarrierOf(v: unknown): string | null {
   return (SHIP_CARRIERS as readonly string[]).includes(s) ? s : null;
 }
 
+/** The three kinds a pickup point can be — MontonioPointType, in our spelling. */
+export const SHIP_POINT_TYPES = ["parcel_machine", "pickup_point", "post_office"] as const;
+
+/**
+ * The kind the checkout says the chosen point is. Anything else — a word
+ * Montonio has not used, or nothing at all — is stored as null, and every
+ * reader treats null as the machine the shop has always called it.
+ */
+export function shipPointTypeOf(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.toLowerCase().trim();
+  return (SHIP_POINT_TYPES as readonly string[]).includes(s) ? s : null;
+}
+
 function shipAddress(v: unknown): Record<string, string> | null {
   if (!v || typeof v !== "object" || Array.isArray(v)) return null;
   const raw = v as Record<string, unknown>;
@@ -1195,6 +1220,9 @@ function cleanShipping(ship: CreateOrderInput["shipping"], price: number): Order
     carrier: parcel ? shipCarrierOf(ship?.carrier) : null,
     pointId: parcel ? shipText(ship?.pointId, 80) : null,
     pointName: parcel ? shipText(ship?.pointName, 160) : null,
+    /* One of three words or nothing at all — the browser does not get to
+       invent a fourth kind that the letters would then have to print. */
+    pointType: parcel ? shipPointTypeOf(ship?.pointType) : null,
     address: parcel ? shipAddress(ship?.address) : null,
     price,
   };
