@@ -64,11 +64,26 @@ function invoiceOrderInput(over: Record<string, unknown> = {}) {
  * date — the calendar, moved. Deliberately re-reads the row first: the stamps
  * the run itself writes (`remindedAt`) live in the same blob, and rewriting
  * from a stale in-memory copy would quietly hand the job a clean slate.
+ *
+ * It also marks the letter as delivered, because neither step chases an
+ * invoice that never left (`sentAt`, the rule at the top of
+ * src/lib/invoice-dunning.ts) and there is no RESEND_API_KEY here: the sink
+ * records what would have gone out and reports every send as skipped, so
+ * issueInvoice() leaves `sentAt` null on every order in this file. Every test
+ * below that expects a reminder or a cancellation is about an invoice the
+ * company actually received; the one that is not says so and stamps nothing.
  */
 async function ageInvoice(id: string, daysAfterDue: number, dueDays = 7): Promise<void> {
   const inv = invoiceOf(await getOrder(id))!;
   const dueAt = addDays(tallinnDate(), -daysAfterDue);
-  await saveInvoiceRecord(id, { ...inv, issueDate: addDays(dueAt, -dueDays), dueAt, dueDays });
+  await saveInvoiceRecord(id, {
+    ...inv,
+    issueDate: addDays(dueAt, -dueDays),
+    dueAt,
+    dueDays,
+    sentAt: inv.sentAt ?? `${inv.issueDate}T09:00:00.000Z`,
+    sendError: "",
+  });
 }
 
 function sinkClear(): void {
@@ -304,6 +319,66 @@ describe("the daily walk", () => {
     // the original moment is kept — the order was cancelled then, not now
     expect(invoiceOf(closed)?.cancelledAt).toBe(stamp);
     expect(mailsOf("invoice-cancelled")).toHaveLength(1);
+  });
+
+  /* An invoice the company never received is nobody's debt. `sentAt` stays
+     null when the IBAN was blank, when Resend was down, when there was no key
+     at all — and the order card says so and offers «Отправить счёт ещё раз».
+     Until 14.09.2026 neither branch read it: the letter that never arrived was
+     chased with a reminder and then, a week later, the order was cancelled and
+     the company was told its invoice «не был оплачен». */
+  it("never reminds or cancels an invoice whose letter never went out", async () => {
+    const order = await createOrder(invoiceOrderInput());
+    // what issueInvoice() leaves behind when the send is refused or fails
+    const inv = invoiceOf(order)!;
+    expect(inv.sentAt).toBeNull();
+
+    await ageInvoice(order.id, -2);
+    await saveInvoiceRecord(order.id, { ...invoiceOf(await getOrder(order.id))!, sentAt: null, sendError: "no_iban" });
+    sinkClear();
+    expect(await runInvoiceDunning()).toMatchObject({ reminded: 0, cancelled: 0, skipped: 1 });
+
+    await ageInvoice(order.id, 30);
+    await saveInvoiceRecord(order.id, { ...invoiceOf(await getOrder(order.id))!, sentAt: null, sendError: "no_iban" });
+    expect(await runInvoiceDunning()).toMatchObject({ reminded: 0, cancelled: 0, skipped: 1 });
+
+    const still = (await getOrder(order.id))!;
+    expect(still.status).toBe("new");
+    expect(invoiceOf(still)?.cancelledAt).toBeNull();
+    expect(invoiceOf(still)?.remindedAt).toBeNull();
+    expect(capturedMail()).toHaveLength(0);
+
+    // …and the moment Renat presses «Отправить счёт ещё раз», the clock runs again
+    await saveInvoiceRecord(order.id, {
+      ...invoiceOf(still)!,
+      sentAt: new Date().toISOString(),
+      sendError: "",
+    });
+    expect(await runInvoiceDunning()).toMatchObject({ cancelled: 1 });
+  });
+
+  /* The reminder renders its own letter rather than going through
+     sendInvoiceMail(), so the one gap that stops a letter — a blank IBAN
+     (src/lib/invoices.ts invoiceSendBlock) — has to be checked here too. The
+     template prints `pick(data.seller.iban)`, which is "" with no fallback:
+     what went out was a demand for 95 € with an empty IBAN row. */
+  it("sends no reminder while the shop has no IBAN, and sends it once the IBAN is there", async () => {
+    await setSetting("content", { company: { iban: "", bankName: "" } });
+    const order = await createOrder(invoiceOrderInput());
+    await ageInvoice(order.id, -2);
+    sinkClear();
+
+    expect(await runInvoiceDunning()).toMatchObject({ reminded: 0, skipped: 1 });
+    expect(mailsOf("invoice-reminder")).toHaveLength(0);
+    // not stamped: the reminder is still owed, and the company is owed a letter
+    // that says where to send the money
+    expect(invoiceOf(await getOrder(order.id))?.remindedAt).toBeNull();
+
+    await setSetting("content", { company: { iban: "EE38 2200 2210 2014 5685", bankName: "Swedbank" } });
+    expect(await runInvoiceDunning()).toMatchObject({ reminded: 1 });
+    const letters = mailsOf("invoice-reminder");
+    expect(letters).toHaveLength(1);
+    expect(letters[0].to).toEqual([COMPANY.email]);
   });
 
   it("rides along in the cron's own report", async () => {

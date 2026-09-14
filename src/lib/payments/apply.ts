@@ -383,15 +383,35 @@ function toNumber(v: unknown): number | null {
   return null;
 }
 
-function alreadyPaid(order: OrderLike): boolean {
-  // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
-  if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
+function paymentSaysPaid(order: OrderLike): boolean {
   const p = order.payment;
   return (
     typeof p === "object" &&
     p !== null &&
     (p as { status?: unknown }).status === "paid"
   );
+}
+
+function alreadyPaid(order: OrderLike): boolean {
+  // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
+  if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
+  return paymentSaysPaid(order);
+}
+
+/**
+ * The payment blob says paid and the order never moved — what a crash between
+ * the two writes below leaves behind (setOrderPayment, then setOrderStatus).
+ * Nothing after the status write can have run, so this order has no stock
+ * taken, no gift card spent, no purchase row and no letter, and every retry
+ * used to stop at `alreadyPaid` and leave it that way for ever.
+ *
+ * Only 'new' and 'failed': an order somebody has since cancelled or refunded
+ * is not half-settled, it is finished, and a webhook Montonio is still
+ * retrying must never drag it back into paid.
+ */
+function halfSettled(order: OrderLike): boolean {
+  const s = String(order.status ?? "");
+  return (s === "new" || s === "failed") && paymentSaysPaid(order);
 }
 
 /**
@@ -517,10 +537,22 @@ export async function applyPaymentResult(
   if (result.status === "paid") {
     // Already paid: a retry, not a payment. Write the blob, touch nothing else
     // — no status change, no gift-card redeem, and the caller sends no mail
-    // (H4); it only makes sure the order's own gift cards exist.
-    if (wasPaid) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
+    // (H4); it only makes sure the order's own gift cards exist. The one
+    // exception is an order the blob calls paid while its status never moved:
+    // that is a settlement that died half-way (halfSettled above), and the
+    // claim below finishes it rather than leaving it stranded.
+    if (wasPaid && !halfSettled(order)) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
 
-    await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
+    /* The single transition into paid, claimed rather than written: in
+       production this is a conditional UPDATE (src/lib/orders.ts
+       claimOrderPaid, wired in settle.ts) that answers with the order only if
+       THIS call is the one that moved it. The shopper's return and the webhook
+       arrive together and both read the order before either writes; without
+       this both would go on to redeem the gift card, spend the points, record
+       the purchase and take the stock a second time. */
+    const moved = await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
+    if (moved === null) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
+
     const giftShortfall = await redeemQuotedGiftCard(order, deps);
     const loyalty = await settleLoyalty(order, deps);
     await recordPurchase(order, deps);

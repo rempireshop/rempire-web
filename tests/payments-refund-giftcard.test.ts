@@ -234,6 +234,39 @@ describe("refunding an order that bought gift cards", () => {
     expect((await getOrder(order.id))!.status).toBe("paid");
   });
 
+  /* «Отменить заказ» first, «Вернуть деньги» after — which is the order Renat
+     does them in when a customer changes their mind. The order cannot move to
+     «возврат» from «отменён», and until 14.09.2026 the cards died only inside
+     that move: the customer kept a live 25 € code AND the 25 € back, while the
+     confirm card had promised «Подарочная карта будет аннулирована» and the
+     answer listed the code as voided. */
+  it("a full refund after «Отменить заказ» still cancels the cards the order sold", async () => {
+    const order = await bankPaid(GIFT_ONLY);
+    const [code] = await cardsSoldBy(order);
+    await setOrderStatus(order.id, "cancelled", "admin");
+
+    const out = await refund(order.id);
+    expect(out.status, JSON.stringify(out.body)).toBe(200);
+    expect(out.body.fully).toBe(true);
+    expect(out.body.voided).toEqual([code]);
+
+    const card = (await getGiftCard(code))!;
+    expect(card.voidedAt).toBeTruthy();
+    expect(card.balance).toBe(0);
+    expect((await checkGiftCard(code)).ok).toBe(false);
+    // the order stays cancelled — it was, and the customer was told so
+    expect((await getOrder(order.id))!.status).toBe("cancelled");
+  });
+
+  it("a partial refund cancels nothing and says so", async () => {
+    const order = await bankPaid(GIFT_AND_GOODS);
+    const [code] = await cardsSoldBy(order);
+    const out = await refund(order.id, { amount: money(order.total - 25) });
+    expect(out.status, JSON.stringify(out.body)).toBe(200);
+    expect(out.body.voided).toEqual([]);
+    expect((await getGiftCard(code))!.voidedAt).toBeNull();
+  });
+
   it("a refund made in Montonio's own portal cancels the cards too", async () => {
     const order = await bankPaid(GIFT_ONLY);
     const [code] = await cardsSoldBy(order);

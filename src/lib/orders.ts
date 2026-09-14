@@ -1489,6 +1489,43 @@ export async function setOrderPayment(id: string, payment: Record<string, unknow
   return rows.length ? mapOrder(rows[0]) : null;
 }
 
+/**
+ * The move into «оплачен», claimed rather than written.
+ *
+ * Montonio fires the shopper's return and the webhook at the same moment, and
+ * both doors read the order first and settle it afterwards — so both can see
+ * `new` and both can go on to redeem the gift card, spend the points, record
+ * the purchase and take the stock. A plain `update … set status='paid'` cannot
+ * tell them apart; this one can, because the row only comes back to whoever
+ * actually moved it:
+ *
+ *   · a row returned — this call is the single transition into paid, and the
+ *     caller runs the once-per-order work;
+ *   · `null` — somebody else got there first (or the order is already shipped
+ *     or delivered, which is paid as far as payments are concerned), and the
+ *     caller must do nothing but record the payment blob.
+ *
+ * Used by src/lib/payments/settle.ts for the paid transition only; every other
+ * status move stays setOrderStatus() below, which must stay unconditional —
+ * the journal's undo of «Отправлен» is a write back to paid on an order that
+ * is already paid, and a guard here would silently refuse it.
+ */
+export async function claimOrderPaid(id: string, actor = "system"): Promise<Order | null> {
+  if (!id || !UUID_RE.test(id)) return null;
+  const before = await getOrder(id);
+  if (!before) return null;
+  const rows = await query<OrderRow>(
+    `update orders set status = 'paid', updated_at = now()
+      where id = $1 and status not in (${PAID_ORDER_STATUSES.map((s) => `'${s}'`).join(", ")})
+     returning *`,
+    [id],
+  );
+  if (!rows.length) return null;
+  const after = mapOrder(rows[0]);
+  await writeAudit(actor, "order.status", { id, number: after.number, from: before.status, to: "paid" });
+  return after;
+}
+
 export async function setOrderStatus(id: string, status: OrderStatus, actor = "system"): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;
   if (!ORDER_STATUSES.includes(status)) throw new OrderError("bad_status", String(status));
@@ -1549,6 +1586,40 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
       }
     } catch (err) {
       console.error("[orders] return stock move failed:", err);
+    }
+  }
+
+  /* inventory, the other way: the journal's undo of a cancellation or a
+     refund — «Изменить статус вручную → оплачен» on a closed order — takes
+     the goods off the shelf again. Without this every cancel/undo cycle added
+     the whole order to the count, because the 'return' move above has no
+     inverse anywhere and the undo is a bare status write (the order's money
+     was settled long ago, so it does not go through applyPaymentResult()).
+     What is given back is exactly what this order put back, and nothing else:
+     the ledger's own net for the line says whether the goods are on the shelf
+     (0, a sale given back) or already off it (-N), and a line with no 'return'
+     move of ours never took stock at all — an unpaid invoice that was
+     cancelled and is now being marked paid is settled by
+     src/lib/payments/apply.ts, which does its own decrement. */
+  if (!wasPaid && (before.status === "cancelled" || before.status === "refunded")
+      && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
+    try {
+      const { move, refLedger } = await import("@/lib/inventory");
+      for (const item of before.items) {
+        if (item.kind !== "product" || !item.qty) continue;
+        const led = await refLedger(after.number, item.id, item.variant ?? "");
+        if (!led.returns || led.net < 0) continue;
+        await move({
+          productId: item.id,
+          variant: item.variant ?? "",
+          delta: -Math.abs(item.qty),
+          reason: "sale_web",
+          ref: after.number,
+          actor,
+        });
+      }
+    } catch (err) {
+      console.error("[orders] re-taking the stock of a re-opened order failed:", err);
     }
   }
 

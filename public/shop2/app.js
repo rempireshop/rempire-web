@@ -633,6 +633,12 @@
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
       "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
       "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
+      /* the answer was lost on the way back — the order may exist, so neither
+         sentence may say it does not (payNow) */
+      "Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз":
+        "Pood ei vastanud. Vaata e-posti: kui tellimuse kiri tuli, on tellimus olemas — muidu proovi uuesti",
+      "Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз":
+        "Makse avamine ebaõnnestus. Tellimus on alles — proovi uuesti",
       "Оплата пока недоступна — попробуйте позже": "Maksmine ei ole hetkel võimalik — proovi hiljem",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "Kirjad — eelvaade ja test",
@@ -3194,6 +3200,12 @@
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
       "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
       "Не получилось оформить заказ": "Could not place the order",
+      /* the answer was lost on the way back — the order may exist, so neither
+         sentence may say it does not (payNow) */
+      "Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз":
+        "The shop did not answer. Check your e-mail: if the order letter arrived, the order exists — otherwise try again",
+      "Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз":
+        "Could not open the payment page. The order is saved — please try again",
       "Оплата пока недоступна — попробуйте позже": "Payment is not available right now — try again later",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "E-mails — preview and test",
@@ -5417,9 +5429,9 @@
         EN: "Unpaid orders: reminder after $1 days, cancellation after $2 days" }],
     /* «Изменить статус вручную» — the confirm card's two-line text before a
        refund, and before «оплачен» by hand (money already in / not yet) */
-    [/^([^\n]+) · ([^\n]+)\nСтатус вернётся на «оплачен»\. Деньги и склад не трогаем — они уже учтены\.$/,
-      { ET: "$1 · $2\nStaatus läheb tagasi «makstud». Raha ja ladu jäävad puutumata — need on juba arvesse võetud.",
-        EN: "$1 · $2\nThe status goes back to “paid”. Money and stock are left alone — they are already accounted for." }],
+    [/^([^\n]+) · ([^\n]+)\nСтатус вернётся на «оплачен»\. Деньги не трогаем — они уже учтены; товары, которые вернула отмена, снова спишутся со склада\.$/,
+      { ET: "$1 · $2\nStaatus läheb tagasi «makstud». Raha jääb puutumata — see on juba arvesse võetud; kaubad, mille tühistamine lattu tagastas, kantakse uuesti maha.",
+        EN: "$1 · $2\nThe status goes back to “paid”. The money is left alone — it is already accounted for; goods the cancellation put back are taken off the shelf again." }],
     [/^([^\n]+) · ([^\n]+)\nТак же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят»\. Отмечайте, только если деньги действительно пришли\.$/,
       { ET: "$1 · $2\nSama mis tavalise makse puhul: kaubad kantakse laost maha, kliendile läheb kiri «Tellimus vastu võetud». Märkige ainult siis, kui raha on tõesti laekunud.",
         EN: "$1 · $2\nThe same as a normal payment: the goods leave the stock and the customer gets the “Order received” letter. Mark it only when the money has really arrived." }],
@@ -13897,6 +13909,16 @@
    * POST JSON and say plainly whether there is an API behind this page at all.
    * `offline` means "no server here" (a static host answers 404/HTML); a real
    * error from a real API comes back as a body with ok:false.
+   *
+   * `lost` is the third answer, and the one that matters at the checkout: the
+   * request left and nothing came back — a dropped connection, a gateway's
+   * 502/504 HTML, a function that timed out. Every caller that only asks about
+   * `offline` keeps the behaviour it had (both are set together, because for a
+   * promo box or a points feed "no answer" and "no server" mean the same
+   * thing); payNow() asks about `lost` first, because there the difference is
+   * whether a real order exists on the server. Telling a shopper «это
+   * демонстрация» after the shop has numbered their order and mailed the
+   * invoice is the one answer that must never be given.
    */
   function postJSON(url, body, signal) {
     return fetch(url, {
@@ -13907,8 +13929,8 @@
     }).then(function (r) {
       if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
       return r.json().then(function (j) { return { body: j, status: r.status }; },
-        function () { return { offline: true }; });
-    }, function () { return { offline: true }; });
+        function () { return { offline: true, lost: true, status: r.status }; });
+    }, function () { return { offline: true, lost: true, status: 0 }; });
   }
   var ORDER_ERRS = {
     empty_order: "Корзина пуста",
@@ -14049,6 +14071,14 @@
       ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
       : postJSON("/api/orders/", payload)
     ).then(function (res) {
+      /* The answer was lost, not refused: the order may well exist on the
+         server — numbered, and for «По счёту» already mailed with its PDF.
+         finishDemo() here emptied the basket and said «настоящий заказ не
+         создан», which was simply untrue. The basket and the checkout are
+         left exactly as they are (the catch below only stops the spinner), so
+         the shopper can look in their mail and, if nothing came, press
+         «Оплатить» again. */
+      if (res.lost) throw new Error("Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз");
       if (res.offline) return finishDemo();
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
@@ -14080,6 +14110,12 @@
         bank: (S.pay === 0 && selectedBankCode()) || undefined,
         lang: S.lang
       }).then(function (pay) {
+        /* Same again, and here the order certainly exists — it is remembered
+           just above. The basket is not cleared and `pendingOrder` is kept, so
+           the next «Оплатить» pays for THIS order instead of making another
+           one; what must never happen is the demo receipt, which threw the
+           basket away and told the shopper their order was not real. */
+        if (pay.lost) throw new Error("Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз");
         if (pay.offline) return finishDemo();
         if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
           /* The remembered order cannot be paid any more — it was settled, it
@@ -14875,7 +14911,12 @@
     });
     giftLeft = Math.max(0, Math.min(giftLeft, giftPaid - giftBack));
     var value = Math.round(((Number(sum) || 0) + giftPaid) * 100) / 100;
-    var paid = !!(pay && pay.status === "paid");
+    /* The status has the last word on an order that is already «возврат»: set
+       by hand it means the money went back outside this shop (the customer has
+       had «Деньги возвращены» for the whole order), and the payment blob still
+       says `paid`. Without this the card offered «Вернуть деньги» for the full
+       amount on top of that, and the server took it. */
+    var paid = !!(pay && pay.status === "paid") && !(srv && srv.status === "refunded");
     var viaProvider = !!(pay && pay.ref && (pay.provider === "montonio" || pay.provider === "mock"));
     var left = Math.max(0, Math.round((value - back) * 100) / 100);
     var gift = Math.round(Math.min(left, giftLeft) * 100) / 100;
@@ -15560,13 +15601,17 @@
            the card's own «Вернуть деньги» button does it through Montonio. */
         detail: v.number + " · " + v.who + "\nЗаказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги»." };
     }
-    // the money is already in (a cancelled or shipped order stepping back):
-    // only the status moves — no letter, no second write-off from the shelf
+    /* The money is already in (a cancelled or shipped order stepping back):
+       the status moves and no letter goes out. The shelf is not left alone,
+       though — a cancellation returned the goods to it, and this undo takes
+       them off again (src/lib/orders.ts setOrderStatus), or every cancel/undo
+       cycle would hand the shop the order's goods a second time. A step back
+       from «Отправлен» returned nothing, so there is nothing to take. */
     var settledNow = v.shipped || v.delivered || !!(v.srv && v.srv.payment && v.srv.payment.status === "paid");
     if (settledNow) {
       return { type: "order_manual", overlay: true, id: v.id, number: v.number, value: "paid",
         title: "Отметить оплаченным?", ok: "Оплачен",
-        detail: v.number + " · " + v.who + "\nСтатус вернётся на «оплачен». Деньги и склад не трогаем — они уже учтены." };
+        detail: v.number + " · " + v.who + "\nСтатус вернётся на «оплачен». Деньги не трогаем — они уже учтены; товары, которые вернула отмена, снова спишутся со склада." };
     }
     return { type: "order_manual", overlay: true, id: v.id, number: v.number, value: "paid",
       title: "Отметить оплаченным?", ok: "Оплачен",

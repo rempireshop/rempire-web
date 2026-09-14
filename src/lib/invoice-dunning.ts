@@ -25,11 +25,18 @@
  *   · **nothing throws.** A flow that fails is a flow that did not run; the
  *     shop keeps selling.
  *
- * And one rule of its own, because this step spends money rather than just
- * mailing about it: **a paid invoice is never touched.** The selection asks
- * the database for open orders only, and every candidate is re-read
- * immediately before it is cancelled — «Отметить оплаченным» pressed while
- * this loop was walking must win, and it does.
+ * And two rules of its own, because this step spends money rather than just
+ * mailing about it:
+ *
+ *   · **a paid invoice is never touched.** The selection asks the database for
+ *     open orders only, and every candidate is re-read immediately before it
+ *     is cancelled — «Отметить оплаченным» pressed while this loop was walking
+ *     must win, and it does.
+ *   · **an invoice that never left is never chased.** No `sentAt` means the
+ *     company was never sent the letter (a blank IBAN, a mail outage), and
+ *     neither a reminder nor a cancellation may follow a demand nobody made.
+ *     Such an order waits for the owner, who sees «Письмо со счётом не ушло»
+ *     on its card and can press «Отправить счёт ещё раз».
  */
 import { query } from "@/lib/db";
 import {
@@ -40,6 +47,7 @@ import {
   invoiceOf,
   invoiceOverdueDays,
   invoiceSeller,
+  invoiceSendBlock,
   saveInvoiceRecord,
   tallinnDate,
   addDays,
@@ -110,7 +118,20 @@ async function openInvoices(): Promise<Order[]> {
  * than the interval would otherwise turn the invoice into two letters in one
  * morning.
  */
-async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceSettings, now: Date): Promise<void> {
+async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceSettings, now: Date): Promise<boolean> {
+  /* The same door every invoice letter goes through (src/lib/invoices.ts
+     invoiceSendBlock), and it has to be here too: this file renders and sends
+     its own letter, so a blank IBAN in the shop's settings used to reach the
+     company as a payment demand with an empty IBAN row — «оплатите 95 €»,
+     nowhere to send it. Checked BEFORE the stamp below, so the reminder is
+     still owed the day Renat fills the field in, and the run reports it as a
+     skip rather than as a letter it never sent. */
+  const seller = await invoiceSeller();
+  if (invoiceSendBlock(seller)) {
+    console.error(`[invoice-dunning] ${order.number}: no IBAN in the shop's settings — no reminder sent`);
+    return false;
+  }
+
   const stamped: InvoiceRecord = { ...invoice, remindedAt: now.toISOString() };
   await saveInvoiceRecord(order.id, stamped);
 
@@ -123,7 +144,6 @@ async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceS
       import("@/emails/layout"),
     ]);
     await loadBrand();
-    const seller = await invoiceSeller();
     const lang = normalizeLang(order.lang);
     const totals = invoiceLines(order, invoice.vatRate, lang);
     const mail = renderInvoiceReminder(
@@ -168,6 +188,7 @@ async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceS
     dueAt: invoice.dueAt,
     sent,
   });
+  return true;
 }
 
 /**
@@ -254,6 +275,20 @@ export async function runInvoiceDunning(now: number = Date.now()): Promise<Dunni
       out.skipped += 1;
       continue;
     }
+    /* An invoice the company never received is nobody's debt. `sentAt` is
+       stamped by issueInvoice() only when the letter actually left (src/lib/
+       invoices.ts); it stays null when the IBAN was blank, when Resend was
+       down, when there was no key at all — and the order card says so and
+       offers «Отправить счёт ещё раз». Neither step below may run on one of
+       those: a reminder would chase a letter that never came, and the
+       cancellation would close the order and tell the company its invoice
+       «не был оплачен» when the shop never sent it one. It waits for the
+       owner instead, which is where it belongs. */
+    if (!invoice.sentAt) {
+      console.warn(`[invoice-dunning] ${order.number}: the invoice letter never went out — left alone`);
+      out.skipped += 1;
+      continue;
+    }
     try {
       const overdue = invoiceOverdueDays(invoice, at);
       if (conf.cancelAfterDays > 0 && overdue >= conf.cancelAfterDays) {
@@ -264,8 +299,8 @@ export async function runInvoiceDunning(now: number = Date.now()): Promise<Dunni
       const left = invoiceDaysLeft(invoice, at);
       const dueSoon = Number.isFinite(left) && left <= conf.remindBeforeDays;
       if (conf.remindBeforeDays > 0 && dueSoon && !invoice.remindedAt && invoice.issueDate !== today) {
-        await sendReminder(order, invoice, conf, at);
-        out.reminded += 1;
+        if (await sendReminder(order, invoice, conf, at)) out.reminded += 1;
+        else out.skipped += 1;
         continue;
       }
       out.skipped += 1;

@@ -357,6 +357,55 @@ describe("«Вернуть деньги» — the admin route", () => {
     expect(nope.body.error).toBe("not_paid");
   });
 
+  /* «Изменить статус вручную → возврат» means the money went back outside
+     this shop — the customer has already been mailed «Деньги возвращены» for
+     the whole order (src/app/api/admin/orders/[id]/route.ts). The payment blob
+     still says `paid`, so until 14.09.2026 the card went on offering «Вернуть
+     деньги» for the full amount and the route went on honouring it: the same
+     money, a second time, through Montonio. */
+  it("an order set to «возврат» by hand has nothing left to send back", async () => {
+    const order = await paidOrder();
+    await setOrderStatus(order.id, "refunded", "admin");
+
+    const out = await refund(order.id);
+    expect(out.status).toBe(409);
+    expect(out.body.error).toBe("already_refunded");
+    expect(refundsOf((await getOrder(order.id))!.payment)).toHaveLength(0);
+  });
+
+  /* Renat presses «Вернуть деньги» on his iPhone, Montonio takes the refund
+     and the answer never arrives; the button unlocks and he presses again.
+     The ledger is exactly as it was, so the shop asks a second time — and the
+     key it asks with has to be the key of the first attempt, or the customer
+     is paid twice. (The mock provider derives its refund id from that key,
+     which is what makes the second answer fold into the first entry here.) */
+  it("a retry after a lost answer carries the same idempotency key", async () => {
+    const order = await paidOrder();
+    const first = await refund(order.id, { amount: 5 });
+    expect(first.status, JSON.stringify(first.body)).toBe(200);
+    const ref = refundsOf((await getOrder(order.id))!.payment)[0].ref;
+
+    // the answer never reached the panel: nothing was recorded
+    await setOrderPayment(order.id, { refunds: [], refundedTotal: 0 });
+    const again = await refund(order.id, { amount: 5 });
+    expect(again.status, JSON.stringify(again.body)).toBe(200);
+
+    const entries = refundsOf((await getOrder(order.id))!.payment);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].ref).toBe(ref);
+    expect(refundedTotal((await getOrder(order.id))!.payment)).toBe(5);
+  });
+
+  it("a second, deliberate refund is a different one — its own key and its own entry", async () => {
+    const order = await paidOrder();
+    expect((await refund(order.id, { amount: 1 })).status).toBe(200);
+    expect((await refund(order.id, { amount: 1 })).status).toBe(200);
+    const entries = refundsOf((await getOrder(order.id))!.payment);
+    expect(entries).toHaveLength(2);
+    expect(entries[0].ref).not.toBe(entries[1].ref);
+    expect(refundedTotal((await getOrder(order.id))!.payment)).toBe(2);
+  });
+
   it("an order with no provider payment — marked paid by hand, or covered by a card — has nothing to reverse", async () => {
     const order = await place();
     await setOrderPayment(order.id, { provider: "manual", ref: "", status: "paid", at: new Date().toISOString() });
