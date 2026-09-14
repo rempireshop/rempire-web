@@ -1,8 +1,12 @@
 /**
- * The checkout names a carrier ("omniva" | "smartpost" | "dpd" | "venipak") in
- * shipping.carrier. It must survive createOrder() and come back out of the
- * database, so Montonio Shipping (src/lib/shipping/montonio.ts) does not have
- * to guess it from a point id or a method label.
+ * The checkout names a carrier ("omniva" | "smartpost" | "dpd" | "unisend" |
+ * "novapost") in shipping.carrier. It must survive createOrder() and come back
+ * out of the database, so Montonio Shipping (src/lib/shipping/montonio.ts) does
+ * not have to guess it from a point id or a method label.
+ *
+ * The list this is checked against is deliberately one longer than the one the
+ * shop offers — see SHIP_CARRIERS in src/lib/orders.ts. It answers «what may an
+ * arriving order say», not «what do we sell».
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
@@ -50,6 +54,23 @@ describe("createOrder keeps the carrier", () => {
     const absent = await createOrder(order({ method: "parcel", country: "EE" }));
     expect(absent.shipping.carrier).toBeNull();
     expect((await getOrder(absent.id))?.shipping.carrier).toBeNull();
+  });
+
+  /* A carrier the shop stopped offering is not junk, and the difference costs
+     a parcel. Venipak went on 14.09.2026; a browser holding the bundle from
+     before that draws the old chip, and the order it posts carries a Venipak
+     pickup-point UUID. Refusing the name would keep the point and lose the
+     only thing that says what the point is — resolvePickupPointId() has no
+     carrier to look it up under, and Renat has no name to ring the shopper
+     about. So it is stored, exactly as sent. */
+  it("keeps a carrier the shop no longer offers, so a stale tab loses nothing", async () => {
+    const stale = await createOrder(
+      order({ method: "parcel", country: "EE", carrier: "Venipak", pointId: "30552d26-f4c5-4e88-b0bc-365da4f88222", pointName: "Narva Kreenholmi Maxima Venipak pakiautomaat" }),
+    );
+    expect(stale.shipping.carrier).toBe("venipak");
+    expect((await getOrder(stale.id))?.shipping.carrier).toBe("venipak");
+    // …and the point it came with is still on the order to address it by
+    expect((await getOrder(stale.id))?.shipping.pointId).toBe("30552d26-f4c5-4e88-b0bc-365da4f88222");
   });
 
   it("stores null for a carrier it does not know, rather than junk", async () => {

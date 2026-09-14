@@ -1108,11 +1108,26 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
    (docs/features.md § «Только подарочные карты»). It is refused for any order
    that also holds something physical (not_digital, below). */
 const SHIP_METHODS = ["parcel", "courier", "pickup", "digital"] as const;
-/* What a NEW order may be tagged with — MONTONIO_CARRIERS, the carriers the
-   checkout draws a chip for. Venipak left the list on 14.09.2026 and Nova Post
-   joined it; orders already in the database keep whatever they were stored
-   with, because this runs on the way in and never on the way out. */
-const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "unisend", "novapost"] as const;
+/* What a NEW order may be **tagged with**, which is not the same list as what
+   the shop **offers**. Nova Post joined the offer on 14.09.2026 and Venipak
+   left it; orders already in the database keep whatever they were stored with,
+   because this runs on the way in and never on the way out.
+
+   Venipak stays here all the same, one longer than SHOP_CARRIERS. Dropping it
+   from this list too looked tidy and is the one place it costs something: a
+   browser still holding the previous bundle draws the old chip, and the order
+   it posts carries a Venipak pickup-point UUID with its carrier stripped to
+   null — a parcel nobody can address and nothing can explain, since
+   resolvePickupPointId() has no carrier to look the point up under and Renat
+   has no name to ring the shopper about. Recorded truthfully it is a phone
+   call; nulled it is a silent loss. The price is identical either way
+   (methods.parcel, 5,47 € / 5,59 €), which is what makes this a data question
+   and not a money one — tests/shipping-rate-table.test.ts freezes those two
+   literals for exactly this case, and they are unreachable through the order
+   API while this list is the shorter one. Nothing here offers Venipak: the
+   chip is gone from CARRIERS_BY_COUNTRY, and SHOP_CARRIERS is what decides
+   whether a price for it can be saved. */
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "unisend", "novapost", "venipak"] as const;
 /** Address fields the checkout actually sends. Anything else is dropped. */
 const SHIP_ADDRESS_KEYS = ["addr", "street", "zip", "city", "house", "flat"] as const;
 
