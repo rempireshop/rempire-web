@@ -37,6 +37,28 @@ interface ReviewRow {
   lang: string;
   status: ReviewStatus;
   created_at: Date | string;
+  /** only the admin queue selects this column — see AdminReview below */
+  email?: string | null;
+}
+
+/**
+ * A review as the OWNER sees it: everything the storefront gets, plus the
+ * address the review was written from.
+ *
+ * Deliberately not a field on `Review`. `Review` is what GET /api/reviews/
+ * hands to anyone who opens a product page, and an author's mailbox on it
+ * would be published to the whole internet by a shape change nobody had to
+ * think about. This one exists behind requireAdmin and nowhere else
+ * (src/app/api/admin/reviews/route.ts).
+ *
+ * `email` is null for a review written signed out and for every row older
+ * than 022_reviews_author.sql. That null is not a gap to hide: a review the
+ * shop cannot attach to anybody looks exactly like one it can until the
+ * queue says which is which (Renat, 14.09.2026 — «reviews do not seem to be
+ * connected to clients anymore»).
+ */
+export interface AdminReview extends Review {
+  email: string | null;
 }
 
 function toReview(r: ReviewRow): Review {
@@ -50,6 +72,13 @@ function toReview(r: ReviewRow): Review {
     status: r.status,
     createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
   };
+}
+
+/** Same row, read through the owner's eyes. Normalised the way the column is
+    written (authorEmail), so a queue row and a customer card cannot disagree
+    about whether an address is an address. */
+function toAdminReview(r: ReviewRow): AdminReview {
+  return { ...toReview(r), email: authorEmail(r.email) };
 }
 
 /* ---------- validation ------------------------------------------------ */
@@ -192,21 +221,29 @@ export async function approvedReviews(productId: string, limit = 30): Promise<Re
   return rows.map(toReview);
 }
 
-/** The admin queue. `status` omitted = everything, newest first. */
-export async function listReviews(status?: ReviewStatus, limit = 100): Promise<Review[]> {
+/**
+ * The admin queue. `status` omitted = everything, newest first.
+ *
+ * Carries `email` — the queue is the one screen that lists every review,
+ * attached and unattached side by side, and until it showed the address the
+ * two were indistinguishable there. Admin-only: the shape is AdminReview and
+ * the only caller is the route behind requireAdmin. approvedReviews() (the
+ * product page) and reviewsByCustomer() (the card) are untouched on purpose.
+ */
+export async function listReviews(status?: ReviewStatus, limit = 100): Promise<AdminReview[]> {
   const capped = Math.min(200, Math.max(1, limit));
   const rows = status
     ? await query<ReviewRow>(
-        `select id, product_id, name, rating, text, lang, status, created_at
+        `select id, product_id, name, rating, text, lang, status, created_at, email
            from reviews where status = $1 order by created_at desc limit $2`,
         [status, capped],
       )
     : await query<ReviewRow>(
-        `select id, product_id, name, rating, text, lang, status, created_at
+        `select id, product_id, name, rating, text, lang, status, created_at, email
            from reviews order by created_at desc limit $1`,
         [capped],
       );
-  return rows.map(toReview);
+  return rows.map(toAdminReview);
 }
 
 /**

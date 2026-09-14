@@ -1651,6 +1651,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 
 .adm-stars { color: var(--a-warn); letter-spacing: 1px; }
 .adm-revtext { line-height: 22px; display: block; }
+/* The author's address on the review queue's grey line. One unbreakable
+   token on a 375 px screen: it wraps onto a second line, it never pushes the
+   row sideways. */
+.adm-row__sub .adm-mono { overflow-wrap: anywhere; }
 
 /* ---------- Маркетинг: подарочные карты ----------------------------------- */
 

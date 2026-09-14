@@ -306,6 +306,17 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   // the 404 screen (screenNotFound in app.js, 07.09.2026)
   "Страница не найдена": { ET: "Lehte ei leitud", EN: "Page not found" },
   "Отзывов пока нет — станьте первым.": { ET: "Arvustusi veel pole — ole esimene.", EN: "No reviews yet — be the first." },
+  // the review form's one line about who the review will belong to — an
+  // invitation to a guest, the address itself to a signed-in shopper
+  // (revAccountHTML in app.js, 14.09.2026)
+  "Войдите в кабинет — и отзыв сохраним за вашим аккаунтом.": {
+    ET: "Logi sisse — siis salvestame arvustuse sinu konto alla.",
+    EN: "Sign in and we'll keep this review with your account.",
+  },
+  "Отзыв сохраним за вашим аккаунтом": {
+    ET: "Salvestame arvustuse sinu konto alla",
+    EN: "We'll keep this review with your account",
+  },
   "Спасибо! Отзыв отправлен — он появится на странице после проверки.": {
     ET: "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",
     EN: "Thank you! Your review has been sent — it appears on the page once checked.",

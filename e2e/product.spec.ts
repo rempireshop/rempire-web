@@ -72,6 +72,15 @@ for (const lang of LANGS) {
       // refocus('[data-revf="name"]') in app.js only lands when the field sits
       // inside a still-open <details>; a collapsed one made it a silent no-op.
       await expect(acc.locator('[data-revf="name"]')).toBeFocused();
+
+      /* Nobody is signed in on this page, so the form invites them to be —
+         and never warns them that the review is about to belong to nobody.
+         POST /api/reviews/ takes the author's address from the signed
+         session and from nothing the form sends, so this line is the only
+         place a shopper is told that signing in is what attaches it. */
+      await expect(acc.locator(".revadd__who")).toHaveText(
+        tr("Войдите в кабинет — и отзыв сохраним за вашим аккаунтом.", lang.code),
+      );
       const submit = acc.locator("[data-revsend]");
       await expect(submit).toBeDisabled();
 
