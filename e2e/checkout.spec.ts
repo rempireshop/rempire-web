@@ -282,6 +282,81 @@ test.describe("checkout — e-mail field stability", () => {
   });
 });
 
+/* Renat, 14.09.2026: «when I go — logged in — to checkout it loads my e-mail
+   and data again within 1 seconds, this needs to be instant (!!!)».
+ *
+ * That second is the round trip to /api/account/me, and two rounds of work
+ * have already taken everything else out of it: boot.js asks in the head,
+ * before the twelve scripts at the foot of the page, and the route itself is
+ * one database phase. What is left is the flight time — the functions run in
+ * a US region, so from Estonia an uncached call costs ~175 ms however little
+ * work it does. No client or server change can make that instant.
+ *
+ * So step 1 stops waiting for it. The server that hands out the shell has
+ * already read the session cookie; it writes the address — and nothing else —
+ * into a JSON tag in the head (src/lib/notfound-page.ts), and app.js adopts
+ * it beside #blogdata, before the first paint. Step 2's name, phone, street
+ * and index are not built until «Далее» is pressed, by which time the profile
+ * is long back, so the e-mail is the whole of what a signed-in shopper can
+ * see too early.
+ *
+ * The profile request is BLOCKED here, not delayed: the only way the box can
+ * carry the address is the document itself. */
+test.describe("checkout — a signed-in e-mail is in the box at first paint", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(45) });
+
+  test("the e-mail is painted from the page, with /api/account/me blocked", async ({ page }) => {
+    const email = freshEmail("boot-email");
+
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    // Nobody is signed in yet, so the page carries no address at all — the
+    // tag exists only for a request that brought a valid session cookie.
+    await expect(page.locator("#acctdata")).toHaveCount(0);
+
+    // Sign in. The code is read off the network, exactly as account.spec.ts
+    // does it (E2E_EXPOSE_LOGIN_CODE, docs/testing.md).
+    await page.locator("[data-email]").fill(email);
+    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
+    await page.locator("[data-login]").click();
+    const codeBody = (await (await codeResponse).json()) as { ok: boolean; code?: string };
+    expect(codeBody.code).toMatch(/^\d{6}$/);
+    await page.locator("[data-acctcode]").fill(codeBody.code!);
+    await page.locator("[data-logincode]").click();
+    await expect(page.locator("[data-logout]")).toBeVisible();
+
+    // From here the profile never answers — boot.js's request and app.js's
+    // alike. Whatever ends up in the box came from the document.
+    await page.route("**/api/account/me/**", (route) => route.abort());
+
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    const response = await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+
+    /* The privacy half of the bargain, and the reason the address is put in
+       the page rather than saved on the device: a page that carries one must
+       never be stored — not by the edge, not by this browser's disk cache,
+       not in the back/forward cache. A shared computer must not serve the
+       previous person's e-mail out of a cache. */
+    expect(response?.headers()["cache-control"]).toBe("no-store");
+
+    // The tag the server wrote: the address, and nothing else in it.
+    expect(JSON.parse((await page.locator("#acctdata").textContent()) || "null")).toEqual({ email });
+
+    const box = page.locator("[data-email]");
+    await expect(box).toHaveValue(email);
+    /* `defaultValue` is the value *attribute* app.js rendered. The late
+       prefill in acctLoad() assigns the property instead (it must not rebuild
+       the field), so an address that arrived with the profile would leave
+       this empty. Reading it full is what "at first paint" means. */
+    expect(await box.evaluate((el) => (el as HTMLInputElement).defaultValue)).toBe(email);
+  });
+});
+
 test.describe("checkout — the step says when it is finished", () => {
   test.use({ extraHTTPHeaders: ipHeaders(46) });
 

@@ -35,6 +35,7 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import legalSlugsGenerated from "@/data/legal-slugs.json";
+import { sessionEmail } from "@/lib/customers";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
@@ -56,8 +57,17 @@ import {
 type Lang = { code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
 
 const HTML = "text/html; charset=utf-8";
-/* Never cached: the same address can start answering 200 the moment the
-   owner publishes a product or a post with that slug. */
+/* Never cached, now for two reasons rather than one.
+   · The same address can start answering 200 the moment the owner publishes
+     a product or a post with that slug.
+   · Since 14.09.2026 the shell this route hands out on a known screen carries
+     the signed-in shopper's e-mail (withSessionIdentity below), so the
+     response is personal: it must not reach Vercel's edge cache, this
+     browser's disk cache, or the back/forward cache, or a shared computer
+     could show the next person the last one's address. `no-store` is the one
+     directive that closes all three — `no-cache` would still write the page
+     to disk, and `private` would still let this browser keep it. Nothing
+     upstream loosens it: next.config.ts sets no Cache-Control for /shop2. */
 const NO_STORE = "no-store";
 
 /* ---------- what exists, and what does not ------------------------------- */
@@ -162,6 +172,68 @@ export function isKnownShopPath(segs: string[]): boolean {
   if (kind === "b") return BRAND_SLUGS.has(id);
   if (kind === "info") return LEGAL_SLUGS.has(id);
   return false;
+}
+
+/* ---------- who is asking, written into the page ------------------------- */
+
+/**
+ * The signed-in shopper's address, carried by the shell itself.
+ *
+ * Renat, 14.09.2026: «when I go — logged in — to checkout it loads my e-mail
+ * and data again within 1 seconds, this needs to be instant (!!!)». That
+ * second is one round trip to /api/account/me and nothing else any more: the
+ * previous two rounds moved the question into a 400-byte async tag in the head
+ * (public/shop2/boot.js) and cut the route down to a single database phase.
+ * What is left is the flight itself — the functions run in a US region, so
+ * from Estonia an uncached call costs ~175 ms however little work it does.
+ * There is no client or query change that makes that instant.
+ *
+ * So step 1 stops waiting for it. This response is already being written by a
+ * function that has the request in its hand, and the session cookie in that
+ * request is signed: the address is simply read off it and put in the page.
+ * The shopper's own browser then paints the box full, in the same frame it
+ * paints everything else, with no request of any kind behind it.
+ *
+ * Only the e-mail, and only on the screens the shell serves. Name, phone,
+ * street and index are step 2's, and step 2's body is not built until «Далее»
+ * is pressed — by which time the profile has long since answered — so nothing
+ * else a signed-in shopper can see is early enough to be worth sending.
+ *
+ * Why the page and not the device. The obvious alternative is to remember the
+ * profile in localStorage and read it back on the next visit, which is faster
+ * still and costs a shared computer its privacy: the last person's address
+ * would sit on the disk, readable by the next one and by any script on the
+ * page, with nothing but a logout that may never happen to clear it. Here the
+ * address is only ever in a response addressed to the holder of that cookie,
+ * the response is `no-store` (see html() at the foot of this file), and the
+ * moment the cookie is gone the page stops carrying it. Nothing is written
+ * to the device at all.
+ *
+ * `type="application/json"` is a data block, not a script: the browser never
+ * executes it, which is why the shop's own CSP (`script-src 'self'`, no
+ * 'unsafe-inline' — next.config.ts) has always allowed #blogdata and #blogpost
+ * to ride on every prerendered page the same way. `</` is escaped for the same
+ * reason those two escape it — a body that contained `</script>` would
+ * otherwise end the block early.
+ */
+const ACCT_TAG_ID = "acctdata";
+
+function withSessionIdentity(shell: string, req?: Request): string {
+  if (!req) return shell;
+  let email: string | null = null;
+  try {
+    email = sessionEmail(req);
+  } catch {
+    /* An unreadable or unsigned cookie is an anonymous visitor, and the shop
+       has to open regardless — the same rule boot.js follows. */
+    email = null;
+  }
+  if (!email) return shell;
+  const json = JSON.stringify({ email }).replace(/<\//g, "<\\/");
+  const tag = '<script type="application/json" id="' + ACCT_TAG_ID + '">' + json + "</script>";
+  // A replacer *function*, so a `$` in the address is a dollar sign and not a
+  // replacement pattern — the same reason patchShell() uses one.
+  return shell.replace("</head>", () => tag + "\n</head>");
 }
 
 /* ---------- the page ----------------------------------------------------- */
@@ -274,13 +346,22 @@ async function isPublishedSet(id: string): Promise<boolean> {
   }
 }
 
-export async function notFoundPageResponse(pathname: string): Promise<Response> {
+/**
+ * `req` is optional so the call sites that only have a path — the unit tests
+ * in tests/storefront-decisions.test.ts — keep compiling and keep meaning the
+ * same thing. Without it the shell is the shell, identical for everybody; with
+ * it, and only on a *known* screen, the signed-in shopper's own address rides
+ * along (withSessionIdentity above). The 404 branch deliberately never does:
+ * a page that does not exist is the same page for everyone, it is the one a
+ * crawler is most likely to be holding, and nothing on it has a field to fill.
+ */
+export async function notFoundPageResponse(pathname: string, req?: Request): Promise<Response> {
   const shell = readShell();
   const parsed = shopPath(pathname);
   if (!parsed) return html(shell, 200);
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
-  if (isKnownShopPath(parsed.segs)) return html(shell, 200);
+  if (isKnownShopPath(parsed.segs)) return html(withSessionIdentity(shell, req), 200);
   /* The two shapes whose ids only the database knows, asked only once the
      closed lists above have said no. A brand slug reaches Postgres only when
      the catalogue has never heard of it; a set id reaches it whenever the
