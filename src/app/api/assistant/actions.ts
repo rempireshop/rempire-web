@@ -13,6 +13,7 @@
  */
 
 import { sanitizeContentPatch } from "@/lib/content";
+import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
 export const INFO_PAGES = ["shipping", "returns", "terms", "contact", "privacy"];
@@ -396,7 +397,69 @@ export function sanitizeShippingRules(raw: unknown): object | null {
     if (Object.keys(carriers).length) out.carriers = carriers;
   }
 
+  fanParcelOutToCarriers(out);
   return Object.keys(out).length ? out : null;
+}
+
+/**
+ * «Сделай пакомат в Эстонию 6,90» has to move a bill.
+ *
+ * It did not. `methods.parcel.EE` was accepted, saved, and read by nobody: in
+ * the four countries with chips the shopper picks the carrier, and a carrier
+ * cell — or, empty, Montonio's price for that carrier — is what bills. The
+ * column is only reached by a delivery the checkout cannot produce. So the
+ * card said «Применено ✓» over a price that never moved: the same defect this
+ * file already carries a comment about for Unisend, one layer down.
+ *
+ * The owner is not wrong about what he wants, so the patch is translated
+ * rather than refused: a parcel price for one of the four carrier-choice
+ * countries is written into every carrier cell of that country — exactly what
+ * he would get by typing that number into the boxes of that row on the rate
+ * screen. «Every» means the boxes the row actually has, which is why this asks
+ * carrierCost() rather than walking SHOP_CARRIERS: Finland takes SmartPosti
+ * and DPD and not the three with no Finnish tariff and no box, and Nova Post
+ * takes its Baltic three. Nova Post being chip-only (CHIP_ONLY_CARRIERS) is no
+ * reason to skip it — that flag keeps it from pricing a *country*, and this is
+ * its own chip's cell, which is the one thing it is allowed to price.
+ *
+ * A carrier the model named itself wins over the fan-out, so «пакомат в
+ * Эстонию 6,90, но Omniva 5,90» means both halves and not one of them. The
+ * country's column key is then dropped from the patch: leaving it would save a
+ * shadow number that agrees with the cells today and drifts from them at the
+ * next edit. Countries outside the four keep theirs — no chips there, so the
+ * column is still the only thing that could price a parcel.
+ *
+ * The below-cost guard applies to the cells this writes, which is part of the
+ * point: a price under the tariff is now refused where it used to be accepted
+ * and quietly ignored.
+ */
+function fanParcelOutToCarriers(out: Record<string, unknown>): void {
+  const methods = out.methods as Record<string, Record<string, number>> | undefined;
+  const parcel = methods?.parcel;
+  if (!parcel) return;
+
+  const named = (out.carriers ?? {}) as Record<string, Record<string, number>>;
+  const fanned: Record<string, Record<string, number>> = {};
+
+  for (const country of CARRIER_CHOICE_COUNTRIES) {
+    const price = parcel[country];
+    if (price === undefined) continue;
+    const boxes = SHIP_CARRIERS.filter((c) => carrierCost(c, country, "parcel") !== null);
+    if (!boxes.length) continue;
+    for (const carrier of boxes) {
+      if (named[carrier]?.[country] !== undefined) continue;   // the model said this one itself
+      (fanned[carrier] ??= {})[country] = price;
+    }
+    delete parcel[country];
+  }
+
+  if (!Object.keys(fanned).length) return;
+  for (const [carrier, row] of Object.entries(fanned)) {
+    named[carrier] = { ...row, ...(named[carrier] ?? {}) };
+  }
+  out.carriers = named;
+  if (!Object.keys(parcel).length) delete methods!.parcel;
+  if (methods && !Object.keys(methods).length) delete out.methods;
 }
 
 /* ---- blog posts (draft_post, publish_post) ------------------------------

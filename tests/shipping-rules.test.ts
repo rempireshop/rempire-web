@@ -36,11 +36,19 @@ const customer = { name: "Мария Тамм", email: "maria@example.com", phon
 describe("what the assistant may do to the delivery prices", () => {
   it("takes a partial patch and leaves everything else alone", () => {
     const out = sanitizeShippingRules({ methods: { parcel: { LV: 6.9 } } }) as {
-      methods: { parcel: Record<string, number> };
+      carriers: Record<string, Record<string, number>>;
     };
-    expect(out).toEqual({ methods: { parcel: { LV: 6.9 } } });
+    /* One price in, one price out — in the cells that actually bill it. The
+       column itself stopped billing anyone in the four chip countries; see
+       «turns a parcel price…» below. */
+    expect(out).toEqual({
+      carriers: {
+        omniva: { LV: 6.9 }, smartpost: { LV: 6.9 }, dpd: { LV: 6.9 },
+        unisend: { LV: 6.9 }, novapost: { LV: 6.9 },
+      },
+    });
     // «сделай доставку в Латвию 6,90» must not carry the other eleven prices
-    expect(Object.keys(out.methods)).toEqual(["parcel"]);
+    for (const row of Object.values(out.carriers)) expect(Object.keys(row)).toEqual(["LV"]);
   });
 
   it("accepts a comma for a decimal point, the way the owner speaks", () => {
@@ -52,10 +60,20 @@ describe("what the assistant may do to the delivery prices", () => {
     expect(sanitizeShippingRules({ methods: { parcel: { EE: -1 } } })).toBe(null);
     expect(sanitizeShippingRules({ methods: { parcel: { EE: 100 } } })).toBe(null);
     expect(sanitizeShippingRules({ methods: { parcel: { EE: "free" } } })).toBe(null);
-    expect(sanitizeShippingRules({ methods: { parcel: { EE: 99 } } })).toEqual({ methods: { parcel: { EE: 99 } } });
+    // …and the range and the rounding survive the fan-out unchanged
+    expect(sanitizeShippingRules({ methods: { parcel: { EE: 99 } } })).toEqual({
+      carriers: {
+        omniva: { EE: 99 }, smartpost: { EE: 99 }, dpd: { EE: 99 },
+        unisend: { EE: 99 }, novapost: { EE: 99 },
+      },
+    });
     // two decimals, never a float tail
-    expect(sanitizeShippingRules({ methods: { parcel: { EE: 3.4567 } } }))
-      .toEqual({ methods: { parcel: { EE: 3.46 } } });
+    expect(sanitizeShippingRules({ methods: { parcel: { EE: 3.4567 } } })).toEqual({
+      carriers: {
+        omniva: { EE: 3.46 }, smartpost: { EE: 3.46 }, dpd: { EE: 3.46 },
+        unisend: { EE: 3.46 }, novapost: { EE: 3.46 },
+      },
+    });
   });
 
   it("drops a country, a method or a carrier the shop does not have", () => {
@@ -95,6 +113,75 @@ describe("what the assistant may do to the delivery prices", () => {
     expect(sanitizeShippingRules({ freeFromByCountry: { XX: 99 } })).toBe(null);
   });
 
+  /* «Сделай пакомат в Эстонию 6,90» used to be accepted, saved, and read by
+     nobody: in the four countries with chips the shopper picks the carrier and
+     a carrier cell bills, so the column charged no one. The card said
+     «Применено ✓» over a price that had not moved. It is now translated into
+     the cells the owner would have typed by hand on that row of the rate
+     screen. */
+  it("turns a parcel price for a carrier country into that row's carrier cells", () => {
+    expect(sanitizeShippingRules({ methods: { parcel: { EE: 6.9 } } })).toEqual({
+      carriers: {
+        omniva: { EE: 6.9 }, smartpost: { EE: 6.9 }, dpd: { EE: 6.9 },
+        unisend: { EE: 6.9 }, novapost: { EE: 6.9 },
+      },
+    });
+  });
+
+  /* Nova Post is chip-only (CHIP_ONLY_CARRIERS), and it still takes the price:
+     that flag keeps it from pricing a *country*, while this is its own chip's
+     cell — the one thing it is allowed to price. Leaving it out would be the
+     original defect again, one carrier wide: the owner sets a locker price for
+     Estonia and the Nova Post shopper pays something else. */
+  it("includes Nova Post, whose chip bills like any other", () => {
+    const out = sanitizeShippingRules({ methods: { parcel: { LT: 5.5 } } }) as {
+      carriers: Record<string, Record<string, number>>;
+    };
+    expect(out.carriers.novapost).toEqual({ LT: 5.5 });
+  });
+
+  it("fans out only to the boxes that row actually has", () => {
+    // Finland is priced by Montonio for SmartPosti and DPD and nobody else,
+    // so those are its two boxes — and its two cells
+    expect(sanitizeShippingRules({ methods: { parcel: { FI: 12.9 } } })).toEqual({
+      carriers: { smartpost: { FI: 12.9 }, dpd: { FI: 12.9 } },
+    });
+  });
+
+  it("lets a carrier the owner named himself beat the fan-out", () => {
+    // «пакомат в Эстонию 6,90, но Omniva 5,90» is both halves, not one
+    expect(sanitizeShippingRules({
+      methods: { parcel: { EE: 6.9 } },
+      carriers: { omniva: { EE: 5.9 } },
+    })).toEqual({
+      carriers: {
+        omniva: { EE: 5.9 }, smartpost: { EE: 6.9 }, dpd: { EE: 6.9 },
+        unisend: { EE: 6.9 }, novapost: { EE: 6.9 },
+      },
+    });
+  });
+
+  it("leaves the column alone where a country has no chips at all", () => {
+    // «Другие страны Европы» draws no carrier boxes, so the column is still
+    // the only thing that could price a parcel there
+    expect(sanitizeShippingRules({ methods: { parcel: { EU: 24.9 } } }))
+      .toEqual({ methods: { parcel: { EU: 24.9 } } });
+    // …and a courier price is never fanned out: nobody picks a courier's carrier
+    expect(sanitizeShippingRules({ methods: { courier: { EE: 12.9 } } }))
+      .toEqual({ methods: { courier: { EE: 12.9 } } });
+  });
+
+  /* The assertion that would have caught the original defect: not the shape of
+     the patch, but the bill after it is saved. */
+  it("moves every Estonian chip's price, which is what «Применено ✓» promised", () => {
+    const patch = sanitizeShippingRules({ methods: { parcel: { EE: 6.9 } } })!;
+    const rules = parseShippingRules(patch);
+    for (const carrier of ["omniva", "smartpost", "dpd", "unisend", "novapost"]) {
+      expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier, subtotal: 10 }).price, carrier)
+        .toBe(6.9);
+    }
+  });
+
   it("says no to nonsense rather than storing an empty table", () => {
     expect(sanitizeShippingRules(null)).toBe(null);
     expect(sanitizeShippingRules("everything free")).toBe(null);
@@ -103,10 +190,13 @@ describe("what the assistant may do to the delivery prices", () => {
   });
 
   it("only reaches the shop through the admin door", () => {
-    const good = { type: "set_shipping_rules", rules: { methods: { parcel: { LV: 6.9 } } } };
+    /* A courier price, so this stays a test about the door: a parcel one is
+       rewritten into carrier cells on the way through (see «turns a parcel
+       price…» below) and the comparison would be about that instead. */
+    const good = { type: "set_shipping_rules", rules: { methods: { courier: { LV: 6.9 } } } };
     expect(sanitizeAction(good, known, true)).toEqual(good);
     expect(sanitizeAction(good, known, false)).toBe(null);   // a customer cannot reprice delivery
-    expect(sanitizeAction({ type: "set_shipping_rules", rules: { methods: { parcel: { LV: 900 } } } }, known, true)).toBe(null);
+    expect(sanitizeAction({ type: "set_shipping_rules", rules: { methods: { courier: { LV: 900 } } } }, known, true)).toBe(null);
   });
 });
 
