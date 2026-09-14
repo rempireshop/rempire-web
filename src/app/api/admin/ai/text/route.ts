@@ -75,7 +75,15 @@ const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
    translation get room for that plus the fields around it, and are refused
    as `truncated` (never saved half-written) if they still run out. */
 const MAX_TOKENS: Record<AiTask, number> = {
-  describe: 900, translate: 900, seo: 900, reply: 900, blog_outline: 900,
+  describe: 900, seo: 900, reply: 900, blog_outline: 900,
+  /* «translate» is not a short task: cleanTranslateInput() takes up to 6 000
+     characters of source and the blog editor's «Перевести на ET и EN» hands it
+     a whole article body and asks for TWO languages at once — twelve thousand
+     characters of answer, four times what 900 tokens can hold. It was cut, the
+     salvage was repaired into valid JSON, and half an article was written into
+     the draft as if it were the translation (audit r19). Same room as the
+     article tasks, and refused the same way below when even that runs out. */
+  translate: 4500,
   post_full: 4500, post_translate: 4500, copy: 400,
   // «Рассылка»: a subject line and 90–220 words of HTML (src/lib/ai-prompts.ts)
   newsletter: 1500,
@@ -395,8 +403,13 @@ export async function POST(req: NextRequest) {
   if (!extracted.value) console.error("[admin/ai/text] model did not return valid JSON", task);
   /* A cut article is not an article: the editor would show a piece that
      stops mid-sentence and the owner would publish it. Refused here, with
-     its own code, so the panel can say «попробуйте ещё раз» and mean it. */
-  if ((task === "post_full" || task === "post_translate" || task === "newsletter") && (extracted.truncated || !extracted.value)) {
+     its own code, so the panel can say «попробуйте ещё раз» and mean it.
+     A cut TRANSLATION is the same thing wearing another name — the blog
+     editor's «Перевести на ET и EN» writes whatever comes back straight into
+     the draft, so half an Estonian article would be saved as the Estonian
+     article. */
+  if ((task === "post_full" || task === "post_translate" || task === "newsletter" || task === "translate")
+      && (extracted.truncated || !extracted.value)) {
     console.error("[admin/ai/text] article cut or unreadable", task, choice.finish_reason);
     return NextResponse.json({ ok: false, error: "truncated" }, { status: 502 });
   }

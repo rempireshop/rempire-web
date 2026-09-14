@@ -11,6 +11,7 @@ import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { upsertPost } from "@/lib/blog";
+import { exec } from "@/lib/db";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const ORIGIN = "https://rempireshop.com";
@@ -80,13 +81,108 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(22);
+    expect(body.v).toBe(23);
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);
     expect(body.retry).toBeUndefined();
     expect(body.action).toEqual({ type: "draft_post", topic: "Как ухаживать за бородой зимой", lang: "RU", hint: "" });
     expect(body.tab).toBe("blog");
+  });
+
+  /* …and the mirror image. ai-json closes a cut document by dropping the
+     unfinished member, so an action that REPLACES A WHOLE LIST comes back as
+     a shorter list — a banner missing its last slides, a set missing its last
+     products, a product missing its last sizes. Applying that salvage deletes
+     exactly the part the model never got to write. */
+  describe("an action that replaces a whole list is dropped when the answer was cut", () => {
+    function cutAt(doc: unknown, marker: string) {
+      const text = JSON.stringify(doc);
+      const at = text.indexOf(marker);
+      expect(at, `the fixture no longer contains ${marker}`).toBeGreaterThan(0);
+      return text.slice(0, at + marker.length + 8);
+    }
+
+    const slide = (id: string, ru: string) => ({
+      id,
+      eyebrow: { RU: "Только сейчас", ET: "Ainult praegu", EN: "Right now" },
+      title: { RU: ru, ET: "Talv", EN: "Winter" },
+      sub: { RU: "Масла, бальзамы и воски.", ET: "Õlid, palsamid ja vahad.", EN: "Oils, balms and waxes." },
+      cta: { RU: "Смотреть", ET: "Vaata", EN: "Shop now" },
+      go: "cat:beard",
+      image: "proraso-wood-spice-beard-balm-100ml",
+      on: true,
+    });
+
+    it("set_hero: the banner's other slides are not deleted by a cut answer", async () => {
+      const doc = {
+        reply: "Поменял второй слайд — посмотрите и подтвердите.",
+        product_ids: [], tab: "setup",
+        action: { type: "set_hero", value: { slides: [slide("s1", "Зима"), slide("s2", "Скидка"), slide("s3", "Наборы")], interval: 6000 } },
+      };
+      stubOpenAI(cutAt(doc, '"s3"'), "length");
+      const { POST } = await import("@/app/api/assistant/route");
+      const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "поменяй второй слайд баннера" }] }, admin))).json();
+      expect(body.action, "a cut banner was offered as the whole banner").toBeNull();
+      expect(body.truncated).toBe(true);
+      // the model's own sentence stands, with the panel's «оборвался» after it
+      expect(body.reply).toMatch(/^Поменял второй слайд/);
+      expect(body.reply).toContain("оборвался");
+      expect(body.retry).toBe(true);
+    });
+
+    it("set_bundle: the set keeps the products the answer never reached", async () => {
+      const items = [
+        { id: "proraso-wood-spice-beard-balm-100ml", variant: 0, qty: 1 },
+        { id: "system-4-bio-botanical-shampoo", variant: 0, qty: 1 },
+        { id: "system-4-bio-botanical-serum", variant: 0, qty: 1 },
+      ];
+      const doc = {
+        reply: "Добавил сыворотку в набор.",
+        product_ids: [], tab: "goods",
+        action: { type: "set_bundle", id: "nabor-boroda", items, price: 39.9 },
+      };
+      stubOpenAI(cutAt(doc, "system-4-bio-botanical-serum"), "length");
+      const { POST } = await import("@/app/api/assistant/route");
+      const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "добавь сыворотку в набор" }] }, admin))).json();
+      expect(body.action, "a cut set was offered as the whole set").toBeNull();
+      expect(body.reply).toContain("оборвался");
+    });
+
+    it("update_product: the size ladder is not shortened by a cut answer", async () => {
+      const { createCustomProduct } = await import("@/lib/custom-products");
+      const p = await createCustomProduct({
+        brand: "Proraso", name: "Beard Balm — бальзам для бороды", cat: "beard",
+        sizes: ["50 мл", "100 мл", "250 мл"], prices: [9.9, 14.9, 24.9],
+      });
+      const doc = {
+        reply: "Поднял цену за 50 мл.",
+        product_ids: [], tab: "goods",
+        action: {
+          type: "update_product", id: p.id,
+          sizes: [{ size: "50 мл", price: 11.9 }, { size: "100 мл", price: 14.9 }, { size: "250 мл", price: 24.9 }],
+        },
+      };
+      stubOpenAI(cutAt(doc, '"250 мл"'), "length");
+      const { POST } = await import("@/app/api/assistant/route");
+      const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "подними цену за 50 мл" }] }, admin))).json();
+      expect(body.action, "a cut size ladder was offered as the whole ladder").toBeNull();
+      expect(body.reply).toContain("оборвался");
+      await exec("truncate custom_products");
+    });
+
+    it("an action that carries no list is still salvaged — set_price is whole or it is nothing", async () => {
+      const doc = {
+        reply: "Ставлю цену 9 € для Kevin.Murphy PLUMPING.WASH — подтвердите, и она применится.",
+        product_ids: [], tab: "goods",
+        action: { type: "set_price", id: "system-4-bio-botanical-shampoo", value: 9 },
+      };
+      const text = JSON.stringify(doc) + ' , "extra":';
+      stubOpenAI(text, "length");
+      const { POST } = await import("@/app/api/assistant/route");
+      const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "подними цену" }] }, admin))).json();
+      expect(body.action).toEqual({ type: "set_price", id: "system-4-bio-botanical-shampoo", value: 9 });
+    });
   });
 
   it("an answer cut inside the reply itself: a sentence with a plain-Russian ending and a retry, never the raw text", async () => {

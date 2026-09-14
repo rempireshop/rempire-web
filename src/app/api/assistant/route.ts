@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { briefContent, mergeContent } from "@/lib/content";
 import { listAllPosts, listPublished } from "@/lib/blog";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
-import { catalogueLines, relevantLines, rowLine, type CatRow } from "@/lib/catalogue-slice";
+import { catalogueLines, relevantProducts, rowLine, type CatRow } from "@/lib/catalogue-slice";
 import { briefAnalytics, briefAttachments, briefHero, sanitizeAction, type AttachmentBrief } from "./actions";
 import {
   ASK_WHICH,
@@ -32,7 +32,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 22; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 23; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -245,6 +245,53 @@ async function weekForPrompt(): Promise<string> {
   }
 }
 
+/* price and stock as they are RIGHT NOW, for the shop chat's own CATALOGUE.
+   That block is built from src/data/catalogue.min.json — whatever was last
+   committed — while the shop itself draws that file with the owner's own
+   overrides on top (GET /api/overrides, product_overrides plus the counted
+   stock derived in getOverrides()). So «Never recommend items with stock
+   "out"» was being enforced against a frozen file: a shampoo sold out this
+   morning was still being recommended this afternoon, and a price the owner
+   moved was still the one the slice offered a shopper building a set to a
+   budget. A minute's in-memory cache, exactly like blogLinesForPrompt() above
+   — a chat message must not cost a round trip of its own — and an empty map
+   on any trouble, because the shop chat has to keep working with no database
+   at all (docs/backend.md, "Without the API"). */
+type LiveRow = { p?: number; s?: string };
+let liveCache: { at: number; rows: Record<string, LiveRow> } | null = null;
+const LIVE_CACHE_MS = 60_000;
+async function liveRowsForPrompt(): Promise<Record<string, LiveRow>> {
+  const now = Date.now();
+  if (liveCache && now - liveCache.at < LIVE_CACHE_MS) return liveCache.rows;
+  const rows: Record<string, LiveRow> = {};
+  try {
+    const { getOverrides } = await import("@/lib/orders");
+    for (const [id, o] of Object.entries(await getOverrides())) {
+      const row: LiveRow = {};
+      if (typeof o.price === "number" && Number.isFinite(o.price) && o.price > 0) row.p = o.price;
+      if (o.stock === "in" || o.stock === "low" || o.stock === "out") row.s = o.stock;
+      /* «Показывать в магазине» off: the product has no page and no card in
+         the shop, so recommending it is a dead end — the same rule the article
+         generator keeps (postFullInput in /api/admin/ai/text). "out" is the
+         only word this line has for «do not offer this», and the prompt
+         already forbids recommending it. */
+      if (o.hidden) row.s = "out";
+      if (row.p !== undefined || row.s !== undefined) rows[id] = row;
+    }
+  } catch {
+    // no database: the committed file still answers, exactly as it did before
+  }
+  liveCache = { at: now, rows };
+  return rows;
+}
+
+/** One catalogue row with the shop's live price and stock over the file's. */
+function withLive(p: CatRow, live: Record<string, LiveRow>): CatRow {
+  const o = live[p.id];
+  if (!o) return p;
+  return { ...p, p: o.p ?? p.p, s: o.s ?? p.s };
+}
+
 const CUSTOMERS_TRIGGER = /балл|клиент|партнёр/i;
 async function customersSummaryForPrompt(): Promise<string> {
   try {
@@ -259,11 +306,26 @@ async function customersSummaryForPrompt(): Promise<string> {
   }
 }
 
-function shopPrompt(lang: string, question: string, blogLines: string) {
+function shopPrompt(
+  lang: string,
+  question: string,
+  blogLines: string,
+  ownRows: CatRow[] = [],
+  live: Record<string, LiveRow> = {},
+) {
+  /* The slice for this question, with the shop's live price and stock over the
+     file's (liveRowsForPrompt above) — and then the owner's own products, which
+     are not in that file at all and are on the storefront just the same
+     (customForPrompt / customForFeed in /api/overrides). Without them the chat
+     could not name, recommend or open a single thing Renat added himself. */
+  const lines = [
+    ...relevantProducts(question).map((p) => withLive(p, live)),
+    ...ownRows,
+  ].map(rowLine).join("\n");
   return `You are the shopping assistant of REMPIRE — a premium men's grooming e-shop run by the Rempire barbershop in Tallinn (Mardi 1).
 
 CATALOGUE — items matching this conversation (id|brand|name|category|price|stock; stock: in/low/out):
-${relevantLines(question)}
+${lines}
 ${blogLines ? `
 BLOG ARTICLES you may point to (slug|Russian title) — only when one genuinely answers the question:
 ${blogLines}
@@ -346,8 +408,8 @@ PHOTOS the owner attached to this conversation, already uploaded (key | file nam
 ${attachments.map((a) => `${a.key} | ${a.name}`).join("\n")}
 ` : ""}
 
-HOME-PAGE BANNER as it is right now (slide id | Russian title | link | picture | shown):
-${hero.length ? hero.map((s) => `${s.id}|${s.title}|${s.go}|${s.image}|${s.on ? "on" : "off"}`).join("\n") : "(the built-in default banner)"}
+HOME-PAGE BANNER as it is right now — one slide per line, in exactly the shape set_hero takes back, with every word the owner has written in all three languages. A slide you were NOT asked to change is copied into your answer letter for letter, straight from this list; never rewrite, shorten, translate or invent a field of one:
+${hero.length ? hero.map((s) => JSON.stringify(s)).join("\n") : "(the built-in default banner)"}
 
 SHOP DETAILS as they are right now:
 ${content}
@@ -572,7 +634,7 @@ export async function POST(req: NextRequest) {
      five latencies in a row before the model was even asked. `Promise.all`
      makes them one. Each keeps its own try/catch, so the slowest or the
      unluckiest of them still cannot stop the assistant answering. */
-  const [blogLines, stockSummary, toShipSummary, weekSummary, customersSummary, custom, adminBlogLines, adminBundleLines] =
+  const [blogLines, stockSummary, toShipSummary, weekSummary, customersSummary, custom, adminBlogLines, adminBundleLines, liveRows] =
     await Promise.all([
       // blog: only the real customer prompt needs it — one query the admin
       // panel (its own catalogue already inlined) and the debug prompt skip
@@ -586,15 +648,22 @@ export async function POST(req: NextRequest) {
       // integration: only fetched when the owner's own message plausibly needs
       // it — see CUSTOMERS_TRIGGER/customersSummaryForPrompt() above
       isAdmin && !isMini && CUSTOMERS_TRIGGER.test(lastUser) ? customersSummaryForPrompt() : "",
-      // product creation: the owner's own rows, so their ids are known to the
-      // prompt and to sanitizeAction() alike — see customForPrompt()
-      isAdmin && !isMini ? customForPrompt() : ({ rows: [], lines: [] } as CustomForPrompt),
+      /* product creation: the owner's own rows, so their ids are known to the
+         prompt and to sanitizeAction() alike — see customForPrompt(). The
+         SHOPPER's chat needs them just as much: those products are live on the
+         storefront (GET /api/overrides, customForFeed) and were the one part of
+         the shelf the chat could neither recommend nor open, because the file
+         its CATALOGUE is built from does not carry them. */
+      !isMini ? customForPrompt() : ({ rows: [], lines: [] } as CustomForPrompt),
       // the blog list when the message is about the blog or a photo is here
       isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? adminBlogLinesForPrompt() : "",
       // «Наборы»: only when the owner is talking about them (bundleLinesForPrompt)
       isAdmin && !isMini && (intent === "bundle" || intent === "ask" || BUNDLE_TRIGGER.test(lastUser))
         ? bundleLinesForPrompt()
         : "",
+      // price and stock as they are right now — only the shop chat quotes the
+      // catalogue file back at a customer, see liveRowsForPrompt()
+      !isAdmin && !isMini ? liveRowsForPrompt() : ({} as Record<string, LiveRow>),
     ]);
 
   /* The panel's own language, and then the language the owner actually wrote
@@ -609,7 +678,7 @@ export async function POST(req: NextRequest) {
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
         ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary)
-        : shopPrompt(lang, lastUser, blogLines);
+        : shopPrompt(lang, lastUser, blogLines, custom.rows, liveRows);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -653,6 +722,22 @@ export async function POST(req: NextRequest) {
     const topic = typeof a.topic === "string" ? a.topic : typeof title === "string" ? title : "";
     rawAction = topic ? { type: "draft_post", topic, lang: "RU" } : null;
   }
+  /* …and the mirror image of that salvage: three actions cannot be salvaged
+     at all. A cut document is closed by dropping the unfinished member and
+     shutting the brackets (src/lib/ai-json.ts closeOpen), so what survives is
+     a SHORTER LIST — and each of these three replaces the whole list it
+     carries: set_hero the banner's slides, set_bundle the products in a set,
+     update_product the product's size ladder (a size left out is removed,
+     with its stock count). Applying the salvage would delete precisely the
+     part that was cut off. The reply still stands, and CUT_REPLY below says
+     the answer was cut; the action does not. */
+  const CUT_UNSAFE = new Set(["set_hero", "set_bundle", "update_product"]);
+  let cutAction = false;
+  if (extracted.truncated && rawAction && typeof rawAction === "object"
+      && CUT_UNSAFE.has(String((rawAction as { type?: unknown }).type))) {
+    rawAction = null;
+    cutAction = true;
+  }
   let action = sanitizeAction(rawAction, known, isAdmin, { attachedKeys: new Set(attachments.map((a) => a.key)) });
 
   let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
@@ -660,9 +745,12 @@ export async function POST(req: NextRequest) {
   if (!reply || looksLikeJson(reply)) {
     reply = extracted.truncated ? CUT_REPLY[lang] : FALLBACK_REPLY[lang];
     retry = !action;
-  } else if (extracted.truncated && !action && !/[.!?…»)]$/.test(reply)) {
-    // the sentence itself was the thing cut — say so instead of trailing off
-    reply += "… " + CUT_REPLY[lang];
+  } else if (extracted.truncated && !action && (cutAction || !/[.!?…»)]$/.test(reply))) {
+    /* the sentence itself was the thing cut — say so instead of trailing off.
+       And when the sentence came through whole but its ACTION was dropped just
+       above, say it too: «Поменял баннер, подтвердите» with no card under it
+       and no word about why is the panel telling the owner something untrue. */
+    reply += (/[.!?…»)]$/.test(reply) ? " " : "… ") + CUT_REPLY[lang];
     retry = true;
   }
 

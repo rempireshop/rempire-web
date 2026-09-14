@@ -41,6 +41,17 @@ function sliceLiteral(marker: string, terminator: string): string {
 }
 const ADM_ASK = runInNewContext("(" + sliceLiteral("var ADM_ASK = ", "\n  ];") + ")") as string[];
 const ASK_CHOICES = runInNewContext("(" + sliceLiteral("var ASK_CHOICES = ", "\n  };") + ")") as Record<string, string[]>;
+/** `function <name>(…) { … }` out of app.js by brace matching (tests/admin-toship.test.ts). */
+function sliceFn(name: string): string {
+  const start = appSrc.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+  let depth = 0;
+  for (let i = appSrc.indexOf("{", start); i < appSrc.length; i++) {
+    if (appSrc[i] === "{") depth++;
+    else if (appSrc[i] === "}" && --depth === 0) return appSrc.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces around ${name}() in app.js`);
+}
 
 function req(body: unknown, cookie: string) {
   return new NextRequest(`${ORIGIN}/api/assistant/`, {
@@ -92,7 +103,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(22);
+    expect(body.v).toBe(23);
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
@@ -457,6 +468,64 @@ describe("the admin prompt tells the truth about the panel", () => {
         for (const needle of cap!.needs) {
           expect(prompt, `«${chip}» is offered, but the prompt carries no ${needle}`).toContain(needle);
         }
+      }
+    });
+  });
+
+  /* THE BANNER. set_hero replaces the WHOLE list of slides, and the prompt
+     tells the model to keep the slides it was not asked about exactly as they
+     are — while showing it one Russian headline per slide and nothing else.
+     «Поменяй второй слайд» therefore came back with the other slides stripped
+     of their Estonian, their English, their eyebrow, their subtitle and their
+     button: the model cannot preserve what it was never shown. Both halves of
+     the trip are pinned here — what the panel sends, and what the prompt says. */
+  describe("the banner the model is shown", () => {
+    const slide = (id: string, ru: string) => ({
+      id,
+      eyebrow: { RU: "Только сейчас", ET: "Ainult praegu", EN: "Right now" },
+      title: { RU: ru, ET: "Talvine hooldus", EN: "Winter care" },
+      sub: { RU: "Масла, бальзамы и воски.", ET: "Õlid, palsamid ja vahad.", EN: "Oils, balms and waxes." },
+      cta: { RU: "Смотреть", ET: "Vaata", EN: "Shop now" },
+      go: "cat:beard",
+      image: "proraso-wood-spice-beard-balm-100ml",
+      on: true,
+    });
+
+    let nth = 400;
+    function heroReq(hero: unknown) {
+      nth += 1;
+      return new NextRequest(`${ORIGIN}/api/assistant/`, {
+        method: "POST",
+        headers: { "content-type": "application/json", host: HOST, origin: ORIGIN, cookie: admin, "x-real-ip": `10.0.2.${nth - 400}` },
+        body: JSON.stringify({ mode: "admin", hero, messages: [{ role: "user", content: "поменяй второй слайд баннера" }] }),
+      });
+    }
+
+    it("carries every slide whole — every field, all three languages", async () => {
+      const slides = [slide("s1", "Зима пришла"), slide("s2", "Скидка на бороду")];
+      const sent = stubOpenAI({ reply: "ок", product_ids: [], tab: "setup", action: null });
+      const { POST } = await import("@/app/api/assistant/route");
+      await POST(heroReq(slides));
+      const prompt = sent[0].messages[0].content;
+      for (const s of slides) {
+        expect(prompt, `slide ${s.id} did not reach the model whole`).toContain(JSON.stringify(s));
+      }
+      // …and is told what to do with a slide it was not asked about
+      expect(prompt).toContain("copied into your answer letter for letter");
+      expect(prompt).toContain("in exactly the shape set_hero takes back");
+    });
+
+    it("the panel sends the whole slide, not just its Russian title", async () => {
+      const stored = slide("s1", "Зима пришла");
+      const run = new Function("SLIDES", `
+        function heroConf() { return { slides: SLIDES, interval: 6000 }; }
+        ${sliceFn("heroForAI")}
+        return heroForAI();
+      `) as (slides: unknown[]) => Array<Record<string, { RU: string; ET: string; EN: string }>>;
+      const out = run([stored]);
+      expect(out).toHaveLength(1);
+      for (const field of ["eyebrow", "title", "sub", "cta"] as const) {
+        expect(out[0][field], `the panel dropped ${field} on its way to the model`).toEqual(stored[field]);
       }
     });
   });

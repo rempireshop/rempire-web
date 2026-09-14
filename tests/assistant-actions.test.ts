@@ -306,16 +306,41 @@ describe("update_product", () => {
 describe("the banner handed to the model", () => {
   it("trims it and strips anything that could read as prompt structure", () => {
     const out = briefHero([
-      { id: "s1", title: "Скидка\n\nна бороду ```", go: "cat:beard", image: someId, on: true },
-      { title: "x".repeat(500), on: false },
-      ...Array.from({ length: 9 }, () => ({ title: "spam" })),
+      { id: "s1", title: { RU: "Скидка\n\nна бороду ```" }, go: "cat:beard", image: someId, on: true },
+      { title: { RU: "x".repeat(500) }, on: false },
+      ...Array.from({ length: 9 }, () => ({ title: { RU: "spam" } })),
     ]);
     expect(out).toHaveLength(5);
-    expect(out[0].title).toBe("Скидка на бороду");
+    expect(out[0].title).toEqual({ RU: "Скидка на бороду" });
     expect(out[1].id).toBe("s2");
-    expect(out[1].title).toHaveLength(60);
+    // the cap the storefront's own layout carries and sanitizeHero enforces
+    expect(out[1].title.RU).toHaveLength(40);
     expect(out[1].on).toBe(false);
     expect(briefHero("nonsense")).toEqual([]);
+  });
+
+  /* Every field in all three languages: set_hero replaces the WHOLE banner,
+     so a slide the owner did not ask about has to reach the model intact or
+     it cannot copy it through. Before this, one Russian title per slide went
+     out and the rest of the banner came back empty. */
+  it("carries every field of every slide in all three languages", () => {
+    const slide = {
+      id: "s2",
+      eyebrow: { RU: "Только сейчас", ET: "Ainult praegu", EN: "Right now" },
+      title: { RU: "−20 % на бороду", ET: "−20 % habemele", EN: "−20 % on beard care" },
+      sub: { RU: "Масла и бальзамы.", ET: "Õlid ja palsamid.", EN: "Oils and balms." },
+      cta: { RU: "Смотреть", ET: "Vaata", EN: "Shop now" },
+      go: "cat:beard",
+      image: someId,
+      on: true,
+    };
+    expect(briefHero([slide])[0]).toEqual(slide);
+  });
+
+  /* A panel cached from before the banner travelled in three languages still
+     sends the Russian title as a bare string. */
+  it("reads an old panel's flat title as Russian", () => {
+    expect(briefHero([{ id: "s1", title: "Скидка на бороду" }])[0].title).toEqual({ RU: "Скидка на бороду" });
   });
 });
 
