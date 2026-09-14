@@ -84,16 +84,16 @@ function client(
   `;
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
-  /* SHIP_RULES_DEFAULT is the storefront's own copy of the Montonio carrier
-     table — what shipRulePrice() falls back to when a carrier has no cell of
-     its own, the same step quoteFromRules() takes on the server. Read out of
-     app.js rather than restated, so the two cannot drift. */
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "SHIP_RULES_DEFAULT", body) as (
-    s: unknown, n: number, r: ShippingRules, m: string, d: ShippingRules,
+  /* MONTONIO_PRICE is the storefront's own copy of what an empty box charges —
+     what shipRulePrice() falls back to when a carrier or a courier has no cell
+     of its own, the same step quoteFromRules() takes on the server. Read out
+     of app.js rather than restated, so the two cannot drift. */
+  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", body) as (
+    s: unknown, n: number, r: ShippingRules, m: string, d: unknown,
   ) => ClientOut;
   return run(
     { promoInfo, country, countryIso, ship: { carrier } },
-    cartSum, rules, method, literal<ShippingRules>("SHIP_RULES"),
+    cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"),
   );
 }
 

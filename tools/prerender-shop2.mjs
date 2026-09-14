@@ -292,8 +292,9 @@ const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s)
 
 /* ---------- «Доставка и оплата»: the builder, lifted the same way ---------
 
-   deliveryPageHTML() and the four declarations it reads — SHIP_RULES (the
-   defaults the checkout bills with), CARRIER_NAMES, CARRIERS_BY_COUNTRY and
+   deliveryPageHTML() and the five declarations it reads — SHIP_RULES (the
+   defaults the checkout bills with), MONTONIO_PRICE (what an empty box
+   charges), CARRIER_NAMES, CARRIERS_BY_COUNTRY and
    DELIVERY_ROWS — live in app.js and only there, next to the checkout that
    uses them. Lifted here, so the static /info/shipping/ page and the one the
    shop draws live are the same function over the same tables; the builder
@@ -304,6 +305,7 @@ let DELIVERY = null;
 try {
   const pieces = [
     sliceFrom(/^ {2}var SHIP_RULES = \{$/, DECL_END),
+    sliceFrom(/^ {2}var MONTONIO_PRICE = \{$/, DECL_END),
     sliceFrom(/^ {2}var CARRIER_NAMES = \{$/, DECL_END),
     sliceFrom(/^ {2}var CARRIERS_BY_COUNTRY = \{$/, DECL_END),
     sliceFrom(/^ {2}var DELIVERY_ROWS = \[$/, DECL_END),
@@ -311,7 +313,7 @@ try {
   ];
   if (pieces.some(p => !p)) throw new Error("could not lift the delivery page (deliveryPageHTML & co) out of app.js");
   DELIVERY = new Function(pieces.join("\n") +
-    "\nreturn { rules: SHIP_RULES, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY, rows: DELIVERY_ROWS, page: deliveryPageHTML };")();
+    "\nreturn { rules: SHIP_RULES, montonio: MONTONIO_PRICE, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY, rows: DELIVERY_ROWS, page: deliveryPageHTML };")();
   if (typeof DELIVERY.page !== "function" || !DELIVERY.rules.methods) throw new Error("the lifted delivery page has the wrong shape");
 } catch (e) {
   console.warn("! " + e.message + "\n! /info/shipping/ is written from the policy text alone");
@@ -1096,6 +1098,7 @@ function infoPage(slug, lang) {
       tr: s => tr(s, code, false),
       esc, eur: n => eurFor(n, code), title: heading,
       rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
+      montonio: DELIVERY.montonio,
       address: c.address, hoursHTML: contactHours(code), phoneHTML, mailHTML,
       logos: PAYLOGOS, banks: null, loyalty: LOYALTY_LIVE,
       link: (s, label) => '<a href="' + href(seg, infoRest(s)) + '">' + esc(label) + "</a>",

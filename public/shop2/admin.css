@@ -1875,6 +1875,42 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* a country the shop does not deliver to: still editable, visibly not for sale */
 .adm-tariffs--off > span:first-child { color: var(--a-muted); }
 .adm-tariffs--off .adm-input { opacity: .55; }
+/* ---------- the rate table, 14.09.2026 -------------------------------------
+   One row per country: a column for every carrier Montonio prices there, then
+   the courier and the free-from threshold. Seven columns on a desktop — and a
+   375 px phone cannot hold seven, so there the row stops being a row: the
+   @media block at the foot of this file turns every .adm-tariffs into a card
+   whose columns are labelled fields, two to a line (.adm-tariffs__l). That is
+   deliberately NOT a sideways scroll: the panel's scrollers fade at the edge
+   and a faded edge still hides a number, which on a screen of prices is the
+   one thing that must not happen. */
+.adm-tariffs--rates { grid-template-columns: 1.25fr repeat(6, minmax(0, 1fr)); gap: 8px 6px; }
+/* the twenty-one European countries: nobody runs a locker to them, so the four
+   carrier columns would be eighty-four dashes — three columns instead */
+.adm-tariffs--eu { grid-template-columns: 1.25fr minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.adm-rates__c { display: block; min-width: 0; }
+/* prices line up digit under digit: a column of money read at a glance is the
+   whole job of this screen */
+.adm-tariffs .adm-input, .adm-tariffs .adm-hint--cell { font-variant-numeric: tabular-nums; }
+/* both readings of the line under a box are the same height, so a row with one
+   override in it does not step up and down across the screen */
+.adm-rates__c .adm-hint--cell { min-height: 30px; margin-top: 0; padding-top: 3px; }
+/* a carrier that does not serve this country. Not an empty box with a grey
+   tint — there is no box at all, and the reason is written under the dash, so
+   it reads as «не возит» to somebody who cannot see the colour either. */
+.adm-rates__c--none .adm-rates__dash {
+  display: block; height: 44px; line-height: 44px; text-align: center; color: var(--a-muted);
+}
+/* the line under a box the owner has typed into: the same hint, now a button
+   that puts Montonio's price back. One tap, and never a guess at what the
+   number used to be. */
+.adm-rates__undo {
+  display: block; width: 100%; text-align: left; background: none; border: 0;
+  font: inherit; font-size: 11px; line-height: 14px; padding: 8px 0 8px; margin-top: -5px;
+  color: var(--a-muted); text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.adm-rates__undo.adm-hint--loss { color: var(--a-warn); font-weight: 600; }
+.adm-rates__undo:hover { color: var(--a-ink); }
 /* the folded country list sits inside the tariff table, so it is indented and
    ruled rather than boxed like a top-level fold */
 .adm-fold--sub { margin-top: 12px; border-top: 1px solid var(--a-rule); padding-top: 12px; }

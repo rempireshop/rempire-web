@@ -1,8 +1,14 @@
 /**
- * The tariff layer between the raw Montonio rate quote and what the admin's
- * «Заполнить по тарифам Montonio» button writes into settings.shipping_rules
+ * The tariff layer between the raw Montonio rate quote and a shelf price
  * (src/lib/shipping/tariffs.ts): the static fallback table, live-vs-static
- * preference with a 24h cache, the markup formula and the .x9 rounding.
+ * preference with a 24h cache, and the .x9 rounding.
+ *
+ * `suggestShippingRulesFromTariffs()` and `applyMarkup()` were tested here
+ * until 14.09.2026. Both were the server half of «Заполнить по тарифам
+ * Montonio», a button whose numbers have been the default since an empty cell
+ * started meaning «цена Montonio» — so they wrote what was already there, and
+ * the markup they added on the way never reached a bill. Ренат: «it seems to
+ * me that this delivery is a bit over engineered.»
  *
  * computeShipping()/quoteFromRules() in src/lib/shipping.ts are untouched by
  * any of this — see tests/shipping.test.ts for those. Nothing here talks to a
@@ -13,7 +19,6 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { vi } from "vitest";
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import {
-  applyMarkup,
   cheapestCost,
   customerPrice,
   getMontonioTariff,
@@ -24,7 +29,6 @@ import {
   roundUpToX9,
   staticTariff,
   staticTariffsForCountry,
-  suggestShippingRulesFromTariffs,
   tariffCountries,
 } from "@/lib/shipping/tariffs";
 
@@ -98,29 +102,13 @@ describe("roundUpToX9", () => {
   });
 });
 
-describe("applyMarkup", () => {
-  it("defaults to no markup at all", () => {
-    expect(applyMarkup(5.47)).toBe(5.47);
-    expect(applyMarkup(5.47, {})).toBe(5.47);
-  });
-
-  it("applies percent, then a flat fixed amount on top", () => {
-    expect(applyMarkup(5.47, { percent: 10, fixed: 0.5 })).toBe(6.52);
-    expect(applyMarkup(10, { percent: 20 })).toBe(12);
-  });
-
-  it("ignores a negative markup rather than discounting the tariff", () => {
-    expect(applyMarkup(10, { percent: -50, fixed: -5 })).toBe(10);
-  });
-});
-
 describe("customerPrice", () => {
-  it("is the marked-up tariff, rounded up to .x9", () => {
+  it("is the tariff rounded up to .x9, and nothing else", () => {
     expect(customerPrice(5.47)).toBe(5.49);
-    expect(customerPrice(5.47, { percent: 10, fixed: 0.5 })).toBe(6.59);
+    expect(customerPrice(3.1)).toBe(3.19);
   });
 
-  it("never prices a delivery below its own marked-up tariff", () => {
+  it("never prices a delivery below its own tariff", () => {
     for (const tariff of [4.5, 5.46, 8.62, 18.6, 26.04]) {
       expect(customerPrice(tariff)).toBeGreaterThanOrEqual(tariff);
     }
@@ -248,108 +236,12 @@ describe("getMontonioTariff — live preferred, static as the fallback", () => {
   });
 });
 
-describe("suggestShippingRulesFromTariffs — what the admin's fill button applies", () => {
-  it("prices the four carrier-choice countries to the priciest carrier the shopper can pick", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    // EE parcel: highest of unisend 2.47 / smartpost 2.54 / dpd 2.59 /
-    // omniva 3.10 -> Omniva's 3.10 -> .x9. Nova Post's 2.33 is not in the
-    // running: the shop has no carrier row for it and never names it.
-    expect(patch.methods.parcel?.EE).toBe(3.19);
-    // A courier has no chips anywhere, home included — Renat picks it, so the
-    // basis is the cheapest he can pick: DPD/Omniva 6.82, not SmartPosti 7.38.
-    expect(patch.methods.courier?.EE).toBe(6.89);
-    // LT parcel ceiling is DPD's 5.58
-    expect(patch.methods.parcel?.LT).toBe(5.59);
-  });
-
-  it("also fills each carrier's own price, cheaper than the ceiling when that carrier is cheaper", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    expect(patch.carriers.dpd?.EE).toBe(2.59); // DPD's own parcel price, below the 3.19 ceiling
-    expect(patch.carriers.omniva?.LT).toBe(4.99);
-  });
-
-  it("never writes a courier price under a carrier — checkout never tags a carrier on a courier order", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    // SmartPosti has an EE courier tariff (7.38), but carriers.smartpost.EE must be its
-    // PARCEL price (2.54 -> 2.59), because src/lib/shipping.ts's carrier override applies
-    // regardless of method and the storefront only ever sends a carrier for "parcel".
-    expect(patch.carriers.smartpost?.EE).toBe(2.59);
-  });
-
-  it("applies the markup before rounding to .x9", async () => {
-    // omniva LT 4.96 -> +10% +0.50 = 5.956 -> rounded 5.96 -> next .x9 is 5.99
-    const patch = await suggestShippingRulesFromTariffs({ percent: 10, fixed: 0.5 });
-    expect(patch.carriers.omniva?.LT).toBe(5.99);
-  });
-
-  it("prices each European country on its own, instead of one number for all of them", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    // Poland's parcel machine and Croatia's are the same box on the same
-    // shelf; charging one price for both is what the «EU» cell used to do.
-    expect(patch.methods.parcel?.PL).toBe(17.89); // dpd 17.86, the only carrier the shop can use
-    expect(patch.methods.parcel?.HR).toBe(59.59); // dpd 59.52 — the dearest route Montonio sells
-    // Outside the four carrier-choice countries Renat picks the carrier, so
-    // the price covers the cheapest he can pick: SmartPosti 22.23, not DPD's
-    // 32.74 — and not Nova Post's 12.91, which the shop cannot use at all.
-    expect(patch.methods.courier?.DE).toBe(22.29);
-    expect(patch.methods.courier?.FR).toBe(24.19); // smartpost 24.19, against dpd 44.64
-    // Greece has no parcel machine at all from Estonia, only a courier.
-    expect(patch.methods.parcel?.GR).toBeUndefined();
-    expect(patch.methods.courier?.GR).toBe(43.19);
-  });
-
-  /* The one thing that must never happen: a European shelf price under the
-     cheapest carrier the shop could actually put the parcel on. */
-  it("never prices a European country below the cheapest carrier the shop can use", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    for (const country of MONTONIO_COUNTRIES) {
-      for (const method of ["parcel", "courier"] as const) {
-        const cost = cheapestCost(country, method);
-        const price = patch.methods[method]?.[country];
-        if (!cost) {
-          expect(price).toBeUndefined();
-          continue;
-        }
-        expect(price).toBeGreaterThanOrEqual(cost.price);
-      }
-    }
-  });
-
-  /* Hungary and Romania have a Nova Post parcel machine and nothing else, so
-     the shop has no parcel price for them — better a missing cell than a
-     price for a parcel it cannot send. */
-  it("writes no cell where the only carrier is one the shop cannot use", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    expect(patch.methods.parcel?.HU).toBeUndefined();
-    expect(patch.methods.parcel?.RO).toBeUndefined();
-    expect(patch.methods.courier?.HU).toBe(27.39); // smartpost 27.33
-  });
-
-  it("names a carrier only for the four countries the checkout lets one be picked in", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    expect(Object.keys(patch.carriers.dpd ?? {}).sort()).toEqual(["EE", "FI", "LT", "LV"]);
-  });
-
-  it("leaves what Montonio quotes nothing for untouched — no Venipak, no EU or 'default' row", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    expect(patch.carriers.venipak).toBeUndefined(); // direct contract only
-    // The «EU» cell now only covers the seven countries Montonio serves not at
-    // all, and no tariff can be invented for a parcel that cannot be sent.
-    expect(patch.methods.parcel?.EU).toBeUndefined();
-    expect(patch.methods.parcel?.default).toBeUndefined();
-    expect(patch.methods.pickup).toBeUndefined();
-    for (const c of MONTONIO_NOT_SERVED) {
-      expect(patch.methods.parcel?.[c]).toBeUndefined();
-      expect(patch.methods.courier?.[c]).toBeUndefined();
-    }
-  });
-
-  it("covers every destination the table has a price for and no other", async () => {
-    const patch = await suggestShippingRulesFromTariffs();
-    const filled = new Set([
-      ...Object.keys(patch.methods.parcel ?? {}),
-      ...Object.keys(patch.methods.courier ?? {}),
-    ]);
-    expect([...filled].sort()).toEqual(tariffCountries());
+describe("tariffCountries", () => {
+  /* What /api/admin/shipping/rates/ will answer for: every destination the
+     static table prices. A request for anything else is refused, so the panel
+     cannot ask Montonio about a route nothing sells. */
+  it("is every destination the mirror prices, sorted", () => {
+    expect(tariffCountries()).toEqual([...MONTONIO_COUNTRIES]);
+    expect(tariffCountries()).toHaveLength(25);
   });
 });

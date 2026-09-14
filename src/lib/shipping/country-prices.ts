@@ -167,24 +167,25 @@ export function returnCost(country: string, method: CostMethod): number | null {
   return rows.length ? (rows[0].returnPrice as number) : null;
 }
 
-/* ---------- markup + psychological rounding --------------------------------
-   The seller's price, not the carrier's: cost, plus a markup the owner
-   controls (settings.shipping_rules.markup, default 0), rounded UP to the next
+/* ---------- one tariff, one shelf price ------------------------------------
+   The seller's price, not the carrier's: the tariff, rounded UP to the next
    price ending in 9 cents. Always up, never to the nearest: rounding down
-   could put the shelf price below the floor that was just computed, which is
+   could put the shelf price below the cost that was just computed, which is
    the one thing this whole feature exists to stop happening.
 
-   These three live here, in the leaf, and are re-exported from ./tariffs so
-   every existing import keeps working. */
+   A `markup` — percent + fixed, from settings.shipping_rules — used to sit
+   between the two until 14.09.2026. It reached a bill by exactly one path
+   (the empty-carrier-cell fallback in quoteFromRules()), and on a shop whose
+   carrier cells are all filled — which every shop's are, because
+   parseShippingRules() merges carrierPriceTable() in before the stored row —
+   that path is unreachable, so it never moved a price. What it *did* do was
+   feed «Заполнить по тарифам Montonio», a button that wrote numbers which are
+   now the default anyway. Both are gone: Ренат, 13.09.2026, «we get prices
+   from Montonio and we should use those, we do not need to make them up».
+   A stored row that still carries the key is read as if it did not.
 
-export interface ShippingMarkup {
-  /** Percent added to the tariff, e.g. 10 for +10%. */
-  percent: number;
-  /** Flat EUR added on top of the percent markup. */
-  fixed: number;
-}
-
-export const DEFAULT_MARKUP: ShippingMarkup = { percent: 0, fixed: 0 };
+   These live here, in the leaf, and are re-exported from ./tariffs so every
+   existing import keeps working. */
 
 /** Smallest amount ending in "9 cents" (…, 4.39, 4.49, 4.59, …) at or above `n`. */
 export function roundUpToX9(n: number): number {
@@ -195,20 +196,9 @@ export function roundUpToX9(n: number): number {
   return (cents + up) / 100;
 }
 
-/** tariff × (1 + percent/100) + fixed — the markup is on top of cost, not a discount. */
-export function applyMarkup(tariff: number, markup: Partial<ShippingMarkup> = {}): number {
-  const percent =
-    typeof markup.percent === "number" && Number.isFinite(markup.percent) && markup.percent >= 0
-      ? markup.percent
-      : 0;
-  const fixed =
-    typeof markup.fixed === "number" && Number.isFinite(markup.fixed) && markup.fixed >= 0 ? markup.fixed : 0;
-  return Math.round((tariff * (1 + percent / 100) + fixed + Number.EPSILON) * 100) / 100;
-}
-
-/** What the shopper pays for a tariff: markup, then rounded up to .x9. */
-export function customerPrice(tariff: number, markup: Partial<ShippingMarkup> = {}): number {
-  return roundUpToX9(applyMarkup(tariff, markup));
+/** What the shopper pays for a tariff — the one step between cost and shelf. */
+export function customerPrice(tariff: number): number {
+  return roundUpToX9(tariff);
 }
 
 /* ---------- the shelf table ------------------------------------------------ */
@@ -219,23 +209,42 @@ export interface CountryPriceTable {
 }
 
 /**
- * One price per country per method, from `costBasis()` plus the markup —
- * the table DEFAULT_SHIPPING_RULES is built on and the fill button writes.
- * A country/method Montonio quotes no reachable carrier for gets no cell at
- * all rather than an invented one: Greece has no parcel machine, Hungary and
- * Romania have none the shop can use, and a made-up number there would be a
- * price for a parcel that cannot be sent.
+ * One price per country per method, from `costBasis()` — the table
+ * DEFAULT_SHIPPING_RULES is built on. A country/method Montonio quotes no
+ * reachable carrier for gets no cell at all rather than an invented one:
+ * Greece has no parcel machine, Hungary and Romania have none the shop can
+ * use, and a made-up number there would be a price for a parcel that cannot
+ * be sent.
  */
-export function countryPriceTable(markup: Partial<ShippingMarkup> = {}): CountryPriceTable {
+export function countryPriceTable(): CountryPriceTable {
   const out: CountryPriceTable = { parcel: {}, courier: {} };
   for (const country of MONTONIO_COUNTRIES) {
     for (const method of ["parcel", "courier"] as const) {
       const basis = costBasis(country, method);
       if (!basis) continue;
-      out[method][country] = customerPrice(basis.price, markup);
+      out[method][country] = customerPrice(basis.price);
     }
   }
   return out;
+}
+
+/**
+ * What the shop charges for this country and method when the box is left
+ * empty — Montonio's own price for the route, the same number
+ * `countryPriceTable()` carries. `null` where Montonio quotes no carrier the
+ * shop can use (Greece has no parcel machine; the seven it has no route to
+ * have nothing at all).
+ *
+ * The carrier-unaware twin of `carrierPrice()` below, and read in the same
+ * two places: `quoteFromRules()` takes it after the owner's own cell and
+ * before the zone, so an empty box means «цена Montonio» in the «Курьер»
+ * column exactly as it does in a carrier one; `belowCostCells()` refuses a
+ * save under it, so the floor the guard enforces is the number the screen
+ * prints under the box rather than a rawer one nobody can reach.
+ */
+export function methodPrice(country: string, method: CostMethod): number | null {
+  const basis = costBasis(country, method);
+  return basis ? customerPrice(basis.price) : null;
 }
 
 /* ---------- one price per carrier, which is how Montonio actually bills ----
@@ -283,35 +292,30 @@ export function carrierCost(carrier: string, country: string, method: CostMethod
   return best;
 }
 
-/** The shelf price for one carrier on one route — cost plus markup — or null. */
-export function carrierPrice(
-  carrier: string,
-  country: string,
-  method: CostMethod,
-  markup: Partial<ShippingMarkup> = {},
-): number | null {
+/** The shelf price for one carrier on one route — what an empty cell charges — or null. */
+export function carrierPrice(carrier: string, country: string, method: CostMethod): number | null {
   const cost = carrierCost(carrier, country, method);
-  return cost === null ? null : customerPrice(cost, markup);
+  return cost === null ? null : customerPrice(cost);
 }
 
 /**
  * `{ dpd: { FI: 12.49, … }, … }` — every carrier-country pair Montonio prices
- * for a parcel machine, at the shop's own markup. What DEFAULT_SHIPPING_RULES
- * carries, so a shop that has never touched the panel already bills what the
- * carrier costs rather than one flat number per country.
+ * for a parcel machine. What DEFAULT_SHIPPING_RULES carries, so a shop that
+ * has never touched the panel already bills what the carrier costs rather
+ * than one flat number per country.
  *
  * Parcel machines only, deliberately: the checkout shows carrier chips under
  * «Пакомат» and nowhere else (CARRIERS_BY_COUNTRY in public/shop2/app.js), so
  * a courier never carries a carrier the shopper chose — Renat picks that one
  * when he makes the label, and the country's own courier cell prices it.
  */
-export function carrierPriceTable(markup: Partial<ShippingMarkup> = {}): Record<string, Record<string, number>> {
+export function carrierPriceTable(): Record<string, Record<string, number>> {
   const out: Record<string, Record<string, number>> = {};
   for (const carrier of SHOP_CARRIERS) {
     for (const country of CARRIER_CHOICE_COUNTRIES) {
       const cost = carrierCost(carrier, country, "parcel");
       if (cost === null) continue;
-      (out[carrier] ??= {})[country] = customerPrice(cost, markup);
+      (out[carrier] ??= {})[country] = customerPrice(cost);
     }
   }
   return out;

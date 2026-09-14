@@ -2,18 +2,14 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
-import { ceilingCost, customerPrice } from "@/lib/shipping/country-prices";
+import { carrierPrice } from "@/lib/shipping/country-prices";
 
-/* What «Заполнить по тарифам Montonio» must write into the Latvian
-   parcel-machine box: for the four countries whose checkout lets the shopper
-   choose the carrier, the fill takes the DEAREST carrier the shop can post
-   with, so one price covers whichever machine is picked. (A quote the shop
-   cannot use is left out — that used to mean Nova Post, which was removed
-   altogether on 13.09.2026.) Read from the shop's own tariff
-   table, never typed here: the price list is re-cut every season, and a
-   number written into a test goes stale silently, which is what happened to
-   the one this replaces. */
-const LV_PARCEL_FILL = customerPrice(ceilingCost("LV", "parcel")!.price);
+/* What the Latvian DPD box charges when it is empty: Montonio's own price for
+   that carrier on that route. Read from the shop's own tariff table, never
+   typed here — the price list is re-cut every season, and a number written
+   into a test goes stale silently, which is what happened to the one this
+   replaces. */
+const LV_DPD = carrierPrice("dpd", "LV", "parcel")!;
 
 /**
  * The second admin sweep (docs/audit/2026-09-06-admin-qa.md): the corners the
@@ -148,7 +144,7 @@ test.describe("admin sweep 2 — the orders list", () => {
 test.describe("admin sweep 2 — delivery tariffs", () => {
   test.use({ extraHTTPHeaders: ipHeaders(192) });
 
-  test("the Montonio fill only fills the boxes, and the reset asks first", async ({ page }, testInfo) => {
+  test("«Везде взять цены Montonio» only clears the boxes, and the reset asks first", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one write per action is enough");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
@@ -156,69 +152,74 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
     const original = await rules();
     try {
       await openSettings(page, "delivery");
-      const lv = page.locator('[data-shiprule="m:parcel:LV"]');
+      const lv = page.locator('[data-shiprule="c:dpd:LV"]');
       await expect(lv).toBeVisible();
 
-      /* The fill has to have something to raise, and on a standard table it no
-         longer does. Since 08.09.2026 the Latvian and Lithuanian locker sits at
-         the 5,59 € the tariff itself computes, and since 13.09.2026 the carrier
-         cells carry Montonio's own price by default too (Ренат: «we get prices
-         from Montonio and we should use those») — so every cell already equals
-         what «Заполнить» would write and the button moves nothing at all. The
-         box is put out of step by hand first, which is also the case that
-         matters now: the fill is what raises a price the owner typed below
-         cost. */
-      await lv.fill("3,49");
+      /* A price of the owner's own, so there is something to clear. 6,49 € is
+         well above Montonio's own price for a Latvian DPD locker, so the save
+         guard has no reason to refuse it. */
+      await lv.fill("6,49");
       await page.locator("[data-admshipsave]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
       await page.locator("[data-closetoast]").click();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
       const before = JSON.stringify(await rules());
 
-      /* «Заполнить по тарифам Montonio»: the sentence under the button says
-         «проверьте цифры и сохраните» — so the shop must not change yet. */
-      await page.locator("[data-admshipfill]").click();
-      await expect(page.getByRole("status")).toContainText("вписаны");
-      await page.locator("[data-closetoast]").click();
-      expect(JSON.stringify(await rules()), "the fill changed the shop before «Сохранить»").toBe(before);
-      // …but the box did follow the tariff, rounded up to x.x9
-      expect(Number((await lv.inputValue()).replace(",", "."))).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
+      /* The line under the box is the way back: it names the price the box
+         would charge if it were empty, and one tap empties it. */
+      await expect(page.locator('[data-shipclear="c:dpd:LV"]'))
+        .toContainText(LV_DPD.toFixed(2).replace(".", ","));
+      await page.locator('[data-shipclear="c:dpd:LV"]').click();
+      await expect(lv).toHaveValue("");
+      expect(JSON.stringify(await rules()), "clearing one cell changed the shop before «Сохранить»").toBe(before);
 
-      // «Сохранить» → the card → now the shop follows
+      /* …and «Везде взять цены Montonio» does the same for the whole table.
+         The sentence under it promises «проверьте цифры и сохраните», so the
+         shop must not move until the confirm card is answered. */
+      await lv.fill("6,49");
+      await page.locator("[data-admshipmontonio]").click();
+      await expect(page.getByRole("status")).toContainText("цены Montonio");
+      await page.locator("[data-closetoast]").click();
+      await expect(lv).toHaveValue("");
+      expect(JSON.stringify(await rules()), "the clear changed the shop before «Сохранить»").toBe(before);
+
+      // «Сохранить» → the card → now the shop follows, and the cell is gone
       await page.locator("[data-admshipsave]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
       await page.locator("[data-closetoast]").click();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
+      /* Back to Montonio's own price, not to nothing: a cell the owner has
+         cleared is read back as what an empty cell charges (parseShippingRules
+         merges carrierPriceTable() in underneath), which is the same number the
+         line under the box promised. */
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(LV_DPD);
 
       // …and the reset below needs a price to put back, so out of step again
-      await lv.fill("3,49");
+      await lv.fill("6,49");
       await page.locator("[data-admshipsave]").click();
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
       await page.locator("[data-closetoast]").click();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
 
-      /* «Вернуть значения по умолчанию» — a delivery price too, so it asks; «Отмена» changes nothing. */
-      /* The one that HOLDS the reset button — «Самовывоз, перевозчики и
-         наценка». Since 07.09.2026 the page has a second fold above it (the
-         twenty-one European countries), so `.first()` opened the wrong one. */
-      await page.locator("details", { has: page.locator("[data-admshipreset]") })
-        .locator("summary").first().click();
+      /* «Вернуть значения по умолчанию» — a delivery price too, so it asks;
+         «Отмена» changes nothing. It sits in the row of actions under the
+         table now, beside «Везде взять цены Montonio», rather than inside the
+         fold that held the markup boxes. */
       await page.locator("[data-admshipreset]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть тарифы по умолчанию?");
       await page.locator("[data-admcancel]").click();
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      expect(Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
+      expect(Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
       await page.locator("[data-admshipreset]").click();
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
-      // back to the shipped default, which is the tariff price to the cent
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(LV_PARCEL_FILL);
+      // back to the shipped default, which is Montonio's own price to the cent
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(LV_DPD);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
     }

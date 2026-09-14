@@ -33,10 +33,18 @@ describe("zones: an order carries a real country, the rules price it by row", ()
       },
       freeFromByCountry: { EU: 120, default: null },
     };
+    /* Germany has no cell of its own here, and since 14.09.2026 an empty
+       courier box means «цена Montonio» before it means «возьмите зону»: the
+       one rule the whole rate screen now runs on. So Germany is priced at
+       Montonio's own 22.29 and not at the owner's 16.29 for all of Europe.
+       The zone still answers for a country Montonio has no route to — CH
+       below — which is the only kind of destination the row can reach once
+       every served country has a cell (db/migrations/148 gives them all one). */
     const de = quoteFromRules(rules, { country: "DE", method: "courier", subtotal: 40 });
-    expect(de.price).toBe(16.29);
+    expect(de.price).toBe(22.29);
     expect(de.freeFrom).toBe(120);
     expect(de.country, "the quote keeps the real country").toBe("DE");
+    expect(quoteFromRules(rules, { country: "CH", method: "courier", subtotal: 40 }).price).toBe(16.29);
     const us = quoteFromRules(rules, { country: "US", method: "courier", subtotal: 40 });
     expect(us.price).toBe(9.9);
     expect(us.freeFrom).toBeNull();
@@ -61,8 +69,13 @@ describe("zones: an order carries a real country, the rules price it by row", ()
     expect(quoteFromRules(rules, { country: "HR", method: "parcel", subtotal: 40 }).price).toBe(59.59);
     // a European country with no cell of its own still falls to the EU row
     expect(quoteFromRules(rules, { country: "DE", method: "parcel", subtotal: 40 }).price).toBe(29.99);
-    // and the method with no country cell at all still falls to the EU row
-    expect(quoteFromRules(rules, { country: "PL", method: "courier", subtotal: 40 }).price).toBe(39.99);
+    /* …but a courier with no country cell takes Montonio's price for that
+       country before the EU row, since 14.09.2026 — an empty box means «цена
+       Montonio» in every column of the rate screen, and Poland's courier is
+       20.69 there. The zone row is what a country Montonio cannot reach still
+       falls to (Switzerland). */
+    expect(quoteFromRules(rules, { country: "PL", method: "courier", subtotal: 40 }).price).toBe(20.69);
+    expect(quoteFromRules(rules, { country: "CH", method: "courier", subtotal: 40 }).price).toBe(39.99);
     // the free-from threshold resolves the same way: country, then zone
     expect(quoteFromRules(rules, { country: "PL", method: "parcel", subtotal: 40 }).freeFrom).toBe(90);
     expect(quoteFromRules(rules, { country: "DE", method: "parcel", subtotal: 40 }).freeFrom).toBe(200);
@@ -303,7 +316,12 @@ describe("parsing the settings row", () => {
     expect(parsed.methods.parcel.EE).toBe(2.5);
     // untouched entries survive
     expect(parsed.methods.parcel.LV).toBe(5.59);
-    expect(parsed.methods.courier.EE).toBe(10.84);
+    /* …and the courier column's floor under a stored row is Montonio's own
+       price, not the 10.84 the shop ships with: since 14.09.2026 those three
+       home numbers are overrides the owner can clear, and a row that does not
+       carry one means «цена Montonio». A shop with no row at all still pays
+       10.84 — DEFAULT_SHIPPING_RULES keeps it. */
+    expect(parsed.methods.courier.EE).toBe(6.89);
   });
 
   it("accepts freeFrom: null as 'never free'", () => {

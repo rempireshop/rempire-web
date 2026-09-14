@@ -1,11 +1,10 @@
 import { query } from "@/lib/db";
 import {
-  carrierCost,
   carrierPrice,
   carrierPriceTable,
   CARRIER_CHOICE_COUNTRIES,
-  costBasis,
   countryPriceTable,
+  methodPrice,
   MONTONIO_NOT_SERVED,
   SHOP_CARRIERS,
 } from "@/lib/shipping/country-prices";
@@ -44,7 +43,20 @@ export interface ShippingRules {
    * as freeFrom above. Defaults to { "EU": 200 } — see below.
    */
   freeFromByCountry?: Record<string, number | null>;
-  /** price[method][ISO country] with a "default" fallback per method. */
+  /**
+   * price[method][ISO country] with a "default" fallback per method.
+   *
+   * `courier` is the rate screen's own «Курьер» column. `parcel` is **not** a
+   * column any more (14.09.2026): the shopper picks a carrier chip in EE, LV,
+   * LT and FI and `carriers` below bills that, and no other country offers a
+   * parcel machine at all — so the column the owner read as «цена пакомата»
+   * was the one number in the table almost nobody paid. It stays in the data
+   * and stays honoured, because it is still the price of the two deliveries
+   * that reach it: a carrier the tariff table has no row for (Venipak), and a
+   * method string `normalizeMethod()` could only read as «parcel». Removing
+   * the key would have changed both bills; removing the column changed none.
+   * `pickup` is free before any table is read — see quoteFromRules().
+   */
   methods: Record<ShipMethod, Record<string, number>>;
   /** Optional per-carrier override of the method price, same shape. */
   carriers?: Record<string, Record<string, number>>;
@@ -62,16 +74,15 @@ export interface ShippingRules {
    * `countryOff()` to ask.
    */
   countriesOff?: string[];
-  /**
-   * Markup added to a Montonio carrier tariff to get the customer-facing
-   * price: `tariff * (1 + percent/100) + fixed`, then rounded up to the next
-   * price ending in 9 cents (src/lib/shipping/tariffs.ts, customerPrice()).
-   * Only the admin's «Заполнить по тарифам Montonio» button reads this —
-   * quoteFromRules() below still prices strictly off `methods`/`carriers`, so
-   * a markup change alone does nothing until that button (or a hand edit) is
-   * used to refill the table. Default: no markup at all.
-   */
-  markup?: { percent: number; fixed: number };
+  /* `markup` — percent + fixed, added to a Montonio tariff on the way to a
+     shelf price — was a key here until 14.09.2026. Ренат: «it seems to me that
+     this delivery is a bit over engineered». It was: its boxes changed no
+     bill. The only price path it had was the empty-carrier-cell fallback in
+     quoteFromRules(), and no shop has an empty carrier cell — parse() merges
+     carrierPriceTable() in before the stored row — so its whole visible job
+     was feeding «Заполнить по тарифам Montonio», a button whose numbers are
+     now the default. Gone with it. A stored row that still carries the key
+     parses exactly as one that never had it. */
 }
 
 export interface ShippingInput {
@@ -193,7 +204,6 @@ export const DEFAULT_SHIPPING_RULES: ShippingRules = {
      the point of the switch: the shop stops promising what it cannot do, and
      the decision stays his. */
   countriesOff: [...MONTONIO_NOT_SERVED],
-  markup: { percent: 0, fixed: 0 },
 };
 
 const SETTINGS_KEY = "shipping_rules";
@@ -271,14 +281,22 @@ export function parseShippingRules(value: unknown): ShippingRules {
     freeFromByCountry: { ...(DEFAULT_SHIPPING_RULES.freeFromByCountry ?? {}) },
     methods: {
       parcel: { ...DEFAULT_SHIPPING_RULES.methods.parcel },
-      courier: { ...DEFAULT_SHIPPING_RULES.methods.courier },
+      /* The courier column's floor is **Montonio's own price**, not the three
+         home numbers the shop ships with (EE 10.84, LV/LT 9.90). Those three
+         are overrides like any other cell, and «пустое поле — цена Montonio»
+         has to hold after a save as well as before it: the panel's «Везде
+         взять цены Montonio» clears the boxes, and a seed of 10.84 underneath
+         would put Estonia's own number back the moment the row was read again
+         — the button lying about what it did.
+         No price moves. Every row a shop can actually have carries an explicit
+         cell for all twenty-five countries (db/migrations/148), and a shop with
+         no row at all is priced by DEFAULT_SHIPPING_RULES above, which still
+         holds 10.84 / 9.90 / 9.90. tests/shipping-rate-table.test.ts checks
+         both, cell by cell. */
+      courier: { default: DEFAULT_SHIPPING_RULES.methods.courier.default, ...COUNTRY_PRICES.courier },
       pickup: { ...DEFAULT_SHIPPING_RULES.methods.pickup },
     },
     countriesOff: [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])],
-    markup: {
-      percent: DEFAULT_SHIPPING_RULES.markup?.percent ?? 0,
-      fixed: DEFAULT_SHIPPING_RULES.markup?.fixed ?? 0,
-    },
   };
 
   if (raw.freeFrom === null) rules.freeFrom = null;
@@ -363,15 +381,12 @@ export function parseShippingRules(value: unknown): ShippingRules {
     ].sort();
   }
 
-  const markup = raw.markup;
-  if (typeof markup === "object" && markup !== null && !Array.isArray(markup)) {
-    const m = markup as Record<string, unknown>;
-    const percent = toNumber(m.percent);
-    const fixed = toNumber(m.fixed);
-    // generous but bounded: a markup is a surcharge, not a second price list
-    if (percent !== null && percent >= 0 && percent <= 100) rules.markup!.percent = percent;
-    if (fixed !== null && fixed >= 0 && fixed <= 20) rules.markup!.fixed = fixed;
-  }
+  /* `raw.markup` is read by nothing and dropped on purpose — see
+     ShippingRules above. Every row written before 14.09.2026 carries the key
+     (the panel saved the whole table, markup included); parsing it away is
+     what makes «the boxes are gone» and «the bill did not move» the same
+     sentence. tests/shipping-rate-table.test.ts runs a row with a real markup
+     in it through all 216 prices the checkout can produce. */
 
   return rules;
 }
@@ -432,7 +447,7 @@ export interface BelowCostCell {
   method: ShipMethod;
   /** What the owner typed. */
   charged: number;
-  /** What Montonio charges for that delivery, VAT in. */
+  /** What the shop would charge for that delivery with the box left empty — Montonio's own price. */
   cost: number;
 }
 
@@ -470,12 +485,20 @@ function eur(n: number): string {
  * enough to stop nine of fourteen carrier-country pairs going out below cost,
  * so the save now refuses.
  *
+ * The floor is **the number the screen prints under the box** — the price an
+ * empty box charges (`carrierPrice()` / `methodPrice()`), not the rawer tariff
+ * underneath it. Until 14.09.2026 the guard used the raw cost, so it accepted
+ * an Estonian Omniva locker at 3.15 € while clearing that very box would have
+ * charged 3.19 €: the message's own advice — «очистите поле» — led to a higher
+ * price than the one it had just allowed. One number now, in the box's hint,
+ * in the refusal and in the till.
+ *
  * What is checked, and what deliberately is not:
  *
  *   · **every carrier cell**, against that carrier's own Montonio price. This
  *     is the one that actually bills a parcel machine, because the shopper
  *     picks the chip.
- *   · **the courier column**, against `costBasis()` — which for a courier is
+ *   · **the courier column**, against `methodPrice()` — which for a courier is
  *     the cheapest carrier the shop can use, because nobody *chooses* that
  *     one: Renat does, when he makes the label. So Finland's 16.29 € courier
  *     is not a loss (SmartPosti costs 15.62 €) even though DPD would cost
@@ -495,7 +518,7 @@ export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
   for (const [carrier, table] of Object.entries(rules.carriers ?? {})) {
     for (const [country, charged] of Object.entries(table)) {
       if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
-      const cost = carrierCost(carrier, country, "parcel");
+      const cost = carrierPrice(carrier, country, "parcel");
       if (cost !== null && charged < cost) out.push({ carrier, country, method: "parcel", charged, cost });
     }
   }
@@ -504,10 +527,8 @@ export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
     for (const [country, charged] of Object.entries(rules.methods[method] ?? {})) {
       if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
       if (method === "parcel" && CARRIER_CHOICE_COUNTRIES.includes(country)) continue;
-      const basis = costBasis(country, method);
-      if (basis && charged < basis.price) {
-        out.push({ carrier: "", country, method, charged, cost: basis.price });
-      }
+      const cost = methodPrice(country, method);
+      if (cost !== null && charged < cost) out.push({ carrier: "", country, method, charged, cost });
     }
   }
 
@@ -586,14 +607,33 @@ export function quoteFromRules(
    * A typed number still wins — the three lookups above come first — so the
    * owner keeps control; this is the floor under him, not a ceiling over him.
    */
-  const fromMontonio =
-    carrier && method === "parcel" ? carrierPrice(carrier, country, "parcel", rules.markup) : null;
+  const fromMontonio = carrier && method === "parcel" ? carrierPrice(carrier, country, "parcel") : null;
+  /*
+   * …and the same rule in the courier column, which until 14.09.2026 was the
+   * one box on the rate screen where empty meant something else.
+   *
+   * Ренат: «If I do not like the Montonio price, I will just override it.»
+   * That is one rule for the whole table or it is not a rule: a cleared box
+   * means «берите цену Montonio» wherever it is, and the number the screen
+   * prints under the box is this. Nobody chooses a courier's carrier — Renat
+   * does, at the label — so the price is the cheapest he can pick
+   * (courierPrice → costBasis), and it is read after the owner's own cell and
+   * before the zone: a typed number still wins, and a country Montonio has no
+   * courier for still falls through to «Другие страны Европы» as before.
+   *
+   * No price moves by adding it. Every country Montonio quotes has a courier
+   * cell in the defaults and in the settings row (db/migrations/148), so this
+   * step is unreachable until the owner clears one himself — which is the
+   * whole point of putting it there.
+   */
+  const courierFromMontonio = method === "courier" ? methodPrice(country, "courier") : null;
   const base =
     carrierTable?.[country] ??
     carrierTable?.[zone] ??
     carrierTable?.default ??
     fromMontonio ??
     table[country] ??
+    courierFromMontonio ??
     table[zone] ??
     table.default ??
     0;

@@ -168,7 +168,14 @@ describe("the rules the shop actually bills on", () => {
     const rules = parseShippingRules({ methods: { parcel: { LV: 6.9 } } });
     expect(rules.methods.parcel.LV).toBe(6.9);
     expect(rules.methods.parcel.EE).toBe(DEFAULT_SHIPPING_RULES.methods.parcel.EE);
-    expect(rules.methods.courier.EE).toBe(DEFAULT_SHIPPING_RULES.methods.courier.EE);
+    /* …except the courier column, whose floor under a stored row is Montonio's
+       own price and not the 10.84 the shop ships with (14.09.2026). The three
+       home courier numbers are overrides like any other cell, so a row that
+       does not send one means «цена Montonio» — which is what the panel's
+       «Везде взять цены Montonio» leaves behind. A shop with no row at all is
+       still priced by DEFAULT_SHIPPING_RULES and still pays 10.84. */
+    expect(rules.methods.courier.EE).toBe(6.89);
+    expect(DEFAULT_SHIPPING_RULES.methods.courier.EE).toBe(10.84);
     expect(rules.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
   });
 
@@ -233,8 +240,9 @@ describe("the rules the shop actually bills on", () => {
      either — the same hole the carrier lookup itself had. */
   it("never prices a courier from a parcel carrier's tariff", () => {
     const rules = parseShippingRules({ freeFrom: 10_000 });
+    // DPD's Estonian LOCKER is 2.59; a courier is never priced off it
     expect(quoteFromRules(rules, { country: "EE", method: "courier", carrier: "dpd", subtotal: 20 }).price)
-      .toBe(DEFAULT_SHIPPING_RULES.methods.courier.EE);
+      .toBe(6.89);
   });
 
   /* Ренат, 13.09.2026. The panel already printed the cost under each box and
@@ -258,9 +266,13 @@ describe("the rules the shop actually bills on", () => {
     });
 
     it("catches the courier column too", () => {
-      // SmartPosti is the cheapest courier to Germany at 22.23 — Renat picks it
+      /* SmartPosti is the cheapest courier to Germany at 22.23 — Renat picks
+         it — and 22.29 is what an empty box would charge for it. The floor is
+         that, not the raw 22.23: since 14.09.2026 the guard refuses exactly
+         what the screen says an empty box gives, so its own advice («очистите
+         поле») can never lead to a higher price than the one it allowed. */
       const bad = belowCostCells(parseShippingRules({ methods: { courier: { DE: 9.9 } } }));
-      expect(bad).toEqual([{ carrier: "", country: "DE", method: "courier", charged: 9.9, cost: 22.23 }]);
+      expect(bad).toEqual([{ carrier: "", country: "DE", method: "courier", charged: 9.9, cost: 22.29 }]);
       expect(belowCostMessage(bad)).toContain("Курьер, Германия");
     });
 

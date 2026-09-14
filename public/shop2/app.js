@@ -998,7 +998,6 @@
       "Вернуть значения по умолчанию": "Taasta vaikeväärtused",
       "Тарифы доставки сохранены ✓": "Tarnetariifid salvestatud ✓",
       "Вернули значения по умолчанию ✓": "Vaikeväärtused taastatud ✓",
-      "Цены по перевозчикам — необязательно": "Vedajate hinnad — valikuline",
       "Бесплатно от": "Tasuta alates", "Пакомат": "Pakiautomaat", "Курьер": "Kuller",
       "Самовывоз": "Järeletulek", "Страна": "Riik",
       "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
@@ -1008,24 +1007,32 @@
         "„Tasuta alates“: 0 — tarne on alati tasuta, tühi — sellesse riiki tasuta tarnet ei ole.",
       /* what is actually charged, what is only reference — the three labels
          and the «Что увидит покупатель» preview, 13.09.2026 */
-      "Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там пустое — тариф Montonio за этого перевозчика.":
-        "Veerg „Pakiautomaat“ on varuhind. Pakiautomaadi eest maksab ostja oma vedaja hinda: seda, mis on all jaotises „Vedajate hinnad“, ja kui see väli on tühi — selle vedaja Montonio tariifi.",
-      "Пустое поле — тариф Montonio за этого перевозчика, он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.":
-        "Tühi väli tähendab selle vedaja Montonio tariifi, see on välja all kirjas. Kui kirjutad numbri, maksab ostja selle; tariifist odavamat salvestada ei saa.",
-      "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
-        "Juurdehindlus iseenesest ei muuda midagi: selle liidab ainult nupp „Täida Montonio tariifide järgi“, kui kirjutab hinnad tabelisse.",
+      /* one rule for every box on the screen, 14.09.2026 — Ренат: «I just need
+         to control the shipping price for the client in the checkout according
+         to Montonio price. If I do not like the Montonio price, I will just
+         override it.» */
+      "Пустое поле — цена Montonio, она написана под полем. Впишете своё число — покупатель заплатит его.":
+        "Tühi väli tähendab Montonio hinda, see on välja all kirjas. Kui kirjutad oma numbri, maksab ostja selle.",
+      "Самовывоза в таблице нет — он всегда бесплатный. «—» — этот перевозчик в эту страну не возит.":
+        "Tabelis järeletulekut ei ole — see on alati tasuta. „—“ tähendab, et see vedaja sellesse riiki ei vii.",
+      "Везде взять цены Montonio": "Võta kõikjal Montonio hinnad",
+      "«Везде взять цены Montonio» очистит все ваши цены — в таблице останутся цены Montonio. Проверьте цифры и сохраните.":
+        "„Võta kõikjal Montonio hinnad“ kustutab kõik sinu hinnad — tabelisse jäävad Montonio hinnad. Kontrolli numbrid üle ja salvesta.",
+      "В таблице цены Montonio — проверьте и нажмите «Сохранить»":
+        "Tabelis on Montonio hinnad — kontrolli ja vajuta „Salvesta“",
+      "не возит": "ei vii",
+      "пусто — доставка бесплатна": "tühi — tarne on tasuta",
+      "пусто — берётся «Остальные страны»": "tühi — kehtib „Ülejäänud riigid“",
+      "Пакоматов тут нет ни у одного перевозчика — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "Pakiautomaate siin ühelgi vedajal ei ole — ainult kuller. Hinna all on see, kui palju pood võtab, kui välja tühjendada, ja millise vedajaga pakk läheb.",
       "Что увидит покупатель": "Mida ostja näeb",
       "та же таблица, что на странице «Доставка и оплата»":
         "sama tabel, mis lehel „Tarne ja maksmine“",
       "Показаны несохранённые правки. «от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.":
         "Näidatud on salvestamata muudatused. „alates …“ — riigis on mitu erineva hinnaga vedajat; „—“ — seda viisi selles riigis ei pakuta.",
-      "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
-        "Kui vedajal on oma hind, kirjuta see siia — see on tugevam kui ülemine tabel. Tühi — hind võetakse tabelist.",
       // per-country prices, 07.09.2026 — «real per-country prices»
       "Цены по странам Европы": "Hinnad Euroopa riikide kaupa",
       "цена страны сильнее цены зоны": "riigi hind on tugevam kui tsooni hind",
-      "Под каждой ценой — сколько эта посылка стоит магазину по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».":
-        "Iga hinna all on see, kui palju see pakk poele Montonio lepingu järgi maksab ja millise vedajaga. Tühi — kehtib rea „Muud Euroopa riigid“ hind.",
       "Доставлять в эту страну": "Saata sellesse riiki",
       "Не доставлять в эту страну": "Mitte saata sellesse riiki",
       "Куда Montonio не возит": "Kuhu Montonio ei vii",
@@ -1723,14 +1730,6 @@
       "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
         "📷 Skanner eraldi rakendusena: avage telefonis /shop2/scan/ ja lisage avakuvale — tekib ikoon «Сканер», mis avaneb kohe kaameras.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
-      "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
-        "«Täida Montonio tariifide järgi» kirjutab ülaltoodud tariifid pluss juurdehindluse, ümardatud X,X9 € peale — aga ainult seal, kus tariif on teada: Venipak, Unisend, «Muu Euroopa» ja «Ülejäänud riigid» nuppu ei puuduta.",
-      "Наценка на тарифы Montonio, проценты": "Juurdehindlus Montonio tariifidele, protsentides",
-      "Наценка на тарифы Montonio, евро": "Juurdehindlus Montonio tariifidele, eurodes",
-      "Разрешить снижать текущие цены": "Luba praeguseid hindu alandada",
-      "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
-        "Vaikimisi ei lange hind juba salvestatust madalamale — tariif ainult tõstab selle tegeliku maksumuseni.",
-      "Заполнить по тарифам Montonio": "Täida Montonio tariifide järgi",
       /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
       "Маркетинг": "Turundus",
       "и отзывы": "ja arvustused",
@@ -1797,7 +1796,6 @@
       "Вернуть тарифы по умолчанию?": "Taastada vaiketariifid?",
       "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений.":
         "Kõik tarnehinnad muutuvad standardseteks ja ostjad näevad neid kohe. Oma hinnad saab tagasi muudatuste logist.",
-      "Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»": "Montonio tariifid on sisse kirjutatud — kontrollige numbrid ja vajutage «Salvesta»",
       "бесплатно": "tasuta",
       "Только для вас": "Ainult teile",
       "Этикетка PDF ↗": "Silt PDF ↗",
@@ -2314,22 +2312,10 @@
       "Языки": "Keeled",
       "RU основной · ET · EN": "RU peamine · ET · EN",
       "ваши изменения с «Вернуть» и журнал сервера": "teie muudatused koos «Taasta» nupuga ja serveri logi",
-      "Пакомат, €": "Pakiautomaat, €",
       "Курьер, €": "Kuller, €",
       "Бесплатно от, €": "Tasuta alates, €",
-      "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
-        "Nupp kirjutab sisse vedaja tariifid pluss juurdehindluse, ümardatuna X,X9 €-ni, ja ainult seal, kus tariif on teada. Kontrolli numbrid üle ja salvesta.",
       // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
       // priced nothing; this line is what stands in its place
-      "Перевозчики и наценка": "Vedajad ja juurdehindlus",
-      "Самовывоза в таблице нет — он всегда бесплатный.":
-        "Järeletulekut tabelis ei ole — see on alati tasuta.",
-      "Наценка, %": "Juurdehindlus, %",
-      "Наценка, €": "Juurdehindlus, €",
-      "Наценка, проценты": "Juurdehindlus, protsentides",
-      "Наценка, евро": "Juurdehindlus, eurodes",
-      "по умолчанию тариф только поднимает цену до реальной стоимости":
-        "vaikimisi tõstab tariif hinna ainult tegeliku maksumuseni",
       "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
         "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dimile.",
       "Какие банки показывать": "Milliseid panku näidata",
@@ -3545,7 +3531,6 @@
       "Вернуть значения по умолчанию": "Restore the defaults",
       "Тарифы доставки сохранены ✓": "Delivery tariffs saved ✓",
       "Вернули значения по умолчанию ✓": "Defaults restored ✓",
-      "Цены по перевозчикам — необязательно": "Prices per carrier — optional",
       "Бесплатно от": "Free from", "Пакомат": "Parcel locker", "Курьер": "Courier",
       "Самовывоз": "Pickup", "Страна": "Country",
       "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
@@ -3553,26 +3538,29 @@
       // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
       "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
         "«Free from»: 0 means delivery is always free, empty means there is no free delivery to that country.",
-      /* what is actually charged, what is only reference — the three labels
-         and the «Что увидит покупатель» preview, 13.09.2026 */
-      "Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там пустое — тариф Montonio за этого перевозчика.":
-        "The «Parcel locker» column is only a fallback price. For a parcel locker the customer pays their own carrier's price: the one set below, under «Prices per carrier», or — if that box is empty — Montonio's own tariff for that carrier.",
-      "Пустое поле — тариф Montonio за этого перевозчика, он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.":
-        "An empty box means Montonio's own tariff for that carrier — it is written under the box. Type a number and that is what the customer pays; below the tariff it cannot be saved.",
-      "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
-        "The markup changes nothing on its own: only the «Fill from Montonio tariffs» button adds it, when it writes prices into the table.",
+      // one rule for every box on the screen, 14.09.2026 — see the ET block
+      "Пустое поле — цена Montonio, она написана под полем. Впишете своё число — покупатель заплатит его.":
+        "An empty box means Montonio's price, written under the box. Type your own number and the buyer pays that.",
+      "Самовывоза в таблице нет — он всегда бесплатный. «—» — этот перевозчик в эту страну не возит.":
+        "Self-collection is not in the table — it is always free. «—» means that carrier does not ship to that country.",
+      "Везде взять цены Montonio": "Use Montonio prices everywhere",
+      "«Везде взять цены Montonio» очистит все ваши цены — в таблице останутся цены Montonio. Проверьте цифры и сохраните.":
+        "«Везде взять цены Montonio» clears every price of yours — Montonio's prices are what stays in the table. Check the figures and save.",
+      "В таблице цены Montonio — проверьте и нажмите «Сохранить»":
+        "The table now holds Montonio's prices — check them and press «Сохранить»",
+      "не возит": "does not ship there",
+      "пусто — доставка бесплатна": "empty — delivery is free",
+      "пусто — берётся «Остальные страны»": "empty — «Остальные страны» applies",
+      "Пакоматов тут нет ни у одного перевозчика — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "No carrier runs a parcel locker here — courier only. Under the price is what the shop charges if the box is cleared, and which carrier carries the parcel.",
       "Что увидит покупатель": "What the customer sees",
       "та же таблица, что на странице «Доставка и оплата»":
         "the same table as on the «Delivery & payment» page",
       "Показаны несохранённые правки. «от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.":
         "These are unsaved edits. «from …» means the country has several carriers at different prices; «—» means that method is not offered there.",
-      "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
-        "If a carrier has its own price, put it here — it beats the table above. Empty — the price comes from the table.",
       // per-country prices, 07.09.2026 — «real per-country prices»
       "Цены по странам Европы": "Prices by European country",
       "цена страны сильнее цены зоны": "a country's price beats its zone's",
-      "Под каждой ценой — сколько эта посылка стоит магазину по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».":
-        "Under each price: what this parcel costs the shop on the Montonio contract, and with which carrier. Empty — the «Other European countries» price applies.",
       "Доставлять в эту страну": "Deliver to this country",
       "Не доставлять в эту страну": "Do not deliver to this country",
       "Куда Montonio не возит": "Where Montonio does not ship",
@@ -4255,14 +4243,6 @@
       "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
         "📷 The scanner as its own app: open /shop2/scan/ on the phone and add it to the home screen — an icon «Сканер» appears that opens straight into the camera.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
-      "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
-        "«Fill from Montonio tariffs» writes the tariffs above plus the markup, rounded to X.X9 €, but only where a tariff is known: the button doesn't touch Venipak, Unisend, «Other European countries» or «Other countries».",
-      "Наценка на тарифы Montonio, проценты": "Markup on Montonio tariffs, percent",
-      "Наценка на тарифы Montonio, евро": "Markup on Montonio tariffs, euros",
-      "Разрешить снижать текущие цены": "Allow lowering current prices",
-      "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
-        "By default the price never drops below what's already saved — the tariff only raises it to the real cost.",
-      "Заполнить по тарифам Montonio": "Fill from Montonio tariffs",
       /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
       "Маркетинг": "Marketing",
       "и отзывы": "and reviews",
@@ -4329,7 +4309,6 @@
       "Вернуть тарифы по умолчанию?": "Restore the default tariffs?",
       "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений.":
         "Every delivery price goes back to the default and customers see it at once. Your own prices can be brought back from the change log.",
-      "Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»": "Montonio tariffs filled in — check the numbers and press “Save”",
       "бесплатно": "free",
       "Только для вас": "Only for you",
       "Этикетка PDF ↗": "Label PDF ↗",
@@ -4844,22 +4823,10 @@
       "Языки": "Languages",
       "RU основной · ET · EN": "RU main · ET · EN",
       "ваши изменения с «Вернуть» и журнал сервера": "your own changes with «Restore», plus the server's log",
-      "Пакомат, €": "Parcel locker, €",
       "Курьер, €": "Courier, €",
       "Бесплатно от, €": "Free from, €",
-      "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
-        "The button fills in the carrier tariffs plus your markup, rounded to €X.X9, and only where a tariff is known. Check the numbers and save.",
       // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
       // priced nothing; this line is what stands in its place
-      "Перевозчики и наценка": "Carriers and markup",
-      "Самовывоза в таблице нет — он всегда бесплатный.":
-        "Pickup is not in the table — it is always free.",
-      "Наценка, %": "Markup, %",
-      "Наценка, €": "Markup, €",
-      "Наценка, проценты": "Markup in percent",
-      "Наценка, евро": "Markup in euros",
-      "по умолчанию тариф только поднимает цену до реальной стоимости":
-        "by default a tariff only raises the price up to the real cost",
       "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
         "Payment methods are switched on by the payment provider. To remove or add one, write to Dim.",
       "Какие банки показывать": "Which banks to show",
@@ -5591,8 +5558,14 @@
     [/^Приход \+(\d+) ✓$/, { ET: "Sissetulek +$1 ✓", EN: "Goods in +$1 ✓" }],
     // scanner app: the write-off half of the same confirm pair
     [/^Списание −(\d+) ✓$/, { ET: "Mahakandmine −$1 ✓", EN: "Written off −$1 ✓" }],
-    [/^тариф Montonio \(live\): (.+)$/, { ET: "Montonio tariif (live): $1", EN: "Montonio tariff (live): $1" }],
-    [/^тариф Montonio \(прайс-лист\): (.+)$/, { ET: "Montonio tariif (hinnakiri): $1", EN: "Montonio tariff (price list): $1" }],
+    /* the line under a rate box: «Montonio: 3,19 € · DPD», and the same line
+       as a button once the owner has typed a price of his own. The money and
+       the carrier's name are the hole; the carrier is a proper noun and is
+       never translated. The «(live)» / «(прайс-лист)» pair that stood here
+       until 14.09.2026 is gone with the live fetch — the screen and the till
+       read one file now, so there is nothing left to label. */
+    [/^Montonio: (.+) · вернуть$/, { ET: "Montonio: $1 · taasta", EN: "Montonio: $1 · undo" }],
+    [/^Ниже Montonio: (.+) · вернуть$/, { ET: "Alla Montonio hinna: $1 · taasta", EN: "Below Montonio: $1 · undo" }],
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
         EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }],
@@ -5784,7 +5757,6 @@
     [/^бесплатно от (.+)$/, { ET: "tasuta alates $1", EN: "free from $1" }],
     [/^бесплатно (.+) (.+)$/, { ET: "tasuta $1 $2", EN: "free $1 $2" }],
     [/^не доставляем: (.+)$/, { ET: "ei tarni: $1", EN: "we do not deliver: $1" }],
-    [/^наценка (.+)% \+ (.+)$/, { ET: "juurdehindlus $1% + $2", EN: "markup $1% + $2" }],
     [/^(.+) и ещё (\d+)$/, { ET: "$1 ja veel $2", EN: "$1 and $2 more" }],
     /* «Промокод», «Набор» and the two long confirm cards the assistant draws —
        all of them built by the same actionText. */
@@ -6284,8 +6256,51 @@
       smartpost: { EE: 2.59, LV: 4.99, LT: 4.99, FI: 9.39 },
       dpd: { EE: 2.59, LV: 5.59, LT: 5.59, FI: 12.39 },
       unisend: { EE: 2.49, LV: 3.79, LT: 3.79 }
+    }
+  };
+  /* ---------- what an EMPTY box charges ------------------------------------
+     Ренат, 14.09.2026: «I just need to control the shipping price for the
+     client in the checkout according to Montonio price. If I do not like the
+     Montonio price, I will just override it.» So a box left empty is not a
+     blank, it is an answer — «возьмите цену Montonio» — and this is that
+     price: Montonio's own contract rate for the route, rounded up to the next
+     «…,X9», VAT in. One number per cell, and it is the number the panel
+     prints under the box, the number the checkout bills and the number the
+     save guard refuses to go under.
+
+     `carriers` mirrors carrierPriceTable() — one price per carrier per
+     country, because that is how Montonio bills a parcel machine and the
+     shopper is the one who picks the chip. `courier` mirrors
+     countryPriceTable().courier and carries the carrier the price assumed,
+     because nobody *chooses* a courier's carrier: Renat does, when he makes
+     the label, so the price covers the cheapest he can pick and the panel
+     prints its name beside the number.
+
+     A `markup` — percent + fixed — used to sit between the tariff and this
+     price. Its boxes changed no bill (the only path was an empty carrier cell,
+     and no shop has one), and its only real job was feeding «Заполнить по
+     тарифам Montonio», whose numbers are now the default. Both are gone.
+
+     tests/shipping-admin-mirror.test.ts fails if a cent here drifts from
+     src/lib/shipping/country-prices.ts. */
+  var MONTONIO_PRICE = {
+    carriers: {
+      omniva: { EE: 3.19, LV: 4.99, LT: 4.99 },
+      smartpost: { EE: 2.59, LV: 4.99, LT: 4.99, FI: 9.39 },
+      dpd: { EE: 2.59, LV: 5.59, LT: 5.59, FI: 12.39 },
+      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 }
     },
-    markup: { percent: 0, fixed: 0 }
+    courier: {
+      AT: [28.49, "smartpost"], BE: [24.39, "smartpost"], BG: [32.59, "smartpost"],
+      CZ: [23.99, "smartpost"], DE: [22.29, "smartpost"], DK: [24.19, "smartpost"],
+      EE: [6.89, "dpd"], ES: [34.29, "smartpost"], FI: [15.69, "smartpost"],
+      FR: [24.19, "smartpost"], GR: [43.19, "dpd"], HR: [28.29, "smartpost"],
+      HU: [27.39, "smartpost"], IE: [38.69, "dpd"], IT: [30.09, "smartpost"],
+      LT: [8.09, "smartpost"], LU: [26.09, "smartpost"], LV: [8.09, "smartpost"],
+      NL: [25.59, "smartpost"], PL: [20.69, "smartpost"], PT: [38.39, "smartpost"],
+      RO: [36.69, "smartpost"], SE: [21.59, "dpd"], SI: [32.59, "smartpost"],
+      SK: [27.69, "smartpost"]
+    }
   };
   /* The seeded values, kept whole: «Вернуть значения по умолчанию» in the
      admin has to put back exactly what src/lib/shipping.ts carries, and a
@@ -6347,6 +6362,13 @@
   function deliveryPageHTML(ctx) {
     var tr = ctx.tr, esc = ctx.esc, eur = ctx.eur, rules = ctx.rules || {};
     var logos = ctx.logos || {}, carriers = ctx.carriers || {}, names = ctx.carrierNames || {};
+    /* What an empty box charges — MONTONIO_PRICE, handed in rather than read
+       from the closure because this function is lifted out of app.js whole
+       (tools/prerender-shop2.mjs). Without it this page answered an empty
+       carrier cell with the country's own «Пакомат» number while the checkout
+       answered it with Montonio's price for that carrier: two prices for one
+       parcel, on the one page whose job is to promise the till's. */
+    var mont = ctx.montonio || { carriers: {}, courier: {} };
     function t(s) { return "<span>" + tr(s) + "</span>"; }
     function h2(s) { return '<h2 class="sec__title dlv__h2">' + tr(s) + "</h2>"; }
     function priceOf(table, c) {
@@ -6365,6 +6387,11 @@
       var seen = [];
       list.forEach(function (k) {
         var p = priceOf(rules.carriers && rules.carriers[k], c);
+        /* the same three steps shipRulePrice() and quoteFromRules() take:
+           the owner's cell, then Montonio's price for THIS carrier, then the
+           country's fallback — which on this shop only Venipak reaches, the
+           one carrier Montonio quotes no price for */
+        if (p == null && mont.carriers[k] && typeof mont.carriers[k][c] === "number") p = mont.carriers[k][c];
         if (p == null) p = base;
         if (p != null && seen.indexOf(p) < 0) seen.push(p);
       });
@@ -6393,6 +6420,8 @@
     }
     function courierCell(c) {
       var p = priceOf(rules.methods && rules.methods.courier, c);
+      // an empty «Курьер» box means Montonio's price here too, since 14.09.2026
+      if (p == null && mont.courier[c]) p = mont.courier[c][0];
       if (c === "EU") {
         var floor = zoneFloor(rules.methods && rules.methods.courier);
         if (floor !== null) return '<span class="num">' + tr("от " + eur(floor)) + "</span>";
@@ -6568,11 +6597,11 @@
         .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
         .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
     }
-    if (raw.markup && typeof raw.markup === "object") {
-      var mp = Number(raw.markup.percent), mf = Number(raw.markup.fixed);
-      if (isFinite(mp) && mp >= 0) SHIP_RULES.markup.percent = mp;
-      if (isFinite(mf) && mf >= 0) SHIP_RULES.markup.fixed = mf;
-    }
+    /* `raw.markup` is read by nothing since 14.09.2026 and is ignored on the
+       way in — the same as parseShippingRules() does on the server. Every row
+       written before then carries the key (the panel saved the whole table),
+       and letting it through would put a multiplier back under a screen that
+       says «цена Montonio». */
     // the announce bar and the footer quote these — keep the promise and the
     // bill the same number
     refreshShipThresholds();
@@ -6587,6 +6616,18 @@
        Europe the 59 € floor back on every whole-table save. */
     SHIP_RULES.freeFromByCountry = cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry);
     SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
+    /* …except the courier column, whose floor is Montonio's own price and not
+       the three home numbers the shop ships with (EE 10,84 €, LV and LT
+       9,90 €). Those three are overrides like any other cell, and «пустое поле
+       — цена Montonio» has to hold after a save as well as before it: «Везде
+       взять цены Montonio» empties the boxes, and a seed of 10,84 here would
+       put Estonia's own number back the moment the table was saved — the
+       button lying about what it did. parseShippingRules() seeds the same way
+       on the server, and a shop with no settings row at all is still priced by
+       SHIP_RULES_DEFAULT, which keeps all three. */
+    Object.keys(MONTONIO_PRICE.courier).forEach(function (c) {
+      SHIP_RULES.methods.courier[c] = MONTONIO_PRICE.courier[c][0];
+    });
     /* Back to the default TABLE, not to null — same reasoning as the
        free-delivery map above. Since 13.09.2026 the defaults carry one price
        per carrier from Montonio's own tariffs, and nulling this would put a
@@ -6594,7 +6635,6 @@
        which is the shape Ренат asked to be rid of. */
     SHIP_RULES.carriers = cloneRules(SHIP_RULES_DEFAULT.carriers);
     SHIP_RULES.countriesOff = cloneRules(SHIP_RULES_DEFAULT.countriesOff);
-    SHIP_RULES.markup = cloneRules(SHIP_RULES_DEFAULT.markup);
     applyShipRules(raw);
     refreshShipThresholds();
   }
@@ -7233,7 +7273,6 @@
     shipDraft: null,    // working copy of settings.shipping_rules while editing
     shipErr: "",
     shipLiveRates: null,   // integration: {EE:[...], LV:[...], ...} once loadShipLiveRates() lands
-    shipAllowLower: false, // integration: let «Заполнить по тарифам Montonio» lower an already-saved price
     shipEuOpen: false,     // «Цены по странам Европы» — kept across a re-render so a country switch does not close it
     admPromos: null,    // admin tab «Промокоды»: [promo] once loaded
     admPromoErr: "",
@@ -7625,14 +7664,18 @@
        step quoteFromRules() takes between the carrier cells and the method
        column — without it the screen would show one Finnish price where the
        bill charges DPD 12,39 € and SmartPosti 9,39 €. */
-    if ((v === undefined || v === null) && m === "parcel" && SHIP_RULES_DEFAULT.carriers) {
-      var fallback = SHIP_RULES_DEFAULT.carriers[carrier];
+    if ((v === undefined || v === null) && m === "parcel") {
+      var fallback = MONTONIO_PRICE.carriers[carrier];
       if (fallback && fallback[iso] !== undefined) v = fallback[iso];
     }
     if (v === undefined || v === null) {
       var table = SHIP_RULES.methods[m] || {};
-      v = table[iso] !== undefined ? table[iso]
-        : table[zone] !== undefined ? table[zone] : table["default"];
+      v = table[iso];
+      /* …and an empty «Курьер» box means Montonio's price too, since
+         14.09.2026 — the same step quoteFromRules() takes between the
+         country's own cell and the zone's. */
+      if (v === undefined && m === "courier" && MONTONIO_PRICE.courier[iso]) v = MONTONIO_PRICE.courier[iso][0];
+      if (v === undefined) v = table[zone] !== undefined ? table[zone] : table["default"];
     }
     return typeof v === "number" && isFinite(v) ? Math.round(v * 100) / 100 : 0;
   }
@@ -10436,6 +10479,7 @@
         tr: function (s) { return s; },   // translateTree() does it after render
         esc: esc, eur: eur, title: title,
         rules: SHIP_RULES, carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES, rows: DELIVERY_ROWS,
+        montonio: MONTONIO_PRICE,
         address: c.company.address, hoursHTML: cHoursRows(), phoneHTML: cPhoneHTML(), mailHTML: cMailHTML(),
         logos: typeof PAYLOGOS !== "undefined" ? PAYLOGOS : {}, banks: PAYMETHODS.banks,
         loyalty: LOYALTY_PUBLIC,
@@ -18511,6 +18555,27 @@
       "&body=" + encodeURIComponent("Страница: " + location.href + "\n\n");
     return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Диму</a>';
   }
+  /* «Подключения» asks Montonio for this store's own rates once per admin
+     session (GET /api/admin/shipping/rates/?country=) and says so on the
+     «Доставка» row — it is the only probe the panel has for «is Montonio
+     Shipping actually connected». It stopped feeding the rate screen on
+     14.09.2026: the prices there have to be the ones the checkout bills, and
+     the checkout bills from the offline mirror. A health check and a price
+     are different questions, and this only answers the first. */
+  function loadShipLiveRates() {
+    if (SRV.admin !== true || S.shipLiveRates || loadShipLiveRates._busy) return;
+    loadShipLiveRates._busy = true;
+    var out = {};
+    Promise.all(["EE", "LV", "LT", "FI"].map(function (cc) {
+      return apiJson("/api/admin/shipping/rates/?country=" + cc).then(function (r) {
+        out[cc] = (r.status === 200 && r.body && r.body.ok && Array.isArray(r.body.rates)) ? r.body.rates : [];
+      }).catch(function () { out[cc] = []; });
+    })).then(function () {
+      S.shipLiveRates = out;
+      loadShipLiveRates._busy = false;
+      render();
+    });
+  }
   function admIntegrationRows() {
     var rows = [];
     var payOk = !!(PAYMETHODS.banks && PAYMETHODS.banks.length);
@@ -18800,17 +18865,35 @@
       "</div>";
   }
 
-  /* Доставка и оплата: the tariff grid of the spec — country, parcel machine,
-     courier, free-from — over the very same shipDraft()/[data-shiprule] state
-     the old table used, plus the carrier prices in a fold-out and the Montonio
-     fill button. «Сохранить» goes through the confirm card: a delivery price
-     is money, and money asks first. */
+  /* ---------- Доставка и оплата: ONE rate table ----------------------------
+     Ренат, 14.09.2026: «I just need to control the shipping price for the
+     client in the checkout according to Montonio price. If I do not like the
+     Montonio price, I will just override it… it seems to me that this delivery
+     is a bit over engineered.»
+
+     It was three tables for two decisions. The grid's «Пакомат» column almost
+     never billed anybody — in EE, LV, LT and FI the shopper picks a carrier
+     chip and quoteFromRules() reads that carrier's own cell long before the
+     column, and no other country offers a locker at all. The «Наценка» boxes
+     changed no bill in any country. And «Заполнить по тарифам Montonio» wrote
+     numbers that have been the default since 13.09.2026.
+
+     So: one table. A row per country, a column per carrier Montonio prices
+     there, plus the courier and the free-from threshold. One rule for every
+     box in it — empty means Montonio's price, a number means yours — and that
+     price written under the box, so what he is overriding and what he would
+     go back to are the same visible number. */
   function admSetDeliveryHTML() {
-    loadShipLiveRates();
     // no inline confirm card here: a tariff save sets `overlay: true`, and
     // screenAdmin() lifts that same card onto a scrim over the page
     return '<div class="adm-narrow">' +
-      '<div class="adm-tariffs adm-tariffs--head"><span>Страна</span><span>Пакомат, €</span>' +
+      /* The rule, once, at the top, because everything below is an instance of
+         it. The old screen needed three paragraphs to explain which of its
+         three tables actually billed; this one needs a sentence. */
+      '<p class="adm-notice">Пустое поле — цена Montonio, она написана под полем. ' +
+        "Впишете своё число — покупатель заплатит его.</p>" +
+      '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--head"><span>Страна</span>' +
+        SHIP_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
         "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
       SHIP_ROWS.map(function (r) {
         return admShipRowHTML(r[0], r[1], "") +
@@ -18828,66 +18911,18 @@
       /* The third delivery method has no row in the grid and no price box
          anywhere — because it has no price. Worth one line so the table does
          not read as «самовывоза тут нет». */
-      '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный.</p>' +
-      /* The misunderstanding this whole screen turns on, said once, loudly and
-         in the owner's own words — Ренат, 13.09.2026: «I do not understand the
-         table and the pickup, carriers and markup difference & what is
-         actually used.» A carrier cell beats the «Пакомат» column
-         (quoteFromRules(): carriers[carrier][country] is read first), and on
-         this shop every carrier cell is filled — so the column he reads as
-         «цена пакомата» is the one number in it nobody pays. */
-      '<p class="adm-notice">Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит ' +
-        "цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там " +
-        "пустое — тариф Montonio за этого перевозчика.</p>" +
+      '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный. ' +
+        "«—» — этот перевозчик в эту страну не возит.</p>" +
       admShipPreviewHTML() +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
-      // «Сохранить» is the page's bar (admSetBarHTML) — the fill button stays with its hint
+      // «Сохранить» is the page's bar (admSetBarHTML); these two are the ways
+      // back — one to Montonio's prices, one to the numbers the shop shipped with
       '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn adm-btn--ghost" data-admshipfill>Заполнить по тарифам Montonio</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-admshipmontonio>Везде взять цены Montonio</button>' +
+        '<button class="adm-link adm-link--muted" data-admshipreset>Вернуть значения по умолчанию</button>' +
       "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
-        "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
-      '<details class="adm-fold" style="margin-top:16px">' +
-        /* «Самовывоз, €» was the first field in this fold until 13.09.2026,
-           and it priced nothing: both halves of the shop short-circuit pickup
-           to 0 before they look at a table (shipPriceFor() here,
-           quoteFromRules() on the server), so the number typed there was
-           stored and never read. On a screen whose whole complaint was «что
-           из этого вообще работает», a box that works on nothing answers
-           better by not being there — so it is gone, with its label, and the
-           one fact worth keeping («самовывоз всегда бесплатный») is a line
-           under the table instead. `methods.pickup` stays in the rules: it is
-           part of their shape, and an old row that carries a number under it
-           goes on being ignored exactly as before. */
-        '<summary class="adm-link">Перевозчики и наценка</summary><div style="padding-top:12px">' +
-          /* Ренат, 13.09.2026: пустое поле больше не проваливается в колонку —
-             оно означает тариф Montonio за этого перевозчика, тот самый,
-             который написан серым под полем (montonioCarrierHint). Одна
-             фраза, потому что это весь смысл экрана. */
-          '<p class="adm-notice" style="margin-top:0">Пустое поле — тариф Montonio за этого перевозчика, ' +
-            "он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.</p>" +
-          SHIP_CARRIER_ROWS.map(function (c) {
-            return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
-              c[2].map(function (cc) {
-                return '<label class="adm-field" style="margin-top:6px">' + cc +
-                  admShipCellHTML("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) +
-                  montonioCarrierHint(c[0], cc) + "</label>";
-              }).join("") + "</div>";
-          }).join("") +
-          '<label class="adm-field" style="margin-top:12px"><span>Наценка, %</span>' +
-            admShipCellHTML("markup:percent", shipMarkupCell("percent"), "Наценка, проценты") + "</label>" +
-          '<label class="adm-field" style="margin-top:10px"><span>Наценка, €</span>' +
-            admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
-          /* markup is not a surcharge on a sale — quoteFromRules() never sees
-             it; computeMontonioFillPatch() is its only reader */
-          '<p class="adm-hint" style="margin-top:6px">Наценка сама по себе ничего не меняет: её ' +
-            "прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.</p>" +
-          '<div class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
-            '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
-            admSwitch("data-shipallowlower", !!S.shipAllowLower, "Разрешить снижать текущие цены") + "</div>" +
-          '<div class="adm-acts" style="margin-top:12px">' +
-            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipreset>Вернуть значения по умолчанию</button>' +
-          "</div></div></details>" +
+      '<p class="adm-hint" style="margin-top:8px">«Везде взять цены Montonio» очистит все ваши цены — ' +
+        "в таблице останутся цены Montonio. Проверьте цифры и сохраните.</p>" +
       '<div class="adm-sec__t" style="margin-top:24px">Оплата</div>' +
       '<div class="adm-list">' + PAYS.map(function (p) {
         return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + p.l + "</span>" +
@@ -19073,7 +19108,7 @@
       tr: function (s) { return s; },   // translateTree() does it after render
       esc: esc, eur: eur,
       rules: shipDraft(),
-      carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES,
+      carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES, montonio: MONTONIO_PRICE,
       rows: ADM_SHIP_PREVIEW_ROWS
     });
   }
@@ -19086,6 +19121,61 @@
         "несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.</p>" +
       "</details>";
   }
+  /**
+   * Redraw the line under ONE box, without a render.
+   *
+   * The line is the box's whole explanation — what it charges when empty, and
+   * a button back to that once the owner types something of his own — so it
+   * has to follow the keystroke. A full render would take the caret out of the
+   * box he is typing in (the same reason paintShipPreview() exists), and a
+   * line that lags one keystroke behind says «вернуть» under a number he has
+   * just cleared. Only the sibling of the input is touched; the input itself,
+   * and therefore the caret, is left alone.
+   */
+  function paintShipFoot(input) {
+    var key = input.dataset.shiprule || "", parts = key.split(":");
+    var cell = input.parentNode, html = "";
+    if (!cell || !cell.className || cell.className.indexOf("adm-rates__c") < 0) return;
+    if (parts[0] === "c") {
+      var row = MONTONIO_PRICE.carriers[parts[1]];
+      var price = row && row[parts[2]];
+      if (typeof price !== "number") return;
+      html = admRateFootHTML(key, String(input.value).trim(), price, "");
+    } else if (parts[0] === "m" && parts[1] === "courier") {
+      html = admShipCourierFoot(parts[2], String(input.value).trim());
+    } else {
+      return;                    // «Бесплатно от» has no Montonio price and no line
+    }
+    var old = input.nextElementSibling;
+    if (old) old.outerHTML = html;
+    else if (html) input.insertAdjacentHTML("afterend", html);
+    translateTree(cell);
+  }
+  /**
+   * Put every rate box back in step with the draft, values and all.
+   *
+   * admMorphNode() leaves an <input> alone when the markup's own `value`
+   * attribute has not changed — «a value the app changed is applied; one the
+   * owner changed by hand survives the render». That is exactly right for a
+   * background render landing mid-word, and exactly wrong for a button whose
+   * whole job is to empty the boxes: type 6,49 into a box whose last painted
+   * markup said `value=""`, press «Везде взять цены Montonio», and the draft
+   * is empty while the box still reads 6,49 — a screen lying about what it
+   * will save. So the button says, in so many words, what the boxes now hold.
+   */
+  function syncShipInputs() {
+    var boxes = document.querySelectorAll("[data-shiprule]");
+    for (var i = 0; i < boxes.length; i++) {
+      var parts = String(boxes[i].dataset.shiprule || "").split(":");
+      var v = parts[0] === "c" ? shipCarrierCell(parts[1], parts[2])
+        : parts[0] === "m" ? shipCell(parts[1], parts[2])
+        : parts[0] === "free" ? shipFreeCell(parts[1])
+        : null;
+      if (v === null) continue;
+      if (boxes[i].value !== v) boxes[i].value = v;
+      paintShipFoot(boxes[i]);
+    }
+  }
   /** Repaint the preview from the draft without a render — the owner is
       typing in a box, and a full render would take the caret out of it. */
   function paintShipPreview() {
@@ -19094,36 +19184,127 @@
     box.innerHTML = admShipPreviewTableHTML();
     translateTree(box);
   }
-  /* `col` is the column's own name, drawn only on a phone: the header row of
-     the grid is hidden there, and three bare boxes under «Эстония» gave the
-     owner no way to tell the parcel machine from the courier. */
-  function admShipCellHTML(key, value, label, col) {
-    return (col ? '<span class="adm-tariffs__l">' + col + "</span>" : "") +
+  /* ---------- one cell of the rate table ------------------------------------
+     `col` is the column's own name. It is drawn into every cell and hidden by
+     CSS where the header row is visible (admin.css .adm-tariffs__l): on a
+     375 px phone seven columns cannot be a table at all, so the row becomes a
+     card and the columns become labelled fields two to a line. No horizontal
+     scroll — the panel's fade-at-the-edge trick still hides something, and a
+     price the owner cannot see is the one thing this screen exists to stop.
+
+     Under the box goes ONE number: what the shop charges if the box is empty.
+     While the box is empty that number is simply printed — it is the price in
+     force. The moment he types his own, the same line becomes a button that
+     puts Montonio's back, so «вернуть» is one tap and never a guess at what
+     the old number was. */
+  function admRateCellHTML(key, value, label, col, foot) {
+    return '<span class="adm-rates__c">' +
+      '<span class="adm-tariffs__l">' + col + "</span>" +
       '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
-      '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
+        '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">' +
+      (foot || "") + "</span>";
+  }
+  /** «· SmartPosti» — which carrier the courier price belongs to, so
+      «22,29 €» is not a number out of nowhere. Never translated: proper nouns.
+      Anything unknown prints its bare code, which is what an unexpected
+      carrier should look like. */
+  function montonioCarrierTag(carrier) {
+    if (!carrier) return "";
+    return " · " + (CARRIER_NAMES[carrier] || carrier);
   }
   /**
-   * One line of the tariff grid: country, parcel machine, courier, free-from.
-   * The same four columns for a zone («Другие страны Европы») and for a single
-   * country (Германия) — the countries are the same table, one fold deeper,
-   * so nothing new has to be learnt to read them.
+   * The line under a box — one number, and it is always the same number: what
+   * the shop charges with the box empty.
+   *
+   * While the box is empty that is the price in force, so the line just says
+   * it. The moment he types his own, the same line becomes a button that puts
+   * Montonio's back — «вернуть» is a tap, never a guess at what the number
+   * used to be. Below Montonio's price the line says so in words as well as in
+   * red: the save will refuse it (belowCostCells on the server), and the
+   * refusal is nicer to read before the save than after it.
+   *
+   * Each of the three readings is one whole sentence with the money as its
+   * only hole, so the dictionary can carry it as a UI_RX rule instead of
+   * three loose fragments — same reasoning as montonioSourceLabel() had.
+   */
+  function admRateFootHTML(key, value, price, carrier) {
+    var money = eur(price) + (carrier ? montonioCarrierTag(carrier) : "");
+    var n = Number(String(value).replace(",", "."));
+    /* An empty box and a box holding Montonio's own number charge the same
+       thing, so neither has anything to return to — the line just says the
+       price. Without this every cell of a fresh shop read «вернуть», because
+       the defaults ARE Montonio's prices (carrierPriceTable()), and a table
+       where every line offers to undo something says nothing about which line
+       the owner actually changed. */
+    if (String(value) === "" || n === price) {
+      return '<span class="adm-hint adm-hint--cell">Montonio: ' + money + "</span>";
+    }
+    /* two whole sentences, each with the price as its only hole: the i18n
+       checker reads the source, and a label spliced in through a ternary or a
+       variable reads to it as loose fragments rather than one line */
+    if (isFinite(n) && n > 0 && n < price) {
+      return '<button class="adm-hint adm-hint--cell adm-rates__undo adm-hint--loss" data-shipclear="' +
+        esc(key) + '">Ниже Montonio: ' + money + " · вернуть</button>";
+    }
+    return '<button class="adm-hint adm-hint--cell adm-rates__undo" data-shipclear="' +
+      esc(key) + '">Montonio: ' + money + " · вернуть</button>";
+  }
+  /** A cell for a carrier that does not serve this country: a dash, not a box.
+      Different from an empty box by shape and not only by colour — there is no
+      field to type in, and the line under it says why in words. */
+  function admRateNoneHTML(col) {
+    return '<span class="adm-rates__c adm-rates__c--none">' +
+      '<span class="adm-tariffs__l">' + col + "</span>" +
+      '<span class="adm-rates__dash" aria-hidden="true">—</span>' +
+      '<span class="adm-hint adm-hint--cell">не возит</span></span>';
+  }
+  /**
+   * One line of the rate table: the country, one box per carrier Montonio
+   * prices there, the courier, the free-from threshold. The same columns for a
+   * zone («Другие страны Европы») and for a single country (Германия) — the
+   * countries are the same table, one fold deeper, so nothing new has to be
+   * learnt to read them.
    * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
    * real country can be switched off, not a zone.
+   * `cols` false leaves the carrier boxes out altogether — the European fold
+   * uses it, because not one of those twenty-one countries has a locker and
+   * twenty-one rows of four dashes is noise, not information.
    */
-  function admShipRowHTML(key, name, iso) {
+  function admShipRowHTML(key, name, iso, cols) {
     var off = iso ? shipCountryOff(iso) : false;
     var head = "<span>" + (iso
       ? '<span class="adm-tariffs__c">' + esc(name) +
           admSwitch('data-shipcountry="' + iso + '"', !off,
             off ? "Доставлять в эту страну" : "Не доставлять в эту страну") + "</span>"
       : name) + "</span>";
-    return '<div class="adm-tariffs' + (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head +
-      "<span>" + admShipCellHTML("m:parcel:" + key, shipCell("parcel", key), "Пакомат — " + name, "Пакомат, €") +
-        montonioHint("parcel", key, shipCellNum("parcel", key)) + "</span>" +
-      "<span>" + admShipCellHTML("m:courier:" + key, shipCell("courier", key), "Курьер — " + name, "Курьер, €") +
-        montonioHint("courier", key, shipCellNum("courier", key)) + "</span>" +
-      "<span>" + admShipCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от, €") +
-      "</span></div>";
+    var carriers = cols === false ? "" : SHIP_CARRIER_COLS.map(function (c) {
+      var price = MONTONIO_PRICE.carriers[c[0]] && MONTONIO_PRICE.carriers[c[0]][key];
+      var label = c[1] + " — " + name;
+      if (typeof price !== "number") return admRateNoneHTML(c[1]);
+      var cell = shipCarrierCell(c[0], key);
+      return admRateCellHTML("c:" + c[0] + ":" + key, cell, label, c[1],
+        admRateFootHTML("c:" + c[0] + ":" + key, cell, price, ""));
+    }).join("");
+    var courier = shipCell("courier", key);
+    return '<div class="adm-tariffs adm-tariffs--rates' + (cols === false ? " adm-tariffs--eu" : "") +
+      (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head + carriers +
+      admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name, "Курьер, €",
+        admShipCourierFoot(key, courier)) +
+      admRateCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от, €", "") +
+      "</div>";
+  }
+  /** What an empty «Курьер» box does on this row — and it is not the same
+      answer everywhere, so it is said on every row rather than in a footnote. */
+  function admShipCourierFoot(key, value) {
+    var m = MONTONIO_PRICE.courier[key];
+    if (m) return admRateFootHTML("m:courier:" + key, value, m[0], m[1]);
+    if (String(value) !== "") return "";
+    /* the two rows Montonio prices no route for: «Другие страны Европы» falls
+       through to «Остальные страны», and «Остальные страны» falls through to
+       nothing at all, which is free delivery — worth saying out loud in the
+       box that does it */
+    return '<span class="adm-hint adm-hint--cell">' +
+      (key === "default" ? "пусто — доставка бесплатна" : "пусто — берётся «Остальные страны»") + "</span>";
   }
   /**
    * «Цены по странам Европы» — the twenty-one countries behind the zone row,
@@ -19134,6 +19315,10 @@
    * glance and twenty-seven lines is not, but the country he needs is one tap
    * from the zone whose price it overrides. Country names come from the
    * browser, so all three languages get them free.
+   *
+   * Three columns inside, not seven: Montonio runs no parcel machine the shop
+   * can use to any of them, so the four carrier columns would be eighty-four
+   * dashes. The line above the list says that once instead.
    */
   function admShipEuropeHTML() {
     return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
@@ -19143,11 +19328,13 @@
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Под каждой ценой — сколько эта посылка стоит магазину ' +
-          "по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».</p>" +
+        '<p class="adm-hint" style="margin:0 0 10px">Пакоматов тут нет ни у одного перевозчика — только курьер. ' +
+          "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
+        '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
+          "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
         SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
-          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0]); }).join("") +
+          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], false); }).join("") +
         admShipUnservedHTML() +
       "</div></details>";
   }
@@ -20701,300 +20888,42 @@
   var SHIP_EU_COUNTRIES = ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "HU", "IE", "IT",
     "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
   var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
-  var SHIP_CARRIER_ROWS = [
-    ["omniva", "Omniva", ["EE", "LV", "LT"]],
-    ["smartpost", "SmartPosti", ["EE", "FI"]],
-    ["dpd", "DPD", ["EE", "LV", "LT", "FI"]],
-    ["venipak", "Venipak", ["EE", "LV", "LT"]],
-    ["unisend", "Unisend", ["EE", "LV", "LT"]]
+  /* The four carrier columns of the rate table: the carriers Montonio quotes a
+     parcel-machine price for, which is exactly the set of cells
+     carrierPriceTable() fills and quoteFromRules() can read. A country a
+     carrier has no tariff for gets «—» in that column rather than a box — the
+     shop cannot promise a price for a parcel Montonio will not quote.
+
+     Venipak is deliberately not here and has not been priced since the table
+     existed: Montonio sells it on a direct contract only and quotes no rate
+     out of Estonia. The checkout still lists it hopefully
+     (CARRIERS_BY_COUNTRY), so a Venipak locker — if a point feed ever answers
+     for one — goes on billing `methods.parcel`, the country's own fallback,
+     exactly as it does today. Nothing about that changed with the column. */
+  var SHIP_CARRIER_COLS = [
+    ["omniva", "Omniva"], ["smartpost", "SmartPosti"], ["dpd", "DPD"], ["unisend", "Unisend"]
   ];
-  /* ---------- Montonio tariffs (fallback table) -----------------------------
-     Mirrors the `rates` in src/data/montonio-tariffs.json — restated here so
-     the admin panel (a static bundle, no server round trip) can show a hint
-     next to each price and compute the «Заполнить по тарифам Montonio» fill
-     without one. src/lib/shipping/tariffs.ts is the tested, canonical version
-     of this same math, plus a live Montonio quote this static mirror cannot
-     make (that needs MONTONIO_SECRET_KEY, which must never reach a browser).
-     Keep the two files in sync by hand; see docs/shipping.md § «Тарифы
-     Montonio» for the sources and dates behind every number.
+  /* `MONTONIO_TARIFFS` (raw per-carrier tariffs) and `MONTONIO_COST` (the
+     per-country cost basis) stood here until 14.09.2026, with
+     `shipRoundUpToX9()`, `montonioPrice()`, `loadShipLiveRates()`,
+     `tariffRowsFor()`, `montonioCost()` and `computeMontonioFillPatch()`.
+     Two tables and a live fetch, all of them so the panel could print a cost
+     under a box and fill the boxes from it.
 
-     07.09.2026: these are now **Montonio's own contract prices** (incl. 24 %
-     VAT), not the carriers' business list prices they used to be — Montonio
-     publishes them after all, and they are less than half the list price at
-     home. Unisend has real numbers for the first time; Venipak still has
-     none, because Montonio quotes none for it (direct contract only), and no
-     invented number takes its place.
+     One number replaces the lot: MONTONIO_PRICE, up beside SHIP_RULES — what
+     the shop charges when a box is empty. That is the number the till bills,
+     the number the save guard refuses to go under, and therefore the only
+     honest number to print under a box.
 
-     One deliberate difference from the server table, to keep this panel
-     honest about what it shows: every country outside EE/LV/LT/FI is left
-     out. (Nova Post was the other one — Montonio International Shipping, a
-     carrier the admin had no row for; Ренат asked for it to go on 13.09.2026
-     and it is no longer in the mirror at all.) tariffs.ts prices all twenty-five
-     destinations Montonio serves and quoteFromRules() reads a country cell in
-     preference to its zone, but this table has six rows, and a fill that
-     wrote twenty-one cells nobody can see here would be hidden state. See
-     docs/audit/2026-09-07-shipping-returns.md, question 2. */
-  var MONTONIO_TARIFFS = {
-    omniva: {
-      EE: { parcel: 3.10, courier: 6.82 }, LV: { parcel: 4.96, courier: 11.16 },
-      LT: { parcel: 4.96, courier: 11.16 }
-    },
-    smartpost: {
-      EE: { parcel: 2.54, courier: 7.38 }, LV: { parcel: 4.90, courier: 8.00 },
-      LT: { parcel: 4.90, courier: 8.00 }, FI: { parcel: 9.30, courier: 15.62 }
-    },
-    dpd: {
-      EE: { parcel: 2.59, courier: 6.82 }, LV: { parcel: 5.58, courier: 9.67 },
-      LT: { parcel: 5.58, courier: 10.42 }, FI: { parcel: 12.39, courier: 20.09 }
-    },
-    unisend: { EE: { parcel: 2.47 }, LV: { parcel: 3.72 }, LT: { parcel: 3.72 } }
-  };
-  /* ---------- what a delivery COSTS, per country ----------------------------
-     07.09.2026, «real per-country prices». One row per country per method:
-     [price incl. VAT, carrier]. Mirrors costBasis() in
-     src/lib/shipping/country-prices.ts, which picks
-       · the DEAREST carrier for a parcel machine in EE/LV/LT/FI, because the
-         shopper picks the carrier there from the chips under «Пакомат»;
-       · the CHEAPEST carrier the shop can actually use everywhere else —
-         couriers at home included, because nobody can choose a courier's
-         carrier; Renat does, when he makes the label. Its name is printed
-         beside the number so he knows which carrier the price assumed.
-     «Can actually use» is SHIP_CARRIER_ROWS — the five this panel has a row
-     for. It used to have to exclude Nova Post (Montonio International
-     Shipping), whose prices are the low ones in
-     docs/audit/2026-09-07-shipping-returns.md — Germany 12,91 €, Poland
-     8,51 € — and which the shop could never reach; Ренат asked for it to go
-     on 13.09.2026 and it is out of the mirror entirely.
-     A missing method means Montonio quotes no carrier the shop can use:
-     Greece has no parcel machine from Estonia at all, and Hungary and Romania
-     have none either now that Nova Post is gone.
-     tests/shipping-admin-mirror.test.ts fails if a cent here drifts from
-     src/data/montonio-tariffs.json. */
-  var MONTONIO_COST = {
-    AT: { parcel: [37.20, "dpd"], courier: [28.40, "smartpost"] },
-    BE: { parcel: [29.76, "dpd"], courier: [24.33, "smartpost"] },
-    BG: { parcel: [52.08, "dpd"], courier: [32.57, "smartpost"] },
-    CZ: { parcel: [28.27, "dpd"], courier: [23.93, "smartpost"] },
-    DE: { parcel: [29.76, "dpd"], courier: [22.23, "smartpost"] },
-    DK: { parcel: [23.81, "dpd"], courier: [24.19, "smartpost"] },
-    EE: { parcel: [3.10, "omniva"], courier: [6.82, "dpd"] },
-    ES: { parcel: [38.69, "dpd"], courier: [34.29, "smartpost"] },
-    FI: { parcel: [12.39, "dpd"], courier: [15.62, "smartpost"] },
-    FR: { parcel: [44.64, "dpd"], courier: [24.19, "smartpost"] },
-    GR: { courier: [43.15, "dpd"] },
-    HR: { parcel: [59.52, "dpd"], courier: [28.26, "smartpost"] },
-    HU: { courier: [27.33, "smartpost"] },
-    IE: { parcel: [52.08, "dpd"], courier: [38.69, "dpd"] },
-    IT: { parcel: [34.22, "dpd"], courier: [30.08, "smartpost"] },
-    LT: { parcel: [5.58, "dpd"], courier: [8.00, "smartpost"] },
-    LU: { parcel: [35.71, "dpd"], courier: [26.03, "smartpost"] },
-    LV: { parcel: [5.58, "dpd"], courier: [8.00, "smartpost"] },
-    NL: { parcel: [29.76, "dpd"], courier: [25.51, "smartpost"] },
-    PL: { parcel: [17.86, "dpd"], courier: [20.66, "smartpost"] },
-    PT: { parcel: [41.66, "dpd"], courier: [38.33, "smartpost"] },
-    RO: { courier: [36.63, "smartpost"] },
-    SE: { parcel: [13.63, "dpd"], courier: [21.58, "dpd"] },
-    SI: { parcel: [40.18, "dpd"], courier: [32.57, "smartpost"] },
-    SK: { parcel: [26.78, "dpd"], courier: [27.60, "smartpost"] }
-  };
-  /** Smallest price ending in 9 cents at or above `n` — never rounds down.
-      Mirrors src/lib/shipping/tariffs.ts roundUpToX9() exactly. */
-  function shipRoundUpToX9(n) {
-    if (!isFinite(n) || n <= 0) return 0;
-    var cents = Math.ceil(n * 100 - 1e-7);
-    var rem = ((cents % 10) + 10) % 10;
-    var up = rem === 9 ? 0 : (9 - rem + 10) % 10;
-    return (cents + up) / 100;
-  }
-  /** tariff × markup, rounded up to .x9 — mirrors tariffs.ts customerPrice(). */
-  function montonioPrice(tariff, markup) {
-    var mk = markup || {};
-    var pct = typeof mk.percent === "number" && mk.percent >= 0 ? mk.percent : 0;
-    var fix = typeof mk.fixed === "number" && mk.fixed >= 0 ? mk.fixed : 0;
-    var marked = Math.round((tariff * (1 + pct / 100) + fix + 1e-9) * 100) / 100;
-    return shipRoundUpToX9(marked);
-  }
-  /** integration: live tariffs for the four fill-button countries — fetched
-      once per admin session (GET /api/admin/shipping/rates/?country=), each
-      row already carrying source:"live"|"static" from the server
-      (src/lib/shipping/tariffs.ts). null until the fetch lands; tariffRowsFor()
-      below falls back to the offline MONTONIO_TARIFFS mirror until then. */
-  function loadShipLiveRates() {
-    if (SRV.admin !== true || S.shipLiveRates || loadShipLiveRates._busy) return;
-    loadShipLiveRates._busy = true;
-    var out = {};
-    Promise.all(["EE", "LV", "LT", "FI"].map(function (cc) {
-      return apiJson("/api/admin/shipping/rates/?country=" + cc).then(function (r) {
-        out[cc] = (r.status === 200 && r.body && r.body.ok && Array.isArray(r.body.rates)) ? r.body.rates : [];
-      }).catch(function () { out[cc] = []; });
-    })).then(function () {
-      S.shipLiveRates = out;
-      loadShipLiveRates._busy = false;
-      render();
-    });
-  }
-  /** Every tariff row for one country: the live-or-static server merge once
-      loaded, the offline MONTONIO_TARIFFS mirror until then — same shape
-      either way ({carrier, country, method, price, source}), so
-      montonioCeiling()/montonioCarrierHint() do not need to know which. */
-  function tariffRowsFor(country) {
-    if (S.shipLiveRates && S.shipLiveRates[country]) return S.shipLiveRates[country];
-    var out = [];
-    Object.keys(MONTONIO_TARIFFS).forEach(function (carrier) {
-      var row = MONTONIO_TARIFFS[carrier][country];
-      if (!row) return;
-      ["parcel", "courier"].forEach(function (m) {
-        if (typeof row[m] === "number") out.push({ carrier: carrier, country: country, method: m, price: row[m], source: "static" });
-      });
-    });
-    return out;
-  }
-  /** What a delivery COSTS for a method+country, by the one rule
-      src/lib/shipping/country-prices.ts costBasis() sets out: the dearest
-      carrier for a parcel machine in the four countries whose checkout shows
-      carrier chips (the shopper picks, so the price must cover the dearest he
-      can pick), the cheapest the shop can actually use everywhere else
-      (Renat picks when he makes the label).
-      {price, carrier, source} — source is "live" when this row came from the
-      store's own Montonio quote, "static" from the offline mirror. Live rows
-      carry only carriers the store has actually activated, which is exactly
-      what makes the live answer the better one. */
-  function montonioCost(method, country) {
-    /* Only carriers «Цены по перевозчикам» has a row for. tariffRowsFor()
-       serves whatever the server merged, and a live quote can name a carrier
-       this panel has no row for. Left in, such a row becomes the cheapest
-       quote on half these routes and the panel prints a себестоимость nobody
-       can reach — which is exactly what Nova Post did until 13.09.2026:
-       Estonia's courier read «4,76 € · Nova Post» instead of DPD's 6,82 €,
-       the number that actually has to be covered. Nova Post is gone (Ренат);
-       the guard stays, and matches computeMontonioFillPatch() below and
-       SHOP_CARRIERS in src/lib/shipping/country-prices.ts. */
-    var rows = tariffRowsFor(country).filter(function (r) {
-      return r.method === method && SHIP_CARRIER_ROWS.some(function (c) { return c[0] === r.carrier; });
-    });
-    if (rows.length) {
-      var dearest = method === "parcel" && ["EE", "LV", "LT", "FI"].indexOf(country) >= 0;
-      var best = null;
-      rows.forEach(function (r) {
-        if (!best || (dearest ? r.price > best.price : r.price < best.price)) best = r;
-      });
-      if (best) return { price: best.price, carrier: best.carrier, source: best.source };
-    }
-    var m = MONTONIO_COST[country] && MONTONIO_COST[country][method];
-    return m ? { price: m[0], carrier: m[1], source: "static" } : null;
-  }
-  /** «тариф Montonio (live): 4,49 €» / «…(прайс-лист): …» next to a
-      method-table price — "" when nothing was sourced for it. */
-  /** integration: a plain variable, not an inline ternary in the return's own
-      "+" chain — same reasoning as cameraErrName() above, so the i18n
-      checker sees one hole in the rendered sentence, not the two label
-      variants as false-positive standalone fragments. */
-  function montonioSourceLabel(source) {
-    return source === "live" ? "тариф Montonio (live): " : "тариф Montonio (прайс-лист): ";
-  }
-  /** «· SmartPosti» — which carrier the cost belongs to, so «22,23 €» is not
-      a number out of nowhere. Never translated: they are proper nouns.
-      Nova Post used to have a name of its own here; it was the only carrier
-      this panel could be handed without a row in CARRIER_NAMES, and it is
-      gone (Ренат, 13.09.2026). Anything unknown now prints its bare code,
-      which is what an unexpected carrier should look like. */
-  function montonioCarrierTag(carrier) {
-    if (!carrier) return "";
-    return " · " + (CARRIER_NAMES[carrier] || carrier);
-  }
-  /**
-   * The provider's own price beside the owner's, quietly — Dim, 07.09.2026:
-   * «so a loss is visible before it happens». Greece costs 43,15 € and the
-   * shop charged 9,90 €; that used to be true and invisible.
-   * `charged` is the price in the draft box right above this hint. When it is
-   * below cost the hint says so and turns into a warning, which is the whole
-   * point of putting the two numbers on the same line.
-   */
-  function montonioHint(method, country, charged) {
-    var t = montonioCost(method, country);
-    if (t == null) return "";
-    var loss = typeof charged === "number" && isFinite(charged) && charged > 0 && charged < t.price;
-    return '<span class="adm-hint adm-hint--cell' + (loss ? " adm-hint--loss" : "") + '">' +
-      montonioSourceLabel(t.source) + eur(t.price) + montonioCarrierTag(t.carrier) +
-      (loss ? " — дешевле себестоимости" : "") + "</span>";
-  }
-  /** The number in a method cell of the draft, or undefined when it is empty
-      (the cell then falls back to the zone, and there is no loss to report). */
-  function shipCellNum(m, c) {
-    var t = shipDraft().methods[m] || {};
-    var v = Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined;
-    return typeof v === "number" && isFinite(v) ? v : undefined;
-  }
-  /** Same hint, for one carrier's own cell in «Цены по перевозчикам» (parcel tariffs only — see below). */
-  function montonioCarrierHint(carrier, country) {
-    var r = tariffRowsFor(country).filter(function (x) { return x.carrier === carrier && x.method === "parcel"; })[0];
-    if (!r) return "";
-    return '<span class="adm-hint adm-hint--cell">' +
-      montonioSourceLabel(r.source) + eur(r.price) + "</span>";
-  }
-  /**
-   * What «Заполнить по тарифам Montonio» writes: methods.{parcel,courier} get
-   * the priciest known carrier for that country (never sold below cost no
-   * matter which carrier ships it); carriers.* get that carrier's own, often
-   * cheaper, price — but only for the parcel tariff, because the checkout
-   * (public/shop2/app.js, ship.carrier) only ever tags a carrier on a "parcel"
-   * order, never on a "courier" one, so a courier-only carrier price here
-   * would just be dead data src/lib/shipping.ts would never read.
-   * Only touches EE/LV/LT/FI and the carriers this module has a tariff for —
-   * Venipak, Unisend, «EU» and «default» are left exactly as they were.
-   * Prefers live tariffs (tariffRowsFor(), fed by loadShipLiveRates()) over
-   * the offline MONTONIO_TARIFFS mirror wherever they have landed.
-   * integration: `allowLower` false (the default — the «Разрешить снижать
-   * текущие цены» checkbox in the card) clamps every cell at its own current
-   * price, so the fill can only raise a price to match the tariff, never
-   * quietly lower one the owner may have set above cost on purpose.
-   */
-  function computeMontonioFillPatch(allowLower) {
-    var markup = shipDraft().markup || { percent: 0, fixed: 0 };
-    var draft = shipDraft();
-    var methods = { parcel: {}, courier: {} };
-    /* Start from what is there, so a Venipak price the owner typed by hand —
-       or any carrier this table has no tariff for — is carried forward rather
-       than dropped by the fill. (Both halves are merged key by key now, on the
-       storefront and on the server; carriers used to be replaced wholesale,
-       which is what made this line load-bearing rather than merely tidy.)
-       Since 13.09.2026 the fill is no longer the only way to get Montonio's
-       per-carrier price: an EMPTY carrier cell already means exactly that
-       (quoteFromRules in src/lib/shipping.ts). What the button still buys is
-       raising a cell the owner typed *below* cost — `Math.max` below — which
-       is the one thing an empty cell cannot do for him. */
-    var carriers = draft.carriers ? cloneRules(draft.carriers) : {};
-    /* Every country Montonio serves, not just the four the checkout names —
-       Dim, 07.09.2026: «"Заполнить по тарифам Montonio" should fill every
-       country». Twenty-five destinations; the «EU» and «Остальные страны»
-       cells are still left alone, because no tariff can be invented for a
-       route Montonio does not sell. */
-    ["EE", "LV", "LT", "FI"].concat(SHIP_EU_COUNTRIES).forEach(function (cc) {
-      ["parcel", "courier"].forEach(function (m) {
-        var cost = montonioCost(m, cc);
-        if (cost == null) return;
-        var price = montonioPrice(cost.price, markup);
-        var current = draft.methods[m] && draft.methods[m][cc];
-        methods[m][cc] = (!allowLower && typeof current === "number") ? Math.max(price, current) : price;
-      });
-      // carrier cells only where the checkout lets a carrier be picked
-      if (["EE", "LV", "LT", "FI"].indexOf(cc) < 0) return;
-      tariffRowsFor(cc).forEach(function (row) {
-        if (row.method !== "parcel") return;
-        // …and only for a carrier «Цены по перевозчикам» actually has a row
-        // for. Once the live rates land, tariffRowsFor() also carries Nova
-        // Post (Montonio International Shipping), which has no row here and
-        // which the storefront never names — a price under it would be a cell
-        // nobody can see. Same guard as suggestShippingRulesFromTariffs().
-        if (!SHIP_CARRIER_ROWS.some(function (r) { return r[0] === row.carrier; })) return;
-        var price = montonioPrice(row.price, markup);
-        var current = draft.carriers && draft.carriers[row.carrier] && draft.carriers[row.carrier][cc];
-        carriers[row.carrier] = carriers[row.carrier] || {};
-        carriers[row.carrier][cc] = (!allowLower && typeof current === "number") ? Math.max(price, current) : price;
-      });
-    });
-    return { methods: methods, carriers: carriers };
-  }
+     The live fetch is gone from this screen on purpose (Dim, 14.09.2026). It
+     asked GET /api/admin/shipping/rates/ and printed «тариф Montonio (live)»,
+     while the checkout and the save guard priced from the offline mirror in
+     src/data/montonio-tariffs.json — so the number the owner read was not the
+     number the shop charged. The checkout cannot be the side that moves:
+     quoteFromRules() is synchronous and must stay so, because a quote that
+     waits on Montonio is a checkout that cannot take money. So the screen
+     stopped claiming live, and all three read one file. The route still
+     exists for the day someone asks Montonio what it charges *this* store. */
   /** A working copy, so a half-typed table never prices a live basket. */
   function shipDraft() {
     if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_RULES);
@@ -21009,16 +20938,16 @@
     return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + jsonCanon(o[k]); }).join(",") + "}";
   }
   /** What the tariff table means, whichever way it is spelt: no carriers and
-      an empty carriers map are the same thing, a missing markup is 0 / 0. */
+      an empty carriers map are the same thing. A `markup` a row written before
+      14.09.2026 still carries is not signed at all — nothing reads it, so a
+      row that differs only there is not a change the owner made. */
   function shipSig(r) {
-    var m = r.markup || {};
     return jsonCanon({
       freeFrom: r.freeFrom === undefined ? null : r.freeFrom,
       by: r.freeFromByCountry || {},
       methods: r.methods || {},
       carriers: r.carriers && Object.keys(r.carriers).length ? r.carriers : null,
-      off: (r.countriesOff || []).slice().sort(),
-      markup: { percent: Number(m.percent) || 0, fixed: Number(m.fixed) || 0 }
+      off: (r.countriesOff || []).slice().sort()
     });
   }
   /** Does the table show prices the shop is not yet charging? */
@@ -21092,11 +21021,6 @@
     else d.countriesOff.push(c);
     d.countriesOff.sort();
   }
-  /** Наценка, % / € — always a plain number, never "empty" or "нет". */
-  function shipMarkupCell(k) {
-    var m = shipDraft().markup;
-    return String(m && typeof m[k] === "number" ? m[k] : 0);
-  }
   /** One field of the draft. Garbage is ignored rather than stored. */
   function setShipDraftField(key, raw) {
     var d = shipDraft(), parts = String(key).split(":");
@@ -21136,12 +21060,6 @@
       else d.carriers[parts[1]][parts[2]] = cv;
       if (!Object.keys(d.carriers[parts[1]]).length) delete d.carriers[parts[1]];
       return;
-    }
-    if (parts[0] === "markup") {
-      var mv = shipNum(raw, parts[1] === "fixed" ? 20 : 100);
-      if (mv !== mv) return;                                // NaN — out of range
-      if (!d.markup) d.markup = { percent: 0, fixed: 0 };
-      d.markup[parts[1]] = (mv === undefined || mv === null) ? 0 : mv;   // "" or "нет" — back to 0, not deleted
     }
   }
   /* ---------- admin: promo codes (tab «Промокоды») -------------------------
@@ -27970,7 +27888,6 @@
         ? "не доставляем: " + r.countriesOff.join(", ")
         : "доставляем во все страны");
     }
-    if (r.markup) parts.push("наценка " + (r.markup.percent || 0) + "% + " + eur(r.markup.fixed || 0));
     if (!parts.length) return "Доставка: без изменений";
     var head = a.full ? "Тарифы доставки: " : "Доставка: ";
     return head + (parts.length <= 4 ? parts.join(" · ") : parts.slice(0, 4).join(" · ") + " и ещё " + (parts.length - 4));
@@ -30534,7 +30451,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -31974,9 +31891,6 @@
       };
       render(); refocus("[data-admapply]"); return;
     }
-    // «Разрешить снижать текущие цены» — computeMontonioFillPatch() clamps at
-    // the current price unless this is on; a switch like every other one here
-    if (d.shipallowlower !== undefined) { S.shipAllowLower = !S.shipAllowLower; render(); return; }
     /* «Доставляем сюда» — a draft change like every price box beside it, so
        «Сохранить» is the one thing that changes what a stranger sees. The fold
        is remembered so the panel does not close under the finger that tapped. */
@@ -31985,7 +31899,16 @@
       S.shipEuOpen = true;
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
     }
-    if (d.shipeu !== undefined) { S.shipEuOpen = !S.shipEuOpen; render(); return; }
+    /* Same as «Что увидит покупатель» below, and for the same reason: a
+       <summary> carries an activation behaviour of its own, and the browser
+       flips `open` after this listener returns. S is what the next render
+       draws from, so the two must not both toggle — one tap, one flip, and S
+       makes it. Without this the fold took two taps to open (the render drew
+       it open, the browser's own toggle closed it again). */
+    if (d.shipeu !== undefined) {
+      e.preventDefault();
+      S.shipEuOpen = !S.shipEuOpen; render(); return;
+    }
     /* «Что увидит покупатель» — remembered like the Europe fold, so the panel
        does not close under the finger that opened it.
        preventDefault() because <summary> carries an activation behaviour of
@@ -32005,20 +31928,31 @@
       };
       render(); refocus("[data-admapply]"); return;
     }
-    /* Into the draft, not the shop. The sentence under the button promises
-       «проверьте цифры и сохраните», so the fill writes the boxes and only
-       «Сохранить» → the confirm card changes what a stranger is charged. A
-       partial merge — Venipak, Unisend, EU and default stay as they were,
-       the way applyShipRules() would have merged the same patch. */
-    if (d.admshipfill !== undefined) {
-      var fillPatch = computeMontonioFillPatch(!!S.shipAllowLower);
-      var fillDraft = shipDraft();
-      Object.keys(fillPatch.methods).forEach(function (fm) {
-        if (!fillDraft.methods[fm]) fillDraft.methods[fm] = {};
-        Object.keys(fillPatch.methods[fm]).forEach(function (fc) { fillDraft.methods[fm][fc] = fillPatch.methods[fm][fc]; });
-      });
-      fillDraft.carriers = fillPatch.carriers;
-      toast("Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»"); render(); return;
+    /* Into the draft, not the shop — the sentence under the button promises
+       «проверьте цифры и сохраните», so only «Сохранить» → the confirm card
+       changes what a stranger is charged.
+
+       «Везде взять цены Montonio» is the whole-table half of the rule every
+       box on the screen follows: it EMPTIES every overridable cell rather
+       than writing numbers into them, because an empty cell already means
+       Montonio's price. That is the difference from the «Заполнить по тарифам
+       Montonio» button it replaces — that one wrote the same numbers in by
+       hand and then they stopped following the price list. «Бесплатно от» is
+       not touched: how much delivery to give away is his decision, not
+       Montonio's, and an empty threshold means something else entirely. */
+    if (d.admshipmontonio !== undefined) {
+      var mDraft = shipDraft();
+      mDraft.carriers = {};
+      Object.keys(MONTONIO_PRICE.courier).forEach(function (cc) { delete mDraft.methods.courier[cc]; });
+      toast("В таблице цены Montonio — проверьте и нажмите «Сохранить»");
+      render(); syncShipInputs(); paintShipPreview(); return;
+    }
+    /* One cell back to Montonio: the grey line under a box he has typed into
+       is a button, so «вернуть» never means guessing what the old number was.
+       The caret goes back to the box it belongs to. */
+    if (d.shipclear) {
+      setShipDraftField(d.shipclear, "");
+      render(); refocus('[data-shiprule="' + d.shipclear + '"]'); return;
     }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     if (d.acctprosend !== undefined) { acctProSubmit(); return; }
@@ -32911,7 +32845,7 @@
       if (shipBad) t.setAttribute("aria-invalid", "true"); else t.removeAttribute("aria-invalid");
       // …and «Что увидит покупатель» follows the draft, not the saved rules:
       // a preview one keystroke behind confirms a number he has just changed
-      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); paintShipPreview();
+      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); paintShipFoot(t); paintShipPreview();
     }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;

@@ -1,7 +1,7 @@
 /**
  * The admin panel is a static bundle: it cannot import src/lib, so it carries
- * its own copy of what a delivery costs (MONTONIO_COST) and of which countries
- * exist in the table at all. Twenty-five countries is far past what anyone
+ * its own copy of what an empty box charges (MONTONIO_PRICE) and of which
+ * countries exist in the table at all. Twenty-five countries is far past what anyone
  * keeps in step by eye, and the number the panel prints beside a price is the
  * one thing that tells Renat he is about to lose money — a stale copy is worse
  * than no copy.
@@ -17,6 +17,7 @@ import {
   carrierCost,
   carrierPriceTable,
   costBasis,
+  methodPrice,
   MONTONIO_COUNTRIES,
   MONTONIO_NOT_SERVED,
 } from "@/lib/shipping/country-prices";
@@ -43,41 +44,73 @@ function literal<T>(name: string): T {
   throw new Error(`unterminated literal for ${name}`);
 }
 
-type CostRow = Partial<Record<"parcel" | "courier", [number, string]>>;
+/**
+ * Since 14.09.2026 the panel carries ONE mirror instead of two, and it holds
+ * prices rather than costs: MONTONIO_PRICE is what the shop charges when a box
+ * is left empty. That is the only number worth printing under a box, because
+ * it is the one the till bills and the one the save guard refuses to go under
+ * — the old pair (`MONTONIO_TARIFFS`, `MONTONIO_COST`) printed a rawer number
+ * nobody could ever be charged.
+ */
+describe("the admin's copy of what an empty box charges", () => {
+  const price = literal<{
+    carriers: Record<string, Record<string, number>>;
+    courier: Record<string, [number, string]>;
+  }>("MONTONIO_PRICE");
 
-describe("the admin's copy of what a delivery costs", () => {
-  const cost = literal<Record<string, CostRow>>("MONTONIO_COST");
-
-  it("covers exactly the countries the tariff table prices", () => {
-    expect(Object.keys(cost).sort()).toEqual([...MONTONIO_COUNTRIES]);
+  it("holds exactly the carrier table the server computes", () => {
+    expect(price.carriers).toEqual(carrierPriceTable());
   });
 
-  it("holds the same price and the same carrier as the server computes", () => {
+  it("covers exactly the countries the tariff table prices a courier for", () => {
+    expect(Object.keys(price.courier).sort()).toEqual([...MONTONIO_COUNTRIES]);
+  });
+
+  it("holds the same courier price and the same carrier as the server computes", () => {
     for (const country of MONTONIO_COUNTRIES) {
-      for (const method of ["parcel", "courier"] as const) {
-        const basis = costBasis(country, method);
-        const mirrored = cost[country]?.[method];
-        if (!basis) {
-          expect([country, method, mirrored]).toEqual([country, method, undefined]);
-          continue;
-        }
-        expect([country, method, mirrored]).toEqual([country, method, [basis.price, basis.carrier]]);
-      }
+      const basis = costBasis(country, "courier");
+      expect([country, price.courier[country]])
+        .toEqual([country, [methodPrice(country, "courier"), basis!.carrier]]);
     }
   });
 
   /* The rule the whole table turns on, restated as an assertion so a future
      edit to either side has to mean it. */
-  it("takes the dearest carrier only for a parcel machine where the shopper picks one", () => {
-    expect(cost.EE.parcel).toEqual([3.1, "omniva"]); // dearest — chips under «Пакомат»
-    expect(cost.EE.courier).toEqual([6.82, "dpd"]); // cheapest — no chips for a courier
-    expect(cost.DE.courier).toEqual([22.23, "smartpost"]); // cheapest the shop can use
+  it("takes the dearest carrier only for a parcel machine, where the shopper picks one", () => {
+    // dearest — the chips under «Пакомат»: Omniva at 3.10 is the one to cover
+    expect(price.carriers.omniva.EE).toBe(3.19);
+    expect(price.courier.EE).toEqual([6.89, "dpd"]); // cheapest — no chips for a courier
+    expect(price.courier.DE).toEqual([22.29, "smartpost"]); // cheapest the shop can use
   });
 
   it("never quotes Nova Post, which the shop cannot put a parcel on", () => {
-    for (const row of Object.values(cost)) {
-      for (const cell of Object.values(row)) expect(cell[1]).not.toBe("novapost");
+    for (const cell of Object.values(price.courier)) expect(cell[1]).not.toBe("novapost");
+    expect(Object.keys(price.carriers)).not.toContain("novapost");
+  });
+
+  it("never charges less than the carrier costs", () => {
+    for (const [carrier, row] of Object.entries(price.carriers)) {
+      for (const [country, p] of Object.entries(row)) {
+        expect(p, `${carrier}/${country}`).toBeGreaterThanOrEqual(carrierCost(carrier, country, "parcel")!);
+      }
     }
+    for (const [country, cell] of Object.entries(price.courier)) {
+      expect(cell[0], country).toBeGreaterThanOrEqual(costBasis(country, "courier")!.price);
+    }
+  });
+});
+
+/**
+ * The four carrier columns of the rate table. A column exists where Montonio
+ * quotes that carrier a parcel price — which is exactly the set of cells
+ * `carrierPriceTable()` fills, so the screen shows every cell the rules can
+ * carry and no cell they cannot.
+ */
+describe("the rate table's carrier columns", () => {
+  const cols = literal<[string, string][]>("SHIP_CARRIER_COLS");
+
+  it("is every carrier Montonio prices a locker for, and only those", () => {
+    expect(cols.map((c) => c[0]).sort()).toEqual(Object.keys(carrierPriceTable()).sort());
   });
 });
 

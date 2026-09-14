@@ -16,40 +16,35 @@
  *      that Montonio published none — see docs/shipping.md § «Тарифы
  *      Montonio» and docs/audit/2026-09-07-shipping-returns.md.
  *
- * Neither source is wired into checkout pricing: `computeShipping()` in
- * src/lib/shipping.ts still prices strictly from `settings.shipping_rules`,
- * fast and DB-cached, exactly as before. This module only *informs* what
- * those rules should say — the admin's «Заполнить по тарифам Montonio»
- * button (public/shop2/app.js, shipRulesCard) turns a tariff plus a markup
- * into the number that actually gets saved, through the same
- * demoApply({type:"set_shipping_rules"}) path a hand-typed price uses.
+ * Neither source is wired into checkout pricing, and that is the whole
+ * reason the rate screen no longer claims to show a live number (14.09.2026).
+ * `computeShipping()` in src/lib/shipping.ts prices strictly from
+ * `settings.shipping_rules`, synchronously and DB-cached; a quote that has to
+ * wait on Montonio is a checkout that cannot take money. So the panel prints
+ * the same offline mirror the till bills from and the save guard refuses
+ * under — one number in all three places — and this module's live leg serves
+ * `/api/admin/shipping/rates/`, which is where «what does Montonio charge
+ * *this* store today» is asked on purpose rather than by accident.
  */
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import type { ShipMethod } from "@/lib/shipping";
 import {
-  CARRIER_CHOICE_COUNTRIES,
-  customerPrice,
-  type ShippingMarkup,
-} from "./country-prices";
-import {
   fetchMontonioRates,
   isMontonioShippingConfigured,
-  MONTONIO_CARRIERS,
   type MontonioRate,
 } from "./montonio";
 
-/* The markup arithmetic and the not-served list moved down into
+/* The cost/price arithmetic and the not-served list live down in
    ./country-prices, the leaf src/lib/shipping.ts can import without a cycle.
    Re-exported here because this is where the rest of the codebase looks for
    them, and one implementation is the whole point. */
 export {
-  applyMarkup,
   ceilingCost,
   cheapestCost,
   costBasis,
   countryPriceTable,
   customerPrice,
-  DEFAULT_MARKUP,
+  methodPrice,
   MONTONIO_COUNTRIES,
   MONTONIO_NOT_SERVED,
   montonioServes,
@@ -57,7 +52,6 @@ export {
   roundUpToX9,
   SHOP_CARRIERS,
   type CountryCost,
-  type ShippingMarkup,
 } from "./country-prices";
 
 /**
@@ -252,119 +246,24 @@ export async function getMontonioTariffsForCountry(country: string): Promise<Tar
   return out;
 }
 
-/* ---------- suggestion builder ---------------------------------------------
-   Used by the admin's «Заполнить по тарифам Montonio» button (mirrored in
-   public/shop2/app.js — see computeMontonioFillPatch there and
-   docs/shipping.md for why the browser cannot call this module directly: the
-   live leg needs MONTONIO_SECRET_KEY, which must never reach a browser). Kept
-   here, real and tested, as the server-side implementation the mirror copies
-   and as the base for a future admin route. */
-
-export interface ShippingRulesPatch {
-  methods: Partial<Record<ShipMethod, Record<string, number>>>;
-  carriers: Record<string, Record<string, number>>;
-}
-
-/**
- * The four countries the checkout names, and the only ones where it lets the
- * shopper pick a carrier — so the only ones that get carrier-specific rows.
- */
-const CARRIER_COUNTRIES = CARRIER_CHOICE_COUNTRIES;
+/* ---------- what the rate screen used to fill -------------------------------
+   `suggestShippingRulesFromTariffs()` lived here until 14.09.2026, with
+   `ShippingRulesPatch`, `methodBasis()` and `CARRIER_COUNTRIES`. It was the
+   server-side twin of the panel's «Заполнить по тарифам Montonio» button:
+   tariff + markup → the numbers to write into settings.shipping_rules.
+   Both are gone. Since 13.09.2026 an empty cell already *means* Montonio's
+   price for that carrier (quoteFromRules in src/lib/shipping.ts), and since
+   14.09.2026 the courier column reads the same way — so the button's whole
+   job was writing numbers that are now the default, and the markup it added
+   on the way never reached a bill. Ренат: «it seems to me that this delivery
+   is a bit over engineered». It is in git at the commit before this one. */
 
 /**
- * Every destination the static table has a price for — the four above plus
- * the twenty-one other European countries Montonio quotes out of Estonia.
- * `methods.parcel`/`methods.courier` get a row for each, which
- * quoteFromRules() (src/lib/shipping.ts) prefers over the «EU» zone cell:
- * one price for «Другая страна Европы» cannot be right when Poland costs
- * 17.86 and Croatia 52.08 for the same box.
+ * Every destination the static table has a price for — the four the checkout
+ * names plus the twenty-one other European countries Montonio quotes out of
+ * Estonia. `/api/admin/shipping/rates/` answers for these and refuses the
+ * rest, so a request cannot ask Montonio about a route nothing sells.
  */
 export function tariffCountries(): string[] {
   return [...new Set(STATIC_RATES.map((r) => r.country.toUpperCase()))].sort();
-}
-
-/**
- * The generic (carrier-unaware) price for a method+country, by the one rule
- * ./country-prices sets out: whoever does the choosing has to be covered.
- *
- *   · **a parcel machine in EE, LV, LT or FI** — the *shopper* picks the
- *     carrier from the chips under «Пакомат», so the price must cover the
- *     dearest of them.
- *   · **everything else, couriers at home included** — one line and no carrier
- *     under it; *Renat* picks when he makes the label. The price covers the
- *     cheapest carrier he can actually pick, and the admin prints that
- *     carrier's name beside the number so the assumption is visible.
- *
- * "Can actually pick" is MONTONIO_CARRIERS, and the filter is what keeps a
- * live quote for something the checkout cannot offer out of the basis. It used
- * to be what excluded Nova Post (Montonio International Shipping), whose
- * prices are the low ones in docs/audit/2026-09-07-shipping-returns.md:
- * pricing off a carrier the shop cannot use would have sold every European
- * order below cost, Poland's cheapest reachable courier being 20.66 € and not
- * the 8.51 € the audit quoted. Nova Post is gone entirely since 13.09.2026
- * (Ренат, «Remove "Nova Post"»); the filter stands for whatever Montonio
- * starts quoting next.
- */
-function methodBasis(rows: TariffQuote[], method: ShipMethod, country: string): TariffQuote | null {
-  const dearest = method === "parcel" && (CARRIER_COUNTRIES as readonly string[]).includes(country);
-  const usable = rows.filter(
-    (r) => r.method === method && (MONTONIO_CARRIERS as readonly string[]).includes(r.carrier),
-  );
-  let best: TariffQuote | null = null;
-  for (const r of usable) {
-    if (!best || (dearest ? r.price > best.price : r.price < best.price)) best = r;
-  }
-  return best;
-}
-
-/**
- * Suggested settings.shipping_rules.methods/carriers from the best tariffs
- * available (live where configured, static otherwise), plus `markup`, rounded
- * to .x9.
- *
- * Only touches countries/carriers/methods this module actually has a sourced
- * tariff for. That is now every European destination Montonio quotes out of
- * Estonia, not just the four the checkout names — so «Другая страна Европы»
- * stops being one number for twenty-four countries whose real cost runs from
- * 17.86 € (Poland, parcel machine) to 52.08 € (Croatia, same box).
- *
- * Still left alone, and deliberately: the "EU" and "default" cells themselves,
- * and Venipak (Montonio quotes no contract price for it from Estonia — direct
- * contract only). "EU" now only prices the seven European countries the
- * checkout offers and Montonio serves not at all — CH, CY, GB, IS, LI, MT, NO
- * (MONTONIO_NOT_SERVED) — and no tariff can be invented for a parcel that
- * cannot be sent; those seven are switched off in the shop by default since
- * 07.09.2026 (ShippingRules.countriesOff).
- *
- * The basis rule is `methodBasis()` above. With MONTONIO_ACCESS_KEY/SECRET_KEY
- * set, the live quote only returns the carriers this store has actually
- * activated, and the whole calculation narrows to them automatically — which
- * is the real fix for a table that today has to guess which carriers are on.
- */
-export async function suggestShippingRulesFromTariffs(
-  markup: Partial<ShippingMarkup> = {},
-): Promise<ShippingRulesPatch> {
-  const patch: ShippingRulesPatch = { methods: {}, carriers: {} };
-  const carrierCountries = new Set<string>(CARRIER_COUNTRIES);
-  for (const country of tariffCountries()) {
-    const rows = await getMontonioTariffsForCountry(country);
-    for (const method of ["parcel", "courier"] as const) {
-      const basis = methodBasis(rows, method, country);
-      if (!basis) continue;
-      patch.methods[method] = patch.methods[method] ?? {};
-      (patch.methods[method] as Record<string, number>)[country] = customerPrice(basis.price, markup);
-    }
-    if (!carrierCountries.has(country)) continue;
-    for (const row of rows) {
-      if (row.method !== "parcel") continue; // checkout only ever tags a carrier for the parcel method
-      // …and only for a carrier the checkout can actually name: a price under
-      // anything else would be a cell nobody can see and nobody can reach.
-      // This is what used to keep Nova Post out of the rate table; Nova Post
-      // itself is gone since 13.09.2026, the guard is not.
-      if (!(MONTONIO_CARRIERS as readonly string[]).includes(row.carrier)) continue;
-      patch.carriers[row.carrier] = patch.carriers[row.carrier] ?? {};
-      patch.carriers[row.carrier][country] = customerPrice(row.price, markup);
-    }
-  }
-  return patch;
 }

@@ -1333,6 +1333,50 @@ describe("fetchMontonioRates", () => {
     ]);
   });
 
+  /**
+   * A rate of exactly 0 is not a free delivery, it is **no rate**.
+   *
+   * Montonio answers `"rate": "0"` for a carrier/method pair this store has no
+   * priced tier for, and DPD's Estonian courier is one of them — a route that
+   * really costs 6.82 €. Read as a price it printed «тариф Montonio: €0 · DPD»
+   * on the rate screen, which tells the owner that any number he types is
+   * above cost, and it would have become the basis of a shelf price anywhere
+   * the cheapest carrier is what counts. A courier that costs nothing does not
+   * exist; the row is dropped like a negative one, and the caller falls back
+   * to the static mirror, which knows the route's real price.
+   */
+  it("drops a rate of zero — that is an unpriced route, not a free delivery", async () => {
+    withKeys();
+    stubFetch([
+      [
+        /rates/,
+        () =>
+          json({
+            destination: "EE",
+            carriers: [
+              {
+                carrierCode: "dpd",
+                shippingMethods: [
+                  { type: "courier", subtypes: [{ code: "standard", rate: "0", currency: "EUR" }] },
+                  {
+                    type: "pickupPoint",
+                    subtypes: [
+                      { code: "parcelMachine", rate: "2.59", currency: "EUR" },
+                      { code: "postOffice", rate: "-1", currency: "EUR" },
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+      ],
+    ]);
+    const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
+    expect(rates).toEqual([
+      { carrier: "dpd", methodType: "pickupPoint", subtype: "parcelMachine", price: 2.59, currency: "EUR" },
+    ]);
+  });
+
   it("is null — not a throw — on a bad destination, an empty parcel list, or a network failure", async () => {
     withKeys();
     expect(await fetchMontonioRates("estonia", [{ length: 1, width: 1, height: 1, weight: 1 }])).toBeNull();

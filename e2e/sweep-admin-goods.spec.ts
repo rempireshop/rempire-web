@@ -306,7 +306,7 @@ async function saveTariffs(page: Page): Promise<void> {
 test.describe("sweep — delivery prices", () => {
   test.use({ extraHTTPHeaders: ipHeaders(158) });
 
-  test("garbage never reaches the table, the Montonio fill never undercuts, the checkout bills what is shown", async ({ page, browser }) => {
+  test("garbage never reaches the table, an emptied box takes Montonio's price, the checkout bills what is shown", async ({ page, browser }) => {
     test.setTimeout(180_000);
     const w = watch(page);
     await openAdmin(page);
@@ -316,7 +316,11 @@ test.describe("sweep — delivery prices", () => {
     const originalRules = before.settings.shipping_rules ?? null;
 
     try {
-      const parcelEE = page.locator('[data-shiprule="m:parcel:EE"]');
+      /* The Estonian Omniva locker: a carrier column of the rate table, which
+         since 14.09.2026 is the only kind of parcel box the screen has. The
+         «Пакомат» column it replaces billed almost nobody — the shopper picks
+         a chip and this is the cell that chip reads. */
+      const parcelEE = page.locator('[data-shiprule="c:omniva:EE"]');
       await expect(parcelEE).toBeVisible();
 
       // Garbage: whatever the panel does with it, the saved table must never
@@ -327,12 +331,12 @@ test.describe("sweep — delivery prices", () => {
         await saveTariffs(page);
         await clearToast(page);
         const now = await (await page.request.get("/api/admin/settings/")).json();
-        const value = now.settings.shipping_rules?.methods?.parcel?.EE;
+        const value = now.settings.shipping_rules?.carriers?.omniva?.EE;
         if (value != null) {
           expect(Number(value), `"${bad}" was stored as a delivery price`).toBeGreaterThanOrEqual(0);
           expect(Number(value), `"${bad}" was stored as a delivery price`).toBeLessThanOrEqual(99);
         }
-        await assertClean(page, w, `shipping parcel EE = "${bad}"`);
+        await assertClean(page, w, `shipping omniva EE = "${bad}"`);
       }
 
       // Comma decimals are how the owner writes money.
@@ -345,7 +349,7 @@ test.describe("sweep — delivery prices", () => {
       expect(await toastText(page)).toMatch(/[Тт]ариф/);
       await clearToast(page);
       let now = await (await page.request.get("/api/admin/settings/")).json();
-      expect(Number(now.settings.shipping_rules.methods.parcel.EE), "«4,20» was not read as 4.20").toBeCloseTo(4.2, 2);
+      expect(Number(now.settings.shipping_rules.carriers.omniva.EE), "«4,20» was not read as 4.20").toBeCloseTo(4.2, 2);
       expect(Number(now.settings.shipping_rules.methods.courier.EE)).toBeCloseTo(13.37, 2);
       await assertClean(page, w, "shipping table saved");
 
@@ -365,18 +369,27 @@ test.describe("sweep — delivery prices", () => {
       await assertClean(shop.page, shop.w, "checkout with the edited delivery price");
       await shop.close();
 
-      // «Заполнить по тарифам Montonio» must only ever raise a price to cost —
-      // never quietly undercut a price the owner set above it on purpose.
-      await page.locator("[data-admshipfill]").click();
+      /* «Везде взять цены Montonio» empties every price of the owner's, and
+         what is left is Montonio's own — the rule the whole screen runs on.
+         The courier box he set to 13,37 € goes back to the Estonian courier
+         price, which is above the 6,89 € an empty box charges, so the save
+         guard has nothing to refuse. */
+      await page.locator("[data-admshipmontonio]").click();
       await clearToast(page);
+      await expect(parcelEE).toHaveValue("");
       await saveTariffs(page);
       await clearToast(page);
       now = await (await page.request.get("/api/admin/settings/")).json();
-      expect(Number(now.settings.shipping_rules.methods.parcel.EE),
-        "the Montonio fill undercut the price already in the table").toBeGreaterThanOrEqual(4.2);
+      /* Back to Montonio's own prices — a cleared cell is read back as what an
+         empty cell charges, which is the number the line under the box
+         promised (3,19 € for an Estonian Omniva locker, 6,89 € for the
+         courier). Not «undefined»: parseShippingRules() merges Montonio's
+         table in underneath every stored row. */
+      expect(Number(now.settings.shipping_rules.carriers.omniva.EE),
+        "clearing the table left the owner's own locker price behind").toBe(3.19);
       expect(Number(now.settings.shipping_rules.methods.courier.EE),
-        "the Montonio fill undercut the price already in the table").toBeGreaterThanOrEqual(13.37);
-      await assertClean(page, w, "montonio fill");
+        "clearing the table left the owner's own courier price behind").toBe(6.89);
+      await assertClean(page, w, "montonio clear-all");
 
       // An emptied cell removes the override rather than storing a blank.
       await page.locator('[data-shiprule="m:courier:LV"]').fill("");

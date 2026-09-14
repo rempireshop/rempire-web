@@ -447,7 +447,18 @@ export async function fetchMontonioRates(
           str(method.type) === "courier" ? "courier" : "pickupPoint";
         for (const sub of method.subtypes ?? []) {
           const price = Number(sub.rate);
-          if (!Number.isFinite(price) || price < 0) continue;
+          /* A rate of exactly 0 is not a free delivery, it is **no rate**.
+             Montonio answers `"rate": "0"` for a carrier/method pair this
+             store has no priced tier for — DPD's Estonian courier is one, and
+             it is a route that really costs 6.82 €. Taken as a price it
+             printed «тариф Montonio: €0 · DPD» in the panel, which would have
+             told the owner that any number he typed was above cost, and it
+             would have become the basis of a shelf price wherever the fill
+             and the cost hints read the cheapest carrier. A courier that
+             costs nothing does not exist; the row is dropped like a negative
+             one and the caller falls back to the static mirror, which knows
+             the route's real price (src/lib/shipping/tariffs.ts). */
+          if (!Number.isFinite(price) || price <= 0) continue;
           out.push({
             carrier,
             methodType,

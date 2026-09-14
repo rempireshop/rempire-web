@@ -38,17 +38,19 @@ function slice(name: string): string {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 
-/** A whole `var <name> = […];` statement, verbatim — the array matched by
- *  brackets, then on to that statement's semicolon so a `.concat(…)` tail
- *  comes along with it. */
+/** A whole `var <name> = …;` statement, verbatim — the literal matched by its
+ *  own brackets or braces, then on to that statement's semicolon so a
+ *  `.concat(…)` tail comes along with it. */
 function decl(name: string): string {
   const at = src.indexOf(`\n  var ${name} = `);
   if (at < 0) throw new Error(`public/shop2/app.js no longer has var ${name}`);
   const start = at + 1;
+  const open = src.indexOf("=", start) + 2;
+  const [in1, out1] = src[open] === "{" ? ["{", "}"] : ["[", "]"];
   let depth = 0;
-  for (let i = src.indexOf("[", start); i < src.length; i++) {
-    if (src[i] === "[") depth++;
-    else if (src[i] === "]" && --depth === 0) return src.slice(start, src.indexOf(";", i) + 1);
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === in1) depth++;
+    else if (src[i] === out1 && --depth === 0) return src.slice(start, src.indexOf(";", i) + 1);
   }
   throw new Error(`unterminated statement for ${name}`);
 }
@@ -58,6 +60,8 @@ type Harness = {
   preview: () => string;
   page: (ctx: Record<string, unknown>) => string;
   rows: () => Array<[string, string, string]>;
+  /** app.js's own MONTONIO_PRICE — what an empty box charges */
+  montonio: () => Record<string, unknown>;
   /** app.js's own eur(), so the assertions read the page's own formatting */
   eur: (v: number) => string;
 };
@@ -71,6 +75,7 @@ function harness(draft: Rules): Harness {
     ${decl("ADM_SHIP_PREVIEW_ROWS")}
     ${slice("admShipPreviewTableHTML")}
     function shipDraft() { return DRAFT; }
+    ${decl("MONTONIO_PRICE")}
     function esc(s) { return String(s); }
     ${slice("eur")}
     var S = { lang: "RU" };
@@ -87,6 +92,7 @@ function harness(draft: Rules): Harness {
       preview: admShipPreviewTableHTML,
       page: deliveryPageHTML,
       rows: function () { return ADM_SHIP_PREVIEW_ROWS; },
+      montonio: function () { return MONTONIO_PRICE; },
       eur: eur
     };
   `;
@@ -136,6 +142,7 @@ describe("the preview is the customer's own table, not a second one", () => {
         FI: ["smartpost", "dpd"], EU: [],
       },
       carrierNames: { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" },
+      montonio: h.montonio(),
       rows: h.rows(),
     });
     expect(h.preview()).toBe(byHand);
@@ -216,44 +223,76 @@ describe("…and it answers for what the owner is typing, not for what is saved"
   });
 });
 
-describe("the three labels say which numbers are real", () => {
-  it("warns, in the grid, that a carrier price beats the «Пакомат» column", () => {
-    expect(src).toContain("Колонка «Пакомат» — это запасная цена.");
-    expect(src).toMatch(/adm-notice">Колонка «Пакомат»/);
+describe("one rule, said once, and true of every box", () => {
+  /* The old screen needed three paragraphs to explain which of its three
+     tables actually billed. Ренат, 14.09.2026: «it seems to me that this
+     delivery is a bit over engineered.» One sentence replaces the three,
+     because there is now one rule and every box on the screen obeys it. */
+  it("says what an empty box means, at the top, once", () => {
+    expect(src).toContain("Пустое поле — цена Montonio, она написана под полем. ");
+    expect(src).toMatch(/adm-notice">Пустое поле — цена Montonio/);
   });
 
-  it("repeats it where the carrier prices are typed", () => {
-    expect(src).toContain("Пустое поле — тариф Montonio за этого перевозчика, ");
+  it("has dropped the three paragraphs that explained the three tables", () => {
+    expect(src).not.toContain("Колонка «Пакомат» — это запасная цена.");
+    expect(src).not.toContain("Наценка сама по себе ничего не меняет");
+    expect(src).not.toContain("Перевозчики и наценка");
   });
 
-  it("says the markup only feeds the button", () => {
-    expect(src).toContain("Наценка сама по себе ничего не меняет: её ");
+  /* Every control whose removal is the point of this change. A box that
+     changes no bill is worse than no box: it is an answer the owner gives
+     that the shop ignores. */
+  it("has no «Пакомат» column, no markup boxes and no fill button", () => {
+    expect(src).not.toContain("m:parcel:");       // the column's own input key
+    expect(src).not.toContain("markup:percent");
+    expect(src).not.toContain("data-admshipfill");
+    expect(src).not.toContain("data-shipallowlower");
+    expect(src).not.toContain("Заполнить по тарифам Montonio</button>");
   });
 
-  /* The «Самовывоз, €» box priced nothing and is gone (13.09.2026) — a field
+  /* The «Самовывоз, €» box priced nothing and went on 13.09.2026 — a field
      that works on nothing is the opposite of an answer to «что из этого
      вообще работает». The fact it carried is kept as a line. */
   it("has no pickup price box left, and says pickup is free instead", () => {
     expect(src).not.toContain("m:pickup:");
-    // the field's own label markup — the comment that explains the removal
-    // still names it, and should
     expect(src).not.toMatch(/<span>Самовывоз, €<\/span>/);
-    expect(src).toContain("Самовывоза в таблице нет — он всегда бесплатный.");
-    expect(src).toContain("Перевозчики и наценка</summary>");
+    expect(src).toContain("Самовывоза в таблице нет — он всегда бесплатный. ");
+  });
+
+  /* «—» has to be readable as «не возит» by somebody who cannot see the
+     colour, so it carries a word and not only a glyph — and it must not be a
+     text input, or it would read as an empty overridable box. */
+  it("draws a carrier that does not serve a country as a dash, not as a box", () => {
+    expect(src).toMatch(/function admRateNoneHTML\(col\) \{[\s\S]*adm-rates__dash[\s\S]*не возит/);
+    expect(src).not.toMatch(/function admRateNoneHTML\(col\) \{[\s\S]{0,400}data-shiprule/);
+    expect(adminCss).toMatch(/\.adm-rates__c--none \.adm-rates__dash \{/);
+  });
+
+  /* Seven columns cannot be a table on a 375 px phone, and the panel's
+     sideways scrollers fade at the edge — on a screen of prices, a faded edge
+     is a hidden number. So the row becomes a card there and the columns become
+     labelled fields: .adm-tariffs__l is drawn into every cell and shown only
+     where the header row is not. */
+  it("turns every column into a labelled field on a phone", () => {
+    expect(src).toMatch(/function admRateCellHTML\([\s\S]{0,200}adm-tariffs__l/);
+    expect(adminCss).toMatch(/@media \(max-width: 899px\) \{[\s\S]*?\.adm-tariffs \{ grid-template-columns: 1fr 1fr;/);
+    expect(adminCss).toMatch(/@media \(max-width: 899px\) \{[\s\S]*?\.adm-tariffs__l \{ display: block;/);
   });
 
   it("has every one of them in Estonian and English", () => {
     const keys = [
-      "Колонка «Пакомат» — это запасная цена. За пакомат покупатель платит цену своего перевозчика: ту, что стоит внизу, в «Ценах по перевозчикам», а если поле там пустое — тариф Montonio за этого перевозчика.",
-      "Пустое поле — тариф Montonio за этого перевозчика, он написан под полем. Впишете число — покупатель платит его; ниже тарифа сохранить нельзя.",
-      "Самовывоза в таблице нет — он всегда бесплатный.",
-      "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.",
+      "Пустое поле — цена Montonio, она написана под полем. Впишете своё число — покупатель заплатит его.",
+      "Самовывоза в таблице нет — он всегда бесплатный. «—» — этот перевозчик в эту страну не возит.",
+      "Везде взять цены Montonio",
+      "не возит",
+      "пусто — доставка бесплатна",
       "Что увидит покупатель",
-      "Перевозчики и наценка",
     ];
-    // one key in the ET dictionary and one in the EN dictionary — never fewer
+    /* `"ключ":` with no space is a dictionary entry and nothing else — the
+       same phrase written into the screen is always followed by markup or by
+       a ` :` of a ternary. One entry in the ET dictionary, one in the EN. */
     for (const k of keys) {
-      expect([k, src.split(JSON.stringify(k)).length - 1]).toEqual([k, 2]);
+      expect([k, src.split(JSON.stringify(k) + ":").length - 1]).toEqual([k, 2]);
     }
   });
 });

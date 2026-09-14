@@ -148,10 +148,13 @@ describe("the shelf table", () => {
     }
   });
 
-  it("applies the markup before rounding", () => {
-    const marked = countryPriceTable({ percent: 10, fixed: 0.5 });
-    expect(marked.courier.DE).toBe(customerPrice(22.23, { percent: 10, fixed: 0.5 }));
-    expect(marked.courier.DE).toBeGreaterThan(table.courier.DE);
+  /* One step between a tariff and a shelf price, and it only ever rounds up:
+     the markup that used to sit in front of it is gone (14.09.2026) — its
+     boxes changed no bill, and a hidden multiplier under a screen that says
+     «цена Montonio» would have made that sentence untrue. */
+  it("is the tariff rounded up, and nothing else", () => {
+    expect(table.courier.DE).toBe(customerPrice(22.23));
+    expect(customerPrice(22.23)).toBe(22.29);
   });
 
   it("leaves out a country/method with no reachable carrier rather than inventing one", () => {
