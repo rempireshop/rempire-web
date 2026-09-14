@@ -1,4 +1,5 @@
 import {
+  claimOrderPaid,
   PAID_ORDER_STATUSES,
   setOrderPayment,
   setOrderStatus,
@@ -32,6 +33,8 @@ export async function settlePayment(
   const outcome = await applyPaymentResult(order, result, providerName, {
     setOrderPayment,
     setOrderStatus,
+    // this door is the one the webhook and the shopper's return race through
+    claimPaid: claimOrderPaid,
     ...deps,
   });
   if (outcome.status === "paid") {

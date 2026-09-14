@@ -47,7 +47,7 @@
  *   provider_unreachable / provider_rejected — Montonio said no
  */
 import { requireAdmin } from "@/lib/auth";
-import { creditGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
+import { creditGiftCard, getGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
 import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, type Order } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { notifyOrderClosed } from "@/lib/payments/mail-hook";
@@ -160,6 +160,29 @@ export async function POST(req: Request, ctx: Ctx) {
   const split = splitRefund(amount, Math.max(0, giftLeftTotal));
   const giftCard = split.gift > 0 ? giftPaid.find((g) => g.left > 0.004) : undefined;
   if (split.gift > 0 && !giftCard) return bad("bad_amount", 400, { left });
+
+  /* Ask the card whether it can take its share BEFORE a cent leaves the bank.
+     creditGiftCard() refuses a voided card, and a card is voided the moment
+     the order that SOLD it is fully refunded — including by a refund made in
+     Montonio's own portal, which the `gift_used` guard above never sees. Until
+     14.09.2026 that refusal arrived after provider.refundPayment() had already
+     succeeded: the money half was gone, the card half could not be paid, and
+     the 409 left the owner with half a refund and nothing to retry (audit
+     14.09.2026). Read-only — the real credit is still the conditional UPDATE
+     further down, which is what makes a double tap harmless. */
+  if (giftCard && split.gift > 0) {
+    const card = await getGiftCard(giftCard.code);
+    const why = !card
+      ? "not_found"
+      : card.voidedAt
+        ? "voided"
+        : card.balance + split.gift > card.amount + 0.005
+          ? "over_face_value"
+          : null;
+    if (why) {
+      return bad("gift_credit_failed", 409, { code: giftCard.code, detail: why, moneyRefunded: 0 });
+    }
+  }
 
   const payment = (order.payment ?? {}) as Record<string, unknown>;
   const providerRef = typeof payment.ref === "string" ? payment.ref.trim() : "";

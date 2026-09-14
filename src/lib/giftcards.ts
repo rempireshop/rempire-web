@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { jsonbParam, query } from "@/lib/db";
+import { jsonbParam, query, withTx } from "@/lib/db";
 /* «Действует до …» is a date on a printed card — the shop's calendar day, not
    the server's (src/lib/day.ts). */
 import { shopDay, ymdParts } from "@/lib/day";
@@ -248,47 +248,70 @@ function recipientOf(item: CartItemLike, order: OrderLike): GiftRecipient {
 }
 
 /**
+ * The most cards one basket line may mint. createOrder() refuses a gift line
+ * bigger than this (src/lib/orders.ts) and the cart's stepper stops there, so
+ * the clamp below can no longer be the place a paid card quietly disappears:
+ * 30 × 100 € used to be charged in full and come back as twenty cards.
+ */
+export const GIFT_MAX_QTY = 20;
+
+/**
  * Create one card per gift line (qty copies of it), once the order is paid.
  * Safe to call more than once: cards already attached to this order win.
+ *
+ * The whole read-then-mint runs inside one transaction holding the order's own
+ * row, because «safe to call more than once» used to mean «safe to call twice
+ * in a row»: the webhook and the shopper's return arrive together, both found
+ * no cards, and both minted a full set — two live 100 € codes for one 100 €
+ * purchase, mailed twice (audit 14.09.2026). The second caller now waits for
+ * the first to commit and gets its cards back.
  */
 export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
   if (!order?.id) return [];
 
-  const existing = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
-       from gift_cards where order_id = $1 order by created_at`,
-    [order.id],
-  );
-  if (existing.length) return existing.map(toCard);
+  return withTx(async (q) => {
+    /* The lock. Nothing is written to `orders` here — the row is held only so
+       a second arrival queues behind the SELECT below instead of racing it.
+       An order that is not in the table (a hand-made card, the e2e hook) locks
+       nothing and behaves exactly as before. */
+    await q(`select id from orders where id = $1 for update`, [order.id]);
 
-  const items: CartItemLike[] = Array.isArray(order.items) ? (order.items as CartItemLike[]) : [];
-  const made: GiftCard[] = [];
+    const existing = await q<GiftRow>(
+      `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
+         from gift_cards where order_id = $1 order by created_at`,
+      [order.id],
+    );
+    if (existing.length) return existing.map(toCard);
 
-  for (const item of items) {
-    const amount = parseGiftItemId(String(item?.id ?? ""));
-    if (amount == null) continue;
-    const qty = Math.min(20, Math.max(1, Math.floor(Number(item?.qty) || 1)));
-    const recipient = recipientOf(item, order);
-    for (let i = 0; i < qty; i++) {
-      // a collision is astronomically unlikely (25^8 ≈ 1.5·10¹¹), but a
-      // primary-key clash would lose a paid card — so retry rather than throw
-      for (let attempt = 0; attempt < 5; attempt++) {
-        const code = generateCode();
-        const rows = await query<GiftRow>(
-          `insert into gift_cards (code, amount, balance, order_id, recipient, lang)
-             values ($1, $2, $2, $3, $4::jsonb, $5)
-           on conflict (code) do nothing
-           returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
-          [code, amount, order.id, jsonbParam(recipient), order.lang || "RU"],
-        );
-        if (rows.length) {
-          made.push(toCard(rows[0]));
-          break;
+    const items: CartItemLike[] = Array.isArray(order.items) ? (order.items as CartItemLike[]) : [];
+    const made: GiftCard[] = [];
+
+    for (const item of items) {
+      const amount = parseGiftItemId(String(item?.id ?? ""));
+      if (amount == null) continue;
+      const qty = Math.min(GIFT_MAX_QTY, Math.max(1, Math.floor(Number(item?.qty) || 1)));
+      const recipient = recipientOf(item, order);
+      for (let i = 0; i < qty; i++) {
+        // a collision is astronomically unlikely (25^8 ≈ 1.5·10¹¹), but a
+        // primary-key clash would lose a paid card — so retry rather than throw
+        for (let attempt = 0; attempt < 5; attempt++) {
+          const code = generateCode();
+          const rows = await q<GiftRow>(
+            `insert into gift_cards (code, amount, balance, order_id, recipient, lang)
+               values ($1, $2, $2, $3, $4::jsonb, $5)
+             on conflict (code) do nothing
+             returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
+            [code, amount, order.id, jsonbParam(recipient), order.lang || "RU"],
+          );
+          if (rows.length) {
+            made.push(toCard(rows[0]));
+            break;
+          }
         }
       }
     }
-  }
-  return made;
+    return made;
+  });
 }
 
 /**
@@ -413,12 +436,26 @@ export interface GiftRedeem {
   /** how much was actually taken */
   taken: number;
   remaining: number;
+  /** true when this order had already spent the card and nothing was taken again */
+  already?: boolean;
 }
 
 /**
  * Spend `amount` off the card, for `orderId`. One conditional UPDATE does the
  * whole thing, so two orders redeeming the same card at the same moment cannot
  * both succeed on the same money.
+ *
+ * Once per order, too. The ledger row IS the receipt: an order that already
+ * has a `redeem` row against this code gets that row back and the balance is
+ * not touched a second time — the same guard redeemLoyaltyPoints() draws in
+ * src/lib/loyalty.ts. A zero-total order charges its card BEFORE anything
+ * durable is written (settleWithoutPayment in src/lib/payments/settle.ts), so
+ * a 503 from the write that follows, or a second tap on «Оплатить», used to
+ * debit a 50 € card twice for one 32 € order (audit 14.09.2026).
+ *
+ * The ledger write is inside the transaction for the same reason: a debit
+ * whose row did not land is a debit nothing can explain — not to the retry
+ * above, and not to the refund that reads these rows to put money back.
  */
 export async function redeemGiftCard(
   code: string,
@@ -430,31 +467,46 @@ export async function redeemGiftCard(
   const want = cents(Number(amount) || 0);
   if (!(want > 0)) return { ok: false, error: "bad_amount", taken: 0, remaining: 0 };
 
-  const rows = await query<GiftRow>(
-    `update gift_cards
-        set balance = balance - $2,
-            redeemed_at = case when balance - $2 <= 0 then now() else redeemed_at end
-      where code = $1 and balance >= $2 and voided_at is null
-      returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
-    [norm, want],
-  );
-  if (!rows.length) {
-    const card = await getGiftCard(norm);
-    if (!card) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
-    return { ok: false, error: "insufficient", code: card.code, taken: 0, remaining: card.balance };
-  }
+  return withTx(async (q) => {
+    if (orderId) {
+      const seen = await q<{ amount: string | number }>(
+        `select amount from gift_card_uses
+          where code = $1 and order_id = $2 and kind = 'redeem' limit 1`,
+        [norm, orderId],
+      );
+      if (seen.length) {
+        const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
+        return {
+          ok: true,
+          already: true,
+          code: norm,
+          taken: cents(Number(seen[0].amount) || 0),
+          remaining: card.length ? cents(Number(card[0].balance) || 0) : 0,
+        };
+      }
+    }
 
-  const card = toCard(rows[0]);
-  // audit only — the balance above is already correct if this insert fails
-  try {
-    await query(
+    const rows = await q<GiftRow>(
+      `update gift_cards
+          set balance = balance - $2,
+              redeemed_at = case when balance - $2 <= 0 then now() else redeemed_at end
+        where code = $1 and balance >= $2 and voided_at is null
+        returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
+      [norm, want],
+    );
+    if (!rows.length) {
+      const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
+      if (!card.length) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
+      return { ok: false, error: "insufficient", code: norm, taken: 0, remaining: cents(Number(card[0].balance) || 0) };
+    }
+
+    const card = toCard(rows[0]);
+    await q(
       `insert into gift_card_uses (code, order_id, amount, kind) values ($1, $2, $3, 'redeem')`,
       [card.code, orderId ?? null, want],
     );
-  } catch (err) {
-    console.error("gift_card_uses insert failed", err);
-  }
-  return { ok: true, code: card.code, taken: want, remaining: card.balance };
+    return { ok: true, code: card.code, taken: want, remaining: card.balance };
+  });
 }
 
 /* ---------- refunds: the card as a payment that comes back ------------- */

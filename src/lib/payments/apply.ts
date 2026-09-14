@@ -40,7 +40,15 @@ export interface OrderLike {
   loyaltyDiscount?: number | string | null;
   /* ---- inventory: migration 090_inventory.sql ---------------------------- */
   /** The order's priced lines — what decrementStock() below walks. */
-  items?: Array<{ id: string; kind?: string; variant?: string | null; qty: number }>;
+  items?: Array<{
+    id: string;
+    kind?: string;
+    variant?: string | null;
+    qty: number;
+    /** line total — read by earnableSubtotal() to take the gift cards back out */
+    sum?: number | string | null;
+    price?: number | string | null;
+  }>;
 }
 
 /* A type alias, not an interface: setOrderPayment() takes a
@@ -64,6 +72,14 @@ export interface ApplyDeps {
   setOrderPayment(id: string, payment: PaymentBlob): Promise<unknown>;
   /** Only ever called with the two statuses a payment can produce. */
   setOrderStatus(id: string, status: "paid" | "failed", actor: string): Promise<unknown>;
+  /**
+   * The conditional version of setOrderStatus(…, "paid"): true when this call
+   * is the one that moved the order. Supplied by settlePayment(), which is the
+   * door the webhook and the shopper's return race each other through; left
+   * out by the callers that cannot race (the admin's «оплачен» button, an
+   * invoice marked paid by hand), which keep the unconditional move.
+   */
+  claimPaid?(id: string, actor: string): Promise<boolean>;
   /**
    * Spend the gift card the order was quoted against. Injected by the tests;
    * production leaves it out and gets @/lib/giftcards by dynamic import.
@@ -363,7 +379,7 @@ async function settleLoyalty(
     }
   }
   let pointsEarned: number | undefined;
-  const subtotal = toNumber(order.subtotal) ?? 0;
+  const subtotal = earnableSubtotal(order);
   try {
     const out = earn ? await earn(customerId, order.id, subtotal) : null;
     if (out?.ok && out.points) pointsEarned = out.points;
@@ -381,6 +397,29 @@ function toNumber(v: unknown): number | null {
     if (Number.isFinite(n)) return n;
   }
   return null;
+}
+
+/**
+ * What this order may earn points on: its subtotal, minus the gift cards in it.
+ *
+ * `orders.subtotal` holds every line, gift cards included (src/lib/orders.ts),
+ * so buying a 100 € card earned a hundred euro of points and then spending
+ * that card on shampoo earned them all over again — the same euro twice, and a
+ * card bought with a card earned on every lap at no cost at all (audit
+ * 14.09.2026). The card's own purchase is worth nothing; what it buys is worth
+ * exactly what any other basket of goods is worth, once.
+ */
+export function earnableSubtotal(order: OrderLike): number {
+  const total = toNumber(order.subtotal) ?? 0;
+  const items = Array.isArray(order.items) ? order.items : [];
+  let gift = 0;
+  for (const it of items) {
+    if (!it || it.kind !== "gift") continue;
+    const sum = toNumber(it.sum);
+    gift += sum ?? (toNumber(it.price) ?? 0) * (toNumber(it.qty) ?? 0);
+  }
+  if (!(gift > 0)) return total;
+  return Math.max(0, Math.round((total - gift) * 100) / 100);
 }
 
 function alreadyPaid(order: OrderLike): boolean {
@@ -520,7 +559,18 @@ export async function applyPaymentResult(
     // (H4); it only makes sure the order's own gift cards exist.
     if (wasPaid) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
 
-    await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
+    /* The order looked unpaid in OUR snapshot — but the webhook and the
+       shopper's return read it at the same moment, so that snapshot is not
+       proof. claimPaid() is the conditional UPDATE that settles it: losing it
+       means the other arrival is already minting the cards, earning the
+       points and taking the stock, and this one must do none of it again. */
+    if (deps.claimPaid) {
+      if (!(await deps.claimPaid(order.id, `payment:${providerName}`))) {
+        return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
+      }
+    } else {
+      await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
+    }
     const giftShortfall = await redeemQuotedGiftCard(order, deps);
     const loyalty = await settleLoyalty(order, deps);
     await recordPurchase(order, deps);

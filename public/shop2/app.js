@@ -630,6 +630,14 @@
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "Sellist kinkekaarti praegu ei müüda — vali teine summa",
+      "Больше 20 подарочных карт одной суммы за раз — разбейте заказ":
+        "Korraga kuni 20 ühesuguse summaga kinkekaarti — jaga tellimus osadeks",
+      "Каждая карта уйдёт своему получателю — они указаны в корзине.":
+        "Iga kaart läheb oma saajale — nad on ostukorvis kirjas.",
+      "Каждому свой": "Igaühele oma",
+      "Сумма изменилась — проверьте заказ": "Summa muutus — vaata tellimus üle",
+      "Сумма изменилась, пока вы оформляли заказ — скидка или карта больше не действуют. Проверьте итог и нажмите ещё раз.":
+        "Summa muutus tellimuse vormistamise ajal — soodustus või kinkekaart enam ei kehti. Vaata kokku üle ja vajuta uuesti.",
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
       "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
       "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
@@ -3191,6 +3199,14 @@
       "Товара не хватает на складе": "Not enough stock",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "That gift card is not on sale right now — pick another amount",
+      "Больше 20 подарочных карт одной суммы за раз — разбейте заказ":
+        "At most 20 gift cards of one amount at a time — split the order",
+      "Каждая карта уйдёт своему получателю — они указаны в корзине.":
+        "Each card goes to its own recipient — they are listed in the basket.",
+      "Каждому свой": "One each",
+      "Сумма изменилась — проверьте заказ": "The total has changed — check the order",
+      "Сумма изменилась, пока вы оформляли заказ — скидка или карта больше не действуют. Проверьте итог и нажмите ещё раз.":
+        "The total changed while you were checking out — the discount or the card no longer applies. Check the total and tap again.",
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
       "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
       "Не получилось оформить заказ": "Could not place the order",
@@ -7206,6 +7222,12 @@
      and it is the server's — a basket the shop refuses to price is a worse
      answer than a stepper that stops. */
   var CART_MAX_QTY = 99;
+  /* …except a gift card, which mints one code per unit: src/lib/giftcards.ts
+     GIFT_MAX_QTY is what issueGiftCards() will make, and createOrder() now
+     refuses a bigger line rather than charging for cards nobody gets. */
+  var GIFT_MAX_QTY = 20;
+  /** The ceiling for one basket line — a gift card's is its own. */
+  function lineMaxQty(l) { return l && l.type === "gift" ? GIFT_MAX_QTY : CART_MAX_QTY; }
   var GIFT_AMOUNTS = [25, 50, 75, 100];
   var GIFT_AMOUNTS_DEFAULT = [25, 50, 100];
 
@@ -7301,6 +7323,10 @@
     shipPicked: false,
     pointOpen: false,   // the parcel-machine picker sheet
     paying: false,      // «Оплатить» is in flight — the button locks
+    /* {from, total}: the sum POST /api/orders came back with when it differed
+       from this screen's own — see total(). `from` is the local sum it was
+       quoted against, so it stops applying by itself the moment that moves. */
+    billed: null,
     done: null,         // receipt state when we got here without a redirect
     newsletter: false,
     /* Has the shopper ticked or unticked «Хочу получать новости и скидки» in
@@ -7588,7 +7614,12 @@
              kept as it is and loadBundles() prunes it once the truth lands —
              the only place that can honestly say a set no longer exists. */
           if (l.type === "bundle") return true;
-          if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
+          if (l.type === "gift") {
+            // a basket saved before the cap: trim it rather than let the till
+            // refuse the whole order with gift_too_many
+            if (l.qty > GIFT_MAX_QTY) l.qty = GIFT_MAX_QTY;
+            return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
+          }
           /* product creation: the owner's own products (ids «c-…») are merged
              into CATALOGUE further down (adoptCustom), after this runs — the
              same story as the sets above. Kept here, pruned by adoptServer()
@@ -7944,10 +7975,20 @@
      A free-shipping code shows up as a discount equal to the delivery price,
      exactly as createOrder() records it, so the summary here, the confirmation
      screen and the e-mail all print the same three lines. */
+  /* What a promo code is allowed to see: the basket minus its gift cards.
+     A card's face value is money the shop owes back in full when the code is
+     spent, not a price with a margin to take a percent off — «−10 %» on a
+     100 € card is ten euro gone. codeDiscount() in src/lib/orders.ts draws
+     the same line, and that is the one that bills. */
+  function promoGoods() {
+    var s = 0;
+    S.cart.forEach(function (l) { if (l.type !== "gift") s += lineUnit(l) * l.qty; });
+    return Math.round(s * 100) / 100;
+  }
   function discount() {
     var p = S.promoInfo;
     if (!p) return 0;
-    var goods = cartSum();
+    var goods = promoGoods();
     if (p.minSubtotal && goods < p.minSubtotal) return 0;
     if (p.kind === "free_shipping") return shipCost();
     var raw = p.kind === "percent" ? goods * p.value / 100 : Math.min(p.value, goods);
@@ -7957,7 +7998,7 @@
   function promoLive() {
     var p = S.promoInfo;
     if (!p) return null;
-    return !p.minSubtotal || cartSum() >= p.minSubtotal ? p : null;
+    return !p.minSubtotal || promoGoods() >= p.minSubtotal ? p : null;
   }
   /* ---- features: gift card at checkout -----------------------------------
      A card pays for goods and delivery both, but never more than the order
@@ -7990,7 +8031,24 @@
     return Math.max(0, Math.min(S.loyalty.balance, cap, left));
   }
   function loyaltyDiscount() { return S.loyaltyRedeem ? loyaltyMaxRedeem() : 0; }
-  function total() { return cartSum() - discount() + shipCost() - giftDiscount() - loyaltyDiscount(); }
+  /** This screen's own arithmetic, to the cent. */
+  function localTotal() {
+    return Math.round((cartSum() - discount() + shipCost() - giftDiscount() - loyaltyDiscount()) * 100) / 100;
+  }
+  /* What the shopper is told to pay. Normally the sum above — but once
+     POST /api/orders has answered with a different figure, that figure is the
+     truth and this says so, because it is the one the bank will be asked for.
+     A promo whose last use went to somebody else between «Применить» and
+     «Оплатить», a card emptied in another tab, a delivery price the owner
+     changed: the checkout used to redirect anyway and the shopper met the
+     higher amount for the first time on Montonio's page (audit 14.09.2026).
+     Kept only while the basket it was quoted for is untouched — the moment
+     the local sum moves, the local sum is the honest answer again, so there
+     is nothing to remember to clear. */
+  function total() {
+    var mine = localTotal();
+    return S.billed && S.billed.from === mine ? S.billed.total : mine;
+  }
   /* The apostrophe is escaped too: every attribute written here is
      double-quoted today, but one single-quoted attribute would silently make
      this wrong, and the e-mail templates already escape all five. */
@@ -11198,7 +11256,7 @@
   };
   function promoErrText() {
     if (S.promoErr === "min_subtotal") {
-      return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + eur(Math.max(0, S.promoMin - cartSum())) + ".";
+      return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + eur(Math.max(0, S.promoMin - promoGoods())) + ".";
     }
     return PROMO_ERRS[S.promoErr] || PROMO_ERRS.unavailable;
   }
@@ -11223,8 +11281,10 @@
     if (S.promoBusy) return;
     S.promoBusy = true; S.promoErr = ""; render();
     postJSON("/api/promos/check/", {
+      // the goods only — the same basket createOrder() will quote the code
+      // against, so «не хватает до 40 €» cannot promise what the till refuses
       code: code,
-      subtotal: Math.round(cartSum() * 100) / 100,
+      subtotal: promoGoods(),
       shipping: shipCost()
     }).then(function (res) {
       S.promoBusy = false;
@@ -13504,9 +13564,40 @@
     return S.giftTo;
   }
   function giftTo() { return S.giftTo || seedGiftTo(); }
+  /** Who one gift line is for, as a comparable string — "" for a line nobody
+      addressed on /gift/. */
+  function giftLineWho(l) {
+    var m = (l && l.meta) || {};
+    var name = typeof m.name === "string" ? m.name.trim() : "";
+    var email = typeof m.email === "string" ? m.email.trim() : "";
+    var msg = typeof m.message === "string" ? m.message.trim() : "";
+    return name || email || msg ? name + "|" + email + "|" + msg : "";
+  }
+  /* Does this basket already say two different things about where its cards
+     should go? The one form above is right for «две карты одному человеку»,
+     and it used to be written onto EVERY gift line — so a basket built on
+     /gift/ for two people issued and mailed both cards to the first of them,
+     while the cart went on showing each line's own name underneath (audit
+     14.09.2026). When the lines disagree, each keeps its own recipient and
+     the form steps aside rather than overwrite them. */
+  function giftRecipientsDiffer() {
+    var seen = null;
+    for (var i = 0; i < S.cart.length; i++) {
+      if (S.cart[i].type !== "gift") continue;
+      var who = giftLineWho(S.cart[i]);
+      if (!who) continue;
+      if (seen === null) seen = who;
+      else if (seen !== who) return true;
+    }
+    return false;
+  }
+  /** True while step 2's one recipient form governs the whole order. */
+  function giftToGoverns() { return isDigital() && !giftRecipientsDiffer(); }
   /** Required and checked when the card goes to the recipient; when it comes to
       the buyer the field is optional — but a typo in it is still a typo. */
   function giftToEmailBad() {
+    // the form is not on screen when each card carries its own recipient
+    if (!giftToGoverns()) return false;
     var g = giftTo(), v = g.email.trim();
     if (g.toMe && !v) return false;
     return !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
@@ -13820,12 +13911,15 @@
        what was typed there wins over whatever the /gift/ page put on the line
        — it is the later, more deliberate answer, and it is the one the shopper
        just looked at. «Отправить мне на почту» simply omits the address, which
-       is exactly what makes src/lib/mail-hooks.ts send the card to the buyer. */
-    var src = isDigital() ? giftTo() : l.meta;
+       is exactly what makes src/lib/mail-hooks.ts send the card to the buyer.
+       Unless the basket already names two different people: then every line
+       keeps its own and the form is not shown at all (giftToGoverns). */
+    var one = giftToGoverns();
+    var src = one ? giftTo() : l.meta;
     if (!src) return undefined;
     var m = {};
     ["name", "email", "message"].forEach(function (k) {
-      if (k === "email" && isDigital() && giftTo().toMe) return;
+      if (k === "email" && one && giftTo().toMe) return;
       var v = typeof src[k] === "string" ? src[k].trim() : "";
       if (v) m[k] = v.slice(0, 300);
     });
@@ -13917,6 +14011,8 @@
     out_of_stock: "Товара не хватает на складе",
     // the owner switched this denomination off while the card sat in the basket
     gift_unavailable: "Такой подарочной карты сейчас нет — выберите другую сумму",
+    // more cards on one line than issueGiftCards() will ever mint (GIFT_MAX_QTY)
+    gift_too_many: "Больше 20 подарочных карт одной суммы за раз — разбейте заказ",
     db_unavailable: "Магазин временно недоступен — попробуйте позже",
     // «По счёту»: what src/lib/invoices.ts cleanCompany() refuses, by field
     bad_company: "Укажите название фирмы",
@@ -13999,6 +14095,7 @@
   function clearOrderState() {
     pendingOrder = null;
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
+    S.billed = null;    // the re-quote belonged to the basket that has just gone
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
     // features: the recipient of THIS order's cards — the next order seeds its
     // own from its own basket, and a stale address here would be the wrong one
@@ -14057,7 +14154,9 @@
       /* «По счёту — для компаний»: the server has already numbered the
          invoice and mailed it with the PDF (src/lib/invoices.ts) — there is
          no payment page to go to. Straight to the receipt, which says where
-         the invoice went and by when it is due. */
+         the invoice went and by when it is due. (And nothing below applies:
+         by the time this answer arrives the invoice is out, so there is no
+         «нажмите ещё раз» left to offer.) */
       if (isInvoice()) {
         var inv = res.body.invoice || {};
         var invEmail = inv.email || invoiceEmail();
@@ -14072,6 +14171,28 @@
       // remembered from here on: everything below can fail, and a second tap
       // must pay for THIS order rather than make another one
       pendingOrder = { id: res.body.orderId, number: res.body.number || "", sig: sig };
+      /* The server re-priced the whole basket (src/lib/orders.ts createOrder),
+         and ITS number is the one Montonio is about to be asked for. When it
+         differs from what is on screen — a promo whose last use went to
+         somebody else since «Применить», a gift card emptied in another tab,
+         a price the owner changed — stop here and show it, rather than
+         redirect and let the shopper meet the new figure on the bank's page
+         (audit 14.09.2026). The order is remembered just above, so the next
+         tap pays THIS order at the amount now on screen instead of making a
+         second one. */
+      var billed = Number(res.body.total);
+      if (isFinite(billed) && Math.abs(billed - localTotal()) > 0.009) {
+        /* cartPush stays off, unlike the catch below: that one runs when the
+           order did NOT happen. This one did — it is sitting unpaid, and
+           src/lib/flows.ts already writes about those. An abandoned-basket
+           letter on top would be the second one about the same basket. */
+        S.billed = { from: localTotal(), total: Math.round(billed * 100) / 100 };
+        S.paying = false;
+        render();
+        toast("Сумма изменилась — проверьте заказ");
+        return;
+      }
+      S.billed = null;
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
         // the radio's own key — a wallet is "wallet", never the bank list it
@@ -14170,6 +14291,11 @@
      where the postal-address fields sit on an ordinary order and for exactly
      the same reason — see patchDelivery()'s own comment. */
   function giftToBlockHTML() {
+    /* Two cards already addressed to two people: there is nothing for one
+       form to ask, and asking would overwrite one of them. */
+    if (!giftToGoverns()) {
+      return '<p class="hint">Каждая карта уйдёт своему получателю — они указаны в корзине.</p>';
+    }
     var g = giftTo(), bad = giftToBad();
     return '<label class="opt opt--plain"><input type="checkbox" data-gifttome' + (g.toMe ? " checked" : "") + '>' +
         "<span>Отправить мне на почту, а не получателю</span></label>" +
@@ -14303,6 +14429,12 @@
         : '<div class="cosum__row cosum__row--rule"><span><span>Доставка</span> — <span>' + shipMethodLabel() +
           '</span></span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>") +
       '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
+      /* The sum the till came back with is not the one this screen had — see
+         total(). Said out loud, above the button, so the next tap is a
+         deliberate one and the bank's page holds no surprise. */
+      (S.billed && S.billed.from === localTotal()
+        ? '<p class="err" role="alert">Сумма изменилась, пока вы оформляли заказ — скидка или карта больше не действуют. Проверьте итог и нажмите ещё раз.</p>'
+        : "") +
       /* Both pay buttons wait for the payment step. Offered from step one
          they compete with «Далее» for the same tap and invite a shopper to
          pay before choosing how the parcel travels or how they are paying. */
@@ -14386,7 +14518,7 @@
                is going rather than how a parcel travels. */
             coHead(2, isDigital() ? "Получатель" : "Доставка",
               isDigital()
-                ? "<span>" + (giftTo().toMe ? "Мне на почту" : esc(giftTo().email.trim() || "—")) + "</span>"
+                ? "<span>" + (!giftToGoverns() ? "Каждому свой" : giftTo().toMe ? "Мне на почту" : esc(giftTo().email.trim() || "—")) + "</span>"
                 : "<span>" + shipMethodLabel() + "</span>" +
                   (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
             (step === 2 ? '<div class="costep__body">' +
@@ -21473,15 +21605,22 @@
   function admPromoUsedLine(p) {
     return "использован " + p.used + (p.maxUses ? " из " + p.maxUses : "");
   }
+  /* Every number here is a free-text box on a phone. What the owner typed
+     travels verbatim so validatePromo() is the one thing that decides what it
+     means: «сто» in «Сколько раз» used to become NaN, then JSON null, then
+     «без ограничений» — a code with no limit at all, saved silently, and the
+     list underneath said «использован 0» with nothing to say it was infinite.
+     The same `|| 0` turned an unreadable «Минимальный заказ» into «no floor». */
   function promoFormPayload() {
     var f = S.promoForm;
+    var text = function (v) { return String(v == null ? "" : v).trim(); };
     var body = {
       code: String(f.code || "").trim().toUpperCase(),
       kind: f.kind,
-      value: f.kind === "free_shipping" ? 0 : Number(String(f.value).replace(",", ".")),
-      minSubtotal: Number(String(f.minSubtotal || 0).replace(",", ".")) || 0,
+      value: f.kind === "free_shipping" ? 0 : text(f.value),
+      minSubtotal: text(f.minSubtotal),
       endsAt: f.endsAt ? new Date(f.endsAt + "T23:59:59Z").toISOString() : null,
-      maxUses: String(f.maxUses).trim() ? Math.trunc(Number(f.maxUses)) : null,
+      maxUses: text(f.maxUses),
       note: f.note || "",
       active: f.active !== false
     };
@@ -30895,7 +31034,7 @@
       // «−» is disabled at qty 1 (aria-disabled in cartBody()) — removal is
       // only ever through the explicit «Убрать» control, never the stepper.
       if (Number(d.d) < 0 && cln.qty <= 1) return;
-      cln.qty = Math.max(1, Math.min(CART_MAX_QTY, cln.qty + Number(d.d)));
+      cln.qty = Math.max(1, Math.min(lineMaxQty(cln), cln.qty + Number(d.d)));
       persist(); patchCart(); return;
     }
     if (d.remove !== undefined) {
