@@ -13,7 +13,7 @@ import { getOverviewSummary, startOfShopDay } from "@/lib/analytics";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { exec, query } from "@/lib/db";
 import { move } from "@/lib/inventory";
-import { createOrder, upsertOverride } from "@/lib/orders";
+import { createOrder, getOverrides, upsertOverride } from "@/lib/orders";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -161,6 +161,19 @@ describe("getOverviewSummary", () => {
 
     const o = await getOverviewSummary(NOW);
     expect(o.lowStock.total).toBe(0);
+  });
+
+  /* …and the shop still refuses to sell that product, which is the point of
+     the manual «нет в наличии»: it is «Снять с продажи», and since r19 no
+     count may talk the storefront past it. This card is deliberately the one
+     place that looks past it the other way — «Заканчиваются» is a re-order
+     list, and a product with ten in the box is not running out. */
+  it("…while the shop itself goes on saying «нет в наличии» about it", async () => {
+    await upsertOverride(productA.id, { stock: "out" });
+    await move({ productId: productA.id, delta: 10, reason: "goods_in", actor: "test" });
+
+    expect((await getOverrides([productA.id]))[productA.id]?.stock).toBe("out");
+    expect((await getOverviewSummary(NOW)).lowStock.total).toBe(0);
   });
 
   it("ignores an override row for a product the catalogue no longer carries", async () => {

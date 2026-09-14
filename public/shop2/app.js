@@ -16102,7 +16102,7 @@
         /* product creation: a blank product the editor really can save —
            custom_products on the server, CATALOGUE here (adoptCustom). */
         : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
-    if (tab === "catalog") loadCustomAll(false);
+    if (tab === "catalog") { loadCustomAll(false); loadProOverrides(false); }
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", 'Товары <small>' + CATALOGUE.length + "</small>", add) +
       '<div class="adm-tabs" role="group" aria-label="Что показываем">' + tabs + "</div>" +
@@ -16162,6 +16162,42 @@
     apiJson("/api/admin/products/").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok && Array.isArray(r.body.products)) { S.customAll = r.body.products; render(); }
+    }).catch(noop);
+  }
+  /* wholesale/loyalty: the salon price, which the panel could not see.
+     `proPrice` is commercial information and is stripped from the public feed
+     (publicOverrides in src/app/api/overrides/route.ts) — and that feed is the
+     only one the panel read, so «Салон, €» opened empty with the «auto»
+     placeholder however many times the owner had saved a price into it, and
+     the «пусто — убрать свою цену» branch of «Сохранить» could never fire,
+     because the value it compares against was always null. The admin's own
+     uncached copy of that same map (GET /api/admin/overrides) carries it.
+     Fetched once per session, on the way into «Каталог» — before any editor
+     is open, so no form is ever rebuilt under the owner's hands. */
+  var PRO_OV = { asked: false };
+  function loadProOverrides(force) {
+    if (SRV.admin !== true) return;
+    if (PRO_OV.asked && !force) return;
+    PRO_OV.asked = true;
+    apiJson("/api/admin/overrides/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; return; }
+      if (r.status !== 200 || !r.body.ok || !r.body.overrides) return;
+      var ov = r.body.overrides, moved = false;
+      Object.keys(ov).forEach(function (id) {
+        var v = ov[id] ? ov[id].proPrice : null;
+        var had = DEMO.proPrice[id] != null ? DEMO.proPrice[id] : null;
+        if (v === had) return;
+        moved = true;
+        if (v != null) DEMO.proPrice[id] = v;
+        else delete DEMO.proPrice[id];
+      });
+      // a shop with no salon price saved anywhere — which is most of them —
+      // costs this screen nothing at all
+      if (!moved) return;
+      applyDemoOverrides();
+      // never over a half-typed form: the values are on the products now and
+      // the editor will read them the moment it opens (see the note above)
+      if (!S.adminEdit) render();
     }).catch(noop);
   }
   /** The rows the list shows: the owner's own products first (a fresh one is
@@ -23414,6 +23450,20 @@
     return (S.pricingLoaded && S.pricingLoaded.proDiscountPct != null) ? S.pricingLoaded.proDiscountPct : 20;
   }
   function edSalonOf(price) { return Math.round(price * (1 - edSalonPct() / 100) * 100) / 100; }
+  /** wholesale/loyalty: what a salon really pays for the rung on THIS row —
+      the same arithmetic proUnitPrice() bills with (src/lib/loyalty.ts): the
+      pro BASE (the owner's own salon price if he set one, otherwise the
+      discount off the first rung) plus this rung's premium over the first.
+      The column used to show price_i × (1 − discount) on every row below the
+      first, so a 20 % discount on a 9 € / 16 € ladder quoted 12.80 € for the
+      big bottle while the shop charged 14.20. */
+  function edSalonRung(p, first, price) {
+    var own = p && p.proPrice != null ? Number(p.proPrice) : NaN;
+    var base = isFinite(own) ? own : edSalonOf(first);
+    var out = Math.round(Math.max(0, base + (price - first)) * 100) / 100;
+    // a money cell must never be able to read «NaN»
+    return isFinite(out) ? out : edSalonOf(price);
+  }
   /** Which size (if any) shows this photo — the tag the design puts on every
       picture after the first. Reads the draft list, like the picker below. */
   function edPhotoTag(p, i) {
@@ -23794,7 +23844,11 @@
       var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = edStockLow(lv);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
-      var salon = edSalonOf(goodsPrice(priceVal) || 0);
+      // row 0 is the editable pro price and its placeholder is the «auto»
+      // value; every row below it is read-only and carries its own premium
+      var salon = i === 0
+        ? edSalonOf(goodsPrice(priceVal) || 0)
+        : edSalonRung(p, goodsPrice(rows[0].price) || 0, goodsPrice(priceVal) || 0);
       return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
           ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
@@ -23849,7 +23903,11 @@
       var key = stockKey(p.id, sz);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = edStockLow(lv);
-      var salon = edSalonOf(goodsPrice(price) || 0);
+      // see edPaneSizesOwn: the first row's box is the pro price itself, the
+      // rows below it show what that base plus their own premium comes to
+      var salon = i === 0
+        ? edSalonOf(goodsPrice(price) || 0)
+        : edSalonRung(p, goodsPrice(rows0[0].price) || 0, goodsPrice(price) || 0);
       return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
           ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) +
@@ -26734,8 +26792,21 @@
     return urls.length ? urls : null;
   }
   function applyDemoOverrides() {
-    for (var i = 0; i < CATALOGUE.length; i++) {
-      var p = CATALOGUE[i], b = BASE[i];
+    /* «Показывать в магазине» off (migration 147): the product is out of
+       CATALOGUE, so walking CATALOGUE alone left it holding the generated
+       file's values — and the editor, which is the one screen that can still
+       open it (admEditProduct's FILE_PRODUCTS fallback), showed the file's
+       price, volumes, salon price and description instead of the owner's
+       saved ones. Typing a Russian description into those empty boxes and
+       pressing «Сохранить» then wrote three empty strings over the stored
+       Estonian and English text. A hidden product is hidden from SHOPPERS;
+       its owner's own edits are no less real. */
+    var list = CATALOGUE.slice(), bases = BASE.slice();
+    for (var h = 0; h < FILE_PRODUCTS.length; h++) {
+      if (shopHidden(FILE_PRODUCTS[h].id)) { list.push(FILE_PRODUCTS[h]); bases.push(FILE_BASE[h]); }
+    }
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i], b = bases[i];
       p.price = b.price;
       if (b.prices) p.prices = b.prices.slice();
       if (b.sizes) p.sizes = b.sizes.slice(); else delete p.sizes;

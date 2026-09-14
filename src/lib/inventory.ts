@@ -526,7 +526,44 @@ export async function syncVariantRows(
   return t;
 }
 
-/* ---------- product-level state for the public overrides feed ------------ */
+/* ---------- derived state: per product for the feed, per size for the till ---- */
+
+/** Every stock_levels row of a TRACKED product×variant (see the module doc),
+    for the two readers below — the per-product aggregate the badge uses and
+    the per-size map the checkout does. */
+async function trackedLevelRows(ids?: string[]): Promise<StockLevelRow[]> {
+  const trackedClause =
+    `exists (select 1 from stock_moves m where m.product_id = sl.product_id and m.variant = sl.variant and m.reason in ${TRACKING_SQL})`;
+  if (ids && ids.length) {
+    const holes = ids.map((_, i) => `$${i + 1}`).join(",");
+    return query<StockLevelRow>(
+      `select sl.* from stock_levels sl where sl.product_id in (${holes}) and ${trackedClause}`,
+      ids,
+    );
+  }
+  return query<StockLevelRow>(`select sl.* from stock_levels sl where ${trackedClause}`);
+}
+
+/**
+ * Those rows, NOT aggregated: productId → variant label → state, tracked
+ * variants only.
+ *
+ * The aggregate below is the right answer for a BADGE — a product with one
+ * size left is still worth a page. It is the wrong answer for a TILL: the
+ * checkout gated on it, so a size counted down to zero went on being sold
+ * and paid for as long as any other size of the same product was in stock,
+ * and the sale move was then clamped to 0 with nothing but a console line to
+ * say so. src/lib/orders.ts priceItems() asks this one about the size that
+ * was actually ordered.
+ */
+export async function variantStockStates(ids?: string[]): Promise<Record<string, Record<string, StockState>>> {
+  const rows = await trackedLevelRows(ids);
+  const out: Record<string, Record<string, StockState>> = {};
+  for (const r of rows) {
+    (out[r.product_id] ??= {})[r.variant] = deriveState(Number(r.qty), Number(r.low_threshold));
+  }
+  return out;
+}
 
 /**
  * One state per product id, aggregated across whatever variants of it are
@@ -539,18 +576,7 @@ export async function syncVariantRows(
  * sellable while one size remains" rule a shopper would expect.
  */
 export async function productStockStates(ids?: string[]): Promise<Record<string, StockState>> {
-  const trackedClause =
-    `exists (select 1 from stock_moves m where m.product_id = sl.product_id and m.variant = sl.variant and m.reason in ${TRACKING_SQL})`;
-  let rows: StockLevelRow[];
-  if (ids && ids.length) {
-    const holes = ids.map((_, i) => `$${i + 1}`).join(",");
-    rows = await query<StockLevelRow>(
-      `select sl.* from stock_levels sl where sl.product_id in (${holes}) and ${trackedClause}`,
-      ids,
-    );
-  } else {
-    rows = await query<StockLevelRow>(`select sl.* from stock_levels sl where ${trackedClause}`);
-  }
+  const rows = await trackedLevelRows(ids);
 
   const byProduct = new Map<string, StockLevelRow[]>();
   for (const r of rows) {
@@ -586,12 +612,52 @@ export type CatalogueLevelRow = {
   updatedAt: string | null;
 };
 
-function catalogueUniverse(): Array<{ productId: string; variant: string }> {
+/**
+ * The size ladders the owner saved in the product editor
+ * (product_overrides.sizes, migration 147) — productId → its labels.
+ *
+ * «Склад» used to build its universe from the generated catalogue file alone,
+ * so a volume he ADDED there never got a row to count and a volume he RENAMED
+ * left its old row behind: invisible on this screen, still counted by
+ * productStockStates(), and therefore still able to hold a sold-out product
+ * at «в наличии» for good. The editor, the cart and the till all read this
+ * ladder first (overrideLadder() in src/lib/orders.ts); the shelf has to read
+ * the same one. Best effort: no table, no column, no change from before.
+ */
+async function overrideLadders(): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  try {
+    const rows = await query<{ product_id: string; sizes: unknown }>(
+      "select product_id, sizes from product_overrides where sizes is not null",
+    );
+    for (const r of rows) {
+      let list: unknown = r.sizes;
+      if (typeof list === "string") {
+        try {
+          list = JSON.parse(list);
+        } catch {
+          continue;
+        }
+      }
+      if (!Array.isArray(list) || !list.length) continue;
+      const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
+      /* One rung with no label is «один объём» — the product has no sizes at
+         all and its shelf key is '', the same rule overrideLadder() applies. */
+      out.set(r.product_id, labels.length === 1 && !labels[0] ? [""] : labels.filter((s) => !!s));
+    }
+  } catch (err) {
+    console.error("[inventory] saved size ladders unavailable, using the catalogue file:", err);
+  }
+  return out;
+}
+
+function catalogueUniverse(ladders: Map<string, string[]>): Array<{ productId: string; variant: string }> {
   const out: Array<{ productId: string; variant: string }> = [];
   for (const p of CATALOGUE) {
-    const v = VARIANTS[p.id];
-    if (v && v.sizes && v.sizes.length) {
-      for (const size of v.sizes) out.push({ productId: p.id, variant: size });
+    const own = ladders.get(p.id);
+    const sizes = own && own.length ? own : VARIANTS[p.id]?.sizes;
+    if (sizes && sizes.length) {
+      for (const size of sizes) out.push({ productId: p.id, variant: size });
     } else {
       out.push({ productId: p.id, variant: "" });
     }
@@ -641,6 +707,27 @@ export async function isTracked(productId: string, variant?: string | null): Pro
   return rows.length > 0 && Number(rows[0].n) > 0;
 }
 
+/**
+ * Has this order's cancellation already put its goods back on the shelf? —
+ * the 'return' moves src/lib/orders.ts setOrderStatus() writes carry the
+ * order NUMBER as `ref`.
+ *
+ * Asked by the mirror of that block, the one that takes the goods off again
+ * when a cancelled order is put back on sale. Without it, a cancelled order
+ * that was never paid and is then paid for from a stale tab would be
+ * decremented twice: once by this re-sale and once by the real
+ * paid-transition decrement in src/lib/payments/apply.ts.
+ */
+export async function hasReturnMove(ref: string): Promise<boolean> {
+  const r = String(ref ?? "").trim();
+  if (!r) return false;
+  const rows = await query<{ n: string }>(
+    "select count(*)::text as n from stock_moves where ref = $1 and reason = 'return'",
+    [r],
+  );
+  return rows.length > 0 && Number(rows[0].n) > 0;
+}
+
 async function trackedKeys(): Promise<Set<string>> {
   const rows = await query<{ product_id: string; variant: string }>(
     `select distinct product_id, variant from stock_moves where reason in ${TRACKING_SQL}`,
@@ -654,14 +741,28 @@ async function trackedKeys(): Promise<Set<string>> {
  * worth a database round trip of its own). This is what the admin «Склад»
  * table shows: a size nobody has scanned in yet still gets a row, at qty 0,
  * not tracked — so Renat can see it is missing, not just not query for it.
+ *
+ * …and, since it is the only screen that can correct one, every stock_levels
+ * row that falls OUTSIDE that universe as well: the leftover of a volume
+ * renamed or removed in the product editor. Such a row is still counted by
+ * productStockStates(), so an orphan at 5 kept a product reading «в наличии»
+ * while every volume it really has sat at zero — and there was no screen on
+ * which it could be found, let alone written off.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
-  const [dbRows, tracked, custom] = await Promise.all([
+  const [dbRows, tracked, custom, ladders] = await Promise.all([
     query<StockLevelRow>("select * from stock_levels"),
     trackedKeys(),
     customUniverse(),
+    overrideLadders(),
   ]);
-  const universe = catalogueUniverse().concat(custom.rows);
+  const universe = catalogueUniverse(ladders).concat(custom.rows);
+  const inUniverse = new Set(universe.map((u) => u.productId + "\u0000" + u.variant));
+  for (const r of dbRows) {
+    if (!inUniverse.has(r.product_id + "\u0000" + r.variant)) {
+      universe.push({ productId: r.product_id, variant: r.variant });
+    }
+  }
   const byKey = new Map(dbRows.map((r) => [r.product_id + "\u0000" + r.variant, r]));
 
   let rows: CatalogueLevelRow[] = universe.map(({ productId, variant }) => {

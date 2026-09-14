@@ -528,11 +528,21 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
      nobody has scanned or adjusted yet is left untouched here and keeps its
      manual value. Best effort and dynamically imported like every optional
      neighbour above: a broken inventory module must not take the storefront
-     down with it. */
+     down with it.
+
+     With ONE exception: a manual «Нет в наличии». That is not the owner's
+     guess at a count the shelf knows better — it is «Снять с продажи»
+     (app.js: the editor's «Наличие» select and the destructive slot of the
+     product card), the only way this panel has of saying «stop selling
+     this». Overwriting it with a derived «в наличии» toasted success and
+     went on selling the product; the badge simply came back on the next
+     feed, which is exactly what Renat would have seen. A count can say a
+     product is gone; it may not say it is on sale again. */
   try {
     const { productStockStates } = await import("@/lib/inventory");
     const derived = await productStockStates(ids);
     for (const [id, stock] of Object.entries(derived)) {
+      if (out[id]?.stock === "out") continue;
       out[id] = out[id]
         ? { ...out[id], stock }
         : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
@@ -793,7 +803,16 @@ function bundlePrice(def: BundleDef, overrides: Record<string, Override>): numbe
 }
 
 /** What the caller already knows about who is buying — wholesale/loyalty (100_tiers_loyalty). */
-export type PriceContext = { customerId?: string | null };
+export type PriceContext = {
+  customerId?: string | null;
+  /**
+   * Which till is asking. 'pos' is the owner standing in front of the goods
+   * with the bottle already in his hand: his shelf count may lag what is on
+   * the shelf, and a refusal there is a sale that cannot be rung up. Only the
+   * web checkout — where nobody can see the shelf — is gated on the count.
+   */
+  channel?: "web" | "pos";
+};
 
 /**
  * Turns the browser's `{id, variant, qty}` list into priced lines. Throws
@@ -815,6 +834,22 @@ export async function priceItems(
   if (items.length > 50) throw new OrderError("too_many_items");
 
   const overrides = await getOverrides();
+  /* inventory: the state of each SIZE, not of the product. `overrides[id].stock`
+     is the aggregate («out only if every tracked size is out»), which is the
+     right answer for the badge and the wrong one for the till — see
+     variantStockStates() in src/lib/inventory.ts. Best effort and dynamically
+     imported like every other inventory call here: with no inventory module
+     the product-level gate below is still in force, exactly as before. */
+  let variantStates: Record<string, Record<string, StockState>> = {};
+  if (ctx.channel !== "pos") {
+    try {
+      const { variantStockStates } = await import("@/lib/inventory");
+      const ids = items.map((it) => (typeof it?.id === "string" ? it.id : "")).filter(Boolean);
+      if (ids.length) variantStates = await variantStockStates(ids);
+    } catch (err) {
+      console.error("[orders] per-size stock states unavailable, product-level gate only:", err);
+    }
+  }
   const bundles = items.some((it) => typeof it?.id === "string" && it.id.startsWith("bundle:"))
     ? await bundleDefs()
     : {};
@@ -952,6 +987,16 @@ export async function priceItems(
     if (ladder && ladder.sizes.length && raw.variant != null && raw.variant !== "" && v.price == null) {
       throw new OrderError("bad_variant", raw.id);
     }
+    /* inventory: and now the shelf, for THIS size. The product-level gate a
+       few lines up asks the aggregate, which says «в наличии» for a product
+       with one size left — so a 500 мл counted down to zero was sold and paid
+       for on the web whenever the 75 мл still had bottles, and the sale move
+       was clamped to 0 with only a console line to record it. A size nobody
+       has counted is not refused: it is not tracked, exactly as everywhere
+       else here. Empty for the till (`variantStates` above): see
+       PriceContext.channel. */
+    const sizeState = variantStates[raw.id]?.[v.label ?? ""];
+    if (sizeState === "out") throw new OrderError("out_of_stock", raw.id);
     /* An override price replaces the base price; a size that costs more keeps
        its premium over the base, so «−1 € on the 75 ml» does not silently
        hand away 16 € on the 500 ml. An owner-saved ladder needs none of that
@@ -1268,7 +1313,7 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
     company = cleanCompany(input.company, email);
   }
 
-  const { lines, subtotal, pricingTier } = await priceItems(input.items, lang, ctx);
+  const { lines, subtotal, pricingTier } = await priceItems(input.items, lang, { ...ctx, channel });
 
   // Rebuilt from a whitelist before anything is priced or stored (audit C2/M2).
   const shippingJson = cleanShipping(input?.shipping ?? {}, 0);
@@ -1549,6 +1594,48 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
       }
     } catch (err) {
       console.error("[orders] return stock move failed:", err);
+    }
+  }
+
+  /* …and the way back. «Отменён» pressed by mistake and put right again —
+     the panel's «Изменить статус вручную» moves an order straight from
+     cancelled/refunded back to paid/shipped/delivered — used to return the
+     goods and never take them off the shelf again: the decrement lives in
+     applyPaymentResult() and runs once, at the payment itself. Every
+     cancel/uncancel cycle therefore added the order's quantities to the
+     shelf, and after a few of them «Склад» said «в наличии» about bottles
+     that had been shipped. The mirror of the block above, under the same
+     rules: product lines only, counted variants only, best effort.
+
+     Only when that cancellation really DID return the goods, though
+     (hasReturnMove — the 'return' rows carry the order number). An order
+     cancelled before it was ever paid never returned anything, and it is
+     the one that can still be paid from a stale tab: applyPaymentResult()
+     moves it to paid and decrements it itself, so a decrement here as well
+     would take the quantity off the shelf twice. */
+  const backOnSale = (PAID_ORDER_STATUSES as readonly string[]).includes(status) &&
+    (before.status === "cancelled" || before.status === "refunded");
+  if (backOnSale) {
+    try {
+      const { move, isTracked, hasReturnMove } = await import("@/lib/inventory");
+      if (await hasReturnMove(after.number)) {
+        for (const item of before.items) {
+          if (item.kind !== "product" || !item.qty) continue;
+          if (!(await isTracked(item.id, item.variant ?? ""))) continue;
+          await move({
+            productId: item.id,
+            variant: item.variant ?? "",
+            delta: -Math.abs(item.qty),
+            // the ledger says where the sale happened, as it does for the
+            // original decrement (src/app/api/admin/pos-orders/route.ts)
+            reason: before.channel === "pos" ? "sale_pos" : "sale_web",
+            ref: after.number,
+            actor,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("[orders] re-sale stock move failed:", err);
     }
   }
 
