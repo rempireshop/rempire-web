@@ -387,6 +387,49 @@ test.describe("receipt — the purchase beacon", () => {
   });
 });
 
+test.describe("statistics — what a «view» beacon carries", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(203) });
+
+  /* Same engine caveat as the receipt beacons above: WebKit hands Playwright
+     an intercepted sendBeacon with no body to read. */
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(
+      testInfo.project.name === "mobile-safari" || testInfo.project.name === "webkit-local",
+      "WebKit does not expose a sendBeacon body to route interception",
+    );
+  });
+
+  /* The privacy policy promises the statistics keep «страница, язык, страна и
+     тип устройства». pathFor() writes the typed phrase into the search
+     screen's own address, so the «view» row used to carry `?q=<what somebody
+     typed>` — a second copy of the phrase, under the same sid, for the whole
+     ninety-day window, in a column no report ever reads (src/lib/analytics.ts
+     only counts distinct sids on a view row). The search row itself still
+     holds the term: that one is «Искали, но не нашли» and is meant to. */
+  test("the search screen's view beacon carries the page, not the phrase", async ({ page }) => {
+    const views: string[] = [];
+    await page.route("**/api/track/", async (route) => {
+      try {
+        const beacon = JSON.parse(route.request().postData() || "{}") as { type?: string; path?: string };
+        if (beacon.type === "view") views.push(String(beacon.path ?? ""));
+      } catch {
+        /* an unreadable beacon is not what this test is about */
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+    });
+
+    await page.goto(shopUrl("", `/search/?q=${encodeURIComponent("шампунь")}`));
+    await waitForScreen(page, "search");
+    await expect.poll(() => views.length).toBeGreaterThan(0);
+    expect(views).toContain("/shop2/search/");
+    for (const path of views) {
+      expect(path).not.toContain("?");
+      expect(path).not.toContain("шампунь");
+      expect(path.toLowerCase()).not.toContain("%d1%88"); // …nor percent-encoded
+    }
+  });
+});
+
 test.describe("account — «Доставка по умолчанию»", () => {
   test.use({ extraHTTPHeaders: ipHeaders(200) });
 

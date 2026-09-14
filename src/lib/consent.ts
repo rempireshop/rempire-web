@@ -183,6 +183,37 @@ export async function optedOutSet(emails: string[]): Promise<Set<string>> {
   return out;
 }
 
+/**
+ * The subset of `emails` whose customer row says the tick was switched OFF by
+ * hand — `marketing = false` with an `marketing_off_at` stamp on it.
+ *
+ * Not the same question as `optedOutSet`, and deliberately narrower than
+ * «marketing is not true»: a row that has never been ticked carries no
+ * off-stamp, and never ticking is not saying no. This is the person who went
+ * into «Кабинет» (or whose card the owner edited) and took the tick off, and
+ * the flows that run without the tick — the abandoned-cart reminder — must
+ * still honour that. Re-ticking clears it: `marketing` is true again and the
+ * row drops out of this set, stamp or no stamp.
+ *
+ * Same chunking and the same throwing posture as `optedOutSet`: a set that
+ * cannot be read stops the run rather than letting it send to everybody.
+ */
+export async function withdrawnSet(emails: string[]): Promise<Set<string>> {
+  const list = [...new Set(emails.map(normalizeEmail).filter(Boolean))];
+  const out = new Set<string>();
+  for (let i = 0; i < list.length; i += 200) {
+    const chunk = list.slice(i, i + 200);
+    const holes = chunk.map((_, j) => `$${j + 1}`).join(",");
+    const rows = await query<{ email: string }>(
+      `select email from customers
+        where email in (${holes}) and marketing = false and marketing_off_at is not null`,
+      chunk,
+    );
+    for (const r of rows) out.add(r.email);
+  }
+  return out;
+}
+
 /* ---------- the link ------------------------------------------------------ */
 
 /* The same key and the same fallback as the resume link (resumeKey() in

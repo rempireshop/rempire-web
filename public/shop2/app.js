@@ -5728,6 +5728,9 @@
     [/^Отправлено (\d+) из (\d+) · ошибок (\d+)$/, { ET: "Saadetud $1 / $2 · vigu $3", EN: "Sent $1 of $2 · $3 failed" }],
     [/^Письмо ушло — отправлено (\d+), ошибок (\d+) ✓$/,
       { ET: "Kiri läks välja — saadetud $1, vigu $2 ✓", EN: "The letter has gone — $1 sent, $2 failed ✓" }],
+    [/^Письмо не ушло — ошибок (\d+)\. Оно осталось черновиком, попробуйте ещё раз\.$/,
+      { ET: "Kiri ei läinud välja — vigu $1. See jäi mustandiks, proovige uuesti.",
+        EN: "The letter did not go out — $1 failed. It is still a draft, try again." }],
     [/^Рассылка «(.+)»: отправлено (\d+), ошибок (\d+)$/,
       { ET: "Uudiskiri «$1»: saadetud $2, vigu $3", EN: "Newsletter «$1»: $2 sent, $3 failed" }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\.$/,
@@ -8253,7 +8256,16 @@
      runs on every keystroke and toggle, which must not each count as a
      view). */
   function trackNav() {
-    track("view", { path: pathFor() });
+    /* The screen's address WITHOUT its query string. pathFor() puts the typed
+       phrase into the search screen's address (`/shop2/search/?q=…`) and the
+       404's address carries whatever the visitor arrived with — and a "view"
+       row's `path` is never read back by any report (src/lib/analytics.ts
+       only counts distinct sids on it), so the query string was a copy of
+       what somebody typed sitting in the events table for ninety days under
+       one sid, beside the search row that is meant to hold it. The privacy
+       policy promises statistics keep «страница, язык, страна и тип
+       устройства» — the page, which is what is left after the «?». */
+    track("view", { path: String(pathFor() || "").split("?")[0] });
     if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
     /* search: a reload, a shared link or the Back button lands on the search
        screen with a query already in the address — nobody typed, so the input
@@ -18235,7 +18247,16 @@
     d.sentCount = n.sentCount || 0; d.failedCount = n.failedCount || 0; d.audienceCount = n.audienceCount || 0;
     newsMarkSaved(d);
   }
-  function newsDoneLine(sent, failed) { return "Письмо ушло — отправлено " + sent + ", ошибок " + failed + " ✓"; }
+  /* «Письмо ушло ✓» only when something did go. A send every address refused
+     — an unverified sending domain is the usual reason — used to end on that
+     same tick with «отправлено 0» beside it, which is the one message that
+     makes the owner stop looking. The letter stays a draft in that case
+     (src/lib/newsletters.ts), so the line says so and the card offers
+     «Отправить …» again. */
+  function newsDoneLine(sent, failed) {
+    if (!sent && failed) return "Письмо не ушло — ошибок " + failed + ". Оно осталось черновиком, попробуйте ещё раз.";
+    return "Письмо ушло — отправлено " + sent + ", ошибок " + failed + " ✓";
+  }
   function newsSendStart(pa) {
     S.newsSend = { id: pa.id, busy: true, sent: 0, failed: 0, left: null, total: 0, err: "" };
     render();

@@ -29,7 +29,7 @@ import { renderBackInStock } from "@/emails/back-in-stock";
 import { renderBirthday } from "@/emails/birthday";
 import { baseUrl, normalizeLang } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
-import { optedOutSet, unsubscribeHeaders, unsubscribeUrl } from "@/lib/consent";
+import { optedOutSet, unsubscribeHeaders, unsubscribeUrl, withdrawnSet } from "@/lib/consent";
 import { query } from "@/lib/db";
 /* A birthday is a calendar date, so the "today" it is compared against has to
    be a calendar day too — Tallinn's, not Greenwich's (src/lib/day.ts). The
@@ -366,6 +366,17 @@ const BATCH = 100;
  * way: it must not be re-selected and re-counted on every run, and no letter
  * is exactly what was asked for. `reason: "opted_out"` in the report says how
  * many.
+ *
+ * So is an address whose customer row says the tick was switched OFF by hand
+ * (`marketing = false` with a `marketing_off_at` stamp — the account form or
+ * the owner). The tick is not what this letter runs on: a guest who abandons
+ * a basket at the checkout has no customers row at all and still gets the
+ * reminder, which is what 052_marketing_consent.sql chose. But somebody who
+ * went into «Кабинет» and unticked has said no to marketing mail in the only
+ * place the shop offers, and this letter carries the marketing unsubscribe
+ * link and the RFC 8058 headers — so «the latest expression of will wins»
+ * (src/lib/consent.ts) has to hold here too. Never ticking is not saying no;
+ * only the off-stamp is.
  */
 export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
@@ -398,6 +409,7 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
      this run sends nothing (the throw is caught in runFlows), never "send to
      everybody and hope". */
   const blocked = await optedOutSet(rows.map((r) => r.email));
+  for (const email of await withdrawnSet(rows.map((r) => r.email))) blocked.add(email);
 
   let sent = 0;
   const skips = counter();
@@ -590,7 +602,20 @@ async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, Aler
       headers: unsubscribeHeaders(alert.email, lang, "backstock"),
     });
     if (res.ok && !res.skipped) sent += 1;
-    else skipped += 1;
+    else {
+      skipped += 1;
+      /* Skipped, not failed: the mail layer did not even try (no key, no
+         address). Nothing reached anybody, so the stamp comes off — exactly
+         as the birthday flow does it (runBirthdays below). Without this a
+         shop whose Resend key arrives next week burns the whole waiting
+         list: every «сообщите, когда появится» is marked sent and no letter
+         ever goes out. A real failure keeps the stamp: Resend was asked, and
+         a retry from here would be the double letter the stamp exists to
+         stop. */
+      if (res.skipped) {
+        await query("update stock_alerts set sent_at = null where id = $1", [alert.id]);
+      }
+    }
   }
   return { sent, skipped };
 }

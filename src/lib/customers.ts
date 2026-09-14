@@ -661,11 +661,29 @@ function money(n: number): number {
   return Math.round((Number(n) || 0) * 100) / 100;
 }
 
+type OrdersLib = typeof import("@/lib/orders");
+type Overrides = Awaited<ReturnType<OrdersLib["getOverrides"]>>;
+
 /**
  * Turns the browser's `[{id, size|variant, qty}]` into a snapshot with names
  * and prices taken from the catalogue and the owner's overrides — never from
  * the request. Unknown ids are dropped rather than refused: this is a
  * reminder letter, not an order.
+ *
+ * The prices are the till's prices, arrived at by the till's own rules —
+ * getOverrides() and overrideLadder() out of src/lib/orders.ts, the two the
+ * checkout's priceLines() uses. This file used to read `price` alone and
+ * apply it flat, which got two things wrong the moment a product had sizes:
+ * the ladder the owner saved in the editor (product_overrides.sizes) was
+ * invisible here, and a single-value override replaced a rung's price
+ * outright instead of keeping the rung's premium over the base. Both made
+ * the «Итого» in the letter lower than what the customer is charged when he
+ * follows the link — the one number in a reminder that must not be a guess.
+ *
+ * `import()` rather than a top-level import on purpose: this module is a leaf
+ * (see the file header) and orders.ts reaches back to it through loyalty.ts.
+ * Best effort, like every other optional neighbour — no database, no
+ * overrides table, and the catalogue's own prices are still an honest answer.
  */
 export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
   const list = Array.isArray(rawItems) ? rawItems.slice(0, 50) : [];
@@ -677,19 +695,18 @@ export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
     const id = typeof it?.id === "string" ? it.id.slice(0, 120) : "";
     if (id && (BY_ID.has(id) || custom.has(id))) ids.add(id);
   }
-  let prices: Record<string, number | null> = {};
+  let overrides: Overrides = {};
+  let overrideLadder: OrdersLib["overrideLadder"] | null = null;
   if (ids.size) {
     try {
-      const holes = [...ids].map((_, i) => `$${i + 1}`).join(",");
-      const rows = await query<{ product_id: string; price: string | number | null }>(
-        `select product_id, price from product_overrides where product_id in (${holes})`,
-        [...ids],
-      );
-      for (const r of rows) prices[r.product_id] = r.price == null ? null : Number(r.price);
+      const orders = await import("@/lib/orders");
+      overrides = await orders.getOverrides([...ids]);
+      overrideLadder = orders.overrideLadder;
     } catch {
       /* No database, or the overrides table is not there yet: catalogue prices
          are still the honest answer for a reminder letter. */
-      prices = {};
+      overrides = {};
+      overrideLadder = null;
     }
   }
 
@@ -705,7 +722,10 @@ export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
     if (own && own.min.s !== "in") continue;
     const qty = Math.max(1, Math.min(99, Math.round(Number(it?.qty) || 1)));
     const rawSize = it?.size ?? it?.variant;
-    const v = VARIANTS[id] ?? own?.variants ?? undefined;
+    const o = overrides[id];
+    // the same three ladders in the same order as priceLines(): the editor's, the owner's product's, the file's
+    const ownLadder = overrideLadder ? overrideLadder(o) : null;
+    const v = ownLadder ?? own?.variants ?? VARIANTS[id] ?? undefined;
     let size: number | null = null;
     let label: string | null = null;
     let sized: number | null = null;
@@ -718,8 +738,16 @@ export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
         sized = Number(v.prices[idx]);
       }
     }
-    const override = prices[id];
-    const base = override != null && Number.isFinite(override) ? override : Number.isFinite(sized as number) ? (sized as number) : p.p;
+    const rung = Number.isFinite(sized as number) ? (sized as number) : null;
+    const override = o?.price;
+    /* priceLines() again, rung for rung: a saved ladder already carries the
+       price the owner typed on every rung; a single-value override replaces
+       the base and the rung keeps its premium over it; otherwise the rung, or
+       the base. */
+    let base: number;
+    if (ownLadder) base = rung ?? ownLadder.prices[0];
+    else if (override != null && Number.isFinite(override)) base = rung == null ? override : money(override + (rung - p.p));
+    else base = rung ?? p.p;
     const price = money(base);
     items.push({ id, title: p.n, brand: p.b, variant: label, size, qty, price });
     total += price * qty;
