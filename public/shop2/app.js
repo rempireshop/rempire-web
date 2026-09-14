@@ -1538,7 +1538,17 @@
       "Переписка с клиентом": "Kirjavahetus kliendiga", "Переписки пока нет.": "Kirjavahetust veel pole.",
       "Письмо отправлено ✓": "Kiri saadetud ✓", "Не удалось отправить письмо": "Kirja saatmine ei õnnestunud",
       "Отчёты": "Aruanded", "Месяц": "Kuu", "Скачать CSV": "Laadi alla CSV", "Скачать XLSX": "Laadi alla XLSX",
-      "НДС": "KM",
+      "НДС": "KM", "Возвращено": "Tagastatud",
+      /* The two delivery sentences WITHOUT the free-delivery clause — drawn
+         when «Бесплатно от» has been emptied for Estonia (pdpShipLine /
+         ftrShipLine). The versions that quote a floor are UI_RX rules, since
+         they carry a number. */
+      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
+        "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · järeletulek aadressil Mardi 1",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
+        "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · 230 pakiautomaati 4 riigis",
+      "Настройки магазина сейчас не отвечают — попробуйте ещё раз.": "Poe seaded ei vasta praegu — proovi uuesti.",
+      "Данные магазина ещё не загрузились — обновите страницу.": "Poe andmed pole veel laadinud — värskenda lehte.",
       "Вставьте сюда, что написал покупатель": "Kleebi siia, mida klient kirjutas",
       "Вставьте сообщение клиента": "Kleebi kliendi sõnum",
       "У заказа нет e-mail покупателя": "Tellimusel pole kliendi e-posti",
@@ -4078,7 +4088,13 @@
       "Переписка с клиентом": "Conversation with the customer", "Переписки пока нет.": "No messages yet.",
       "Письмо отправлено ✓": "Message sent ✓", "Не удалось отправить письмо": "Could not send the message",
       "Отчёты": "Reports", "Месяц": "Month", "Скачать CSV": "Download CSV", "Скачать XLSX": "Download XLSX",
-      "НДС": "VAT",
+      "НДС": "VAT", "Возвращено": "Refunded",
+      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
+        "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · pickup at Mardi 1",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
+        "DPD, Omniva, SmartPosti and courier · 1–3 days · 230 parcel lockers in 4 countries",
+      "Настройки магазина сейчас не отвечают — попробуйте ещё раз.": "The shop's settings are not answering right now — please try again.",
+      "Данные магазина ещё не загрузились — обновите страницу.": "The shop's details have not loaded yet — refresh the page.",
       "Вставьте сюда, что написал покупатель": "Paste in what the customer wrote",
       "Вставьте сообщение клиента": "Paste in the customer's message",
       "У заказа нет e-mail покупателя": "This order has no customer e-mail",
@@ -6211,10 +6227,29 @@
     Object.keys(THRESH).forEach(function (c) {
       var by = SHIP_RULES.freeFromByCountry;
       var v = by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : SHIP_RULES.freeFrom;
-      // null means "never free" — the marketing lines have no way to say that,
-      // so they keep the last real number while threshold() bills correctly
-      if (typeof v === "number" && isFinite(v)) THRESH[c] = v;
+      /* null = «never free in that country» — an emptied «Бесплатно от» box
+         in the panel. THRESH used to keep the LAST REAL NUMBER in that case
+         and every marketing line went on quoting it, while threshold() below
+         answered Infinity and the checkout charged: the strip, the footer and
+         the product page promised free delivery the till refused to give
+         (14.09.2026). THRESH carries the null now and every line that quotes
+         it drops the promise — pdpShipLine() / ftrShipLine() / cTokens(). */
+      THRESH[c] = typeof v === "number" && isFinite(v) ? v : null;
     });
+  }
+  /* The two marketing sentences that quote Estonia's floor. Both exist in a
+     second shape with the free-delivery clause taken out, because there is no
+     honest way to word «бесплатно от null»; the shape without it is a plain
+     dictionary key in ET and EN, the one with it a UI_RX rule (see UI_RX). */
+  function pdpShipLine() {
+    return THRESH.EE == null
+      ? "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1"
+      : "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от " + THRESH.EE + " € · самовывоз на Mardi 1";
+  }
+  function ftrShipLine() {
+    return THRESH.EE == null
+      ? "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах"
+      : "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах";
   }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
   /* «Другая страна Европы» prices the parcel (the EU row of the rules), but a
@@ -9291,7 +9326,7 @@
           (out
             ? '<p class="muted">Одного из товаров сейчас нет — соберём набор, как только он приедет.</p>'
             : '<button class="btn btn--wide" data-addbundle="' + b.id + '">В корзину — ' + eur(b.price) + "</button>") +
-          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
+          '<div class="pdp__ship">' + esc(pdpShipLine()) + "</div>" +
         "</div>" +
       "</div></div>" +
       (out ? "" :
@@ -10104,6 +10139,21 @@
   /* The stored object may be older than this build (or hand-edited), so every
      field is taken one by one and anything missing falls back to the default —
      the same shape always comes out. */
+  /* Has the shop's own document ever been read?
+     DEMO.content is filled in ONE place — adoptServer(), from a 200 on
+     /api/overrides, which always answers the fully merged document
+     (mergeContent in src/lib/content.ts). Null therefore means «this browser
+     has never seen the shop's real details», and contentConf() below is then
+     handing back CONTENT_DEFAULT, whose iban and bankName are "".
+     Saving from that state used to PUT the whole assembled document
+     ({ content: DEMO.content } in srvPush), so one phone-number edit made
+     after a failed read stored the defaults over the shop's real IBAN,
+     address and social links. The two save buttons refuse until it has
+     landed; the answer is kept in localStorage, so this only ever bites the
+     session where the read actually failed. */
+  function contentLoaded() {
+    return !!(DEMO.content && typeof DEMO.content === "object" && !Array.isArray(DEMO.content));
+  }
   function contentConf() {
     var s = DEMO.content && typeof DEMO.content === "object" ? DEMO.content : {};
     var d = CONTENT_DEFAULT, out = {};
@@ -10143,9 +10193,20 @@
      thresholds, so the default strip keeps telling the truth after the
      shipping rules change. */
   function cTokens(s) {
-    return String(s || "").replace(/\{(EE|LV|LT|FI|EU)\}/g, function (whole, code) {
-      return THRESH[code] != null ? String(THRESH[code]) : whole;
+    /* A country whose «Бесплатно от» has been emptied has NO free-delivery
+       floor — threshold() answers Infinity and the checkout charges. A strip
+       that names such a country is promising what the till refuses, and there
+       is no number to put in the hole, so the whole line goes: announceBody()
+       below falls through to the built-in text (which carries the same
+       tokens, so it goes too) and the strip is hidden. Blunt on purpose — it
+       drops the line even when only one of the three countries lost its floor
+       — because the alternative is a sentence the shop will not honour. */
+    var gone = false;
+    var out = String(s || "").replace(/\{(EE|LV|LT|FI|EU)\}/g, function (whole, code) {
+      if (THRESH[code] == null) { gone = true; return whole; }
+      return String(THRESH[code]);
     });
+    return gone ? "" : out;
   }
   /* {{legalName}} & co in the legal texts (public/shop/legal*.js) — the pages
      carry placeholders instead of a frozen company identity. */
@@ -10397,8 +10458,7 @@
          sentence carries a price and is translated by a UI_RX rule anchored
          on its last word — one appended « · » and it stops matching in ET
          and EN. Same reason «Самовывоз» below keeps its own <span>. */
-      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE +
-        " € · 230 пакоматов в 4 странах" +
+      ftrSec("Доставка", esc(ftrShipLine()) +
         '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
@@ -10807,7 +10867,7 @@
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
-          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
+          '<div class="pdp__ship">' + esc(pdpShipLine()) + "</div>" +
           /* The live shop's own description when we have it (harvested — all
              95 products); the old placeholder text only where we somehow
              don't. Its images are stripped: cdn.shopify.com dies with the
@@ -15061,6 +15121,33 @@
       return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
     }
   }
+  /**
+   * «Продажи → Сегодня»: today's takings, summed from the orders the panel
+   * already holds (the overview endpoint counts today's orders but does not
+   * price them).
+   *
+   * Two rules, both the server's, both wrong here until 14.09.2026:
+   *   · a sale is paid OR shipped OR delivered (PAID_STATUSES in
+   *     src/lib/analytics.ts). Only paid and shipped counted, so pressing
+   *     «Доставлен»/«Выдан клиенту» — the last button on the order card —
+   *     TOOK THE SALE OUT of today's takings: the day's money went down while
+   *     «Аналитика» went on counting it;
+   *   · the day is the Tallinn one (admShopDay, src/lib/day.ts on the server),
+   *     not this browser's local midnight. Renat reads the panel on a phone
+   *     that travels; it must show the shop's day, not his hotel's.
+   */
+  function admTodayTakings(vms) {
+    var out = { sum: 0, n: 0, pos: 0 };
+    var day0 = admShopDay(new Date());
+    (vms || []).forEach(function (v) {
+      if (!v || !v.srv) return;
+      var at = new Date(v.srv.createdAt);
+      if (isNaN(at.getTime()) || admShopDay(at) !== day0) return;
+      if (!(v.status === "paid" || v.status === "shipped" || v.status === "delivered")) return;
+      out.sum += Number(v.sum) || 0; out.n++; if (v.pos) out.pos++;
+    });
+    return out;
+  }
   /** «2026-09-13» + n CALENDAR days. Not n×864e5: the last Sunday of October
       is a 25-hour day in Tallinn, and stepping by hours would name it twice
       and skip the day after it — one bar of the week drawn over another. */
@@ -15184,15 +15271,8 @@
        them); the week and its seven bars come from the summary, which builds
        them with the very function «Аналитика» calls for its own "7d" range
        (qRevenueByDay), so the two screens can never disagree. */
-    var todaySum = 0, todayN = 0, todayPos = 0;
-    var day0 = new Date(); day0.setHours(0, 0, 0, 0);
-    vms.forEach(function (v) {
-      if (!v.srv) return;
-      var at = new Date(v.srv.createdAt);
-      if (isNaN(at.getTime()) || at < day0) return;
-      if (!(v.status === "paid" || v.status === "shipped")) return;
-      todaySum += Number(v.sum) || 0; todayN++; if (v.pos) todayPos++;
-    });
+    var today = admTodayTakings(vms);
+    var todaySum = today.sum, todayN = today.n, todayPos = today.pos;
     var week = o ? o.revenue7d : null;
     /* The summary's own rows; the «Аналитика» copy is the fallback for a
        panel still holding an answer from before the field existed. */
@@ -20858,9 +20938,23 @@
       }
     };
   }
+  /* GET /api/admin/settings — «Цены и баллы», «Когда заказ считается
+     доставленным» and «Какие банки показывать», all three off the one read.
+     A read that FAILED used to fall back to the built-in defaults
+     (S.pricingLoaded = normalisePricing(null)): the card then drew «Партнёры и
+     баллы» off and a 20 % salon discount as though that were what Renat had
+     saved, and pressing «Сохранить» PUT those defaults over his real ones.
+     Every caller passes force=false, so it never re-asked either. Now a failed
+     read sets S.pricingLoadErr and leaves S.pricingLoaded alone: the card says
+     so and carries «Повторить», and nothing on this screen can be saved until
+     a real answer has landed. S.pricingLoadErr is also what stops the card's
+     own loadAdminPricing(false) from re-firing the failing request on every
+     render. (S.pricingErr, one word shorter, is the FORM's field-validation
+     message — a different thing entirely.) */
   function loadAdminPricing(force) {
     if (SRV.admin !== true) return;
     if (S.pricingLoaded && !force) return;
+    if (S.pricingLoadErr && !force) return;
     if (loadAdminPricing._busy) return;
     loadAdminPricing._busy = true;
     apiJson("/api/admin/settings/").then(function (r) {
@@ -20883,16 +20977,19 @@
         S.deliveryLoaded = normaliseDelivery(st0.delivery);
         // «Какие банки показывать» — settings.payment_banks, from the same map
         S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
+        S.pricingLoadErr = false;
         render();
       }
-      else if (!S.pricingLoaded) { S.pricingLoaded = normalisePricing(null); render(); }
+      else if (!S.pricingLoaded) { S.pricingLoadErr = true; render(); }
     }).catch(function () {
       loadAdminPricing._busy = false;
-      // never leave «Цены и баллы» on its skeleton: the defaults are what the
-      // card drew before this screen learned to wait, and they draw again here
-      if (!S.pricingLoaded) { S.pricingLoaded = normalisePricing(null); render(); }
+      if (!S.pricingLoaded) { S.pricingLoadErr = true; render(); }
     });
   }
+  /** True once GET /api/admin/settings has really answered — the one gate on
+      every write this screen makes (prices and points, «Доставлен» без кнопки,
+      the bank list). Writing before it has landed writes the defaults. */
+  function adminSettingsReady() { return !!S.pricingLoaded; }
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
     return S.pricingDraft;
@@ -20958,6 +21055,8 @@
   /* «Сохранить» proposes and the confirm card applies: a discount is money,
      and it lands on every partner's next basket the moment it is saved. */
   function savePricing() {
+    // never over the defaults: the PUT sends the whole `pricing` document
+    if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
     if (!pricingDirty()) { toast("Изменений нет"); return; }
     S.pricingErr = ""; S.pricingErrField = "";
     var value = cloneRules(pricingDraft());
@@ -21087,7 +21186,10 @@
     if (SRV.admin === true && !S.pricingLoaded) {
       return '<div class="adm-form">' +
         '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
-        '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+        (S.pricingLoadErr
+          ? '<div class="adm-error"><span>Настройки магазина сейчас не отвечают — попробуйте ещё раз.</span>' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="pricing">Повторить</button></div>'
+          : '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
     }
     var d = pricingDraft(), lo = d.loyalty.enabled, on = d.partnersOn === true;
     return '<div class="adm-form">' +
@@ -27029,7 +27131,30 @@
     return { id: a.id, sizes: lad.length ? lad : null,
       price: lad.length ? lad[0].price : (a.price != null ? a.price : null) };
   }
+  /* What the last optimistic tariff save has to put back if the server says
+     no — set by demoApply(), consumed once by srvPush() below. */
+  var shipRollback = null;
+  /** The save was refused (below_cost) or never landed: the live table goes
+      back to what the shop is really charging, the owner's own numbers go
+      back into the boxes with the dirty bar lit, «Сохранено ✓» goes out, and
+      the journal line that claimed the save is dropped. The toast is already
+      the server's own sentence — it names the carrier, the country and both
+      numbers, and now it names a box that is still on screen. */
+  function shipRulesRefused(back) {
+    if (!back) return;
+    setShipRules(back.was);
+    S.shipDraft = back.tried;
+    S.admSetSaved = "";
+    if (back.entry) {
+      DEMO.log = DEMO.log.filter(function (e) { return e !== back.entry; });
+      demoSave();
+    }
+    render();
+  }
   function srvPush(a) {
+    // consumed here whatever the action was, so a stale one can never be
+    // applied to some later save (the panel signed out, an undo, …)
+    var shipBack = shipRollback; shipRollback = null;
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
     if (a.type === "set_price") srvSaved(apiSend(ov, "PUT", { id: a.id, price: a.value }));
@@ -27128,7 +27253,14 @@
     /* checkout-gaps: the whole delivery table travels, because a merge cannot
        express a price the owner deleted. Promo codes have their own routes —
        they are rows in promo_codes, not a settings blob. */
-    else if (a.type === "set_shipping_rules") srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) }));
+    else if (a.type === "set_shipping_rules") {
+      srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) })).then(function (r) {
+        // anything but a 200/ok — the below_cost refusal, a 503, no answer at
+        // all: the panel must not go on showing a table the shop is not running
+        if (r && r.status === 200 && r.body && r.body.ok) return;
+        shipRulesRefused(shipBack);
+      });
+    }
     else if (a.type === "create_promo") {
       apiSend("/api/admin/promos/", "POST", a.promo).then(function (r) {
         if (!(r.status === 200 && r.body.ok)) toast("Промокод не сохранился — проверьте условия");
@@ -27243,6 +27375,9 @@
       SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
       // …and the summary goes with them, so signing back in asks again
       OVERVIEW.data = null; OVERVIEW.err = null; OVERVIEW.asked = false;
+      // same for a settings read that had failed: it keeps «Цены и баллы» on
+      // its error card until «Повторить», and signing back in is a retry
+      S.pricingLoadErr = false;
       render();
     });
   }
@@ -27799,8 +27934,14 @@
           '<input class="adm-input" type="month" data-admreportsmonth value="' + esc(month) + '"></label>' +
         (sum
           ? (sum.orders
+              /* «Выручка» and «НДС» are net of refunds (summarize() in
+                 src/lib/reports.ts) — a month in which an order went back
+                 used to report its money as takings and its VAT as due. The
+                 reversal gets its own tile when there was one, so the figure
+                 is explained rather than merely smaller. */
               ? '<div class="adm-kpis">' + admPlainKpi("Заказы", String(sum.orders)) +
-                admPlainKpi("Выручка", eur(sum.revenue)) + admPlainKpi("НДС", eur(sum.vat)) + "</div>"
+                admPlainKpi("Выручка", eur(sum.revenue)) + admPlainKpi("НДС", eur(sum.vat)) +
+                (sum.refunded > 0 ? admPlainKpi("Возвращено", "−" + eur(sum.refunded)) : "") + "</div>"
               : '<div class="adm-empty" style="margin:0">За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.</div>')
           : SRV.admin === true ? '<div class="adm-skel" style="margin:0"><i></i><i></i></div>' : "") +
         /* The same pair as «Клиенты», drawn the same way and in the same
@@ -28310,7 +28451,16 @@
        (srvPush below) plus a log entry. */
     else if (a.type === "set_shipping_rules") {
       entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_RULES), full: true };
+      var shipWas = cloneRules(SHIP_RULES);
       if (a.full) setShipRules(a.rules); else applyShipRules(a.rules);
+      /* …and what to put back if the server refuses the save (a price under
+         what Montonio charges — belowCostMessage in src/lib/shipping.ts) or
+         if it never lands. The table is replaced, the draft emptied and
+         «Сохранено ✓» lit here, before the PUT has answered; without this the
+         panel went on showing prices the shop is not charging, with the
+         owner's own numbers gone from the boxes the server's sentence was
+         talking about. srvPush() below is where it is used. */
+      shipRollback = { was: shipWas, tried: cloneRules(SHIP_RULES), entry: entry };
       S.shipDraft = null; S.shipErr = "";
     }
     // undoing a code the assistant just made switches it off again
@@ -31033,6 +31183,8 @@
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
       else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
+      // the one GET behind «Цены и баллы», «Доставлен» без кнопки and the banks
+      else if (d.admreload === "pricing") { S.pricingLoadErr = false; loadAdminPricing(true); }
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
@@ -31934,12 +32086,17 @@
     /* «Доставлен» без кнопки: both halves of settings.delivery apply at once
        with the toast's undo — nothing here sends anything or moves money. */
     if (d.delivcarrier !== undefined) {
+      // the PUT carries the whole settings.delivery object, so never before
+      // the read that says what is in it has landed (loadAdminPricing)
+      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
       var dc = deliveryConf();
       var dcEntry = demoApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } });
       render(); toast("Сохранено ✓", dcEntry); return;
     }
     // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks
     if (d.admbank !== undefined) {
+      // same gate as the delivery switch above: the whole array travels
+      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
       /* The last bank of a country stays on — the server would hand that
          country's whole list back anyway (filterBanks), and a switch that
          says «off» while the checkout shows the bank is worse than a switch
@@ -32154,6 +32311,8 @@
       render(); return;
     }
     if (d.contentsave !== undefined) {
+      // never the defaults over the real document — see contentLoaded()
+      if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
       var cPatch = contentDiff(contentConf(), contentDraft());
       if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
       pendingAction = {
@@ -32163,6 +32322,9 @@
       render(); refocus("[data-admapply]"); return;
     }
     if (d.contentreset !== undefined) {
+      // same gate: «вернуть стандартные» must mean «back to the defaults from
+      // what is really stored», not «write the defaults over the unknown»
+      if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
       var cBack = contentDiff(contentConf(), CONTENT_DEFAULT);
       if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
       pendingAction = {
@@ -33385,6 +33547,8 @@
     else if (t.matches("[data-acctreturn]")) { acctReturnSubmit(t.getAttribute("data-acctreturn")); }
     /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
     else if (t.matches("[data-delivdays]")) {
+      // same gate as the switch beside it — the whole object travels
+      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
       var dvc = deliveryConf();
       var dvEntry = demoApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } });
       render(); toast("Сохранено ✓", dvEntry);

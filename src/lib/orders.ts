@@ -23,7 +23,7 @@ import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
 // Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
 // this same build, unlike the optional neighbours below: no try/catch needed.
-import { customerTier, getPricingSettings, loyaltyOn, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
+import { customerTier, getPricingSettings, loyaltyOn, proUnitPrice, quoteLoyaltyRedeem, reverseLoyaltyForOrder } from "@/lib/loyalty";
 // Shipping defaults — src/lib/shipping.ts is a module of this build too (see
 // docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
 // cannot drift from it; the live computeShipping() call itself still goes
@@ -1569,6 +1569,24 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
       }
     } catch (err) {
       console.error("[orders] voiding the gift cards of a refunded order failed:", err);
+    }
+  }
+
+  /* loyalty (14.09.2026): and the points go back with the money. Until now a
+     refund left both ledger lines standing — the shop kept paying the bonus
+     for a sale it un-made, and a customer who had paid with points lost the
+     points as well as keeping none of the goods. Same shape as the two
+     neighbours above: only off a paid order, only on a refund (a cancellation
+     still holds the money), idempotent, best effort — a ledger hiccup must
+     never stop a refund from being recorded. */
+  if (wasPaid && status === "refunded") {
+    try {
+      const out = await reverseLoyaltyForOrder(id);
+      if (out.reversed) {
+        await writeAuditSafe(actor, "loyalty.reversed", { id, number: after.number, lines: out.reversed });
+      }
+    } catch (err) {
+      console.error("[orders] reversing the loyalty points of a refunded order failed:", err);
     }
   }
 

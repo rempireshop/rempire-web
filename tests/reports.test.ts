@@ -10,7 +10,8 @@
 import { inflateRawSync } from "node:zlib";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { createOrder, setOrderStatus, type Order } from "@/lib/orders";
+import { query } from "@/lib/db";
+import { createOrder, setOrderPayment, setOrderStatus, type Order } from "@/lib/orders";
 import {
   buildZip,
   DEFAULT_VAT_RATE,
@@ -96,7 +97,9 @@ function row(over: Partial<ReportOrderRow> = {}): ReportOrderRow {
     shipping: 3.49,
     discount: 0,
     discountCode: "",
+    loyaltyDiscount: 0,
     total: 103.49,
+    refunded: 0,
     vatRate: 24,
     vatAmount: 20.03,
     totalExclVat: 83.46,
@@ -205,10 +208,23 @@ describe("buildZip / ordersToXlsx", () => {
 describe("summarize", () => {
   it("adds up orders/revenue/VAT across rows", () => {
     const s = summarize([row({ total: 100, vatAmount: 19.35 }), row({ total: 50, vatAmount: 9.68 })]);
-    expect(s).toEqual({ orders: 2, revenue: 150, vat: 29.03 });
+    expect(s).toEqual({ orders: 2, revenue: 150, vat: 29.03, refunded: 0 });
   });
   it("is all zero for an empty month", () => {
-    expect(summarize([])).toEqual({ orders: 0, revenue: 0, vat: 0 });
+    expect(summarize([])).toEqual({ orders: 0, revenue: 0, vat: 0, refunded: 0 });
+  });
+  /* 14.09.2026: money that went back was still counted as takings, and its
+     VAT as due. REPORTABLE_STATUSES keeps a refunded row on purpose — the
+     accountant wants to see the reversal — but nothing ever subtracted it. */
+  it("takes refunds off the revenue and off the VAT, and names them", () => {
+    const s = summarize([
+      row({ total: 124, vatAmount: 24, refunded: 0 }),
+      // fully refunded: the row stays, the money does not
+      row({ total: 124, vatAmount: 24, refunded: 124, status: "refunded" }),
+      // …and a partial refund on an order that is still `paid`
+      row({ total: 124, vatAmount: 24, refunded: 62 }),
+    ]);
+    expect(s).toEqual({ orders: 3, revenue: 186, vat: 36, refunded: 186 });
   });
 });
 
@@ -299,5 +315,47 @@ describe("listReportOrders (PGlite)", () => {
     expect(found.customerName).toBe("Мария Тамм");
     expect(found.customerEmail).toBe("maria@example.com");
     expect(found.country).toBe("EE");
+  });
+
+  /* 14.09.2026. total = subtotal + shipping − discount − loyalty_discount
+     (createOrder in src/lib/orders.ts), and the fourth term was neither
+     selected nor shown: on every order that spent points the sheet's own
+     columns did not add up to its own Total. */
+  it("carries loyalty_discount, so Subtotal + Shipping − Discount − Points foots to Total", async () => {
+    const order = await paidOrder();
+    await query("update orders set loyalty_discount = 5, total = total - 5 where id = $1", [order.id]);
+    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    expect(found.loyaltyDiscount).toBe(5);
+    expect(Math.round((found.subtotal + found.shipping - found.discount - found.loyaltyDiscount) * 100) / 100)
+      .toBe(found.total);
+  });
+
+  /* A partial refund is written ONLY to payment.refunds — the order keeps
+     status `paid` and its original total — so «Выручка», the VAT figure and
+     the export's Total all went on counting money that had gone back. */
+  it("reports what went back on a partly refunded order that is still `paid`", async () => {
+    const order = await paidOrder();
+    await setOrderPayment(order.id, {
+      provider: "montonio", ref: "pay-1", status: "paid",
+      refunds: [
+        { ref: "r-1", amount: 10, status: "done", at: new Date().toISOString(), by: "admin" },
+        // a refund the provider rejected never left the account
+        { ref: "r-2", amount: 99, status: "failed", at: new Date().toISOString(), by: "admin" },
+      ],
+    });
+    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    expect(found.status).toBe("paid");
+    expect(found.total).toBe(order.total);   // the invoice line is left as invoiced
+    expect(found.refunded).toBe(10);
+    expect(summarize([found]).revenue).toBe(Math.round((order.total - 10) * 100) / 100);
+  });
+
+  it("treats «возврат» marked by hand — no refund entry at all — as the whole total", async () => {
+    const order = await paidOrder();
+    await setOrderStatus(order.id, "refunded", "test");
+    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    expect(found.status).toBe("refunded");
+    expect(found.refunded).toBe(order.total);
+    expect(summarize([found])).toMatchObject({ orders: 1, revenue: 0, vat: 0 });
   });
 });

@@ -356,10 +356,18 @@ describe("POST /api/payments/create", () => {
       expect(res.body.paid).toBe(true);
       expect((await row(o.orderId)).status).toBe("paid");
       expect(await balanceOf()).toBe(0);
-      // only what was left, not the whole cap — and earned points come on top
+      /* Only what was left, not the whole cap — and NOTHING is earned:
+         a gift card paid for the rest and points paid for this part, so no
+         money was paid for the goods. Until 14.09.2026 the earn ran on
+         `order.subtotal` (the figure before discount and loyaltyDiscount come
+         off), so this basket credited 5 % of a purchase the customer settled
+         entirely with value the shop had already paid a bonus on — see
+         earnBase() in src/lib/payments/apply.ts. */
       const balance = await getLoyaltyBalance(customer.id);
-      const earned = Math.round((goods * pricing.loyalty.earnPct) / 100);
-      expect(balance).toBe(1000 - left + earned);
+      expect(balance).toBe(1000 - left);
+      const lines = await query<{ reason: string }>("select reason from loyalty_ledger where order_id = $1", [o.orderId]);
+      expect(lines.map((l) => l.reason)).toEqual(["redeem"]);
+      expect(pricing.loyalty.earnPct).toBeGreaterThan(0);   // the rate is on; the base is nil
       expect(paidMails()).toBe(1);
     });
 
@@ -380,10 +388,16 @@ describe("POST /api/payments/create", () => {
       const res = await create({ orderId: o.orderId, method: "card" });
       expect(res.status).toBe(200);
       expect(res.body.paid).toBe(true);
-      const earned = Math.round((r.subtotal * pricing.loyalty.earnPct) / 100);
-      expect(await getLoyaltyBalance(customer.id)).toBe(1000 + earned);
+      /* …and earns nothing, for the same reason as the test above: the card
+         paid the whole basket, so nothing was paid for the goods in money.
+         The earn base is subtotal − discount − loyaltyDiscount (earnBase() in
+         src/lib/payments/apply.ts), and a gift card is redeemed through
+         `discount` (codeDiscount in src/lib/orders.ts). */
+      expect(r.discount).toBeCloseTo(r.subtotal + r.shippingPrice, 2);
+      expect(pricing.loyalty.earnPct).toBeGreaterThan(0);
+      expect(await getLoyaltyBalance(customer.id)).toBe(1000);
       const ledger = await query<{ reason: string }>("select reason from loyalty_ledger where order_id = $1", [o.orderId]);
-      expect(ledger.map((l) => l.reason)).toEqual(earned > 0 ? ["earn"] : []);
+      expect(ledger.map((l) => l.reason)).toEqual([]);
     });
 
     it("a promo code that zeroes the order counts its use once", async () => {

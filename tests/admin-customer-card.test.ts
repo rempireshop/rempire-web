@@ -18,7 +18,7 @@ import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin, updateCustomer } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
-import { customerOrdersAdmin } from "@/lib/loyalty";
+import { customerOrdersAdmin, listCustomersAdmin } from "@/lib/loyalty";
 import { createOrder, setOrderStatus } from "@/lib/orders";
 import { addReview, reviewsByCustomer, setReviewStatus } from "@/lib/reviews";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
@@ -127,6 +127,37 @@ describe("customerOrdersAdmin — the orders behind the card", () => {
     expect(stats.topBrands).toEqual(want);
   });
 
+  /* 14.09.2026. «Потратил» said money the shop does not have. The rule was
+     "anything but cancelled or failed", so an order still in `new` — the
+     insert default, moved only by a provider verdict, and nothing ever sweeps
+     the abandoned ones — counted as spend, and so did one the owner had
+     refunded in full. The tiles and these facts now count what «Аналитика»
+     counts: paid, shipped, delivered. */
+  it("counts neither an abandoned `new` basket nor a refunded order as money spent", async () => {
+    await recordLogin(EMAIL, "RU");
+    const paid = await order(EMAIL, NAME, [{ id: first.id, qty: 1 }], 30);
+    const refunded = await order(EMAIL, NAME, [{ id: second.id, qty: 3 }], 20);
+    await order(EMAIL, NAME, [{ id: first.id, qty: 7 }], 2); // never paid, still `new`
+    await setOrderStatus(paid.id, "paid");
+    await setOrderStatus(refunded.id, "paid");
+    await setOrderStatus(refunded.id, "refunded");
+
+    const { orders, stats } = await customerOrdersAdmin(EMAIL);
+    // the history still shows all three — it is what the owner is reading
+    expect(orders).toHaveLength(3);
+    expect(orders.map((o) => o.status)).toEqual(["new", "refunded", "paid"]);
+    // …but only the one purchase is a purchase
+    expect(stats.avgOrder).toBe(Math.round(paid.total * 100) / 100);
+    expect(stats.firstOrderAt).toBe(orders[2].createdAt);
+    expect(stats.lastOrderAt).toBe(orders[2].createdAt);
+    expect(stats.topBrands).toEqual([{ brand: first.b, spent: Math.round(paid.items[0].sum * 100) / 100 }]);
+
+    // and the tiles above them read the same rule
+    const [mine] = await listCustomersAdmin({ q: EMAIL });
+    expect(mine.ordersCount).toBe(1);
+    expect(mine.revenue).toBe(Math.round(paid.total * 100) / 100);
+  });
+
   it("answers empty, not a throw, for an address with no orders", async () => {
     expect(await customerOrdersAdmin("nobody@example.com")).toEqual({
       orders: [],
@@ -176,6 +207,9 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     await setOrderStatus(paid.id, "paid");
     // a guest order, signed a little differently — still hers: the tiles key on the address
     const guest = await order(EMAIL, "Maria Tamm", [{ id: second.id, qty: 2 }], 3);
+    // …and paid, because the tiles count purchases: a basket still sitting in
+    // `new` is one that opened a payment page and never came back
+    await setOrderStatus(guest.id, "paid");
     const review = await addReview({ productId: second.id, name: "Maria Tamm", rating: 5, text: "Отличный продукт, проверено на себе не один раз.", lang: "RU" }, null, EMAIL);
     await setReviewStatus(review.id, "approved");
     await addReview({ productId: first.id, name: "Кто-то другой", rating: 1, text: "Мне не понравилось, отправлю обратно как только смогу.", lang: "RU" }, null, "странник@example.com");

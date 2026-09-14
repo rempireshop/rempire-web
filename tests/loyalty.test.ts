@@ -19,7 +19,7 @@ import variants from "@/data/catalogue.variants.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
-import { createOrder, getOverrides, priceItems, upsertOverride } from "@/lib/orders";
+import { createOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
 import {
   adjustLoyaltyPoints,
   approveProCustomer,
@@ -356,6 +356,73 @@ describe("loyalty ledger — redeem", () => {
   });
 });
 
+/* 14.09.2026. A refund used to leave both ledger lines standing: the shop went
+   on paying the bonus for a sale it had un-made, and a customer who had paid
+   with points got the euros back and lost the points as well. */
+describe("loyalty ledger — a refund takes the points back with the money", () => {
+  async function paidOrderFor(email: string, redeem: boolean) {
+    await query(
+      "insert into settings (key, value) values ($1, $2::jsonb) on conflict (key) do update set value = excluded.value",
+      ["pricing", JSON.stringify({ partnersOn: true, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 100, minRedeem: 1 } })],
+    );
+    const id = await recordLogin(email, "RU").then((c) => c.id);
+    if (redeem) await adjustLoyaltyPoints(id, 30, "seed");
+    const o = await createOrder(
+      { lang: "ru", items: [{ id: plain.id, qty: 4 }], customer, shipping: ship, redeemPoints: redeem },
+      { customerId: id },
+    );
+    await applyPaymentResult(
+      { id: o.id, number: o.number, status: "new", total: o.total, subtotal: o.subtotal, discount: o.discount, loyaltyDiscount: o.loyaltyDiscount, items: o.items, customerId: id },
+      verifyResult({ orderRef: o.number, amount: o.total }),
+      "montonio",
+      // the real one: the order row has to actually reach `paid`, because that
+      // is what setOrderStatus() reads before deciding a refund reverses
+      deps({ setOrderStatus: async (oid, st) => setOrderStatus(oid, st, "payment:montonio") }),
+    );
+    return { id, order: o };
+  }
+
+  it("cancels the points it earned when the order is refunded", async () => {
+    const { id, order: o } = await paidOrderFor("refund-earn@example.com", false);
+    const earned = await getLoyaltyBalance(id);
+    expect(earned).toBeGreaterThan(0);
+
+    await setOrderStatus(o.id, "refunded");
+    expect(await getLoyaltyBalance(id)).toBe(0);
+    const history = await getLoyaltyHistory(id);
+    expect(history.filter((h) => h.reason === "adjust" && h.orderId === o.id)).toEqual([
+      expect.objectContaining({ delta: -earned }),
+    ]);
+  });
+
+  it("gives back the points the refunded order was paid with", async () => {
+    const { id, order: o } = await paidOrderFor("refund-redeem@example.com", true);
+    expect(o.loyaltyDiscount).toBeGreaterThan(0);
+    const afterPaid = await getLoyaltyBalance(id);
+
+    await setOrderStatus(o.id, "refunded");
+    // the spent points come back, and whatever this order earned goes away
+    const earn = (await getLoyaltyHistory(id)).find((h) => h.reason === "earn" && h.orderId === o.id);
+    expect(await getLoyaltyBalance(id)).toBe(afterPaid + o.loyaltyDiscount - (earn?.delta ?? 0));
+    expect(await getLoyaltyBalance(id)).toBe(30);
+  });
+
+  it("does not post the reversal twice, and leaves a cancellation alone", async () => {
+    const { id, order: o } = await paidOrderFor("refund-twice@example.com", false);
+    await setOrderStatus(o.id, "refunded");
+    const once = await getLoyaltyHistory(id);
+    await setOrderStatus(o.id, "refunded");
+    expect(await getLoyaltyHistory(id)).toHaveLength(once.length);
+    expect(await getLoyaltyBalance(id)).toBe(0);
+
+    // a cancellation is not a refund — the order still holds the money
+    const other = await paidOrderFor("refund-cancel@example.com", false);
+    const before = await getLoyaltyBalance(other.id);
+    await setOrderStatus(other.order.id, "cancelled");
+    expect(await getLoyaltyBalance(other.id)).toBe(before);
+  });
+});
+
 describe("quoteLoyaltyRedeem — the checkout preview", () => {
   it("caps by both the balance and redeemMaxPct of the basket", async () => {
     const id = await recordLogin("quote@example.com", "RU").then((c) => c.id);
@@ -409,6 +476,38 @@ describe("applyPaymentResult — loyalty settles once, only on paid", () => {
     const out = await applyPaymentResult(order, verifyResult({ amount: 45 }), "montonio", deps({ earnLoyaltyPoints: earn }));
     expect(earn).toHaveBeenCalledWith("c-1", "id-3", 42);
     expect(out.pointsEarned).toBe(5);
+  });
+
+  /* 14.09.2026: «earnPct of the PAID goods subtotal» is what the setting has
+     always promised; the call passed order.subtotal, which is the figure
+     before discount and loyaltyDiscount come off and which prices a gift-card
+     line at face value. */
+  it("earns on what was paid for goods — not on the discount, not on the points, not on a gift card", async () => {
+    const earn = vi.fn(async () => ({ ok: true, points: 1 }));
+    // 100 € of goods, a 10 € promo and 5 points spent → 85 € was paid for goods
+    const discounted = { id: "id-b1", number: "R-B1", status: "new", total: 85, subtotal: 100, discount: 10, loyaltyDiscount: 5, customerId: "c-1" };
+    await applyPaymentResult(discounted, verifyResult({ amount: 85 }), "montonio", deps({ earnLoyaltyPoints: earn }));
+    expect(earn).toHaveBeenCalledWith("c-1", "id-b1", 85);
+
+    // a 100 € gift card bought alongside 20 € of shampoo: the card is money
+    // changing shape and earns where it is SPENT, so only the 20 € counts
+    earn.mockClear();
+    const withCard = {
+      id: "id-b2", number: "R-B2", status: "new", total: 120, subtotal: 120, customerId: "c-1",
+      items: [
+        { id: "gift-100", kind: "gift", qty: 1, price: 100, sum: 100 },
+        { id: plain.id, kind: "product", qty: 1, price: 20, sum: 20 },
+      ],
+    };
+    await applyPaymentResult(withCard, verifyResult({ amount: 120 }), "montonio", deps({ earnLoyaltyPoints: earn }));
+    expect(earn).toHaveBeenCalledWith("c-1", "id-b2", 20);
+
+    // …and the basket that card later pays for earns on nothing at all: the
+    // card is redeemed through `discount` (codeDiscount in src/lib/orders.ts)
+    earn.mockClear();
+    const paidByCard = { id: "id-b3", number: "R-B3", status: "new", total: 0, subtotal: 60, discount: 60, customerId: "c-1" };
+    await applyPaymentResult(paidByCard, verifyResult({ amount: 0 }), "montonio", deps({ earnLoyaltyPoints: earn }));
+    expect(earn).toHaveBeenCalledWith("c-1", "id-b3", 0);
   });
 
   it("a webhook retry (order already paid) never earns twice", async () => {

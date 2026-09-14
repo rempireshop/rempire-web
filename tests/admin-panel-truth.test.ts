@@ -1,0 +1,273 @@
+/**
+ * Five places where the owner's panel said something that was not true, all
+ * found by the r19 audit sweep and all in public/shop2/app.js:
+ *
+ *   · «Обзор → Сегодня» dropped a sale out of the day's takings the moment
+ *     «Доставлен» was pressed, and counted the day on the browser's calendar
+ *     rather than on Tallinn's;
+ *   · a delivery price the server REFUSED (below Montonio's own cost) was
+ *     applied to the panel anyway, announced as «Тарифы доставки сохранены»
+ *     and left «Сохранено ✓» lit;
+ *   · «О компании» wrote the built-in defaults over the shop's real IBAN,
+ *     address and social links when the document had never loaded;
+ *   · an emptied «Бесплатно от» kept the old number in the announce bar, the
+ *     footer and the product page while the checkout charged for delivery;
+ *   · a failed GET /api/admin/settings drew the built-in defaults as the
+ *     shop's own settings, and a save persisted them.
+ *
+ * The storefront is a vanilla-JS IIFE with no DOM here, so the functions are
+ * **sliced out of app.js by source text** and run against stubs — the same
+ * technique tests/checkout-parity.test.ts and tests/shipping-admin-mirror.ts
+ * use. Retyping them would test this file instead of the shop, and the slice
+ * fails loudly if app.js drops or renames one.
+ */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
+const src = readFileSync(APP_JS, "utf8");
+
+/** Cut `function <name>(…) { … }` out of app.js by brace matching. */
+function slice(name: string): string {
+  const start = src.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces around ${name}() in app.js`);
+}
+
+/** Build a callable from one or more sliced functions plus named stubs. */
+function build<T>(names: string[], scope: Record<string, unknown>, expr = names[0]): T {
+  const keys = Object.keys(scope);
+  const body = names.map(slice).join("\n") + `\nreturn ${expr};`;
+  return new Function(...keys, body)(...keys.map((k) => scope[k])) as T;
+}
+
+/* ---------- «Обзор → Сегодня» ---------------------------------------------- */
+
+describe("today's takings on «Обзор»", () => {
+  type Vm = { srv: { createdAt: string }; status: string; sum: number; pos?: boolean };
+  const takings = () =>
+    build<(vms: Vm[]) => { sum: number; n: number; pos: number }>(["admTodayTakings", "admShopDay"], {});
+
+  /** Noon in Tallinn today, as an instant — safely inside the shop's own day. */
+  function todayNoonISO(): string {
+    const day = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Tallinn", year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(new Date());
+    return `${day}T09:00:00.000Z`; // 12:00 Tallinn in summer, 11:00 in winter — both inside the day
+  }
+
+  it("counts a delivered order — pressing the last button must not unmake the sale", () => {
+    const at = todayNoonISO();
+    const rows: Vm[] = [
+      { srv: { createdAt: at }, status: "paid", sum: 30 },
+      { srv: { createdAt: at }, status: "shipped", sum: 20 },
+      // the one that used to vanish from the day's money
+      { srv: { createdAt: at }, status: "delivered", sum: 50 },
+    ];
+    expect(takings()(rows)).toEqual({ sum: 100, n: 3, pos: 0 });
+  });
+
+  it("still leaves out what is not a sale", () => {
+    const at = todayNoonISO();
+    const rows: Vm[] = [
+      { srv: { createdAt: at }, status: "paid", sum: 10 },
+      { srv: { createdAt: at }, status: "new", sum: 999 },
+      { srv: { createdAt: at }, status: "cancelled", sum: 999 },
+      { srv: { createdAt: at }, status: "refunded", sum: 999 },
+      { srv: { createdAt: at }, status: "failed", sum: 999 },
+    ];
+    expect(takings()(rows)).toMatchObject({ sum: 10, n: 1 });
+  });
+
+  it("names the day on the Tallinn calendar, not on the browser's", () => {
+    /* 21:30 UTC on the 13th is 00:30 on the 14th in Tallinn: the shop has
+       already turned the page. A browser sitting in UTC (or anywhere west of
+       Tallinn) used to file this order under the 13th and drop it out of
+       «Сегодня» — the figure the owner reads at the start of his day. */
+    const rows: Vm[] = [{ srv: { createdAt: "2026-09-13T21:30:00.000Z" }, status: "paid", sum: 42 }];
+    const fn = build<(vms: Vm[]) => { sum: number }>(
+      ["admTodayTakings", "admShopDay"],
+      // pin "now" to that same instant, so "today" is the 14th in Tallinn
+      { Date: class extends Date { constructor(...a: unknown[]) { if (!a.length) super("2026-09-13T21:30:00.000Z"); else super(...(a as [string])); } } },
+    );
+    expect(fn(rows).sum).toBe(42);
+  });
+
+  it("ignores a row the panel has no server order for, and an unreadable date", () => {
+    const rows = [
+      { status: "paid", sum: 99 },
+      { srv: { createdAt: "not a date" }, status: "paid", sum: 99 },
+    ] as unknown as Vm[];
+    expect(takings()(rows)).toEqual({ sum: 0, n: 0, pos: 0 });
+  });
+});
+
+/* ---------- «Бесплатно от» emptied ------------------------------------------ */
+
+describe("an emptied «Бесплатно от» stops the shop promising free delivery", () => {
+  type Thresh = Record<string, number | null>;
+
+  function thresholds(rules: Record<string, unknown>): Thresh {
+    const THRESH: Thresh = { EE: 59, LV: 59, LT: 59, FI: 59, EU: 200 };
+    const fn = build<() => void>(["refreshShipThresholds"], { SHIP_RULES: rules, THRESH });
+    fn();
+    return THRESH;
+  }
+
+  it("carries the null instead of keeping the last real number", () => {
+    // what the panel stores when the box is emptied — setShipDraftField()
+    expect(thresholds({ freeFrom: null, freeFromByCountry: { EU: 200 } }))
+      .toEqual({ EE: null, LV: null, LT: null, FI: null, EU: 200 });
+    // …and one country switched off on its own
+    expect(thresholds({ freeFrom: 59, freeFromByCountry: { EE: null, EU: 200 } }))
+      .toMatchObject({ EE: null, LV: 59, EU: 200 });
+  });
+
+  const lines = (THRESH: Thresh) =>
+    build<{ pdp: () => string; ftr: () => string }>(
+      ["pdpShipLine", "ftrShipLine"], { THRESH }, "({ pdp: pdpShipLine, ftr: ftrShipLine })",
+    );
+
+  it("drops the clause from the product page and the footer when there is no floor", () => {
+    const off = lines({ EE: null });
+    expect(off.pdp()).not.toContain("бесплатно");
+    expect(off.ftr()).not.toContain("бесплатно");
+    // …and both shapes are real dictionary keys, or the shop speaks Russian
+    // to an Estonian (see the UI/UI_RX tables in app.js)
+    expect(src).toContain(`"${off.pdp()}":`);
+    expect(src).toContain(`"${off.ftr()}":`);
+  });
+
+  it("still quotes the floor when there is one", () => {
+    const on = lines({ EE: 59 });
+    expect(on.pdp()).toContain("бесплатно от 59 €");
+    expect(on.ftr()).toContain("бесплатно от 59 €");
+  });
+
+  it("empties the announce line rather than quoting a floor that is gone", () => {
+    const text = "Бесплатная доставка: Эстония от {EE} € · LV, LT от {LV} € · Финляндия от {FI} €";
+    const live = build<(s: string) => string>(["cTokens"], { THRESH: { EE: 59, LV: 79, LT: 79, FI: 99 } });
+    expect(live(text)).toBe("Бесплатная доставка: Эстония от 59 € · LV, LT от 79 € · Финляндия от 99 €");
+
+    const gone = build<(s: string) => string>(["cTokens"], { THRESH: { EE: 59, LV: 79, LT: 79, FI: null } });
+    expect(gone(text)).toBe("");
+  });
+});
+
+/* ---------- a refused delivery-price save ----------------------------------- */
+
+describe("a delivery-price save the server refuses", () => {
+  it("puts the live table back, the owner's numbers back in the boxes and «Сохранено ✓» out", () => {
+    const rules: Record<string, unknown> = { freeFrom: 0.5 };   // the refused table, already live in the panel
+    const was = { freeFrom: 59 };
+    const tried = { freeFrom: 0.5 };
+    const entry = { txt: "Тарифы доставки" };
+    const S: Record<string, unknown> = { shipDraft: null, admSetSaved: "delivery" };
+    const DEMO: Record<string, unknown> = { log: [entry, { txt: "что-то раньше" }] };
+    let rendered = 0;
+    let setTo: unknown = null;
+
+    const fn = build<(b: unknown) => void>(["shipRulesRefused"], {
+      setShipRules: (r: unknown) => { setTo = r; },
+      cloneRules: (r: unknown) => JSON.parse(JSON.stringify(r)),
+      S, DEMO, demoSave: () => {}, render: () => { rendered++; },
+    });
+    fn({ was, tried, entry });
+
+    expect(setTo).toEqual(was);                       // the table the shop is really running on
+    expect(S.shipDraft).toEqual(tried);               // his numbers still in the boxes, dirty bar lit
+    expect(S.admSetSaved).toBe("");                   // nothing was saved, so nothing says «Сохранено ✓»
+    expect(DEMO.log).toEqual([{ txt: "что-то раньше" }]);   // and the journal does not claim it either
+    expect(rendered).toBe(1);
+    expect(rules).toBeTruthy();
+  });
+
+  it("is wired to every answer that is not a 200/ok, not just to below_cost", () => {
+    /* The panel applies the new table BEFORE the PUT answers (demoApply), so
+       the rollback has to hang off the PUT itself. */
+    const push = slice("srvPush");
+    const at = push.indexOf('a.type === "set_shipping_rules"');
+    expect(at, "srvPush() no longer has a set_shipping_rules branch").toBeGreaterThan(0);
+    const branch = push.slice(at, at + 600);
+    expect(branch).toContain("shipRulesRefused(shipBack)");
+    expect(branch).toMatch(/status === 200 && r\.body && r\.body\.ok/);
+    // and demoApply has to record what to put back
+    expect(slice("demoApply")).toContain("shipRollback = {");
+  });
+});
+
+/* ---------- the two documents a failed read must not overwrite --------------- */
+
+describe("nothing is saved over the shop's own settings before they have been read", () => {
+  it("a failed GET /api/admin/settings leaves S.pricingLoaded alone and says so", async () => {
+    const S: Record<string, unknown> = {};
+    let renders = 0;
+    let calls = 0;
+    const load = build<(force?: boolean) => void>(["loadAdminPricing"], {
+      SRV: { admin: true },
+      S,
+      apiJson: () => { calls++; return Promise.resolve({ status: 503, body: {} }); },
+      normalisePricing: () => ({ partnersOn: false, proDiscountPct: 20 }),
+      normaliseDelivery: () => ({}),
+      adoptPricingLocally: () => {},
+      render: () => { renders++; },
+    });
+
+    load(false);
+    await Promise.resolve(); await Promise.resolve();
+    expect(calls).toBe(1);
+    // the built-in defaults are NOT the shop's settings
+    expect(S.pricingLoaded).toBeUndefined();
+    expect(S.pricingLoadErr).toBe(true);
+    expect(renders).toBe(1);
+
+    // …and the card's own loadAdminPricing(false) does not re-fire on every render
+    load(false);
+    expect(calls).toBe(1);
+    // «Повторить» does
+    S.pricingLoadErr = false;
+    load(true);
+    expect(calls).toBe(2);
+  });
+
+  it("the card draws the error and a «Повторить» instead of the defaults", () => {
+    const card = slice("admPricingCard");
+    expect(card).toContain("S.pricingLoadErr");
+    expect(card).toContain('data-admreload="pricing"');
+    // and the retry is wired into the one delegated handler
+    expect(src).toContain('d.admreload === "pricing"');
+  });
+
+  it("every write on that screen is gated on a real read having landed", () => {
+    expect(slice("savePricing")).toContain("adminSettingsReady()");
+    // «Спрашивать перевозчика», «Закрывать заказ через» and the bank switches
+    // all PUT a whole object assembled from the same failed read
+    const gate = /if \(!adminSettingsReady\(\)\)/g;
+    expect(src.match(gate)?.length ?? 0).toBeGreaterThanOrEqual(4);
+  });
+
+  it("«О компании» refuses to save until the document has really been read", () => {
+    const loaded = build<() => boolean>(["contentLoaded"], { DEMO: { content: null } });
+    expect(loaded()).toBe(false);
+    const filled = build<() => boolean>(["contentLoaded"], { DEMO: { content: { company: { iban: "EE00" } } } });
+    expect(filled()).toBe(true);
+    // an array is not a document either
+    const array = build<() => boolean>(["contentLoaded"], { DEMO: { content: [] } });
+    expect(array()).toBe(false);
+
+    /* The gate itself: both «Сохранить» and «Вернуть стандартные» send
+       { content: DEMO.content } in full (srvPush), so both have to hold. */
+    const saveAt = src.indexOf("if (d.contentsave !== undefined) {");
+    const resetAt = src.indexOf("if (d.contentreset !== undefined) {");
+    expect(saveAt).toBeGreaterThan(0);
+    expect(resetAt).toBeGreaterThan(0);
+    expect(src.slice(saveAt, saveAt + 320)).toContain("if (!contentLoaded())");
+    expect(src.slice(resetAt, resetAt + 380)).toContain("if (!contentLoaded())");
+  });
+});
