@@ -37,7 +37,9 @@ describe("what a verified payment does to an order", () => {
     const d = deps();
     const out = await applyPaymentResult(order, result(), "montonio", d);
     expect(out.status).toBe("paid");
-    expect(d.setOrderStatus).toHaveBeenCalledWith(order.id, "paid", "payment:montonio");
+    expect(d.setOrderStatus).toHaveBeenCalledWith(order.id, "paid", "payment:montonio", {
+      unless: ["paid", "shipped", "delivered"],
+    });
     expect(d.setOrderPayment).toHaveBeenCalledOnce();
     expect(d.setOrderPayment.mock.calls[0][1]).toMatchObject({
       provider: "montonio",
@@ -293,6 +295,8 @@ describe("the authoritative revenue row", () => {
     const d = deps();
     const out = await applyPaymentResult(order, result(), "montonio", { ...d, recordPurchaseEvent });
     expect(out.status).toBe("paid");
-    expect(d.setOrderStatus).toHaveBeenCalledWith(order.id, "paid", "payment:montonio");
+    expect(d.setOrderStatus).toHaveBeenCalledWith(order.id, "paid", "payment:montonio", {
+      unless: ["paid", "shipped", "delivered"],
+    });
   });
 });

@@ -61,7 +61,7 @@ import {
 } from "@/lib/payments/refund";
 import { giftPaidOf, refundValue, settleRefund } from "@/lib/payments/settle";
 import { PaymentError } from "@/lib/payments/types";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,6 +74,31 @@ function bad(error: string, status = 400, extra: Record<string, unknown> = {}) {
 
 function money(n: number): number {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * The key Montonio dedupes a refund by, and the whole point of it: the SAME
+ * key twice is one refund, a new key is a second one.
+ *
+ * So it cannot be minted per request. «Вернуть деньги» tapped twice on a phone
+ * that lost the answer to the first tap, or a request that timed out after
+ * Montonio had already taken it, used to reach /refunds with a fresh uuid and
+ * send the customer's money a second time — the ledger check above cannot
+ * catch that, because an attempt that never came back never wrote to it.
+ *
+ * Derived instead from the three things that make this refund what it is: the
+ * order, what had already gone back before it, and the amount. A retry of the
+ * same attempt repeats all three and carries the same key; a genuine second
+ * refund of the same amount follows a bigger `alreadyBack` and gets its own.
+ * Shaped as a v4 uuid because that is what Montonio's guide asks for.
+ */
+function refundIdempotencyKey(orderId: string, alreadyBack: number, amount: number): string {
+  const seed = `${orderId}:${alreadyBack.toFixed(2)}:${amount.toFixed(2)}`;
+  const b = Buffer.from(createHash("sha256").update(seed).digest().subarray(0, 16));
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = b.toString("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
 /** Whether the money for this order ever arrived — the same test the card uses. */
@@ -186,9 +211,9 @@ export async function POST(req: Request, ctx: Ctx) {
         providerRef,
         amount: split.money,
         currency: order.currency || "EUR",
-        // one per attempt: Montonio must not send the money twice if this
-        // request is retried, and it is what makes a double tap harmless
-        idempotencyKey: randomUUID(),
+        // the same for every retry of this same refund — see above: it is
+        // what makes a double tap, and a request that timed out, harmless
+        idempotencyKey: refundIdempotencyKey(order.id, back, split.money),
         orderNumber: order.number,
       });
     } catch (err) {

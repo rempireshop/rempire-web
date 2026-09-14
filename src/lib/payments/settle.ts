@@ -7,7 +7,7 @@ import {
 } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome, type OrderLike } from "./apply";
 import { issueOrderGiftCards, notifyOrderClosed, notifyOrderPaid } from "./mail-hook";
-import { foldRefund, fullyRefunded, type RefundEntry } from "./refund";
+import { foldRefund, fullyRefunded, refundedTotal, type RefundEntry } from "./refund";
 import { PaymentError, type VerifyResult } from "./types";
 
 /**
@@ -100,7 +100,18 @@ export async function settleRefund(
      money alone: an order a gift card paid for has a total of 0 and is fully
      refunded only once the card has its balance back (refundValue below). */
   const value = await refundValue(order);
-  const fully = entry.status !== "failed" && fullyRefunded(value, folded.refundedTotal);
+  /* Measured against the money that has actually gone back, not against every
+     refund on the ledger. A refund Montonio has merely accepted sits at
+     PENDING until it has the balance — up to ten days, and it may then be
+     CANCELED (src/lib/payments/montonio.ts) — while the move into «возврат»
+     below voids the gift cards this order sold and puts its stock back, and
+     nothing undoes either of those. So a pending refund still counts towards
+     refundedTotal, which is what stops the same money being sent twice while
+     it is in flight, and simply does not close the order yet; the
+     PENDING → SUCCESSFUL webhook arrives on this same door and closes it
+     then. */
+  const settledBack = refundedTotal({ refunds: folded.refunds.filter((r) => r.status === "done") });
+  const fully = fullyRefunded(value, settledBack);
   /* The move into «возврат» is also what cancels the gift cards the order
      sold (setOrderStatus in src/lib/orders.ts): the money is back in full, so
      whoever holds the code must not keep the value the shop has just handed

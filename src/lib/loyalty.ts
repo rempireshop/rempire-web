@@ -365,6 +365,57 @@ export async function redeemLoyaltyPoints(
   }
 }
 
+/**
+ * The points an order spent, back on the customer's balance — the refund's
+ * half of redeemLoyaltyPoints() above.
+ *
+ * Called on the move into `refunded` (src/lib/orders.ts setOrderStatus), next
+ * to the stock going back on the shelf and the gift cards this order sold
+ * being cancelled. Until 14.09.2026 nothing did it: a customer who took 30 €
+ * off a 100 € order with points, and was then refunded, got the money back
+ * and lost the points — the refund is measured in money (`orders.total` plus
+ * what a gift card paid), and points are not money, so no amount of it could
+ * ever have brought them back.
+ *
+ * What goes back is what the ledger says was TAKEN, not what the order was
+ * quoted: a redeem that fell short (the balance had shrunk in between —
+ * apply.ts loyaltyShortfall) must not be handed back in full. An order that
+ * spent none has no redeem row and nothing happens.
+ *
+ * Idempotent per order, the same select-then-insert in one transaction as
+ * earning and redeeming, with loyalty_ledger_refund_once_idx
+ * (101_loyalty_refund_once.sql) behind it for two refund doors landing at once.
+ */
+export async function refundLoyaltyPoints(orderId: string, note = ""): Promise<LedgerWrite> {
+  if (!UUID_RE.test(orderId)) return { ok: false, error: "bad_order" };
+  try {
+    return await withTx(async (q) => {
+      const spent = await q<{ customer_id: string; delta: number | string }>(
+        "select customer_id, delta from loyalty_ledger where order_id = $1 and reason = 'redeem'",
+        [orderId],
+      );
+      const points = Math.trunc(-num(spent[0]?.delta, 0));
+      if (!spent.length || !(points > 0)) return { ok: true, points: 0 };
+
+      const back = await q<{ id: number }>(
+        "select id from loyalty_ledger where order_id = $1 and reason = 'adjust'",
+        [orderId],
+      );
+      if (back.length) return { ok: true, already: true, points };
+
+      await q(
+        `insert into loyalty_ledger (customer_id, delta, reason, order_id, note)
+         values ($1, $2, 'adjust', $3, $4)`,
+        [spent[0].customer_id, points, orderId, note || null],
+      );
+      return { ok: true, points };
+    });
+  } catch (err) {
+    if (isUniqueViolation(err)) return { ok: true, already: true };
+    throw err;
+  }
+}
+
 /** Admin/assistant `adjust_points` — a manual credit or correction, no order attached. */
 export async function adjustLoyaltyPoints(
   customerId: string,

@@ -23,7 +23,14 @@ import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
 // Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
 // this same build, unlike the optional neighbours below: no try/catch needed.
-import { customerTier, getPricingSettings, loyaltyOn, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
+import {
+  customerTier,
+  getPricingSettings,
+  loyaltyOn,
+  proUnitPrice,
+  quoteLoyaltyRedeem,
+  refundLoyaltyPoints,
+} from "@/lib/loyalty";
 // Shipping defaults — src/lib/shipping.ts is a module of this build too (see
 // docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
 // cannot drift from it; the live computeShipping() call itself still goes
@@ -1489,11 +1496,30 @@ export async function setOrderPayment(id: string, payment: Record<string, unknow
   return rows.length ? mapOrder(rows[0]) : null;
 }
 
-export async function setOrderStatus(id: string, status: OrderStatus, actor = "system"): Promise<Order | null> {
+/**
+ * `opts.unless` — the statuses this move must refuse to make, checked inside
+ * the UPDATE itself rather than against a snapshot read before it.
+ *
+ * The one caller is the transition into `paid` (src/lib/payments/apply.ts):
+ * the shopper's return and Montonio's webhook race by design, both arrive
+ * holding an order that said «не оплачен», and a plain UPDATE lets both of
+ * them believe they are the one that moved it — so the gift card is spent
+ * twice, the stock comes off twice and the revenue row is written twice. With
+ * `unless` the row itself is the lock: exactly one call gets an order back,
+ * the other gets null and settles nothing. `null` here means "somebody else
+ * got there first", not an error.
+ */
+export async function setOrderStatus(
+  id: string,
+  status: OrderStatus,
+  actor = "system",
+  opts: { unless?: readonly OrderStatus[] } = {},
+): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;
   if (!ORDER_STATUSES.includes(status)) throw new OrderError("bad_status", String(status));
   const before = await getOrder(id);
   if (!before) return null;
+  const unless = (opts.unless ?? []).filter((s) => ORDER_STATUSES.includes(s));
   /* The day «Доставлен» was pressed, stamped onto the shipping jsonb the first
      time it happens. The shop needs it for exactly one thing: the return
      window a customer's «Хочу вернуть заказ» tick lives inside runs from the
@@ -1511,10 +1537,12 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
                 then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('deliveredAt', $3::text)
               else shipping end,
             updated_at = now()
-      where id = $1
+      where id = $1${unless.length ? " and status <> all($4::text[])" : ""}
      returning *`,
-    [id, status, deliveredStamp],
+    unless.length ? [id, status, deliveredStamp, [...unless]] : [id, status, deliveredStamp],
   );
+  // somebody else made this move between the read above and the UPDATE
+  if (!rows.length) return null;
   const after = mapOrder(rows[0]);
   await writeAudit(actor, "order.status", { id, number: after.number, from: before.status, to: status });
 
@@ -1549,6 +1577,26 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
       }
     } catch (err) {
       console.error("[orders] return stock move failed:", err);
+    }
+  }
+
+  /* loyalty (14.09.2026): «Использовать баллы» spends the points on the paid
+     transition (src/lib/payments/apply.ts) and until now nothing ever gave
+     them back — a customer who took 30 € off a 100 € order with points and
+     was then refunded got the 100 € and lost the 30. A refund is measured in
+     money, and points are not money, so no amount of it could ever have
+     carried them; they come back here, beside the stock above and the cards
+     below, on the same move. What goes back is what the ledger says was
+     taken. Idempotent per order, best effort: a points hiccup must never
+     stop a refund being recorded. */
+  if (wasPaid && status === "refunded") {
+    try {
+      const out = await refundLoyaltyPoints(id, `возврат баллов за заказ ${after.number}`);
+      if (out.ok && out.points && !out.already) {
+        await writeAuditSafe(actor, "loyalty.refunded", { id, number: after.number, points: out.points });
+      }
+    } catch (err) {
+      console.error("[orders] returning the points of a refunded order failed:", err);
     }
   }
 

@@ -58,12 +58,28 @@ export type PaymentBlob = {
   amountMismatch?: { expected: number; got: number };
   /** A status the order refused to take, kept for the admin to look at. */
   rejected?: { status: PaymentStatus; at: string; detail?: string };
+  /**
+   * A SECOND payment that arrived for an order already paid by another one —
+   * the shopper paid twice. Kept beside the first payment instead of on top of
+   * it; see applyPaymentResult() below.
+   */
+  repeat?: PaymentBlob;
 };
 
 export interface ApplyDeps {
-  setOrderPayment(id: string, payment: PaymentBlob): Promise<unknown>;
-  /** Only ever called with the two statuses a payment can produce. */
-  setOrderStatus(id: string, status: "paid" | "failed", actor: string): Promise<unknown>;
+  /** Merges into the stored blob — top-level keys only (src/lib/orders.ts). */
+  setOrderPayment(id: string, payment: Record<string, unknown>): Promise<unknown>;
+  /**
+   * Only ever called with the two statuses a payment can produce. `unless`
+   * makes the move conditional inside the UPDATE; a falsy answer means another
+   * arrival won the race and this one must settle nothing.
+   */
+  setOrderStatus(
+    id: string,
+    status: "paid" | "failed",
+    actor: string,
+    opts?: { unless?: readonly string[] },
+  ): Promise<unknown>;
   /**
    * Spend the gift card the order was quoted against. Injected by the tests;
    * production leaves it out and gets @/lib/giftcards by dynamic import.
@@ -383,6 +399,14 @@ function toNumber(v: unknown): number | null {
   return null;
 }
 
+/** The provider reference already stored on the order, if any. */
+function storedRef(order: OrderLike): string {
+  const p = order.payment;
+  if (typeof p !== "object" || p === null) return "";
+  const ref = (p as { ref?: unknown }).ref;
+  return typeof ref === "string" ? ref.trim() : "";
+}
+
 function alreadyPaid(order: OrderLike): boolean {
   // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
   if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
@@ -505,14 +529,29 @@ export async function applyPaymentResult(
     );
   }
 
+  /* A SECOND payment, not a retry of the first: the order is paid and this
+     token carries a different provider reference. POST /api/payments/create/
+     will start a fresh payment for an order whose first one is still in
+     flight, so a shopper CAN pay twice. setOrderPayment() merges top-level
+     keys, so writing the blob would put this reference over the first one's —
+     and `payment.ref` is the only id «Вернуть деньги» can send money back
+     through (src/app/api/admin/orders/[id]/refund/). The payment that actually
+     took the money would become unrefundable and untraceable. So the second
+     one is recorded BESIDE the first, under `repeat`, and never on top of it;
+     the admin order card shows a warning about it. */
+  const first = wasPaid ? storedRef(order) : "";
+  const isRepeat = !!first && !!payment.ref && payment.ref !== first;
+  const record = (blob: PaymentBlob) =>
+    deps.setOrderPayment(order.id, isRepeat ? { status: "paid", repeat: blob } : blob);
+
   if (wasPaid && result.status !== "paid") {
     payment.status = "paid";
     payment.rejected = { status: result.status, at: now, detail: result.detail };
-    await deps.setOrderPayment(order.id, payment);
+    await record(payment);
     return { status: "unchanged", keptPaid: true, alreadyPaid: true, payment };
   }
 
-  await deps.setOrderPayment(order.id, payment);
+  await record(payment);
 
   if (result.status === "paid") {
     // Already paid: a retry, not a payment. Write the blob, touch nothing else
@@ -520,7 +559,18 @@ export async function applyPaymentResult(
     // (H4); it only makes sure the order's own gift cards exist.
     if (wasPaid) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
 
-    await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
+    /* The lock, not a formality: this call and the other door (the webhook and
+       the shopper's return, which race by design) both got here from a
+       snapshot that said «не оплачен». Only the one whose UPDATE actually
+       moved the row settles what hangs off the transition — otherwise the gift
+       card is spent twice, the stock comes off twice and the revenue row is
+       written twice. The loser reports `alreadyPaid`, exactly as if it had
+       read the order a moment later. */
+    const moved = await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`, {
+      unless: ["paid", "shipped", "delivered"],
+    });
+    if (!moved) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
+
     const giftShortfall = await redeemQuotedGiftCard(order, deps);
     const loyalty = await settleLoyalty(order, deps);
     await recordPurchase(order, deps);

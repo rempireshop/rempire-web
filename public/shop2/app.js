@@ -616,7 +616,7 @@
       "Оплата не прошла": "Makse ebaõnnestus",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "Raha ei võetud. Tellimus on alles — proovi uuesti maksta või vali teine makseviis.",
       "Заказ не оплачен": "Tellimus on maksmata",
-      "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.": "Pank ei kinnitanud makset — raha ei võetud. Tellimus on alles: maksa uuesti või vali teine makseviis.",
+      "Банк пока не подтвердил оплату. Если деньги всё же спишутся, мы пришлём письмо — платить второй раз не нужно. Если нет, заказ сохранён: оплатите его ещё раз или выберите другой способ.": "Pank ei ole makset veel kinnitanud. Kui raha siiski maha võetakse, saadame kirja — teist korda maksma ei pea. Kui ei, siis on tellimus alles: maksa uuesti või vali teine makseviis.",
       "Платёж обрабатывается": "Makset töödeldakse",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
       "Вернуться в магазин": "Tagasi poodi",
@@ -1890,6 +1890,9 @@
       "без оплаты — к оплате было 0 €": "makseta — maksta oli 0 €", "ждёт оплаты": "ootab makset",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ Hiljem saatis pank «maksmata» — tellimus jäi makstuks, kontrolli Montonios",
+      "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
+        "⚠ Tellimusele tuli teine makse — võimalik, et klient maksis kaks korda, kontrolli Montonios",
+      "Баллы за заказ возвращены": "Punktid tellimuse eest tagastatud",
       "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
       "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
@@ -3177,7 +3180,7 @@
       "Оплата не прошла": "Payment did not go through",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "No money was taken. The order is saved — try paying again or choose another method.",
       "Заказ не оплачен": "The order is not paid",
-      "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.": "The bank did not confirm the payment — no money was taken. The order is saved: pay for it again or choose another method.",
+      "Банк пока не подтвердил оплату. Если деньги всё же спишутся, мы пришлём письмо — платить второй раз не нужно. Если нет, заказ сохранён: оплатите его ещё раз или выберите другой способ.": "The bank has not confirmed the payment yet. If the money is taken after all, we will write to you — there is no need to pay a second time. If it is not, the order is saved: pay for it again or choose another method.",
       "Платёж обрабатывается": "Payment is being processed",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
       "Вернуться в магазин": "Back to the shop",
@@ -4426,6 +4429,9 @@
       "без оплаты — к оплате было 0 €": "no payment — there was 0 € to pay", "ждёт оплаты": "awaiting payment",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ The bank later sent «not paid» — the order stayed paid, check in Montonio",
+      "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
+        "⚠ A second payment arrived for this order — the customer may have paid twice, check in Montonio",
+      "Баллы за заказ возвращены": "The order's points were given back",
       "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
       "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
@@ -15860,6 +15866,12 @@
     var notes = "";
     if (p.amountMismatch) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
     if (p.rejected) notes += '<br><span class="adm-err">⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio</span>';
+    /* A third: a second payment arrived for an order the first one had
+       already paid for — the shopper paid twice (src/lib/payments/apply.ts
+       keeps it beside the first one, never on top of it, so the reference the
+       refund goes through stays the one that took the money). Nothing is
+       given back automatically; the owner looks and decides. */
+    if (p.repeat && p.repeat.ref && p.repeat.ref !== p.ref) notes += '<br><span class="adm-err">⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio</span>';
     /* Money that went back — «Вернуть деньги» here, or a refund Renat made in
        Montonio's own portal, which reaches the order through the refund
        webhook (src/lib/payments/refund.ts). A refund the provider is still
@@ -19895,6 +19907,9 @@
     "customer.pro_approved": "Партнёр одобрен", "customer.pro_rejected": "Заявке партнёра отказано",
     "customer.tier_set": "Клиент переведён между «Розница» и «Партнёр»",
     "customer.points_adjust": "Баллы клиента изменены",
+    /* «Использовать баллы» on an order that was later refunded: the points
+       the order spent go back with the money (src/lib/orders.ts). */
+    "loyalty.refunded": "Баллы за заказ возвращены",
     "media.upload": "Загружен файл", "media.delete": "Файл удалён", "media.cutout": "У фото убран фон",
     "ai.text": "Черновик у ИИ запрошен",
     "newsletter.sent": "Рассылка отправлена",
@@ -29042,8 +29057,15 @@
        wait for the letter. */
     if (d.status === "pending") {
       if (d.order) {
+        /* This screen must not tell the shopper their money is untouched.
+           Montonio says PENDING both for a payment the shopper cancelled and
+           for one the bank has taken and not yet confirmed (AUTHORIZED lands
+           here too), and nothing here can tell the two apart — so it promises
+           nothing about the money and says what happens either way. The
+           failed receipt above is a different piece of news and keeps its
+           own, true, sentence. */
         return doneUnpaidHTML(d, num, false, "Заказ не оплачен",
-          "Банк не подтвердил оплату — деньги не списаны. Заказ сохранён: оплатите его ещё раз или выберите другой способ.");
+          "Банк пока не подтвердил оплату. Если деньги всё же спишутся, мы пришлём письмо — платить второй раз не нужно. Если нет, заказ сохранён: оплатите его ещё раз или выберите другой способ.");
       }
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
         '<div class="done__tick done__tick--wait">…</div>' +

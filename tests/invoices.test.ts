@@ -480,7 +480,10 @@ describe("on the database", () => {
     expect(first.alreadyPaid).toBe(false);
     expect(first.invoice?.paidAt).toBeTruthy();
     expect(statusSpy).toHaveBeenCalledTimes(1);
-    expect(statusSpy).toHaveBeenCalledWith(order.id, "paid", "payment:invoice");
+    // the guard that makes the paid transition itself the lock (apply.ts)
+    expect(statusSpy).toHaveBeenCalledWith(order.id, "paid", "payment:invoice", {
+      unless: ["paid", "shipped", "delivered"],
+    });
     expect(notify).toHaveBeenCalledTimes(1);
     expect(notify.mock.calls[0][0]).toMatchObject({ status: "paid", number: order.number });
 

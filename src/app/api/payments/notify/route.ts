@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getOrder, getOrderByNumber, getOrderByPaymentRef } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { canRefund, refundableAmount, type RefundNotification } from "@/lib/payments/refund";
-import { settlePayment, settleRefund } from "@/lib/payments/settle";
+import { canRefund, refundableAmount, refundsOf, type RefundNotification } from "@/lib/payments/refund";
+import { refundValue, settlePayment, settleRefund } from "@/lib/payments/settle";
 import { PaymentError, type PaymentProvider } from "@/lib/payments/types";
 
 /**
@@ -106,14 +106,26 @@ export async function POST(req: Request) {
      none. Either way the order stops claiming the money is still the shop's. */
   if (result.refunded === "full") {
     try {
-      await settleRefund(await reread(order), {
-        ref: `montonio-order:${result.providerRef || order.number}`,
-        amount: Number(order.total) || 0,
-        status: "done",
-        at: new Date().toISOString(),
-        by: "webhook",
-        detail: "возврат отмечен в Montonio",
-      });
+      const fresh = await reread(order);
+      /* Only what is NOT on the ledger yet. The refund webhook for the very
+         same refund arrives on this route too, under Montonio's own refund
+         id, and «Вернуть деньги» may have recorded it before that — this
+         entry has an id of its own, so foldRefund() cannot tell it is the
+         same money and would count it a second time: the order would read as
+         refunded twice over, a second letter would go to the customer, and
+         nothing would be left refundable. Nothing left to record is the
+         normal case, and it is recorded as nothing. */
+      const amount = refundableAmount(await refundValue(fresh), fresh.payment);
+      if (amount > 0) {
+        await settleRefund(fresh, {
+          ref: `montonio-order:${result.providerRef || order.number}`,
+          amount,
+          status: "done",
+          at: new Date().toISOString(),
+          by: "webhook",
+          detail: "возврат отмечен в Montonio",
+        });
+      }
     } catch (err) {
       console.error("payments/notify: recording a refunded order token failed", err);
     }
@@ -167,18 +179,33 @@ async function refund(provider: PaymentProvider, req: Request) {
   /* Montonio may report a refund larger than what is left to refund — a
      second portal refund racing this one, or a figure we already recorded
      under another id. Clamped so the ledger can never say more went back than
-     the order was worth; the audit row keeps what was actually reported. */
-  const amount = Math.min(note.amount, refundableAmount(Number(order.total) || 0, order.payment));
+     the order was worth; the audit row keeps what was actually reported.
+     Against what the customer GAVE — the money plus what a gift card paid
+     (refundValue), the same figure every other refund calculation uses — and
+     not against `orders.total` alone, which would shrink a 30 € bank refund to
+     10 € on an order a 20 € card had already had back, and then tell the
+     customer that 10 € in a letter.
+     What is already recorded under THIS refund's own id does not narrow it:
+     the admin route records the entry the moment Montonio answers and the
+     webhook for the same refund follows (PENDING → SUCCESSFUL), and folding
+     that in must leave the amount where it was rather than zero it. */
+  const others = refundsOf(order.payment).filter((r) => r.ref !== note.refundRef);
+  const amount = Math.min(note.amount, refundableAmount(await refundValue(order), { refunds: others }));
 
   try {
-    const out = await settleRefund(order, {
-      ref: note.refundRef,
-      amount: amount > 0 ? amount : note.amount,
-      status: note.status,
-      at: new Date().toISOString(),
-      by: "webhook",
-      detail: note.detail,
-    });
+    const out = await settleRefund(
+      order,
+      {
+        ref: note.refundRef,
+        amount,
+        status: note.status,
+        at: new Date().toISOString(),
+        by: "webhook",
+        detail: note.detail,
+      },
+      // nothing left to give back under this id means nothing to write about
+      { notify: amount > 0 },
+    );
     return NextResponse.json({
       ok: true,
       refund: note.status,
