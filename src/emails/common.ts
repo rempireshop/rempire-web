@@ -126,6 +126,10 @@ const SHIP_WORDS: Record<
   {
     pickup: string;
     locker: (carrier: string) => string;
+    /** A manned counter — Montonio's `parcelShop`, our "pickup_point". */
+    counter: (carrier: string) => string;
+    /** Montonio's `postOffice`. None in the four countries today; kept honest anyway. */
+    postOffice: (carrier: string) => string;
     courier: (carrier: string) => string;
     post: string;
     generic: string;
@@ -134,6 +138,8 @@ const SHIP_WORDS: Record<
   ru: {
     pickup: "Самовывоз",
     locker: (c) => (c ? `Пакомат ${c}` : "Пакомат"),
+    counter: (c) => (c ? `Пункт выдачи ${c}` : "Пункт выдачи"),
+    postOffice: (c) => (c ? `Почта ${c}` : "Почта"),
     courier: (c) => (c ? `Курьер ${c}` : "Курьер"),
     post: "Почта",
     generic: "Доставка",
@@ -141,6 +147,12 @@ const SHIP_WORDS: Record<
   et: {
     pickup: "Järeletulek",
     locker: (c) => (c ? `Pakiautomaat ${c}` : "Pakiautomaat"),
+    /* Carrier after the noun, like the locker line right above — the letters
+       have always read «Pakiautomaat Omniva», and the two new kinds follow it.
+       (The storefront's own UI_RX rules put the carrier first, «Omniva
+       pakiautomaat»; that difference is older than this change and left alone.) */
+    counter: (c) => (c ? `Pakipunkt ${c}` : "Pakipunkt"),
+    postOffice: (c) => (c ? `Postkontor ${c}` : "Postkontor"),
     courier: (c) => (c ? `Kuller ${c}` : "Kuller"),
     post: "Post",
     generic: "Tarne",
@@ -148,11 +160,37 @@ const SHIP_WORDS: Record<
   en: {
     pickup: "Pickup",
     locker: (c) => (c ? `${c} parcel locker` : "Parcel locker"),
+    counter: (c) => (c ? `${c} pickup point` : "Pickup point"),
+    postOffice: (c) => (c ? `${c} post office` : "Post office"),
     courier: (c) => (c ? `Courier ${c}` : "Courier"),
     post: "Post",
     generic: "Delivery",
   },
 };
+
+/**
+ * Which of the three words a parcel line gets. `shipping.pointType` is the
+ * kind Montonio gave the point the shopper chose, stored with the order since
+ * 14.09.2026 — the live list is the only other place it exists, and a shipped
+ * letter is written weeks after the point was picked.
+ *
+ * An order without it is a machine, because that is what the shop called every
+ * point until then; nothing is guessed from the name. (It could be: not one of
+ * the 1 295 counters Montonio returns today carries a machine word in its
+ * name. But a *machine* often carries no word at all — «Viljandi Turu Konsum»
+ * is an Itella automat — so a name-reader would be right about counters and
+ * wrong about lockers, and the letter would start inventing counters that are
+ * not there.)
+ */
+function lockerWord(
+  w: (typeof SHIP_WORDS)[Lang],
+  pointType: string | null | undefined,
+): (carrier: string) => string {
+  const t = pick(pointType).toLowerCase();
+  if (t === "pickup_point") return w.counter;
+  if (t === "post_office") return w.postOffice;
+  return w.locker;
+}
 
 /**
  * Where a pickup order is collected. Not a per-language constant any more:
@@ -260,7 +298,7 @@ export function deliveryLine(
     kind === "pickup"
       ? w.pickup
       : kind === "locker"
-        ? w.locker(carrier)
+        ? lockerWord(w, shipping?.pointType)(carrier)
         : kind === "courier"
           ? w.courier(carrier)
           : pick(shipping?.method, carrier, w.generic);

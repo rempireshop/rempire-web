@@ -32,6 +32,13 @@ interface Strings {
   code: string;
   cta: string;
   noteLocker: string;
+  /**
+   * The same note for the orders that went to a manned counter rather than a
+   * machine — Montonio mixes the two into one list and the shop labels them
+   * apart since 14.09.2026. The locker note promises an SMS with a door code,
+   * and a counter has no door; this one says what actually happens instead.
+   */
+  noteCounter: string;
   noCode: string;
 }
 
@@ -43,6 +50,8 @@ const T: Record<Lang, Strings> = {
     cta: "Отследить посылку",
     noteLocker:
       "Если вы выбрали пакомат — когда посылка приедет, вам придёт SMS с кодом дверцы. Если доставка курьером — курьер свяжется с вами перед приездом.",
+    noteCounter:
+      "Вы выбрали пункт выдачи, а не автомат: посылку отдаст продавец в часы работы точки. Номер посылки — выше.",
     noCode: "будет добавлен",
   },
   et: {
@@ -52,6 +61,8 @@ const T: Record<Lang, Strings> = {
     cta: "Jälgi pakki",
     noteLocker:
       "Kui valisite pakiautomaadi, saate paki saabudes SMS-i ukse koodiga. Kui valisite kulleri, võtab kuller enne saabumist ühendust.",
+    noteCounter:
+      "Valisite pakipunkti, mitte automaadi: paki annab üle müüja punkti lahtiolekuaegadel. Paki number on ülal.",
     noCode: "lisandub",
   },
   en: {
@@ -61,6 +72,8 @@ const T: Record<Lang, Strings> = {
     cta: "Track the parcel",
     noteLocker:
       "If you chose a parcel locker, you will get an SMS with the door code when the parcel arrives. If you chose a courier, the courier calls before delivery.",
+    noteCounter:
+      "You chose a pickup point, not a machine: a shop assistant hands the parcel over during the point’s opening hours. The parcel number is above.",
     noCode: "to follow",
   },
 };
@@ -133,6 +146,11 @@ export function renderOrderShipped(
   const hello = greeting(L, name);
   const { code, url } = parseTracking(tracking, order, L);
   const delivery = deliveryLine(order.shipping, L);
+  /* A counter is not a machine and has no door code — the note has to match
+     the point the parcel actually went to. Missing pointType means an order
+     from before the field existed, and those were all called machines. */
+  const pt = String(order.shipping?.pointType ?? "").toLowerCase();
+  const note = pt === "pickup_point" || pt === "post_office" ? t.noteCounter : t.noteLocker;
 
   const values: MailTextValues = {
     name,
@@ -148,7 +166,7 @@ export function renderOrderShipped(
     rowLead(`${esc(hello)} ${mailTextHtml("order-shipped", L, "intro", values)}`) +
     rowCode(t.code, code || t.noCode, delivery) +
     rowButton(url, t.cta) +
-    rowNote([esc(t.noteLocker), mailTextHtml("order-shipped", L, "signature", values)]);
+    rowNote([esc(note), mailTextHtml("order-shipped", L, "signature", values)]);
 
   const html = shell({
     lang: L,
@@ -168,7 +186,7 @@ export function renderOrderShipped(
     "",
     `${t.cta}: ${url}`,
     "",
-    t.noteLocker,
+    note,
     signature,
     textFooter(L, c.serviceNote),
   ]);

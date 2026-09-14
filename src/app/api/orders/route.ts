@@ -3,7 +3,7 @@
  *
  * The body carries ids, not prices: {lang, items:[{id, variant?, qty}],
  * customer:{name,email,phone}, shipping:{method,country,carrier?,pointId?,
- * pointName?,address?}, discountCode?, notes?}. Everything money-shaped is
+ * pointName?,pointType?,address?}, discountCode?, notes?}. Everything money-shaped is
  * recomputed in src/lib/orders.ts, so a doctored cart cannot buy a 25 € bottle
  * for 1 €; every shipping field is rebuilt there from a whitelist.
  */

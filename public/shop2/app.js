@@ -583,6 +583,23 @@
       /* оформление: доставка, выбор пакомата, оплата, чек */
       "Курьер до двери": "Kuller ukseni", "Перевозчик": "Vedaja",
       "Выберите пакомат": "Vali pakiautomaat", "выбрать": "vali",
+      /* Montonio's list is not machines only — see POINT_KIND in this file.
+         Where a carrier's list holds counters too, the picker says so. */
+      "Пункт выдачи": "Pakipunkt", "Почта": "Postkontor",
+      "Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец.":
+        "«Pakiautomaadi» all on ka pakipunkte — seal annab paki üle müüja.",
+      "При оформлении у каждой точки написано, какая она; цена одна и та же.":
+        "Vormistamisel on iga punkti juures kirjas, kumb ta on; hind on sama.",
+      /* the same two sentences as one node — the owner's rate table prints them
+         under the «Пакомат» column he is pricing */
+      "Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. При оформлении у каждой точки написано, какая она; цена одна и та же.":
+        "«Pakiautomaadi» all on ka pakipunkte — seal annab paki üle müüja. Vormistamisel on iga punkti juures kirjas, kumb ta on; hind on sama.",
+      "Пакомат или пункт выдачи": "Pakiautomaat või pakipunkt",
+      "Выберите пакомат или пункт выдачи": "Vali pakiautomaat või pakipunkt",
+      "Выберите пакомат или пункт выдачи — туда приедет посылка.":
+        "Vali pakiautomaat või pakipunkt — sinna pakk saabubki.",
+      "Пакомат или пункт выдачи по умолчанию": "Vaikimisi pakiautomaat või pakipunkt",
+      "— выберите пакомат или пункт выдачи —": "— vali pakiautomaat või pakipunkt —",
       "Поиск по адресу и городу": "Otsi aadressi või linna järgi",
       "Загружаем список…": "Laadime nimekirja…",
       "Выберите пакомат — туда приедет посылка.": "Vali pakiautomaat — sinna pakk saabubki.",
@@ -3119,6 +3136,23 @@
       /* checkout: delivery, machine picker, payment, receipt */
       "Курьер до двери": "Courier to your door", "Перевозчик": "Carrier",
       "Выберите пакомат": "Choose a parcel locker", "выбрать": "choose",
+      /* Montonio's list is not machines only — see POINT_KIND in this file.
+         Where a carrier's list holds counters too, the picker says so. */
+      "Пункт выдачи": "Pickup point", "Почта": "Post office",
+      "Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец.":
+        "A “parcel locker” can also be a pickup point — there a shop assistant hands the parcel over.",
+      "При оформлении у каждой точки написано, какая она; цена одна и та же.":
+        "At checkout every point says which it is; the price is the same either way.",
+      /* the same two sentences as one node — the owner's rate table prints them
+         under the «Пакомат» column he is pricing */
+      "Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. При оформлении у каждой точки написано, какая она; цена одна и та же.":
+        "A “parcel locker” can also be a pickup point — there a shop assistant hands the parcel over. At checkout every point says which it is; the price is the same either way.",
+      "Пакомат или пункт выдачи": "Parcel locker or pickup point",
+      "Выберите пакомат или пункт выдачи": "Choose a parcel locker or pickup point",
+      "Выберите пакомат или пункт выдачи — туда приедет посылка.":
+        "Choose a parcel locker or pickup point — that is where the parcel goes.",
+      "Пакомат или пункт выдачи по умолчанию": "Default parcel locker or pickup point",
+      "— выберите пакомат или пункт выдачи —": "— choose a parcel locker or pickup point —",
       "Поиск по адресу и городу": "Search by address or city",
       "Загружаем список…": "Loading the list…",
       "Выберите пакомат — туда приедет посылка.": "Choose a parcel locker — that is where the parcel goes.",
@@ -5389,6 +5423,14 @@
     // the blog editor's toast after the assistant wrote an article and chose its products (admBlogWriteFull)
     [/^Добавлены товары: (.+)$/, { ET: "Lisatud tooted: $1", EN: "Products added: $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
+    /* …and the two kinds that are not a machine. Montonio's pickup-point list
+       mixes them (parcelShop / postOffice among the parcelMachines), the
+       picker rows, the chosen-point button, the account's default and the
+       admin's «Доставка» line all print «<вид> · <адрес или название>», and
+       calling a manned counter «Пакомат» was the thing Ренат caught on
+       14.09.2026. */
+    [/^Пункт выдачи · (.+)$/, { ET: "Pakipunkt · $1", EN: "Pickup point · $1" }],
+    [/^Почта · (.+)$/, { ET: "Postkontor · $1", EN: "Post office · $1" }],
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
     [/^Курьера Montonio в (.+) нет — отправьте другим способом\.$/,
       { ET: "Montonio kullerit riiki $1 ei ole — saada muul viisil.", EN: "Montonio has no courier for $1 — ship another way." }],
@@ -5415,6 +5457,16 @@
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
     [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
       { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
+    /* The picker's heading and the summary's delivery line. Three shapes, and
+       the widest one first: «Пакомат или пункт выдачи Nova Post» tops a list
+       that really does hold both, «Пункт выдачи Nova Post» names the counter
+       the shopper then chose, and the plain one is every carrier whose list
+       is machines from end to end — which is all of them but Nova Post and
+       Finnish DPD. */
+    [/^Пакомат или пункт выдачи (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/,
+      { ET: "$1 pakiautomaat või pakipunkt", EN: "$1 parcel locker or pickup point" }],
+    [/^Пункт выдачи (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/, { ET: "$1 pakipunkt", EN: "$1 pickup point" }],
+    [/^Почта (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/, { ET: "$1 postkontor", EN: "$1 post office" }],
     [/^Пакомат (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
     [/^Трек-номер: (.+)$/, { ET: "Jälgimisnumber: $1", EN: "Tracking number: $1" }],
     [/^Код сдачи посылки: (.+)$/, { ET: "Paki üleandmise kood: $1", EN: "Drop-off code: $1" }],
@@ -5495,6 +5547,9 @@
     [/^Фото (\d+)$/, { ET: "Foto $1", EN: "Photo $1" }],
     [/^Показать (\d+) товар(?:|а|ов)$/, { ET: "Näita $1 toodet", EN: "Show $1 products" }],
     [/^Оплатить (.+)$/, { ET: "Maksa $1", EN: "Pay $1" }],
+    [/^Пакомат или пункт выдачи по умолчанию — (\d+) (?:точка|точки|точек)$/,
+      { ET: "Vaikimisi pakiautomaat või pakipunkt — $1 punkti",
+        EN: "Default parcel locker or pickup point — $1 locations" }],
     [/^Пакомат по умолчанию — (\d+) (?:точка|точки|точек)$/,
       { ET: "Vaikimisi pakiautomaat — $1 punkti", EN: "Default parcel locker — $1 locations" }],
     [/^Рег\. (.+)$/, { ET: "Reg-kood $1", EN: "Reg. no $1" }],
@@ -6466,6 +6521,16 @@
        assembling (the policy text, the bank marks, the contacts), so the
        early return is here rather than a second function down there. */
     if (ctx.tableOnly) return table;
+    /* The column is one price for one method, and that method is Montonio's
+       `pickupPoint` — a machine most of the time and a manned counter the rest
+       of it (Nova Post in LV/LT, DPD in Finland). Widening the header to
+       «Пакомат или пункт выдачи» would not survive four columns at 360 px, so
+       the column keeps its word and this sentence says the part the word
+       leaves out. The picker itself labels every point one by one — POINT_KIND
+       in this file — and the same sentence is under the owner's rate table. */
+    var kinds = '<p class="dlv__note">' +
+      t("Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец.") + " " +
+      t("При оформлении у каждой точки написано, какая она; цена одна и та же.") + "</p>";
     var pickup = '<div class="dlv__pickup">' +
       "<p><b>" + t("Самовывоз в салоне") + "</b> — " + t("бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.") + "</p>" +
       (ctx.address ? '<p class="dlv__addr">' + esc(ctx.address) + "</p>" : "") +
@@ -6526,7 +6591,7 @@
       : "";
     return '<h1 class="display h1">' + esc(ctx.title) + "</h1>" +
       '<p class="sec__intro">' + tr("Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.") + "</p>" +
-      h2("Способы и цены") + table +
+      h2("Способы и цены") + table + kinds +
       '<p class="dlv__note">' + t("Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.") + "</p>" +
       pickup +
       h2("Сроки") + times +
@@ -6718,7 +6783,13 @@
     // it is what an all-gift-card order simply is
     if (k === "digital") return "Электронная доставка";
     for (var i = 0; i < DELIVERY.length; i++) if (DELIVERY[i].k === k) {
-      return k === "parcel" && shipCarrier() ? DELIVERY[i].l + " " + CARRIER_NAMES[shipCarrier()] : DELIVERY[i].l;
+      if (k !== "parcel") return DELIVERY[i].l;
+      /* Once a point is chosen the line names *that* point — «Пункт выдачи
+         Nova Post» for one of the 129 Latvian counters — instead of the
+         method's own word. Before the choice the method's word stands: the
+         price is the same either way, and it is the only thing said yet. */
+      var w = S.ship.point ? pointKind(S.ship.point) : DELIVERY[i].l;
+      return shipCarrier() ? w + " " + CARRIER_NAMES[shipCarrier()] : w;
     }
     return "";
   }
@@ -6731,11 +6802,45 @@
   var POINTS = { by: {}, empty: {}, loading: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
   function pointsKey() { return shipCarrier() + ":" + S.country; }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
+  /* ---------- what a point actually is ----------
+     Montonio's pickup-point rows have always carried a kind of their own —
+     parcelMachine, parcelShop, postOffice — and mapMontonioPickupPoints()
+     hands it through as parcel_machine / pickup_point / post_office, which
+     /api/shipping/points/ puts on every row. The shop threw it away and
+     called all of them «Пакомат».
+
+     That is not a rounding error. Of the 10 432 points Montonio returns for
+     the four countries today, 1 295 are not machines at all: Nova Post keeps
+     129 manned counters in Latvia, 110 in Lithuania and 3 in Estonia, and
+     Finnish DPD counts 1 053 of them against 1 519 machines. Everything else
+     — every Omniva, SmartPosti, Unisend row, and DPD in the Baltics — really
+     is a machine.
+
+     Ренат, 14.09.2026: «Currently when I choose "nova Post" in checkout (for
+     estonia), it offers me package lockers - are you sure?» He was right to
+     ask. Nothing is filtered out and nothing is hidden — each point simply
+     says which of the two it is, here and in the letter. */
+  var POINT_KIND = { parcel_machine: "Пакомат", post_office: "Почта" };
+  function pointKind(p) { return (p && POINT_KIND[p.type]) || "Пункт выдачи"; }
+  /** «Пакомат · Küti tee 4, Peetri» — one text node, so it stays translatable. */
+  function pointKindLine(p) {
+    var ad = [p.address, p.city].filter(Boolean).join(", ");
+    return pointKind(p) + (ad ? " · " + esc(ad) : "");
+  }
+  /** Does the carrier's loaded list hold anything that is not a machine?
+      False while the list is still in flight — nothing is claimed yet. */
+  function pointsMixed() {
+    var list = pointsList();
+    if (!list) return false;
+    for (var i = 0; i < list.length; i++) if (list[i].type !== "parcel_machine") return true;
+    return false;
+  }
   function demoPoints(carrier, country) {
     try {
       var names = SHIPPING_DATA.machines[country || S.country][carrier] || [];
       return names.map(function (n, i) {
-        return { id: carrier + "-demo-" + i, name: n, address: "", city: "" };
+        // the committed stand-in lists machines and only machines
+        return { id: carrier + "-demo-" + i, name: n, address: "", city: "", type: "parcel_machine" };
       });
     } catch (e) { return []; }
   }
@@ -7752,7 +7857,10 @@
     var cc = acctShipCountry();
     loadPointsFor(x.pm, cc);
     var live = POINTS.by[x.pm + ":" + cc];
-    return live ? live.map(function (pt) { return pt.name; }) : null;
+    /* The name is still what is stored — but the kind rides along so the
+       option can say «Пункт выдачи · …» for a counter, exactly as the
+       checkout's own list does. */
+    return live ? live.map(function (pt) { return { name: pt.name, kind: pointKind(pt) }; }) : null;
   }
   /** The machine the block's select is on: the draft's, while the list still
       has it — else nothing, and the placeholder asks for one. A name and not
@@ -7761,7 +7869,9 @@
       shopper actually chose. */
   function acctMachineName() {
     var d = S.acctForm.ship, mach = acctMachines();
-    return d && d.machine && mach && mach.indexOf(d.machine) >= 0 ? d.machine : "";
+    if (!d || !d.machine || !mach) return "";
+    for (var i = 0; i < mach.length; i++) if (mach[i].name === d.machine) return d.machine;
+    return "";
   }
   /* Put the saved preference into the checkout — country, method and
      carrier — unless the shopper has already chosen a delivery in this
@@ -12641,12 +12751,20 @@
         var mach = acctMachines();
         if (mach && !mach.length) return "";
         var sel = acctMachineName();
+        /* The label widens the same way the checkout's does, and for the same
+           reason: this carrier's list may hold counters as well as machines. */
+        var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
+        var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
         return '<label class="field"><span class="field__label">' +
-          (mach ? "Пакомат по умолчанию — " + points(mach.length) : "Пакомат по умолчанию") + "</span>" +
+          (mach ? head + " — " + points(mach.length) : head) + "</span>" +
           '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
           (mach
-            ? '<option value=""' + (sel ? "" : " selected") + ">— выберите пакомат —</option>" +
-              mach.map(function (n) { return '<option value="' + esc(n) + '"' + (n === sel ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("")
+            ? '<option value=""' + (sel ? "" : " selected") + ">" +
+              (anyCounter ? "— выберите пакомат или пункт выдачи —" : "— выберите пакомат —") + "</option>" +
+              mach.map(function (x) {
+                return '<option value="' + esc(x.name) + '"' + (x.name === sel ? " selected" : "") + ">" +
+                  esc(x.kind + " · " + x.name) + "</option>";
+              }).join("")
             : "<option>Загружаем список…</option>") +
           "</select></span></label>";
       })() +
@@ -13391,8 +13509,13 @@
      nothing — so the count lives in the sheet instead. */
   function carrierLabel() {
     var c = CARRIER_NAMES[shipCarrier()];
-    return c ? "Пакомат " + c : "Пакомат";
+    // the heading widens only where the list behind it really is mixed, so
+    // Omniva and SmartPosti keep the short word they have always had
+    var w = pointsMixed() ? "Пакомат или пункт выдачи" : "Пакомат";
+    return c ? w + " " + c : w;
   }
+  /** «Выберите пакомат», and the honest mouthful where counters are in the list. */
+  function pickWord() { return pointsMixed() ? "Выберите пакомат или пункт выдачи" : "Выберите пакомат"; }
   function pointField() {
     var chosen = S.ship.point, bad = S.shipTouched && !chosen;
     var list = pointsList();
@@ -13400,11 +13523,15 @@
       '<button class="pointbtn' + (chosen ? " pointbtn--set" : "") + '" data-pointopen aria-invalid="' + bad + '">' +
         (chosen
           ? '<span class="pointbtn__nm">' + esc(chosen.name) + "</span>" +
-            '<span class="pointbtn__ad">' + esc([chosen.address, chosen.city].filter(Boolean).join(", ")) + "</span>"
-          : '<span class="pointbtn__nm">Выберите пакомат</span>' +
+            '<span class="pointbtn__ad">' + pointKindLine(chosen) + "</span>"
+          : '<span class="pointbtn__nm">' + pickWord() + "</span>" +
             '<span class="pointbtn__ad">' + (list ? "Поиск по адресу и городу" : "Загружаем список…") + "</span>") +
         '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button>" +
-      (bad ? '<div class="err" role="alert">Выберите пакомат — туда приедет посылка.</div>' : "") + "</div>";
+      /* Both sentences whole, not assembled around pickWord(): tools/i18n-gaps.mjs
+         reads literals, and a string glued together at runtime counts as a hole. */
+      (bad ? '<div class="err" role="alert">' + (pointsMixed()
+        ? "Выберите пакомат или пункт выдачи — туда приедет посылка."
+        : "Выберите пакомат — туда приедет посылка.") + "</div>" : "") + "</div>";
   }
   /** The list is patched in place so typing never costs the input its focus. */
   function pointRows() {
@@ -13417,7 +13544,10 @@
       return '<button class="prow" data-pointpick="' + esc(p.id) + '"' +
         (S.ship.point && S.ship.point.id === p.id ? ' aria-current="true"' : "") + ">" +
         '<span class="prow__nm">' + esc(p.name) + "</span>" +
-        '<span class="prow__ad">' + esc([p.address, p.city].filter(Boolean).join(", ")) + "</span></button>";
+        /* the kind first, then the address: a counter is a shop with opening
+           hours and a machine is open at night, and that is the difference
+           the shopper is actually choosing between */
+        '<span class="prow__ad">' + pointKindLine(p) + "</span></button>";
     }).join("");
   }
   /* Typing patches only the list: a full render would take the search input
@@ -13653,6 +13783,12 @@
         carrier: isParcel() ? shipCarrier() : "",
         pointId: S.ship.point ? S.ship.point.id : null,
         pointName: S.ship.point ? S.ship.point.name : null,
+        /* parcel_machine | pickup_point | post_office — Montonio's own kind,
+           stored with the order so the admin card and the three letters can
+           call a counter a counter months later, when the live list is long
+           gone. An old order without it reads as a machine, which is what the
+           shop called every one of them until 14.09.2026. */
+        pointType: S.ship.point ? S.ship.point.type || null : null,
         address: shipMethod() === "courier"
           ? { addr: S.ship.addr, zip: S.ship.zip, city: S.ship.city }
           : null
@@ -18955,6 +19091,13 @@
          not read as «самовывоза тут нет». */
       '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный. ' +
         "«—» — этот перевозчик в эту страну не возит.</p>" +
+      /* One cell prices Montonio's `pickupPoint`, and that method is not
+         machines only: Nova Post keeps 129 manned counters in Latvia and 110
+         in Lithuania, Finnish DPD 1053 of them. The shopper sees which is
+         which at each point in the picker; the owner should know the column
+         he is pricing covers both. */
+      '<p class="adm-hint" style="margin-top:4px">Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. ' +
+        "При оформлении у каждой точки написано, какая она; цена одна и та же.</p>" +
       admShipPreviewHTML() +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       // «Сохранить» is the page's bar (admSetBarHTML); these two are the ways
@@ -20936,17 +21079,20 @@
     "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
   var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
   /* The carrier columns of the rate table: the carriers Montonio quotes a
-     parcel-machine price for, which is exactly the set of cells
-     carrierPriceTable() fills and quoteFromRules() can read. A country a
+     pickup-point price for — one price per carrier per country, whether the
+     shopper then picks a machine or one of that carrier's manned counters
+     (POINT_KIND above; the two cost the same) — which is exactly the set of
+     cells carrierPriceTable() fills and quoteFromRules() can read. A country a
      carrier has no tariff for gets «—» in that column rather than a box — the
      shop cannot promise a price for a parcel Montonio will not quote.
 
      Venipak was never here and is not offered at all since 14.09.2026:
      Montonio sells it on a direct contract only and quotes no rate out of
      Estonia, so it had no cell to put in a column. Nova Post arrived the same
-     day with cells in EE, LV and LT; Finland has none — Montonio runs no Nova
-     Post locker there — so the Finnish row gets a dash in that column, the
-     third on that row beside Omniva's and Unisend's.
+     day with cells in EE, LV and LT; Finland has none — Montonio returns no
+     Nova Post point there at all, machine or counter — so the Finnish row
+     gets a dash in that column, the third on that row beside Omniva's and
+     Unisend's.
 
      Five columns plus the country, the courier and «Бесплатно от» is eight
      tracks on a desktop; admin.css .adm-tariffs--rates carries the count, and
@@ -27033,9 +27179,18 @@
      method (src/lib/orders.ts) — nothing is packed, nothing is posted, and the
      panel has to say so plainly rather than showing a blank «Пакомат». */
   var SHIP_WORD = { parcel: "Пакомат", courier: "Курьер", pickup: "Самовывоз", digital: "Электронная доставка" };
+  /* Which of the two a parcel order actually went to. `pointType` is stored
+     with the order since 14.09.2026; before that every point was called a
+     machine, and an order without the field keeps that reading rather than
+     being re-labelled by a guess. */
+  function srvPointKind(s) {
+    return s && s.pointType && POINT_KIND[s.pointType] ? POINT_KIND[s.pointType]
+      : s && s.pointType ? "Пункт выдачи" : SHIP_WORD.parcel;
+  }
   function srvShipLabel(s) {
     if (!s) return "—";
-    var m = SHIP_WORD[String(s.method || "").toLowerCase()] || s.method || "Доставка";
+    var k = String(s.method || "").toLowerCase();
+    var m = (k === "parcel" && s.pointName ? srvPointKind(s) : SHIP_WORD[k]) || s.method || "Доставка";
     return s.pointName ? m + " · " + s.pointName : m;
   }
   function srvRow(o) {
