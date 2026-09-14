@@ -7,6 +7,7 @@ import {
   MIN_TEXT,
   ratingFor,
   reviewCounts,
+  reviewsByCustomer,
   setReviewStatus,
   validateReview,
   type ReviewInput,
@@ -169,5 +170,66 @@ describe("review storage and moderation", () => {
 
   it("returns null when the id is not there", async () => {
     expect(await setReviewStatus("00000000-0000-0000-0000-000000000000", "approved")).toBe(null);
+  });
+
+  /**
+   * Who a review belongs to, on the one screen that lists them all.
+   *
+   * Renat, 14.09.2026: «reviews do not seem to be connected to clients
+   * anymore». The queue showed a name, a date and a language for every review
+   * alike, so a review the shop can prove an owner for and one it cannot
+   * looked identical there — and the only conclusion available from that
+   * screen was that none of them were connected. The queue carries `email`.
+   *
+   * The other half of the rule is what must NOT carry it: GET /api/reviews/
+   * is open to the whole internet, so the product page's shape stays exactly
+   * as clean as it was. A field that leaks an author's mailbox onto a selling
+   * page is one careless `select *` away, and this is what notices.
+   */
+  describe("the moderation queue carries the author", () => {
+    const SIGNED_IN = "maria.tamm@example.com";
+
+    it("gives the queue the address a signed-in review was written from", async () => {
+      const mine = await addReview(ok(GOOD).value, "hash", SIGNED_IN);
+      const guest = await addReview(ok({ ...GOOD, name: "Гость" }).value, "hash", null);
+
+      const queue = await listReviews();
+      const byId = new Map(queue.map((r) => [r.id, r]));
+      expect(byId.get(mine.id)!.email).toBe(SIGNED_IN);
+      // written signed out — the queue says «без аккаунта» off exactly this null
+      expect(byId.get(guest.id)!.email).toBe(null);
+
+      // and the filtered query is the same shape, not a second one that forgot
+      expect((await listReviews("pending")).map((r) => r.email).sort()).toEqual([SIGNED_IN, null]);
+    });
+
+    it("reads the address back the way the card looks it up", async () => {
+      // the column is written lower-cased and trimmed (authorEmail); the queue
+      // must not show one spelling while reviewsByCustomer matches another
+      const saved = await addReview(ok(GOOD).value, null, "  Maria.Tamm@Example.COM ");
+      const row = (await listReviews()).find((r) => r.id === saved.id)!;
+      expect(row.email).toBe(SIGNED_IN);
+      expect((await reviewsByCustomer(SIGNED_IN)).map((r) => r.id)).toEqual([saved.id]);
+    });
+
+    it("never lets the address onto the storefront's shape", async () => {
+      const saved = await addReview(ok(GOOD).value, null, SIGNED_IN);
+      await setReviewStatus(saved.id, "approved");
+
+      const shown = await approvedReviews("handmade-soap-666");
+      expect(shown).toHaveLength(1);
+      expect(Object.keys(shown[0])).not.toContain("email");
+      // the customer card's list is the same public shape — the address is the
+      // key it is found BY, never a field it hands back
+      const card = await reviewsByCustomer(SIGNED_IN);
+      expect(Object.keys(card[0])).not.toContain("email");
+    });
+
+    it("leaves a pre-13.09 review on nobody's card and in the queue with no author", async () => {
+      // exactly what the migration refused to guess: a row with only a name
+      const saved = await addReview(ok(GOOD).value, null, null);
+      expect(await reviewsByCustomer(SIGNED_IN)).toEqual([]);
+      expect((await listReviews()).find((r) => r.id === saved.id)!.email).toBe(null);
+    });
   });
 });

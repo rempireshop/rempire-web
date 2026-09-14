@@ -5,7 +5,12 @@ import { listReviews, reviewCounts, setReviewStatus, type ReviewStatus } from "@
  * Review moderation. Both verbs are behind requireAdmin.
  *
  * GET   /api/admin/reviews/?status=pending   → { ok, reviews, counts }
- *         status omitted = every review, newest first.
+ *         status omitted = every review, newest first. Each review is the
+ *         AdminReview shape (src/lib/reviews.ts): the public fields plus
+ *         `email`, the address it was written from, or null when the shop
+ *         cannot prove one. That field travels only through this door —
+ *         GET /api/reviews/, which any visitor may call, still answers the
+ *         plain `Review`, with no author's mailbox on it.
  * PATCH /api/admin/reviews/  { id, status }  → { ok, review }
  *         status is "approved" | "rejected" | "pending".
  *

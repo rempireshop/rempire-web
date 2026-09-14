@@ -1979,6 +1979,10 @@ button, a, summary, label { touch-action: manipulation; }
 .revadd { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 4px; }
 .revadd--done p { margin: 0 0 8px; font-size: 14px; }
 .revadd--open .field:first-of-type { margin-top: 10px; }
+/* Whose review this will be. One muted line under «Публикуем после
+   проверки»; the address inside it is one unbreakable token, so it wraps
+   instead of widening the page on a phone. */
+.revadd__who { font-size: 12.5px; margin: 4px 0 0; overflow-wrap: anywhere; }
 .revstars { display: flex; align-items: center; gap: 2px; margin: 2px 0 16px; }
 .revstar {
   /* ≥44px targets: a five-star row is the single easiest thing to mis-tap */

@@ -780,6 +780,12 @@
       "Согласен(на) опубликовать отзыв и имя на этой странице": "Nõustun arvustuse ja nime avaldamisega sellel lehel",
       "Отправить отзыв": "Saada arvustus", "Отправляем…": "Saadame…",
       "Публикуем после проверки — обычно в тот же день.": "Avaldame pärast ülevaatamist — tavaliselt samal päeval.",
+      /* who the review will belong to — the form's one new line, and the
+         queue's word for a review that belongs to nobody */
+      "Отзыв сохраним за вашим аккаунтом": "Salvestame arvustuse sinu konto alla",
+      "Войдите в кабинет — и отзыв сохраним за вашим аккаунтом.":
+        "Logi sisse — siis salvestame arvustuse sinu konto alla.",
+      "без аккаунта": "kontota",
       "Спасибо! Отзыв отправлен — он появится на странице после проверки.":
         "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",
       "Не получилось отправить — попробуйте ещё раз.": "Saatmine ebaõnnestus — proovi uuesti.",
@@ -3313,6 +3319,12 @@
       "Согласен(на) опубликовать отзыв и имя на этой странице": "I agree to publish this review and my name on this page",
       "Отправить отзыв": "Send review", "Отправляем…": "Sending…",
       "Публикуем после проверки — обычно в тот же день.": "We publish after a check — usually the same day.",
+      /* who the review will belong to — the form's one new line, and the
+         queue's word for a review that belongs to nobody */
+      "Отзыв сохраним за вашим аккаунтом": "We'll keep this review with your account",
+      "Войдите в кабинет — и отзыв сохраним за вашим аккаунтом.":
+        "Sign in and we'll keep this review with your account.",
+      "без аккаунта": "no account",
       "Спасибо! Отзыв отправлен — он появится на странице после проверки.":
         "Thank you! Your review has been sent — it appears on the page once checked.",
       "Не получилось отправить — попробуйте ещё раз.": "Sending failed — please try again.",
@@ -10872,7 +10884,31 @@
       '<button class="btn btn--wide" data-revsend' + (reviewReady() && S.revState !== "sending" ? "" : " disabled") + ">" +
         (S.revState === "sending" ? "Отправляем…" : "Отправить отзыв") + "</button>" +
       '<p class="muted" style="font-size:12.5px">Публикуем после проверки — обычно в тот же день.</p>' +
+      revAccountHTML() +
       "</div>";
+  }
+  /* Whether this review will have an owner — the one thing the form never
+     said. POST /api/reviews/ stamps the author's address from the signed
+     `rmp_cust` cookie and from nothing the form sends (src/lib/reviews.ts
+     addReview), so a review left signed out belongs to nobody, and that is
+     decided here, before the button, by whether the shopper is in their
+     кабинет at all.
+
+     Signed out this is an invitation, never a warning: the review is welcome
+     either way, and a line that told a guest their words were about to be
+     filed under nobody would cost a review the shop wants.
+
+     The address is its own element — translateTree() rewrites whole text
+     nodes, and a sentence with a mailbox baked into it can never match a
+     dictionary key. Same idiom as the login screen's «Код отправлен на
+     почту» above its e-mail line. */
+  function revAccountHTML() {
+    var mail = S.loggedIn && S.cust ? String(S.cust.email || "").trim() : "";
+    if (!mail) {
+      return '<p class="muted revadd__who"><span>Войдите в кабинет — и отзыв сохраним за вашим аккаунтом.</span></p>';
+    }
+    return '<p class="muted revadd__who"><span>Отзыв сохраним за вашим аккаунтом</span> ' +
+      '<span class="num">' + esc(mail) + "</span></p>";
   }
   function sendReview() {
     if (!reviewReady() || S.revState === "sending") return;
@@ -11188,6 +11224,27 @@
     if (!data.reviews.length) return chips + '<div class="adm-empty">Отзывов пока нет</div>';
     return chips + '<div class="adm-list">' + data.reviews.map(admReviewRowHTML).join("") + "</div>";
   }
+  /* Whose review this is, on the queue's own grey line — the address it was
+     written from (reviews.email, carried here by GET /api/admin/reviews/),
+     or the words «без аккаунта» when there is none.
+
+     Renat, 14.09.2026: «reviews do not seem to be connected to clients
+     anymore». They are — the ones written from a signed-in кабинет — but
+     this screen showed a name and a date for all of them alike, so an
+     attached review and an unattached one looked identical, and the owner
+     could only conclude that none of them were attached.
+
+     Both halves are their own element: translateTree() rewrites whole text
+     nodes, so «без аккаунта» has to sit alone to match a dictionary key, and
+     an address must never be inside a sentence that wants to. It is text and
+     not a button: the panel routes every tap through one delegated handler,
+     and a data-* it does not know is a dead tap on a phone. */
+  function admReviewWhoHTML(r) {
+    var mail = String((r && r.email) || "").trim();
+    return mail
+      ? '<span class="adm-mono">' + esc(mail) + "</span>"
+      : "<span>без аккаунта</span>";
+  }
   function admReviewRowHTML(r) {
     var p = byIdOrNull(r.productId);
     var st = r.status === "approved" ? ["Опубликован", "adm-badge--ok"]
@@ -11198,7 +11255,8 @@
         esc(p ? p.brand + " — " + p.name : r.productId) + "</span>" +
         '<span class="adm-badge ' + st[1] + '">' + st[0] + "</span></span>" +
       '<span class="adm-revtext">' + esc(r.text) + "</span>" +
-      '<span class="adm-row__sub">' + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) + "</span>" +
+      '<span class="adm-row__sub">' + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) +
+        " · " + admReviewWhoHTML(r) + "</span>" +
       '<span class="adm-acts">' +
         (r.status === "approved" ? "" :
           '<button class="adm-btn adm-btn--row" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
