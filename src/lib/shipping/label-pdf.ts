@@ -175,7 +175,11 @@ const clean = (v: unknown, max = 120): string =>
     carrierWord() in public/shop2/app.js so the sheet and the screen agree. */
 const CARRIER_WORD: Record<string, string> = {
   omniva: "Omniva", smartpost: "SmartPosti", itella: "SmartPosti",
-  dpd: "DPD", venipak: "Venipak", unisend: "Unisend",
+  dpd: "DPD", unisend: "Unisend", novapost: "Nova Post",
+  /* not offered since 14.09.2026, but a slip is printed for orders placed
+     before that and a parcel with no carrier word on it is a parcel nobody
+     can sort */
+  venipak: "Venipak",
 };
 
 /** «13.09.2026» out of an ISO stamp — the day the order was placed. */

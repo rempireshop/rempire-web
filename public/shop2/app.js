@@ -1023,8 +1023,8 @@
       "не возит": "ei vii",
       "пусто — доставка бесплатна": "tühi — tarne on tasuta",
       "пусто — берётся «Остальные страны»": "tühi — kehtib „Ülejäänud riigid“",
-      "Пакоматов тут нет ни у одного перевозчика — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "Pakiautomaate siin ühelgi vedajal ei ole — ainult kuller. Hinna all on see, kui palju pood võtab, kui välja tühjendada, ja millise vedajaga pakk läheb.",
+      "Пакоматов магазин в этих странах не предлагает — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "Nendes riikides pood pakiautomaate ei paku — ainult kuller. Hinna all on see, kui palju pood võtab, kui välja tühjendada, ja millise vedajaga pakk läheb.",
       "Что увидит покупатель": "Mida ostja näeb",
       "та же таблица, что на странице «Доставка и оплата»":
         "sama tabel, mis lehel „Tarne ja maksmine“",
@@ -3551,8 +3551,8 @@
       "не возит": "does not ship there",
       "пусто — доставка бесплатна": "empty — delivery is free",
       "пусто — берётся «Остальные страны»": "empty — «Остальные страны» applies",
-      "Пакоматов тут нет ни у одного перевозчика — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "No carrier runs a parcel locker here — courier only. Under the price is what the shop charges if the box is cleared, and which carrier carries the parcel.",
+      "Пакоматов магазин в этих странах не предлагает — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "The shop offers no parcel locker in these countries — courier only. Under the price is what the shop charges if the box is cleared, and which carrier carries the parcel.",
       "Что увидит покупатель": "What the customer sees",
       "та же таблица, что на странице «Доставка и оплата»":
         "the same table as on the «Delivery & payment» page",
@@ -5415,7 +5415,7 @@
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
     [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
       { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
-    [/^Пакомат (DPD|Omniva|SmartPosti|Venipak)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
+    [/^Пакомат (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
     [/^Трек-номер: (.+)$/, { ET: "Jälgimisnumber: $1", EN: "Tracking number: $1" }],
     [/^Код сдачи посылки: (.+)$/, { ET: "Paki üleandmise kood: $1", EN: "Drop-off code: $1" }],
     [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
@@ -6255,7 +6255,8 @@
       omniva: { EE: 3.19, LV: 4.99, LT: 4.99 },
       smartpost: { EE: 2.59, LV: 4.99, LT: 4.99, FI: 9.39 },
       dpd: { EE: 2.59, LV: 5.59, LT: 5.59, FI: 12.39 },
-      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 }
+      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 },
+      novapost: { EE: 2.39, LV: 4.79, LT: 4.09 }
     }
   };
   /* ---------- what an EMPTY box charges ------------------------------------
@@ -6288,7 +6289,8 @@
       omniva: { EE: 3.19, LV: 4.99, LT: 4.99 },
       smartpost: { EE: 2.59, LV: 4.99, LT: 4.99, FI: 9.39 },
       dpd: { EE: 2.59, LV: 5.59, LT: 5.59, FI: 12.39 },
-      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 }
+      unisend: { EE: 2.49, LV: 3.79, LT: 3.79 },
+      novapost: { EE: 2.39, LV: 4.79, LT: 4.09 }
     },
     courier: {
       AT: [28.49, "smartpost"], BE: [24.39, "smartpost"], BG: [32.59, "smartpost"],
@@ -6318,20 +6320,30 @@
      deliveryPageHTML below) out of this file by its opening and closing
      lines, exactly as it lifts the dictionary. */
   var CARRIER_NAMES = {
-    omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend"
+    omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", unisend: "Unisend", novapost: "Nova Post"
   };
   /* Carriers worth *asking* about, per country — deliberately optimistic.
      /api/shipping/points answers for every one of them, and a carrier that
      comes back with nothing is struck off (POINTS.empty) before its chip is
-     drawn. So DPD and Venipak appear only where Montonio Shipping is connected
-     and actually has points, and Finland gains a parcel option the day Montonio
-     returns Finnish ones — with no second deploy. Without Montonio the public
-     feeds still answer for Omniva (EE/LV/LT) and the seed for SmartPosti EE,
-     exactly as before. See docs/shipping.md. */
+     drawn. So DPD and Nova Post appear only where Montonio Shipping is
+     connected and actually has points, and Finland gains a parcel option the
+     day Montonio returns Finnish ones — with no second deploy. Without
+     Montonio the public feeds still answer for Omniva (EE/LV/LT) and the seed
+     for SmartPosti EE, exactly as before. See docs/shipping.md.
+
+     14.09.2026: Venipak out («Venipak does not seem to be available, so
+     remove» — and Montonio quotes no price for it anywhere, so it had no cell
+     of its own and billed the country's «Пакомат» number), Nova Post in («From
+     montonio page there is Nova Post, so keep it actually»). Nova Post has
+     lockers in nine more countries Montonio prices — AT CZ DE ES HU IT PL RO
+     SK — and they are deliberately NOT here: a chip in a country that has
+     never had one is a change to what the customer sees, and nobody asked for
+     it. Adding a country is one line plus a price cell; see docs/shipping.md
+     § «Пакоматы Nova Post за пределами Балтии». */
   var CARRIERS_BY_COUNTRY = {
-    EE: ["omniva", "smartpost", "dpd", "venipak", "unisend"],
-    LV: ["omniva", "dpd", "venipak", "unisend"],
-    LT: ["omniva", "dpd", "venipak", "unisend"],
+    EE: ["omniva", "smartpost", "dpd", "unisend", "novapost"],
+    LV: ["omniva", "dpd", "unisend", "novapost"],
+    LT: ["omniva", "dpd", "unisend", "novapost"],
     FI: ["smartpost", "dpd"],
     EU: []
   };
@@ -6389,8 +6401,9 @@
         var p = priceOf(rules.carriers && rules.carriers[k], c);
         /* the same three steps shipRulePrice() and quoteFromRules() take:
            the owner's cell, then Montonio's price for THIS carrier, then the
-           country's fallback — which on this shop only Venipak reaches, the
-           one carrier Montonio quotes no price for */
+           country's fallback — which no carrier on this shop reaches any more:
+           Venipak was the one Montonio quotes no price for and it is gone
+           since 14.09.2026, and every remaining chip has a cell of its own */
         if (p == null && mont.carriers[k] && typeof mont.carriers[k][c] === "number") p = mont.carriers[k][c];
         if (p == null) p = base;
         if (p != null && seen.indexOf(p) < 0) seen.push(p);
@@ -13576,7 +13589,7 @@
     /* Montonio's own list carries no coordinates; the server borrows them
        from the carrier's public feed (enrichCoordinates in
        src/lib/shipping/montonio.ts). A carrier with no public feed — DPD
-       without credentials, Venipak — still ends up with an empty map, and an
+       without credentials, Nova Post — still ends up with an empty map, and an
        empty map with no word about it reads as broken. */
     var all = pointsMatching();
     if (all.length && !all.map(pointGeo).filter(Boolean).length) {
@@ -15421,7 +15434,10 @@
     }).join("") + "</div>";
   }
   /** The carrier's name as the owner knows it, from the code Montonio uses. */
-  var CARRIER_WORD = { omniva: "Omniva", smartpost: "SmartPosti", itella: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" };
+  /* venipak is not offered since 14.09.2026 and stays in this map on purpose:
+     it is what an order placed before that is tagged with, and the panel has
+     to name the carrier on it. */
+  var CARRIER_WORD = { omniva: "Omniva", smartpost: "SmartPosti", itella: "SmartPosti", dpd: "DPD", unisend: "Unisend", novapost: "Nova Post", venipak: "Venipak" };
   function carrierWord(code) {
     var c = String(code || "").toLowerCase();
     return CARRIER_WORD[c] || (c ? c.charAt(0).toUpperCase() + c.slice(1) : "");
@@ -17192,7 +17208,7 @@
     // the phone header reads the classes: the primary (quiet while nothing
     // differs), the cancel, the status word — admBarNoteHTML
     return '<button class="adm-btn adm-savebar__main' + (mailDirty() ? "" : " adm-savebar__main--quiet") + '" data-mailsave>Сохранить</button>' +
-      (mailDirty() ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-mailrevert>Отменить правки</button>' : "") +
+      (mailDirty() ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-mailrevert>' + SAVEBAR_CANCEL + '</button>' : "") +
       admBarNoteHTML("mail");
   }
   /** The letter as the customer will see it, drawn from the draft — so the
@@ -17835,7 +17851,7 @@
     var dirty = newsDirty();
     return '<button class="adm-btn adm-savebar__main' + (dirty ? "" : " adm-btn--ghost adm-savebar__main--quiet") +
         '" data-newssave' + (S.newsBusy ? " disabled" : "") + ">Сохранить</button>" +
-      (dirty ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-newsrevert>Отменить правки</button>' : "") +
+      (dirty ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-newsrevert>' + SAVEBAR_CANCEL + '</button>' : "") +
       admBarNoteHTML("news");
   }
   /** A letter that has gone out, or is going out: read-only — the counts, the subject per language, the letter itself. */
@@ -18753,6 +18769,32 @@
   function admBarIdent() {
     return S.goodsNew || S.adminEdit || S.bundleForm || S.promoForm || S.partnerForm || null;
   }
+  /* ---- the cancel on the left, in two lengths ------------------------------
+     Ренат, 14.09.2026: «I'm not sure about on mobile if everything fits in the
+     upper save bar in each language… Check the sizes of the letters.» It did
+     not. The three bars that carry a status word — the mail texts, a
+     newsletter draft and the settings pages — said «Отменить правки» at every
+     width, and on a phone that word is the widest thing in the row: 144 px in
+     Russian, 165 px in Estonian («Tühista muudatused»). The status word is the
+     one element with `flex: 1 1 0`, so it is the one that gives way, and at
+     360 px it had 75 px for a «Не сохранено» that needs 89 — cut mid-word by
+     the ellipsis. At 375 px it cleared by 0,7 px in Russian and by nothing at
+     all in Estonian, which is not «fits», it is luck.
+
+     So the phone says «Отмена», the same word the four bars without a status
+     word have always used there and the one the row was designed around
+     (admin.css, «Отмена · state · Сохранить»); the desktop keeps the precise
+     «Отменить правки», where there is room for it. Same trick as the status
+     line's own `--long` / `--short` (admin.css ≤ 767 and ≥ 768), and each word
+     is its own text node so the dictionary translates it as the whole key it
+     already is.
+
+     One constant for all three bars: the squeeze is the shared bar's, not one
+     screen's, and a fix that lived in one of them would leave the other two
+     clipped. */
+  var SAVEBAR_CANCEL =
+    '<span class="adm-savebar__cancel--long">Отменить правки</span>' +
+    '<span class="adm-savebar__cancel--short">Отмена</span>';
   function admBarNoteState(kind) {
     var dirty = kind === "mail" ? mailDirty()
       : kind === "news" ? newsDirty()
@@ -18833,7 +18875,7 @@
     return note +
       '<button class="adm-btn adm-savebar__main' + (dirty.length ? "" : " adm-btn--ghost") + '" ' + attr + (dirty.length ? "" : " disabled") + ">" +
         (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      (dirty.length ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-setrevert>Отменить правки</button>' : "");
+      (dirty.length ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-setrevert>' + SAVEBAR_CANCEL + '</button>' : "");
   }
   function paintSetBar() {
     var bar = document.querySelector("[data-setbar]");
@@ -19267,8 +19309,8 @@
    * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
    * real country can be switched off, not a zone.
    * `cols` false leaves the carrier boxes out altogether — the European fold
-   * uses it, because not one of those twenty-one countries has a locker and
-   * twenty-one rows of four dashes is noise, not information.
+   * uses it, because the checkout offers a locker in none of those twenty-one
+   * countries and twenty-one rows of five dashes is noise, not information.
    */
   function admShipRowHTML(key, name, iso, cols) {
     var off = iso ? shipCountryOff(iso) : false;
@@ -19316,9 +19358,14 @@
    * from the zone whose price it overrides. Country names come from the
    * browser, so all three languages get them free.
    *
-   * Three columns inside, not seven: Montonio runs no parcel machine the shop
-   * can use to any of them, so the four carrier columns would be eighty-four
-   * dashes. The line above the list says that once instead.
+   * Three columns inside, not eight: the checkout offers a locker chip in none
+   * of them, so the five carrier columns would be a hundred and five dashes.
+   * The line above the list says that once instead.
+   *
+   * Nine of the twenty-one — AT, CZ, DE, ES, HU, IT, PL, RO, SK — do have a
+   * Nova Post locker Montonio prices, and Hungary and Romania have no other
+   * carrier at all. Offering them is a decision about what the customer sees,
+   * not a layout question, so the fold says «только курьер» until it is taken.
    */
   function admShipEuropeHTML() {
     return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
@@ -19328,7 +19375,7 @@
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Пакоматов тут нет ни у одного перевозчика — только курьер. ' +
+        '<p class="adm-hint" style="margin:0 0 10px">Пакоматов магазин в этих странах не предлагает — только курьер. ' +
           "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
         '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
           "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
@@ -20888,20 +20935,25 @@
   var SHIP_EU_COUNTRIES = ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "HU", "IE", "IT",
     "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
   var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
-  /* The four carrier columns of the rate table: the carriers Montonio quotes a
+  /* The carrier columns of the rate table: the carriers Montonio quotes a
      parcel-machine price for, which is exactly the set of cells
      carrierPriceTable() fills and quoteFromRules() can read. A country a
      carrier has no tariff for gets «—» in that column rather than a box — the
      shop cannot promise a price for a parcel Montonio will not quote.
 
-     Venipak is deliberately not here and has not been priced since the table
-     existed: Montonio sells it on a direct contract only and quotes no rate
-     out of Estonia. The checkout still lists it hopefully
-     (CARRIERS_BY_COUNTRY), so a Venipak locker — if a point feed ever answers
-     for one — goes on billing `methods.parcel`, the country's own fallback,
-     exactly as it does today. Nothing about that changed with the column. */
+     Venipak was never here and is not offered at all since 14.09.2026:
+     Montonio sells it on a direct contract only and quotes no rate out of
+     Estonia, so it had no cell to put in a column. Nova Post arrived the same
+     day with cells in EE, LV and LT; Finland has none — Montonio runs no Nova
+     Post locker there — so the Finnish row gets a dash in that column, the
+     third on that row beside Omniva's and Unisend's.
+
+     Five columns plus the country, the courier and «Бесплатно от» is eight
+     tracks on a desktop; admin.css .adm-tariffs--rates carries the count, and
+     ≤ 899 px the whole grid becomes two labelled fields per line instead. */
   var SHIP_CARRIER_COLS = [
-    ["omniva", "Omniva"], ["smartpost", "SmartPosti"], ["dpd", "DPD"], ["unisend", "Unisend"]
+    ["omniva", "Omniva"], ["smartpost", "SmartPosti"], ["dpd", "DPD"], ["unisend", "Unisend"],
+    ["novapost", "Nova Post"]
   ];
   /* `MONTONIO_TARIFFS` (raw per-carrier tariffs) and `MONTONIO_COST` (the
      per-country cost basis) stood here until 14.09.2026, with

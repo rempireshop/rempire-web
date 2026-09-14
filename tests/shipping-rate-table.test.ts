@@ -25,6 +25,17 @@ import {
  * carrier the storefront can tag — Venipak included, which is the one carrier
  * Montonio quotes no tariff for and therefore the only one that still reaches
  * `methods.parcel`, the column that left the screen.
+ *
+ * **Two carriers changed hands on 14.09.2026 and not one of these numbers
+ * moved.** Venipak was removed («Venipak does not seem to be available, so
+ * remove») and Nova Post restored («From montonio page there is Nova Post, so
+ * keep it actually»). Every Venipak literal below is **kept exactly as it
+ * was**: a delivery still tagged with Venipak — an old order, a stale tab —
+ * bills `methods.parcel` now as it did then, because Venipak never had a cell
+ * of its own to lose. That is the proof the removal moved no price, and it is
+ * worth more as a frozen literal than as a deleted line. NOVAPOST below is the
+ * new carrier's own column, added rather than merged in, so the two questions
+ * — «did anything move» and «what does the new one charge» — stay separable.
  */
 const FROZEN: Record<string, number> = {
   "EE|parcel|": 5.47, "EE|parcel|omniva": 3.19, "EE|parcel|smartpost": 2.59,
@@ -101,9 +112,40 @@ const FROZEN: Record<string, number> = {
   "US|parcel|unisend": 4.99, "US|courier|": 9.90, "US|pickup|": 0.00,
 };
 
+/**
+ * The column Nova Post added on 14.09.2026, kept apart from FROZEN on purpose.
+ *
+ * FROZEN is the "nothing moved" assertion and it has to stay readable as one:
+ * merging a new carrier's twenty-seven prices into it would make every future
+ * reader wonder which literals are the freeze and which are the new thing.
+ *
+ * Three of these are the carrier's own Montonio rate — EE 2,39, LV 4,79,
+ * LT 4,09, the only countries the checkout draws a Nova Post chip in. Finland
+ * is 12,39 because Montonio runs no Nova Post locker there, so the chip is not
+ * drawn and the tag falls through to `methods.parcel` — the same number every
+ * other carrier without a Finnish cell gets. Every remaining country falls
+ * through the same way, which is why each one equals its Venipak twin above.
+ */
+const NOVAPOST: Record<string, number> = {
+  "EE|parcel|novapost": 2.39, "LV|parcel|novapost": 4.79, "LT|parcel|novapost": 4.09,
+  "FI|parcel|novapost": 12.39, "AT|parcel|novapost": 37.29, "BE|parcel|novapost": 29.79,
+  "BG|parcel|novapost": 52.09, "CZ|parcel|novapost": 28.29, "DE|parcel|novapost": 29.79,
+  "DK|parcel|novapost": 23.89, "ES|parcel|novapost": 38.69, "FR|parcel|novapost": 44.69,
+  "GR|parcel|novapost": 4.99, "HR|parcel|novapost": 59.59, "HU|parcel|novapost": 4.99,
+  "IE|parcel|novapost": 52.09, "IT|parcel|novapost": 34.29, "LU|parcel|novapost": 35.79,
+  "NL|parcel|novapost": 29.79, "PL|parcel|novapost": 17.89, "PT|parcel|novapost": 41.69,
+  "RO|parcel|novapost": 4.99, "SE|parcel|novapost": 13.69, "SI|parcel|novapost": 40.19,
+  "SK|parcel|novapost": 26.79, "EU|parcel|novapost": 4.99, "US|parcel|novapost": 4.99,
+};
+
+const ALL = { ...FROZEN, ...NOVAPOST };
+
 const COUNTRIES = ["EE", "LV", "LT", "FI", "AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR",
   "HR", "HU", "IE", "IT", "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK", "EU", "US"];
-const CARRIERS = ["", "omniva", "smartpost", "dpd", "venipak", "unisend"];
+/* «venipak» stays in this list although the shop no longer offers it: the
+   question the freeze answers is what a delivery ALREADY tagged with it bills,
+   and the answer has to go on being the one above. */
+const CARRIERS = ["", "omniva", "smartpost", "dpd", "venipak", "unisend", "novapost"];
 
 /** Every price the checkout can ask for, keyed the way FROZEN is. */
 function priceEveryDelivery(rules: ShippingRules): Record<string, number> {
@@ -158,11 +200,11 @@ function carriersOf(rules: ShippingRules): Record<string, Record<string, number>
 
 describe("the rate table lost two columns and no price moved", () => {
   it("the defaults bill exactly what they billed before the screen changed", () => {
-    expect(priceEveryDelivery(DEFAULT_SHIPPING_RULES)).toEqual(FROZEN);
+    expect(priceEveryDelivery(DEFAULT_SHIPPING_RULES)).toEqual(ALL);
   });
 
   it("the shop's own stored row bills exactly what it billed before", () => {
-    expect(priceEveryDelivery(parseShippingRules(STORED_ROW))).toEqual(FROZEN);
+    expect(priceEveryDelivery(parseShippingRules(STORED_ROW))).toEqual(ALL);
   });
 
   /* The one key that was actually deleted from the shape. Every row the panel
@@ -171,7 +213,7 @@ describe("the rate table lost two columns and no price moved", () => {
      that still has a markup in it, not only for one that never did. */
   it("a stored markup — even a big one — changes nothing now that the key is dropped", () => {
     const withMarkup = { ...STORED_ROW, markup: { percent: 30, fixed: 5 } };
-    expect(priceEveryDelivery(parseShippingRules(withMarkup))).toEqual(FROZEN);
+    expect(priceEveryDelivery(parseShippingRules(withMarkup))).toEqual(ALL);
     expect((parseShippingRules(withMarkup) as unknown as Record<string, unknown>).markup).toBeUndefined();
   });
 
@@ -183,6 +225,35 @@ describe("the rate table lost two columns and no price moved", () => {
   it("the guard accepts the defaults and the shop's own stored row", () => {
     expect(belowCostCells(DEFAULT_SHIPPING_RULES)).toEqual([]);
     expect(belowCostCells(parseShippingRules(STORED_ROW))).toEqual([]);
+  });
+
+  /* Removing a carrier is the move that quietly changes a price, because the
+     stored row outlives the code: a `carriers.venipak` table written while the
+     panel still had the carrier is still in `settings.shipping_rules` after
+     the deploy that dropped it, and quoteFromRules() reads that map *before*
+     the method's own. So this is the removal's own proof — the same 216
+     numbers, out of a row that still carries Venipak, and a deliberately
+     absurd 0,01 € in it so a leak would be unmissable rather than a rounding
+     argument. */
+  it("a stored Venipak table changes no price at all — not even Venipak's", () => {
+    const stale = {
+      ...STORED_ROW,
+      carriers: { venipak: { EE: 0.01, LV: 0.01, LT: 0.01, FI: 0.01, default: 0.01 } },
+    };
+    expect(priceEveryDelivery(parseShippingRules(stale))).toEqual(ALL);
+    expect(parseShippingRules(stale).carriers?.venipak).toBeUndefined();
+    expect(belowCostCells(parseShippingRules(stale))).toEqual([]);
+  });
+
+  /* The other half of the same day: a carrier arriving must not move anything
+     either. Nova Post prices its own three cells and touches nothing else —
+     no country's «Курьер», no country's «Пакомат», no other carrier's chip. */
+  it("Nova Post prices its own column and moves nothing else", () => {
+    const priced = priceEveryDelivery(DEFAULT_SHIPPING_RULES);
+    for (const [k, v] of Object.entries(FROZEN)) expect([k, priced[k]]).toEqual([k, v]);
+    expect(priced["EE|parcel|novapost"]).toBe(2.39);   // cheapest chip in Estonia
+    expect(priced["LV|parcel|novapost"]).toBe(4.79);   // Unisend's 3,79 is still cheaper
+    expect(priced["LT|parcel|novapost"]).toBe(4.09);   // …and here too
   });
 });
 

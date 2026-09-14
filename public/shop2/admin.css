@@ -1274,6 +1274,14 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   /* the settings pages' long sentence («Изменения не сохранены: Главный
      баннер, Верхняя полоска») is the desktop's; the phone says one word */
   .adm-savebar__note--long { display: none; }
+  /* …and so is «Отменить правки». The status word between the two buttons is
+     the row's only flexible element, so whatever the cancel takes comes out of
+     it: at 360 px the long word left 75 px for a «Не сохранено» that needs 89,
+     and Estonian's «Loobu muudatustest» left 70 for an 86-px «Salvestamata».
+     «Отмена» / «Tühista» / «Cancel» are around half that, which is what puts
+     ~150 px under a word that needs 89 — and it is the same «Отмена» the bars
+     without a status word have always shown here. */
+  .adm-savebar__cancel--long { display: none; }
   /* margin-left auto: the button keeps the right edge even when it is the
      row's only child — the settings bar after a save has no status word and
      no «Отменить правки», and «Сохранено ✓» must not jump to the left */
@@ -1291,6 +1299,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    desktop their buttons say enough, and the settings bar keeps its own line */
 @media (min-width: 768px) {
   .adm-savebar__note--phone, .adm-savebar__note--short { display: none; }
+  /* the desktop has room for the exact word, so it says it */
+  .adm-savebar__cancel--short { display: none; }
 }
 
 /* ---------- Салон (POS) ---------------------------------------------------- */
@@ -1877,16 +1887,19 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-tariffs--off .adm-input { opacity: .55; }
 /* ---------- the rate table, 14.09.2026 -------------------------------------
    One row per country: a column for every carrier Montonio prices there, then
-   the courier and the free-from threshold. Seven columns on a desktop — and a
-   375 px phone cannot hold seven, so there the row stops being a row: the
-   @media block at the foot of this file turns every .adm-tariffs into a card
-   whose columns are labelled fields, two to a line (.adm-tariffs__l). That is
-   deliberately NOT a sideways scroll: the panel's scrollers fade at the edge
-   and a faded edge still hides a number, which on a screen of prices is the
-   one thing that must not happen. */
-.adm-tariffs--rates { grid-template-columns: 1.25fr repeat(6, minmax(0, 1fr)); gap: 8px 6px; }
-/* the twenty-one European countries: nobody runs a locker to them, so the four
-   carrier columns would be eighty-four dashes — three columns instead */
+   the courier and the free-from threshold. Eight columns on a desktop since
+   Nova Post joined — and a 375 px phone could not hold seven, never mind
+   eight, so there the row stops being a row: the @media block at the foot of
+   this file turns every .adm-tariffs into a card whose columns are labelled
+   fields, two to a line (.adm-tariffs__l). That is deliberately NOT a sideways
+   scroll: the panel's scrollers fade at the edge and a faded edge still hides
+   a number, which on a screen of prices is the one thing that must not happen.
+   So a carrier column costs the phone one more labelled field, not a pixel of
+   width — which is why adding Nova Post needed no new breakpoint. */
+.adm-tariffs--rates { grid-template-columns: 1.25fr repeat(7, minmax(0, 1fr)); gap: 8px 6px; }
+/* the twenty-one European countries: the checkout offers a locker in none of
+   them, so the five carrier columns would be a hundred and five dashes —
+   three columns instead */
 .adm-tariffs--eu { grid-template-columns: 1.25fr minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .adm-rates__c { display: block; min-width: 0; }
 /* prices line up digit under digit: a column of money read at a glance is the
@@ -1908,6 +1921,25 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: block; width: 100%; text-align: left; background: none; border: 0;
   font: inherit; font-size: 11px; line-height: 14px; padding: 8px 0 8px; margin-top: -5px;
   color: var(--a-muted); text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+/* …and on a phone it is a thumb target, not a footnote. Measured 14.09.2026 at
+   375 and 360 px: 39 px tall where the sentence wrapped to two lines and 30 px
+   where it did not, both under the 44 the panel promises everywhere else. The
+   height goes on the button rather than on `.adm-hint--cell` above it, because
+   the plain hint beside it is a line of text nobody taps and 44 px of it would
+   space the table out for nothing. Flex rather than a line-height, so the
+   wrapped two-line reading centres in the taller box exactly as the one-line
+   one does — keeping those two the same height is what the min-height above
+   is for. */
+@media (max-width: 899px) {
+  /* `.adm-rates__c` in the selector is load-bearing, not decoration: the
+     min-height it has to beat is `.adm-rates__c .adm-hint--cell`'s 30 px, two
+     classes to this rule's one, and a bare `.adm-rates__undo` here lost to it
+     silently — the button came out 35 px and the measurement, not the reading,
+     is what caught it. */
+  .adm-rates__c .adm-rates__undo {
+    min-height: 44px; display: flex; align-items: center; padding: 4px 0; margin-top: -3px;
+  }
 }
 .adm-rates__undo.adm-hint--loss { color: var(--a-warn); font-weight: 600; }
 .adm-rates__undo:hover { color: var(--a-ink); }

@@ -65,16 +65,22 @@ const SOURCE_COUNTRY = "EE";
 const VAT_EE = 0.24;
 
 /**
- * Montonio's `carrierCode` values, from the calculator bundle's own enum —
- * minus `novaPost`, which is deliberately not asked for.
+ * Montonio's `carrierCode` values, from the calculator bundle's own enum.
  *
- * Nova Post (Montonio International Shipping) is a carrier the shop does not
- * offer and Renat asked to have gone («Remove "Nova Post"», 13.09.2026). It
- * used to be fetched into the mirror and then filtered out again at every
- * place that reads it, which is one filter too many to trust: leaving it out
- * of the *fetch* is what makes a rebuild of this file unable to bring it back.
+ * `novaPost` is back (Ренат, 14.09.2026: «From montonio page there is Nova
+ * Post, so keep it actually… Nova Post is marked as international shipping»).
+ * It was taken out of this list on 13.09.2026 so that a rebuild could not
+ * bring its rows back; the shop has since decided to offer it, so the mirror
+ * has to carry what Montonio charges for it again.
+ *
+ * `venipak` stays in the list even though the shop no longer offers it: the
+ * endpoint answers `[]` for every Venipak route out of Estonia, and that empty
+ * answer is what puts it in `noMontonioContractPrice` — the written-down proof
+ * that «Montonio quotes no Venipak price», which is the reason it went. Asking
+ * costs one request per route and keeps the file able to say so; the carrier
+ * being offered or not is decided in SHOP_CARRIERS, not here.
  */
-const CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend", "latvian_post", "inpost", "orlen"];
+const CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend", "novaPost", "latvian_post", "inpost", "orlen"];
 
 /**
  * Everywhere the checkout can send a parcel: the four countries with a row of

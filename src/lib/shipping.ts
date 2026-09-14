@@ -51,10 +51,12 @@ export interface ShippingRules {
    * LT and FI and `carriers` below bills that, and no other country offers a
    * parcel machine at all — so the column the owner read as «цена пакомата»
    * was the one number in the table almost nobody paid. It stays in the data
-   * and stays honoured, because it is still the price of the two deliveries
-   * that reach it: a carrier the tariff table has no row for (Venipak), and a
-   * method string `normalizeMethod()` could only read as «parcel». Removing
-   * the key would have changed both bills; removing the column changed none.
+   * and stays honoured, because it is still the price of the deliveries that
+   * reach it: a parcel tagged with a carrier the tariff table has no cell for
+   * — an old order's Venipak, since 14.09.2026, or a Finnish Nova Post locker
+   * Montonio prices no route to — and a method string `normalizeMethod()`
+   * could only read as «parcel». Removing the key would change those bills;
+   * removing the column changed none.
    * `pickup` is free before any table is read — see quoteFromRules().
    */
   methods: Record<ShipMethod, Record<string, number>>;
@@ -125,14 +127,17 @@ export interface ShippingQuote {
  *
  * **The audit's cost column was optimistic and this table is not.** It quoted
  * the cheapest carrier Montonio prices for each route — which for Germany,
- * Italy, Poland and half the others was **Nova Post** (Montonio International
- * Shipping): a product the shop never activated, had no carrier row for, never
- * named in the storefront, and which supports no returns at all. Renat asked
- * for it to be gone on 13.09.2026 and it is: no rows in the mirror, no name in
- * the code. Against the carriers the shop can actually put a parcel on, the
- * cheapest courier to Poland is 20.66 €, not 8.51 €. So 9.90 € covered the
- * courier in **no** European country — not even the one the audit found it
- * covered.
+ * Italy, Poland and half the others is **Nova Post** (Montonio International
+ * Shipping). The shop offers Nova Post again since 14.09.2026 («From montonio
+ * page there is Nova Post, so keep it actually»), but only as a chip a shopper
+ * taps under «Пакомат» in EE, LV and LT: it prices itself and nothing else.
+ * Those low numbers are still not the basis of any country's price, because
+ * the basis is the carrier *Renat* picks at the label and Nova Post takes no
+ * returns at all — see CHIP_ONLY_CARRIERS in
+ * src/lib/shipping/country-prices.ts. Against the carriers a country price is
+ * computed from, the cheapest courier to Poland is 20.66 €, not 8.51 €. So
+ * 9.90 € covered the courier in **no** European country — not even the one the
+ * audit found it covered.
  *
  * What is kept deliberately:
  *   · **EE 5.47 / 10.84 and the LV, LT courier at 9.90.** All three sit above
@@ -345,13 +350,15 @@ export function parseShippingRules(value: unknown): ShippingRules {
      would mean one typed Estonian DPD price silently blanked DPD everywhere
      else, and the shop would be back to one number per country.
 
-     Only carriers the shop can actually put a parcel on survive the read. Nova
-     Post was removed on 13.09.2026 («Remove "Nova Post"»), but the live shop's
-     settings row already carries a `carriers.novapost` table from the days the
-     fill button wrote one, and a row written once outlives the code that wrote
+     Only carriers the shop can actually put a parcel on survive the read —
+     SHOP_CARRIERS, and this is the one door every reader of the stored row
+     comes through. Venipak went on 14.09.2026 («Venipak does not seem to be
+     available, so remove») and the live shop's settings row can still carry a
+     `carriers.venipak` table; a row written once outlives the code that wrote
      it. A carrier the checkout can never send would only ever be a price nobody
      can reach — and quoteFromRules() reads `rules.carriers?.[carrier]` before
-     the method's own table, so a stale entry is not inert, it is a trapdoor. */
+     the method's own table, so a stale entry is not inert, it is a trapdoor.
+     Dropped here rather than trusted to stay unused. */
   const carriers = raw.carriers;
   const out: Record<string, Record<string, number>> = {};
   for (const [name, table] of Object.entries(DEFAULT_SHIPPING_RULES.carriers ?? {})) {
@@ -468,7 +475,7 @@ const COUNTRY_RU: Record<string, string> = {
 };
 
 const CARRIER_RU: Record<string, string> = {
-  omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend",
+  omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", unisend: "Unisend", novapost: "Nova Post",
 };
 
 /** `7,89 €` — the panel's own spelling, so the sentence reads like the screen. */

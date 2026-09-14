@@ -10,7 +10,7 @@ import {
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
- * GET /api/shipping/points/?country=EE&carrier=omniva|dpd|smartpost|venipak|all
+ * GET /api/shipping/points/?country=EE&carrier=omniva|dpd|smartpost|unisend|novapost|all
  *   → { ok: true, points: [{ id, carrier, name, address, city, zip, lat, lng, type }] }
  *
  * The checkout's parcel-machine picker. Cached hard at the edge (an hour) and

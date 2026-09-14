@@ -26,22 +26,51 @@
  *     that carrier's name beside it so he knows which one the price assumed.
  *     That is `cheapestCost()`.
  *
- * ## Nova Post is gone (Ренат, 13.09.2026)
+ * ## Nova Post is back, as a chip and nothing else (Ренат, 14.09.2026)
  *
- * docs/audit/2026-09-07-shipping-returns.md quotes «Германия 12,91 €,
- * Италия 18,43 €, Польша 8,51 €». Those were **Nova Post** prices — Montonio
- * International Shipping, a separate product the shop never offered: not in
- * MONTONIO_CARRIERS, no carrier row in the admin, never named by the
- * storefront, and no returns at all (help.montonio.com/en/articles/431075).
- * Pricing off it would have sold every European order below cost, so it was
- * filtered out everywhere it was read — and then Renat asked for it to be
- * gone outright. Its rows are no longer in the mirror and
- * tools/fetch-montonio-tariffs.mjs no longer asks Montonio for them, so a
- * rebuild cannot put them back.
+ * «From montonio page there is Nova Post, so keep it actually… Nova Post is
+ * marked as international shipping.» So it is a carrier the shop offers again:
+ * its rows are in the mirror, it is in SHOP_CARRIERS, the checkout draws its
+ * chip and the rate screen has a column for it.
  *
- * Against the carriers the shop *can* use, the cheapest courier to Germany is
- * 22.23 € (SmartPosti) and to Poland 20.66 € — so 9.90 € covers the courier in
- * **no** European country, not even the one the audit found it covered.
+ * It is offered **only where the shopper picks a carrier from a chip** — the
+ * parcel machines of EE, LV and LT (it has no Finnish locker). That is the
+ * whole of it, and `CHIP_ONLY_CARRIERS` below is what holds the line, because
+ * the same rows reach two very different decisions:
+ *
+ *   · **a chip** is a price the shopper opts into, carrier named on the
+ *     button. Nova Post's EE locker costs 2.33 € against Unisend's 2.47 €, and
+ *     whoever taps it gets that. Nothing else moves.
+ *   · **a country/method basis** is the price everyone pays, chip or no chip,
+ *     and the carrier is picked later by Renat at the label. Nova Post is the
+ *     cheapest courier on fourteen routes and the cheapest locker on nine, so
+ *     letting it into `rowsFor()` would silently reprice most of Europe
+ *     downwards — EE courier 6.82 → 4.76, DE courier 22.23 → 12.91 — and
+ *     commit the shop to actually putting those parcels on Montonio
+ *     International Shipping, which has **no returns at all**
+ *     (help.montonio.com/en/articles/431075). Nobody asked for that.
+ *
+ * docs/audit/2026-09-07-shipping-returns.md's headline numbers («Германия
+ * 12,91 €, Италия 18,43 €, Польша 8,51 €») are exactly those Nova Post rows.
+ * `cheapestCostAnyCarrier()` is the view that shows them, so the admin and the
+ * docs can say what switching Nova Post on as a basis would be worth without
+ * any price actually moving.
+ *
+ * Against the carriers that *are* the basis, the cheapest courier to Germany
+ * is 22.23 € (SmartPosti) and to Poland 20.66 € — so 9.90 € covers the courier
+ * in **no** European country, not even the one the audit found it covered.
+ *
+ * ## Venipak is gone (Ренат, 14.09.2026)
+ *
+ * «Venipak does not seem to be available, so remove.» Montonio quotes no
+ * Venipak price out of Estonia at all — the contract-price endpoint answers
+ * `[]` for every route, which is what `noMontonioContractPrice` in
+ * src/data/montonio-tariffs.json records — so it never had a row here, a
+ * column on the rate screen or a cost of its own. What it had was a chip the
+ * checkout drew hopefully and a cell in a stored settings row, and both are
+ * now gone: it is out of SHOP_CARRIERS, which is the list `parseShippingRules()`
+ * filters a stored row through, so a `carriers.venipak` entry written in the
+ * past is read as if it were not there.
  *
  * Every price here includes Estonian VAT, like the shelf prices they are
  * compared against; `src/data/montonio-tariffs.json` keeps the ex-VAT original.
@@ -69,8 +98,32 @@ const RATES: StaticRateRow[] = (montonioTariffsData as { rates: StaticRateRow[] 
  * row for and the storefront can name. Identical to MONTONIO_CARRIERS in
  * src/lib/shipping/montonio.ts — restated rather than imported to keep this
  * module a leaf, and asserted equal in tests/shipping-country-prices.test.ts.
+ *
+ * `venipak` left on 14.09.2026 and `novapost` joined the same day; see the
+ * two sections at the top of this file for both.
  */
-export const SHOP_CARRIERS: readonly string[] = ["omniva", "smartpost", "dpd", "venipak", "unisend"];
+export const SHOP_CARRIERS: readonly string[] = ["omniva", "smartpost", "dpd", "unisend", "novapost"];
+
+/**
+ * Of those, the ones offered **only** as a chip the shopper taps — never as
+ * the carrier a country/method price is computed from.
+ *
+ * A carrier reaches a bill two ways. As a chip it prices itself: its own cell,
+ * its own Montonio rate, its name on the button, and only under «Пакомат» in
+ * CARRIER_CHOICE_COUNTRIES. As a *basis* it prices the country — the courier
+ * line, and the locker in every country with no chips — and there the carrier
+ * is chosen afterwards, by Renat at the label, so the price has to be one he
+ * can actually honour.
+ *
+ * Nova Post is a chip. It is Montonio International Shipping, it is the
+ * cheapest quote on most routes it covers, and it supports no returns at all —
+ * so pricing the whole of Europe off it would drop ~20 shelf prices and bind
+ * every one of those parcels to a carrier the shop cannot take a return
+ * through. Whether to do that is a decision of its own;
+ * `cheapestCostAnyCarrier()` is what lets the admin and the docs price it up
+ * without moving a cent in the meantime.
+ */
+export const CHIP_ONLY_CARRIERS: readonly string[] = ["novapost"];
 
 /**
  * The four countries whose checkout lets the shopper choose the carrier, and
@@ -100,18 +153,27 @@ export interface CountryCost {
 }
 
 /**
- * The mirror's rows for one route, minus any carrier the shop cannot pick.
+ * The mirror's rows for one route that a *basis* price may be computed from:
+ * a carrier the shop can pick, and not one that is only ever a chip.
  *
- * The filter no longer removes anything from today's mirror — Nova Post was
- * the only carrier in it the shop could not use, and it is gone. It stays
- * because tools/fetch-montonio-tariffs.mjs still asks Montonio for
- * `latvian_post`, `inpost` and `orlen`: the day one of those starts answering,
- * a price the checkout cannot offer must not become the basis of a shelf price.
+ * `all` keeps every carrier the shop offers, chips included — the "what would
+ * change if Nova Post priced the route" view, and the only caller is
+ * `cheapestCostAnyCarrier()`.
+ *
+ * The SHOP_CARRIERS half of the filter removes nothing from today's mirror.
+ * It stays because tools/fetch-montonio-tariffs.mjs still asks Montonio for
+ * `venipak`, `latvian_post`, `inpost` and `orlen`: the day one of those starts
+ * answering, a price the checkout cannot offer must not become the basis of a
+ * shelf price.
  */
-function rowsFor(country: string, method: CostMethod): StaticRateRow[] {
+function rowsFor(country: string, method: CostMethod, all = false): StaticRateRow[] {
   const cc = String(country || "").toUpperCase();
   return RATES.filter(
-    (r) => r.country.toUpperCase() === cc && r.method === method && SHOP_CARRIERS.includes(r.carrier),
+    (r) =>
+      r.country.toUpperCase() === cc &&
+      r.method === method &&
+      SHOP_CARRIERS.includes(r.carrier) &&
+      (all || !CHIP_ONLY_CARRIERS.includes(r.carrier)),
   );
 }
 
@@ -133,12 +195,20 @@ export function ceilingCost(country: string, method: CostMethod): CountryCost | 
   return pick(rowsFor(country, method), true);
 }
 
-/* `cheapestCostAnyCarrier()` lived here until 13.09.2026. It was the one
-   function whose whole purpose was the Nova Post view — "what the route would
-   cost if Montonio International Shipping were switched on" — and with those
-   rows out of the mirror it answered exactly what cheapestCost() answers. No
-   production code ever called it; only the test that checked the two differed.
-   It is in git at e9f20c8. */
+/**
+ * The cheapest of *every* carrier the shop offers, chips included — which
+ * today means "with Nova Post allowed to price the route".
+ *
+ * Not a price anything charges: `costBasis()` below never reads it. It is the
+ * «what would switching Montonio International Shipping on be worth» number,
+ * and it exists so the admin, the docs and a report can put a figure on that
+ * question without any code having to move a price to find out. Germany's
+ * courier is 22.23 € the way the shop prices it and 12.91 € this way; the
+ * difference is what the decision is about.
+ */
+export function cheapestCostAnyCarrier(country: string, method: CostMethod): CountryCost | null {
+  return pick(rowsFor(country, method, true), false);
+}
 
 /**
  * The cost a shelf price for this country has to cover: the dearest carrier

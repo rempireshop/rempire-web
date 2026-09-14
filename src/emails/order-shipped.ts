@@ -82,6 +82,14 @@ function carrierUrl(carrier: string, code: string, lang: Lang): string {
   if (/venipak/.test(c)) {
     return `https://venipak.com/en/tracking/?tracking_id=${q}`;
   }
+  /* Nova Post (Montonio International Shipping) before the `post` branch
+     below, which would otherwise send a Nova Post parcel to Omniva's page:
+     "novapost" contains "post". No URL of its own on purpose — Montonio sends
+     the tracking link with the shipment (`tracking.url`, preferred above), and
+     a guessed page is worse than the account page the caller falls back to. */
+  if (/nova ?post/.test(c)) {
+    return "";
+  }
   if (/post|eesti/.test(c)) {
     return `https://www.omniva.ee/private/track-and-trace?barcode=${q}`;
   }

@@ -75,7 +75,8 @@ export type OrderItem = {
 export type OrderShipping = {
   method: string;
   country: string;
-  /** Parcel-machine operator: omniva | smartpost | dpd | venipak | unisend. */
+  /** Parcel-machine operator: omniva | smartpost | dpd | unisend | novapost
+      (and «venipak» on orders placed before 14.09.2026). */
   carrier?: string | null;
   pointId?: string | null;
   pointName?: string | null;
@@ -1107,7 +1108,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
    (docs/features.md § «Только подарочные карты»). It is refused for any order
    that also holds something physical (not_digital, below). */
 const SHIP_METHODS = ["parcel", "courier", "pickup", "digital"] as const;
-const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"] as const;
+/* What a NEW order may be tagged with — MONTONIO_CARRIERS, the carriers the
+   checkout draws a chip for. Venipak left the list on 14.09.2026 and Nova Post
+   joined it; orders already in the database keep whatever they were stored
+   with, because this runs on the way in and never on the way out. */
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "unisend", "novapost"] as const;
 /** Address fields the checkout actually sends. Anything else is dropped. */
 const SHIP_ADDRESS_KEYS = ["addr", "street", "zip", "city", "house", "flat"] as const;
 

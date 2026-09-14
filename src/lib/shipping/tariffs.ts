@@ -41,6 +41,8 @@ import {
 export {
   ceilingCost,
   cheapestCost,
+  cheapestCostAnyCarrier,
+  CHIP_ONLY_CARRIERS,
   costBasis,
   countryPriceTable,
   customerPrice,

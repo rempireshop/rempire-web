@@ -208,7 +208,12 @@ test.describe("«Доставка и оплата» — the customer page", () =
          the below-cost guard has nothing to say about it. */
       const patched = JSON.parse(JSON.stringify(before ?? {}));
       patched.carriers = patched.carriers ?? {};
-      for (const carrier of ["omniva", "smartpost", "dpd", "venipak", "unisend"]) {
+      /* The list is the shop's carriers as of 14.09.2026 — Venipak out, Nova
+         Post in (CARRIERS_BY_COUNTRY in public/shop2/app.js). It has to be
+         complete: the row prints «от …» the moment two of a country's chips
+         differ, so one carrier missed here turns this assertion's single price
+         back into a range and the test fails on its own staleness. */
+      for (const carrier of ["omniva", "smartpost", "dpd", "unisend", "novapost"]) {
         patched.carriers[carrier] = { ...(patched.carriers[carrier] ?? {}), LV: 6.66 };
       }
       patched.methods = patched.methods ?? {};

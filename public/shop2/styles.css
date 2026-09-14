@@ -1748,8 +1748,15 @@ button, a, summary, label { touch-action: manipulation; }
 .carrier[data-carrier="omniva"]::before { background: #f47a20; }
 .carrier[data-carrier="dpd"]::before { background: #dc0032; }
 .carrier[data-carrier="smartpost"]::before { background: linear-gradient(135deg, #ffcf00 50%, #111 50%); }
-.carrier[data-carrier="venipak"]::before { background: #1e4b9d; }
 .carrier[data-carrier="unisend"]::before { background: #7dd957; }
+/* Nova Post: its red over its dark, split down the middle. A flat #da291c
+   would be the third warm circle in an Estonian row that already has DPD's
+   #dc0032 and Omniva's #f47a20 — three reds at 10 px is no cue at all — and
+   the split reads apart from SmartPosti's diagonal too. The colour is never
+   the only cue in any case: the carrier's name is beside every circle.
+   Venipak's #1e4b9d lived here until 14.09.2026; the shop does not offer it,
+   so a chip for it is never drawn. */
+.carrier[data-carrier="novapost"]::before { background: linear-gradient(90deg, #da291c 50%, #1a1a1a 50%); }
 .carrier[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
 
 .pointbtn {

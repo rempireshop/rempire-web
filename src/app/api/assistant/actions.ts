@@ -319,8 +319,11 @@ const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
 /* The same five the order validator accepts (SHIP_CARRIERS in
    src/lib/orders.ts). «unisend» was missing here, so a tariff the owner asked
    the assistant to set for Unisend was dropped without a word — the card said
-   «Применено ✓» and the price stayed what it was. */
-const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"];
+   «Применено ✓» and the price stayed what it was. Venipak left and Nova Post
+   joined on 14.09.2026; a tariff for a carrier the shop does not offer is
+   dropped by parseShippingRules() anyway, so naming one here would be the same
+   silent nothing. */
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "unisend", "novapost"];
 
 /** 0–99 €, two decimals. A price outside that is a typo, not a tariff. */
 function shipPrice(raw: unknown): number | null {

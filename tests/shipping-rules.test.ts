@@ -74,13 +74,17 @@ describe("what the assistant may do to the delivery prices", () => {
      so a Unisend price the owner asked for was dropped without a word — the
      confirm card still said «Применить» and the tariff never moved. */
   it("takes a price for every carrier the shop ships with, Unisend included", () => {
-    for (const carrier of ["omniva", "smartpost", "dpd", "venipak", "unisend"]) {
+    for (const carrier of ["omniva", "smartpost", "dpd", "unisend", "novapost"]) {
       expect(sanitizeShippingRules({ carriers: { [carrier]: { EE: 4.5 } } }), carrier)
         .toEqual({ carriers: { [carrier]: { EE: 4.5 } } });
     }
     // …and the name as the model is likeliest to write it
     expect(sanitizeShippingRules({ carriers: { Unisend: { LV: 5.2 } } }))
       .toEqual({ carriers: { unisend: { LV: 5.2 } } });
+    // Venipak is not one of them since 14.09.2026 («Venipak does not seem to
+    // be available, so remove»), so asking for a Venipak price is asking for
+    // nothing — and the card must not claim it applied one
+    expect(sanitizeShippingRules({ carriers: { venipak: { EE: 4.5 } } })).toBe(null);
   });
 
   it("handles the free-shipping floor, null included", () => {
@@ -186,30 +190,43 @@ describe("the rules the shop actually bills on", () => {
     expect(rules.methods.parcel.LV).toBe(DEFAULT_SHIPPING_RULES.methods.parcel.LV);
   });
 
-  /* Ренат, 13.09.2026: «Remove "Nova Post"». The live shop's settings row
-     already carries a `carriers.novapost` table written by the fill button
-     back when the mirror had Nova Post rows, and a row written once outlives
-     the code that wrote it. quoteFromRules() reads `rules.carriers?.[carrier]`
+  /* Ренат, 14.09.2026: «Venipak does not seem to be available, so remove».
+     The live shop's settings row can still carry a `carriers.venipak` table —
+     the fill button wrote whole tables, and a row written once outlives the
+     code that wrote it. quoteFromRules() reads `rules.carriers?.[carrier]`
      *before* the method's own table, so a stale entry is not inert — it is a
      price nobody can reach that would win if an order ever carried that
      carrier. parseShippingRules() is the one door every reader comes through,
      so it is where the row is dropped. */
-  it("ignores a carrier the shop cannot ship with, Nova Post included", () => {
+  it("ignores a carrier the shop cannot ship with, Venipak included", () => {
     const rules = parseShippingRules({
-      carriers: { novapost: { EE: 0.01, default: 0.01 }, omniva: { EE: 3.29 } },
+      carriers: { venipak: { EE: 0.01, default: 0.01 }, omniva: { EE: 3.29 } },
     });
-    expect(rules.carriers?.novapost).toBeUndefined();
+    expect(rules.carriers?.venipak).toBeUndefined();
     // the typed Estonian cell wins; the rest of Omniva stays on the mirror
     expect(rules.carriers?.omniva?.EE).toBe(3.29);
     expect(rules.carriers?.omniva?.LV).toBe(DEFAULT_SHIPPING_RULES.carriers?.omniva?.LV);
-    // …and a parcel tagged with Nova Post is billed the method's price, not 0.01 €
-    expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "novapost", subtotal: 10 }).price)
+    // …and a parcel tagged with Venipak is billed the method's price, not 0.01 €
+    expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "venipak", subtotal: 10 }).price)
       .toBe(DEFAULT_SHIPPING_RULES.methods.parcel.EE);
   });
 
   it("drops a carriers map that holds nothing the shop can use", () => {
-    expect(parseShippingRules({ carriers: { novapost: { EE: 0.01 } } }).carriers)
+    expect(parseShippingRules({ carriers: { venipak: { EE: 0.01 } } }).carriers)
       .toEqual(DEFAULT_SHIPPING_RULES.carriers);
+  });
+
+  /* …and the carrier that came the other way on the same day. Nova Post is in
+     SHOP_CARRIERS now, so a stored cell for it is the owner's number and is
+     kept — the read is a whitelist, not a blanket refusal, and the two halves
+     have to be asserted separately or one list could quietly swallow both. */
+  it("keeps a stored Nova Post cell, which the shop does ship with again", () => {
+    const rules = parseShippingRules({ carriers: { novapost: { EE: 2.9 } } });
+    expect(rules.carriers?.novapost?.EE).toBe(2.9);
+    // the cells he did not type stay on Montonio's own prices
+    expect(rules.carriers?.novapost?.LV).toBe(DEFAULT_SHIPPING_RULES.carriers?.novapost?.LV);
+    expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "novapost", subtotal: 10 }).price)
+      .toBe(2.9);
   });
 
   /* Ренат, 13.09.2026: «we get prices from Montonio and we should use those,

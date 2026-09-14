@@ -15,8 +15,11 @@ import { DEFAULT_SHIPPING_RULES, quoteFromRules } from "@/lib/shipping";
 import { MONTONIO_CARRIERS } from "@/lib/shipping/montonio";
 import {
   CARRIER_CHOICE_COUNTRIES,
+  carrierPriceTable,
   ceilingCost,
   cheapestCost,
+  cheapestCostAnyCarrier,
+  CHIP_ONLY_CARRIERS,
   costBasis,
   countryPriceTable,
   customerPrice,
@@ -32,6 +35,9 @@ const RATES = (montonioTariffsData as { rates: { carrier: string; country: strin
   .rates;
 /** The per-carrier reachability index the fetch tool writes beside the rates. */
 const COVERAGE = (montonioTariffsData as { coverage: Record<string, unknown> }).coverage;
+/** Carriers Montonio quotes nowhere out of Estonia — "direct contract only". */
+const NO_CONTRACT_PRICE = (montonioTariffsData as { noMontonioContractPrice: string[] })
+  .noMontonioContractPrice;
 
 describe("which carriers count", () => {
   /* The list is restated in country-prices.ts to keep that module a leaf (no
@@ -41,21 +47,57 @@ describe("which carriers count", () => {
     expect([...SHOP_CARRIERS].sort()).toEqual([...MONTONIO_CARRIERS].sort());
   });
 
-  /* Ренат, 13.09.2026: «Remove "Nova Post"». It used to be in the mirror and
-     filtered out at every place that read it; now it is not in the mirror at
-     all, and tools/fetch-montonio-tariffs.mjs does not ask Montonio for it,
-     so a rebuild of the table cannot bring it back. Both halves are asserted
-     because either one alone would let it return. */
-  it("has no Nova Post anywhere — not in the list, not in the table", () => {
-    expect(SHOP_CARRIERS).not.toContain("novapost");
-    expect(RATES.some((r) => r.carrier === "novapost")).toBe(false);
-    expect(Object.keys(COVERAGE)).not.toContain("novapost");
+  /* Ренат, 14.09.2026: «From montonio page there is Nova Post, so keep it
+     actually… Venipak does not seem to be available, so remove.» */
+  it("offers Nova Post and not Venipak", () => {
+    expect(SHOP_CARRIERS).toContain("novapost");
+    expect(SHOP_CARRIERS).not.toContain("venipak");
+    // 26 rows and a coverage block, back from Montonio's own endpoint
+    expect(RATES.filter((r) => r.carrier === "novapost")).toHaveLength(26);
+    expect(Object.keys(COVERAGE)).toContain("novapost");
+    // Venipak has no row to lose: Montonio quotes no price for it out of
+    // Estonia at all, which is what `noMontonioContractPrice` records
+    expect(RATES.some((r) => r.carrier === "venipak")).toBe(false);
+    expect(NO_CONTRACT_PRICE).toContain("venipak");
   });
 
-  it("every carrier left in the table is one the shop can pick", () => {
+  it("every carrier in the table is one the shop can pick", () => {
     const carriers = [...new Set(RATES.map((r) => r.carrier))].sort();
-    expect(carriers).toEqual(["dpd", "omniva", "smartpost", "unisend"]);
+    expect(carriers).toEqual(["dpd", "novapost", "omniva", "smartpost", "unisend"]);
     for (const c of carriers) expect(SHOP_CARRIERS).toContain(c);
+  });
+
+  /* The line that keeps Nova Post a chip. It is in SHOP_CARRIERS — the
+     checkout names it, the rate screen has a column for it — and it is in
+     CHIP_ONLY_CARRIERS, so `rowsFor()` will not let it price a country. Both
+     have to hold: in the first list alone it would reprice most of Europe
+     downwards, in neither it would not exist. */
+  it("keeps Nova Post out of every basis, and only Nova Post", () => {
+    expect(CHIP_ONLY_CARRIERS).toEqual(["novapost"]);
+    for (const c of CHIP_ONLY_CARRIERS) expect(SHOP_CARRIERS).toContain(c);
+    for (const country of MONTONIO_COUNTRIES) {
+      for (const m of ["parcel", "courier"] as const) {
+        expect(cheapestCost(country, m)?.carrier, `${country}/${m}`).not.toBe("novapost");
+        expect(ceilingCost(country, m)?.carrier, `${country}/${m}`).not.toBe("novapost");
+        expect(costBasis(country, m)?.carrier, `${country}/${m}`).not.toBe("novapost");
+      }
+    }
+  });
+
+  /* …and the countries it must not open. Nova Post has a locker Montonio
+     prices in nine countries with no chips — AT CZ DE ES HU IT PL RO SK, and
+     Hungary and Romania have no other carrier at all — so letting it into the
+     basis would put a parcel price on two countries that have never had one.
+     Offering a locker somewhere new is a decision about what the customer
+     sees; this is the assertion that it has not been taken by accident. */
+  it("opens no parcel machine in a country that had none", () => {
+    expect(CARRIER_CHOICE_COUNTRIES).toEqual(["EE", "LV", "LT", "FI"]);
+    const parcel = countryPriceTable().parcel;
+    expect(parcel.HU).toBeUndefined();
+    expect(parcel.RO).toBeUndefined();
+    expect(cheapestCostAnyCarrier("HU", "parcel")).toEqual({ price: 10.24, carrier: "novapost" });
+    // …and a Nova Post cell exists in exactly the three Baltic countries
+    expect(Object.keys(carrierPriceTable().novapost).sort()).toEqual(["EE", "LT", "LV"]);
   });
 });
 
@@ -71,15 +113,19 @@ describe("cost: cheapest, dearest, and the one the audit quoted", () => {
     expect(ceilingCost("EE", "parcel")).toEqual({ price: 3.1, carrier: "omniva" });
   });
 
-  /* The audit's headline numbers — «Германия 12,91 €, Польша 8,51 €» — were
-     Nova Post's, and `cheapestCostAnyCarrier()` existed only to show them.
-     With those rows gone there is no second view left to keep: the cheapest
-     carrier in the table IS the cheapest the shop can pick. This is the
-     assertion that catches a mirror rebuild quietly putting them back. */
-  it("the audit's cheap numbers are not reachable from the table any more", () => {
+  /* The audit's headline numbers — «Германия 12,91 €, Польша 8,51 €» — are
+     Nova Post's, and `cheapestCostAnyCarrier()` is the one view that shows
+     them. They are in the mirror again since 14.09.2026 and they still price
+     nothing: the basis is what the shop can put a parcel on knowing it can
+     take a return, and that is not Montonio International Shipping. Both
+     halves asserted, because the whole point is that the two answers differ. */
+  it("the audit's cheap numbers are visible and still price nothing", () => {
+    expect(cheapestCostAnyCarrier("DE", "courier")).toEqual({ price: 12.91, carrier: "novapost" });
+    expect(cheapestCostAnyCarrier("PL", "courier")).toEqual({ price: 8.51, carrier: "novapost" });
     expect(cheapestCost("DE", "courier")!.price).toBeGreaterThan(12.91);
     expect(cheapestCost("PL", "courier")!.price).toBeGreaterThan(8.51);
-    expect(RATES.some((r) => r.price === 12.91 || r.price === 8.51)).toBe(false);
+    expect(countryPriceTable().courier.DE).toBe(22.29);
+    expect(countryPriceTable().courier.PL).toBe(20.69);
   });
 
   it("knows what a return costs where Montonio prices one", () => {

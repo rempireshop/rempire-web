@@ -46,8 +46,43 @@ const REQUEST_TIMEOUT_MS = 10_000;
 /** Same six hours the carrier feeds are cached for — machine lists barely move. */
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
-/** Carriers Montonio can resell to us. Codes are Montonio's own `carrierCode`. */
-export const MONTONIO_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"] as const;
+/**
+ * Carriers Montonio can resell to us. Codes are Montonio's own `carrierCode`,
+ * lowercased — Nova Post's is `novaPost` on the wire and `novapost` here, the
+ * way every other code in this list is folded.
+ *
+ * Venipak left on 14.09.2026 (Ренат: «Venipak does not seem to be available,
+ * so remove») and Nova Post joined the same day («From montonio page there is
+ * Nova Post, so keep it actually»). Kept identical to SHOP_CARRIERS in
+ * src/lib/shipping/country-prices.ts, asserted in
+ * tests/shipping-country-prices.test.ts.
+ */
+export const MONTONIO_CARRIERS = ["omniva", "smartpost", "dpd", "unisend", "novapost"] as const;
+
+/**
+ * The spelling Montonio's own query strings want, which is not always ours.
+ *
+ * Every carrier code the shop has ever used was lowercase and identical on
+ * both sides, so `carrierCode=${carrier}` was right by accident for four years
+ * — and Nova Post is the first one where it is not. Montonio's enum is
+ * **case-sensitive**: `carrierCode=novapost` answers HTTP 400 «carrierCode
+ * must be one of the following values: smartpost, dpd, venipak, omniva,
+ * unisend, latvian_post, inpost, orlen, novaPost, postnord», and only
+ * `novaPost` answers 200. Lowercase is what the rest of the codebase stores
+ * (orders.shipping.carrier, the rate table's keys, the chip ids), so the
+ * translation happens here, at the wire, and nowhere else.
+ *
+ * An unknown carrier passes through unchanged: Montonio answering 400 for a
+ * code nobody recognises is the right outcome, and better than guessing at a
+ * capitalisation.
+ */
+const MONTONIO_WIRE_CODE: Record<string, string> = { novapost: "novaPost" };
+
+/** Our lowercase carrier key as Montonio's `carrierCode` query parameter. */
+export function montonioCarrierCode(carrier: string): string {
+  const key = String(carrier || "").trim().toLowerCase();
+  return MONTONIO_WIRE_CODE[key] ?? key;
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -314,7 +349,7 @@ async function fetchOneCarrier(
 
   const body = await call<unknown>(
     config,
-    `/shipping-methods/pickup-points?carrierCode=${encodeURIComponent(carrier)}` +
+    `/shipping-methods/pickup-points?carrierCode=${encodeURIComponent(montonioCarrierCode(carrier))}` +
       `&countryCode=${encodeURIComponent(country)}`,
   );
   const points = mapMontonioPickupPoints(body, carrier, country);
@@ -807,7 +842,7 @@ async function courierServiceOf(
     courierServices?: Array<{ id?: string; type?: string }>;
   }>(
     config,
-    `/shipping-methods/courier-services?carrierCode=${encodeURIComponent(carrier)}` +
+    `/shipping-methods/courier-services?carrierCode=${encodeURIComponent(montonioCarrierCode(carrier))}` +
       `&countryCode=${encodeURIComponent(country)}`,
   );
   const services = body.courierServices ?? [];
@@ -872,7 +907,11 @@ export function carrierHint(order: Order, opts: CreateShipmentOptions = {}): str
   const pointId = String(ship.pointId ?? "").toLowerCase();
   const prefixed = MONTONIO_CARRIERS.find((c) => pointId.startsWith(`${c}-`));
   if (prefixed) return prefixed;
-  if (/venipak/i.test(String(ship.method ?? ""))) return "venipak";
+  /* Venipak stopped being offered on 14.09.2026 and is not in MONTONIO_CARRIERS
+     any more, but orders placed before that are still in the database and this
+     function's job is to read them. Reading history is not offering a carrier:
+     nothing new can be tagged venipak, and the checkout draws no chip for it. */
+  if (/venipak/i.test(String(ship.method ?? "")) || pointId.startsWith("venipak-")) return "venipak";
   if (/unisend/i.test(String(ship.method ?? ""))) return "unisend";
   return sniffCarrier(ship.method) ?? "";
 }

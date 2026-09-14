@@ -83,9 +83,22 @@ describe("the admin's copy of what an empty box charges", () => {
     expect(price.courier.DE).toEqual([22.29, "smartpost"]); // cheapest the shop can use
   });
 
-  it("never quotes Nova Post, which the shop cannot put a parcel on", () => {
-    for (const cell of Object.values(price.courier)) expect(cell[1]).not.toBe("novapost");
-    expect(Object.keys(price.carriers)).not.toContain("novapost");
+  /* Nova Post is a chip, not a basis (CHIP_ONLY_CARRIERS in
+     src/lib/shipping/country-prices.ts), so it has a carrier row of its own
+     here and never a courier line — the courier is the carrier Renat picks at
+     the label, and it is not that one. */
+  it("quotes Nova Post as a carrier and never as a courier", () => {
+    expect(price.carriers.novapost).toEqual({ EE: 2.39, LV: 4.79, LT: 4.09 });
+    for (const [country, cell] of Object.entries(price.courier)) {
+      expect(cell[1], country).not.toBe("novapost");
+    }
+  });
+
+  it("has no Venipak anywhere, which is why it was removed", () => {
+    expect(Object.keys(price.carriers)).not.toContain("venipak");
+    for (const [country, cell] of Object.entries(price.courier)) {
+      expect(cell[1], country).not.toBe("venipak");
+    }
   });
 
   it("never charges less than the carrier costs", () => {
@@ -158,8 +171,9 @@ describe("the storefront's copy of the default carrier prices", () => {
     }
   });
 
-  it("has no Nova Post row at all", () => {
-    expect(Object.keys(rules.carriers)).not.toContain("novapost");
+  it("has a Nova Post row and no Venipak one", () => {
+    expect(rules.carriers.novapost).toEqual({ EE: 2.39, LV: 4.79, LT: 4.09 });
+    expect(Object.keys(rules.carriers)).not.toContain("venipak");
   });
 });
 

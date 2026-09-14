@@ -176,6 +176,9 @@ const CARRIER_NAMES: Array<[RegExp, string]> = [
   [/^dpd/i, "DPD"],
   [/^smart ?post/i, "SmartPosti"],
   [/^itella/i, "Itella"],
+  [/^nova ?post/i, "Nova Post"],
+  /* not offered since 14.09.2026; a shipped-mail for an order placed before
+     that still has to name the carrier the customer is waiting on */
   [/^venipak/i, "Venipak"],
   [/^post/i, "Post"],
 ];
