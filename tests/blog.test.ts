@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { exec, query } from "@/lib/db";
 import {
+  BODY_MAX,
   deletePost,
   getPostById,
   getPostBySlug,
@@ -374,6 +375,40 @@ describe("blog storage", () => {
   it("throws a not_found error editing an id that does not exist", async () => {
     await expect(upsertPost({ id: "00000000-0000-0000-0000-000000000000", title: { RU: "x" } }))
       .rejects.toThrow();
+  });
+
+  /* An article past BODY_MAX used to be `.slice()`d to length and written —
+     the panel answered «Черновик сохранён ✓» over a row whose last sections,
+     and the product cards in them, had been cut off, and the editor's next
+     open showed the short version as if that was what had been written. */
+  it("refuses a body past BODY_MAX instead of saving a cut-off article", async () => {
+    const long = "<p>" + "я".repeat(BODY_MAX) + "</p>";
+    await expect(upsertPost({ title: { RU: "Длинная" }, body: { RU: long } }))
+      .rejects.toThrow("body_too_long");
+    // …and nothing was written: a refusal is not half a post
+    expect(await listAllPosts()).toHaveLength(0);
+  });
+
+  it("refuses it in any of the three languages, and on an edit as well", async () => {
+    const long = "<p>" + "a".repeat(BODY_MAX) + "</p>";
+    await expect(upsertPost({ title: { RU: "Длинная" }, body: { ET: long } }))
+      .rejects.toThrow("body_too_long");
+
+    const created = await upsertPost({ title: { RU: "Заголовок" }, body: { RU: "<p>текст</p>" } });
+    await expect(upsertPost({ id: created.id, title: { RU: "Заголовок" }, body: { EN: long } }))
+      .rejects.toThrow("body_too_long");
+    // the row still holds the article it held before the refused save
+    expect((await getPostById(created.id))!.body.RU).toBe("<p>текст</p>");
+  });
+
+  it("stores a body that is exactly BODY_MAX long, whole", async () => {
+    const body = "<p>" + "я".repeat(BODY_MAX - 7) + "</p>";
+    expect(body).toHaveLength(BODY_MAX);
+    const post = await upsertPost({ title: { RU: "Ровно" }, body: { RU: body } });
+    expect(post.body.RU).toBe(body);
+    // …and the other trilingual fields are still clipped, not refused
+    const seo = await upsertPost({ title: { RU: "Клип" }, seoDesc: { RU: "я".repeat(400) } });
+    expect(seo.seoDesc.RU).toHaveLength(170);
   });
 
   it("publishes, keeping publishedAt across a republish, and unpublishes without losing it", async () => {
@@ -749,6 +784,27 @@ describe("admin blog API — CRUD", () => {
     const { PATCH } = await import("@/app/api/admin/blog/route");
     const res = await PATCH(send("PATCH", { title: { RU: "x" } }));
     expect(res.status).toBe(400);
+  });
+
+  /* The editor reads `error` off the answer and says what to do about it
+     (BLOG_ERR_TEXT in app.js) — the reason has to reach it by name, not as
+     the catch-all «unavailable». */
+  it("answers body_too_long, and the article the row already had is untouched", async () => {
+    const { GET, POST, PATCH } = await import("@/app/api/admin/blog/route");
+    const long = "<p>" + "я".repeat(20_001) + "</p>";
+
+    const refused = await POST(send("POST", { title: { RU: "Длинная" }, body: { RU: long } }));
+    expect(refused.status).toBe(400);
+    expect((await refused.json()).error).toBe("body_too_long");
+
+    const created = await POST(send("POST", { title: { RU: "Заголовок" }, body: { RU: "<p>текст</p>" } }));
+    const post = (await created.json()).post;
+    const refusedEdit = await PATCH(send("PATCH", { id: post.id, title: { RU: "Заголовок" }, body: { RU: long } }));
+    expect(refusedEdit.status).toBe(400);
+    expect((await refusedEdit.json()).error).toBe("body_too_long");
+
+    const back = await GET(new Request(`${ORIGIN}/api/admin/blog/?id=${post.id}`, { headers: { cookie: admin } }));
+    expect((await back.json()).post.body.RU).toBe("<p>текст</p>");
   });
 
   it("DELETE with no id is rejected", async () => {
