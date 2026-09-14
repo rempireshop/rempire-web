@@ -11851,6 +11851,13 @@
         S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
         S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
         S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
+        /* …and at the top of the article, like «+ Написать» beside it and like
+           the letter editor's newsOpen(): the list of articles is taller than
+           the phone, so one opened from the bottom of it used to appear
+           already scrolled into its own middle. Only when the fetch came back
+           with a post — a failed one leaves the owner on the list he tapped
+           from, and a list that jumps to its top is a second surprise. */
+        window.scrollTo({ top: 0 });
       } else toast("Не получилось сохранить — попробуйте ещё раз.");
       render();
     }).catch(function () {
@@ -32009,7 +32016,18 @@
     /* ---- wholesale/loyalty ------------------------------------------------ */
     if (d.acctprosend !== undefined) { acctProSubmit(); return; }
     if (d.admcusttier !== undefined) { S.admCustTier = d.admcusttier; render(); return; }
-    if (d.admcustopen) { S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
+    /* A card opens at its own top, like «Заказы», «Каталог» and «Письма» — the
+       list it replaces is taller than the phone, and the window keeps the
+       scroll of the row that was tapped, so a client opened from the bottom of
+       «Клиенты» used to appear already scrolled to the middle of itself
+       (Renat, 14.09.2026). The reset is written out here rather than inside
+       render(): every screen in the panel that must NOT move on a redraw —
+       the banner editor, the article editor, the order's note — relies on
+       render() leaving the page exactly where the finger left it. */
+    if (d.admcustopen) {
+      S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null;
+      window.scrollTo({ top: 0 }); render(); return;
+    }
     if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
     if (d.admcustapprove) { askCustDecision(admCustById(d.admcustapprove), "approve"); return; }
     if (d.admcustreject) { askCustDecision(admCustById(d.admcustreject), "reject"); return; }

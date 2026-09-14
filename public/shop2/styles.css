@@ -834,7 +834,10 @@ body:has(.stickybar) .ftr {
    is marked the way a chosen product thumbnail is marked instead
    (.pdp__thumb below): the ink ring, drawn as an inset shadow so nothing
    moves by a pixel, over the tile's own light ground — which every logo,
-   black or coloured, stays readable on. The unpicked tile is untouched. */
+   black or coloured, stays readable on. The unpicked tile is untouched.
+   The carrier chips at «Доставка», the step before this one, carry the same
+   kind of mark and had gone the same way — .carrier[aria-current="true"] is
+   the other half of this decision, made a day later. */
 .bank:active { background: var(--hover); }
 .bank[aria-current="true"] {
   border-color: var(--ink); background: var(--hover); color: var(--ink);
@@ -1757,7 +1760,21 @@ button, a, summary, label { touch-action: manipulation; }
    Venipak's #1e4b9d lived here until 14.09.2026; the shop does not offer it,
    so a chip for it is never drawn. */
 .carrier[data-carrier="novapost"]::before { background: linear-gradient(90deg, #da291c 50%, #1a1a1a 50%); }
-.carrier[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
+/* The same fill had already destroyed the same kind of mark on the bank tiles
+   at «Оплата», the step after this one — see the note above
+   .bank[aria-current="true"], which this rule is a verbatim copy of; the two
+   are one decision, and this is the half that was missed. Here it was Unisend
+   (Renat, 14.09.2026): its logo is black artwork on nothing, so the picked
+   chip went completely black — and the first carrier in the list is picked
+   before the shopper has touched anything, so the step opened with a black
+   hole already in it. The ink ring over the chip's own light
+   ground marks the pick instead, and every mark Montonio sends, black or
+   coloured, stays readable on it. The colour dots above are the no-logo half
+   of the same list and are untouched. */
+.carrier[aria-current="true"] {
+  border-color: var(--ink); background: var(--hover); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
 
 .pointbtn {
   display: grid; grid-template-columns: 1fr auto; align-items: center;

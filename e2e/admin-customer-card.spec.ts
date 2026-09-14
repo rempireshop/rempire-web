@@ -236,3 +236,126 @@ test.describe("admin — the customer card", () => {
     await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
   });
 });
+
+/**
+ * A card opens at its own top.
+ *
+ * Renat, 14.09.2026: «When I open a client, then the client page isn't opened
+ * at the top, instead it's initially scrolled somewhere to the middle». It was
+ * not scrolled anywhere — the window simply kept the scroll of the row that
+ * was tapped, and «Клиенты» on a phone is a long list, so a customer opened
+ * from the bottom of it appeared already halfway down his own card. Every
+ * other opener in this panel («Заказы», «Каталог», «Письма», «Настройки»,
+ * «+ Написать») resets the scroll by hand before its render; this one did not
+ * (app.js, the data-admcustopen handler).
+ *
+ * The list and the card are both stubbed rather than seeded. The list has to
+ * be longer than a phone to have anywhere to scroll from, and the card taller
+ * than a phone for «at the top» to mean anything — neither is true of whatever
+ * the rest of the suite happens to have left in the shared database, and
+ * forty customers created for one assertion would be left in it for everyone
+ * else. Both invariants are asserted below, so the day a stub stops producing
+ * them this fails loudly instead of passing on a page that cannot scroll.
+ */
+test.describe("admin — a customer's card opens at its top", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(240) });
+
+  const CUSTOMERS = Array.from({ length: 40 }, (_, i) => ({
+    id: `e2e-top-${i}`,
+    email: `e2e-top-${i}@example.com`,
+    name: `Клиент номер ${i}`,
+    tier: "retail",
+    ordersCount: (i % 5) + 1,
+    revenue: 1990 + i * 100,
+    pointsBalance: 0,
+    proRequestedAt: null,
+    marketing: i % 2 === 0,
+    marketingAt: "2026-09-01T10:00:00.000Z",
+    notes: "",
+    phone: "+372 5000000",
+    company: "",
+    regCode: "",
+  }));
+  // far enough down that the row cannot be reached without scrolling
+  const WANTED = CUSTOMERS[34];
+
+  const DETAIL = {
+    ok: true,
+    customer: WANTED,
+    history: [],
+    stats: {
+      firstOrderAt: "2026-01-14T10:00:00.000Z",
+      lastOrderAt: "2026-09-01T10:00:00.000Z",
+      avgOrder: 4250,
+      topBrands: [{ brand: "Davines", n: 4 }],
+    },
+    orders: Array.from({ length: 12 }, (_, i) => ({
+      id: `e2e-top-order-${i}`,
+      number: `R-90${100 + i}`,
+      createdAt: "2026-08-20T10:00:00.000Z",
+      status: "paid",
+      channel: "web",
+      itemsCount: 2,
+      firstItem: "Davines — шампунь",
+      total: 4250,
+      invoice: null,
+      labeled: false,
+    })),
+    reviews: Array.from({ length: 6 }, (_, i) => ({
+      id: `e2e-top-review-${i}`,
+      productId: PRODUCT.id,
+      product: `${PRODUCT.brand} — шампунь`,
+      rating: 5,
+      text: `Отзыв номер ${i}: беру уже не первый раз, всё хорошо.`,
+      name: "Клиент",
+      createdAt: "2026-08-21T10:00:00.000Z",
+      status: "approved",
+    })),
+  };
+
+  test("a customer's card opens at its top, not where the list was scrolled to", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    // the phone the defect was reported on, whichever project is running
+    await page.setViewportSize({ width: 375, height: 812 });
+
+    // the list is one page (?limit=500); the card is /api/admin/customers/<id>/
+    await page.route(
+      (u) => u.pathname === "/api/admin/customers/",
+      (route) => (route.request().method() === "GET"
+        ? route.fulfill({ json: { ok: true, customers: CUSTOMERS } })
+        : route.fallback()),
+    );
+    await page.route(
+      (u) => u.pathname === `/api/admin/customers/${WANTED.id}/`,
+      (route) => (route.request().method() === "GET" ? route.fulfill({ json: DETAIL }) : route.fallback()),
+    );
+
+    await adminSection(page, "people");
+    const row = page.locator(`[data-admcustopen="${WANTED.id}"]`);
+    await expect(row, "the stubbed list never reached the screen").toHaveCount(1);
+
+    // ---- down the list, to the row the owner would have to scroll to -------
+    await row.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    const before = await page.evaluate(() => window.scrollY);
+    expect(before, "«Клиенты» did not scroll — there was nowhere to open a card FROM").toBeGreaterThan(400);
+
+    // clicked from the page, not through Playwright, which scrolls first
+    await page.evaluate((id) => {
+      (document.querySelector(`[data-admcustopen="${id}"]`) as HTMLElement).click();
+    }, WANTED.id);
+
+    // the whole card, not the skeleton: «at the top» is about the finished page
+    await expect(page.locator("[data-admcustclose]")).toBeVisible();
+    await expect(page.locator(".adm-h2")).toHaveText(WANTED.name);
+    await expect(page.locator('[data-admorder="e2e-top-order-0"]')).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const room = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    expect(room, "the card is shorter than the phone — «at the top» would be true either way").toBeGreaterThan(400);
+
+    const after = await page.evaluate(() => window.scrollY);
+    expect(after, "the card opened where the list was, somewhere down its own middle").toBeLessThanOrEqual(4);
+  });
+});
