@@ -206,14 +206,30 @@ duplicate to clean up:
 
 ### The assistant
 
-When the owner asks a sales question in the panel's «Помощник» ("сколько
-продали за неделю", "какой товар лучше идёт"), `analyticsForAI()`
-(`public/shop2/app.js`, beside `heroForAI()`) sends a 30-day summary along
-with the question — revenue, orders, AOV, conversion and the top 5 products
-and search terms. `briefAnalytics()` in
-`src/app/api/assistant/actions.ts` re-shapes it before it reaches the prompt,
-the same way `briefHero()` does for the banner. No new action type: the
-assistant can talk about the numbers, not change anything here.
+The prompt carries **two sales windows**, and they arrive by different roads.
+
+- **The week** — `weekSales()` here, read on the server for every admin
+  question (`weekForPrompt()` in `src/app/api/assistant/route.ts`): takings,
+  orders, average order, per-day rows and the change against the previous
+  seven days. Same window and same two queries as «Обзор»'s `revenue7d` and
+  its sparkline (`qOrdersSummary` + `qRevenueByDay` over `rangeBounds("7d")`),
+  so the assistant's figure and the first screen's cannot drift apart. Two
+  indexed queries, ~2 ms next to the 30-day summary's ~13 — cheap enough to
+  pay for on every question.
+- **The month** — `analyticsForAI()` (`public/shop2/app.js`, beside
+  `heroForAI()`) sends the 30-day summary the panel already fetched along with
+  the question: revenue, orders, AOV, conversion and the top 5 products and
+  search terms. `briefAnalytics()` in `src/app/api/assistant/actions.ts`
+  re-shapes it before it reaches the prompt, the same way `briefHero()` does
+  for the banner. It is only there once the panel has loaded it — which is why
+  the week is read server-side instead: Renat (14.09.2026) tapped «Покажи
+  аналитику за неделю» and was told the analytics were not loaded, truthfully,
+  because the prompt held nothing seven days long.
+
+Visitors, conversion, traffic sources and search terms stay out of the week
+block on purpose — they live on «Аналитика», and the prompt says so rather
+than inviting a guess. No new action type: the assistant can talk about the
+numbers, not change anything here.
 
 ## Setting up Google Search Console
 

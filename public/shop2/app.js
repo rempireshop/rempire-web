@@ -1168,7 +1168,7 @@
       "Что заканчивается и что дозаказать?": "Mis on lõppemas ja mida juurde tellida?",
       "Сколько заработали на Kevin.Murphy?": "Kui palju teenisime Kevin.Murphy pealt?",
       "Добавь новый товар — вот фото": "Lisa uus toode — siin on foto",
-      "Покажи аналитику за неделю": "Näita nädala statistikat",
+      "Сколько продали за неделю?": "Kui palju müüsime nädalaga?",
       "Какие письма получают клиенты?": "Milliseid kirju kliendid saavad?",
       "Какие заказы ждут отправки?": "Millised tellimused ootavad saatmist?",
       "Сделай набор из этих товаров": "Tee nendest toodetest komplekt",
@@ -2439,6 +2439,8 @@
       "Товар не найден — обновите список товаров": "Toodet ei leitud — värskendage toodete nimekirja",
       "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
         "Külastajad, konversioon ja otsingud nädala lõikes — «Analüütikas», poe päris andmete järgi.",
+      "Выручка за неделю и заказы по дням — на «Обзоре», за 30 дней и по товарам — в «Аналитике». По настоящим данным магазина.":
+        "Nädala käive ja tellimused päevade kaupa — «Ülevaates», 30 päeva ja toodete lõikes — «Analüütikas». Poe päris andmete järgi.",
       "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
         "Mis on makstud ja veel saatmata — «Tellimustes», seal trükitakse ka sildid.",
       /* phase 4 — the settings cards rebuilt in the panel's own markup, the
@@ -3696,7 +3698,7 @@
       "Что заканчивается и что дозаказать?": "What is running low and what should I reorder?",
       "Сколько заработали на Kevin.Murphy?": "How much did we make on Kevin.Murphy?",
       "Добавь новый товар — вот фото": "Add a new product — here is the photo",
-      "Покажи аналитику за неделю": "Show me this week's analytics",
+      "Сколько продали за неделю?": "How much did we sell this week?",
       "Какие письма получают клиенты?": "What e-mails do customers get?",
       "Какие заказы ждут отправки?": "Which orders are waiting to be shipped?",
       "Сделай набор из этих товаров": "Make a set of these products",
@@ -4945,6 +4947,8 @@
       "Товар не найден — обновите список товаров": "Product not found — refresh the product list",
       "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
         "Visitors, conversion and search terms for the week are in “Analytics”, from the shop's real data.",
+      "Выручка за неделю и заказы по дням — на «Обзоре», за 30 дней и по товарам — в «Аналитике». По настоящим данным магазина.":
+        "The week's takings and the orders day by day are on “Overview”; 30 days and the per-product breakdown are in “Analytics”. From the shop's real data.",
       "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
         "What is paid and not yet shipped is in “Orders” — the labels print from there too.",
       /* phase 4 — the settings cards rebuilt in the panel's own markup, the
@@ -5519,9 +5523,6 @@
     [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно: (.+)\. Могу собрать заказ поставщику и отправить его вам на подпись\.$/,
       { ET: "Lõppemas on $1 toodet. Kiireloomulised: $2. Võin koostada tarnijale tellimuse ja saata selle sulle allkirjastamiseks.",
         EN: "$1 products are running low. Urgent: $2. I can put a supplier order together and send it to you to sign." }],
-    [/^Kevin\.Murphy: (\d+) товар(?:|а|ов) в каталоге, средняя цена (.+)\. В рабочей версии здесь будет выручка за месяц по бренду и сравнение с прошлым\.$/,
-      { ET: "Kevin.Murphy: kataloogis $1 toodet, keskmine hind $2. Päris versioonis on siin brändi kuukäive ja võrdlus eelmisega.",
-        EN: "Kevin.Murphy: $1 products in the catalogue, average price $2. In the live version this shows the brand’s monthly revenue and a comparison with last month." }],
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
     [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
     // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
@@ -16170,10 +16171,26 @@
      sheet on a phone. Both drive the panel's existing assistant — the same
      question box, the same answers, the same proposal card that has to go
      through «Применить» before anything changes. */
+  /* The three questions one tap away. Each one is a PROMISE, and the prompt
+     has to be able to keep it: every chip here is covered by a block the
+     assistant's prompt always carries — «что заканчивается» by STOCK
+     (stockSummaryForPrompt), «какие заказы ждут отправки» by ORDERS WAITING TO
+     BE SHIPPED (toShipForPrompt), «сколько продали за неделю» by SALES THIS
+     WEEK (weekForPrompt), all three in src/app/api/assistant/route.ts.
+     tests/assistant-prompt.test.ts reads this very array and fails if a chip
+     is added without the data behind it.
+
+     The third one used to read «Покажи аналитику за неделю» and was the whole
+     of Renat's complaint (14.09.2026): the prompt held one sales window, thirty
+     days long, so the assistant answered that the analytics were not loaded —
+     truthfully. The week is in the prompt now; the wording is the week's
+     TAKINGS rather than its «аналитика», because visitors, conversion and
+     search terms still live on «Аналитика» alone and a chip must not promise
+     them. */
   var ADM_ASK = [
     "Что заканчивается и что дозаказать?",
     "Какие заказы ждут отправки?",
-    "Покажи аналитику за неделю"
+    "Сколько продали за неделю?"
   ];
   /** The assistant's last answer, kept in S (askAdminAI) so a render() that
       lands after it — a probe finishing, the products list arriving — draws
@@ -28514,11 +28531,16 @@
         low.slice(0, 3).map(function (p) { return esc(p.brand) + " " + esc(p.name); }).join(", ") +
         ". Могу собрать заказ поставщику и отправить его вам на подпись.";
     }
-    if (/заработал|выручк|месяц/i.test(q)) {
-      var km = CATALOGUE.filter(function (p) { return p.brand === "Kevin.Murphy"; });
-      return "Kevin.Murphy: " + km.length + " " + plural(km.length) + " в каталоге, средняя цена " +
-        eur(km.reduce(function (a, p) { return a + p.price; }, 0) / km.length) +
-        ". В рабочей версии здесь будет выручка за месяц по бренду и сравнение с прошлым.";
+    /* The week's takings, when the assistant itself is off (no key on the
+       server — probeAdmAI). The chip «Сколько продали за неделю?» lands here
+       then, and the honest answer is the screen that holds the figure, not a
+       number this fallback does not have: «Обзор» sums the same seven days the
+       assistant's prompt now carries (weekSales in src/lib/analytics.ts). What
+       stood here was the demo era's Kevin.Murphy average price and a promise of
+       real revenue «в рабочей версии» — the panel has run on the real database
+       since 13.09.2026. */
+    if (/продал|заработал|выручк|недел|месяц/i.test(q)) {
+      return "Выручка за неделю и заказы по дням — на «Обзоре», за 30 дней и по товарам — в «Аналитике». По настоящим данным магазина." + aiGo("over", "Открыть обзор");
     }
     if (/описан|текст/i.test(q)) {
       return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».";

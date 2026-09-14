@@ -730,6 +730,71 @@ export async function toShipOrders(limit = 10): Promise<{ total: number; rows: T
   };
 }
 
+/* ---------- the week, for the admin assistant -----------------------------
+ *
+ * Renat, 14.09.2026: the assistant offers «Покажи аналитику за неделю» and
+ * then answers that the analytics are not loaded — open the «Аналитика» tab.
+ * It was telling the truth: its prompt carried one sales window, «SALES, last
+ * 30 days», built from whatever the panel had already fetched, and nothing in
+ * it was ever seven days long. A suggestion that promises a figure the prompt
+ * cannot hold is the defect; this is the figure.
+ *
+ * The SAME WINDOW «Обзор» sums, out of the same two queries, so the two
+ * screens cannot disagree:
+ *   · the window is rangeBounds("7d") — `now` back 7×24 h — which is exactly
+ *     the `weekFrom` getOverviewSummary() computes for revenue7d, and exactly
+ *     the range «Аналитика» draws for "7d".
+ *   · qOrdersSummary() is the statement getAnalyticsSummary("7d") reads its
+ *     revenue/orders KPI from. Its current-window predicate is qRevenue7d()'s,
+ *     word for word (`status in (PAID_SQL)` over `created_at >= from < to`),
+ *     and it carries the previous seven days in the same round trip — which is
+ *     where «на сколько это больше прошлой недели» comes from, free.
+ *   · qRevenueByDay() is «Обзор»'s own sparkline, named on the Tallinn
+ *     calendar (src/lib/day.ts). A trailing 7×24 h window touches eight
+ *     Tallinn days: its first and last are part-days, and that is what the
+ *     bars already show.
+ *
+ * Two indexed queries in one Promise.all — deliberately NOT getAnalyticsSummary(),
+ * whose sixteen queries (several of them jsonb_array_elements scans over every
+ * order) were taken off the panel's first screen for being slow. Nobody should
+ * pay for the funnel, the referrers and the abandoned carts to be told what the
+ * shop took this week.
+ */
+export type WeekSales = {
+  /** ISO instants of the window, for anyone who has to say what was counted. */
+  from: string;
+  to: string;
+  revenue: number;
+  orders: number;
+  /** Takings ÷ orders, 0 with no orders. */
+  aov: number;
+  /** Takings ÷ 7, like «Обзор»'s revenue7d.perDay — not ÷ days-with-a-sale. */
+  perDay: number;
+  prevRevenue: number;
+  prevOrders: number;
+  /** Takings against the previous seven days, per cent; null when there is nothing to compare with. */
+  deltaPct: number | null;
+  /** «Обзор»'s own bars: one row per Tallinn day that had a paid order. */
+  byDay: Array<{ day: string; revenue: number; orders: number }>;
+};
+
+export async function weekSales(now: Date = new Date()): Promise<WeekSales> {
+  const { from, to, prevFrom } = rangeBounds("7d", now);
+  const [sum, byDay] = await Promise.all([qOrdersSummary(from, to, prevFrom), qRevenueByDay(from, to)]);
+  return {
+    from: from.toISOString(),
+    to: to.toISOString(),
+    revenue: sum.revenue,
+    orders: sum.orders,
+    aov: sum.orders > 0 ? money(sum.revenue / sum.orders) : 0,
+    perDay: money(sum.revenue / 7),
+    prevRevenue: sum.prevRevenue,
+    prevOrders: sum.prevOrders,
+    deltaPct: kpi(sum.revenue, sum.prevRevenue).deltaPct,
+    byDay,
+  };
+}
+
 export async function getOverviewSummary(now: Date = new Date()): Promise<OverviewSummary> {
   const dayStart = startOfShopDay(now);
   const prevStart = new Date(dayStart.getTime() - 86_400_000);
