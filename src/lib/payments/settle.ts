@@ -1,4 +1,5 @@
 import {
+  claimOrderPaid,
   PAID_ORDER_STATUSES,
   setOrderPayment,
   setOrderStatus,
@@ -31,7 +32,13 @@ export async function settlePayment(
 ): Promise<ApplyOutcome> {
   const outcome = await applyPaymentResult(order, result, providerName, {
     setOrderPayment,
-    setOrderStatus,
+    /* The move into paid is a claim, not a write (claimOrderPaid): the return
+       and the webhook arrive together, both having read the order before
+       either wrote, and only the one whose UPDATE actually moved the row may
+       run the once-per-order work below. Every other status this door writes
+       is the plain one. */
+    setOrderStatus: (id, status, actor) =>
+      status === "paid" ? claimOrderPaid(id, actor) : setOrderStatus(id, status, actor),
     ...deps,
   });
   if (outcome.status === "paid") {
@@ -56,6 +63,8 @@ export interface SettleRefundOutcome {
   fully: boolean;
   /** The order's status after this call. */
   status: string;
+  /** The gift cards this refund actually cancelled — codes, empty on a partial. */
+  voided: string[];
 }
 
 /**
@@ -112,12 +121,27 @@ export async function settleRefund(
      then. */
   const settledBack = refundedTotal({ refunds: folded.refunds.filter((r) => r.status === "done") });
   const fully = fullyRefunded(value, settledBack);
-  /* The move into «возврат» is also what cancels the gift cards the order
-     sold (setOrderStatus in src/lib/orders.ts): the money is back in full, so
-     whoever holds the code must not keep the value the shop has just handed
-     back. Both doors — the admin card has already refused a used card by now
-     (docs/payments.md § 11); a refund made in Montonio's own portal cannot be
-     refused, so the card dies with whatever was left on it. */
+  /* A full refund cancels the gift cards the order sold: the money is back in
+     full, so whoever holds the code must not keep the value the shop has just
+     handed back. Both doors — the admin card has already refused a used card
+     by now (docs/payments.md § 11); a refund made in Montonio's own portal
+     cannot be refused, so the card dies with whatever was left on it.
+
+     It hangs off the refund, not off the move into «возврат» below, which is
+     where it used to live (setOrderStatus in src/lib/orders.ts). An order
+     cancelled first and refunded afterwards («Отменить заказ», then «Вернуть
+     деньги» — the order Renat does them in) cannot make that move, and kept
+     its codes live on top of the money going back while the panel told him
+     they had been cancelled. Voided here, before the move: this is the call
+     that knows which codes were live, and the move's own void is then the
+     no-op voidGiftCards() promises.
+
+     `fully` is the settled measure above, so a refund Montonio has merely
+     accepted (PENDING) voids nothing: it has not handed the money back yet,
+     and voiding a card is not undoable. The PENDING → SUCCESSFUL webhook
+     comes back through this same door and voids then. */
+  const voided = fully ? await voidSoldCards(order, entry.by || "system") : [];
+
   let status = String(order.status ?? "");
   if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
     const moved = await setOrderStatus(order.id, "refunded", entry.by || "system");
@@ -137,7 +161,26 @@ export async function settleRefund(
     );
   }
 
-  return { applied: folded.applied, refundedTotal: folded.refundedTotal, fully, status };
+  return { applied: folded.applied, refundedTotal: folded.refundedTotal, fully, status, voided };
+}
+
+/**
+ * Cancel the gift cards this order sold — balance 0, `voided_at` stamped, the
+ * code buys nothing any more — and say which ones actually died. Idempotent
+ * (voidGiftCards only touches cards that are still live) and best effort: a
+ * gift-card hiccup must never be the reason a refund goes unrecorded.
+ */
+async function voidSoldCards(order: OrderLike, by: string): Promise<string[]> {
+  try {
+    const { voidGiftCards } = await import("@/lib/giftcards");
+    const cards = await voidGiftCards(order.id);
+    if (!cards.length) return [];
+    await writeAuditSafe(by, "giftcards.voided", { id: order.id, number: order.number, cards });
+    return cards.map((c) => c.code);
+  } catch (err) {
+    console.error(`[payments] voiding the gift cards of ${order.number} failed:`, err);
+    return [];
+  }
 }
 
 /**

@@ -41,6 +41,8 @@ interface Call {
 
 interface Answer {
   offline?: boolean;
+  /** postJSON(): the request left and no answer came back — see its comment. */
+  lost?: boolean;
   body?: Record<string, unknown>;
   status?: number;
 }
@@ -55,6 +57,8 @@ interface Rig {
   tap(): Promise<void>;
   calls: Call[];
   toasts: string[];
+  /** The basket as it stands now — emptied, or still there to pay for. */
+  cart: Array<{ id: string; qty: number }>;
   /** Every basket parked on the way to the bank, newest last. */
   held: Held[];
   /** Where the browser was sent, if anywhere. */
@@ -132,6 +136,7 @@ function rig(answers: Answer[]): Rig {
       calls: calls,
       toasts: toasts,
       held: held,
+      cart: function () { return S.cart; },
       href: function () { return href; },
       setCart: function (lines) { S.cart = lines; },
       // the button locks for the length of the page: payNow() never unlocks on
@@ -144,6 +149,7 @@ function rig(answers: Answer[]): Rig {
     calls: Call[];
     toasts: string[];
     held: Held[];
+    cart(): Array<{ id: string; qty: number }>;
     href(): string;
     setCart(l: Array<{ id: string; qty: number }>): void;
     reload(): void;
@@ -153,6 +159,9 @@ function rig(answers: Answer[]): Rig {
     calls: made.calls,
     toasts: made.toasts,
     held: made.held,
+    get cart() {
+      return made.cart();
+    },
     get href() {
       return made.href();
     },
@@ -269,11 +278,109 @@ describe("payNow(): a failed payment does not cost the shop a second order", () 
     ]);
   });
 
+  /* The other half of the same story, and the worse one. postJSON() used to
+     answer `offline` to three different things: a static host (404), a dropped
+     connection, and a gateway's 502/504 HTML. payNow() read all three as «there
+     is no shop behind this page» and called finishDemo(), which empties the
+     basket and says «Это демонстрация — настоящий заказ не создан». For «По
+     счёту» that sentence was printed while the server had already numbered the
+     invoice and mailed the PDF; on the payment step it threw away a basket that
+     had just become a real, unpaid order. */
+  it("a lost answer to POST /api/orders/ never says the order was a demo", async () => {
+    const r = rig([{ offline: true, lost: true, status: 502 }, ORDER_OK, PAY_OK]);
+    await r.tap();
+
+    expect(r.toasts).toEqual([
+      "Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз",
+    ]);
+    // the basket is still there to try again with
+    expect(r.cart).toEqual([{ id: "p1", qty: 1 }]);
+
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/", "/api/orders/", "/api/payments/create/"]);
+    expect(r.href).toBe("https://bank.example/pay/1");
+  });
+
+  it("a lost answer to POST /api/payments/create/ keeps the order and the basket", async () => {
+    const r = rig([ORDER_OK, { offline: true, lost: true, status: 0 }, PAY_OK]);
+    await r.tap();
+
+    expect(r.toasts).toEqual(["Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз"]);
+    expect(r.cart).toEqual([{ id: "p1", qty: 1 }]);
+    expect(r.held).toEqual([]);
+    expect(r.href).toBe("");
+
+    // the next tap pays for the order that already exists, and makes no second one
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/", "/api/payments/create/", "/api/payments/create/"]);
+    expect(r.calls[2].body.orderId).toBe("order-1");
+  });
+
+  it("a static host still gets the demo receipt", async () => {
+    const r = rig([{ offline: true }]);
+    await r.tap();
+    expect(r.toasts).toEqual(["demo"]);
+  });
+
   it("a failed POST /api/orders/ leaves nothing remembered", async () => {
     const r = rig([{ body: { ok: false, error: "out_of_stock" } }, ORDER_OK, PAY_OK]);
     await r.tap();
     expect(r.toasts).toEqual(["order:out_of_stock"]);
     await r.tap();
     expect(urls(r)).toEqual(["/api/orders/", "/api/orders/", "/api/payments/create/"]);
+  });
+});
+
+/* ---------- what postJSON() is actually answering ------------------------ */
+
+/**
+ * The three answers, told apart. `offline` is still set on all of them, so the
+ * promo box, the points feed and the rest keep the behaviour they had; `lost`
+ * is the new one, and the only thing that separates "there is no shop here"
+ * from "the shop may well have taken the order and we did not hear back".
+ */
+describe("postJSON(): a dead host and a lost answer are not the same thing", () => {
+  type Answered = { offline?: boolean; lost?: boolean; status?: number; body?: unknown };
+
+  function post(fetchStub: unknown): Promise<Answered> {
+    const body = `
+      var fetch = FETCH;
+      ${slice("postJSON")}
+      return postJSON("/api/orders/", { a: 1 });
+    `;
+    // repository source plus a stub function — nothing interpolated
+    return (new Function("FETCH", body) as (f: unknown) => Promise<Answered>)(fetchStub);
+  }
+
+  const res = (status: number, json: () => Promise<unknown>) => ({ status, json });
+
+  it("404/405/501 is a static host — offline, and not lost", async () => {
+    for (const status of [404, 405, 501]) {
+      const out = await post(async () => res(status, async () => ({})));
+      expect(out).toEqual({ offline: true });
+    }
+  });
+
+  it("a dropped connection is lost", async () => {
+    const out = await post(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    expect(out).toMatchObject({ offline: true, lost: true, status: 0 });
+  });
+
+  it("a gateway's HTML 502 is lost, not a dead host", async () => {
+    const out = await post(async () =>
+      res(502, async () => {
+        throw new SyntaxError("Unexpected token <");
+      }),
+    );
+    expect(out).toMatchObject({ offline: true, lost: true, status: 502 });
+  });
+
+  it("a real answer — good or bad — is neither", async () => {
+    const ok = await post(async () => res(200, async () => ({ ok: true, orderId: "x" })));
+    expect(ok).toEqual({ body: { ok: true, orderId: "x" }, status: 200 });
+    const refused = await post(async () => res(409, async () => ({ ok: false, error: "out_of_stock" })));
+    expect(refused).toEqual({ body: { ok: false, error: "out_of_stock" }, status: 409 });
   });
 });

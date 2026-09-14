@@ -112,10 +112,11 @@ test.describe("admin sweep 2 — the order card", () => {
     await expect(page.locator(".adm-badge--big")).toHaveText("Возврат");
 
     /* …and «оплачен» on a refunded order is the step back — the card says the
-       money and the shelf are left alone, and the payment record proves it. */
+       money is left alone (the payment record proves it) and that the goods
+       the refund put back on the shelf are taken off it again. */
     await page.locator('[data-admstatus="paid"]').click();
     await expect(page.locator(".adm-confirm__t")).toHaveText("Отметить оплаченным?");
-    await expect(page.locator(".adm-confirm__d")).toContainText("Деньги и склад не трогаем");
+    await expect(page.locator(".adm-confirm__d")).toContainText("Деньги не трогаем");
     await page.locator("[data-admapply]").click();
     await expect.poll(status).toBe("paid");
     await expect(page.locator(".adm-badge--big")).toHaveText("Оплачен");

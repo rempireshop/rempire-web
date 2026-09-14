@@ -76,36 +76,37 @@ function money(n: number): number {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 }
 
-/**
- * The key Montonio dedupes a refund by, and the whole point of it: the SAME
- * key twice is one refund, a new key is a second one.
- *
- * So it cannot be minted per request. «Вернуть деньги» tapped twice on a phone
- * that lost the answer to the first tap, or a request that timed out after
- * Montonio had already taken it, used to reach /refunds with a fresh uuid and
- * send the customer's money a second time — the ledger check above cannot
- * catch that, because an attempt that never came back never wrote to it.
- *
- * Derived instead from the three things that make this refund what it is: the
- * order, what had already gone back before it, and the amount. A retry of the
- * same attempt repeats all three and carries the same key; a genuine second
- * refund of the same amount follows a bigger `alreadyBack` and gets its own.
- * Shaped as a v4 uuid because that is what Montonio's guide asks for.
- */
-function refundIdempotencyKey(orderId: string, alreadyBack: number, amount: number): string {
-  const seed = `${orderId}:${alreadyBack.toFixed(2)}:${amount.toFixed(2)}`;
-  const b = Buffer.from(createHash("sha256").update(seed).digest().subarray(0, 16));
-  b[6] = (b[6] & 0x0f) | 0x40;
-  b[8] = (b[8] & 0x3f) | 0x80;
-  const h = b.toString("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
-
 /** Whether the money for this order ever arrived — the same test the card uses. */
 function settled(order: Order): boolean {
   if ((PAID_ORDER_STATUSES as readonly string[]).includes(order.status)) return true;
   const p = order.payment as { status?: unknown } | null | undefined;
   return !!p && typeof p === "object" && p.status === "paid";
+}
+
+/**
+ * The idempotency key for one refund — the same on every attempt at it.
+ *
+ * What stood here was `randomUUID()` per request, with a comment claiming it
+ * made a double tap harmless; it is the opposite. Renat presses «Вернуть
+ * деньги» on his iPhone, Montonio takes the refund and the answer never
+ * arrives (a 504, or the phone losing the signal); the button comes back and
+ * he presses it again. With a fresh key that second request is a second
+ * refund, and the customer is paid twice — the shop's only other guard is
+ * `left`, which is read from a snapshot the first attempt never got to write.
+ *
+ * So the key is derived from what the refund IS: this order, this provider
+ * payment, what had already gone back before it, and how much is going now. A
+ * retry of the same press carries the same key and Montonio sends the money
+ * once; a second, deliberate refund has a different `back` and is a different
+ * key. Shaped as a v4 uuid because that is what the refunds guide asks for
+ * (docs/payments.md § 11) — the bits, not the randomness, are what it checks.
+ */
+function refundKey(orderId: string, providerRef: string, back: number, amount: number): string {
+  const h = createHash("sha256")
+    .update(`refund|${orderId}|${providerRef}|${back.toFixed(2)}|${amount.toFixed(2)}`)
+    .digest("hex");
+  const variant = ((parseInt(h.slice(16, 17), 16) & 0x3) | 0x8).toString(16);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-${variant}${h.slice(17, 20)}-${h.slice(20, 32)}`;
 }
 
 /** What the gift lines of an order add up to — the cards it sold. */
@@ -135,6 +136,16 @@ export async function POST(req: Request, ctx: Ctx) {
   }
   if (!order) return bad("not_found", 404);
   if (!settled(order)) return bad("not_paid", 409);
+  /* «возврат» already, so there is nothing left to send back — whether the
+     ledger below knows it or not. An order set to «возврат» by hand is one
+     whose money «moved outside this shop» (that is what the status means, and
+     the customer has already been mailed «Деньги возвращены» for the whole
+     order — src/app/api/admin/orders/[id]/route.ts). Without this the payment
+     blob still said `paid`, `left` was still the whole order, and the card
+     would cheerfully send the money a second time, through Montonio. */
+  if (order.status === "refunded") {
+    return bad("already_refunded", 409, { refundedTotal: refundedTotal(order.payment) });
+  }
 
   /* What the order was worth to the customer — the money plus what a gift
      card paid — and what of it has already gone back, to either place. */
@@ -211,9 +222,9 @@ export async function POST(req: Request, ctx: Ctx) {
         providerRef,
         amount: split.money,
         currency: order.currency || "EUR",
-        // the same for every retry of this same refund — see above: it is
-        // what makes a double tap, and a request that timed out, harmless
-        idempotencyKey: refundIdempotencyKey(order.id, back, split.money),
+        // the same key for every attempt at this refund — see refundKey():
+        // it is what makes a double tap, and a request that timed out, harmless
+        idempotencyKey: refundKey(order.id, providerRef, back, split.money),
         orderNumber: order.number,
       });
     } catch (err) {
@@ -226,7 +237,8 @@ export async function POST(req: Request, ctx: Ctx) {
   try {
     const at = new Date().toISOString();
     let current: Order = order;
-    let out = { refundedTotal: back, fully: false, status: order.status as string };
+    let out = { refundedTotal: back, fully: false, status: order.status as string, voided: [] as string[] };
+    const voided: string[] = [];
 
     /* 1. the money, through the provider — recorded before the card is
           touched, because this is the half that has already happened. */
@@ -244,6 +256,7 @@ export async function POST(req: Request, ctx: Ctx) {
         // the letter goes below, where the amount and the language are already in hand
         { notify: false },
       );
+      voided.push(...out.voided);
       current = (await getOrder(order.id)) ?? current;
     }
 
@@ -272,6 +285,7 @@ export async function POST(req: Request, ctx: Ctx) {
         },
         { notify: false },
       );
+      voided.push(...out.voided);
       current = (await getOrder(order.id)) ?? current;
     }
 
@@ -289,7 +303,6 @@ export async function POST(req: Request, ctx: Ctx) {
     }
 
     const fresh = (await getOrder(order.id)) ?? current;
-    const voided = out.fully ? sold.filter((c) => !c.voidedAt).map((c) => c.code) : [];
     return Response.json(
       {
         ok: true,

@@ -407,15 +407,35 @@ function storedRef(order: OrderLike): string {
   return typeof ref === "string" ? ref.trim() : "";
 }
 
-function alreadyPaid(order: OrderLike): boolean {
-  // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
-  if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
+function paymentSaysPaid(order: OrderLike): boolean {
   const p = order.payment;
   return (
     typeof p === "object" &&
     p !== null &&
     (p as { status?: unknown }).status === "paid"
   );
+}
+
+function alreadyPaid(order: OrderLike): boolean {
+  // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
+  if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
+  return paymentSaysPaid(order);
+}
+
+/**
+ * The payment blob says paid and the order never moved — what a crash between
+ * the two writes below leaves behind (setOrderPayment, then setOrderStatus).
+ * Nothing after the status write can have run, so this order has no stock
+ * taken, no gift card spent, no purchase row and no letter, and every retry
+ * used to stop at `alreadyPaid` and leave it that way for ever.
+ *
+ * Only 'new' and 'failed': an order somebody has since cancelled or refunded
+ * is not half-settled, it is finished, and a webhook Montonio is still
+ * retrying must never drag it back into paid.
+ */
+function halfSettled(order: OrderLike): boolean {
+  const s = String(order.status ?? "");
+  return (s === "new" || s === "failed") && paymentSaysPaid(order);
 }
 
 /**
@@ -556,16 +576,27 @@ export async function applyPaymentResult(
   if (result.status === "paid") {
     // Already paid: a retry, not a payment. Write the blob, touch nothing else
     // — no status change, no gift-card redeem, and the caller sends no mail
-    // (H4); it only makes sure the order's own gift cards exist.
-    if (wasPaid) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
+    // (H4); it only makes sure the order's own gift cards exist. The one
+    // exception is an order the blob calls paid while its status never moved:
+    // that is a settlement that died half-way (halfSettled above), and the
+    // claim below finishes it rather than leaving it stranded.
+    if (wasPaid && !halfSettled(order)) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
 
-    /* The lock, not a formality: this call and the other door (the webhook and
-       the shopper's return, which race by design) both got here from a
-       snapshot that said «не оплачен». Only the one whose UPDATE actually
-       moved the row settles what hangs off the transition — otherwise the gift
-       card is spent twice, the stock comes off twice and the revenue row is
-       written twice. The loser reports `alreadyPaid`, exactly as if it had
-       read the order a moment later. */
+    /* The single transition into paid, claimed rather than written, and the
+       lock is the row itself: the shopper's return and the webhook race by
+       design, both got here from a snapshot that said «не оплачен», and only
+       the one whose UPDATE actually moved the row settles what hangs off the
+       transition — otherwise the gift card is spent twice, the points are
+       spent twice, the stock comes off twice and the revenue row is written
+       twice. The loser reports `alreadyPaid`, exactly as if it had read the
+       order a moment later.
+
+       Conditional on both doors: `unless` makes the UPDATE itself refuse an
+       order that is already paid (src/lib/orders.ts setOrderStatus), and the
+       production wiring in settle.ts sends this same move through
+       claimOrderPaid(), which is the same conditional UPDATE under its own
+       name. A dep that honours neither — a test stand-in — is the only way
+       `moved` comes back for a second caller. */
     const moved = await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`, {
       unless: ["paid", "shipped", "delivered"],
     });

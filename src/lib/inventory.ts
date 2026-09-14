@@ -641,6 +641,35 @@ export async function isTracked(productId: string, variant?: string | null): Pro
   return rows.length > 0 && Number(rows[0].n) > 0;
 }
 
+/**
+ * What one order still holds off the shelf on one line — the net of every move
+ * ever written against its number, plus how many of them were returns.
+ *
+ * The question src/lib/orders.ts asks before it re-takes the stock of an order
+ * whose cancellation was undone: `net < 0` means the goods are already off the
+ * shelf (the sale stands), `net >= 0` with at least one 'return' move means
+ * this order gave them back and they are there to take again, and no return at
+ * all means the order never took anything — an unpaid invoice, or an untracked
+ * variant whose sale move() skipped.
+ */
+export async function refLedger(
+  ref: string,
+  productId: string,
+  variant?: string | null,
+): Promise<{ net: number; returns: number }> {
+  const r = cleanRef(ref);
+  const pid = String(productId ?? "").trim();
+  if (!r || !pid) return { net: 0, returns: 0 };
+  const rows = await query<{ net: string | number; returns: string | number }>(
+    `select coalesce(sum(delta), 0)::text as net,
+            coalesce(sum(case when reason = 'return' then 1 else 0 end), 0)::text as returns
+       from stock_moves where ref = $1 and product_id = $2 and variant = $3`,
+    [r, pid, normVariant(variant)],
+  );
+  if (!rows.length) return { net: 0, returns: 0 };
+  return { net: Number(rows[0].net) || 0, returns: Number(rows[0].returns) || 0 };
+}
+
 async function trackedKeys(): Promise<Set<string>> {
   const rows = await query<{ product_id: string; variant: string }>(
     `select distinct product_id, variant from stock_moves where reason in ${TRACKING_SQL}`,

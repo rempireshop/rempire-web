@@ -369,6 +369,61 @@ describe("inventory", () => {
       }
     });
 
+    /* The undo of «Отменить заказ» (the card's «Изменить статус вручную →
+       оплачен» on an order whose money is already in) is a bare status write,
+       so until 14.09.2026 the +3 'return' the cancellation wrote had no
+       inverse anywhere: every cancel/undo cycle handed the shelf the whole
+       order again, and after two of them the shop thought it had six bottles
+       it did not have. */
+    it("the undo of a cancellation takes the returned stock off the shelf again", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
+      const order = await payOrder();
+      await setOrderStatus(order.id, "cancelled", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+
+      // …and a second cycle is not a second gift either
+      await setOrderStatus(order.id, "cancelled", "test");
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+    });
+
+    it("the undo of a refund takes it back too", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
+      const order = await payOrder();
+      await setOrderStatus(order.id, "refunded", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+    });
+
+    /* The other half of the same rule: an order that never took stock has
+       nothing to take again. A cancelled invoice the company pays afterwards
+       is settled through applyPaymentResult(), which does its own decrement —
+       a second one here would sell the shelf twice on one order. */
+    it("marking a cancelled order that never paid takes the stock exactly once", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
+      const order = await createOrder({
+        items: [{ id: plain.id, qty: 3 }],
+        customer: { name: "Т", email: "t3@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await setOrderStatus(order.id, "cancelled", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+
+      const { setOrderPayment, setOrderStatus: realSetStatus } = await import("@/lib/orders");
+      await applyPaymentResult(
+        { ...order, status: "cancelled" } as unknown as OrderLike,
+        { orderRef: order.number, status: "paid", providerRef: "manual", amount: Number(order.total), currency: "EUR" },
+        "manual",
+        { setOrderPayment, setOrderStatus: realSetStatus },
+      );
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7);
+      expect(await listMoves({ productId: plain.id, reason: "sale_web" })).toHaveLength(1);
+    });
+
     it("cancelling a NEW order (never paid) returns nothing — it never took stock", async () => {
       const order = await createOrder({
         items: [{ id: plain.id, qty: 2 }],
