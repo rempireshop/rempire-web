@@ -977,6 +977,91 @@ describe("the shipping routes", () => {
     expect((await getOrder(order.id))!.status).toBe("paid");
   });
 
+  /* The «second press» above is the easy half: by then the shipment is on the
+     order row. The hard half is the press that arrives while the FIRST one is
+     still inside Montonio — the owner's phone timed the request out and he
+     pressed again. The route read the order, saw no shipment, booked, and only
+     then wrote the row, so that second press booked (and paid for) a second
+     parcel with nothing to show for it (audit 14.09.2026). The slot on the
+     order row is claimed before the call now. */
+  it("a press that arrives while the first is still inside Montonio books nothing", async () => {
+    withKeys();
+    let bookings = 0;
+    let letGo = () => {};
+    let firstIsInside = () => {};
+    const held = new Promise<void>((r) => { letGo = r; });
+    const reached = new Promise<void>((r) => { firstIsInside = r; });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = String(input);
+        if (!/\/shipments$/.test(url)) throw new Error(`unexpected fetch: ${url}`);
+        bookings += 1;
+        // only the first call hangs — a second one answers at once, so a shop
+        // without the claim fails this test on the count instead of timing out
+        if (bookings === 1) { firstIsInside(); await held; }
+        return json(SHIPMENT_BODY);
+      }),
+    );
+
+    const order = await paidOrder({
+      method: "Пакомат Omniva",
+      country: "EE",
+      pointId: POINT_UUID,
+      pointName: "Laagri Coop Maksimarketi pakiautomaat",
+    });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const press = () =>
+      POST(req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin));
+
+    const first = press();
+    await reached;
+    const second = await press();
+    expect(second.status).toBe(409);
+    expect((await second.json()).error).toBe("in_progress");
+
+    letGo();
+    const firstRes = await first;
+    expect(firstRes.status).toBe(200);
+    // one parcel at the carrier, one invoice from it
+    expect(bookings).toBe(1);
+
+    const ship = (await getOrder(order.id))!.shipping as unknown as Record<string, Record<string, unknown>>;
+    expect(ship.montonio.shipmentId).toBe(SHIPMENT_BODY.id);
+    // the claim goes out with the write that records the parcel
+    expect(ship.montonio.bookingAt).toBeNull();
+  });
+
+  /* …and a booking Montonio refused must not leave the button locked: there is
+     no parcel, so the owner has to be able to press again at once. */
+  it("gives the slot back when Montonio refuses, so the next press goes through", async () => {
+    withKeys();
+    let attempts = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        if (!/\/shipments$/.test(String(input))) throw new Error(`unexpected fetch: ${String(input)}`);
+        attempts += 1;
+        return attempts === 1 ? json({ message: "nope" }, 500) : json(SHIPMENT_BODY);
+      }),
+    );
+    const order = await paidOrder({
+      method: "Пакомат Omniva",
+      country: "EE",
+      pointId: POINT_UUID,
+      pointName: "Laagri Coop Maksimarketi pakiautomaat",
+    });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const press = () =>
+      POST(req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin));
+
+    const refused = await press();
+    expect(refused.status).toBe(502);
+    const ok = await press();
+    expect(ok.status).toBe(200);
+    expect(attempts).toBe(2);
+  });
+
   it("«Отправлен» is the PATCH: shipped, the letter with the tracking link, and every step undoable", async () => {
     withKeys();
     stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);

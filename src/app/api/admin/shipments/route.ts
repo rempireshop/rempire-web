@@ -23,13 +23,18 @@
  * Idempotent: a second press returns the shipment already stored rather than
  * booking (and paying for) a second parcel. A shipment the journal's undo had
  * set aside (`dismissed`, see MontonioShipment) is brought back the same way —
- * the parcel at the carrier is the same parcel.
+ * the parcel at the carrier is the same parcel. And a press that arrives while
+ * the FIRST one is still inside Montonio — the timed-out tap on the owner's
+ * phone — is answered `in_progress` rather than booking a second one: the slot
+ * on the order row is claimed before the call (claimShipmentSlot).
  */
 import { requireAdmin } from "@/lib/auth";
 import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
 import {
   MontonioShippingError,
+  claimShipmentSlot,
   createMontonioShipment,
+  releaseShipmentSlot,
   saveShipmentOnOrder,
   shipmentOnOrder,
 } from "@/lib/shipping/montonio";
@@ -92,6 +97,21 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "not_paid", detail: order.status }, { status: 409 });
   }
 
+  /* The slot is taken BEFORE Montonio is called. Everything above ran against
+     a snapshot of the order, and between "there is no shipment here" and the
+     write at the bottom sits a live call to a carrier: a press that timed out
+     on the owner's phone and was pressed again booked — and paid for — a
+     second parcel. `false` means another press is inside that call right now
+     (claimShipmentSlot, which expires by itself). */
+  let claimed = false;
+  try {
+    claimed = await claimShipmentSlot(order.id);
+  } catch (err) {
+    console.error("[api/admin/shipments] could not claim the booking slot:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+  if (!claimed) return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
+
   let shipment;
   try {
     shipment = await createMontonioShipment(order, {
@@ -99,6 +119,8 @@ export async function POST(req: Request) {
       carrier: typeof body.carrier === "string" && body.carrier ? body.carrier : undefined,
     });
   } catch (err) {
+    // nothing was booked, so the button must work again at once
+    await releaseShipmentSlot(order.id).catch(() => {});
     if (err instanceof MontonioShippingError) {
       const status = err.code === "not_configured" ? 501 : CLIENT_ERRORS.has(err.code) ? 400 : 502;
       console.error("[api/admin/shipments] montonio refused:", err.code, err.detail);
@@ -109,7 +131,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    await saveShipmentOnOrder(order.id, { ...shipment });
+    // the claim goes out with the same write that records the parcel
+    await saveShipmentOnOrder(order.id, { ...shipment, bookingAt: null });
   } catch (err) {
     // The parcel exists at the carrier; losing the row is bad but not fatal —
     // report it with the tracking code so nobody books it twice.

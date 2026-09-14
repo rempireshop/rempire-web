@@ -9,6 +9,8 @@
  * the last of which stopped meaning "until the next deploy" on 08.09.2026,
  * see the block at the bottom of this file.
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
@@ -234,5 +236,125 @@ describe("a hidden catalogue product, without a rebuild", () => {
     }
     const inStock = xml.split("<url>").find((u) => u.includes(`/shop2/p/${plain.id}/<`))!;
     expect(inStock).toContain("<priority>0.7</priority>");
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   «×» and the basket that was already sitting in localStorage.
+
+   A cart line carries the INDEX of the rung, not its name. Take a rung off the
+   ladder and every screen clamps that index quietly — sizePrice() and
+   lineLabelParts() both do — so the cart looks healthy and charges the last
+   rung that still exists. What went out on the order, though, was the raw
+   index: variantOf() found no such rung, createOrder() threw `bad_variant`,
+   and ORDER_ERRS had no sentence for it, so the shopper was told «Не
+   получилось оформить заказ — попробуйте ещё раз» for ever. The basket could
+   not be checked out and did not say why (audit 14.09.2026).
+
+   Fixed at both ends: the order carries the rung the cart is showing, and
+   `bad_variant` has words of its own for the cases that get past it.
+--------------------------------------------------------------------------- */
+const APP_JS = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+
+/** Cut `function <name>(…) { … }` out of app.js by brace matching. */
+function slice(name: string): string {
+  const start = APP_JS.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+  let depth = 0;
+  for (let i = APP_JS.indexOf("{", start); i < APP_JS.length; i++) {
+    if (APP_JS[i] === "{") depth++;
+    else if (APP_JS[i] === "}" && --depth === 0) return APP_JS.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces around ${name}() in app.js`);
+}
+
+type ShopProduct = { id: string; sizes?: string[]; prices?: number[]; price?: number };
+
+/** The three functions of the cart that touch a line's size, over one catalogue. */
+function cart(catalogue: ShopProduct[]) {
+  const body = `
+    var CATALOGUE = CAT;
+    var COLOUR_RU = {};
+    function byId(id) {
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i];
+      return CATALOGUE[0];
+    }
+    ${slice("colourRu")}
+    ${slice("sizePrice")}
+    ${slice("lineLabelParts")}
+    ${slice("lineVariant")}
+    return {
+      /** what the order carries */
+      posted: lineVariant,
+      /** what the cart charges */
+      price: function (l) { return sizePrice(byId(l.id), l.size || 0); },
+      /** what the cart shows */
+      label: function (l) { return lineLabelParts(l).join(" "); }
+    };
+  `;
+  const run = new Function("CAT", body) as (c: ShopProduct[]) => {
+    posted: (l: { id: string; size?: number | string | null }) => unknown;
+    price: (l: { id: string; size?: number }) => number;
+    label: (l: { id: string; size?: number }) => string;
+  };
+  return run(catalogue);
+}
+
+describe("a basket saved before a size was deleted", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+  beforeEach(truncateAll);
+
+  /* The ladder as the shop sees it after the owner pressed «×» on the third
+     rung: two left, and a cart line still pointing at index 2. */
+  const LADDER = [{ size: "75 мл", price: 10 }, { size: "250 мл", price: 16 }];
+  const shelf: ShopProduct[] = [{ id: sized.id, sizes: ["75 мл", "250 мл"], prices: [10, 16] }];
+  const stale = { id: sized.id, size: 2 };
+
+  it("posts the rung the cart is showing, not the one that is gone", () => {
+    const c = cart(shelf);
+    // the cart already clamps: it shows and charges the last rung there is
+    expect(c.label(stale)).toBe("250 мл");
+    expect(c.price(stale)).toBe(16);
+    // …and that is what goes out now
+    expect(c.posted(stale)).toBe(1);
+    expect(c.posted({ id: sized.id, size: 0 })).toBe(0); // a live index is untouched
+  });
+
+  it("checks that basket out — the whole point", async () => {
+    await upsertOverride(sized.id, { sizes: LADDER });
+    const c = cart(shelf);
+    const made = await createOrder(order([{ id: sized.id, variant: c.posted(stale) as number, qty: 1 }]));
+    // the shopper gets the volume the cart showed them, at the price it showed
+    expect(made.items[0].variant).toBe("250 мл");
+    expect(made.items[0].price).toBe(16);
+  });
+
+  it("…where the raw stale index is still refused, as it must be", async () => {
+    await upsertOverride(sized.id, { sizes: LADDER });
+    await expect(createOrder(order([{ id: sized.id, variant: 2, qty: 1 }]))).rejects.toMatchObject({
+      code: "bad_variant",
+    });
+  });
+
+  it("leaves a label alone — the server resolves those by name", () => {
+    const c = cart(shelf);
+    expect(c.posted({ id: sized.id, size: "250 мл" })).toBe("250 мл");
+  });
+
+  it("says nothing about a size for a product that has only one price", () => {
+    const c = cart([{ id: "solo", prices: [9], sizes: ["100 мл"] }]);
+    expect(c.posted({ id: "solo", size: 3 })).toBeNull();
+  });
+
+  /* And when one gets past all of that — a replayed payload, an override
+     ladder that landed after the line was built — the shopper has to be told
+     something they can act on. ORDER_ERRS is the storefront's own map. */
+  it("has a sentence for bad_variant instead of the endless «попробуйте ещё раз»", () => {
+    const errs = new Function(`${APP_JS.slice(APP_JS.indexOf("var ORDER_ERRS = {"), APP_JS.indexOf("function orderErrText("))}
+      ${slice("orderErrText")}
+      return orderErrText;`)() as (code: string) => string;
+    expect(errs("bad_variant")).not.toBe(errs("something_else_entirely"));
+    expect(errs("bad_variant")).toContain("размер");
   });
 });

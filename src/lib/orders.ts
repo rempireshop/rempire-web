@@ -210,6 +210,14 @@ export type Override = {
   proPrice: number | null;
   /** The whole size ladder as the owner saved it; null = the catalogue's own. */
   sizes: SizeRung[] | null;
+  /**
+   * `stock` per SIZE, keyed by the size label an order line carries ('' for a
+   * product with no sizes) — filled in by getOverrides() from the numeric
+   * inventory, absent for a product nobody has counted. `stock` above is the
+   * product's one word and says «in» while any single size is left, which is
+   * right for a card and wrong for an order line; createOrder() reads this.
+   */
+  stockByVariant?: Record<string, StockState> | null;
   /** True = out of the shop, the search, the sets and the sitemap. */
   hidden: boolean;
   updatedAt: string | null;
@@ -530,12 +538,16 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
      neighbour above: a broken inventory module must not take the storefront
      down with it. */
   try {
-    const { productStockStates } = await import("@/lib/inventory");
-    const derived = await productStockStates(ids);
+    const { stockStates } = await import("@/lib/inventory");
+    const { byProduct: derived, byVariant } = await stockStates(ids);
     for (const [id, stock] of Object.entries(derived)) {
+      /* `stockByVariant` travels with the product's word, not instead of it:
+         the word is what a card shows («in» while any size is left), and the
+         map is what createOrder() checks for the size the order names. */
+      const stockByVariant = byVariant[id] ?? null;
       out[id] = out[id]
-        ? { ...out[id], stock }
-        : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
+        ? { ...out[id], stock, stockByVariant }
+        : { price: null, stock, stockByVariant, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
     }
   } catch (err) {
     console.error("[orders] inventory stock derivation failed, using manual overrides:", err);
@@ -952,6 +964,16 @@ export async function priceItems(
     if (ladder && ladder.sizes.length && raw.variant != null && raw.variant !== "" && v.price == null) {
       throw new OrderError("bad_variant", raw.id);
     }
+    /* …and a size that exists but has none left. `stock` a few lines up is the
+       product's one word, and it says «in» while ANY size is on the shelf: a
+       sold-out 500 ml on a product whose 75 ml is in stock walked through that
+       check, was paid for, and left the owner to explain it (audit
+       14.09.2026). The per-size states come from the same counted inventory
+       (src/lib/inventory.ts stockStates) and are keyed by the label this line
+       is about to carry. A product nobody has counted has no map and is
+       judged, as before, by the word alone. */
+    const perVariant = o?.stockByVariant;
+    if (perVariant && perVariant[v.label ?? ""] === "out") throw new OrderError("out_of_stock", raw.id);
     /* An override price replaces the base price; a size that costs more keeps
        its premium over the base, so «−1 € on the 75 ml» does not silently
        hand away 16 € on the 500 ml. An owner-saved ladder needs none of that

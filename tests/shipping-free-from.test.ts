@@ -273,3 +273,106 @@ describe("a real threshold still prices a basket the way it always did", () => {
     expect(p.cell("default")).toBe("59");
   });
 });
+
+/* ---------------------------------------------------------------------------
+   …and the sentences that QUOTE the floor.
+
+   Everything above is about the number the till uses. This is about the number
+   the shop prints: the product page, the footer and the announcement strip all
+   say «по Эстонии бесплатно от 59 €», and until 14.09.2026 they went on saying
+   it after the owner cleared «Бесплатно от» — refreshShipThresholds() only
+   wrote a finite number back, so THRESH kept the seed while threshold() above
+   correctly answered Infinity and the checkout billed the parcel. A promise on
+   the product page that the last screen of the checkout breaks is worse than
+   no promise at all.
+--------------------------------------------------------------------------- */
+
+/** Read a `var <name> = { … };` literal out of app.js, verbatim. */
+function objectLiteral(name: string): string {
+  const at = src.indexOf(`var ${name} = {`);
+  if (at < 0) throw new Error(`public/shop2/app.js no longer has var ${name}`);
+  const open = src.indexOf("{", at);
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return `${src.slice(at, i + 1)};`;
+  }
+  throw new Error(`unterminated literal for ${name}`);
+}
+
+type Marketing = {
+  thresh: Record<string, number | null>;
+  pdp: string;
+  ftr: string;
+  /** the announcement strip's own body, "" when it refuses to print */
+  announce: (ru: string) => string;
+};
+
+/** The shop's own four functions over a set of rules — no DOM needed. */
+function marketing(rules: Partial<ShippingRules>): Marketing {
+  const body = `
+    var SHIP_RULES = RULES;
+    ${objectLiteral("THRESH")}
+    ${slice("refreshShipThresholds")}
+    ${slice("pdpShipLine")}
+    ${slice("ftrShipLine")}
+    ${slice("cTokens")}
+    ${slice("announceBody")}
+    function cText(t) { return t && t.RU ? t.RU : ""; }
+    function esc(s) { return s; }
+    var CONTENT_DEFAULT = { announcement: { text: {} } };
+    var ANN = { on: true, text: {}, short: {}, link: "" };
+    function contentConf() { return { announcement: ANN }; }
+    refreshShipThresholds();
+    return {
+      thresh: THRESH,
+      pdp: pdpShipLine(),
+      ftr: ftrShipLine(),
+      announce: function (ru) { ANN.text = { RU: ru }; ANN.short = {}; return announceBody(); }
+    };
+  `;
+  const run = new Function("RULES", body) as (r: unknown) => Marketing;
+  return run(JSON.parse(JSON.stringify({ methods: {}, ...rules })));
+}
+
+describe("the sentences that quote «бесплатно от» stop quoting it when there is none", () => {
+  it("prints the owner's real floor while there is one", () => {
+    const m = marketing({ ...SHIPPED, freeFromByCountry: { EE: 39, EU: 200 } });
+    expect(m.thresh.EE).toBe(39);
+    expect(m.pdp).toContain("по Эстонии бесплатно от 39 €");
+    expect(m.ftr).toContain("по Эстонии бесплатно от 39 €");
+    expect(m.announce("Бесплатная доставка по Эстонии от {EE} €")).toBe("Бесплатная доставка по Эстонии от 39 €");
+  });
+
+  it("drops the clause outright when «Бесплатно от» is cleared for Estonia", () => {
+    const rules = { ...SHIPPED, freeFromByCountry: { EE: null, EU: 200 } };
+    const m = marketing(rules);
+    // the till already knew; now the pages do too
+    expect(storefront(rules, "EE")).toBe(Infinity);
+    expect(m.thresh.EE).toBeNull();
+    expect(m.pdp).not.toContain("бесплатно");
+    expect(m.ftr).not.toContain("бесплатно");
+    expect(m.pdp).toBe("Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1");
+    expect(m.ftr).toBe("DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах");
+  });
+
+  it("drops the announcement strip rather than printing «от {EE} €» at a shopper", () => {
+    const m = marketing({ ...SHIPPED, freeFromByCountry: { EE: null, EU: 200 } });
+    expect(m.announce("Бесплатная доставка по Эстонии от {EE} €")).toBe("");
+    // a strip that names no threshold is none of this test's business
+    expect(m.announce("Новая партия Kevin.Murphy")).toBe("Новая партия Kevin.Murphy");
+  });
+
+  it("follows the shop-wide box too — clearing «Остальные страны» empties every row that inherits it", () => {
+    const m = marketing({ ...SHIPPED, freeFrom: null, freeFromByCountry: {} });
+    expect(m.thresh).toEqual({ EE: null, LV: null, LT: null, FI: null, EU: null });
+    expect(m.pdp).not.toContain("бесплатно");
+  });
+
+  /* The half that must not break: 0 is «always free», not «no floor». */
+  it("keeps printing a floor of 0", () => {
+    const m = marketing({ ...SHIPPED, freeFromByCountry: { EE: 0, EU: 200 } });
+    expect(m.thresh.EE).toBe(0);
+    expect(m.pdp).toContain("по Эстонии бесплатно от 0 €");
+  });
+});

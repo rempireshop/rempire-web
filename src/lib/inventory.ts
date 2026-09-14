@@ -539,6 +539,25 @@ export async function syncVariantRows(
  * sellable while one size remains" rule a shopper would expect.
  */
 export async function productStockStates(ids?: string[]): Promise<Record<string, StockState>> {
+  return (await stockStates(ids)).byProduct;
+}
+
+/**
+ * Both readings of the same tracked levels, from one query.
+ *
+ * `byProduct` is the word above — what a product card shows. `byVariant` is
+ * the state of each size on its own, keyed by the size LABEL exactly as an
+ * order line carries it (module doc; '' for a product with no sizes).
+ *
+ * The two are not interchangeable, and treating them as one was a real hole:
+ * the product word says "in" while any single size is left, so a sold-out
+ * 500 ml on a product whose 75 ml is on the shelf was shown in stock, put in
+ * a basket and paid for. createOrder() checks `byVariant` for the size the
+ * order actually names (audit 14.09.2026).
+ */
+export async function stockStates(
+  ids?: string[],
+): Promise<{ byProduct: Record<string, StockState>; byVariant: Record<string, Record<string, StockState>> }> {
   const trackedClause =
     `exists (select 1 from stock_moves m where m.product_id = sl.product_id and m.variant = sl.variant and m.reason in ${TRACKING_SQL})`;
   let rows: StockLevelRow[];
@@ -552,18 +571,20 @@ export async function productStockStates(ids?: string[]): Promise<Record<string,
     rows = await query<StockLevelRow>(`select sl.* from stock_levels sl where ${trackedClause}`);
   }
 
-  const byProduct = new Map<string, StockLevelRow[]>();
+  const byProduct: Record<string, StockState> = {};
+  const byVariant: Record<string, Record<string, StockState>> = {};
+  const seen = new Map<string, StockState[]>();
   for (const r of rows) {
-    const list = byProduct.get(r.product_id) ?? [];
-    list.push(r);
-    byProduct.set(r.product_id, list);
+    const state = deriveState(Number(r.qty), Number(r.low_threshold));
+    (byVariant[r.product_id] ??= {})[r.variant] = state;
+    const list = seen.get(r.product_id) ?? [];
+    list.push(state);
+    seen.set(r.product_id, list);
   }
-  const out: Record<string, StockState> = {};
-  for (const [productId, list] of byProduct) {
-    const states = list.map((r) => deriveState(Number(r.qty), Number(r.low_threshold)));
-    out[productId] = states.every((s) => s === "out") ? "out" : states.some((s) => s === "low") ? "low" : "in";
+  for (const [productId, states] of seen) {
+    byProduct[productId] = states.every((s) => s === "out") ? "out" : states.some((s) => s === "low") ? "low" : "in";
   }
-  return out;
+  return { byProduct, byVariant };
 }
 
 /* ---------- the admin table: every catalogue variant, tracked or not ----- */

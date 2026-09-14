@@ -1153,6 +1153,53 @@ export async function saveShipmentOnOrder(
   );
 }
 
+/**
+ * How long a booking claim below stays in the way. Long enough that a slow
+ * Montonio is never overtaken by an impatient second press, short enough that
+ * a request which died mid-call does not lock the button while the owner is
+ * still looking at the card.
+ */
+export const SHIPMENT_CLAIM_MS = 120_000;
+
+/**
+ * Take the order's booking slot before Montonio is called — and say whether
+ * it was free.
+ *
+ * POST /api/admin/shipments used to read the order, see no shipment, call
+ * Montonio, and only then write the row. Between those two there is a booked,
+ * paid-for parcel that nothing has recorded yet: a press that timed out on the
+ * owner's phone and was pressed again booked a SECOND parcel (audit
+ * 14.09.2026). One conditional UPDATE closes it — Postgres locks the row, so
+ * of two presses exactly one sees the slot empty.
+ *
+ * The claim is the database's own clock, never the caller's: two serverless
+ * instances do not share a wristwatch. It is dropped by releaseShipmentSlot()
+ * when the call fails, overwritten by the shipment itself when it succeeds,
+ * and ignored once SHIPMENT_CLAIM_MS has passed.
+ */
+export async function claimShipmentSlot(orderId: string): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `update orders
+        set shipping = coalesce(shipping, '{}'::jsonb)
+                       || jsonb_build_object('montonio',
+                            coalesce(shipping -> 'montonio', '{}'::jsonb)
+                            || jsonb_build_object('bookingAt', (extract(epoch from now()) * 1000)::bigint)),
+            updated_at = now()
+      where id = $1
+        and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') = ''
+        and coalesce((shipping -> 'montonio' ->> 'bookingAt')::bigint, 0)
+            < (extract(epoch from now()) * 1000)::bigint - $2::bigint
+      returning id`,
+    [orderId, SHIPMENT_CLAIM_MS],
+  );
+  return rows.length > 0;
+}
+
+/** Give the slot back — the booking failed, so the next press may try again. */
+export async function releaseShipmentSlot(orderId: string): Promise<void> {
+  await saveShipmentOnOrder(orderId, { bookingAt: null });
+}
+
 /** What we stored earlier for this order, if anything. */
 export function shipmentOnOrder(order: Order): (MontonioShipment & Record<string, unknown>) | null {
   const raw = (order.shipping as unknown as { montonio?: unknown } | null)?.montonio;

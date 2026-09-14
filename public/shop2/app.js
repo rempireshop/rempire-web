@@ -262,6 +262,13 @@
       "Понедельник": "Esmaspäev", "Вторник": "Teisipäev", "Среда": "Kolmapäev",
       "Четверг": "Neljapäev", "Пятница": "Reede", "Суббота": "Laupäev", "Воскресенье": "Pühapäev",
       "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
+      /* The same two delivery sentences as the UI_RX rules with a price in
+         them, for a shop whose owner has cleared «Бесплатно от»: there is no
+         floor to name, so the clause is gone (pdpShipLine, ftrShipLine). */
+      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
+        "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · järeletulek aadressil Mardi 1",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
+        "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · 230 pakiautomaati 4 riigis",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
@@ -628,6 +635,7 @@
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
+      "Этого размера больше нет — выберите другой в корзине": "Seda suurust enam ei ole — vali ostukorvis teine",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "Sellist kinkekaarti praegu ei müüda — vali teine summa",
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
@@ -1897,6 +1905,7 @@
       "Трек-номер скопирован ✓": "Jälgimisnumber kopeeritud ✓",
       "Для самовывоза и электронных заказов этикетка не нужна.": "Järeletuleku ja e-tellimuste puhul pole silti vaja.",
       "Этикетка создаётся после оплаты.": "Silt luuakse pärast maksmist.",
+      "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "Silti juba luuakse — oota minut ja ava tellimus uuesti.",
       "Сообщение клиенту": "Sõnum kliendile",
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
@@ -2831,6 +2840,13 @@
       "Понедельник": "Monday", "Вторник": "Tuesday", "Среда": "Wednesday",
       "Четверг": "Thursday", "Пятница": "Friday", "Суббота": "Saturday", "Воскресенье": "Sunday",
       "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "free · your order waits 7 days, then €1.50 per day.",
+      /* The same two delivery sentences as the UI_RX rules with a price in
+         them, for a shop whose owner has cleared «Бесплатно от»: there is no
+         floor to name, so the clause is gone (pdpShipLine, ftrShipLine). */
+      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
+        "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · pickup at Mardi 1",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
+        "DPD, Omniva, SmartPosti and courier · 1–3 days · 230 parcel lockers in 4 countries",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day.",
@@ -3189,6 +3205,7 @@
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
+      "Этого размера больше нет — выберите другой в корзине": "That size is gone — pick another one in the basket",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "That gift card is not on sale right now — pick another amount",
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
@@ -4433,6 +4450,7 @@
       "Трек-номер скопирован ✓": "Tracking number copied ✓",
       "Для самовывоза и электронных заказов этикетка не нужна.": "Pickup and electronic orders need no label.",
       "Этикетка создаётся после оплаты.": "The label is created after payment.",
+      "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "The label is already being created — wait a minute and open the order again.",
       "Сообщение клиенту": "Message to the customer",
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
@@ -6211,10 +6229,31 @@
     Object.keys(THRESH).forEach(function (c) {
       var by = SHIP_RULES.freeFromByCountry;
       var v = by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : SHIP_RULES.freeFrom;
-      // null means "never free" — the marketing lines have no way to say that,
-      // so they keep the last real number while threshold() bills correctly
-      if (typeof v === "number" && isFinite(v)) THRESH[c] = v;
+      /* null is «delivery is never free here» — the owner cleared «Бесплатно
+         от» in «Доставка и оплата». It used to be dropped, and the seeded 59
+         stayed on screen: the product page and the footer went on promising
+         «по Эстонии бесплатно от 59 €» while threshold() returned Infinity and
+         the checkout billed the parcel. The null is carried now, and the
+         sentences that quote a floor are dropped instead of printing one
+         (pdpShipLine, ftrShipLine, announceBody). */
+      THRESH[c] = typeof v === "number" && isFinite(v) ? v : null;
     });
+  }
+  /* The delivery sentence under «В корзину» and the footer's — both quote the
+     Estonian floor, and both have to stop quoting it when there is none.
+     Two whole sentences rather than one with a clause glued into the middle:
+     translateTree() rewrites whole text nodes, and tools/i18n-gaps.mjs reads
+     the literals the same way, so a spliced-in fragment would be untranslated
+     in ET and EN. */
+  function pdpShipLine() {
+    return THRESH.EE == null
+      ? "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1"
+      : "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от " + THRESH.EE + " € · самовывоз на Mardi 1";
+  }
+  function ftrShipLine() {
+    return THRESH.EE == null
+      ? "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах"
+      : "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах";
   }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
   /* «Другая страна Европы» prices the parcel (the EU row of the rules), but a
@@ -9291,7 +9330,7 @@
           (out
             ? '<p class="muted">Одного из товаров сейчас нет — соберём набор, как только он приедет.</p>'
             : '<button class="btn btn--wide" data-addbundle="' + b.id + '">В корзину — ' + eur(b.price) + "</button>") +
-          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
+          '<div class="pdp__ship">' + pdpShipLine() + "</div>" +
         "</div>" +
       "</div></div>" +
       (out ? "" :
@@ -10168,6 +10207,11 @@
     // every language blank → the built-in line, thresholds and all
     if (!full) full = cTokens(cText(CONTENT_DEFAULT.announcement.text));
     if (!short) short = full;
+    /* A country whose «Бесплатно от» the owner cleared has no number to put
+       in its {EE} — cTokens() leaves the token standing rather than inventing
+       one. The strip is dropped then: «Бесплатная доставка по Эстонии от {EE}
+       €» is both broken and a promise the checkout does not keep. */
+    if (/\{(EE|LV|LT|FI|EU)\}/.test(full + " " + short)) return "";
     var body = short === full
       ? esc(full)
       : '<span class="wide-only">' + esc(full) + '</span><span class="narrow-only">' + esc(short) + "</span>";
@@ -10397,8 +10441,7 @@
          sentence carries a price and is translated by a UI_RX rule anchored
          on its last word — one appended « · » and it stops matching in ET
          and EN. Same reason «Самовывоз» below keeps its own <span>. */
-      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE +
-        " € · 230 пакоматов в 4 странах" +
+      ftrSec("Доставка", ftrShipLine() +
         '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
@@ -10807,7 +10850,7 @@
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
-          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
+          '<div class="pdp__ship">' + pdpShipLine() + "</div>" +
           /* The live shop's own description when we have it (harvested — all
              95 products); the old placeholder text only where we somehow
              don't. Its images are stripped: cdn.shopify.com dies with the
@@ -13804,7 +13847,17 @@
     if (l.size === undefined || l.size === null) return null;
     for (var i = 0; i < CATALOGUE.length; i++) {
       if (CATALOGUE[i].id === l.id) {
-        return CATALOGUE[i].prices && CATALOGUE[i].prices.length > 1 ? l.size : null;
+        var pr = CATALOGUE[i].prices;
+        if (!pr || pr.length <= 1) return null;
+        /* A basket saved before the owner took a rung off the ladder still
+           carries the old index. Every screen already clamps it — sizePrice()
+           and lineLabelParts() both do — so the cart SHOWS the last rung that
+           still exists and charges its price; what went out on the order was
+           the raw index, which the server cannot find (variantOf → bad_variant
+           in src/lib/orders.ts), and the basket became unorderable for good.
+           The order now carries the rung the shopper is looking at. */
+        var n = Number(l.size);
+        return isFinite(n) && n > pr.length - 1 ? pr.length - 1 : l.size;
       }
     }
     return null;
@@ -13895,8 +13948,21 @@
   };
   /**
    * POST JSON and say plainly whether there is an API behind this page at all.
-   * `offline` means "no server here" (a static host answers 404/HTML); a real
-   * error from a real API comes back as a body with ok:false.
+   * `offline` means "no server here" and nothing else: the route answered
+   * 404, 405 or 501, which is what a static host says about /api/… . Only
+   * that answer may finish the demo.
+   *
+   * `failed` is everything that did not come back as JSON — a dropped
+   * connection, a timeout, an edge 502/504 whose body is an HTML error page.
+   * Until 14.09.2026 those were `offline` too, and that was the worst thing
+   * in the checkout: a 504 on the way back from POST /api/orders/ — an order
+   * that really exists, on a shop that really works — showed the shopper the
+   * green «Заказ оформлен» of the demo, and «Сообщить о наличии» answered
+   * «Записали ✓» for a request that had reached nobody. A `failed` carries no
+   * `body`, so every caller's own «the server said no» branch takes it and
+   * says «попробуйте ещё раз».
+   *
+   * A real error from a real API still comes back as a body with ok:false.
    */
   function postJSON(url, body, signal) {
     return fetch(url, {
@@ -13907,14 +13973,22 @@
     }).then(function (r) {
       if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
       return r.json().then(function (j) { return { body: j, status: r.status }; },
-        function () { return { offline: true }; });
-    }, function () { return { offline: true }; });
+        function () { return { failed: true }; });
+    }, function () { return { failed: true }; });
   }
   var ORDER_ERRS = {
     empty_order: "Корзина пуста",
     rate_limited: "Слишком много попыток — подождите минуту",
     bad_email: "Проверьте e-mail",
     out_of_stock: "Товара не хватает на складе",
+    /* The size on the line is not on the product any more — the owner took a
+       rung off the ladder while the basket sat in localStorage. lineVariant()
+       clamps the stale index to the rung the cart is already SHOWING, so this
+       should not happen from this shop; it still has to say something a
+       shopper can act on when it does (a tampered payload, an override ladder
+       that arrived after the line was built), because the fallback sentence
+       below sends them round the same loop for ever. */
+    bad_variant: "Этого размера больше нет — выберите другой в корзине",
     // the owner switched this denomination off while the card sat in the basket
     gift_unavailable: "Такой подарочной карты сейчас нет — выберите другую сумму",
     db_unavailable: "Магазин временно недоступен — попробуйте позже",
@@ -14034,7 +14108,14 @@
     if (isInvoice()) { S.invTouched = true; if (invoiceMissing().length) { return failStep(3, "Заполните данные фирмы для счёта"); } }
     if (!S.cart.length) { toast("Корзина пуста"); return; }
     if (S.paying) return;
-    if (API.ok === false) return finishDemo();
+    /* There used to be an `if (API.ok === false) return finishDemo();` here,
+       and it cost orders. API.ok is latched false by the .catch of the
+       one-shot probes this screen fires at load (loadShipRules,
+       loadCarrierLogos, loadPayMethods, loadPointsFor) — none of which ever
+       asks again — so one blink of the shopper's connection turned «Оплатить»
+       into the demo receipt for the whole life of the page. The POST itself
+       is the only honest test of whether there is a server here, and it
+       answers `offline` below when there is not. */
 
     S.paying = true; render();
     // no abandoned-cart snapshot from here on: this basket is becoming an order
@@ -27560,7 +27641,10 @@
     not_configured: "Доставка Montonio не подключена",
     point_unresolved: "Пакомат не найден у Montonio",
     not_shippable: "Для самовывоза и электронных заказов этикетка не нужна.",
-    not_paid: "Этикетка создаётся после оплаты."
+    not_paid: "Этикетка создаётся после оплаты.",
+    // the previous press is still inside Montonio — the server refuses to book
+    // a second parcel for the same order (POST /api/admin/shipments)
+    in_progress: "Этикетка уже создаётся — подождите минуту и откройте заказ заново."
   };
   /* Montonio found no courier for the order's country. Two different
      stories: an order placed before the checkout asked for the real country
