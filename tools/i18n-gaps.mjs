@@ -301,6 +301,7 @@ const ASSEMBLED = [
   [/^\. За пределами Эстонии значения/, "tail of the same note — same rule"],
   [/^Новый товар заводится в «Товарах»/, "key — the hole is the aiGo() button markup"],
   [/^Посетители, конверсия и поисковые запросы/, "key — the hole is the aiGo() button markup"],
+  [/^Выручка за неделю и заказы по дням/, "key — the hole is the aiGo() button markup"],
   [/^Письма магазин шлёт сам/, "key — the hole is the aiGo() button markup"],
   [/^Вот что подключено к магазину/, "key — the hole is the aiGo() button markup"],
   [/^Что оплачено и ещё не отправлено/, "key — the hole is the aiGo() button markup"],
