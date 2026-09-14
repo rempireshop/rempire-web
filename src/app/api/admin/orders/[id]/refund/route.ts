@@ -56,6 +56,8 @@ import {
   giftRefundedTotal,
   refundableAmount,
   refundedTotal,
+  refundIdempotencyKey,
+  refundsOf,
   splitRefund,
   type RefundEntry,
 } from "@/lib/payments/refund";
@@ -186,9 +188,12 @@ export async function POST(req: Request, ctx: Ctx) {
         providerRef,
         amount: split.money,
         currency: order.currency || "EUR",
-        // one per attempt: Montonio must not send the money twice if this
-        // request is retried, and it is what makes a double tap harmless
-        idempotencyKey: randomUUID(),
+        /* Derived from the order, never random: the whole point of the key is
+           that a retry after a LOST answer — the one case where this shop
+           cannot see that the money has already gone — asks Montonio about
+           the refund it already made instead of making a second one. A fresh
+           UUID per attempt deduplicated nothing at all (audit). */
+        idempotencyKey: refundIdempotencyKey(order.id, refundsOf(order.payment).length, split.money),
         orderNumber: order.number,
       });
     } catch (err) {

@@ -339,6 +339,61 @@ describe("«Вернуть деньги» — the admin route", () => {
     expect((await getOrder(order.id))!.status).toBe("refunded");
   });
 
+  /* The lost answer: Montonio HAS sent the money, but the shop never heard so
+     — the function timed out, the gateway answered 502. Nothing is written to
+     the ledger, so `left` is unchanged and «Вернуть деньги» is pressable
+     again. Until 14.09.2026 that second press carried a fresh randomUUID(),
+     which deduplicated nothing: the customer was refunded twice. */
+  it("a retry after a lost answer carries the SAME idempotency key", async () => {
+    const order = await paidOrder();
+    const { MockProvider } = await import("@/lib/payments/mock");
+    const { PaymentError } = await import("@/lib/payments/types");
+
+    const keys: string[] = [];
+    const real = MockProvider.prototype.refundPayment;
+    const spy = vi.spyOn(MockProvider.prototype, "refundPayment").mockImplementation(async function (
+      this: InstanceType<typeof MockProvider>,
+      req,
+    ) {
+      keys.push(req.idempotencyKey);
+      // the first attempt: the money leaves Montonio, the answer never arrives
+      if (keys.length === 1) throw new PaymentError("provider_unreachable");
+      return real.call(this, req);
+    });
+
+    try {
+      const lost = await refund(order.id);
+      expect(lost.status).toBe(502);
+      // nothing recorded — which is exactly why the owner presses again
+      expect(refundsOf((await getOrder(order.id))!.payment)).toHaveLength(0);
+
+      const again = await refund(order.id);
+      expect(again.status, JSON.stringify(again.body)).toBe(200);
+    } finally {
+      spy.mockRestore();
+    }
+
+    expect(keys).toHaveLength(2);
+    expect(keys[1]).toBe(keys[0]);
+    // …and it is still the v4 UUID Montonio's refunds guide asks for
+    expect(keys[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  });
+
+  /* The other half of the same rule: a refund the ledger has RECORDED moves
+     the sequence on, so refunding the same amount again on purpose is a
+     different refund and must not be swallowed by the provider's dedupe. */
+  it("a second deliberate refund of the same amount carries a different key", async () => {
+    const order = await paidOrder();
+    const first = await refund(order.id, { amount: 1 });
+    expect(first.status).toBe(200);
+    const second = await refund(order.id, { amount: 1 });
+    expect(second.status).toBe(200);
+    // the mock's own ref is minted from the key — two refunds, two refs
+    const list = refundsOf((await getOrder(order.id))!.payment);
+    expect(list).toHaveLength(2);
+    expect(list[0].ref).not.toBe(list[1].ref);
+  });
+
   it("refuses more than is left, a refund of a refunded order, and an order nobody paid for", async () => {
     const order = await paidOrder();
     const total = Number(order.total);

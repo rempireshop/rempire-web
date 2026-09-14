@@ -602,8 +602,11 @@
       "— выберите пакомат или пункт выдачи —": "— vali pakiautomaat või pakipunkt —",
       "Поиск по адресу и городу": "Otsi aadressi või linna järgi",
       "Загружаем список…": "Laadime nimekirja…",
+      "Список не загрузился — нажмите ещё раз": "Nimekiri ei laadinud — vajuta uuesti",
       "Выберите пакомат — туда приедет посылка.": "Vali pakiautomaat — sinna pakk saabubki.",
       "Загружаем список пакоматов…": "Laadime pakiautomaatide nimekirja…",
+      "Не удалось загрузить список пакоматов — закройте окно и попробуйте ещё раз.":
+        "Pakiautomaatide nimekirja ei õnnestunud laadida — sulge aken ja proovi uuesti.",
       "Для этой страны список пока пуст — выберите курьера.": "Selle riigi kohta nimekirja veel pole — vali kuller.",
       "Ничего не нашли. Попробуйте название города или улицы.": "Midagi ei leitud. Proovi linna või tänava nime.",
       "Выбор пакомата": "Pakiautomaadi valik",
@@ -633,6 +636,7 @@
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
       "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
       "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
+      "Связь прервалась — проверьте интернет и попробуйте ещё раз": "Ühendus katkes — kontrolli internetti ja proovi uuesti",
       "Оплата пока недоступна — попробуйте позже": "Maksmine ei ole hetkel võimalik — proovi hiljem",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "Kirjad — eelvaade ja test",
@@ -3163,8 +3167,11 @@
       "— выберите пакомат или пункт выдачи —": "— choose a parcel locker or pickup point —",
       "Поиск по адресу и городу": "Search by address or city",
       "Загружаем список…": "Loading the list…",
+      "Список не загрузился — нажмите ещё раз": "The list did not load — tap again",
       "Выберите пакомат — туда приедет посылка.": "Choose a parcel locker — that is where the parcel goes.",
       "Загружаем список пакоматов…": "Loading parcel lockers…",
+      "Не удалось загрузить список пакоматов — закройте окно и попробуйте ещё раз.":
+        "Could not load the parcel lockers — close this window and try again.",
       "Для этой страны список пока пуст — выберите курьера.": "No lockers listed for this country yet — pick the courier.",
       "Ничего не нашли. Попробуйте название города или улицы.": "Nothing found. Try a town or street name.",
       "Выбор пакомата": "Parcel locker picker",
@@ -3194,6 +3201,7 @@
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
       "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
       "Не получилось оформить заказ": "Could not place the order",
+      "Связь прервалась — проверьте интернет и попробуйте ещё раз": "The connection dropped — check your internet and try again",
       "Оплата пока недоступна — попробуйте позже": "Payment is not available right now — try again later",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "E-mails — preview and test",
@@ -6644,9 +6652,13 @@
     };
   }
 
-  /* Is there a server behind this page? null until the first call answers.
-     false puts the checkout back into demo mode — the prototype is hosted
-     statically for Renat, and it must still walk end to end there. */
+  /* Has anything answered this page yet? null until the first call does.
+     A hint, not a verdict: every probe that sets it false is a one-shot that
+     never runs again to set it back, so one blip holds it false for the visit.
+     It therefore decides nothing a customer is told — the checkout's demo
+     receipt hangs off the orders route's own 404/405/501 (payNow, postJSON's
+     `noApi`), not off this. All it still does is hold back the abandoned-cart
+     snapshot, which is free to be wrong. */
   var API = { ok: null };
   function apiSeen(ok) { if (API.ok !== ok) API.ok = ok; }
 
@@ -6808,11 +6820,15 @@
   }
 
   /* ---------- parcel points ----------
-     One list per carrier+country, fetched once and kept. A dead feed is not an
-     error the shopper should see: the API falls back to its committed seed,
-     and this falls back to shipping-data.js, so there is always something to
-     pick from. */
-  var POINTS = { by: {}, empty: {}, loading: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
+     One list per carrier+country, fetched once and kept. A dead carrier feed
+     is not an error the shopper should see: the API answers from its own
+     committed seed and still hands back the carrier's REAL ids. A dead API is
+     a different matter — shipping-data.js holds names, not ids, so standing in
+     for the route would put a machine on the order that no carrier can deliver
+     to. That substitution is now made only where there is no shop behind this
+     page at all (loadPointsFor: a 404/405/501, the static prototype); anything
+     else marks the feed in `err` and says so. */
+  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
   function pointsKey() { return shipCarrier() + ":" + S.country; }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
   /* ---------- what a point actually is ----------
@@ -6889,7 +6905,7 @@
     if (!carrier) return;
     var cc = country || S.country;
     var key = carrier + ":" + cc;
-    if (POINTS.by[key] || POINTS.loading[key]) return;
+    if (POINTS.by[key] || POINTS.loading[key] || POINTS.err[key]) return;
     POINTS.loading[key] = true;
     stampPointsLoading();
     var done = function (list) {
@@ -6899,13 +6915,35 @@
       if (!list.length) POINTS.empty[key] = true;
       pointsArrived();
     };
+    /* The feed is there and would not answer — a 500, a 429, a connection
+       that died mid-list. The committed stand-in list must NOT step in here:
+       its ids are invented («omniva-demo-0»), the checkout stores the chosen
+       id on the order verbatim (cleanShipping in src/lib/orders.ts) and no
+       carrier has ever heard of it — a parcel with nowhere to go, and the
+       shopper believing they picked a machine (audit). Say so instead, and
+       let reopening the picker ask again. Idempotent: `done` having already
+       run makes this a no-op, so a throw inside pointsArrived() cannot turn
+       an arrived list into a failure. */
+    var failed = function () {
+      if (POINTS.by[key] || POINTS.err[key]) return;
+      POINTS.loading[key] = false;
+      POINTS.err[key] = true;
+      stampPointsLoading();
+      apiSeen(false);
+      pointsArrived();
+    };
     fetch("/api/shipping/points/?country=" + encodeURIComponent(cc) + "&carrier=" + encodeURIComponent(carrier))
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (j && j.ok && j.points) { apiSeen(true); done(j.points); }
-        else done(demoPoints(carrier, cc));
+      .then(function (r) {
+        // 404/405/501 — no shop behind this page at all (the prototype served
+        // statically), which is the one case the stand-in list is for.
+        if (r.status === 404 || r.status === 405 || r.status === 501) { done(demoPoints(carrier, cc)); return; }
+        if (!r.ok) { failed(); return; }
+        return r.json().then(function (j) {
+          if (j && j.ok && j.points) { apiSeen(true); done(j.points); }
+          else failed();
+        }, failed);
       })
-      .catch(function () { apiSeen(false); done(demoPoints(carrier, cc)); });
+      .catch(failed);
   }
   /* The carriers' own brand marks — GET /api/shipping/carriers/ (server route:
      src/app/api/shipping/carriers/route.ts, 6h cache, only answers when
@@ -13383,7 +13421,15 @@
     S.notifyBusy = true; render();
     postJSON("/api/stock-alerts/", { email: e, productId: productId, lang: S.lang }).then(function (res) {
       S.notifyBusy = false;
-      if (res.offline) { apiSeen(false); S.notifyOpen = ""; render(); toast("Записали — сообщим, когда появится ✓"); return; }
+      // No shop behind this page at all (the static prototype answers 404):
+      // the demo finishes the way it always did.
+      if (res.noApi) { apiSeen(false); S.notifyOpen = ""; render(); toast("Записали — сообщим, когда появится ✓"); return; }
+      /* A LOST answer is not a subscription. This branch used to toast the
+         byte-identical green «Записали ✓» of the success below, so a failed
+         POST /api/stock-alerts/ was indistinguishable from a real one: nobody
+         was on the list and the customer was never told (audit). The form
+         stays open, so trying again is one tap. */
+      if (res.offline) { apiSeen(false); render(); toast("Не получилось — попробуйте ещё раз"); return; }
       apiSeen(true);
       if (!res.body || !res.body.ok) {
         render();
@@ -13591,7 +13637,9 @@
           ? '<span class="pointbtn__nm">' + esc(chosen.name) + "</span>" +
             '<span class="pointbtn__ad">' + pointKindLine(chosen) + "</span>"
           : '<span class="pointbtn__nm">' + pickWord() + "</span>" +
-            '<span class="pointbtn__ad">' + (list ? "Поиск по адресу и городу" : "Загружаем список…") + "</span>") +
+            '<span class="pointbtn__ad">' + (list ? "Поиск по адресу и городу"
+              // a feed that failed is not a feed that is still coming
+              : POINTS.err[pointsKey()] ? "Список не загрузился — нажмите ещё раз" : "Загружаем список…") + "</span>") +
         '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button>" +
       /* Both sentences whole, not assembled around pickWord(): tools/i18n-gaps.mjs
          reads literals, and a string glued together at runtime counts as a hole. */
@@ -13602,7 +13650,11 @@
   /** The list is patched in place so typing never costs the input its focus. */
   function pointRows() {
     var list = pointsList();
-    if (!list) return '<p class="muted psheet__msg">Загружаем список пакоматов…</p>';
+    if (!list) {
+      return POINTS.err[pointsKey()]
+        ? '<p class="muted psheet__msg">Не удалось загрузить список пакоматов — закройте окно и попробуйте ещё раз.</p>'
+        : '<p class="muted psheet__msg">Загружаем список пакоматов…</p>';
+    }
     if (!list.length) return '<p class="muted psheet__msg">Для этой страны список пока пуст — выберите курьера.</p>';
     var found = pointsFiltered();
     if (!found.length) return '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
@@ -13895,8 +13947,22 @@
   };
   /**
    * POST JSON and say plainly whether there is an API behind this page at all.
-   * `offline` means "no server here" (a static host answers 404/HTML); a real
-   * error from a real API comes back as a body with ok:false.
+   * A real error from a real API comes back as a body with ok:false.
+   *
+   * Two different failures, and telling them apart is the whole point:
+   *
+   *   · `noApi` — the route is not there. 404/405/501 is what a static host
+   *     answers, and it is the ONLY answer that proves nothing happened on a
+   *     server, because no server ran anything. The prototype's demo mode
+   *     hangs off this one.
+   *   · `offline` without `noApi` — the answer was lost. The connection
+   *     dropped, the phone changed cell, the gateway timed out and returned
+   *     its own HTML page. The request may well have arrived and been carried
+   *     out; we simply did not hear the answer, so nothing may be claimed
+   *     about it — least of all «настоящий заказ не создан» (audit).
+   *
+   * `noApi` implies `offline`, so the callers that only ever meant "no answer"
+   * read the same as before.
    */
   function postJSON(url, body, signal) {
     return fetch(url, {
@@ -13905,7 +13971,7 @@
       body: JSON.stringify(body),
       signal: signal || undefined
     }).then(function (r) {
-      if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
+      if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true, noApi: true };
       return r.json().then(function (j) { return { body: j, status: r.status }; },
         function () { return { offline: true }; });
     }, function () { return { offline: true }; });
@@ -14034,7 +14100,14 @@
     if (isInvoice()) { S.invTouched = true; if (invoiceMissing().length) { return failStep(3, "Заполните данные фирмы для счёта"); } }
     if (!S.cart.length) { toast("Корзина пуста"); return; }
     if (S.paying) return;
-    if (API.ok === false) return finishDemo();
+    /* No sticky «есть ли здесь сервер» check here any more. API.ok goes false
+       on ONE failed background probe — the shipping rules, a carrier's machine
+       list, the bank logos, an abandoned-cart push — every one of them a one
+       shot that never runs again to put it back. A single blip on a phone
+       therefore used to put the LIVE checkout into demo mode for the rest of
+       the visit: «Оплатить» sent nothing at all, emptied the basket and
+       printed «настоящий заказ не создан» (audit). Whether there is a shop
+       behind this page is the order route's own answer, below. */
 
     S.paying = true; render();
     // no abandoned-cart snapshot from here on: this basket is becoming an order
@@ -14049,7 +14122,13 @@
       ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
       : postJSON("/api/orders/", payload)
     ).then(function (res) {
-      if (res.offline) return finishDemo();
+      /* The demo receipt is for a page with no shop behind it — and only a
+         404/405/501 from the orders route says that. An answer that was LOST
+         says nothing: the order may be in the database, numbered, with its
+         invoice already mailed, and «это демонстрация — настоящий заказ не
+         создан» would be a lie told to a paying customer. */
+      if (res.noApi) return finishDemo();
+      if (res.offline) throw new Error("Связь прервалась — проверьте интернет и попробуйте ещё раз");
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
         throw new Error(orderErrText(res.body && res.body.error));
@@ -14080,7 +14159,11 @@
         bank: (S.pay === 0 && selectedBankCode()) || undefined,
         lang: S.lang
       }).then(function (pay) {
-        if (pay.offline) return finishDemo();
+        if (pay.noApi) return finishDemo();
+        /* pendingOrder is already set, so the retry pays for THIS order
+           instead of making a second one — which is exactly why this must
+           not clear the basket the way the demo receipt does. */
+        if (pay.offline) throw new Error("Связь прервалась — проверьте интернет и попробуйте ещё раз");
         if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
           /* The remembered order cannot be paid any more — it was settled, it
              was closed, or it is gone. Forget it, so the next tap starts a
@@ -25355,6 +25438,16 @@
       SCAN.lastCode = "";
       scanLookup(code);
       scanStockChanged();
+    }, function () {
+      /* apiJson() REJECTS on a dead connection and on an answer that is not
+         JSON («no-api») — the phone in the stockroom with one bar, the shop
+         that woke up as an error page. With no handler here S.scanBusy stayed
+         true for ever: «Приход» and «Списание» were greyed out and the only
+         way back was to close the scanner and reopen it (audit). The same
+         refusal the route's own «no» gets. */
+      S.scanBusy = false;
+      toast("Не удалось сохранить");
+      scanRenderPanel();
     });
   }
   function setScanTorch(on) {
@@ -26453,6 +26546,16 @@
       // «Сохранено ✓» on the row itself, where the eye is (stockRowHTML)
       S.stockSaved = failed ? "" : key;
       reloadStock();
+    }, function () {
+      /* stockLevelSaveDetailed() catches its own failures, stockMoveSend()
+         does not: it rejects whenever apiJson() does (a dead connection, an
+         answer that is not JSON). Without this Promise.all was left rejected,
+         the form stayed open and the button stayed disabled on «Сохраняем…»
+         until the panel was reloaded (audit). */
+      S.stockEdit = key;
+      S.stockSaved = "";
+      toast("Не удалось сохранить");
+      render();
     });
   }
 
@@ -30955,6 +31058,9 @@
       loadPoints(); render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
     }
     if (d.pointopen !== undefined) {
+      // the retry: a feed that failed is asked again the next time the
+      // shopper opens the picker, not left dead for the rest of the visit
+      POINTS.err = {};
       loadPoints(); POINTS.q = ""; S.pointOpen = true; repaintPicker("[data-pointq]"); return;
     }
     if (d.pointclose !== undefined) { S.pointOpen = false; repaintPicker("[data-pointopen]"); return; }
