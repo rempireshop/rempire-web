@@ -361,6 +361,48 @@ test.describe("checkout — the carrier's own mark", () => {
     await expect(omniva).toHaveClass(/carrier--logo/);
     await expect(omniva).toContainText("Omniva");
 
+    /* …and the picked chip does not eat the mark it was given.
+
+       Renat, 14.09.2026: «logos which are having black text and when you click
+       on them then the button is fully black, for example "unisend"». The pick
+       filled the chip with --ink, and half of Montonio's marks are black
+       artwork on nothing — and the first carrier is picked before the shopper
+       has touched anything, so the delivery step opened with a black hole in
+       it. It is marked the way the bank tiles one step later already are
+       (styles.css, .bank[aria-current="true"] and the copy of it under
+       .carrier[aria-current="true"]): an ink ring over the chip's own light
+       ground.
+
+       Measured rather than matched against a colour name, so any treatment a
+       black mark survives passes — and composited down the ancestors, because
+       --hover is 5% ink and an alpha channel read on its own would read as
+       black as the fill it replaced. */
+    await expect(omniva, "the first carrier is no longer picked on arrival").toHaveAttribute("aria-current", "true");
+    const lum = await omniva.evaluate((el: Element) => {
+      const parse = (css: string) => {
+        const n = (css.match(/[\d.]+/g) || []).map(Number);
+        return n.length >= 3 ? { r: n[0], g: n[1], b: n[2], a: n.length > 3 ? n[3] : 1 } : null;
+      };
+      const stack: Array<{ r: number; g: number; b: number; a: number }> = [];
+      for (let n: Element | null = el; n; n = n.parentElement) {
+        const c = parse(getComputedStyle(n).backgroundColor);
+        if (c && c.a > 0) { stack.push(c); if (c.a >= 1) break; }
+      }
+      // the browser's own canvas under everything, then each layer over it
+      let out = { r: 255, g: 255, b: 255 };
+      for (let i = stack.length - 1; i >= 0; i--) {
+        const c = stack[i];
+        out = {
+          r: c.r * c.a + out.r * (1 - c.a),
+          g: c.g * c.a + out.g * (1 - c.a),
+          b: c.b * c.a + out.b * (1 - c.a),
+        };
+      }
+      const s = (v: number) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+      return 0.2126 * s(out.r) + 0.7152 * s(out.g) + 0.0722 * s(out.b);
+    });
+    expect(lum, "the picked carrier chip is dark — a black brand mark disappears into it").toBeGreaterThan(0.5);
+
     /* The fallback, which is the same one the bank chips have had since UX fix
        9: the capture-phase "error" listener takes the broken image out, and
        the name it was sitting next to is what stays on the chip. */
