@@ -21,6 +21,13 @@ import { notFoundPageResponse } from "@/lib/notfound-page";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/* The request itself, and not just its path, since 14.09.2026: on a screen the
+   shop does serve, notFoundPageResponse() reads the signed session cookie off
+   it and writes the shopper's own e-mail into the shell, so the checkout's
+   first field is filled in the first paint instead of a round trip later
+   (Renat: «this needs to be instant (!!!)»). One line, and all three languages
+   with it — /shop2/checkout/, /shop2/et/checkout/ and /shop2/en/checkout/ are
+   the same catch-all, because the language is a path segment here. */
 export async function GET(req: Request) {
-  return notFoundPageResponse(new URL(req.url).pathname);
+  return notFoundPageResponse(new URL(req.url).pathname, req);
 }

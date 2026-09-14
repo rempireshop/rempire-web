@@ -33916,6 +33916,42 @@
       S.blogPosts[blogKey(slug, lang)] = en;
     });
   })();
+
+  /* …and, for a signed-in shopper, their own e-mail — read the same way, from
+     the same kind of tag, one line above the first render.
+
+     Renat, 14.09.2026: «when I go — logged in — to checkout it loads my e-mail
+     and data again within 1 seconds, this needs to be instant (!!!)». That
+     second is the round trip to /api/account/me, and it has already been made
+     as short as it can be: boot.js asks from the <head>, before the twelve
+     script tags at the foot of the page, and the route is down to one database
+     phase. The rest is flight time — the functions run in a US region, so from
+     Estonia the call costs ~175 ms whatever it does. No amount of further work
+     here makes that instant.
+
+     So the answer arrives with the page instead. The function that serves the
+     shell already holds the request, and the session cookie in it is signed:
+     src/lib/notfound-page.ts reads the address off that cookie and writes it
+     into #acctdata, and this takes it before anything is painted. The box is
+     full in the first frame, with no request behind it.
+
+     Only the e-mail. Name, phone, street and index live in step 2's body,
+     which is not built until «Далее» is pressed — the profile is long back by
+     then — so there is nothing else early enough to be worth sending, and
+     nothing personal is written to this device either way.
+
+     Never over something typed: `!S.email` means a shopper who is part way
+     through another address keeps it, which is the rule acctApply() follows
+     for the name and the phone. On a cold load S.email is "" anyway — this
+     runs once, before the first render. */
+  (function hydrateAcct() {
+    try {
+      var el = document.getElementById("acctdata");
+      if (!el) return;
+      var j = JSON.parse(el.textContent || "null");
+      if (j && typeof j.email === "string" && j.email && !S.email) S.email = j.email;
+    } catch (e) {}
+  })();
   function firstPaint() {
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
