@@ -40,6 +40,20 @@ const C = inStock[2];
 const SIZED = CATALOGUE.find((p) => p.s === "in" && (VARIANTS[p.id]?.sizes.length ?? 0) > 1)!;
 const OUT = CATALOGUE.find((p) => p.s === "out")!;
 
+/* Migration 147 — «Товары → Размеры и цены». Two ladders the owner could save
+   over SIZED's generated one: the first drops a rung and re-prices both that
+   are left, the second adds a volume the catalogue file has never heard of.
+   Labels come from the file so a regenerated catalogue cannot break the test;
+   the prices are deliberately far from anything the file carries. */
+const OWN_LADDER = [
+  { size: VARIANTS[SIZED.id].sizes[0], price: 4.5 },
+  { size: VARIANTS[SIZED.id].sizes[VARIANTS[SIZED.id].sizes.length - 1], price: 41.2 },
+];
+const LONGER_LADDER = [
+  ...VARIANTS[SIZED.id].sizes.map((size, i) => ({ size, price: VARIANTS[SIZED.id].prices[i] })),
+  { size: "1 л", price: 60 },
+];
+
 const MIGRATION = readFileSync(new URL("../db/migrations/120_bundles.sql", import.meta.url), "utf8");
 
 const customer = { name: "Мария Тамм", email: "maria@example.com", phone: "+372 5555 5555" };
@@ -187,6 +201,35 @@ describe("validateBundle", () => {
     const check = validateBundle(draft({ price: A.p + B.p - 0.5 }), overrides);
     expect(check).toMatchObject({ error: "price_too_high" });
   });
+
+  /* The «дешевле по отдельности» guard is only as honest as the sum it is
+     checked against, and that sum has to come from the ladder the owner
+     actually saved — src/lib/orders.ts has priced every other line that way
+     since migration 147. */
+  it("counts the parts at the size ladder the owner saved, not the generated one", () => {
+    const overrides = { [SIZED.id]: { price: OWN_LADDER[0].price, sizes: OWN_LADDER } } as never;
+    const items = [{ productId: SIZED.id, variant: 1 }, { productId: B.id }];
+    const parts = OWN_LADDER[1].price + B.p;
+
+    const check = validateBundle(draft({ items, price: parts - 5 }), overrides);
+    expect(check.ok).toBe(true);
+    if (!check.ok) return;
+    expect(check.sum).toBeCloseTo(parts, 2);
+    // and the guard is checked against that same sum, not the file's
+    expect(validateBundle(draft({ items, price: parts }), overrides)).toMatchObject({ error: "price_too_high" });
+  });
+
+  it("takes a volume the owner added that the catalogue file does not have", () => {
+    const overrides = { [SIZED.id]: { price: LONGER_LADDER[0].price, sizes: LONGER_LADDER } } as never;
+    const items = [{ productId: SIZED.id, variant: LONGER_LADDER.length - 1 }, { productId: B.id }];
+    // with no ladder saved the rung does not exist, and the set is refused
+    expect(validateBundle(draft({ items, price: 50 }))).toMatchObject({ error: "bad_variant" });
+
+    const check = validateBundle(draft({ items, price: 50 }), overrides);
+    expect(check.ok).toBe(true);
+    if (!check.ok) return;
+    expect(check.sum).toBeCloseTo(LONGER_LADDER[LONGER_LADDER.length - 1].price + B.p, 2);
+  });
 });
 
 describe("the bundles table", () => {
@@ -258,6 +301,49 @@ describe("the bundles table", () => {
     expect(after.price).toBe(before.price);
     expect(after.save).toBeCloseTo(after.sum - after.price, 2);
     await upsertOverride(A.id, { price: null });
+  });
+
+  /* «Товары → Размеры и цены» (product_overrides.sizes, migration 147) is the
+     whole truth about a product's volumes everywhere else in the shop. A set
+     holding that product has to price its part from the same ladder, or
+     «столько они стоят по отдельности» quotes the customer a volume at a
+     price this shop no longer charges for it. */
+  it("prices a part from the size ladder the owner saved, not the generated file", async () => {
+    await upsertBundle(
+      valid({ items: [{ productId: SIZED.id, variant: 1 }, { productId: B.id }], price: 9.9 }),
+    );
+    try {
+      await upsertOverride(SIZED.id, { sizes: OWN_LADDER });
+      const set = (await getBundle("test-set"))!;
+      const part = set.items[0];
+      expect(part.productId).toBe(SIZED.id);
+      expect(part.price).toBeCloseTo(OWN_LADDER[1].price, 2);
+      expect(part.sizeLabel).toBe(OWN_LADDER[1].size);
+      expect(set.sum).toBeCloseTo(OWN_LADDER[1].price + B.p, 2);
+      // the set's own price is the owner's number and does not move
+      expect(set.price).toBe(9.9);
+      expect(set.save).toBeCloseTo(set.sum - 9.9, 2);
+      expect(set.pct).toBe(Math.round((set.save / set.sum) * 100));
+    } finally {
+      await upsertOverride(SIZED.id, { sizes: null, price: null });
+    }
+  });
+
+  /* A product with no ladder of its own keeps the older behaviour: the single
+     price override moves every volume by the same premium. */
+  it("keeps the plain price override for a product with no ladder saved", async () => {
+    await upsertBundle(
+      valid({ items: [{ productId: SIZED.id, variant: 1 }, { productId: B.id }], price: 9.9 }),
+    );
+    try {
+      await upsertOverride(SIZED.id, { price: SIZED.p + 10 });
+      const set = (await getBundle("test-set"))!;
+      const part = set.items[0];
+      expect(part.productId).toBe(SIZED.id);
+      expect(part.price).toBeCloseTo(VARIANTS[SIZED.id].prices[1] + 10, 2);
+    } finally {
+      await upsertOverride(SIZED.id, { price: null });
+    }
   });
 
   it("reports the worst stock of its parts", async () => {
