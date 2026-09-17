@@ -30,7 +30,7 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { query } from "@/lib/db";
-import { getOverrides, type Override, type StockState } from "@/lib/orders";
+import { getOverrides, overrideLadder, type Override, type StockState } from "@/lib/orders";
 
 /* ---------- shapes ------------------------------------------------------- */
 
@@ -122,13 +122,56 @@ const num = (v: unknown, fallback = 0) => {
   return Number.isFinite(n) ? n : fallback;
 };
 
-/** The price and the label of one product at one size index. */
-function variantOf(productId: string, index: number): { label: string; price: number | null } {
-  const v = VARIANTS[productId];
+/**
+ * The price and the label of one product at one size index, read off the
+ * ladder handed in — the owner's own when he has saved one, the generated
+ * catalogue file when he has not.
+ */
+function variantOf(
+  productId: string,
+  index: number,
+  table?: { sizes: string[]; prices: number[] } | null,
+): { label: string; price: number | null } {
+  const v = table ?? VARIANTS[productId];
   if (!v || !v.sizes?.length) return { label: "", price: null };
   const i = index >= 0 && index < v.sizes.length ? index : 0;
   const price = num(v.prices?.[i], NaN);
   return { label: v.sizes[i], price: Number.isFinite(price) ? price : null };
+}
+
+/** The volumes a product actually has: the owner's ladder, else the file's. */
+function ladderOf(productId: string, o: Override | undefined) {
+  return overrideLadder(o) ?? VARIANTS[productId] ?? null;
+}
+
+/**
+ * What one part of a set costs at one volume, and what that volume is called.
+ *
+ * The ladder the owner saved in «Товары → Размеры и цены»
+ * (product_overrides.sizes, migration 147) decides both wherever it exists:
+ * «+ Размер» adds a rung the generated file has never heard of, «×» takes one
+ * away, and every rung left already carries the price he typed — so there is
+ * no premium to add on top of it.
+ *
+ * Below it the file decides the volumes, and a per-product price override is
+ * set on the base volume and moves the others by the same premium — exactly
+ * what the storefront's proPrice()/sizePrice() pair does and what the goods
+ * editor promises.
+ *
+ * This is the order src/lib/orders.ts prices every other line of an order in.
+ * A set that read only the file quoted «столько они стоят по отдельности» at
+ * prices this shop no longer charges.
+ */
+function partPrice(productId: string, variant: number, o: Override | undefined): { label: string; price: number } {
+  const p = BY_ID.get(productId);
+  const own = overrideLadder(o);
+  const v = variantOf(productId, variant, own);
+  if (own) return { label: v.label, price: money(v.price != null ? v.price : num(own.prices[0])) };
+
+  const basePrice = p ? num(p.p) : 0;
+  const base = v.price != null ? v.price : basePrice;
+  const premium = v.price != null && p ? v.price - basePrice : 0;
+  return { label: v.label, price: o?.price != null ? money(num(o.price) + premium) : money(base) };
 }
 
 /** in < low < out — the worst part decides what the whole set can promise. */
@@ -203,14 +246,8 @@ function expand(row: BundleRow, overrides: Record<string, Override>): Bundle {
   const items: BundleItemOut[] = [];
   for (const it of stored) {
     const p = BY_ID.get(it.productId);
-    const v = variantOf(it.productId, it.variant);
-    const base = v.price != null ? v.price : p ? num(p.p) : 0;
     const o = overrides[it.productId];
-    /* A per-product price override is set on the base volume, so it moves the
-       other volumes by the same premium — exactly what the storefront's own
-       proPrice()/sizePrice() pair does, and what the goods editor promises. */
-    const premium = v.price != null && p ? v.price - num(p.p) : 0;
-    const unit = o?.price != null ? money(num(o.price) + premium) : money(base);
+    const part = partPrice(it.productId, it.variant, o);
     items.push({
       productId: it.productId,
       id: it.productId,
@@ -219,8 +256,8 @@ function expand(row: BundleRow, overrides: Record<string, Override>): Bundle {
       qty: it.qty,
       brand: p?.b ?? "",
       name: p?.n ?? it.productId,
-      sizeLabel: v.label,
-      price: unit,
+      sizeLabel: part.label,
+      price: part.price,
       /* «Показывать в магазине» off (product_overrides.hidden, migration 147)
          takes the product off the shelf everywhere — the storefront drops it
          from the catalogue and src/lib/orders.ts refuses a line of it with
@@ -378,7 +415,11 @@ export function validateBundle(
        "abc" is how a set ends up selling something nobody meant to sell. */
     const rawVariant = it.variant ?? it.size;
     const variant = Math.trunc(rawVariant == null || rawVariant === "" ? 0 : num(rawVariant, NaN));
-    const sizes = VARIANTS[productId]?.sizes ?? [];
+    /* Which volumes exist is the owner's ladder to decide too: a rung he
+       added is a real volume the shop already offers, and a rung he removed
+       is one no set may point at any more. */
+    const o = overrides[productId];
+    const sizes = ladderOf(productId, o)?.sizes ?? [];
     if (!Number.isFinite(variant) || variant < 0 || (variant > 0 && variant >= sizes.length)) {
       return { ok: false, error: "bad_variant" };
     }
@@ -390,11 +431,7 @@ export function validateBundle(
     if (seen.has(key)) return { ok: false, error: "dup_item" };
     seen.add(key);
 
-    const v = variantOf(productId, variant);
-    const base = v.price != null ? v.price : num(p.p);
-    const premium = v.price != null ? v.price - num(p.p) : 0;
-    const o = overrides[productId];
-    sum += (o?.price != null ? money(num(o.price) + premium) : money(base)) * qty;
+    sum += partPrice(productId, variant, o).price * qty;
     items.push({ productId, variant, qty });
   }
   sum = money(sum);
