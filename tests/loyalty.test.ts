@@ -34,8 +34,10 @@ import {
   PRICING_BOUNDS,
   proUnitPrice,
   quoteLoyaltyRedeem,
+  redeemCapPoints,
   redeemLoyaltyPoints,
   requestProTier,
+  setCustomerTier,
 } from "@/lib/loyalty";
 import { applyPaymentResult, type ApplyDeps } from "@/lib/payments/apply";
 import type { VerifyResult } from "@/lib/payments/types";
@@ -433,6 +435,29 @@ describe("quoteLoyaltyRedeem — the checkout preview", () => {
     expect(q.maxRedeemable).toBe(15);
     expect(q.balance).toBe(100);
   });
+
+  /* A ceiling floors. eurosToPoints() rounds to the nearest point, which is
+     what earning wants and the opposite of what «не больше 30 % от суммы
+     корзины» means: on an 11.70 € basket round(3.51) allowed 4 points — 4 €,
+     34 % — off a limit the account screen states in words. Up to half a euro
+     of the shop's money, every basket that landed on a .5. */
+  it("the percentage cap rounds down, never up", () => {
+    expect(redeemCapPoints(11.7, 30)).toBe(3); // was round(3.51) = 4
+    expect(redeemCapPoints(5, 30)).toBe(1); // was round(1.5) = 2
+    expect(redeemCapPoints(50, 30)).toBe(15); // exact stays exact
+    expect(redeemCapPoints(20, 100)).toBe(20);
+    expect(redeemCapPoints(0, 30)).toBe(0);
+    expect(redeemCapPoints(-10, 30)).toBe(0);
+    // counted in cents, so 11.70 * 30 / 100 = 3.5100000000000002 cannot tip it
+    expect(redeemCapPoints(10, 30)).toBe(3);
+  });
+
+  it("the quote takes the floored cap", async () => {
+    const id = await recordLogin("floor@example.com", "RU").then((c) => c.id);
+    await adjustLoyaltyPoints(id, 100, "seed");
+    const q = await quoteLoyaltyRedeem(id, 11.7, { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 });
+    expect(q.maxRedeemable).toBe(3);
+  });
 });
 
 /* ---------- earn/redeem only happen on the paid transition ----------------- */
@@ -653,6 +678,37 @@ describe("PATCH /api/admin/customers/[id] — approve, reject, adjust points", (
     expect(body.ok).toBe(true);
     expect(body.customer.tier).toBe("pro");
     expect(await customerTier(c.id)).toBe("pro");
+  });
+
+  /* A decision closes the request — either decision. Until 17.09.2026
+     «Одобрить» flipped the tier and left `pro_requested_at` standing, so the
+     pending predicate (`pro_requested_at is not null and tier = 'retail'` —
+     listCustomersAdmin, the «Заявка Pro» badge, the panel's counter and
+     «Аналитика») matched the row again the moment that partner was moved back
+     to retail: a request decided months ago, waiting for ever. The customer's
+     own account screen read the same field and sat on «на рассмотрении ·
+     Заявку получили, скоро рассмотрим», with no form to ask a second time. */
+  it("a decided request stays decided — demoting a partner does not raise it again", async () => {
+    const c = await recordLogin("decided@example.com", "RU");
+    await requestProTier(c.email, { company: "OÜ Näidis", regCode: "12345678", phone: "" });
+    expect((await listCustomersAdmin({ tier: "pending" })).map((r) => r.email)).toContain(c.email);
+
+    const approved = await approveProCustomer(c.id);
+    expect(approved?.tier).toBe("pro");
+    expect(approved?.proRequestedAt).toBeNull();
+
+    const demoted = await setCustomerTier(c.id, "retail");
+    expect(demoted?.tier).toBe("retail");
+    expect(demoted?.proRequestedAt).toBeNull();
+    expect((await listCustomersAdmin({ tier: "pending" })).map((r) => r.email)).not.toContain(c.email);
+  });
+
+  it("the card's switch closes an open request exactly as «Одобрить» does", async () => {
+    const c = await recordLogin("switched@example.com", "RU");
+    await requestProTier(c.email, { company: "OÜ Näidis", regCode: "12345678", phone: "" });
+    expect((await setCustomerTier(c.id, "pro"))?.proRequestedAt).toBeNull();
+    expect((await setCustomerTier(c.id, "retail"))?.proRequestedAt).toBeNull();
+    expect(await listCustomersAdmin({ tier: "pending" })).toHaveLength(0);
   });
 
   it("rejecting clears the request without granting pro", async () => {

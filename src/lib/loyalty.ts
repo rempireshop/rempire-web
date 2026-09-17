@@ -204,6 +204,27 @@ export function eurosToPoints(euros: number): number {
   return Math.round(cents / 100);
 }
 
+/**
+ * The most a basket of `subtotal` may redeem under «не больше N % от суммы
+ * корзины» — whole points, always rounded DOWN.
+ *
+ * Rounding to the NEAREST point is right for earning (5 % of 118.40 € is 5.92,
+ * and the customer gets 6) and wrong for a ceiling: an 11.70 € basket at 30 %
+ * came out as round(3.51) = 4 points, so the shopper took 4 € — 34 % — off a
+ * limit the account screen states in words. Half a euro at most, every time in
+ * the shop's own pocket. A cap floors.
+ *
+ * Counted in whole cents, so a price that cannot be written exactly in binary
+ * (11.70 * 30 / 100 is 3.5100000000000002) cannot push the floor either way.
+ * public/shop2/app.js loyaltyMaxRedeem() draws the same line for the checkout
+ * preview, and the two must not disagree about what a basket may spend.
+ */
+export function redeemCapPoints(subtotal: number, redeemMaxPct: number): number {
+  const cents = Math.round(Math.max(0, num(subtotal)) * 100);
+  const pct = Math.max(0, num(redeemMaxPct));
+  return Math.max(0, Math.floor((cents * pct) / 10_000));
+}
+
 export interface LedgerEntry {
   id: number;
   at: string;
@@ -476,7 +497,7 @@ export async function quoteLoyaltyRedeem(
   settings: LoyaltySettings,
 ): Promise<LoyaltyQuote> {
   const balance = await getLoyaltyBalance(customerId);
-  const capFromSubtotal = eurosToPoints((Math.max(0, num(subtotal)) * settings.redeemMaxPct) / 100);
+  const capFromSubtotal = redeemCapPoints(subtotal, settings.redeemMaxPct);
   const maxRedeemable = Math.max(0, Math.min(balance, capFromSubtotal));
   return { enabled: settings.enabled, balance, minRedeem: settings.minRedeem, maxRedeemable };
 }
@@ -647,6 +668,12 @@ export interface AdminCustomerRow {
   marketingOffAt: string | null;
   /** The address is on the stop list (`mail_optouts`): no cart reminder, no birthday letter. */
   optedOut: boolean;
+  /** When the link took it out — `mail_optouts.at`, null when it is not on the
+   *  list. Its own date: `marketingOffAt` only moves on a real on → off
+   *  transition, so an account tick taken off last month leaves it standing
+   *  when the letter's link is pressed today, and the card was dating the
+   *  click with the untick. */
+  optedOutAt: string | null;
   company: string | null;
   regCode: string | null;
   notes: string | null;
@@ -670,7 +697,7 @@ interface AdminCustomerDbRow {
   marketing_at: string | Date | null;
   marketing_source: string | null;
   marketing_off_at: string | Date | null;
-  opted_out: boolean | null;
+  opted_out_at: string | Date | null;
   company: string | null;
   reg_code: string | null;
   notes: string | null;
@@ -701,7 +728,10 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
     marketingAt: isoOrNull(r.marketing_at),
     marketingSource: r.marketing_source ? String(r.marketing_source) : null,
     marketingOffAt: isoOrNull(r.marketing_off_at),
-    optedOut: r.opted_out === true,
+    // mail_optouts.at is `not null default now()` (052_marketing_consent.sql),
+    // so a date IS the row and the two answers cannot drift apart
+    optedOut: r.opted_out_at != null,
+    optedOutAt: isoOrNull(r.opted_out_at),
     company: r.company,
     regCode: r.reg_code,
     notes: r.notes,
@@ -741,7 +771,7 @@ const PURCHASE_SQL = PURCHASE_STATUSES.map((s) => `'${s}'`).join(", ");
 const CUSTOMER_COLS = `
   c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
   c.marketing_at, c.marketing_source, c.marketing_off_at,
-  exists (select 1 from mail_optouts mo where mo.email = c.email) as opted_out,
+  (select mo.at from mail_optouts mo where mo.email = c.email) as opted_out_at,
   c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
   coalesce(agg.orders_count, 0) as orders_count,
   coalesce(agg.revenue, 0) as revenue,
@@ -977,10 +1007,26 @@ export async function customerOrdersAdmin(
   };
 }
 
-/** «Одобрить» — flips the tier and stamps when. */
+/**
+ * «Одобрить» — flips the tier, stamps when, and closes the request.
+ *
+ * The request is cleared by the approval itself, exactly as upsertPartner()
+ * clears it when «+ Партнёр» promotes a row. Until 17.09.2026 it was left
+ * standing, and `pro_requested_at is not null and tier = 'retail'` — the
+ * pending predicate of listCustomersAdmin(), of the «Заявки Pro» badge and of
+ * the panel's own counter — matched the row again the moment the owner
+ * demoted that partner back to retail. The badge then said «Заявка Pro» for
+ * ever over a request that was decided months ago, and the customer's own
+ * account screen said «на рассмотрении · Заявку получили, скоро рассмотрим»
+ * and would not offer the form again, so they could not even ask a second
+ * time. A decision, either way, ends the request.
+ */
 export async function approveProCustomer(id: string): Promise<AdminCustomerRow | null> {
   if (!UUID_RE.test(id)) return null;
-  await query("update customers set tier = 'pro', pro_approved_at = now() where id = $1", [id]);
+  await query(
+    "update customers set tier = 'pro', pro_approved_at = now(), pro_requested_at = null where id = $1",
+    [id],
+  );
   return getCustomerAdmin(id);
 }
 
@@ -991,11 +1037,16 @@ export async function rejectProCustomer(id: string): Promise<AdminCustomerRow | 
   return getCustomerAdmin(id);
 }
 
-/** Also how the owner demotes a pro account back to retail. */
+/** Also how the owner demotes a pro account back to retail. The card's switch
+ *  promotes exactly as «Одобрить» does, so it closes an open request the same
+ *  way — see the note on approveProCustomer(). */
 export async function setCustomerTier(id: string, tier: "retail" | "pro"): Promise<AdminCustomerRow | null> {
   if (!UUID_RE.test(id) || (tier !== "retail" && tier !== "pro")) return null;
   if (tier === "pro") {
-    await query("update customers set tier = 'pro', pro_approved_at = coalesce(pro_approved_at, now()) where id = $1", [id]);
+    await query(
+      "update customers set tier = 'pro', pro_approved_at = coalesce(pro_approved_at, now()), pro_requested_at = null where id = $1",
+      [id],
+    );
   } else {
     await query("update customers set tier = 'retail' where id = $1", [id]);
   }
@@ -1052,13 +1103,20 @@ export async function upsertPartner(input: PartnerInput): Promise<PartnerResult 
   const lang = normalizeLangCode(input.lang);
 
   const before = await getCustomerAdminByEmail(email);
+  /* Whether the insert below is what put the row there. `on conflict do
+     nothing` returns no row when somebody else got there first — recordLogin()
+     at that customer's very first sign-in — and the audit line the route
+     writes («customer.created») should not claim a row this call did not make. */
+  let insertedHere = false;
   if (!before) {
-    await query(
+    const back = await query<{ id: string }>(
       `insert into customers (email, lang, name, phone, company, reg_code, tier, pro_approved_at)
        values ($1, $2, $3, $4, $5, $6, $7, case when $7 = 'pro' then now() else null end)
-       on conflict (email) do nothing`,
+       on conflict (email) do nothing
+       returning id`,
       [email, lang, name, phone, company, regCode, tier],
     );
+    insertedHere = back.length > 0;
   } else {
     await query(
       `update customers set
@@ -1075,8 +1133,16 @@ export async function upsertPartner(input: PartnerInput): Promise<PartnerResult 
   if (!customer) return null;
   return {
     customer,
-    created: !before,
-    promoted: tier === "pro" && (!before || before.tier !== "pro"),
+    created: !before && insertedHere,
+    /* Read off the row as it NOW is, not off the read that opened this call.
+       recordLogin() creates the row at a customer's first sign-in, and one
+       landing between that read and the insert above leaves `on conflict do
+       nothing` with nothing to do — the tier stays 'retail'. Computed from
+       `before` alone, this said «promoted» over a row that never moved, and
+       the route posted «Цены для салонов включены» to somebody who is still
+       paying retail prices. The window is microseconds; the letter is a
+       promise to a customer, so it follows the tier that is really there. */
+    promoted: tier === "pro" && customer.tier === "pro" && (!before || before.tier !== "pro"),
   };
 }
 

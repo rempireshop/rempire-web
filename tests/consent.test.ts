@@ -9,7 +9,7 @@
  * mailbox unsubscribe another; a consent nobody can date.
  */
 import catalogueMin from "@/data/catalogue.min.json";
-import { shopDay } from "@/lib/day";
+import { addShopDays, shopDay } from "@/lib/day";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import {
@@ -28,6 +28,7 @@ import {
 import { addStockAlert, getCustomer, makeCustomerToken, recordLogin, saveCart, updateCustomer } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
 import { flowCounters, runAbandonedCarts, runBackInStock, runBirthdays } from "@/lib/flows";
+import { getCustomerAdminByEmail } from "@/lib/loyalty";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; s: string };
@@ -111,6 +112,15 @@ async function birthdayToday(email: string, marketing: boolean): Promise<void> {
   await recordLogin(email, "RU");
   await updateCustomer(email, { birthday: iso });
   if (marketing) await recordMarketingConsent(email, "RU", "account");
+}
+
+/** The same, `ahead` calendar days from today — Tallinn's days, like the run's
+ *  own window. Born in a leap year, so «three days from now» can be a 29th. */
+async function birthdayIn(email: string, ahead: number): Promise<void> {
+  const day = addShopDays(shopDay(new Date()), ahead);
+  await recordLogin(email, "RU");
+  await updateCustomer(email, { birthday: "1992" + day.slice(4) });
+  await recordMarketingConsent(email, "RU", "account");
 }
 
 let admin = "";
@@ -540,6 +550,28 @@ describe("the stop list and the three letters", () => {
     expect(await flowCounters()).toMatchObject({ carts: 0, birthdays: 0 });
   });
 
+  /* The same promise, against the two things the birthday counter used to
+     ignore: «за сколько дней» (a fixed week here, birthdayWindow() there —
+     and its default is 0, today only) and the letter that has already gone
+     this year. The panel said «Ждут письма: 1» beside a run with nothing to
+     send, and went on saying it after «Запустить сейчас» had sent it. */
+  it("the birthday queue is the run's own window, and drops what has already been sent", async () => {
+    await setFlows({ birthday: true, birthdayCode: "REM-BD-STATIC" });
+    await birthdayIn(OTHER, 3);
+
+    // three days out: inside a fixed week, outside the window the run uses
+    expect(await flowCounters()).toMatchObject({ birthdays: 0 });
+    expect((await runBirthdays()).sent).toBe(0);
+
+    // «за 3 дня»: now the run reaches it, and the counter says so
+    await setFlows({ birthday: true, birthdayCode: "REM-BD-STATIC", birthdayDays: 3 });
+    expect(await flowCounters()).toMatchObject({ birthdays: 1 });
+    expect((await runBirthdays()).sent).toBe(1);
+
+    // and this birthday's letter has gone — the queue is empty, not still 1
+    expect(await flowCounters()).toMatchObject({ birthdays: 0 });
+  });
+
   it("a fresh tick puts the address back — the latest expression of will wins", async () => {
     await recordLogin(EMAIL, "RU");
     await optOut(EMAIL, "marketing", "one-click");
@@ -606,5 +638,34 @@ describe("the admin customers API", () => {
     const other = lines.find((l) => l.startsWith(OTHER))!.split(";");
     expect(other[at]).toBe("");
     expect(other[at + 1]).toBe("");
+  });
+
+  /* The card draws «Отписался по ссылке в письме · <дата>». The date used to
+     be `marketing_off_at`, which only moves on a real on → off transition —
+     so for somebody who had already taken the tick off in «Кабинет», the
+     card dated a click from today with an untick from weeks ago. The stop
+     list has its own stamp; the row carries it now. */
+  it("the stop-list row carries its own date, apart from the account untick", async () => {
+    await recordLogin(EMAIL, "RU");
+    await recordMarketingConsent(EMAIL, "RU", "account");
+    await withdrawMarketingConsent(EMAIL, "account");
+    const untick = "2026-08-01T10:00:00.000Z";
+    await query("update customers set marketing_off_at = $2 where email = $1", [EMAIL, untick]);
+
+    // …and only now does the link get pressed, from a letter sent long ago
+    await optOut(EMAIL, "marketing", "link");
+
+    const row = await getCustomerAdminByEmail(EMAIL);
+    expect(row?.optedOut).toBe(true);
+    // the untick keeps its own date — the tick was already off, nothing flipped
+    expect(row?.marketingOffAt).toBe(untick);
+    expect(typeof row?.optedOutAt).toBe("string");
+    expect(new Date(row!.optedOutAt!).getTime()).toBeGreaterThan(new Date(untick).getTime());
+  });
+
+  it("an address that is not on the stop list has no date to show", async () => {
+    await recordLogin(OTHER, "RU");
+    const row = await getCustomerAdminByEmail(OTHER);
+    expect(row).toMatchObject({ optedOut: false, optedOutAt: null });
   });
 });

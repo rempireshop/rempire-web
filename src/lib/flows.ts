@@ -1328,7 +1328,8 @@ export interface FlowCounters {
   carts: number;
   /** Addresses waiting for a «снова в наличии» letter. */
   alerts: number;
-  /** Birthdays in the next seven days, marketing consent given, address not opted out. */
+  /** Birthdays inside the run's own window (flows.birthdayDays), marketing
+   *  consent given, address not opted out, this year's letter not yet sent. */
   birthdays: number;
   /** Unpaid orders old enough for the reminder and not reminded yet. */
   unpaid: number;
@@ -1340,6 +1341,10 @@ const NOT_OPTED_OUT = (email: string) => `not exists (select 1 from mail_optouts
 
 export async function flowCounters(now: number = Date.now()): Promise<FlowCounters> {
   const out: FlowCounters = { carts: 0, alerts: 0, birthdays: 0, unpaid: 0 };
+  /* Read once for the two queues that need it (the birthday window, the
+     unpaid days): one settings row, not one per counter. getFlows() answers
+     with the defaults rather than throwing, so it needs no try of its own. */
+  const flows = await getFlows();
   try {
     const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
     const [carts] = await query<{ n: string | number }>(
@@ -1362,32 +1367,53 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
     /* ignored */
   }
   try {
-    // Seven days including today, wrapping across the New Year without a
-    // calendar library: compare the month/day pair as a number. Tallinn's
-    // calendar and Tallinn's steps, the same as birthdayWindow() above — this
-    // counter and that queue must not disagree about which day it is.
-    const days: number[] = [];
-    const from = shopDay(new Date(now)) || shopDay(new Date());
-    for (let i = 0; i < 7; i += 1) {
-      const p = ymdParts(addShopDays(from, i));
-      if (p) days.push(p.month * 100 + p.day);
-    }
+    /* The days the RUN is going to look at — birthdayWindow(now,
+       flows.birthdayDays), the very list runBirthdays() builds, wrapping
+       across the New Year and putting a 29 February birthday on the 28th in
+       the three years out of four that have no 29th.
+
+       This used to be a fixed seven days, while «за сколько дней» has been a
+       setting since 07.09.2026 and defaults to 0 — today only. The panel said
+       «в очереди 4» beside a run that had one letter to send, which is the one
+       thing the note above NOT_OPTED_OUT exists to forbid. The other half of
+       the same disagreement was `birthday_sent_year`: a letter that has
+       already gone this year was still counted as queued, so the number never
+       dropped after «Запустить сейчас» until the birthday itself had passed. */
+    const window = birthdayWindow(now, flows.birthdayDays);
+    /** mmdd → the year that calendar day falls in, first one wins (the window
+     *  can name the same day twice: 28 February in a non-leap year). */
+    const byDay = new Map<number, number>();
+    for (const d of window) if (!byDay.has(d.mmdd)) byDay.set(d.mmdd, d.year);
     // Placeholders rather than an array parameter: the two drivers disagree
-    // about how a JS array becomes a Postgres one, and seven holes cost nothing.
-    const holes = days.map((_, i) => `$${i + 1}`).join(",");
-    const [bd] = await query<{ n: string | number }>(
-      `select count(*)::int as n from customers c
-        where c.birthday is not null and c.marketing = true
-          and (extract(month from c.birthday) * 100 + extract(day from c.birthday)) in (${holes})
-          and ${NOT_OPTED_OUT("c.email")}`,
-      days,
-    );
+    // about how a JS array becomes a Postgres one, and a day is two holes.
+    const params: unknown[] = [];
+    const terms: string[] = [];
+    for (const [mmdd, year] of byDay) {
+      params.push(mmdd, year);
+      const i = params.length;
+      /* Per day, not against the newest year in the window: across a New Year
+         the window holds two of them, and a December birthday stamped this
+         year must not be read as a January one stamped last year — the same
+         reasoning as the per-row test in runBirthdays(). */
+      terms.push(
+        `((extract(month from c.birthday) * 100 + extract(day from c.birthday)) = $${i - 1}
+           and (c.birthday_sent_year is null or c.birthday_sent_year <> $${i}))`,
+      );
+    }
+    const [bd] = terms.length
+      ? await query<{ n: string | number }>(
+          `select count(*)::int as n from customers c
+            where c.birthday is not null and c.marketing = true
+              and (${terms.join(" or ")})
+              and ${NOT_OPTED_OUT("c.email")}`,
+          params,
+        )
+      : [];
     out.birthdays = Number(bd?.n) || 0;
   } catch {
     /* ignored */
   }
   try {
-    const flows = await getFlows();
     const day = 24 * 60 * 60 * 1000;
     const [unpaid] = await query<{ n: string | number }>(
       `select count(*)::int as n from orders
