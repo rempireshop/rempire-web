@@ -1438,6 +1438,8 @@
         "Kas kindlasti kustutada see artikkel? See läheb mustandisse — tekst jääb alles, kuid poes seda enam ei näe.",
       "Да, удалить": "Jah, kustuta",
       "Не получилось сохранить — попробуйте ещё раз.": "Salvestamine ei õnnestunud — proovi uuesti.",
+      "Статья слишком длинная — сократите текст и сохраните ещё раз.":
+        "Artikkel on liiga pikk — lühenda teksti ja salvesta uuesti.",
       "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
       "Показать ещё": "Näita veel",
       // analytics agent — «Аналитика» tab
@@ -2187,6 +2189,7 @@
       "Итого 28,84 €": "Kokku 28,84 €",
       "+ Статья": "+ Artikkel",
       "Пока нет ни одной статьи — нажмите «+ Статья»": "Ühtegi artiklit veel pole — vajuta «+ Artikkel»",
+      "Статьи не загрузились — попробуйте ещё раз.": "Artiklid ei laadinud — proovi uuesti.",
       "черновик": "mustand",
       "Опубликована": "Avaldatud",
       "• Список": "• Loend",
@@ -3995,6 +3998,8 @@
         "Delete this article? It goes back to drafts — the text stays, but it will not be visible in the shop.",
       "Да, удалить": "Yes, delete",
       "Не получилось сохранить — попробуйте ещё раз.": "Could not save — try again.",
+      "Статья слишком длинная — сократите текст и сохраните ещё раз.":
+        "The article is too long — shorten the text and save again.",
       "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
       "Показать ещё": "Show more",
       // analytics agent — «Аналитика» tab
@@ -4740,6 +4745,7 @@
       "Итого 28,84 €": "Total €28.84",
       "+ Статья": "+ Article",
       "Пока нет ни одной статьи — нажмите «+ Статья»": "No articles yet — press “+ Article”",
+      "Статьи не загрузились — попробуйте ещё раз.": "The articles did not load — try again.",
       "черновик": "draft",
       "Опубликована": "Published",
       "• Список": "• List",
@@ -7463,6 +7469,7 @@
     blogListBusy: false,  // «Показать ещё» (page 2+) in flight
     blogPosts: {},        // "LANG:slug" -> {post, at, failed?}; post null = no such post; undefined = not asked yet
     adminBlog: null,       // admin tab «Блог»: [post,...] once loaded
+    adminBlogListErr: false, // that list did not load (401/503) — «Блог» says so instead of «нет ни одной статьи»
     adminBlogEdit: null,   // the post being created/edited (a draft object), or null for the list
     adminBlogEditBusy: false, // fetching the full post before the editor can open
     adminBlogLang: "RU",   // which language pill the editor shows
@@ -10036,7 +10043,17 @@
       var isProduct = BLOG_PRODUCT_ID.test(pid);
       if (isProduct && cards) {
         var card = blogProductHTML(pid);
-        if (card) return card;                                 // a product that is gone falls back to the link
+        if (card) return card;
+        /* No such product on the shelf any more. The marker carries the words
+           and the PRICE as they were when the article was written
+           (blogProductLinkHTML), and its href points at a page the shop no
+           longer has — so falling back to it told the shopper «12,90 €» for
+           something withdrawn and then sent them nowhere. The card simply
+           goes, the way a cart line whose product left the feed goes
+           (adoptServer). Only where `cards` is on, i.e. what the shopper
+           reads: the editor cleans the same body with cards off, so the
+           marker stays in the article and the owner can see it and fix it. */
+        return "";
       }
       var open = "<a";
       if (isProduct) open += ' data-product="' + esc(pid) + '"';
@@ -11480,15 +11497,32 @@
      the editor says so in its own first line. The list only ever holds
      summaries (no body — see @/lib/blog PostSummary), so opening one for
      editing is its own fetch. */
+  /* A list that did not load is NOT an empty blog. The route answers 401 on
+     an expired cookie and 503 when the database is out, and both used to land
+     on S.adminBlog = [] — so «Блог» said «Пока нет ни одной статьи» over the
+     owner's own articles and invited him to write another one. The list the
+     screen already has survives a failed refresh, exactly as
+     loadAdminReviews() and loadOverview() do it; the flag is what «Блог»
+     draws the «Повторить» line from. */
   function loadAdminBlog(force) {
     if (S.adminBlog && !force) return;
+    var failed = function () {
+      S.adminBlogListErr = true;
+      if (!S.adminBlog) S.adminBlog = [];
+      if (S.screen === "admin" && S.adminTab === "blog") render();
+    };
     apiJson("/api/admin/blog/").then(function (r) {
-      S.adminBlog = (r.status === 200 && r.body.ok) ? r.body.posts : [];
-      if (S.screen === "admin" && S.adminTab === "blog") render();
-    }).catch(function () {
-      S.adminBlog = [];
-      if (S.screen === "admin" && S.adminTab === "blog") render();
-    });
+      /* An expired cookie is not an outage. Every other loader in the panel
+         answers a 401 by dropping back to the sign-in card (loadAdminPromos,
+         loadOverview, loadAdminGiftCards, … — and the editor's own fetch two
+         screens down); this one did not, and «Повторить» below would then be
+         a button that can never work. */
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.adminBlog = r.body.posts; S.adminBlogListErr = false;
+        if (S.screen === "admin" && S.adminTab === "blog") render();
+      } else failed();
+    }).catch(failed);
   }
 
   // A Latin slug out of a Cyrillic or Estonian title — mirrors slugify() in
@@ -12454,7 +12488,7 @@
       return blogGenTranslate(d, "EN");
     }).then(function () {
       step("save");
-      return saveBlogFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
+      return saveBlogFields(d).catch(function (e) { throw new Error(blogSaveErrText(e)); });
     }).then(function () {
       S.adminBlogGen = null;
       toast("Статья готова на трёх языках — проверьте и опубликуйте");
@@ -12501,9 +12535,25 @@
   // "try again" is exactly when a retry needs the reason to still be on
   // screen. Both read the same sentence.
   var BLOG_SAVE_ERR = "Не получилось сохранить — попробуйте ещё раз.";
-  function blogFail() {
-    S.adminBlogErr = BLOG_SAVE_ERR;
-    toast(BLOG_SAVE_ERR);
+  /* …except where «ещё раз» would fail again for a reason the owner can act
+     on. A body past BODY_MAX (src/lib/blog.ts) used to be cut to length and
+     written to the row while the panel answered «Черновик сохранён ✓» — the
+     end of the article, and the product cards in it, simply gone. It is
+     refused now, so the text stays in the box and the sentence says what to
+     do with it. */
+  var BLOG_ERR_TEXT = {
+    body_too_long: "Статья слишком длинная — сократите текст и сохраните ещё раз."
+  };
+  function blogSaveErrText(e) {
+    // typeof, not truthiness: e.message is whatever the route put in `error`,
+    // and "constructor"/"toString" would otherwise reach Object.prototype
+    var known = e && BLOG_ERR_TEXT[e.message];
+    return typeof known === "string" ? known : BLOG_SAVE_ERR;
+  }
+  function blogFail(e) {
+    var msg = blogSaveErrText(e);
+    S.adminBlogErr = msg;
+    toast(msg);
   }
   function saveBlogDraft() {
     if (S.adminBlogBusy || !S.adminBlogEdit) return;
@@ -12516,8 +12566,8 @@
       S.adminBlogBusy = false;
       toast(p.status === "published" ? "Изменения сохранены ✓" : "Черновик сохранён ✓");
       render();
-    }).catch(function () {
-      S.adminBlogBusy = false; blogFail(); render();
+    }).catch(function (e) {
+      S.adminBlogBusy = false; blogFail(e); render();
     });
   }
   /** `confirmed` — the second press, the one that answers blogPublishWarnText(). */
@@ -12543,8 +12593,8 @@
       } else blogFail();
       S.adminBlog = null; blogForget();
       render();
-    }).catch(function () {
-      S.adminBlogBusy = false; blogFail(); render();
+    }).catch(function (e) {
+      S.adminBlogBusy = false; blogFail(e); render();
     });
   }
   function unpublishBlogPost() {
@@ -17743,8 +17793,17 @@
     var head = '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Блог", '<button class="adm-btn adm-btn--head" data-admblognew>+ Статья</button>');
     if (!posts) return head + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
-    if (!posts.length) return head + '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div></div>';
-    return head + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
+    /* The list did not load — say so instead of showing the empty blog's
+       invitation over articles that are still there (loadAdminBlog above).
+       Same line and same «Повторить» «Обзор» and «Заказы» use. */
+    var listErr = S.adminBlogListErr
+      ? '<div class="adm-error"><span>Статьи не загрузились — попробуйте ещё раз.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="blog">Повторить</button></div>'
+      : "";
+    if (!posts.length) {
+      return head + (listErr || '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div>') + "</div>";
+    }
+    return head + listErr + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
   }
   /* The list has no bodies in it (GET /api/admin/blog/ leaves them out), so
      what a row can honestly say about the three languages is whether each
@@ -27501,7 +27560,14 @@
         if (r.status === 200 && r.body.ok) return;
         toast("Не получилось сохранить отзыв");
         loadAdminReviews(true);
-      }).catch(function () { loadAdminReviews(true); });
+      /* The same sentence when the call never came back as JSON at all — a
+         504 HTML page, a dropped connection, a phone that lost the network.
+         apiJson() throws on those, so they landed here, and here said
+         nothing: the green «Отзыв опубликован» stayed on screen over a
+         review the shop had not published. The refetch cannot cover for it
+         either — loadAdminReviews() keeps the list it already has when it
+         fails too, and its _busy guard can swallow this call outright. */
+      }).catch(function () { toast("Не получилось сохранить отзыв"); loadAdminReviews(true); });
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
     else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
@@ -30706,7 +30772,19 @@
     else if (top === "scan") closeScannerState();
     else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
-    else if (top === "blog") { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; }
+    /* blog: the same question «← Блог» asks. A swipe back is the gesture the
+       owner closes a card with on a phone, and it used to throw an unsaved
+       article away without a word — the confirmation lived in the button's
+       own branch only. Read the screen first (the box repaints itself, so the
+       draft is not what the last `input` happened to catch), then ask once;
+       the layer stays open, so admSyncHistory() parks a fresh entry and the
+       next Back — like the second press of «← Блог» — closes for real. */
+    else if (top === "blog") {
+      blogReadForm();
+      if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; return true; }
+      S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
+      BLOGSEL = null; BLOGCARET = null;
+    }
     else if (top === "edit") {
       var backId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
@@ -31390,6 +31468,7 @@
       else if (d.admreload === "bundles") loadAdminBundles(true);
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
+      else if (d.admreload === "blog") loadAdminBlog(true);
       else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       render(); return;
@@ -33065,6 +33144,13 @@
       });
       var live = document.querySelector("[data-revrating]");
       if (live) live.textContent = S.revForm.rating + " из 5";
+      /* …and «Отправить отзыв», which is rendered disabled until
+         reviewReady(). The stars repaint themselves rather than going through
+         render(), so nothing else here would touch the button — and a rating
+         chosen AFTER the name, the text and the tick left it grey for good
+         (the [data-revf] branch below is the only other place it is updated). */
+      var revsend = document.querySelector("[data-revsend]");
+      if (revsend) revsend.disabled = !reviewReady();
       return;
     }
     if (d.revsend !== undefined) { sendReview(); return; }

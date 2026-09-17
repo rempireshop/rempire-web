@@ -537,7 +537,17 @@ function cleanBody(v: string): string {
     .trim();
 }
 
-function trilingual(raw: unknown, max: number, multiline = false): Trilingual {
+/**
+ * `tooLong` — the BlogError code to raise instead of cutting. Only `body`
+ * passes one: a title or an SEO description past its limit is a field being
+ * clipped to the length Google reads anyway, but a body past its limit is
+ * the article itself, and `.slice()` took the end of it off while the panel
+ * answered «Сохранено ✓». Everything after the cut — the last sections, the
+ * product cards in them — was gone from the row and from the editor's next
+ * open, with nothing said. Refusing is the only answer that keeps the text:
+ * it stays in the box in front of the owner, who is told to shorten it.
+ */
+function trilingual(raw: unknown, max: number, multiline = false, tooLong = ""): Trilingual {
   /* A bare string is the Russian text — the panel always sends {RU,ET,EN},
      but the assistant's draft and a hand-written API call may not, and a
      title that silently vanished used to publish a post with an empty <h1>
@@ -551,7 +561,10 @@ function trilingual(raw: unknown, max: number, multiline = false): Trilingual {
   const out = { ...EMPTY3 };
   for (const l of LANGS) {
     const v = src[l];
-    if (typeof v === "string") out[l] = (multiline ? cleanBody(v) : cleanLine(v)).slice(0, max);
+    if (typeof v !== "string") continue;
+    const clean = multiline ? cleanBody(v) : cleanLine(v);
+    if (tooLong && clean.length > max) throw new BlogError(tooLong);
+    out[l] = clean.slice(0, max);
   }
   return out;
 }
@@ -597,6 +610,10 @@ export interface PostInput {
   seoDesc?: unknown;
   author?: unknown;
 }
+
+/** One language's article, cleaned: a few pages of HTML. Past this, `upsertPost`
+    refuses with «body_too_long» rather than saving a cut-off article. */
+export const BODY_MAX = 20_000;
 
 export class BlogError extends Error {
   code: string;
@@ -663,7 +680,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function upsertPost(input: PostInput): Promise<Post> {
   const title = trilingual(input.title, 200);
   const excerpt = trilingual(input.excerpt, 500);
-  const body = trilingual(input.body, 20_000, true); // the one field where "\n" is content
+  const body = trilingual(input.body, BODY_MAX, true, "body_too_long"); // the one field where "\n" is content
   const coverAlt = trilingual(input.coverAlt, 160);
   const seoTitle = trilingual(input.seoTitle, 70);
   const seoDesc = trilingual(input.seoDesc, 170);
