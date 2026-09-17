@@ -518,7 +518,10 @@ describe("6 · the partner letter goes the first time only", () => {
     /* No `mail` at all, on purpose: the panel reads a missing `mail` as «no
        letter was due» and says «Партнёр одобрен». A {sent:false} would have
        made it report a failure that did not happen. */
-    expect(again.body.mail).toBeUndefined();
+    /* Reported as deliberately skipped, not omitted and not failed. Omitting it
+       made the panel say «Партнёр одобрен · письмо ушло» — admCustPatch()'s
+       fallback — i.e. claim a letter this branch had just refused to send. */
+    expect(again.body.mail).toMatchObject({ sent: false, skipped: true, reason: "welcomed_before" });
   });
 
   it("says nothing when «Одобрить Pro» comes round a second time", async () => {
@@ -531,7 +534,10 @@ describe("6 · the partner letter goes the first time only", () => {
     const again = await patch(id, { action: "approve" });
     expect(again.body.ok).toBe(true);
     expect(sent).toHaveLength(0);
-    expect(again.body.mail).toBeUndefined();
+    /* Reported as deliberately skipped, not omitted and not failed. Omitting it
+       made the panel say «Партнёр одобрен · письмо ушло» — admCustPatch()'s
+       fallback — i.e. claim a letter this branch had just refused to send. */
+    expect(again.body.mail).toMatchObject({ sent: false, skipped: true, reason: "welcomed_before" });
   });
 
   it("keeps the stamp that proves it — a demotion never clears it", async () => {

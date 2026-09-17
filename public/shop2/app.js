@@ -2771,6 +2771,7 @@
       "Партнёр добавлен · письмо ушло": "Partner lisatud · kiri saadetud", "Партнёр добавлен ✓": "Partner lisatud ✓",
       "Партнёр одобрен · письмо ушло": "Partner kinnitatud · kiri saadetud",
       "Партнёр одобрен · письмо не ушло": "Partner kinnitatud · kiri ei läinud välja",
+      "Партнёр одобрен · письмо уже отправляли": "Partner kinnitatud · kiri on juba saadetud",
       "Сделать партнёром?": "Teha partneriks?", "Перевести в розницу?": "Viia jaemüüki?",
       "Сделать партнёром": "Tee partneriks", "Перевести в розницу": "Vii jaemüüki",
       /* the cabinet's «Стать партнёром» form — what happens next */
@@ -5470,6 +5471,7 @@
       "Партнёр добавлен · письмо ушло": "Partner added · letter sent", "Партнёр добавлен ✓": "Partner added ✓",
       "Партнёр одобрен · письмо ушло": "Partner approved · letter sent",
       "Партнёр одобрен · письмо не ушло": "Partner approved · letter did not go out",
+      "Партнёр одобрен · письмо уже отправляли": "Partner approved · the letter was sent before",
       "Сделать партнёром?": "Make a partner?", "Перевести в розницу?": "Move to retail?",
       "Сделать партнёром": "Make a partner", "Перевести в розницу": "Move to retail",
       /* the cabinet's «Стать партнёром» form — what happens next */
@@ -25121,7 +25123,7 @@
       the panel telling the owner about a letter it had never looked at
       (17.09.2026). applyAddPartner() has read `mail.sent` since «+ Партнёр»
       was written; this is the same reading on the same letter. */
-  function admCustPatch(id, body, okMsg, noMailMsg) {
+  function admCustPatch(id, body, okMsg, noMailMsg, skipMsg) {
     if (admCustPatch._busy) return;   // «Одобрить Pro» tapped twice is one approval
     admCustPatch._busy = true;
     apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
@@ -25132,8 +25134,14 @@
         S.admCustDetail = { customer: r.body.customer, history: (S.admCustDetail && S.admCustDetail.history) || [] };
         loadAdminCustomerDetail(id, true);
         loadAdminCustomers(true);
-        // no `mail` in the answer means no letter was due — the message stands
-        toast(noMailMsg && r.body.mail && !r.body.mail.sent ? noMailMsg : okMsg);
+        /* Three outcomes, not two. `skipped` is the route deciding the letter
+           must NOT go — this address has been welcomed before — and saying so
+           is not the same as reporting a failure, which is what «не ушло»
+           means. No `mail` at all means no letter was due on this path. */
+        var ml = r.body.mail;
+        toast(ml && ml.skipped && skipMsg ? skipMsg
+          : ml && !ml.sent && noMailMsg ? noMailMsg
+          : okMsg);
         render();
         return;
       }
@@ -25141,7 +25149,7 @@
       render();
     }).catch(function () { admCustPatch._busy = false; S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
   }
-  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло", "Партнёр одобрен · письмо не ушло"); }
+  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло", "Партнёр одобрен · письмо не ушло", "Партнёр одобрен · письмо уже отправляли"); }
   function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
   function adjustCustomerPoints(id) {
     var delta = Math.trunc(Number(String(S.admCustPoints).replace(",", ".")));
