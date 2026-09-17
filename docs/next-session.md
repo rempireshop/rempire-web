@@ -1,93 +1,119 @@
-# Where we stopped — 14.09.2026
+# Where we stopped — 17.09.2026
 
-Paused to keep tokens free for urgent fixes. Resume **Thursday 18.09.2026**.
+Rounds 19 to 22 are merged and pushed. `origin/main` is `7dc8d44`: 160 test
+files, 3496 tests, 0 failures, `tsc` clean, 814 prerendered pages with 0
+failures. Everything described below as done is live on staging.
 
-Everything below is merged, pushed, CI-green and live on staging. Nothing in the
-repository is half-finished.
+## What happened on 17.09
 
-## Done and deployed
+**Dim answered all twenty owner-only questions** from the third decision page
+(https://claude.ai/artifact/WFi2yVUHHHdkkNncCHWVcn, collection `decisions`, docs
+`q1`..`q20`). He took every recommendation, tapping them one at a time over eight
+minutes. What each one means in code is in the `rempire-r22-decisions` memory;
+the short version is below.
 
-| Was | Now |
+Merged and pushed:
+
+| | |
 |---|---|
-| Customer card opened scrolled to its middle | Opens at the top. One missing line on the row that opens it; the article editor had the same omission |
-| Carrier chip went solid black behind black logos | Its own rule, not the bank one fixed earlier. Outline instead of fill |
-| Assistant offered «analytics for this week» and could not answer | Knows the week: takings, orders, average order, per-day, change against the previous week |
-| Reviews attached to nobody | The moderation queue shows the author, or «без аккаунта». The review form tells a signed-in shopper the review is kept with their account |
-| Checkout e-mail filled in a second late | Delivered inside the page itself: 0 ms against 49–2345 ms |
-| Every pickup point was called «Пакомат» | «Пакомат» / «Пункт выдачи» / «Почта», from Montonio's own type field |
-| Venipak could be posted with no carrier from a stale tab | The order validator accepts it again on arrival while nothing offers it |
+| The page build now **fails** when the translation lift fails | It used to write 542 ET and EN pages in Russian and exit 0 |
+| A repeated tap no longer creates a second order, sale or stock movement | Key minted at commitment, reused on retry, three routes wired |
+| One sold-out counted size no longer hides a whole product | «нет в наличии» now needs the whole size ladder counted |
+| A guest order no longer lifts a stranger off the marketing stop list | Only a shopper signed in on that mailbox has proved it is theirs |
+| Abandoned-cart reminders survive, bounded per address in the database | An in-memory bound gives a fresh budget on every cold start |
+| «Снова в наличии» no longer sends when the counted stock is zero | The shop was contradicting itself in writing |
+| The partner welcome letter goes on the first approval only | Two doors send it; both are gated now |
+| Unsubscribing ignores robots and still costs a human one press | Three test-plan checks reworded to match |
+| The VAT rate is stamped on the order | A filed month re-exports byte-identically forever |
+| «Из корзины в заказ» is counted honestly | The figure is much lower than it was; the caption is now true |
+| Failed logins meet a growing delay instead of a refusal | Still per-instance — see the correction below |
+| Search phrases are named in the privacy text | The «Искали, но не нашли» report stays |
 
-### The region move — DONE
+## Branches finished but NOT merged
 
-The database was always in Amsterdam (Railway, EU West). The **functions** had no
-region set, so they ran in Washington, and every query crossed the Atlantic.
-They now run in Frankfurt, ten milliseconds from the database.
+- **`r22-shop`** — the public order-status endpoint and safe basket recovery
+  (question 13), and blog price markers for new articles (question 16). Pushed,
+  3552 tests green.
+- **`r22-blogfig`** — on top of `r22-shop`. Fixes a real regression found while
+  in there: `tools/lib/blog-export.mjs`, the sanitizer the prerenderer uses for
+  articles, has **no `data-fig` handling at all**, so the picture sizes and
+  placement Renat asked for in round 20 are silently stripped from every
+  prerendered article page. `src/lib/blog.ts` handles it in six places. Second
+  time that hand-kept twin has drifted.
 
-Set in two places, which agree: `"regions": ["fra1"]` in `vercel.json` (the one
-that wins, and the one that survives a rollback) and the Function Region field in
-the Vercel dashboard, which Dim set on 14.09.
+## Branches still building when the session ended
 
-Measured from Estonia, before against after:
+`r22-panel` (rename «Топ товаров»/«Бренды» to the value of goods, server-side
+order search, the «Обработано» button for returns, the rate screen editing the
+stored row), `r22-idem-rest` (the seven remaining idempotency sites),
+`r22-testplan` (all 173 checks brought level with the code). Check whether they
+pushed before you assume they did not.
 
-| | Washington | Frankfurt |
-|---|---|---|
-| Function with one database query | 258 ms | 73–193 ms |
-| Function with no query | 392 ms | 110 ms |
-| Product page | 305–453 ms | 83 ms |
-| Static file | 48 ms | 25 ms |
+## First job next session
 
-The legs were: Estonia→Stockholm 47 ms, Stockholm→Washington 135 ms, and
-Washington→Amsterdam **86 ms per sequential wave of queries** — three waves on the
-overview, about fourteen on the checkout. Reasoning and verification commands in
-`docs/region-move.md`.
+Merge those branches, regenerate (`minify-shop2` → `prerender-shop2` →
+`check-prerender`), run the full suite, push. **`public/shop2/app.js` has had
+two writers** — `r22-panel` and `r22-shop` both touch it, the second unavoidably
+edits one line in the admin half — so expect a conflict there and resolve it by
+keeping both sides, not by taking one whole. That mistake nearly reverted
+question 5 during this round's merge and nothing would have failed to say so.
 
-**Cold starts are now the largest remaining delay and are not fixed.** At three to
-five orders a month the functions are asleep most of the time, so the first
-request after a quiet spell is still slow. That is why the one-query figure above
-is a range rather than a number.
+## Then: Dim re-tests, then two Fable 5.1 passes
 
-## Stopped mid-run — start here
+The test plan marks each changed check so he can find them: **re-run** (behaviour
+changed), **reworded** (text moved, his answer stands) and **new**. He is not
+re-running all 173 — only the marked ones. **The Claude Design hand-off is
+cancelled; he says the design is fine.**
 
-1. **Full system audit.** All 22 subsystems were swept from two angles and produced
-   **347 distinct findings, 31 critical and 115 high**, saved in
-   `docs/audit-2026-09-14-unverified.md`. The adversarial verification never ran, so
-   **none of them are confirmed**. On the day they were written, skeptics refuted
-   several confident findings and two of Claude's own stated facts turned out to be
-   wrong. Treat that file as places to look, not as defects. Verify first, fix only
-   what survives.
-2. **Claude Design hand-off for the admin.** Screenshots of every admin screen at
-   375 and 1280, plus four documents: a description per section, the design system,
-   the full content inventory with Estonian and English, and the constraints that
-   must not be broken. 71 screenshots were captured but lived in a temporary session
-   folder and are gone, so capture must be redone. None of the writing was done.
+Once he reports the re-test is clean, run **two separate Fable 5.1 passes**, in
+this order:
 
-## Waiting on Dim
+1. **A regression review of the diff** since 14.09 — about 250 changes landed
+   through heavy parallel merging, and merging is where this project bleeds. On
+   17.09 alone: two branches fixed the same bug and git merged both without a
+   conflict so both now run; the same pattern earlier in the round would have
+   taken stock off twice on a cancel. No subsystem audit looks for this.
+2. **A go-live readiness pass.** Not a code audit, and the more important of the
+   two. The shop has run as staging and going live flips switches nobody has ever
+   exercised. At least: the pages say `noindex, nofollow` and `robots.txt` is the
+   staging policy; `PUBLIC_BASE_URL` unset makes the prerender write live URLs
+   carrying noindex; Montonio sandbox versus live keys, the webhook URL and the
+   shipping contract; `SESSION_SECRET` is now load-bearing for the order-status
+   token and fails closed silently if unset, so basket recovery would never work
+   and nothing would say so; `flows.unpaid` is still **off**; cron schedules; the
+   `fra1` region; Railway backups; whether anything tells Dim when a payment
+   webhook fails; the stale `public/shop/legal.js`, which still names Shopify as
+   the data processor; DNS at ASCIO.
 
-- **Nova Post pickup points in nine more countries.** Poland 17.89 → 7.85 €,
-  Germany 29.79 → 12.56 €, and Hungary and Romania have no pickup option from any
-  other carrier. Blocked on one thing: Nova Post supports no returns at all.
-- **Size-based pricing.** The catalogue holds no weight and no dimensions for any of
-  220 products; 113 carry a volume. Until that exists a basket cannot be turned into
-  a parcel.
-- Whether to rename the «Пакомат» price column, whether to filter out the Latvian
-  and Lithuanian counters, and whether to backfill the point type on old orders.
-- The Montonio letter is drafted; the earlier one has been sent and is unanswered.
+Do **not** run a fresh 22-subsystem audit. The 14.09 one is measurably stale —
+three times on 17.09 an agent found it wrong about current code (the till was
+rated HIGH for having no protection it has had since 07.09, the checkout already
+had half the idempotency, the 7-day unpaid cancel was already built).
 
-## Two tests to watch
+## Corrections worth carrying forward
 
-`admin-assistant.spec.ts:303` (the microphone language button) and
-`admin-sections.spec.ts:109` (publishing a review with an undo) failed once on the CI
-run for a commit that changed only `vercel.json`. They pass now, but the code around
-both changed in the same push, so it is unknown whether they were flakes or were
-fixed. Do not write them off as flakes.
+- **The reason question 19 chose a growing delay over a shared counter was
+  wrong.** Dim was told a database counter meant a write per login attempt. It
+  does not: `writeAuditSafe(…, "admin.login.failed")` already writes every
+  failure to Postgres on the existing path, so a durable ladder that survives a
+  cold start costs one SELECT and zero extra writes. The delay as built is still
+  per-instance, which is the weakness it was meant to fix. Offered to Dim; he has
+  not answered.
+- **The conversion figure is now reported by the browser**, not read from the
+  orders table, so someone loading a receipt URL could add to it. Consent-gated
+  and rate-limited, and it is a vanity KPI rather than an accounting figure — but
+  it is no longer tied to real orders.
+- **The robot-proof unsubscribe does not close the whole class.** A scanner that
+  opens links in a real headless browser (Defender for Office 365 does) would run
+  the script and complete the unsubscribe. Closing that needs a click, which Dim
+  rejected.
+- **71 admin screenshots survive** in the session scratchpad under `handoff/shots`
+  from 04.09. Irrelevant now that the hand-off is cancelled.
 
-## Two corrections Claude had to make to itself
+## Still open, nobody blocked on them
 
-- The inference that the database sat beside the functions came from timing
-  `/api/testplan/`, which for an anonymous request returns a constant from a file and
-  never queries the database. Measure only routes that actually query.
-- Nova Post does have parcel lockers — 979 across Estonia, Latvia and Lithuania. The
-  earlier claim came from the contract-price endpoint refusing a parcel-machine
-  request, which is about the method Montonio sells the carrier under, not the
-  hardware. Of 10,432 points, **1,295 are not machines**: EE 249/3, LV 271/129,
-  LT 459/110, FI DPD 1519/1053.
+Thirty-odd deferred findings from rounds 19 and 21 that nobody has picked up; the
+three content routes in `r22-idem-rest` do nothing until `app.js` mints keys for
+them; AI-placed blog cards write empty anchors with no words or link, invisible
+to a crawler; a custom product in a prerendered article shows its name with no
+price, because the build's catalogue holds no owner-created products.
