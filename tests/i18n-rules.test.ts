@@ -78,3 +78,94 @@ describe("UI — the ET and EN dictionaries", () => {
     expect({ onlyEt, onlyEn }).toEqual({ onlyEt: [], onlyEn: [] });
   });
 });
+
+/* trText()'s own loop, to the letter: the dictionary first, then the FIRST
+   UI_RX rule that matches — which is why a rule's position in the list is a
+   fact about behaviour and not about tidiness. */
+function tr(s: string, lang: "ET" | "EN"): string {
+  const d = UI[lang];
+  if (d[s]) return d[s];
+  for (const e of UI_RX) {
+    if (!e) continue;
+    const m = s.match(e[0]);
+    if (m) return e[1][lang].replace(/\$(\d)/g, (_, n) => d[m[+n]] || m[+n]);
+  }
+  return s;
+}
+
+/* Scoped promo codes (db/migrations/170_promo_scope.sql). Every sentence the
+   shopper and the owner read about a scope carries a brand name, a product
+   name or a sum inside it, so each is a UI_RX rule rather than a key — and two
+   of them are near-misses of rules that were already there. «Код действует от
+   … — добавьте ещё на …» has existed since the codes did and matches the
+   scoped variants too; if it came first, an English checkout would read «The
+   code applies from 40,00 € товаров Davines». */
+describe("UI_RX — the scoped-promo sentences", () => {
+  const CYR = /[А-Яа-яЁё]/;
+  /* A product name is not translated by these rules — it travels through $1
+     and is turned into ET/EN by trName(), which needs the element to sit
+     inside NAME_CTX (see the last test here). So the fixtures below use a
+     wholly Latin product name: what is being checked is the SENTENCE around
+     the name, and a Russian tail in the name would be somebody else's job
+     reported as this one's failure. */
+  const cases: Array<[string, string]> = [
+    ["Скидка только на Davines: 61,00 € из 140,00 €.", "brand, at the checkout"],
+    ["Скидка только на «OI Shampoo»: 20,00 € из 140,00 €.", "product, at the checkout"],
+    ["В корзине нет товаров Davines — код действует только на них.", "nothing matched"],
+    ["Код действует от 40,00 € товаров Davines — добавьте ещё на 12,00 €.", "floor, brand"],
+    ["Код действует от 40,00 € по этому товару — добавьте ещё на 12,00 €.", "floor, product"],
+    ["на бренд Davines", "the codes list"],
+    ["на товар «OI Shampoo»", "the codes list"],
+    ["только на бренд Davines · 61,00 € из 140,00 €", "the order card"],
+    ["только на товар «OI Shampoo» · 20,00 € из 140,00 €", "the order card"],
+    // …and the whole-basket floor the first of these must not have displaced
+    ["Код действует от 40,00 € — добавьте ещё на 12,00 €.", "floor, whole basket"],
+  ];
+
+  it("translates each of them, leaving no Russian behind", () => {
+    const left: string[] = [];
+    for (const [ru, where] of cases) {
+      for (const lang of ["ET", "EN"] as const) {
+        const out = tr(ru, lang);
+        if (out === ru) left.push(`${lang} ${where}: no rule matched «${ru}»`);
+        else if (CYR.test(out)) left.push(`${lang} ${where}: «${out}» still has Russian in it`);
+      }
+    }
+    expect(left).toEqual([]);
+  });
+
+  it("keeps the brand and the product names out of the translator's hands", () => {
+    // a name is a proper noun: it travels through $1 unchanged, in both languages
+    expect(tr("на бренд Davines", "EN")).toContain("Davines");
+    expect(tr("на бренд Davines", "ET")).toContain("Davines");
+    expect(tr("Скидка только на Davines: 61,00 € из 140,00 €.", "EN")).toContain("61,00 €");
+  });
+
+  it("puts the scoped floor ahead of the whole-basket one", () => {
+    const scoped = UI_RX.findIndex((e) => e && e[0].source.includes("Код действует от (.+) товаров"));
+    const plain = UI_RX.findIndex((e) => e && e[0].source === "^Код действует от (.+) — добавьте ещё на (.+)\\.$");
+    expect(scoped).toBeGreaterThanOrEqual(0);
+    expect(plain).toBeGreaterThanOrEqual(0);
+    expect(scoped).toBeLessThan(plain);
+  });
+
+  it("puts the product rule ahead of the brand one, so «…» is not swallowed", () => {
+    const product = UI_RX.findIndex((e) => e && e[0].source.includes("Скидка только на «"));
+    const brand = UI_RX.findIndex((e) => e && e[0].source === "^Скидка только на (.+): (.+) из (.+)\\.$");
+    expect(product).toBeGreaterThanOrEqual(0);
+    expect(brand).toBeGreaterThan(product);
+  });
+
+  /* The product name inside those sentences is translated by trName(), and
+     translateTree() only calls trName() for a node that sits inside one of
+     NAME_CTX's selectors. The three places a scoped code prints a product name
+     are the checkout's note (.cosum__scope), the codes list and the order card
+     (both .adm-row__sub) — drop either selector and an English panel starts
+     reading «on “Bio Botanical Shampoo — шампунь”». */
+  it("keeps the classes those sentences are rendered in inside NAME_CTX", () => {
+    const at = src.indexOf("var NAME_CTX =");
+    expect(at).toBeGreaterThan(0);
+    const decl = src.slice(at, src.indexOf(";", at));
+    for (const sel of [".cosum__scope", ".adm-row__sub"]) expect(decl).toContain(sel);
+  });
+});

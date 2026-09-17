@@ -47,8 +47,12 @@ function literal<T>(name: string): T {
   throw new Error(`unbalanced braces around ${name} in app.js`);
 }
 
-type ClientOut = { discount: number; ship: number; sum: number; goods: number };
-type PromoInfo = { code: string; kind: string; value: number; minSubtotal: number } | null;
+type ClientOut = { discount: number; ship: number; sum: number; goods: number; base: number };
+type PromoInfo = {
+  code: string; kind: string; value: number; minSubtotal: number;
+  /** 170_promo_scope: 'order' | 'brand' | 'product', and what it names. */
+  scope?: string; scopeValue?: string | null;
+} | null;
 
 /**
  * Run the storefront's own discount() / promoLive() / shipPriceFor() over a
@@ -65,6 +69,8 @@ function client(
   countryIso = "",
   /** How much of `cartSum` is a gift card's face value — see promoGoods(). */
   giftFace = 0,
+  /** 170_promo_scope: the brand on the one product line, when a code names one. */
+  brand = "",
 ): ClientOut {
   /* threshold() and orderCountry() are sliced out of app.js too rather than
      restated here. Both learned about the real country on 07.09.2026 — the
@@ -75,21 +81,35 @@ function client(
      line), and a stub here would hide exactly that. It walks the basket, so
      the basket is what the harness builds — one product line and, when a
      card is in play, one gift line. */
+  /* promoBase()/promoLines()/promoLineIn() are sliced too, since 170: a code
+     narrowed to one brand or one product is priced on the lines it matches,
+     and those four functions ARE that arithmetic on the browser's side. A stub
+     would hide the one drift that matters — a subset the screen and the server
+     disagree about. byIdOrNull() is the only genuine stub: the harness's
+     basket is one product line, and this is its brand. */
   const body = `
     ${slice("discount")}
     ${slice("promoGoods")}
+    ${slice("promoLines")}
+    ${slice("promoBrandKey")}
+    ${slice("promoLineIn")}
+    ${slice("promoBase")}
     ${slice("promoLive")}
     ${slice("shipPriceFor")}
     ${slice("shipRulePrice")}
     ${slice("threshold")}
     ${slice("orderCountry")}
+    function byIdOrNull(id) { return { id: id, brand: BRAND, name: id }; }
     function lineUnit(l) { return l.type === "gift" ? GIFT_FACE : CART_SUM - GIFT_FACE; }
     function cartSum() { return CART_SUM; }
     function freeShip() { return cartSum() >= threshold(); }
     function shipMethod() { return METHOD; }
     function shipCarrier() { return S.ship.carrier; }
     function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
-    return { discount: discount(), ship: shipCost(), sum: cartSum(), goods: promoGoods() };
+    return {
+      discount: discount(), ship: shipCost(), sum: cartSum(),
+      goods: promoGoods(), base: promoBase(S.promoInfo)
+    };
   `;
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
@@ -97,15 +117,24 @@ function client(
      what shipRulePrice() falls back to when a carrier or a courier has no cell
      of its own, the same step quoteFromRules() takes on the server. Read out
      of app.js rather than restated, so the two cannot drift. */
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", "GIFT_FACE", body) as (
-    s: unknown, n: number, r: ShippingRules, m: string, d: unknown, g: number,
+  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", "GIFT_FACE", "BRAND", body) as (
+    s: unknown, n: number, r: ShippingRules, m: string, d: unknown, g: number, b: string,
   ) => ClientOut;
   const cart: Array<Record<string, unknown>> = [{ id: "p", qty: 1 }];
   if (giftFace > 0) cart.push({ type: "gift", id: "gift:50", qty: 1 });
   return run(
     { promoInfo, country, countryIso, ship: { carrier }, cart },
-    cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"), giftFace,
+    cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"), giftFace, brand,
   );
+}
+
+/** The same basket the client harness builds, as src/lib/promos.ts reads it. */
+function serverLines(cartSum: number, giftFace: number, brand: string) {
+  const lines: Array<Record<string, unknown>> = [
+    { id: "p", kind: "product", brand, sum: cartSum - giftFace },
+  ];
+  if (giftFace > 0) lines.push({ id: "gift:50", kind: "gift", brand, sum: giftFace });
+  return lines;
 }
 
 const RULES: ShippingRules = {
@@ -180,7 +209,7 @@ describe("the checkout total on screen equals the one the server bills", () => {
       const c = client(info, sum, RULES);
 
       const serverShip = quoteFromRules(RULES, { country: "EE", method: "parcel", subtotal: sum }).price;
-      const quote = p ? quoteFromPromo(p, sum, serverShip) : null;
+      const quote = p ? quoteFromPromo(p, sum, serverShip, new Date(), serverLines(sum, 0, "")) : null;
       const serverDiscount = quote?.ok ? quote.discount : 0;
 
       expect(c.ship).toBe(serverShip);
@@ -223,6 +252,55 @@ describe("the checkout total on screen equals the one the server bills", () => {
       const c = client(withFloor, 140, RULES, "EE", "parcel", "", "", 100);
       expect(c.discount).toBe(0);
       expect(quoteFromPromo(floor, 40, 0).ok).toBe(false);
+    });
+  });
+
+  /* A code narrowed to one brand or one product (db/migrations/170_promo_scope).
+     The subset is arithmetic the browser has to do too — it is what the
+     summary shows while the shopper is still editing the basket — so this is
+     the one place the two halves of that arithmetic are compared directly.
+     The harness's basket is one product line, so «matches» and «does not» are
+     the whole of the space, and the third case is the one that would hurt: a
+     Davines code on a basket with no Davines in it must take nothing, not
+     everything. */
+  describe("a code narrowed to a brand or a product", () => {
+    const cases: Array<[string, Partial<Promo>, string, number]> = [
+      ["ten per cent off the brand in the basket", { value: 10, scope: "brand", scopeValue: "Davines" }, "Davines", 140],
+      ["…and nothing when the basket is another brand", { value: 10, scope: "brand", scopeValue: "Davines" }, "Proraso", 140],
+      ["a fixed code capped at the matching line", { kind: "fixed", value: 200, scope: "brand", scopeValue: "Davines" }, "Davines", 12],
+      ["a product code that names the line", { value: 25, scope: "product", scopeValue: "p" }, "Davines", 80],
+      ["…and one that names something else", { value: 25, scope: "product", scopeValue: "other" }, "Davines", 80],
+      ["a floor measured on the subset, cleared", { value: 10, minSubtotal: 60, scope: "brand", scopeValue: "Davines" }, "Davines", 80],
+      ["a floor measured on the subset, missed", { value: 10, minSubtotal: 60, scope: "brand", scopeValue: "Davines" }, "Davines", 40],
+    ];
+
+    for (const [label, over, brand, sum] of cases) {
+      it(label, () => {
+        const p = promo(over);
+        const info: PromoInfo = {
+          code: p.code, kind: p.kind, value: p.value, minSubtotal: p.minSubtotal,
+          scope: p.scope, scopeValue: p.scopeValue ?? null,
+        };
+        const c = client(info, sum, RULES, "EE", "parcel", "", "", 0, brand);
+        const serverShip = quoteFromRules(RULES, { country: "EE", method: "parcel", subtotal: sum }).price;
+        const quote = quoteFromPromo(p, sum, serverShip, new Date(), serverLines(sum, 0, brand));
+        expect(c.base).toBe(quote.ok || quote.error === "min_subtotal" ? quote.base : 0);
+        expect(c.discount).toBe(quote.ok ? quote.discount : 0);
+      });
+    }
+
+    it("never reaches a gift card, whichever way the code is pointed", () => {
+      // a product code naming the card's own line — the one shape the scope
+      // made possible, and the audit of 14.09.2026 closed for the other two
+      const atCard = promo({ value: 10, scope: "product", scopeValue: "gift:50" });
+      const info: PromoInfo = {
+        code: atCard.code, kind: atCard.kind, value: atCard.value, minSubtotal: 0,
+        scope: "product", scopeValue: "gift:50",
+      };
+      const c = client(info, 140, RULES, "EE", "parcel", "", "", 100, "Davines");
+      expect(c.discount).toBe(0);
+      const quote = quoteFromPromo(atCard, 40, 3.49, new Date(), serverLines(140, 100, "Davines"));
+      expect(quote).toMatchObject({ ok: false, error: "no_match" });
     });
   });
 

@@ -12,7 +12,7 @@
  * file exists (the import is resolved at run time and a miss is swallowed):
  *   src/lib/shipping.ts   computeShipping({country, method, subtotal})
  *   src/lib/giftcards.ts  applyGiftCard(code, total)
- *   src/lib/promos.ts     quotePromo(code, subtotal, shipping)
+ *   src/lib/promos.ts     quotePromo(code, subtotal, shipping, lines)
  *   src/lib/mail-hooks.ts onOrderCreated(order)
  *   src/data/bundles.json bundle definitions for items with id "bundle:<id>"
  * Without them the order still goes through: a flat shipping table, no
@@ -126,6 +126,14 @@ export type Order = {
   shippingPrice: number;
   discount: number;
   discountCode: string | null;
+  /**
+   * What a SCOPED promo code took its discount off — db/migrations/170_promo_scope.sql:
+   * `{ kind: 'brand' | 'product', value, base, lines[] }`. Null for a
+   * whole-basket code, for a gift card, for a POS percent, and on every order
+   * placed before the column existed — all of which mean «весь заказ», which
+   * is how the admin card reads a missing value.
+   */
+  discountScope?: Record<string, unknown> | null;
   /** inventory: 'web' | 'pos' — where the order was made. db/migrations/091_pos_channel.sql. */
   channel: "web" | "pos";
   /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
@@ -460,14 +468,33 @@ async function shippingPrice(
  * on a 100 € card is ten euro of straight cash loss, repeatable for as long as
  * the promo lives (audit 14.09.2026). A GIFT CARD paying for another gift card
  * is a different matter and is left alone: that money was already taken once.
+ *
+ * `lines` is the priced basket, handed over so a SCOPED code (one brand, one
+ * product — db/migrations/170_promo_scope.sql) can be priced on the lines it
+ * actually matches. src/lib/promos.ts refuses such a code outright when the
+ * lines are missing, so the gift-card rule above cannot be walked around by a
+ * product code that names a «gift:100» line either: promoLineMatches() throws
+ * every gift line out first, whatever the scope says.
+ *
+ * Answers what it took off AND what it took it off, because the order records
+ * both (orders.discount_scope) and the admin card reads them back.
  */
+interface CodeDiscount {
+  discount: number;
+  /** {kind, value, base, lines} for a scoped code, null for everything else. */
+  scope: Record<string, unknown> | null;
+}
+
+const NO_DISCOUNT: CodeDiscount = { discount: 0, scope: null };
+
 async function codeDiscount(
   code: string | null | undefined,
   subtotal: number,
   shipping: number,
   goods: number = subtotal,
-): Promise<number> {
-  if (!code) return 0;
+  lines: OrderItem[] = [],
+): Promise<CodeDiscount> {
+  if (!code) return NO_DISCOUNT;
   const promos = await optionalLib("promos");
   const isGift = fn(promos, "looksLikeGiftCode");
   const quote = fn(promos, "quotePromo");
@@ -477,20 +504,35 @@ async function codeDiscount(
      know. The degradation is «no discount», never «the wrong discount». */
   if (isGift && quote && !isGift(code)) {
     try {
-      const out = (await quote(code, goods, shipping)) as {
+      const out = (await quote(code, goods, shipping, lines)) as {
         ok?: boolean;
         discount?: unknown;
+        scope?: unknown;
+        scopeValue?: unknown;
+        base?: unknown;
+        lines?: unknown;
       } | null;
-      if (!out?.ok) return 0;
+      if (!out?.ok) return NO_DISCOUNT;
       const discount = num(out.discount, 0);
-      if (!Number.isFinite(discount) || discount <= 0) return 0;
-      return money(Math.min(discount, goods + shipping));
+      if (!Number.isFinite(discount) || discount <= 0) return NO_DISCOUNT;
+      const kind = out.scope === "brand" || out.scope === "product" ? out.scope : null;
+      return {
+        discount: money(Math.min(discount, goods + shipping)),
+        scope: kind
+          ? {
+              kind,
+              value: String(out.scopeValue ?? ""),
+              base: money(num(out.base, 0)),
+              lines: Array.isArray(out.lines) ? out.lines.map(String).slice(0, 50) : [],
+            }
+          : null,
+      };
     } catch (err) {
       console.error("[orders] quotePromo failed, order priced without a discount:", err);
-      return 0;
+      return NO_DISCOUNT;
     }
   }
-  return giftDiscountFor(code, money(subtotal + shipping));
+  return { discount: await giftDiscountFor(code, money(subtotal + shipping)), scope: null };
 }
 
 /**
@@ -1174,6 +1216,7 @@ type OrderRow = {
   shipping_price: string | number;
   discount: string | number;
   discount_code: string | null;
+  discount_scope?: unknown;
   channel: string;
   customer_id: string | null;
   pricing_tier: string | null;
@@ -1215,6 +1258,7 @@ export function mapOrder(r: OrderRow): Order {
     shippingPrice: money(num(r.shipping_price)),
     discount: money(num(r.discount)),
     discountCode: r.discount_code ?? null,
+    discountScope: jsonOf<Record<string, unknown> | null>(r.discount_scope, null),
     channel: r.channel === "pos" ? "pos" : "web",
     customerId: r.customer_id ?? null,
     pricingTier: r.pricing_tier === "pro" || r.pricing_tier === "retail" ? r.pricing_tier : null,
@@ -1451,6 +1495,11 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
      column that would otherwise hold "SUVI10" holds "POS -15%". */
   let discount: number;
   let discountCodeStored: string | null;
+  /* What the code took it off, when it was narrowed to a brand or a product
+     (db/migrations/170_promo_scope.sql). Written once, here, and never
+     recomputed: a brand code edited next week must not rewrite what an order
+     from today was actually charged. */
+  let discountScope: Record<string, unknown> | null = null;
   if (channel === "pos") {
     const pct = Math.round(num(input.posDiscountPercent, 0));
     discount = pct > 0 && pct <= 90 ? money(subtotal * (pct / 100)) : 0;
@@ -1460,7 +1509,9 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
        See codeDiscount() — the face value of a card is money the shop owes
        back in full, never a price to take a percent off. */
     const goodsSubtotal = money(lines.reduce((s, l) => s + (l.kind === "gift" ? 0 : l.sum), 0));
-    discount = await codeDiscount(input.discountCode, subtotal, shipPrice, goodsSubtotal);
+    const off = await codeDiscount(input.discountCode, subtotal, shipPrice, goodsSubtotal, lines);
+    discount = off.discount;
+    discountScope = off.scope;
     discountCodeStored = input.discountCode ? String(input.discountCode).trim().slice(0, 60) : null;
   }
 
@@ -1493,8 +1544,8 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   if (invoiceMethod && !(total > 0)) throw new OrderError("invoice_zero_total");
 
   const rows = await query<OrderRow>(
-    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company, pos_ref)
-     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17::jsonb, $18)
+    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, discount_scope, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company, pos_ref)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17, $18::jsonb, $19)
      returning *`,
     [
       lang,
@@ -1507,6 +1558,7 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
       shipPrice,
       discount,
       discountCodeStored,
+      discountScope ? jsonbParam(discountScope) : null,
       channel,
       ctx.customerId ?? null,
       ctx.customerId ? pricingTier : null,
