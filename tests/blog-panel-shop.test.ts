@@ -403,12 +403,19 @@ function moderate(answer: Answer): Promise<Moderation> {
   let reloads = 0;
   const apiSend = () => (answer === "throw" ? Promise.reject(new Error("no-api")) : Promise.resolve(answer));
   const branch = sliceBranch('else if (a.type === "moderate_review")').replace(/^else\s+/, "");
-  const run = new Function("a", "apiSend", "toast", "loadAdminReviews", branch);
+  // loadOverview: a moderation that went through also refreshes «Сделать
+  // сегодня»; revQueue: one review's calls run one at a time — both halves
+  // are tests/blog-reviews-r21.test.ts's
+  const run = new Function(
+    "a", "apiSend", "toast", "loadAdminReviews", "loadOverview",
+    `${sliceVar("REVQ")} ${slice("revQueue")} ${branch}`,
+  );
   run(
     { type: "moderate_review", id: "r1", value: "approved" },
     apiSend,
     (m: string) => toasts.push(m),
     () => { reloads++; },
+    () => {},
   );
   return flush().then(() => ({ toasts, reloads }));
 }

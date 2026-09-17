@@ -28,9 +28,11 @@
  * shell carrying `noindex, nofollow`, like a hidden product does.
  */
 import catalogueMin from "@/data/catalogue.min.json";
+import variantData from "@/data/catalogue.variants.json";
 import { getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
-import { customMinByIds } from "@/lib/custom-products";
+import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
+import { getOverrides } from "@/lib/orders";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
@@ -55,6 +57,8 @@ import {
 type Lang = { code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
 const CATALOGUE = new Map((catalogueMin as Min[]).map((p) => [p.id, p]));
+type Variants = Record<string, { sizes: string[]; prices: number[] } | undefined>;
+const VARIANTS = variantData as Variants;
 
 /** A product under the article: brand, name and price — the links are what a crawler is here for. */
 export type ShelfProduct = { id: string; brand: string; name: string; price: number; priceFrom: boolean };
@@ -257,26 +261,72 @@ function html(body: string, status: number, cacheControl: string): Response {
   return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
 }
 
-/** The products under an article: catalogue rows by id, the owner's own rows through their table. Best effort. */
+/** The lowest price of a ladder, and whether the ladder holds more than one. */
+function cheapest(prices: Array<number | null | undefined>, fallback: number): { price: number; from: boolean } {
+  const list = prices.map((p) => Number(p)).filter((p) => Number.isFinite(p) && p > 0);
+  if (!list.length) return { price: fallback, from: false };
+  return { price: Math.min(...list), from: new Set(list).size > 1 };
+}
+
+/**
+ * The products under an article: catalogue rows by id, the owner's own rows
+ * through their table, and — for both — the owner's own price.
+ *
+ * Until 17.09.2026 a catalogue product here was read out of catalogue.min and
+ * nothing else, which got three things wrong on a page nobody with JS ever
+ * sees (a crawler, a link scraper, a reader with scripts off):
+ *
+ *   · «9 €» for the 57 of 220 products sold from several sizes, where the
+ *     shop itself says «от 9 €» — the file carries the cheapest rung only;
+ *   · the price the last deploy was built with, for a product repriced in
+ *     the panel since (product_overrides.price, and the `sizes` ladder);
+ *   · a product switched off with «Показывать в магазине»
+ *     (product_overrides.hidden) still listed, and still linked to a /p/
+ *     address that answers 404 noindex.
+ *
+ * Best effort on the database, exactly as the letter's cards are
+ * (newsletterCards in src/lib/newsletters.ts, the same shape of work): a
+ * hiccup costs the owner's price, never the article.
+ */
 async function shelfProducts(ids: string[]): Promise<ShelfProduct[]> {
-  const out: ShelfProduct[] = [];
-  const customIds: string[] = [];
-  for (const id of ids.slice(0, 8)) {
-    const p = CATALOGUE.get(id);
-    if (p) out.push({ id: p.id, brand: p.b, name: p.n, price: p.p, priceFrom: false });
-    else if (id.startsWith("c-")) customIds.push(id);
+  const want = ids.slice(0, 8);
+  const catIds = want.filter((id) => CATALOGUE.has(id));
+  const customIds = want.filter((id) => !CATALOGUE.has(id) && id.startsWith("c-"));
+
+  let overrides: Awaited<ReturnType<typeof getOverrides>> = {};
+  if (catIds.length) {
+    try {
+      overrides = await getOverrides(catIds);
+    } catch (err) {
+      console.error("[blog-page] overrides unavailable, catalogue prices used:", err);
+    }
   }
+  let custom = new Map<string, MinWithVariants>();
   if (customIds.length) {
     try {
-      const rows = await customMinByIds(customIds);
-      for (const id of customIds) {
-        const r = rows.get(id);
-        if (!r || r.min.s === "out") continue;
-        out.push({ id, brand: r.min.b, name: r.min.n, price: r.min.p, priceFrom: !!r.variants && new Set(r.variants.prices).size > 1 });
-      }
+      custom = await customMinByIds(customIds);
     } catch (err) {
       console.error("[blog-page] custom products unavailable:", err);
     }
+  }
+
+  const out: ShelfProduct[] = [];
+  for (const id of want) {
+    const c = custom.get(id);
+    if (c) {
+      if (c.min.s === "out") continue;
+      const { price, from } = cheapest(c.variants?.prices ?? [c.min.p], c.min.p);
+      out.push({ id, brand: c.min.b, name: c.min.n, price, priceFrom: from });
+      continue;
+    }
+    const m = CATALOGUE.get(id);
+    if (!m) continue;
+    const o = overrides[id];
+    if (o?.hidden) continue;
+    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : (VARIANTS[id]?.prices ?? []);
+    const base = o?.price ?? m.p;
+    const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
+    out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });
   }
   return out;
 }
