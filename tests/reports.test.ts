@@ -126,8 +126,29 @@ describe("ordersToCsv", () => {
     const csv = ordersToCsv([row({ customerName: 'Tamm; "VIP"' })]);
     expect(csv).toContain('"Tamm; ""VIP"""');
   });
-  it("formats money to two decimals", () => {
+  /* The decimal separator has to agree with the delimiter. The `;` and the BOM
+     are picked for Excel on the Estonian or Russian Windows this shop is run
+     from, and in BOTH of those locales the decimal separator is a comma — so
+     `19.90` in a money column is not a number there: Excel reads a value like
+     `31.05` as 31 May and leaves the rest as text that will not add up. The
+     export the accountant files was written with dots all along (audit). */
+  it("formats money to two decimals, with the comma those locales expect", () => {
     const csv = ordersToCsv([row({ total: 19.9 })]);
+    expect(csv).toContain("19,90");
+    expect(csv).not.toContain("19.90");
+  });
+  it("does not quote a money cell — the comma is not the delimiter here", () => {
+    const csv = ordersToCsv([row({ total: 1234.5 })]);
+    expect(csv).toContain(";1234,50;");
+    expect(csv).not.toContain('"1234,50"');
+  });
+  it("keeps every row at the header's width once the decimals carry commas", () => {
+    const csv = ordersToCsv([row({ total: 19.9, subtotal: 15.5, vatAmount: 3.77 })]);
+    const [header, data] = csv.replace("﻿", "").split("\r\n");
+    expect(data.split(";")).toHaveLength(header.split(";").length);
+  });
+  it("leaves the dot alone for a caller that asked for the comma delimiter", () => {
+    const csv = ordersToCsv([row({ total: 19.9 })], ",");
     expect(csv).toContain("19.90");
   });
   it("one data row per order, in the header's column order", () => {

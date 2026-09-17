@@ -403,8 +403,25 @@ function defuseFormula(s: string): string {
   return s;
 }
 
+/**
+ * `31,05`, not `31.05`, in the `;` file.
+ *
+ * The delimiter and the BOM below are chosen for one spreadsheet: Excel on the
+ * Estonian or Russian Windows this shop's owner and his accountant use. In both
+ * of those locales the DECIMAL separator is a comma — so `31.05` in a money
+ * column is not a number there at all: Excel reads it as 31 May and shows a
+ * date, and `1234.50` it leaves as text that will not add up (audit). A file
+ * whose separators disagree with each other is a file nobody can sum.
+ * A caller that asks for the `,` delimiter is asking for the other convention,
+ * and keeps the dot.
+ */
+function csvNumber(v: number, delimiter: string): string {
+  const s = v.toFixed(2);
+  return delimiter === ";" ? s.replace(".", ",") : s;
+}
+
 function csvCell(v: string | number, delimiter: string): string {
-  const s = typeof v === "number" ? v.toFixed(2) : defuseFormula(String(v ?? ""));
+  const s = typeof v === "number" ? csvNumber(v, delimiter) : defuseFormula(String(v ?? ""));
   if (s.includes(delimiter) || s.includes('"') || s.includes("\n") || s.includes("\r")) {
     return `"${s.replace(/"/g, '""')}"`;
   }

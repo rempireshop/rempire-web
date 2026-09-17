@@ -350,7 +350,9 @@ function sendSkip(res: { ok: boolean; skipped?: boolean; error?: string }): Skip
   return "send_failed";
 }
 
-const ABANDONED_AFTER_MS = 3 * 60 * 60 * 1000;
+/** Exported so «Брошенные корзины» on «Аналитика» can count the same carts this
+    letter writes to — src/lib/analytics.ts holds a copy and a test ties them. */
+export const ABANDONED_AFTER_MS = 3 * 60 * 60 * 1000;
 const BATCH = 100;
 
 /**

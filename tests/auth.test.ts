@@ -154,6 +154,40 @@ describe("admin session", () => {
     resetRateLimits();
   });
 
+  /* A SESSION_SECRET of ten characters is not a secret this shop can sign with
+     — secret() in src/lib/auth.ts wants sixteen — but /api/admin/login/ used to
+     test the env var for mere PRESENCE. The password was verified, then
+     adminCookie() → makeSessionToken() threw: a bare 500 with no `error` in the
+     body, which admLogin() in app.js reads as «Сервер не отвечает», while
+     /api/admin/me/ went on answering `configured: true`. Nothing anywhere
+     pointed at the secret (audit). Both must ask the one question. */
+  it("calls a SESSION_SECRET under 16 characters not_configured, in both routes", async () => {
+    resetRateLimits();
+    const { POST: login } = await import("@/app/api/admin/login/route");
+    const { GET: me } = await import("@/app/api/admin/me/route");
+    const kept = process.env.SESSION_SECRET;
+    process.env.SESSION_SECRET = "short-one"; // nine characters: present, unusable
+    try {
+      const r = await login(
+        new Request("https://rempireshop.com/api/admin/login/", {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-forwarded-for": "198.51.100.44" },
+          body: JSON.stringify({ password: PASSWORD }),
+        }),
+      );
+      expect(r.status).toBe(500);
+      expect(await r.json()).toEqual({ ok: false, error: "not_configured" });
+      expect(r.headers.get("set-cookie")).toBeNull();
+
+      const probe = await me(req());
+      expect(probe.status).toBe(401);
+      expect((await probe.json()).configured).toBe(false);
+    } finally {
+      process.env.SESSION_SECRET = kept;
+      resetRateLimits();
+    }
+  });
+
   it("keeps the cookie unsecured only on plain-http localhost", async () => {
     const { POST: login } = await import("@/app/api/admin/login/route");
     resetRateLimits();

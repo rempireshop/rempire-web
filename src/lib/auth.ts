@@ -30,6 +30,22 @@ function secret(): string | null {
   return s && s.length >= 16 ? s : null;
 }
 
+/**
+ * True when SESSION_SECRET is long enough to sign a session with.
+ *
+ * The only rule about the secret lives in secret() above — sixteen characters
+ * — and everything that asks "can this deployment sign anybody in?" has to ask
+ * the SAME question. /api/admin/login/ used to test `process.env.SESSION_SECRET`
+ * for mere presence: a ten-character secret walked through that gate, the
+ * password was verified, and then makeSessionToken() threw — a bare 500 with no
+ * `error` in it, which the login card reads as «Сервер не отвечает» while
+ * /api/admin/me/ went on answering `configured: true`. Nothing on screen
+ * pointed at the secret (audit). One predicate, one answer.
+ */
+export function sessionSecretOk(): boolean {
+  return secret() !== null;
+}
+
 function sign(payload: string, key: string): string {
   return createHmac("sha256", key).update(payload).digest("base64url");
 }
