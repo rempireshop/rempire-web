@@ -144,6 +144,10 @@ async function payNow(answers: PostOut[], apiOk: boolean | null = null): Promise
     function apiSeen(ok) { API.ok = ok; }
     function clearOrderState() { S.cart = []; pendingOrder = null; }
     function finishDemo() { out.demo++; clearOrderState(); S.paying = false; }
+    /* «сделать один раз»: the real minter, so a lost answer keeps its key. */
+    var orderIdem = { sig: "", key: "" };
+    ${slice("idemNewKey")}
+    ${slice("orderIdemKey")}
     ${slice("payNow")}
     payNow();
     return Promise.resolve().then(function () {}).then(function () {}).then(function () {}).then(function () {
@@ -336,6 +340,7 @@ describe("a stock write that never answered releases the button", () => {
       var SCAN = { lastCode: "123" };
       var SCANEL = null;
       function stockMoveSend() { return Promise.reject(new Error("no-api")); }
+      function stockMoveFailText(f) { return f; }
       function scanRenderPanel() {}
       function toast(m) { out.toasts.push(m); }
       function scanLookup() {}
@@ -365,6 +370,7 @@ describe("a stock write that never answered releases the button", () => {
       function stockFindRow() { return { productId: "p", variant: "", ean: "", lowThreshold: null, tracked: true, qty: 3 }; }
       function stockLevelSaveDetailed() { return Promise.resolve({ ok: true }); }
       function stockMoveSend() { return Promise.reject(new Error("no-api")); }
+      function stockMoveFailText(f) { return f; }
       function stockSaveErrText() { return ""; }
       function toast(m) { out.toasts.push(m); }
       function render() { out.renders++; }

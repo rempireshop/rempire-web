@@ -546,4 +546,115 @@ describe("the basket id the register mints", () => {
     const [a] = refs(basket());
     expect(cleanPosRef(a)).toBe(a);
   });
+
+  /* …and the register sends that very id BOTH ways: in the body as `ref`, and
+     in the `Idempotency-Key` header. The two guards do different work — `ref`
+     keeps the basket to one order row, the key stops the route being walked a
+     second time at all — and giving them one id is what keeps them from
+     drifting apart. The route half is tests/idempotency-routes.test.ts. */
+  interface Sent {
+    body: Record<string, unknown>;
+    key: string;
+  }
+
+  /** The real posSend(), tapped as many times as there are `answers`. */
+  async function till(
+    answers: Array<{ status: number; body: Record<string, unknown> }>,
+    taps = answers.length,
+    langs: string[] = [],
+  ) {
+    const body = `
+      var window = {};
+      var out = { sent: [], errs: [], done: null, cart: 0 };
+      var POS_SALE = { key: "", ref: "" };
+      var S = { posBusy: false, posErr: "", posCart: [{ id: "night-rider", variant: "", qty: 1 }],
+                posEmail: "", posPhone: "", posDiscount: "", posPayment: "cash", posDone: null, lang: "RU" };
+      var SRV = { admin: true };
+      var nth = 0;
+      function apiSend(url, method, b, idemKey) {
+        out.sent.push({ body: b, key: idemKey || "" });
+        var next = ANSWERS[nth++] || { status: 500, body: {} };
+        return Promise.resolve(next);
+      }
+      function render() {}
+      function journalNote() {}
+      function admPosJournalLine() { return ""; }
+      function admOrdersChanged() {}
+      function posSendErr(code) { return "касса: " + code; }
+      // the cashier switching the panel between two taps — LANGS[n] is what the
+      // register is set to when tap n is made
+      function switchLang(n) { if (LANGS[n]) S.lang = LANGS[n]; }
+      ${slice("posNewRef")}
+      ${slice("posSaleRef")}
+      ${slice("posSend")}
+      var chain = Promise.resolve();
+      for (var i = 0; i < TAPS; i++) {
+        chain = chain.then(function () { switchLang(out.sent.length); S.posBusy = false; posSend(); })
+          .then(function () {}).then(function () {}).then(function () {
+            if (S.posErr) out.errs.push(S.posErr);
+          });
+      }
+      return chain.then(function () {
+        out.done = S.posDone; out.cart = S.posCart.length;
+        return out;
+      });
+    `;
+    const fn = new Function("ANSWERS", "TAPS", "LANGS", body) as (
+      a: unknown[],
+      t: number,
+      l: string[],
+    ) => Promise<{ sent: Sent[]; errs: string[]; done: unknown; cart: number }>;
+    return fn(answers, taps, langs);
+  }
+
+  const SALE_OK = { status: 201, body: { ok: true, orderId: "o1", number: "R-100001", total: 10, mailed: false } };
+  const SALE_OK_2 = { status: 201, body: { ok: true, orderId: "o2", number: "R-100002", total: 10, mailed: false } };
+  const BUSY = { status: 409, body: { ok: false, error: "in_progress" } };
+
+  it("sends the basket id as the request's key as well", async () => {
+    const out = await till([SALE_OK]);
+    expect(out.sent).toHaveLength(1);
+    expect(out.sent[0].key).toBe(out.sent[0].body.ref);
+    expect(String(out.sent[0].key)).not.toBe("");
+  });
+
+  /* 409 in_progress is the cashier's own previous tap still ringing this very
+     basket up. Nothing is emptied, the id is kept, and the register says so in
+     words that are not a refusal — there is a customer standing there. */
+  it("an in-progress answer keeps the basket and its id, and does not read as a failure", async () => {
+    const out = await till([BUSY, SALE_OK], 2);
+
+    expect(out.errs[0]).toBe("Продажа уже проводится — подождите пару секунд.");
+    expect(out.sent).toHaveLength(2);
+    // the same id both times, so the second tap is answered with the first sale
+    expect(out.sent[1].key).toBe(out.sent[0].key);
+    expect(out.done).not.toBeNull();
+  });
+
+  /* The language is frozen with the basket id. posSaleRef() reads the basket
+     and not the panel, so a cashier who switches the register to English
+     between a lost answer and the retry would otherwise send the same key
+     over a different body — which the shop refuses as a key that changed its
+     mind (`fingerprint`) instead of replaying the sale that already happened. */
+  it("a language switch between the taps does not change the body under the key", async () => {
+    const out = await till([BUSY, SALE_OK], 2, ["RU", "EN"]);
+
+    expect(out.sent).toHaveLength(2);
+    expect(out.sent[1].key).toBe(out.sent[0].key);
+    expect(out.sent[1].body.lang).toBe(out.sent[0].body.lang);
+    expect(out.sent[0].body.lang).toBe("RU");
+  });
+
+  /* …and the next customer buying exactly the same bottle is a new sale with
+     a new id, because the basket was emptied when the first one landed. */
+  it("the sale after a completed one gets an id of its own", async () => {
+    const out = await till([SALE_OK, SALE_OK_2], 1);
+    const first = out.sent[0].key;
+
+    const next = await till([SALE_OK_2]);
+    expect(next.sent[0].key).not.toBe("");
+    expect(first).not.toBe("");
+    // two registers, two baskets, two ids — never a hash of the basket
+    expect(next.sent[0].key).not.toBe(first);
+  });
 });

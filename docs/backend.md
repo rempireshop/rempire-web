@@ -280,6 +280,21 @@ differs. A route therefore never dedupes on content; `fingerprintOf(body)` is
 passed as a *guard* (the same key must still carry the same body), never as
 the thing keys are looked up by.
 
+Wired on three routes, and on the three screens that call them
+(`public/shop2/app.js`):
+
+| Route | The client, and what it mints the key from |
+| --- | --- |
+| `POST /api/orders/` | `payNow()` — minted when the shopper commits to this order, from the order body (`orderIdemKey(sig)`). The other half of the same guard is `pendingOrder`, which covers the case where the order WAS made and the payment then failed; the key covers the one it cannot see, where the answer never came back at all. |
+| `POST /api/admin/pos-orders/` | `posSend()` — the basket id `posSaleRef()` already mints, sent both as the body's `ref` and as the key, so the two guards cannot drift apart. `pos_ref` (`093_pos_sale_ref.sql`) keeps the basket to one order row; the key stops the route being walked a second time at all. |
+| `POST /api/admin/inventory/moves/` | `stockMoveSend()` — one key per movement, from the body. The scanner's ±, the «Склад» row and its undo, the first count, and the assistant's confirmed `stock_adjust`/`stock_set` all go through it. |
+
+In every case the key is kept only while the outcome is **unknown** (no answer
+came back, or a 409 `in_progress`) and dropped the moment the shop says
+anything definite — otherwise the next genuine «+1 приход» would be replayed
+instead of applied. The 409 the person sees is worded as «подождите», never as
+a failure: it means their own first tap is still working.
+
 ### Public
 
 | Route | What it does |
