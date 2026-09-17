@@ -353,11 +353,71 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     return import("@/app/api/mail/unsubscribe/route");
   }
 
-  it("a valid link takes the address off, turns the tick off, and says so without printing the address", async () => {
+  function post(url: string, body: string, ip = IP): Promise<Response> {
+    return route().then(({ POST }) =>
+      POST(req(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body }, ip)),
+    );
+  }
+
+  /** What the page does by itself the moment a browser renders it — and what
+   *  its «Отписаться» button does when no script ever ran. One press either way. */
+  const press = (url: string, ip = IP) => post(url, "from=page", ip);
+
+  /** The mail client's own button: RFC 8058, no marker, no browser. */
+  const oneClick = (url: string, ip = IP) => post(url, "List-Unsubscribe=One-Click", ip);
+
+  /* The bug this whole shape exists for: the link in a letter is a plain
+     <a href>, and a mail scanner, a Safe-Links rewriter or a preview fetcher
+     opens it without anybody touching anything. Until 17.09.2026 that GET
+     unsubscribed the customer, and on a back-in-stock letter it deleted the
+     rows they were waiting on. */
+  it("a robot's plain GET changes nothing — no opt-out, and no cancelled waiting list", async () => {
     await recordLogin(EMAIL, "RU");
     await recordMarketingConsent(EMAIL, "RU", "checkout");
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
     const { GET } = await route();
-    const res = await GET(req(unsubscribeUrl(EMAIL, "RU", "marketing")));
+
+    for (const kind of ["marketing", "backstock"] as const) {
+      const res = await GET(req(unsubscribeUrl(EMAIL, "RU", kind)));
+      expect(res.status, kind).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/html");
+      expect(res.headers.get("cache-control")).toBe("no-store");
+      expect(res.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    }
+
+    expect(await optOutRow(EMAIL)).toBeNull();
+    expect(await isOptedOut(EMAIL)).toBe(false);
+    expect((await customerRow(EMAIL))?.marketing).toBe(true);
+    // the row the old GET deleted on sight
+    expect(await query("select 1 from stock_alerts where sent_at is null")).toHaveLength(1);
+  });
+
+  it("the page presses the button itself, and shows a real one when it cannot", async () => {
+    const { GET } = await route();
+    const html = await (await GET(req(unsubscribeUrl(EMAIL, "RU", "marketing")))).text();
+
+    // the control somebody with scripting off sees: a real POST to this same URL
+    expect(html).toContain('<form id="go" method="post" action="/api/mail/unsubscribe/?u=');
+    expect(html).toContain('<input type="hidden" name="from" value="page">');
+    expect(html).toContain('<button class="btn" type="submit">Отписаться</button>');
+    // …and the script that presses it for everybody else
+    expect(html).toMatch(/fetch\(f\.action,\{method:"POST"/);
+    expect(html).toContain('body:"from=page"');
+    // the form is what the HTML says by default; only the script hides it
+    expect(html).toContain(".js #ask,.done #ask{display:none;}");
+    // …and hands it back after fifteen seconds of a fetch that never settles
+    expect(html).toContain('if(h.className==="js")h.className="fail";},15000)');
+    // self-contained: script and styles inline, nothing fetched from anywhere
+    expect(html).not.toMatch(/<link|<img|\ssrc=|@import|url\(/i);
+    // masked here too, and never printed in full
+    expect(html).toContain("s***@example.com");
+    expect(html).not.toContain(EMAIL);
+  });
+
+  it("one press takes the address off, turns the tick off, and says so without printing the address", async () => {
+    await recordLogin(EMAIL, "RU");
+    await recordMarketingConsent(EMAIL, "RU", "checkout");
+    const res = await press(unsubscribeUrl(EMAIL, "RU", "marketing"));
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("text/html");
     expect(res.headers.get("cache-control")).toBe("no-store");
@@ -367,12 +427,12 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect(html).toContain("s***@example.com");
     expect(html).not.toContain(EMAIL);
     expect(html).toContain(`href="${BASE}/shop2/"`);
-    // self-contained: nothing is loaded from anywhere
-    expect(html).not.toMatch(/<script|<link|<img|@import|url\(/i);
 
     const row = await customerRow(EMAIL);
     expect(row?.marketing).toBe(false);
     expect(row?.marketing_off_at).toBeTruthy();
+    /* Still «Отписался по ссылке в письме» on the customer card: the press was
+       the human's, only the request that carried it was the page's. */
     expect(await optOutRow(EMAIL)).toMatchObject({ email: EMAIL, kind: "marketing", source: "link" });
     expect(await isOptedOut(EMAIL)).toBe(true);
     expect(await isOptedOut(OTHER)).toBe(false);
@@ -380,7 +440,12 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
 
   it("answers in the letter's language, and for a guest with no account", async () => {
     const { GET } = await route();
-    const et = await GET(req(unsubscribeUrl(OTHER, "ET", "marketing")));
+    const ask = await (await GET(req(unsubscribeUrl(OTHER, "ET", "marketing")))).text();
+    expect(ask).toContain("Loobu kirjadest");
+    expect(ask).toContain("Loobun</button>");
+    expect(ask).toContain('lang="et"');
+
+    const et = await press(unsubscribeUrl(OTHER, "ET", "marketing"));
     expect(et.status).toBe(200);
     const html = await et.text();
     expect(html).toContain("Olete loobunud");
@@ -390,26 +455,26 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect(await getCustomer(OTHER)).toBeNull();
     expect(await optOutRow(OTHER)).toMatchObject({ kind: "marketing", source: "link" });
 
-    const en = await GET(req(unsubscribeUrl(OTHER, "EN", "marketing")));
-    expect(await en.text()).toContain("You are unsubscribed");
+    expect(await (await GET(req(unsubscribeUrl(OTHER, "EN", "marketing")))).text()).toContain("Unsubscribe</button>");
+    expect(await (await press(unsubscribeUrl(OTHER, "EN", "marketing"))).text()).toContain("You are unsubscribed");
   });
 
-  it("the one-click POST does the same in plain text, and both are idempotent", async () => {
+  it("the mail client's one-click POST still does it in plain text, and everything here is idempotent", async () => {
     await recordLogin(EMAIL, "RU");
     await recordMarketingConsent(EMAIL, "RU", "checkout");
-    const { GET, POST } = await route();
+    const { GET } = await route();
     const url = unsubscribeUrl(EMAIL, "RU", "marketing");
-    const post = () =>
-      POST(req(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "List-Unsubscribe=One-Click" }));
 
-    const first = await post();
+    const first = await oneClick(url);
     expect(first.status).toBe(200);
     expect(first.headers.get("content-type")).toContain("text/plain");
     expect(await first.text()).toBe("ok");
+    // the mail client's button is stamped apart from the page's
     expect(await optOutRow(EMAIL)).toMatchObject({ kind: "marketing", source: "one-click" });
     expect((await customerRow(EMAIL))?.marketing).toBe(false);
 
-    expect((await post()).status).toBe(200);
+    expect((await oneClick(url)).status).toBe(200);
+    expect((await press(url)).status).toBe(200);
     expect((await GET(req(url))).status).toBe(200);
     expect(await query("select 1 from mail_optouts")).toHaveLength(1);
   });
@@ -417,10 +482,11 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
   it("a wrong or missing token gets a 400 that says nothing but «ссылка не работает»", async () => {
     await recordLogin(EMAIL, "RU");
     await recordMarketingConsent(EMAIL, "RU", "checkout");
-    const { GET, POST } = await route();
+    const { GET } = await route();
     const { u } = linkOf(unsubscribeUrl(EMAIL, "RU", "marketing"));
+    const forgedUrl = `${BASE}/api/mail/unsubscribe/?u=${u}&t=${unsubscribeToken(OTHER)}`;
 
-    const forged = await GET(req(`${BASE}/api/mail/unsubscribe/?u=${u}&t=${unsubscribeToken(OTHER)}`));
+    const forged = await GET(req(forgedUrl));
     expect(forged.status).toBe(400);
     const html = await forged.text();
     expect(html).toContain("Ссылка не работает");
@@ -428,20 +494,26 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect(html).toContain("info@rempireshop.com");
     expect(html).not.toContain(EMAIL);
     expect(html).not.toContain("s***@");
+    // and no button that would post it anyway
+    expect(html).not.toContain("<form");
 
     for (const q of ["", "?u=&t=", "?u=junk&t=junk", `?u=${u}`, `?t=${unsubscribeToken(EMAIL)}`]) {
       expect((await GET(req(`${BASE}/api/mail/unsubscribe/${q}`))).status, q).toBe(400);
     }
-    const post = await POST(req(`${BASE}/api/mail/unsubscribe/?u=${u}&t=forged`, { method: "POST", body: "List-Unsubscribe=One-Click" }));
-    expect(post.status).toBe(400);
-    expect(await post.text()).toBe("bad_token");
+    // a forged link is refused on the way out too, in both shapes
+    const pressed = await press(forgedUrl);
+    expect(pressed.status).toBe(400);
+    expect(await pressed.text()).toContain("Ссылка не работает");
+    const clicked = await oneClick(`${BASE}/api/mail/unsubscribe/?u=${u}&t=forged`);
+    expect(clicked.status).toBe(400);
+    expect(await clicked.text()).toBe("bad_token");
 
     // nothing was written
     expect((await customerRow(EMAIL))?.marketing).toBe(true);
     expect(await optOutRow(EMAIL)).toBeNull();
   });
 
-  it("the back-in-stock link cancels that address's pending alerts — and only those", async () => {
+  it("the back-in-stock link cancels that address's pending alerts — and only those, and only when pressed", async () => {
     await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
     await addStockAlert({ email: EMAIL, productId: PRODUCT_2, lang: "RU" });
     await addStockAlert({ email: OTHER, productId: PRODUCT, lang: "RU" });
@@ -451,7 +523,11 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     await recordMarketingConsent(EMAIL, "RU", "account");
 
     const { GET } = await route();
-    const res = await GET(req(unsubscribeUrl(EMAIL, "RU", "backstock")));
+    // opened and not finished — a scanner's fetch, or a person who closed the tab
+    expect((await GET(req(unsubscribeUrl(EMAIL, "RU", "backstock")))).status).toBe(200);
+    expect(await query("select 1 from stock_alerts where sent_at is null")).toHaveLength(2);
+
+    const res = await press(unsubscribeUrl(EMAIL, "RU", "backstock"));
     expect(res.status).toBe(200);
 
     const left = await query<{ email: string; product_id: string; sent_at: string | null }>(
@@ -477,7 +553,12 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     await recordMarketingConsent(EMAIL, "RU", "account");
 
     const { GET } = await route();
-    const html = await (await GET(req(unsubscribeUrl(EMAIL, "RU", "marketing")))).text();
+    // the page carries the finished wording before anything is written, so the
+    // script has nothing left to compose
+    expect(await (await GET(req(unsubscribeUrl(EMAIL, "RU", "marketing")))).text())
+      .toContain("Уведомление о наличии товара вы просили сами");
+
+    const html = await (await press(unsubscribeUrl(EMAIL, "RU", "marketing"))).text();
     expect(html).toContain("Вы отписаны");
     expect(html).toContain("Уведомление о наличии товара вы просили сами");
     // the alert itself is untouched — this link was not about it
@@ -487,13 +568,15 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
   it("makes the plain promise when there is nothing left to come", async () => {
     const { GET } = await route();
     // nobody waiting at all
-    const plain = await (await GET(req(unsubscribeUrl(OTHER, "RU", "marketing")))).text();
+    const plain = await (await press(unsubscribeUrl(OTHER, "RU", "marketing"))).text();
     expect(plain).toContain("Вы отписаны");
     expect(plain).not.toContain("Уведомление о наличии");
 
-    // …and the back-in-stock link, which cancels the rows it is about
+    // …and the back-in-stock link, which cancels the rows it is about — the
+    // page says so up front, before the rows are gone
     await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
-    const gone = await (await GET(req(unsubscribeUrl(EMAIL, "RU", "backstock")))).text();
+    expect(await (await GET(req(unsubscribeUrl(EMAIL, "RU", "backstock")))).text()).not.toContain("Уведомление о наличии");
+    const gone = await (await press(unsubscribeUrl(EMAIL, "RU", "backstock"))).text();
     expect(gone).toContain("Вы отписаны");
     expect(gone).not.toContain("Уведомление о наличии");
   });
