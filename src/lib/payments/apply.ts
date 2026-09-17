@@ -39,7 +39,8 @@ export interface OrderLike {
   /** Quoted at checkout by «Использовать баллы», spent here. */
   loyaltyDiscount?: number | string | null;
   /* ---- inventory: migration 090_inventory.sql ---------------------------- */
-  /** The order's priced lines — what decrementStock() below walks. */
+  /** The order's priced lines — what decrementStock() below walks, and what
+   *  earnableSubtotal()/earnBase() below read the gift-card face values off. */
   items?: Array<{
     id: string;
     kind?: string;
@@ -396,15 +397,50 @@ async function settleLoyalty(
     }
   }
   let pointsEarned: number | undefined;
-  const subtotal = earnableSubtotal(order);
   try {
-    const out = earn ? await earn(customerId, order.id, subtotal) : null;
+    const out = earn ? await earn(customerId, order.id, earnBase(order)) : null;
     if (out?.ok && out.points) pointsEarned = out.points;
   } catch (err) {
     console.error(`[payments] earnLoyaltyPoints failed on ${order.number}`, err);
   }
 
   return { shortfall, pointsEarned };
+}
+
+/**
+ * What the points are earned on — «the paid goods subtotal», which is what
+ * LoyaltySettings.earnPct has always promised and what this passed until
+ * 14.09.2026, when it passed `order.subtotal` instead. That is the goods
+ * subtotal BEFORE discount and loyaltyDiscount come off (src/lib/orders.ts
+ * createOrder: total = subtotal + shipping − discount − loyaltyDiscount), and
+ * it prices gift-card lines at face value. Two consequences, both money:
+ *
+ *   · a basket paid for with points earned points back on the part the points
+ *     had already paid — a discount that partly refunds itself;
+ *   · a 100 € gift card earned 5 points when it was bought AND 5 more when it
+ *     paid for a basket (a card is redeemed through `discount`, see
+ *     codeDiscount() in src/lib/orders.ts), so the shop paid the bonus twice
+ *     on one hundred euro.
+ *
+ * Gift-card lines are left out of the base entirely: a card is not goods, it
+ * is money changing shape, and it earns where it is spent. `discount` is
+ * booked against the goods — with a `free_shipping` promo (src/lib/promos.ts)
+ * it really came off the delivery line, and the order row does not keep the
+ * promo's kind, so such a basket earns on a few euro less than it paid. At
+ * this shop's 5 % that is under half a point, and it errs towards not paying a
+ * bonus that was never earned.
+ *
+ * The gift-card half of that sum is earnableSubtotal() above, which the audit
+ * found from the other end («подарочные карты», the same day) and which is
+ * unit-tested on its own; this adds what the basket did not actually pay for
+ * in money. Pure arithmetic over one order row; tests/loyalty.test.ts drives
+ * the whole of it through applyPaymentResult() with a stubbed
+ * earnLoyaltyPoints, which is the only way it is reached in production.
+ */
+function earnBase(order: OrderLike): number {
+  const goods = earnableSubtotal(order);
+  const off = (toNumber(order.discount) ?? 0) + (toNumber(order.loyaltyDiscount) ?? 0);
+  return Math.max(0, Math.round((goods - Math.max(0, off)) * 100) / 100);
 }
 
 function toNumber(v: unknown): number | null {

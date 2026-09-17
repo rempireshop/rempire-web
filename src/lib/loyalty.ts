@@ -1,5 +1,8 @@
 import { query, withTx } from "@/lib/db";
 import { normalizeEmail, normalizeLangCode } from "@/lib/customers";
+/* Type only — erased at build, so this module stays importable from
+   src/lib/orders.ts (which imports it) without a runtime cycle. */
+import type { OrderStatus } from "@/lib/orders";
 
 /* The same shape src/lib/customers.ts isEmail() checks — repeated rather than
    imported so this file's only import from customers.ts stays the two
@@ -366,49 +369,72 @@ export async function redeemLoyaltyPoints(
 }
 
 /**
- * The points an order spent, back on the customer's balance — the refund's
- * half of redeemLoyaltyPoints() above.
+ * The money went back — so do the points, BOTH ways.
  *
  * Called on the move into `refunded` (src/lib/orders.ts setOrderStatus), next
  * to the stock going back on the shelf and the gift cards this order sold
- * being cancelled. Until 14.09.2026 nothing did it: a customer who took 30 €
- * off a 100 € order with points, and was then refunded, got the money back
- * and lost the points — the refund is measured in money (`orders.total` plus
- * what a gift card paid), and points are not money, so no amount of it could
- * ever have brought them back.
+ * being cancelled. Until 14.09.2026 a refund left both of an order's ledger
+ * lines standing, and the audit found the two halves of that from opposite
+ * ends on the same day:
  *
- * What goes back is what the ledger says was TAKEN, not what the order was
- * quoted: a redeem that fell short (the balance had shrunk in between —
- * apply.ts loyaltyShortfall) must not be handed back in full. An order that
- * spent none has no redeem row and nothing happens.
+ *   · the points the order SPENT stayed spent. A customer who took 30 € off a
+ *     100 € order with points and was then refunded got the money back and
+ *     lost the points — a refund is measured in money (`orders.total` plus
+ *     what a gift card paid), and points are not money, so no amount of it
+ *     could ever have carried them back.
+ *   · the points the order EARNED stayed credited — the shop went on paying a
+ *     bonus for a sale it had un-made.
  *
- * Idempotent per order, the same select-then-insert in one transaction as
- * earning and redeeming, with loyalty_ledger_refund_once_idx
- * (101_loyalty_refund_once.sql) behind it for two refund doors landing at once.
+ * What moves is what the ledger says HAPPENED, not what the order was quoted:
+ * a redeem that fell short (the balance had shrunk in between — apply.ts
+ * loyaltyShortfall) must not be handed back in full, and an order that earned
+ * nothing has nothing to take off.
+ *
+ * ONE compensating row, carrying the net of the two. Not one row per line:
+ * loyalty_ledger_refund_once_idx (101_loyalty_refund_once.sql) is unique on
+ * order_id for reason='adjust', so an order that both earned and spent has
+ * room for exactly one — and the net is what the balance has to move by
+ * either way. 'adjust' because loyalty_ledger.reason's check constraint
+ * (100_tiers_loyalty.sql) has no 'reverse', and a compensating entry is
+ * exactly what an adjustment is; it reads as «Корректировка» with the order
+ * number in the note on «Мои баллы».
+ *
+ * The balance may legitimately go negative: the points were earned and then
+ * spent elsewhere. Redeeming already clamps at zero (redeemLoyaltyPoints /
+ * quoteLoyaltyRedeem), so a negative balance simply buys nothing until it is
+ * earned back.
+ *
+ * Idempotent per order — any existing 'adjust' row carrying this order id
+ * means the reversal is posted (a second «возврат» on the card, a webhook
+ * retry) — with the same select-then-insert in one transaction as earning and
+ * redeeming, and the unique index behind it for two refund doors landing at
+ * once: «Вернуть деньги» in the admin and Montonio's refund webhook.
  */
 export async function refundLoyaltyPoints(orderId: string, note = ""): Promise<LedgerWrite> {
   if (!UUID_RE.test(orderId)) return { ok: false, error: "bad_order" };
   try {
     return await withTx(async (q) => {
-      const spent = await q<{ customer_id: string; delta: number | string }>(
-        "select customer_id, delta from loyalty_ledger where order_id = $1 and reason = 'redeem'",
+      const rows = await q<{ customer_id: string; delta: number | string; reason: string }>(
+        "select customer_id, delta, reason from loyalty_ledger where order_id = $1 order by id asc",
         [orderId],
       );
-      const points = Math.trunc(-num(spent[0]?.delta, 0));
-      if (!spent.length || !(points > 0)) return { ok: true, points: 0 };
+      if (rows.some((r) => r.reason === "adjust")) return { ok: true, already: true, points: 0 };
 
-      const back = await q<{ id: number }>(
-        "select id from loyalty_ledger where order_id = $1 and reason = 'adjust'",
-        [orderId],
-      );
-      if (back.length) return { ok: true, already: true, points };
+      let customerId = "";
+      let net = 0;
+      for (const r of rows) {
+        if (r.reason !== "earn" && r.reason !== "redeem") continue;
+        if (!customerId) customerId = r.customer_id;
+        net -= Math.trunc(num(r.delta));
+      }
+      if (!customerId || !net) return { ok: true, points: 0 };
 
       await q(
         `insert into loyalty_ledger (customer_id, delta, reason, order_id, note)
          values ($1, $2, 'adjust', $3, $4)`,
-        [spent[0].customer_id, points, orderId, note || null],
+        [customerId, net, orderId, note || null],
       );
-      return { ok: true, points };
+      return { ok: true, points: net };
     });
   } catch (err) {
     if (isUniqueViolation(err)) return { ok: true, already: true };
@@ -695,9 +721,23 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
    card could say «Заказов: 0» above a list of three orders once the list
    (customerOrdersAdmin, matched by e-mail like the account's «Мои заказы»)
    was drawn beneath the tiles. Same key, same rule as the facts under them:
-   a cancelled order is not a purchase and a failed one never became one.
+   a purchase is an order whose money arrived and stayed (PURCHASE_STATUSES).
+   Until 14.09.2026 the rule was the other way round — "anything but cancelled
+   or failed" — which counted a `new` order (the insert default: a basket that
+   opened a payment page and never came back, and nothing ever sweeps them) and
+   a `refunded` one as spend. «Потратил» then named money the shop does not
+   have, on the same card whose «Аналитика» neighbour counts only paid.
    c.email is stored lower-cased (normalizeEmail); orders.email is whatever
    the checkout typed, hence lower() on that side — orders_email_idx covers it. */
+/** The orders that are a purchase: money arrived and stayed. The same list as
+ *  PAID_ORDER_STATUSES in src/lib/orders.ts and PAID_STATUSES in
+ *  src/lib/analytics.ts — the type-only import keeps this file free of the
+ *  runtime cycle a value import would make (orders.ts imports this module),
+ *  while `satisfies readonly OrderStatus[]` still refuses a status that is not
+ *  one. Widen one of the three and widen the others. */
+const PURCHASE_STATUSES = ["paid", "shipped", "delivered"] as const satisfies readonly OrderStatus[];
+/** Interpolated, never parameterised — the values are compile-time constants. */
+const PURCHASE_SQL = PURCHASE_STATUSES.map((s) => `'${s}'`).join(", ");
 const CUSTOMER_COLS = `
   c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
   c.marketing_at, c.marketing_source, c.marketing_off_at,
@@ -710,7 +750,7 @@ const CUSTOMER_JOIN = `
   from customers c
   left join (
     select lower(email) as email, count(*) as orders_count, sum(total) as revenue
-    from orders where email is not null and status not in ('cancelled', 'failed')
+    from orders where email is not null and status in (${PURCHASE_SQL})
     group by lower(email)
   ) agg on agg.email = c.email
   left join (
@@ -832,11 +872,12 @@ function jsonOf<T>(v: unknown, fallback: T): T {
   return v as T;
 }
 
-/* Which orders the facts read: a cancelled order is not a purchase and a
-   failed one never became one — the same two the tiles on the card leave out
-   (CUSTOMER_JOIN above). A failed payment is an unpaid basket the shopper
-   walked away from: not money, and not a date worth calling «first». */
-const NOT_A_PURCHASE = new Set(["cancelled", "failed"]);
+/* Which orders the facts read: exactly the ones the tiles on the card count
+   (CUSTOMER_JOIN above) — money that arrived and stayed. A failed payment is
+   an unpaid basket the shopper walked away from, a `new` one is a basket that
+   never even got a verdict, and a refunded one is money given back: none of
+   the three is a purchase, or a date worth calling «first». */
+const IS_A_PURCHASE = new Set<string>(PURCHASE_STATUSES);
 
 /**
  * The orders behind a customer's card, and the facts drawn from them.
@@ -885,7 +926,7 @@ export async function customerOrdersAdmin(
     const at = isoOrNull(r.created_at);
     const total = money(num(r.total));
 
-    if (!NOT_A_PURCHASE.has(r.status)) {
+    if (IS_A_PURCHASE.has(r.status)) {
       counted += 1;
       spent += total;
       // newest first: the first row seen is the last order, the last row the first

@@ -15,6 +15,11 @@
  */
 import { deflateRawSync } from "node:zlib";
 import { query } from "@/lib/db";
+/* What has actually gone back on an order — the same reader the refund route
+   and src/lib/payments/settle.ts use, so the export cannot disagree with the
+   order card about how much of a payment was reversed. A pure module: no db,
+   no import back into this one. */
+import { refundedTotal } from "@/lib/payments/refund";
 /* Which day — and therefore which MONTH — an order belongs to: the Tallinn
    calendar, because the month this file exports is the month the accountant
    files. See src/lib/day.ts. */
@@ -125,7 +130,17 @@ export interface ReportOrderRow {
   shipping: number;
   discount: number;
   discountCode: string;
+  /* orders.loyalty_discount (migration 100) — «Использовать баллы» at the
+     checkout. Its own column in the table and its own column here, because
+     total = subtotal + shipping − discount − loyalty_discount: without it the
+     sheet's own arithmetic does not foot on any order that spent points. */
+  loyaltyDiscount: number;
   total: number;
+  /* What of this order's money has gone back — a partial refund recorded on
+     the payment blob, or the whole total once the order is `refunded`. `total`
+     is left exactly as invoiced; this is the reversal beside it, and what
+     summarize() takes off the month's «Выручка» and «НДС». */
+  refunded: number;
   vatRate: number;
   vatAmount: number;
   totalExclVat: number;
@@ -153,6 +168,7 @@ type RawRow = {
   shipping_price: string | number;
   discount: string | number;
   discount_code: string | null;
+  loyalty_discount?: string | number | null;
   total: string | number;
   payment: unknown;
   status: string;
@@ -214,9 +230,34 @@ function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+/**
+ * How much of this order's money went back, capped at what it invoiced.
+ *
+ * Two independent records, because the shop has two ways of giving money back
+ * and until 14.09.2026 the export saw neither:
+ *
+ *   · a PARTIAL refund («Вернуть деньги» for less than the whole, or one made
+ *     in Montonio's portal) is written only to payment.refunds — the order
+ *     keeps status `paid` and its original total, so «Выручка» and «НДС» went
+ *     on counting money the shop no longer had;
+ *   · a FULL one moves the status to `refunded`, and REPORTABLE_STATUSES keeps
+ *     the row deliberately (the accountant wants to see the reversal) — but
+ *     nothing ever subtracted it. A refund handed over in cash and marked by
+ *     hand writes no refund entry at all, so the status is the whole record.
+ *
+ * Capped at `total`: a refund paid back onto the gift card that bought the
+ * order (refund.ts `to: "giftcard"`) can exceed the money line, which was
+ * never revenue to begin with — it must not turn a month's takings negative.
+ */
+function refundedOf(payment: unknown, status: string, total: number): number {
+  const recorded = refundedTotal(payment);
+  const whole = status === "refunded" ? total : 0;
+  return Math.min(total, Math.max(0, recorded, whole));
+}
+
 function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
   const shipping = jsonOf<{ country?: string; method?: string }>(r.shipping, {});
-  const payment = jsonOf<{ provider?: string; ref?: string }>(r.payment, {});
+  const payment = jsonOf<{ provider?: string; ref?: string; refunds?: unknown }>(r.payment, {});
   const company = jsonOf<{ name?: string; regCode?: string; vatNumber?: string } | null>(r.company, null) ?? {};
   const invoice = jsonOf<{ number?: string; dueAt?: string } | null>(r.invoice, null) ?? {};
   const total = num(r.total);
@@ -239,7 +280,9 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
     shipping: num(r.shipping_price),
     discount: num(r.discount),
     discountCode: r.discount_code ?? "",
+    loyaltyDiscount: num(r.loyalty_discount),
     total,
+    refunded: refundedOf(payment, r.status, total),
     vatRate,
     vatAmount: vat,
     totalExclVat: net,
@@ -259,7 +302,7 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
  *  test (tests/reports.test.ts) rather than one that has to drop a column
  *  `orders.ts`'s own createOrder() now hard-depends on existing. */
 export function reportOrderColumns(hasChannel: boolean): string {
-  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}`;
+  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, loyalty_discount, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}`;
 }
 
 /**
@@ -282,10 +325,23 @@ export async function listReportOrders(from: string, to: string, vatRate: number
   return rows.map((r) => toReportRow(r, vatRate));
 }
 
-export function summarize(rows: ReportOrderRow[]): { orders: number; revenue: number; vat: number } {
-  const revenue = Math.round(rows.reduce((s, r) => s + r.total, 0) * 100) / 100;
-  const vat = Math.round(rows.reduce((s, r) => s + r.vatAmount, 0) * 100) / 100;
-  return { orders: rows.length, revenue, vat };
+/**
+ * The «Заказы · Выручка · НДС» card above the download buttons.
+ *
+ * `revenue` and `vat` are NET OF REFUNDS — what the shop kept and what it owes
+ * the tax office on it. Until 14.09.2026 they were the gross of every
+ * reportable row, refunded ones included, so a month in which Renat gave an
+ * order back still reported its money as takings and its VAT as due.
+ * `refunded` is the reversal itself, so the card can name it instead of
+ * leaving the owner to wonder why the figure moved.
+ */
+export function summarize(rows: ReportOrderRow[]): { orders: number; revenue: number; vat: number; refunded: number } {
+  const cents = (n: number) => Math.round(n * 100) / 100;
+  const refunded = cents(rows.reduce((s, r) => s + r.refunded, 0));
+  const revenue = cents(rows.reduce((s, r) => s + r.total - r.refunded, 0));
+  // the VAT goes back with the money it was charged on, at that row's own rate
+  const vat = cents(rows.reduce((s, r) => s + r.vatAmount - vatSplit(r.refunded, r.vatRate).vat, 0));
+  return { orders: rows.length, revenue, vat, refunded };
 }
 
 /* ---------- CSV --------------------------------------------------------------- */
@@ -302,7 +358,9 @@ export const REPORT_COLUMNS: Array<[key: keyof ReportOrderRow, header: string]> 
   ["shipping", "Shipping"],
   ["discount", "Discount"],
   ["discountCode", "Discount code"],
+  ["loyaltyDiscount", "Points"],
   ["total", "Total"],
+  ["refunded", "Refunded"],
   ["vatRate", "VAT %"],
   ["vatAmount", "VAT amount"],
   ["totalExclVat", "Total excl. VAT"],
@@ -317,7 +375,7 @@ export const REPORT_COLUMNS: Array<[key: keyof ReportOrderRow, header: string]> 
 ];
 
 const NUMERIC_COLUMNS = new Set<keyof ReportOrderRow>([
-  "subtotal", "shipping", "discount", "total", "vatRate", "vatAmount", "totalExclVat",
+  "subtotal", "shipping", "discount", "loyaltyDiscount", "total", "refunded", "vatRate", "vatAmount", "totalExclVat",
 ]);
 
 /**

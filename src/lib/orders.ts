@@ -1765,18 +1765,23 @@ export async function setOrderStatus(
     }
   }
 
-  /* loyalty (14.09.2026): «Использовать баллы» spends the points on the paid
-     transition (src/lib/payments/apply.ts) and until now nothing ever gave
-     them back — a customer who took 30 € off a 100 € order with points and
-     was then refunded got the 100 € and lost the 30. A refund is measured in
-     money, and points are not money, so no amount of it could ever have
-     carried them; they come back here, beside the stock above and the cards
-     below, on the same move. What goes back is what the ledger says was
-     taken. Idempotent per order, best effort: a points hiccup must never
-     stop a refund being recorded. */
+  /* loyalty (14.09.2026): the points go back with the money, both ways. Until
+     now a refund left both of the order's ledger lines standing.
+     «Использовать баллы» spends points on the paid transition
+     (src/lib/payments/apply.ts) and nothing ever gave them back — a customer
+     who took 30 € off a 100 € order with points and was then refunded got the
+     100 € and lost the 30; a refund is measured in money, and points are not
+     money, so no amount of it could ever have carried them. And the points the
+     order EARNED stayed credited, so the shop went on paying a bonus for a
+     sale it had un-made. Both are settled here, beside the stock above and the
+     cards below, on the same move: one compensating row carrying the net of
+     the two (refundLoyaltyPoints — the ledger's own figures, not the quoted
+     ones). Only off a paid order and only on a refund — a cancellation still
+     holds the money. Idempotent per order, best effort: a points hiccup must
+     never stop a refund being recorded. */
   if (wasPaid && status === "refunded") {
     try {
-      const out = await refundLoyaltyPoints(id, `возврат баллов за заказ ${after.number}`);
+      const out = await refundLoyaltyPoints(id, `возврат заказа ${after.number}`);
       if (out.ok && out.points && !out.already) {
         await writeAuditSafe(actor, "loyalty.refunded", { id, number: after.number, points: out.points });
       }
