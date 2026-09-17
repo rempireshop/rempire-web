@@ -123,6 +123,8 @@
       "Масло, бальзам и мыло — всё, с чего начинается уход.": "Õli, palsam ja seep — kõik, millest hooldus algab.",
       "Что внутри — минимум два товара": "Mis sees on — vähemalt kaks toodet",
       "Пока пусто. Найдите товар ниже и нажмите на него.": "Praegu on tühi. Otsi allpool toode ja klõpsa sellel.",
+      "Свои товары в набор пока не добавить — только из каталога.":
+        "Oma tooteid komplekti veel lisada ei saa — ainult kataloogist.",
       "Название или бренд": "Nimi või bränd",
       "Цена набора, €": "Komplekti hind, €",
       "Фото набора": "Komplekti foto",
@@ -641,6 +643,8 @@
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
       "Этого размера больше нет — выберите другой в корзине": "Seda suurust enam ei ole — vali ostukorvis teine",
+      "Этого набора больше нет в продаже — уберите его из корзины":
+        "Seda komplekti enam ei müüda — eemalda see ostukorvist",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "Sellist kinkekaarti praegu ei müüda — vali teine summa",
       "Больше 20 подарочных карт одной суммы за раз — разбейте заказ":
@@ -2801,6 +2805,8 @@
       "Масло, бальзам и мыло — всё, с чего начинается уход.": "Oil, balm and soap — everything care starts with.",
       "Что внутри — минимум два товара": "What is inside — at least two products",
       "Пока пусто. Найдите товар ниже и нажмите на него.": "Empty so far. Find a product below and click it.",
+      "Свои товары в набор пока не добавить — только из каталога.":
+        "Your own products cannot go into a set yet — catalogue ones only.",
       "Название или бренд": "Name or brand",
       "Цена набора, €": "Set price, €",
       "Фото набора": "Set photo",
@@ -3303,6 +3309,8 @@
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
       "Этого размера больше нет — выберите другой в корзине": "That size is gone — pick another one in the basket",
+      "Этого набора больше нет в продаже — уберите его из корзины":
+        "This set is no longer on sale — remove it from the basket",
       "Такой подарочной карты сейчас нет — выберите другую сумму":
         "That gift card is not on sale right now — pick another amount",
       "Больше 20 подарочных карт одной суммы за раз — разбейте заказ":
@@ -9617,6 +9625,22 @@
     }
     return worst;
   }
+  /** Is the set actually cheaper than its parts RIGHT NOW?
+      `price` is the number the owner stored; `sum` is recomputed from the live
+      catalogue on every read (expand() in src/lib/bundles.ts). validateBundle()
+      refuses to SAVE a set that costs as much as its parts, but nothing
+      re-checks a set already stored — so one product's price coming down is
+      enough to leave the sum below the price. expand() then clamps save and
+      pct to 0, and the card went on printing «−0 %» beside a crossed-out sum
+      LOWER than the price next to it: a discount badge over a «было» that was
+      never true. No saving, no badge, no «было», no «выгода». The set stays on
+      sale at the price the owner set; it is simply not a deal this week. */
+  function bundleSaved(b) {
+    // half a cent: both numbers are already rounded to cents (money() in
+    // src/lib/bundles.ts), so this is «at least one cent» written in a way
+    // that binary floating point cannot round the wrong side of
+    return Number(b && b.sum) - Number(b && b.price) >= 0.005;
+  }
   /* The API knows what a set costs; only the browser knows what it looks
      like — photos live in the catalogue, not on the server. So every set that
      arrives is topped up here with the fields the shop draws from: the photo
@@ -9712,14 +9736,15 @@
     return '<div class="card card--bundle">' +
       '<button class="card__go" data-go-bundle="' + b.id + '">' +
         '<span class="card__media">' + bundleStack(b, "bstack--card") +
-          '<span class="bbadge num">−' + b.pct + ' %</span>' +
+          (bundleSaved(b) ? '<span class="bbadge num">−' + b.pct + ' %</span>' : "") +
           (out ? '<span class="card__flags"><span class="chip chip--out card__flag">нет в наличии</span></span>' : "") +
         "</span>" +
         '<span class="card__brand">Набор</span>' +
         '<span class="card__name">' + esc(bundleTitle(b)) + "</span>" +
       "</button>" +
       '<div class="card__foot">' +
-        '<span class="card__price num">' + eur(b.price) + ' <s class="bwas">' + eur(b.sum) + "</s></span>" +
+        '<span class="card__price num">' + eur(b.price) +
+          (bundleSaved(b) ? ' <s class="bwas">' + eur(b.sum) + "</s>" : "") + "</span>" +
         (out
           ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
           : '<button type="button" class="card__add" data-addbundle="' + b.id + '">В корзину</button>') +
@@ -9798,8 +9823,11 @@
         "<div>" +
           '<div class="pdp__idrow"><span class="card__brand pdp__brand">Набор</span></div>' +
           '<h1 class="pdp__title">' + esc(bundleTitle(b)) + "</h1>" +
-          '<div class="num pdp__price"><span>' + eur(b.price) + '</span> <s class="bwas">' + eur(b.sum) + "</s>" +
-            ' <span class="chip chip--ok">выгода ' + eur(b.save) + "</span>" +
+          '<div class="num pdp__price"><span>' + eur(b.price) + "</span>" +
+            (bundleSaved(b)
+              ? ' <s class="bwas">' + eur(b.sum) + "</s>" +
+                ' <span class="chip chip--ok">выгода ' + eur(b.save) + "</span>"
+              : "") +
             (out ? ' <span class="chip chip--out">нет в наличии</span>' : "") + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
           '<p class="bdesc">' + esc(bundleDesc(b)) + "</p>" +
@@ -9816,7 +9844,15 @@
             return '<div class="bitem"><span class="bitem__ph">' +
                 '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
               '<button class="bitem__nm" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
-                (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") + "</button>" +
+                (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") +
+                /* How many of it. expand() multiplies the part's price by qty
+                   when it adds the «было» sum up, and the list beside that sum
+                   showed only the unit price — so a set holding two of
+                   something quoted a crossed-out total the shopper could not
+                   make the parts come to. The admin's own editor has counted
+                   them all along («adm-step-qty»); this is the same fact on
+                   the shopper's side of the screen. */
+                (Number(it.qty) > 1 ? ' <span class="muted num">× ' + Number(it.qty) + "</span>" : "") + "</button>" +
               (gone ? '<span class="chip chip--out bitem__out" data-bitemout="' + esc(it.id) + '">нет в наличии</span>' : "") +
               '<span class="num bitem__pr">' + eur(it.price) + "</span></div>";
           }).join("") + "</div>" +
@@ -10565,7 +10601,16 @@
      Three kinds share one list: a catalogue product, a set and a gift card.
      Everything that used to call byId(l.id) goes through these instead. */
   function lineUnit(l) {
-    if (l.type === "bundle") { var b = bundleById(l.id); return b ? b.price : 0; }
+    /* The price the line was added at is the fallback, not 0. A set the shop
+       cannot resolve right now — /api/bundles/ answered 503 and the static
+       file never had this one, because the owner built it in the panel — used
+       to price at nothing: the cart total, the free-shipping bar and the
+       checkout summary were all short by the whole set, and the server then
+       billed the real price. The server re-prices every «bundle:» line from
+       its own table (bundleDefsForOrders), so nothing here can become a
+       discount the shop did not agree to; a stale number is merely the
+       closest true thing the browser still has. */
+    if (l.type === "bundle") { var b = bundleById(l.id); return b ? b.price : (Number(l.price) || 0); }
     if (l.type === "gift") return giftAmount(l.id);
     var p = byId(l.id);
     var pro = proPrice(p, l.size || 0);
@@ -10602,7 +10647,9 @@
       var b = bundleById(l.id);
       if (!b) return "";
       return '<span class="cline__parts">' + b.items.map(function (it) {
-        return esc(bundleItemName(it)) + (it.sizeLabel ? " · " + esc(it.sizeLabel) : "");
+        // …and how many of it, as on the set's own page — see screenBundle()
+        return esc(bundleItemName(it)) + (it.sizeLabel ? " · " + esc(it.sizeLabel) : "") +
+          (Number(it.qty) > 1 ? " × " + Number(it.qty) : "");
       }).join("<br>") + "</span>";
     }
     if (l.type === "gift") {
@@ -14999,6 +15046,15 @@
        that arrived after the line was built), because the fallback sentence
        below sends them round the same loop for ever. */
     bad_variant: "Этого размера больше нет — выберите другой в корзине",
+    /* The set was DELETED, not hidden: src/lib/bundles.ts bundleDefsForOrders()
+       still prices a switched-off set, so this is the one case the server
+       cannot honour. The cart can still be holding a line for it — the shop
+       carries a set over from the static public/shop/bundles.js when the API's
+       list no longer has it (loadBundles), and that file still carries the
+       eight seeded sets whatever the owner has since done to them. Without a
+       sentence of its own the fallback below said «попробуйте ещё раз» to a
+       basket that could never be paid for, however many times it was tried. */
+    bundle_unknown: "Этого набора больше нет в продаже — уберите его из корзины",
     // the owner switched this denomination off while the card sat in the basket
     gift_unavailable: "Такой подарочной карты сейчас нет — выберите другую сумму",
     // more cards on one line than issueGiftCards() will ever mint (GIFT_MAX_QTY)
@@ -17362,8 +17418,14 @@
           return '<button class="adm-chip" data-goodsfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
+        /* Not «штрихкод»: admCatalogRows() matches the query against
+           brand + name + id and nothing else. Barcodes live on the warehouse
+           rows (S.stockLevels[].ean), which this screen never loads — so a
+           code typed here answered «Таких товаров нет» for a product that is
+           right there. The screens that really do find a product by its code
+           are «Склад» and the scanner. */
         '<input class="adm-input adm-input--row" data-goodsq value="' + esc(S.goodsQ || "") +
-          '" placeholder="Название, бренд, штрихкод" aria-label="Поиск по товарам" style="flex:1;min-width:180px">' +
+          '" placeholder="Название или бренд" aria-label="Поиск по товарам" style="flex:1;min-width:180px">' +
       "</div>" +
       '<div class="adm-list adm-list--flat" id="goodslist">' + admCatalogRows() + "</div>";
   }
@@ -23485,10 +23547,26 @@
     box.textContent = bundleHintHTML();
     translateTree(box);
   }
+  /* Catalogue products only. src/lib/bundles.ts resolves every item of a set
+     against src/data/catalogue.min.json and nothing else (BY_ID), so a
+     product the owner made himself is refused on save with `unknown_product`
+     — «Одного из товаров больше нет в каталоге», said about a product he had
+     just picked out of the shop's own picker, with the whole form filled in.
+     Offering it and then refusing it is the lie; not offering it is a limit,
+     and the line under the picker says so in as many words. Sets holding the
+     owner's own products are a server change (custom_products in expand() and
+     validateBundle()), not a picker one. */
   function bundlePickRows() {
-    var list = heroFind(S.bundleQ);
+    var list = heroFind(S.bundleQ).filter(function (p) { return !p.custom; });
     if (!list.length) return HERO_NOHIT;
     return list.map(function (p) { return admPickTile("data-bundleadd", p.id, p, false); }).join("");
+  }
+  /** …and why his own product is not in that list — only once he has one. */
+  function bundleOwnHint() {
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      if (CATALOGUE[i].custom) return '<p class="hint adm-hint" style="margin:0">Свои товары в набор пока не добавить — только из каталога.</p>';
+    }
+    return "";
   }
   /** The photos the set can wear: one per product inside it, plus «сами». */
   function bundleImageRowHTML() {
@@ -23563,7 +23641,7 @@
       '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
       '<label class="adm-field">Найти товар' +
         '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
-      '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
+      '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" + bundleOwnHint() +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
         '<label class="adm-field">Цена набора, €' +
           '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
@@ -24491,7 +24569,11 @@
      of those before saving really removes it from the bucket, while an older
      photo is only dropped from the list, because undo has to be able to put
      it back. */
-  var GAL = { id: "", list: [], fresh: {}, reset: false, cutting: null };
+  /* `picks` is «Фото по объёмам» before it is saved: size index → the chosen
+     photo's own ADDRESS, never its position. ← → ★ × and «Вернуть фото из
+     каталога» all reorder GAL.list and all end in a render(), so a position
+     written down before one of them means a different photo after it. */
+  var GAL = { id: "", list: [], fresh: {}, reset: false, cutting: null, picks: {} };
   /* assistant-work: one snapshot of the description+SEO fields, taken the
      first time an AI button is pressed for the product currently open — so
      «Отменить» always restores what was on screen before any AI call this
@@ -24654,6 +24736,7 @@
   function galDraft(p) {
     if (GAL.id !== p.id) {
       GAL.id = p.id; GAL.list = galPhotos(p); GAL.fresh = {}; GAL.reset = false; GAL.cutting = null;
+      GAL.picks = {};
       UP.busy = 0; UP.total = 0; UP.err = "";
     }
     return GAL.list;
@@ -24846,7 +24929,31 @@
    * that pointed at it still points at it; delete it and the size falls back
    * to the main photo.
    */
+  /** Is the per-size photo map now on screen a change from the stored one?
+      A product with no map shows every size its main photo, which is exactly
+      what galSizePick() renders and what the rows read back as [0, 0, …] — so
+      an untouched editor «changed» it on every first save of a multi-size
+      product with several photos: a journal line, a PUT to the overrides and
+      «Сохранено ✓» for an edit nobody made. An all-zero map IS the absent one.
+      A row with nothing ticked (-1) is not a map at all and decides nothing. */
+  function varImgChanged(map, saved) {
+    if (!map.length || !map.every(function (x) { return x >= 0; })) return false;
+    var cur = saved && saved.length ? saved : map.map(function () { return 0; });
+    return JSON.stringify(map) !== JSON.stringify(cur);
+  }
   function galSizePick(p, si) {
+    /* The owner's own choice first, while it is still unsaved. It used to
+       live nowhere but in an `aria-current` attribute the next render() threw
+       away — and ← → ★ × and «Вернуть фото из каталога» all end in a
+       render(), as does every background fetch — so a size photo picked and
+       then anything else pressed was simply gone by the time «Сохранить»
+       read the rows back (audit 14.09.2026). A choice whose photo has since
+       been deleted falls through to the stored map, exactly like a stored
+       one whose photo is gone. */
+    var want = GAL.picks && GAL.picks[si];
+    if (want) {
+      for (var w = 0; w < GAL.list.length; w++) if (GAL.list[w].url === want) return w;
+    }
     var saved = galPhotos(p);
     var idx = p.varImg && p.varImg.length > si ? p.varImg[si] : -1;
     var url = idx >= 0 && idx < saved.length ? saved[idx].url : null;
@@ -25032,6 +25139,41 @@
       if (pEl) rows[i].price = pEl.value;
     }
     return rows;
+  }
+  /* inventory: the three columns edSizeRowsRead() does NOT carry.
+     «+ Размер» and «×» rebuild the whole sizes pane in place — deliberately,
+     because a render() there would put the saved values back over everything
+     typed on the other four tabs — and the rebuilt pane draws «Остаток» and
+     «Штрихкод» from the warehouse and «Салон, €» from the saved row. So a
+     count just typed, a code just scanned and a salon price just entered
+     vanished the moment a volume was added or removed beside them. Same rule
+     as renderImpl's goodsKeep, applied to the one pane being replaced: a box
+     still holding exactly what the last render wrote into it (its `value`
+     attribute) has not been touched and is left to re-render itself; anything
+     else is the owner's typing and travels. Keys are «productId size», so a
+     removed row takes its own boxes with it and the rows left keep theirs. */
+  function edSizePaneKeep(pane) {
+    var keep = {};
+    if (!pane) return keep;
+    var cells = pane.querySelectorAll("[data-edqty],[data-edean],[data-edproprice]");
+    for (var i = 0; i < cells.length; i++) {
+      var el = cells[i];
+      var was = el.getAttribute("value");
+      if (was !== null && el.value === was) continue;
+      var attr = el.hasAttribute("data-edqty") ? "data-edqty"
+        : el.hasAttribute("data-edean") ? "data-edean" : "data-edproprice";
+      keep[attr === "data-edproprice" ? "[data-edproprice]"
+        : "[" + attr + '="' + el.getAttribute(attr) + '"]'] = el.value;
+    }
+    return keep;
+  }
+  function edSizePaneRestore(pane, keep) {
+    if (!pane) return;
+    for (var sel in keep) {
+      if (!Object.prototype.hasOwnProperty.call(keep, sel)) continue;
+      var el = pane.querySelector(sel);
+      if (el) el.value = keep[sel];
+    }
   }
   /* ---- Бренд: the in-page list under the box (Dim, 10.09.2026) ----------
      <datalist> put the choice in the OS's hands: Chrome drew its own popup
@@ -25308,6 +25450,27 @@
      says so in the box. «Отвязать» only empties the box — the code is freed
      by «Сохранить», like every other change in this form, so a mis-tap on a
      phone costs nothing. */
+  /* inventory: the «Остаток» column of the sizes grid.
+     Dead until the warehouse list has landed. What «Сохранить» sends is a
+     RELATIVE move — `delta = typed − what the row says now`, the only shape
+     two clients can race safely — and with no list there is no «now»:
+     stockFindRow() answers null, the save loop read that as 0, and the whole
+     typed number went out as the move. A shelf of 7 recounted as 3 became 10.
+     Nothing on screen told the two states apart: an empty box under «не
+     учтено» looks the same while /api/admin/inventory/ is in flight as it
+     does for a volume nobody has ever counted, and the editor opens the load
+     itself, so the first seconds in this pane are exactly that window. The
+     box lights up by itself — loadStockLevels()'s answer ends in a render().
+     If the warehouse never answers it stays dead, which is the right answer
+     too: a move computed against a count we have never seen is a guess at the
+     owner's shelf. */
+  function edQtyCell(key, lv, low) {
+    var ready = !!S.stockLevels;
+    return edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") +
+      '" data-edqty="' + esc(key) + '" inputmode="numeric" value="' + (lv && lv.tracked ? String(lv.qty) : "") +
+      '" placeholder="' + (ready ? (lv && lv.tracked ? "0" : "не учтено") : "…") + '"' +
+      (ready ? "" : " disabled") + ' aria-label="Остаток">');
+  }
   function edEanCell(key, ean) {
     return edCell("ean", "Штрихкод",
       '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' + esc(ean || "") +
@@ -25339,7 +25502,6 @@
       var variant = multi ? r.size : "";
       var key = stockKey(p.id, variant);
       var lv = p.isNew ? null : edStockFor(p, variant);
-      var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = edStockLow(lv);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
       // row 0 is the editable pro price and its placeholder is the «auto»
@@ -25360,8 +25522,7 @@
                 '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
               : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
             : "") +
-          edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
-            '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
+          edQtyCell(key, lv, low) +
           edEanCell(key, lv && lv.ean)) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
           ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
@@ -25399,7 +25560,6 @@
       var lv = edStockFor(p, sz);
       var price = r.price === "" || r.price == null ? "" : String(r.price);
       var key = stockKey(p.id, sz);
-      var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = edStockLow(lv);
       // see edPaneSizesOwn: the first row's box is the pro price itself, the
       // rows below it show what that base plus their own premium comes to
@@ -25420,8 +25580,7 @@
               '" placeholder="' + salon + '" aria-label="Салон, €">'
             : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
           : "") +
-        edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
-          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
+        edQtyCell(key, lv, low) +
         edEanCell(key, lv && lv.ean) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
           ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
@@ -33179,11 +33338,16 @@
       // back over everything typed on the other four tabs
       var szPane = document.querySelector('[data-edpane="sizes"]');
       if (szPane) {
+        // inventory: Остаток / Штрихкод / Салон, € are re-rendered from the
+        // warehouse and the saved row, so whatever the owner typed into them
+        // rides across the replacement (edSizePaneKeep)
+        var szKeep = edSizePaneKeep(szPane);
         var szTpl = document.createElement("template");
         szTpl.innerHTML = szP.custom ? edPaneSizesOwn(szP) : edPaneSizes(szP);
         var szFresh = szTpl.content.firstElementChild;
         translateTree(szFresh);
         szPane.replaceWith(szFresh);
+        edSizePaneRestore(szFresh, szKeep);
       }
       /* The ladder changed, so the bar says «Не сохранено» — for the deletion
          as well as for the addition. It used to say it only for the addition,
@@ -33307,6 +33471,12 @@
     if (d.vpick !== undefined) {
       // select a photo for one size inside the editor (applied on Save)
       var pk = d.vpick.split(":");
+      /* Into the draft as well as into the DOM — see galSizePick(). The DOM
+         is still patched rather than rendered, because a render() here would
+         rebuild the whole editor from what is SAVED and take the price, the
+         SEO boxes and the descriptions being typed on the other tabs with it. */
+      var pkPhoto = GAL.list[Number(pk[1])];
+      if (pkPhoto) GAL.picks[Number(pk[0])] = pkPhoto.url;
       var row = document.querySelector('[data-vrow="' + pk[0] + '"]');
       if (row) row.querySelectorAll("[data-vpick]").forEach(function (b2) {
         b2.setAttribute("aria-current", String(b2 === t));
@@ -33537,8 +33707,7 @@
           var sel2 = r2.querySelector('[data-vpick][aria-current="true"]');
           return sel2 ? Number(sel2.dataset.vpick.split(":")[1]) : -1;
         });
-        if (map2.every(function (x) { return x >= 0; }) &&
-            JSON.stringify(map2) !== JSON.stringify(gp.varImg || [])) {
+        if (varImgChanged(map2, gp.varImg)) {
           demoApply({ type: "set_varimg", id: gp.id, map: map2 }); changed = true;
         }
       }
