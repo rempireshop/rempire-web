@@ -136,8 +136,15 @@ export async function POST(req: Request) {
       tier,
     });
 
+    /* …and only the FIRST time this address becomes a partner. `welcomed` is
+       an earlier `pro_approved_at` stamp on the row — a partner who was
+       demoted and is being added again. The letter says «Цены для салонов
+       включены», and a second copy of it months later reads as the shop
+       having forgotten (Dim, 17.09.2026); Renat greets a returning partner by
+       hand. `{sent:false}` here is the same thing the answer already carries
+       for a row that was not promoted at all. */
     let mail: { sent: boolean; skipped?: boolean; reason?: string } = { sent: false };
-    if (out.promoted) {
+    if (out.promoted && !out.welcomed) {
       const res = await sendPartnerWelcome({
         email: out.customer.email,
         name: out.customer.name,

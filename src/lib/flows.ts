@@ -35,13 +35,14 @@ import { query } from "@/lib/db";
    be a calendar day too — Tallinn's, not Greenwich's (src/lib/day.ts). The
    daily run fires at 07:00 Tallinn, but a hand-started run at half past
    midnight would otherwise still be looking at yesterday's date. */
-import { addShopDays, endOfShopDay, shopDay, ymdParts } from "@/lib/day";
+import { addShopDays, endOfShopDay, shopDay, shopDayStart, ymdParts } from "@/lib/day";
 import { sendRendered } from "@/lib/mail";
 import {
   markStockAlertSent,
   normalizeLangCode,
   pendingStockAlerts,
   productsForAlerts,
+  pruneCartWrites,
   type AlertProduct,
   type CartLine,
   type LangCode,
@@ -72,6 +73,27 @@ export interface Flows {
   unpaidRemindDays: number;
   /** Days after an unpaid order before it cancels itself. */
   unpaidCancelDays: number;
+  /**
+   * The day the switch above was last turned ON, `YYYY-MM-DD` on the Tallinn
+   * calendar — stamped by the settings route, never typed by anybody. "" for
+   * a shop that has never turned it on, and for one that had it on before
+   * this stamp existed.
+   *
+   * What it is for: the backlog. Nothing has ever cancelled an abandoned
+   * «новый» order, so the day this switch is first flipped there is a list of
+   * them going back to the shop's first month — and the first run releases a
+   * hundred of them, each with a «Заказ отменён» letter. Dim, 17.09.2026: let
+   * the whole backlog go quietly. The orders are dead either way and a
+   * cancellation letter about a six-month-old basket reads as a mistake, not
+   * as tidying up.
+   *
+   * So the stamp is a floor, and runUnpaidOrders() reads it as: an order that
+   * was ALREADY past its cancel day when the switch was flipped is released
+   * without a letter. Everything placed since is the shop working normally and
+   * gets both letters. The cancellation itself is never suppressed — those
+   * orders have to go — only the letter about it.
+   */
+  unpaidFrom: string;
   /** Static promo code for the birthday letter when there is no promo module. */
   birthdayCode: string;
   /** Percent shown in the birthday letter. */
@@ -97,6 +119,7 @@ export const FLOW_DEFAULTS: Flows = {
   unpaid: false,
   unpaidRemindDays: 3,
   unpaidCancelDays: 7,
+  unpaidFrom: "",
   birthdayCode: "",
   birthdayPercent: 10,
   birthdayDays: 0,
@@ -113,6 +136,14 @@ function bool(v: unknown, fallback: boolean): boolean {
   if (typeof v === "string") return /^(1|true|on|yes|да)$/i.test(v.trim());
   if (typeof v === "number") return v !== 0;
   return fallback;
+}
+
+/** A stored `YYYY-MM-DD`, or "" for anything that is not one. The stamp is
+ *  written by the shop itself (stampUnpaidFloor), but it lives in a jsonb blob
+ *  the admin can PUT, so it is read like every other untrusted field here. */
+function shopDayOrBlank(v: unknown): string {
+  const s = typeof v === "string" ? v.trim() : "";
+  return ymdParts(s) ? s : "";
 }
 
 /**
@@ -154,9 +185,56 @@ export async function getFlows(): Promise<Flows> {
     unpaid: bool(f.unpaid, FLOW_DEFAULTS.unpaid),
     unpaidRemindDays: remindDays,
     unpaidCancelDays: cancelDays,
+    unpaidFrom: shopDayOrBlank(f.unpaidFrom),
     birthdayCode: typeof f.birthdayCode === "string" ? f.birthdayCode.trim().toUpperCase().slice(0, 40) : "",
     birthdayPercent: Number.isFinite(percent) && percent > 0 && percent <= 90 ? Math.round(percent) : FLOW_DEFAULTS.birthdayPercent,
   };
+}
+
+/**
+ * The writer's side of `unpaidFrom` — PUT /api/admin/settings calls this for
+ * the `flows` key and stores what comes back.
+ *
+ * One transition matters: the «Заказ ждёт оплаты» switch going OFF → ON. That
+ * is the moment the backlog exists, so that is the day stamped. While the
+ * switch stays on the stamp is carried through untouched, whatever the panel
+ * sent — the form posts the whole blob back on every save and knows nothing
+ * about this field. Turning the switch off drops it: if it is ever turned on
+ * again, everything that piled up in between is a new backlog and the new
+ * day is the honest floor for it.
+ *
+ * A shop that already had the flow running when this shipped gets no stamp
+ * (prev.unpaid is already true), which is right: its backlog was posted
+ * months ago and there is nothing left to keep quiet about.
+ *
+ * Best effort on the READ of the previous value — a settings row that cannot
+ * be read leaves the incoming blob alone rather than refusing the save. The
+ * worst case is a floor that is not stamped, i.e. exactly today's behaviour.
+ */
+export async function stampUnpaidFloor(next: unknown, now: number = Date.now()): Promise<unknown> {
+  if (!next || typeof next !== "object" || Array.isArray(next)) return next;
+  const incoming = { ...(next as Record<string, unknown>) };
+  let prev: Flows;
+  try {
+    prev = await getFlows();
+  } catch {
+    return next;
+  }
+  const on = bool(incoming.unpaid, FLOW_DEFAULTS.unpaid);
+  if (!on) {
+    delete incoming.unpaidFrom;
+    return incoming;
+  }
+  if (prev.unpaid) {
+    /* Already on. Carry the stamp the shop holds, never the one the caller
+       sent: this field is the shop's own memory of a day, and a blob posted
+       to /api/admin/settings must not be able to move the floor. */
+    if (prev.unpaidFrom) incoming.unpaidFrom = prev.unpaidFrom;
+    else delete incoming.unpaidFrom;
+    return incoming;
+  }
+  incoming.unpaidFrom = shopDay(now);
+  return incoming;
 }
 
 /**
@@ -523,10 +601,23 @@ function safeJson(s: string): unknown {
  * `upsertOverride` in src/lib/orders.ts the moment the owner sets stock to
  * «в наличии» — pending rows only exist for a product that was sold out, so
  * "no pending rows" is the same statement as "it was not out".
+ *
+ * …as long as the shop agrees. The owner writing «в наличии» is one of two
+ * voices on that question: for a product anybody has actually counted, the
+ * COUNT is what the storefront's badge reads (getOverrides() in
+ * src/lib/orders.ts, and the same merge the sweep below does). So the switch
+ * could be flipped on a shelf the scanner had already counted down to zero,
+ * and the shop would post «Снова в наличии» over a page that says «нет в
+ * наличии». Dim, 17.09.2026: do not send when the count is zero — the shop
+ * must not contradict itself in writing.
+ *
+ * Nothing is stamped when that happens: the alerts stay pending, and the
+ * daily sweep sends them the day the shelf really has something on it.
  */
 export async function runBackInStock(productId: string): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
+  if (await countedOut(productId)) return { sent: 0, skipped: 0 };
   /* The owner's own subject / intro / signature, exactly as the sweep below
      loads them. This is the PRIMARY path — the stock switch in the panel calls
      it (upsertOverride, src/lib/orders.ts) — and without this line the letter
@@ -536,6 +627,29 @@ export async function runBackInStock(productId: string): Promise<FlowRun> {
   await loadTexts();
   const alerts = await pendingStockAlerts(productId);
   return sendStockAlerts(alerts);
+}
+
+/**
+ * Does the counted shelf say this product is empty?
+ *
+ * Only ever `true` for a product somebody has actually counted and counted to
+ * zero. A product nobody has ever scanned has no count and is absent from the
+ * map (src/lib/inventory.ts, «tracked»), and «мало» is still something on the
+ * shelf — neither of those is a reason to hold a letter back.
+ *
+ * Best effort and dynamically imported, exactly as sweepBackInStock() reads
+ * the same numbers: an inventory module that cannot answer leaves the owner's
+ * own word in charge, which is what this hook did before the question was
+ * asked at all.
+ */
+async function countedOut(productId: string): Promise<boolean> {
+  try {
+    const { productStockStates } = await import("@/lib/inventory");
+    return (await productStockStates([productId]))[productId] === "out";
+  } catch (err) {
+    console.error("[flows] numeric stock unavailable, trusting the switch:", err);
+    return false;
+  }
 }
 
 /**
@@ -1110,6 +1224,21 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
   const day = 24 * 60 * 60 * 1000;
   const remindBefore = new Date(now - flows.unpaidRemindDays * day).toISOString();
   const cancelBefore = new Date(now - flows.unpaidCancelDays * day).toISOString();
+  /* The backlog line (`unpaidFrom`, and the note on it in the Flows type). An
+     order created at or before this instant was already past its cancel day
+     the moment the owner turned the switch on: it is released, and it is
+     released without a letter. Tallinn midnight of the stamped day, minus the
+     cancel window — shopDayStart(), because the stamp is a calendar day in
+     this shop's own zone and a Date built from the string any other way is up
+     to three hours out.
+
+     Deliberately NOT a precondition on the query above or below: the letter is
+     what Dim asked to keep quiet, not the cancellation, and a reminder-shaped
+     filter on the cancel query is the thing tests/flows-unpaid.test.ts pins
+     against («does not send the reminder to an order that is already past the
+     cancel day» — that order still has to go, and go now). */
+  const floorStart = flows.unpaidFrom ? shopDayStart(flows.unpaidFrom).getTime() : NaN;
+  const quietBefore = Number.isFinite(floorStart) ? floorStart - flows.unpaidCancelDays * day : null;
 
   const { onOrderClosed, onOrderUnpaid } = await import("@/lib/mail-hooks");
   const { setOrderStatus } = await import("@/lib/orders");
@@ -1198,6 +1327,12 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
     if (!moved) continue;
     cancelled += 1;
     if (!row.email) continue;
+    /* The backlog goes quietly. This order was already dead when the switch
+       was flipped — nobody was ever going to pay for it and nobody was
+       waiting to hear about it — so it is let go and nothing is written to
+       the customer. Counted as cancelled, because it was; not counted as
+       skipped, because no letter was due in the first place. */
+    if (quietBefore !== null && new Date(row.created_at).getTime() <= quietBefore) continue;
     const res = await onOrderClosed({ ...unpaidOrderLike(row), status: "cancelled" }, { kind: "cancelled" });
     if (res.ok && !res.skipped) sent += 1;
   }
@@ -1394,6 +1529,11 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     console.error("[flows] delivered failed:", err);
     out.delivered = { closed: 0, checked: 0, reason: "error" };
   }
+  /* Housekeeping, not a letter: the per-address cart-write counters
+     (db/migrations/181_cart_writes.sql) for days long past. It rides the one
+     scheduled job the shop has for the same reason everything else here does
+     — there is no second one. pruneCartWrites() swallows its own errors. */
+  await pruneCartWrites(now);
   out.ms = Date.now() - started;
   return out;
 }

@@ -18,6 +18,7 @@ import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
 import { cleanDelivery } from "@/lib/delivery";
 import { cleanBankFilter } from "@/lib/payments/methods";
+import { stampUnpaidFloor } from "@/lib/flows";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,6 +129,14 @@ export async function PUT(req: Request) {
          «показывать все», which is what a shop that never opened this setting
          has. Same first door as pricing and gift_amounts above. */
       if (key === "payment_banks") value = cleanBankFilter(value);
+      /* «Заказ ждёт оплаты»: the day the switch was turned ON is stamped into
+         the blob here, because this route is the only place that can see the
+         transition — it knows what the flows row said a moment ago and what it
+         is about to say. Nothing else in the shop, and nobody in the panel,
+         ever writes that field: it is the line the backlog goes quietly under
+         (src/lib/flows.ts stampUnpaidFloor, and the `unpaidFrom` note on the
+         Flows type). Same first door as everything above it. */
+      if (key === "flows") value = await stampUnpaidFloor(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

@@ -34,7 +34,9 @@
  * A tier that flips retail → pro here — «Одобрить» or `{tier:"pro"}` from the
  * card's switch — sends the «Цены для салонов включены» letter, the same one
  * «+ Партнёр» sends (src/lib/partner-mail.ts); the answer carries `mail`.
- * Demotions and repeats send nothing.
+ * Demotions and repeats send nothing, and neither does a RETURN: an address
+ * that has been a partner before (`pro_approved_at` on the row) is welcomed
+ * once and only once, whatever the tier has done since.
  */
 import { isEmail, productsForAlerts } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
@@ -154,6 +156,12 @@ export async function PATCH(req: Request, ctx: Ctx) {
     // path segment — the segment may have been an e-mail address
     const realId = customer.id;
     const tierBefore = customer.tier;
+    /* …and whether this address has ever been a partner before. `pro_approved_at`
+       is stamped on the very first promotion (db/migrations/100_tiers_loyalty.sql)
+       and is never cleared by a demotion, so it is the shop's memory of having
+       welcomed somebody. Read HERE, off the row as it was before this request
+       touched it: approveProCustomer() re-stamps it. */
+    const welcomedBefore = !!customer.proApprovedAt;
 
     if (action === "approve") {
       customer = (await approveProCustomer(realId)) ?? customer;
@@ -181,9 +189,21 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
     /* The welcome letter, once, on the flip itself: approve and the switch
        both land here, a card that was pro already sends nothing. Best effort
-       — the tier is already written; a mail failure is reported, not raised. */
+       — the tier is already written; a mail failure is reported, not raised.
+       `welcomedBefore` is the rest of it (Dim, 17.09.2026): «Одобрить Pro» has
+       no undo precisely so that it cannot be pressed twice, but the tier
+       switch on the same card does — pro → retail → pro is two flips and was
+       two letters, on two different days, so partner-mail.ts's own same-day
+       idempotency key did not catch the second one. The letter goes the first
+       time this address becomes a partner and never again; a genuinely
+       returning partner is rare enough for Renat to greet by hand.
+
+       Nothing is put in `mail` when the letter is suppressed: the panel reads
+       a missing `mail` as «no letter was due» and says «Партнёр одобрен»,
+       which is the true thing to say. A `{sent:false}` there would have made
+       it say «письмо не ушло», i.e. report a failure that did not happen. */
     let mail: { sent: boolean; skipped?: boolean; reason?: string } | undefined;
-    if (tierBefore !== "pro" && customer.tier === "pro" && (action === "approve" || tier === "pro")) {
+    if (tierBefore !== "pro" && customer.tier === "pro" && (action === "approve" || tier === "pro") && !welcomedBefore) {
       const res = await sendPartnerWelcome({
         email: customer.email,
         name: customer.name,

@@ -14,9 +14,19 @@
  * The address is used as written unless a customer session says otherwise, in
  * which case the session wins: a signed-in shopper cannot file a cart under
  * somebody else's mailbox.
+ *
+ * Which leaves the guest, who is the whole point of the letter and proves
+ * nothing at all. Dim, 17.09.2026: keep the feature, bound the exposure per
+ * ADDRESS rather than per IP. The per-IP limiter below stays — it is what
+ * keeps a single client from hammering this route — but it is a Map in one
+ * Node process, so a serverless cold start forgets it and a second instance
+ * never saw it. The bound that matters is `allowGuestCartWrite`
+ * (src/lib/customers.ts): a counter on the address itself, in the database,
+ * rolling over on the Tallinn day. A signed-in shopper writing their own
+ * mailbox is proven and is not counted.
  */
 import { clientIp, rateLimit } from "@/lib/auth";
-import { isEmail, normalizeEmail, saveCart, sessionEmail } from "@/lib/customers";
+import { allowGuestCartWrite, isEmail, normalizeEmail, saveCart, sessionEmail } from "@/lib/customers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,12 +58,22 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
 
-  const email = sessionEmail(req) ?? normalizeEmail(body.email);
+  const session = sessionEmail(req);
+  const email = session ?? normalizeEmail(body.email);
   if (!isEmail(email)) {
     return Response.json({ ok: false, error: "bad_email" }, { status: 400 });
   }
 
   try {
+    /* Nobody proved this address is theirs. Count the write against the
+       address and refuse once the day's budget is gone — same answer as the
+       per-IP limiter above, because from the browser's side it is the same
+       thing: this snapshot was not filed, try later. The storefront already
+       treats a failed snapshot as a snapshot it will send again on the next
+       change, so nothing on screen depends on it. */
+    if (!session && !(await allowGuestCartWrite(email))) {
+      return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
+    }
     const snap = await saveCart({ email, lang: body.lang, items: body.items });
     return Response.json(
       { ok: true, items: snap?.items.length ?? 0, total: snap?.total ?? 0 },

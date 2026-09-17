@@ -23,9 +23,24 @@
  *     link (kind "backstock") cancels the person's pending alerts instead.
  *
  * The rule that keeps the two halves honest: the latest expression of will
- * wins. The link takes an address out (and turns the tick off on the row); a
- * later tick at the checkout or in the account puts it back and clears the
- * opt-out. Nothing here is a newsletter — there is still no list to send from.
+ * wins — **from the person whose address it is**. The link takes an address
+ * out (and turns the tick off on the row); a later tick puts it back and
+ * clears the opt-out, but only when the shop knows who ticked it.
+ *
+ * That qualification is Dim's answer of 17.09.2026 and it amends the rule as
+ * db/migrations/052_marketing_consent.sql first wrote it down. POST /api/orders
+ * is open to guests — it has to be, a first order is placed by somebody who
+ * has never signed in — so «a later tick at the checkout» is a tick anybody
+ * can send on anybody's behalf. Typing a stranger's address into a checkout is
+ * not that stranger changing their mind, and it must not take them off the
+ * stop list they put themselves on. So: the consent is recorded either way
+ * (the shop stores what it was told, stamped with where), and the stop list is
+ * cleared only when the poster proved the address is theirs — a customer
+ * session on the same mailbox, the account form, or the owner's own hand in
+ * the panel. An unproven tick leaves `mail_optouts` exactly as it was, and the
+ * flows go on treating that address as one that asked for silence.
+ *
+ * Nothing here is a newsletter — there is still no list to send from.
  *
  * Nothing in here is allowed to be a hard dependency of the shop: the consent
  * writers never throw (a consent that could not be stored must not fail an
@@ -40,6 +55,20 @@ import { replyToAddress } from "@/lib/mail";
 
 /** Where a consent was given. */
 export type ConsentSource = "checkout" | "account" | "admin";
+
+/** How much of the tick the caller is entitled to act on. */
+export interface ConsentOptions {
+  /**
+   * Did the poster prove the address is theirs? True for the account form and
+   * for the owner in the panel, and for a checkout placed from a customer
+   * session on that same mailbox. False for a guest checkout, where the
+   * address is simply what was typed into a box.
+   *
+   * Only a proven yes clears `mail_optouts`. The consent itself is stored
+   * either way — see the amendment at the top of this file.
+   */
+  proven?: boolean;
+}
 
 /** Which letter's link took the address out. */
 export type OptOutKind = "marketing" | "backstock";
@@ -60,15 +89,22 @@ const KINDS: readonly OptOutKind[] = ["marketing", "backstock"];
  * day the form was last saved.
  *
  * Clears the address from mail_optouts — a fresh, explicit yes supersedes an
- * older «Отписаться» (see the note at the top). Never throws.
+ * older «Отписаться» (see the note at the top) — **but only when the yes is
+ * proven to come from that mailbox** (`opts.proven`, default true: every
+ * caller that can prove it says nothing, the one that cannot says so). An
+ * unproven yes writes the consent and leaves the stop list alone, so a guest
+ * order typed under a stranger's address cannot start the letters again.
+ * Never throws.
  */
 export async function recordMarketingConsent(
   email: string,
   lang?: unknown,
   source: ConsentSource = "checkout",
+  opts: ConsentOptions = {},
 ): Promise<boolean> {
   const addr = normalizeEmail(email);
   if (!addr || !isEmail(addr)) return false;
+  const proven = opts.proven !== false;
   try {
     await withTx(async (q) => {
       await q(
@@ -84,7 +120,7 @@ export async function recordMarketingConsent(
              else $3 end`,
         [addr, normalizeLangCode(lang), source],
       );
-      await q("delete from mail_optouts where email = $1", [addr]);
+      if (proven) await q("delete from mail_optouts where email = $1", [addr]);
     });
     return true;
   } catch (err) {
