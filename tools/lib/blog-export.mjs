@@ -16,10 +16,18 @@
    plain .mjs tool cannot import a TypeScript module with no build step, and
    the alternative — lifting the source text out of blog.ts and eval-ing it,
    the trick this file's sibling uses for app.js's UI dictionary — only works
-   on plain JavaScript, and blog.ts is typed. Keep the two in sync by hand;
-   tests/blog.test.ts and tests/prerender-blog.test.ts both exercise the
-   real (TypeScript) renderer, so a drift here is a wrong prerendered page,
-   not a security hole — the live API always serves the real one. */
+   on plain JavaScript, and blog.ts is typed. Keep the two in sync by hand.
+
+   «By hand» failed twice, silently, in the same way: an attribute added to
+   the real sanitiser and not to this one. `data-price` was caught by the
+   agent who added it, `data-fig` was not — it had been dropping the owner's
+   picture sizes out of every prerendered article since the presets were
+   built. Both drifts read as a wrong prerendered page, never as a security
+   hole (the live API always serves the real renderer), which is exactly why
+   nothing complained. tests/blog-figure-r22.test.ts now runs a corpus of
+   bodies through BOTH renderers and demands the same bytes out of each, so
+   the next attribute to be added on one side alone fails a test instead of
+   quietly changing what Google reads. */
 
 import { sslFor } from "../migrate.mjs";
 
@@ -158,6 +166,11 @@ const MAX_DEPTH = 24;
 const TAG_RE = /^<(\/?)([a-zA-Z][a-zA-Z0-9:-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/;
 const ATTR_RE = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s"'>]+))?/g;
 const PRODUCT_ID_RE = /^[a-z0-9][a-z0-9._-]{0,79}$/i;
+/* How wide a picture inside the text stands and which side the words run
+   down — the twin of FIG_VALUES in src/lib/blog.ts. Four words and nothing
+   else is written; anything outside the list leaves a bare <figure>, which
+   is what every article written before the presets existed carries. */
+const FIG_VALUES = new Set(["full", "half-left", "half-right", "small"]);
 const BARE_AMP = /&(?!#\d{1,7};|#[xX][0-9a-fA-F]{1,6};|[a-zA-Z][a-zA-Z0-9]{1,31};)/g;
 
 function escapeText(s) {
@@ -188,8 +201,21 @@ function parseAttrs(raw) {
   return out;
 }
 function openTag(name, attrsRaw) {
-  if (name !== "a" && name !== "img") return `<${name}>`;
+  if (name !== "a" && name !== "img" && name !== "figure") return `<${name}>`;
   const attrs = parseAttrs(attrsRaw);
+
+  /* The one attribute a figure may carry, and the only reason a <figure> is
+     read here at all: the size and the side the owner chose in the editor.
+     This is not decoration in the twin — the `.blog__body figure[data-fig]`
+     rules in public/shop2/styles.css hang off this attribute alone, so a
+     figure written bare here renders full width whatever the owner picked,
+     and every picture in every prerendered article came out the same size
+     until 17.09.2026. */
+  if (name === "figure") {
+    const fig = String(attrs["data-fig"] || "").trim().toLowerCase();
+    return FIG_VALUES.has(fig) ? `<figure data-fig="${fig}">` : "<figure>";
+  }
+
   if (name === "img") {
     const src = safeImageUrl(attrs.src || "");
     if (!src) return null;
