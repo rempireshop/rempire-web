@@ -222,8 +222,20 @@ describe("api routes", () => {
     expect(res.status).toBe(200);
     const back = await (await GET(get("/api/admin/settings/", admin))).json();
     expect(back.settings.shipping_rules.carriers.dpd.FI).toBe(12.39);
-    // the cells the owner did not touch are still Montonio's own
-    expect(back.settings.shipping_rules.carriers.smartpost.FI).toBe(9.39);
+    /* …and the cells he did not touch are not in the row AT ALL (r22,
+       17.09.2026). They used to be stored as explicit numbers, seeded from
+       Montonio's table by parseShippingRules() on the way in, which quietly
+       turned every empty box into an override that stopped following the
+       tariff. What an absent cell charges is still Montonio's price — that is
+       the read path's job — but now it is read at the moment of the quote. */
+    expect(back.settings.shipping_rules.carriers.smartpost).toBeUndefined();
+    expect(back.settings.shipping_rules.methods.courier).toEqual({});
+    expect(back.settings.shipping_rules.methods.parcel).toEqual({});
+    // …and a basket still costs exactly what it cost: the read path seeds
+    const { parseShippingRules, quoteFromRules } = await import("@/lib/shipping");
+    const priced = parseShippingRules(back.settings.shipping_rules);
+    expect(quoteFromRules(priced, { country: "FI", method: "parcel", carrier: "smartpost", subtotal: 20 }).price).toBe(9.39);
+    expect(quoteFromRules(priced, { country: "DE", method: "courier", subtotal: 20 }).price).toBe(22.29);
   });
 
   it("PUT /api/admin/settings still refuses a body that is not a JSON object", async () => {

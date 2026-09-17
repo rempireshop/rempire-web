@@ -9,7 +9,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { resetRateLimits } from "@/lib/auth";
+import { ADMIN_COOKIE, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { CUSTOMER_COOKIE, listCustomerOrders, makeCustomerToken } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
 import { createOrder, getOrder, setOrderNote, setOrderStatus } from "@/lib/orders";
@@ -18,8 +18,10 @@ import {
   canRequestReturn,
   deliveredAt,
   recordReturnRequest,
+  returnHandledAt,
   returnRequestedAt,
   returnWindowEnds,
+  setReturnHandled,
 } from "@/lib/returns";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
@@ -244,5 +246,117 @@ describe("POST /api/account/return-request", () => {
     const res = await POST(post({}));
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ ok: false, error: "bad_order" });
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * «Обработано» — the stamp that lets the counter fall (r22, Dim 17.09.2026)
+ * ------------------------------------------------------------------------ */
+
+describe("«Обработано»: the owner's answer to a return request", () => {
+  /** The tick, then whatever the owner does about it. */
+  async function askedFor() {
+    const order = await delivered();
+    const out = await recordReturnRequest(order);
+    expect(out.ok).toBe(true);
+    return (await getOrder(order.id))!;
+  }
+
+  /** The «Возвраты» number «Обзор» and «Сделать сегодня» both read. */
+  async function waiting(): Promise<number> {
+    const { getOverviewSummary } = await import("@/lib/analytics");
+    return (await getOverviewSummary()).attention.returnRequests;
+  }
+
+  function patch(id: string, body: unknown) {
+    return new Request(`https://rempireshop.com/api/admin/orders/${id}/`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", cookie: `${ADMIN_COOKIE}=${makeSessionToken()}` },
+      body: JSON.stringify(body),
+    });
+  }
+  const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
+
+  it("is not stamped until the owner stamps it", async () => {
+    const order = await askedFor();
+    expect(returnRequestedAt(order)).toBeTruthy();
+    expect(returnHandledAt(order)).toBeNull();
+  });
+
+  /* The whole reason it exists: until 17.09.2026 the number could only rise.
+     A refund takes an order out of it by moving the status, but a refund is
+     the answer to only some returns — the one settled on the phone and the one
+     he looked at and turned down both stayed in it for good, under the words
+     «те, на которые вы ещё не ответили». */
+  it("takes the order out of the «Возвраты» count, and puts it back", async () => {
+    const order = await askedFor();
+    expect(await waiting()).toBe(1);
+
+    const done = await setReturnHandled(order.id);
+    expect(done.ok).toBe(true);
+    expect(await waiting()).toBe(0);
+
+    const undone = await setReturnHandled(order.id, false);
+    expect(undone).toEqual({ ok: true, at: null });
+    expect(await waiting()).toBe(1);
+  });
+
+  it("moves no money, sends nothing and leaves the status where it was", async () => {
+    const order = await askedFor();
+    await setReturnHandled(order.id);
+    const after = (await getOrder(order.id))!;
+    expect(after.status).toBe("delivered");
+    expect(after.total).toBe(order.total);
+    expect(after.payment).toEqual(order.payment);
+    // …and the tick itself is untouched: the customer still asked, and when
+    expect(returnRequestedAt(after)).toBe(returnRequestedAt(order));
+  });
+
+  it("undoing it deletes the key rather than writing a false", async () => {
+    const order = await askedFor();
+    await setReturnHandled(order.id);
+    await setReturnHandled(order.id, false);
+    const [row] = await query<{ req: Record<string, unknown> }>(
+      "select shipping -> 'returnRequest' as req from orders where id = $1",
+      [order.id],
+    );
+    // one shape for one state, so the count stays a single `is null`
+    expect(Object.keys(row.req)).toEqual(["at"]);
+  });
+
+  it("refuses an order nobody asked to return — the key is not invented", async () => {
+    const order = await delivered();
+    expect(await setReturnHandled(order.id)).toEqual({ ok: false, error: "not_requested" });
+    const [row] = await query<{ req: unknown }>(
+      "select shipping -> 'returnRequest' as req from orders where id = $1",
+      [order.id],
+    );
+    expect(row.req).toBeNull();
+  });
+
+  it("is reachable from the order card, and says so in the journal", async () => {
+    const { PATCH } = await import("@/app/api/admin/orders/[id]/route");
+    const order = await askedFor();
+
+    const res = await PATCH(patch(order.id, { returnHandled: true }), ctx(order.id));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(returnHandledAt(body.order)).toBeTruthy();
+    expect(body.order.status).toBe("delivered");
+
+    const log = await query<{ payload: { handled: boolean; number: string } }>(
+      "select payload from admin_audit where action = 'return.handled'",
+    );
+    expect(log).toHaveLength(1);
+    expect(log[0].payload).toMatchObject({ handled: true, number: order.number });
+  });
+
+  it("the card refuses it on an order with no request — 409, not a silent write", async () => {
+    const { PATCH } = await import("@/app/api/admin/orders/[id]/route");
+    const order = await delivered();
+    const res = await PATCH(patch(order.id, { returnHandled: true }), ctx(order.id));
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ ok: false, error: "no_return_request" });
   });
 });

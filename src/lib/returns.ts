@@ -58,7 +58,7 @@ export type ReturnableOrder = {
 /** The fulfilment stamps this module keeps on the order's shipping jsonb. */
 type ReturnFields = {
   deliveredAt?: unknown;
-  returnRequest?: { at?: unknown } | null;
+  returnRequest?: { at?: unknown; doneAt?: unknown } | null;
 };
 
 function fields(shipping: unknown): ReturnFields {
@@ -96,6 +96,71 @@ export function returnWindowEnds(order: Pick<ReturnableOrder, "shipping" | "upda
 export function returnRequestedAt(order: Pick<ReturnableOrder, "shipping">): string | null {
   const req = fields(order.shipping).returnRequest;
   return req && typeof req === "object" ? isoOrNull(req.at) : null;
+}
+
+/**
+ * When the owner marked the request dealt with, or `null` — it is still open.
+ *
+ * Dim, 17.09.2026. The counter on «Обзор» and the «Возвраты» chip both said,
+ * in so many words, «в счётчике — те, на которые вы ещё не ответили», and
+ * neither could ever fall: the tick was the only thing stored, and nothing in
+ * the shop wrote a second stamp beside it. A request the owner had already
+ * settled sat in the number for good, so the number was «сколько людей когда-
+ * либо просили вернуть заказ» wearing the words «сколько ждут ответа».
+ *
+ * What it deliberately is NOT tied to:
+ *
+ *   · **not a letter.** He rings the customer as often as he writes — the
+ *     return that was settled on the phone would never leave the counter.
+ *   · **not a refund.** «Вернуть деньги» is the answer to some returns and not
+ *     to others: a return he looked at and turned down (opened cosmetics,
+ *     outside the window, the customer changed their mind again) is answered
+ *     and refunded nothing. Hanging the stamp on the money would leave exactly
+ *     those in the queue for good — the ones he has already spent his time on.
+ *
+ * So it is its own thing: one button, «Обработано», on the order card. It
+ * moves no money, sends nothing and changes no status — it says «я этим
+ * занялся», which is the only fact the counter was ever asking about.
+ */
+export function returnHandledAt(order: Pick<ReturnableOrder, "shipping">): string | null {
+  const req = fields(order.shipping).returnRequest;
+  return req && typeof req === "object" ? isoOrNull(req.doneAt) : null;
+}
+
+export type ReturnHandledOutcome =
+  | { ok: true; at: string | null }
+  | { ok: false; error: "not_requested" };
+
+/**
+ * Stamp — or un-stamp — «Обработано» on a return request.
+ *
+ * Only ever on an order that carries a request: there is nothing to answer
+ * otherwise, and writing the key onto an order nobody asked about would put a
+ * `returnRequest` object on it out of thin air, which is exactly what
+ * `admReturnAskedAt()` and the partial index read to mean «somebody asked».
+ *
+ * `done: false` is the undo, and it deletes the key rather than writing a
+ * false: «нет ключа» is what every order the owner has not answered looks
+ * like, and one shape for one state keeps the count a single `is null`.
+ */
+export async function setReturnHandled(
+  orderId: string,
+  done = true,
+  now: Date = new Date(),
+): Promise<ReturnHandledOutcome> {
+  const at = done ? now.toISOString() : null;
+  const rows = await query<{ at: string | null }>(
+    `update orders
+        set shipping = case when $2::text is null
+                         then shipping #- '{returnRequest,doneAt}'
+                         else jsonb_set(shipping, '{returnRequest,doneAt}', to_jsonb($2::text)) end,
+            updated_at = now()
+      where id = $1 and (shipping -> 'returnRequest') is not null
+      returning shipping -> 'returnRequest' ->> 'doneAt' as at`,
+    [orderId, at],
+  );
+  if (!rows.length) return { ok: false, error: "not_requested" };
+  return { ok: true, at: isoOrNull(rows[0]?.at) };
 }
 
 /**

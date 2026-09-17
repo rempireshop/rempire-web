@@ -148,9 +148,22 @@ describe("feedShipRules: a shop that has never saved the tariff table", () => {
       var MONTONIO_PRICE = ${literalSrc("MONTONIO_PRICE")};
       function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
       var SHIP_RULES_DEFAULT = cloneRules(SHIP_RULES);
+      /* r22: the panel keeps the STORED row beside the merged table, and
+         setShipRules() is what fills both — so the harness carries it too. */
+      var SHIP_STORED_DEFAULT = {
+        freeFrom: SHIP_RULES_DEFAULT.freeFrom,
+        freeFromByCountry: cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry),
+        methods: { parcel: {}, courier: {}, pickup: {} },
+        carriers: {},
+        countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff)
+      };
+      var SHIP_STORED = cloneRules(SHIP_STORED_DEFAULT);
       var THRESH = { EE: null, LV: null, LT: null, FI: null, EU: null };
       ${slice("refreshShipThresholds")}
       ${slice("applyShipRules")}
+      ${slice("shipRulesBase")}
+      ${slice("shipStoredMerge")}
+      ${slice("shipRulesFrom")}
       ${slice("setShipRules")}
       ${slice("feedShipRules")}
       var r = feedShipRules(S);

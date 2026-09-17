@@ -734,12 +734,19 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
  *
  * `returns` is the tick a customer put on a delivered order — «Хочу вернуть
  * заказ», src/lib/returns.ts. It counts the orders still standing at
- * «доставлен», because that is what "waiting for the owner to write back"
- * looks like in the database: the answer to a return is a refund, and a refund
- * that covers the order moves it to «возврат» and out of this count by itself.
- * The predicate is spelled exactly as orders_return_requested_idx spells it
- * (db/migrations/150_order_return_request.sql), or the partial index would not
- * be used.
+ * «доставлен» and NOT yet stamped «Обработано» by the owner.
+ *
+ * Until 17.09.2026 the stamp did not exist and this number could only ever
+ * rise: a refund that covers the order moves it to «возврат» and out of the
+ * count, but a refund is the answer to only some returns. The one he settled
+ * on the phone and the one he looked at and turned down both stayed in it for
+ * good, under the words «те, на которые вы ещё не ответили». `doneAt` is that
+ * answer, written by «Обработано» on the order card (setReturnHandled).
+ *
+ * The first two conditions are spelled exactly as orders_return_requested_idx
+ * spells them (db/migrations/150_order_return_request.sql); the third narrows
+ * the same set further, so the query's `where` still implies the index's
+ * predicate and the partial index is still the one Postgres reaches for.
  */
 async function qAttention(): Promise<OverviewSummary["attention"]> {
   const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string; returns: string }>(
@@ -751,7 +758,8 @@ async function qAttention(): Promise<OverviewSummary["attention"]> {
        (select count(*) from reviews where status = 'pending') as reviews,
        (select count(*) from stock_alerts where sent_at is null) as alerts,
        (select count(*) from orders
-          where status = 'delivered' and (shipping -> 'returnRequest') is not null) as returns`,
+          where status = 'delivered' and (shipping -> 'returnRequest') is not null
+            and (shipping -> 'returnRequest' ->> 'doneAt') is null) as returns`,
   );
   const r = rows[0];
   return {

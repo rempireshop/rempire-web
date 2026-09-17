@@ -267,6 +267,99 @@ function toPriceTable(v: unknown): Record<string, number> | null {
 }
 
 /**
+ * What settings.shipping_rules is allowed to HOLD — the owner's own cells,
+ * cleaned, and not one seeded number beside them.
+ *
+ * Dim, 17.09.2026. parseShippingRules() below seeds every missing cell from
+ * the defaults, which is exactly right on the way OUT — a basket has to be
+ * priced — and quietly wrong on the way IN. PUT /api/admin/settings ran the
+ * incoming value through it and stored the result, so the row came back out of
+ * the database with all twenty-five courier cells and all fourteen carrier
+ * cells written down as explicit numbers, whether the owner had typed them or
+ * not. A number in the row is an override; an override does not move when
+ * Montonio's tariff moves. So «пустое поле — цена Montonio» — the one sentence
+ * the whole rate screen is built on — stopped being true the moment anything
+ * was saved, and «Везде взять цены Montonio» froze that day's price list
+ * instead of clearing the table.
+ *
+ * This is the same cleaning without the seeding: numbers are validated and
+ * upper-cased, `markup` and anything unknown is dropped, and a cell that is
+ * not there stays not there. The three keys that ARE authoritative — how much
+ * delivery to give away and where the shop delivers at all — keep their
+ * defaults when the row does not mention them, because a row that says nothing
+ * about them is not a row that says «нигде не бесплатно».
+ *
+ * Reading is unchanged: loadShippingRules() still parses with the seeds, so
+ * every absent cell is priced from Montonio's own table at the moment of the
+ * quote, which is the whole point.
+ */
+export function cleanShippingRules(value: unknown): ShippingRules {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return cleanShippingRules({});
+  }
+  const raw = value as Record<string, unknown>;
+  const rules: ShippingRules = {
+    freeFrom: DEFAULT_SHIPPING_RULES.freeFrom,
+    freeFromByCountry: { ...(DEFAULT_SHIPPING_RULES.freeFromByCountry ?? {}) },
+    methods: { parcel: {}, courier: {}, pickup: {} },
+    carriers: {},
+    countriesOff: [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])],
+  };
+
+  if (raw.freeFrom === null) rules.freeFrom = null;
+  else {
+    const n = toNumber(raw.freeFrom);
+    if (n !== null && n >= 0) rules.freeFrom = n;
+  }
+
+  const byCountry = raw.freeFromByCountry;
+  if (typeof byCountry === "object" && byCountry !== null && !Array.isArray(byCountry)) {
+    const out: Record<string, number | null> = {};
+    for (const [c, v] of Object.entries(byCountry as Record<string, unknown>)) {
+      if (v === null) out[c.toUpperCase()] = null;
+      else {
+        const n = toNumber(v);
+        if (n !== null && n >= 0) out[c.toUpperCase()] = n;
+      }
+    }
+    rules.freeFromByCountry = out;
+  }
+
+  const methods = raw.methods;
+  if (typeof methods === "object" && methods !== null && !Array.isArray(methods)) {
+    for (const [name, table] of Object.entries(methods as Record<string, unknown>)) {
+      if (!isMethod(name)) continue;
+      rules.methods[name] = toPriceTable(table) ?? {};
+    }
+  }
+
+  const carriers = raw.carriers;
+  if (typeof carriers === "object" && carriers !== null && !Array.isArray(carriers)) {
+    const out: Record<string, Record<string, number>> = {};
+    for (const [carrier, table] of Object.entries(carriers as Record<string, unknown>)) {
+      /* …and only a carrier the shop can actually put a parcel on, for the
+         reason parseShippingRules() drops the others on the way out: a stale
+         `carriers.venipak` is not inert, quoteFromRules() reads the carrier
+         map before the method's own table. Refusing to STORE one keeps the
+         row and the read agreeing. */
+      const key = String(carrier).toLowerCase();
+      if (!SHOP_CARRIERS.includes(key)) continue;
+      const parsed = toPriceTable(table);
+      if (parsed) out[key] = parsed;
+    }
+    rules.carriers = out;
+  }
+
+  if (Array.isArray(raw.countriesOff)) {
+    rules.countriesOff = raw.countriesOff
+      .map((c) => String(c ?? "").trim().toUpperCase())
+      .filter((c) => /^[A-Z]{2}$/.test(c));
+  }
+
+  return rules;
+}
+
+/**
  * Parse whatever sits in settings.shipping_rules, keeping the defaults for
  * anything missing or nonsense. A half-written rules row degrades one line at a
  * time instead of taking the checkout down.
@@ -514,13 +607,26 @@ function eur(n: number): string {
  *     is not a loss (SmartPosti costs 15.62 €) even though DPD would cost
  *     20.09 €; it is a thin margin, not a hole, and refusing the save over it
  *     would be refusing a price that makes money.
- *   · **the parcel column outside EE/LV/LT/FI**, same rule. Inside those four
- *     the shopper always picks a chip and the carrier cell is what bills, so
- *     the column there is a fallback and flagging it would refuse a save over
- *     a number that charges nobody.
+ *   · not the parcel column, at all, since 17.09.2026 — see below.
  *   · not `default`, not a zone row (`EU`), not `freeFrom`. Those are not one
  *     route and have no one cost to compare against; giving delivery away over
  *     a threshold is the owner's own decision and always was.
+ *
+ * **Why the «Пакомат» column left the guard.** It was checked outside
+ * EE/LV/LT/FI on the reasoning that those four bill from the carrier chip and
+ * the rest bill from the column. What that missed is that no box on the rate
+ * screen writes the column: admShipRowHTML() in public/shop2/app.js emits
+ * `c:<carrier>:<country>`, `m:courier:<country>` and `free:<country>` and
+ * nothing else — the «Пакомат» boxes went when the screen lost two tables on
+ * 14.09.2026, and the checkout offers no parcel machine in any of those
+ * eighteen countries either. So every cell this half of the loop could see was
+ * a default nobody typed, and the day a Montonio tariff rose past one of them
+ * the shop would have refused the owner's next save — any save, of any cell —
+ * over a number with no box to change. A refusal you cannot act on is not a
+ * guard, it is a locked panel. The cells themselves are unchanged and are
+ * still honoured by quoteFromRules(); since r22 a saved row does not carry
+ * them at all (cleanShippingRules), so they are the defaults, and the defaults
+ * are Montonio's own prices.
  */
 export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
   const out: BelowCostCell[] = [];
@@ -533,13 +639,10 @@ export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
     }
   }
 
-  for (const method of ["parcel", "courier"] as const) {
-    for (const [country, charged] of Object.entries(rules.methods[method] ?? {})) {
-      if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
-      if (method === "parcel" && CARRIER_CHOICE_COUNTRIES.includes(country)) continue;
-      const cost = methodPrice(country, method);
-      if (cost !== null && charged < cost) out.push({ carrier: "", country, method, charged, cost });
-    }
+  for (const [country, charged] of Object.entries(rules.methods.courier ?? {})) {
+    if (country === "default" || shippingZone(country) === "default" || country === "EU") continue;
+    const cost = methodPrice(country, "courier");
+    if (cost !== null && charged < cost) out.push({ carrier: "", country, method: "courier", charged, cost });
   }
 
   return out;

@@ -71,6 +71,7 @@ function panel(orders: ReturnType<typeof row>[]): Panel {
     ${slice("admWaitingSplit")}
     ${slice("admOrderMatches")}
     ${slice("admReturnAskedAt")}
+    ${slice("admReturnDoneAt")}
     ${slice("admRefundView")}
     function admRefundedTotal() { return 0; }
     function admRefunds() { return []; }
@@ -137,6 +138,7 @@ describe("the admin's «Отправить» queue", () => {
     const body = `
       ${slice("admOrderVM")}
       ${slice("admReturnAskedAt")}
+    ${slice("admReturnDoneAt")}
       ${slice("admRefundView")}
       function admRefundedTotal() { return 0; }
       function admRefunds() { return []; }

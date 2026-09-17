@@ -2774,6 +2774,49 @@
       }
     },
     {
+      "id": "order-search-server",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Поиск по заказам ищет во всём магазине",
+      "steps": [
+        "Открыть «Заказы» и пролистать список до самого низа, нажимая «Показать ещё».",
+        "Взять номер заказа, которого в списке нет, — из старого письма покупателю.",
+        "Ввести этот номер в поиск и подождать.",
+        "Стереть пару знаков и дописать их обратно, быстро.",
+        "Ввести номер, которого нет вообще."
+      ],
+      "expect": [
+        "Пока ищем, над списком написано «Ищем…».",
+        "Старый заказ нашёлся, хотя в самом списке его не было.",
+        "После быстрой правки список отвечает на то, что в поле сейчас.",
+        "На несуществующий номер написано «Ничего не нашли» и по чему мы ищем.",
+        "Числа на чипах «Отправить», «По счёту» и «Возвраты» от поиска не изменились."
+      ],
+      "why": "Заказ, который покупатель называет по телефону, обычно старый — он-то в сотне последних и не лежит.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The order search looks through the whole shop",
+        "steps": [
+          "Open «Заказы» and scroll to the very bottom, pressing «Показать ещё».",
+          "Take an order number that is NOT in that list — from an old letter to a customer.",
+          "Type that number into the search and wait.",
+          "Delete a couple of characters and type them back, quickly.",
+          "Type a number that does not exist at all."
+        ],
+        "expect": [
+          "While it is looking, «Ищем…» stands above the list.",
+          "The old order is found, although it was not in the list itself.",
+          "After the quick edit the list answers what is in the box, not the previous word.",
+          "A number that does not exist gets «Ничего не нашли» and what we search by.",
+          "The numbers on the «Отправить», «По счёту» and «Возвраты» chips did not move."
+        ],
+        "why": "The order a customer names on the phone is usually an old one — which is exactly what the hundred newest do not hold."
+      }
+    },
+    {
       "id": "order-card-payment",
       "area": "orders",
       "who": "renat",
@@ -3231,6 +3274,49 @@
           "The row from «Обзор» leads to «Возвраты», not to «В пути»."
         ],
         "why": "A return request with nowhere to look for it comes back as a complaint."
+      }
+    },
+    {
+      "id": "order-return-handled",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Возврат: кнопка «Обработано»",
+      "steps": [
+        "Запомнить число у чипа «Возвраты» и число в строке про возврат на «Обзоре».",
+        "Открыть заказ, по которому просили возврат.",
+        "Нажать «Обработано».",
+        "Вернуться на «Заказы» и на «Обзор».",
+        "Снова открыть этот заказ и нажать «Вернуть в «Возвраты»»."
+      ],
+      "expect": [
+        "Под кнопкой написано, что деньги не уходят и письмо не отправляется.",
+        "Оба числа стали на один меньше.",
+        "Заказ остался в списке «Возвраты», но метка на строке теперь «Возврат обработан».",
+        "Деньги не вернулись и покупателю ничего не пришло.",
+        "После «Вернуть в «Возвраты»» оба числа снова выросли на один."
+      ],
+      "why": "Счётчик, который умеет только расти, через месяц показывает не работу, а историю.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "A return: the «Обработано» button",
+        "steps": [
+          "Note the number on the «Возвраты» chip and the number in the return row on «Обзор».",
+          "Open the order the return was asked for.",
+          "Press «Обработано» (dealt with).",
+          "Go back to «Заказы» and to «Обзор».",
+          "Open that order again and press «Вернуть в «Возвраты»»."
+        ],
+        "expect": [
+          "The line under the button says no money moves and no letter goes out.",
+          "Both numbers have gone down by one.",
+          "The order is still in the «Возвраты» list, but its row is now marked «Возврат обработан».",
+          "No money came back and the customer got nothing.",
+          "After «Вернуть в «Возвраты»» both numbers are up by one again."
+        ],
+        "why": "A counter that can only go up stops showing the work and starts showing the history."
       }
     },
     {
