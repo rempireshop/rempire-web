@@ -280,7 +280,9 @@ function clean(node: Node, opts: { cards: boolean; live?: string[] }): string {
     ${sliceVar("BLOG_DROP_EMPTY")}
     ${sliceVar("BLOG_PRODUCT_ID")}
     ${sliceVar("BLOG_MAX_DEPTH")}
+    ${sliceVar("BLOG_FIG")}
     ${slice("esc")}
+    ${slice("blogFigOf")}
     ${slice("blogImgUrl")}
     ${slice("blogSafeUrl")}
     function blogProductHTML(id) { return LIVE.indexOf(id) < 0 ? "" : '<button data-go-product="' + id + '"></button>'; }
@@ -320,6 +322,75 @@ describe("an inline product card on the storefront", () => {
     expect(clean(link, { cards: true })).toBe('<a href="https://example.com/a" target="_blank" rel="noopener noreferrer">сайт</a>');
     // the editor cleans the same body with cards off — the owner must still see his card
     expect(clean(marker(OIL), { cards: false })).toContain(`data-product="${OIL}"`);
+  });
+});
+
+/* ---------- a picture's size, and its trip through a translation ---------- */
+
+/** blogFigsIn() — the half of the round-trip that is pure string work. */
+function figsIn(html: string, figs: Array<{ src: string; alt: string; fig: string }>): string {
+  const body = `
+    ${sliceVar("BLOG_FIG")}
+    ${sliceVar("BLOG_FIG_MARK_RX")}
+    ${slice("esc")}
+    ${slice("blogFigOf")}
+    ${slice("blogImgUrl")}
+    ${slice("blogFigMark")}
+    ${slice("blogFigHTML")}
+    ${slice("blogFigsIn")}
+    return blogFigsIn(HTML, FIGS);
+  `;
+  const run = new Function("HTML", "FIGS", body) as (h: string, f: unknown[]) => string;
+  return run(html, figs);
+}
+
+const PIC = { src: "/shop/img/night-rider-0.webp", alt: "паста", fig: "half-left" };
+
+describe("a picture inside the text", () => {
+  it("keeps the size the owner chose, and refuses one nobody offered", () => {
+    for (const fig of ["full", "half-left", "half-right", "small"]) {
+      const node = el("FIGURE", { "data-fig": fig }, [el("IMG", { src: PIC.src, alt: "" })]);
+      expect(clean(node, { cards: false })).toBe(
+        `<figure data-fig="${fig}"><img src="${PIC.src}" alt="" loading="lazy"></figure>`,
+      );
+    }
+    const bad = el("FIGURE", { "data-fig": "enormous" }, [el("IMG", { src: PIC.src, alt: "" })]);
+    expect(clean(bad, { cards: false })).toBe(`<figure><img src="${PIC.src}" alt="" loading="lazy"></figure>`);
+  });
+
+  /* The promise the whole feature is judged on: a body written before the
+     presets existed has a bare <figure>, and a bare <figure> has to come out
+     of the cleaner bare — in the editor, on the article page and in the
+     prerendered copy, all three of which run this function or its twin in
+     src/lib/blog.ts. */
+  it("leaves an article written before the presets exactly as it was", () => {
+    const old = el("FIGURE", {}, [el("IMG", { src: PIC.src, alt: "кот" })]);
+    expect(clean(old, { cards: false })).toBe(`<figure><img src="${PIC.src}" alt="кот" loading="lazy"></figure>`);
+  });
+
+  /* «Перевести на ET и EN» flattens the body to text for the model, which
+     used to cost every picture its <figure> — and would now cost it the size
+     and the side with it. The pictures are lifted out first and put back
+     after, exactly as the product cards are. */
+  it("comes back from a translation with its size, its side and its words", () => {
+    const out = figsIn("<p>Uus tekst.</p><p>[[i1]]</p><p>Veel teksti.</p>", [PIC]);
+    expect(out).toContain('<figure data-fig="half-left">');
+    expect(out).toContain(`src="${PIC.src}"`);
+    expect(out).toContain('alt="паста"');
+    expect(out).not.toContain("[[i1]]");
+  });
+
+  it("is appended rather than lost when the model swallowed its token", () => {
+    const out = figsIn("<p>Uus tekst ilma märgita.</p>", [PIC]);
+    expect(out, "the picture vanished with its token").toContain('<figure data-fig="half-left">');
+    expect(out.indexOf("<figure")).toBeGreaterThan(out.indexOf("</p>"));
+  });
+
+  it("drops a token the model invented, and never writes a picture it cannot serve", () => {
+    expect(figsIn("<p>[[i1]] и ещё [[i7]]</p>", [PIC])).not.toContain("[[i7]]");
+    // http:, javascript: — blogImgUrl refuses both, so nothing is written at all
+    const bad = [{ src: "javascript:alert(1)", alt: "", fig: "full" }];
+    expect(figsIn("<p>[[i1]]</p>", bad)).not.toContain("javascript");
   });
 });
 

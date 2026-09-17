@@ -304,7 +304,13 @@ test.describe("blog — the visual editor", () => {
      types, because the picture is the explanation. Without a cover, the
      dashed zone with «+ Обложка» and the hint. One upload behind both. The
      suite has no bucket, so «Заменить обложку» stands disabled with the
-     storage note — a state line, not the hint. */
+     storage note — a state line, not the hint.
+
+     Since 17.09.2026 «the picture itself» is the picture in the two frames
+     the shop puts it in, not one 16:9 crop of it that matched neither — see
+     e2e/admin-blog-pictures.spec.ts, which owns those two frames. What this
+     test still owns is everything around them: the caption, the two actions,
+     the upload, and the dashed zone the block falls back to. */
   test("the cover block: a large preview with «Заменить обложку» and «Удалить» once a cover is set, the dashed «+ Обложка» zone without one", async ({ page }) => {
     test.setTimeout(90_000);
     const w = watch(page);
@@ -325,15 +331,16 @@ test.describe("blog — the visual editor", () => {
       await page.locator(`[data-admblogedit="${post.id}"]`).click();
       const cover = page.locator('.adm-cover[data-galdrop="blog"]');
       await expect(cover).toBeVisible();
-      const img = cover.locator("img.adm-cover__img");
-      await expect(img).toHaveAttribute("src", IMAGE_URL);
-      await expect(img).toHaveAttribute("alt", "Бальзам Proraso на полке");
-      // large: the picture is the block's width and 16:9, not a thumbnail beside the buttons
-      const pic = await img.boundingBox();
+      const see = cover.locator(".adm-see");
+      await expect(see, "the cover is not shown at all").toBeVisible();
+      const frame = see.locator(".blog__cover");
+      await expect(frame).toHaveAttribute("style", new RegExp(IMAGE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      await expect(frame).toHaveAttribute("aria-label", "Бальзам Proraso на полке");
+      // large: the picture takes the block, it is not a thumbnail beside the buttons
+      const pic = await frame.boundingBox();
       const zone = await cover.boundingBox();
-      expect(pic!.width).toBeGreaterThan(zone!.width - 4);
-      expect(pic!.height).toBeGreaterThanOrEqual(150);
-      expect(pic!.height).toBeLessThanOrEqual(282);
+      expect(pic!.width).toBeGreaterThan(zone!.width / 2 - 4);
+      expect(pic!.height).toBeGreaterThanOrEqual(100);
       await expect(cover.locator(".adm-cover__alt")).toHaveText("Бальзам Proraso на полке");
       await expect(cover.locator('[data-galup="blog"]')).toHaveText("Заменить обложку");
       await expect(cover.locator("[data-admblogcoverdel]")).toHaveText("Удалить");

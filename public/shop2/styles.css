@@ -2123,6 +2123,44 @@ button, a, summary, label { touch-action: manipulation; }
    this only caps the measure and gives images and quotes their own room. */
 .blog__body { max-width: 68ch; }
 .blog__body img { display: block; max-width: 100%; height: auto; margin: 18px 0; }
+/* ---- a picture inside the text: how wide it stands, and on which side ----
+   Four presets, written by the panel onto the picture's own <figure> as
+   `data-fig` (BLOG_FIG in app.js; FIG_VALUES in src/lib/blog.ts is the
+   server's copy of the same four words).
+
+   A <figure> with no `data-fig` is matched by nothing below, deliberately:
+   that is every picture in every article written before the presets existed,
+   and it keeps exactly the rendering it has today — the browser's own figure
+   margins, and `.blog__body img` above. Nothing here can move an old article,
+   because nothing here can select one.
+
+   Half width is a float, and has to be: only a float makes the paragraphs
+   that FOLLOW the picture run down beside it, which is what «текст рядом»
+   means — a flex or a grid row could put one paragraph there and no more.
+   The two costs of a float are paid on the spot: headings, quotes and
+   product cards clear it, so a new section never opens halfway down a
+   picture, and the body closes its own floats, so a tall picture at the end
+   cannot push into the products shelf below.
+
+   On a phone there is no «beside». 48 % of a 343 px column is 165 px of
+   picture and about twenty characters of text per line, which is not
+   reading. Both halves go full width under the shop's own phone breakpoint;
+   «маленькая» stays small, being the one preset that still means something
+   at 375 px. */
+.blog__body figure[data-fig] { margin: 18px 0; }
+.blog__body figure[data-fig] img { width: 100%; margin: 0; }
+.blog__body figure[data-fig="half-left"],
+.blog__body figure[data-fig="half-right"] { width: 48%; }
+.blog__body figure[data-fig="half-left"] { float: left; margin: 6px 22px 10px 0; }
+.blog__body figure[data-fig="half-right"] { float: right; margin: 6px 0 10px 22px; }
+.blog__body figure[data-fig="small"] { width: 50%; max-width: 260px; }
+.blog__body h2, .blog__body h3, .blog__body blockquote, .blog__body .blog__prod { clear: both; }
+.blog__body::after { content: ""; display: block; clear: both; }
+@media (max-width: 767px) {
+  .blog__body figure[data-fig="half-left"],
+  .blog__body figure[data-fig="half-right"] { float: none; width: 100%; margin: 18px 0; }
+  .blog__body figure[data-fig="small"] { width: 62%; max-width: 190px; }
+}
 .blog__body blockquote {
   margin: 18px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--rule); color: var(--muted);
 }

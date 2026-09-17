@@ -187,6 +187,34 @@ describe("sanitizeHtml — what a body written in the editor is allowed to be", 
     expect(sanitizeHtml('<p><a data-product="<script>">x</a></p>')).toBe("<p>x</p>");
   });
 
+  /* The four sizes a picture inside the text can have — `data-fig` on its own
+     <figure>, written by the panel when the owner taps the picture. The point
+     of the checks below is the pair at the end: an article written before the
+     presets existed carries a bare <figure>, and a bare <figure> has to come
+     back out of here bare, or every old article moves. */
+  it("keeps the four picture presets on a figure, and nothing else", () => {
+    for (const fig of ["full", "half-left", "half-right", "small"]) {
+      expect(sanitizeHtml(`<figure data-fig="${fig}"><img src="/a.webp" alt=""></figure>`))
+        .toBe(`<figure data-fig="${fig}"><img src="/a.webp" alt="" loading="lazy"></figure>`);
+    }
+  });
+
+  it("drops a picture preset it does not know, and leaves an older article's figure bare", () => {
+    for (const bad of ["", "huge", "left", "half left", "<script>alert(1)</script>"]) {
+      expect(sanitizeHtml(`<figure data-fig="${bad}"><img src="/a.webp" alt=""></figure>`))
+        .toBe('<figure><img src="/a.webp" alt="" loading="lazy"></figure>');
+    }
+    // a preset that only differs in case or spacing is the preset, not a refusal
+    expect(sanitizeHtml('<figure data-fig=" HALF-LEFT "><img src="/a.webp" alt=""></figure>'))
+      .toBe('<figure data-fig="half-left"><img src="/a.webp" alt="" loading="lazy"></figure>');
+    // the shape every body written before this change holds, unchanged
+    expect(sanitizeHtml('<figure><img src="/a.webp" alt="кот"></figure>'))
+      .toBe('<figure><img src="/a.webp" alt="кот" loading="lazy"></figure>');
+    // and no other attribute gets in on the back of it
+    expect(sanitizeHtml('<figure class="x" style="width:9px" onclick="alert(1)" data-fig="small"><img src="/a.webp" alt=""></figure>'))
+      .toBe('<figure data-fig="small"><img src="/a.webp" alt="" loading="lazy"></figure>');
+  });
+
   it("cleans a paste from Word down to the text and the emphasis it carried", () => {
     const word =
       '<div class="WordSection1"><o:p></o:p><p class="MsoNormal">' +
