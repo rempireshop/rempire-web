@@ -40,6 +40,7 @@ interface Call {
 }
 
 interface Answer {
+  /** postJSON(): the route answered 404/405/501 — there is no API here. */
   offline?: boolean;
   /** postJSON(): the request left and no answer came back — see its comment. */
   lost?: boolean;
@@ -74,7 +75,11 @@ interface Rig {
  * answered from a script, and the rest of the checkout says «everything is
  * filled in».
  */
-function rig(answers: Answer[]): Rig {
+/**
+ * @param apiOk what API.ok holds when «Оплатить» is pressed. `false` is what a
+ *   single failed background probe at page load latches it to.
+ */
+function rig(answers: Answer[], apiOk: boolean | null = true): Rig {
   const body = `
     var calls = [], toasts = [], held = [], href = "", cart = [{ id: "p1", qty: 1 }];
     var script = ANSWERS.slice();
@@ -84,7 +89,7 @@ function rig(answers: Answer[]): Rig {
       emailTouched: false, shipTouched: false, giftToTouched: false, invTouched: false,
       country: "EE", countryIso: "", coStep: 3, done: null
     };
-    var API = { ok: true };
+    var API = { ok: API_OK };
     /* The abandoned-cart snapshot, which payNow() switches off before it makes
        the order and back on if the order failed — a basket that is becoming an
        order is not an abandoned one, and the request must not still be in
@@ -144,7 +149,7 @@ function rig(answers: Answer[]): Rig {
       reload: function () { S.paying = false; }
     };
   `;
-  const made = (new Function("ANSWERS", body) as (a: Answer[]) => {
+  const made = (new Function("ANSWERS", "API_OK", body) as (a: Answer[], ok: boolean | null) => {
     tap(): Promise<void>;
     calls: Call[];
     toasts: string[];
@@ -153,7 +158,7 @@ function rig(answers: Answer[]): Rig {
     href(): string;
     setCart(l: Array<{ id: string; qty: number }>): void;
     reload(): void;
-  })(answers);
+  })(answers, apiOk);
   return {
     tap: made.tap,
     calls: made.calls,
@@ -382,5 +387,74 @@ describe("postJSON(): a dead host and a lost answer are not the same thing", () 
     expect(ok).toEqual({ body: { ok: true, orderId: "x" }, status: 200 });
     const refused = await post(async () => res(409, async () => ({ ok: false, error: "out_of_stock" })));
     expect(refused).toEqual({ body: { ok: false, error: "out_of_stock" }, status: 409 });
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   …and the receipt that was never earned.
+
+   `finishDemo()` empties the basket, persists it and paints the green «Заказ
+   оформлен» — it exists because the prototype is also served statically for
+   Renat, with no API behind it at all. Two ways into it were wrong, and both
+   showed that receipt to a shopper of the REAL shop:
+
+   1. `if (API.ok === false) return finishDemo();` before the POST. API.ok is
+      latched false by the .catch of the one-shot probes this screen fires at
+      load, none of which ever asks again, so one blink of a phone's connection
+      turned «Оплатить» into a lie for the life of the page.
+   2. postJSON() answered a bare `offline` for a rejected fetch and for any body
+      it could not parse — which is exactly what an edge 502/504 is. A timeout
+      on the way BACK from POST /api/orders/ meant the order existed, was
+      unpaid, and the shopper was told it was done. Such an answer now carries
+      `lost`, and payNow() asks about that before it asks about `offline`.
+
+   Only a real 404/405/501 finishes the demo now; everything else is an error
+   the shopper can act on.
+--------------------------------------------------------------------------- */
+const OFFLINE = { offline: true };
+/* A lost answer as postJSON() reports it: `offline` rides along for the
+   callers that cannot tell the difference, `lost` is what payNow() reads. */
+const DROPPED = { offline: true, lost: true, status: 502 };
+const LOST_ORDER =
+  "Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз";
+const LOST_PAY = "Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз";
+
+describe("payNow(): the demo receipt is only for a shop with no API at all", () => {
+  it("still posts the order when a background probe has latched API.ok = false", async () => {
+    const r = rig([ORDER_OK, PAY_OK], false);
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/", "/api/payments/create/"]);
+    expect(r.toasts).not.toContain("demo");
+    expect(r.href).toBe("https://bank.example/pay/1");
+  });
+
+  it("finishes the demo on a 404 from /api/orders/ — the static prototype still walks", async () => {
+    const r = rig([OFFLINE]);
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/"]);
+    expect(r.toasts).toEqual(["demo"]);
+  });
+
+  it("a dropped line on POST /api/orders/ is an error, not a receipt", async () => {
+    const r = rig([DROPPED]);
+    await r.tap();
+    expect(r.toasts).toEqual([LOST_ORDER]);
+    expect(r.toasts).not.toContain("demo");
+  });
+
+  /* The worst of the two: the order EXISTS by now. A green receipt here is a
+     paid-looking page for an order nobody has paid for. */
+  it("a dropped line on POST /api/payments/create/ is an error, not a receipt", async () => {
+    const r = rig([ORDER_OK, DROPPED, PAY_OK]);
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/", "/api/payments/create/"]);
+    expect(r.toasts).toEqual([LOST_PAY]);
+    expect(r.toasts).not.toContain("demo");
+    expect(r.href).toBe("");
+    // …and the order it already made is still the one the next tap pays for
+    await r.tap();
+    expect(urls(r)).toEqual(["/api/orders/", "/api/payments/create/", "/api/payments/create/"]);
+    expect(r.calls[2].body.orderId).toBe("order-1");
+    expect(r.href).toBe("https://bank.example/pay/1");
   });
 });

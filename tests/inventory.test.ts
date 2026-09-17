@@ -359,6 +359,64 @@ describe("inventory", () => {
     });
   });
 
+  /* The product's one word says «in» while ANY size is left — right for a
+     card, and until 14.09.2026 the only thing createOrder() looked at. A
+     sold-out 500 ml on a product whose 75 ml was on the shelf went into the
+     basket, through the checkout and onto a paid order, and the owner was
+     left to explain it. The order gate reads the ordered size's own state. */
+  describe("a sold-out SIZE is refused even while the product reads in stock", () => {
+    const buyer = { name: "Т", email: "t@example.com", phone: "+372 5555 5555" } as const;
+    const ship = { method: "pickup", country: "EE" } as const;
+
+    /** First size counted and on the shelf, second size counted and sold out. */
+    async function shelf() {
+      const [first, second] = VARIANTS[sized.id].sizes;
+      await move({ productId: sized.id, variant: first, delta: 5, reason: "goods_in" });
+      await move({ productId: sized.id, variant: second, delta: 1, reason: "goods_in" });
+      await move({ productId: sized.id, variant: second, delta: -1, reason: "sale_web" });
+      return { first, second };
+    }
+
+    it("ships the per-size states on the feed while the product's word stays «in»", async () => {
+      const { first, second } = await shelf();
+      const ov = (await getOverrides([sized.id]))[sized.id];
+      // the trap in one line: the word a card shows says the product is sellable
+      expect(ov?.stock).toBe("in");
+      expect(ov?.stockByVariant?.[first]).toBe("in");
+      expect(ov?.stockByVariant?.[second]).toBe("out");
+    });
+
+    it("refuses an order for the size that is out", async () => {
+      const { second } = await shelf();
+      await expect(
+        createOrder({ items: [{ id: sized.id, variant: second, qty: 1 }], customer: buyer, shipping: ship as never }),
+      ).rejects.toMatchObject({ code: "out_of_stock" });
+    });
+
+    it("…and still sells the size that is on the shelf", async () => {
+      const { first } = await shelf();
+      const order = await createOrder({
+        items: [{ id: sized.id, variant: first, qty: 1 }],
+        customer: buyer,
+        shipping: ship as never,
+      });
+      expect(order.items[0].variant).toBe(first);
+    });
+
+    it("leaves a product nobody has counted to its manual word, as before", async () => {
+      const [, second] = VARIANTS[sized.id].sizes;
+      await upsertOverride(sized.id, { stock: "in" });
+      const ov = (await getOverrides([sized.id]))[sized.id];
+      expect(ov?.stockByVariant ?? null).toBeNull();
+      const order = await createOrder({
+        items: [{ id: sized.id, variant: second, qty: 1 }],
+        customer: buyer,
+        shipping: ship as never,
+      });
+      expect(order.items[0].variant).toBe(second);
+    });
+  });
+
   describe("getLevels() — the admin table's full catalogue×variant universe", () => {
     it("includes an untracked variant at qty 0, not just rows that exist in the database", async () => {
       const rows = await getLevels({ q: plain.b });

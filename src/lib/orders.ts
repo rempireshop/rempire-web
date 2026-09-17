@@ -234,6 +234,14 @@ export type Override = {
   proPrice: number | null;
   /** The whole size ladder as the owner saved it; null = the catalogue's own. */
   sizes: SizeRung[] | null;
+  /**
+   * `stock` per SIZE, keyed by the size label an order line carries ('' for a
+   * product with no sizes) — filled in by getOverrides() from the numeric
+   * inventory, absent for a product nobody has counted. `stock` above is the
+   * product's one word and says «in» while any single size is left, which is
+   * right for a card and wrong for an order line; createOrder() reads this.
+   */
+  stockByVariant?: Record<string, StockState> | null;
   /** True = out of the shop, the search, the sets and the sitemap. */
   hidden: boolean;
   updatedAt: string | null;
@@ -571,13 +579,17 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
      feed, which is exactly what Renat would have seen. A count can say a
      product is gone; it may not say it is on sale again. */
   try {
-    const { productStockStates } = await import("@/lib/inventory");
-    const derived = await productStockStates(ids);
+    const { stockStates } = await import("@/lib/inventory");
+    const { byProduct: derived, byVariant } = await stockStates(ids);
     for (const [id, stock] of Object.entries(derived)) {
       if (out[id]?.stock === "out") continue;
+      /* `stockByVariant` travels with the product's word, not instead of it:
+         the word is what a card shows («in» while any size is left), and the
+         map is what createOrder() checks for the size the order names. */
+      const stockByVariant = byVariant[id] ?? null;
       out[id] = out[id]
-        ? { ...out[id], stock }
-        : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
+        ? { ...out[id], stock, stockByVariant }
+        : { price: null, stock, stockByVariant, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
     }
   } catch (err) {
     console.error("[orders] inventory stock derivation failed, using manual overrides:", err);
@@ -1064,7 +1076,15 @@ export async function priceItems(
        was clamped to 0 with only a console line to record it. A size nobody
        has counted is not refused: it is not tracked, exactly as everywhere
        else here. Empty for the till (`variantStates` above): see
-       PriceContext.channel. */
+       PriceContext.channel — at the counter the goods are in the seller's
+       hand, so it is the count that lags, not the shelf.
+
+       The audit found this from both ends, «товары» and «витрина». One gate,
+       here, and it is this one because the other spelling read the map off
+       the override, which the till reads too — that would have refused a sale
+       the seller is holding. The same per-size map still rides on the
+       override (getOverrides: `stockByVariant`) for the storefront to show
+       what is left size by size. */
     const sizeState = variantStates[raw.id]?.[v.label ?? ""];
     if (sizeState === "out") throw new OrderError("out_of_stock", raw.id);
     /* An override price replaces the base price; a size that costs more keeps
