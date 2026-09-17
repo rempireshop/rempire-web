@@ -420,8 +420,8 @@
         "Mitu päeva varem õnnitleda",
       "промокод действует две недели от самого дня рождения, каким бы ни был запас":
         "sooduskood kehtib kaks nädalat sünnipäevast endast, olgu varu kui tahes pikk",
-      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
-        "Kolm lülitiga kirja saadab pood ise, üks kord ööpäevas. Kuni lüliti on väljas, ei lähe kiri kellelegi.",
+      "Письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "Lülitiga kirjad saadab pood ise, üks kord ööpäevas. Kuni lüliti on väljas, ei lähe kiri kellelegi.",
       "Когда заказ считается доставленным":
         "Millal tellimus loetakse kohale toimetatuks",
       "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
@@ -3017,8 +3017,8 @@
         "How many days early to send it",
       "промокод действует две недели от самого дня рождения, каким бы ни был запас":
         "the promo code is good for two weeks from the birthday itself, however long the head start",
-      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
-        "The shop sends the three switchable letters itself, once a day. While a switch is off, that letter goes to nobody.",
+      "Письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "The shop sends the switchable letters itself, once a day. While a switch is off, that letter goes to nobody.",
       "Когда заказ считается доставленным":
         "When an order counts as delivered",
       "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
@@ -17866,7 +17866,17 @@
         // bracketed group under the switch that opened them
         (subs ? '<div class="adm-sub">' + subs + "</div>" : "");
     }).join("") + "</div>" +
-      '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
+      /* What the switches above do — the one thing this page never said. The
+         rows carry their own «когда», but only two of the four spell out «раз
+         в сутки», and that an off switch means the letter reaches nobody was
+         said only by a toast, after «Запустить сейчас». The sentence itself is
+         older than its home: it was written for the three flows that had a
+         switch and then stranded, unrendered, at the end of
+         srvUnpaidSettingsSave() when «Заказ ждёт оплаты» made it four. It
+         counts none of them now, so the fifth switch cannot make it wrong. */
+      '<p class="adm-hint" style="margin-top:12px">Письма с переключателем магазин рассылает сам, ' +
+        "один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>" +
+      '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
       unpaidSettingsCard();
   }
@@ -17946,7 +17956,6 @@
       }
       toast("Не удалось сохранить");
     }).catch(function () { toast("Сервер не отвечает"); });
-      '<p class="adm-hint">Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>';
   }
   /** « · Ждут письма: 3» — only when the server actually counted, never a zero
       the panel cannot stand behind. Its own function so the i18n check sees
