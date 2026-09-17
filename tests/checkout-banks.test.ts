@@ -43,24 +43,31 @@ const LIST: Bank[] = [
   { code: "CBVILT2X", name: "Swedbank", country: "LT", logoUrl: "" },
 ];
 
-function run(banks: Bank[] | null, country: string, iso: string, bankIndex: number) {
+/**
+ * `cc` is the receipt's own country — what the retry screen passes, having
+ * read it off its URL (`c`, src/lib/payments/receipt.ts). The checkout passes
+ * nothing and the delivery select answers; the cases below exercise both.
+ */
+function run(banks: Bank[] | null, country: string, iso: string, bankIndex: number, cc = "") {
   const body = `
     ${slice("banksForCountry")}
+    ${slice("foreignToBuiltInBanks")}
     ${slice("selectedBankCode")}
     var PAYMETHODS = { banks: BANKS_IN };
     var S = { country: COUNTRY, countryIso: ISO, bank: BANK_INDEX };
     var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
     var BANK_CODES = { Swedbank: "HABAEE2X", SEB: "EEUHEE2X", LHV: "LHVBEE22", Luminor: "RIKOEE22", Coop: "EKRDEE22" };
     function orderCountry() { return S.country === "EU" ? (S.countryIso || "EU") : S.country; }
-    return { banks: banksForCountry(), code: selectedBankCode() };
+    return { banks: banksForCountry(CC), code: selectedBankCode(CC) };
   `;
-  const fn = new Function("BANKS_IN", "COUNTRY", "ISO", "BANK_INDEX", body) as (
+  const fn = new Function("BANKS_IN", "COUNTRY", "ISO", "BANK_INDEX", "CC", body) as (
     b: Bank[] | null,
     c: string,
     i: string,
     n: number,
+    cc: string,
   ) => { banks: Bank[] | null; code: string | undefined };
-  return fn(banks, country, iso, bankIndex);
+  return fn(banks, country, iso, bankIndex, cc);
 }
 
 describe("the bank chips follow the delivery country", () => {
@@ -119,6 +126,35 @@ describe("the bank chips follow the delivery country", () => {
     const out = run(null, "EE", "", 3);
     expect(out.banks).toBeNull();
     expect(out.code).toBe("RIKOEE22");
+  });
+
+  /* Ренат, R-100033, 17.09.2026: «Оплата не прошла» for a Finnish order opened
+     on five Estonian banks and then swapped them for eight Finnish ones under
+     his hand. That screen is a cold page load after the redirect back from the
+     bank — S.country is at its "EE" default and knows nothing about the order
+     on it — so the country now travels on the receipt's own URL (`c`,
+     src/lib/payments/receipt.ts) and is passed in here. */
+  it("the receipt's own country wins over the checkout's, which has reset to Estonia", () => {
+    const fi = [...LIST, { code: "OKOYFIHH", name: "OP", country: "FI", logoUrl: "" }];
+    const out = run(fi, "EE", "", 0, "FI");
+    expect(out.banks?.map((b) => b.code)).toEqual(["OKOYFIHH"]);
+    expect(out.code).toBe("OKOYFIHH");
+  });
+
+  /* …and the same order when Montonio's list never came at all. The five
+     built-in names are Estonian and only Estonian — offering them for a parcel
+     to Helsinki sends the shopper to a bank they have no account with, which
+     is the Danish mistake above wearing a different hat. */
+  it("no real list and a foreign order: no built-in Estonian chips, and no preferred bank", () => {
+    const out = run(null, "EE", "", 0, "FI");
+    expect(out.banks).toBeNull();
+    expect(out.code).toBe("");
+  });
+
+  it("no real list and no country on the receipt still falls back to the built-in five", () => {
+    // an older letter's link, or a return the route could not resolve
+    const out = run(null, "EE", "", 1, "");
+    expect(out.code).toBe("EEUHEE2X");
   });
 });
 

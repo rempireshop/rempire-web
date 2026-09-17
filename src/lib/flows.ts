@@ -1015,10 +1015,22 @@ function unpaidOrderLike(row: UnpaidRow): Record<string, unknown> {
   };
 }
 
-/** `/shop2/et/done/?n=R-…&s=failed&o=<id>` — the screen with «Оплатить ещё раз». */
+/** `/shop2/et/done/?n=R-…&s=failed&o=<id>&c=FI` — the screen with «Оплатить ещё раз».
+ *
+ *  `c` is the order's delivery country and it is not decoration: the screen
+ *  draws one country's bank chips, and a letter is opened in a browser that
+ *  has never seen this shop's checkout — so without it a Finnish customer was
+ *  handed the five built-in Estonian banks (Ренат, 17.09.2026, and see
+ *  src/lib/payments/receipt.ts for the same fix on the redirect back from the
+ *  bank). Built by hand here rather than through receiptUrl() because the
+ *  letter also needs the language segment, which a receipt redirect never has.
+ */
 function payAgainUrl(lang: LangCode, row: UnpaidRow): string {
   const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
   const q = new URLSearchParams({ n: row.number, s: "failed", o: row.id });
+  const ship = row.shipping as { country?: unknown } | null | undefined;
+  const country = ship && typeof ship === "object" ? String(ship.country ?? "") : "";
+  if (/^[A-Za-z]{2}$/.test(country)) q.set("c", country.toUpperCase());
   return `${baseUrl()}/shop2${seg}/done/?${q.toString()}`;
 }
 

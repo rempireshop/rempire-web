@@ -67,12 +67,31 @@ export interface ReceiptParams {
    * to a screen offering Swedbank.
    */
   bank?: string;
+  /**
+   * `c` — the order's delivery country, two letters, beside `o`.
+   *
+   * The retry screen draws one country's bank chips, and until 17.09.2026 it
+   * had no way of knowing which: it asked the shop's own checkout state, which
+   * on this screen is a browser that has just been redirected back from the
+   * bank and has therefore reset to its "EE" default. A Finnish order was
+   * offered the five built-in Estonian names — and then, if the shopper
+   * happened to be signed in, the account's saved country landed a moment
+   * later and swapped them for eight Finnish banks under their hand
+   * (Ренат, R-100033).
+   *
+   * The routes that build this URL have the order in front of them and know
+   * the answer, so they say it. An old link without it falls back to the old
+   * behaviour rather than to a wrong country.
+   */
+  country?: string;
 }
 
 /** The three the checkout's radio has, and the only values `m` may carry. */
 const METHODS: readonly string[] = ["bank", "card", "wallet"];
 /** A bank code is a BIC — 8 or 11 of A–Z and 0–9, and nothing else in a URL. */
 const BIC_RE = /^[A-Z0-9]{8,11}$/;
+/** A delivery country is an ISO-3166 alpha-2, and the shop stores it upper. */
+const COUNTRY_RE = /^[A-Za-z]{2}$/;
 
 export function receiptUrl(base: string, p: ReceiptParams): string {
   const params = new URLSearchParams();
@@ -87,6 +106,12 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   if (owing && p.orderId) params.set("o", p.orderId);
   if (owing && p.orderId && p.method && METHODS.includes(p.method)) params.set("m", p.method);
   if (owing && p.orderId && p.method === "bank" && p.bank && BIC_RE.test(p.bank)) params.set("b", p.bank);
+  /* Not tied to `m`: the country decides which banks the screen may offer
+     whatever way the first try was paid for, because switching a refused card
+     to a bank link is exactly what the picker is there for. */
+  if (owing && p.orderId && p.country && COUNTRY_RE.test(p.country)) {
+    params.set("c", p.country.toUpperCase());
+  }
   return `${base}/shop2/done/?${params.toString()}`;
 }
 

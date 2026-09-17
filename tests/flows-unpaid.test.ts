@@ -112,8 +112,13 @@ describe("the reminder", () => {
     expect(sent).toHaveLength(1);
     expect(sent[0].subject).toContain(order.number);
     expect(sent[0].to).toEqual(["maria@example.com"]);
-    // the button goes to the screen that can pay this order again
-    expect(sent[0].text).toContain(`/shop2/done/?n=${order.number}&s=failed&o=${order.id}`);
+    /* The button goes to the screen that can pay this order again — carrying
+       the order's country, because that screen draws one country's bank chips
+       and a letter is opened in a browser that has never seen this shop's
+       checkout (Ренат, R-100033, 17.09.2026). */
+    expect(sent[0].text).toContain(
+      `/shop2/done/?n=${order.number}&s=failed&o=${order.id}&c=EE`,
+    );
     // …and it says how long THIS order really has left: cancelled on day 7,
     // reminded on day 4, so three days — not the four the settings imply
     expect(sent[0].text).toMatch(/ещё 3 дня/);

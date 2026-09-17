@@ -1868,6 +1868,31 @@ button, a, summary, label { touch-action: manipulation; }
 .done__gift { display: inline-flex; justify-content: center; gap: 8px; align-items: baseline; }
 .done__gift .num { font-size: 13px; opacity: .7; }
 
+/* ---------- «Оплата не прошла» / «Заказ не оплачен» ----------
+   The one receipt that is not a receipt: the order still owes money, and the
+   screen carries the checkout's payment picker so it can be paid from here.
+   A radio list, bank chips and a form's two buttons lay themselves out from
+   the left whatever the container says, so the three lines above them used to
+   float in the middle over a block that did not — «text alignment is wrong»
+   (Ренат, 17.09.2026). One left edge for the whole column instead, which is
+   the edge the checkout, the basket and every other screen already start
+   from. The receipts that really are receipts keep their centred setting:
+   they have nothing to fill in. */
+.done--unpaid { text-align: left; }
+.done--unpaid .done__tick { margin-left: 0; }
+.done__lead { margin: 0 0 20px; }
+/* The chips used to sit directly on the top edge of «Оплатить ещё раз» —
+   `.banks` has a top margin and nothing had a bottom one, so the last row of
+   bank tiles and the button shared a border. The picker owns its own space
+   now, at every width and with any number of banks. */
+.done__pay { margin-bottom: 22px; }
+/* Montonio's list is still in flight at the first paint, so the row is not
+   drawn at all until it lands (doneBanksHTML in app.js). This is the box it
+   holds open in the meantime — one chip tall, so the button below it does not
+   move when the real tiles arrive. */
+.banks--wait { min-height: 44px; align-items: center; }
+.banks--wait .muted { font-size: 13px; }
+
 /* ==========================================================================
    FEATURES — наборы, подарочная карта, отзывы, видео
    Appended by the features agent. Everything below belongs to those four and

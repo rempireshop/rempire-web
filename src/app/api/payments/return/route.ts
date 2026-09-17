@@ -25,7 +25,14 @@ function done(
   base: string,
   number: string | null,
   state: ReceiptState,
-  extra: { total?: number; gift?: string; orderId?: string; method?: string; bank?: string } = {},
+  extra: {
+    total?: number;
+    gift?: string;
+    orderId?: string;
+    method?: string;
+    bank?: string;
+    country?: string;
+  } = {},
 ) {
   return NextResponse.redirect(receiptUrl(base, { number, state, ...extra }), 303);
 }
@@ -104,7 +111,12 @@ async function handle(req: Request, params: URLSearchParams) {
     outcome = await settlePayment(order, result, provider.name);
   } catch (err) {
     console.error("payments/return: apply failed", err);
-    return done(base, order.number, result.status, { orderId: order.id, method: methodOf(order), bank: bankOf(order) });
+    return done(base, order.number, result.status, {
+      orderId: order.id,
+      method: methodOf(order),
+      bank: bankOf(order),
+      country: countryOf(order),
+    });
   }
 
   const state: ReceiptState =
@@ -132,6 +144,10 @@ async function handle(req: Request, params: URLSearchParams) {
     // way the shopper already chose rather than proposing a different one
     method: methodOf(order),
     bank: bankOf(order),
+    /* …and where the parcel is going, which is what decides the bank chips.
+       The screen cannot work this out for itself: it is a cold page load
+       after the redirect, and its own checkout state has reset to Estonia. */
+    country: countryOf(order),
   });
 }
 
@@ -147,4 +163,11 @@ function bankOf(order: { payment?: unknown }): string | undefined {
   const p = order.payment as { bank?: unknown } | null | undefined;
   const b = p && typeof p === "object" ? p.bank : undefined;
   return typeof b === "string" && b ? b : undefined;
+}
+
+/** The order's delivery country — which country's banks the retry may offer. */
+function countryOf(order: { shipping?: unknown }): string | undefined {
+  const s = order.shipping as { country?: unknown } | null | undefined;
+  const c = s && typeof s === "object" ? s.country : undefined;
+  return typeof c === "string" && c ? c : undefined;
 }

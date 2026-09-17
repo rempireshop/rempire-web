@@ -631,6 +631,8 @@
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
       "Вернуться в магазин": "Tagasi poodi",
       "Оплатить ещё раз": "Maksa uuesti",
+      "Загружаем список банков…": "Laadime pankade nimekirja…",
+      "Оплата прямо со счёта в своём банке": "Makse otse oma pangakontolt",
       "Этот заказ уже оплачен": "See tellimus on juba makstud",
       "Этот заказ уже закрыт": "See tellimus on juba suletud",
       "Банк не отвечает — попробуйте через минуту": "Pank ei vasta — proovi minuti pärast uuesti",
@@ -3226,6 +3228,8 @@
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
       "Вернуться в магазин": "Back to the shop",
       "Оплатить ещё раз": "Pay again",
+      "Загружаем список банков…": "Loading the list of banks…",
+      "Оплата прямо со счёта в своём банке": "Pay straight from your own bank account",
       "Этот заказ уже оплачен": "This order is already paid",
       "Этот заказ уже закрыт": "This order is already closed",
       "Банк не отвечает — попробуйте через минуту": "The bank is not responding — try again in a minute",
@@ -7212,7 +7216,23 @@
      src/app/api/payments/methods/route.ts, 6h cache, only answers when
      Montonio is configured). Until it answers — or if it never does — the
      chips fall back to the plain BANKS/BANK_CODES pair above, unchanged. */
-  var PAYMETHODS = { banks: null, all: null, asked: false };
+  /* `settled` — the question has been answered, whichever way: the list is
+     here, or the route said there is none. It is what the receipt's retry
+     screen waits for before it draws a single bank chip; see doneBanksHTML().
+     Once true it never goes back, so the owner's forced reload (reloadPayMethods)
+     swaps one real list for another instead of re-opening the waiting state. */
+  var PAYMETHODS = { banks: null, all: null, asked: false, settled: false };
+  /** The longest the retry receipt will hold its bank row open, whatever the
+   *  network is doing. Four seconds: long enough that a normal answer is
+   *  always the one that lands first, short enough that nobody is left
+   *  looking at a screen whose whole job is to be paid from. */
+  var PAY_SETTLE_CAP_MS = 4000;
+  /** The answer is in — repaint the one screen that has nothing else to wait for. */
+  function paySettled() {
+    var first = !PAYMETHODS.settled;
+    PAYMETHODS.settled = true;
+    if (first && S.screen === "done") render();
+  }
   function loadPayMethods(fresh) {
     if (PAYMETHODS.asked && !fresh) return;
     PAYMETHODS.asked = true;
@@ -7223,8 +7243,15 @@
        a stale-while-revalidate hit for longer. A one-off query string is a
        miss at the CDN, so the answer is the one his own setting produces. */
     var url = "/api/payments/methods/" + (fresh ? "?r=" + Date.now() : "");
+    /* A floor under the wait. The retry receipt refuses to draw a bank chip
+       until this question is answered, so a request that is never answered at
+       all — a hung connection, a proxy that holds the socket open — would
+       leave «Загружаем список банков…» on screen for ever and the shopper with
+       no bank to pick. fetch() has no timeout of its own; this is it. After
+       it, the built-in list stands in exactly as it did before any of this. */
+    setTimeout(paySettled, PAY_SETTLE_CAP_MS);
     fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (!j || !j.ok || !j.banks || !j.banks.length) return;
+      if (!j || !j.ok || !j.banks || !j.banks.length) { paySettled(); return; }
       apiSeen(true);
       PAYMETHODS.banks = j.banks;
       /* `allBanks` is Montonio's list with nothing taken out — `banks` is the
@@ -7236,15 +7263,47 @@
       // a different list can be a different length or order — the index a
       // shopper had picked in the fallback list may no longer be that bank
       S.bank = 0;
+      preloadBankLogos(j.banks, paySettled);
       patchPayment();
       // «Доставка и оплата» draws the same bank marks in its payment list,
       // and «Настройки → Доставка и оплата» draws one switch per bank
       if (S.screen === "info" || S.screen === "admin") render();
-    }).catch(function () { apiSeen(false); });
+    }).catch(function () { apiSeen(false); paySettled(); });
   }
   /** Ask Montonio's list again, past every cache — the owner has just changed
       which of them the checkout may draw. */
   function reloadPayMethods() { loadPayMethods(true); }
+  /* The marks themselves, fetched before a single chip is drawn.
+     An <img> that starts downloading inside a tile is a tile that changes
+     width when it lands — and Montonio's Finnish list is eight of them, which
+     re-wrapped the row and walked «Оплатить ещё раз» down the screen as they
+     arrived one by one (Ренат, 17.09.2026). Warmed here instead: by the time
+     the receipt draws the row every file is already in the browser's cache, so
+     the chips are laid out once, at their real widths, and nothing moves
+     afterwards. The checkout is not held back by this — it patches its own
+     block the moment the list lands, exactly as before, and gets the warmed
+     cache for free.
+     Nothing waits longer than the grace period below: a slow logo CDN must
+     never keep the pay button off a screen whose whole job is to be pressed.
+     A mark that will not load at all is not waited for either — the chip falls
+     back to the bank's name (the "error" listener at the foot of this file). */
+  var PAY_LOGO_WAIT_MS = 2500;
+  function preloadBankLogos(list, done) {
+    var urls = [], seen = {}, i;
+    for (i = 0; i < list.length; i++) {
+      var u = list[i] && list[i].logoUrl;
+      if (u && !seen[u]) { seen[u] = 1; urls.push(u); }
+    }
+    var fired = false, left = urls.length, timer;
+    function finish() { if (fired) return; fired = true; clearTimeout(timer); done(); }
+    if (!left) { finish(); return; }
+    timer = setTimeout(finish, PAY_LOGO_WAIT_MS);
+    urls.forEach(function (src) {
+      var img = new Image();
+      img.onload = img.onerror = function () { if (--left <= 0) finish(); };
+      img.src = src;
+    });
+  }
   /* The banks to offer: Montonio's list comes for every country the store
      has switched on (EE, LV, LT, FI, PL — src/lib/payments/methods.ts), and
      an Estonian shopper must not be handed twenty chips with Latvian banks
@@ -7265,25 +7324,48 @@
      every Estonian, Latvian, Lithuanian, Finnish and Polish bank at once, one
      of which was then sent to Montonio as `preferredProvider` — a bank the
      Dane has no account with. Montonio's own page asks properly, so the
-     honest answer is no chips and a line saying where the bank is chosen. */
-  function banksForCountry() {
+     honest answer is no chips and a line saying where the bank is chosen.
+
+     `cc` overrides the country: the checkout has the shopper in front of it
+     and passes nothing, so the delivery select answers. The retry receipt has
+     no checkout behind it — it is a fresh page load after the bank — and
+     passes the country of the ORDER, which came with the receipt's own URL
+     (`c`, src/lib/payments/receipt.ts). Without it that screen fell back to
+     S.country, which starts at "EE" on every load and is only moved later by
+     a signed-in shopper's saved preference: a Finnish order was shown five
+     Estonian banks, and then — if the profile happened to land — eight
+     Finnish ones in their place (Ренат, R-100033, 17.09.2026). */
+  function banksForCountry(cc) {
     var real = PAYMETHODS.banks;
     if (!real || !real.length) return null;
-    var c = String(orderCountry() || "").toUpperCase();
+    var c = String(cc || orderCountry() || "").toUpperCase();
     // no country picked yet («Другая страна Европы» before the second select):
     // nothing is known, so nothing is narrowed
     if (!c || c === "EU") return real;
     return real.filter(function (b) { return String(b.country || "").toUpperCase() === c; });
   }
-  function bankChipsHTML() {
-    var real = banksForCountry();
+  /** Is this a country the five built-in names below would be a lie for? */
+  function foreignToBuiltInBanks(cc) {
+    var c = String(cc || orderCountry() || "").toUpperCase();
+    return !!c && c !== "EE" && c !== "EU";
+  }
+  function bankChipsHTML(cc) {
+    var real = banksForCountry(cc);
     if (real && real.length) {
       // a list for another country can be shorter than the index picked in this one
       if (S.bank >= real.length) S.bank = 0;
       return real.map(function (b, i) {
+        /* width AND height, both of them: an <img> with only a height and no
+           file yet is nought pixels wide, so the tile was the width of its own
+           padding until the logo landed and then jumped to the mark's own
+           width — eight of them at once re-wrapped the row and walked
+           «Оплатить ещё раз» down the screen (Ренат, 17.09.2026). The pair is
+           a default ratio the browser reserves the box from; CSS `width:auto`
+           hands the real ratio back the moment the file is decoded, so the
+           drawn mark is exactly what it always was. */
         return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' +
           (b.logoUrl
-            ? '<img class="bank__logo" src="' + esc(b.logoUrl) + '" alt="' + esc(b.name) + '" height="24">'
+            ? '<img class="bank__logo" src="' + esc(b.logoUrl) + '" alt="' + esc(b.name) + '" width="72" height="24">'
             : esc(b.name)) +
           "</button>";
       }).join("");
@@ -7292,10 +7374,32 @@
        chips to draw, and the five Estonian names below would be worse than
        none — the shopper would pick one and be sent to a bank they have no
        account with. Montonio's own page offers what it really has. */
-    if (real) return '<p class="hint">Банк для вашей страны выберете на странице Montonio — там будут все доступные.</p>';
+    if (real) return bankElsewhereHTML();
+    /* No real list at all — no keys, or Montonio would not answer. The five
+       names below are Estonian and nothing else, so they stand in only where
+       Estonia is the answer: a parcel to Helsinki offered «Swedbank, SEB,
+       LHV…» would send the shopper to a bank they have no account with, which
+       is the same mistake the Danish list above was fixed for. */
+    if (foreignToBuiltInBanks(cc)) return bankElsewhereHTML();
     return BANKS.map(function (b, i) {
       return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
     }).join("");
+  }
+  function bankElsewhereHTML() {
+    return '<p class="hint">Банк для вашей страны выберете на странице Montonio — там будут все доступные.</p>';
+  }
+  /* The line under a method's name. «Банковская ссылка» carries five bank
+     names in it, and they are the same five built-in Estonian ones the chips
+     used to fall back to — so for an order going anywhere else the shop was
+     promising Swedbank and SEB directly above a row of Finnish banks
+     (Ренат, R-100033, 17.09.2026). The names are dropped where they cannot be
+     kept, and the sentence says what the method is instead; an Estonian order,
+     and one whose country is not known, read exactly as they always have.
+     `cc` as everywhere else: the receipt's own country, the checkout's when
+     nothing is passed. */
+  function payHint(o, cc) {
+    if (o.k === "bank" && foreignToBuiltInBanks(cc)) return "Оплата прямо со счёта в своём банке";
+    return o.h;
   }
   /** The BIC `preferredProvider` Montonio wants, from whichever bank list is
       currently on screen — the real one when it loaded, BANK_CODES otherwise.
@@ -7303,10 +7407,13 @@
       it: `preferredProvider` says which bank to *send* the shopper to, and
       naming a foreign one is worse than letting Montonio ask (createPayment()
       in src/lib/payments/montonio.ts omits the field when it is empty). */
-  function selectedBankCode() {
-    var real = banksForCountry();
+  function selectedBankCode(cc) {
+    var real = banksForCountry(cc);
     if (real && real.length) return real[S.bank] ? real[S.bank].code : real[0].code;
     if (real) return "";
+    // …and the same for the built-in five: an Estonian BIC is not a bank a
+    // Finn can be sent to, so the field is left out and Montonio asks
+    if (foreignToBuiltInBanks(cc)) return "";
     return BANK_CODES[BANKS[S.bank]];
   }
   /* features: the gift-card amounts the shop is ALLOWED to sell — the same
@@ -14318,11 +14425,13 @@
   function payAgain(orderId) {
     if (S.paying || !orderId) return;
     S.paying = true; render();
-    var pick = donePayIndex(doneState());
+    var d = doneState();
+    var pick = donePayIndex(d);
     postJSON("/api/payments/create/", {
       orderId: orderId,
       method: PAYS[pick] ? PAYS[pick].k : "bank",
-      bank: (pick === 0 && selectedBankCode()) || undefined,
+      // the order's country, not the checkout's — same reason the chips read it
+      bank: (pick === 0 && selectedBankCode(d.country)) || undefined,
       lang: S.lang
     }).then(function (pay) {
       if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
@@ -14627,7 +14736,7 @@
     var out = '<div class="optlist">' + PAYS.map(function (o, i) {
         if (o.k === "invoice" && !invoiceOffered()) return "";
         return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
-          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + (o.k === "invoice" ? invoiceHint() : o.h) + "</span></span>" +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + (o.k === "invoice" ? invoiceHint() : payHint(o)) + "</span></span>" +
           '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
       }).join("") + "</div>" +
       (S.pay === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
@@ -29589,7 +29698,15 @@
          all three methods and all the chips, and these two are which of them
          start selected: the shopper's own choice, not one the shop proposes. */
       method: owing && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : "",
-      bank: owing && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : ""
+      bank: owing && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : "",
+      /* `c` — the order's own delivery country, two letters. This screen is a
+         fresh page load after the bank, with no checkout behind it: S.country
+         is back at its "EE" default and knows nothing about the order on
+         screen. The route that redirected here had the order in its hands and
+         says so (src/lib/payments/receipt.ts), which is why the bank chips can
+         be right at the first paint instead of being corrected afterwards.
+         "" for an old link — banksForCountry() then falls back as before. */
+      country: owing && /^[A-Z]{2}$/.test(q.c || "") ? q.c : ""
     };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
@@ -29693,22 +29810,37 @@
      lists. Touching a chip is the shopper's own answer and wins from then on. */
   function doneBankSeed(d) {
     if (S.doneBankPicked || !d || !d.bank) return;
-    var list = banksForCountry();
+    var list = banksForCountry(d.country);
     if (list && list.length) {
       for (var i = 0; i < list.length; i++) if (list[i].code === d.bank) { S.bank = i; return; }
       return;
     }
     for (var j = 0; j < BANKS.length; j++) if (BANK_CODES[BANKS[j]] === d.bank) { S.bank = j; return; }
   }
+  /* The bank row, drawn once and then left alone.
+     Until 17.09.2026 it was drawn immediately from whatever was known at that
+     instant, which was nothing: Montonio's list is still in flight at the
+     first paint, so the row opened as the five built-in Estonian names in
+     plain text and was replaced later — by chips with logos, and, for an order
+     going anywhere but Estonia, by a different country's banks entirely. Both
+     replacements moved the button underneath (Ренат, R-100033).
+     So nothing is drawn until the question is answered. The box keeps its
+     height while it waits (.banks--wait), and what lands in it is final. */
+  function doneBanksHTML(d) {
+    if (!PAYMETHODS.settled) {
+      return '<div class="banks banks--wait"><span class="muted" aria-live="polite">Загружаем список банков…</span></div>';
+    }
+    return '<div class="banks">' + bankChipsHTML(d.country) + "</div>";
+  }
   function donePayPickerHTML(d) {
     var pick = donePayIndex(d);
     if (pick === 0) doneBankSeed(d);
     return '<div class="done__pay"><div class="optlist">' + PAYS.slice(0, 3).map(function (o, i) {
         return '<label class="opt opt--pay"><input type="radio" name="donepay" ' + (i === pick ? "checked" : "") + ' data-donepay="' + i + '">' +
-          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + payHint(o, d.country) + "</span></span>" +
           '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
       }).join("") + "</div>" +
-      (pick === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
+      (pick === 0 ? doneBanksHTML(d) : "") +
       (pick === 2 ? '<p class="hint">Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.</p>' : "") +
       "</div>";
   }
@@ -29726,6 +29858,18 @@
      same «Оплатить ещё раз» for both ways a payment can not happen. Only the
      mark and the two sentences differ, because the two are not the same
      news — a refused card is a failure, a cancelled one is just unfinished. */
+  /* Centred down to the last line until 17.09.2026, which was right while the
+     screen was a mark, a heading and one button — and stopped being right the
+     day a payment picker was put on it. A radio list, its chips and a form's
+     two buttons cannot be centred; they laid themselves out from the left
+     while the three lines above them stayed in the middle, and the seam
+     between the two read as a mistake (Ренат: «text alignment is wrong»).
+     An order that still owes money is not a receipt, it is a task — the same
+     task the checkout's payment step is — so it is set like one: one left
+     edge for the whole column, which is also the edge every other screen in
+     the shop starts from. The receipts that really are receipts (paid,
+     «Счёт отправлен», the demo) are still centred, because they have nothing
+     to fill in. */
   function doneUnpaidHTML(d, num, bad, head, line) {
     // the real bank logos, if Montonio's list is reachable — one-shot and
     // silent, exactly as the checkout asks for them
@@ -29733,9 +29877,9 @@
     var tick = bad
       ? '<div class="done__tick done__tick--bad">✕</div>'
       : '<div class="done__tick done__tick--wait">…</div>';
-    return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' + tick +
+    return '<div class="wrap wrap--narrow done--unpaid"><section class="sec">' + tick +
       '<h1 class="display h1">' + head + "</h1>" + num +
-      '<p class="muted" style="margin-bottom:22px">' + line + "</p>" +
+      '<p class="muted done__lead">' + line + "</p>" +
       /* The sentence above promises another way to pay; until 07.09.2026 it
          did not exist — «Оплатить ещё раз» sent the order back to the same
          method every time. The picker below is that promise kept: the same
@@ -29745,7 +29889,7 @@
           '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
             (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
             '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
-        : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
+        : '<div class="done__acts"><button class="btn" data-go="home">Вернуться в магазин</button></div>') +
       "</section></div>";
   }
   function screenDone() {
