@@ -26,10 +26,30 @@
  * already happened in the room, and a stock hiccup, a mail outage or a
  * missing points programme must never make the register screen show a
  * failure.
+ *
+ * TWO GUARDS AGAINST ONE SALE RUNG TWICE, and they do different work.
+ *
+ *   `ref` / orders.pos_ref (093_pos_sale_ref.sql, saleAlreadyRung() below) is
+ *   about the ORDER: whatever else happened, this basket gets one row. It
+ *   answers a repeat by finishing the settlement the first attempt may have
+ *   died in the middle of, which is why it must stay.
+ *
+ *   The `Idempotency-Key` header is about the REQUEST: a second tap carrying
+ *   the key of the first does not run this route at all and is handed the
+ *   first answer byte for byte. It is what stops the whole createOrder →
+ *   setOrderPayment → settlePayment sequence from being walked a second time
+ *   while the first walk is still going.
+ *
+ * The register sends the SAME id for both (posSaleRef() in public/shop2/app.js
+ * — one id per basket, reused on a retry, re-minted when the basket changes),
+ * so there is one thing to reason about and the two cannot drift apart. A
+ * request with no key — an older cached app.min.js — falls through to `ref`
+ * exactly as before.
  */
 import { requireAdmin } from "@/lib/auth";
 import { getCustomer, isEmail, normalizeEmail, type Customer } from "@/lib/customers";
 import { query } from "@/lib/db";
+import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import { cleanPosRef, createOrder, getOrder, OrderError, setOrderPayment, type Order } from "@/lib/orders";
 import { settlePayment } from "@/lib/payments/settle";
 
@@ -37,6 +57,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 16_000;
+/** What the key is stored against — see src/lib/idempotency.ts `mismatch`. */
+const ROUTE = "POST /api/admin/pos-orders";
+const NO_STORE = { "cache-control": "no-store" };
 const METHODS = new Set(["cash", "terminal"]);
 /** What the order journal says about a till sale — the method in words. */
 const METHOD_WORD: Record<string, string> = { cash: "наличные", terminal: "терминал" };
@@ -232,98 +255,117 @@ export async function POST(req: Request) {
   const customer = body.customer ?? {};
   const ref = cleanPosRef(body.ref);
 
-  try {
-    /* Before the row is written, not after: `orders.lang` is what every letter
-       about this sale renders from, and it cannot be corrected once the
-       receipt has gone (receiptLang above). */
-    const card = await findCustomer(customer.email);
-    /* Already rung up — the first attempt reached the database and only its
-       answer was lost. Looked up before anything is written, and backed by the
-       unique index for the case where two taps are in flight at once. */
-    let order = await saleAlreadyRung(ref);
-    const repeat = !!order;
-    if (!order) {
-      try {
-        order = await createOrder({
-          channel: "pos",
-          lang: receiptLang(card, body),
-          items: cleanItems,
-          customer: {
-            name: typeof customer.name === "string" ? customer.name : undefined,
-            email: typeof customer.email === "string" ? customer.email : undefined,
-            phone: typeof customer.phone === "string" ? customer.phone : undefined,
-          },
-          shipping: { method: "pickup", country: "EE" },
-          posDiscountPercent: discountPercent,
-          posRef: ref,
-        });
-      } catch (err) {
-        /* Two taps close enough together that both got past the lookup above.
-           The index let exactly one row through; this is the other one, and
-           the sale it was trying to write is the one that landed. */
-        const raced = isUniqueViolation(err) ? await saleAlreadyRung(ref) : null;
-        if (!raced) throw err;
-        order = raced;
-      }
-    }
-
-    /* The method is written first and settlePayment()'s blob merges on top of
-       it (setOrderPayment() is `||`, not `=`) — the same order the zero-total
-       path uses in src/lib/payments/settle.ts, and the reason the order card
-       goes on saying «наличные» rather than only «pos». */
-    const paidAt = new Date().toISOString();
-    const priced = await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
-
-    /* …and the ROW that write produced is what goes on, not the snapshot from
-       before it. The e-mailed receipt names how the sale was paid
-       (renderPosReceipt → posMethod in src/lib/mail-hooks.ts), and it read
-       that off the order object this call hands to settlePayment: an object
-       whose `payment` was still the pre-payment one, i.e. nothing. So the
-       slip the owner prints said «наличные» and the letter the customer got
-       said only the amount. */
-    const settled = await attachCustomer(priced ?? order, card);
-    let mailed = false;
+  /* Everything below happens at most once per key. `requireAdmin` and the
+     body checks stay outside it: they are answers about THIS request, and
+     there is no sale to protect from a second one. */
+  const done = await runOnce({ key: readIdempotencyKey(req), route: ROUTE, fingerprint: fingerprintOf(raw) }, async (): Promise<IdempotentAnswer> => {
     try {
-      await settlePayment(
-        settled,
-        {
-          orderRef: settled.number,
-          status: "paid",
-          providerRef: "",
-          amount: Number(settled.total) || 0,
-          currency: settled.currency || "EUR",
-          detail: `продажа в салоне, ${METHOD_WORD[method] ?? method}`,
-        },
-        "pos",
-        { decrementStock: decrementPosStock },
-      );
-      /* What the register screen turns into «чек ушёл на почту»: an address
-         was given and the settlement handed the «Заказ принят» letter to the
-         mail layer. It is the same claim every other letter in this shop
-         makes — src/lib/mail.ts swallows a Resend outage by design — and it
-         is deliberately NOT the invoice's `sentAt`: there the shop refuses to
-         send at all when the IBAN is blank, which is a state of our own
-         making and therefore one the screen must not paper over. */
-      mailed = !!settled.email;
-    } catch (err) {
-      /* The money is in the till and the order row exists; a settlement that
-         threw is something to fix on the order card, not a failure to show on
-         the register screen while a customer is standing there. */
-      console.error("[api/admin/pos-orders] settle failed:", err);
-    }
+      /* Before the row is written, not after: `orders.lang` is what every letter
+         about this sale renders from, and it cannot be corrected once the
+         receipt has gone (receiptLang above). */
+      const card = await findCustomer(customer.email);
+      /* Already rung up — the first attempt reached the database and only its
+         answer was lost. Looked up before anything is written, and backed by the
+         unique index for the case where two taps are in flight at once. */
+      let order = await saleAlreadyRung(ref);
+      const repeat = !!order;
+      if (!order) {
+        try {
+          order = await createOrder({
+            channel: "pos",
+            lang: receiptLang(card, body),
+            items: cleanItems,
+            customer: {
+              name: typeof customer.name === "string" ? customer.name : undefined,
+              email: typeof customer.email === "string" ? customer.email : undefined,
+              phone: typeof customer.phone === "string" ? customer.phone : undefined,
+            },
+            shipping: { method: "pickup", country: "EE" },
+            posDiscountPercent: discountPercent,
+            posRef: ref,
+          });
+        } catch (err) {
+          /* Two taps close enough together that both got past the lookup above.
+             The index let exactly one row through; this is the other one, and
+             the sale it was trying to write is the one that landed. */
+          const raced = isUniqueViolation(err) ? await saleAlreadyRung(ref) : null;
+          if (!raced) throw err;
+          order = raced;
+        }
+      }
 
-    return Response.json(
-      /* `repeat` is for the admin's own log and for the tests, never for the
-         cashier: the register shows «Продажа оформлена» either way, because
-         either way the sale is rung up exactly once. */
-      { ok: true, orderId: order.id, number: order.number, total: order.total, mailed, repeat },
-      { status: 201, headers: { "cache-control": "no-store" } },
-    );
-  } catch (err) {
-    if (err instanceof OrderError) {
-      return Response.json({ ok: false, error: err.code, detail: err.detail }, { status: 400 });
+      /* The method is written first and settlePayment()'s blob merges on top of
+         it (setOrderPayment() is `||`, not `=`) — the same order the zero-total
+         path uses in src/lib/payments/settle.ts, and the reason the order card
+         goes on saying «наличные» rather than only «pos». */
+      const paidAt = new Date().toISOString();
+      const priced = await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
+
+      /* …and the ROW that write produced is what goes on, not the snapshot from
+         before it. The e-mailed receipt names how the sale was paid
+         (renderPosReceipt → posMethod in src/lib/mail-hooks.ts), and it read
+         that off the order object this call hands to settlePayment: an object
+         whose `payment` was still the pre-payment one, i.e. nothing. So the
+         slip the owner prints said «наличные» and the letter the customer got
+         said only the amount. */
+      const settled = await attachCustomer(priced ?? order, card);
+      let mailed = false;
+      try {
+        await settlePayment(
+          settled,
+          {
+            orderRef: settled.number,
+            status: "paid",
+            providerRef: "",
+            amount: Number(settled.total) || 0,
+            currency: settled.currency || "EUR",
+            detail: `продажа в салоне, ${METHOD_WORD[method] ?? method}`,
+          },
+          "pos",
+          { decrementStock: decrementPosStock },
+        );
+        /* What the register screen turns into «чек ушёл на почту»: an address
+           was given and the settlement handed the «Заказ принят» letter to the
+           mail layer. It is the same claim every other letter in this shop
+           makes — src/lib/mail.ts swallows a Resend outage by design — and it
+           is deliberately NOT the invoice's `sentAt`: there the shop refuses to
+           send at all when the IBAN is blank, which is a state of our own
+           making and therefore one the screen must not paper over. */
+        mailed = !!settled.email;
+      } catch (err) {
+        /* The money is in the till and the order row exists; a settlement that
+           threw is something to fix on the order card, not a failure to show on
+           the register screen while a customer is standing there. */
+        console.error("[api/admin/pos-orders] settle failed:", err);
+      }
+
+      return {
+        status: 201,
+        /* `repeat` is for the admin's own log and for the tests, never for the
+           cashier: the register shows «Продажа оформлена» either way, because
+           either way the sale is rung up exactly once. */
+        body: { ok: true, orderId: order.id, number: order.number, total: order.total, mailed, repeat },
+      };
+    } catch (err) {
+      /* Caught rather than thrown on, so the key is released (runOnce() lets
+         go of anything past 399) and a corrected basket goes through under a
+         key of its own instead of meeting the old complaint. */
+      if (err instanceof OrderError) {
+        return { status: 400, body: { ok: false, error: err.code, detail: err.detail } };
+      }
+      console.error("[api/admin/pos-orders] failed:", err);
+      return { status: 500, body: { ok: false, error: "server_error" } };
     }
-    console.error("[api/admin/pos-orders] failed:", err);
-    return Response.json({ ok: false, error: "server_error" }, { status: 500 });
+  });
+
+  /* The cashier's own first tap is still going through. Not an error, and the
+     register says so rather than «Не удалось оформить продажу». */
+  if (done.outcome === "in_flight") {
+    return Response.json({ ok: false, error: "in_progress" }, { status: 409, headers: NO_STORE });
   }
+  /* This key already belongs to a different basket or a different route. */
+  if (done.outcome === "mismatch") {
+    return Response.json({ ok: false, error: "key_reused" }, { status: 409, headers: NO_STORE });
+  }
+  return Response.json(done.body, { status: done.status, headers: NO_STORE });
 }

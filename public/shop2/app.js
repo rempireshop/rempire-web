@@ -673,6 +673,11 @@
         "Pood ei vastanud. Vaata e-posti: kui tellimuse kiri tuli, on tellimus olemas — muidu proovi uuesti",
       "Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз":
         "Makse avamine ebaõnnestus. Tellimus on alles — proovi uuesti",
+      /* «сделать один раз»: the tap before this one is still being carried out
+         (409 in_progress, src/lib/idempotency.ts). Not a refusal, and none of
+         the three may be worded as one. */
+      "Заказ уже оформляется — подождите пару секунд и нажмите ещё раз":
+        "Tellimus on juba vormistamisel — oota paar sekundit ja vajuta uuesti",
       "Оплата пока недоступна — попробуйте позже": "Maksmine ei ole hetkel võimalik — proovi hiljem",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "Kirjad — eelvaade ja test",
@@ -2041,6 +2046,13 @@
       "штрихкод не привязан": "triipkood pole seotud",
       "Пока пусто": "Praegu tühi",
       "Склад не принял правку": "Ladu ei võtnud muudatust vastu",
+      /* «сделать один раз»: the tap before this one is still being carried out
+         (409 in_progress, src/lib/idempotency.ts). Not a refusal, and none of
+         the three may be worded as one. */
+      "Продажа уже проводится — подождите пару секунд.":
+        "Müük on juba pooleli — oodake paar sekundit.",
+      "Движение уже записывается — подождите пару секунд.":
+        "Liikumine on juba salvestamisel — oodake paar sekundit.",
       "Не удалось сохранить статус": "Staatust ei õnnestunud salvestada",
       "Отменено": "Tagasi võetud",
       /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
@@ -3394,6 +3406,11 @@
         "The shop did not answer. Check your e-mail: if the order letter arrived, the order exists — otherwise try again",
       "Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз":
         "Could not open the payment page. The order is saved — please try again",
+      /* «сделать один раз»: the tap before this one is still being carried out
+         (409 in_progress, src/lib/idempotency.ts). Not a refusal, and none of
+         the three may be worded as one. */
+      "Заказ уже оформляется — подождите пару секунд и нажмите ещё раз":
+        "The order is already being placed — wait a couple of seconds and tap again",
       "Оплата пока недоступна — попробуйте позже": "Payment is not available right now — try again later",
       /* «Письма» — предпросмотр и тестовая отправка */
       "Письма — предпросмотр и тест": "E-mails — preview and test",
@@ -4733,6 +4750,13 @@
       "штрихкод не привязан": "no barcode linked",
       "Пока пусто": "Nothing yet",
       "Склад не принял правку": "The warehouse did not accept the change",
+      /* «сделать один раз»: the tap before this one is still being carried out
+         (409 in_progress, src/lib/idempotency.ts). Not a refusal, and none of
+         the three may be worded as one. */
+      "Продажа уже проводится — подождите пару секунд.":
+        "The sale is already going through — wait a couple of seconds.",
+      "Движение уже записывается — подождите пару секунд.":
+        "The movement is already being recorded — wait a couple of seconds.",
       "Не удалось сохранить статус": "Could not save the status",
       "Отменено": "Undone",
       /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
@@ -13884,16 +13908,20 @@
     var body = a.type === "stock_adjust"
       ? { productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "помощник" }
       : { productId: a.product_id, variant: a.variant || "", qty: a.qty, reason: "adjust", ref: "помощник" };
-    apiSend("/api/admin/inventory/moves/", "POST", body).then(function (r) {
-      toast(r.status === 200 && r.body.ok ? "Склад обновлён ✓" : "Не получилось сохранить — попробуйте ещё раз.");
-      if (r.status === 200 && r.body.ok) reloadStock();
+    /* Through stockMoveSend() rather than straight at the route: that is where
+       the movement's «сделать один раз» key lives, so «Применить» pressed
+       again after a lost answer is recognised as the same movement instead of
+       counting the bottles a second time. It also puts this on the same
+       one-at-a-time chain as the panel's own ±. */
+    stockMoveSend(body).then(function (res) {
+      toast(res ? "Склад обновлён ✓" : stockMoveFailText("Не получилось сохранить — попробуйте ещё раз."));
+      if (res) reloadStock();
       render();
     }).catch(function () {
       /* No answer came back — which is NOT the same as «не сохранилось». The
-         move may well be on the shelf: /api/admin/inventory/moves/ takes a
-         relative delta with no key to recognise a repeat by, so «попробуйте
-         ещё раз» over a lost answer is how six bottles become twelve. The
-         sentence says what is actually known and where to look. */
+         move may well be on the shelf, and the shop cannot tell us either way
+         from here. The key above is what makes pressing «Применить» again
+         safe; this sentence says what is actually known and where to look. */
       toast("Ответ не пришёл — движение могло записаться. Проверьте остаток в «Складе».");
       render();
     });
@@ -15357,6 +15385,38 @@
     Swedbank: "HABAEE2X", SEB: "EEUHEE2X", LHV: "LHVBEE22",
     Luminor: "RIKOEE22", Coop: "EKRDEE22"
   };
+  /* ---------- «сделать один раз»: the key a retry has to carry -------------
+     A POST that CREATES something has no memory of having run, so an answer
+     lost on the way back turns the next tap into a second order, a second
+     salon sale, a second bottle on the shelf. Nothing in the request tells the
+     shop which it is — only the CLIENT knows, because only the client knows
+     whether this is a new intention or a repeat of the last one. So it mints
+     one key per intention, sends it in the `Idempotency-Key` header and sends
+     THE SAME ONE again for as long as it does not know what became of the
+     first attempt (src/lib/idempotency.ts, db/migrations/180_idempotency.sql).
+
+     «The same intention» is the body: the same basket, the same address, the
+     same «+1 приход» is the same thing being asked for, and anything the
+     person changed is a new one. Exactly the shape posSaleRef() already uses
+     for the till's basket id.
+
+     And the memo is dropped the moment a DEFINITE answer arrives — which is
+     the half that is easy to get wrong. A second «+1 приход» after the first
+     one landed is a second real bottle and needs a key of its own, or the
+     shelf would quietly swallow it. Kept only while the outcome is unknown:
+     no answer at all, or the shop's own «первое нажатие ещё идёт» (409). */
+  function idemNewKey() {
+    try {
+      if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    } catch (e) { /* an old WebView: the fallback below is plenty */ }
+    return "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+  }
+  /** The checkout's memo — { sig: the body it was minted for, key }. */
+  var orderIdem = { sig: "", key: "" };
+  function orderIdemKey(sig) {
+    if (orderIdem.sig !== sig) orderIdem = { sig: sig, key: idemNewKey() };
+    return orderIdem.key;
+  }
   /**
    * POST JSON and say plainly whether there is an API behind this page at all.
    * A real error from a real API comes back as a body with ok:false.
@@ -15387,10 +15447,14 @@
    * their order and mailed the invoice is the one answer that must never be
    * given, so only a bare `offline` may finish the demo.
    */
-  function postJSON(url, body, signal) {
+  function postJSON(url, body, signal, idemKey) {
+    var head = { "content-type": "application/json" };
+    // «сделать один раз» — see idemNewKey() above. Absent on every call that
+    // does not create anything, and harmless where the route ignores it.
+    if (idemKey) head["idempotency-key"] = idemKey;
     return fetch(url, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: head,
       body: JSON.stringify(body),
       signal: signal || undefined
     }).then(function (r) {
@@ -15568,10 +15632,34 @@
     var payload = orderPayload();
     var sig = JSON.stringify(payload);
     var known = pendingOrder && pendingOrder.sig === sig ? pendingOrder : null;
+    /* …and the key the shop remembers this tap by. Minted here, where the
+       shopper commits to THIS order, and handed out again unchanged for as
+       long as the basket is the same — so the tap that follows a lost answer
+       is recognised as the same order rather than creating a second one.
+       `pendingOrder` above covers the other half (the order was made and the
+       payment failed); this covers the half it cannot see, where the answer
+       never came back at all and the checkout does not know there is an order.
+       Dropped below the moment the shop says something definite. */
     (known
       ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
-      : postJSON("/api/orders/", payload)
+      : postJSON("/api/orders/", payload, null, orderIdemKey(sig))
     ).then(function (res) {
+      /* «Ваше первое нажатие ещё идёт» — the order from the tap before this
+         one is being created right now, under this very key, so nothing was
+         run and there is no answer to give yet. Not a failure: the basket,
+         the key and the abandoned-cart hold all stay exactly as they are, and
+         the next tap in a few seconds gets that first order back. */
+      if (res.status === 409 && res.body && res.body.error === "in_progress") {
+        S.paying = false; render();
+        toast("Заказ уже оформляется — подождите пару секунд и нажмите ещё раз");
+        return;
+      }
+      /* The key is ours but the body under it is not — a checkout that lost
+         track of itself. Forget the key so the next tap mints a fresh one,
+         then fall through to the ordinary refusal below. */
+      if (res.status === 409 && res.body && res.body.error === "key_reused") {
+        orderIdem = { sig: "", key: "" };
+      }
       /* The answer was lost, not refused: the order may well exist on the
          server — numbered, and for «По счёту» already mailed with its PDF.
          finishDemo() here emptied the basket and said «настоящий заказ не
@@ -15580,6 +15668,12 @@
          the shopper can look in their mail and, if nothing came, press
          «Оплатить» again. */
       if (res.lost) throw new Error("Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз");
+      /* Past this line the shop has said something definite — it took the
+         order, or it refused it, or there is no API here — so this key has
+         done its job. Forgotten now, so that a later tap on the same basket
+         (an order that can no longer be paid for, see `already_paid` below)
+         makes a NEW order instead of being handed this one back for ever. */
+      orderIdem = { sig: "", key: "" };
       if (res.offline) return finishDemo();
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
@@ -27720,7 +27814,7 @@
       delta: sign * qty, reason: sign > 0 ? "goods_in" : "sale_pos", ref: "сканер"
     }).then(function (res) {
       S.scanBusy = false;
-      if (!res) { toast("Не удалось сохранить"); scanRenderPanel(); return; }
+      if (!res) { toast(stockMoveFailText("Не удалось сохранить")); scanRenderPanel(); return; }
       toast(scanMoveToast(sign, qty, res));
       S.scanQty = 1;
       S.scanReady = true;
@@ -28722,7 +28816,15 @@
      belongs to the BASKET, not to the tap: the same sale sent twice is one
      sale, while a basket the cashier has changed since mints a new one and is
      a new sale. Cleared on success, so the next customer buying exactly the
-     same thing is rung up properly. */
+     same thing is rung up properly.
+
+     That same id is also the sale's `Idempotency-Key` (see idemNewKey()), so
+     the register has one thing to reason about rather than two that could
+     drift apart. The route wants both and they do different work: `ref` makes
+     sure this basket ends up as ONE order even when the first attempt died
+     half-settled, while the key stops createOrder → setOrderPayment →
+     settlePayment from being walked a second time at all — the repeat is
+     handed the first answer and runs nothing. */
   var POS_SALE = { key: "", ref: "" };
   function posNewRef() {
     try {
@@ -28748,22 +28850,44 @@
       payment: { method: S.posPayment === "terminal" ? "terminal" : "cash" },
       discountPercent: Number(S.posDiscount) || 0
     };
+    // one id for this basket: the body's `ref` and the request's key — see
+    // POS_SALE above for why the route wants both
+    var ref = posSaleRef(sale);
+    /* …and the receipt's language is frozen with that id. It is deliberately
+       not part of what mints a new id (posSaleRef reads the basket, not the
+       panel), so without this a cashier who switched the panel to English
+       between a lost answer and the retry would send the same key over a
+       different body — which the shop refuses as a key that changed its mind
+       (`fingerprint`, src/lib/idempotency.ts) instead of replaying the sale.
+       The language a sale was rung up in belongs to the sale anyway. */
+    POS_SALE.lang = POS_SALE.lang || S.lang;
     apiSend("/api/admin/pos-orders/", "POST", {
       items: sale.items,
       customer: sale.customer,
       payment: sale.payment,
       discountPercent: sale.discountPercent,
-      ref: posSaleRef(sale),
+      ref: ref,
       /* The language the sale was rung up in. Renat, 13.09.2026: «I did a
          salon sale in English, but e-mail arrived in russian» — the till sent
          no language at all, so every sale in the room was stamped RU and the
          receipt followed. The server prefers the customer's own card when the
          typed address has one; this is what a walk-in gets, and at the till
-         it is what they were actually served in (receiptLang, the route). */
-      lang: S.lang
-    }).then(function (r) {
+         it is what they were actually served in (receiptLang, the route).
+         Read off POS_SALE, not off the panel: see the freeze above. */
+      lang: POS_SALE.lang
+    }, ref).then(function (r) {
       S.posBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
+      /* «Ваше первое нажатие ещё идёт»: the tap before this one is still
+         ringing up this very basket, so nothing ran here. The basket and its
+         id are kept as they are — the next tap in a moment gets that sale's
+         own receipt back — and the register says so instead of showing a
+         refusal over a sale that is going through perfectly well. */
+      if (r.status === 409 && r.body && r.body.error === "in_progress") {
+        S.posErr = "Продажа уже проводится — подождите пару секунд.";
+        render();
+        return;
+      }
       if (r.status === 201 && r.body.ok) {
         S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how, mailed: !!r.body.mailed };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
@@ -28785,6 +28909,23 @@
      «Отменить» right behind it is exactly that pair — the −1 arriving first is
      clamped at zero and the +1 then sticks. */
   var stockMoveChain = Promise.resolve();
+  /* «Сделать один раз», and this is the route it matters most on — see
+     idemNewKey(). A move is a RELATIVE delta: two «+1 приход» in a row are two
+     real bottles and nothing in the request tells them from one bottle counted
+     twice, so the key is the only thing that can. Minted per movement, kept
+     for as long as the answer is unknown, dropped the moment the shop says
+     anything definite — so the retry after a lost answer is recognised, and
+     the next genuine «+1» gets a key of its own and lands on the shelf.
+
+     One slot is enough because stockMoveChain runs these one at a time. */
+  var STOCK_MOVE = { sig: "", key: "" };
+  /** True when the last answer was the shop's own «первое нажатие ещё идёт». */
+  var stockMoveWait = false;
+  /** The right sentence for a move that did not go through: an in-progress
+      answer is not a failure and must not be shown as one. */
+  function stockMoveFailText(fallback) {
+    return stockMoveWait ? "Движение уже записывается — подождите пару секунд." : fallback;
+  }
   /** The route's own answer, not a yes/no: `appliedDelta` can be smaller than
       the delta that was asked for (the shelf stops at 0) and `skipped` is
       true when a SALE was written against a size nobody has counted yet — in
@@ -28793,8 +28934,21 @@
       Falsy (null) on a refusal, so every `if (!ok)` reader still reads. */
   function stockMoveSend(body) {
     var run = stockMoveChain.then(function () {
-      return apiSend("/api/admin/inventory/moves/", "POST", body)
-        .then(function (r) { return r.status === 200 && r.body.ok ? (r.body.result || true) : null; });
+      var sig = JSON.stringify(body);
+      if (STOCK_MOVE.sig !== sig) STOCK_MOVE = { sig: sig, key: idemNewKey() };
+      /* Cleared before the round trip, not after: apiJson() REJECTS on a dead
+         connection, so a left-over `true` from an earlier 409 would put
+         «подождите» on a move that never reached anybody. */
+      stockMoveWait = false;
+      return apiSend("/api/admin/inventory/moves/", "POST", body, STOCK_MOVE.key)
+        .then(function (r) {
+          var wait = r.status === 409 && r.body && r.body.error === "in_progress";
+          stockMoveWait = wait;
+          // anything but «ещё идёт» is a definite answer, so this movement is
+          // finished with its key — the next identical tap is a NEW bottle
+          if (!wait) STOCK_MOVE = { sig: "", key: "" };
+          return !wait && r.status === 200 && r.body.ok ? (r.body.result || true) : null;
+        });
     });
     stockMoveChain = run.then(noop, noop);
     return run;
@@ -28919,7 +29073,7 @@
     Promise.all(jobs).then(function (results) {
       var failed = results.filter(function (x) { return !x.ok; })[0];
       if (!failed) toast("Сохранено ✓");
-      else toast(stockSaveErrText(failed) || "Часть изменений не сохранилась");
+      else toast(stockSaveErrText(failed) || stockMoveFailText("Часть изменений не сохранилась"));
       S.stockEdit = failed ? key : "";
       // «Сохранено ✓» on the row itself, where the eye is (stockRowHTML)
       S.stockSaved = failed ? "" : key;
@@ -29362,10 +29516,14 @@
       return res.json().then(function (body) { return { status: res.status, body: body || {} }; });
     });
   }
-  function apiSend(url, method, body) {
+  /** `idemKey`: «сделать один раз» — see idemNewKey(). Only the three routes
+      that CREATE something read it; everywhere else it is simply absent. */
+  function apiSend(url, method, body, idemKey) {
+    var head = { "content-type": "application/json" };
+    if (idemKey) head["idempotency-key"] = idemKey;
     return apiJson(url, {
       method: method,
-      headers: { "content-type": "application/json" },
+      headers: head,
       body: JSON.stringify(body || {})
     });
   }
@@ -29667,7 +29825,7 @@
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
     else if (a.type === "stock_adjust") {
       stockMoveSend({ productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "панель" })
-        .then(function (res) { if (!res) toast("Склад не принял правку"); else stockUndoApplied(a, res); reloadStock(); })
+        .then(function (res) { if (!res) toast(stockMoveFailText("Склад не принял правку")); else stockUndoApplied(a, res); reloadStock(); })
         .catch(noop);
     }
     /* …and the first count of a size nobody has counted yet, which is an
@@ -29675,7 +29833,7 @@
        zero has to be sayable). Same route, its other body shape. */
     else if (a.type === "stock_set") {
       stockMoveSend({ productId: a.product_id, variant: a.variant || "", qty: a.qty, reason: "adjust", ref: "панель" })
-        .then(function (ok) { if (!ok) toast("Склад не принял правку"); reloadStock(); })
+        .then(function (ok) { if (!ok) toast(stockMoveFailText("Склад не принял правку")); reloadStock(); })
         .catch(noop);
     }
     // «Заказы»: the status the card moved, and the status undo moves back

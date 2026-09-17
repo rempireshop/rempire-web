@@ -9,12 +9,31 @@
  *     N штук» after a physical count. reason defaults to 'adjust'.
  * `actor` is always "admin" here — the assistant's stock_adjust/stock_set
  * actions write "assistant" instead, straight through src/lib/inventory.ts.
+ *
+ * A RETRY AND A REAL REPEAT LOOK IDENTICAL HERE, and that is the whole reason
+ * this route takes an `Idempotency-Key`. `delta` is relative: two «+1 приход»
+ * in a row are two real bottles on the shelf and both must count, so nothing
+ * in the request can tell a second bottle from a second tap for the first one.
+ * Only the client knows — it minted one key for this movement and sends that
+ * same key again when the answer did not come back (stockMoveSend() in
+ * public/shop2/app.js).
+ *
+ * The `fingerprint` below is therefore a GUARD and never a dedupe: it only
+ * asks whether the same KEY still carries the same body. Two different keys
+ * with byte-identical bodies are two rows and both run — that is the
+ * behaviour the shelf needs, and tests/idempotency-routes.test.ts pins it so
+ * that nobody later "improves" this into a hash of the body.
  */
 import { requireAdmin } from "@/lib/auth";
+import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import { InventoryError, LEDGER_REASONS, MOVE_REASONS, listMoves, move, setQty, type LedgerReason, type MoveReason } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** What the key is stored against — see src/lib/idempotency.ts `mismatch`. */
+const ROUTE = "POST /api/admin/inventory/moves";
+const NO_STORE = { "cache-control": "no-store" };
 
 export async function GET(req: Request) {
   const denied = await requireAdmin(req);
@@ -45,9 +64,14 @@ export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
+  /* The raw text rather than req.json(): fingerprintOf() wants the bytes the
+     client actually sent, and two objects that differ only in key order hash
+     differently once they have been through a parse and a re-serialise. */
+  let raw: string;
   let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    raw = await req.text();
+    body = JSON.parse(raw) as Record<string, unknown>;
   } catch {
     return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
   }
@@ -64,46 +88,64 @@ export async function POST(req: Request) {
   const variant = body.variant == null ? "" : String(body.variant);
   const ref = typeof body.ref === "string" && body.ref.trim() ? body.ref.trim().slice(0, 200) : null;
 
-  try {
-    if (body.qty !== undefined) {
-      const reason =
-        typeof body.reason === "string" && (MOVE_REASONS as readonly string[]).includes(body.reason)
-          ? (body.reason as MoveReason)
-          : "adjust";
-      /* null / "" / true all coerce to a number the shelf would obey — Number(null)
-         is 0 — so an emptied field used to wipe the count with «Сохранено ✓». */
-      const qty = Number(body.qty);
-      if (body.qty === null || body.qty === "" || typeof body.qty === "boolean" || !Number.isFinite(qty)) {
-        return Response.json({ ok: false, error: "bad_qty" }, { status: 400 });
+  /* At most once per key — and a DIFFERENT key with this very same body is a
+     different bottle, which runs. See the header. */
+  const done = await runOnce({ key: readIdempotencyKey(req), route: ROUTE, fingerprint: fingerprintOf(raw) }, async (): Promise<IdempotentAnswer> => {
+    try {
+      if (body.qty !== undefined) {
+        const reason =
+          typeof body.reason === "string" && (MOVE_REASONS as readonly string[]).includes(body.reason)
+            ? (body.reason as MoveReason)
+            : "adjust";
+        /* null / "" / true all coerce to a number the shelf would obey — Number(null)
+           is 0 — so an emptied field used to wipe the count with «Сохранено ✓». */
+        const qty = Number(body.qty);
+        if (body.qty === null || body.qty === "" || typeof body.qty === "boolean" || !Number.isFinite(qty)) {
+          return { status: 400, body: { ok: false, error: "bad_qty" } };
+        }
+        const result = await setQty(productId, variant, qty, { reason, ref, actor: "admin" });
+        return { status: 200, body: { ok: true, result } };
       }
-      const result = await setQty(productId, variant, qty, { reason, ref, actor: "admin" });
-      return Response.json({ ok: true, result }, { headers: { "cache-control": "no-store" } });
-    }
 
-    if (body.delta === undefined) {
-      return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+      if (body.delta === undefined) {
+        return { status: 400, body: { ok: false, error: "bad_body" } };
+      }
+      if (typeof body.reason !== "string" || !(MOVE_REASONS as readonly string[]).includes(body.reason)) {
+        return { status: 400, body: { ok: false, error: "bad_reason" } };
+      }
+      const delta = Number(body.delta);
+      if (body.delta === null || body.delta === "" || typeof body.delta === "boolean" || !Number.isFinite(delta)) {
+        return { status: 400, body: { ok: false, error: "bad_delta" } };
+      }
+      const result = await move({
+        productId,
+        variant,
+        delta,
+        reason: body.reason as MoveReason,
+        ref,
+        actor: "admin",
+      });
+      return { status: 200, body: { ok: true, result } };
+    } catch (err) {
+      /* Caught rather than thrown on: a refusal releases the key, so the
+         corrected move goes through under a key of its own. */
+      if (err instanceof InventoryError) {
+        return { status: 400, body: { ok: false, error: err.code, detail: err.detail } };
+      }
+      console.error("[api/admin/inventory/moves] write failed:", err);
+      return { status: 503, body: { ok: false, error: "db_unavailable" } };
     }
-    if (typeof body.reason !== "string" || !(MOVE_REASONS as readonly string[]).includes(body.reason)) {
-      return Response.json({ ok: false, error: "bad_reason" }, { status: 400 });
-    }
-    const delta = Number(body.delta);
-    if (body.delta === null || body.delta === "" || typeof body.delta === "boolean" || !Number.isFinite(delta)) {
-      return Response.json({ ok: false, error: "bad_delta" }, { status: 400 });
-    }
-    const result = await move({
-      productId,
-      variant,
-      delta,
-      reason: body.reason as MoveReason,
-      ref,
-      actor: "admin",
-    });
-    return Response.json({ ok: true, result }, { headers: { "cache-control": "no-store" } });
-  } catch (err) {
-    if (err instanceof InventoryError) {
-      return Response.json({ ok: false, error: err.code, detail: err.detail }, { status: 400 });
-    }
-    console.error("[api/admin/inventory/moves] write failed:", err);
-    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  });
+
+  /* The same movement is being written right now by the tap before this one.
+     Nothing ran here, and the panel says «подождите», not «не сохранилось». */
+  if (done.outcome === "in_flight") {
+    return Response.json({ ok: false, error: "in_progress" }, { status: 409, headers: NO_STORE });
   }
+  /* This key already carried a different body. Refused rather than applied to
+     the shelf under a key that was supposed to stop exactly that. */
+  if (done.outcome === "mismatch") {
+    return Response.json({ ok: false, error: "key_reused" }, { status: 409, headers: NO_STORE });
+  }
+  return Response.json(done.body, { status: done.status, headers: NO_STORE });
 }

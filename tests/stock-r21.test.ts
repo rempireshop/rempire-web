@@ -62,6 +62,7 @@ async function commit(row: Record<string, unknown>, typed: string): Promise<Comm
     function stockFindRow() { return ROW; }
     function stockLevelSaveDetailed() { return Promise.resolve({ ok: true }); }
     function stockMoveSend(b) { out.sent.push(b); return Promise.resolve(true); }
+    function stockMoveFailText(f) { return f; }
     function stockSaveErrText() { return ""; }
     function toast(m) { out.toasts.push(m); }
     function render() {}
@@ -167,6 +168,7 @@ async function scanCommit(sign: number, qty: number, result: MoveResult | null):
     var SCAN = { lastCode: "123" };
     var SCANEL = null;
     function stockMoveSend() { return Promise.resolve(RESULT); }
+    function stockMoveFailText(f) { return f; }
     function scanRenderPanel() {}
     function toast(m) { out.push(m); }
     function scanLookup() {}
@@ -411,5 +413,127 @@ describe("undo puts back only what left the shelf", () => {
 
   it("a move that applied nothing carries no undo at all", () => {
     expect(undoAfter(-5, { appliedDelta: 0, skipped: true })).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * «Сделать один раз»: the key stockMoveSend() puts on a movement
+ *
+ * A move is a RELATIVE delta, so the shop cannot tell a retry from a real
+ * repeat by looking at the request — two «+1 приход» in a row are two real
+ * bottles. Only the panel knows, and this is where it says so. The route half
+ * is tests/idempotency-routes.test.ts.
+ * ------------------------------------------------------------------------ */
+
+interface MoveCall {
+  body: Record<string, unknown>;
+  key: string;
+}
+
+/** The real stockMoveSend(), called once per entry in `plan`. */
+async function moves(
+  plan: Array<{ body: Record<string, unknown>; answer: { status: number; body: Record<string, unknown> } | "dead" }>,
+): Promise<{ sent: MoveCall[]; results: unknown[]; fail: string[] }> {
+  const body = `
+    var window = {};
+    var out = { sent: [], results: [], fail: [] };
+    var nth = 0;
+    function noop() {}
+    function apiSend(url, method, b, idemKey) {
+      out.sent.push({ body: b, key: idemKey || "" });
+      var next = PLAN[nth++].answer;
+      return next === "dead" ? Promise.reject(new Error("no-api")) : Promise.resolve(next);
+    }
+    ${slice("idemNewKey")}
+    ${slice("stockMoveFailText")}
+    ${slice("stockMoveSend")}
+    var chain = Promise.resolve();
+    PLAN.forEach(function (step) {
+      chain = chain.then(function () {
+        return stockMoveSend(step.body).then(function (r) {
+          out.results.push(r);
+          if (!r) out.fail.push(stockMoveFailText("Не удалось сохранить"));
+        }, function () { out.results.push("rejected"); });
+      });
+    });
+    return chain.then(function () { return out; });
+  `;
+  // app.js's own source plus fixed stub text — nothing is interpolated in
+  const fn = new Function("PLAN", `var STOCK_MOVE = { sig: "", key: "" }; var stockMoveWait = false; var stockMoveChain = Promise.resolve();` + body) as (
+    p: unknown[],
+  ) => Promise<{ sent: MoveCall[]; results: unknown[]; fail: string[] }>;
+  return fn(plan);
+}
+
+const PLUS_ONE = { productId: "p", variant: "", delta: 1, reason: "goods_in", ref: "сканер" };
+const MOVED = { status: 200, body: { ok: true, result: { appliedDelta: 1 } } };
+const BUSY = { status: 409, body: { ok: false, error: "in_progress" } };
+
+describe("the key a stock movement carries", () => {
+  it("is sent, and is a key the shop will accept", async () => {
+    const out = await moves([{ body: PLUS_ONE, answer: MOVED }]);
+    expect(out.sent[0].key).toMatch(/^[A-Za-z0-9._:-]{8,200}$/);
+  });
+
+  /* THE ONE THAT MATTERS. The scanner's «+1 приход», then the very same
+     «+1 приход» for the next bottle out of the box. Byte-identical
+     bodies, and they MUST carry different keys — otherwise the shop replays
+     the first answer and the second bottle never reaches the shelf. */
+  it("two identical «+1 приход» after a good answer carry DIFFERENT keys", async () => {
+    const out = await moves([
+      { body: PLUS_ONE, answer: MOVED },
+      { body: PLUS_ONE, answer: MOVED },
+    ]);
+    expect(out.sent).toHaveLength(2);
+    expect(out.sent[1].body).toEqual(out.sent[0].body);
+    expect(out.sent[1].key).not.toBe(out.sent[0].key);
+  });
+
+  /* …and the opposite, which is what the key is for: the answer never came
+     back, so the panel does not know whether the bottle landed. The tap that
+     follows is a RETRY of that movement and carries the same key. */
+  it("a movement whose answer was lost keeps its key for the retry", async () => {
+    const out = await moves([
+      { body: PLUS_ONE, answer: "dead" },
+      { body: PLUS_ONE, answer: MOVED },
+    ]);
+    expect(out.sent).toHaveLength(2);
+    expect(out.sent[1].key).toBe(out.sent[0].key);
+  });
+
+  /* 409 in_progress is the same movement still being written by the tap
+     before. The key is kept, and the panel says so rather than «не
+     сохранилось» over a movement that is going through perfectly well. */
+  it("an in-progress answer keeps the key and is not worded as a failure", async () => {
+    const out = await moves([
+      { body: PLUS_ONE, answer: BUSY },
+      { body: PLUS_ONE, answer: MOVED },
+    ]);
+    expect(out.results[0]).toBeNull();
+    expect(out.fail).toEqual(["Движение уже записывается — подождите пару секунд."]);
+    expect(out.sent[1].key).toBe(out.sent[0].key);
+  });
+
+  /* A dead connection is not an in-progress answer, and must not borrow its
+     sentence from the call before it. */
+  it("a dead connection after an in-progress answer does not inherit «подождите»", async () => {
+    const out = await moves([
+      { body: PLUS_ONE, answer: BUSY },
+      { body: PLUS_ONE, answer: "dead" },
+      { body: PLUS_ONE, answer: { status: 503, body: { ok: false, error: "db_unavailable" } } },
+    ]);
+    expect(out.results[1]).toBe("rejected");
+    expect(out.fail).toEqual([
+      "Движение уже записывается — подождите пару секунд.",
+      "Не удалось сохранить",
+    ]);
+  });
+
+  it("a different movement always gets a key of its own", async () => {
+    const out = await moves([
+      { body: PLUS_ONE, answer: "dead" },
+      { body: { ...PLUS_ONE, delta: -1, reason: "sale_pos" }, answer: MOVED },
+    ]);
+    expect(out.sent[1].key).not.toBe(out.sent[0].key);
   });
 });

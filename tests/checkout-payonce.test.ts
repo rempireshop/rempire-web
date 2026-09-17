@@ -37,6 +37,8 @@ function slice(name: string): string {
 interface Call {
   url: string;
   body: Record<string, unknown>;
+  /** The `Idempotency-Key` header this call carried, "" when it carried none. */
+  key: string;
 }
 
 interface Answer {
@@ -127,12 +129,17 @@ function rig(answers: Answer[], apiOk: boolean | null = true): Rig {
     // orderPayload(), whose only relevant property here is that it changes
     // when the basket does
     function orderPayload() { return { items: S.cart.slice(), lang: S.lang }; }
-    function postJSON(url, b) {
-      calls.push({ url: url, body: b });
+    function postJSON(url, b, signal, idemKey) {
+      calls.push({ url: url, body: b, key: idemKey || "" });
       var next = script.shift() || { body: { ok: false, error: "unstubbed" } };
       return Promise.resolve(next);
     }
     var location = { get href() { return href; }, set href(v) { href = v; } };
+    /* «сделать один раз»: the real minter and the real memo, so the key a
+       retry carries is the shop's own answer and not the test's. */
+    var orderIdem = { sig: "", key: "" };
+    ${slice("idemNewKey")}
+    ${slice("orderIdemKey")}
 
     ${slice("payNow")}
 
@@ -333,6 +340,123 @@ describe("payNow(): a failed payment does not cost the shop a second order", () 
     expect(r.toasts).toEqual(["order:out_of_stock"]);
     await r.tap();
     expect(urls(r)).toEqual(["/api/orders/", "/api/orders/", "/api/payments/create/"]);
+  });
+});
+
+/* ---------- «сделать один раз»: the key the checkout sends -----------------
+ *
+ * `pendingOrder` above covers the half where the order was MADE and the
+ * payment failed — the checkout knows there is an order. This is the half it
+ * cannot see: POST /api/orders/ arrived, the shop numbered the order and
+ * («По счёту») mailed a real invoice, and the answer was lost on the way
+ * back. The checkout has nothing to remember, so the second tap re-POSTs — and
+ * the only thing that stops that becoming a second order is the key it carries.
+ *
+ * The server half is tests/idempotency-routes.test.ts; this is the client's
+ * end of the same contract, run against the shop's own payNow().
+ */
+function orderCalls(r: Rig): Call[] {
+  return r.calls.filter((c) => c.url === "/api/orders/");
+}
+
+describe("payNow(): the key a retry carries", () => {
+  it("sends one, and it is a key the shop will accept", async () => {
+    const r = rig([ORDER_OK, PAY_OK]);
+    await r.tap();
+    const key = orderCalls(r)[0].key;
+    expect(key.length).toBeGreaterThanOrEqual(8);
+    expect(key.length).toBeLessThanOrEqual(200);
+    // the same character class src/lib/idempotency.ts KEY_RE allows
+    expect(key).toMatch(/^[A-Za-z0-9._:-]+$/);
+  });
+
+  /* THE ONE THIS EXISTS FOR. A 502 on the way back from an order that really
+     was created; the shopper taps «Оплатить» again. Both POSTs must carry
+     the SAME key, or the shop has no way to know they are one order. */
+  it("a lost answer and the tap that follows it are one key", async () => {
+    const r = rig([{ offline: true, lost: true, status: 502 }, ORDER_OK, PAY_OK]);
+    await r.tap();
+    await r.tap();
+
+    const posted = orderCalls(r);
+    expect(posted).toHaveLength(2);
+    expect(posted[1].key).toBe(posted[0].key);
+    expect(posted[0].key).not.toBe("");
+  });
+
+  /* And the other direction, which is what stops somebody «fixing» this into a
+     hash of the basket later: a basket the shopper changed is a different
+     order and must get a key of its own. */
+  it("a changed basket gets a new key, not the old one", async () => {
+    const r = rig([{ offline: true, lost: true, status: 502 }, ORDER_OK, PAY_OK]);
+    await r.tap();
+    r.setCart([{ id: "p1", qty: 1 }, { id: "p2", qty: 2 }]);
+    await r.tap();
+
+    const posted = orderCalls(r);
+    expect(posted).toHaveLength(2);
+    expect(posted[1].key).not.toBe(posted[0].key);
+  });
+
+  /* …and once the shop has answered, the key has done its job. The order this
+     one made can no longer be paid for (a webhook settled it), so the next tap
+     makes a NEW order — which must not be handed the old one back. */
+  it("a definite answer ends the key: the next order gets its own", async () => {
+    const r = rig([
+      ORDER_OK,
+      PAY_DEAD,
+      { body: { ok: false, error: "already_paid" } },
+      ORDER_OK_2,
+      PAY_OK,
+    ]);
+    await r.tap();
+    await r.tap();
+    await r.tap();
+
+    const posted = orderCalls(r);
+    expect(posted).toHaveLength(2);
+    expect(posted[1].key).not.toBe(posted[0].key);
+  });
+
+  /* 409 in_progress is the shopper's OWN first tap still running. Nothing is
+     lost, nothing is thrown away, and the sentence does not read like a
+     refusal — the next tap in a moment is handed that first order. */
+  it("409 in_progress keeps the basket, the key and a sentence that is not an error", async () => {
+    const r = rig([
+      { status: 409, body: { ok: false, error: "in_progress" } },
+      ORDER_OK,
+      PAY_OK,
+    ]);
+    await r.tap();
+
+    expect(r.toasts).toEqual(["Заказ уже оформляется — подождите пару секунд и нажмите ещё раз"]);
+    expect(r.cart).toEqual([{ id: "p1", qty: 1 }]);
+
+    r.reload();
+    await r.tap();
+    const posted = orderCalls(r);
+    expect(posted).toHaveLength(2);
+    // the same key, so the second tap is answered with the FIRST order
+    expect(posted[1].key).toBe(posted[0].key);
+    expect(r.href).toBe("https://bank.example/pay/1");
+  });
+
+  /* A key the shop says belongs to a different body is a checkout that lost
+     track of itself. It is forgotten, so the retry is not wedged on it. */
+  it("key_reused is forgotten, and the retry mints a fresh one", async () => {
+    const r = rig([
+      { status: 409, body: { ok: false, error: "key_reused" } },
+      ORDER_OK,
+      PAY_OK,
+    ]);
+    await r.tap();
+    expect(r.toasts).toEqual(["order:key_reused"]);
+
+    await r.tap();
+    const posted = orderCalls(r);
+    expect(posted).toHaveLength(2);
+    expect(posted[1].key).not.toBe(posted[0].key);
+    expect(r.href).toBe("https://bank.example/pay/1");
   });
 });
 
