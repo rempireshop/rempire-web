@@ -370,17 +370,21 @@ export function totalRows(
 
   const shipValue =
     t.shipping > 0 ? money(t.shipping, true) : esc(COMMON[lang].free);
+  /* «Доставка — Omniva», but «Доставка» on its own when the letter has no
+     method to name. The unpaid-order reminder is that letter — it is written
+     before the parcel has a carrier — and it used to print «Доставка — :
+     бесплатно», a dash with nothing after it, in both halves of the mail. */
+  const shipName = shipLabel.trim()
+    ? `${COMMON[lang].shipping} — ${shipLabel.trim()}`
+    : COMMON[lang].shipping;
   lines.push({
-    label: esc(`${COMMON[lang].shipping} — ${shipLabel}`).replace(
-      / — /g,
-      "&nbsp;— ",
-    ),
+    label: esc(shipName).replace(/ — /g, "&nbsp;— "),
     value: shipValue,
     muted: true,
     last: true,
   });
   text.push(
-    `  ${COMMON[lang].shipping} — ${shipLabel}: ${t.shipping > 0 ? money(t.shipping) : COMMON[lang].free}`,
+    `  ${shipName}: ${t.shipping > 0 ? money(t.shipping) : COMMON[lang].free}`,
   );
 
   lines.push({

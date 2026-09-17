@@ -86,6 +86,23 @@ async function newestCodeExpiry(): Promise<number> {
   return new Date(rows[0].ends_at).getTime();
 }
 
+/**
+ * The code must be good for the WHOLE Tallinn day `dayOf` falls in.
+ *
+ * The letter prints a calendar date and says «до … включительно», and the
+ * checkout refuses the code the instant `ends_at` passes — so an expiry set at
+ * the o'clock the cron ran killed it halfway through the last day the customer
+ * had been promised. What is pinned is the day (the arithmetic each caller
+ * spells out) and, inside it, the last millisecond: still valid, and the next
+ * millisecond is the next day.
+ */
+async function expectCodeLastsAllOf(dayOf: number): Promise<void> {
+  const at = await newestCodeExpiry();
+  expect(shopDay(at), "the code expires on the wrong day").toBe(shopDay(dayOf));
+  expect(shopDay(at - 1)).toBe(shopDay(at)); // the whole day is inside it
+  expect(shopDay(at + 1)).not.toBe(shopDay(at)); // …and nothing beyond it
+}
+
 beforeAll(async () => {
   restoreEnv = setFuzzEnv();
   await setupDb();
@@ -180,8 +197,8 @@ describe("runBirthdays() — the tolerant window", () => {
     const run = await runBirthdays(MAR11);
     expect(run.sent).toBe(1);
     expect(await sentYear(id)).toBe(2026);
-    // fourteen days from the birthday itself: 17 from today
-    expect(await newestCodeExpiry()).toBe(MAR11 + 17 * DAY);
+    // fourteen days from the birthday itself: 17 from today, to the end of it
+    await expectCodeLastsAllOf(MAR11 + 17 * DAY);
   });
 
   it("catches up on a day the cron missed — and gives the code its full fortnight from the birthday", async () => {
@@ -191,7 +208,7 @@ describe("runBirthdays() — the tolerant window", () => {
     const run = await runBirthdays(MAR11 + DAY);
     expect(run.sent).toBe(1);
     expect(await sentYear(id)).toBe(2026);
-    expect(await newestCodeExpiry()).toBe(MAR11 + DAY + 16 * DAY);
+    await expectCodeLastsAllOf(MAR11 + DAY + 16 * DAY);
   });
 
   it("greets on the birthday itself when every earlier day was missed, and never the day after", async () => {
@@ -199,7 +216,7 @@ describe("runBirthdays() — the tolerant window", () => {
     const late = await customer("1990-03-14");
     expect((await runBirthdays(MAR11 + 3 * DAY)).sent).toBe(1);
     expect(await sentYear(late)).toBe(2026);
-    expect(await newestCodeExpiry()).toBe(MAR11 + 3 * DAY + 14 * DAY);
+    await expectCodeLastsAllOf(MAR11 + 3 * DAY + 14 * DAY);
 
     const missed = await customer("1990-03-13");
     // the 15th: the 13th is behind us, the 14th too — a greeting after the day is not one

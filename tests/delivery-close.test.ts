@@ -11,6 +11,7 @@ import { query } from "@/lib/db";
 import { cleanDelivery, closeDeliveredOrders, looksDelivered, looksReturned, MAX_AUTO_DAYS } from "@/lib/delivery";
 import { BIRTHDAY_MAX_DAYS, FLOW_DEFAULTS, getFlows, runBirthdays } from "@/lib/flows";
 import { setSetting } from "@/lib/orders";
+import { shopDay } from "@/lib/day";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
 /* The one carrier call this module makes. Stubbed so a shipment status can be
@@ -192,6 +193,23 @@ describe("«за N дней до дня рождения»", () => {
     return new Date(rows[0].ends_at).getTime();
   }
 
+  /**
+   * The Tallinn day the code is good until, and the proof that it is good for
+   * ALL of it.
+   *
+   * The letter prints a calendar date and says «до … включительно», so the
+   * expiry is the last millisecond of that day rather than the o'clock the
+   * run happened at (endOfShopDay, src/lib/day.ts). What each case below
+   * spells out is the DAY — that is what the head start moves — so the day is
+   * what is compared, and the end-of-day rule is checked once, here.
+   */
+  async function expiryDay(): Promise<string> {
+    const at = await issuedCodeExpiry();
+    expect(shopDay(at - 1), "the code dies before its last day is over").toBe(shopDay(at));
+    expect(shopDay(at + 1), "the code outlives the day the letter named").not.toBe(shopDay(at));
+    return shopDay(at);
+  }
+
   it("defaults to the day itself, exactly as before", async () => {
     expect(FLOW_DEFAULTS.birthdayDays).toBe(0);
     expect((await getFlows()).birthdayDays).toBe(0);
@@ -257,7 +275,7 @@ describe("«за N дней до дня рождения»", () => {
 
     await runBirthdays(now);
     expect(await sentYear(id)).toBe(2026);
-    expect(await issuedCodeExpiry()).toBe(now + 14 * DAY);
+    expect(await expiryDay()).toBe(shopDay(now + 14 * DAY));
   });
 
   it("«за 3 дня» gives the code back the three days the head start took", async () => {
@@ -268,10 +286,9 @@ describe("«за N дней до дня рождения»", () => {
 
     await runBirthdays(now);
     expect(await sentYear(id)).toBe(2026);
-    const ends = await issuedCodeExpiry();
-    expect(ends).toBe(now + 17 * DAY);
+    expect(await expiryDay()).toBe(shopDay(now + 17 * DAY));
     // …which is the same fortnight measured from the birthday itself
-    expect(ends - Date.UTC(2026, 6, 5, 9, 0, 0)).toBe(14 * DAY);
+    expect(await expiryDay()).toBe(shopDay(Date.UTC(2026, 6, 5, 9, 0, 0) + 14 * DAY));
   });
 
   it("«за 14 дней» no longer hands out a code that expires on the birthday", async () => {
@@ -283,10 +300,9 @@ describe("«за N дней до дня рождения»", () => {
 
     await runBirthdays(now);
     expect(await sentYear(id)).toBe(2026);
-    const ends = await issuedCodeExpiry();
     // the case that started this: the old code expired exactly here
-    expect(ends).toBeGreaterThan(birthday);
-    expect(ends).toBe(now + 28 * DAY);
-    expect(ends - birthday).toBe(14 * DAY);
+    expect(await issuedCodeExpiry()).toBeGreaterThan(birthday);
+    expect(await expiryDay()).toBe(shopDay(now + 28 * DAY));
+    expect(await expiryDay()).toBe(shopDay(birthday + 14 * DAY));
   });
 });

@@ -31,6 +31,7 @@ import type {
   Lang,
   RenderedEmail,
 } from "./types";
+import { shopDay, ymdParts } from "../lib/day";
 
 const DEFAULT_PERCENT = 15;
 const VALID_DAYS = 14;
@@ -54,10 +55,16 @@ const MONTHS: Record<Lang, string[]> = {
   ],
 };
 
+/* The Tallinn calendar day, never the host's: the code is written to die at
+   the end of a Tallinn day (endOfShopDay, src/lib/flows.ts) and this line is
+   the promise the customer reads, so the two have to name the same date on a
+   server set to any zone at all. src/lib/day.ts is pure Intl and pulls no
+   database in behind it, which is what lets a letter import it. */
 function formatDate(d: Date, lang: Lang): string {
-  const day = d.getDate();
-  const month = MONTHS[lang][d.getMonth()];
-  const year = d.getFullYear();
+  const parts = ymdParts(shopDay(d));
+  if (!parts) return "";
+  const { year, day } = parts;
+  const month = MONTHS[lang][parts.month - 1];
   if (lang === "et") return `${day}. ${month} ${year}`;
   return `${day} ${month} ${year}`;
 }

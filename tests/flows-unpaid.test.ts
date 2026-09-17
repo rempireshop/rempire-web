@@ -28,6 +28,10 @@ const DAY = 24 * 60 * 60 * 1000;
 /** Every letter Resend was asked to send since the last reset. */
 const sent: Array<{ subject: string; to: string[]; text: string }> = [];
 
+/** Runs once, while the NEXT letter is in flight — the shop's clock does not
+ *  stop while the cron walks its list, and this is how a test says so. */
+let whileSending: (() => Promise<void>) | null = null;
+
 const ORDER = {
   lang: "RU",
   items: [{ id: PRODUCT, qty: 1 }],
@@ -63,9 +67,15 @@ afterAll(async () => {
 beforeEach(async () => {
   await truncateAll();
   sent.length = 0;
+  whileSending = null;
   vi.stubGlobal("fetch", async (_url: unknown, init: RequestInit) => {
     const body = JSON.parse(String(init.body)) as { subject: string; to: string[]; text?: string };
     sent.push({ subject: body.subject, to: body.to, text: body.text ?? "" });
+    if (whileSending) {
+      const hook = whileSending;
+      whileSending = null;
+      await hook();
+    }
     return new Response(JSON.stringify({ id: `msg_${sent.length}` }), {
       status: 200,
       headers: { "content-type": "application/json" },
@@ -188,6 +198,36 @@ describe("the cancellation", () => {
       "select actor from admin_audit where action = 'order.status'",
     );
     expect(rows.map((r) => r.actor)).toContain("system:unpaid");
+  });
+
+  /* The cancel list is read ONCE and every letter after it takes its own trip
+     to Resend, so the list is minutes old by the time the last row is reached
+     — long enough for a bank to answer. Until the write was guarded
+     («unless», src/lib/orders.ts) the order paid in the middle of the walk was
+     overwritten with «отменён», and the customer who had just paid was told
+     his order was gone. */
+  it("leaves an order alone when the money lands in the middle of the walk", async () => {
+    const first = await place();
+    const second = await place();
+    await age(first.id, 20);
+    await age(second.id, 15); // younger, so `order by created_at` puts it second
+
+    whileSending = async () => {
+      await setOrderPayment(second.id, {
+        provider: "mock", ref: "r", status: "paid", at: new Date().toISOString(),
+      });
+      await setOrderStatus(second.id, "paid", "test");
+    };
+
+    const run = await runUnpaidOrders();
+    expect(run.cancelled).toBe(1);
+    expect((await getOrder(first.id))!.status).toBe("cancelled");
+    expect((await getOrder(second.id))!.status).toBe("paid");
+
+    // one letter, and it is not the one that would have been a lie
+    expect(sent).toHaveLength(1);
+    expect(sent[0].subject).toContain(first.number);
+    expect(sent.some((m) => m.subject.includes(second.number))).toBe(false);
   });
 
   it("does not send the reminder to an order that is already past the cancel day", async () => {

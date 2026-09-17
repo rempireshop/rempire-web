@@ -883,5 +883,28 @@ export async function productsForAlerts(ids: string[]): Promise<Map<string, Aler
   for (const [id, own] of await customLookup(missing)) {
     out.set(id, { id, brand: own.min.b, name: own.min.n, price: own.min.p, stock: own.min.s, img: own.img });
   }
+  /* …and the owner's own price on top, the same one the product page shows
+     (renderCustomProductPage / productSpec read product_overrides.price the
+     moment there is one). Without this the «снова в наличии» letter quoted the
+     catalogue file and the page it links to quoted the panel, so a product
+     whose price Renat had changed was advertised at a figure the shop does not
+     charge. Best effort: no table, no override — the file's price stands. */
+  if (out.size) {
+    const keys = [...out.keys()];
+    const holes = keys.map((_, i) => `$${i + 1}`).join(",");
+    try {
+      const rows = await query<{ product_id: string; price: number | string | null }>(
+        `select product_id, price from product_overrides where product_id in (${holes}) and price is not null`,
+        keys,
+      );
+      for (const r of rows) {
+        const price = Number(r.price);
+        const p = out.get(r.product_id);
+        if (p && Number.isFinite(price)) p.price = price;
+      }
+    } catch {
+      /* no overrides table — the catalogue's own price is the answer */
+    }
+  }
   return out;
 }
