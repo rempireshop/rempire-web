@@ -62,6 +62,8 @@ type Harness = {
   rows: () => Array<[string, string, string]>;
   /** app.js's own MONTONIO_PRICE — what an empty box charges */
   montonio: () => Record<string, unknown>;
+  /** the draft as the TILL reads it — the boxes hold the stored row (r22) */
+  live: () => Rules;
   /** app.js's own eur(), so the assertions read the page's own formatting */
   eur: (v: number) => string;
 };
@@ -75,6 +77,16 @@ function harness(draft: Rules): Harness {
     ${decl("ADM_SHIP_PREVIEW_ROWS")}
     ${slice("admShipPreviewTableHTML")}
     function shipDraft() { return DRAFT; }
+    /* r22: the boxes show the STORED row and the preview shows the BILL, so
+       the draft goes through the same merge the till does before it is drawn
+       — an empty cell is Montonio's price and not a blank. */
+    ${decl("SHIP_RULES")}
+    function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
+    var SHIP_RULES_DEFAULT = cloneRules(SHIP_RULES);
+    ${slice("shipRulesBase")}
+    ${slice("shipStoredMerge")}
+    ${slice("shipRulesFrom")}
+    ${slice("shipDraftLive")}
     ${decl("MONTONIO_PRICE")}
     function esc(s) { return String(s); }
     ${slice("eur")}
@@ -93,6 +105,7 @@ function harness(draft: Rules): Harness {
       page: deliveryPageHTML,
       rows: function () { return ADM_SHIP_PREVIEW_ROWS; },
       montonio: function () { return MONTONIO_PRICE; },
+      live: shipDraftLive,
       eur: eur
     };
   `;
@@ -135,7 +148,12 @@ describe("the preview is the customer's own table, not a second one", () => {
       tr: (s: string) => s,
       esc: (s: string) => String(s),
       eur: h.eur,
-      rules: LIVE, carriers: {
+      /* `h.live()` and not the draft itself: since r22 the boxes hold the
+         stored row, where an empty cell is an absent key, and the preview is
+         the BILL — the same merge quoteFromRules() does on the server. The
+         claim being pinned is unchanged: the preview is the customer's own
+         renderer over the owner's own numbers, not a second table. */
+      rules: h.live(), carriers: {
         EE: ["omniva", "smartpost", "dpd", "venipak", "unisend"],
         LV: ["omniva", "dpd", "venipak", "unisend"],
         LT: ["omniva", "dpd", "venipak", "unisend"],

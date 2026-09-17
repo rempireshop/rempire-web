@@ -393,13 +393,23 @@ describe("the rules the shop actually bills on", () => {
       expect(belowCostCells(parseShippingRules({ methods: { courier: { FI: 15.5 } } }))).toHaveLength(1);
     });
 
-    /* Inside EE/LV/LT/FI the shopper always picks a chip, so the carrier cell
-       is what bills and the «Пакомат» column is a fallback nobody reaches.
-       Flagging it would refuse a save over a number that charges no one. */
-    it("leaves the parcel column alone where the shopper picks the carrier", () => {
+    /* The «Пакомат» column is not policed at all, anywhere, since 17.09.2026.
+       Inside EE/LV/LT/FI the shopper always picks a chip, so the carrier cell
+       is what bills and the column is a fallback nobody reaches. Outside them
+       the column is not a fallback — but it is not the owner's either: the
+       rate screen has had no «Пакомат» box since 14.09.2026 (admShipRowHTML
+       emits `c:`, `m:courier:` and `free:` keys and nothing else), and the
+       checkout offers no parcel machine in any of those countries. So every
+       cell the guard could see there was a default nobody typed, and the day
+       a Montonio tariff rose past one of them the shop would have refused the
+       owner's next save — of any cell at all — over a number with no box to
+       change. A refusal nobody can act on locks the panel instead of guarding
+       the money. */
+    it("leaves the parcel column alone — no box on the rate screen can edit it", () => {
       expect(belowCostCells(parseShippingRules({ methods: { parcel: { FI: 7.89 } } }))).toEqual([]);
-      // …but not outside those four, where the column IS the price
-      expect(belowCostCells(parseShippingRules({ methods: { parcel: { PL: 9.9 } } }))).toHaveLength(1);
+      expect(belowCostCells(parseShippingRules({ methods: { parcel: { PL: 9.9 } } }))).toEqual([]);
+      // …and a cell that IS the owner's, one column over, is still refused
+      expect(belowCostCells(parseShippingRules({ methods: { courier: { PL: 9.9 } } }))).toHaveLength(1);
     });
 
     it("says nothing about a zone row, a default or the free-delivery floor", () => {

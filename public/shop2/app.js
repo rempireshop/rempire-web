@@ -359,6 +359,20 @@
       "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Täitke IBAN ülal olevas plokis «Ettevõtte andmed» — ilma pangakonto numbrita pole arvet kuhugi tasuda, seepärast pood sellist kirja välja ei saada.",
       "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Täitke ja vajutage tellimuses «Saada arve uuesti».",
       "Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».": "Arve on saatmata: tookord polnud «Ettevõtte andmetes» IBAN-i. Nüüd on see täidetud — vajutage «Saada arve uuesti».",
+      /* r22 — «Заказы»: the search now goes to the server, so it has a wait,
+         an empty answer and a failure of its own */
+      "Ищем…": "Otsime…",
+      "Ничего не нашли.": "Midagi ei leidnud.",
+      "Ищем по номеру заказа, имени, телефону и почте.": "Otsime tellimuse numbri, nime, telefoni ja e-posti järgi.",
+      "Поиск не сработал — попробуйте ещё раз.": "Otsing ei töötanud — proovige uuesti.",
+      /* r22 — «Обработано»: the one button that answers a return request */
+      "Обработано": "Käsitletud", "Возврат обработан": "Tagastus on käsitletud",
+      "Просили вернуть заказ": "Paluti tellimus tagastada",
+      "Вернуть в «Возвраты»": "Tagasi «Tagastustesse»",
+      "«Обработано» убирает заказ из счётчика «Возвраты». Деньги не уходят и письмо не отправляется — это отметка для вас.":
+        "«Käsitletud» võtab tellimuse loendurist «Tagastused» välja. Raha ei liigu ja kirja ei saadeta — see on märge teile.",
+      "Возврат отмечен обработанным ✓": "Tagastus on märgitud käsitletuks ✓",
+      "Возврат снова в списке": "Tagastus on taas loendis",
       /* r16 — «Заказы»: the returns chip, its row badge and its one line */
       "Возвраты": "Tagastused", "Просит возврат": "Soovib tagastada",
       "Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.": "Kõik tellimused, mille kohta on tagastust palutud. Loenduris on need, millele te pole veel vastanud.",
@@ -1525,7 +1539,7 @@
       "Добавили в корзину": "Lisasid ostukorvi", "Открыли оформление": "Avasid tellimuse vormistamise",
       "Купили": "Ostsid",
       "Топ товаров по выручке": "Enimmüüdud tooted käibe järgi", "Пока нет продаж.": "Müüke veel pole.",
-      "Бренды: что приносит деньги": "Brändid: mis toob raha",
+      "Бренды: на какую сумму заказали": "Brändid: mis summas telliti",
       "Топ товаров по просмотрам": "Enim vaadatud tooted", "Пока нет просмотров.": "Vaatamisi veel pole.",
       "Смотрят, но не покупают": "Vaatavad, aga ei osta", "Таких товаров нет.": "Selliseid tooteid pole.",
       "Популярные запросы": "Populaarsed otsingud", "Пока не искали.": "Veel ei ole otsitud.",
@@ -1546,13 +1560,16 @@
         "Mitu inimest igast 100 poodi sisenenust midagi ostis.",
       "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
         "Üks tulp on üks päev, kõige parempoolsem on tänane. Mida kõrgem tulp, seda rohkem raha see päev tõi.",
-      "Что принесло больше всего денег за период.": "Mis tõi perioodi jooksul kõige rohkem raha.",
+      "Топ товаров: на какую сумму заказали": "Enimmüüdud tooted: mis summas telliti",
+      "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
+        "See on tellimustes olevate kaupade hind, mitte saadud raha: soodustused, punktid, kinkekaardid ja tarne siia ei kuulu. Kui palju raha laekus, on ülal «Käibes».",
       "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
         "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
       "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "Mitu inimest jõudis igasse sammu. Tavaliselt numbrid kahanevad, aga sammu saab ka vahele jätta: kauba paneb ostukorvi otse kataloogist, kaardit avamata. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
-      "Сколько денег принёс каждый бренд за период.": "Kui palju raha tõi iga bränd perioodi jooksul.",
+      "Цена товаров каждого бренда в заказах, а не полученные деньги. Наборы и подарочные карты сюда не попадают — бренд у них не указан.":
+        "Iga brändi kaupade hind tellimustes, mitte saadud raha. Komplektid ja kinkekaardid siia ei satu — neil pole brändi märgitud.",
       "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
         "Neid kaupu avati, aga kordagi ei pandud ostukorvi. Paremal on, mitu korda avati. Tavaliselt aitab teine foto, aus hind või arusaadav kirjeldus.",
       "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
@@ -3093,6 +3110,20 @@
       "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Fill in the IBAN in the «Details» block above — an invoice with no bank account number on it cannot be paid, so the shop does not send that letter.",
       "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Fill it in, then press “Send the invoice again” on the order.",
       "Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».": "The invoice was not sent: there was no IBAN in «Details» at the time. It is filled in now — press “Send the invoice again”.",
+      /* r22 — «Заказы»: the search now goes to the server, so it has a wait,
+         an empty answer and a failure of its own */
+      "Ищем…": "Searching…",
+      "Ничего не нашли.": "Nothing found.",
+      "Ищем по номеру заказа, имени, телефону и почте.": "We search the order number, the name, the phone and the e-mail.",
+      "Поиск не сработал — попробуйте ещё раз.": "The search did not work — try again.",
+      /* r22 — «Обработано»: the one button that answers a return request */
+      "Обработано": "Dealt with", "Возврат обработан": "Return dealt with",
+      "Просили вернуть заказ": "A return was asked for",
+      "Вернуть в «Возвраты»": "Put back into “Returns”",
+      "«Обработано» убирает заказ из счётчика «Возвраты». Деньги не уходят и письмо не отправляется — это отметка для вас.":
+        "“Dealt with” takes the order out of the “Returns” counter. No money moves and no letter goes out — it is a mark for you.",
+      "Возврат отмечен обработанным ✓": "Return marked as dealt with ✓",
+      "Возврат снова в списке": "The return is back in the list",
       /* r16 — «Заказы»: the returns chip, its row badge and its one line */
       "Возвраты": "Returns", "Просит возврат": "Return asked for",
       "Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.": "Every order a return has been asked for. The count is the ones you have not answered yet.",
@@ -4234,7 +4265,7 @@
       "Добавили в корзину": "Added to cart", "Открыли оформление": "Opened checkout",
       "Купили": "Purchased",
       "Топ товаров по выручке": "Top products by revenue", "Пока нет продаж.": "No sales yet.",
-      "Бренды: что приносит деньги": "Brands: what brings in money",
+      "Бренды: на какую сумму заказали": "Brands: what was ordered, by value",
       "Топ товаров по просмотрам": "Top products by views", "Пока нет просмотров.": "No views yet.",
       "Смотрят, но не покупают": "Viewed but not bought", "Таких товаров нет.": "No such products.",
       "Популярные запросы": "Popular searches", "Пока не искали.": "No searches yet.",
@@ -4255,13 +4286,16 @@
         "Out of every 100 people who came into the shop, this many bought something.",
       "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
         "One bar is one day, the rightmost is today. The taller the bar, the more money that day brought.",
-      "Что принесло больше всего денег за период.": "What brought in the most money over the period.",
+      "Топ товаров: на какую сумму заказали": "Top products: what was ordered, by value",
+      "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
+        "This is the price of the goods in the orders, not the money received: discounts, points, gift cards and delivery are not in it. What actually came in is above, under “Revenue”.",
       "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
         "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
       "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "How many people reached each step. The numbers usually go down, but a step can be skipped: a product goes into the basket straight from the catalogue, without opening its page. The biggest step down is where the buyers are lost.",
-      "Сколько денег принёс каждый бренд за период.": "How much money each brand brought over the period.",
+      "Цена товаров каждого бренда в заказах, а не полученные деньги. Наборы и подарочные карты сюда не попадают — бренд у них не указан.":
+        "The price of each brand's goods in the orders, not the money received. Bundles and gift cards are not here at all — they carry no brand.",
       "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
         "These products were opened but never put into a basket. On the right — how many times they were opened. Usually a better photo, an honest price or a clear description fixes it.",
       "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
@@ -6795,6 +6829,40 @@
      partial merge left behind. */
   function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
   var SHIP_RULES_DEFAULT = cloneRules(SHIP_RULES);
+  /* ---------- the STORED row, which is not the table above -----------------
+     Dim, 17.09.2026. `SHIP_RULES` is the MERGED table — the defaults with the
+     owner's own cells written over them — and it is what the till reads. It is
+     not what `settings.shipping_rules` holds, and until now the panel kept no
+     copy of what that row actually said: shipDraft() cloned the merged table,
+     so every save PUT all twenty-five courier cells and all fourteen carrier
+     cells back as explicit numbers, whether the owner had typed them or not.
+
+     That is what made a cleared cell un-clearable. The whole rate screen turns
+     on one sentence — «пустое поле — цена Montonio» — and an empty cell can
+     only mean that for as long as it is ABSENT from the stored row: the price
+     it falls through to is read from MONTONIO_PRICE / country-prices.ts, so it
+     moves when Montonio's tariff moves. Written down as a number it stops
+     moving, and «Везде взять цены Montonio» — the button whose whole job is to
+     empty the table — froze that day's price list into the row instead.
+
+     So the screen edits THIS: the stored row, sparse, holding only what the
+     owner chose. An empty box here is an absent key, and it stays absent
+     through the save. What he will notice the first time: boxes that read a
+     number today read empty after his next save, because the row the shop has
+     now was written by a panel that filled them all in.
+
+     `SHIP_STORED_DEFAULT` is the same thing for a shop that has saved nothing:
+     the two decisions that are the owner's and not Montonio's — how much
+     delivery to give away, and where the shop delivers at all — and not one
+     price. */
+  var SHIP_STORED_DEFAULT = {
+    freeFrom: SHIP_RULES_DEFAULT.freeFrom,
+    freeFromByCountry: cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry),
+    methods: { parcel: {}, courier: {}, pickup: {} },
+    carriers: {},
+    countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff)
+  };
+  var SHIP_STORED = cloneRules(SHIP_STORED_DEFAULT);
   var DELIVERY = [
     { k: "parcel", l: "Пакомат" },
     { k: "courier", l: "Курьер до двери" },
@@ -7118,36 +7186,101 @@
     // bill the same number
     refreshShipThresholds();
   }
-  /** A whole-table save: back to the defaults, then the owner's rules over them.
-      applyShipRules() can only add and change, so a price the owner cleared
-      would otherwise survive its own deletion. */
+  /**
+   * What an EMPTY stored row bills — the table a shop that has saved nothing
+   * charges from, and the floor every one of the owner's own cells sits on.
+   *
+   * It is the defaults, with one correction: the courier column's floor is
+   * Montonio's own price and not the three home numbers the shop ships with
+   * (EE 10,84 €, LV and LT 9,90 €). Those three are overrides like any other
+   * cell, and «пустое поле — цена Montonio» has to hold after a save as well
+   * as before it — «Везде взять цены Montonio» empties the boxes, and a seed
+   * of 10,84 underneath would put Estonia's own number back the moment the
+   * table was read again, the button lying about what it did.
+   * parseShippingRules() seeds the same way on the server, and a shop with no
+   * settings row at all is still priced by SHIP_RULES_DEFAULT, which keeps
+   * all three.
+   */
+  function shipRulesBase() {
+    var b = cloneRules(SHIP_RULES_DEFAULT);
+    Object.keys(MONTONIO_PRICE.courier).forEach(function (c) {
+      b.methods.courier[c] = MONTONIO_PRICE.courier[c][0];
+    });
+    return b;
+  }
+  /**
+   * A stored row merged over a base, cell by cell — the same arithmetic
+   * applyShipRules() does to SHIP_RULES, but as a value rather than as a side
+   * effect, so the live table and the preview under the boxes can be built
+   * from one function.
+   *
+   * `freeFromByCountry` and `countriesOff` are AUTHORITATIVE when present,
+   * empty included: «одна цена везде» and «доставляем везде» are real answers
+   * and a merge that put the defaults back would be a table that refuses to be
+   * emptied. A price is not — an absent price cell means «возьмите цену
+   * Montonio» and must stay absent.
+   */
+  function shipStoredMerge(base, raw) {
+    var out = cloneRules(base);
+    if (!raw || typeof raw !== "object") return out;
+    if (raw.freeFrom === null || typeof raw.freeFrom === "number") out.freeFrom = raw.freeFrom;
+    if (raw.freeFromByCountry && typeof raw.freeFromByCountry === "object") out.freeFromByCountry = cloneRules(raw.freeFromByCountry);
+    if (raw.methods && typeof raw.methods === "object") {
+      ["parcel", "courier", "pickup"].forEach(function (m) {
+        if (!raw.methods[m] || typeof raw.methods[m] !== "object") return;
+        if (!out.methods[m]) out.methods[m] = {};
+        Object.keys(raw.methods[m]).forEach(function (c) {
+          var v = Number(raw.methods[m][c]);
+          if (isFinite(v) && v >= 0) out.methods[m][c] = v;
+        });
+      });
+    }
+    if (raw.carriers && typeof raw.carriers === "object") {
+      if (!out.carriers) out.carriers = {};
+      Object.keys(raw.carriers).forEach(function (k) {
+        var row = raw.carriers[k];
+        if (!row || typeof row !== "object") return;
+        if (!out.carriers[k]) out.carriers[k] = {};
+        Object.keys(row).forEach(function (c) {
+          var v = Number(row[c]);
+          if (isFinite(v) && v >= 0) out.carriers[k][c] = v;
+        });
+      });
+    }
+    if (Array.isArray(raw.countriesOff)) {
+      out.countriesOff = raw.countriesOff
+        .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
+        .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    }
+    /* `raw.markup` is read by nothing since 14.09.2026 and is ignored here as
+       it is in parseShippingRules() on the server. */
+    return out;
+  }
+  /** The table a stored row bills from. */
+  function shipRulesFrom(raw) { return shipStoredMerge(shipRulesBase(), raw); }
+  /** A whole-table save: the stored row is remembered as it came, and the live
+      table is rebuilt from it. applyShipRules() can only add and change, so a
+      price the owner cleared would otherwise survive its own deletion. */
   function setShipRules(raw) {
-    SHIP_RULES.freeFrom = SHIP_RULES_DEFAULT.freeFrom;
+    /* The row first, in ONE shape — the same shape cleanShippingRules() gives
+       it on the server: the three method tables and the carrier map always
+       present, whatever the feed sent, and nothing in it that is not a rule.
+       A `markup` an older row still carries is dropped here as it is there. */
+    SHIP_STORED = shipStoredMerge(SHIP_STORED_DEFAULT, raw);
+    var live = shipRulesFrom(SHIP_STORED);
+    SHIP_RULES.freeFrom = live.freeFrom;
     /* Back to the default map, not to null: since 08.09.2026 the defaults
        carry «Европа — от 200 €», and nulling it here would have quietly given
        Europe the 59 € floor back on every whole-table save. */
-    SHIP_RULES.freeFromByCountry = cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry);
-    SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
-    /* …except the courier column, whose floor is Montonio's own price and not
-       the three home numbers the shop ships with (EE 10,84 €, LV and LT
-       9,90 €). Those three are overrides like any other cell, and «пустое поле
-       — цена Montonio» has to hold after a save as well as before it: «Везде
-       взять цены Montonio» empties the boxes, and a seed of 10,84 here would
-       put Estonia's own number back the moment the table was saved — the
-       button lying about what it did. parseShippingRules() seeds the same way
-       on the server, and a shop with no settings row at all is still priced by
-       SHIP_RULES_DEFAULT, which keeps all three. */
-    Object.keys(MONTONIO_PRICE.courier).forEach(function (c) {
-      SHIP_RULES.methods.courier[c] = MONTONIO_PRICE.courier[c][0];
-    });
+    SHIP_RULES.freeFromByCountry = live.freeFromByCountry;
+    SHIP_RULES.methods = live.methods;
     /* Back to the default TABLE, not to null — same reasoning as the
        free-delivery map above. Since 13.09.2026 the defaults carry one price
        per carrier from Montonio's own tariffs, and nulling this would put a
        whole-table save back on «одна цена на страну для всех перевозчиков»,
        which is the shape Ренат asked to be rid of. */
-    SHIP_RULES.carriers = cloneRules(SHIP_RULES_DEFAULT.carriers);
-    SHIP_RULES.countriesOff = cloneRules(SHIP_RULES_DEFAULT.countriesOff);
-    applyShipRules(raw);
+    SHIP_RULES.carriers = live.carriers;
+    SHIP_RULES.countriesOff = live.countriesOff;
     refreshShipThresholds();
   }
   var shipRulesAsked = false;
@@ -16616,6 +16749,13 @@
     var req = srv && srv.shipping && srv.shipping.returnRequest;
     return req && typeof req === "object" && req.at ? String(req.at) : "";
   }
+  /** returns: when the OWNER pressed «Обработано», "" while it is still open.
+      `shipping.returnRequest.doneAt`, written by PATCH /api/admin/orders/<id>
+      {returnHandled:true} (setReturnHandled in src/lib/returns.ts). */
+  function admReturnDoneAt(srv) {
+    var req = srv && srv.shipping && srv.shipping.returnRequest;
+    return req && typeof req === "object" && req.doneAt ? String(req.doneAt) : "";
+  }
   function admOrderVM(o) {
     var srv = o.srv || null;
     var status = srv ? srv.status
@@ -16668,6 +16808,10 @@
          request/ (src/lib/returns.ts). "" on every order nobody has asked
          about, which is nearly all of them. */
       returnAskedAt: admReturnAskedAt(srv),
+      /* returns: and the day the owner said he had dealt with it — «Обработано»
+         on the card. "" on every request still waiting for him, which is what
+         the «Возвраты» counter counts (r22, Dim 17.09.2026). */
+      returnDoneAt: admReturnDoneAt(srv),
       /* A pickup order has no parcel to label and no «Отправлен» either — the
          customer takes it from the salon counter, so its one step after
          payment is «Выдан». An all-gift-card order has nothing to hand over. */
@@ -16749,8 +16893,14 @@
       not only behind its own chip. Gone once the money has gone back — the
       «Возврат» badge is the whole story then. */
   function admReturnBadge(v) {
-    return v.returnAskedAt && v.status !== "refunded"
-      ? '<span class="adm-badge adm-badge--warn">Просит возврат</span>' : "";
+    if (!v.returnAskedAt || v.status === "refunded") return "";
+    /* …and once he has pressed «Обработано» the row stops shouting. It does
+       not go quiet altogether: the request is still a fact about this order,
+       and the owner who comes back to it a week later must be able to see at a
+       glance that he has already been here (r22). */
+    return v.returnDoneAt
+      ? '<span class="adm-badge adm-badge--quiet">Возврат обработан</span>'
+      : '<span class="adm-badge adm-badge--warn">Просит возврат</span>';
   }
   function admItemsLabel(n) { return n + " " + pl(n, "товар", "товара", "товаров"); }
   /** «2 заказа» — the same word the queue rows use, in one place. */
@@ -17059,7 +17209,7 @@
       what lets the row name the customers. */
   function admReturnsAsked() {
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
-      .filter(function (v) { return v.delivered && v.returnAskedAt; });
+      .filter(function (v) { return v.delivered && v.returnAskedAt && !v.returnDoneAt; });
   }
   /** Which chip is lit. «Все» is where the screen opens (r16); a key from an
       older session that no longer names a chip falls back to it too. */
@@ -17105,30 +17255,54 @@
   function admOrderRows() {
     var f = admOrderFilter();
     var q = (S.admOrderQ || "").toLowerCase().trim();
-    var list = admOrders().map(admOrderVM)
+    /* Where the search happens (r22, Dim 17.09.2026). With a server there it
+       has already happened — FOUND.rows IS the answer to FOUND.q, matched in
+       SQL over number, e-mail, name and phone (listOrders), so the rows below
+       are matches out of every order the shop has ever taken and not out of
+       the hundred newest. The in-browser filter stays for the demo shop, which
+       has no server to ask. */
+    var on = admOrderQOn();
+    var srv = SRV.admin === true;
+    var list = (on ? FOUND.rows || [] : admOrders()).map(admOrderVM)
       .filter(function (v) { return q ? true : admOrderMatches(v, f); })
       .filter(function (v) {
-        if (!q) return true;
+        if (!q || srv) return true;
         // the e-mail too: a customer's letter carries it more often than a phone
         var phone = (v.srv && v.srv.phone) || "", mail = (v.srv && v.srv.email) || "";
         return (v.number + " " + v.who + " " + phone + " " + mail).toLowerCase().indexOf(q) >= 0;
       });
     // still loading: bars, not «Таких заказов нет» over a list that has not arrived
-    if (!list.length && SRV.admin === true && !SRV.orders && !SRV.ordersErr) {
+    if (!list.length && srv && !on && !SRV.orders && !SRV.ordersErr) {
       return '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    }
+    // …and the same for the very first search, which has no rows to keep
+    if (!list.length && srv && q && !FOUND.rows && !FOUND.err) {
+      return '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    }
+    /* In flight. The rows underneath are the answer to the PREVIOUS question
+       and he is looking at them right now, so they stay — on mobile data a
+       list that blanks itself between keystrokes is worse than a list one word
+       behind. This line is the whole difference between the two: while it is
+       there, what is below it is not yet his answer. */
+    var waiting = admOrderSearching()
+      ? '<div class="adm-hint" style="margin:0 0 8px">Ищем…</div>' : "";
+    /* …and a search the server refused says so, in the place «Ищем…» was. */
+    if (FOUND.err && q) {
+      waiting = '<div class="adm-error"><span>Поиск не сработал — попробуйте ещё раз.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="search">Повторить</button></div>';
     }
     /* The chip stays lit while a search is typed — it is the filter the owner
        will come back to — but the search really does look through every order,
        so the list says so. Without this line the screen was one chip saying
        «Новые» over a list of shipped orders, with nothing to explain it. */
-    var over = q && f !== "all"
+    var over = waiting || (q && f !== "all"
       ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
       /* returns: the chip counts what is still waiting, the list keeps every
          request — so an order being dealt with does not disappear from under
          the owner's thumb. One line, only on this chip, says so. */
       : f === "returns" && !q
         ? '<div class="adm-hint" style="margin:0 0 8px">Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.</div>'
-        : "";
+        : "");
     /* Speed, 07.09.2026. «Все» was the one list in the panel that drew
        everything it had: «Товары» pages at 40 and «Склад» at 60, but 100 orders
        meant 100 rows — 1 500 elements — rebuilt as a string, parsed and diffed
@@ -17138,12 +17312,68 @@
     var cap = S.ordersShown || ORDERS_PAGE;
     var shown = list.slice(0, cap);
     return over + shown.map(admOrderRowHTML).join("") +
-      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>') +
+      (list.length ? "" : admOrderEmptyHTML(q, waiting)) +
       (list.length > cap
         ? '<p class="adm-hint" style="margin:10px 0 0">Показаны первые ' + cap + " из " + list.length + "</p>" +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admordersmore ' +
             'style="margin-top:10px">Показать ещё</button>'
         : "");
+  }
+  /**
+   * Nothing matched — and which nothing it is matters.
+   *
+   * While an answer is on its way there is no empty state at all: «Ищем…» is
+   * already above the list, and «ничего не нашли» under it would be the screen
+   * contradicting itself in two lines.
+   *
+   * With a search behind it, the emptiness is about the search and not about
+   * the shop, so it says what the search looked at — the four fields
+   * listOrders() actually matches on. The owner types a phone number he has
+   * from a customer's letter; if that number is stored with spaces and his is
+   * not, «Таких заказов нет» sends him looking for a missing order instead of
+   * for a second way to spell it.
+   *
+   * Two text nodes, not one sentence with the query spliced in: translateTree()
+   * rewrites whole text nodes, and the query is the owner's own typing — it has
+   * no translation and must not turn the sentence around it into a fragment the
+   * dictionary cannot reach. The box holding the query is 44 px above this line
+   * anyway.
+   */
+  function admOrderEmptyHTML(q, waiting) {
+    if (waiting) return "";
+    if (!q) return '<div class="adm-empty">Таких заказов нет</div>';
+    return '<div class="adm-empty"><span>Ничего не нашли.</span> ' +
+      "<span>Ищем по номеру заказа, имени, телефону и почте.</span></div>";
+  }
+  /** The rows in place, without a render() — the owner is typing in the search
+      box and a render would take the caret out of it (same reasoning as
+      paintOrderNote and paintShipPreview). */
+  function paintOrderRows() {
+    var list = document.getElementById("orderlist");
+    if (!list) return;
+    list.innerHTML = admOrderRows();
+    translateTree(list);
+  }
+  /**
+   * One request per pause, not one per keystroke.
+   *
+   * 300 ms is roughly the gap between two characters of a phone number typed
+   * with a thumb, so «R-100423» is one query and not eight. What it is NOT is
+   * the thing that keeps the answers in order — a debounce only makes the
+   * races rarer, and rarer is the worst kind of wrong on a screen about money.
+   * The tickets in loadSrvOrders() are what makes a late answer harmless; this
+   * just stops the shop being asked eight questions to get one answer.
+   */
+  var admOrderQTimer = 0;
+  function admOrderQSchedule() {
+    clearTimeout(admOrderQTimer);
+    admOrderQTimer = setTimeout(admOrderQSend, 300);
+  }
+  function admOrderQSend() {
+    admOrderQTimer = 0;
+    if (SRV.admin !== true) { paintOrderRows(); return; }
+    loadOrderSearch(S.admOrderQ);
+    paintOrderRows();
   }
   /** The one step an order is at, as a button — the same primary action the
       card leads with, so the row can do it without opening the card. */
@@ -17732,12 +17962,35 @@
      genuinely cannot do — print a return label — so that Renat writes the
      customer the truth (docs/audit/2026-09-07-shipping-returns.md § «Ответ 2»,
      docs/payments.md § 11). */
+  /* …and, since 17.09.2026, the one button that answers it.
+     The counter on «Обзор» and the «Возвраты» chip both promised «в счётчике —
+     те, на которые вы ещё не ответили» and neither could ever fall: the tick
+     was the only thing stored. The answer is not a letter — he rings people —
+     and not a refund — he turns some returns down — so it is its own button,
+     and it does exactly one thing: it says he has dealt with this one. No
+     money moves, no letter goes, the status does not change. See
+     setReturnHandled() in src/lib/returns.ts. */
   function admReturnStateHTML(v) {
     if (!v.returnAskedAt) return "";
+    var busy = SRV.returnBusy === v.id;
+    var done = !!v.returnDoneAt;
     return '<div class="adm-hint" data-admreturn>' +
-      '<span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
-      '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span><br>" +
-      "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span></div>";
+      (done
+        ? '<span>Возврат обработан</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnDoneAt)) + "</span><br>" +
+          // the date is its own node: translateTree() rewrites whole text
+          // nodes, and a day glued into a sentence would take it out of reach
+          '<span>Просили вернуть заказ</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span>"
+        : '<span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
+          '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span><br>" +
+          "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span>") +
+      '<div class="adm-acts" style="margin-top:10px">' +
+        '<button class="adm-btn adm-btn--row' + (done ? " adm-btn--ghost" : "") + '" ' +
+          'data-admreturndone="' + esc(v.id) + '" data-admreturnval="' + (done ? "0" : "1") + '"' +
+          (busy ? " disabled" : "") + ">" +
+          (busy ? "Сохраняем…" : done ? "Вернуть в «Возвраты»" : "Обработано") + "</button>" +
+      "</div>" +
+      (done ? "" : '<p class="adm-hint" style="margin:6px 0 0">«Обработано» убирает заказ из счётчика «Возвраты». Деньги не уходят и письмо не отправляется — это отметка для вас.</p>') +
+      "</div>";
   }
 
   /* ---------- «По счёту — для компаний» on the card ------------------------
@@ -20517,8 +20770,20 @@
         '<div><div class="adm-sec__t">Выручка по дням</div>' +
           '<p class="adm-hint adm-hint--lead">Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.</p>' +
           (a.revenueByDay.length ? admBarsHTML(a.revenueByDay, range) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
-        '<div class="adm-sec__t">Топ товаров</div>' +
-        '<p class="adm-hint adm-hint--lead">Что принесло больше всего денег за период.</p>' +
+        /* Not money, and the title has to say so (Дим, 17.09.2026). Both this
+           block and «Бренды» below add up `item.sum` — цена × количество по
+           каждой строке заказа — and that is the price list, taken before the
+           order's discount, before the points the customer spent, before a
+           gift card settled part of the bill, and without the delivery. So a
+           товар that sold for 40 € after a 20 % code stands here at 50 €, and
+           the column has never been what landed in the bank.
+           Pro-rating the discount back onto the lines was considered and
+           refused: it would make every figure on this screen an estimate
+           nobody could check against a single order. The numbers stay exactly
+           as they were; the words above them stop calling them money, and
+           point at the one figure on this screen that IS money. */
+        '<div class="adm-sec__t">Топ товаров: на какую сумму заказали</div>' +
+        '<p class="adm-hint adm-hint--lead">Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».</p>' +
         admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
         '<div class="adm-sec__t adm-sec__t--sub">Искали, но не нашли</div>' +
         '<p class="adm-hint adm-hint--lead">Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.</p>' +
@@ -20544,7 +20809,14 @@
         admPairsHTML(FUNNEL_STAGES.map(function (s) {
           return [s[1], String(a.funnel[s[0]] || 0)];
         }), "Пока нет данных", true)) +
-      sec("Бренды: что приносит деньги", "Сколько денег принёс каждый бренд за период.",
+      /* The same `item.sum` as «Топ товаров» above — the price list, not the
+         takings — and with one more hole of its own: the query behind it
+         (brandRevenue in src/lib/analytics.ts) reads `item->>'brand'`, and a
+         набор or a подарочная карта is built without that key at all
+         (src/lib/orders.ts, the bundle and gift-card lines), so neither is in
+         this table under any name. Saying it here is cheaper than the owner
+         finding it out by adding the rows up. */
+      sec("Бренды: на какую сумму заказали", "Цена товаров каждого бренда в заказах, а не полученные деньги. Наборы и подарочные карты сюда не попадают — бренд у них не указан.",
         admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж")) +
       sec("Смотрят, но не покупают",
         "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
@@ -21377,7 +21649,8 @@
       lang: S.lang,
       tr: function (s) { return s; },   // translateTree() does it after render
       esc: esc, eur: eur,
-      rules: shipDraft(),
+      // the BILL, not the boxes: an empty cell is Montonio's price (r22)
+      rules: shipDraftLive(),
       carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES, montonio: MONTONIO_PRICE,
       rows: ADM_SHIP_PREVIEW_ROWS
     });
@@ -23345,11 +23618,24 @@
      waits on Montonio is a checkout that cannot take money. So the screen
      stopped claiming live, and all three read one file. The route still
      exists for the day someone asks Montonio what it charges *this* store. */
-  /** A working copy, so a half-typed table never prices a live basket. */
+  /**
+   * A working copy of the STORED row, so a half-typed table never prices a
+   * live basket — and so an empty box stays empty (r22, Dim 17.09.2026).
+   *
+   * It used to clone SHIP_RULES, the merged table, and that one word is what
+   * made «пустое поле — цена Montonio» untrue the moment anything was saved:
+   * the draft arrived with every cell already filled in from the defaults, so
+   * the save wrote all of them back as the owner's own numbers and they
+   * stopped following the tariff. See SHIP_STORED.
+   */
   function shipDraft() {
-    if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_RULES);
+    if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_STORED);
     return S.shipDraft;
   }
+  /** The draft as the TILL would read it — the boxes show the stored row, but
+      «Что увидит покупатель» has to show the bill, and an empty box is
+      Montonio's price rather than a blank. */
+  function shipDraftLive() { return shipRulesFrom(shipDraft()); }
   /** JSON with the keys in one fixed order — so a cell emptied and refilled
       with the same number compares equal to the rules it came from. */
   function jsonCanon(o) {
@@ -23371,10 +23657,13 @@
       off: (r.countriesOff || []).slice().sort()
     });
   }
-  /** Does the table show prices the shop is not yet charging? */
+  /** Does the table show prices the shop is not yet charging? Against the
+      STORED row, which is what the draft is a copy of and what the save sends
+      — comparing against the merged table would have called a freshly opened
+      screen dirty on every empty cell (r22). */
   function shipDirty() {
     if (!S.shipDraft) return false;
-    try { return shipSig(S.shipDraft) !== shipSig(SHIP_RULES); } catch (e) { return true; }
+    try { return shipSig(S.shipDraft) !== shipSig(SHIP_STORED); } catch (e) { return true; }
   }
   function shipNum(raw, max) {
     var s = String(raw == null ? "" : raw).trim().replace(",", ".");
@@ -29541,7 +29830,8 @@
      cannot show from a local copy, because an order's status has none
      (demoApply). Set when the step is taken, cleared by the reload that
      brings the new status back (loadSrvOrders). */
-  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false, stepBusy: "" };
+  // `returnBusy`: the order whose «Обработано» is in flight (r22)
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false, stepBusy: "", returnBusy: "" };
   function noop() {}
   /* product creation: true while the very first paint waits for
      /api/overrides/ — a direct visit to a product only the server knows
@@ -29695,6 +29985,9 @@
        A saved row is never empty — parseShippingRules() always writes
        freeFrom, the methods and the carriers — so feedShipRules() tells the
        two apart exactly. */
+    /* setShipRules() keeps the row itself in SHIP_STORED — that row, and not
+       the merged table it builds, is what «Настройки → Доставка» shows and
+       what the next save sends back (r22). */
     var srvRules = feedShipRules(s);
     if (srvRules) setShipRules(srvRules);
     S.shipDraft = null;
@@ -29971,7 +30264,9 @@
        express a price the owner deleted. Promo codes have their own routes —
        they are rows in promo_codes, not a settings blob. */
     else if (a.type === "set_shipping_rules") {
-      srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) })).then(function (r) {
+      // the STORED row, not the merged table: a cell the owner left empty is
+      // absent from it and goes on following Montonio's tariff (r22)
+      srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_STORED) })).then(function (r) {
         // anything but a 200/ok — the below_cost refusal, a 503, no answer at
         // all: the panel must not go on showing a table the shop is not running
         if (r && r.status === 200 && r.body && r.body.ok) return;
@@ -30177,12 +30472,98 @@
       render();
     }).catch(function () { loadSrvOrders._busy = false; SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
   }
+  /* ---------- «Заказы»: the search itself, on the server (r22) --------------
+   *
+   * Dim, 17.09.2026. Until now `q` never left the browser: the panel fetched
+   * `?limit=100` once and admOrderRows() filtered that array. The hundred is a
+   * RENDER budget, not a search budget — see the «Speed, 07.09.2026» note in
+   * admOrderRows() for why it is a hundred — so a typed search could only ever
+   * find an order among the hundred newest, and the one order the owner is
+   * searching for is, by definition, the one he cannot see. listOrders() has
+   * taken a `q` all along (a SQL LIKE over number, e-mail, name and phone);
+   * this hands it over.
+   *
+   * **A slot of its own, not SRV.orders.** SRV.orders is «the hundred newest
+   * orders», full stop, and eight things count it without ever drawing a row:
+   * «Отправить N» on «Обзор» and on the chip, «Возвраты N», «По счёту»,
+   * «Сделать сегодня», the queue of names. Putting a search result in there
+   * would quietly re-answer every one of them about the search — the owner
+   * would type a customer's name and «Обзор» would tell him one parcel is
+   * waiting when nine are.
+   *
+   * `q === null` means «no search»: the plain list is what the screen draws.
+   */
+  var FOUND = { q: null, want: "", rows: null, err: false, busy: false, seq: 0 };
+  /** The search as the server will see it — trimmed and capped exactly where
+      listOrders() caps it (100 characters), so «is the list answering what is
+      in the box» is one string comparison and never a near-miss. */
+  function admOrderQClean(q) {
+    return String(q == null ? "" : q).trim().slice(0, 100);
+  }
+  /** Which question the rows on screen answer: "" — the plain newest list. */
+  function admOrderQShown() { return FOUND.q == null ? "" : FOUND.q; }
+  /** Is a search on at all? Then the list is FOUND.rows, not SRV.orders. */
+  function admOrderQOn() { return SRV.admin === true && FOUND.q != null; }
+  /** Is the list on screen still the answer to an older question? True from the
+      first keystroke — before the debounce has sent anything — because that is
+      exactly when the rows under the box stop being his answer. */
+  function admOrderSearching() {
+    return SRV.admin === true && admOrderQShown() !== admOrderQClean(S.admOrderQ);
+  }
+  /**
+   * Ask the server, and — the rule this screen turns on — **never let a slow
+   * answer to an old question replace a fast answer to a new one.**
+   *
+   * He types on a phone, on mobile data, and «R-10» and «R-1004» leave a
+   * quarter of a second apart: two requests in flight, and the network decides
+   * which comes back first. Every request takes a ticket (`FOUND.seq`); an
+   * answer whose ticket is no longer the last one issued is dropped whole,
+   * before it can touch the rows, the error flag or the busy flag. It is the
+   * one thing here a person cannot see going wrong — the list would simply be
+   * the answer to a question he had already finished asking, with his own
+   * search still in the box above it.
+   */
+  function loadOrderSearch(q, force) {
+    if (SRV.admin !== true) return;
+    var want = admOrderQClean(q);
+    // an empty box is not a search: the plain newest list comes straight back,
+    // and any answer still in flight is orphaned by the ticket bump
+    if (!want) { FOUND.seq++; FOUND.q = null; FOUND.want = ""; FOUND.rows = null; FOUND.err = false; FOUND.busy = false; return; }
+    if (!force && FOUND.want === want && (FOUND.busy || FOUND.rows || FOUND.err)) return;
+    FOUND.want = want;
+    FOUND.busy = true;
+    FOUND.err = false;
+    var seq = ++FOUND.seq;
+    apiJson("/api/admin/orders/?limit=100&q=" + encodeURIComponent(want)).then(function (r) {
+      if (seq !== FOUND.seq) return;          // a newer search has gone out since
+      FOUND.busy = false;
+      if (r.status === 401) { SRV.admin = false; FOUND.q = null; FOUND.rows = null; render(); return; }
+      if (r.status === 200 && r.body.ok === true) {
+        FOUND.rows = (r.body.orders || []).map(srvRow);
+        FOUND.q = want;
+      } else {
+        /* A search that failed keeps the rows that are on screen and says so
+           over them — same rule as loadSrvOrders() above. What it must NOT do
+           is claim to have answered: FOUND.q stays where it was, so «Ищем…»
+           gives way to the error and not to «Ничего не нашли». */
+        FOUND.err = true;
+      }
+      render();
+    }).catch(function () {
+      if (seq !== FOUND.seq) return;
+      FOUND.busy = false; FOUND.err = true; render();
+    });
+  }
   /** After anything that moves an order's status — shipped, cancelled, marked
       paid, a salon sale, an undo — both copies of the count are refreshed:
       the list the rows and the badge draw from, and the overview's cached
       summary («Сделать сегодня»). */
   function admOrdersChanged() {
     loadSrvOrders(true);
+    /* …and the search result too, when one is on screen: it is a separate
+       hundred rows from a separate query, and the order whose status just
+       moved is the one the owner is looking at (r22). */
+    if (FOUND.q != null) loadOrderSearch(FOUND.q, true);
     loadOverview(true);
     /* Everything else that counts orders is now a stale copy: «Ждут письма»
        on «Письма» and the accountant's month on «Отчёты». Marked old rather
@@ -30198,6 +30579,28 @@
        over a «Склад» screen still showing the old number is exactly what the
        owner reported. Same door the scanner already uses. */
     scanStockChanged();
+  }
+  /**
+   * returns: «Обработано» on the order card, and the undo of it.
+   *
+   * One request, one stamp. The button refuses a second tap until the answer
+   * is back (SRV.returnBusy) for the reason Renat found on «Выдан клиенту»,
+   * 13.09.2026: a status with no local copy goes on reading the old thing
+   * until a PATCH and a reload have both come back, and on his phone that is
+   * a second of a screen that looks as though nothing happened.
+   */
+  function srvReturnHandled(id, done) {
+    if (SRV.returnBusy) return;
+    SRV.returnBusy = String(id);
+    render();
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", { returnHandled: !!done }).then(function (r) {
+      SRV.returnBusy = "";
+      if (r.status === 200 && r.body.ok) {
+        toast(done ? "Возврат отмечен обработанным ✓" : "Возврат снова в списке");
+        admOrdersChanged();
+      } else if (r.status === 401) { SRV.admin = false; render(); }
+      else { toast("Не удалось сохранить"); render(); }
+    }).catch(function () { SRV.returnBusy = ""; toast("Сервер не отвечает"); render(); });
   }
   function srvOrderPatch(id, patch) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {
@@ -31223,9 +31626,14 @@
        live on the server and nowhere else, so applying one is the server write
        (srvPush below) plus a log entry. */
     else if (a.type === "set_shipping_rules") {
-      entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_RULES), full: true };
-      var shipWas = cloneRules(SHIP_RULES);
-      if (a.full) setShipRules(a.rules); else applyShipRules(a.rules);
+      /* The journal remembers the STORED row, not the merged table (r22):
+         «Вернуть» has to put back the row the shop had — cells and holes —
+         and a merged table put back as a row would fill every hole in it. */
+      entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_STORED), full: true };
+      var shipWas = cloneRules(SHIP_STORED);
+      // a partial patch (the assistant's) is merged INTO the stored row, so
+      // that one is a row too and never a merged table wearing a row's name
+      setShipRules(a.full ? a.rules : shipStoredMerge(SHIP_STORED, a.rules));
       /* …and what to put back if the server refuses the save (a price under
          what Montonio charges — belowCostMessage in src/lib/shipping.ts) or
          if it never lands. The table is replaced, the draft emptied and
@@ -31233,7 +31641,9 @@
          panel went on showing prices the shop is not charging, with the
          owner's own numbers gone from the boxes the server's sentence was
          talking about. srvPush() below is where it is used. */
-      shipRollback = { was: shipWas, tried: cloneRules(SHIP_RULES), entry: entry };
+      // both halves are stored ROWS: `was` goes back through setShipRules()
+      // and `tried` goes straight into S.shipDraft, which is a row (r22)
+      shipRollback = { was: shipWas, tried: cloneRules(SHIP_STORED), entry: entry };
       S.shipDraft = null; S.shipErr = "";
     }
     // undoing a code the assistant just made switches it off again
@@ -32693,7 +33103,15 @@
     admMorphAttrs(from, to);
     if (tag === "INPUT") {
       var valNow = to.getAttribute("value");
-      if (valNow !== valWas) from.value = valNow == null ? "" : valNow;
+      /* …and only when the box is not already showing it. Since r22 a render
+         lands WHILE the owner types — the order search answers mid-word — and
+         its markup carries the very characters he has just typed, so `valNow`
+         differs from the attribute while the live field already matches it.
+         Assigning `.value` then is a no-op that costs a caret: on a phone it
+         jumps to the end of the field, which is only invisible for as long as
+         he never goes back to fix a digit. */
+      var valWant = valNow == null ? "" : valNow;
+      if (valNow !== valWas && from.value !== valWant) from.value = valWant;
       if (to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
       return;
     }
@@ -33914,7 +34332,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -34199,6 +34617,8 @@
     if (d.admreload) {
       if (d.admreload === "overview") loadOverview(true);
       else if (d.admreload === "orders") loadSrvOrders(true);
+      // «Заказы»: the search is its own request and its own error (r22)
+      else if (d.admreload === "search") loadOrderSearch(S.admOrderQ, true);
       else if (d.admreload === "stock") reloadStock();
       else if (d.admreload === "moves") reloadStockMoves();
       else if (d.admreload === "bundles") loadAdminBundles(true);
@@ -34254,6 +34674,16 @@
       });
       render();
       toast(dRow.pickup ? dRow.number + " выдан клиенту" : dRow.number + " доставлен", dEntry);
+      return;
+    }
+    /* returns: «Обработано», and its own way back — the same button reading
+       «Вернуть в «Возвраты»». Not through the journal like the steps above it:
+       nothing about the order, the shop or the money moves, so there is no
+       state to roll back beyond this one stamp, and the undo belongs on the
+       card the owner is already looking at rather than in a toast he has four
+       seconds to catch. */
+    if (d.admreturndone) {
+      srvReturnHandled(d.admreturndone, t.getAttribute("data-admreturnval") !== "0");
       return;
     }
     if (d.admcopy) { admCopyText(d.admcopy, t.getAttribute("data-admcopymsg") || ""); return; }
@@ -35422,7 +35852,12 @@
     // the defaults are prices too — the same card as «Сохранить»
     if (d.admshipreset !== undefined) {
       pendingAction = {
-        type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true, reset: true, overlay: true,
+        /* «по умолчанию» is the EMPTY row (r22): no prices of the shop's own,
+           so every cell goes back to following Montonio's tariff. Sending the
+           default table instead would write today's tariff in as the owner's
+           own numbers — which is «стандартные цены на сегодня», not
+           «стандартные настройки». */
+        type: "set_shipping_rules", rules: cloneRules(SHIP_STORED_DEFAULT), full: true, reset: true, overlay: true,
         title: "Вернуть тарифы по умолчанию?",
         detail: "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений."
       };
@@ -35443,7 +35878,15 @@
     if (d.admshipmontonio !== undefined) {
       var mDraft = shipDraft();
       mDraft.carriers = {};
-      Object.keys(MONTONIO_PRICE.courier).forEach(function (cc) { delete mDraft.methods.courier[cc]; });
+      /* Every price cell, not only the ones with a box. Until r22 the draft
+         was the merged table, so «очистит все ваши цены» could only mean «put
+         Montonio's numbers back in», and the row the shop kept went on
+         carrying the twenty-two «Пакомат» cells no box on this screen has ever
+         been able to edit — cells that then had to be argued with by the save
+         guard. Emptied, they fall back to the same numbers
+         (DEFAULT_SHIPPING_RULES.methods.parcel on the server), so no price
+         moves; they simply stop being the owner's. */
+      mDraft.methods = { parcel: {}, courier: {}, pickup: {} };
       toast("В таблице цены Montonio — проверьте и нажмите «Сохранить»");
       render(); syncShipInputs(); paintShipPreview(); return;
     }
@@ -36294,8 +36737,11 @@
     else if (t.matches("[data-admorderq]")) {
       S.admOrderQ = t.value;
       S.ordersShown = ORDERS_PAGE;   // a new search starts from its first page again
-      var ordList = document.getElementById("orderlist");
-      if (ordList) { ordList.innerHTML = admOrderRows(); translateTree(ordList); }
+      /* …and the search itself goes to the server, debounced (r22). The box
+         and «Ищем…» under it move on this keystroke; the request waits for
+         him to stop typing. */
+      admOrderQSchedule();
+      paintOrderRows();
     }
     /* ---- inventory: «Склад», «Продажа в салоне», the scanner's assign search — targeted patches, same reasoning as data-goodsq above ---- */
     else if (t.matches("[data-stockq]")) {

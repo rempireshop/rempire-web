@@ -12,7 +12,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
-import { belowCostCells, belowCostMessage, parseShippingRules, type ShippingRules } from "@/lib/shipping";
+import { belowCostCells, belowCostMessage, cleanShippingRules, type ShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
@@ -86,7 +86,14 @@ export async function PUT(req: Request) {
       // the same parser the checkout reads with — a rule the storefront would
       // ignore (NaN, 1e9, a negative) is normalised here instead of stored raw
       if (key === "shipping_rules") {
-        value = parseShippingRules(value);
+        /* cleanShippingRules(), not parseShippingRules(): the same validation
+           without the seeds. A cell the owner did not fill must be ABSENT from
+           the stored row — that is the only way «пустое поле — цена Montonio»
+           survives a save, because a number written down stops following the
+           tariff. Reading is unchanged (loadShippingRules still parses with
+           the seeds), so nothing about a quote moves. See cleanShippingRules
+           in src/lib/shipping.ts for the whole of it. */
+        value = cleanShippingRules(value);
         /* …and a price under what Montonio charges for that very delivery is
            refused outright (Ренат, 13.09.2026: «we get prices from Montonio
            and we should use those»). The panel has printed the cost under each

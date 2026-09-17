@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   belowCostCells,
+  cleanShippingRules,
   DEFAULT_SHIPPING_RULES,
   parseShippingRules,
   quoteFromRules,
@@ -292,5 +293,128 @@ describe("an empty box means Montonio's price — in every column now", () => {
     // charges — the case the old guard let through, so that its own advice
     // («очистите поле») offered a higher price than the one it had allowed
     expect(bad[0]).toMatchObject({ carrier: "omniva", country: "EE", charged: 3.15, cost: 3.19 });
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * What the row is allowed to HOLD — r22, Dim 17.09.2026
+ * ------------------------------------------------------------------------ */
+
+/**
+ * **A cell nobody typed must not be in the row.**
+ *
+ * PUT /api/admin/settings used to run the incoming table through
+ * parseShippingRules() and store the result, so the row came back out of the
+ * database with every cell seeded from Montonio's own table and written down
+ * as an explicit number. A number in the row is an override, and an override
+ * does not move when Montonio's tariff moves — so «пустое поле — цена
+ * Montonio», the one sentence the rate screen is built on, stopped being true
+ * the moment anything was saved, and «Везде взять цены Montonio» froze that
+ * day's price list instead of clearing the table.
+ *
+ * cleanShippingRules() is the same validation without the seeding. The proof
+ * it costs nothing is the 216 prices above: they are computed here out of a
+ * CLEANED row and have to come out identical.
+ */
+describe("cleanShippingRules: the row keeps the owner's cells and no others", () => {
+  it("stores an empty table as empty — not as today's tariff", () => {
+    const row = cleanShippingRules({ methods: { parcel: {}, courier: {}, pickup: {} }, carriers: {} });
+    expect(row.methods).toEqual({ parcel: {}, courier: {}, pickup: {} });
+    expect(row.carriers).toEqual({});
+    // …and the two decisions that ARE the owner's keep their defaults
+    expect(row.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
+    expect(row.countriesOff).toEqual(DEFAULT_SHIPPING_RULES.countriesOff);
+  });
+
+  it("keeps exactly the cells that were sent, cleaned", () => {
+    const row = cleanShippingRules({
+      methods: { courier: { de: "25,50", FR: -1, PL: "x" } },
+      carriers: { DPD: { fi: 13 }, venipak: { EE: 1 } },
+      markup: { percent: 30 },
+    });
+    expect(row.methods.courier).toEqual({ DE: 25.5 });
+    // a carrier the shop cannot put a parcel on is dropped on the way in too
+    expect(row.carriers).toEqual({ dpd: { FI: 13 } });
+    expect((row as unknown as Record<string, unknown>).markup).toBeUndefined();
+  });
+
+  /* An EMPTY saved row is not the same thing as NO row, and never has been:
+     parseShippingRules() seeds the courier column from Montonio's own table
+     rather than from DEFAULT_SHIPPING_RULES, exactly so that «пустое поле —
+     цена Montonio» holds after a save as well as before it. Three cells differ by
+     that rule — EE 10,84 → 6,89 and LV/LT 9,90 → 8,09 — and they are the three
+     the shop ships with rather than Montonio's. Every other one of the 216 is
+     identical, which is what makes this a statement about those three and not
+     about the cleaning. */
+  it("an empty row prices every delivery as an empty box has always priced it", () => {
+    const priced = priceEveryDelivery(parseShippingRules(cleanShippingRules({})));
+    const moved = Object.keys(ALL).filter((k) => priced[k] !== ALL[k]);
+    expect(moved.sort()).toEqual(["EE|courier|", "LT|courier|", "LV|courier|"]);
+    expect([priced["EE|courier|"], priced["LV|courier|"], priced["LT|courier|"]]).toEqual([6.89, 8.09, 8.09]);
+  });
+
+  it("the live shop's row prices every delivery the same after a clean", () => {
+    const cleaned = cleanShippingRules(STORED_ROW);
+    expect(priceEveryDelivery(parseShippingRules(cleaned))).toEqual(ALL);
+  });
+
+  /* And the point of all of it: a cell that is not in the row follows the
+     tariff. Montonio raising Germany's courier is a one-line change to
+     src/lib/shipping/country-prices.ts — here it is simulated by comparing an
+     absent cell against the table the read path seeds from. */
+  it("an absent cell is priced from Montonio's table, not from the row", () => {
+    const cleaned = parseShippingRules(cleanShippingRules({ methods: { courier: { EE: 12 } } }));
+    // his own cell stands
+    expect(quoteFromRules(cleaned, { country: "EE", method: "courier", subtotal: 10 }).price).toBe(12);
+    // the one he never touched is whatever the price table says today
+    expect(quoteFromRules(cleaned, { country: "DE", method: "courier", subtotal: 10 }).price)
+      .toBe(DEFAULT_SHIPPING_RULES.methods.courier.DE);
+  });
+
+  it("an empty «Бесплатно от» is still an answer and still survives", () => {
+    expect(cleanShippingRules({ freeFrom: null }).freeFrom).toBeNull();
+    expect(cleanShippingRules({ freeFromByCountry: { EU: null } }).freeFromByCountry).toEqual({ EU: null });
+    // …and `{}` means «одна цена везде», not «put the default back»
+    expect(cleanShippingRules({ freeFromByCountry: {} }).freeFromByCountry).toEqual({});
+    expect(cleanShippingRules({ countriesOff: [] }).countriesOff).toEqual([]);
+  });
+});
+
+/* The eighteen «Пакомат» cells no box can edit. belowCostCells() stopped
+   policing them on 17.09.2026 on the stated grounds that a saved row no longer
+   carries them — which was not true of the code until the review that produced
+   these tests. If they are ever stored again, the guard has to come back. */
+describe("the parcel column is not stored", () => {
+  it("drops the country cells an ordinary save sends back, keeping default", () => {
+    const live = {
+      methods: {
+        parcel: { default: 4.99, DE: 29.79, PL: 17.89, AT: 28.49, SK: 27.69 },
+        courier: { default: 9.9, EE: 6.89, LV: 8.09, LT: 8.09 },
+      },
+    };
+    const clean = cleanShippingRules(live);
+    expect(clean.methods.parcel).toEqual({ default: 4.99 });
+    /* The courier column is seeded WITHOUT its three home prices, so the same
+       treatment there would move real money. It must survive untouched. */
+    expect(clean.methods.courier).toEqual({ default: 9.9, EE: 6.89, LV: 8.09, LT: 8.09 });
+  });
+
+  it("prices every delivery exactly the same after the drop", () => {
+    const withCells = parseShippingRules({
+      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+    });
+    const dropped = parseShippingRules(cleanShippingRules({
+      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+    }));
+    for (const c of ["DE", "PL", "AT", "SK", "GR", "HU", "RO", "ES", "IT"]) {
+      const q = { country: c, method: "parcel" as const, subtotal: 10 };
+      expect(quoteFromRules(dropped, q).price).toBe(quoteFromRules(withCells, q).price);
+    }
+  });
+
+  it("leaves nothing below cost for the removed guard to have caught", () => {
+    const clean = parseShippingRules(cleanShippingRules({ methods: { parcel: { DE: 0.01 } } }));
+    expect(belowCostCells(clean).filter((c) => c.method === "parcel" && c.country === "DE")).toEqual([]);
+    expect(quoteFromRules(clean, { country: "DE", method: "parcel", subtotal: 10 }).price).not.toBe(0.01);
   });
 });

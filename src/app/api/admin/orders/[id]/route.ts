@@ -1,6 +1,6 @@
 /**
  * GET   /api/admin/orders/<id>  — one order, whole
- * PATCH /api/admin/orders/<id>  — { status?, note?, labelStep? }
+ * PATCH /api/admin/orders/<id>  — { status?, note?, labelStep?, returnHandled? }
  *
  * The id is the uuid; an order number (R-100042) works too, so a link from a
  * letter opens the right order. Every status change lands in admin_audit.
@@ -22,6 +22,11 @@
  *                       stays on the order (Montonio cannot cancel it), the
  *                       card just shows the step as not done. `true` brings
  *                       it back.
+ *   returnHandled: true «Обработано» on a return request — the owner has dealt
+ *                       with it, however he dealt with it. No money, no
+ *                       letter, no status; it takes the order out of the
+ *                       «Возвраты» counter and nothing else. `false` is its
+ *                       undo. 409 on an order nobody asked to return.
  */
 import { requireAdmin } from "@/lib/auth";
 import { attachGiftCards } from "@/lib/giftcard-links";
@@ -39,6 +44,7 @@ import {
 import { applyPaymentResult } from "@/lib/payments/apply";
 import { notifyOrderClosed, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { refundedTotal } from "@/lib/payments/refund";
+import { setReturnHandled } from "@/lib/returns";
 import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
 
 export const runtime = "nodejs";
@@ -113,7 +119,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (denied) return denied;
   const { id } = await ctx.params;
 
-  let body: { status?: unknown; note?: unknown; notes?: unknown; labelStep?: unknown };
+  let body: { status?: unknown; note?: unknown; notes?: unknown; labelStep?: unknown; returnHandled?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -130,7 +136,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const status = typeof body.status === "string" ? body.status : null;
   const note = typeof body.note === "string" ? body.note : typeof body.notes === "string" ? body.notes : null;
   const labelStep = typeof body.labelStep === "boolean" ? body.labelStep : null;
-  if (!status && note == null && labelStep == null) {
+  /* returns: «Обработано» on the card, and the journal's undo of it. It moves
+     no money, sends no letter and changes no status — see setReturnHandled()
+     in src/lib/returns.ts for why answering a return is none of those three. */
+  const returnHandled = typeof body.returnHandled === "boolean" ? body.returnHandled : null;
+  if (!status && note == null && labelStep == null && returnHandled == null) {
     return Response.json({ ok: false, error: "nothing_to_do" }, { status: 400 });
   }
   if (status && !ORDER_STATUSES.includes(status as OrderStatus)) {
@@ -151,6 +161,17 @@ export async function PATCH(req: Request, ctx: Ctx) {
         await saveShipmentOnOrder(found.id, { dismissed: !labelStep });
         await writeAuditSafe("admin", "shipment.step", { orderId: found.id, number: found.number, labelStep });
       }
+      order = (await getOrder(found.id)) ?? order;
+    }
+
+    if (returnHandled != null) {
+      const out = await setReturnHandled(found.id, returnHandled);
+      if (!out.ok) return Response.json({ ok: false, error: "no_return_request" }, { status: 409 });
+      await writeAuditSafe("admin", "return.handled", {
+        orderId: found.id,
+        number: found.number,
+        handled: returnHandled,
+      });
       order = (await getOrder(found.id)) ?? order;
     }
 
