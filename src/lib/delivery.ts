@@ -144,20 +144,30 @@ async function shippedOrders(limit: number): Promise<ShippedRow[]> {
 }
 
 /**
- * When the parcel actually left — `shipping.shippedAt`, stamped once by
+ * When this parcel left — `shipping.shippedAt`, stamped once by
  * setOrderStatus() on the move into `shipped` (src/lib/orders.ts).
  *
- * The clock below used to be read off `updated_at`, which is not the same
- * question: setOrderNote(), setOrderPayment() and saveShipmentOnOrder() all
- * touch it, and the shipping webhook calls the last of those on EVERY carrier
- * status event — so a parcel the carrier reported on daily restarted the
- * countdown daily, and «через N дней» quietly meant «N days after the last
- * thing that happened to this row». "" on an order shipped before this stamp
- * existed, and those keep the old behaviour.
+ * `updated_at` is the fallback and NOT the measure: setOrderNote(),
+ * setOrderPayment() and saveShipmentOnOrder() all touch it, and the shipping
+ * notify route calls the last of those for EVERY status word the carrier
+ * sends — registered, in transit, awaiting collection. So a parcel the
+ * carrier chatted about pushed its own «через N дней» deadline forward with
+ * every message and never reached it, and a note typed in the panel did the
+ * same: «через N дней» quietly meant «N days after the last thing that
+ * happened to this row». Orders shipped before the stamp existed have no key
+ * and keep the old behaviour, which is the most that can honestly be said
+ * about them.
+ *
+ * r21-orders and r21-shipping both found this and both wrote a shippedAtOf().
+ * This is the wider of the two signatures — it takes the row and folds the
+ * fallback in, so the one caller cannot forget it and hand a NaN to the
+ * comparison below.
  */
-function shippedAtOf(shipping: unknown): string {
-  const s = (shipping && typeof shipping === "object" ? shipping : {}) as Record<string, unknown>;
-  return typeof s.shippedAt === "string" ? s.shippedAt : "";
+function shippedAtOf(row: ShippedRow): number {
+  const s = (row.shipping && typeof row.shipping === "object" ? row.shipping : {}) as Record<string, unknown>;
+  const stamped = typeof s.shippedAt === "string" ? Date.parse(s.shippedAt) : NaN;
+  if (Number.isFinite(stamped)) return stamped;
+  return new Date(row.updated_at as string).getTime();
 }
 
 function shipmentIdOf(shipping: unknown): string {
@@ -212,7 +222,7 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
     }
 
     if (!deliver && cutoff != null) {
-      const since = new Date(shippedAtOf(row.shipping) || (row.updated_at as string)).getTime();
+      const since = shippedAtOf(row);
       if (Number.isFinite(since) && since <= cutoff) deliver = true;
     }
 

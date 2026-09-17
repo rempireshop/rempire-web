@@ -297,6 +297,8 @@
       "Заполните данные фирмы для счёта": "Täitke ettevõtte andmed arve jaoks",
       "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты":
         "Arve ettevõttele väljastame ainult Eestisse — valige teine makseviis",
+      // the owner switched this country off while the tab still had it
+      "В эту страну мы сейчас не доставляем — выберите другую": "Sellesse riiki me praegu ei tarni — valige teine",
       "Счёт отправлен на": "Arve on saadetud aadressile", "Счёт отправлен на почту.": "Arve on saadetud e-postile.",
       /* …and the honest halves of the same two sentences: a blank IBAN blocks
          the send (src/lib/invoices.ts invoiceSendBlock), so the receipt says
@@ -1105,7 +1107,6 @@
       "В таблице цены Montonio — проверьте и нажмите «Сохранить»":
         "Tabelis on Montonio hinnad — kontrolli ja vajuta „Salvesta“",
       "не возит": "ei vii",
-      "пусто — доставка бесплатна": "tühi — tarne on tasuta",
       "пусто — берётся «Остальные страны»": "tühi — kehtib „Ülejäänud riigid“",
       "Пакоматов магазин в этих странах не предлагает — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
         "Nendes riikides pood pakiautomaate ei paku — ainult kuller. Hinna all on see, kui palju pood võtab, kui välja tühjendada, ja millise vedajaga pakk läheb.",
@@ -1704,8 +1705,8 @@
       "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Suunake kaamera EAN-13/EAN-8/UPC-A triipkoodile.",
       "Закрыть сканер": "Sulge skanner", "Фонарик": "Taskulamp",
       "Код вручную": "Kood käsitsi", "Ввести код вручную": "Sisesta kood käsitsi", "Найти": "Otsi",
-      "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.":
-        "Kaamera pole selles brauseris toetatud — triipkoodi tuvastus töötab Chrome'is/Edge'is Androidil ja Safaris 17+ iPhone'is. Kasutage allpool otsingut või käsitsi sisestust.",
+      "Не удалось загрузить распознавание штрихкодов — проверьте связь и откройте сканер заново. Пока найдите товар поиском или введите код вручную ниже.":
+        "Triipkoodituvastust ei õnnestunud laadida — kontrollige ühendust ja avage skanner uuesti. Seni leidke kaup otsinguga või sisestage kood allpool käsitsi.",
       "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.":
         "Kaamera pole selles brauseris saadaval. Kasutage allpool otsingut või koodi käsitsi sisestust.",
       "Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».":
@@ -1925,6 +1926,10 @@
         "Saadetis jääb Montoniosse — seda tühistada ei saa. Samm «Silt» on tagasi võetud; sama sildi uuesti kasutamiseks tooge see tagasi.",
       "Вернуть этикетку": "Too silt tagasi", "Скопировать": "Kopeeri", "Скопировать трек-номер": "Kopeeri jälgimisnumber",
       "Трек-номер появится, когда перевозчик примет посылку.": "Jälgimisnumber ilmub, kui vedaja paki vastu võtab.",
+      // …and when Montonio says the carrier refused the registration
+      "Перевозчик не принял": "Vedaja ei võtnud vastu",
+      "Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.":
+        "Montonio märkis saadetise vastu võtmata jäänuks: jälgimisnumbrit ei tule ja selle sildiga pakki vastu ei võeta. Pange silt kõrvale ja looge see uuesti.",
       "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
@@ -3007,6 +3012,8 @@
       "Заполните данные фирмы для счёта": "Fill in the company details for the invoice",
       "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты":
         "We only issue a company invoice within Estonia — please choose another payment method",
+      // the owner switched this country off while the tab still had it
+      "В эту страну мы сейчас не доставляем — выберите другую": "We do not deliver to that country at the moment — please choose another",
       "Счёт отправлен на": "The invoice has been sent to", "Счёт отправлен на почту.": "The invoice has been sent by e-mail.",
       "Счёт выписан — пришлём его на": "The invoice has been issued — we will send it to",
       "Счёт выписан — пришлём его на почту.": "The invoice has been issued — we will send it by e-mail.",
@@ -3799,7 +3806,6 @@
       "В таблице цены Montonio — проверьте и нажмите «Сохранить»":
         "The table now holds Montonio's prices — check them and press «Save»",
       "не возит": "does not ship there",
-      "пусто — доставка бесплатна": "empty — delivery is free",
       "пусто — берётся «Остальные страны»": "empty — «All other countries» applies",
       "Пакоматов магазин в этих странах не предлагает — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
         "The shop offers no parcel locker in these countries — courier only. Under the price is what the shop charges if the box is cleared, and which carrier carries the parcel.",
@@ -4379,8 +4385,8 @@
       "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Point the camera at an EAN-13/EAN-8/UPC-A barcode.",
       "Закрыть сканер": "Close scanner", "Фонарик": "Flashlight",
       "Код вручную": "Code by hand", "Ввести код вручную": "Enter the code by hand", "Найти": "Find",
-      "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.":
-        "The camera isn't supported in this browser — barcode scanning works in Chrome/Edge on Android and Safari 17+ on iPhone. Use the search or manual entry below.",
+      "Не удалось загрузить распознавание штрихкодов — проверьте связь и откройте сканер заново. Пока найдите товар поиском или введите код вручную ниже.":
+        "The barcode reader could not be loaded — check the connection and open the scanner again. For now, find the product by search or type the code in below.",
       "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.":
         "The camera is not available in this browser. Use the search or manual code entry below.",
       "Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».":
@@ -4600,6 +4606,10 @@
         "The shipment stays with Montonio — it cannot be cancelled. The «Label» step is back; to use this label again, bring it back.",
       "Вернуть этикетку": "Bring the label back", "Скопировать": "Copy", "Скопировать трек-номер": "Copy the tracking number",
       "Трек-номер появится, когда перевозчик примет посылку.": "The tracking number appears once the carrier accepts the parcel.",
+      // …and when Montonio says the carrier refused the registration
+      "Перевозчик не принял": "The carrier refused it",
+      "Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.":
+        "Montonio marked this shipment as not registered: no tracking number is coming and the parcel will not be accepted with this label. Set the label aside and make a new one.",
       "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
@@ -5901,6 +5911,11 @@
        read one file now, so there is nothing left to label. */
     [/^Montonio: (.+) · вернуть$/, { ET: "Montonio: $1 · taasta", EN: "Montonio: $1 · undo" }],
     [/^Ниже Montonio: (.+) · вернуть$/, { ET: "Alla Montonio hinna: $1 · taasta", EN: "Below Montonio: $1 · undo" }],
+    /* …and the one row Montonio prices no route for: «Остальные страны» →
+       «Курьер». Its empty box is not an empty cell — see admShipCourierFoot()
+       — so the line says the number that comes back, and that number is a
+       hole like every other price on this screen. */
+    [/^пусто — вернётся (.+)$/, { ET: "tühi — tuleb tagasi $1", EN: "empty — it goes back to $1" }],
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
         EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }],
@@ -7085,7 +7100,15 @@
   function loadShipRules() {
     if (shipRulesAsked) return;
     shipRulesAsked = true;
-    fetch("/api/overrides/").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    /* FEED_FETCH — `cache: "no-store"` — like the two other readers of this
+       feed (loadServerOverrides, loadBundles). /api/overrides/ goes out with
+       `stale-while-revalidate=120`, so a bare fetch() is handed the browser's
+       own saved copy, up to two minutes old, and applyShipRules() MERGES it:
+       a number the boot copy already had fresh would be overwritten here by
+       the stale one, and the checkout would quote a price the shop is not
+       charging. The edge cache still answers most of these — only this
+       browser's own stale copy is taken out of the path. */
+    fetch("/api/overrides/", FEED_FETCH).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || !j.ok) return;
       apiSeen(true);
       var s = j.settings || {};
@@ -15190,6 +15213,11 @@
     bad_invoice_email: "Проверьте e-mail для счёта",
     invoice_zero_total: "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты",
     invoice_country: "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты",
+    /* The owner switched this country off in «Настройки → Доставка» while the
+       tab (or the saved delivery address) still had it: europeOptionsHTML()
+       keeps a country the shopper already picked, so the list is not the
+       guard — src/lib/orders.ts is. */
+    country_off: "В эту страну мы сейчас не доставляем — выберите другую",
   };
   function orderErrText(code) {
     return ORDER_ERRS[code] || "Не получилось оформить заказ — попробуйте ещё раз";
@@ -16996,6 +17024,26 @@
     var c = String(code || "").toLowerCase();
     return CARRIER_WORD[c] || (c ? c.charAt(0).toUpperCase() + c.slice(1) : "");
   }
+  /**
+   * Did Montonio say the carrier REFUSED this shipment?
+   *
+   * `orders.shipping.montonio.status` holds Montonio's own shipment word —
+   * pending | registered | registrationFailed | inTransit | awaitingCollection
+   * | delivered | returned — written by «Создать этикетку» from the booking
+   * reply and overwritten by every `shipment.statusUpdated` webhook
+   * (src/app/api/shipping/notify). The box read none of it until 17.09.2026,
+   * so a shipment the carrier never accepted had an id, a PDF button and the
+   * line «Трек-номер появится, когда перевозчик примет посылку» — and looked
+   * exactly like a good one, for as long as Renat was willing to wait for a
+   * code that was never coming.
+   *
+   * Only this one word is acted on. Everything else Montonio may send is a
+   * parcel on its way, and the panel has nothing to add to it.
+   */
+  function shipRegFailed(status) {
+    var s = String(status == null ? "" : status).trim().toLowerCase().replace(/[\s_-]+/g, "");
+    return s === "registrationfailed" || s === "failed";
+  }
   /* ---- «Отправление»: the parcel as Montonio has it -----------------------
      Drawn once the label exists: the carrier and the point, the tracking code
      with a copy button (Renat pastes it into WhatsApp more often than into
@@ -17021,10 +17069,17 @@
         "</div>";
     }
     var code = String(mont.trackingCode || "");
+    var failed = shipRegFailed(mont.status);
     return '<div class="adm-ship">' +
       '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
+        (failed ? '<span class="adm-badge adm-badge--warn">Перевозчик не принял</span>' : "") +
         '<span class="adm-hint">' + esc((who ? who + " · " : "") + (where || "")) + "</span></div>" +
-      (code
+      /* A refused registration first, because the two sentences under it are
+         both false about one: there is no tracking code coming, and the
+         parcel is not «waiting for the carrier». */
+      (failed
+        ? '<div class="adm-hint">Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.</div>'
+        : code
         ? '<div class="adm-ship__row adm-ship__row--code"><span><span class="adm-hint">Трек-номер</span><br>' +
             '<span class="adm-ship__code" data-trackingcode>' + esc(code) + "</span></span>" +
             '<button class="adm-copy" data-admcopy="' + esc(code) + '" data-admcopymsg="Трек-номер скопирован ✓"' +
@@ -21120,12 +21175,22 @@
     var m = MONTONIO_PRICE.courier[key];
     if (m) return admRateFootHTML("m:courier:" + key, value, m[0], m[1]);
     if (String(value) !== "") return "";
-    /* the two rows Montonio prices no route for: «Другие страны Европы» falls
-       through to «Остальные страны», and «Остальные страны» falls through to
-       nothing at all, which is free delivery — worth saying out loud in the
-       box that does it */
-    return '<span class="adm-hint adm-hint--cell">' +
-      (key === "default" ? "пусто — доставка бесплатна" : "пусто — берётся «Остальные страны»") + "</span>";
+    /* The two rows Montonio prices no route for. «Другие страны Европы» falls
+       through to «Остальные страны» — true, and the cell really can stay
+       empty: nothing seeds an `EU` key, here or on the server.
+       «Остальные страны» cannot. This line said «пусто — доставка бесплатна»
+       until 17.09.2026, which is what quoteFromRules() would do if the key
+       were missing — and it never is: a save re-seeds the methods table from
+       SHIP_RULES_DEFAULT (setShipRules) and parseShippingRules() seeds
+       `courier.default` on the server as well, so the box the owner just
+       cleared comes back at 9,90 € and the shop goes on charging it. So the
+       line names the number that comes back instead of promising delivery the
+       till will not give away. */
+    if (key === "default") {
+      return '<span class="adm-hint adm-hint--cell">пусто — вернётся ' +
+        eur(SHIP_RULES_DEFAULT.methods.courier["default"]) + "</span>";
+    }
+    return '<span class="adm-hint adm-hint--cell">пусто — берётся «Остальные страны»</span>';
   }
   /**
    * «Цены по странам Европы» — the twenty-one countries behind the zone row,
@@ -27771,7 +27836,17 @@
          there at all, leaves nothing to run: say so, rather than restart a
          detector that will throw again three ticks later, for ever. */
       if (reason === "silent") { startNativeLoop(); return; }
-      S.scanErr = "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.";
+      /* …and what to SAY about it. Until 17.09.2026 this line was «Камера не
+         поддерживается этим браузером … работает в Chrome/Edge на Android и в
+         Safari 17+ на iPhone», which is wrong twice over on the phone Renat
+         actually holds: the camera is supported — its stream is open behind
+         this very card — and iOS Safari has no BarcodeDetector at ANY version,
+         so it always takes the "absent" path and the bundled zxing IS its
+         scanner. The one thing that went wrong is that zxing did not load, and
+         the one thing that fixes it is the connection. Closing and opening the
+         scanner clears the failure and fetches it again (startScanEngine
+         resets SCAN.zxingFailed), so that is what the sentence asks for. */
+      S.scanErr = "Не удалось загрузить распознавание штрихкодов — проверьте связь и откройте сканер заново. Пока найдите товар поиском или введите код вручную ниже.";
       scanRenderPanel();
     });
   }

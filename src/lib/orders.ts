@@ -39,7 +39,7 @@ import {
 // docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
 // cannot drift from it; the live computeShipping() call itself still goes
 // through the optional-neighbour door a few lines down.
-import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
+import { DEFAULT_SHIPPING_RULES, shippingZone } from "@/lib/shipping";
 // media: what product_overrides.video_url is allowed to hold — a pure module
 // of this build, no side effects, see src/lib/video.ts.
 import { cleanVideoUrl } from "@/lib/video";
@@ -421,15 +421,61 @@ export const FALLBACK_SHIPPING = {
   courierEE: DEFAULT_SHIPPING_RULES.methods.courier.EE,
   eu: DEFAULT_SHIPPING_RULES.methods.courier.default,
   freeFrom: DEFAULT_SHIPPING_RULES.freeFrom ?? 59,
+  /* …and the per-country/zone overrides of it, from the same constant —
+     `{ EU: 200 }` since 08.09.2026. One threshold for the whole world was the
+     one thing this table still had that the real rules do not: a 60 € order to
+     Greece shipped FREE here against a 43,19 € courier, while
+     quoteFromRules() would have charged for it up to 200 €. */
+  freeFromByCountry: DEFAULT_SHIPPING_RULES.freeFromByCountry ?? {},
 };
+
+/**
+ * The threshold that applies to one country — its own key, then its zone's,
+ * then the shop-wide one. The same three steps quoteFromRules() takes, so the
+ * fallback gives delivery away in exactly the places the real rules do.
+ * `null` is «never free here» and is an answer, not a missing value.
+ */
+function fallbackFreeFrom(country: string): number | null {
+  const by = FALLBACK_SHIPPING.freeFromByCountry;
+  if (country in by) return by[country];
+  const zone = shippingZone(country);
+  if (zone in by) return by[zone];
+  return FALLBACK_SHIPPING.freeFrom;
+}
 
 export function fallbackShipping(country: string, method: string, subtotal: number): number {
   const m = String(method || "").toLowerCase();
   const c = String(country || "EE").toUpperCase();
   if (/pickup|самовывоз|ise|tule|store/.test(m)) return 0;
-  if (subtotal >= FALLBACK_SHIPPING.freeFrom) return 0;
+  const freeFrom = fallbackFreeFrom(c);
+  if (freeFrom !== null && freeFrom >= 0 && subtotal >= freeFrom) return 0;
   if (c === "EE") return /courier|kuller|курьер|door/.test(m) ? FALLBACK_SHIPPING.courierEE : FALLBACK_SHIPPING.parcelEE;
   return FALLBACK_SHIPPING.eu;
+}
+
+/**
+ * Is this country switched off in «Настройки → Доставка»?
+ *
+ * Through the same optional-neighbour door the price goes through, and
+ * fail-soft the same way: a shipping module that is missing or throwing must
+ * never be the reason an order is refused — a checkout that cannot take money
+ * is worse than one that took an order for Norway. The rules read here are the
+ * cached ones `computeShipping()` is about to read anyway (60 s,
+ * loadShippingRules), so this costs no extra query in practice.
+ */
+async function shipCountryOff(country: string): Promise<boolean> {
+  try {
+    const mod = await optionalLib("shipping");
+    const load = fn(mod, "loadShippingRules");
+    const off = fn(mod, "countryOff");
+    if (!load || !off) return false;
+    // no row in `settings` — the defaults still carry the seven Montonio will not post to
+    const rules = (await load()) ?? DEFAULT_SHIPPING_RULES;
+    return off(rules, country) === true;
+  } catch (err) {
+    console.error("[orders] countriesOff check skipped:", err);
+    return false;
+  }
 }
 
 async function shippingPrice(
@@ -1494,6 +1540,21 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
      browser never sends it for a mixed cart — but the browser is not what
      decides here, exactly like every price in this file. */
   if (method === "digital" && !giftOnly) throw new OrderError("not_digital");
+  /* …and the same door for a country the owner switched off.
+     `countriesOff` is the seven European countries Montonio answers
+     `contract_prices_no_applicable_tier` for, plus whatever Renat adds in
+     «Настройки → Доставка»: a parcel to one of them can be ordered and paid
+     for and then never posted. Until now only the checkout's own dropdown
+     asked — and it deliberately KEEPS a country the shopper has already
+     picked (europeOptionsHTML in public/shop2/app.js), so a saved delivery
+     address, a tab left open over the switch, or a POST of our own shape got
+     an order the shop cannot honour and the customer's money with it.
+     Only where a parcel really leaves: pickup is the salon counter, a
+     gift-card-only order and a digital one have no parcel at all, and the
+     country on those is the customer's, not the shipment's. */
+  if (!giftOnly && method !== "digital" && method !== "pickup" && (await shipCountryOff(country))) {
+    throw new OrderError("country_off", country);
+  }
   const shipPrice = giftOnly || method === "digital" ? 0 : await shippingPrice(country, method, subtotal, carrier);
   shippingJson.price = shipPrice;
 
@@ -1800,11 +1861,19 @@ export async function setOrderStatus(
      reason: «Доставлен» closes itself N days after the parcel LEFT
      (src/lib/delivery.ts closeDeliveredOrders), and that clock used to be read
      off `updated_at` — which setOrderNote(), setOrderPayment() and every
-     carrier status event the shipping webhook records all push forward. A
-     parcel Montonio reported on four times took four days longer to close, and
-     a note typed on a shipped order restarted the week from scratch. Written
-     once, like the delivery stamp: an undo and a second «Отправлен» keep the
-     first date, because the parcel left once. */
+     carrier status event the shipping notify route records through
+     saveShipmentOnOrder() all push forward. A parcel Montonio reported on four
+     times took four days longer to close; one that reports progress more often
+     than `autoDays` pushed its own deadline forward for ever and never closed
+     at all; and a note typed on a shipped order restarted the week from
+     scratch. Written once, like the delivery stamp: an undo back to `paid` and
+     a second «Отправлен» keep the first date, because the parcel left once. An
+     order shipped before this existed has no key, and delivery.ts falls back to
+     `updated_at` for it exactly as it always did.
+
+     r21-orders and r21-shipping each found this and each wrote this line; they
+     wrote it identically, so the stamp and the UPDATE below are one, not two.
+     The two readings of why are merged into this one comment. */
   const shippedStamp = status === "shipped" ? new Date().toISOString() : null;
   const rows = await query<OrderRow>(
     `update orders

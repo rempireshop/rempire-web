@@ -115,6 +115,26 @@ export async function GET(req: Request) {
 
   const source = sources.length ? sources.join("+") : montonio ? "montonio" : "seed";
 
+  /*
+   * Did anybody actually answer?
+   *
+   * `fetchMontonioPickupPoints()` returns `null` — never a throw — when there
+   * are no keys or when every carrier call failed, and `[]` when Montonio
+   * answered and had nothing. The route cannot tell those apart from the list
+   * alone, and the public feeds cover only omniva/dpd/smartpost in EE/LV/LT
+   * (src/lib/parcel-points.ts), so a Finnish or Unisend/Nova Post lookup has
+   * nothing else to fall back on.
+   *
+   * An empty list from a lookup that FAILED must not be cached: with
+   * `s-maxage=3600` one slow minute at Montonio took the parcel-machine chips
+   * off the checkout for an hour — and, with the stale window, up to a day —
+   * for every shopper behind that edge. So the failure answers `no-store` and
+   * the next shopper asks again. A real empty answer (Montonio replied, that
+   * carrier has no machines there) keeps the hour, because it is the truth and
+   * it does not change by the minute.
+   */
+  const answered = montonio !== null || sources.length > 0;
+
   return NextResponse.json(
     {
       ok: true,
@@ -129,7 +149,9 @@ export async function GET(req: Request) {
       headers: {
         // shared caches hold it for an hour and may serve a stale copy for a
         // day while they refresh in the background
-        "cache-control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "cache-control": answered
+          ? "public, s-maxage=3600, stale-while-revalidate=86400"
+          : "no-store",
       },
     },
   );

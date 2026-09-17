@@ -71,9 +71,12 @@ export interface ShippingRules {
    *
    * Off is a *storefront* switch, not a pricing one: quoteFromRules() still
    * prices a basket for a switched-off country, because a checkout that
-   * refuses to quote is a checkout that cannot take money, and an order that
-   * reached the server past the dropdown is better priced than dropped. Use
-   * `countryOff()` to ask.
+   * refuses to quote is a checkout that cannot take money. The *order* is a
+   * different question, and since 17.09.2026 createOrder() refuses one
+   * (`country_off`) for any method that actually posts a parcel: the dropdown
+   * keeps a country the shopper has already picked, so a saved address or a
+   * tab left open over the switch could otherwise buy a delivery Montonio will
+   * not carry. Use `countryOff()` to ask.
    */
   countriesOff?: string[];
   /* `markup` — percent + fixed, added to a Montonio tariff on the way to a

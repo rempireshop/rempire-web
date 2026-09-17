@@ -285,7 +285,7 @@ describe("one rule, said once, and true of every box", () => {
       "Самовывоза в таблице нет — он всегда бесплатный. «—» — этот перевозчик в эту страну не возит.",
       "Везде взять цены Montonio",
       "не возит",
-      "пусто — доставка бесплатна",
+      "пусто — берётся «Остальные страны»",
       "Что увидит покупатель",
     ];
     /* `"ключ":` with no space is a dictionary entry and nothing else — the
@@ -294,5 +294,21 @@ describe("one rule, said once, and true of every box", () => {
     for (const k of keys) {
       expect([k, src.split(JSON.stringify(k) + ":").length - 1]).toEqual([k, 2]);
     }
+  });
+
+  /*
+   * …and the sixth line, which is a RULE rather than a key because it carries
+   * a price. «Остальные страны» → «Курьер» said «пусто — доставка бесплатна»
+   * until 17.09.2026, which is what quoteFromRules() would do if
+   * `methods.courier.default` could go missing — and it cannot: the panel's
+   * own setShipRules() re-seeds the methods table on every whole-table save
+   * and parseShippingRules() seeds the same cell on the server, so the box
+   * comes back at 9,90 € and the shop goes on charging it. The one box on the
+   * screen whose hint was not true of it.
+   */
+  it("names the price that comes back where an empty box cannot stay empty", () => {
+    expect(src).not.toContain('"пусто — доставка бесплатна"');
+    expect(src).toContain('<span class="adm-hint adm-hint--cell">пусто — вернётся \' +');
+    expect(src).toContain('[/^пусто — вернётся (.+)$/, { ET: "tühi — tuleb tagasi $1", EN: "empty — it goes back to $1" }]');
   });
 });
