@@ -329,7 +329,27 @@ export function cleanShippingRules(value: unknown): ShippingRules {
   if (typeof methods === "object" && methods !== null && !Array.isArray(methods)) {
     for (const [name, table] of Object.entries(methods as Record<string, unknown>)) {
       if (!isMethod(name)) continue;
-      rules.methods[name] = toPriceTable(table) ?? {};
+      const parsed = toPriceTable(table) ?? {};
+      if (name === "parcel") {
+        /* The parcel column's country cells are STORED BY NOBODY, deliberately.
+           admShipRowHTML() emits `c:<carrier>:`, `m:courier:` and `free:` keys
+           and no `m:parcel:` one, so eighteen of its twenty-two countries have
+           no box on any screen — and the row the shop runs on today carries all
+           twenty-two as literals from 148_shipping_country_prices.sql. Left
+           alone they round-trip through every ordinary save, frozen on the day
+           they were written, while the tariff they were copied from moves.
+
+           Dropping them here is what makes «пустая клетка следует за тарифом»
+           true rather than aspirational (Dim, 17.09.2026), and it is a no-op on
+           price: parseShippingRules() re-seeds this column on READ from the full
+           DEFAULT_SHIPPING_RULES.methods.parcel, so every cell dropped comes
+           back as the identical number. Note the courier column is NOT like
+           this — it is seeded without its three home prices, so dropping a
+           courier cell would move real money. Do not generalise this. */
+        rules.methods[name] = "default" in parsed ? { default: parsed.default } : {};
+      } else {
+        rules.methods[name] = parsed;
+      }
     }
   }
 
@@ -351,9 +371,12 @@ export function cleanShippingRules(value: unknown): ShippingRules {
   }
 
   if (Array.isArray(raw.countriesOff)) {
-    rules.countriesOff = raw.countriesOff
+    /* De-duplicated and sorted like parseShippingRules() does it: countryOff()
+       does not care, but the stored row and the audit line it produces are read
+       by people, and «LV, EE, LV» is a row that looks edited when it is not. */
+    rules.countriesOff = [...new Set(raw.countriesOff
       .map((c) => String(c ?? "").trim().toUpperCase())
-      .filter((c) => /^[A-Z]{2}$/.test(c));
+      .filter((c) => /^[A-Z]{2}$/.test(c)))].sort();
   }
 
   return rules;
@@ -624,9 +647,18 @@ function eur(n: number): string {
  * the shop would have refused the owner's next save — any save, of any cell —
  * over a number with no box to change. A refusal you cannot act on is not a
  * guard, it is a locked panel. The cells themselves are unchanged and are
- * still honoured by quoteFromRules(); since r22 a saved row does not carry
- * them at all (cleanShippingRules), so they are the defaults, and the defaults
- * are Montonio's own prices.
+ * still honoured by quoteFromRules(); a saved row does not carry them at all
+ * (cleanShippingRules), so they are the defaults, and the defaults are
+ * Montonio's own prices.
+ *
+ * **That last sentence is load-bearing, and it was false for a few hours.**
+ * This paragraph was written first and cleanShippingRules only preserved the
+ * column rather than dropping it, so an ordinary save round-tripped all
+ * twenty-two frozen literals back into the row — with the guard now removed
+ * and no box to edit them. A review on 17.09.2026 caught it. If anyone ever
+ * puts those cells back into the stored row, this loop has to come back with
+ * them, or a tariff rise turns eighteen uneditable cells into eighteen silent
+ * losses instead of one loud refusal.
  */
 export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
   const out: BelowCostCell[] = [];

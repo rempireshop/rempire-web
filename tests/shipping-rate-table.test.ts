@@ -379,3 +379,42 @@ describe("cleanShippingRules: the row keeps the owner's cells and no others", ()
     expect(cleanShippingRules({ countriesOff: [] }).countriesOff).toEqual([]);
   });
 });
+
+/* The eighteen «Пакомат» cells no box can edit. belowCostCells() stopped
+   policing them on 17.09.2026 on the stated grounds that a saved row no longer
+   carries them — which was not true of the code until the review that produced
+   these tests. If they are ever stored again, the guard has to come back. */
+describe("the parcel column is not stored", () => {
+  it("drops the country cells an ordinary save sends back, keeping default", () => {
+    const live = {
+      methods: {
+        parcel: { default: 4.99, DE: 29.79, PL: 17.89, AT: 28.49, SK: 27.69 },
+        courier: { default: 9.9, EE: 6.89, LV: 8.09, LT: 8.09 },
+      },
+    };
+    const clean = cleanShippingRules(live);
+    expect(clean.methods.parcel).toEqual({ default: 4.99 });
+    /* The courier column is seeded WITHOUT its three home prices, so the same
+       treatment there would move real money. It must survive untouched. */
+    expect(clean.methods.courier).toEqual({ default: 9.9, EE: 6.89, LV: 8.09, LT: 8.09 });
+  });
+
+  it("prices every delivery exactly the same after the drop", () => {
+    const withCells = parseShippingRules({
+      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+    });
+    const dropped = parseShippingRules(cleanShippingRules({
+      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+    }));
+    for (const c of ["DE", "PL", "AT", "SK", "GR", "HU", "RO", "ES", "IT"]) {
+      expect(quoteFromRules(dropped, c, "parcel", null, 10))
+        .toStrictEqual(quoteFromRules(withCells, c, "parcel", null, 10));
+    }
+  });
+
+  it("leaves nothing below cost for the removed guard to have caught", () => {
+    const clean = parseShippingRules(cleanShippingRules({ methods: { parcel: { DE: 0.01 } } }));
+    expect(belowCostCells(clean).filter((c) => c.method === "parcel" && c.country === "DE")).toEqual([]);
+    expect(quoteFromRules(clean, "DE", "parcel", null, 10).price).not.toBe(0.01);
+  });
+});
