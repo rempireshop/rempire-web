@@ -63,7 +63,15 @@ function shopPrices(demo: { price?: number; sizes?: Ladder }): number[] {
     ${slice("baseOf")}
     ${slice("applyDemoOverrides")}
     ${slice("sizePrice")}
+    ${slice("shopHidden")}
     var BASE = CATALOGUE.map(baseOf);
+    /* applyDemoOverrides() walks the file's own products as well as CATALOGUE,
+       so that a product the owner has HIDDEN — dropped from CATALOGUE, but
+       still openable in the editor — is priced from its saved values and not
+       from the generated file. These are the two names app.js keeps beside
+       shopHidden(), spelled the same way. Nothing is hidden in this rig, so
+       that pass adds no rows; the names simply have to exist. */
+    var FILE_PRODUCTS = CATALOGUE.slice(), FILE_BASE = BASE.slice();
     applyDemoOverrides();
     var p = CATALOGUE[0], out = [];
     var n = p.sizes && p.sizes.length ? p.sizes.length : 1;

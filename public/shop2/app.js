@@ -1566,14 +1566,6 @@
       "Письмо отправлено ✓": "Kiri saadetud ✓", "Не удалось отправить письмо": "Kirja saatmine ei õnnestunud",
       "Отчёты": "Aruanded", "Месяц": "Kuu", "Скачать CSV": "Laadi alla CSV", "Скачать XLSX": "Laadi alla XLSX",
       "НДС": "KM", "Возвращено": "Tagastatud",
-      /* The two delivery sentences WITHOUT the free-delivery clause — drawn
-         when «Бесплатно от» has been emptied for Estonia (pdpShipLine /
-         ftrShipLine). The versions that quote a floor are UI_RX rules, since
-         they carry a number. */
-      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
-        "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · järeletulek aadressil Mardi 1",
-      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
-        "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · 230 pakiautomaati 4 riigis",
       "Настройки магазина сейчас не отвечают — попробуйте ещё раз.": "Poe seaded ei vasta praegu — proovi uuesti.",
       "Данные магазина ещё не загрузились — обновите страницу.": "Poe andmed pole veel laadinud — värskenda lehte.",
       "Вставьте сюда, что написал покупатель": "Kleebi siia, mida klient kirjutas",
@@ -4148,10 +4140,6 @@
       "Письмо отправлено ✓": "Message sent ✓", "Не удалось отправить письмо": "Could not send the message",
       "Отчёты": "Reports", "Месяц": "Month", "Скачать CSV": "Download CSV", "Скачать XLSX": "Download XLSX",
       "НДС": "VAT", "Возвращено": "Refunded",
-      "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
-        "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · pickup at Mardi 1",
-      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
-        "DPD, Omniva, SmartPosti and courier · 1–3 days · 230 parcel lockers in 4 countries",
       "Настройки магазина сейчас не отвечают — попробуйте ещё раз.": "The shop's settings are not answering right now — please try again.",
       "Данные магазина ещё не загрузились — обновите страницу.": "The shop's details have not loaded yet — refresh the page.",
       "Вставьте сюда, что написал покупатель": "Paste in what the customer wrote",
