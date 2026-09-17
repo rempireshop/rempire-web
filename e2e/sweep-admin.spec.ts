@@ -52,10 +52,15 @@ test.describe("sweep — sign in", () => {
      about a minute that nothing kept. Since 17.09.2026 a wrong password is a
      plain, slow 401 and the throttle is a delay that grows, keyed on the
      account (src/lib/auth.ts, «failed-login backoff»; the ladder's arithmetic
-     is asserted in tests/auth.test.ts).
-     THREE attempts here, not six, and that is the whole cost of this test:
-     the first two misses are free by design and the third is 500 ms, so the
-     spec that used to sit out a lockout now adds about half a second. What it
+     is asserted in tests/auth.test.ts). Since 17.09.2026 that ladder is
+     counted in the database rather than in a Map, which changes nothing here:
+     the webServer runs on an in-memory PGlite that dies with it
+     (playwright.config.ts), so the count is exactly as short-lived as the Map
+     was, and `workers: 1` means nothing else is signing in alongside.
+     THREE attempts here, not six, and they are FREE: the delay charged is the
+     one the PREVIOUS misses earned, so attempts one, two and three all pay
+     nothing (the first 500 ms would fall on a fourth). The spec that used to
+     sit out a lockout now adds no wall clock at all. What it
      still has to prove is what the OWNER sees — a Russian refusal, a password
      box that survives it, nothing leaking from behind the card — and that the
      right password is never locked out, only made to wait. */

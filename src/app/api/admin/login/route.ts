@@ -7,12 +7,20 @@
  * WHAT SLOWS A GUESSER DOWN. Consecutive wrong passwords make the NEXT attempt
  * wait, and the wait doubles — nothing for the first two, then half a second,
  * a second, two, up to a twenty-second ceiling, forgotten again after an hour
- * of quiet. The ladder is keyed on the account, not on the caller's address.
+ * of quiet. The ladder is keyed on the account, not on the caller's address,
+ * and since 17.09.2026 it is COUNTED IN THE DATABASE, out of the audit rows
+ * this route already writes, so a cold start no longer hands out a fresh one.
  * The rules, the numbers and an honest account of what this does and does not
  * guarantee all live in one place: the «failed-login backoff» section of
  * src/lib/auth.ts. Do not restate them here — the previous version of this
  * docstring stated a five-tries-a-minute limit as enforced fact, and it had
  * not been true since the day it was written.
+ *
+ * THE TWO writeAuditSafe() CALLS BELOW ARE NOT BOOKKEEPING ANY MORE. They are
+ * the counter. "admin.login.failed" is a rung; "admin.login" is what puts the
+ * ladder back on the floor for every instance at once. Moving either one off
+ * this path, making it conditional, or letting it run after the response
+ * (`after()`) turns the throttle off without touching the throttle.
  *
  * There is deliberately no 429 on this route any more. It used to come from
  * rateLimit(), the per-IP Map that resets on every cold start, and the panel
@@ -20,17 +28,19 @@
  * public/shop2/app.js) — a promise about a minute that nothing kept. A wrong
  * password is now simply a slow 401.
  *
- * `maxDuration` must stay above LOGIN_DELAY_MAX_MS: the wait happens inside
- * the request, so a budget under the ceiling would turn the longest delays
- * into killed functions and 500s instead of throttling.
+ * `maxDuration` must stay above LOGIN_DELAY_MAX_MS + LOGIN_READ_TIMEOUT_MS:
+ * both the counter read and the wait happen inside the request, so a budget
+ * under their sum would turn the longest delays into killed functions and
+ * 500s instead of throttling. 20 s + 1.5 s against 60 leaves the rest for
+ * scrypt, the audit write and a cold start — tests/auth.test.ts asserts it.
  */
 import {
   ADMIN_ACCOUNT,
   adminCookie,
   clearLoginFailures,
   clientIp,
+  loginDelayFor,
   noteLoginFailure,
-  pendingLoginDelayMs,
   sessionSecretOk,
   sleepForLogin,
   verifyPassword,
@@ -69,8 +79,18 @@ export async function POST(req: Request) {
      Answering first and sleeping afterwards would hand the guesser the result
      at full speed and charge them nothing they could not hang up on; this way
      the answer itself is what is late. A correct password is never refused for
-     being early — it waits its turn and then opens the door. */
-  await sleepForLogin(pendingLoginDelayMs(ADMIN_ACCOUNT));
+     being early — it waits its turn and then opens the door.
+
+     Since 17.09.2026 the rung is read out of admin_audit rather than out of a
+     Map that a cold start empties, so this line now touches the database. It
+     is one indexed SELECT of rows the route was already writing, it cannot
+     refuse anybody — a read that fails or drags falls back on the Map and the
+     wait it computes, never on zero and never on the ceiling — and the
+     reasoning for that is written out at loginDelayFor() in src/lib/auth.ts.
+     The correct password stays free: a sign-in that gets it right pays this
+     one read and no delay at all, which is what keeps the e2e suite's several
+     dozen sign-ins costing nothing. */
+  await sleepForLogin(await loginDelayFor(ADMIN_ACCOUNT));
 
   if (!verifyPassword(password)) {
     noteLoginFailure(ADMIN_ACCOUNT);

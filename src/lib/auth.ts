@@ -17,6 +17,11 @@
  *   if (denied) return denied;
  */
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+/* The failed-login ladder counts rows in admin_audit — see «failed-login
+   backoff» below. src/lib/db.ts only imports `pg` as a type and loads the
+   driver on first use, so nothing here is pulled into a bundle that does not
+   already ask a question of the database. */
+import { query, type Querier } from "@/lib/db";
 
 export const ADMIN_COOKIE = "rmp_admin";
 export const SESSION_DAYS = 30;
@@ -266,15 +271,51 @@ export function resetRateLimits(): void {
  * removing it. The one thing a test must not do is spend twenty real seconds
  * proving arithmetic.
  *
- * WHAT THIS HONESTLY IS NOT. The counter is still a Map in one instance, so a
- * cold start still resets the ladder and a caller with real concurrency gets
- * one ladder per instance — a shared counter in Postgres was considered and
- * rejected, as this shop is not under attack and that is a database write on
- * every login. It is written down here rather than glossed over, because
- * claiming more than that is exactly what went wrong the last time. What it
- * does buy, which the 429 did not: every wrong guess now costs the attacker
- * wall-clock time on the instance that served it, and a held-open function is
- * a concurrency slot they do not get back.
+ * WHERE THE COUNTER LIVES, and why that changed on 17.09.2026. It was a Map
+ * in one serverless instance, and this paragraph used to say so and stop
+ * there: a cold start emptied it, a second instance ran its own, and a
+ * guesser therefore got a fresh ladder for free — the exact weakness the
+ * delay was built to close. A shared counter in Postgres had been turned down
+ * on the grounds that it meant a database write on every login. That was
+ * simply wrong, and checking it is what settled the question: every refused
+ * password ALREADY writes a row, `writeAuditSafe(…, "admin.login.failed")` in
+ * the login route, and every accepted one writes "admin.login" beside it. The
+ * ladder was in the table the whole time and nothing was reading it, so the
+ * durable version costs one SELECT and no write at all (192_login_ladder_index.sql
+ * adds the two partial indexes that make the SELECT cheap, and is honest
+ * there about the one b-tree entry a login row now maintains).
+ *
+ * So there are two counters, and they are not rivals:
+ *
+ *   the DATABASE is the truth — failures since the later of the last accepted
+ *   password and an hour ago, shared by every instance, unmoved by a cold
+ *   start or a redeploy;
+ *
+ *   the MAP is the fallback — the same ladder this file has always kept,
+ *   still written on every miss, and what the shop falls back on when the
+ *   read fails or is slow.
+ *
+ * The delay is taken from whichever is HIGHER, so the read can only ever add
+ * rungs, never quietly remove one. See loginDelayFor() below for the failure
+ * decision and the argument for it.
+ *
+ * WHAT IT STILL IS NOT. It is not a lockout and it is not a fortress: a
+ * guesser who is willing to spend twenty seconds a try still gets three tries
+ * a minute, forever. What it now is, which it was not yesterday, is a ladder
+ * that keeps climbing across cold starts, instances and deploys — so the
+ * twenty seconds actually arrive and stay.
+ *
+ * AND WHAT IT COSTS THE OWNER, said plainly rather than discovered at 3 a.m.
+ * A ladder shared by every instance is a ladder an attacker can hold at the
+ * ceiling, and the owner is on the same one. So while somebody is hammering
+ * the shop, Renat's own first sign-in waits up to twenty seconds too. That is
+ * the price of the thing being fixed, and it was half-true before — a warm
+ * instance with a climbed Map did the same, only unreliably. It is still not
+ * a lockout: the wait ends, the right password is taken, and taking it puts
+ * the ladder back on the floor for everyone. If that twenty seconds is ever
+ * judged too much, the lever is the ORDER in the login route — verifying
+ * before waiting, so that only a refusal is ever made to wait — not a lower
+ * ceiling, which would help the attacker and the owner equally.
  */
 
 /** The one account this shop has (src/lib/auth.ts header: one password, no user table). */
@@ -299,7 +340,10 @@ export function loginDelayMs(failures: number): number {
   return Math.min(LOGIN_DELAY_MAX_MS, LOGIN_DELAY_BASE_MS * 2 ** steps);
 }
 
-const loginFailures = new Map<string, { n: number; at: number }>();
+/* The in-instance ladder. `n`/`at` are the consecutive misses and when the
+   last one was; `okAt` is when THIS instance last saw the right password, and
+   it is kept after the ladder is cleared — see loginFailuresSince(). */
+const loginFailures = new Map<string, { n: number; at: number; okAt: number }>();
 
 function currentFailures(account: string, now: number): number {
   const rec = loginFailures.get(account);
@@ -307,19 +351,174 @@ function currentFailures(account: string, now: number): number {
   return rec.n;
 }
 
-/** What this attempt must wait before it is even looked at. */
+/**
+ * What this attempt must wait according to THIS INSTANCE alone.
+ *
+ * The fallback, not the answer: loginDelayFor() is what the route asks. Kept
+ * synchronous and exported because the ladder's arithmetic is tested through
+ * it without a database in the way.
+ */
 export function pendingLoginDelayMs(account: string, now: number = Date.now()): number {
   return loginDelayMs(currentFailures(account, now));
 }
 
 /** A wrong password: one more rung on the ladder. */
 export function noteLoginFailure(account: string, now: number = Date.now()): void {
-  loginFailures.set(account, { n: currentFailures(account, now) + 1, at: now });
+  const okAt = loginFailures.get(account)?.okAt ?? 0;
+  loginFailures.set(account, { n: currentFailures(account, now) + 1, at: now, okAt });
 }
 
-/** The right password: back to the bottom, so the owner is never made to pay twice. */
-export function clearLoginFailures(account: string): void {
-  loginFailures.delete(account);
+/**
+ * The right password: back to the bottom, so the owner is never made to pay
+ * twice.
+ *
+ * The instant is REMEMBERED rather than merely forgotten, because the durable
+ * ladder is reset by the "admin.login" audit row and that row is written by
+ * writeAuditSafe(), which swallows its own failures. A database that takes
+ * writes badly and reads fine would otherwise leave the owner paying a wait
+ * he had already cleared: the right password let him in, and nothing the next
+ * instance could read said so. What this instance watched happen is allowed
+ * to say so instead — loginFailuresSince() hands the timestamp to the query
+ * as a floor on the window.
+ */
+export function clearLoginFailures(account: string, now: number = Date.now()): void {
+  loginFailures.set(account, { n: 0, at: now, okAt: now });
+}
+
+/* ---------- the durable ladder ------------------------------------------- */
+
+/**
+ * How long to wait for the count before giving up on it. Small against the
+ * route's 60 s budget and generous against a cold connection pool: a login
+ * during a database outage is slower by this much ONCE, and then answered
+ * from the Map. Anything larger would let a sick database, rather than a
+ * guesser, decide how long the owner stands at his own door.
+ */
+export const LOGIN_READ_TIMEOUT_MS = 1_500;
+
+/**
+ * Failures on this account since the ladder was last put back on the floor —
+ * counted in Postgres, where a cold start cannot forget them.
+ *
+ * WHAT IS BEING COUNTED. admin_audit rows, which the login route already
+ * writes and which nothing else produces: one "admin.login.failed" per
+ * refused password, one "admin.login" per accepted one. The window opens at
+ * the LATEST of three instants and every one of them is load-bearing:
+ *
+ *   an hour ago            — the quiet hour, so this morning's typos are not
+ *                            still being charged for tonight;
+ *   the last "admin.login" — a correct password clears the ladder, durably
+ *                            and for every instance at once;
+ *   `sinceMs`              — a success this instance saw, for the case where
+ *                            that row failed to be written (clearLoginFailures).
+ *
+ * KEYED ON THE ACCOUNT, and `actor` is deliberately not in the query. The
+ * audit row records `ip:<address>` as the actor, because that is the
+ * interesting thing to have later — but the address is a line the attacker
+ * picks and the owner cannot, so it must not be what the ladder counts by.
+ * The action name is what identifies the account here, and it can, because
+ * this shop has exactly ONE (ADMIN_ACCOUNT, and the file header above). A
+ * second admin would need the account in the row, not a filter added here.
+ *
+ * Null, never a number, when the read fails or runs out of time — the caller
+ * decides what that means, and loginDelayFor() is where that decision is
+ * written down.
+ *
+ * THE CLOCK is the database's for everything the database decides: `at`
+ * defaults to now() and the hour is measured from now(), so the window and the
+ * rows it is comparing come from one clock. The single exception is `sinceMs`,
+ * which is by nature this instance's own — it is what this instance WATCHED
+ * happen, so it can only be timed by the clock that watched it. It is compared
+ * against database timestamps and so carries the machines' skew, which is why
+ * it is the third floor and not the only one: when the success row was written
+ * the database's own copy of that instant sits beside it in the greatest() and
+ * a skewed one changes nothing. It decides alone only in the case it exists
+ * for — the success whose row was lost.
+ *
+ * An elapsed hour, not a calendar day, so src/lib/day.ts and Tallinn do not
+ * come into it (see 192_login_ladder_index.sql).
+ */
+export async function loginFailuresSince(
+  account: string,
+  opts: { q?: Querier; sinceMs?: number; timeoutMs?: number } = {},
+): Promise<number | null> {
+  if (account !== ADMIN_ACCOUNT) return null;
+  const run = opts.q ?? query;
+  const since = opts.sinceMs && opts.sinceMs > 0 ? new Date(opts.sinceMs).toISOString() : null;
+
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const rows = await Promise.race([
+      run<{ n: number | string }>(
+        `select count(*) as n
+           from admin_audit
+          where action = 'admin.login.failed'
+            and at > greatest(
+                  now() - interval '1 millisecond' * $1::double precision,
+                  coalesce((select max(at) from admin_audit where action = 'admin.login'), '-infinity'::timestamptz),
+                  coalesce($2::timestamptz, '-infinity'::timestamptz)
+                )`,
+        [LOGIN_FORGET_MS, since],
+      ),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), opts.timeoutMs ?? LOGIN_READ_TIMEOUT_MS);
+      }),
+    ]);
+    if (!rows) return null; // the timer won
+    const n = Number(rows[0]?.n ?? 0);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+  } catch (err) {
+    console.error("[auth] the failed-login counter could not be read:", err);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * What this attempt must wait. The one the route asks.
+ *
+ * WHEN THE READ FAILS OR IS SLOW: fall back on the Map — NOT on zero, and NOT
+ * on the ceiling. Both of the obvious answers are worse than the thing this
+ * change replaced:
+ *
+ *   FAILING OPEN hands an attacker a lever. The protection would switch
+ *   itself off during any database wobble, and a wobble is not something they
+ *   have to cause — waiting for one is enough, and the login route keeps
+ *   working without the database (the password is an env var and the cookie
+ *   is signed with another), so an outage is precisely when the shop is both
+ *   guessable and unwatched.
+ *
+ *   FAILING CLOSED — twenty seconds for everybody — punishes the owner on the
+ *   one day the shop is already having a bad one, and it punishes his CORRECT
+ *   password, which is the single thing this design promised never to do. A
+ *   wait he cannot clear by getting it right is a lockout with better manners.
+ *
+ * The Map is neither. It is the ladder the shop ran on until today and the
+ * owner already accepted, it is keyed on the same account, and it is kept up
+ * to date on every miss whether the database answers or not. So a failed read
+ * degrades to yesterday's protection rather than to none of it, and a correct
+ * password still clears it instantly. The cost is stated plainly: while the
+ * database is unreadable the ladder is per-instance again, which is to say a
+ * cold start forgets it.
+ *
+ * Whichever counter is higher wins, so the read can only ever add rungs. The
+ * two agree in the ordinary case; they part after a cold start (the database
+ * remembers, the Map does not) and during an outage (the Map remembers, the
+ * database cannot be asked).
+ */
+export async function loginDelayFor(
+  account: string,
+  opts: { q?: Querier; timeoutMs?: number; now?: number } = {},
+): Promise<number> {
+  const now = opts.now ?? Date.now();
+  const local = currentFailures(account, now);
+  const durable = await loginFailuresSince(account, {
+    q: opts.q,
+    timeoutMs: opts.timeoutMs,
+    sinceMs: loginFailures.get(account)?.okAt,
+  });
+  return loginDelayMs(durable === null ? local : Math.max(durable, local));
 }
 
 /* The wait itself, behind a seam. The real one is setTimeout; a test replaces
