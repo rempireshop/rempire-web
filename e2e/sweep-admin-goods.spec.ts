@@ -440,10 +440,31 @@ test.describe("sweep — promo codes", () => {
       await assertClean(page, w, `promo percent "${bad}"`);
     }
 
-    // Minimum-order garbage falls back to «no condition» rather than NaN.
+    /* «Минимальный заказ» in letters is refused out loud — it is not read as
+       «no floor».
+
+       This step used to assert the opposite («garbage falls back to no
+       condition rather than NaN»), and that was right until the audit of
+       14.09.2026 turned it round: `|| 0` on an unreadable minimum silently
+       saved a code with no threshold at all, and on «Сколько раз» the same
+       coercion saved a code with no limit at all — see 109243d and
+       promoFormPayload()'s own comment in public/shop2/app.js. The panel now
+       keeps what the owner typed, the server answers `bad_min`, and the form
+       says so. The fix reached main this morning with the r19-giftcards
+       merge, which is when this assertion started failing. */
     await page.locator('[data-promof="value"]').fill("10");
     await page.locator('[data-promof="minSubtotal"]').fill("abc");
     await page.locator('[data-promof="code"]').fill(good);
+    await page.locator("[data-admpromosave]").click();
+    const minErr = page.locator(".adm-err[role=alert]");
+    await expect(minErr, "an unreadable minimum order was accepted").toHaveText(/[Мм]инимальн/);
+    expect(isRussian((await minErr.textContent()) || ""), "the minimum-order message is not Russian").toBe(true);
+    await expect(page.locator(`[data-admpromoedit="${good}"]`),
+      "an unreadable minimum order was saved anyway").toHaveCount(0);
+    await assertClean(page, w, "promo minimum in letters");
+
+    // …and the same code saves the moment the box holds a number — or nothing.
+    await page.locator('[data-promof="minSubtotal"]').fill("");
     await page.locator("[data-admpromosave]").click();
     expect(await toastText(page)).toMatch(/[Пп]ромокод/);
     await clearToast(page);

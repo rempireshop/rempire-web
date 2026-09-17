@@ -1,8 +1,8 @@
 import { expect, type Page, type TestInfo, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { ipHeaders, shopUrl } from "./fixtures";
-import { openAdmin, tab, watch } from "./sweep-helpers";
+import { adminSection, shopUrl } from "./fixtures";
+import { openAdmin, watch } from "./sweep-helpers";
 
 /**
  * The two things the owner asked for about pictures in an article
@@ -88,25 +88,65 @@ async function shot(page: Page, name: string, testInfo: TestInfo, into?: string)
   await page.screenshot({ path: join(SHOTS, `${name}-${testInfo.project.name}.png`), fullPage: false });
 }
 
-/** «Блог» is one of the six sections that sit behind «Ещё» on a phone — and
-    once it has opened it is not in the bottom bar to be marked current, which
-    is the one thing tab() insists on, so the phone takes its own two clicks. */
-async function blogTab(page: Page, testInfo: TestInfo) {
-  if (testInfo.project.name !== "mobile") { await tab(page, "blog"); return; }
-  await page.locator("[data-admmore]").click();
-  await page.locator('[data-admtab="blog"]:visible').first().click();
-  await expect(page.locator("[data-admblognew]"), "«Блог» did not open on the phone").toBeVisible();
+/** «Блог» is one of the six sections that sit behind «Ещё» on a narrow
+    screen — and once it has opened it is not in the bottom bar to be marked
+    current, which is the one thing tab() insists on.
+
+    Which screens are narrow is a CSS question, not a project-name one: this
+    used to branch on `project.name !== "mobile"` and so sent the **tablet**
+    project (iPad Mini, 768 px — the bottom bar and «Ещё» too, not the 232-px
+    sidebar) down the desktop path, where `[data-admtab="blog"][aria-current]`
+    never becomes visible. It passes on desktop and on mobile, which is what
+    it was written against, and fails on the third Chromium project CI also
+    runs (.github/workflows/ci.yml). adminSection() asks the page which
+    navigation it actually drew, so there is no viewport it can be wrong on. */
+async function blogTab(page: Page) {
+  await adminSection(page, "blog");
+  await expect(page.locator("[data-admblognew]"), "«Блог» did not open").toBeVisible();
 }
 
 /** Open a post for editing — and, on a phone, get the body onto the screen. */
-async function edit(page: Page, id: string, testInfo: TestInfo) {
-  await blogTab(page, testInfo);
+async function edit(page: Page, id: string) {
+  await blogTab(page);
   await page.locator(`[data-admblogedit="${id}"]`).click();
   await expect(page.locator("[data-blogbody]")).toBeVisible();
 }
 
+/* Which screens lay the halves out side by side: the one number both
+   stylesheets are written against (`@media (max-width: 767px)` in
+   public/shop2/styles.css for the shop and public/shop2/admin.css for the
+   editor), asked of the viewport rather than of the project's name — the
+   iPad Mini is 768 px, i.e. one pixel the wide side of it. */
+const PHONE_MAX = 767;
+function collapses(testInfo: TestInfo): boolean {
+  return (testInfo.project.use.viewport?.width ?? 1280) <= PHONE_MAX;
+}
+
+/* One address per test, per project.
+
+   Every test here signs in for itself, and POST /api/admin/login allows five
+   tries a minute per IP (src/app/api/admin/login/route.ts, `rateLimit`).
+   Five tests across the three Chromium projects is fifteen sign-ins from one
+   address inside a couple of minutes, so a single `ipHeaders(174)` for the
+   whole file turns the sixth of them into a 429 and the test into «the login
+   card would not accept the test password» — which is what running this file
+   on --project=desktop --project=mobile does.
+
+   198.51.100.x (TEST-NET-2), not the 203.0.113.x the rest of the suite uses:
+   that block is nearly full, and .174 in particular is already spoken for by
+   e2e/admin-products.spec.ts. A documentation range nobody else in e2e/
+   touches cannot collide with anything, now or later. */
+const IP_BLOCK: Record<string, number> = { desktop: 10, tablet: 30, mobile: 50, "mobile-safari": 70 };
+const seats = new Map<string, number>();
+
 test.describe("blog pictures — the cover's two frames and the four presets", () => {
-  test.use({ extraHTTPHeaders: ipHeaders(174) });
+  test.use({
+    extraHTTPHeaders: async ({}, use, testInfo) => {
+      if (!seats.has(testInfo.title)) seats.set(testInfo.title, seats.size);
+      const octet = (IP_BLOCK[testInfo.project.name] ?? 90) + (seats.get(testInfo.title)! % 20);
+      await use({ "x-forwarded-for": `198.51.100.${octet}` });
+    },
+  });
 
   /* ---- 1. the cover, in the two frames the shop will use ----------------- */
   test("the panel shows the cover as the list and as the top of the article, through the shop's own classes", async ({ page }, testInfo) => {
@@ -115,7 +155,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     await openAdmin(page);
     const post = await makePost(page, `Обложка ${Date.now().toString().slice(-6)}`, "full");
 
-    await edit(page, post.id, testInfo);
+    await edit(page, post.id);
 
     const see = page.locator(".adm-see");
     await expect(see, "the cover preview is not on the screen").toBeVisible();
@@ -154,7 +194,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     await openAdmin(page);
     const post = await makePost(page, `Картинки ${Date.now().toString().slice(-6)}`, "full");
 
-    await edit(page, post.id, testInfo);
+    await edit(page, post.id);
     const box = page.locator("[data-blogbody]");
 
     // nothing on screen until a picture is tapped — the bar is not chrome
@@ -185,7 +225,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     const fig = box.locator("figure");
     const inner = (await box.boundingBox())!.width;
     const half = (await fig.boundingBox())!.width;
-    if (testInfo.project.name === "mobile") {
+    if (collapses(testInfo)) {
       expect(half / inner, "half width did not collapse on a phone").toBeGreaterThan(0.85);
     } else {
       expect(half / inner, "half width is not about half the column").toBeLessThan(0.62);
@@ -197,7 +237,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     test.setTimeout(120_000);
     await openAdmin(page);
     const post = await makePost(page, `Сдвиг ${Date.now().toString().slice(-6)}`, "full");
-    await edit(page, post.id, testInfo);
+    await edit(page, post.id);
     const box = page.locator("[data-blogbody]");
     const kids = () => box.evaluate((el) => Array.from(el.children).filter((c) => !c.hasAttribute("data-figui")).map((c) => c.tagName.toLowerCase()));
 
@@ -254,7 +294,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
       const pic = (await fig.boundingBox())!.width;
       if (p === "small") expect(pic, "«маленькая» is not small").toBeLessThan(col * 0.7);
       else if (p === "full") expect(pic / col, "«во всю ширину» is not full width").toBeGreaterThan(0.9);
-      else if (testInfo.project.name === "mobile") {
+      else if (collapses(testInfo)) {
         expect(pic / col, "half width did not collapse on a phone").toBeGreaterThan(0.9);
       } else {
         expect(pic / col, "half width is not about half the column").toBeLessThan(0.62);
@@ -292,7 +332,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
        session from the top of the test is still good, so this walks back into
        the panel rather than signing in again. */
     await page.goto(shopUrl("", "/admin/"));
-    await edit(page, post.id, testInfo);
+    await edit(page, post.id);
     const box = page.locator("[data-blogbody]");
     await expect(box.locator("figure")).toHaveCount(1);
     expect(await box.locator("figure").evaluate((el) => el.hasAttribute("data-fig"))).toBe(false);
