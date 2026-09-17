@@ -327,6 +327,36 @@ describe("inventory", () => {
       expect(ov[plain.id]?.stock).toBe("low");
       expect(ov[plain.id]?.price).toBeNull();
     });
+
+    /* «Снять с продажи» — the editor's «Наличие» select and the destructive
+       slot of the product card — writes exactly this override and nothing
+       else. The count used to overwrite it, so the panel toasted «Снято с
+       продажи ✓» and the shop went on selling the product: the badge came
+       back on the very next feed. A count may say a product is gone; it may
+       not say it is on sale again. */
+    it("a manual «нет в наличии» beats the count — it is a decision, not a guess at a number", async () => {
+      await move({ productId: plain.id, delta: 8, reason: "goods_in" }); // counted, plenty on the shelf
+      await upsertOverride(plain.id, { stock: "out" }); // …and pulled from sale anyway
+      expect((await getOverrides([plain.id]))[plain.id]?.stock).toBe("out");
+    });
+
+    it("and the till refuses it while it is pulled", async () => {
+      await move({ productId: plain.id, delta: 8, reason: "goods_in" });
+      await upsertOverride(plain.id, { stock: "out" });
+      await expect(
+        createOrder({
+          items: [{ id: plain.id, qty: 1 }],
+          customer: { name: "Т", email: "pulled@example.com", phone: "+372 5555 5555" },
+          shipping: { method: "pickup", country: "EE" },
+        }),
+      ).rejects.toMatchObject({ code: "out_of_stock" });
+    });
+
+    it("«в наличии» and «мало» still defer to the count, which knows better", async () => {
+      await upsertOverride(plain.id, { stock: "in" });
+      await move({ productId: plain.id, delta: 1, reason: "goods_in" }); // one left
+      expect((await getOverrides([plain.id]))[plain.id]?.stock).toBe("low");
+    });
   });
 
   describe("getLevels() — the admin table's full catalogue×variant universe", () => {
@@ -347,6 +377,34 @@ describe("inventory", () => {
       const untracked = await getLevels({ filter: "untracked" });
       expect(untracked.some((r) => r.productId === plain.id)).toBe(false); // it just became tracked
       expect(untracked.length).toBeGreaterThan(0);
+    });
+
+    /* «Склад» built its universe from the generated catalogue file alone, so
+       a volume the owner ADDED in the product editor had no row to count —
+       and a volume he RENAMED left its old row behind, invisible here and
+       still counted by productStockStates(). The editor, the cart and the
+       till all read product_overrides.sizes first; the shelf has to too. */
+    it("counts a volume the owner added in the editor, which the catalogue file has never heard of", async () => {
+      expect(VARIANTS[plain.id]).toBeUndefined();
+      await upsertOverride(plain.id, { sizes: [{ size: "100 мл", price: 12 }, { size: "250 мл", price: 20 }] });
+      const rows = await getLevels({ q: plain.b });
+      const mine = rows.filter((r) => r.productId === plain.id).map((r) => r.variant).sort();
+      expect(mine).toEqual(["100 мл", "250 мл"]);
+    });
+
+    it("shows the leftover row of a renamed volume, so it can be found and written off", async () => {
+      await upsertOverride(plain.id, { sizes: [{ size: "100 мл", price: 12 }] });
+      await move({ productId: plain.id, variant: "100 мл", delta: 5, reason: "goods_in" });
+      await upsertOverride(plain.id, { sizes: [{ size: "150 мл", price: 12 }] }); // renamed in the editor
+
+      // the orphan is still what holds the product at «в наличии»…
+      expect((await productStockStates([plain.id]))[plain.id]).toBe("in");
+      // …so «Склад» has to show it: it is the only screen that can zero it
+      const rows = await getLevels({ q: plain.b });
+      const orphan = rows.find((r) => r.productId === plain.id && r.variant === "100 мл");
+      expect(orphan?.qty).toBe(5);
+      expect(orphan?.tracked).toBe(true);
+      expect(rows.some((r) => r.productId === plain.id && r.variant === "150 мл")).toBe(true);
     });
   });
 
@@ -377,6 +435,44 @@ describe("inventory", () => {
       const order = await payOrder();
       await setOrderStatus(order.id, "cancelled", "test");
       expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+    });
+
+    /* …and the way back. «Отменён» pressed by mistake and put right again
+       returned the goods and never took them off the shelf a second time —
+       the only decrement lives in the payment transition and had already
+       run. Every cancel/uncancel cycle therefore inflated the shelf by the
+       order's quantities, and «Склад» ended up saying «в наличии» about
+       bottles that had been shipped. */
+    it("putting a cancelled order back on sale takes the goods off the shelf again", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
+      const order = await payOrder();
+      await setOrderStatus(order.id, "cancelled", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+
+      await setOrderStatus(order.id, "paid", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+
+      // …however many times the owner changes his mind
+      await setOrderStatus(order.id, "cancelled", "test");
+      await setOrderStatus(order.id, "shipped", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+    });
+
+    /* The guard on that mirror: an order cancelled BEFORE it was ever paid
+       returned nothing, and it is exactly the one that can still be paid from
+       a stale tab — applyPaymentResult() moves it to paid and decrements it
+       itself, so a decrement here as well would take the quantity off twice. */
+    it("an order cancelled before it was ever paid is decremented once, by the payment", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
+      const order = await createOrder({
+        items: [{ id: plain.id, qty: 3 }],
+        customer: { name: "Т", email: "stale@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await setOrderStatus(order.id, "cancelled", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10); // nothing returned — nothing was taken
+      await setOrderStatus(order.id, "paid", "test");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10); // and nothing taken here either
     });
 
     /* The sale of an uncounted variant is skipped (move() — "tracked"), so its
@@ -476,6 +572,62 @@ describe("inventory", () => {
       });
       await setOrderStatus(order.id, "cancelled", "test");
       expect(await getLevel(plain.id, "")).toBeNull();
+    });
+  });
+
+  /* The checkout asked productStockStates(), which aggregates a product's
+     sizes as «out only if EVERY tracked size is out» — the right answer for a
+     badge and the wrong one for a till. A 500 мл counted down to zero went on
+     being sold and paid for as long as the 75 мл still had bottles, and the
+     sale move was then clamped to 0 with only a console line to record it. */
+  describe("priceItems — the shelf is checked per SIZE, not per product", () => {
+    const sizedIn = CATALOGUE.find((p) => p.s === "in" && VARIANTS[p.id] && VARIANTS[p.id].sizes.length > 1)!;
+
+    function order(variant: string, email: string) {
+      return {
+        items: [{ id: sizedIn.id, variant, qty: 1 }],
+        customer: { name: "Т", email, phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      } as Parameters<typeof createOrder>[0];
+    }
+
+    it("refuses the size that is at zero and sells the one that is not", async () => {
+      const sizes = VARIANTS[sizedIn.id].sizes;
+      await move({ productId: sizedIn.id, variant: sizes[0], delta: 5, reason: "goods_in" });
+      await move({ productId: sizedIn.id, variant: sizes[1], delta: 2, reason: "goods_in" });
+      await move({ productId: sizedIn.id, variant: sizes[1], delta: -2, reason: "sale_web" });
+
+      // the product as a whole is still «в наличии» — the first size has five
+      expect((await productStockStates([sizedIn.id]))[sizedIn.id]).toBe("in");
+
+      await expect(createOrder(order(sizes[1], "zero@example.com"))).rejects.toMatchObject({
+        code: "out_of_stock",
+      });
+      const ok = await createOrder(order(sizes[0], "five@example.com"));
+      expect(ok.items[0].variant).toBe(sizes[0]);
+    });
+
+    it("leaves a size nobody has counted alone", async () => {
+      const sizes = VARIANTS[sizedIn.id].sizes;
+      await move({ productId: sizedIn.id, variant: sizes[0], delta: 5, reason: "goods_in" });
+      const ok = await createOrder(order(sizes[1], "uncounted@example.com"));
+      expect(ok.items[0].variant).toBe(sizes[1]);
+    });
+
+    /* …but never at the register. «Продажа в салоне» is the owner with the
+       bottle already in his hand: his count is what lags, not the shelf, and
+       a refusal there is a sale that cannot be rung up at all. The clamp at 0
+       inside move() is what keeps the ledger honest for that one. */
+    it("still rings up that size in the salon, where somebody can see the shelf", async () => {
+      const sizes = VARIANTS[sizedIn.id].sizes;
+      await move({ productId: sizedIn.id, variant: sizes[0], delta: 5, reason: "goods_in" });
+      await move({ productId: sizedIn.id, variant: sizes[1], delta: 2, reason: "goods_in" });
+      await move({ productId: sizedIn.id, variant: sizes[1], delta: -2, reason: "sale_web" });
+      const till = await createOrder({
+        ...order(sizes[1], "till@example.com"),
+        channel: "pos",
+      } as Parameters<typeof createOrder>[0]);
+      expect(till.items[0].variant).toBe(sizes[1]);
     });
   });
 

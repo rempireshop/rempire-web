@@ -581,9 +581,24 @@ async function qRevenue7d(from: Date, to: Date) {
  */
 async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
   const overrides = await getOverrides();
+  /* …with one exception, and only on this card. Since r19 a manual «нет в
+     наличии» survives the count in getOverrides(), because that setting is
+     «Снять с продажи» and the shop has to stop selling the product. But this
+     card is about the SHELF — «что заканчивается, закажите ещё» — and a
+     product the owner pulled with ten in the box is not running out. Where
+     there is a real count, it decides here, exactly as it did before that
+     rule existed. Best effort: no inventory module, no exception. */
+  let counted: Record<string, "in" | "low" | "out"> = {};
+  try {
+    const { productStockStates } = await import("@/lib/inventory");
+    counted = await productStockStates();
+  } catch (err) {
+    console.error("[analytics] numeric stock unavailable for «Заканчиваются»:", err);
+  }
   const short: Array<[string, "low" | "out"]> = [];
   for (const [id, o] of Object.entries(overrides)) {
-    if (o.stock === "low" || o.stock === "out") short.push([id, o.stock]);
+    const stock = counted[id] ?? o.stock;
+    if (stock === "low" || stock === "out") short.push([id, stock]);
   }
   const names = await customNames(short.map(([id]) => id));
   const items: OverviewLowStockItem[] = [];

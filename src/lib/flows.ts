@@ -543,6 +543,22 @@ export async function sweepBackInStock(): Promise<FlowRun> {
     /* no overrides table — the catalogue's own stock is the answer */
   }
 
+  /* inventory: and the count, which is what the shop's own badge reads for a
+     product anybody has actually counted (productStockStates(); the merge
+     lives in getOverrides() in src/lib/orders.ts — imported dynamically from
+     @/lib/inventory, never from orders.ts, see this module's own note about
+     the cycle). Deciding on `product_overrides.stock` alone meant a product
+     counted down to 0 whose old manual value still said «в наличии» mailed
+     «снова в наличии» to everyone waiting — and marked the alert spent, so
+     the letter they were owed never came. */
+  const counted = new Map<string, string>();
+  try {
+    const { productStockStates } = await import("@/lib/inventory");
+    for (const [id, state] of Object.entries(await productStockStates(ids))) counted.set(id, state);
+  } catch (err) {
+    console.error("[flows] numeric stock unavailable, deciding on the override:", err);
+  }
+
   /* The catalogue file and the owner's own rows (`c-…`) in one map: a custom
      product that is on sale reads "in" from its row and "out" from the
      override the owner switched — exactly the one this sweep is waiting on. */
@@ -550,7 +566,11 @@ export async function sweepBackInStock(): Promise<FlowRun> {
   const ready = alerts.filter((a) => {
     const p = products.get(a.product_id);
     if (!p) return false;
-    const stock = overrides.get(a.product_id) ?? p.stock;
+    const manual = overrides.get(a.product_id);
+    // the same order getOverrides() merges in: a manual «нет в наличии» is
+    // «Снять с продажи» and beats any count; otherwise the count wins, and
+    // an uncounted product falls back to the override, then to the file
+    const stock = manual === "out" ? "out" : (counted.get(a.product_id) ?? manual ?? p.stock);
     return stock === "in";
   });
   return sendStockAlerts(ready, products);

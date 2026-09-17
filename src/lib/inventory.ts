@@ -567,7 +567,44 @@ export async function syncVariantRows(
   return t;
 }
 
-/* ---------- product-level state for the public overrides feed ------------ */
+/* ---------- derived state: per product for the feed, per size for the till ---- */
+
+/** Every stock_levels row of a TRACKED product×variant (see the module doc),
+    for the two readers below — the per-product aggregate the badge uses and
+    the per-size map the checkout does. */
+async function trackedLevelRows(ids?: string[]): Promise<StockLevelRow[]> {
+  const trackedClause =
+    `exists (select 1 from stock_moves m where m.product_id = sl.product_id and m.variant = sl.variant and m.reason in ${TRACKING_SQL})`;
+  if (ids && ids.length) {
+    const holes = ids.map((_, i) => `$${i + 1}`).join(",");
+    return query<StockLevelRow>(
+      `select sl.* from stock_levels sl where sl.product_id in (${holes}) and ${trackedClause}`,
+      ids,
+    );
+  }
+  return query<StockLevelRow>(`select sl.* from stock_levels sl where ${trackedClause}`);
+}
+
+/**
+ * Those rows, NOT aggregated: productId → variant label → state, tracked
+ * variants only.
+ *
+ * The aggregate below is the right answer for a BADGE — a product with one
+ * size left is still worth a page. It is the wrong answer for a TILL: the
+ * checkout gated on it, so a size counted down to zero went on being sold
+ * and paid for as long as any other size of the same product was in stock,
+ * and the sale move was then clamped to 0 with nothing but a console line to
+ * say so. src/lib/orders.ts priceItems() asks this one about the size that
+ * was actually ordered.
+ */
+export async function variantStockStates(ids?: string[]): Promise<Record<string, Record<string, StockState>>> {
+  const rows = await trackedLevelRows(ids);
+  const out: Record<string, Record<string, StockState>> = {};
+  for (const r of rows) {
+    (out[r.product_id] ??= {})[r.variant] = deriveState(Number(r.qty), Number(r.low_threshold));
+  }
+  return out;
+}
 
 /**
  * One state per product id, aggregated across whatever variants of it are
@@ -580,18 +617,7 @@ export async function syncVariantRows(
  * sellable while one size remains" rule a shopper would expect.
  */
 export async function productStockStates(ids?: string[]): Promise<Record<string, StockState>> {
-  const trackedClause =
-    `exists (select 1 from stock_moves m where m.product_id = sl.product_id and m.variant = sl.variant and m.reason in ${TRACKING_SQL})`;
-  let rows: StockLevelRow[];
-  if (ids && ids.length) {
-    const holes = ids.map((_, i) => `$${i + 1}`).join(",");
-    rows = await query<StockLevelRow>(
-      `select sl.* from stock_levels sl where sl.product_id in (${holes}) and ${trackedClause}`,
-      ids,
-    );
-  } else {
-    rows = await query<StockLevelRow>(`select sl.* from stock_levels sl where ${trackedClause}`);
-  }
+  const rows = await trackedLevelRows(ids);
 
   const byProduct = new Map<string, StockLevelRow[]>();
   for (const r of rows) {
@@ -636,7 +662,14 @@ export type CatalogueLevelRow = {
  * size «+ Размер» added, or one renamed, was unknown to the table below, so it
  * had no «Склад» row at all: nobody could count it in, which left it untracked,
  * which made every sale of it a sale on an uncounted variant — skipped in
- * silence by move() while the receipt said «остатки списаны».
+ * silence by move() while the receipt said «остатки списаны». The row a RENAMED
+ * size leaves behind is the other half of the same hole: off this screen, so
+ * unfindable and uncorrectable, yet still counted by productStockStates(), so
+ * one orphan at 5 could hold a product at «в наличии» while every size it
+ * really has stood at zero.
+ *
+ * The editor, the cart and the till all read this ladder first
+ * (overrideLadder() in src/lib/orders.ts); the shelf has to read the same one.
  */
 function ladderOf(productId: string, owned: Map<string, string[]>): string[] {
   const own = owned.get(productId);
@@ -646,7 +679,8 @@ function ladderOf(productId: string, owned: Map<string, string[]>): string[] {
 }
 
 /** The owner's saved ladders, as the shelf needs them: id → size LABELS.
-    Read here rather than through src/lib/orders.ts, which imports this file. */
+    Read here rather than through src/lib/orders.ts, which imports this file.
+    Best effort: no table, no column, no change from before. */
 async function ownerLadders(): Promise<Map<string, string[]>> {
   const out = new Map<string, string[]>();
   try {
@@ -654,16 +688,28 @@ async function ownerLadders(): Promise<Map<string, string[]>> {
       "select product_id, sizes from product_overrides where sizes is not null",
     );
     for (const r of rows) {
-      const list = typeof r.sizes === "string" ? (JSON.parse(r.sizes) as unknown) : r.sizes;
+      let list: unknown = r.sizes;
+      if (typeof list === "string") {
+        /* Per row, not per table: one unparsable ladder must not cost every
+           other product the one it saved. */
+        try {
+          list = JSON.parse(list);
+        } catch {
+          continue;
+        }
+      }
       if (!Array.isArray(list) || !list.length) continue;
       const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
       /* One rung with no label is «один объём» — the product has no volumes at
          all and its shelf row is the unlabelled one, exactly as the storefront
-         paints it (applyDemoOverrides in public/shop2/app.js). */
+         paints it (applyDemoOverrides in public/shop2/app.js) and exactly the
+         rule overrideLadder() applies in src/lib/orders.ts. Any other ladder is
+         taken rung for rung, unfiltered, so that the shelf's universe is the
+         same list the cart and the till price against. */
       out.set(r.product_id, labels.length === 1 && !labels[0] ? [""] : labels);
     }
   } catch (err) {
-    console.error("[inventory] owner size ladders not loaded, using the catalogue file:", err);
+    console.error("[inventory] saved size ladders unavailable, using the catalogue file:", err);
   }
   return out;
 }
@@ -728,6 +774,14 @@ export async function isTracked(productId: string, variant?: string | null): Pro
  * this order gave them back and they are there to take again, and no return at
  * all means the order never took anything — an unpaid invoice, or an untracked
  * variant whose sale move() skipped.
+ *
+ * That last case is the one that bites: an order cancelled before it was ever
+ * paid returned nothing, and it is exactly the order that can still be paid
+ * from a stale tab. applyPaymentResult() moves it to paid and decrements it
+ * itself (src/lib/payments/apply.ts), so a decrement on the re-open as well
+ * would take the quantity off the shelf twice. Per line and per variant rather
+ * than per order: an order can have given back one of its lines and not the
+ * other.
  */
 export async function refLedger(
   ref: string,
@@ -760,6 +814,13 @@ async function trackedKeys(): Promise<Set<string>> {
  * worth a database round trip of its own). This is what the admin «Склад»
  * table shows: a size nobody has scanned in yet still gets a row, at qty 0,
  * not tracked — so Renat can see it is missing, not just not query for it.
+ *
+ * …and, since it is the only screen that can correct one, every stock_levels
+ * row that falls OUTSIDE that universe as well: the leftover of a volume
+ * renamed or removed in the product editor. Such a row is still counted by
+ * productStockStates(), so an orphan at 5 kept a product reading «в наличии»
+ * while every volume it really has sat at zero — and there was no screen on
+ * which it could be found, let alone written off.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
   const [dbRows, tracked, custom, owned] = await Promise.all([
@@ -772,9 +833,13 @@ export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?
 
   /* A volume the owner RENAMED leaves its old row behind with a real count on
      it. That row is not in the universe above any more, and dropping it here
-     would hide goods that are on the shelf — so a level the database already
-     holds for a product the shop still has gets a row of its own too, for
-     Renat to move across and zero. */
+     would hide goods that are on the shelf — and leave it counted by
+     productStockStates(), holding a sold-out product at «в наличии» from a
+     screen on which it could not be found, let alone written off. So a level
+     the database already holds for a product the shop still has gets a row of
+     its own too, for Renat to move across and zero. A row whose product has
+     left the catalogue altogether stays out: there is no name, no price and no
+     shelf to put it on. */
   const listed = new Map<string, Set<string>>();
   for (const u of universe) {
     const seen = listed.get(u.productId);

@@ -495,6 +495,51 @@ describe("back in stock flow", () => {
     await query("update product_overrides set stock = 'in' where product_id = $1", [PRODUCT]);
     expect((await sweepBackInStock()).sent).toBe(1);
   });
+
+  /* The sweep decided on product_overrides.stock alone, while the storefront's
+     own badge comes from the count the moment anybody has counted the product
+     (productStockStates → getOverrides). A product at 0 whose old manual value
+     still said «в наличии» therefore mailed «снова в наличии» to everybody
+     waiting — and stamped their alerts spent, so the letter they were really
+     owed never came. */
+  it("waits for the shelf, not for the old manual override", async () => {
+    await setFlows({ backstock: true });
+    const { move } = await import("@/lib/inventory");
+    // counted, then sold out — with nobody waiting yet, so no letter is due
+    await move({ productId: PRODUCT, variant: "75 мл", delta: 2, reason: "goods_in" });
+    await move({ productId: PRODUCT, variant: "75 мл", delta: -2, reason: "sale_web" });
+    await query("insert into product_overrides (product_id, stock) values ($1, 'in')", [PRODUCT]);
+    await addStockAlert({ email: EMAIL, productId: PRODUCT });
+
+    expect((await sweepBackInStock()).sent).toBe(0);
+    expect(sent).toHaveLength(0);
+    // …and the alert is still waiting for the day the shelf really has one
+    const rows = await query<{ sent_at: string | null }>("select sent_at from stock_alerts");
+    expect(rows.every((r) => r.sent_at === null)).toBe(true);
+  });
+
+  it("sends on the count even when the manual override still says «мало»", async () => {
+    await setFlows({ backstock: true });
+    const { move } = await import("@/lib/inventory");
+    await move({ productId: PRODUCT, variant: "75 мл", delta: 4, reason: "goods_in" }); // nobody waiting yet
+    await query("insert into product_overrides (product_id, stock) values ($1, 'low')", [PRODUCT]);
+    await addStockAlert({ email: EMAIL, productId: PRODUCT });
+
+    expect((await sweepBackInStock()).sent).toBe(1);
+  });
+
+  /* …and the other way round: «Снять с продажи» is the owner saying stop,
+     and no count may talk the sweep past it. */
+  it("stays quiet for a product the owner pulled from sale, however full the shelf is", async () => {
+    await setFlows({ backstock: true });
+    const { move } = await import("@/lib/inventory");
+    await move({ productId: PRODUCT, variant: "75 мл", delta: 9, reason: "goods_in" });
+    await query("insert into product_overrides (product_id, stock) values ($1, 'out')", [PRODUCT]);
+    await addStockAlert({ email: EMAIL, productId: PRODUCT });
+
+    expect((await sweepBackInStock()).sent).toBe(0);
+    expect(sent).toHaveLength(0);
+  });
 });
 
 /* ---------- «С днём рождения» ---------------------------------------------- */
