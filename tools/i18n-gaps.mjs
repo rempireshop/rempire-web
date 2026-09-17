@@ -246,6 +246,41 @@ function covered(text, dict, rules) {
   return null;
 }
 
+/* ---------- the sentences the panel COMPOSES ------------------------------
+   A confirm card's detail and a journal line are assembled at runtime — a
+   label, then live values, joined with « · », with a newline between the
+   facts and what follows — and since 17.09.2026 the panel paints them in
+   PIECES: admDetailHTML() gives each line an element and each « · » fact
+   inside it an element of its own (public/shop2/app.js, and the comment
+   above admConfirmHTML for why). translateTree() then meets one whole node
+   per piece, which is the only shape an open-ended list of facts can be
+   translated in at all.
+
+   So a composed fragment is tested the way it is PAINTED: the whole first,
+   in case it is one node after all, then piece by piece. Which fragments
+   are composed: the ones that carry a newline (nothing else in the shop
+   renders one as a visible break — `white-space: pre-line` is on
+   .adm-confirm__d and .adm-propose__d and nowhere else), plus the output of
+   the journal's own composers, named below because their lines are one line
+   long and carry no newline to recognise them by. */
+const COMPOSED_FNS = new Set([
+  "actionText", "contentActionText", "shipActionText",
+  "productJournalLine", "admCancelLine", "admPosJournalLine", "auditTextHTML",
+]);
+function coveredComposed(text, dict, rules, fn) {
+  const whole = covered(text, dict, rules);
+  if (whole) return whole;
+  if (!text.includes("\n") && !COMPOSED_FNS.has(fn)) return null;
+  const pieces = text.split("\n").flatMap((l) => l.split(" · "));
+  if (pieces.length < 2) return null;
+  for (const piece of pieces) {
+    const t = piece.trim();
+    if (!t || !CYR.test(t.split(HOLE).join(" "))) continue;   // a hole or a number is data
+    if (!covered(t, dict, rules)) return null;
+  }
+  return "pieces";
+}
+
 /* ---------- deliberately Russian ----------------------------------------
    Checked by hand and left alone: either the string never reaches the DOM as
    a text node of its own, or it is Russian on purpose. Keeping the list here
@@ -329,21 +364,12 @@ const ASSEMBLED = [
   [/^, первый — «$/, "tail of «Баннер: 3 слайда, первый — «…»» — rule /^Баннер: (\\d+) …, первый — «(.*)»$/"],
   [/^скидка $/, "half of «Промокод X: скидка …» — rules /^Промокод (.+): скидка …$/"],
   [/^· описание: $/, "tail of «Новый товар «…» · … · описание: RU, ET» — rule /^Новый товар «(.+)» · (.+)$/"],
-  [/^\nСтраница набора перестанет открываться/, "second line of the «Удалить набор» card — the rule matches both lines at once"],
-  [/^\nФото появится на странице товара/, "second line of the «Главное фото» card — the rule matches both lines at once"],
-  [/^\. Отменить можно в журнале\.$/, "tail of that same second line — same rule"],
-  [/^\nОтменить можно в журнале\.$/, "second line of the «Обложка статьи» card — the rule matches both lines at once"],
-  [/^\nЗаголовок, анонс, текст, теги/, "second line of the «Статья целиком» card — the rule matches both lines at once"],
-  [/^\nФото добавите на вкладке/, "second line of the «Новый товар» card — the rule matches both lines at once"],
-  /* «Цены и лояльность: скидка для салонов 20% · баллы включены» — the
-     sentence is translated by /^Цены и лояльность: (.+)$/ and the facts after
-     the colon are handed back as they were composed. Deliberate, and the only
-     journal line where that is still true: the list is open-ended (seven
-     settings in any combination), so no rule can name its shapes, and every
-     one of those settings has a screen of its own that does say it in the
-     panel's language. */
-  [/^(скидка для салонов|баллы|начисление|списание до) /,
-    "one fact inside «Цены и лояльность: …» — the line is translated, the facts after the colon are not"],
+  /* The second line of a confirm card. Each of them is a whole key or a whole
+     rule of its own since 17.09.2026 (the card paints a node per line — see
+     coveredComposed above); these are the HALVES the extractor cuts them into
+     at the string-literal boundary, which the browser never sees. */
+  [/^\nФото появится на странице товара/, "first half of «Фото появится на странице товара… Отменить можно в журнале.» — its own rule"],
+  [/^\. Отменить можно в журнале\.$/, "tail of that same line — same rule"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;
@@ -471,8 +497,8 @@ for (const f of files) {
       /* translateTree() walks hdrSlot / bodySlot / navSlot / ovl only, and
          chat.js appends its root straight to document.body — so the app.js
          dictionary never reaches it. Its own T table is the only cover. */
-      const et = f.name === "chat.js" ? null : covered(fr.text, dict.et, dict.rules);
-      const en = f.name === "chat.js" ? null : covered(fr.text, dict.en, dict.rules);
+      const et = f.name === "chat.js" ? null : coveredComposed(fr.text, dict.et, dict.rules, fn);
+      const en = f.name === "chat.js" ? null : coveredComposed(fr.text, dict.en, dict.rules, fn);
       const rec = seen.get(key) || {
         text: fr.text, kind: fr.kind, et, en,
         // chat.js has no dictionary cover, so only its truly internal words

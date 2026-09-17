@@ -32,7 +32,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 23; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 24; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -350,6 +350,8 @@ YOUR TASK:
   {"type":"open_product","id":"<id>"} — «покажи», «открой товар»
   {"type":"open_category","id":"hair|styling|beard|face|body|perfume|merch"}
   {"type":"open_cart"} · {"type":"checkout"} — «корзина», «оформить», «к оплате»
+
+- The shop shows ONLY the ids you put in product_ids, as cards under your sentence. So never offer to show, pick or suggest products in "reply" without filling product_ids with the ids you mean — an answer that promises options and carries none is the shop promising something it does not give.
 
 Respond ONLY with JSON: {"reply": "<answer, no prices>", "product_ids": ["<2-4 catalogue ids when any product matches>"], "action": <optional>}.
 
@@ -716,8 +718,26 @@ export async function POST(req: NextRequest) {
   const parsed = (extracted.value ?? {}) as { reply?: unknown; product_ids?: unknown; tab?: unknown; action?: unknown };
   const known = new Set((catalogue as Array<{ id: string }>).map((p) => p.id));
   for (const c of custom.rows) known.add(c.id);
-  const ids = (Array.isArray(parsed.product_ids) ? parsed.product_ids : [])
+  let ids = (Array.isArray(parsed.product_ids) ? parsed.product_ids : [])
     .filter((id): id is string => typeof id === "string" && known.has(id)).slice(0, 4);
+  /* An answer that OFFERS products and hands over none is the shop promising
+     something it does not give: «I can help you pick the best options from
+     our selection» arrived with no options under it (Renat, 17.09.2026, on
+     «подарок до 50 €»). It happens two ways — the model writes the sentence
+     and forgets the ids, or it names ids the catalogue does not have and the
+     filter above drops every one of them.
+
+     So the shop keeps the promise itself: when the reply SAYS there are
+     options and none survived, the same slice the prompt was built from
+     answers instead (relevantProducts — the shop's own match for this
+     question, in stock, at most four). It is never a substitute for what the
+     model chose: this runs only when it chose nothing. Shop mode only; the
+     owner's panel has its own cards and no product rail. */
+  const OFFERS = /(подберу|подобрать|подскажу|варианты|подойдут|предлагаю|вот|soovita|valik|sobiv|pakun|siin|option|pick|suggest|recommend|choose|here)/i;
+  if (!isAdmin && !ids.length && typeof parsed.reply === "string" && OFFERS.test(parsed.reply)) {
+    ids = relevantProducts(lastUser, { limit: 8, fill: 0 })
+      .filter((p) => p.s !== "out").slice(0, 4).map((p) => p.id);
+  }
   const TABS = new Set(["over", "orders", "goods", "stock", "pos", "people", "promos", "blog", "stats", "mail", "apps", "setup"]);
   const tab = typeof parsed.tab === "string" && TABS.has(parsed.tab) ? parsed.tab : "";
 

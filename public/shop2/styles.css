@@ -1443,6 +1443,12 @@ body:has(.drawer) #rempire-feedback { display: none; }
 
 /* cover fill last: merch is a model shot, it fills its frame */
 .ph--cover { inset: 0; background-size: cover; }
+/* media: a product with no photograph yet — the owner has just created it, or
+   its one photo row carries no usable url. The shop's own mark instead of an
+   empty square (media(), app.js): a name and a price over nothing reads as a
+   broken page, the mark reads as «no photograph yet». */
+.ph--mark { display: flex; align-items: center; justify-content: center; }
+.ph__mark { width: 46%; height: 62%; color: var(--ink); opacity: .18; }
 
 /* ---------- share ----------
    This used to sit under «Другие способы оплаты» wearing the same .link dress:

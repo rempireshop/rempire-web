@@ -63,6 +63,11 @@
       chips: ["Что-то для бороды", "Шампунь", "Подарок до 50 €", "Набор для ухода", "Парфюм"],
       add: "В корзину", open: "Открыть", addAll: "Добавить всё в корзину",
       found: "Вот что подходит:", none: "Точного совпадения не нашёл — вот популярное из каталога:",
+      /* «Вот что подходит:» with nothing under it is a promise the widget did
+         not keep — pick() drops everything that is out of stock, and a shelf
+         that is empty right now left the sentence standing alone (Renat,
+         17.09.2026). Said plainly instead, with what to do next. */
+      empty: "Сейчас в наличии ничего подходящего нет — напишите, что нужно, и мы подскажем замену.",
       set: "Собрал набор — вместе:", cart: "Открываю корзину…",
       placeholder: "Например: масло для бороды…",
       // the chat root hangs off document.body, outside translateTree()'s four
@@ -78,6 +83,7 @@
       chips: ["Midagi habemele", "Šampoon", "Kingitus kuni 50 €", "Hoolduskomplekt", "Parfüüm"],
       add: "Lisa ostukorvi", open: "Ava", addAll: "Lisa kõik ostukorvi",
       found: "Need sobivad:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
+      empty: "Praegu pole laos midagi sobivat — kirjuta, mida vajad, ja soovitame asenduse.",
       set: "Panin komplekti kokku — koos:", cart: "Avan ostukorvi…",
       placeholder: "Näiteks: habemeõli…",
       aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates ",
@@ -90,6 +96,7 @@
       chips: ["Something for the beard", "Shampoo", "Gift under €50", "Care set", "Perfume"],
       add: "Add to cart", open: "Open", addAll: "Add all to cart",
       found: "Here's what fits:", none: "No exact match — here are the popular ones:",
+      empty: "Nothing that fits is in stock right now — tell us what you need and we will suggest an alternative.",
       set: "Here's a set — together:", cart: "Opening the cart…",
       placeholder: "e.g. beard oil…",
       aria: "Chat with the assistant", close: "Close", send: "Send", from: "from ",
@@ -117,8 +124,14 @@
     [/паст|pasta|paste/i, /паста/]
   ];
 
+  /* The budget in «подарок до 50 €» — and in «Gift under €50», which is the
+     widget's OWN English chip: the euro sign sits between the word and the
+     number there, and `\s*(\d+)` could not step over it, so the chip that says
+     «under €50» came back with four perfumes at three figures. A promise the
+     shop did not keep, the same family as an answer with no rows under it
+     (Renat, 17.09.2026). */
   function money(s) {
-    var m = String(s).match(/(?:до|kuni|under|alla)\s*(\d+)/i);
+    var m = String(s).match(/(?:до|kuni|under|alla)\s*[€$]?\s*(\d+)/i);
     return m ? +m[1] : null;
   }
   function inStock(p) { return p.stock !== "out"; }
@@ -295,6 +308,12 @@
   }
   function rulesReply(q) {
     var r = match(q), t = tt();
+    /* Nothing to show is not «вот что подходит:» with a blank under it. Every
+       branch of match() ends in pick(), which drops what is out of stock, so
+       a shelf that is empty right now can empty any of them — and both of the
+       sentences below promise rows. Checked here, once, where the answer is
+       actually written (Renat, 17.09.2026). */
+    if (!r.items || !r.items.length) { bubble("bot", t.empty); return; }
     if (r.kind === "set") {
       var sum = r.items.reduce(function (s, p) { return s + p.price; }, 0);
       bubble("bot", t.set + " " + eur(sum) + r.items.map(productRow).join("") +
@@ -326,6 +345,10 @@
            confirm card (Renat, 13.09.2026). */
         var text = typeof j.reply === "string" ? j.reply : "";
         convo.push({ role: "assistant", content: text });
+        /* The route refuses an id the catalogue does not have, and fills
+           the list from the shop's own match when the model promised options
+           and named none (src/app/api/assistant/route.ts) — so a sentence
+           that offers products arrives with the products under it. */
         var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
           .filter(Boolean).map(productRow).join("");
         bubble("bot", esc(text) + cards);

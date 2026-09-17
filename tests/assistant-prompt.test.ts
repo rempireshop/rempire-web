@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(23);
+    expect(body.v).toBe(24);   // r20: the shop prompt gained the «never offer what you do not hand over» line
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
