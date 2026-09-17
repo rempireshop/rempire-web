@@ -4188,7 +4188,8 @@
         "Письмо пришло сразу, как товар вернулся в наличие.",
         "В письме название товара и цена.",
         "Есть ссылка на сам товар.",
-        "Внизу есть «Отписаться» — с одного нажатия снимает ожидание этого товара."
+        "Внизу есть «Отписаться»: страница открывается и сама снимает ожидание этого товара.",
+        "Если вместо подтверждения видна кнопка «Отписаться» — нажмите её."
       ],
       "why": "Если переключатель выключен, все собранные подписки пропадают зря.",
       "risk": "med",
@@ -4205,7 +4206,8 @@
           "The letter arrives as soon as the product is back.",
           "It carries the product's name and price.",
           "There is a link to the product itself.",
-          "«Отписаться» at the bottom cancels the wait for that product with one press."
+          "«Отписаться» at the bottom opens a page that cancels the wait itself.",
+        "If you see an «Отписаться» button instead of the confirmation, press it."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       }
@@ -4230,7 +4232,7 @@
         "Через три часа — «Отправлено 1 · пропущено 0», под письмом «Последний запуск».",
         "Следующее нажатие говорит, что письмо уже уходило.",
         "Письмо пришло со списком товаров, кнопка открывает магазин с той же корзиной.",
-        "«Отписаться» срабатывает с одного нажатия, страница это подтверждает.",
+        "После «Отписаться» страница подтверждает отписку сама; если нет — нажмите кнопку на ней.",
         "Следующая брошенная корзина с этой почты письма не получает."
       ],
       "why": "Второе письмо про ту же корзину надоедает, и человек отписывается.",
@@ -4251,7 +4253,7 @@
           "Three hours later — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
           "The next press says the letter has already gone.",
           "The letter lists the cart, and its button opens the shop with that cart.",
-          "«Отписаться» works with one press, and the page confirms it.",
+          "After «Отписаться» the page confirms it by itself; if not, press the button on it.",
           "The next abandoned cart from that address gets no letter."
         ],
         "why": "A second letter about the same cart annoys people into unsubscribing."
@@ -4278,7 +4280,7 @@
         "Письмо пришло, в нём личный промокод на 15 %.",
         "Третье нажатие говорит, что письмо уже уходило.",
         "Код срабатывает на кассе и живёт две недели после дня рождения.",
-        "После «Отписаться» в карточке стоит «Отписался по ссылке в письме»."
+        "После «Отписаться» страница подтверждает отписку, в карточке — «Отписался по ссылке в письме»."
       ],
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
       "risk": "med",
@@ -4299,7 +4301,7 @@
           "The letter arrives with a personal 15 % promo code.",
           "The third press says the letter has already gone.",
           "The code works at the checkout and lives two weeks past the birthday.",
-          "After «Отписаться» the card says «Отписался по ссылке в письме»."
+          "After «Отписаться» the page confirms it, and the card says «Отписался по ссылке в письме»."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
       }
