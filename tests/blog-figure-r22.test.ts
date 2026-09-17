@@ -10,7 +10,8 @@
  * attribute and nothing else, so a <figure> that arrives without it renders
  * full column width — which is what a picture did before the presets existed.
  *
- * There are two sanitisers. src/lib/blog.ts is the real one and has handled
+ * There were two sanitisers when this was written. src/lib/blog.ts was the
+ * real one and had handled
  * `data-fig` since the presets were built. tools/lib/blog-export.mjs is its
  * hand-kept twin, the one tools/prerender-shop2.mjs sanitises with, and it
  * handled `data-fig` nowhere at all: `openTag()` read attributes for <a> and
@@ -28,10 +29,30 @@
  * three commits ago, and was noticed by accident. Nothing compared the two
  * renderers to each other, so «keep them in sync by hand» had no way to fail
  * out loud. CORPUS below is that comparison: a body of every shape either
- * renderer knows about, put through both, byte for byte. It does not make the
- * duplication safe — a body shape nobody thought to add is still invisible to
- * it — but it turns the drift that has actually happened twice into a red test
- * instead of a quietly wrong page.
+ * renderer knows about, put through both, byte for byte. It did not make the
+ * duplication safe — a body shape nobody thought to add was still invisible
+ * to it — but it turned the drift that had actually happened twice into a red
+ * test instead of a quietly wrong page.
+ *
+ * Then the duplication went. Both renderers moved into src/lib/blog-html.mjs
+ * the same day, and the two imports below now resolve to that one module, so
+ * every assertion here compares it with itself. That is worth keeping rather
+ * than deleting, and worth being honest about:
+ *
+ *   · What it still guards is the PIPELINE, end to end — `@/lib/blog` really
+ *     re-exports the renderer, `tools/lib/blog-export.mjs` really re-exports
+ *     the same one, `renderPostBody()` really picks the right door per body,
+ *     and a preset really survives sanitising followed by the price fill the
+ *     build does after it. Re-introduce a copy on either path — or break a
+ *     re-export — and these go red.
+ *   · What it can no longer guard is the class it was written for. An
+ *     attribute added on one side only has no second side to be absent from.
+ *     The extraction is what closed that, not this file; a test can only
+ *     compare the shapes somebody thought to list, which is exactly why one
+ *     implementation was the real fix.
+ *
+ * So do not read a green run here as proof that two renderers agree. There is
+ * one. Read it as proof that the one is wired to both callers.
  */
 import { describe, expect, it } from "vitest";
 import { markdownToHtml, renderPostBody, sanitizeHtml } from "@/lib/blog";
@@ -116,10 +137,12 @@ describe("a picture keeps the size and the side the owner chose", () => {
 /* ---------- the drift the bug came out of -------------------------------- */
 
 /**
- * One body per shape either renderer knows about. Add a line here whenever
- * either sanitiser learns a new tag, attribute or escape — that is the whole
- * maintenance contract of this file, and it is cheaper than the morning spent
- * working out why a prerendered article looks different from the live one.
+ * One body per shape the renderer knows about. Add a line here whenever it
+ * learns a new tag, attribute or escape — that is the whole maintenance
+ * contract of this file. Since the extraction the payoff is smaller and still
+ * real: the new shape gets pinned through both call paths and through the
+ * build's own sanitise-then-fill-prices order, which is where the last two
+ * wrong-looking articles actually surfaced.
  */
 const CORPUS: ReadonlyArray<readonly [string, string]> = [
   // — the four presets, and the shape that predates them
@@ -189,11 +212,15 @@ const CORPUS: ReadonlyArray<readonly [string, string]> = [
 ];
 
 describe("the build's sanitiser and the shop's agree, body for body", () => {
-  /* The twin exists because a plain .mjs cannot import a TypeScript module
-     with no build step (see the header of tools/lib/blog-export.mjs). Nothing
-     enforced that it stayed a twin; this does. A failure here is not a style
-     difference — it is the prerendered article and the live article showing
-     the reader two different pages. */
+  /* This compared two hand-kept copies when it was written. The twin was
+     believed to be unavoidable — a plain .mjs cannot import a TypeScript
+     module with no build step — which was true of the premise and wrong of
+     the conclusion: the shared half simply moved to plain ESM
+     (src/lib/blog-html.mjs), the way src/lib/seo-head.mjs had always been
+     written. Both names below now import that one module. A failure here is
+     therefore no longer a drift between copies; it means a re-export broke,
+     or a copy came back. Either way it is the prerendered article and the
+     live article about to show the reader two different pages. */
   for (const [name, body] of CORPUS) {
     it(`renders the same bytes: ${name}`, () => {
       expect(exportRenderPostBody(body)).toBe(renderPostBody(body));
