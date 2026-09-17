@@ -292,7 +292,7 @@ describe("inventory", () => {
       expect((await productStockStates([plain.id]))[plain.id]).toBe("out");
     });
 
-    it("aggregates variants: out only when every tracked variant is out", async () => {
+    it("aggregates variants: out only when every size on the LADDER is counted and out", async () => {
       const sizes = VARIANTS[sized.id].sizes;
       await move({ productId: sized.id, variant: sizes[0], delta: 3, reason: "goods_in" });
       await move({ productId: sized.id, variant: sizes[1], delta: 0 === 0 ? 1 : 0, reason: "goods_in" });
@@ -302,6 +302,17 @@ describe("inventory", () => {
       // size 0 now out, size 1 still low(1) — still sellable overall
       expect((await productStockStates([sized.id]))[sized.id]).toBe("low");
       await move({ productId: sized.id, variant: sizes[1], delta: -1, reason: "sale_web" });
+      /* Two of this product's three volumes are at zero now and nobody has
+         ever counted the third — not enough to tell the shop the product is
+         gone, so it has no word here and keeps the manual one. Counting one
+         size of a ladder to zero used to refuse the whole product at every
+         size, the full ones included (tests/stock-ladder-partial.test.ts). */
+      expect((await productStockStates([sized.id]))[sized.id]).toBeUndefined();
+      for (const size of sizes.slice(2)) {
+        await move({ productId: sized.id, variant: size, delta: 1, reason: "goods_in" });
+        await move({ productId: sized.id, variant: size, delta: -1, reason: "sale_web" });
+      }
+      // …and with the whole ladder counted and empty, it really is out
       expect((await productStockStates([sized.id]))[sized.id]).toBe("out");
     });
   });

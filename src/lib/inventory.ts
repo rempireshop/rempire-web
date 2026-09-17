@@ -604,12 +604,15 @@ export async function variantStockStates(ids?: string[]): Promise<Record<string,
 /**
  * One state per product id, aggregated across whatever variants of it are
  * actually tracked (see the module doc for what "tracked" means). A product
- * missing from the returned map has no tracked variant at all — the caller
- * (src/lib/orders.ts getOverrides()) falls back to the manual override.
+ * missing from the returned map has no word of its own, and the caller
+ * (src/lib/orders.ts getOverrides()) falls back to the manual override —
+ * either because nothing about it is tracked, or because the count is not
+ * complete enough to say «нет в наличии», which is the rule below.
  *
- * Aggregation: out only if EVERY tracked variant is out; low if any tracked
- * variant is low (and not all are out); in otherwise — the same "still
- * sellable while one size remains" rule a shopper would expect.
+ * Aggregation: low if any tracked variant is low (and not all are out); in
+ * otherwise — the same "still sellable while one size remains" rule a shopper
+ * would expect. Out only if every tracked variant is out AND those variants
+ * cover the product's whole size ladder: see stockStates().
  */
 export async function productStockStates(ids?: string[]): Promise<Record<string, StockState>> {
   return (await stockStates(ids)).byProduct;
@@ -635,21 +638,56 @@ export async function productStockStates(ids?: string[]): Promise<Record<string,
  */
 export async function stockStates(
   ids?: string[],
+  ladders?: Map<string, string[]>,
 ): Promise<{ byProduct: Record<string, StockState>; byVariant: Record<string, Record<string, StockState>> }> {
   const rows = await trackedLevelRows(ids);
 
   const byProduct: Record<string, StockState> = {};
   const byVariant: Record<string, Record<string, StockState>> = {};
-  const seen = new Map<string, StockState[]>();
+  const counted = new Map<string, Map<string, StockState>>();
   for (const r of rows) {
     const state = deriveState(Number(r.qty), Number(r.low_threshold));
     (byVariant[r.product_id] ??= {})[r.variant] = state;
-    const list = seen.get(r.product_id) ?? [];
-    list.push(state);
-    seen.set(r.product_id, list);
+    let sizes = counted.get(r.product_id);
+    if (!sizes) counted.set(r.product_id, (sizes = new Map<string, StockState>()));
+    sizes.set(r.variant, state);
   }
-  for (const [productId, states] of seen) {
-    byProduct[productId] = states.every((s) => s === "out") ? "out" : states.some((s) => s === "low") ? "low" : "in";
+
+  /* «мало» and «в наличии» are decided by the counted sizes alone, as before:
+     news that a shelf is running low costs no sale, and holding it back until
+     every other size has been counted would leave the badge frozen in a shop
+     that counts one shelf at a time. */
+  const allOut: string[] = [];
+  for (const [productId, sizes] of counted) {
+    const states = [...sizes.values()];
+    if (states.every((s) => s === "out")) allOut.push(productId);
+    else byProduct[productId] = states.some((s) => s === "low") ? "low" : "in";
+  }
+
+  /* «Нет в наличии» is the one word that costs a sale, so it needs the whole
+     LADDER counted behind it, not just the sizes somebody happened to reach.
+     A product whose 75 мл was counted to zero while nobody ever counted the
+     250 мл and the 500 мл read «out» for every size at once: the storefront
+     said «нет в наличии» and priceItems() refused the order on the sizes that
+     were full on the shelf, with nothing on any screen to explain it (audit
+     14.09.2026). Short of full coverage the product simply has no word of its
+     own here — it drops out of the map and getOverrides() leaves the manual
+     product_overrides.stock in charge, which is what a product nobody has
+     counted at all already does (see the module doc).
+
+     The ladder is read once, and only when something actually reads out — a
+     feed with nothing empty on it pays for no ladder query at all, and
+     getOverrides() hands over ladders it has already fetched. */
+  if (allOut.length) {
+    const owned = ladders ?? (await ownerLadders());
+    for (const productId of allOut) {
+      const ladder = knownLadder(productId, owned);
+      const sizes = counted.get(productId)!;
+      /* No ladder we can vouch for (an owner's own product, whose rungs live
+         in a table this path does not read) leaves the old rule standing:
+         this may only ever withhold «out», never invent one. */
+      if (!ladder || ladder.every((rung) => sizes.has(rung))) byProduct[productId] = "out";
+    }
   }
   return { byProduct, byVariant };
 }
@@ -693,10 +731,58 @@ export type CatalogueLevelRow = {
  * (overrideLadder() in src/lib/orders.ts); the shelf has to read the same one.
  */
 function ladderOf(productId: string, owned: Map<string, string[]>): string[] {
+  return knownLadder(productId, owned) ?? [""];
+}
+
+/**
+ * The same ladder, but honest about not knowing one.
+ *
+ * `[""]` is the right answer for a CATALOGUE product with no volumes: one
+ * unlabelled rung, which is the shape stock_levels stores it in. For an id the
+ * generated file has never heard of it is only a guess — that is one of the
+ * owner's own products (src/lib/custom-products.ts), whose ladder lives in a
+ * table this path deliberately does not read. stockStates() has to tell the
+ * two apart: counting a guess as a ladder would let a custom product's «S» at
+ * zero speak for a product whose rungs are «S» and «M», which is exactly the
+ * hole it is there to close.
+ */
+function knownLadder(productId: string, owned: Map<string, string[]>): string[] | null {
   const own = owned.get(productId);
   if (own) return own;
   const v = VARIANTS[productId];
-  return v && v.sizes && v.sizes.length ? v.sizes : [""];
+  if (v && v.sizes && v.sizes.length) return v.sizes;
+  return BY_ID.has(productId) ? [""] : null;
+}
+
+/**
+ * One saved ladder as the shelf needs it — the raw product_overrides.sizes
+ * value in, size LABELS out — or null where there is no usable ladder.
+ *
+ * Exported because src/lib/orders.ts getOverrides() has these very rows in
+ * hand already and passes the ladders it builds with this into stockStates(),
+ * which saves the feed's hottest path a second read of the same table. One
+ * function so the two can never disagree about what a saved ladder means.
+ */
+export function ladderLabels(sizes: unknown): string[] | null {
+  let list: unknown = sizes;
+  if (typeof list === "string") {
+    /* Per row, not per table: one unparsable ladder must not cost every
+       other product the one it saved. */
+    try {
+      list = JSON.parse(list);
+    } catch {
+      return null;
+    }
+  }
+  if (!Array.isArray(list) || !list.length) return null;
+  const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
+  /* One rung with no label is «один объём» — the product has no volumes at
+     all and its shelf row is the unlabelled one, exactly as the storefront
+     paints it (applyDemoOverrides in public/shop2/app.js) and exactly the
+     rule overrideLadder() applies in src/lib/orders.ts. Any other ladder is
+     taken rung for rung, unfiltered, so that the shelf's universe is the
+     same list the cart and the till price against. */
+  return labels.length === 1 && !labels[0] ? [""] : labels;
 }
 
 /** The owner's saved ladders, as the shelf needs them: id → size LABELS.
@@ -709,25 +795,8 @@ async function ownerLadders(): Promise<Map<string, string[]>> {
       "select product_id, sizes from product_overrides where sizes is not null",
     );
     for (const r of rows) {
-      let list: unknown = r.sizes;
-      if (typeof list === "string") {
-        /* Per row, not per table: one unparsable ladder must not cost every
-           other product the one it saved. */
-        try {
-          list = JSON.parse(list);
-        } catch {
-          continue;
-        }
-      }
-      if (!Array.isArray(list) || !list.length) continue;
-      const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
-      /* One rung with no label is «один объём» — the product has no volumes at
-         all and its shelf row is the unlabelled one, exactly as the storefront
-         paints it (applyDemoOverrides in public/shop2/app.js) and exactly the
-         rule overrideLadder() applies in src/lib/orders.ts. Any other ladder is
-         taken rung for rung, unfiltered, so that the shelf's universe is the
-         same list the cart and the till price against. */
-      out.set(r.product_id, labels.length === 1 && !labels[0] ? [""] : labels);
+      const labels = ladderLabels(r.sizes);
+      if (labels) out.set(r.product_id, labels);
     }
   } catch (err) {
     console.error("[inventory] saved size ladders unavailable, using the catalogue file:", err);

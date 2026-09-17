@@ -621,14 +621,27 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
      feed, which is exactly what Renat would have seen. A count can say a
      product is gone; it may not say it is on sale again. */
   try {
-    const { stockStates } = await import("@/lib/inventory");
-    const { byProduct: derived, byVariant } = await stockStates(ids);
-    for (const [id, stock] of Object.entries(derived)) {
+    const { stockStates, ladderLabels } = await import("@/lib/inventory");
+    /* The size ladders come out of the rows already fetched above: saying
+       «нет в наличии» about a whole product now takes the ladder (a count that
+       covers one size of three may not condemn the other two), and the feed's
+       hottest path must not read product_overrides twice to learn it. */
+    const ladders = new Map<string, string[]>();
+    for (const r of rows) {
+      const labels = r.sizes == null ? null : ladderLabels(r.sizes);
+      if (labels) ladders.set(r.product_id, labels);
+    }
+    const { byProduct: derived, byVariant } = await stockStates(ids, ladders);
+    /* Walked by SIZE rather than by product word: a product whose ladder is
+       only half counted has no word of its own any more and keeps the manual
+       one, but its sizes still have to travel — the size that really is at
+       zero must stay greyed out on the page and refused at the checkout. */
+    for (const [id, stockByVariant] of Object.entries(byVariant)) {
       if (out[id]?.stock === "out") continue;
       /* `stockByVariant` travels with the product's word, not instead of it:
          the word is what a card shows («in» while any size is left), and the
          map is what createOrder() checks for the size the order names. */
-      const stockByVariant = byVariant[id] ?? null;
+      const stock = derived[id] ?? out[id]?.stock ?? null;
       out[id] = out[id]
         ? { ...out[id], stock, stockByVariant }
         : { price: null, stock, stockByVariant, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
