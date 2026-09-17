@@ -142,9 +142,24 @@ export async function PUT(req: Request) {
         }
       }
     }
-    return Response.json({ ok: true, settings: await getSettings() }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/settings] write failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+
+  /* The read-back is a courtesy, not part of the write, so it sits OUTSIDE
+     the try above — the write is done by now. Inside it, a `getSettings()`
+     that failed (the pool ran dry, the connection dropped between the two
+     statements) answered `db_unavailable`, 503, about a row that was already
+     written and a tariff cache that was already reset: the panel then said
+     «Не удалось сохранить на сервере — попробуйте ещё раз» about a change
+     that had been saved. The panel is told what happened, not what happened
+     to the answer; a read that fails simply sends no `settings` back, and
+     every caller already treats that field as optional. */
+  try {
+    return Response.json({ ok: true, settings: await getSettings() }, { headers: { "cache-control": "no-store" } });
+  } catch (err) {
+    console.error("[api/admin/settings] saved, but the read-back failed:", err);
+    return Response.json({ ok: true }, { headers: { "cache-control": "no-store" } });
   }
 }
