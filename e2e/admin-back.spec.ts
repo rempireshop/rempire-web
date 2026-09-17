@@ -28,12 +28,19 @@ async function back(page: Page): Promise<void> {
 test.describe("admin — «Назад» closes what is open", () => {
   /* One address per repeat, not one for the file. `--repeat-each` is how this
      file is read — the bug it guards is a race, and a race that only shows up
-     one run in three is not caught by running once — but every test in here
-     signs in, and /api/admin/login allows five attempts a minute from one
-     address (src/app/api/admin/login/route.ts). Six repeats past that limit
-     and the sign-in card simply stays up, which fails the tests for a reason
-     that has nothing to do with «Назад». 220+ is free — nothing else in this
-     suite goes above 218 — and index 0 is what a normal single run gets. */
+     one run in three is not caught by running once.
+
+     This allocation was forced by /api/admin/login, which used to allow five
+     attempts a minute per IP and counted SUCCESSES: six repeats, all signing
+     in correctly, put the sixth over the limit and left the sign-in card up,
+     failing the tests for a reason that had nothing to do with «Назад». That
+     limit is gone since 17.09.2026 — a correct password now costs nothing at
+     all, however many times it is typed (src/lib/auth.ts, «failed-login
+     backoff») — so this file no longer needs its own block of addresses to
+     pass. It is kept because the other per-IP limiters in the shop are real
+     and a repeat-heavy run still talks to them. 220+ is free — nothing else
+     in this suite goes above 218 — and index 0 is what a normal single run
+     gets. */
   test.use({
     extraHTTPHeaders: async ({}, use, testInfo) => { await use(ipHeaders(220 + testInfo.repeatEachIndex)); },
   });

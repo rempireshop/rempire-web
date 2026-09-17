@@ -22,7 +22,13 @@
  * See docs/testing.md § «Фаззинг API».
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetRateLimits } from "@/lib/auth";
+import {
+  ADMIN_ACCOUNT,
+  pendingLoginDelayMs,
+  resetLoginDelays,
+  resetRateLimits,
+  setLoginSleeper,
+} from "@/lib/auth";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
 import { query } from "@/lib/db";
 import { mockSecret, signMockTicket } from "@/lib/payments/mock";
@@ -414,17 +420,43 @@ describe("money and stock invariants", () => {
     expect(orderCodes.filter((c) => c === 429).length).toBe(2);
     expect((await orders.POST(order(BASE, { ip: COLD }))).status).toBe(201);
 
-    const loginCodes: number[] = [];
-    for (let i = 0; i < 7; i++) {
-      loginCodes.push(
-        (await login.POST(makeRequest("/api/admin/login/", { method: "POST", body: { password: "nope" }, ip: HOT }))).status,
-      );
+    /* The login is the one route here that is deliberately NOT limited per IP
+       any more (17.09.2026). An IP budget on a password is the wrong key —
+       the attacker picks the address, the account is what is being guessed at
+       — and the per-instance Map behind it was never the five-a-minute rule
+       the route and the panel claimed. It is an escalating, account-keyed
+       delay now (src/lib/auth.ts, «failed-login backoff»; the ladder itself is
+       tested in tests/auth.test.ts). Here: every wrong password is a plain
+       401, from any address, and no 429 is ever produced for the panel to
+       mistranslate into a promise about a minute. */
+    resetLoginDelays();
+    const waited: number[] = [];
+    setLoginSleeper(async (ms) => { waited.push(ms); }); // record the wait, do not spend it
+    try {
+      const loginCodes: number[] = [];
+      for (let i = 0; i < 7; i++) {
+        loginCodes.push(
+          (await login.POST(makeRequest("/api/admin/login/", { method: "POST", body: { password: "nope" }, ip: HOT }))).status,
+        );
+      }
+      expect(loginCodes.filter((c) => c === 401).length).toBe(7);
+      expect(loginCodes.filter((c) => c === 429).length).toBe(0);
+      // what replaced the 429: a wait that grew on every wrong password
+      expect(waited).toEqual([500, 1000, 2000, 4000]);
+
+      /* …and the second address is deliberately NOT left alone. The password
+         belongs to the account, not to the address the guesser is calling
+         from, so switching IP buys nothing: the same ladder applies. */
+      const fromCold = pendingLoginDelayMs(ADMIN_ACCOUNT);
+      expect(fromCold).toBeGreaterThan(0);
+      expect(
+        (await login.POST(makeRequest("/api/admin/login/", { method: "POST", body: { password: "nope" }, ip: COLD }))).status,
+      ).toBe(401);
+      expect(waited[waited.length - 1]).toBe(fromCold);
+    } finally {
+      setLoginSleeper(null);
+      resetLoginDelays();
     }
-    expect(loginCodes.filter((c) => c === 401).length).toBe(5);
-    expect(loginCodes.filter((c) => c === 429).length).toBe(2);
-    expect(
-      (await login.POST(makeRequest("/api/admin/login/", { method: "POST", body: { password: "nope" }, ip: COLD }))).status,
-    ).toBe(401);
 
     const promoCodes: number[] = [];
     for (let i = 0; i < 22; i++) {

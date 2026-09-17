@@ -184,7 +184,7 @@ describe("every day-shaped figure, with the database set to three different zone
         await paidOrderAt(EVENING);
         await paidOrderAt(AFTER_MIDNIGHT);
         const range = monthRange("2026-09")!;
-        const rows = await listReportOrders(range.from, range.to, 24);
+        const rows = await listReportOrders(range.from, range.to);
         expect(rows.map((r) => r.date)).toEqual(["2026-09-13", "2026-09-13"]);
       });
 
@@ -198,17 +198,17 @@ describe("every day-shaped figure, with the database set to three different zone
         const next = await paidOrderAt("2026-09-30T22:00:00Z");
 
         const sep = monthRange("2026-09")!;
-        const sepRows = await listReportOrders(sep.from, sep.to, 24);
+        const sepRows = await listReportOrders(sep.from, sep.to);
         expect(sepRows.map((r) => r.number)).toEqual([first.number]);
         expect(sepRows[0].date).toBe("2026-09-01");
 
         const aug = monthRange("2026-08")!;
-        const augRows = await listReportOrders(aug.from, aug.to, 24);
+        const augRows = await listReportOrders(aug.from, aug.to);
         expect(augRows.map((r) => r.number)).toEqual([last.number]);
         expect(augRows[0].date).toBe("2026-08-31");
 
         const oct = monthRange("2026-10")!;
-        const octRows = await listReportOrders(oct.from, oct.to, 24);
+        const octRows = await listReportOrders(oct.from, oct.to);
         expect(octRows.map((r) => r.number)).toEqual([next.number]);
         expect(octRows[0].date).toBe("2026-10-01");
       });
@@ -226,7 +226,7 @@ describe("every day-shaped figure, with the database set to three different zone
       const a = await getAnalyticsSummary("7d", NOW);
       const o = await getOverviewSummary(NOW);
       const sep = monthRange("2026-09")!;
-      const rows = await listReportOrders(sep.from, sep.to, 24);
+      const rows = await listReportOrders(sep.from, sep.to);
       return JSON.stringify({
         byDay: a.revenueByDay.map((r) => [r.day, r.orders]),
         bars: o.revenueByDay.map((r) => [r.day, r.orders]),

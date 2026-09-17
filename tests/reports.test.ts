@@ -11,7 +11,7 @@ import { inflateRawSync } from "node:zlib";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { query } from "@/lib/db";
-import { createOrder, setOrderPayment, setOrderStatus, type Order } from "@/lib/orders";
+import { createOrder, setOrderPayment, setOrderStatus, setSetting, type Order } from "@/lib/orders";
 import {
   buildZip,
   DEFAULT_VAT_RATE,
@@ -23,7 +23,7 @@ import {
   ordersToXlsx,
   reportOrderColumns,
   REPORT_COLUMNS,
-  resetChannelColumnCache,
+  resetOrderColumnCache,
   resolveVatRate,
   summarize,
   vatSplit,
@@ -272,7 +272,7 @@ describe("listReportOrders (PGlite)", () => {
   afterAll(teardownDb);
   beforeEach(async () => {
     await truncateAll();
-    resetChannelColumnCache();
+    resetOrderColumnCache();
   });
 
   it("ordersHasChannelColumn detects orders.channel (db/migrations/091_pos_channel.sql, inventory agent's range)", async () => {
@@ -281,7 +281,7 @@ describe("listReportOrders (PGlite)", () => {
 
   it("reads the real channel column when it is present", async () => {
     const order = await paidOrder();
-    const rows = await listReportOrders("2000-01-01", "2100-01-01", 24);
+    const rows = await listReportOrders("2000-01-01", "2100-01-01");
     const found = rows.find((r) => r.number === order.number);
     expect(found).toBeDefined();
     expect(found!.channel).toBe("web"); // createOrder()'s own checkout path, same as the column's own default
@@ -310,28 +310,91 @@ describe("listReportOrders (PGlite)", () => {
       customer: { name: "Never Paid", email: "unpaid@example.com", phone: "+372 5555 5555" },
       shipping: { method: "parcel", country: "EE", pointId: "1", pointName: "Kristiine" },
     });
-    const rows = await listReportOrders("2000-01-01", "2100-01-01", 24);
+    const rows = await listReportOrders("2000-01-01", "2100-01-01");
     expect(rows.find((r) => r.number === created.number)).toBeUndefined();
   });
 
   it("respects the date range (a range that excludes today finds nothing)", async () => {
     await paidOrder();
-    const rows = await listReportOrders("1999-01-01", "1999-02-01", 24);
+    const rows = await listReportOrders("1999-01-01", "1999-02-01");
     expect(rows).toHaveLength(0);
   });
 
-  it("computes the VAT split at the rate it is given", async () => {
+  /* ---------- the rate is the order's, not the shop's ----------------------
+     db/migrations/190_order_vat_rate.sql. The export used to read
+     settings.vat_rate per request and stamp it on every row of any month, so
+     correcting the rate restated every month already filed. */
+
+  it("stamps the rate in force when the order was created, and splits at it", async () => {
+    await setSetting("vat_rate", 22);
     const order = await paidOrder();
-    const rows = await listReportOrders("2000-01-01", "2100-01-01", 22);
-    const found = rows.find((r) => r.number === order.number)!;
-    const expected = Math.round((found.total - found.total / 1.22) * 100) / 100;
-    expect(found.vatAmount).toBeCloseTo(expected, 2);
+    const found = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
     expect(found.vatRate).toBe(22);
+    expect(found.vatAmount).toBeCloseTo(vatSplit(found.total, 22).vat, 2);
+    expect(found.totalExclVat).toBeCloseTo(vatSplit(found.total, 22).net, 2);
+  });
+
+  /* THE TEST THIS WHOLE CHANGE EXISTS FOR. Export a month, change the rate the
+     way Estonia did on 1 July 2025, export the same month again — and get the
+     same sheet. Not "the same totals": the same bytes, in the CSV the
+     accountant actually receives. */
+  it("re-exports a filed month identically after the shop's rate changes", async () => {
+    await setSetting("vat_rate", 22);
+    await paidOrder({ email: "one@example.com" });
+    await paidOrder({ email: "two@example.com" });
+
+    const before = await listReportOrders("2000-01-01", "2100-01-01");
+    const beforeCsv = ordersToCsv(before);
+    expect(before).toHaveLength(2);
+    expect(before.every((r) => r.vatRate === 22)).toBe(true);
+    const beforeVat = summarize(before).vat;
+
+    // the owner corrects the shop's rate, months after those orders were filed
+    await setSetting("vat_rate", 24);
+
+    const after = await listReportOrders("2000-01-01", "2100-01-01");
+    expect(ordersToCsv(after)).toBe(beforeCsv);
+    expect(after.every((r) => r.vatRate === 22)).toBe(true);
+    expect(summarize(after).vat).toBe(beforeVat);
+
+    // …while an order placed AFTER the change carries the new rate, in the
+    // same export, beside the old ones: one sheet, two rates, each true
+    const fresh = await paidOrder({ email: "three@example.com" });
+    const mixed = await listReportOrders("2000-01-01", "2100-01-01");
+    expect(mixed.find((r) => r.number === fresh.number)!.vatRate).toBe(24);
+    expect(mixed.filter((r) => r.vatRate === 22)).toHaveLength(2);
+  });
+
+  /* An order from before 190 ran has no rate and no way to reconstruct one
+     (prices are VAT-inclusive, so the total is the same number at any rate).
+     The fallback must be a CONSTANT and never the live setting — see rateFor()
+     in src/lib/reports.ts. */
+  it("falls back to DEFAULT_VAT_RATE for a row from before the column, whatever the setting says", async () => {
+    await setSetting("vat_rate", 24);
+    const order = await paidOrder();
+    // exactly what such a row looks like: the column exists, this row is null
+    await query("update orders set vat_rate = null where id = $1", [order.id]);
+
+    const atDefault = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
+    expect(atDefault.vatRate).toBe(DEFAULT_VAT_RATE);
+
+    // the setting moves; the historical row does not
+    await setSetting("vat_rate", 9);
+    const later = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
+    expect(later.vatRate).toBe(DEFAULT_VAT_RATE);
+    expect(later.vatAmount).toBe(atDefault.vatAmount);
+  });
+
+  it("names vat_rate in the SELECT list only when the column exists", () => {
+    expect(reportOrderColumns(true, true)).toContain(", vat_rate");
+    expect(reportOrderColumns(true, false)).not.toContain("vat_rate");
+    // a deployment a migration behind reads every other column and falls back
+    expect(reportOrderColumns(false, false)).not.toContain("vat_rate");
   });
 
   it("reads the customer name/email and country from the order", async () => {
     const order = await paidOrder({ name: "Мария Тамм", email: "maria@example.com" });
-    const rows = await listReportOrders("2000-01-01", "2100-01-01", 24);
+    const rows = await listReportOrders("2000-01-01", "2100-01-01");
     const found = rows.find((r) => r.number === order.number)!;
     expect(found.customerName).toBe("Мария Тамм");
     expect(found.customerEmail).toBe("maria@example.com");
@@ -345,7 +408,7 @@ describe("listReportOrders (PGlite)", () => {
   it("carries loyalty_discount, so Subtotal + Shipping − Discount − Points foots to Total", async () => {
     const order = await paidOrder();
     await query("update orders set loyalty_discount = 5, total = total - 5 where id = $1", [order.id]);
-    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    const found = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
     expect(found.loyaltyDiscount).toBe(5);
     expect(Math.round((found.subtotal + found.shipping - found.discount - found.loyaltyDiscount) * 100) / 100)
       .toBe(found.total);
@@ -364,7 +427,7 @@ describe("listReportOrders (PGlite)", () => {
         { ref: "r-2", amount: 99, status: "failed", at: new Date().toISOString(), by: "admin" },
       ],
     });
-    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    const found = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
     expect(found.status).toBe("paid");
     expect(found.total).toBe(order.total);   // the invoice line is left as invoiced
     expect(found.refunded).toBe(10);
@@ -384,21 +447,21 @@ describe("listReportOrders (PGlite)", () => {
       [order.id, JSON.stringify({ number: "A-2025-0007", issuedAt: "2025-06-01T09:00:00.000Z", issueDate: "2025-06-01", dueAt: "2025-06-08", dueDays: 7, vatRate: 22 })],
     );
     // the shop is on 24 % now; this invoice was issued at 22 %
-    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    const found = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
     expect(found.invoiceNumber).toBe("A-2025-0007");
     expect(found.vatRate).toBe(22);
     expect(found.vatAmount).toBeCloseTo(vatSplit(found.total, 22).vat, 2);
     expect(found.totalExclVat).toBeCloseTo(vatSplit(found.total, 22).net, 2);
-    // an order with no invoice still takes the live rate it is given
+    // an order with no invoice falls through to the rate stamped on the row
     const plain = await paidOrder({ email: "plain@example.com" });
-    const other = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === plain.number)!;
+    const other = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === plain.number)!;
     expect(other.vatRate).toBe(24);
   });
 
   it("treats «возврат» marked by hand — no refund entry at all — as the whole total", async () => {
     const order = await paidOrder();
     await setOrderStatus(order.id, "refunded", "test");
-    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    const found = (await listReportOrders("2000-01-01", "2100-01-01")).find((r) => r.number === order.number)!;
     expect(found.status).toBe("refunded");
     expect(found.refunded).toBe(order.total);
     expect(summarize([found])).toMatchObject({ orders: 1, revenue: 0, vat: 0 });

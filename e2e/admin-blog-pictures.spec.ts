@@ -124,13 +124,21 @@ function collapses(testInfo: TestInfo): boolean {
 
 /* One address per test, per project.
 
-   Every test here signs in for itself, and POST /api/admin/login allows five
-   tries a minute per IP (src/app/api/admin/login/route.ts, `rateLimit`).
-   Five tests across the three Chromium projects is fifteen sign-ins from one
+   Every test here signs in for itself, and POST /api/admin/login used to
+   allow only five tries a minute per IP — counting the CORRECT ones. Five
+   tests across the three Chromium projects is fifteen sign-ins from one
    address inside a couple of minutes, so a single `ipHeaders(174)` for the
-   whole file turns the sixth of them into a 429 and the test into «the login
+   whole file turned the sixth of them into a 429 and the test into «the login
    card would not accept the test password» — which is what running this file
-   on --project=desktop --project=mobile does.
+   on --project=desktop --project=mobile did.
+
+   That limit is gone since 17.09.2026. A correct password costs nothing now,
+   however often it is given: the throttle that replaced it is a delay keyed on
+   the account and charged only for WRONG passwords, which these tests never
+   send (src/lib/auth.ts, «failed-login backoff»). The allocation below is left
+   in place — the shop's other per-IP limiters are real, and a file that gives
+   every test its own address cannot be surprised by any of them — but it is no
+   longer load-bearing for signing in.
 
    198.51.100.x (TEST-NET-2), not the 203.0.113.x the rest of the suite uses:
    that block is nearly full, and .174 in particular is already spoken for by

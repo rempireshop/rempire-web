@@ -209,3 +209,138 @@ export function rateLimit(bucket: string, ip: string, max: number, windowMs: num
 export function resetRateLimits(): void {
   buckets.clear();
 }
+
+/* ---------- failed-login backoff ----------------------------------------
+ *
+ * The admin password used to be guarded by rateLimit() above — five tries a
+ * minute per IP — and both the route's own docstring and the panel told the
+ * owner that was the rule. It was not. The Map lives in one serverless
+ * instance and dies with it, so every cold start, and every instance the
+ * platform happens to spin up alongside, handed out a fresh budget of five;
+ * and the 429 it answered with was instant and free, which is the worst
+ * possible reply to give a guesser. Subtract the claim and what actually slowed
+ * anybody down was scrypt: about 100 ms a try.
+ *
+ * What replaces it is a delay that GROWS, keyed on the account rather than on
+ * the address — because the account is the thing being guessed at, and an
+ * address is a line the attacker picks and the owner cannot.
+ *
+ * WHY A DELAY AND NOT A LOCKOUT. A lockout keyed on the one account this shop
+ * has is a denial-of-service anybody can trigger from anywhere: type rubbish
+ * five times and Renat cannot get into his own panel. A delay has no such
+ * lever — the right password always works, it is only ever made to wait.
+ *
+ * THE SHAPE, and why it is shaped like this. The first two misses cost
+ * nothing: the owner runs this shop from a phone, on a soft keyboard, and a
+ * typo is not an attack. From the third the wait doubles, so a PERSON who
+ * mistypes three times has spent half a second in total, while a MACHINE
+ * reaches the ceiling within a dozen tries and is then held to about three
+ * guesses a minute for as long as it keeps going. That asymmetry is the whole
+ * mechanism; the exact constants matter much less than the fact that one side
+ * is flat and the other is exponential.
+ *
+ * THE CEILING IS A HARD REQUIREMENT, not a preference. The wait happens inside
+ * the request, so a delay longer than the platform's function budget does not
+ * throttle anybody — it just kills the function and answers 500. LOGIN_DELAY_MAX_MS
+ * is 20 s against the `maxDuration = 60` the login route declares, leaving
+ * room for scrypt, the audit write and a slow cold start on top.
+ *
+ * AN HOUR OF QUIET FORGETS THE LADDER. Without that, three fat-fingered
+ * attempts in the morning would still be charging the owner a full wait that
+ * evening, for no security anybody could name.
+ *
+ * ONLY A WRONG PASSWORD COSTS ANYTHING, and a right one puts the ladder back
+ * on the floor. That is not a convenience, it is what makes an account-keyed
+ * delay safe to key on an account that EVERYTHING shares — one owner, one
+ * password, and an e2e suite in which several dozen tests sign in as him,
+ * often at the same time. All of those sign-ins are correct ones, so they cost
+ * zero and each of them clears whatever a wrong-password test had just built
+ * up. Compare the per-IP limiter this replaces, which counted SUCCESSES too:
+ * fifteen valid sign-ins from one address tripped it, and e2e/admin-back.spec.ts
+ * and e2e/admin-blog-pictures.spec.ts both carry hand-allocated address blocks
+ * that exist for no other reason than to dodge it.
+ *
+ * The suite therefore does not need the delay switched off, and must not
+ * switch it off: setLoginSleeper() below is for OBSERVING the wait — a test
+ * records the milliseconds the route asked for and asserts on them — not for
+ * removing it. The one thing a test must not do is spend twenty real seconds
+ * proving arithmetic.
+ *
+ * WHAT THIS HONESTLY IS NOT. The counter is still a Map in one instance, so a
+ * cold start still resets the ladder and a caller with real concurrency gets
+ * one ladder per instance — a shared counter in Postgres was considered and
+ * rejected, as this shop is not under attack and that is a database write on
+ * every login. It is written down here rather than glossed over, because
+ * claiming more than that is exactly what went wrong the last time. What it
+ * does buy, which the 429 did not: every wrong guess now costs the attacker
+ * wall-clock time on the instance that served it, and a held-open function is
+ * a concurrency slot they do not get back.
+ */
+
+/** The one account this shop has (src/lib/auth.ts header: one password, no user table). */
+export const ADMIN_ACCOUNT = "admin";
+
+/** Misses that cost nothing — a person's typos. */
+const LOGIN_FREE_TRIES = 2;
+const LOGIN_DELAY_BASE_MS = 500;
+/** Must stay well under the route's `maxDuration` (60 s) — see the note above. */
+export const LOGIN_DELAY_MAX_MS = 20_000;
+/** A quiet hour and the ladder is back to the bottom. */
+const LOGIN_FORGET_MS = 60 * 60 * 1000;
+
+/**
+ * How long the NEXT attempt waits after `failures` consecutive misses. Pure,
+ * so the curve can be read off in a test without anything actually sleeping.
+ */
+export function loginDelayMs(failures: number): number {
+  const n = Math.floor(Number(failures) || 0);
+  if (n <= LOGIN_FREE_TRIES) return 0;
+  const steps = Math.min(n - LOGIN_FREE_TRIES - 1, 40); // 2^40 ms already dwarfs the cap
+  return Math.min(LOGIN_DELAY_MAX_MS, LOGIN_DELAY_BASE_MS * 2 ** steps);
+}
+
+const loginFailures = new Map<string, { n: number; at: number }>();
+
+function currentFailures(account: string, now: number): number {
+  const rec = loginFailures.get(account);
+  if (!rec || now - rec.at >= LOGIN_FORGET_MS) return 0;
+  return rec.n;
+}
+
+/** What this attempt must wait before it is even looked at. */
+export function pendingLoginDelayMs(account: string, now: number = Date.now()): number {
+  return loginDelayMs(currentFailures(account, now));
+}
+
+/** A wrong password: one more rung on the ladder. */
+export function noteLoginFailure(account: string, now: number = Date.now()): void {
+  loginFailures.set(account, { n: currentFailures(account, now) + 1, at: now });
+}
+
+/** The right password: back to the bottom, so the owner is never made to pay twice. */
+export function clearLoginFailures(account: string): void {
+  loginFailures.delete(account);
+}
+
+/* The wait itself, behind a seam. The real one is setTimeout; a test replaces
+   it with a RECORDER, so the suite can read back the exact millisecond figures
+   the route asked for and assert on them — proving the ladder without spending
+   half a minute climbing it. A replacement that silently swallows the wait and
+   checks nothing is the protection turned off, not a test of it. */
+type Sleeper = (ms: number) => Promise<void>;
+const realSleep: Sleeper = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let sleeper: Sleeper = realSleep;
+
+export function sleepForLogin(ms: number): Promise<void> {
+  return ms > 0 ? sleeper(ms) : Promise.resolve();
+}
+
+/** Tests only — swap the timer out, or pass null to put the real one back. */
+export function setLoginSleeper(fn: Sleeper | null): void {
+  sleeper = fn ?? realSleep;
+}
+
+/** Tests only — forget every ladder. */
+export function resetLoginDelays(): void {
+  loginFailures.clear();
+}

@@ -1,0 +1,50 @@
+-- 190_order_vat_rate.sql — the VAT rate the order was sold under (migration range 190–199)
+--
+-- The accountant export (GET /api/admin/reports/orders) split VAT out of each
+-- order's total at `settings.vat_rate` — the shop's LIVE setting, read fresh
+-- on every request and stamped onto every row of whatever month was asked
+-- for. So the day Estonia moves the rate and the owner corrects the setting,
+-- every month already filed re-exports at the NEW rate: the sheet handed to
+-- the accountant in March stops matching the sheet the same month prints in
+-- April, and nothing on either sheet says which one the tax office has.
+--
+-- That is not hypothetical here. The rate went 20 → 22 % on 1 January 2024
+-- and 22 → 24 % on 1 July 2025, and a further change is already written into
+-- Estonian law. Twice in two years the shop's whole history would have been
+-- silently restated.
+--
+-- The rate is therefore stored ON THE ORDER, the same way 100_tiers_loyalty
+-- stores `pricing_tier`: set once, at the moment the order is created, from
+-- the setting in force that moment, and never recomputed. The order already
+-- carries every other thing it was sold under — the prices, the discount, the
+-- code, the tier, the shipping price — and the tax on it belongs in the same
+-- row for the same reason.
+--
+-- WHY NOT A RATE TABLE KEYED BY DATE. It was the obvious alternative and it
+-- is more machinery than the problem deserves: a second table to seed, to
+-- keep in step with the law, and to join on every export, in exchange for
+-- answering a question the order itself can answer. The rate changes about
+-- once a decade; orders are written a handful of times a day.
+--
+-- NULLABLE ON PURPOSE. Every order written before this migration ran has no
+-- rate and must keep having none — a column defaulted to today's value would
+-- write today's rate onto 2024's orders and call it history, which is the
+-- exact bug this file exists to fix. Null means "this order predates the
+-- column, nobody recorded what it was sold under", and src/lib/reports.ts
+-- decides — in one place, with the reasoning written down beside it — what a
+-- row with no rate is reported at. A DEFAULT here would take that decision
+-- away from the code that has to explain it.
+--
+-- WHY numeric(5,2) AND NOT the numeric(10,2) of the money columns beside it.
+-- This is a percentage, not an amount: 24.00, never 240000.00. The check
+-- constraint is the same one resolveVatRate() applies in TypeScript
+-- (src/lib/reports.ts) — 0 to 100 inclusive, two decimals — so a rate that
+-- could not survive the round trip cannot be written in the first place.
+-- 0 is deliberately allowed: a shop can legitimately sell at 0 % VAT.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite (the test suite).
+
+alter table orders add column if not exists vat_rate numeric(5,2)
+  check (vat_rate is null or (vat_rate >= 0 and vat_rate <= 100));

@@ -157,6 +157,74 @@ describe("getAnalyticsSummary", () => {
     expect(a.funnel.purchase).toBe(1); // NOT 2 — the server row must not count as a session
   });
 
+  /* ---------- «Из корзины в заказ» -----------------------------------------
+   *
+   * The caption under this figure is «Сколько человек из каждых 100 зашедших в
+   * магазин что-то купили». Until 17.09.2026 the numerator was every paid
+   * order — including sales rung up on the salon till, from people who never
+   * opened the site — while the denominator counted only sessions that had
+   * consented to analytics. Both errors pushed the same way, and the figure
+   * could read well above the truth and above 100 %. */
+
+  it("counts only sessions that were seen arriving — a till sale is not a visitor", async () => {
+    // two people opened the shop; one of them bought
+    await event({ at: days(1), sid: "s1", type: "view", path: "/shop2/" });
+    await event({ at: days(1), sid: "s2", type: "view", path: "/shop2/" });
+    await event({ at: days(1), sid: "s1", type: "purchase", value: productA.p });
+
+    // and three sales that the site never saw: two in the salon, one from a
+    // shopper who declined analytics (no events at all, only an order)
+    const pos = await createOrder({
+      lang: "ru", channel: "pos", items: [{ id: productA.id, qty: 1 }],
+      customer: { name: "Продажа в салоне" }, shipping: { method: "pickup", country: "EE" },
+      posDiscountPercent: null,
+    });
+    await query("update orders set status = 'paid', created_at = $2, updated_at = $2 where id = $1", [pos.id, days(1).toISOString()]);
+    await orderAt([{ id: productA.id, qty: 1 }], days(1));
+    await orderAt([{ id: productB.id, qty: 1 }], days(1));
+
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.kpi.orders.value).toBe(3);  // the money side still counts every sale
+    expect(a.funnel.sessions).toBe(2);
+    // 1 of the 2 sessions the shop actually saw arrive — 50 %, not 150 %
+    expect(a.kpi.conversion.value).toBe(0.5);
+  });
+
+  /* THE PROPERTY THE CAPTION PROMISES. "Out of every 100 who came in" cannot
+     be more than 100, whatever the data does. It is not clamped after the
+     division — the numerator is a subset of the denominator by construction
+     (qFunnel's `exists` clause), so there is nothing to clamp. */
+  it("can never read above 100 %, not even on the shapes that used to break it", async () => {
+    // (a) a session that bought without the shop ever recording it arriving:
+    //     it came in yesterday, on the far side of the window, and paid inside
+    await event({ at: days(9), sid: "straddler", type: "view", path: "/shop2/" });
+    await event({ at: days(1), sid: "straddler", type: "purchase", value: productA.p });
+    // (b) a session that bought twice
+    await event({ at: days(1), sid: "twice", type: "view", path: "/shop2/" });
+    await event({ at: days(1), sid: "twice", type: "purchase", value: productA.p });
+    await event({ at: days(1), sid: "twice", type: "purchase", value: productB.p });
+    // (c) paid orders with no browsing behind them at all
+    for (let i = 0; i < 5; i++) await orderAt([{ id: productA.id, qty: 1 }], days(1));
+
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.kpi.conversion.value).toBeLessThanOrEqual(1);
+    // one session arrived inside the window and bought; the straddler's own
+    // arrival is outside it, so neither side counts him
+    expect(a.funnel.sessions).toBe(1);
+    expect(a.kpi.conversion.value).toBe(1);
+    // the «Купили» funnel bar still reports both buyers — it answers a
+    // different question and must not under-report sales
+    expect(a.funnel.purchase).toBe(2);
+  });
+
+  it("is zero, not a division by zero, when nobody was seen arriving", async () => {
+    await orderAt([{ id: productA.id, qty: 1 }], days(1));
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.funnel.sessions).toBe(0);
+    expect(a.kpi.conversion.value).toBe(0);
+    expect(Number.isFinite(a.kpi.conversion.value)).toBe(true);
+  });
+
   it("finds products that were viewed but never added to cart or bought, and excludes the rest", async () => {
     // productA: viewed and carted -> must NOT appear
     await event({ at: days(1), sid: "s1", type: "product", productId: productA.id });

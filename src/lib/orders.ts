@@ -1627,9 +1627,24 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
      belongs to the payment routes, not to an invoice for 0 €). */
   if (invoiceMethod && !(total > 0)) throw new OrderError("invoice_zero_total");
 
+  /* The VAT rate this order is sold under, frozen onto the row here and never
+     recomputed — the same rule `pricing_tier` follows in the same INSERT, for
+     the same reason: a rate changed next year must not rewrite what this order
+     was actually taxed at. The accountant export reads THIS, not the setting
+     (src/lib/reports.ts rateFor); without it, correcting settings.vat_rate
+     silently restated every month the shop had already filed.
+     One stamp for both doors — the web checkout and the salon till both arrive
+     here, and this is the only INSERT into `orders` in the codebase.
+     `resolveVatRate` is imported the same lazy way as issueInvoice() below:
+     it is six lines of clamping that live in a module which also carries an
+     xlsx writer and node:zlib, and none of that belongs in the bundle a
+     shopper's checkout loads. */
+  const { resolveVatRate } = await import("@/lib/reports");
+  const vatRate = resolveVatRate((await getSettings()).vat_rate);
+
   const rows = await query<OrderRow>(
-    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, discount_scope, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company, pos_ref)
-     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17, $18::jsonb, $19)
+    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, discount_scope, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company, pos_ref, vat_rate)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17, $18::jsonb, $19, $20)
      returning *`,
     [
       lang,
@@ -1651,6 +1666,7 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
       typeof input.notes === "string" ? input.notes.replace(/\s+$/, "").slice(0, 2000) || null : null,
       company ? jsonbParam(company) : null,
       channel === "pos" ? cleanPosRef(input.posRef) : null,
+      vatRate,
     ],
   );
   let order = mapOrder(rows[0]);
