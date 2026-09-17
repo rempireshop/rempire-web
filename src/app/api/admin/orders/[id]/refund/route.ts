@@ -54,6 +54,7 @@ import { notifyOrderClosed } from "@/lib/payments/mail-hook";
 import {
   canRefund,
   giftRefundedTotal,
+  giftRefundRef,
   refundableAmount,
   refundedTotal,
   refundIdempotencyKey,
@@ -63,7 +64,6 @@ import {
 } from "@/lib/payments/refund";
 import { giftPaidOf, refundValue, settleRefund } from "@/lib/payments/settle";
 import { PaymentError } from "@/lib/payments/types";
-import { randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -268,16 +268,35 @@ export async function POST(req: Request, ctx: Ctx) {
           taken from anybody, and the owner must look at the card. */
     let giftBack = 0;
     if (giftCard && split.gift > 0) {
-      const credited = await creditGiftCard(giftCard.code, split.gift, order.id);
+      /* Derived from the order and from the ledger AS IT STANDS RIGHT NOW —
+         after the money half above has been recorded — so that a retry of this
+         very refund lands on the same reference and a second, deliberate
+         partial refund does not. It is one string doing both halves of the
+         job, the same way the till sends one basket id as both its `ref` and
+         its key (POST /api/admin/pos-orders): creditGiftCard() refuses to
+         write it twice, so the card cannot be credited twice; and
+         foldRefund() matches on it, so the retry updates the line the first
+         attempt wrote instead of appending a second one to `refunds`. A fresh
+         uuid per attempt, which is what stood here until 17.09.2026, did
+         neither. */
+      const giftRef = giftRefundRef(order.id, refundsOf(current.payment).length, split.gift);
+      const credited = await creditGiftCard(giftCard.code, split.gift, order.id, { ref: giftRef });
       if (!credited.ok) {
         console.error("[api/admin/orders/:id/refund] card credit refused:", credited.error, giftCard.code);
         return bad("gift_credit_failed", 409, { code: giftCard.code, detail: credited.error, moneyRefunded: split.money });
+      }
+      /* `already` is the retry arriving: the first attempt credited the card
+         and died before it could write the line below. Not an error and not a
+         second credit — the amount is the one that really went back, and the
+         recording it never finished is finished here. */
+      if (credited.already) {
+        console.warn(`[api/admin/orders/:id/refund] card ${giftCard.code} was already credited under ${giftRef}`);
       }
       giftBack = credited.taken;
       out = await settleRefund(
         current,
         {
-          ref: `gc:${randomUUID()}`,
+          ref: giftRef,
           amount: giftBack,
           status: "done",
           at,

@@ -38,8 +38,13 @@
  * that has been a partner before (`pro_approved_at` on the row) is welcomed
  * once and only once, whatever the tier has done since.
  */
+import { createHash } from "node:crypto";
 import { isEmail, productsForAlerts } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
+/* The shop's own calendar day — Tallinn, never UTC and never the machine
+   clock (src/lib/day.ts). See pointsRef() below: a day boundary in the wrong
+   timezone is a double credit that only happens in the evening. */
+import { shopDay } from "@/lib/day";
 import { writeAuditSafe } from "@/lib/orders";
 import { sendPartnerWelcome } from "@/lib/partner-mail";
 import { reviewsByCustomer } from "@/lib/reviews";
@@ -54,6 +59,42 @@ import {
   setCustomerNotes,
   setCustomerTier,
 } from "@/lib/loyalty";
+
+/**
+ * What ONE manual points adjustment is, so the ledger can refuse the second
+ * copy of it — the value behind loyalty_ledger_ref_idx
+ * (191_gift_loyalty_once.sql).
+ *
+ * This is a PATCH, not a POST, and that is the reason it is not wired to
+ * runOnce() like the checkout and the till. Two reasons, and the verb is the
+ * smaller of them:
+ *
+ *   · runOnce() protects a REQUEST, and this request is four writes in a
+ *     trench coat — approve, tier, notes, points. Memoising the whole answer
+ *     would put the tier flip and the «Цены для салонов включены» letter
+ *     behind the same key as the points, which is a far wider blast radius
+ *     than the one insert that is actually unguarded.
+ *   · it would protect nothing TODAY. runOnce() needs the client to send an
+ *     `Idempotency-Key`, and the panel does not; the routes wired this round
+ *     are honestly waiting for that. Points are money-shaped and the ledger is
+ *     right here, so this one does not have to wait.
+ *
+ * The identity has to be invented, because a manual adjustment has no order id
+ * to borrow one from (which is exactly why 101_loyalty_refund_once.sql's index
+ * has never seen one). It is invented out of what the person actually did:
+ * this customer, this delta, this note, on this DAY — and the day is the
+ * shop's, Tallinn, because the machine's UTC midnight falls at 2 or 3 in the
+ * morning Tallinn time and a double tap either side of it would be two rows.
+ *
+ * What that costs is real and small: two byte-identical adjustments of the
+ * same customer on the same day, both genuinely meant, become one. «Renat
+ * pressed Сохранить twice» is much the likelier reading, and the second one he
+ * really wants is one word in the note away — a note is part of the ref.
+ */
+function pointsRef(customerId: string, delta: number, note: string): string {
+  const h = createHash("sha256").update(`${customerId}|${delta}|${note}|${shopDay(new Date())}`).digest("hex");
+  return `adj:${h.slice(0, 32)}`;
+}
 
 /** uuid or e-mail in the URL, resolved to the real admin-shaped row. */
 function resolveCustomer(idOrEmail: string) {
@@ -181,9 +222,20 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
     if (pointsDelta && Number.isFinite(pointsDelta) && pointsDelta !== 0) {
       const note = typeof body.note === "string" ? body.note : "";
-      const out = await adjustLoyaltyPoints(realId, pointsDelta, note);
+      /* Once per intention — see pointsRef() above. A repeat comes back
+         `already` with the points the FIRST one granted, and the card below is
+         re-read either way, so the panel shows the balance that exists rather
+         than the one a second insert would have made. */
+      const out = await adjustLoyaltyPoints(realId, pointsDelta, note, {
+        ref: pointsRef(realId, pointsDelta, note),
+      });
       if (!out.ok) return Response.json({ ok: false, error: out.error ?? "bad_delta" }, { status: 400 });
-      await writeAuditSafe("admin", "customer.points_adjust", { id: realId, delta: pointsDelta, note });
+      /* No audit row for a repeat: «Корректировка +50» twice in «Журнал» is a
+         report of something that did not happen, and the journal is what the
+         owner reads to find out what did. */
+      if (!out.already) {
+        await writeAuditSafe("admin", "customer.points_adjust", { id: realId, delta: pointsDelta, note });
+      }
       customer = (await getCustomerAdmin(realId)) ?? customer;
     }
 

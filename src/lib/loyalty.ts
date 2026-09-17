@@ -463,22 +463,71 @@ export async function refundLoyaltyPoints(orderId: string, note = ""): Promise<L
   }
 }
 
-/** Admin/assistant `adjust_points` — a manual credit or correction, no order attached. */
+/**
+ * Admin/assistant `adjust_points` — a manual credit or correction, no order
+ * attached.
+ *
+ * ONCE PER `ref`, when the caller names one. This was a bare insert, and it
+ * was the one write in this file with nothing at all behind it: the three
+ * unique indexes on loyalty_ledger (100_tiers_loyalty.sql for earn and redeem,
+ * 101_loyalty_refund_once.sql for the refund reversal) all key on `order_id`,
+ * and a manual adjustment carries none — 101 says so itself, in the line that
+ * ends «so the partial index never sees them». So «+50 баллов» on a customer
+ * card, pressed twice or answered late, was +100.
+ *
+ * Nothing is derived here, deliberately, and this is the one place in this
+ * change where that is worth arguing. There is no column to derive an identity
+ * from — a manual adjustment is a customer, a number and a sentence — so an
+ * identity has to be INVENTED, and inventing one inside this helper would
+ * quietly redefine what every existing caller means by calling it twice. The
+ * request is where an intention exists, so the request names it: see
+ * src/app/api/admin/customers/[id]/route.ts, which builds one out of the
+ * customer, the delta, the note and the shop's own calendar day.
+ *
+ * Guarded the way earning and redeeming are guarded — select-then-insert in
+ * one transaction for the common case, loyalty_ledger_ref_idx
+ * (191_gift_loyalty_once.sql) behind it for two of them landing at once — and
+ * a repeat comes back `already`, carrying the points the first one granted, so
+ * the panel shows the balance that really exists.
+ */
 export async function adjustLoyaltyPoints(
   customerId: string,
   delta: number,
   note = "",
+  opts: { ref?: string | null } = {},
 ): Promise<LedgerWrite> {
   if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer" };
   const d = Math.trunc(Number(delta) || 0);
   // loyalty_ledger.delta is an integer column: anything past its range is
   // 22003 from Postgres, which the admin route reports as a 503.
   if (!d || !Number.isFinite(d) || Math.abs(d) > 1_000_000) return { ok: false, error: "bad_delta" };
-  await query(
-    "insert into loyalty_ledger (customer_id, delta, reason, note) values ($1, $2, 'adjust', $3)",
-    [customerId, d, note ? note.slice(0, 300) : null],
-  );
-  return { ok: true, points: d };
+  const ref = (opts.ref ?? "").trim().slice(0, 200) || null;
+
+  if (!ref) {
+    await query(
+      "insert into loyalty_ledger (customer_id, delta, reason, note) values ($1, $2, 'adjust', $3)",
+      [customerId, d, note ? note.slice(0, 300) : null],
+    );
+    return { ok: true, points: d };
+  }
+
+  try {
+    return await withTx(async (q) => {
+      const seen = await q<{ delta: number | string }>(
+        "select delta from loyalty_ledger where ref = $1 limit 1",
+        [ref],
+      );
+      if (seen.length) return { ok: true, already: true, points: Math.trunc(num(seen[0].delta)) };
+      await q(
+        "insert into loyalty_ledger (customer_id, delta, reason, note, ref) values ($1, $2, 'adjust', $3, $4)",
+        [customerId, d, note ? note.slice(0, 300) : null, ref],
+      );
+      return { ok: true, points: d };
+    });
+  } catch (err) {
+    if (isUniqueViolation(err)) return { ok: true, already: true, points: d };
+    throw err;
+  }
 }
 
 /* ---------- checkout: what a basket could redeem right now ----------------- */

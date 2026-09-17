@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { jsonbParam, query, withTx } from "@/lib/db";
+import { jsonbParam, query, withTx, type Querier } from "@/lib/db";
 /* «Действует до …» is a date on a printed card — the shop's calendar day, not
    the server's (src/lib/day.ts). */
 import { shopDay, ymdParts } from "@/lib/day";
@@ -440,6 +440,31 @@ export interface GiftRedeem {
   already?: boolean;
 }
 
+/** Postgres/PGlite unique-constraint violation — the `ref` indexes here. */
+function isUniqueViolation(err: unknown): boolean {
+  return !!err && typeof err === "object" && (err as { code?: unknown }).code === "23505";
+}
+
+/**
+ * What one ledger row was FOR, when the caller can name it — the value behind
+ * gift_card_uses_ref_idx (191_gift_loyalty_once.sql). A spend is named by the
+ * order it paid for, which is what (code, order_id) has always meant here;
+ * a refund is named by the attempt, which nothing on the row can say, so
+ * creditGiftCard() takes its ref and never invents one.
+ */
+function redeemRef(code: string, orderId: string | null | undefined): string | null {
+  return orderId ? `gcu:${code}:${orderId}` : null;
+}
+
+/** The row this ref already wrote, or null. Its amount IS the first answer. */
+async function usedUnder(q: Querier, ref: string): Promise<{ amount: number } | null> {
+  const rows = await q<{ amount: string | number }>(
+    "select amount from gift_card_uses where ref = $1 limit 1",
+    [ref],
+  );
+  return rows.length ? { amount: cents(Number(rows[0].amount) || 0) } : null;
+}
+
 /**
  * Spend `amount` off the card, for `orderId`. One conditional UPDATE does the
  * whole thing, so two orders redeeming the same card at the same moment cannot
@@ -456,57 +481,102 @@ export interface GiftRedeem {
  * The ledger write is inside the transaction for the same reason: a debit
  * whose row did not land is a debit nothing can explain — not to the retry
  * above, and not to the refund that reads these rows to put money back.
+ *
+ * THE SELECT IS NOT THE GUARD, it is the fast path — that is what changed on
+ * 17.09.2026. Two of these running at once both read nothing and both go on to
+ * the UPDATE, and the UPDATE lets both through whenever the card can afford it
+ * twice — a 50 € card and a 20 € order leave 10 € and TWO ledger rows, one
+ * order debited twice. What refuses the second one is `ref` and its unique
+ * index (191_gift_loyalty_once.sql):
+ * the insert raises 23505, the transaction rolls its own UPDATE back, and the
+ * loser is handed what the winner took. Same division of labour as
+ * loyalty_ledger's three indexes — the helper answers the common case in one
+ * round trip, the index is what makes the answer true.
+ *
+ * `ref` is derived from the order when the caller does not pass one, so every
+ * caller alive today gets this for nothing. A redeem with neither an order nor
+ * a ref is unguarded, deliberately: nothing in such a call tells a retry from
+ * a second real spend, and inventing an answer is the mistake
+ * 180_idempotency.sql spends a page arguing against.
  */
 export async function redeemGiftCard(
   code: string,
   amount: number,
   orderId?: string | null,
+  opts: { ref?: string | null } = {},
 ): Promise<GiftRedeem> {
   const norm = normaliseCode(code);
   if (!norm) return { ok: false, error: "bad_code", taken: 0, remaining: 0 };
   const want = cents(Number(amount) || 0);
   if (!(want > 0)) return { ok: false, error: "bad_amount", taken: 0, remaining: 0 };
+  const ref = (opts.ref ?? "").trim() || redeemRef(norm, orderId);
 
-  return withTx(async (q) => {
-    if (orderId) {
-      const seen = await q<{ amount: string | number }>(
-        `select amount from gift_card_uses
-          where code = $1 and order_id = $2 and kind = 'redeem' limit 1`,
-        [norm, orderId],
-      );
-      if (seen.length) {
+  try {
+    return await withTx(async (q) => {
+      /* The original guard, kept exactly as it was. It is not redundant beside
+         the ref: every row written BEFORE 191_gift_loyalty_once.sql has a null
+         `ref`, so an order whose card was debited by the old code would look
+         unspent to a lookup by ref alone — and be debited a second time. This
+         one still recognises it. */
+      const spentOn = orderId
+        ? await q<{ amount: string | number }>(
+            `select amount from gift_card_uses
+              where code = $1 and order_id = $2 and kind = 'redeem' limit 1`,
+            [norm, orderId],
+          )
+        : [];
+      const seen = spentOn.length
+        ? { amount: cents(Number(spentOn[0].amount) || 0) }
+        : ref
+          ? await usedUnder(q, ref)
+          : null;
+      if (seen) {
         const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
         return {
           ok: true,
           already: true,
           code: norm,
-          taken: cents(Number(seen[0].amount) || 0),
+          taken: seen.amount,
           remaining: card.length ? cents(Number(card[0].balance) || 0) : 0,
         };
       }
-    }
 
-    const rows = await q<GiftRow>(
-      `update gift_cards
-          set balance = balance - $2,
-              redeemed_at = case when balance - $2 <= 0 then now() else redeemed_at end
-        where code = $1 and balance >= $2 and voided_at is null
-        returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
-      [norm, want],
-    );
-    if (!rows.length) {
-      const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
-      if (!card.length) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
-      return { ok: false, error: "insufficient", code: norm, taken: 0, remaining: cents(Number(card[0].balance) || 0) };
-    }
+      const rows = await q<GiftRow>(
+        `update gift_cards
+            set balance = balance - $2,
+                redeemed_at = case when balance - $2 <= 0 then now() else redeemed_at end
+          where code = $1 and balance >= $2 and voided_at is null
+          returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
+        [norm, want],
+      );
+      if (!rows.length) {
+        const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
+        if (!card.length) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
+        return { ok: false, error: "insufficient", code: norm, taken: 0, remaining: cents(Number(card[0].balance) || 0) };
+      }
 
-    const card = toCard(rows[0]);
-    await q(
-      `insert into gift_card_uses (code, order_id, amount, kind) values ($1, $2, $3, 'redeem')`,
-      [card.code, orderId ?? null, want],
-    );
-    return { ok: true, code: card.code, taken: want, remaining: card.balance };
-  });
+      const card = toCard(rows[0]);
+      await q(
+        `insert into gift_card_uses (code, order_id, amount, kind, ref) values ($1, $2, $3, 'redeem', $4)`,
+        [card.code, orderId ?? null, want, ref],
+      );
+      return { ok: true, code: card.code, taken: want, remaining: card.balance };
+    });
+  } catch (err) {
+    /* The other one landed between our SELECT and our INSERT. Its row is the
+       receipt and the debit it made is the only one; ours rolled back with the
+       transaction, so the card is whole. */
+    if (!isUniqueViolation(err) || !ref) throw err;
+    const seen = await usedUnder(query, ref);
+    const card = await getGiftCard(norm);
+    return {
+      ok: true,
+      already: true,
+      code: norm,
+      taken: seen ? seen.amount : want,
+      remaining: card ? card.balance : 0,
+    };
+  }
 }
 
 /* ---------- refunds: the card as a payment that comes back ------------- */
@@ -570,32 +640,101 @@ export async function giftPaidByOrders(orderIds: string[]): Promise<Record<strin
  *
  * `redeemed_at` is cleared: a card that was spent to the end and then had a
  * spend reversed is a card with money on it again.
+ *
+ * ONCE PER `ref`, and until 191_gift_loyalty_once.sql there was no «once» here
+ * at all. The face-value ceiling in the UPDATE reads like a guard and is not
+ * one — it only refuses a card that would end up holding more than it was
+ * sold for, and the two cases that actually happen stay well underneath it:
+ *
+ *   · a card that paid for TWO orders. Face 50, spent 20 and 20, balance 10.
+ *     Refund the first order: 30. The answer is lost, the owner presses
+ *     «Вернуть деньги» again: 50 — under the ceiling, allowed, and the
+ *     customer now holds 20 € the shop never took back from anybody.
+ *   · any partial refund. Face 50, spent to 0, refund 10 at a time: every
+ *     repeat lands under the ceiling until the fifth one.
+ *
+ * `ref` is what refuses it, and the route derives it from the order and from
+ * what the order has already had refunded (giftRefundRef in
+ * src/lib/payments/refund.ts) — never from a random, which is the whole of the
+ * bug. Nothing is derived HERE, unlike the redeem: (code, order_id) is not the
+ * identity of a credit, because a partial refund is allowed to credit the same
+ * card for the same order again and must not be mistaken for a retry of the
+ * one before it. A caller that passes no ref is unguarded exactly as before.
+ *
+ * The UPDATE and the ledger row are one transaction for the first time here,
+ * so a duplicate ref takes the balance change back with it rather than leaving
+ * money on a card no row can explain.
  */
-export async function creditGiftCard(code: string, amount: number, orderId: string | null): Promise<GiftRedeem> {
+export async function creditGiftCard(
+  code: string,
+  amount: number,
+  orderId: string | null,
+  opts: { ref?: string | null } = {},
+): Promise<GiftRedeem> {
   const norm = normaliseCode(code);
   if (!norm) return { ok: false, error: "bad_code", taken: 0, remaining: 0 };
   const want = cents(Number(amount) || 0);
   if (!(want > 0)) return { ok: false, error: "bad_amount", taken: 0, remaining: 0 };
+  const ref = (opts.ref ?? "").trim() || null;
 
-  const rows = await query<GiftRow>(
-    `update gift_cards
-        set balance = balance + $2,
-            redeemed_at = null
-      where code = $1 and voided_at is null and balance + $2 <= amount + 0.005
-      returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
-    [norm, want],
-  );
-  if (!rows.length) {
+  try {
+    return await withTx(async (q) => {
+      if (ref) {
+        const seen = await usedUnder(q, ref);
+        if (seen) {
+          const card = await q<GiftRow>(`select balance from gift_cards where code = $1`, [norm]);
+          return {
+            ok: true,
+            already: true,
+            code: norm,
+            /* The ledger stores a refund as a negative row (151); what the
+               first attempt PUT BACK is its magnitude, and that is what the
+               route records and reports. */
+            taken: cents(Math.abs(seen.amount)),
+            remaining: card.length ? cents(Number(card[0].balance) || 0) : 0,
+          };
+        }
+      }
+
+      const rows = await q<GiftRow>(
+        `update gift_cards
+            set balance = balance + $2,
+                redeemed_at = null
+          where code = $1 and voided_at is null and balance + $2 <= amount + 0.005
+          returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
+        [norm, want],
+      );
+      if (!rows.length) {
+        const card = await q<GiftRow>(
+          `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
+             from gift_cards where code = $1`,
+          [norm],
+        );
+        if (!card.length) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
+        const was = toCard(card[0]);
+        return { ok: false, error: was.voidedAt ? "voided" : "over_face_value", code: was.code, taken: 0, remaining: was.balance };
+      }
+      const card = toCard(rows[0]);
+      await q(
+        `insert into gift_card_uses (code, order_id, amount, kind, ref) values ($1, $2, $3, 'refund', $4)`,
+        [card.code, orderId ?? null, -want, ref],
+      );
+      return { ok: true, code: card.code, taken: want, remaining: card.balance };
+    });
+  } catch (err) {
+    /* Two refund doors at once — «Вернуть деньги» and Montonio's webhook. One
+       row landed; ours rolled back, so the card holds exactly one credit. */
+    if (!isUniqueViolation(err) || !ref) throw err;
+    const seen = await usedUnder(query, ref);
     const card = await getGiftCard(norm);
-    if (!card) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
-    return { ok: false, error: card.voidedAt ? "voided" : "over_face_value", code: card.code, taken: 0, remaining: card.balance };
+    return {
+      ok: true,
+      already: true,
+      code: norm,
+      taken: seen ? cents(Math.abs(seen.amount)) : want,
+      remaining: card ? card.balance : 0,
+    };
   }
-  const card = toCard(rows[0]);
-  await query(
-    `insert into gift_card_uses (code, order_id, amount, kind) values ($1, $2, $3, 'refund')`,
-    [card.code, orderId ?? null, -want],
-  );
-  return { ok: true, code: card.code, taken: want, remaining: card.balance };
 }
 
 /** A card an order bought, and how much of it somebody has already spent. */

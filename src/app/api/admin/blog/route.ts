@@ -16,8 +16,19 @@
  * DELETE /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (soft delete — see deletePost in @/lib/blog)
  *
  * NB: trailing slash on every path — next.config has trailingSlash: true.
+ *
+ * ONE «Создать», ONE ARTICLE. The POST takes an `Idempotency-Key`
+ * (src/lib/idempotency.ts): a lost answer used to leave a second draft behind,
+ * and uniqueSlug() made room for it quietly, so the blog list grew a twin the
+ * owner had to notice and delete. Only the POST — a PATCH already names the
+ * row it is editing and a repeat of one changes nothing.
+ *
+ * The editor does not send the header yet, and until it does this route
+ * behaves exactly as it did: runOnce() runs an unkeyed call straight through.
+ * The client half is a later pass.
  */
 import { requireAdmin } from "@/lib/auth";
+import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import {
   BlogError,
   deletePost,
@@ -34,6 +45,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const NO_STORE = { "cache-control": "no-store" } as const;
+/** What the key is stored against — see src/lib/idempotency.ts `mismatch`. */
+const ROUTE = "POST /api/admin/blog";
 
 function bad(error: string, status = 400) {
   return Response.json({ ok: false, error }, { status });
@@ -43,7 +56,13 @@ function bad(error: string, status = 400) {
     this is not an article, and `body` here is written straight into the row. */
 const MAX_BYTES = 200_000;
 
-async function readJson(req: Request): Promise<Record<string, unknown> | null> {
+/**
+ * The body, and the bytes it arrived as. POST needs both: fingerprintOf()
+ * wants what the editor actually sent, and two objects that differ only in key
+ * order hash differently once they have been through a parse and a
+ * re-serialise. PATCH takes the parsed half and ignores the rest.
+ */
+async function readJson(req: Request): Promise<{ raw: string; body: Record<string, unknown> } | null> {
   let raw: string;
   try {
     raw = (await req.text()) || "{}";
@@ -62,7 +81,7 @@ async function readJson(req: Request): Promise<Record<string, unknown> | null> {
      lands on «title_required», but it is one `body.a.b` away from a 500, and
      every other admin route already refuses these four shapes here. */
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-  return parsed as Record<string, unknown>;
+  return { raw, body: parsed as Record<string, unknown> };
 }
 
 /** Postgres `posts.id` is a uuid: a `where id = 'abc'` raises 22P02, which is
@@ -114,25 +133,48 @@ export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
-  const body = await readJson(req);
-  if (!body) return bad("bad_request");
+  const read = await readJson(req);
+  if (!read) return bad("bad_request");
+  const { raw, body } = read;
 
-  try {
-    const post = await upsertPost(fieldsOf(body));
-    return Response.json({ ok: true, post }, { headers: NO_STORE });
-  } catch (err) {
-    if (err instanceof BlogError) return bad(err.code, err.code === "not_found" ? 404 : 400);
-    console.error("admin/blog POST failed", err);
-    return bad("unavailable", 503);
-  }
+  /* At most once per key — see the header. A DIFFERENT key with the same
+     fields is a second article and writes one: uniqueSlug() is happy to make
+     room, and the owner may genuinely want two drafts to start from. */
+  const done = await runOnce(
+    { key: readIdempotencyKey(req), route: ROUTE, fingerprint: fingerprintOf(raw) },
+    async (): Promise<IdempotentAnswer> => {
+      try {
+        const post = await upsertPost(fieldsOf(body));
+        return { status: 200, body: { ok: true, post } };
+      } catch (err) {
+        /* Caught rather than thrown on: a refusal releases the key, so the
+           corrected draft goes through under the same key. */
+        if (err instanceof BlogError) {
+          return { status: err.code === "not_found" ? 404 : 400, body: { ok: false, error: err.code } };
+        }
+        console.error("admin/blog POST failed", err);
+        return { status: 503, body: { ok: false, error: "unavailable" } };
+      }
+    },
+  );
+
+  /* The editor's own first «Создать» is still going through. */
+  if (done.outcome === "in_flight") return bad("in_progress", 409);
+  /* This key already carries a different draft, or belongs to another route. */
+  if (done.outcome === "mismatch") return bad("key_reused", 409);
+  return Response.json(done.body, { status: done.status, headers: NO_STORE });
 }
 
 export async function PATCH(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
-  const body = await readJson(req);
-  if (!body) return bad("bad_request");
+  const read = await readJson(req);
+  if (!read) return bad("bad_request");
+  /* No key on the edit path: a PATCH names the row it is changing, so a
+     repeat writes the same fields onto the same post rather than making a
+     second one. It is the CREATE that has nothing to name. */
+  const { body } = read;
 
   const idRaw = typeof body.id === "string" ? body.id.trim() : "";
   const slugRaw = typeof body.slug === "string" ? body.slug.trim() : "";
