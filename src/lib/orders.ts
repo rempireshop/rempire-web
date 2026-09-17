@@ -428,11 +428,19 @@ async function shippingPrice(
  * rather than as a zeroed shipping line: the receipt then still shows what the
  * parcel costs and what the code took off it, and `shipping_price` keeps
  * meaning «what this delivery costs» for everything downstream.
+ *
+ * `goods` is the part of the subtotal a PROMO may touch: everything except the
+ * gift-card lines. A card's face value is not a price with a margin in it —
+ * it is money the shop will owe back in full when the code is spent, so «−10 %»
+ * on a 100 € card is ten euro of straight cash loss, repeatable for as long as
+ * the promo lives (audit 14.09.2026). A GIFT CARD paying for another gift card
+ * is a different matter and is left alone: that money was already taken once.
  */
 async function codeDiscount(
   code: string | null | undefined,
   subtotal: number,
   shipping: number,
+  goods: number = subtotal,
 ): Promise<number> {
   if (!code) return 0;
   const promos = await optionalLib("promos");
@@ -444,14 +452,14 @@ async function codeDiscount(
      know. The degradation is «no discount», never «the wrong discount». */
   if (isGift && quote && !isGift(code)) {
     try {
-      const out = (await quote(code, subtotal, shipping)) as {
+      const out = (await quote(code, goods, shipping)) as {
         ok?: boolean;
         discount?: unknown;
       } | null;
       if (!out?.ok) return 0;
       const discount = num(out.discount, 0);
       if (!Number.isFinite(discount) || discount <= 0) return 0;
-      return money(Math.min(discount, subtotal + shipping));
+      return money(Math.min(discount, goods + shipping));
     } catch (err) {
       console.error("[orders] quotePromo failed, order priced without a discount:", err);
       return 0;
@@ -892,9 +900,17 @@ export async function priceItems(
     if (raw.id.startsWith("gift:")) {
       // Virtual product: a gift card for a fixed amount. The features agent's
       // module decides which amounts exist; without it no card can be sold.
-      const parse = fn(await optionalLib("giftcards"), "parseGiftItemId");
+      const giftLib = await optionalLib("giftcards");
+      const parse = fn(giftLib, "parseGiftItemId");
       const amount = parse ? num(await parse(raw.id), NaN) : NaN;
       if (!Number.isFinite(amount) || amount <= 0) throw new OrderError("gift_unknown", raw.id);
+      /* issueGiftCards() mints at most GIFT_MAX_QTY cards for one line and
+         silently drops the rest, while this line was priced amount × qty and
+         charged in full: «30 × 100 €» took 3000 € and handed back twenty
+         cards (audit 14.09.2026). One limit, read from the module that
+         enforces it, so the two can never drift apart again. */
+      const giftMax = num(giftLib?.GIFT_MAX_QTY, 20);
+      if (qty > giftMax) throw new OrderError("gift_too_many", raw.id);
       /* …and the owner decides which of them are on sale today. Checked
          against settings.gift_amounts, not against the four the module
          allows: a denomination switched off in «Маркетинг → Подарочные
@@ -903,7 +919,7 @@ export async function priceItems(
          page and the till all read the one setting now). Resolved once per
          order, and only for a basket that actually holds a card. */
       if (onSale === null) {
-        const list = fn(await optionalLib("giftcards"), "giftAmountsOnSale");
+        const list = fn(giftLib, "giftAmountsOnSale");
         onSale = list ? ((await list()) as number[]) : [];
       }
       // an empty list means the module or the database could not answer —
@@ -1315,7 +1331,11 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
     discount = pct > 0 && pct <= 90 ? money(subtotal * (pct / 100)) : 0;
     discountCodeStored = discount > 0 ? `POS -${pct}%` : null;
   } else {
-    discount = await codeDiscount(input.discountCode, subtotal, shipPrice);
+    /* What a promo code is allowed to see: the basket minus its gift cards.
+       See codeDiscount() — the face value of a card is money the shop owes
+       back in full, never a price to take a percent off. */
+    const goodsSubtotal = money(lines.reduce((s, l) => s + (l.kind === "gift" ? 0 : l.sum), 0));
+    discount = await codeDiscount(input.discountCode, subtotal, shipPrice, goodsSubtotal);
     discountCodeStored = input.discountCode ? String(input.discountCode).trim().slice(0, 60) : null;
   }
 
@@ -1512,6 +1532,23 @@ export async function setOrderPayment(id: string, payment: Record<string, unknow
  *     or delivered, which is paid as far as payments are concerned), and the
  *     caller must do nothing but record the payment blob.
  *
+ * Everything that may happen exactly once per order hangs off that branch —
+ * the order's own cards are minted and mailed, the points are earned, the
+ * shelf is decremented, the revenue row is written — so until 14.09.2026 two
+ * overlapping arrivals could do all of it twice (audit r19, «платежи» and
+ * «подарочные карты» found the same race from opposite ends). The conditional
+ * UPDATE is the lock: only one of them gets a row back.
+ *
+ * `status <> all(PAID_ORDER_STATUSES)` and not `<> 'paid'`: an order already
+ * «отправлен» or «доставлен» must never be dragged back to «оплачен» by a late
+ * webhook. Writes the same journal line setOrderStatus() would, and nothing
+ * else — paid is the one status with no stock or gift-card side effect of its
+ * own.
+ *
+ * Returns the moved order rather than a bare flag: the caller that won the
+ * race usually needs the row it just wrote, and `null`/row reads exactly as
+ * false/true for the ones that only need to know who won.
+ *
  * Used by src/lib/payments/settle.ts for the paid transition only; every other
  * status move stays setOrderStatus() below, whose guard is opt-in (`opts.unless`)
  * and off by default — the journal's undo of «Отправлен» is a write back to paid
@@ -1524,9 +1561,8 @@ export async function claimOrderPaid(id: string, actor = "system"): Promise<Orde
   if (!before) return null;
   const rows = await query<OrderRow>(
     `update orders set status = 'paid', updated_at = now()
-      where id = $1 and status not in (${PAID_ORDER_STATUSES.map((s) => `'${s}'`).join(", ")})
-     returning *`,
-    [id],
+      where id = $1 and status <> all($2) returning *`,
+    [id, [...PAID_ORDER_STATUSES]],
   );
   if (!rows.length) return null;
   const after = mapOrder(rows[0]);

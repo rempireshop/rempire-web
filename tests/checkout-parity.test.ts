@@ -47,7 +47,7 @@ function literal<T>(name: string): T {
   throw new Error(`unbalanced braces around ${name} in app.js`);
 }
 
-type ClientOut = { discount: number; ship: number; sum: number };
+type ClientOut = { discount: number; ship: number; sum: number; goods: number };
 type PromoInfo = { code: string; kind: string; value: number; minSubtotal: number } | null;
 
 /**
@@ -63,24 +63,33 @@ function client(
   method = "parcel",
   carrier = "",
   countryIso = "",
+  /** How much of `cartSum` is a gift card's face value — see promoGoods(). */
+  giftFace = 0,
 ): ClientOut {
   /* threshold() and orderCountry() are sliced out of app.js too rather than
      restated here. Both learned about the real country on 07.09.2026 — the
      shop prices Greece and Germany apart now — and a stub would have hidden
      exactly the drift this file exists to catch. */
+  /* promoGoods() likewise: since 14.09.2026 a promo code may not touch a gift
+     card's face value (codeDiscount() in src/lib/orders.ts draws the same
+     line), and a stub here would hide exactly that. It walks the basket, so
+     the basket is what the harness builds — one product line and, when a
+     card is in play, one gift line. */
   const body = `
     ${slice("discount")}
+    ${slice("promoGoods")}
     ${slice("promoLive")}
     ${slice("shipPriceFor")}
     ${slice("shipRulePrice")}
     ${slice("threshold")}
     ${slice("orderCountry")}
+    function lineUnit(l) { return l.type === "gift" ? GIFT_FACE : CART_SUM - GIFT_FACE; }
     function cartSum() { return CART_SUM; }
     function freeShip() { return cartSum() >= threshold(); }
     function shipMethod() { return METHOD; }
     function shipCarrier() { return S.ship.carrier; }
     function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
-    return { discount: discount(), ship: shipCost(), sum: cartSum() };
+    return { discount: discount(), ship: shipCost(), sum: cartSum(), goods: promoGoods() };
   `;
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
@@ -88,12 +97,14 @@ function client(
      what shipRulePrice() falls back to when a carrier or a courier has no cell
      of its own, the same step quoteFromRules() takes on the server. Read out
      of app.js rather than restated, so the two cannot drift. */
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", body) as (
-    s: unknown, n: number, r: ShippingRules, m: string, d: unknown,
+  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", "GIFT_FACE", body) as (
+    s: unknown, n: number, r: ShippingRules, m: string, d: unknown, g: number,
   ) => ClientOut;
+  const cart: Array<Record<string, unknown>> = [{ id: "p", qty: 1 }];
+  if (giftFace > 0) cart.push({ type: "gift", id: "gift:50", qty: 1 });
   return run(
-    { promoInfo, country, countryIso, ship: { carrier } },
-    cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"),
+    { promoInfo, country, countryIso, ship: { carrier }, cart },
+    cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"), giftFace,
   );
 }
 
@@ -178,6 +189,42 @@ describe("the checkout total on screen equals the one the server bills", () => {
         .toBe(Math.round((sum + serverShip - serverDiscount) * 100) / 100);
     });
   }
+
+  /* A gift card in the basket. Its face value is money the shop owes back in
+     full when the code is spent, so a promo may not take a percent of it —
+     «−10 %» on a 100 € card was ten euro of the shop's own money, and the
+     card was still minted at 100 € on the paid transition (audit
+     14.09.2026). createOrder() hands quotePromo() the goods only; this is the
+     browser drawing the same line, so the screen and the bill still agree. */
+  describe("a promo code and a gift card in one basket", () => {
+    const tenPct = promo({ value: 10 });
+    const info: PromoInfo = { code: tenPct.code, kind: tenPct.kind, value: tenPct.value, minSubtotal: 0 };
+
+    it("takes its percent off the goods and none off the card", () => {
+      const c = client(info, 140, RULES, "EE", "parcel", "", "", 100);
+      expect(c.goods).toBe(40);
+      // the server is given the same 40 €, and both come to 4 €
+      const serverShip = quoteFromRules(RULES, { country: "EE", method: "parcel", subtotal: 140 }).price;
+      expect(c.discount).toBe(quoteFromPromo(tenPct, 40, serverShip).discount);
+      expect(c.discount).toBe(4);
+    });
+
+    it("takes nothing off a basket that is only gift cards", () => {
+      const c = client(info, 100, RULES, "EE", "digital", "", "", 100);
+      expect(c.goods).toBe(0);
+      expect(c.discount).toBe(0);
+      expect(quoteFromPromo(tenPct, 0, 0).discount).toBe(0);
+    });
+
+    it("measures the code's floor against the goods too", () => {
+      const floor = promo({ value: 10, minSubtotal: 60 });
+      const withFloor: PromoInfo = { code: floor.code, kind: floor.kind, value: floor.value, minSubtotal: 60 };
+      // 100 € of card plus 40 € of shampoo used to clear a 60 € floor
+      const c = client(withFloor, 140, RULES, "EE", "parcel", "", "", 100);
+      expect(c.discount).toBe(0);
+      expect(quoteFromPromo(floor, 40, 0).ok).toBe(false);
+    });
+  });
 
   it("agrees about a country the owner priced separately", () => {
     const rules: ShippingRules = { ...RULES, freeFromByCountry: { LV: null }, methods: { ...RULES.methods, parcel: { ...RULES.methods.parcel, LV: 6.9 } } };

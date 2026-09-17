@@ -40,7 +40,15 @@ export interface OrderLike {
   loyaltyDiscount?: number | string | null;
   /* ---- inventory: migration 090_inventory.sql ---------------------------- */
   /** The order's priced lines — what decrementStock() below walks. */
-  items?: Array<{ id: string; kind?: string; variant?: string | null; qty: number }>;
+  items?: Array<{
+    id: string;
+    kind?: string;
+    variant?: string | null;
+    qty: number;
+    /** line total — read by earnableSubtotal() to take the gift cards back out */
+    sum?: number | string | null;
+    price?: number | string | null;
+  }>;
 }
 
 /* A type alias, not an interface: setOrderPayment() takes a
@@ -73,6 +81,13 @@ export interface ApplyDeps {
    * Only ever called with the two statuses a payment can produce. `unless`
    * makes the move conditional inside the UPDATE; a falsy answer means another
    * arrival won the race and this one must settle nothing.
+   *
+   * This one option is the whole claim mechanism: settlePayment() — the door
+   * the webhook and the shopper's return race each other through — routes the
+   * paid move to claimOrderPaid(), which is the same conditional UPDATE under
+   * its own name. The callers that cannot race (the admin's «оплачен» button,
+   * an invoice marked paid by hand) pass no `unless` and keep the
+   * unconditional move.
    */
   setOrderStatus(
     id: string,
@@ -379,7 +394,7 @@ async function settleLoyalty(
     }
   }
   let pointsEarned: number | undefined;
-  const subtotal = toNumber(order.subtotal) ?? 0;
+  const subtotal = earnableSubtotal(order);
   try {
     const out = earn ? await earn(customerId, order.id, subtotal) : null;
     if (out?.ok && out.points) pointsEarned = out.points;
@@ -405,6 +420,29 @@ function storedRef(order: OrderLike): string {
   if (typeof p !== "object" || p === null) return "";
   const ref = (p as { ref?: unknown }).ref;
   return typeof ref === "string" ? ref.trim() : "";
+}
+
+/**
+ * What this order may earn points on: its subtotal, minus the gift cards in it.
+ *
+ * `orders.subtotal` holds every line, gift cards included (src/lib/orders.ts),
+ * so buying a 100 € card earned a hundred euro of points and then spending
+ * that card on shampoo earned them all over again — the same euro twice, and a
+ * card bought with a card earned on every lap at no cost at all (audit
+ * 14.09.2026). The card's own purchase is worth nothing; what it buys is worth
+ * exactly what any other basket of goods is worth, once.
+ */
+export function earnableSubtotal(order: OrderLike): number {
+  const total = toNumber(order.subtotal) ?? 0;
+  const items = Array.isArray(order.items) ? order.items : [];
+  let gift = 0;
+  for (const it of items) {
+    if (!it || it.kind !== "gift") continue;
+    const sum = toNumber(it.sum);
+    gift += sum ?? (toNumber(it.price) ?? 0) * (toNumber(it.qty) ?? 0);
+  }
+  if (!(gift > 0)) return total;
+  return Math.max(0, Math.round((total - gift) * 100) / 100);
 }
 
 function paymentSaysPaid(order: OrderLike): boolean {
@@ -588,7 +626,8 @@ export async function applyPaymentResult(
        the one whose UPDATE actually moved the row settles what hangs off the
        transition — otherwise the gift card is spent twice, the points are
        spent twice, the stock comes off twice and the revenue row is written
-       twice. The loser reports `alreadyPaid`, exactly as if it had read the
+       twice, and the order's own cards go out as two sets of codes in two
+       letters. The loser reports `alreadyPaid`, exactly as if it had read the
        order a moment later.
 
        Conditional on both doors: `unless` makes the UPDATE itself refuse an

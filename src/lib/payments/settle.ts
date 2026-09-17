@@ -32,11 +32,12 @@ export async function settlePayment(
 ): Promise<ApplyOutcome> {
   const outcome = await applyPaymentResult(order, result, providerName, {
     setOrderPayment,
-    /* The move into paid is a claim, not a write (claimOrderPaid): the return
-       and the webhook arrive together, both having read the order before
-       either wrote, and only the one whose UPDATE actually moved the row may
-       run the once-per-order work below. Every other status this door writes
-       is the plain one. */
+    /* The move into paid is a claim, not a write (claimOrderPaid): this is the
+       door the webhook and the shopper's return race through, both having read
+       the order before either wrote, and only the one whose UPDATE actually
+       moved the row may run the once-per-order work below — mint the cards,
+       earn the points, take the stock. Every other status this door writes is
+       the plain one. */
     setOrderStatus: (id, status, actor) =>
       status === "paid" ? claimOrderPaid(id, actor) : setOrderStatus(id, status, actor),
     ...deps,

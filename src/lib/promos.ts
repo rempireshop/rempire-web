@@ -298,6 +298,11 @@ function optionalDate(v: unknown): { ok: true; value: string | null } | { ok: fa
   return { ok: true, value: d.toISOString() };
 }
 
+/** An empty box: «not answered», as opposed to «answered with something unreadable». */
+function blank(v: unknown): boolean {
+  return v == null || (typeof v === "string" && !v.trim());
+}
+
 function toNum(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v.trim()) {
@@ -334,8 +339,13 @@ export function validatePromo(raw: unknown): PromoValidation {
     value = 0;
   }
 
-  const minRaw = toNum(x.minSubtotal ?? x.min_subtotal) ?? 0;
-  if (minRaw < 0 || minRaw > 10_000) return { ok: false, error: "bad_min" };
+  /* «Минимальный заказ» is a free-text box on a phone, so «сто» and a stray
+     letter both reach here. Until 14.09.2026 anything that did not parse fell
+     through `?? 0` to «no floor at all» and the code was saved wide open —
+     the one answer the owner certainly did not type. Empty still means «no
+     floor»; unreadable is refused. */
+  const minRaw = blank(x.minSubtotal ?? x.min_subtotal) ? 0 : toNum(x.minSubtotal ?? x.min_subtotal);
+  if (minRaw === null || minRaw < 0 || minRaw > 10_000) return { ok: false, error: "bad_min" };
   const minSubtotal = cents(minRaw);
 
   const starts = optionalDate(x.startsAt ?? x.starts_at);
@@ -348,7 +358,7 @@ export function validatePromo(raw: unknown): PromoValidation {
 
   const rawUses = x.maxUses ?? x.max_uses;
   let maxUses: number | null = null;
-  if (rawUses != null && rawUses !== "") {
+  if (!blank(rawUses)) {
     const n = toNum(rawUses);
     if (n === null || !Number.isFinite(n)) return { ok: false, error: "bad_uses" };
     maxUses = Math.trunc(n);
