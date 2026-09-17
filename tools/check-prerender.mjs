@@ -242,7 +242,23 @@ if (!BLOG_SLUGS) console.log("blog: no public/shop2/blog/ — nothing to check t
 for (const [lang, seg] of LANGS) {
   await checkPage(path.join(SHOP2, seg, "index.html"), { lang, seg, rest: "/" });
   for (const c of ["all", ...Object.keys(CAT_NAMES)]) {
-    await checkPage(path.join(SHOP2, seg, "c", c, "index.html"), { lang, seg, rest: `/c/${c}/` });
+    const file = path.join(SHOP2, seg, "c", c, "index.html");
+    await checkPage(file, { lang, seg, rest: `/c/${c}/` });
+    /* Everything else here checks that a page is built correctly — lang
+       attribute, hreflang, canonical, JSON-LD. None of it notices a page that
+       is built correctly and written in the wrong language, which is what an
+       Estonian shopper actually sees when the prerenderer fails to lift the
+       translation tables out of app.js and falls back to the identity
+       function. The category name is the one string that is certain to be on
+       the page, certain to differ per language, and read off the same table
+       that would have failed; if the Russian name survives into /et or /en,
+       the whole tree is Russian. Checked here as well as in the prerenderer
+       so that committed pages from an older, broken run are caught too. */
+    if (lang !== "ru" && c !== "all" && (await readFile(file, "utf8")).includes(CAT_NAMES[c])) {
+      once(file, `untranslated:${lang}`,
+        `carries the Russian category name «${CAT_NAMES[c]}» — the ${lang.toUpperCase()} pages were ` +
+        "written without translation. Re-run `npm run prerender` and check its output for `x `.");
+    }
   }
   for (const b of BRANDS) {
     await checkPage(path.join(SHOP2, seg, "b", b, "index.html"), { lang, seg, rest: `/b/${b}/` });
