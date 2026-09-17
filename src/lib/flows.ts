@@ -673,13 +673,27 @@ export function birthdayCode(): string {
   return `REM-BD-${out}`;
 }
 
+/** What a birthday run has to send, and whether this run created it. */
+interface BirthdayPromo {
+  code: string;
+  expires: Date;
+  /**
+   * True when THIS call wrote a fresh row into `promo_codes`. The letter can
+   * still be skipped afterwards (no Resend key, no address) and then the code
+   * has to go with it — see dropBirthdayPromo(). False for the static
+   * `settings.flows.birthdayCode`, which is the owner's own and outlives every
+   * run.
+   */
+  minted: boolean;
+}
+
 /**
  * A real, single-use promo when the promo module exists (the checkout agent's
  * `src/lib/promos.ts`), otherwise the static `settings.flows.birthdayCode`.
  * Null means "there is no code to send" — and then no letter goes out, because
  * a birthday letter with a code that does nothing is worse than silence.
  */
-async function promoForBirthday(flows: Flows, now: number, daysAhead: number): Promise<{ code: string; expires: Date } | null> {
+async function promoForBirthday(flows: Flows, now: number, daysAhead: number): Promise<BirthdayPromo | null> {
   const expires = new Date(now + birthdayCodeDays(daysAhead) * 24 * 60 * 60 * 1000);
   try {
     /* The checkout agent's module. Both spellings are accepted: `upsertPromo`
@@ -703,7 +717,7 @@ async function promoForBirthday(flows: Flows, now: number, daysAhead: number): P
         active: true,
         note: "День рождения — код выписан автоматически",
       });
-      return { code, expires };
+      return { code, expires, minted: true };
     }
     if (mod.createPromo) {
       await mod.createPromo({
@@ -713,13 +727,39 @@ async function promoForBirthday(flows: Flows, now: number, daysAhead: number): P
         ends_at: expires,
         max_uses: 1,
       });
-      return { code, expires };
+      return { code, expires, minted: true };
     }
   } catch (err) {
     // No module, no table, or it refused: fall through to the static code.
     console.warn("[flows] promo module unavailable:", (err as Error)?.message);
   }
-  return flows.birthdayCode ? { code: flows.birthdayCode, expires } : null;
+  return flows.birthdayCode ? { code: flows.birthdayCode, expires, minted: false } : null;
+}
+
+/**
+ * Take back the code this run minted for a letter that never went.
+ *
+ * The code is written before the send is even attempted, and a skipped send
+ * (no Resend key, no address) puts the stamp back so the customer is greeted
+ * as soon as letters work again — which means the next run mints another one.
+ * Without this, a shop waiting for its Resend key grew one dead `REM-BD-…`
+ * row per customer per day in the list the owner scrolls by hand.
+ *
+ * Only ever a code THIS run wrote (`minted`), and only one still untouched:
+ * deletePromo refuses a code with a use or an order against it, which is
+ * exactly the code that must survive. Best effort — a tidying-up must never
+ * be the reason a run fails.
+ */
+async function dropBirthdayPromo(promo: BirthdayPromo): Promise<void> {
+  if (!promo.minted) return;
+  try {
+    const mod = (await import("@/lib/promos")) as unknown as {
+      deletePromo?: (code: string) => Promise<unknown>;
+    };
+    await mod.deletePromo?.(promo.code);
+  } catch (err) {
+    console.warn("[flows] birthday code left behind:", (err as Error)?.message);
+  }
 }
 
 /** One day of the birthday window: the calendar day the job is looking at, and how far ahead of «now» it is. */
@@ -889,9 +929,13 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
          address). Nothing reached anybody, so the stamp comes off — a shop
          that gets its Resend key next week must still greet this customer
          this year. A real failure keeps the stamp: Resend was asked, and a
-         retry from here would be the double letter the stamp exists to stop. */
+         retry from here would be the double letter the stamp exists to stop.
+
+         The code goes back with the stamp, for the same reason: the next run
+         will write a new one, and nobody was ever told this one. */
       if (res.skipped) {
         await query("update customers set birthday_sent_year = null where id = $1 and birthday_sent_year = $2", [row.id, year]);
+        await dropBirthdayPromo(promo);
       }
     }
   }

@@ -116,7 +116,10 @@ export async function DELETE(req: Request) {
   try {
     const gone = await deletePromo(code);
     if (!gone.ok) {
-      const status = gone.error === "not_found" ? 404 : gone.error === "in_use" ? 409 : 400;
+      /* `on_order` is 409 beside `in_use`: both mean «the code is part of
+         somebody's order», and the panel tells them apart by the body so it
+         can stop saying «уже использован» about a code nobody has paid with. */
+      const status = gone.error === "not_found" ? 404 : gone.error === "bad_code" ? 400 : 409;
       return Response.json({ ok: false, error: gone.error }, { status, headers: NO_STORE });
     }
     await writeAuditSafe("admin", "promo.delete", { code });

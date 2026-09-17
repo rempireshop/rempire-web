@@ -31,6 +31,11 @@ export interface OrderLike {
   /** Quoted at checkout, spent here — see redeemQuotedGiftCard() below. */
   discount?: number | string | null;
   discountCode?: string | null;
+  /**
+   * 'web' | 'pos'. A salon sale has no code box — see redeemQuotedGiftCard().
+   * Absent reads as 'web', which is every order written before this mattered.
+   */
+  channel?: string | null;
   /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
   /** Set only for a signed-in customer's order — see settleLoyalty() below. */
   customerId?: string | null;
@@ -216,13 +221,33 @@ async function redeemQuotedGiftCard(
   const amount = toNumber(order.discount) ?? 0;
   if (!code) return undefined;
 
+  /* A salon sale has no code box at all. The cashier types a percent, and
+     createOrder folds it into the same column as a label — «POS -15%», not a
+     code (src/lib/orders.ts). Sent down the promo branch below it normalises
+     to nothing (the «%» is not a code character), so every discounted sale
+     wrote a `promo_consume_failed` row about a code nobody had typed. A POS
+     order can carry neither a card nor a promo, so there is nothing here to
+     settle either way. */
+  if (order.channel === "pos") return undefined;
+
   /* The same checkout box takes a gift card and a promo code, so the order's
      `discount_code` can be either. A promo handed to redeemGiftCard() would
      come back "not_found" and write a giftcard_redeem_failed row about a card
      that never existed — tell them apart by shape first. A free-shipping promo
      carries a discount of 0 on a free basket, so the promo branch runs on the
      code alone; only the card needs money to redeem. */
-  if (await isPromoCode(code)) return consumeQuotedPromo(order, deps, code, amount);
+  if (await isPromoCode(code)) {
+    /* …but a code that took NOTHING off this order must not spend one of its
+       uses. createOrder stores whatever was typed whether the quote worked or
+       not (src/lib/orders.ts), so an order whose code had expired between the
+       checkout and the bank, or whose basket fell under the code's floor, was
+       charged full price and then burned a use of a live campaign — one fewer
+       «первым двадцати» for somebody who actually gets the discount. Free
+       delivery on a basket that already ships free is the one code that
+       honestly discounts nothing, and it is asked for by name. */
+    if (!(amount > 0) && !(await promoPaysDelivery(code))) return undefined;
+    return consumeQuotedPromo(order, deps, code, amount);
+  }
   if (!(amount > 0)) return undefined;
 
   let redeem = deps.redeemGiftCard;
@@ -273,6 +298,26 @@ async function isPromoCode(code: string): Promise<boolean> {
     return !mod.looksLikeGiftCode(code);
   } catch {
     return false;
+  }
+}
+
+/**
+ * Does this code pay for the delivery rather than for goods?
+ *
+ * Asked only of an order whose discount came to nothing, to tell «бесплатная
+ * доставка on a basket that already ships free» — a code that worked and took
+ * 0 € off — from a code that did not apply at all. When the answer cannot be
+ * had (no module, no table) the old behaviour stands and the use is counted:
+ * missing a use the shop already gave away is worse than counting one twice.
+ */
+async function promoPaysDelivery(code: string): Promise<boolean> {
+  try {
+    const mod = await import("@/lib/promos");
+    const promo = await mod.getPromo(code);
+    return promo ? promo.kind === "free_shipping" : false;
+  } catch (err) {
+    console.error("[payments] promo kind could not be read", err);
+    return true;
   }
 }
 

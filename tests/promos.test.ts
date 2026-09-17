@@ -211,7 +211,10 @@ describe("promo codes", () => {
     expect(o.discountCode).toBe("on order");
     expect((await getPromo("ONORDER"))!.used).toBe(0);   // nothing paid, nothing spent
 
-    expect(await deletePromo("ONORDER")).toEqual({ ok: false, error: "in_use" });
+    /* `on_order`, not `in_use`: the code is refused for a different reason
+       from the one the row's own «использован 0» shows, and the panel has to
+       be able to say which — see tests/promos-r21.test.ts. */
+    expect(await deletePromo("ONORDER")).toEqual({ ok: false, error: "on_order" });
     expect(await getPromo("ONORDER")).not.toBe(null);
   });
 
