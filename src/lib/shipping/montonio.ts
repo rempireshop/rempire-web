@@ -30,6 +30,9 @@ import { jsonbParam, query } from "@/lib/db";
 import { signHs256 } from "@/lib/payments/jwt";
 import { montonioConfigFromEnv, type MontonioConfig } from "@/lib/payments/montonio";
 import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
+/* A leaf module (it imports the tariff mirror and nothing else), so this adds
+   no cycle — see the header of src/lib/shipping/country-prices.ts. */
+import { basisCost } from "@/lib/shipping/country-prices";
 import type { ParcelPoint } from "@/lib/parcel-points";
 import type { Order } from "@/lib/orders";
 // SHIPPING_PROVIDER=mock — the e2e suite's carrier; see that file's header.
@@ -853,8 +856,9 @@ async function courierServiceOf(
 /**
  * A standard courier service. The checkout never asks which carrier should
  * drive — it offers "курьер до двери" and nothing else — so when nothing on the
- * order names one, whichever carrier the store has activated for couriers in
- * that country is used. The admin can force one by posting `carrier`.
+ * order names one, the cheapest carrier the store has activated for couriers
+ * in that country is used: the one the shelf price was computed from. The
+ * admin can force one by posting `carrier`.
  */
 async function resolveCourierService(
   config: MontonioConfig,
@@ -879,7 +883,36 @@ async function resolveCourierService(
     .map((c) => str(c?.carrierCode).toLowerCase())
     .filter(Boolean);
 
-  for (const carrier of candidates) {
+  /*
+   * Cheapest first — and «cheapest» means the very number the ORDER was priced
+   * from.
+   *
+   * A courier price is `costBasis()` → `cheapestCost()` (country-prices.ts):
+   * nobody chooses the carrier for a courier, Renat does, at the label, so the
+   * shelf price covers the cheapest carrier he CAN choose. This walk is where
+   * he chooses, and until 17.09.2026 it took whatever order Montonio returned
+   * — so the shop could charge Germany 22.29 € (SmartPosti, 22.23 €) and then
+   * book DPD at 32.74 €, ten euro out of the margin of one parcel.
+   *
+   * A carrier the mirror has no basis row for keeps its place at the back
+   * rather than being dropped: an unpriced candidate is still a parcel that
+   * goes out, and this is the label, not the till. Nova Post is deliberately
+   * one of them — it is the cheapest courier on most routes and is kept out of
+   * every basis because it has no returns at all, so a label must not prefer
+   * it either (CHIP_ONLY_CARRIERS).
+   */
+  const ordered = candidates
+    .map((carrier, at) => ({ carrier, at, cost: basisCost(carrier, country, "courier") }))
+    .sort((a, b) => {
+      if (a.cost === null || b.cost === null) {
+        if (a.cost === b.cost) return a.at - b.at;
+        return a.cost === null ? 1 : -1;
+      }
+      return a.cost === b.cost ? a.at - b.at : a.cost - b.cost;
+    })
+    .map((x) => x.carrier);
+
+  for (const carrier of ordered) {
     const id = await courierServiceOf(config, carrier, country);
     if (id) return { id, carrier };
   }

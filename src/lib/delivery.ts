@@ -143,6 +143,25 @@ async function shippedOrders(limit: number): Promise<ShippedRow[]> {
   );
 }
 
+/**
+ * When this parcel left — `shipping.shippedAt`, stamped once by
+ * setOrderStatus() on the move into `shipped`.
+ *
+ * `updated_at` is the fallback and NOT the measure: the notify route writes
+ * `saveShipmentOnOrder()` for every status word the carrier sends and that sets
+ * `updated_at = now()`, so an order the carrier chats about — registered, in
+ * transit, awaiting collection — pushed its own «через N дней» deadline
+ * forward with every message and never reached it. A note typed in the panel
+ * did the same. Orders shipped before the stamp existed have no key and keep
+ * the old behaviour, which is the most that can honestly be said about them.
+ */
+function shippedAtOf(row: ShippedRow): number {
+  const s = (row.shipping && typeof row.shipping === "object" ? row.shipping : {}) as Record<string, unknown>;
+  const stamped = typeof s.shippedAt === "string" ? Date.parse(s.shippedAt) : NaN;
+  if (Number.isFinite(stamped)) return stamped;
+  return new Date(row.updated_at as string).getTime();
+}
+
 function shipmentIdOf(shipping: unknown): string {
   const s = (shipping && typeof shipping === "object" ? shipping : {}) as Record<string, unknown>;
   const m = (s.montonio && typeof s.montonio === "object" ? s.montonio : {}) as Record<string, unknown>;
@@ -195,7 +214,7 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
     }
 
     if (!deliver && cutoff != null) {
-      const since = new Date(row.updated_at as string).getTime();
+      const since = shippedAtOf(row);
       if (Number.isFinite(since) && since <= cutoff) deliver = true;
     }
 

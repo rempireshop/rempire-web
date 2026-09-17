@@ -196,6 +196,35 @@ export function ceilingCost(country: string, method: CostMethod): CountryCost | 
 }
 
 /**
+ * What ONE carrier costs on one route, **if that carrier may be a basis at
+ * all** — the same rows `cheapestCost()` picks from, one carrier at a time.
+ * `null` for a route the mirror has no row for, for a carrier the shop cannot
+ * put a parcel on, and for a chip-only one (Nova Post).
+ *
+ * This is a cost, not a shelf price, and nothing bills from it. It exists so
+ * the label can book the carrier the country's price was computed from:
+ * `resolveCourierService()` in ./montonio walks Montonio's `/shipping-methods`
+ * candidates, and until 17.09.2026 it took whichever one Montonio happened to
+ * list first — while `costBasis()` had priced the order off the CHEAPEST. Any
+ * dearer carrier in that list ate the margin (Germany: 22.23 € priced,
+ * 32.74 € booked). Ordering that walk by this number makes the two agree.
+ *
+ * Nova Post returning `null` here is the point, not an omission: it is the
+ * cheapest courier on most routes and it was deliberately kept out of every
+ * basis (no returns at all), so a label must not prefer it either.
+ */
+export function basisCost(carrier: string, country: string, method: CostMethod): number | null {
+  const c = String(carrier || "").trim().toLowerCase();
+  if (!c) return null;
+  let best: number | null = null;
+  for (const r of rowsFor(country, method)) {
+    if (r.carrier !== c) continue;
+    if (best === null || r.price < best) best = r.price;
+  }
+  return best;
+}
+
+/**
  * The cheapest of *every* carrier the shop offers, chips included — which
  * today means "with Nova Post allowed to price the route".
  *
