@@ -77,6 +77,35 @@ describe("UI — the ET and EN dictionaries", () => {
     const onlyEn = Object.keys(UI.EN).filter((k) => !(k in UI.ET));
     expect({ onlyEt, onlyEn }).toEqual({ onlyEt: [], onlyEn: [] });
   });
+
+  /* Renat, 17.09.2026: an English toast read «The table now holds Montonio's
+     prices — check them and press «Сохранить»» — and the button on that panel
+     says Save. A sentence that names a control has to name the control the
+     reader can see, or it sends him looking for something that is not there.
+     Five values were like that; the rule is simply that a translation carries
+     no Russian, with the handful of places where the Russian word IS the
+     thing being named written out below. */
+  const CYRILLIC = /[А-Яа-яЁё]/;
+  const RUSSIAN_ON_PURPOSE = [
+    // the home-screen icons really do read «Админка» and «Сканер» — that is
+    // what admin.webmanifest and scanner.webmanifest call them, in any language
+    /icon|ikoon/i,
+    // «Beard Balm — бальзам для бороды» and the list of type words: the
+    // sentence is telling the owner to write the type in Russian, so the
+    // example has to BE in Russian
+    /Beard Balm|шампунь, бальзам/,
+  ];
+  it("never leaves a Russian word inside an ET or EN sentence", () => {
+    const left: string[] = [];
+    for (const lang of ["ET", "EN"] as const) {
+      for (const [key, value] of Object.entries(UI[lang])) {
+        if (!CYRILLIC.test(value)) continue;
+        if (RUSSIAN_ON_PURPOSE.some((rx) => rx.test(value))) continue;
+        left.push(`${lang}: ${key.slice(0, 60)} → ${value.slice(0, 80)}`);
+      }
+    }
+    expect(left).toEqual([]);
+  });
 });
 
 /* trText()'s own loop, to the letter: the dictionary first, then the FIRST

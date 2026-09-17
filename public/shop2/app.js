@@ -2470,6 +2470,39 @@
       "включены": "sees",
       "выключены": "väljas",
       "без изменений": "muudatusteta",
+      "Уже партнёр": "Juba partner",
+      /* ---- the confirm cards' own sentences -----------------------------
+         One key per LINE of a card, because the card paints a node per line
+         (admDetailHTML). Until 17.09.2026 these were the tails of one UI_RX
+         rule each, matching a whole two-line detail; as keys they are shared
+         by every card that says the same thing and there is nothing left to
+         keep in step with a composer. */
+      "Включим цены для салонов и отправим письмо «Цены для салонов включены».": "Lülitame sisse salongihinnad ja saadame kirja „Salongihinnad on sisse lülitatud“.",
+      "Цены для салонов выключатся со следующего заказа. Письмо не отправляется.": "Salongihinnad lülituvad välja alates järgmisest tellimusest. Kirja ei saadeta.",
+      "Включим цены для салонов и отправим письмо на эту почту.": "Lülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
+      "Заявка закроется, цены для салонов не включатся. Письмо не отправляется.": "Taotlus suletakse, salongihindu sisse ei lülitata. Kirja ei saadeta.",
+      "Клиенту уйдёт письмо «Заказ отправлен» — без трек-номера.": "Kliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
+      "Клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+      "Им ещё никто не пользовался — код просто исчезнет.": "Keegi pole seda veel kasutanud — kood lihtsalt kaob.",
+      "Письмо уйдёт сразу, отозвать его нельзя.": "Kiri läheb kohe välja, seda ei saa tagasi võtta.",
+      "Заказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён». Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги».": "Tellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi, kliendile läheb kiri «Tellimus tühistatud». Tühistamine raha ei tagasta — selleks on nupp «Tagasta raha».",
+      "Заказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».": "Tellimus ei ole veel makstud — tagastada pole midagi. Kliendile läheb kiri «Tellimus tühistatud».",
+      "Заказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги».": "Tellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi, kliendile läheb kiri «Raha tagastatud». Raha ise siit ei liigu — selleks on nupp «Tagasta raha».",
+      "Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.": "Kõigepealt tagastatakse kaardiga makstud osa, ülejäänu läheb Montonio kaudu sama teed, kust raha tuli. Kliendile läheb kiri.",
+      "Картой снова можно будет платить. Клиенту уйдёт письмо.": "Kaardiga saab jälle maksta. Kliendile läheb kiri.",
+      "Статус вернётся на «оплачен». Деньги не трогаем — они уже учтены; товары, которые вернула отмена, снова спишутся со склада.": "Staatus läheb tagasi «makstud». Raha jääb puutumata — see on juba arvesse võetud; kaubad, mille tühistamine lattu tagastas, kantakse uuesti maha.",
+      "Так же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят». Отмечайте, только если деньги действительно пришли.": "Sama mis tavalise makse puhul: kaubad kantakse laost maha, kliendile läheb kiri «Tellimus vastu võetud». Märkige ainult siis, kui raha on tõesti laekunud.",
+      "Покупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.": "Ostjad näevad muudatust kohe. Endise bänneri saab tagasi muudatuste päevikust.",
+      "Изменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах.": "Muutub kõikjal: poe jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
+      "Новые условия начнут действовать сразу — для всех покупателей и партнёров.": "Uued tingimused hakkavad kehtima kohe — kõigile ostjatele ja partneritele.",
+      "Товар исчезнет из магазина — из каталога, поиска и корзины. Вернуть можно здесь же, в «Товарах», или из журнала.": "Toode kaob poest — kataloogist, otsingust ja ostukorvist. Tagasi saab siinsamas «Toodetes» või logist.",
+      "В магазине останется страница товара, но купить его будет нельзя. Вернуть можно здесь же — «Наличие».": "Tootel jääb poes leht alles, aga osta seda ei saa. Tagasi saab siinsamas — «Saadavus».",
+      "Страница набора перестанет открываться, вернуть его будет нельзя. Уже оформленные заказы не изменятся.": "Komplekti leht enam ei avane, tagasi seda saada ei õnnestu. Juba vormistatud tellimused ei muutu.",
+      "Отменить можно в журнале.": "Tühistada saab logist.",
+      "Заголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.": "Pealkiri, sissejuhatus, tekst, sildid, tooted ja Google'i tekst — vene keeles, siis eesti ja inglise keeles. Avaneb blogi redaktoris mustandina: loete läbi ja avaldate.",
+      "Фото добавите на вкладке «Фото и видео» — она откроется сама.": "Fotod lisate vahekaardil «Fotod ja video» — see avaneb ise.",
+      "баллы включены": "punktid on sees",
+      "баллы выключены": "punktid on väljas",
       "снова в продаже": "jälle müügil",
       "снят с продажи": "müügilt eemaldatud",
       "как было": "nagu oli",
@@ -3710,12 +3743,12 @@
         "Self-collection is not in the table — it is always free. «—» means that carrier does not ship to that country.",
       "Везде взять цены Montonio": "Use Montonio prices everywhere",
       "«Везде взять цены Montonio» очистит все ваши цены — в таблице останутся цены Montonio. Проверьте цифры и сохраните.":
-        "«Везде взять цены Montonio» clears every price of yours — Montonio's prices are what stays in the table. Check the figures and save.",
+        "«Use Montonio prices everywhere» clears every price of yours — Montonio's prices are what stays in the table. Check the figures and save.",
       "В таблице цены Montonio — проверьте и нажмите «Сохранить»":
-        "The table now holds Montonio's prices — check them and press «Сохранить»",
+        "The table now holds Montonio's prices — check them and press «Save»",
       "не возит": "does not ship there",
       "пусто — доставка бесплатна": "empty — delivery is free",
-      "пусто — берётся «Остальные страны»": "empty — «Остальные страны» applies",
+      "пусто — берётся «Остальные страны»": "empty — «All other countries» applies",
       "Пакоматов магазин в этих странах не предлагает — только курьер. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
         "The shop offers no parcel locker in these countries — courier only. Under the price is what the shop charges if the box is cleared, and which carrier carries the parcel.",
       "Что увидит покупатель": "What the customer sees",
@@ -4296,10 +4329,10 @@
       "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.":
         "The camera is not available in this browser. Use the search or manual code entry below.",
       "Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».":
-        "Put the sale together — search for a product here or scan a barcode in «Склад», set the payment and confirm. The order is marked paid immediately and shows up in «Orders» tagged «Salon».",
+        "Put the sale together — search for a product here or scan a barcode in «Stock», set the payment and confirm. The order is marked paid immediately and shows up in «Orders» tagged «Salon».",
       "Поиск товара": "Product search",
       "Пока пусто — добавьте товар выше или отсканируйте штрихкод в «Складе».":
-        "Empty for now — add a product above or scan a barcode in «Склад».",
+        "Empty for now — add a product above or scan a barcode in «Stock».",
       "Покупатель (необязательно)": "Customer (optional)",
       "E-mail": "E-mail",
       "Наличные": "Cash", "Терминал": "Card terminal",
@@ -5069,6 +5102,39 @@
       "включены": "on",
       "выключены": "off",
       "без изменений": "no changes",
+      "Уже партнёр": "Already a partner",
+      /* ---- the confirm cards' own sentences -----------------------------
+         One key per LINE of a card, because the card paints a node per line
+         (admDetailHTML). Until 17.09.2026 these were the tails of one UI_RX
+         rule each, matching a whole two-line detail; as keys they are shared
+         by every card that says the same thing and there is nothing left to
+         keep in step with a composer. */
+      "Включим цены для салонов и отправим письмо «Цены для салонов включены».": "Salon prices go on and the letter “Salon prices are on” goes out.",
+      "Цены для салонов выключатся со следующего заказа. Письмо не отправляется.": "Salon prices switch off from the next order on. No letter is sent.",
+      "Включим цены для салонов и отправим письмо на эту почту.": "Salon prices go on and a letter goes to this address.",
+      "Заявка закроется, цены для салонов не включатся. Письмо не отправляется.": "The request is closed and salon prices stay off. No letter is sent.",
+      "Клиенту уйдёт письмо «Заказ отправлен» — без трек-номера.": "The customer gets the “Order shipped” letter — without a tracking number.",
+      "Клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "The customer gets the “Order shipped” letter with the tracking number.",
+      "Им ещё никто не пользовался — код просто исчезнет.": "Nobody has used it yet — the code simply goes.",
+      "Письмо уйдёт сразу, отозвать его нельзя.": "The letter goes out at once and cannot be recalled.",
+      "Заказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён». Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги».": "The order gets the status “cancelled”, the goods go back to stock and the customer gets the “Order cancelled” letter. Cancelling returns no money — the “Refund” button does that.",
+      "Заказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».": "The order has not been paid — there is nothing to return. The customer gets the “Order cancelled” letter.",
+      "Заказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги».": "The order gets the status “refunded”, the goods go back to stock and the customer gets the “Money refunded” letter. No money moves from here — the “Refund” button does that.",
+      "Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.": "The part paid with the card goes back first; the rest goes through Montonio the way the money came. The customer gets a letter.",
+      "Картой снова можно будет платить. Клиенту уйдёт письмо.": "The card works again. The customer gets a letter.",
+      "Статус вернётся на «оплачен». Деньги не трогаем — они уже учтены; товары, которые вернула отмена, снова спишутся со склада.": "The status goes back to “paid”. The money is left alone — it is already accounted for; goods the cancellation put back are taken off the shelf again.",
+      "Так же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят». Отмечайте, только если деньги действительно пришли.": "The same as a normal payment: the goods leave the stock and the customer gets the “Order received” letter. Mark it only when the money has really arrived.",
+      "Покупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.": "Customers see the change at once. The previous banner can be brought back from the change journal.",
+      "Изменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах.": "Changes everywhere: in the shop footer, on the Contact page, in the legal texts and in the letters.",
+      "Новые условия начнут действовать сразу — для всех покупателей и партнёров.": "The new terms apply at once — to every customer and partner.",
+      "Товар исчезнет из магазина — из каталога, поиска и корзины. Вернуть можно здесь же, в «Товарах», или из журнала.": "The product disappears from the shop — the catalogue, search and the cart. Put it back right here in «Products» or from the log.",
+      "В магазине останется страница товара, но купить его будет нельзя. Вернуть можно здесь же — «Наличие».": "The product page stays in the shop, but nobody can buy it. Put it back right here — «Availability».",
+      "Страница набора перестанет открываться, вернуть его будет нельзя. Уже оформленные заказы не изменятся.": "The set's page stops opening and it cannot be brought back. Orders already placed do not change.",
+      "Отменить можно в журнале.": "It can be undone from the log.",
+      "Заголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.": "Title, intro, body, tags, products and the Google text — in Russian first, then Estonian and English. It opens in the blog editor as a draft: you read it and publish it.",
+      "Фото добавите на вкладке «Фото и видео» — она откроется сама.": "You add the photos on the “Photos and video” tab — it opens by itself.",
+      "баллы включены": "points are on",
+      "баллы выключены": "points are off",
       "снова в продаже": "back on sale",
       "снят с продажи": "taken off sale",
       "как было": "as before",
@@ -5419,23 +5485,14 @@
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
         EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
     /* the switch on a promo-code row is named after the code it belongs to */
-    [/^Промокод (.+)$/, { ET: "Sooduskood $1", EN: "Promo code $1" }],
+    // ([^:]+), not (.+): «Промокод SUMMER: скидка 15%» is the journal's own
+    // line and belongs to the rules further down — this one is the bare code,
+    // and a greedy capture here swallowed the colon and left the rest Russian
+    [/^Промокод ([^:]+)$/, { ET: "Sooduskood $1", EN: "Promo code $1" }],
     [/^Партнёр · (.+)$/, { ET: "Partner · $1", EN: "Partner · $1" }],
     [/^Розница · (.+)$/, { ET: "Jaemüük · $1", EN: "Retail · $1" }],
     [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
-    [/^(.+)\nВключим цены для салонов и отправим письмо «Цены для салонов включены»\.$/,
-      { ET: "$1\nLülitame sisse salongihinnad ja saadame kirja „Salongihinnad on sisse lülitatud“.",
-        EN: "$1\nSalon prices go on and the letter “Salon prices are on” goes out." }],
-    [/^(.+)\nЦены для салонов выключатся со следующего заказа\. Письмо не отправляется\.$/,
-      { ET: "$1\nSalongihinnad lülituvad välja alates järgmisest tellimusest. Kirja ei saadeta.",
-        EN: "$1\nSalon prices switch off from the next order on. No letter is sent." }],
-    [/^(.+)\nВключим цены для салонов и отправим письмо на эту почту\.$/,
-      { ET: "$1\nLülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
-        EN: "$1\nSalon prices go on and a letter goes to this address." }],
     // «Отказать» on a partner request — the other half of the same card
-    [/^(.+)\nЗаявка закроется, цены для салонов не включатся\. Письмо не отправляется\.$/,
-      { ET: "$1\nTaotlus suletakse, salongihindu sisse ei lülitata. Kirja ei saadeta.",
-        EN: "$1\nThe request is closed and salon prices stay off. No letter is sent." }],
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
     [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
@@ -5453,23 +5510,11 @@
     /* the confirm card before «Отправлен» — one pre-line block, so the whole
        thing is one text node; with the tracking number the letter will carry,
        or the plain fact that there is none */
-    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером (.+)\.$/,
-      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga $4.",
-        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number $4." }],
-    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
-      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
-        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
     /* «Удалить промокод?» — the code on its own line, then the one fact that
        makes the answer easy. One text node, like every other confirm card. */
-    [/^([^\n]+)\nИм ещё никто не пользовался — код просто исчезнет\.$/,
-      { ET: "$1\nKeegi pole seda veel kasutanud — kood lihtsalt kaob.",
-        EN: "$1\nNobody has used it yet — the code simply goes." }],
     /* «Написать клиенту» → «Отправить»: the confirm card's own two lines —
        the order and the address, then the warning. One text node either way,
        and the letter itself is drawn in the card's preview box below it. */
-    [/^([^\n]+)\nПисьмо уйдёт сразу, отозвать его нельзя\.$/,
-      { ET: "$1\nKiri läheb kohe välja, seda ei saa tagasi võtta.",
-        EN: "$1\nThe letter goes out at once and cannot be recalled." }],
     // …and the journal line it leaves behind
     [/^Письмо клиенту · заказ (.+)$/,
       { ET: "Kiri kliendile · tellimus $1", EN: "Letter to the customer · order $1" }],
@@ -5488,28 +5533,10 @@
     [/^(.+): (\d+) шт$/, { ET: "$1: $2 tk", EN: "$1: $2 pcs" }],
     /* the confirm card before an order moves — one pre-line block, so the
        whole thing is one text node */
-    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером\.$/,
-      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
-        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number." }],
     /* «Отменить заказ» and «возврат» say what they do now: the letter that
        did not exist before 07.09.2026 goes out, and moving money is the
        card's own «Вернуть деньги» button rather than a trip to Montonio. */
-    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён»\. Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги»\.$/,
-      { ET: "$1 · $2\nTellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi, kliendile läheb kiri «Tellimus tühistatud». Tühistamine raha ei tagasta — selleks on nupp «Tagasta raha».",
-        EN: "$1 · $2\nThe order gets the status “cancelled”, the goods go back to stock and the customer gets the “Order cancelled” letter. Cancelling returns no money — the “Refund” button does that." }],
-    [/^([^\n]+) · ([^\n]+)\nЗаказ ещё не оплачен — возвращать нечего\. Клиенту уйдёт письмо «Заказ отменён»\.$/,
-      { ET: "$1 · $2\nTellimus ei ole veel makstud — tagastada pole midagi. Kliendile läheb kiri «Tellimus tühistatud».",
-        EN: "$1 · $2\nThe order has not been paid — there is nothing to return. The customer gets the “Order cancelled” letter." }],
-    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены»\. Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги»\.$/,
-      { ET: "$1 · $2\nTellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi, kliendile läheb kiri «Raha tagastatud». Raha ise siit ei liigu — selleks on nupp «Tagasta raha».",
-        EN: "$1 · $2\nThe order gets the status “refunded”, the goods go back to stock and the customer gets the “Money refunded” letter. No money moves from here — the “Refund” button does that." }],
     /* the «Вернуть деньги» card, first refund and second */
-    [/^([^\n]+) · ([^\n]+)\nВернём (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, товары вернутся на склад, заказ станет «возврат»\. Можно вернуть часть — измените сумму\.$/,
-      { ET: "$1 · $2\nTagastame $3 Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, kaubad lähevad lattu tagasi ja tellimus saab staatuse «tagastus». Tagastada saab ka osa — muutke summat.",
-        EN: "$1 · $2\nWe will send $3 back through Montonio, the way the money came. The customer gets a letter, the goods go back to stock and the order becomes “refunded”. You can refund part of it — change the amount." }],
-    [/^([^\n]+) · ([^\n]+)\nПо заказу уже возвращено (.+)\. Осталось (.+) — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо\.$/,
-      { ET: "$1 · $2\nTellimuse eest on juba tagastatud $3. Jäänud on $4 — raha läheb Montonio kaudu sama teed, kust tuli, ja klient saab kirja.",
-        EN: "$1 · $2\n$3 has already been refunded on this order. $4 is left — the money goes back through Montonio the way it came, and the customer gets a letter." }],
     /* the refund ledger on the order card, and the two toasts behind it */
     [/^Возвращено (.+) из (.+)$/, { ET: "Tagastatud $1 / $2", EN: "Refunded $1 of $2" }],
     [/^⚠ Возврат (.+) не прошёл — проверьте в Montonio$/,
@@ -5523,12 +5550,6 @@
     /* gift cards and refunds (10.09.2026): the split on the confirm card, the
        note about the cards the order sold, the toasts, and the order card's
        own lines about a card */
-    [/^([^\n]+) · ([^\n]+)\nВернём на подарочную карту: (.+) · на счёт покупателя: (.+)\. Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли\. Клиенту уйдёт письмо\.$/,
-      { ET: "$1 · $2\nTagastame kinkekaardile: $3 · ostja kontole: $4. Kõigepealt tagastatakse kaardiga makstud osa, ülejäänu läheb Montonio kaudu sama teed, kust raha tuli. Kliendile läheb kiri.",
-        EN: "$1 · $2\nBack onto the gift card: $3 · to the buyer's account: $4. The part paid with the card goes back first; the rest goes through Montonio the way the money came. The customer gets a letter." }],
-    [/^([^\n]+) · ([^\n]+)\nВернём на подарочную карту: (.+) · на счёт покупателя: (.+)\. Картой снова можно будет платить\. Клиенту уйдёт письмо\.$/,
-      { ET: "$1 · $2\nTagastame kinkekaardile: $3 · ostja kontole: $4. Kaardiga saab jälle maksta. Kliendile läheb kiri.",
-        EN: "$1 · $2\nBack onto the gift card: $3 · to the buyer's account: $4. The card works again. The customer gets a letter." }],
     [/^Подарочная карта (.+) из этого заказа уже потрачена на (.+) — вернуть заказ целиком нельзя\.$/,
       { ET: "Selle tellimuse kinkekaart $1 on juba kulutatud $2 ulatuses — tervet tellimust tagastada ei saa.",
         EN: "Gift card $1 from this order has already been spent — $2 of it — so the whole order cannot be refunded." }],
@@ -5553,12 +5574,6 @@
         EN: "Unpaid orders: reminder after $1 days, cancellation after $2 days" }],
     /* «Изменить статус вручную» — the confirm card's two-line text before a
        refund, and before «оплачен» by hand (money already in / not yet) */
-    [/^([^\n]+) · ([^\n]+)\nСтатус вернётся на «оплачен»\. Деньги не трогаем — они уже учтены; товары, которые вернула отмена, снова спишутся со склада\.$/,
-      { ET: "$1 · $2\nStaatus läheb tagasi «makstud». Raha jääb puutumata — see on juba arvesse võetud; kaubad, mille tühistamine lattu tagastas, kantakse uuesti maha.",
-        EN: "$1 · $2\nThe status goes back to “paid”. The money is left alone — it is already accounted for; goods the cancellation put back are taken off the shelf again." }],
-    [/^([^\n]+) · ([^\n]+)\nТак же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят»\. Отмечайте, только если деньги действительно пришли\.$/,
-      { ET: "$1 · $2\nSama mis tavalise makse puhul: kaubad kantakse laost maha, kliendile läheb kiri «Tellimus vastu võetud». Märkige ainult siis, kui raha on tõesti laekunud.",
-        EN: "$1 · $2\nThe same as a normal payment: the goods leave the stock and the customer gets the “Order received” letter. Mark it only when the money has really arrived." }],
     /* checkout trust line — the phone and the e-mail come from the content
        layer, so only the label around them is translated. The two-value rule
        has to come first: the one-value rule would swallow the «или». */
@@ -5600,6 +5615,10 @@
     [/^Бесплатная доставка от (.+)$/, { ET: "Tasuta tarne alates $1", EN: "Free delivery from $1" }],
     [/^Бесплатная доставка: Эстония от (.+) · LV, LT от (.+) · Финляндия от (.+)$/,
       { ET: "Tasuta tarne: Eesti alates $1 · LV, LT alates $2 · Soome alates $3", EN: "Free delivery: Estonia from $1 · LV, LT from $2 · Finland from $3" }],
+    /* «от 5 баллов» — the loyalty floor, a number AND a word. Ahead of the
+       bare «от <сумма>» below, which would otherwise match first and leave
+       the word behind it in Russian. */
+    [/^от (\d+) баллов$/, { ET: "alates $1 punktist", EN: "from $1 points" }],
     [/^от (\d.*)$/, { ET: "alates $1", EN: "from $1" }],
     [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Delivery — $1" }],
     [/^Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от (.+) · самовывоз на Mardi 1$/,
@@ -5665,15 +5684,6 @@
     // cards in front of the rebuilt settings cards (one pre-line block each)
     [/^(\d+) слайд$/, { ET: "$1 slaid", EN: "$1 slide" }],
     [/^(\d+) слайд(?:а|ов)$/, { ET: "$1 slaidi", EN: "$1 slides" }],
-    [/^Слайдов на сайте: (\d+)\.\nПокупатели увидят изменение сразу\. Вернуть прежний баннер можно из журнала изменений\.$/,
-      { ET: "Slaide saidil: $1.\nOstjad näevad muudatust kohe. Endise bänneri saab tagasi muudatuste päevikust.",
-        EN: "Slides on the site: $1.\nCustomers see the change at once. The previous banner can be brought back from the change journal." }],
-    [/^(.+)\nИзменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах\.$/,
-      { ET: "$1\nMuutub kõikjal: poe jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
-        EN: "$1\nChanges everywhere: in the shop footer, on the Contact page, in the legal texts and in the letters." }],
-    [/^(.+)\nНовые условия начнут действовать сразу — для всех покупателей и партнёров\.$/,
-      { ET: "$1\nUued tingimused hakkavad kehtima kohe — kõigile ostjatele ja partneritele.",
-        EN: "$1\nThe new terms apply at once — to every customer and partner." }],
     [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }],
     /* checkout-gaps: the applied promo code carries the code and the number
        inside the same line, so it cannot be a plain dictionary key. */
@@ -5824,9 +5834,6 @@
     // product creation: the undo of the line above, and the confirm card
     // before the owner's own product leaves the shelf (one pre-line block)
     [/^Снова в продаже · (.+)$/, { ET: "Jälle müügil · $1", EN: "Back on sale · $1" }],
-    [/^(.+) — (.+)\nТовар исчезнет из магазина — из каталога, поиска и корзины\. Вернуть можно здесь же, в «Товарах», или из журнала\.$/,
-      { ET: "$1 — $2\nToode kaob poest — kataloogist, otsingust ja ostukorvist. Tagasi saab siinsamas «Toodetes» või logist.",
-        EN: "$1 — $2\nThe product disappears from the shop — the catalogue, search and the cart. Put it back right here in «Products» or from the log." }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
     // the same line when the sale carried an e-mail and the letter really went
@@ -5835,11 +5842,7 @@
         EN: "$1 lines · $2 · stock written off · the receipt went by e-mail" }],
     /* the confirm card before a salon sale — one pre-line block, so the whole
        thing is one text node (same shape as the shipping confirm above) */
-    [/^([\s\S]+)\n\nИтого (.+) · (.+)$/, { ET: "$1\n\nKokku $2 · $3", EN: "$1\n\nTotal $2 · $3" }],
     /* the confirm card before a product is taken off sale — one pre-line block */
-    [/^(.+) — (.+)\nВ магазине останется страница товара, но купить его будет нельзя\. Вернуть можно здесь же — «Наличие»\.$/,
-      { ET: "$1 — $2\nTootel jääb poes leht alles, aga osta seda ei saa. Tagasi saab siinsamas — «Saadavus».",
-        EN: "$1 — $2\nThe product page stays in the shop, but nobody can buy it. Put it back right here — «Availability»." }],
     /* админка, этап 3 — the six lines that carry a sum, a count, a language
        name or a country, so they cannot be plain dictionary keys. */
     [/^(.+) не потрачено$/, { ET: "$1 kasutamata", EN: "$1 unspent" }],
@@ -5870,9 +5873,6 @@
     [/^Письмо со счётом не ушло \((.+)\) — нажмите «Отправить счёт ещё раз»\.$/,
       { ET: "Arvega kiri ei läinud välja ($1) — vajutage «Saada arve uuesti».", EN: "The invoice letter did not go out ($1) — press “Send the invoice again”." }],
     [/^Просрочен на (\d+) (?:день|дня|дней)\.$/, { ET: "Üle tähtaja $1 päeva.", EN: "$1 days overdue." }],
-    [/^([^\n]+) · ([^\n]+)\nДеньги по счёту №(.+) пришли на счёт\? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят»\.$/,
-      { ET: "$1 · $2\nKas raha arve nr $3 eest on kontole laekunud? Tellimus märgitakse makstuks, kliendile läheb kiri «Tellimus vastu võetud».",
-        EN: "$1 · $2\nHas the money for invoice $3 arrived? The order becomes paid and the customer gets the “Order confirmed” letter." }],
     [/^(.+) уже был оплачен$/, { ET: "$1 oli juba makstud", EN: "$1 was already paid" }],
     [/^(.+) оплачен по счёту · письмо ушло$/, { ET: "$1 makstud arve alusel · kiri läks välja", EN: "$1 paid by invoice · the letter has gone" }],
     [/^Заказ (.+): оплачен по счёту (.+)$/, { ET: "Tellimus $1: makstud arve $2 alusel", EN: "Order $1: paid by invoice $2" }],
@@ -5978,6 +5978,57 @@
        update_product, rendered by jrowTextHTML); then those fields. */
     [/^Товар «(.+)»$/, { ET: "Toode «$1»", EN: "Product “$1”" }],
     [/^Новый товар «(.+)»$/, { ET: "Uus toode «$1»", EN: "A new product “$1”" }],
+    /* ---- the confirm cards, line by line --------------------------------
+       Until 17.09.2026 each of these cards was ONE rule matching its whole
+       two- or three-line detail, because the card printed the detail as one
+       text node. It paints a node per line and a node per « · » fact now
+       (admDetailHTML), which is the only shape an open-ended list of facts
+       can be translated in at all — so the fixed sentences below moved into
+       the dictionary as plain keys, and the ones carrying a value are these
+       rules. Shorter, and each is reusable by any card that says the same
+       thing. */
+    [/^Клиенту уйдёт письмо «Заказ отправлен» с трек-номером (.+)\.$/,
+      { ET: "Kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga $1.",
+        EN: "The customer gets the “Order shipped” letter with the tracking number $1." }],
+    [/^Вернём (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, товары вернутся на склад, заказ станет «возврат»\. Можно вернуть часть — измените сумму\.$/,
+      { ET: "Tagastame $1 Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, kaubad lähevad lattu tagasi ja tellimus saab staatuse «tagastus». Tagastada saab ka osa — muutke summat.",
+        EN: "We will send $1 back through Montonio, the way the money came. The customer gets a letter, the goods go back to stock and the order becomes “refunded”. You can refund part of it — change the amount." }],
+    [/^По заказу уже возвращено (.+)\. Осталось (.+) — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо\.$/,
+      { ET: "Tellimuse eest on juba tagastatud $1. Jäänud on $2 — raha läheb Montonio kaudu sama teed, kust tuli, ja klient saab kirja.",
+        EN: "$1 has already been refunded on this order. $2 is left — the money goes back through Montonio the way it came, and the customer gets a letter." }],
+    /* the gift-card split: two facts of one list, so two rules rather than
+       one sentence with a « · » inside it (admRefundConfirmText) */
+    [/^Вернём на подарочную карту: (.+)$/,
+      { ET: "Tagastame kinkekaardile: $1", EN: "Back onto the gift card: $1" }],
+    [/^на счёт покупателя: (.+)$/,
+      { ET: "ostja kontole: $1", EN: "to the buyer's account: $1" }],
+    [/^Деньги по счёту №(.+) пришли на счёт\? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят»\.$/,
+      { ET: "Kas raha arve nr $1 eest on kontole laekunud? Tellimus märgitakse makstuks, kliendile läheb kiri «Tellimus vastu võetud».",
+        EN: "Has the money for invoice $1 arrived? The order becomes paid and the customer gets the “Order confirmed” letter." }],
+    [/^Слайдов на сайте: (\d+)\.$/, { ET: "Slaide saidil: $1.", EN: "Slides on the site: $1." }],
+    /* the salon till's receipt — «Итого 28,84 € · наличные», one fact each */
+    [/^Итого (.+)$/, { ET: "Kokku $1", EN: "Total $1" }],
+    [/^Фото появится на странице товара(.*)\. Отменить можно в журнале\.$/,
+      { ET: "Foto ilmub toote lehele$1. Tühistada saab logist.",
+        EN: "The photo appears on the product page$1. It can be undone from the log." }],
+    [/^Ещё одно фото «(.+)»$/, { ET: "Veel üks foto «$1»", EN: "One more photo of “$1”" }],
+    /* «Цены и баллы» — the facts of an open-ended list, one node each now
+       (actionText's set_pricing). Seven settings in any combination is a
+       shape no single rule can name, which is exactly why each fact had to
+       become a node of its own before any of them could be translated. */
+    [/^скидка для салонов (.+)$/, { ET: "salongi soodustus $1", EN: "salon discount $1" }],
+    [/^начисление (.+)$/, { ET: "kogumine $1", EN: "earning $1" }],
+    [/^списание до (.+)$/, { ET: "kasutamine kuni $1", EN: "redeeming up to $1" }],
+    /* «Контент · телефон → +372 5555 1234»: the field NAME is a key of its
+       own (CONTENT_FIELD_WORD), so one rule covers all eight of them and
+       $1 is looked up in the dictionary like any other capture. */
+    [/^(название компании|рег\. номер|номер KMKR|адрес|почта|телефон|IBAN|банк) → (.+)$/,
+      { ET: "$1 → $2", EN: "$1 → $2" }],
+    /* a promo code's own conditions, each its own fact in the same list */
+    [/^(\d+) (?:использование|использования|использований)$/,
+      { ET: "$1 kasutuskorda", EN: "$1 uses" }],
+    [/^Номиналы подарочной карты: (.+)$/,
+      { ET: "Kinkekaardi nimiväärtused: $1", EN: "Gift card amounts: $1" }],
     [/^Товар «(.+)»: (.+)$/, { ET: "Toode «$1»: $2", EN: "Product “$1”: $2" }],
     [/^бренд: «(.*)» → «(.*)»$/, { ET: "kaubamärk: «$1» → «$2»", EN: "brand: “$1” → “$2”" }],
     [/^название: «(.*)» → «(.*)»$/, { ET: "nimi: «$1» → «$2»", EN: "name: “$1” → “$2”" }],
@@ -6004,22 +6055,7 @@
     [/^Промокод (.+): бесплатная доставка(.*)$/,
       { ET: "Sooduskood $1: tasuta tarne$2", EN: "Promo code $1: free delivery$2" }],
     [/^Промокод удалён: (.+)$/, { ET: "Sooduskood kustutatud: $1", EN: "Promo code deleted: $1" }],
-    [/^Удалить набор «(.+)»(.*)\nСтраница набора перестанет открываться, вернуть его будет нельзя\. Уже оформленные заказы не изменятся\.$/,
-      { ET: "Kustutada komplekt «$1»$2\nKomplekti leht enam ei avane, tagasi seda saada ei õnnestu. Juba vormistatud tellimused ei muutu.",
-        EN: "Delete the set “$1”$2\nThe set's page stops opening and it cannot be brought back. Orders already placed do not change." }],
-    [/^(Главное фото|Ещё одно фото) «(.+)»\nФото появится на странице товара(.*)\. Отменить можно в журнале\.$/,
-      { ET: "$1 «$2»\nFoto ilmub toote lehele$3. Tühistada saab logist.",
-        EN: "$1 “$2”\nThe photo appears on the product page$3. It can be undone from the log." }],
-    [/^Обложка статьи «(.+)»(.*)\nОтменить можно в журнале\.$/,
-      { ET: "Artikli «$1» kaanepilt$2\nTühistada saab logist.",
-        EN: "The cover of the article “$1”$2\nIt can be undone from the log." }],
-    [/^Статья целиком на тему «(.+)»(.*)\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском\. Откроется в редакторе блога черновиком: прочитаете и опубликуете\.$/,
-      { ET: "Terve artikkel teemal «$1»$2\nPealkiri, sissejuhatus, tekst, sildid, tooted ja Google'i tekst — vene keeles, siis eesti ja inglise keeles. Avaneb blogi redaktoris mustandina: loete läbi ja avaldate.",
-        EN: "A whole article on “$1”$2\nTitle, intro, body, tags, products and the Google text — in Russian first, then Estonian and English. It opens in the blog editor as a draft: you read it and publish it." }],
     [/^Черновик статьи «(.+)»(.*)$/, { ET: "Artikli «$1» mustand$2", EN: "A draft of the article “$1”$2" }],
-    [/^Новый товар «(.+)» · (.+)\nФото добавите на вкладке «Фото и видео» — она откроется сама\.$/,
-      { ET: "Uus toode «$1» · $2\nFotod lisate vahekaardil «Fotod ja video» — see avaneb ise.",
-        EN: "A new product “$1” · $2\nYou add the photos on the “Photos and video” tab — it opens by itself." }],
     /* The catch-alls of the block above, LAST of all: a line whose tail is a
        price, a country code or a date rather than a word still gets its
        template translated, and the value is handed back untouched. */
@@ -6042,7 +6078,6 @@
     /* …and the confirm card's own copy of a product save, which is ONE text
        node with its lines still in it (the journal splits them, the card does
        not — .adm-propose__d is `white-space: pre-line`). */
-    [/^Товар «(.+)»\n([\s\S]+)$/, { ET: "Toode «$1»\n$2", EN: "Product “$1”\n$2" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -8057,7 +8092,34 @@
     });
     return s;
   }
-  function gal(p) { return p.gallery && p.gallery.length ? p.gallery : [p.img]; }
+  /* Every photo the shop has for this product, in the order it shows them —
+     and never a hole.
+
+     `gallery` USED to win whole: `p.gallery.length ? p.gallery : [p.img]`. A
+     list is only as good as its entries, though, and the owner's own products
+     are the ones whose entries the catalogue generator never wrote — one
+     photo row with no usable url made `p.gallery` a list of one `undefined`,
+     which beat a perfectly good `p.img` and reached media() as
+     `background-image:url('undefined')`: a card with a name, a price and an
+     empty square where the picture belongs, which is exactly what «С этим
+     покупают» showed on a hoodie's page (Renat, 17.09.2026).
+
+     So the holes are dropped first, `img` is the fallback when nothing is
+     left, and media() draws the shop's own mark when even that is missing.
+     Same shape as galUrlsOf() and galleryUrls(), which have always filtered —
+     this was the one reader that did not. */
+  function gal(p) {
+    var out = [];
+    var list = p && p.gallery;
+    if (list && list.length) {
+      for (var i = 0; i < list.length; i++) {
+        var u = list[i] && (typeof list[i] === "string" ? list[i] : list[i].url);
+        if (u) out.push(u);
+      }
+    }
+    if (!out.length && p && p.img) out.push(p.img);
+    return out;
+  }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
   // lineUnit() knows the three line kinds — product, set, gift card
   function cartSum() { var s = 0; S.cart.forEach(function (l) { s += lineUnit(l) * l.qty; }); return s; }
@@ -9353,9 +9415,18 @@
      parent picks up an opacity transition. Merch is a model shot: it keeps
      its frame and fills the tile edge to edge instead. */
   function media(p, i, cls) {
-    var g = gal(p), src = g[Math.min(i || 0, g.length - 1)];
+    var g = gal(p), src = g.length ? g[Math.min(i || 0, g.length - 1)] : "";
+    /* No photo at all — the shop's own mark, the same one a gift card and a
+       deleted order line get (tower). An empty tile beside a name and a price
+       reads as a broken page; the mark reads as «no photograph yet», which is
+       the truth about a product the owner has only just created. */
+    if (!src) {
+      return '<span class="' + (cls || "ph") + ' ph--mark">' + tower("ph__mark") + "</span>";
+    }
+    // esc(): a photo url is data now (the owner's uploads), and an apostrophe
+    // in it would close the style attribute's own quote
     return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") +
-      '" style="background-image:url(\'' + src + '\')"></span>';
+      '" style="background-image:url(\'' + esc(src) + '\')"></span>';
   }
 
   /* ---------- the volume a card speaks for --------------------------------
@@ -13508,7 +13579,17 @@
     return !S.query.trim()
       // every chip must actually return something — «воск» returned nothing
       // because the catalogue has no wax
-      ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
+      /* The chip carries the query in the language it is READ in. Its label
+         is a text node, so translateTree() turned «шампунь» into «shampoo» on
+         the English shop — but data-q is not a text node and stayed Russian,
+         so tapping «shampoo» searched «шампунь» and put that in the box
+         (Renat, 17.09.2026). One word in two places is one word too many:
+         trText() answers for both, and the search itself reads all three
+         languages (searchWide), so every chip still finds what it promises. */
+      ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) {
+          var shown = trText(q, S.lang);
+          return '<button class="link" data-q="' + esc(shown) + '">' + esc(shown) + "</button>";
+        }).join(" · ") + "</p>"
       : res.length
         ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
         : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
@@ -17828,6 +17909,42 @@
     return '<button class="adm-fab" data-admai aria-expanded="false" title="Помощник" aria-label="Помощник">' +
       admIcon("assistant", true, 20) + '<span class="adm-fab__lbl">Помощник</span></button>';
   }
+  /* ---- a composed sentence, as ELEMENTS ------------------------------------
+     THE RULE, and it is the same one payPiecesHTML() follows (13.09.2026):
+     a sentence the panel ASSEMBLES at runtime — a label, then live values,
+     joined with « · » and with a newline between the facts and what follows —
+     must reach the DOM in pieces, never glued. translateTree() rewrites a
+     text node only when it recognises the WHOLE of it, so one glued node is
+     one node the dictionary cannot touch: «Цены и лояльность: партнёры и
+     баллы включены · скидка для салонов 20% · …» stayed Russian under an
+     English heading, and the whole of «Товар «X»» + its changed fields with
+     it (Renat, 17.09.2026).
+
+     So every part gets an element of its own: one per LINE, and inside a line
+     one per « · » piece, with the separators left outside them. Each piece is
+     then a whole text node a key or a UI_RX rule can reach — «скидка для
+     салонов 20%» is a rule, «партнёры и баллы включены» is a key — and a
+     piece that is pure data (an order number, a customer's name, a sum) has
+     no Cyrillic in it and is left exactly as it was composed.
+
+     Split here, at PAINT time, rather than where the sentence is written:
+     a journal line is STORED as the Russian string it was composed in
+     (DEMO.log in localStorage, and the server's own admin_audit), so the
+     entries made before today have to come through the same door. Which in
+     turn is why every « · » in these sentences has to be a list separator and
+     never prose — see admGiftRefundConfirmText(), which was rewritten for it.
+
+     The newline survives as a text node of its own: .adm-confirm__d and
+     .adm-propose__d are `white-space: pre-line`, so the line breaks are the
+     CSS's to draw exactly as before. */
+  function admPiecesHTML(line) {
+    return String(line == null ? "" : line).split(" · ").map(function (piece) {
+      return "<span>" + esc(piece) + "</span>";
+    }).join(" · ");
+  }
+  function admDetailHTML(text) {
+    return String(text == null ? "" : text).split("\n").map(admPiecesHTML).join("\n");
+  }
   /** The confirm card as an overlay — a card over the page on a desktop, a
       sheet at the bottom on a phone. Actions that touch the shop or the money
       go through this before anything happens. */
@@ -17839,7 +17956,9 @@
         // txt(): the overlay twin of confirmCard()'s heading — the same card
         // lifted onto a scrim, so the same door in front of a model's object
         '<div class="adm-confirm__t">' + esc(txt(a.title) || "Подтвердите изменение") + "</div>" +
-        '<div class="adm-confirm__d">' + esc(txt(a.detail) || actionText(a)) + "</div>" +
+        // admDetailHTML(), not esc() straight: the detail is assembled, and a
+        // glued sentence is one the dictionary cannot reach — see the rule above
+        '<div class="adm-confirm__d">' + admDetailHTML(txt(a.detail) || actionText(a)) + "</div>" +
         /* One action needs a number before it happens: «Вернуть деньги» may
            send back part of the order. The field is prefilled with everything
            that is left, so the common case is still one tap. */
@@ -21148,7 +21267,9 @@
       left exactly as the server wrote it. */
   function auditTextHTML(row) {
     var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
-    if (typeof p.line === "string" && p.line) return esc(p.line);
+    // a line the SERVER composed is assembled the same way ours are, so it
+    // goes through the same door — admPiecesHTML(), see the rule above
+    if (typeof p.line === "string" && p.line) return admPiecesHTML(p.line);
     var word = AUDIT_WORDS[row.action] || row.action;
     var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
     return "<span>" + esc(word) + "</span>" + (what ? ": " + esc(what) : "");
@@ -21171,7 +21292,9 @@
       could ever reach it. */
   function jrowTextHTML(txt) {
     return String(txt == null ? "" : txt).split("\n").map(function (line) {
-      return '<span class="adm-jrow__l">' + esc(line) + "</span>";
+      // …and one node per « · » fact inside the line, for the same reason —
+      // admPiecesHTML() carries the whole of it
+      return '<span class="adm-jrow__l">' + admPiecesHTML(line) + "</span>";
     }).join("");
   }
   function admSetJournalHTML() {
@@ -28130,7 +28253,10 @@
   var CUSTOM_FRESH_MS = 24 * 3600 * 1000;   // «новый» in the panel's list for a day
   function customProduct(c) {
     var photos = Array.isArray(c.photos) ? c.photos.filter(function (ph) { return ph && ph.url; }) : [];
-    var urls = Array.isArray(c.gallery) && c.gallery.length ? c.gallery.slice() : photos.map(function (ph) { return ph.url; });
+    // filtered, not sliced: one row with no url used to make `gallery` a list
+    // of one `undefined`, and that beat `img` in gal() — see gal()'s comment
+    var urls = (Array.isArray(c.gallery) && c.gallery.length ? c.gallery : photos.map(function (ph) { return ph.url; }))
+      .filter(function (u) { return typeof u === "string" && u; });
     var desc = c.description && typeof c.description === "object" && (c.description.RU || c.description.ET || c.description.EN)
       ? c.description : null;
     var p = { id: String(c.id), brand: String(c.brand || ""), name: String(c.name || ""), cat: CAT_NAMES[c.cat] ? c.cat : "hair",
@@ -28202,7 +28328,10 @@
   function customSetGallery(id, list) {
     var c = findCustom(id);
     if (!c) return;
-    c.photos = (list || []).map(function (g) { return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" }; });
+    // the assistant's own list, so a row without a url is dropped here rather
+    // than left to poison the product's gallery (gal())
+    c.photos = (list || []).filter(function (g) { return g && g.url; })
+      .map(function (g) { return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" }; });
     c.gallery = c.photos.map(function (g) { return g.url; });
     if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
     adoptCustom(DEMO.custom);
@@ -29024,14 +29153,19 @@
       var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
       var gift = Math.round(Math.min(amount, rv.gift) * 100) / 100;
       var money = Math.round((amount - gift) * 100) / 100;
+      /* The split is a LIST and what follows it is prose, so they are two
+         lines rather than one sentence with a « · » buried in it: the card
+         paints a line's facts one element each (admDetailHTML), and a « · »
+         inside prose would cut a sentence in half where no key can reach
+         either piece. Three lines, three straight chains. */
       if (money > 0.004) {
         return v.number + " · " + v.who +
           "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
-          ". Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.";
+          "\nСначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.";
       }
       return v.number + " · " + v.who +
         "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
-        ". Картой снова можно будет платить. Клиенту уйдёт письмо.";
+        "\nКартой снова можно будет платить. Клиенту уйдёт письмо.";
     }
     if (v.refunded > 0.004) {
       return v.number + " · " + v.who +
@@ -29049,7 +29183,8 @@
     if (!row || !node) return;
     var text = admRefundConfirmText(row, Number(String(typed).replace(",", ".")));
     if (node.textContent === text) return;
-    node.textContent = text;
+    // in pieces, like every other paint of a detail — see admDetailHTML()
+    node.innerHTML = admDetailHTML(text);
     pendingAction.detail = text;
     translateTree(node.parentElement || node);
   }
@@ -29560,11 +29695,20 @@
       if (pv.partnersOn != null) bits.push(pv.partnersOn ? "партнёры и баллы включены" : "партнёры и баллы выключены");
       if (pv.proDiscountPct != null) bits.push("скидка для салонов " + pv.proDiscountPct + "%");
       if (pv.proMinOrder != null) bits.push("от " + eur(pv.proMinOrder));
-      if (plo.enabled != null) bits.push("баллы " + (plo.enabled ? "включены" : "выключены"));
+      // two whole strings, not one with a branch inside it: each of them is a
+      // dictionary key, and «баллы » + a word is neither
+      if (plo.enabled != null) bits.push(plo.enabled ? "баллы включены" : "баллы выключены");
       if (plo.earnPct != null) bits.push("начисление " + plo.earnPct + "%");
       if (plo.redeemMaxPct != null) bits.push("списание до " + plo.redeemMaxPct + "%");
       if (plo.minRedeem != null) bits.push("от " + plo.minRedeem + " баллов");
-      return "Цены и лояльность: " + (bits.length ? bits.join(" · ") : "без изменений");
+      /* « · » after the label, not «: ». The facts after it are an open-ended
+         list — seven settings in any combination — so no rule can ever name
+         its shapes, and the only thing that CAN translate them is one element
+         per fact (admPiecesHTML). That needs the label to be a piece of the
+         list too, and « · » is what makes it one. The old «Цены и лояльность:»
+         rule stays below: the journal entries written before today are stored
+         with the colon and still have to read in the panel's language. */
+      return "Цены и лояльность · " + (bits.length ? bits.join(" · ") : "без изменений");
     }
     if (a.type === "adjust_points") {
       return "Баллы клиента: " + (a.delta > 0 ? "+" : "") + a.delta + (a.note ? " — " + a.note : "");
@@ -30064,7 +30208,8 @@
        an assistant action today and which would land in the same place. */
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(txt(a.title) || "Предпросмотр изменения") + "</div>" +
-      '<div class="adm-propose__d">' + esc(txt(a.detail) || actionText(a) || "Изменений нет") + "</div>" +
+      // admDetailHTML() for the same reason as the overlay twin above
+      '<div class="adm-propose__d">' + admDetailHTML(txt(a.detail) || actionText(a) || "Изменений нет") + "</div>" +
       /* What is about to leave, in the owner's own words — «Написать клиенту»
          is the one action whose whole content he typed himself, and a
          «Отправить?» with the letter out of sight is a question he cannot
