@@ -1344,7 +1344,7 @@ function giftPage(lang) {
       '<img class="pre__img" src="/brand/rempire-tower.svg" alt="REMPIRE" width="120" height="186" style="max-width:120px">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       '<p class="sec__intro">' + esc(tr(
-        "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.",
+        "Работает на весь магазин. После оплаты придёт письмо с кодом — вам или сразу получателю.",
         code, false)) + "</p>" +
       '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' +
         esc(tr("Сумма", code, false)) + "</h2>" +

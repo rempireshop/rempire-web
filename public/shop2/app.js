@@ -348,6 +348,13 @@
       "нет IBAN": "IBAN puudub",
       "Счета компаниям не уходят, пока здесь нет IBAN.": "Ettevõtetele arveid ei saadeta, kuni siin pole IBAN-i.",
       "Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.": "See ei näe IBAN-i moodi: kaks riigi tähte ja seejärel 10–40 numbrit ja tähte, näiteks EE38 2200 2210 2014 5685. Pood salvestab välja tühjana.",
+      /* …and the same sentence for the five other identifiers on that page
+         (cFieldHint) — the server blanks each of them just as quietly */
+      "Регистрационный номер — это 4–20 цифр, например 12216136. Магазин сохранит поле пустым.": "Registrikood on 4–20 numbrit, näiteks 12216136. Pood salvestab välja tühjana.",
+      "Номер KMKR — две буквы страны и дальше 2–14 цифр или букв, например EE102723858. Магазин сохранит поле пустым.": "KMKR-number on kaks riigi tähte ja seejärel 2–14 numbrit või tähte, näiteks EE102723858. Pood salvestab välja tühjana.",
+      "Это не похоже на адрес почты — например info@rempireshop.com. Магазин сохранит поле пустым.": "See ei näe e-posti aadressi moodi — näiteks info@rempireshop.com. Pood salvestab välja tühjana.",
+      "Телефон — цифры, пробелы и скобки, не меньше пяти знаков, например +372 5623 7237. Магазин сохранит поле пустым.": "Telefon on numbrid, tühikud ja sulud, vähemalt viis märki, näiteks +372 5623 7237. Pood salvestab välja tühjana.",
+      "Ссылка должна начинаться с https:// — например https://instagram.com/rempire. Магазин сохранит поле пустым.": "Link peab algama https:// — näiteks https://instagram.com/rempire. Pood salvestab välja tühjana.",
       "В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым и письмо со счётом не отправит.": "Ülal plokis «Ettevõtte andmed» on IBAN-i asemel midagi muud — pood salvestab välja tühjana ja arvet välja ei saada.",
       "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Täitke IBAN ülal olevas plokis «Ettevõtte andmed» — ilma pangakonto numbrita pole arvet kuhugi tasuda, seepärast pood sellist kirja välja ei saada.",
       "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Täitke ja vajutage tellimuses «Saada arve uuesti».",
@@ -785,8 +792,8 @@
       "Подарочная карта Rempire на": "Rempire'i kinkekaart",
       "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
         "— tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
-      "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
-        "Kehtib kogu poes ega aegu kohe. Pärast maksmist tuleb kirjaga kood — sulle või kohe saajale.",
+      "Работает на весь магазин. После оплаты придёт письмо с кодом — вам или сразу получателю.":
+        "Kehtib kogu poes. Pärast maksmist tuleb kirjaga kood — sulle või kohe saajale.",
       "Кому — имя": "Kellele — nimi", "Имя получателя": "Saaja nimi",
       "E-mail получателя — не обязательно": "Saaja e-post — pole kohustuslik",
       "Оставьте пустым — пришлём карту вам, подарите сами.": "Jäta tühjaks — saadame kaardi sulle ja kingid ise.",
@@ -3062,6 +3069,13 @@
       "нет IBAN": "no IBAN",
       "Счета компаниям не уходят, пока здесь нет IBAN.": "Invoices to companies do not go out while there is no IBAN here.",
       "Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.": "That does not look like an IBAN: two country letters, then 10–40 digits and letters — for example EE38 2200 2210 2014 5685. The shop will store the field empty.",
+      /* …and the same sentence for the five other identifiers on that page
+         (cFieldHint) — the server blanks each of them just as quietly */
+      "Регистрационный номер — это 4–20 цифр, например 12216136. Магазин сохранит поле пустым.": "A registration number is 4–20 digits — for example 12216136. The shop will store the field empty.",
+      "Номер KMKR — две буквы страны и дальше 2–14 цифр или букв, например EE102723858. Магазин сохранит поле пустым.": "A KMKR number is two country letters, then 2–14 digits or letters — for example EE102723858. The shop will store the field empty.",
+      "Это не похоже на адрес почты — например info@rempireshop.com. Магазин сохранит поле пустым.": "That does not look like an e-mail address — for example info@rempireshop.com. The shop will store the field empty.",
+      "Телефон — цифры, пробелы и скобки, не меньше пяти знаков, например +372 5623 7237. Магазин сохранит поле пустым.": "A phone number is digits, spaces and brackets, at least five characters — for example +372 5623 7237. The shop will store the field empty.",
+      "Ссылка должна начинаться с https:// — например https://instagram.com/rempire. Магазин сохранит поле пустым.": "A link has to start with https:// — for example https://instagram.com/rempire. The shop will store the field empty.",
       "В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым и письмо со счётом не отправит.": "The «Details» block above holds something other than an IBAN — the shop will store the field empty and will not send the invoice.",
       "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо.": "Fill in the IBAN in the «Details» block above — an invoice with no bank account number on it cannot be paid, so the shop does not send that letter.",
       "Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Fill it in, then press “Send the invoice again” on the order.",
@@ -3496,8 +3510,8 @@
       "Подарочная карта Rempire на": "A Rempire gift card for",
       "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
         "— e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
-      "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
-        "Valid across the whole shop and it doesn't expire on you. After payment the code arrives by e-mail — to you or straight to the recipient.",
+      "Работает на весь магазин. После оплаты придёт письмо с кодом — вам или сразу получателю.":
+        "Valid across the whole shop. After payment the code arrives by e-mail — to you or straight to the recipient.",
       "Кому — имя": "To — name", "Имя получателя": "Recipient's name",
       "E-mail получателя — не обязательно": "Recipient's e-mail — optional",
       "Оставьте пустым — пришлём карту вам, подарите сами.": "Leave it empty and we'll send the card to you to give in person.",
@@ -9096,13 +9110,26 @@
     }).filter(function (d) { return d.n > 0; });
   }
 
+  /** «Сначала дешевле» has to sort on the number the CARD prints, which is
+      shownPrice() at cardSizeIdx() — the cheapest volume, and a salon
+      customer's own price where there is one. `p.price` is neither: it is the
+      first rung of the ladder, which is not always the cheapest (RE.STORE is
+      36 € for 40 мл and 7 € for 200 мл), and it is always the retail one. Both
+      showed as a grid visibly out of order under a button that says it is
+      sorted. Read once per product rather than inside the comparator: byId()
+      walks the catalogue, and a comparator would walk it n·log n times. */
+  function sortByShown(list, dir) {
+    var keyed = list.map(function (p) { return [shownPrice(p, cardSizeIdx(p.id)), p]; });
+    keyed.sort(function (a, b) { return dir * (a[0] - b[0]); });
+    return keyed.map(function (r) { return r[1]; });
+  }
   function filtered() {
     if (S.brand) {
       var b = CATALOGUE.filter(function (p) { return p.brand === S.brand; });
       if (S.onlyInStock) b = b.filter(function (p) { return p.stock !== "out"; });
       if (S.sort === "new") b = b.slice().reverse();
-      if (S.sort === "asc") b = b.slice().sort(function (x, y) { return x.price - y.price; });
-      if (S.sort === "desc") b = b.slice().sort(function (x, y) { return y.price - x.price; });
+      if (S.sort === "asc") b = sortByShown(b, 1);
+      if (S.sort === "desc") b = sortByShown(b, -1);
       return b;
     }
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
@@ -9113,8 +9140,8 @@
     if (S.onlyInStock) list = list.filter(function (p) { return p.stock !== "out"; });
     if (S.brandFilter.length) list = list.filter(function (p) { return S.brandFilter.indexOf(p.brand) >= 0; });
     if (S.sort === "new") list = list.slice().reverse();
-    if (S.sort === "asc") list = list.slice().sort(function (a, b) { return a.price - b.price; });
-    if (S.sort === "desc") list = list.slice().sort(function (a, b) { return b.price - a.price; });
+    if (S.sort === "asc") list = sortByShown(list, 1);
+    if (S.sort === "desc") list = sortByShown(list, -1);
     return list;
   }
   /* Russian inflects, so a literal substring match fails on the obvious
@@ -10088,7 +10115,7 @@
           : " / Подарочная карта</div>") +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Подарочная карта</h1>' +
-        '<p class="sec__intro">Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.</p>' +
+        '<p class="sec__intro">Работает на весь магазин. После оплаты придёт письмо с кодом — вам или сразу получателю.</p>' +
         '<div class="field__label">Сумма</div>' +
         /* Only the denominations the owner has switched on in
            «Маркетинг → Подарочные карты» — settings.gift_amounts. */
@@ -14796,9 +14823,16 @@
     var added = 0;
     list.slice(0, 50).forEach(function (l) {
       var id = String(l && l.id || "");
-      var known = false;
-      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = true; break; }
+      var known = null;
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = CATALOGUE[i]; break; }
       if (!known) return;
+      /* …and the same backstop addToCart() has: nothing out of stock enters
+         the basket, whatever put it there. The letter is written when the
+         basket is abandoned and read days later, so a line of it can easily
+         have sold out in between — and until 17.09.2026 it came back all the
+         same, sat in the basket looking ordinary, and was refused as a whole
+         order (out_of_stock) at the very last tap of the checkout. */
+      if (known.stock === "out") return;
       var size = Number(l.s) || 0;
       var qty = Math.max(1, Math.min(CART_MAX_QTY, Math.round(Number(l.q) || 1)));
       var line = null;
@@ -21546,6 +21580,58 @@
      quicker»). One rule, spelled the same in both places. */
   var IBAN_RE = /^[A-Z]{2}[0-9A-Z ]{10,40}$/;
   function ibanOk(v) { return IBAN_RE.test(String(v || "").trim().toUpperCase()); }
+  /* ---- …and the five fields beside it, judged the same way -----------------
+     The IBAN is not the only identifier on this page. The registration
+     number, the KMKR number, the e-mail, the phone and every link go through
+     a regex of their own on the way in (REG_RE, VAT_RE, EMAIL_RE, PHONE_RE,
+     URL_RE in src/lib/content.ts) and are stored as "" when they do not
+     match — the same silent blanking, with nothing anywhere saying so. A
+     phone typed with a letter in it left the panel showing what was typed and
+     «Сохранено ✓» under it, while the footer of every page, the «Контакты»
+     page and the letters lost the number altogether; the panel does not
+     re-read after boot (refreshFeeds leaves the admin alone), so the owner
+     found out on another device, or not at all.
+
+     A warning, not a refusal: an empty field is a legitimate answer, the
+     value is his, and blocking a save would be a new way to lose an
+     afternoon's typing. One sentence per kind, under the field it is about,
+     exactly as the IBAN's — tests/settings-audit-r21.test.ts runs these five
+     and src/lib/content.ts over the same values and fails on the first cell
+     where they disagree. */
+  var C_FIELD_RE = {
+    regCode: /^[0-9]{4,20}$/,
+    vatNumber: /^[A-Z]{2}[0-9A-Z]{2,14}$/,
+    email: /^[^@\s]{1,64}@[^@\s.]{1,180}(?:\.[^@\s.]{1,60}){1,4}$/,
+    phone: /^[+0-9][0-9 ()+\-.]{4,29}$/,
+    url: /^https?:\/\/[^\s"'<>]{3,290}$/i
+  };
+  /** The server's own normalisation before the test, so a KMKR written
+      «EE 1027 2385 8» is not called bad for the spaces in it. */
+  function cFieldNorm(kind, v) {
+    var s = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+    if (kind === "regCode") return s.replace(/[\s-]/g, "");
+    if (kind === "vatNumber") return s.replace(/[\s-]/g, "").toUpperCase();
+    if (kind === "email") return s.toLowerCase();
+    return s;
+  }
+  /** Will the server keep what is typed here? "" is kept by everything. */
+  function cFieldOk(kind, v) {
+    var s = cFieldNorm(kind, v);
+    return !s || C_FIELD_RE[kind].test(s);
+  }
+  var C_FIELD_WARN = {
+    regCode: "Регистрационный номер — это 4–20 цифр, например 12216136. Магазин сохранит поле пустым.",
+    vatNumber: "Номер KMKR — две буквы страны и дальше 2–14 цифр или букв, например EE102723858. Магазин сохранит поле пустым.",
+    email: "Это не похоже на адрес почты — например info@rempireshop.com. Магазин сохранит поле пустым.",
+    phone: "Телефон — цифры, пробелы и скобки, не меньше пяти знаков, например +372 5623 7237. Магазин сохранит поле пустым.",
+    url: "Ссылка должна начинаться с https:// — например https://instagram.com/rempire. Магазин сохранит поле пустым."
+  };
+  /** The hint `cInput()` takes: the warning when the server would blank this
+      value, and whatever the field says for itself otherwise. */
+  function cFieldHint(kind, path, plain) {
+    if (cFieldOk(kind, cDraftGet(path))) return plain || "";
+    return '<span class="adm-hint--warn">' + C_FIELD_WARN[kind] + "</span>";
+  }
   /** The IBAN the shop can actually print on an invoice — "" when there is
       none, and "" when what is typed is not an IBAN the server will keep. */
   function companyIban() {
@@ -22601,12 +22687,16 @@
           esc(co.legalName) + (co.regCode ? " · <span>рег. " + esc(co.regCode) + "</span>" : "") + (co.address ? " · " + esc(co.address) : ""),
           cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
           '<div class="adm-edpair">' +
-            cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.") +
-            cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24) + "</div>" +
+            cInput("company.regCode", "Регистрационный номер", "12216136", 24,
+              cFieldHint("regCode", "company.regCode", "Только цифры.")) +
+            cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24,
+              cFieldHint("vatNumber", "company.vatNumber")) + "</div>" +
           cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200) +
           '<div class="adm-edpair">' +
-            cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
-            cInput("company.phone", "Телефон", "+372 5623 7237", 30) + "</div>" +
+            cInput("company.email", "Электронная почта", "info@rempireshop.com", 190,
+              cFieldHint("email", "company.email")) +
+            cInput("company.phone", "Телефон", "+372 5623 7237", 30,
+              cFieldHint("phone", "company.phone")) + "</div>" +
           '<div class="adm-edpair">' +
             /* The field says what the server will do with what is typed —
                a value that is not an IBAN is stored as an empty one, and
@@ -22627,7 +22717,8 @@
         (!show("social") ? "" : cBlock("social", "Соцсети",
           esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ")) || "нет ссылок",
           '<div class="adm-edpair">' + CONTENT_SOCIALS.map(function (r) {
-            return cInput("social." + r[0], r[1], "https://…", 300);
+            return cInput("social." + r[0], r[1], "https://…", 300,
+              cFieldHint("url", "social." + r[0]));
           }).join("") + "</div>" +
           '<p class="adm-hint" style="margin:0">Пустая строка убирает значок из подвала.</p>')) +
         (!show("announcement") ? "" : cBlock("announcement", title ? "Текст и ссылка" : "Верхняя полоска",
@@ -22644,7 +22735,8 @@
              owner cannot easily write himself — a banner slide and a product
              name. Everything else he asks the assistant for in its own words,
              where it can also show him what it is about to change. */
-          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
+          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300,
+            cFieldHint("url", "announcement.link")))) +
         (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
           cTri("contactPage", "Текст страницы", "textarea", 1200))) +
@@ -29380,15 +29472,38 @@
     /* Delivery prices come down with the rest of the settings, and the whole
        shop quotes them — the announce bar, the footer, the product page and
        the checkout — so they are adopted at boot, not only when the checkout
-       is opened. What the shop promises and what it bills is one number. */
-    setShipRules(s.shipping_rules || s.shippingRules || s.shipping);
+       is opened. What the shop promises and what it bills is one number.
+
+       An EMPTY object is «нет строки тарифов», not «строка со всеми пустыми
+       клетками», and the difference is a price: the feed sends `shipping: {}`
+       as its default for a shop that has never saved the table (DEFAULT_SETTINGS
+       in src/app/api/overrides/route.ts), while the server prices such a shop
+       from DEFAULT_SHIPPING_RULES — loadShippingRules() answers null when the
+       row is missing. setShipRules() seeds the courier column from Montonio,
+       because in a SAVED row an empty box means «цена Montonio»; run against
+       `{}` it quoted Estonia's courier at 6,89 € while the till billed 10,84 €.
+       A saved row is never empty — parseShippingRules() always writes
+       freeFrom, the methods and the carriers — so feedShipRules() tells the
+       two apart exactly. */
+    var srvRules = feedShipRules(s);
+    if (srvRules) setShipRules(srvRules);
     S.shipDraft = null;
+  }
+  /** The tariff row inside a feed answer, or null when the shop has none.
+      Whatever the key is called, and `{}` is «none» — see adoptServer(). */
+  function feedShipRules(s) {
+    var r = (s && (s.shipping_rules || s.shippingRules || s.shipping)) || null;
+    if (!r || typeof r !== "object" || Array.isArray(r) || !Object.keys(r).length) return null;
+    return r;
   }
 
   function loadServerOverrides() {
     return apiJson("/api/overrides/", FEED_FETCH).then(function (r) {
       SRV.on = r.status !== 404;
       if (r.status !== 200 || r.body.ok !== true) return;
+      // …counted here and not before the fetch: the shopper goes on shopping
+      // while it is in flight, and only adoptServer's own filters count
+      var cartWas = S.cart.length;
       adoptServer(r.body);
       demoSave();
       applyDemoOverrides();
@@ -29402,6 +29517,15 @@
       if (bootHeld) return;   // the first paint is waiting for exactly this answer
       if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
       else render();
+      /* This answer can take a LINE out of the basket — a product the owner
+         has hidden since, one of his own the feed no longer carries
+         (adoptServer's two filters). render() re-mounts the overlay only when
+         the KIND of overlay changes, so an open drawer would keep the rows it
+         was drawn with; `data-cline` is an INDEX into S.cart, so its «−» and
+         «Убрать» would then work on a different line than the one under the
+         finger. Redraw the list — rebuildCart() does it without replaying the
+         drawer's slide-in, the same as «Убрать» itself. */
+      if (S.cartOpen && S.cart.length !== cartWas) rebuildCart();
     }).catch(noop);
   }
 
@@ -29432,7 +29556,17 @@
          numbers, so there is nothing to go and look up. Shown as it came
          rather than folded into «Не удалось сохранить», which would hide the
          one thing that needs fixing (Ренат, 13.09.2026). */
-      if (r.body && r.body.detail && r.body.error === "below_cost") { toast(r.body.detail); render(); return r; }
+      if (r.body && r.body.detail && r.body.error === "below_cost") {
+        /* …and it STAYS on the delivery page, not only in a toast that is
+           gone in two and a half seconds. The sentence names the carrier, the
+           country and both numbers, and it is read on a phone by somebody who
+           has just scrolled a table of twenty-five rows — the one place it is
+           of any use is beside that table. S.shipErr is the box that was built
+           for it (shipRulesCard) and had, until 17.09.2026, no writer at all:
+           it was only ever cleared, so the box could never appear. */
+        S.shipErr = String(r.body.detail);
+        toast(r.body.detail); render(); return r;
+      }
       if (!(r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить на сервере — попробуйте ещё раз");
       return r;
     }, function () { toast("Сервер не отвечает — изменение не сохранилось"); });
@@ -31804,15 +31938,33 @@
     var gap = thr - sum;
     var inCart = {};
     S.cart.forEach(function (l) { inCart[l.id] = true; });
-    var pool = CATALOGUE.filter(function (p) { return p.stock !== "out" && !inCart[p.id] && p.cat !== "merch"; });
-    var bridge = pool.filter(function (p) { return p.price >= gap && p.price <= gap + 25; })
-      .sort(function (a, b) { return a.price - b.price; })[0];
+    /* The product whose page is underneath the open drawer is never offered
+       here. «+» carries a bare id, and addToCart() reads the volume and the
+       QUANTITY off the screen when it is given none — so a row that quoted
+       9 € for the smallest bottle added three 500 ml ones at 25 €, and the
+       free delivery it promised was neither the sum nor the price on the row.
+       Nothing else in the drawer can reach the product page's own state. */
+    var openId = S.screen === "product" ? S.productId : null;
+    /* …and the number both the pick and the print use is the one the «+» will
+       actually basket: shownPrice() at cardSizeIdx(), the same pair every card
+       in the shop prices itself with. `p.price` is the FIRST rung of the
+       ladder, not the cheapest (applyDemoOverrides), and it knows nothing
+       about a salon customer's own prices — so the row could quote 36 € and
+       add 7 €, and «и доставка бесплатно» was then simply false. */
+    function upPrice(p) { return shownPrice(p, cardSizeIdx(p.id)); }
+    var pool = CATALOGUE.filter(function (p) {
+      return p.stock !== "out" && !inCart[p.id] && p.cat !== "merch" && p.id !== openId;
+    });
+    var bridge = pool.filter(function (p) { return upPrice(p) >= gap && upPrice(p) <= gap + 25; })
+      .sort(function (a, b) { return upPrice(a) - upPrice(b); })[0];
     // the pairing is read off the last real product: a set or a gift card has
     // no complements, and byId() would have silently used CATALOGUE[0]
     var lastLine = null;
     for (var li2 = S.cart.length - 1; li2 >= 0; li2--) if (!S.cart[li2].type) { lastLine = S.cart[li2]; break; }
     var mate = lastLine
-      ? complementsFor(byId(lastLine.id)).filter(function (p) { return !inCart[p.id] && p.stock !== "out" && p !== bridge; })[0]
+      ? complementsFor(byId(lastLine.id)).filter(function (p) {
+        return !inCart[p.id] && p.stock !== "out" && p !== bridge && p.id !== openId;
+      })[0]
       : null;
     var picks = [bridge, mate].filter(Boolean).slice(0, 2);
     if (!picks.length) return "";
@@ -31820,7 +31972,7 @@
       picks.map(function (p) {
         return '<div class="upsell__row"><span class="upsell__ph">' + media(p, 0, "ph") + "</span>" +
           '<button class="upsell__nm" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</button>" +
-          '<span class="num">' + (p.priceFrom ? "от " : "") + eur(p.price) + "</span>" +
+          '<span class="num">' + cardPriceText(p, cardSizeIdx(p.id)) + "</span>" +
           '<button class="btn btn--sm" data-add="' + p.id + '">+</button></div>';
       }).join("") + "</div>";
   }
@@ -31985,6 +32137,19 @@
      rendering /shop2/ in English must not tell a crawler that /shop2/ is the
      English page. x-default is the unprefixed path, which is what every old
      link and every legacy redirect already points at. */
+  /** The absolute address of a product photo, for the JSON-LD `image`.
+   *
+   *  The origin goes in front of a PATH, never in front of a URL: an
+   *  owner-uploaded photo is stored as the bucket's own absolute address
+   *  (publicUrl() in src/lib/storage.ts) and applyDemoOverrides() puts it
+   *  straight into p.img, so `location.origin + p.img` handed Google
+   *  «https://shop…https://pub-….r2.dev/…» for every photo Renat uploaded —
+   *  every product he made himself, and every catalogue one whose photos he
+   *  replaced. */
+  function ldImage(img) {
+    var s = String(img || "");
+    return /^https?:\/\//i.test(s) ? s : location.origin + s;
+  }
   var ALT_TAGS = [["RU", "ru"], ["ET", "et"], ["EN", "en"]];
   function setAltTags() {
     var rest = stripLangPrefix(location.pathname).replace(/^\/shop2/, "") || "/";
@@ -32073,7 +32238,7 @@
       var ld = {
         "@context": "https://schema.org", "@type": "Product",
         name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
-        image: [location.origin + p.img],
+        image: [ldImage(p.img)],
         description: unentity(stripTags(descFor(p))).slice(0, 500),
         category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
         sku: p.id,
@@ -35053,9 +35218,10 @@
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page
-    // …the bar's «Сохранено ✓» belongs to the page it was earned on
-    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admsetback !== undefined) { S.admSetPage = ""; S.admSetSaved = ""; window.scrollTo({ top: 0 }); render(); return; }
+    // …the bar's «Сохранено ✓» belongs to the page it was earned on, and so
+    // does the delivery page's refusal (S.shipErr) — a page opens quiet
+    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admsetback !== undefined) { S.admSetPage = ""; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
     /* A denomination is a quick, reversible edit: it applies at once and the
        toast offers to take it back (README § State). The last one on cannot be
        switched off — a gift page with no amounts on it is a broken page. */
