@@ -245,6 +245,50 @@ test("«Развернуть» makes the panel a wide window, and the session re
   await expect(panel.getByRole("button", { name: "Развернуть" })).toBeVisible();
   expect(Math.round((await panel.boundingBox())!.width)).toBe(360);
 });
+
+/* r21. The shop prompt asks the assistant to end an answer with the article's
+   own address — «add its link at the end of your reply as a bare relative
+   path: /shop2/blog/<slug>/» (src/app/api/assistant/route.ts) — and the bubble
+   printed it as text a shopper could only retype into the address bar.
+
+   The model is stubbed here, both halves of it: this suite runs with no key on
+   purpose (see the file header), so the widget's own probe answers «no model»
+   and the POST below is never made otherwise. It is the one path in this file
+   that needs the model to be there. */
+test("the article the assistant points at is a link, and it opens the article", async ({ page }) => {
+  const SLUG = "uhod-za-borodoy-zimoy";
+  await page.route("**/api/assistant/**", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ enabled: true, v: 99, model: "stub" }),
+      });
+    }
+    await route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({
+        reply: `Зимой борода сохнет — вот статья про это: /shop2/blog/${SLUG}/`,
+        product_ids: [],
+      }),
+    });
+  });
+
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("что делать с сухой бородой зимой");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const link = panel.locator(`.sbot__msg--bot a[data-go-blog="${SLUG}"]`);
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute("href", `/shop2/blog/${SLUG}/`);
+
+  // …and it is the shop's own link: the article opens in place, no reload
+  await link.click();
+  await waitForScreen(page, "blogpost");
+  expect(new URL(page.url()).pathname).toBe(`/shop2/blog/${SLUG}/`);
+});
 });
 
 /* «mobiilis ei kasuta üldse poes assistenti» — not hidden with CSS, not

@@ -1102,6 +1102,9 @@ body.is-locked .sbot { display: none; }
 .sbot__msg { max-width: 92%; padding: 9px 12px; font-size: 13.5px; line-height: 1.45; }
 .sbot__msg--bot { background: var(--shell, #edeae1); align-self: flex-start; }
 .sbot__msg--me { background: var(--ink); color: #fff; align-self: flex-end; }
+/* the article the assistant points at (chat.js withBlogLinks): the shop's own
+   ink, underlined, never the browser's blue inside the bubble */
+.sbot__msg a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .sbot__prod { display: flex; gap: 9px; align-items: center; margin-top: 10px; }
 .sbot__ph {
   width: 44px; height: 44px; flex: 0 0 44px;

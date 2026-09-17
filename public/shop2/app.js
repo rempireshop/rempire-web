@@ -1495,6 +1495,8 @@
       "Да, удалить": "Jah, kustuta",
       "Не получилось сохранить — попробуйте ещё раз.": "Salvestamine ei õnnestunud — proovi uuesti.",
       "Не получилось открыть статью — попробуйте ещё раз.": "Artiklit ei õnnestunud avada — proovi uuesti.",
+      "Ответ не пришёл — движение могло записаться. Проверьте остаток в «Складе».":
+        "Vastust ei tulnud — liikumine võis siiski kirja minna. Kontrolli jääki «Laos».",
       "Статья слишком длинная — сократите текст и сохраните ещё раз.":
         "Artikkel on liiga pikk — lühenda teksti ja salvesta uuesti.",
       "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
@@ -4181,6 +4183,8 @@
       "Да, удалить": "Yes, delete",
       "Не получилось сохранить — попробуйте ещё раз.": "Could not save — try again.",
       "Не получилось открыть статью — попробуйте ещё раз.": "Could not open the article — try again.",
+      "Ответ не пришёл — движение могло записаться. Проверьте остаток в «Складе».":
+        "No answer came back — the move may still have gone through. Check the count in «Stock».",
       "Статья слишком длинная — сократите текст и сохраните ещё раз.":
         "The article is too long — shorten the text and save again.",
       "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
@@ -13842,7 +13846,15 @@
       toast(r.status === 200 && r.body.ok ? "Склад обновлён ✓" : "Не получилось сохранить — попробуйте ещё раз.");
       if (r.status === 200 && r.body.ok) reloadStock();
       render();
-    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
+    }).catch(function () {
+      /* No answer came back — which is NOT the same as «не сохранилось». The
+         move may well be on the shelf: /api/admin/inventory/moves/ takes a
+         relative delta with no key to recognise a repeat by, so «попробуйте
+         ещё раз» over a lost answer is how six bottles become twelve. The
+         sentence says what is actually known and where to look. */
+      toast("Ответ не пришёл — движение могло записаться. Проверьте остаток в «Складе».");
+      render();
+    });
   }
 
 
@@ -31036,13 +31048,40 @@
      square that is green before the answer arrives is the same lie the audit
      found (question 7). The «asked» flag is separate so null can survive
      until the fetch really lands. */
-  var admAI = null, admConvo = [], admAIAsked = false;
+  /* `admAIFailed` is the third case the flag above cannot hold: the probe was
+     asked and never came back. Until r21 that landed as a plain `false` and
+     the «asked» guard never let it ask again, so one dropped request — a lift,
+     a sleeping laptop — left the owner with the canned answers for as long as
+     the tab stayed open. It is not re-probed on a timer (screenAdmin() calls
+     probeAdmAI on EVERY render, and a failing fetch that renders would loop):
+     the next question the owner asks carries the re-probe (admAsk below). */
+  var admAI = null, admConvo = [], admAIAsked = false, admAIFailed = false;
   function probeAdmAI() {
     if (admAIAsked) return;
     admAIAsked = true;
     fetch("/api/assistant/").then(function (r) { return r.json(); })
-      .then(function (j) { admAI = !!j.enabled; render(); })
-      .catch(function () { admAI = false; render(); });
+      .then(function (j) { admAI = !!j.enabled; admAIFailed = false; admAskWaiting(); render(); })
+      .catch(function () { admAI = false; admAIFailed = true; render(); });
+  }
+  /** A question asked before the probe landed — a chip is one tap away the
+   *  moment the panel opens, and `admAI` is null until the answer to
+   *  GET /api/assistant/ arrives. It used to be dropped: the box drew the
+   *  canned answer, then the probe turned the panel to the model and
+   *  admAnswerHTML() had nothing to draw but «…», with no request ever sent
+   *  and no way back except retyping. It waits here instead. */
+  function admAskWaiting() {
+    if (!admAI || !S.adminAsk) return;
+    if (S.adminAns && S.adminAns.q === S.adminAsk) return;
+    askAdminAI(S.adminAsk);
+  }
+  /** The one door the chips, «Спросить» and Enter go through. */
+  function admAsk(q) {
+    if (admAI) { askAdminAI(q); return; }
+    if (admAI === null) return;   // the probe is in the air: admAskWaiting() fires this question
+    if (!admAIFailed) return;     // there is no model behind the route — the canned answer stands
+    // the probe never landed: one more go, and this question rides on it
+    admAIFailed = false; admAIAsked = false; admAI = null;
+    probeAdmAI();
   }
   /* What the banner says right now — «поменяй второй слайд» needs to know
      there is a second slide.
@@ -31104,7 +31143,18 @@
     var el = document.querySelector("[data-aians]");
     if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
   }
+  /* The question whose request is in the air, "" when none. There is ONE
+     confirm slot and one answer box, and the same question sent twice — a
+     chip double-tapped on a phone is one finger, not two — used to put the
+     same turn into the history twice and race two proposals into that slot:
+     the owner reading the first card could press «Применить» on a second one
+     that had just replaced it. A DIFFERENT question still takes over, as it
+     always did (the older answer is dropped by the `S.adminAsk !== q` guard
+     below); it is the repeat that is ignored. */
+  var admAskFlight = "";
   function askAdminAI(q) {
+    if (admAskFlight === q) return;
+    admAskFlight = q;
     admConvo.push({ role: "user", content: q });
     fetch("/api/assistant/", {
       method: "POST",
@@ -31118,6 +31168,7 @@
         return r.json().catch(function () { throw new Error("unreadable"); });
       })
       .then(function (j) {
+        if (admAskFlight === q) admAskFlight = "";
         var reply = typeof j.reply === "string" ? j.reply : "";
         var retry = !!j.retry;
         if (!reply || replyLooksLikeJson(reply)) { reply = AI_UNREADABLE; retry = !j.action; }
@@ -31155,6 +31206,7 @@
         admPaintAnswer();
       })
       .catch(function (err) {
+        if (admAskFlight === q) admAskFlight = "";
         if (S.adminAsk !== q) return;
         var unreadable = err && err.message === "unreadable";
         S.adminAns = { q: q, reply: unreadable ? AI_UNREADABLE : AI_SILENT, action: null, tab: "", retry: true };
@@ -35256,7 +35308,7 @@
       if (undoSlot) undoSlot.textContent = "";
       return;
     }
-    if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
+    if (d.admask) { S.adminAsk = d.admask; render(); admAsk(d.admask); return; }
     if (d.admsend !== undefined) {
       admVoiceDrop();
       var qEl = document.querySelector("[data-admq]");
@@ -35271,7 +35323,7 @@
            render (the 30-day summary landing) happened to fall between the
            typing and the send — which is why it only cleared sometimes. */
         if (qEl) qEl.value = "";
-        render(); if (admAI) askAdminAI(q); refocus("[data-admq]");
+        render(); admAsk(q); refocus("[data-admq]");
       }
       return;
     }
@@ -36819,7 +36871,7 @@
         // the box is emptied by hand, same as the → button — see [data-admsend]
         // in the click handler for why the render alone does not do it
         t.value = "";
-        render(); if (admAI) askAdminAI(q); refocus("[data-admq]");
+        render(); admAsk(q); refocus("[data-admq]");
       }
     }
     // the order card's note is a textarea — Ctrl/Cmd+Enter saves it, plain Enter is a new line

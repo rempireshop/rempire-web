@@ -310,7 +310,20 @@ export function sanitizeContentPatch(raw: unknown): ContentPatch | null {
   if (src.hours && typeof src.hours === "object" && !Array.isArray(src.hours)) {
     const h = src.hours as Record<string, unknown>;
     const ho: Partial<Record<Day, string>> & { note?: Partial<Trilingual> } = {};
-    for (const d of DAYS) if (d in h) ho[d] = sanitizeHours(h[d]);
+    /* An empty string is the owner emptying the field — «не публиковать», and
+       merge() writes it. A value that was SENT and could not be READ is not
+       that instruction: the assistant answering «10-19» for «работаем во
+       вторник с 10 до 19» used to sanitise to "" and ERASE the day the shop
+       publishes, while its own sentence promised the new hours and the confirm
+       card said only «часы работы». The panel's own form normalises before it
+       sends (cHoursNorm), so this door is the assistant's. Unreadable now
+       changes nothing instead of changing the wrong thing. */
+    for (const d of DAYS) {
+      if (!(d in h)) continue;
+      const v = sanitizeHours(h[d]);
+      if (!v && !(typeof h[d] === "string" && (h[d] as string).trim() === "")) continue;
+      ho[d] = v;
+    }
     const note = triPatch(h.note, MAX_STR);
     if (note) ho.note = note;
     if (Object.keys(ho).length) out.hours = ho;

@@ -55,7 +55,14 @@
     fetch("/api/assistant/", { method: "GET" })
       .then(function (r) { return r.json(); })
       .then(function (j) { aiEnabled = !!j.enabled; refreshHint(); })
-      .catch(function () {});
+      /* A probe that never landed is not an answer. The flag is set to false
+         BEFORE the fetch so a question asked while it is in the air is
+         answered by the rules — but leaving it false afterwards meant one
+         dropped request (a tunnel, a sleeping laptop, a hiccup at the edge)
+         downgraded the shopper to the canned matcher for as long as the page
+         stayed open, and the guard above never let it ask again. Back to
+         «не спрашивали»: the next open, and the next message, re-probe. */
+      .catch(function () { aiEnabled = null; });
   }
   var byIdMap = {};
   CATALOGUE.forEach(function (p) { byIdMap[p.id] = p; });
@@ -309,6 +316,25 @@
       '<button class="sbot__mini sbot__mini--ghost" data-go-product="' + p.id + '">' + tt().open + "</button></span>" +
       "</div>";
   }
+  /* The shop prompt asks the assistant to finish an answer with the article's
+     own address — «add its link at the end of your reply as a bare relative
+     path: /shop2/blog/<slug>/» (src/app/api/assistant/route.ts) — and the
+     bubble printed it as text: a shopper reading «/shop2/blog/kak-uhazhivat/»
+     had to retype it into the address bar. It becomes the shop's own blog link
+     here, AFTER escaping, so the path stays text until this line makes it a
+     link and nothing else in the reply can: the slug is [a-z0-9-] and nothing
+     else, and `data-go-blog` is what a tile on /shop2/blog/ carries, so the
+     click is app.js's and stays in the SPA. The href is built in the language
+     the shopper is reading — the model always writes the Russian path. */
+  var BLOG_SEG = { RU: "", ET: "/et", EN: "/en" };
+  var BLOG_PATH_RX = /\/shop2\/(?:et\/|en\/|ru\/)?blog\/([a-z0-9-]{1,80})\/?/gi;
+  function withBlogLinks(html) {
+    return String(html).replace(BLOG_PATH_RX, function (whole, slug) {
+      var s = String(slug).toLowerCase();
+      return '<a href="/shop2' + (BLOG_SEG[lang()] || "") + "/blog/" + encodeURIComponent(s) +
+        '/" data-go-blog="' + s + '">' + whole + "</a>";
+    });
+  }
   function rulesReply(q) {
     var r = match(q), t = tt();
     /* Nothing to show is not «вот что подходит:» with a blank under it. Every
@@ -327,6 +353,9 @@
   }
   function reply(q) {
     convo.push({ role: "user", content: q });
+    // …and the re-probe (see probeAI): this one is answered by the rules, the
+    // next one by the model if the shop has it after all
+    probeAI();
     if (!aiEnabled) { rulesReply(q); return; }
     var wait = document.createElement("div");
     wait.className = "sbot__msg sbot__msg--bot";
@@ -363,7 +392,7 @@
            that offers products arrives with the products under it. */
         var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
           .filter(Boolean).map(productRow).join("");
-        bubble("bot", esc(text) + cards);
+        bubble("bot", withBlogLinks(esc(text)) + cards);
         runAction(j.action);
       })
       .catch(function () { wait.remove(); if (gen === convoGen) rulesReply(q); });
