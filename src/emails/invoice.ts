@@ -152,7 +152,11 @@ export function renderInvoice(order: OrderLike, data: InvoiceMailData, lang: Lan
   const hello = greeting(L, name);
   const items = itemsBlock(order.items, L);
   const totals = totalsOf(order, items.sum);
-  const rows = totalRows(totals, c.shipping, L);
+  /* No label: totalRows() writes the word «Доставка» itself and glues
+     « — <label>» after it, so handing it that same word printed «Доставка —
+     Доставка» on every invoice letter. An invoice has no carrier to name
+     anyway — the parcel is chosen at the checkout, not on the bill. */
+  const rows = totalRows(totals, "", L);
   const total = money(data.totals.total || totals.total);
   // the HTML part keeps every price on one line (&nbsp; before the sign); the text part uses the plain gap
   const totalHtml = money(data.totals.total || totals.total, true);

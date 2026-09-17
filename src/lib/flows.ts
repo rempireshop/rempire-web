@@ -35,7 +35,7 @@ import { query } from "@/lib/db";
    be a calendar day too — Tallinn's, not Greenwich's (src/lib/day.ts). The
    daily run fires at 07:00 Tallinn, but a hand-started run at half past
    midnight would otherwise still be looking at yesterday's date. */
-import { addShopDays, shopDay, ymdParts } from "@/lib/day";
+import { addShopDays, endOfShopDay, shopDay, ymdParts } from "@/lib/day";
 import { sendRendered } from "@/lib/mail";
 import {
   markStockAlertSent,
@@ -525,6 +525,13 @@ function safeJson(s: string): unknown {
 export async function runBackInStock(productId: string): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
+  /* The owner's own subject / intro / signature, exactly as the sweep below
+     loads them. This is the PRIMARY path — the stock switch in the panel calls
+     it (upsertOverride, src/lib/orders.ts) — and without this line the letter
+     was rendered against whatever the process happened to be holding: the
+     built-in defaults on a cold serverless start, so the text Renat saved in
+     «Письма» was silently dropped from the very letter it was written for. */
+  await loadTexts();
   const alerts = await pendingStockAlerts(productId);
   return sendStockAlerts(alerts);
 }
@@ -694,7 +701,14 @@ interface BirthdayPromo {
  * a birthday letter with a code that does nothing is worse than silence.
  */
 async function promoForBirthday(flows: Flows, now: number, daysAhead: number): Promise<BirthdayPromo | null> {
-  const expires = new Date(now + birthdayCodeDays(daysAhead) * 24 * 60 * 60 * 1000);
+  /* To the END of that Tallinn day, not to the o'clock the cron ran at.
+     The letter prints a calendar date and says «до … включительно»
+     (src/emails/birthday.ts), while the checkout refuses the code the instant
+     `endsAt` passes (quoteFromPromo, src/lib/promos.ts) — so a plain
+     «now + 14 days» killed the code halfway through the last day the customer
+     had been promised, and the shop said «промокод истёк» on a day its own
+     letter called valid. */
+  const expires = endOfShopDay(new Date(now + birthdayCodeDays(daysAhead) * 24 * 60 * 60 * 1000));
   try {
     /* The checkout agent's module. Both spellings are accepted: `upsertPromo`
        is what it shipped with, `createPromo` is what the brief called it. The
@@ -1033,6 +1047,14 @@ const UNPAID_COLUMNS =
    (the shopper pressed «Отменить» at the bank). Both are orders the customer
    may still want — which is the whole point of writing to them first. */
 const UNPAID_STATUSES = "('new','failed')";
+
+/* The mirror of UNPAID_STATUSES for setOrderStatus()'s `unless` guard: every
+   status that is NOT one of those two, i.e. every status this loop's
+   cancellation must refuse to make. Written out rather than imported from
+   src/lib/orders.ts, which this file deliberately does not import (see the
+   note at the top); the type check at the call site is what keeps the two
+   vocabularies in step. */
+const STILL_UNPAID_ONLY = ["paid", "shipped", "delivered", "cancelled", "refunded"] as const;
 const NOT_PAID = "coalesce(payment->>'status','') <> 'paid'";
 /* «По счёту» is not this loop's business. An invoice order carries its own
    clock — src/lib/invoice-dunning.ts, counted from the invoice's due date
@@ -1156,13 +1178,22 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
   );
 
   for (const row of stale) {
+    let moved: Awaited<ReturnType<typeof setOrderStatus>>;
     try {
-      await setOrderStatus(row.id, "cancelled", "system:unpaid");
+      moved = await setOrderStatus(row.id, "cancelled", "system:unpaid", { unless: STILL_UNPAID_ONLY });
     } catch (err) {
       console.error(`[flows] unpaid cancel failed on ${row.number}:`, err);
       skipped += 1;
       continue;
     }
+    /* The money arrived while this walk was going on. The select above read a
+       hundred orders once and each letter that follows takes its own trip to
+       Resend, so the list is minutes old by the time the last row is reached —
+       long enough for a bank to answer. `unless` puts the test inside the
+       UPDATE itself (src/lib/orders.ts), so a payment that landed in between
+       is not overwritten with «отменён» and its customer is not told his paid
+       order has been cancelled. Nothing happened: nothing is counted. */
+    if (!moved) continue;
     cancelled += 1;
     if (!row.email) continue;
     const res = await onOrderClosed({ ...unpaidOrderLike(row), status: "cancelled" }, { kind: "cancelled" });

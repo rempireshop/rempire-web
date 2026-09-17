@@ -163,6 +163,22 @@ export function startOfShopDay(at: Date): Date {
   return shopDayStart(shopDay(at));
 }
 
+/**
+ * The last instant of the Tallinn day `at` falls in — 23:59:59.999 local,
+ * whatever the offset is that week.
+ *
+ * For a deadline the shop has PROMISED as a date: «до 3 октября включительно»
+ * on a birthday code has to mean the whole of the 3rd, not up to whatever
+ * o'clock the cron happened to run a fortnight earlier. The last millisecond
+ * rather than the next midnight on purpose — the promo check is
+ * `endsAt <= now` (src/lib/promos.ts), and a bound of 00:00 the next day both
+ * dies a millisecond into the day it should cover and prints the wrong date.
+ */
+export function endOfShopDay(at: Date): Date {
+  const start = shopDayStart(addShopDays(shopDay(at), 1));
+  return Number.isNaN(start.getTime()) ? at : new Date(start.getTime() - 1);
+}
+
 /** `YYYY-MM-DD` + n calendar days. Pure calendar arithmetic: a 23- or 25-hour
  *  day (the two switch-overs) never turns into a skipped or repeated date. */
 export function addShopDays(ymd: string, days: number): string {

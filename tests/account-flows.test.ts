@@ -9,7 +9,8 @@
  * mails customers for anybody who finds the URL.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { shopDay } from "@/lib/day";
+import { addShopDays, shopDay, shopDayStart } from "@/lib/day";
+import { setMailTextsOverride } from "@/emails/texts";
 import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
@@ -535,6 +536,41 @@ describe("back in stock flow", () => {
     expect(sent[0].to).toEqual([EMAIL]);
   });
 
+  /* The letter's own closing line promises «Наличие и цена актуальны на
+     момент отправки письма», and the price came straight out of the catalogue
+     file while the product page it links to quotes product_overrides.price —
+     so a product Renat had re-priced was advertised at a figure the shop does
+     not charge, one tap away from the page that charges the other one. */
+  it("quotes the owner's price, not the catalogue file's", async () => {
+    await setFlows({ backstock: true });
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
+    await query("insert into product_overrides (product_id, price, stock) values ($1, 12.5, 'in')", [PRODUCT]);
+
+    expect((await runBackInStock(PRODUCT)).sent).toBe(1);
+    expect(sent[0].text).toContain("12,50 €");
+    expect(sent[0].text).not.toContain("9 €"); // the catalogue's own figure
+  });
+
+  /* The stock switch in the panel calls runBackInStock() directly
+     (upsertOverride, src/lib/orders.ts) and it never loaded
+     settings.mail_texts, so the letter was rendered against whatever the
+     process happened to be holding — the built-in wording on a cold
+     serverless start. The sweep beside it had always loaded them. */
+  it("sends the owner's own subject from the stock switch, not the built-in one", async () => {
+    await setFlows({ backstock: true });
+    await query(
+      `insert into settings (key, value) values ('mail_texts', $1::jsonb)
+       on conflict (key) do update set value = $1::jsonb`,
+      [JSON.stringify({ "back-in-stock": { ru: { subject: "Ждали? {product} снова у нас" } } })],
+    );
+    // a cold process holds no letter texts at all
+    setMailTextsOverride(null);
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
+
+    expect((await runBackInStock(PRODUCT)).sent).toBe(1);
+    expect(sent[0].subject).toContain("Ждали?");
+  });
+
   it("fires from the admin's own stock switch", async () => {
     await setFlows({ backstock: true });
     await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
@@ -649,6 +685,37 @@ describe("birthday flow", () => {
     await setFlows({ birthday: false, birthdayCode: "REM-BD-STATIC" });
     await birthdayToday(EMAIL, true);
     expect(await runBirthdays()).toMatchObject({ sent: 0, reason: "disabled" });
+  });
+
+  /* The letter prints a calendar date and says «до … включительно», while the
+     checkout refuses a code the instant `ends_at` passes (quoteFromPromo).
+     A plain «now + 14 дней» put that instant at whatever o'clock the cron had
+     run, so the code died halfway through the last day the letter promised —
+     and the shop answered «промокод истёк» on a day its own letter called
+     valid. The bound is the last millisecond of the Tallinn day, not the next
+     midnight: midnight would both kill the code a millisecond into the day it
+     covers and make the letter print the day after. */
+  it("lets the code live to the end of the last day the letter advertises", async () => {
+    await setFlows({ birthday: true });
+    await birthdayToday(EMAIL, true);
+    expect((await runBirthdays()).sent).toBe(1);
+
+    const code = /REM-BD-[A-Z0-9]+/.exec(sent[0].text)?.[0] ?? "";
+    expect(code).toMatch(/^REM-BD-/);
+    const { getPromo, quoteFromPromo } = await import("@/lib/promos");
+    const promo = await getPromo(code);
+    expect(promo?.endsAt).toBeTruthy();
+
+    const endsAt = new Date(promo!.endsAt!);
+    const lastDay = shopDay(endsAt);
+    const nextMidnight = shopDayStart(addShopDays(lastDay, 1));
+    expect(endsAt.getTime()).toBe(nextMidnight.getTime() - 1);
+
+    // …which is what the customer feels: still good late that evening
+    const lateThatDay = new Date(nextMidnight.getTime() - HOUR);
+    expect(quoteFromPromo(promo!, 100, 0, lateThatDay).ok).toBe(true);
+    // …and gone the moment the next Tallinn day starts
+    expect(quoteFromPromo(promo!, 100, 0, nextMidnight).error).toBe("expired");
   });
 
   it("refuses to send a letter whose promo code would do nothing", async () => {

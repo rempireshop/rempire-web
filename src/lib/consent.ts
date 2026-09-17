@@ -157,6 +157,36 @@ export async function optOut(email: string, kind: OptOutKind, source: OptOutSour
   return true;
 }
 
+/**
+ * Is this address still waiting to be told that something came back in stock?
+ *
+ * The «Отписаться» page says «Рассылок на адрес … больше не будет», and for a
+ * waiting-list notice that sentence is not true: the shopper asked for that
+ * letter by name, so the stop list deliberately does not cover it (the note at
+ * the top of this file) and sendStockAlerts() never reads `mail_optouts`.
+ * The page asks this AFTER the opt-out, so a back-in-stock link — which
+ * cancels those very rows — correctly answers "no" and the page keeps its
+ * plain promise.
+ *
+ * Never throws. A database that cannot answer means no extra sentence; by
+ * then the opt-out itself has already been written, so the row is safe either
+ * way and the worst case is the page it used to show.
+ */
+export async function hasPendingStockAlerts(email: string): Promise<boolean> {
+  const addr = normalizeEmail(email);
+  if (!addr) return false;
+  try {
+    const rows = await query<{ id: string }>(
+      "select id from stock_alerts where email = $1 and sent_at is null limit 1",
+      [addr],
+    );
+    return rows.length > 0;
+  } catch (err) {
+    console.error("[consent] pending stock alerts unreadable:", (err as Error)?.message ?? err);
+    return false;
+  }
+}
+
 /** Is this address on the stop list? */
 export async function isOptedOut(email: string): Promise<boolean> {
   const addr = normalizeEmail(email);

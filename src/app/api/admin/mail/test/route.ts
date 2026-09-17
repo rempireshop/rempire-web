@@ -3,6 +3,7 @@ import { renderDemo, isTemplateId, TEMPLATE_IDS } from "@/emails";
 import { normalizeLang } from "@/emails/layout";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { loadMailTexts } from "@/lib/mail-texts";
+import { getFlows } from "@/lib/flows";
 
 /**
  * POST /api/admin/mail/test/  { template, to, lang }
@@ -79,10 +80,13 @@ export async function POST(req: Request): Promise<Response> {
   // The owner's own subject / intro / signature — the sample has to be the
   // letter, not the factory default (src/lib/mail-texts.ts).
   await loadMailTexts();
+  // …and the birthday percent the shop really offers, exactly as the preview
+  // iframe beside this button reads it (src/app/api/admin/mail/preview).
+  const demo = { birthdayPercent: (await getFlows()).birthdayPercent };
 
   let mail;
   try {
-    mail = renderDemo(template, lang);
+    mail = renderDemo(template, lang, demo);
   } catch (err) {
     console.error("[mail-test] render failed", template, lang, err);
     return Response.json({ ok: false, error: "render_failed" }, { status: 500 });

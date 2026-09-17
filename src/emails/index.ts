@@ -296,6 +296,28 @@ export function demoInvoiceCancelled(total = 95): InvoiceCancelledData {
 /* ---------- the sample values behind the tokens -------------------------- */
 
 /**
+ * What the demo letters are allowed to differ on: the birthday percent, which
+ * is a setting (`settings.flows.birthdayPercent`) and not a constant.
+ *
+ * Renat, 13.09.2026, about the same card: «Name also in preview is "Mart" in
+ * e-mail it's "Renat".» The preview hard-coded 15 % while the shop sent
+ * whatever the panel's own «Скидка ко дню рождения» box said — 10 % out of the
+ * box — so the owner read a discount he was not giving, and the number he had
+ * chosen himself never appeared in his preview at all. The two admin routes
+ * (preview and test send) read the setting and pass it in; the fallback below
+ * only stands for a caller that has no shop to ask, which is a test.
+ */
+export interface DemoOptions {
+  /** `settings.flows.birthdayPercent` — what the real birthday letter offers. */
+  birthdayPercent?: number;
+}
+
+function demoPercent(opts: DemoOptions | undefined): number {
+  const n = Number(opts?.birthdayPercent);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 15;
+}
+
+/**
  * What `{name}`, `{order}`, `{total}` … become in the demo letter — the very
  * values renderDemo() below feeds to fillPlaceholders().
  *
@@ -311,7 +333,11 @@ export function demoInvoiceCancelled(total = 95): InvoiceCancelledData {
  * A token the template never fills is "" here, exactly as fillPlaceholders()
  * leaves it.
  */
-export function demoValues(template: TemplateId, lang: Lang | string = "ru"): Record<string, string> {
+export function demoValues(
+  template: TemplateId,
+  lang: Lang | string = "ru",
+  opts?: DemoOptions,
+): Record<string, string> {
   const L = normalizeLang(lang);
   const order = demoOrder(L);
   const none: Record<string, string> = {
@@ -338,7 +364,7 @@ export function demoValues(template: TemplateId, lang: Lang | string = "ru"): Re
       return { ...shop, product: `${p.brand ?? ""} ${p.title ?? ""}`.trim(), total: money(p.price) };
     }
     case "birthday":
-      return { ...shop, name: "Renat", code: "REM-BDAY-2417", percent: "15" };
+      return { ...shop, name: "Renat", code: "REM-BDAY-2417", percent: String(demoPercent(opts)) };
     case "login-code":
       return { ...shop, code: "482915" };
     case "partner-welcome":
@@ -359,6 +385,7 @@ export function demoValues(template: TemplateId, lang: Lang | string = "ru"): Re
 export function renderDemo(
   template: TemplateId,
   lang: Lang | string = "ru",
+  opts?: DemoOptions,
 ): RenderedEmail {
   const L = normalizeLang(lang);
   switch (template) {
@@ -393,7 +420,7 @@ export function renderDemo(
       return renderBackInStock(demoProduct(L), L);
     case "birthday":
       return renderBirthday(demoCustomer(L), L, "REM-BDAY-2417", {
-        percent: 15,
+        percent: demoPercent(opts),
       });
     case "login-code":
       return renderLoginCode("482915", L);

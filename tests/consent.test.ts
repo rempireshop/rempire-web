@@ -456,6 +456,38 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect((await customerRow(EMAIL))?.marketing).toBe(false);
   });
 
+  /* «Рассылок на адрес … больше не будет» was not true for one letter: a
+     «сообщите о наличии» notice is something the shopper asked for by name, so
+     the stop list deliberately does not block it (sendStockAlerts never reads
+     mail_optouts) — and a marketing-kind link does not cancel those rows
+     either. The page said silence and the shop went on writing. */
+  it("says so when a waiting-list notice is still coming", async () => {
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
+    await recordLogin(EMAIL, "RU");
+    await recordMarketingConsent(EMAIL, "RU", "account");
+
+    const { GET } = await route();
+    const html = await (await GET(req(unsubscribeUrl(EMAIL, "RU", "marketing")))).text();
+    expect(html).toContain("Вы отписаны");
+    expect(html).toContain("Уведомление о наличии товара вы просили сами");
+    // the alert itself is untouched — this link was not about it
+    expect(await query("select 1 from stock_alerts where sent_at is null")).toHaveLength(1);
+  });
+
+  it("makes the plain promise when there is nothing left to come", async () => {
+    const { GET } = await route();
+    // nobody waiting at all
+    const plain = await (await GET(req(unsubscribeUrl(OTHER, "RU", "marketing")))).text();
+    expect(plain).toContain("Вы отписаны");
+    expect(plain).not.toContain("Уведомление о наличии");
+
+    // …and the back-in-stock link, which cancels the rows it is about
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
+    const gone = await (await GET(req(unsubscribeUrl(EMAIL, "RU", "backstock")))).text();
+    expect(gone).toContain("Вы отписаны");
+    expect(gone).not.toContain("Уведомление о наличии");
+  });
+
   it("rate-limits an address that grinds through it", async () => {
     const { GET } = await route();
     let last: Response | undefined;

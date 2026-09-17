@@ -9,6 +9,10 @@ import {
   mailTextsOverride,
 } from "@/emails/texts";
 import { loadMailTexts } from "@/lib/mail-texts";
+/* «Скидка ко дню рождения» — the percent the shop really sends. The preview
+   used to print a hard-coded 15 while the letter offered whatever this box
+   said (10 out of the box), so the owner read a discount he was not giving. */
+import { getFlows } from "@/lib/flows";
 
 /**
  * GET /api/admin/mail/preview/?template=order-confirmed&lang=RU
@@ -61,6 +65,7 @@ export async function GET(req: Request): Promise<Response> {
   // The owner's own subject / intro / signature — before anything is rendered
   // and before the texts feed is answered, so both show the same thing.
   await loadMailTexts();
+  const demo = { birthdayPercent: (await getFlows()).birthdayPercent };
 
   if (format === "texts") {
     return Response.json(
@@ -76,7 +81,7 @@ export async function GET(req: Request): Promise<Response> {
            the iframe beside it shows (Renat, 13.09.2026: «Name also in preview
            is "Mart" in e-mail it's "Renat"»). Keyed by template; the demo data
            is the same in all three languages. */
-        samples: Object.fromEntries(TEMPLATE_IDS.map((id) => [id, demoValues(id, lang)])),
+        samples: Object.fromEntries(TEMPLATE_IDS.map((id) => [id, demoValues(id, lang, demo)])),
       },
       { headers: { "cache-control": "no-store", "X-Robots-Tag": "noindex, nofollow" } },
     );
@@ -91,7 +96,7 @@ export async function GET(req: Request): Promise<Response> {
 
   let mail;
   try {
-    mail = renderDemo(template, lang);
+    mail = renderDemo(template, lang, demo);
   } catch (err) {
     console.error("[mail-preview] render failed", template, lang, err);
     return Response.json({ ok: false, error: "render_failed" }, { status: 500 });

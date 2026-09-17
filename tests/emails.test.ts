@@ -161,6 +161,33 @@ describe("key strings per language", () => {
     expect(mail.text).toContain("REM-BDAY-2417");
   });
 
+  it("the birthday preview offers the percent it is handed", () => {
+    expect(renderDemo("birthday", "ru", { birthdayPercent: 10 }).html).toContain("10 %");
+    expect(renderDemo("birthday", "ru", { birthdayPercent: 10 }).html).not.toContain("15 %");
+    expect(demoValues("birthday", "ru", { birthdayPercent: 10 }).percent).toBe("10");
+  });
+
+  /* «Заказ ждёт оплаты» is written before the parcel has a carrier, so it is
+     the one letter that passes totalRows() no delivery label — and totalRows
+     glued «Доставка — <label>» whatever it was given, leaving «Доставка — :
+     бесплатно» in the letter the customer reads. */
+  it("the unpaid reminder names delivery without a dangling dash", () => {
+    const cases: Array<[Lang, string]> = [["ru", "Доставка"], ["et", "Tarne"], ["en", "Shipping"]];
+    for (const [lang, word] of cases) {
+      const mail = renderDemo("order-unpaid", lang);
+      expect(mail.text, lang).toContain(`${word}: `);
+      expect(mail.text, lang).not.toContain(`${word} — :`);
+      expect(mail.html, lang).not.toContain(`${word}&nbsp;—`);
+    }
+    // the invoice letter handed totalRows() the word «Доставка» itself, so the
+    // bill read «Доставка — Доставка» — the same glue, from the other end
+    expect(renderDemo("invoice", "ru").text).not.toContain("Доставка — Доставка");
+    expect(renderDemo("invoice", "ru").text).toContain("Доставка: ");
+
+    // …and the letter that DOES know the carrier still names it
+    expect(renderDemo("order-confirmed", "ru").text).toMatch(/Доставка — \S/);
+  });
+
   it("marketing letters carry an unsubscribe link, service ones do not", () => {
     for (const t of ["abandoned-cart", "back-in-stock", "birthday"] as const) {
       expect(renderDemo(t, "ru").html).toContain("Отписаться");

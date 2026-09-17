@@ -8,7 +8,9 @@
  *        letter's language: «Вы отписаны. Письма о заказах будут приходить
  *        как прежде.» A link that does not check out answers 400 with «Ссылка
  *        не работает. Напишите нам: …». Both idempotent — the second click
- *        gets the same page.
+ *        gets the same page. The page adds one more line when the address
+ *        is still on a waiting list, which is the one letter «больше не
+ *        будет» does not cover.
  *   POST same URL, body `List-Unsubscribe=One-Click` (RFC 8058)
  *        Gmail, Apple Mail and the rest press the button for the person and
  *        follow no redirect, so the address in the header is this exact URL,
@@ -26,7 +28,7 @@
  */
 import { clientIp, rateLimit } from "@/lib/auth";
 import { baseUrl, esc } from "@/emails/layout";
-import { maskEmail, optOut, readUnsubscribeParams, supportAddress } from "@/lib/consent";
+import { hasPendingStockAlerts, maskEmail, optOut, readUnsubscribeParams, supportAddress } from "@/lib/consent";
 import type { LangCode } from "@/lib/customers";
 
 export const runtime = "nodejs";
@@ -38,6 +40,13 @@ const WINDOW_MS = 60_000;
 interface Strings {
   done: string;
   doneText: (masked: string) => string;
+  /**
+   * The one letter «больше не будет» does not cover, shown only to somebody it
+   * is really true for: a «сообщите о наличии» notice is something the shopper
+   * asked for by name, and the stop list does not block it (src/lib/consent.ts).
+   * Without this line the page promised silence and the shop went on writing.
+   */
+  stillWaiting: string;
   shop: string;
   bad: string;
   badText: string;
@@ -50,6 +59,7 @@ const T: Record<LangCode, Strings> = {
   RU: {
     done: "Вы отписаны",
     doneText: (m) => `Рассылок на адрес ${m} больше не будет. Письма о заказах будут приходить как прежде.`,
+    stillWaiting: "Уведомление о наличии товара вы просили сами — оно всё равно придёт. Отказаться от него можно по ссылке в том письме.",
     shop: "В магазин",
     bad: "Ссылка не работает",
     badText: "Отпишем вручную — напишите нам.",
@@ -60,6 +70,7 @@ const T: Record<LangCode, Strings> = {
   ET: {
     done: "Olete loobunud",
     doneText: (m) => `Aadressile ${m} pakkumisi enam ei saadeta. Tellimuste kirjad tulevad nagu varem.`,
+    stillWaiting: "Toote saadavuse teavitust palusite ise — see tuleb ikkagi. Sellest saab loobuda selle kirja lingiga.",
     shop: "Poodi",
     bad: "Link ei tööta",
     badText: "Võtame teid nimekirjast maha käsitsi — kirjutage meile.",
@@ -70,6 +81,7 @@ const T: Record<LangCode, Strings> = {
   EN: {
     done: "You are unsubscribed",
     doneText: (m) => `No more offers to ${m}. Order e-mails keep coming as before.`,
+    stillWaiting: "You asked for the back-in-stock notice yourself — it still arrives. The link in that e-mail cancels it.",
     shop: "Back to the shop",
     bad: "This link does not work",
     badText: "We will unsubscribe you by hand — write to us.",
@@ -135,9 +147,10 @@ function writeUsLine(lang: LangCode): string {
   return `  <p>${esc(T[lang].writeUs)} <a href="mailto:${esc(addr)}">${esc(addr)}</a></p>\n`;
 }
 
-function donePage(lang: LangCode, email: string): Response {
+function donePage(lang: LangCode, email: string, stillWaiting: boolean): Response {
   const t = T[lang];
-  return page(lang, t.done, `  <p>${esc(t.doneText(maskEmail(email)))}</p>\n`, 200);
+  const extra = stillWaiting ? `  <p>${esc(t.stillWaiting)}</p>\n` : "";
+  return page(lang, t.done, `  <p>${esc(t.doneText(maskEmail(email)))}</p>\n${extra}`, 200);
 }
 
 function badPage(lang: LangCode): Response {
@@ -167,7 +180,10 @@ export async function GET(req: Request) {
     console.error("[api/mail/unsubscribe] write failed:", (err as Error)?.message ?? err);
     return laterPage(p.lang);
   }
-  return donePage(p.lang, p.email);
+  /* Asked after the write: a back-in-stock link has just cancelled this
+     address's pending alerts, so it answers "no" and the page keeps the
+     plain promise it has always made. */
+  return donePage(p.lang, p.email, await hasPendingStockAlerts(p.email));
 }
 
 /* RFC 8058 §3.2: the client POSTs `List-Unsubscribe=One-Click` to the URL
