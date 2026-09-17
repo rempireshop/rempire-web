@@ -39,6 +39,13 @@ export interface MailHookResult {
   id?: string;
   /** Whether Renat/Dim were pinged. */
   notified?: boolean;
+  /**
+   * The CUSTOMER's letter really left — not `ok`, which onOrderPaid() widens
+   * to «something got through» by folding the owner's ping into it, and not
+   * `!skipped`, which says only that a send was attempted. The panel words
+   * «письмо ушло» from this and from nothing else.
+   */
+  sent?: boolean;
 }
 
 /* ---------- shared bits -------------------------------------------------- */
@@ -217,6 +224,8 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
     let ok = true;
     let reason: string | undefined;
     let skipped: boolean | undefined;
+    // the customer's letter, on its own — see MailHookResult.sent
+    let sent = false;
 
     if (to) {
       /* «Продажа в салоне» gets the receipt, everything else gets «Заказ
@@ -237,6 +246,7 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
       id = res.id;
       reason = res.error;
       skipped = res.skipped;
+      sent = res.ok && !res.skipped;
     } else {
       skipped = true;
       reason = "no_customer_email";
@@ -251,10 +261,10 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
     // on their own when a "paid" arrives twice, see issueOrderGiftCards().
     await issueOrderGiftCards(order);
 
-    return { ok: ok || notified, skipped, reason, id, notified };
+    return { ok: ok || notified, skipped, reason, id, notified, sent };
   } catch (err) {
     console.error("[mail-hooks] onOrderPaid failed", err);
-    return { ok: false, reason: "exception" };
+    return { ok: false, sent: false, reason: "exception" };
   }
 }
 

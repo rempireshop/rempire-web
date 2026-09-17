@@ -259,9 +259,18 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
   const shipping = jsonOf<{ country?: string; method?: string }>(r.shipping, {});
   const payment = jsonOf<{ provider?: string; ref?: string; refunds?: unknown }>(r.payment, {});
   const company = jsonOf<{ name?: string; regCode?: string; vatNumber?: string } | null>(r.company, null) ?? {};
-  const invoice = jsonOf<{ number?: string; dueAt?: string } | null>(r.invoice, null) ?? {};
+  const invoice = jsonOf<{ number?: string; dueAt?: string; vatRate?: unknown } | null>(r.invoice, null) ?? {};
   const total = num(r.total);
-  const { net, vat } = vatSplit(total, vatRate);
+  /* An order that carries an invoice carries the rate that invoice was issued
+     at, frozen in the record (src/lib/invoices.ts InvoiceRecord.vatRate) — and
+     that is the figure printed on the PDF in the company's hands. `vatRate`
+     here is the shop's LIVE setting, so without this line every export of a
+     past month would be restated at today's rate the day Estonia changes it
+     (22 → 24 % on 1 July 2025 already happened once), and the accountant's
+     sheet would disagree with the invoices themselves. An order with no
+     invoice has no frozen rate and takes the live one, as before. */
+  const rate = invoice.vatRate == null ? vatRate : resolveVatRate(invoice.vatRate);
+  const { net, vat } = vatSplit(total, rate);
   return {
     number: r.number,
     // the day the shop had, not the day Greenwich had — an evening order must
@@ -283,7 +292,7 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
     loyaltyDiscount: num(r.loyalty_discount),
     total,
     refunded: refundedOf(payment, r.status, total),
-    vatRate,
+    vatRate: rate,
     vatAmount: vat,
     totalExclVat: net,
     paymentProvider: payment.provider ?? "",

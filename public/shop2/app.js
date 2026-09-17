@@ -1961,6 +1961,7 @@
       "Для самовывоза и электронных заказов этикетка не нужна.": "Järeletuleku ja e-tellimuste puhul pole silti vaja.",
       "Этикетка создаётся после оплаты.": "Silt luuakse pärast maksmist.",
       "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "Silti juba luuakse — oota minut ja ava tellimus uuesti.",
+      "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте.": "Saadetis on Montonios loodud, aga tellimusele ei salvestunud. Otsi see Montoniost üles — teist korda ära loo.",
       "Сообщение клиенту": "Sõnum kliendile",
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
@@ -4601,6 +4602,7 @@
       "Для самовывоза и электронных заказов этикетка не нужна.": "Pickup and electronic orders need no label.",
       "Этикетка создаётся после оплаты.": "The label is created after payment.",
       "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "The label is already being created — wait a minute and open the order again.",
+      "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте.": "The shipment was created in Montonio but was not saved onto the order. Find it in Montonio — do not create a second one.",
       "Сообщение клиенту": "Message to the customer",
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
@@ -5905,6 +5907,11 @@
     [/^Просрочен на (\d+) (?:день|дня|дней)\.$/, { ET: "Üle tähtaja $1 päeva.", EN: "$1 days overdue." }],
     [/^(.+) уже был оплачен$/, { ET: "$1 oli juba makstud", EN: "$1 was already paid" }],
     [/^(.+) оплачен по счёту · письмо ушло$/, { ET: "$1 makstud arve alusel · kiri läks välja", EN: "$1 paid by invoice · the letter has gone" }],
+    /* …and the same news when the letter did NOT go: the payment is recorded
+       either way, and only the server knows whether Resend took the «Заказ
+       принят» (the route answers `sent`). */
+    [/^(.+) оплачен по счёту · письмо не ушло$/,
+      { ET: "$1 makstud arve alusel · kiri ei läinud välja", EN: "$1 paid by invoice · the letter did not go out" }],
     [/^Заказ (.+): оплачен по счёту (.+)$/, { ET: "Tellimus $1: makstud arve $2 alusel", EN: "Order $1: paid by invoice $2" }],
     [/^Счёт (.+) \((.+)\): отправлен ещё раз$/, { ET: "Arve $1 ($2): saadetud uuesti", EN: "Invoice $1 ($2): sent again" }],
     [/^Счета для компаний: префикс «(.*)», срок оплаты (\d+) (?:день|дня|дней)$/,
@@ -17218,8 +17225,15 @@
        «After I added IBAN, the warning was still there, but invoice was sent
        and the warning disappeared.» So the line is read against the settings
        as they are NOW: the refusal is still true, but with an IBAN in place
-       what it asks for is one press, not a trip to «Настройки». */
-    else if (inv.sendError === "no_iban") out += companyIban()
+       what it asks for is one press, not a trip to «Настройки».
+
+       Read on its OWN, not as the alternative to the line above: a resend
+       keeps the date of the letter that DID go out and only rewrites
+       `sendError` (src/lib/invoices.ts resendInvoice), so as an `else if`
+       neither warning could ever draw once `sentAt` was set — a failed
+       «Отправить счёт ещё раз» left the card saying «Письмо ушло» and nothing
+       else, and the owner had no way to know the second one never left. */
+    if (inv.sendError === "no_iban") out += companyIban()
       ? '<br><span class="adm-hint--warn">Счёт не отправлен: тогда в «Реквизитах» не было IBAN. Сейчас он заполнен — нажмите «Отправить счёт ещё раз».</span>'
       : '<br><span class="adm-hint--warn">Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».</span>';
     else if (inv.sendError) out += '<br><span class="adm-hint--warn">Письмо со счётом не ушло (' + esc(inv.sendError) + ") — нажмите «Отправить счёт ещё раз».</span>";
@@ -28751,7 +28765,17 @@
     }
     render();
   }
-  function srvPush(a) {
+  /* A journal line the server refused. demoApply() writes the line and saves
+     it BEFORE the call leaves, so the panel stays quick — which means a
+     refusal has to take it back out, or the journal claims a step nobody
+     took and offers «Вернуть» for it. Same shape as shipRulesRefused()
+     above, which does this for the delivery prices. */
+  function journalDrop(entry) {
+    if (!entry) return;
+    DEMO.log = DEMO.log.filter(function (e) { return e !== entry; });
+    demoSave();
+  }
+  function srvPush(a, entry) {
     // consumed here whatever the action was, so a stale one can never be
     // applied to some later save (the panel signed out, an undo, …)
     var shipBack = shipRollback; shipRollback = null;
@@ -28784,9 +28808,13 @@
       SRV.stepBusy = String(a.id);
       apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
         .then(function (r) {
-          if (!(r.status === 200 && r.body.ok)) toast("Не удалось сохранить статус");
+          /* the journal may not keep a step the server refused — see
+             journalDrop(); the render is its own, because toast() paints only
+             the toast and admOrdersChanged() renders when its loads come back
+             (and not at all when one is already in flight) */
+          if (!(r.status === 200 && r.body.ok)) { toast("Не удалось сохранить статус"); journalDrop(entry); render(); }
           admOrdersChanged();
-        }).catch(function () { SRV.stepBusy = ""; render(); });
+        }).catch(function () { journalDrop(entry); SRV.stepBusy = ""; render(); });
     }
     /* «Создать этикетку» and its undo. The forward line is written AFTER the
        server registered the parcel (`done`, see srvCreateShipment), so there
@@ -29151,7 +29179,15 @@
       if (r.status === 200 && r.body.ok) {
         var paidLine = "Заказ " + number + ": оплачен по счёту " + invoiceNumber;
         journalNote(paidLine);
-        toast(r.body.alreadyPaid ? number + " уже был оплачен" : number + " оплачен по счёту · письмо ушло");
+        /* «письмо ушло» is the SERVER's answer, not a hope: the route reports
+           what became of the customer's «Заказ принят» (`sent`), the way the
+           resend button's answer already did. It used to be printed whenever
+           the call returned at all, so a shop whose Resend key had expired
+           told the owner the customer had been written to — and nothing else
+           on the card would ever have corrected it. */
+        toast(r.body.alreadyPaid ? number + " уже был оплачен"
+          : r.body.sent === false ? number + " оплачен по счёту · письмо не ушло"
+          : number + " оплачен по счёту · письмо ушло");
         admOrdersChanged();
         return;
       }
@@ -29311,7 +29347,13 @@
     not_paid: "Этикетка создаётся после оплаты.",
     // the previous press is still inside Montonio — the server refuses to book
     // a second parcel for the same order (POST /api/admin/shipments)
-    in_progress: "Этикетка уже создаётся — подождите минуту и откройте заказ заново."
+    in_progress: "Этикетка уже создаётся — подождите минуту и откройте заказ заново.",
+    /* The parcel WAS booked and the shop was charged for it; only the row
+       that records it did not save (POST /api/admin/shipments). The generic
+       «Не удалось создать этикетку» was false twice over — it said nothing
+       happened, and it invited a second press, which after a minute books
+       (and pays for) a second parcel. */
+    store_failed: "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте."
   };
   /* Montonio found no courier for the order's country. Two different
      stories: an order placed before the checkout asked for the real country
@@ -30171,7 +30213,9 @@
     DEMO.log = DEMO.log.slice(0, 40);
     demoSave();
     applyDemoOverrides();
-    srvPush(a);   // and through to the server when the owner is signed in
+    // and through to the server when the owner is signed in — with the line
+    // just written, so a refusal can take it back out again (journalDrop)
+    srvPush(a, entry);
     return entry;   // so a toast can offer to take exactly this line back
   }
   function demoUndo(i) {

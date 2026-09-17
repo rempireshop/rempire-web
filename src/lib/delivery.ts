@@ -143,6 +143,23 @@ async function shippedOrders(limit: number): Promise<ShippedRow[]> {
   );
 }
 
+/**
+ * When the parcel actually left — `shipping.shippedAt`, stamped once by
+ * setOrderStatus() on the move into `shipped` (src/lib/orders.ts).
+ *
+ * The clock below used to be read off `updated_at`, which is not the same
+ * question: setOrderNote(), setOrderPayment() and saveShipmentOnOrder() all
+ * touch it, and the shipping webhook calls the last of those on EVERY carrier
+ * status event — so a parcel the carrier reported on daily restarted the
+ * countdown daily, and «через N дней» quietly meant «N days after the last
+ * thing that happened to this row». "" on an order shipped before this stamp
+ * existed, and those keep the old behaviour.
+ */
+function shippedAtOf(shipping: unknown): string {
+  const s = (shipping && typeof shipping === "object" ? shipping : {}) as Record<string, unknown>;
+  return typeof s.shippedAt === "string" ? s.shippedAt : "";
+}
+
 function shipmentIdOf(shipping: unknown): string {
   const s = (shipping && typeof shipping === "object" ? shipping : {}) as Record<string, unknown>;
   const m = (s.montonio && typeof s.montonio === "object" ? s.montonio : {}) as Record<string, unknown>;
@@ -195,7 +212,7 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
     }
 
     if (!deliver && cutoff != null) {
-      const since = new Date(row.updated_at as string).getTime();
+      const since = new Date(shippedAtOf(row.shipping) || (row.updated_at as string)).getTime();
       if (Number.isFinite(since) && since <= cutoff) deliver = true;
     }
 

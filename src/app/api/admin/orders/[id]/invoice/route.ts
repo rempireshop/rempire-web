@@ -98,7 +98,16 @@ export async function POST(req: Request, ctx: Ctx) {
       const outcome = await markInvoicePaid(order, { setOrderPayment, setOrderStatus }, "admin");
       const fresh = (await getOrder(order.id)) ?? order;
       return Response.json(
-        { ok: true, order: fresh, alreadyPaid: outcome.alreadyPaid },
+        {
+          ok: true,
+          order: fresh,
+          alreadyPaid: outcome.alreadyPaid,
+          /* Whether the customer's «Заказ принят» really left, the same two
+             fields the `resend` answer below carries — the card says «письмо
+             ушло» only when this is true. */
+          sent: outcome.mail?.sent ?? false,
+          skipped: outcome.mail?.skipped ?? false,
+        },
         { headers: { "cache-control": "no-store" } },
       );
     }

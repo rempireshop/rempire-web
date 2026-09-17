@@ -16,26 +16,60 @@ async function call(
   name: "onOrderPaid" | "issueOrderGiftCards" | "onOrderClosed",
   order: unknown,
   opts?: unknown,
-): Promise<boolean> {
+): Promise<{ ran: boolean; result?: unknown }> {
   try {
     const mod: Record<string, unknown> = await import("@/lib/mail-hooks");
     const hook = mod?.[name] as OrderHook | undefined;
-    if (typeof hook !== "function") return false;
-    await hook(order, opts);
-    return true;
+    if (typeof hook !== "function") return { ran: false };
+    return { ran: true, result: await hook(order, opts) };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     // "module not found" is the normal case before the mail agent lands
     if (!/cannot find module|failed to resolve|not found/i.test(message)) {
       console.error(`${name} failed`, message);
     }
-    return false;
+    return { ran: false };
   }
 }
 
+/**
+ * What became of the customer's letter — as much of it as anything outside
+ * the mail module may rely on.
+ *
+ * `ran` (the old boolean) only ever said that the hook itself resolved, which
+ * is true of a mail server that refused the letter and of a shop with no
+ * Resend key at all. «Отметить оплаченным» reported «письмо ушло» from it, so
+ * the owner was told the customer had been written to whenever the hook did
+ * not throw. Typed structurally rather than imported from src/lib/mail-hooks.ts
+ * on purpose: this file must keep working when that module is not there.
+ */
+export interface OrderMailReport {
+  /** The customer's «Заказ принят» really left. */
+  sent: boolean;
+  /** Nothing was sent on purpose — no Resend key, or no address on the order. */
+  skipped: boolean;
+  reason?: string;
+}
+
+/**
+ * Whatever the hook answered, read defensively — it is another module's value,
+ * and on the markInvoicePaid() seam it is a test's stand-in. Exported so the
+ * one reader serves both.
+ */
+export function readOrderMailReport(raw: unknown): OrderMailReport {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  return {
+    sent: r.sent === true,
+    skipped: r.skipped === true,
+    reason: typeof r.reason === "string" ? r.reason : undefined,
+  };
+}
+
 /** The transition into paid: the customer's letter, Renat's ping, the gift cards. */
-export async function notifyOrderPaid(order: unknown): Promise<boolean> {
-  return call("onOrderPaid", order);
+export async function notifyOrderPaid(order: unknown): Promise<OrderMailReport> {
+  const { ran, result } = await call("onOrderPaid", order);
+  if (!ran) return { sent: false, skipped: false, reason: "no_mail_module" };
+  return readOrderMailReport(result);
 }
 
 /**
@@ -45,7 +79,7 @@ export async function notifyOrderPaid(order: unknown): Promise<boolean> {
  * that will ever mint them. Idempotent on the mail side.
  */
 export async function issueOrderGiftCards(order: unknown): Promise<boolean> {
-  return call("issueOrderGiftCards", order);
+  return (await call("issueOrderGiftCards", order)).ran;
 }
 
 /**
@@ -68,5 +102,5 @@ export async function notifyOrderClosed(
     giftCode?: string;
   },
 ): Promise<boolean> {
-  return call("onOrderClosed", order, opts);
+  return (await call("onOrderClosed", order, opts)).ran;
 }

@@ -324,6 +324,16 @@ export interface Totals {
   itemsSum: number;
   shipping: number;
   discount: number;
+  /**
+   * `orders.loyalty_discount` — what «Использовать баллы» took off at the
+   * checkout, its own stream beside the promo code (src/lib/orders.ts:
+   * total = subtotal + shipping − discount − loyalty_discount). Without it
+   * the rows of a letter simply did not add up to the «Итого» printed under
+   * them, and the invoice letter asked a company to transfer a figure its own
+   * lines contradicted — the attached PDF has carried this line all along
+   * (src/lib/invoices.ts invoiceLines).
+   */
+  loyalty: number;
   total: number;
 }
 
@@ -337,17 +347,27 @@ export function totalsOf(order: OrderLike, itemsSum: number): Totals {
     0,
   );
   const discount = Math.abs(num(order.discount, 0));
+  // mapOrder() hands the camelCase name, the column is snake_case — both read,
+  // like shippingPrice above
+  const loyalty = Math.abs(num(order.loyaltyDiscount ?? order.loyalty_discount, 0));
   const stored = num(order.total, NaN);
   const total = Number.isFinite(stored)
     ? stored
-    : Math.max(0, itemsSum + shipping - discount);
-  return { itemsSum, shipping, discount, total };
+    : Math.max(0, itemsSum + shipping - discount - loyalty);
+  return { itemsSum, shipping, discount, loyalty, total };
 }
 
 const DISCOUNT_WORD: Record<Lang, string> = {
   ru: "Скидка",
   et: "Allahindlus",
   en: "Discount",
+};
+
+/** The same word the invoice PDF prints on its own points line. */
+const POINTS_WORD: Record<Lang, string> = {
+  ru: "Баллы",
+  et: "Boonuspunktid",
+  en: "Loyalty points",
 };
 
 /** Shipping + discount rows and the bold totals row, HTML and text at once. */
@@ -366,6 +386,15 @@ export function totalRows(
       muted: true,
     });
     text.push(`  ${DISCOUNT_WORD[lang]} — −${money(t.discount)}`);
+  }
+
+  if (t.loyalty > 0) {
+    lines.push({
+      label: esc(POINTS_WORD[lang]),
+      value: "−" + money(t.loyalty, true),
+      muted: true,
+    });
+    text.push(`  ${POINTS_WORD[lang]} — −${money(t.loyalty)}`);
   }
 
   const shipValue =

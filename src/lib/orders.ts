@@ -1796,17 +1796,31 @@ export async function setOrderStatus(
      shipped and a second «Доставлен» keep the first date, because the parcel
      reached the customer once. */
   const deliveredStamp = status === "delivered" ? new Date().toISOString() : null;
+  /* …and the day «Отправлен» was pressed, by the same rule and for a sibling
+     reason: «Доставлен» closes itself N days after the parcel LEFT
+     (src/lib/delivery.ts closeDeliveredOrders), and that clock used to be read
+     off `updated_at` — which setOrderNote(), setOrderPayment() and every
+     carrier status event the shipping webhook records all push forward. A
+     parcel Montonio reported on four times took four days longer to close, and
+     a note typed on a shipped order restarted the week from scratch. Written
+     once, like the delivery stamp: an undo and a second «Отправлен» keep the
+     first date, because the parcel left once. */
+  const shippedStamp = status === "shipped" ? new Date().toISOString() : null;
   const rows = await query<OrderRow>(
     `update orders
         set status = $2,
             shipping = case
               when $3::text is not null and (shipping -> 'deliveredAt') is null
                 then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('deliveredAt', $3::text)
+              when $4::text is not null and (shipping -> 'shippedAt') is null
+                then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('shippedAt', $4::text)
               else shipping end,
             updated_at = now()
-      where id = $1${unless.length ? " and status <> all($4::text[])" : ""}
+      where id = $1${unless.length ? " and status <> all($5::text[])" : ""}
      returning *`,
-    unless.length ? [id, status, deliveredStamp, [...unless]] : [id, status, deliveredStamp],
+    unless.length
+      ? [id, status, deliveredStamp, shippedStamp, [...unless]]
+      : [id, status, deliveredStamp, shippedStamp],
   );
   // somebody else made this move between the read above and the UPDATE
   if (!rows.length) return null;

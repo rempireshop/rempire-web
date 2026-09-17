@@ -95,6 +95,15 @@ describe("POST /api/admin/pos-orders", () => {
     expect(order?.email).toBe("walk-in@example.com");
     expect(order?.discount).toBeCloseTo(product.p * 0.1, 2);
     expect(order?.discountCode).toBe("POS -10%");
+
+    /* …and that label is not a promo code. It reached consumePromo() on the
+       paid transition, was refused on the '%' (normalisePromoCode) and wrote
+       an English `promo_consume_failed` row into the owner's journal on every
+       discounted salon sale — an alarm about money that was never at risk. */
+    const rows = await query<{ action: string }>(
+      "select action from admin_audit where action in ('promo_consume_failed', 'giftcard_redeem_failed')",
+    );
+    expect(rows).toHaveLength(0);
   });
 
   it("refuses an unknown payment method", async () => {

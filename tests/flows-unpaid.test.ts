@@ -160,6 +160,28 @@ describe("the reminder", () => {
     expect((await getOrder(paid.id))!.status).toBe("paid");
     expect((await getOrder(till.id))!.status).toBe("new");
   });
+
+  /* …and a cancelled order stays cancelled when the bank's ticket finally
+     turns up. Montonio marks an unfinished payment ABANDONED long after the
+     shopper walked away — by then this order had been closed and the customer
+     told so. The `failed` that ticket used to write is one of the two statuses
+     this loop selects, so the shop went on to ask for the money anyway. */
+  it("is not restarted by a late ABANDONED ticket on a cancelled order", async () => {
+    const { settlePayment } = await import("@/lib/payments/settle");
+    const order = await place();
+    await setOrderStatus(order.id, "cancelled", "test");
+    await age(order.id, 4);
+
+    await settlePayment(
+      (await getOrder(order.id))!,
+      { orderRef: order.number, status: "failed", providerRef: "montonio-uuid-9", amount: 0, currency: "EUR", detail: "ABANDONED" },
+      "montonio",
+    );
+
+    expect((await getOrder(order.id))!.status).toBe("cancelled");
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 0, cancelled: 0 });
+    expect(sent).toHaveLength(0);
+  });
 });
 
 describe("the cancellation", () => {

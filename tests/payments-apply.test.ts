@@ -104,6 +104,25 @@ describe("idempotency — the webhook and the return race by design", () => {
     expect(d.setOrderStatus).not.toHaveBeenCalled();
   });
 
+  /* A cancelled order is finished, not unpaid. Montonio's ABANDONED ticket
+     arrives long after the owner (or the unpaid cron) closed the order, and
+     moving it to `failed` put it back among the two statuses the unpaid loop
+     writes to (src/lib/flows.ts UNPAID_STATUSES) — «Заказ ждёт оплаты» to a
+     customer who had already been told the order was cancelled. */
+  it("does not drag a cancelled order back into `failed`", async () => {
+    const d = deps();
+    const out = await applyPaymentResult(
+      { ...order, status: "cancelled" },
+      result({ status: "failed", detail: "ABANDONED" }),
+      "montonio",
+      d,
+    );
+    expect(out.status).toBe("unchanged");
+    expect(d.setOrderStatus).not.toHaveBeenCalled();
+    // …and what the bank said is still on the record
+    expect(d.setOrderPayment.mock.calls[0][1]).toMatchObject({ status: "failed", detail: "ABANDONED" });
+  });
+
   it("a shipped order is paid as far as payments are concerned", async () => {
     const d = deps();
     const out = await applyPaymentResult(
