@@ -34,12 +34,25 @@ Merged and pushed:
 - **`r22-shop`** — the public order-status endpoint and safe basket recovery
   (question 13), and blog price markers for new articles (question 16). Pushed,
   3552 tests green.
-- **`r22-blogfig`** — on top of `r22-shop`. Fixes a real regression found while
-  in there: `tools/lib/blog-export.mjs`, the sanitizer the prerenderer uses for
-  articles, has **no `data-fig` handling at all**, so the picture sizes and
-  placement Renat asked for in round 20 are silently stripped from every
-  prerendered article page. `src/lib/blog.ts` handles it in six places. Second
-  time that hand-kept twin has drifted.
+- **`r22-blogfig`** — on top of `r22-shop`, done, 3615 tests green. Fixes a real
+  regression found while in there. `tools/lib/blog-export.mjs`, the sanitizer the
+  prerenderer uses for articles, had **no `data-fig` handling at all**, because
+  one line in its `openTag()` rewrote every tag but `a` and `img` bare — so
+  `<figure data-fig="half-left">`, `"small"` and the default all came out as the
+  same bare `<figure>`. Every CSS rule that gives those presets meaning is keyed
+  on that attribute, so the picture sizes and placement Renat asked for in round
+  20 rendered as one full-width picture for Google, for no-JS readers and on
+  everybody's first paint, then visibly reflowed once the SPA repainted from the
+  real renderer. Second time that hand-kept twin has drifted.
+
+  **Recommended follow-up, not done:** extract the two sanitizers into one shared
+  module. `blog-export.mjs`'s own header has long argued this is impossible — it
+  is wrong, and `src/lib/seo-head.mjs` is exact precedent: a plain `.mjs` under
+  `src/lib/` imported by both strict TypeScript and the bare-node build. The
+  47-body corpus test on this branch guards today's behaviour but cannot contain
+  tomorrow's attribute, which is what both drifts actually were. Note that this
+  unifies two of three: `blogCleanHtml()` in `app.js` is a DOMParser version with
+  no build step and genuinely cannot share code.
 
 ## Branches still building when the session ended
 
