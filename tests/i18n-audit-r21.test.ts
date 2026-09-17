@@ -484,6 +484,21 @@ function chatHarness(fetchStub: () => Promise<unknown>): ChatHarness {
     function bubble(who, html) { bubbles.push(String(html)); }
     function runAction(a) { if (a) actions.push(a); }
     function rulesReply(q) { rules.push(q); }
+    /* Two collaborators reply() grew after this harness was written, both
+       stubbed like every other one above.
+
+       probeAI — r21-assistant's re-probe: a dropped GET /api/assistant/ used
+       to leave the shopper on the canned matcher for as long as the page
+       stayed open, so every question re-asks. With aiEnabled already decided
+       here (true), the real one returns on its first line, which is exactly
+       what this no-op does.
+
+       withBlogLinks — r21-assistant turns a /shop2/blog/<slug>/ path the model
+       wrote into a link, AFTER escaping. What it makes of the text belongs to
+       its own test; here the bubble has to arrive unchanged so the assertions
+       below can look for the sentence in it. */
+    function probeAI() {}
+    function withBlogLinks(html) { return String(html); }
     var fetch = FETCH;
     ${fn(chat, "reply", "public/shop2/chat.js")}
     ${fn(chat, "paintPanel", "public/shop2/chat.js")}

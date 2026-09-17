@@ -70,6 +70,15 @@ function save(answer: Res): Promise<void> {
     "toast",
     "apiSend",
     "blogFieldsPayload",
+    /* r21-blog put a snapshot of the draft between the payload and the
+       request — «Сохранено ✓» is now measured against what LEFT rather than
+       against the draft as it is when the answer lands, so a word typed while
+       the save was in the air is no longer folded into the yardstick. Plumbing
+       from this file's point of view, and stubbed like its neighbours: what
+       this test is about is what the owner READS when the write is refused,
+       and on that path the snapshot is never looked at again. */
+    "blogDraftSnap",
+    "blogDraftSig",
     "blogMarkSaved",
     "blogForget",
     [
@@ -87,6 +96,8 @@ function save(answer: Res): Promise<void> {
     (t: string) => toasts.push(t),
     () => Promise.resolve(answer),
     () => ({}),
+    (d: Record<string, unknown>) => ({ ...d }),
+    () => "sig",
     () => {},
     () => {},
   ) as () => Promise<void>;
