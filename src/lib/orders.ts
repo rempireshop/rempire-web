@@ -72,6 +72,16 @@ export type OrderItem = {
   qty: number;
   price: number; // per unit, as charged
   sum: number; // price × qty
+  /**
+   * Set lines («bundle:<id>») only: the catalogue products the set was sold
+   * as — `variant` is the size LABEL the shelf keys on, `qty` is how many of
+   * it are in ONE set. Written when the line is priced, so the stock move on
+   * the paid transition (and the 'return' move behind a refund) takes the
+   * goods that were actually bought rather than whatever the set holds by the
+   * time the money lands. Absent on a line priced before this existed, which
+   * then behaves exactly as it did: no parts, no move.
+   */
+  parts?: Array<{ id: string; variant: string; qty: number }> | null;
 };
 
 /**
@@ -156,6 +166,13 @@ export type CreateOrderInput = {
   discountCode?: string | null;
   /** inventory: channel:'pos' only — a flat percent off the goods, typed at the register. */
   posDiscountPercent?: number | null;
+  /**
+   * inventory: channel:'pos' only — the id the register minted for the basket
+   * in front of it (db/migrations/093_pos_sale_ref.sql). Written with the row,
+   * so a sale whose answer never arrived is recognisable when the cashier
+   * sends it again. Ignored for a web order.
+   */
+  posRef?: string | null;
   notes?: string | null;
   /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
   /** «Использовать баллы» toggle at checkout — the amount is quoted server-side, never sent by the client. */
@@ -780,6 +797,20 @@ function bundleParts(def: BundleDef): BundlePart[] {
   return (def.products ?? []).map((id) => ({ id, qty: 1 }));
 }
 
+/**
+ * Which shelf row one part of a set comes off: the size LABEL stock_levels
+ * and stock_moves key on ("250 мл"), or "" for a product with no volumes at
+ * all — never the index the set stores. The owner's saved ladder decides the
+ * labels where he has one, exactly as it does for a plain product line.
+ */
+function bundlePartVariant(id: string, raw: unknown, o: Override | undefined): string {
+  const table = overrideLadder(o) ?? VARIANTS[id];
+  if (!table || !table.sizes.length) return "";
+  const asIndex = typeof raw === "number" ? raw : /^\d+$/.test(String(raw ?? "")) ? Number(raw) : -1;
+  const i = asIndex >= 0 ? asIndex : table.sizes.indexOf(String(raw ?? ""));
+  return table.sizes[i >= 0 && i < table.sizes.length ? i : 0] ?? "";
+}
+
 /** bundles.json titles are trilingual objects; RU is the source of truth. */
 function bundleTitle(def: BundleDef, lang: string, fallback: string): string {
   const t = def.title ?? def.name;
@@ -879,9 +910,24 @@ export async function priceItems(
       if (!def) throw new OrderError("bundle_unknown", bid);
       if (def.stock === "out") throw new OrderError("out_of_stock", raw.id);
       // a bundle is out of stock as soon as one of its parts is
+      const parts: NonNullable<OrderItem["parts"]> = [];
       for (const part of bundleParts(def)) {
-        const state = overrides[part.id]?.stock ?? (BY_ID.get(part.id)?.s as StockState | undefined);
+        const o = overrides[part.id];
+        /* «Показывать в магазине» off (product_overrides.hidden) is the same
+           refusal inside a set as it is on a line of its own below: the owner
+           took the bottle off sale, and a set must not be a side door back
+           onto the shelf for it. */
+        const state = o?.hidden ? "out" : (o?.stock ?? (BY_ID.get(part.id)?.s as StockState | undefined));
         if (state === "out") throw new OrderError("out_of_stock", part.id);
+        /* What the shelf will be moved by when this order is paid. Resolved
+           here, while the set's definition is in hand: the line itself only
+           ever carries «bundle:<id>», and a set edited between the order and
+           the payment would otherwise write off the wrong goods. */
+        parts.push({
+          id: part.id,
+          variant: bundlePartVariant(part.id, part.variant ?? part.size, o),
+          qty: Math.max(1, Math.trunc(num(part.qty, 1))),
+        });
       }
       const price = bundlePrice(def, overrides);
       lines.push({
@@ -892,6 +938,7 @@ export async function priceItems(
         qty,
         price,
         sum: money(price * qty),
+        parts,
       });
       proUnits.push(null); // no pro price on a set — it is already one fixed price
       continue;
@@ -1252,6 +1299,19 @@ function cleanShipping(ship: CreateOrderInput["shipping"], price: number): Order
 }
 
 /**
+ * The basket id the register minted (db/migrations/093_pos_sale_ref.sql), or
+ * null when there is none. Deliberately narrow — letters, digits, `-` and `_`,
+ * 8 to 64 of them — because it goes into a unique index and is compared as
+ * plain text: anything else is not an id this shop wrote and is treated as if
+ * the till had sent none, which is exactly the behaviour of every sale rung up
+ * before the column existed.
+ */
+export function cleanPosRef(v: unknown): string | null {
+  const s = String(v ?? "").trim();
+  return /^[A-Za-z0-9_-]{8,64}$/.test(s) ? s : null;
+}
+
+/**
  * `ctx.customerId` is resolved by the caller (the route reads the `rmp_cust`
  * cookie — this file has no Request to read it from itself) from a valid,
  * signed-in session, never from anything the body claims. It drives both pro
@@ -1368,8 +1428,8 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   if (invoiceMethod && !(total > 0)) throw new OrderError("invoice_zero_total");
 
   const rows = await query<OrderRow>(
-    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company)
-     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17::jsonb)
+    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company, pos_ref)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17::jsonb, $18)
      returning *`,
     [
       lang,
@@ -1389,6 +1449,7 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
       total,
       typeof input.notes === "string" ? input.notes.replace(/\s+$/, "").slice(0, 2000) || null : null,
       company ? jsonbParam(company) : null,
+      channel === "pos" ? cleanPosRef(input.posRef) : null,
     ],
   );
   let order = mapOrder(rows[0]);
@@ -1630,29 +1691,29 @@ export async function setOrderStatus(
      'return' move. An order that was never paid never took stock in the
      first place (see the paid-transition decrement in
      src/lib/payments/apply.ts), so cancelling one here has nothing to return.
-     Product lines only: a bundle line's id ("bundle:<id>") is not a catalogue
-     product, so its parts are not resolved and returned individually here —
-     out of scope for this pass, same boundary the decrement below draws.
+     A set line comes back as the parts it was sold as, exactly as it left —
+     stockUnitsOf(), the same rows the decrement took.
      Best effort: a stock hiccup must never stop a refund from being recorded. */
   const wasPaid = (PAID_ORDER_STATUSES as readonly string[]).includes(before.status);
   if (wasPaid && (status === "refunded" || status === "cancelled")) {
     try {
-      const { move, isTracked } = await import("@/lib/inventory");
+      const { move, isTracked, stockUnitsOf } = await import("@/lib/inventory");
       for (const item of before.items) {
-        if (item.kind !== "product" || !item.qty) continue;
-        /* Only a counted shelf gets the bottle back. The sale of an uncounted
-           variant was skipped (move() — "tracked"), so there is nothing to
-           return; a +N here made the variant tracked at N and the shop said
-           «мало» about a product the owner never counted. */
-        if (!(await isTracked(item.id, item.variant ?? ""))) continue;
-        await move({
-          productId: item.id,
-          variant: item.variant ?? "",
-          delta: Math.abs(item.qty),
-          reason: "return",
-          ref: after.number,
-          actor,
-        });
+        for (const unit of stockUnitsOf(item)) {
+          /* Only a counted shelf gets the bottle back. The sale of an uncounted
+             variant was skipped (move() — "tracked"), so there is nothing to
+             return; a +N here made the variant tracked at N and the shop said
+             «мало» about a product the owner never counted. */
+          if (!(await isTracked(unit.productId, unit.variant))) continue;
+          await move({
+            productId: unit.productId,
+            variant: unit.variant,
+            delta: unit.qty,
+            reason: "return",
+            ref: after.number,
+            actor,
+          });
+        }
       }
     } catch (err) {
       console.error("[orders] return stock move failed:", err);

@@ -387,6 +387,47 @@ async function fireBackInStock(productId: string): Promise<void> {
   }
 }
 
+/** One shelf row and how much of it an order line moves. */
+export type StockUnit = { productId: string; variant: string; qty: number };
+
+/**
+ * The shelf rows ONE order line moves — what the paid transition decrements
+ * (src/lib/payments/apply.ts, the POS route) and what a refund puts back
+ * (src/lib/orders.ts setOrderStatus).
+ *
+ * A product line is one row, at its own size label. A set line («bundle:<id>»)
+ * is not a catalogue product and never was: it carries the parts it was sold
+ * as, and each of those is a row of its own, multiplied by how many sets were
+ * bought — before this, a paid set took nothing off the shelf at all and the
+ * shop went on offering bottles that had left the room. A gift card, and a set
+ * line from before the parts were recorded, move nothing.
+ */
+export function stockUnitsOf(line: {
+  id?: string;
+  kind?: string;
+  variant?: string | null;
+  qty?: number | string | null;
+  parts?: Array<{ id?: string; variant?: string | null; qty?: number | string | null }> | null;
+}): StockUnit[] {
+  const qty = Math.abs(Math.trunc(Number(line?.qty) || 0));
+  if (!qty) return [];
+  if (line?.kind === "product") {
+    const productId = String(line.id ?? "").trim();
+    return productId ? [{ productId, variant: normVariant(line.variant), qty }] : [];
+  }
+  if (line?.kind === "bundle" && Array.isArray(line.parts)) {
+    const out: StockUnit[] = [];
+    for (const part of line.parts) {
+      const productId = String(part?.id ?? "").trim();
+      const each = Math.abs(Math.trunc(Number(part?.qty) || 0));
+      if (!productId || !each) continue;
+      out.push({ productId, variant: normVariant(part?.variant), qty: qty * each });
+    }
+    return out;
+  }
+  return [];
+}
+
 /**
  * Atomic `qty = qty + delta` plus its ledger row, never below 0. A delta that
  * would cross 0 is clamped there and reported back via `clampedNegative`
@@ -586,15 +627,51 @@ export type CatalogueLevelRow = {
   updatedAt: string | null;
 };
 
-function catalogueUniverse(): Array<{ productId: string; variant: string }> {
+/**
+ * The volumes a catalogue product actually has — the ladder the owner saved in
+ * the editor where there is one (product_overrides.sizes, migration 147), the
+ * generated file's otherwise.
+ *
+ * This is the difference between a shelf that exists and one that does not. A
+ * size «+ Размер» added, or one renamed, was unknown to the table below, so it
+ * had no «Склад» row at all: nobody could count it in, which left it untracked,
+ * which made every sale of it a sale on an uncounted variant — skipped in
+ * silence by move() while the receipt said «остатки списаны».
+ */
+function ladderOf(productId: string, owned: Map<string, string[]>): string[] {
+  const own = owned.get(productId);
+  if (own) return own;
+  const v = VARIANTS[productId];
+  return v && v.sizes && v.sizes.length ? v.sizes : [""];
+}
+
+/** The owner's saved ladders, as the shelf needs them: id → size LABELS.
+    Read here rather than through src/lib/orders.ts, which imports this file. */
+async function ownerLadders(): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  try {
+    const rows = await query<{ product_id: string; sizes: unknown }>(
+      "select product_id, sizes from product_overrides where sizes is not null",
+    );
+    for (const r of rows) {
+      const list = typeof r.sizes === "string" ? (JSON.parse(r.sizes) as unknown) : r.sizes;
+      if (!Array.isArray(list) || !list.length) continue;
+      const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
+      /* One rung with no label is «один объём» — the product has no volumes at
+         all and its shelf row is the unlabelled one, exactly as the storefront
+         paints it (applyDemoOverrides in public/shop2/app.js). */
+      out.set(r.product_id, labels.length === 1 && !labels[0] ? [""] : labels);
+    }
+  } catch (err) {
+    console.error("[inventory] owner size ladders not loaded, using the catalogue file:", err);
+  }
+  return out;
+}
+
+function catalogueUniverse(owned: Map<string, string[]>): Array<{ productId: string; variant: string }> {
   const out: Array<{ productId: string; variant: string }> = [];
   for (const p of CATALOGUE) {
-    const v = VARIANTS[p.id];
-    if (v && v.sizes && v.sizes.length) {
-      for (const size of v.sizes) out.push({ productId: p.id, variant: size });
-    } else {
-      out.push({ productId: p.id, variant: "" });
-    }
+    for (const size of ladderOf(p.id, owned)) out.push({ productId: p.id, variant: size });
   }
   return out;
 }
@@ -685,12 +762,31 @@ async function trackedKeys(): Promise<Set<string>> {
  * not tracked — so Renat can see it is missing, not just not query for it.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
-  const [dbRows, tracked, custom] = await Promise.all([
+  const [dbRows, tracked, custom, owned] = await Promise.all([
     query<StockLevelRow>("select * from stock_levels"),
     trackedKeys(),
     customUniverse(),
+    ownerLadders(),
   ]);
-  const universe = catalogueUniverse().concat(custom.rows);
+  const universe = catalogueUniverse(owned).concat(custom.rows);
+
+  /* A volume the owner RENAMED leaves its old row behind with a real count on
+     it. That row is not in the universe above any more, and dropping it here
+     would hide goods that are on the shelf — so a level the database already
+     holds for a product the shop still has gets a row of its own too, for
+     Renat to move across and zero. */
+  const listed = new Map<string, Set<string>>();
+  for (const u of universe) {
+    const seen = listed.get(u.productId);
+    if (seen) seen.add(u.variant);
+    else listed.set(u.productId, new Set([u.variant]));
+  }
+  for (const r of dbRows) {
+    const seen = listed.get(r.product_id);
+    if (!seen || seen.has(r.variant)) continue;
+    seen.add(r.variant);
+    universe.push({ productId: r.product_id, variant: r.variant });
+  }
   const byKey = new Map(dbRows.map((r) => [r.product_id + "\u0000" + r.variant, r]));
 
   let rows: CatalogueLevelRow[] = universe.map(({ productId, variant }) => {

@@ -342,7 +342,10 @@ shoppers (read).
   `allBundles()` :5521 (respects the «Показывать наборы» switch, `settings.
   bundles`), `screenBundles` :5685, `screenBundle` :5700. Static
   `public/shop/bundles.js` / `src/data/bundles.json` remain as offline copy
-  and prerender source (`npm run build:bundles`).
+  and prerender source (`npm run build:bundles`) — with the PRICE taken from
+  the table at build time (`tools/lib/bundles-export.mjs`), because nothing
+  regenerates that file after an admin edit and the set page's `<title>`, meta
+  and schema.org Offer are written from it.
 - **AI on product texts** (§13): `POST /api/admin/ai/text/` tasks `describe`,
   `translate`, `seo`, `copy{product_name}`; assistant actions `set_price`,
   `set_stock`, `set_seo`, `create_product`, `update_product`, `add_product_photo`.

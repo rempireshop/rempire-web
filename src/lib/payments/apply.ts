@@ -48,6 +48,8 @@ export interface OrderLike {
     /** line total — read by earnableSubtotal() to take the gift cards back out */
     sum?: number | string | null;
     price?: number | string | null;
+    /** Set lines: the products the set was sold as — src/lib/orders.ts. */
+    parts?: Array<{ id: string; variant: string; qty: number }> | null;
   }>;
 }
 
@@ -502,12 +504,13 @@ async function recordPurchase(order: OrderLike, deps: ApplyDeps): Promise<void> 
 }
 
 /**
- * Take every product line out of stock, once, on the transition into paid —
- * inventory agent, migration 090. Bundle lines (id "bundle:<id>") and gift
- * lines carry no catalogue product to decrement and are skipped; the same
- * boundary the matching 'return' move draws in src/lib/orders.ts
- * setOrderStatus(). Best effort per line: one product's stock hiccup must
- * never stop the rest of the order — or the payment itself — from saving.
+ * Take the goods out of stock, once, on the transition into paid — inventory
+ * agent, migration 090. A product line is itself; a set line («bundle:<id>»)
+ * is the parts it was sold as, which the line carries (stockUnitsOf() in
+ * src/lib/inventory.ts, and the same boundary the matching 'return' move
+ * draws in src/lib/orders.ts setOrderStatus). A gift card moves nothing. Best
+ * effort per row: one product's stock hiccup must never stop the rest of the
+ * order — or the payment itself — from saving.
  */
 async function decrementStock(order: OrderLike, deps: ApplyDeps): Promise<void> {
   const items = Array.isArray(order.items) ? order.items : [];
@@ -530,25 +533,29 @@ async function decrementStock(order: OrderLike, deps: ApplyDeps): Promise<void> 
     ref?: string | null;
     actor?: string | null;
   }) => Promise<unknown>;
+  let stockUnitsOf: (line: unknown) => Array<{ productId: string; variant: string; qty: number }>;
   try {
-    move = (await import("@/lib/inventory")).move as typeof move;
+    const inv = await import("@/lib/inventory");
+    move = inv.move as typeof move;
+    stockUnitsOf = inv.stockUnitsOf as typeof stockUnitsOf;
   } catch (err) {
     console.error("[payments] inventory module not available", err);
     return;
   }
   for (const item of items) {
-    if (item.kind !== "product" || !item.qty) continue;
-    try {
-      await move({
-        productId: item.id,
-        variant: item.variant ?? "",
-        delta: -Math.abs(Number(item.qty) || 0),
-        reason: "sale_web",
-        ref: order.number,
-        actor: "system",
-      });
-    } catch (err) {
-      console.error(`[payments] stock decrement failed on ${order.number} (${item.id}):`, err);
+    for (const unit of stockUnitsOf(item)) {
+      try {
+        await move({
+          productId: unit.productId,
+          variant: unit.variant,
+          delta: -unit.qty,
+          reason: "sale_web",
+          ref: order.number,
+          actor: "system",
+        });
+      } catch (err) {
+        console.error(`[payments] stock decrement failed on ${order.number} (${unit.productId}):`, err);
+      }
     }
   }
 }

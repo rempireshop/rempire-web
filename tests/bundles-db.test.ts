@@ -209,6 +209,36 @@ describe("the bundles table", () => {
     expect(beard.pct).toBeGreaterThan(0);
   });
 
+  /* The seed and the generator's own output are the same eight sets, so they
+     must carry the same eight prices. They did not: styling-duo was seeded at
+     24,90 (33,90 in the file) and hair-young-again at 39,90 — 90 € of
+     Kevin.Murphy — because 120_bundles.sql was written the day before the
+     per-volume price fix of 09.09 and was never regenerated with it. */
+  it("charges for every seeded set what src/data/bundles.json says it costs", async () => {
+    const file = JSON.parse(
+      readFileSync(new URL("../src/data/bundles.json", import.meta.url), "utf8"),
+    ) as Array<{ id: string; price: number }>;
+    const seeded = await listBundles();
+    for (const b of file) {
+      const row = seeded.find((s) => s.id === b.id);
+      expect(row, `${b.id} is missing from the bundles table`).toBeTruthy();
+      expect(row!.price, `${b.id} is priced differently in the table`).toBeCloseTo(b.price, 2);
+    }
+  });
+
+  /* The live database was seeded before the fix and `on conflict do nothing`
+     can never correct it, so 121 carries the repair — guarded on the wrong
+     number, so a price Renat set himself is his. */
+  it("121 repairs a live row still at the wrong price and leaves an edited one alone", async () => {
+    const FIX = readFileSync(new URL("../db/migrations/121_bundles_seed_price_fix.sql", import.meta.url), "utf8");
+    await query("update bundles set price = 39.90 where id = 'hair-young-again'");
+    await query("update bundles set price = 29.00 where id = 'styling-duo'");
+    await exec(FIX);
+    expect((await getBundle("hair-young-again"))?.price).toBe(78.9);
+    expect((await getBundle("styling-duo"))?.price).toBe(29);
+    await query("update bundles set price = 33.90 where id = 'styling-duo'");
+  });
+
   /* «on conflict do nothing»: a second run of the migration — a redeploy, a
      re-applied migration list — must never quietly undo an edit. */
   it("re-running the migration changes nothing that was edited", async () => {
@@ -323,6 +353,23 @@ describe("an order with a set in it", () => {
     expect((await bundleDefsForOrders())["test-set"]).toBeTruthy();
   });
 
+  /* «Показывать в магазине» off is not a shop-window decision like «скрыт»
+     above — it takes the bottle off sale. A set holding it used to show it and
+     sell it anyway, so the one product the owner had pulled went on leaving
+     the shelf inside every set that carried it. */
+  it("refuses a set whose part the owner took off sale, and says the set is out", async () => {
+    await upsertBundle(valid({ price: 5 }));
+    await upsertOverride(B.id, { hidden: true });
+    try {
+      expect((await getBundle("test-set"))!.stock).toBe("out");
+      await expect(
+        createOrder({ lang: "ru", items: [{ id: "bundle:test-set", qty: 1 }], customer, shipping: ship }),
+      ).rejects.toMatchObject({ code: "out_of_stock" } as OrderError);
+    } finally {
+      await upsertOverride(B.id, { hidden: false });
+    }
+  });
+
   it("refuses a set that no longer exists", async () => {
     await expect(
       createOrder({ lang: "ru", items: [{ id: "bundle:gone-for-good", qty: 1 }], customer, shipping: ship }),
@@ -345,5 +392,60 @@ describe("an order with a set in it", () => {
       shipping: ship,
     });
     expect(et.items[0].title).toBe("Testkomplekt");
+  });
+});
+
+/**
+ * The browser half of the same promise.
+ *
+ * A product the owner takes off sale with «Показывать в магазине» is REMOVED
+ * from the storefront's catalogue (rebuildCatalogue in public/shop2/app.js),
+ * so a set holding it had no p.stock to read and fell back to the snapshot
+ * /api/bundles/ sent at boot — which still said «in». The set went on
+ * offering «В корзину» for a bottle that was no longer for sale, in the same
+ * session the owner had just pulled it in. Sliced out of app.js by source
+ * text, the way tests/checkout-parity.test.ts does it.
+ */
+describe("what the shop shows for a set whose part was taken off sale", () => {
+  const app = readFileSync(new URL("../public/shop2/app.js", import.meta.url), "utf8");
+
+  function slice(name: string): string {
+    const start = app.indexOf(`function ${name}(`);
+    if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+    let depth = 0;
+    for (let i = app.indexOf("{", start); i < app.length; i++) {
+      if (app[i] === "{") depth++;
+      else if (app[i] === "}" && --depth === 0) return app.slice(start, i + 1);
+    }
+    throw new Error(`unbalanced braces around ${name}() in app.js`);
+  }
+
+  /** bundleItemStock() over one part, with the catalogue and the switch stubbed. */
+  function shown(part: { id: string; stock?: string }, hidden: string[], inCatalogue: boolean): string {
+    const body = `
+      function bundleItemProduct(it) { return IN_CATALOGUE ? { id: it.id, stock: "in" } : null; }
+      function shopHidden(id) { return HIDDEN.indexOf(id) >= 0; }
+      ${slice("bundleItemStock")}
+      return bundleItemStock(PART);
+    `;
+    // app.js's own source plus fixed stub text — nothing is interpolated in.
+    return (new Function("PART", "HIDDEN", "IN_CATALOGUE", body) as (
+      p: unknown,
+      h: string[],
+      c: boolean,
+    ) => string)(part, hidden, inCatalogue);
+  }
+
+  it("says «нет в наличии» for a part the switch was turned off for", () => {
+    expect(shown({ id: "a", stock: "in" }, ["a"], false)).toBe("out");
+  });
+
+  it("still trusts the boot snapshot for a part the catalogue simply does not carry", () => {
+    expect(shown({ id: "a", stock: "low" }, [], false)).toBe("low");
+    expect(shown({ id: "a" }, [], false)).toBe("in");
+  });
+
+  it("reads the live catalogue first while the product is on sale", () => {
+    expect(shown({ id: "a", stock: "out" }, [], true)).toBe("in");
   });
 });

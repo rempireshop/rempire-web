@@ -2,7 +2,8 @@
  * POST /api/admin/pos-orders/ — «Продажа в салоне», the in-salon quick sale.
  *
  * Body: { items: [{id, variant?, qty}], customer?: {email?, phone?, name?},
- *         payment: {method: "cash"|"terminal"}, discountPercent?: 0..90 }
+ *         payment: {method: "cash"|"terminal"}, discountPercent?: 0..90,
+ *         ref?: the register's id for this basket — saleAlreadyRung() below }
  *
  * Unlike POST /api/orders/ (the storefront checkout) this never touches
  * Montonio: the till already has the money the moment this call is made, so
@@ -29,7 +30,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { getCustomer, isEmail, normalizeEmail, type Customer } from "@/lib/customers";
 import { query } from "@/lib/db";
-import { createOrder, OrderError, setOrderPayment, type Order } from "@/lib/orders";
+import { cleanPosRef, createOrder, getOrder, OrderError, setOrderPayment, type Order } from "@/lib/orders";
 import { settlePayment } from "@/lib/payments/settle";
 
 export const runtime = "nodejs";
@@ -49,22 +50,30 @@ const METHOD_WORD: Record<string, string> = { cash: "наличные", terminal
  */
 async function decrementPosStock(order: {
   number: string;
-  items: Array<{ id: string; kind?: string; variant?: string | null; qty: number }>;
+  items: Array<{
+    id: string;
+    kind?: string;
+    variant?: string | null;
+    qty: number;
+    parts?: Array<{ id: string; variant: string; qty: number }> | null;
+  }>;
 }): Promise<void> {
-  const { move } = await import("@/lib/inventory");
+  const { move, stockUnitsOf } = await import("@/lib/inventory");
   for (const line of order.items) {
-    if (line.kind !== "product" || !line.qty) continue;
-    try {
-      await move({
-        productId: line.id,
-        variant: line.variant ?? "",
-        delta: -Math.abs(Number(line.qty) || 0),
-        reason: "sale_pos",
-        ref: order.number,
-        actor: "admin",
-      });
-    } catch (err) {
-      console.error(`[api/admin/pos-orders] stock decrement failed on ${line.id}:`, err);
+    // a set line is the parts it was sold as, a product line is itself
+    for (const unit of stockUnitsOf(line)) {
+      try {
+        await move({
+          productId: unit.productId,
+          variant: unit.variant,
+          delta: -unit.qty,
+          reason: "sale_pos",
+          ref: order.number,
+          actor: "admin",
+        });
+      } catch (err) {
+        console.error(`[api/admin/pos-orders] stock decrement failed on ${unit.productId}:`, err);
+      }
     }
   }
 }
@@ -144,7 +153,41 @@ type Body = {
   discountPercent?: unknown;
   /** The language the register was in when the sale was rung up — see receiptLang(). */
   lang?: unknown;
+  /** The id the register minted for this basket — see `saleAlreadyRung` below. */
+  ref?: unknown;
 };
+
+/**
+ * The order this basket id already wrote, or null.
+ *
+ * The register keeps the basket and both pay buttons alive when the answer
+ * does not come back, so a request that timed out AFTER the order was written
+ * is answered by a cashier tapping «Терминал» again — and until
+ * db/migrations/093_pos_sale_ref.sql that second tap was a second paid order,
+ * a second lot of points, the shelf written off twice and two letters to the
+ * customer. The id belongs to the basket, not to the request: the same basket
+ * sent twice is one sale; an edited basket mints a new one and is a new sale.
+ *
+ * What comes back is the ORDER, not an answer: the repeat then walks the same
+ * settlement below that the first attempt walked, which is idempotent by
+ * design (src/lib/payments/apply.ts — everything that may happen once hangs
+ * off the single transition into paid). So a first attempt that died between
+ * the INSERT and the settlement is finished by the second tap instead of
+ * being reported as done while the order sits unpaid.
+ */
+async function saleAlreadyRung(ref: string | null): Promise<Order | null> {
+  if (!ref) return null;
+  const rows = await query<{ id: string }>("select id from orders where pos_ref = $1 limit 1", [ref]);
+  if (!rows.length) return null;
+  const order = await getOrder(rows[0].id);
+  if (order) console.warn(`[api/admin/pos-orders] repeat of sale ${ref} answered with ${order.number}`);
+  return order;
+}
+
+/** Postgres/PGlite unique-constraint violation — orders_pos_ref_idx here. */
+function isUniqueViolation(err: unknown): boolean {
+  return !!err && typeof err === "object" && (err as { code?: unknown }).code === "23505";
+}
 
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
@@ -187,24 +230,42 @@ export async function POST(req: Request) {
   const discountPercent = Number.isFinite(pctRaw) ? Math.min(90, Math.max(0, Math.round(pctRaw))) : 0;
 
   const customer = body.customer ?? {};
+  const ref = cleanPosRef(body.ref);
 
   try {
     /* Before the row is written, not after: `orders.lang` is what every letter
        about this sale renders from, and it cannot be corrected once the
        receipt has gone (receiptLang above). */
     const card = await findCustomer(customer.email);
-    const order = await createOrder({
-      channel: "pos",
-      lang: receiptLang(card, body),
-      items: cleanItems,
-      customer: {
-        name: typeof customer.name === "string" ? customer.name : undefined,
-        email: typeof customer.email === "string" ? customer.email : undefined,
-        phone: typeof customer.phone === "string" ? customer.phone : undefined,
-      },
-      shipping: { method: "pickup", country: "EE" },
-      posDiscountPercent: discountPercent,
-    });
+    /* Already rung up — the first attempt reached the database and only its
+       answer was lost. Looked up before anything is written, and backed by the
+       unique index for the case where two taps are in flight at once. */
+    let order = await saleAlreadyRung(ref);
+    const repeat = !!order;
+    if (!order) {
+      try {
+        order = await createOrder({
+          channel: "pos",
+          lang: receiptLang(card, body),
+          items: cleanItems,
+          customer: {
+            name: typeof customer.name === "string" ? customer.name : undefined,
+            email: typeof customer.email === "string" ? customer.email : undefined,
+            phone: typeof customer.phone === "string" ? customer.phone : undefined,
+          },
+          shipping: { method: "pickup", country: "EE" },
+          posDiscountPercent: discountPercent,
+          posRef: ref,
+        });
+      } catch (err) {
+        /* Two taps close enough together that both got past the lookup above.
+           The index let exactly one row through; this is the other one, and
+           the sale it was trying to write is the one that landed. */
+        const raced = isUniqueViolation(err) ? await saleAlreadyRung(ref) : null;
+        if (!raced) throw err;
+        order = raced;
+      }
+    }
 
     /* The method is written first and settlePayment()'s blob merges on top of
        it (setOrderPayment() is `||`, not `=`) — the same order the zero-total
@@ -245,7 +306,10 @@ export async function POST(req: Request) {
     }
 
     return Response.json(
-      { ok: true, orderId: order.id, number: order.number, total: order.total, mailed },
+      /* `repeat` is for the admin's own log and for the tests, never for the
+         cashier: the register shows «Продажа оформлена» either way, because
+         either way the sale is rung up exactly once. */
+      { ok: true, orderId: order.id, number: order.number, total: order.total, mailed, repeat },
       { status: 201, headers: { "cache-control": "no-store" } },
     );
   } catch (err) {

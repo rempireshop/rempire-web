@@ -13,6 +13,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
 import { query } from "@/lib/db";
+import { getLevels, move } from "@/lib/inventory";
 import { cleanSizes, createOrder, getOverrides, OrderError, overrideLadder, upsertOverride } from "@/lib/orders";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
@@ -93,6 +94,37 @@ describe("product_overrides.sizes / .hidden", () => {
     const keep = VARIANTS[sized.id].sizes[0];
     const made = await createOrder(order([{ id: sized.id, variant: keep, qty: 1 }]));
     expect(made.items[0].variant).toBe(keep);
+  });
+
+  /* ---- and the shelf behind them ---------------------------------------- */
+
+  /* «Склад» listed every volume the GENERATED file knows about and nothing
+     else, so a volume «+ Размер» added had no row: Renat could not count it
+     in, which left it untracked, which made every sale of it a sale on an
+     uncounted variant — skipped in silence by move() while the receipt said
+     «остатки списаны». */
+  it("gives a volume the owner added a «Склад» row of its own", async () => {
+    const added = "1 л";
+    await upsertOverride(sized.id, { sizes: [{ size: "250 мл", price: 20 }, { size: added, price: 30 }] });
+    const rows = await getLevels({ q: sized.id });
+    const mine = rows.filter((r) => r.productId === sized.id).map((r) => r.variant);
+    expect(mine).toContain(added);
+    expect(mine).toContain("250 мл");
+    // and the file's volumes, which this ladder replaced, are gone from it
+    for (const gone of VARIANTS[sized.id].sizes) {
+      if (gone !== "250 мл") expect(mine).not.toContain(gone);
+    }
+  });
+
+  /* …but a volume he RENAMED leaves its old row behind with a real count on
+     it, and hiding that from him would be hiding goods that are on the shelf. */
+  it("keeps showing a renamed volume while its count is still there", async () => {
+    const before = VARIANTS[sized.id].sizes[0];
+    await move({ productId: sized.id, variant: before, delta: 4, reason: "goods_in" });
+    await upsertOverride(sized.id, { sizes: [{ size: "новый объём", price: 12 }] });
+    const rows = (await getLevels({ q: sized.id })).filter((r) => r.productId === sized.id);
+    expect(rows.find((r) => r.variant === "новый объём")).toBeTruthy();
+    expect(rows.find((r) => r.variant === before)?.qty).toBe(4);
   });
 
   /* ---- «Показывать в магазине» ------------------------------------------ */
