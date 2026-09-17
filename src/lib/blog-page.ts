@@ -36,11 +36,13 @@ import { getOverrides } from "@/lib/orders";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
+  blogCardIds,
   breadcrumbLD,
   clip,
   crumbs,
   esc,
   eur,
+  fillBlogCardPrices,
   fitTitle,
   headBlock,
   href,
@@ -62,6 +64,13 @@ const VARIANTS = variantData as Variants;
 
 /** A product under the article: brand, name and price — the links are what a crawler is here for. */
 export type ShelfProduct = { id: string; brand: string; name: string; price: number; priceFrom: boolean };
+
+/** How many «Товары из статьи» the shelf shows — the same eight app.js draws. */
+const SHELF_MAX = 8;
+/** …and how many cards inside the text get a live price. Far past what an
+ *  article ever carries (the assistant places at most POST_CARDS_MAX); it is
+ *  here so a body somebody pastes cannot turn one render into a long query. */
+const INLINE_MAX = 24;
 
 /** Every published post the build did not write — what sitemap-custom.xml lists. Pure. */
 export function postsNotPrerendered<P extends { slug: string }>(posts: P[], prerenderedSlugs: string[]): P[] {
@@ -110,12 +119,18 @@ function tile(post: PostSummary, seg: string, code: string): string {
     "</a></li>";
 }
 
+/** «от 12,90 €» in this language — the shelf's own price line, reused by the
+ *  cards inside the text so both read the same figure the same way. */
+function priceLabel(p: ShelfProduct, t: { from: string }): string {
+  return (p.priceFrom ? t.from : "") + eur(p.price);
+}
+
 function shelf(products: ShelfProduct[], seg: string, t: { from: string }): string {
   return '<ul class="grid" style="list-style:none;padding:0">' + products.map((p) =>
     '<li><a class="pre__card" href="' + href(seg, "/p/" + encodeURIComponent(p.id) + "/") + '">' +
       '<span class="pre__brand">' + esc(p.brand) + "</span>" +
       '<span class="pre__nm">' + esc(p.name) + "</span>" +
-      '<span class="pre__pr num">' + esc((p.priceFrom ? t.from : "") + eur(p.price)) + "</span>" +
+      '<span class="pre__pr num">' + esc(priceLabel(p, t)) + "</span>" +
     "</a></li>").join("") + "</ul>";
 }
 
@@ -131,7 +146,7 @@ export function renderBlogPostPage(
   list: { posts: PostSummary[]; total: number },
   lang: Lang,
   shell: string,
-  opts: { base: string; robots: string; products: ShelfProduct[] },
+  opts: { base: string; robots: string; products: ShelfProduct[]; inline?: ShelfProduct[] },
 ): string {
   const { base, robots } = opts;
   const code = lang.code;
@@ -142,6 +157,18 @@ export function renderBlogPostPage(
   const excerpt = pickLang(post.excerpt, code);
   const bodyHtml = renderPostBody(pickLang(post.body, code));
   const bodyText = stripTags(bodyHtml);
+  /* The article as it is READ, which is the stored body plus the prices that
+     are deliberately not stored in it (fillBlogCardPrices in seo-head.mjs).
+     `bodyHtml` itself is left alone: it is what #blogpost below carries, and
+     that block is the very answer /api/blog/<slug>/ gives — app.js adopts it
+     and builds its own cards from the live catalogue, so a price written in
+     here would be a figure nobody reads and one more thing to keep in step.
+     `bodyText` feeds the meta description, which has no business carrying a
+     price either. A body of the old shape comes back byte for byte. */
+  const bodyShown = fillBlogCardPrices(bodyHtml, (id: string) => {
+    const p = (opts.inline ?? []).find((x) => x.id === id);
+    return p ? priceLabel(p, t) : "";
+  });
   // the Google pair is per language (pickLang: this language, else Russian);
   // the excerpt, then the text, stand in only when neither was written — the
   // same ladder setHead() in app.js runs once the SPA takes the page over
@@ -162,7 +189,7 @@ export function renderBlogPostPage(
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
       (post.tags.length ? '<ul class="blog__tags">' + post.tags.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
-      '<div class="acc__rich blog__body">' + bodyHtml + "</div>" +
+      '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
     "</article>" +
     (opts.products.length
       ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t) + "</section>"
@@ -287,9 +314,15 @@ function cheapest(prices: Array<number | null | undefined>, fallback: number): {
  * Best effort on the database, exactly as the letter's cards are
  * (newsletterCards in src/lib/newsletters.ts, the same shape of work): a
  * hiccup costs the owner's price, never the article.
+ *
+ * Since 17.09.2026 it answers for the cards INSIDE the text as well, which is
+ * the same question about the same products — the shelf under the article
+ * takes the first `max` of `ids` and the body takes its own. One call for
+ * both: a page that named eight products under the article and three in the
+ * text would otherwise ask the overrides table twice for one render.
  */
-async function shelfProducts(ids: string[]): Promise<ShelfProduct[]> {
-  const want = ids.slice(0, 8);
+async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
+  const want = ids.slice(0, max);
   const catIds = want.filter((id) => CATALOGUE.has(id));
   const customIds = want.filter((id) => !CATALOGUE.has(id) && id.startsWith("c-"));
 
@@ -352,10 +385,25 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
   }
   if (!post) return html(noindexShell(shell), 404, NO_STORE);
 
-  const products = await shelfProducts(post.products);
+  /* The shelf under the article and the cards inside it, priced together.
+     The body is this language's — a card may stand in the Estonian text and
+     not in the Russian one — so the ids are read from the body that is about
+     to be rendered, and only a body of the new shape names any at all. */
+  const inlineIds = blogCardIds(renderPostBody(pickLang(post.body, lang.code)));
+  const shelfIds = post.products.slice(0, SHELF_MAX);
+  const resolved = await shelfProducts([...new Set([...shelfIds, ...inlineIds])], SHELF_MAX + INLINE_MAX);
+  const byId = new Map(resolved.map((p) => [p.id, p]));
+  const pick = (ids: string[]) => ids.map((id) => byId.get(id)).filter((p): p is ShelfProduct => !!p);
+
   const base = baseFrom(process.env.PUBLIC_BASE_URL);
   const robots = robotsFor(process.env.PUBLIC_BASE_URL);
-  return html(renderBlogPostPage(post, list, lang, shell, { base, robots, products }), 200, PAGE_CACHE);
+  return html(
+    renderBlogPostPage(post, list, lang, shell, {
+      base, robots, products: pick(shelfIds), inline: pick(inlineIds.slice(0, INLINE_MAX)),
+    }),
+    200,
+    PAGE_CACHE,
+  );
 }
 
 /** GET /shop2/{,et/,en/}blog/ when the build wrote no listing (no database at build time). */

@@ -124,6 +124,74 @@ export function fitTitle(core, full, alt) {
 
 export const langPath = (seg, rest) => "/shop2" + (seg ? "/" + seg : "") + rest;
 
+/* ---------- the product card INSIDE an article ---------------------------
+ *
+ * The «Товар» button puts a marker into the body: an <a> carrying the
+ * product's id, which the storefront swaps for a real card and which a
+ * crawler (and a reader with no JS) follows as the ordinary product link it
+ * is. There are TWO shapes of it in the database, and both must keep working
+ * for good — the owner's decision of 17.09.2026 was explicitly that already
+ * published articles are left exactly as they are, not migrated:
+ *
+ *   old   <a data-product="ID" href="…">Имя — от 12,90 €</a>
+ *         The price is literal text, written on the day the article was
+ *         written, and it stays whatever the owner does to the price
+ *         afterwards. Nothing below touches it: a marker with no
+ *         `data-price` is copied through untouched, exactly as it has been
+ *         since the marker existed. DO NOT "tidy" this branch away — every
+ *         article published before 17.09.2026 is in it.
+ *
+ *   new   <a data-product="ID" data-price="live" href="…">Имя</a>
+ *         No price is stored at all. Each renderer fills in today's price as
+ *         it writes the page: the request-time article (src/lib/blog-page.ts),
+ *         the prerendered one (tools/prerender-shop2.mjs) and the shop itself
+ *         (blogProductHTML() in public/shop2/app.js, which has rebuilt the
+ *         whole card from the live catalogue all along and therefore needed
+ *         no change). Google, the first paint and a reader without JS finally
+ *         see the same figure the shop charges.
+ *
+ * The pattern is keyed to the sanitiser's own output — openTag() in
+ * src/lib/blog.ts writes `data-product` first, then `data-price`, then the
+ * href — the same way src/app/api/admin/ai/text/route.ts already keys to it.
+ * A body that has been through sanitizeHtml() cannot carry these attributes
+ * in any other order or spelling.
+ */
+const BLOG_CARD_SRC = '<a data-product="([^"]+)" data-price="live"([^>]*)>([^<]*)</a>';
+const BLOG_CARD_HINT = 'data-price="live"';
+
+/** Every product a live-price marker in this body names, in order, once each. */
+export function blogCardIds(html) {
+  const src = String(html || "");
+  const out = [];
+  if (!src.includes(BLOG_CARD_HINT)) return out;
+  const rx = new RegExp(BLOG_CARD_SRC, "g");
+  let m;
+  while ((m = rx.exec(src))) if (!out.includes(m[1])) out.push(m[1]);
+  return out;
+}
+
+/**
+ * Today's price written into every live-price marker. `priceOf(id)` gives the
+ * whole label — «от 12,90 €», «alates 12,90 €», «from 12,90 €» — because the
+ * word in front of it is this language's and the caller is the one that knows
+ * both the language and where the shop's current prices come from.
+ *
+ * A marker whose product the caller cannot price — it left the catalogue, or
+ * the database that holds the owner's own products did not answer — keeps its
+ * name and gets no price, rather than a made-up one.
+ */
+export function fillBlogCardPrices(html, priceOf) {
+  const src = String(html || "");
+  if (!src.includes(BLOG_CARD_HINT)) return src;
+  return src.replace(new RegExp(BLOG_CARD_SRC, "g"), (whole, id, rest, text) => {
+    const price = String(priceOf(id) || "").trim();
+    if (!price) return whole;
+    const words = String(text || "").trim();
+    return '<a data-product="' + id + '" data-price="live"' + rest + ">" +
+      (words ? words + " — " : "") + esc(price) + "</a>";
+  });
+}
+
 /* ---------- copy, one table per language -------------------------------- */
 
 /* Mirrors the strings setHead() in app.js uses, so the tab title does not

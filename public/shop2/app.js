@@ -10680,6 +10680,19 @@
   var BLOG_DROP_EMPTY = { p: 1, h2: 1, h3: 1, li: 1, blockquote: 1, figure: 1, ul: 1, ol: 1 };
   var BLOG_PRODUCT_ID = /^[a-z0-9][a-z0-9._-]{0,79}$/i;
   var BLOG_MAX_DEPTH = 24;
+  /** Does this marker keep its price, or is the price the reader's own day's?
+      One word, `live`, like the four `data-fig` knows — anything else is not
+      written, and absent is the old shape.
+
+      The product page's own price span carries a bare `data-price` and
+      patchPdp() reaches for it with querySelector("[data-price]"). The two
+      never meet — that function returns at once unless the product screen is
+      the one on show, and a blog marker only ever exists inside .blog__body
+      or the editor's box — but if a third `[data-price]` is ever added, give
+      it a name of its own rather than a second value. */
+  function blogLivePrice(node) {
+    return String(node.getAttribute("data-price") || "").trim().toLowerCase() === "live";
+  }
 
   /** https, or a picture this shop already serves. Not http: — the shop is https. */
   function blogImgUrl(raw) {
@@ -10782,7 +10795,21 @@
         return "";
       }
       var open = "<a";
-      if (isProduct) open += ' data-product="' + esc(pid) + '"';
+      if (isProduct) {
+        open += ' data-product="' + esc(pid) + '"';
+        /* …and whether the price belongs to the marker or to the moment it is
+           read. Written by the editor since 17.09.2026 (blogProductLinkHTML);
+           absent on every article published before that, whose price is
+           literal text inside the <a> and stays there — the owner asked for
+           those to be left alone, not migrated. Carried through here because
+           this is the pass the EDITOR cleans with (cards off): a card the
+           owner opens and saves again must come back the same shape it went
+           in. With cards on the whole marker is replaced by blogProductHTML()
+           and the attribute never reaches the page. Keep in step with
+           src/lib/blog.ts openTag() and fillBlogCardPrices() in
+           src/lib/seo-head.mjs. */
+        if (blogLivePrice(node)) open += ' data-price="live"';
+      }
       var u = blogSafeUrl(node.getAttribute("href") || "");
       if (u) {
         open += ' href="' + esc(u) + '"';
@@ -13066,13 +13093,26 @@
     if (!p) return "";
     var href = "/shop2" + (SEG_OF_LANG[L] || "") + "/p/" + encodeURIComponent(p.id) + "/";
     /* The words, in the language the text around them is written in — the
-       same two helpers the storefront card uses, so a card in the Estonian
-       article reads Estonian in the editor, in the saved HTML, for a crawler
-       and for a reader without JS, not only after the storefront has swapped
-       it (Renat, 13.09.2026). The link already pointed at the right language's
-       product page; only its words did not follow. */
-    return '<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
-      esc(blogProductName(p, L)) + " — " + esc(blogProductPrice(p, L)) + "</a>";
+       same helper the storefront card uses, so a card in the Estonian article
+       reads Estonian in the editor, in the saved HTML, for a crawler and for
+       a reader without JS, not only after the storefront has swapped it
+       (Renat, 13.09.2026). The link already pointed at the right language's
+       product page; only its words did not follow.
+
+       THE PRICE IS NOT WRITTEN (Dim, 17.09.2026). It used to be, and it then
+       said what the product cost on the day the article was written for ever
+       after: the shop rebuilt the card, but Google, the first paint of the
+       page and every reader without JS got the old figure. `data-price="live"`
+       is the marker saying so, and each of the three renderers fills in the
+       price as it draws — blogProductHTML() here, src/lib/blog-page.ts at
+       request time, tools/prerender-shop2.mjs at build.
+
+       Articles already published keep the old shape, on purpose, and every
+       renderer goes on reading it. That is not an oversight to be tidied up
+       later: see the note beside fillBlogCardPrices() in
+       src/lib/seo-head.mjs. */
+    return '<a data-product="' + esc(p.id) + '" data-price="live" href="' + esc(href) + '">' +
+      esc(blogProductName(p, L)) + "</a>";
   }
   function blogInsertProduct(id) {
     var rd = richDraft();
@@ -15749,8 +15789,12 @@
            thrown away, though — holdCart() parks it against this order, and
            a receipt that says the order was not paid gives it back
            (restoreHeldCart(), by doneState()). Held first: clearOrderState()
-           is what empties S.cart. */
-        holdCart(res.body.orderId);
+           is what empties S.cart.
+
+           `statusToken` rides along: it is what lets the NEXT page load ask
+           whether this order was paid, for the shopper who never gets a
+           receipt because they pressed «Назад» at the bank (heldAsk()). */
+        holdCart(res.body.orderId, res.body.statusToken);
         clearOrderState();
         location.href = pay.body.redirectUrl;
       });
@@ -31808,29 +31852,111 @@
      ignored, so a basket nobody came back for cannot surface weeks later. */
   var HELD_LS = "rmp-held-cart";
   var HELD_MAX_AGE_MS = 864e5;   // a day
-  function holdCart(orderId) {
+  /**
+   * Park the basket against the order it became.
+   *
+   * `token` — what POST /api/orders/ answered beside the order id
+   * (`statusToken`): the proof that this browser may later ask whether this
+   * order was paid. It is kept here and nowhere else, because this record is
+   * exactly «the basket of an order whose fate this browser does not know».
+   * Left out by «Оплатить ещё раз», which is re-paying an order it did not
+   * place in this page load and has no token of its own for — so the token
+   * already parked against THAT order is carried over rather than lost.
+   */
+  function holdCart(orderId, token) {
     if (!orderId || !S.cart.length) return;
+    var keep = String(token || "");
+    if (!keep) {
+      var was = heldRead();
+      if (was && was.order === String(orderId)) keep = was.token;
+    }
     try {
       localStorage.setItem(HELD_LS, JSON.stringify({
-        order: String(orderId), at: Date.now(), cart: S.cart, promo: S.promo
+        order: String(orderId), at: Date.now(), cart: S.cart, promo: S.promo, token: keep
       }));
     } catch (e) {}
   }
   function dropHeldCart() { try { localStorage.removeItem(HELD_LS); } catch (e) {} }
+  /** The parked basket, or null — parsed, aged out, and with its fields named.
+      A record older than a day is not merely ignored, it is removed: a basket
+      nobody came back for must not surface weeks later. */
+  function heldRead() {
+    var h = null;
+    try { h = JSON.parse(localStorage.getItem(HELD_LS) || "null"); } catch (e) {}
+    if (!h || typeof h !== "object") return null;
+    if (!Array.isArray(h.cart) || !h.cart.length) return null;
+    if (!(Date.now() - Number(h.at || 0) < HELD_MAX_AGE_MS)) { dropHeldCart(); return null; }
+    return {
+      order: String(h.order || ""),
+      at: Number(h.at || 0),
+      cart: h.cart,
+      promo: typeof h.promo === "string" ? h.promo : "",
+      token: typeof h.token === "string" ? h.token : "",
+      /* This basket has already been handed back once. The record itself stays
+         — «Оплатить ещё раз» needs the token in it — but heldAsk() must not
+         ask about it a second time: a shopper who got the basket back and then
+         emptied it by hand has said what they want, and a reload that filled
+         it again would read as the shop arguing. Cleared by holdCart(), i.e.
+         the moment the basket goes to a bank again and its fate is unknown
+         again. */
+      back: !!h.back
+    };
+  }
   /** A paid (or invoiced) order: the basket really is spent — let it go, and
       clear whatever a restore on an earlier visit to this receipt put back. */
   function doneDropHeld() {
     dropHeldCart();
     if (S.cart.length) clearOrderState();
   }
+  /* ---------- back from the bank with no receipt at all ---------------------
+     Everything above settles the basket from a receipt, and a receipt is the
+     only thing that ever settles it: a shopper who pressed «Назад» at the
+     bank, or closed that tab, never sees one. Their basket sat here for a day
+     and the shop opened empty.
+
+     Restoring at boot «whenever no paid receipt was seen» is NOT the answer,
+     and must never become it: a shopper who PAID and closed the bank's tab
+     sees no receipt either, so that rule hands them back goods they already
+     own and invites a second payment for them. Nothing in this browser can
+     tell the two apart — the difference happened at the bank.
+
+     So the shop asks the shop. One bit, over POST /api/orders/status/, proved
+     with the token parked beside the basket (src/lib/payments/order-status.ts).
+     The basket comes back on a definite «не оплачен» and on nothing else: no
+     token, no answer, an answer of the wrong shape, an offline page — all of
+     them leave it exactly where it is. An empty basket is recoverable through
+     the receipt link in the letter; a double payment is not. */
+  function heldAsk() {
+    if (S.cart.length) return;   // a new basket already — nothing to give back
+    var h = heldRead();
+    /* No token: an old record, a shop with no SESSION_SECRET, or a retry that
+       had nothing to carry over. There is no way to ask, so nothing is done —
+       the receipt path still works exactly as it did. */
+    if (!h || !h.order || !h.token || h.back) return;
+    postJSON("/api/orders/status/", { orderId: h.order, token: h.token }).then(function (r) {
+      var b = r && r.body;
+      if (r.offline || !b || b.ok !== true || typeof b.paid !== "boolean") return;
+      /* The money is in: the basket is spent, let the record go. dropHeldCart()
+         and not doneDropHeld() — the answer arrives a moment after the page
+         drew, and anything in the cart by now is a NEW basket the shopper has
+         started since. That one is theirs; only the receipt, which is the
+         screen for the order itself, may clear a cart. */
+      if (b.paid) { dropHeldCart(); return; }
+      /* …and the same moment cuts the other way: restoreHeldCart() refuses to
+         write over a basket that is no longer empty, so «did it actually come
+         back» is the only honest thing to render and say. */
+      var had = S.cart.length;
+      restoreHeldCart(h.order);
+      if (S.cart.length === had) return;
+      render();
+      toast("Корзина восстановлена ✓");
+    }).catch(function () { /* the shop did not answer — leave the basket alone */ });
+  }
   /** Put the basket back, but only the one this very order was made from. */
   function restoreHeldCart(orderId) {
     if (S.cart.length) return;   // they have already started a new basket
-    var h = null;
-    try { h = JSON.parse(localStorage.getItem(HELD_LS) || "null"); } catch (e) {}
+    var h = heldRead();
     if (!h || h.order !== String(orderId)) return;
-    if (!Array.isArray(h.cart) || !h.cart.length) return;
-    if (!(Date.now() - Number(h.at || 0) < HELD_MAX_AGE_MS)) { dropHeldCart(); return; }
     /* Same guard the saved cart gets at boot: a line whose product has gone
        from the catalogue in the meantime is dropped rather than restored,
        because byId() falls back to the first product and would show the wrong
@@ -31847,8 +31973,16 @@
     }
     if (!back.length) { dropHeldCart(); return; }
     S.cart = back;
-    S.promo = typeof h.promo === "string" ? h.promo : "";
+    S.promo = h.promo;
     persist();
+    /* Given back once. The record is kept — «Оплатить ещё раз» takes the token
+       out of it — but heldAsk() will not offer this basket again on a later
+       page load; see `back` in heldRead(). */
+    try {
+      localStorage.setItem(HELD_LS, JSON.stringify({
+        order: h.order, at: h.at, cart: h.cart, promo: h.promo, token: h.token, back: 1
+      }));
+    } catch (e) {}
   }
   /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
      (src/app/api/payments/return/route.ts). The token is an HMAC of the code
@@ -37380,6 +37514,14 @@
      first paint and after the boot replaceState above, which would otherwise
      put ?resume= straight back into the address bar. */
   resumeCart();
+
+  /* …and is there a basket still parked against an order this browser was
+     sent to the bank with and never heard the end of? Asked after
+     resumeCart(), because a basket that letter has just refilled is a basket
+     the shopper is using and nothing may be put back over it — heldAsk()
+     stops on a non-empty cart. A receipt has already settled its own basket
+     by now: doneState() ran inside the render() above. */
+  heldAsk();
 
   /* …and who is this? Asked here, right after the first paint, in a browser
      that has been signed in before — never in one that has not, which is what

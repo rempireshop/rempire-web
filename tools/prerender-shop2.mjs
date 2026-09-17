@@ -82,7 +82,8 @@ import {
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
-  baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED
+  baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
+  fillBlogCardPrices
 } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -1484,6 +1485,25 @@ function blogPostPage(post, lang) {
   const excerpt = pickLang(post.excerpt, code);
   const bodyHtml = renderPostBody(pickLang(post.body, code));
   const bodyText = stripTags(bodyHtml);
+  /* The cards inside the text, priced as this build found the catalogue —
+     `data-price="live"` markers only, which is every article written from
+     17.09.2026 on. An article written before that carries its price as
+     literal text and comes back from here byte for byte; both shapes are
+     permanent, see fillBlogCardPrices() in src/lib/seo-head.mjs.
+
+     From CATALOGUE, the same file every other card on every prerendered page
+     is priced from, so a static page is at worst as old as the deploy that
+     wrote it instead of as old as the article. A product the owner made in
+     the panel (`c-…`) is not in that file and is not in a static page at
+     all — its marker keeps its name and shows no price here; the shop fills
+     it in the moment app.js runs.
+
+     `bodyHtml` itself is left alone: #blogpost below is the shape
+     /api/blog/<slug>/ answers, and hydrateBlog() builds its own cards. */
+  const bodyShown = fillBlogCardPrices(bodyHtml, id => {
+    const p = CATALOGUE.find(x => x.id === id);
+    return p ? priceLabel(p, t) : "";
+  });
   // the Google pair is per language (pickLang: this language, else Russian),
   // and the excerpt, then the text, stand in only when neither was written —
   // the same ladder setHead() in app.js runs once the SPA takes the page over
@@ -1516,7 +1536,7 @@ function blogPostPage(post, lang) {
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
       tagsHtml +
-      '<div class="acc__rich blog__body">' + bodyHtml + "</div>" +
+      '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
     "</article>" +
     (featured.length
       ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
