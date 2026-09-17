@@ -1709,6 +1709,21 @@
       "Добавьте хотя бы один товар.": "Lisage vähemalt üks toode.",
       "Выберите способ оплаты.": "Valige makseviis.",
       "Не удалось оформить продажу — попробуйте ещё раз.": "Müüki ei õnnestunud vormistada — proovige uuesti.",
+      // the till's refusals, each naming the field to fix (posSendErr)
+      "Проверьте e-mail покупателя — адрес набран с ошибкой.":
+        "Kontrollige kliendi e-posti — aadressis on viga.",
+      "Этот товар снят с продажи — уберите строку из чека.":
+        "See toode on müügilt eemaldatud — eemaldage rida tšekilt.",
+      "Такого товара в магазине нет — уберите строку из чека.":
+        "Sellist toodet poes ei ole — eemaldage rida tšekilt.",
+      "У товара нет такого объёма — уберите строку и добавьте заново.":
+        "Tootel pole sellist mahtu — eemaldage rida ja lisage uuesti.",
+      "Количество — целое число от 1 до 99.": "Kogus on täisarv 1 kuni 99.",
+      "Слишком много позиций — не больше 50 в одном чеке.":
+        "Liiga palju ridu — ühel tšekil kuni 50.",
+      // …and the bottle the register may not put in a basket at all
+      "Этот товар снят с продажи — верните его в «Товарах».":
+        "See toode on müügilt eemaldatud — taastage see jaotises «Tooted».",
       "Продажа оформлена ✓": "Müük vormistatud ✓",
       "Чек для печати": "Kviitung printimiseks", "Новая продажа": "Uus müük",
       "Добавить": "Lisa",
@@ -1806,6 +1821,11 @@
       "Порог «мало» — целое число от 0 до 100 000.": "«Vähe» lävi — täisarv 0 kuni 100 000.",
       "Тарифы Montonio применены ✓": "Montonio tariifid rakendatud ✓",
       "Приход +1 ✓": "Sissetulek +1 ✓",
+      // scanner: the two confirms that say NOTHING moved — a write-off on a
+      // size nobody has counted (move() skips it), and one clamped at zero
+      "Этот объём ещё не считали — впишите остаток на «Складе».":
+        "Seda mahtu pole veel loetud — märkige jääk «Laos».",
+      "На складе уже 0 — списывать нечего.": "Laos on juba 0 — pole midagi maha kanda.",
       // scanner app: the standalone /shop2/scan/ route
       "Rempire · Сканер": "Rempire · Skanner", "Сканер": "Skanner",
       "В админку": "Paneeli", "Сканер открывается…": "Skanner avaneb…",
@@ -4352,6 +4372,21 @@
       "Добавьте хотя бы один товар.": "Add at least one product.",
       "Выберите способ оплаты.": "Choose a payment method.",
       "Не удалось оформить продажу — попробуйте ещё раз.": "Couldn't complete the sale — try again.",
+      // the till's refusals, each naming the field to fix (posSendErr)
+      "Проверьте e-mail покупателя — адрес набран с ошибкой.":
+        "Check the customer's e-mail — the address has a typo in it.",
+      "Этот товар снят с продажи — уберите строку из чека.":
+        "This product is off sale — remove the line from the receipt.",
+      "Такого товара в магазине нет — уберите строку из чека.":
+        "There is no such product in the shop — remove the line from the receipt.",
+      "У товара нет такого объёма — уберите строку и добавьте заново.":
+        "The product has no such size — remove the line and add it again.",
+      "Количество — целое число от 1 до 99.": "Quantity is a whole number from 1 to 99.",
+      "Слишком много позиций — не больше 50 в одном чеке.":
+        "Too many lines — at most 50 on one receipt.",
+      // …and the bottle the register may not put in a basket at all
+      "Этот товар снят с продажи — верните его в «Товарах».":
+        "This product is off sale — put it back in «Products».",
       "Продажа оформлена ✓": "Sale complete ✓",
       "Чек для печати": "Printable receipt", "Новая продажа": "New sale",
       "Добавить": "Add",
@@ -4449,6 +4484,11 @@
       "Порог «мало» — целое число от 0 до 100 000.": "The «low» threshold — a whole number from 0 to 100,000.",
       "Тарифы Montonio применены ✓": "Montonio tariffs applied ✓",
       "Приход +1 ✓": "Goods in +1 ✓",
+      // scanner: the two confirms that say NOTHING moved — a write-off on a
+      // size nobody has counted (move() skips it), and one clamped at zero
+      "Этот объём ещё не считали — впишите остаток на «Складе».":
+        "This size has never been counted — enter the stock in «Stock».",
+      "На складе уже 0 — списывать нечего.": "The shelf is already at 0 — there is nothing to write off.",
       // scanner app: the standalone /shop2/scan/ route
       "Rempire · Сканер": "Rempire · Scanner", "Сканер": "Scanner",
       "В админку": "To the panel", "Сканер открывается…": "The scanner is opening…",
@@ -26378,7 +26418,12 @@
               // under a cut-off product name read as the end of the name
               '<span class="adm-row__sub">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span> " : "") +
                 esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
-            '<span class="adm-row__sub" style="margin:0">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
+            /* The ledger's stamp is a full ISO instant in UTC, and printing
+               its first sixteen characters showed the owner a Tallinn evening
+               two or three hours early — 22:40 as «19:40», and a late scan
+               under the previous DAY. Read in the reader's own browser, like
+               the change journal and «Журнал магазина» beside it. */
+            '<span class="adm-row__sub" style="margin:0">' + esc(auditWhen(m.at)) + "</span>" +
             // a card change moved nothing, so it shows no number (migration 092)
             '<span class="adm-row__amt">' + (m.reason === "edit" ? "" : sign + m.delta) + "</span></div>";
         }).join("") + "</div>" : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
@@ -26692,6 +26737,13 @@
   function scanToCart() {
     var h = S.scanHit;
     if (!h || !h.product) return;
+    /* The lookup route reads the whole catalogue file, so it happily finds a
+       bottle the shop has switched off — but the register names and prices
+       its lines from CATALOGUE, which drops one, and byId() then answers
+       CATALOGUE[0]. Scanning such a bottle put a DIFFERENT product's name and
+       price in the basket. Refused here, in words, rather than surfacing as
+       the server's generic refusal after the money was counted out. */
+    if (!byIdOrNull(h.productId)) { toast(POS_GONE); return; }
     var qty = scanQtyNow(), variant = h.variant || "";
     for (var i = 0; i < S.posCart.length; i++) {
       if (S.posCart[i].id === h.productId && (S.posCart[i].variant || "") === variant) {
@@ -26918,8 +26970,13 @@
       if (r.status === 401) { SRV.admin = false; closeScanner(); render(); return; }
       if (r.status !== 200 || !r.body.ok) { scanLookupFailed(); return; }
       var hit = r.body.hit;
+      /* `tracked` is the route's answer, never a literal true: a code bound
+         to a bottle nobody has counted yet has a row at qty 0 and no ledger
+         line, and claiming it was counted made the card read «на складе 0» —
+         an empty shelf — over a cupboard that may well be full. «не учтено»
+         is what that card has to say, and until now that branch was dead. */
       S.scanHit = hit
-        ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: true, product: hit.product }
+        ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: hit.tracked !== false, product: hit.product }
         : { code: code, product: null, tracked: false };
       S.scanAssignQ = "";
       S.scanAssignPick = ""; S.scanBindConfirm = "";
@@ -26929,7 +26986,13 @@
     }).catch(scanLookupFailed);
   }
   function loadScanToday() {
-    var d = new Date(); d.setUTCHours(0, 0, 0, 0);
+    /* «Сегодня» starts at midnight where the owner is standing, not at UTC
+       midnight: with setUTCHours() every scan made after 21:00 (22:00 in
+       winter) fell into tomorrow's list, and for the first three hours of a
+       Tallinn morning the list still showed yesterday's. The phone's own
+       clock IS the shop's calendar — see src/lib/day.ts on why timestamps
+       read as a moment are formatted in the reader's browser. */
+    var d = new Date(); d.setHours(0, 0, 0, 0);
     apiJson("/api/admin/inventory/moves/?limit=20&since=" + encodeURIComponent(d.toISOString())).then(function (r) {
       // «Сегодня» is only drawn between codes — repainting while a card is up
       // would rebuild the product search the owner is typing into
@@ -26953,6 +27016,22 @@
     if (!isFinite(n) || n < 1) n = 1;
     return Math.min(999, n);
   }
+  /**
+   * What the confirm may claim, given what the shelf actually did.
+   *
+   * A write-off is a 'sale_pos' move, and a sale on a size nobody has counted
+   * yet is skipped by the server on purpose (src/lib/inventory.ts move() — a
+   * sale must never flip an uncounted bottle to «нет в наличии»). Nothing was
+   * written, no ledger line appeared, and the old toast said «Списание −3 ✓»
+   * anyway. A write-off bigger than the shelf holds is clamped at zero and
+   * reported back the same way. Both now say what really happened.
+   */
+  function scanMoveToast(sign, qty, res) {
+    if (res && res.skipped) return "Этот объём ещё не считали — впишите остаток на «Складе».";
+    var n = res && typeof res.appliedDelta === "number" ? Math.abs(res.appliedDelta) : qty;
+    if (!n) return "На складе уже 0 — списывать нечего.";
+    return sign > 0 ? "Приход +" + n + " ✓" : "Списание −" + n + " ✓";
+  }
   /* scanner app: ONE confirm per scan. The stepper's number, signed by which
      of the two buttons was pressed, straight to the moves route — «приход» is
      goods_in, «списание» is sale_pos, the same two reasons the old +1/−1 pair
@@ -26969,10 +27048,10 @@
     stockMoveSend({
       productId: S.scanHit.productId, variant: S.scanHit.variant,
       delta: sign * qty, reason: sign > 0 ? "goods_in" : "sale_pos", ref: "сканер"
-    }).then(function (ok) {
+    }).then(function (res) {
       S.scanBusy = false;
-      if (!ok) { toast("Не удалось сохранить"); scanRenderPanel(); return; }
-      toast(sign > 0 ? "Приход +" + qty + " ✓" : "Списание −" + qty + " ✓");
+      if (!res) { toast("Не удалось сохранить"); scanRenderPanel(); return; }
+      toast(scanMoveToast(sign, qty, res));
       S.scanQty = 1;
       S.scanReady = true;
       SCAN.lastCode = "";
@@ -27723,8 +27802,15 @@
       first size, which is what the register always did. */
   function posAddProduct(spec) {
     var bits = String(spec).split(":");
-    var p = byId(bits[0]);
-    if (!p) return;
+    /* byIdOrNull, never byId: byId() answers CATALOGUE[0] for an id the shop
+       does not carry, and `if (!p) return` could therefore never fire. A
+       bottle switched off «Показывать в магазине» (or an own product set
+       inactive) is not in CATALOGUE, so the line it added carried the FIRST
+       catalogue product's name and its price — into the cart, the confirm
+       card and the total the cashier reads out loud. The sale itself was then
+       refused by the server, which is the one thing that went right. */
+    var p = byIdOrNull(bits[0]);
+    if (!p) { toast(POS_GONE); return; }
     var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
     var i = bits.length > 1 ? Math.max(0, Math.min(sizes.length - 1, Number(bits[1]) || 0)) : 0;
     var variant = sizes[i] || "";
@@ -27829,6 +27915,33 @@
     return lines.join("\n") + "\n\n" + "Итого " + eur(total) + " · " + POS_HOW[how];
   }
   var POS_HOW = { cash: "наличные", terminal: "терминал" };
+  /** A bottle the register cannot sell because the shop is not offering it —
+      «Показывать в магазине» off, or an own product set inactive. Both doors
+      into the basket (a chip and the scanner) say this one sentence. */
+  var POS_GONE = "Этот товар снят с продажи — верните его в «Товарах».";
+  /**
+   * What went wrong, in the cashier's words.
+   *
+   * Everything but «нет товаров» and «нет способа оплаты» used to land on
+   * «Не удалось оформить продажу — попробуйте ещё раз», and a mistyped
+   * customer e-mail is the one refusal that NEVER succeeds on retry: the
+   * cashier tapped «Терминал» again and again with a customer standing there
+   * and no way to learn that the address was the problem. Every code
+   * createOrder() can raise at a till now names the field to fix.
+   */
+  var POS_SEND_ERRS = {
+    empty_order: "Добавьте хотя бы один товар.",
+    bad_payment_method: "Выберите способ оплаты.",
+    bad_email: "Проверьте e-mail покупателя — адрес набран с ошибкой.",
+    out_of_stock: "Этот товар снят с продажи — уберите строку из чека.",
+    unknown_item: "Такого товара в магазине нет — уберите строку из чека.",
+    bad_variant: "У товара нет такого объёма — уберите строку и добавьте заново.",
+    bad_qty: "Количество — целое число от 1 до 99.",
+    too_many_items: "Слишком много позиций — не больше 50 в одном чеке."
+  };
+  function posSendErr(code) {
+    return POS_SEND_ERRS[code] || "Не удалось оформить продажу — попробуйте ещё раз.";
+  }
   function admPosReceiptHTML() {
     var d = S.posDone;
     return '<div class="adm-receipt">' +
@@ -27978,9 +28091,7 @@
         journalNote(admPosJournalLine(r.body.number, r.body.total));
         admOrdersChanged();
       } else {
-        S.posErr = r.body && r.body.error === "empty_order" ? "Добавьте хотя бы один товар."
-          : r.body && r.body.error === "bad_payment_method" ? "Выберите способ оплаты."
-          : "Не удалось оформить продажу — попробуйте ещё раз.";
+        S.posErr = posSendErr(r.body && r.body.error);
       }
       render();
     }).catch(function () { S.posBusy = false; S.posErr = "Сервер не отвечает."; render(); });
@@ -27994,10 +28105,16 @@
      «Отменить» right behind it is exactly that pair — the −1 arriving first is
      clamped at zero and the +1 then sticks. */
   var stockMoveChain = Promise.resolve();
+  /** The route's own answer, not a yes/no: `appliedDelta` can be smaller than
+      the delta that was asked for (the shelf stops at 0) and `skipped` is
+      true when a SALE was written against a size nobody has counted yet — in
+      which case nothing moved at all. Collapsing both to `true` is how the
+      scanner came to toast «Списание −3 ✓» over a shelf that had not moved.
+      Falsy (null) on a refusal, so every `if (!ok)` reader still reads. */
   function stockMoveSend(body) {
     var run = stockMoveChain.then(function () {
       return apiSend("/api/admin/inventory/moves/", "POST", body)
-        .then(function (r) { return r.status === 200 && r.body.ok; });
+        .then(function (r) { return r.status === 200 && r.body.ok ? (r.body.result || true) : null; });
     });
     stockMoveChain = run.then(noop, noop);
     return run;
@@ -28086,7 +28203,13 @@
       qty = stockQtyValue(rawQty);
       if (qty === null) { toast("Остаток — целое число от 0 до 1 000 000."); refocus("[data-stockqtyinput]"); return; }
     }
-    var qtyChanged = qty !== null && qty !== (r.tracked ? r.qty : 0);
+    /* A row nobody has counted yet has no quantity at all — «не учтено», not
+       «0». So ANY number typed against it is the first count, including zero:
+       comparing an untracked row against 0 made «шкаф пустой» the one answer
+       the panel refused to record («Изменений нет»), and the product went on
+       being advertised from the manual override because the size never became
+       tracked. A tracked row still only moves when the number moves. */
+    var qtyChanged = qty !== null && (!r.tracked || qty !== r.qty);
     if (eanChanged || lowChanged) {
       var patch = { productId: r.productId, variant: r.variant };
       if (eanChanged) patch.ean = S.stockEditEan || null;
@@ -28775,6 +28898,32 @@
     DEMO.log = DEMO.log.filter(function (e) { return e !== entry; });
     demoSave();
   }
+  /**
+   * «Отменить» has to put back exactly what left the shelf, not what was
+   * asked for.
+   *
+   * The journal line is written before the server answers, so its undo was
+   * built from the REQUESTED delta: a write-off of 5 against a shelf holding
+   * 2 is clamped to 2 by move() (it never leaves a row negative), and undoing
+   * it added 5 — three bottles that never existed, which the shop then
+   * advertised and sold. The entry is found by identity, so an undo's own
+   * push (whose action is some entry's `prev`, never an entry's `a`) matches
+   * nothing and is left alone.
+   */
+  function stockUndoApplied(a, res) {
+    if (!res || typeof res.appliedDelta !== "number" || res.appliedDelta === a.delta) return;
+    for (var i = 0; i < DEMO.log.length; i++) {
+      var e = DEMO.log[i];
+      if (e && e.a === a && e.prev && e.prev.type === "stock_adjust") {
+        // nothing moved at all (clamped to zero, or a sale on a size nobody
+        // has counted): there is nothing to put back, so the line keeps no undo
+        if (res.appliedDelta === 0) e.prev = null;
+        else e.prev.delta = -res.appliedDelta;
+        demoSave();
+        return;
+      }
+    }
+  }
   function srvPush(a, entry) {
     // consumed here whatever the action was, so a stale one can never be
     // applied to some later save (the panel signed out, an undo, …)
@@ -28796,6 +28945,14 @@
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
     else if (a.type === "stock_adjust") {
       stockMoveSend({ productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "панель" })
+        .then(function (res) { if (!res) toast("Склад не принял правку"); else stockUndoApplied(a, res); reloadStock(); })
+        .catch(noop);
+    }
+    /* …and the first count of a size nobody has counted yet, which is an
+       absolute number rather than a move (the editor's «Остаток» column —
+       zero has to be sayable). Same route, its other body shape. */
+    else if (a.type === "stock_set") {
+      stockMoveSend({ productId: a.product_id, variant: a.variant || "", qty: a.qty, reason: "adjust", ref: "панель" })
         .then(function (ok) { if (!ok) toast("Склад не принял правку"); reloadStock(); })
         .catch(noop);
     }
@@ -30024,6 +30181,13 @@
     else if (a.type === "stock_adjust") {
       entry.prev = { type: "stock_adjust", product_id: a.product_id, variant: a.variant, delta: -a.delta, reason: "adjust" };
     }
+    /* The first count of a size nobody had counted yet. No undo: before it
+       there was no number at all — «не учтено» is not a quantity to go back
+       to — so the journal line records what was counted and stops there,
+       exactly like journalNote()'s own entries. */
+    else if (a.type === "stock_set") {
+      entry.prev = null;
+    }
     else if (a.type === "order_status") {
       entry.prev = { type: "order_status", id: a.id, number: a.number, value: a.prev, prev: a.value };
     }
@@ -30233,7 +30397,7 @@
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
-    else if (a.type === "stock_adjust" || a.type === "order_status" || a.type === "order_label") noop();
+    else if (a.type === "stock_adjust" || a.type === "stock_set" || a.type === "order_status" || a.type === "order_label") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
@@ -33683,13 +33847,19 @@
         var qVal = qtyCells[qi].value.trim();
         if (!qVal) continue;
         var qWant = stockQtyValue(qVal);
-        var qHas = qRow && qRow.tracked ? qRow.qty : 0;
-        if (qWant === qHas && qRow && qRow.tracked) continue;
-        demoApply({
-          type: "stock_adjust", product_id: gp.id,
-          variant: qRow ? qRow.variant : qKey.slice(gp.id.length + 1),
-          delta: qWant - qHas, reason: "adjust"
-        });
+        var qTracked = !!(qRow && qRow.tracked);
+        var qHas = qTracked ? qRow.qty : 0;
+        if (qWant === qHas && qTracked) continue;
+        var qVariant = qRow ? qRow.variant : qKey.slice(gp.id.length + 1);
+        /* The first count of a never-counted size is an ABSOLUTE number, not a
+           move: «шкаф пустой» is a delta of 0, which the route rightly refuses
+           as bad_delta, so the one count that matters most came back as «Склад
+           не принял правку». stock_set carries the number itself. A size that
+           is already counted keeps the relative move — that is the only shape
+           two clients can race safely. */
+        demoApply(qTracked
+          ? { type: "stock_adjust", product_id: gp.id, variant: qVariant, delta: qWant - qHas, reason: "adjust" }
+          : { type: "stock_set", product_id: gp.id, variant: qVariant, qty: qWant });
         changed = true;
       }
       var eanCells = document.querySelectorAll("[data-edean]");
