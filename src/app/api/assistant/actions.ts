@@ -1039,23 +1039,56 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
 
 /* ---- what the panel tells the model about the banner it already has ----- */
 
-type HeroBrief = { id: string; title: string; go: string; image: string; on: boolean };
+type HeroBrief = {
+  id: string;
+  eyebrow: Trilingual;
+  title: Trilingual;
+  sub: Trilingual;
+  cta: Trilingual;
+  go: string;
+  image: string;
+  on: boolean;
+};
 
 /**
  * The storefront posts its current banner along with the question, so «поменяй
  * второй слайд» has something to point at. It is the owner's own text coming
  * back through the browser, and it lands inside a prompt — so it is trimmed
  * hard and stripped of anything that could be read as structure.
+ *
+ * Every field of every slide, in all three languages: set_hero replaces the
+ * WHOLE banner, and the model used to be shown one Russian headline per slide
+ * and nothing else — so «поменяй второй слайд» came back with the other slides
+ * stripped of their Estonian and English, their eyebrow, their subtitle and
+ * their button, because the model cannot copy through what it was never shown.
+ * This is the same shape the action takes back, so «keep the other slides
+ * exactly as the list above has them» is now something it can actually do.
  */
 export function briefHero(raw: unknown): HeroBrief[] {
   if (!Array.isArray(raw)) return [];
   const clean = (v: unknown, max: number) =>
     typeof v === "string" ? v.replace(/[`\r\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+  /* A panel cached from before the banner travelled in three languages sends
+     the Russian title as a bare string — read as Russian rather than dropped.
+     The backtick goes the same way it did when these were flat lines: nothing
+     that could be read as a fence reaches the prompt. */
+  const noTicks = (s: string) => s.replace(/`+/g, " ");
+  const tri = (v: unknown, max: number): Trilingual => {
+    if (typeof v === "string") return heroText({ RU: noTicks(v) }, max);
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    const src = v as Record<string, unknown>;
+    const flat: Record<string, unknown> = {};
+    for (const l of HERO_LANGS) if (typeof src[l] === "string") flat[l] = noTicks(src[l] as string);
+    return heroText(flat, max);
+  };
   return raw.slice(0, HERO_MAX_SLIDES).map((s, i) => {
     const row = (s && typeof s === "object" ? s : {}) as Record<string, unknown>;
     return {
       id: clean(row.id, 24) || `s${i + 1}`,
-      title: clean(row.title, 60),
+      eyebrow: tri(row.eyebrow, 40),
+      title: tri(row.title, 40),
+      sub: tri(row.sub, 90),
+      cta: tri(row.cta, 24),
       go: clean(row.go, 80),
       image: clean(row.image, 300),
       on: row.on !== false,

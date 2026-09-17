@@ -21208,6 +21208,35 @@
       if (!S.pricingLoaded) { S.pricingLoaded = normalisePricing(null); render(); }
     });
   }
+  /* «Применить» on a set_pricing — the form's own «Сохранить» and, far more
+     dangerously, the assistant's «подними скидку для салонов до 25 %».
+     set_pricing is a PATCH: demoApply() merges it over S.pricingLoaded and
+     srvPush() PUTs the WHOLE merged object back. S.pricingLoaded is only ever
+     filled by the three cards that call loadAdminPricing() — «Цены и баллы»,
+     «Доставка и оплата», the goods editor — and the assistant is asked this
+     from «Обзор», where it is still null. mergePricing(null, patch) is the
+     built-in defaults with the patch on top, so one confirmed sentence wrote
+     «Партнёры и баллы» off, баллы back to 5 % and «списать» back to 30 % over
+     whatever Renat had saved — and the journal's «Вернуть» restored those
+     same defaults, not his numbers. So the shop's own figures are read first,
+     and nothing is applied until they are here. */
+  function applySetPricing(pa) {
+    if (S.pricingLoaded) {
+      toast("Цены и баллы сохранены", demoApply(pa));
+      S.admSetSaved = S.admSetPage || "";
+      render(); return;
+    }
+    apiJson("/api/admin/settings/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); render(); return; }
+      S.pricingLoaded = normalisePricing((r.body.settings || {}).pricing);
+      S.pricingDraft = null;
+      adoptPricingLocally();
+      toast("Цены и баллы сохранены", demoApply(pa));
+      S.admSetSaved = S.admSetPage || "";
+      render();
+    }).catch(function () { toast("Не получилось — попробуйте ещё раз"); render(); });
+  }
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
     return S.pricingDraft;
@@ -28940,13 +28969,28 @@
       .then(function (j) { admAI = !!j.enabled; render(); })
       .catch(function () { admAI = false; render(); });
   }
-  /* What the banner says right now, trimmed to what the assistant can act on —
-     «поменяй второй слайд» needs to know there is a second slide. */
+  /* What the banner says right now — «поменяй второй слайд» needs to know
+     there is a second slide.
+
+     Every field, in all three languages: set_hero sends the WHOLE banner back
+     and it replaces what is stored, so a slide the owner did not ask about
+     has to survive the trip. It used to go out as the Russian title and
+     nothing else, and came back without its Estonian, its English, its
+     eyebrow, its subtitle and its button — the model cannot keep what it was
+     never shown. The route trims it again (briefHero in
+     src/app/api/assistant/actions.ts). */
   function heroForAI() {
+    function tri(v) {
+      var o = v && typeof v === "object" ? v : {};
+      return { RU: String(o.RU || ""), ET: String(o.ET || ""), EN: String(o.EN || "") };
+    }
     return heroConf().slides.slice(0, 5).map(function (s) {
       return {
         id: String(s.id || ""),
-        title: String((s.title && s.title.RU) || ""),
+        eyebrow: tri(s.eyebrow),
+        title: tri(s.title),
+        sub: tri(s.sub),
+        cta: tri(s.cta),
         go: String(s.go || ""),
         image: String(s.image || ""),
         on: s.on !== false
@@ -29004,7 +29048,20 @@
         if (!reply || replyLooksLikeJson(reply)) { reply = AI_UNREADABLE; retry = !j.action; }
         admConvo.push({ role: "assistant", content: reply });
         if (S.adminAsk !== q) return;
-        pendingAction = j.action || null;
+        /* There is ONE confirm slot in the panel, and a confirm the owner is
+           looking at RIGHT NOW owns it: «Оформить продажу?», «Вернуть
+           деньги», «Одобрить Pro» all put themselves in `pendingAction` with
+           `overlay: true`, and screenAdmin() lifts that very object onto the
+           scrim. An answer landing a second later used to overwrite it — and
+           admPaintAnswer() below repaints only the answer box, never the
+           overlay, so the sale's own words stayed on the screen while
+           «Применить» applied the assistant's action underneath them. The
+           overlay keeps the slot; the proposal is dropped and «Спросить ещё
+           раз» fetches it again once the confirm is done. */
+        var busy = !!(pendingAction && pendingAction.overlay);
+        var act = busy ? null : (j.action || null);
+        if (busy && j.action) retry = true;
+        if (!busy) pendingAction = act;
         /* «Удалить набор» is the one thing the assistant can propose that the
            change journal cannot take back, so it wears the panel's own
            destructive card: the red button and the words the set editor's own
@@ -29012,14 +29069,14 @@
            name lives in the sets list, which this side pane may never have
            opened, so it is fetched now and loadAdminBundles()'s own render
            redraws the answer with the name in it. */
-        if (pendingAction && pendingAction.type === "delete_bundle") {
-          pendingAction.danger = true;
-          pendingAction.ok = "Да, удалить";
+        if (act && act.type === "delete_bundle") {
+          act.danger = true;
+          act.ok = "Да, удалить";
           loadAdminBundles();
         }
         // kept in S, drawn by admAnswerHTML() — here and on every later render
         // (`ask` is the route's «набор или промокод?» — two chips, no action)
-        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry, ask: typeof j.ask === "string" ? j.ask : "" };
+        S.adminAns = { q: q, reply: reply, action: act, tab: j.tab || "", retry: retry, ask: typeof j.ask === "string" ? j.ask : "" };
         admPaintAnswer();
       })
       .catch(function (err) {
@@ -32337,7 +32394,10 @@
           toast(pa.value ? "Баннер сохранён" : "Баннер снова стандартный", demoApply(pa));
         }
         else if (pa.type === "set_content") { toast("Данные магазина сохранены", demoApply(pa)); }
-        else if (pa.type === "set_pricing") { toast("Цены и баллы сохранены", demoApply(pa)); }
+        /* …and «Цены и баллы» reads the shop's own figures first when this
+           screen has never loaded them — see applySetPricing(). It writes the
+           toast and the «Сохранено ✓» itself, so it returns. */
+        else if (pa.type === "set_pricing") { applySetPricing(pa); return; }
         /* «Клиенты»: the new partner is a POST of its own (applyAddPartner
            writes the journal line once the server answered); the tier switch
            is journalled like a tariff change, «Отменить» on the toast. */

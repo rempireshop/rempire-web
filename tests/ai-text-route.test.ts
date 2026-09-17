@@ -183,6 +183,42 @@ describe("POST /api/admin/ai/text", () => {
     expect(body.text).toBeUndefined();
   });
 
+  /* «Перевести на ET и EN» in the blog editor hands this task a whole article
+     body and asks for two languages at once (app.js, data-admblogtranslate) —
+     twelve thousand characters of answer against a 900-token ceiling. It was
+     cut, ai-json repaired the remains into valid JSON, the route answered 200,
+     and the editor wrote half an Estonian article into the draft as if it were
+     the translation. Room to finish, and a refusal when even that runs out. */
+  it("translate: gets the room a whole article needs, not a short task's", async () => {
+    const fetchMock = vi.fn(async () => fakeCompletion({ ET: "Eesti tekst", EN: "English text" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    await POST(req({ task: "translate", lang: "RU", input: { text: "Русский текст", targetLangs: ["ET", "EN"] } }, { cookie: admin }));
+    const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(JSON.parse(String((init as RequestInit).body)).max_tokens).toBe(4500);
+  });
+
+  it("translate: a cut answer is refused, never written into the draft half-done", async () => {
+    const whole = JSON.stringify({
+      ET: "Talvel muutub habe kuivemaks — süüdi pole ainult ilm, vaid ka toasoojus.",
+      EN: "In winter the beard gets drier — the weather is not the only culprit.",
+    });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      JSON.stringify({
+        model: "gpt-4.1-mini",
+        choices: [{ message: { content: whole.slice(0, whole.indexOf("toasoojus")) }, finish_reason: "length" }],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    )));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(
+      req({ task: "translate", lang: "RU", input: { text: "Зимой борода становится суше.", targetLangs: ["ET", "EN"] } }, { cookie: admin }),
+    );
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body).toEqual({ ok: false, error: "truncated" });
+  });
+
   it("blog_outline: shapes {text:{title,h2,meta}}, capped to 8 headings", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => fakeCompletion({
       title: "Уход за бородой зимой",
