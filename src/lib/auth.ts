@@ -147,6 +147,12 @@ export function verifyPassword(password: string, stored: string | undefined = pr
   try {
     const salt = Buffer.from(parts[4], "base64");
     const want = Buffer.from(parts[5], "base64");
+    /* The key has to be the whole 32 bytes hashPassword() writes. A clipped
+       or mangled ADMIN_PASSWORD_HASH decodes to an empty Buffer, scryptSync()
+       with keylen 0 answers an empty Buffer too, and timingSafeEqual() of two
+       empty Buffers is TRUE — the login then let every password in, while
+       /api/admin/me/ went on reporting the password as configured (audit). */
+    if (want.length !== SCRYPT.keylen) return false;
     const got = scryptSync(password, salt, want.length, { N, r, p, maxmem: SCRYPT.maxmem });
     return want.length === got.length && timingSafeEqual(want, got);
   } catch {

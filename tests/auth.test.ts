@@ -34,6 +34,28 @@ describe("admin session", () => {
     expect(verifyPassword(PASSWORD, hashPassword("something else"))).toBe(false);
   });
 
+  /* A hash that lost its key — clipped by a copy-paste, truncated by an env
+     editor, or mangled to something base64 decodes to nothing — used to let
+     EVERY password in: Buffer.from("", "base64") is empty, scryptSync() with
+     keylen 0 answers an empty Buffer, and timingSafeEqual(empty, empty) is
+     true. The key must be the whole 32 bytes or the hash is not a hash. */
+  it("refuses a hash whose key is missing, short or not base64", () => {
+    const good = hashPassword(PASSWORD);
+    const [, n, r, p, salt, key] = good.split("$");
+
+    const clipped = `scrypt$${n}$${r}$${p}$${salt}$`;
+    expect(verifyPassword(PASSWORD, clipped)).toBe(false);
+    expect(verifyPassword("literally anything", clipped)).toBe(false);
+
+    // base64 skips characters it does not know, so this decodes to nothing
+    expect(verifyPassword("literally anything", `scrypt$${n}$${r}$${p}$${salt}$!!!!`)).toBe(false);
+    // …and a key that decodes to fewer than 32 bytes is not one either
+    expect(verifyPassword("literally anything", `scrypt$${n}$${r}$${p}$${salt}$${key.slice(0, 8)}`)).toBe(false);
+
+    // the whole one still opens the door
+    expect(verifyPassword(PASSWORD, good)).toBe(true);
+  });
+
   it("signs a session that verifies and expires", () => {
     const token = makeSessionToken();
     expect(verifySessionToken(token)).toBe(true);

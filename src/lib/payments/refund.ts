@@ -31,6 +31,7 @@
  *     a human must look at is never something this code decides alone.
  */
 
+import { createHash } from "node:crypto";
 import type { PaymentProvider } from "./types";
 
 /** Montonio's five refund states, boiled down to three outcomes. */
@@ -208,6 +209,34 @@ export function foldRefund(
   const next = at < 0 ? [...list, entry] : list.map((r, i) => (i === at ? { ...r, ...entry } : r));
   const folded = { refunds: next, refundedTotal: refundedTotal({ refunds: next }), applied: at < 0 };
   return folded;
+}
+
+/**
+ * The idempotency key for ONE refund attempt, derived from the order rather
+ * than drawn fresh.
+ *
+ * A random key per attempt is the same as no key at all. Montonio sends the
+ * money and this shop never hears the answer — the function timed out, the
+ * gateway answered 502, the phone lost its signal on the way back — nothing
+ * is written to `orders.payment`, so `refundableAmount()` still says the
+ * whole amount is refundable and «Вернуть деньги» is pressable again. With a
+ * fresh UUID that second press is a second, undeduplicable refund: the
+ * customer gets the money twice.
+ *
+ * Same order, same amount, same ledger → same key, so the retry asks Montonio
+ * about the refund it already has and gets that one back. `seq` is how many
+ * refund entries the order already carries: a refund that is RECORDED (even a
+ * failed one, which frees its amount to be refunded again) moves the sequence
+ * on, so refunding the same amount a second time deliberately is a different
+ * key and a different refund.
+ *
+ * Shaped as a v4 UUID because that is what Montonio's refunds guide asks for
+ * (docs/payments.md § 11) — the bits, not the randomness, are what it checks.
+ */
+export function refundIdempotencyKey(orderId: string, seq: number, amount: number): string {
+  const h = createHash("sha256").update(`rempire-refund|${orderId}|${seq}|${money(amount).toFixed(2)}`).digest("hex");
+  const variant = ((parseInt(h[16], 16) & 0x3) | 0x8).toString(16);
+  return [h.slice(0, 8), h.slice(8, 12), `4${h.slice(13, 16)}`, `${variant}${h.slice(17, 20)}`, h.slice(20, 32)].join("-");
 }
 
 /** True once the refunds cover the order — the moment it becomes «возврат». */

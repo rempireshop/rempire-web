@@ -56,12 +56,14 @@ import {
   giftRefundedTotal,
   refundableAmount,
   refundedTotal,
+  refundIdempotencyKey,
+  refundsOf,
   splitRefund,
   type RefundEntry,
 } from "@/lib/payments/refund";
 import { giftPaidOf, refundValue, settleRefund } from "@/lib/payments/settle";
 import { PaymentError } from "@/lib/payments/types";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,32 +83,6 @@ function settled(order: Order): boolean {
   if ((PAID_ORDER_STATUSES as readonly string[]).includes(order.status)) return true;
   const p = order.payment as { status?: unknown } | null | undefined;
   return !!p && typeof p === "object" && p.status === "paid";
-}
-
-/**
- * The idempotency key for one refund — the same on every attempt at it.
- *
- * What stood here was `randomUUID()` per request, with a comment claiming it
- * made a double tap harmless; it is the opposite. Renat presses «Вернуть
- * деньги» on his iPhone, Montonio takes the refund and the answer never
- * arrives (a 504, or the phone losing the signal); the button comes back and
- * he presses it again. With a fresh key that second request is a second
- * refund, and the customer is paid twice — the shop's only other guard is
- * `left`, which is read from a snapshot the first attempt never got to write.
- *
- * So the key is derived from what the refund IS: this order, this provider
- * payment, what had already gone back before it, and how much is going now. A
- * retry of the same press carries the same key and Montonio sends the money
- * once; a second, deliberate refund has a different `back` and is a different
- * key. Shaped as a v4 uuid because that is what the refunds guide asks for
- * (docs/payments.md § 11) — the bits, not the randomness, are what it checks.
- */
-function refundKey(orderId: string, providerRef: string, back: number, amount: number): string {
-  const h = createHash("sha256")
-    .update(`refund|${orderId}|${providerRef}|${back.toFixed(2)}|${amount.toFixed(2)}`)
-    .digest("hex");
-  const variant = ((parseInt(h.slice(16, 17), 16) & 0x3) | 0x8).toString(16);
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-${variant}${h.slice(17, 20)}-${h.slice(20, 32)}`;
 }
 
 /** What the gift lines of an order add up to — the cards it sold. */
@@ -245,9 +221,12 @@ export async function POST(req: Request, ctx: Ctx) {
         providerRef,
         amount: split.money,
         currency: order.currency || "EUR",
-        // the same key for every attempt at this refund — see refundKey():
-        // it is what makes a double tap, and a request that timed out, harmless
-        idempotencyKey: refundKey(order.id, providerRef, back, split.money),
+        /* Derived from the order, never random: the whole point of the key is
+           that a retry after a LOST answer — the one case where this shop
+           cannot see that the money has already gone — asks Montonio about
+           the refund it already made instead of making a second one. A fresh
+           UUID per attempt deduplicated nothing at all (audit). */
+        idempotencyKey: refundIdempotencyKey(order.id, refundsOf(order.payment).length, split.money),
         orderNumber: order.number,
       });
     } catch (err) {
