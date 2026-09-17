@@ -239,6 +239,39 @@ export function refundIdempotencyKey(orderId: string, seq: number, amount: numbe
   return [h.slice(0, 8), h.slice(8, 12), `4${h.slice(13, 16)}`, `${variant}${h.slice(17, 20)}`, h.slice(20, 32)].join("-");
 }
 
+/**
+ * The reference for ONE credit back onto a gift card — the card half of what
+ * refundIdempotencyKey() does for the money half, and derived the same way for
+ * the same reason.
+ *
+ * It was `gc:${randomUUID()}` until 17.09.2026, which is the same as no
+ * reference at all, and it did two jobs badly at once:
+ *
+ *   · foldRefund() matches an incoming entry to an existing one BY REF, so a
+ *     fresh uuid always appended a second line to `orders.payment.refunds`
+ *     instead of landing on the one the first attempt wrote — and
+ *     refundedTotal() is the sum of those lines, so an order could show more
+ *     refunded than it was ever worth;
+ *   · creditGiftCard() now refuses a ref it has already written
+ *     (191_gift_loyalty_once.sql), and a value drawn fresh on every attempt
+ *     can never be refused.
+ *
+ * `seq` is how many refunds the order carries AT THE MOMENT THIS CREDIT IS
+ * ABOUT TO BE WRITTEN — after the money half of the same refund has been
+ * recorded, if there was one. That is what makes a retry agree with the
+ * attempt it is retrying: whatever killed the first attempt, the ledger it
+ * left behind is the one the retry counts, so the same tap twice derives the
+ * same ref, and a SECOND, deliberate partial refund of the same amount counts
+ * one line further and derives a different one.
+ *
+ * Kept behind the `gc:` prefix it has always had, so the ledger, the order
+ * card and docs/payments.md § 11 go on reading the way they did.
+ */
+export function giftRefundRef(orderId: string, seq: number, amount: number): string {
+  const h = createHash("sha256").update(`rempire-gift-refund|${orderId}|${seq}|${money(amount).toFixed(2)}`).digest("hex");
+  return `gc:${h.slice(0, 32)}`;
+}
+
 /** True once the refunds cover the order — the moment it becomes «возврат». */
 export function fullyRefunded(total: number, refunded: number): boolean {
   return num(total) > 0 ? refunded >= num(total) - 0.005 : refunded > 0;

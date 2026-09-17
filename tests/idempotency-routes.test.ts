@@ -1,6 +1,7 @@
 /**
- * «Сделать один раз» on the three routes that are wired to it — the checkout,
- * the till and the shelf. src/lib/idempotency.ts is proven on its own in
+ * «Сделать один раз» on the six routes that are wired to it — the checkout,
+ * the till and the shelf, and since 17.09.2026 a new product, a new article
+ * and a new review. src/lib/idempotency.ts is proven on its own in
  * tests/idempotency.test.ts; this file is about the wiring, and it asks the
  * same three questions of each route:
  *
@@ -39,11 +40,16 @@ const KEY_A = "aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa";
 const KEY_B = "bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb";
 
 let ip = 0;
-/** One POST. `key` goes in the header the client sends it in, or nowhere. */
-function post(path: string, body: unknown, opts: { key?: string; cookie?: string } = {}) {
+/**
+ * One POST. `key` goes in the header the client sends it in, or nowhere.
+ * `from` pins the caller's address — a fresh one per call by default, so the
+ * rate limits never notice these tests, and a fixed one where a test is about
+ * a rate limit (POST /api/reviews below).
+ */
+function post(path: string, body: unknown, opts: { key?: string; cookie?: string; from?: string } = {}) {
   const headers: Record<string, string> = {
     "content-type": "application/json",
-    "x-forwarded-for": `203.0.113.${(ip++ % 200) + 1}`,
+    "x-forwarded-for": opts.from ?? `203.0.113.${(ip++ % 200) + 1}`,
   };
   if (opts.cookie) headers.cookie = opts.cookie;
   if (opts.key) headers[IDEMPOTENCY_HEADER] = opts.key;
@@ -79,8 +85,15 @@ afterAll(teardownDb);
 beforeEach(async () => {
   resetRateLimits();
   await truncateAll();
+  await query("truncate custom_products, posts, reviews restart identity cascade");
   await query("delete from idempotency_keys");
 });
+
+/** How many rows a table holds — the one question every «second thing» asks. */
+async function countOf(table: string): Promise<number> {
+  const rows = await query<{ n: string }>(`select count(*)::text as n from ${table}`);
+  return Number(rows[0].n);
+}
 
 /* ------------------------------------------------------------------------ *
  * 1. POST /api/orders — the worst one
@@ -380,5 +393,316 @@ describe("POST /api/admin/inventory/moves: a retry is not a second bottle", () =
     const res = await POST(post("/api/admin/inventory/moves/", goodsIn, { key: KEY_A }));
     expect(res.status).toBe(401);
     expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * 4. POST /api/admin/products — «Сохранить товар»
+ *
+ * The three routes below are wired on the SERVER ONLY: the panel and the
+ * storefront do not mint keys for them yet, so in the shop as it stands today
+ * every one of these behaves exactly as it did — which is what the «no key at
+ * all» test of each is really pinning. The client half is a later pass, and
+ * until it lands none of the three is finished.
+ * ------------------------------------------------------------------------ */
+
+const goodProduct = {
+  brand: "Proraso",
+  name: "Beard Balm — бальзам для бороды",
+  cat: "beard",
+  price: 14.9,
+};
+
+describe("POST /api/admin/products: one «Сохранить», one product", () => {
+  it("the same key again creates nothing and replays the first answer", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+
+    const first = await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }));
+    const one = await first.json();
+    expect(first.status).toBe(201);
+    expect(one.ok).toBe(true);
+
+    const second = await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }));
+    const two = await second.json();
+
+    expect(await countOf("custom_products")).toBe(1);
+    // byte for byte: the editor opens on exactly this card
+    expect(second.status).toBe(201);
+    expect(two).toEqual(one);
+  });
+
+  /* The owner may genuinely sell the same balm under two entries, and
+     uniqueCustomId() is there for exactly that — it names the second one
+     `c-…-2`. Which is also what made the retry so quiet: the duplicate did
+     not collide with anything, it just appeared in the shop window. */
+  it("a DIFFERENT key with the same fields creates a second product", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+
+    const first = await (await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }))).json();
+    const second = await POST(post("/api/admin/products/", goodProduct, { key: KEY_B, cookie: admin }));
+    const two = await second.json();
+
+    expect(second.status).toBe(201);
+    expect(await countOf("custom_products")).toBe(2);
+    expect(two.product.id).not.toBe(first.product.id);
+  });
+
+  it("no key at all behaves exactly as before — two products", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+    await POST(post("/api/admin/products/", goodProduct, { cookie: admin }));
+    await POST(post("/api/admin/products/", goodProduct, { cookie: admin }));
+    expect(await countOf("custom_products")).toBe(2);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+
+  it("says «in_progress», and creates nothing, while the first save is still going", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+    await holdKey(KEY_A, "POST /api/admin/products");
+
+    const res = await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("in_progress");
+    expect(await countOf("custom_products")).toBe(0);
+  });
+
+  it("refuses a key whose card has changed", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+    await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }));
+
+    const res = await POST(post("/api/admin/products/", { ...goodProduct, price: 99 }, { key: KEY_A, cookie: admin }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("key_reused");
+    expect(await countOf("custom_products")).toBe(1);
+  });
+
+  it("does not pin a refusal: the corrected card goes through on the same key", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+
+    const bad = await POST(post("/api/admin/products/", { ...goodProduct, brand: "  " }, { key: KEY_A, cookie: admin }));
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error).toBe("brand_required");
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+
+    const fixed = await POST(post("/api/admin/products/", goodProduct, { key: KEY_A, cookie: admin }));
+    expect(fixed.status).toBe(201);
+    expect(await countOf("custom_products")).toBe(1);
+  });
+
+  it("the admin cookie is still checked before the key is looked at", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+    const res = await POST(post("/api/admin/products/", goodProduct, { key: KEY_A }));
+    expect(res.status).toBe(401);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * 5. POST /api/admin/blog — «Создать» in the blog editor
+ * ------------------------------------------------------------------------ */
+
+const goodPost = { title: "Как выбрать бритву", excerpt: "Коротко о главном", body: "Текст статьи." };
+
+describe("POST /api/admin/blog: one «Создать», one article", () => {
+  it("the same key again creates nothing and replays the first answer", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+
+    const first = await POST(post("/api/admin/blog/", goodPost, { key: KEY_A, cookie: admin }));
+    const one = await first.json();
+    expect(first.status).toBe(200);
+    expect(one.ok).toBe(true);
+
+    const second = await POST(post("/api/admin/blog/", goodPost, { key: KEY_A, cookie: admin }));
+    const two = await second.json();
+
+    expect(await countOf("posts")).toBe(1);
+    expect(second.status).toBe(200);
+    expect(two).toEqual(one);
+  });
+
+  /* uniqueSlug() makes room the same way uniqueCustomId() does — the twin
+     gets `…-2` — so two deliberate drafts of one title are two articles. */
+  it("a DIFFERENT key with the same title creates a second article", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+
+    const first = await (await POST(post("/api/admin/blog/", goodPost, { key: KEY_A, cookie: admin }))).json();
+    const second = await POST(post("/api/admin/blog/", goodPost, { key: KEY_B, cookie: admin }));
+    const two = await second.json();
+
+    expect(second.status).toBe(200);
+    expect(await countOf("posts")).toBe(2);
+    expect(two.post.id).not.toBe(first.post.id);
+    expect(two.post.slug).not.toBe(first.post.slug);
+  });
+
+  it("no key at all behaves exactly as before — two articles", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+    await POST(post("/api/admin/blog/", goodPost, { cookie: admin }));
+    await POST(post("/api/admin/blog/", goodPost, { cookie: admin }));
+    expect(await countOf("posts")).toBe(2);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+
+  it("says «in_progress», and creates nothing, while the first «Создать» is still going", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+    await holdKey(KEY_A, "POST /api/admin/blog");
+
+    const res = await POST(post("/api/admin/blog/", goodPost, { key: KEY_A, cookie: admin }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("in_progress");
+    expect(await countOf("posts")).toBe(0);
+  });
+
+  it("refuses a key whose draft has changed", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+    await POST(post("/api/admin/blog/", goodPost, { key: KEY_A, cookie: admin }));
+
+    const res = await POST(post("/api/admin/blog/", { ...goodPost, title: "Другое" }, { key: KEY_A, cookie: admin }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("key_reused");
+    expect(await countOf("posts")).toBe(1);
+  });
+
+  /* The edit path takes no key and must not have grown one: a PATCH names the
+     row it is changing, so a repeat writes the same fields onto the same post. */
+  it("PATCH is untouched — a repeat edits the same article, it does not clone it", async () => {
+    const { POST, PATCH } = await import("@/app/api/admin/blog/route");
+    const made = await (await POST(post("/api/admin/blog/", goodPost, { cookie: admin }))).json();
+
+    const edit = { id: made.post.id as string, title: "Как выбрать бритву — 2" };
+    const req = () =>
+      new Request(`${ORIGIN}/api/admin/blog/`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", cookie: admin },
+        body: JSON.stringify(edit),
+      });
+    expect((await PATCH(req())).status).toBe(200);
+    expect((await PATCH(req())).status).toBe(200);
+
+    expect(await countOf("posts")).toBe(1);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+
+  it("the admin cookie is still checked before the key is looked at", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+    const res = await POST(post("/api/admin/blog/", goodPost, { key: KEY_A }));
+    expect(res.status).toBe(401);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * 6. POST /api/reviews — «Отправить отзыв»
+ * ------------------------------------------------------------------------ */
+
+const goodReview = {
+  product: "handmade-soap-666",
+  name: "Андрей",
+  rating: 5,
+  text: "Беру третий раз, пенится хорошо и запах не бьёт в нос.",
+  lang: "RU",
+  consent: true,
+};
+
+describe("POST /api/reviews: one «Отправить», one review", () => {
+  it("the same key again stores nothing and replays the first answer", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.77";
+
+    const first = await POST(post("/api/reviews/", goodReview, { key: KEY_A, from }));
+    const one = await first.json();
+    expect(first.status).toBe(200);
+    expect(one).toMatchObject({ ok: true, status: "pending" });
+
+    const second = await POST(post("/api/reviews/", goodReview, { key: KEY_A, from }));
+    const two = await second.json();
+
+    expect(await countOf("reviews")).toBe(1);
+    expect(second.status).toBe(200);
+    // the same id back, so the page does not think a second review was taken
+    expect(two).toEqual(one);
+  });
+
+  /* …and the three-an-hour limit is INSIDE the key, so the replay above did
+     not spend one of the customer's three. Four sends, one of them a replay:
+     three reviews land and the fourth is the one refused. */
+  it("a replay does not spend one of the customer's three an hour", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.78";
+    const send = (key: string, n: number) =>
+      POST(post("/api/reviews/", { ...goodReview, text: `${goodReview.text} ${"да ".repeat(n)}` }, { key, from }));
+
+    await send(KEY_A, 1);
+    await send(KEY_A, 1); // the replay
+    await send(KEY_B, 2);
+    const third = await send("cccccccc-3333-4333-8333-cccccccccccc", 3);
+    expect(third.status).toBe(200);
+    expect(await countOf("reviews")).toBe(3);
+
+    const fourth = await send("dddddddd-4444-4444-8444-dddddddddddd", 4);
+    expect(fourth.status).toBe(429);
+    expect((await fourth.json()).error).toBe("rate_limited");
+  });
+
+  it("a DIFFERENT key with the same text stores a second review", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.79";
+
+    await POST(post("/api/reviews/", goodReview, { key: KEY_A, from }));
+    const second = await POST(post("/api/reviews/", goodReview, { key: KEY_B, from }));
+
+    expect(second.status).toBe(200);
+    expect((await second.json()).ok).toBe(true);
+    expect(await countOf("reviews")).toBe(2);
+  });
+
+  it("no key at all behaves exactly as before — two reviews", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.80";
+    await POST(post("/api/reviews/", goodReview, { from }));
+    await POST(post("/api/reviews/", goodReview, { from }));
+    expect(await countOf("reviews")).toBe(2);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+  });
+
+  it("says «in_progress», and stores nothing, while the first send is still going", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    await holdKey(KEY_A, "POST /api/reviews");
+
+    const res = await POST(post("/api/reviews/", goodReview, { key: KEY_A }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("in_progress");
+    expect(await countOf("reviews")).toBe(0);
+  });
+
+  it("refuses a key whose review has changed", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.81";
+    await POST(post("/api/reviews/", goodReview, { key: KEY_A, from }));
+
+    const res = await POST(post("/api/reviews/", { ...goodReview, rating: 1 }, { key: KEY_A, from }));
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("key_reused");
+    expect(await countOf("reviews")).toBe(1);
+  });
+
+  /* A refusal the customer can fix — a link in the text — is not worth
+     pinning: they take it out and send again, under the key they already have. */
+  it("does not pin a refusal: the corrected review goes through on the same key", async () => {
+    const { POST } = await import("@/app/api/reviews/route");
+    const from = "203.0.113.82";
+
+    const bad = await POST(post("/api/reviews/", { ...goodReview, text: "Отлично, смотрите https://spam.example" }, { key: KEY_A, from }));
+    expect(bad.status).toBe(400);
+    expect(await query("select key from idempotency_keys")).toHaveLength(0);
+
+    const fixed = await POST(post("/api/reviews/", goodReview, { key: KEY_A, from }));
+    expect(fixed.status).toBe(200);
+    expect(await countOf("reviews")).toBe(1);
   });
 });
