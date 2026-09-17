@@ -282,6 +282,32 @@ describe("runBirthdays() — the tolerant window", () => {
     expect(wet.sent).toBe(1);
     expect(await sentYear(id)).toBe(2026);
   });
+
+  it("takes the code back with the stamp, so a shop without a key grows no dead codes", async () => {
+    /* The code is written before the send is even attempted. A skipped send
+       puts the stamp back so the customer is greeted once letters work, which
+       means the next run mints another code — and the old one stayed, live and
+       unmentioned, in the list the owner scrolls by hand. One row per customer
+       per day for as long as the Resend key was missing. */
+    await setSetting("flows", { birthday: true, birthdayDays: 0 });
+    const id = await customer("1990-03-14");
+    delete process.env.RESEND_API_KEY;
+
+    // three runs of the job on the birthday itself, none of which can send
+    for (const hour of [0, 1, 2]) {
+      const run = await runBirthdays(MAR11 + 3 * DAY + hour * 3600_000);
+      expect(run.skipped, `run ${hour}`).toBe(1);
+      const left = await query<{ n: string }>("select count(*) as n from promo_codes where code like 'REM-BD-%'");
+      expect(Number(left[0].n), `run ${hour}`).toBe(0);
+    }
+
+    // …and the one the customer is actually told about stays
+    process.env.RESEND_API_KEY = "re_test_key";
+    expect((await runBirthdays(MAR11 + 3 * DAY + 3 * 3600_000)).sent).toBe(1);
+    expect(await sentYear(id)).toBe(2026);
+    const kept = await query<{ n: string }>("select count(*) as n from promo_codes where code like 'REM-BD-%'");
+    expect(Number(kept[0].n)).toBe(1);
+  });
 });
 
 /* ---------- «Запустить сейчас» ------------------------------------------- */

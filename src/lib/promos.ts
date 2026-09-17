@@ -515,6 +515,14 @@ export function validatePromo(raw: unknown): PromoValidation {
 
   const code = normalisePromoCode(x.code);
   if (!code) return { ok: false, error: "bad_code" };
+  /* …and not a code shaped like a gift card. One box at the checkout takes
+     both, and it routes by shape before anything is looked up — in the browser
+     (public/shop2/app.js) and again on the way in here — so «RMP» plus eight
+     more characters would be sent to the card lookup whatever the promo table
+     says. The owner would have a code the panel lists as live, that no shopper
+     can ever use and that answers «Карта не найдена». Refused at the one door
+     both the panel and the assistant go through, so it cannot be made. */
+  if (looksLikeGiftCode(code)) return { ok: false, error: "gift_shape" };
 
   const kind = PROMO_KINDS.includes(x.kind as PromoKind) ? (x.kind as PromoKind) : "percent";
 
@@ -676,7 +684,7 @@ export async function setPromoActive(code: unknown, active: boolean): Promise<Pr
 
 export type PromoDelete =
   | { ok: true; code: string }
-  | { ok: false; error: "bad_code" | "not_found" | "in_use" };
+  | { ok: false; error: "bad_code" | "not_found" | "in_use" | "on_order" };
 
 /**
  * Delete one code — and refuse the moment it is part of somebody's order.
@@ -693,6 +701,13 @@ export type PromoDelete =
  *   · the counter itself, which the paid transition bumps (consumePromo);
  *   · a redemption row, in case that counter was ever put back by hand;
  *   · an order carrying the code, which is what the order card reads.
+ *
+ * The third has its own answer, `on_order`, because it is not the same fact.
+ * `discount_code` is written at checkout and the counter only on payment, so
+ * a shopper who applied the code and then walked away from the bank's page
+ * leaves a code whose counter reads 0 and which this still refuses — and the
+ * panel, told only `in_use`, said «Код уже использован» about a code nobody
+ * had used, one row under its own «использован 0».
  */
 export async function deletePromo(code: unknown): Promise<PromoDelete> {
   const norm = normalisePromoCode(code);
@@ -720,7 +735,7 @@ export async function deletePromo(code: unknown): Promise<PromoDelete> {
       "select id from orders where upper(replace(discount_code, ' ', '')) = $1 limit 1",
       [norm],
     );
-    if (onOrder.length) return { ok: false, error: "in_use" as const };
+    if (onOrder.length) return { ok: false, error: "on_order" as const };
 
     await q("delete from promo_codes where code = $1", [norm]);
     return { ok: true as const, code: norm };

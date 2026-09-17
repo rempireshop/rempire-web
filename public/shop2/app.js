@@ -1045,8 +1045,12 @@
       "Не получилось удалить промокод": "Sooduskoodi ei õnnestunud kustutada",
       "Код уже использован — его можно только выключить":
         "Koodi on juba kasutatud — selle saab ainult välja lülitada",
+      "Код есть в незавершённом заказе — его можно только выключить":
+        "Kood on lõpetamata tellimuses — selle saab ainult välja lülitada",
       "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
         "Kood võib sisaldada ainult ladina tähti, numbreid ja sidekriipsu — kuni 24 märki.",
+      "Такой код похож на подарочную карту — придумайте другой.":
+        "See kood sarnaneb kinkekaardiga — mõtle välja teine.",
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
         "Kontrolli soodustuse suurust: protsent 1–90, summa kuni 200 €.",
       "Проверьте дату окончания.": "Kontrolli lõppkuupäeva.",
@@ -3740,8 +3744,12 @@
       "Не получилось удалить промокод": "The promo code could not be deleted",
       "Код уже использован — его можно только выключить":
         "The code has already been used — it can only be switched off",
+      "Код есть в незавершённом заказе — его можно только выключить":
+        "The code is on an unfinished order — it can only be switched off",
       "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
         "A code may contain only Latin letters, digits and a hyphen — up to 24 characters.",
+      "Такой код похож на подарочную карту — придумайте другой.":
+        "This code looks like a gift card — please choose another one.",
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
         "Check the size of the discount: 1–90 per cent, or up to 200 €.",
       "Проверьте дату окончания.": "Check the end date.",
@@ -11989,12 +11997,25 @@
       var have = scope === "brand" || scope === "product"
         ? promoBase({ scope: scope, scopeValue: S.promoErrValue })
         : promoGoods();
+      /* …and the shortfall is counted against the basket as it is NOW, while
+         the refusal itself is from whenever «Применить» was last pressed. Do
+         as you are told — add the missing bottle — and the same line said
+         «добавьте ещё на 0,00 €» and stayed there: nothing but typing in the
+         box, «убрать» or a finished order ever cleared it. A shortfall that
+         has been made up is no longer a refusal, so there is nothing to say;
+         the code is still in the box and «Применить» is still next to it. */
+      if (have >= S.promoMin) return "";
       var need = eur(Math.max(0, S.promoMin - have));
       if (scope === "brand" && name) return "Код действует от " + eur(S.promoMin) + " товаров " + name + " — добавьте ещё на " + need + ".";
       if (scope === "product") return "Код действует от " + eur(S.promoMin) + " по этому товару — добавьте ещё на " + need + ".";
       return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + need + ".";
     }
     return PROMO_ERRS[S.promoErr] || PROMO_ERRS.unavailable;
+  }
+  /** The refusal under the box, or "" when there is nothing left to refuse. */
+  function promoErrHTML() {
+    var t = S.promoErr ? promoErrText() : "";
+    return t ? '<div class="err" role="alert">' + esc(t) + "</div>" : "";
   }
   function promoLabel(p) {
     if (p.kind === "free_shipping") return p.code + " — бесплатная доставка";
@@ -15547,7 +15568,7 @@
       }).join("") : '<p class="muted">Корзина пуста.</p>') +
       '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo' + (S.promoBusy ? " disabled" : "") + ">" +
         (S.promoBusy ? "Проверяем…" : "Применить") + "</button></div>" +
-      (S.promoErr ? '<div class="err" role="alert">' + esc(promoErrText()) + "</div>" : "") +
+      promoErrHTML() +
       promoRowHTML() +
       /* ---- features: gift card ------------------------------------------
          Owned by the features agent. The same input above accepts a card
@@ -18482,14 +18503,25 @@
   function admGiftRowHTML(c) {
     var to = (c.recipient && (c.recipient.name || c.recipient.email)) || "покупателю";
     var until = String(c.validUntil || "").split("-").reverse().join(".");
+    /* A cancelled card — the order that bought it was refunded in full, so
+       `voided_at` is stamped and the code buys nothing (src/lib/giftcards.ts
+       voidGiftCards). This list read only the balance, so such a card stood
+       here as an ordinary spent one at 0,00 € and still offered its PDF: a
+       document that says «на карте 100 €» about money the shop has already
+       handed back. The order card has said «Аннулирована» and dropped the PDF
+       since 10.09.2026; this is the same two lines, on the same field the
+       payload already carries. */
+    var dead = !!c.voidedAt;
     return '<div class="adm-row adm-row--stack">' +
       '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
-        '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
+        '<span class="adm-row__nm adm-mono">' + esc(c.code) +
+          (dead ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>' : "") +
+        "</span>" +
         '<span class="adm-row__amt">' + eur(c.balance) + "</span></span>" +
       '<span class="adm-row__sub" style="width:100%">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +
         (until ? ' · <span>Действует до</span> <span>' + esc(until) + "</span>" : "") +
         (c.balance === c.amount ? "" : ' · <span>из ' + eur(c.amount) + "</span>") + "</span>" +
-      (c.pdfUrl
+      (c.pdfUrl && !dead
         ? '<div class="adm-acts"><a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
           '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>'
         : "") +
@@ -22963,9 +22995,25 @@
   }
   function blankPromo() {
     return {
-      code: "", kind: "percent", value: 10, minSubtotal: 0, endsAt: "", maxUses: "", note: "", active: true,
+      code: "", kind: "percent", value: 10, minSubtotal: 0, startsAt: null, endsAt: "", maxUses: "", note: "", active: true,
       // «На что действует» — 'order' | 'brand' | 'product' (170_promo_scope)
       scope: "order", scopeValue: ""
+    };
+  }
+  /** The form for a code that already exists — «Изменить промокод». */
+  function promoFormFrom(p) {
+    return {
+      editing: true, code: p.code, kind: p.kind, value: p.value,
+      minSubtotal: p.minSubtotal, endsAt: p.endsAt ? String(p.endsAt).slice(0, 10) : "",
+      /* «Действует с» has no field on this form — only the assistant can set
+         one — but it rides along so that saving gives it back. The body is the
+         whole code as far as the server is concerned (validatePromo), so a
+         missing key was stored as «нет даты начала»: a code made for December
+         went live the moment Renat corrected its percent in September. */
+      startsAt: p.startsAt || null,
+      maxUses: p.maxUses == null ? "" : p.maxUses, note: p.note || "", active: p.active,
+      // a code saved before 170 has neither field; both read as «весь заказ»
+      scope: p.scope || "order", scopeValue: p.scopeValue || ""
     };
   }
   function promoKindLabel(p) {
@@ -23186,6 +23234,11 @@
       kind: f.kind,
       value: f.kind === "free_shipping" ? 0 : text(f.value),
       minSubtotal: text(f.minSubtotal),
+      /* Whatever the code already had. There is no field for it on this form
+         (the assistant is the only thing that sets one), and the server reads
+         a missing key as «нет даты начала» — so leaving it out was an edit
+         that quietly made a future code live today. */
+      startsAt: f.startsAt || null,
       endsAt: f.endsAt ? new Date(f.endsAt + "T23:59:59Z").toISOString() : null,
       maxUses: text(f.maxUses),
       note: f.note || "",
@@ -23197,6 +23250,11 @@
   }
   var PROMO_SAVE_ERRS = {
     bad_code: "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.",
+    /* RMP plus eight more characters is the shape of a gift card, and the
+       checkout box routes by shape before it looks anything up — so such a
+       code would be listed here as live and answer «Карта не найдена» to every
+       shopper who typed it. The server refuses to create one (validatePromo). */
+    gift_shape: "Такой код похож на подарочную карту — придумайте другой.",
     bad_value: "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.",
     bad_min: "Минимальная сумма заказа выглядит неправдоподобно.",
     bad_date: "Проверьте дату окончания.",
@@ -23269,8 +23327,17 @@
         toast("Промокод удалён ✓"); render(); return;
       }
       if (r.status === 409) {
-        // it was paid with between the list loading and this tap
+        /* Two different facts, and this used to tell only the first. `in_use`
+           is a code somebody has PAID with, which is what the row's own
+           «использован» counts. `on_order` is a code sitting in an order
+           nobody paid for — applied at the checkout, then abandoned on the
+           bank's page — so the counter reads 0, the row offers «Удалить», and
+           «Код уже использован» was a sentence the panel itself disproved one
+           line above. Each branch is one whole sentence for the dictionary. */
         loadAdminPromos(true);
+        if (r.body && r.body.error === "on_order") {
+          toast("Код есть в незавершённом заказе — его можно только выключить"); return;
+        }
         toast("Код уже использован — его можно только выключить"); return;
       }
       toast("Не получилось удалить промокод"); render();
@@ -34744,13 +34811,7 @@
     if (d.admpromoedit) {
       var found = (S.admPromos || []).filter(function (x) { return x.code === d.admpromoedit; })[0];
       if (found) {
-        S.promoForm = {
-          editing: true, code: found.code, kind: found.kind, value: found.value,
-          minSubtotal: found.minSubtotal, endsAt: found.endsAt ? String(found.endsAt).slice(0, 10) : "",
-          maxUses: found.maxUses == null ? "" : found.maxUses, note: found.note || "", active: found.active,
-          // a code saved before 170 has neither field; both read as «весь заказ»
-          scope: found.scope || "order", scopeValue: found.scopeValue || ""
-        };
+        S.promoForm = promoFormFrom(found);
         S.promoQ = "";
         S.promoFormErr = ""; render();
       }
