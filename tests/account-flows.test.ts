@@ -106,7 +106,11 @@ beforeEach(async () => {
   await exec(
     // cascade: order_messages (111_order_messages.sql) has a foreign key onto
     // orders, so a plain truncate of orders alone is refused by Postgres.
-    "truncate customers, login_codes, carts, stock_alerts, mail_optouts, orders, settings, product_overrides restart identity cascade",
+    // stock_levels/stock_moves belong here too (they are in helpers.ts's own
+    // truncateAll): the sweep below reads the count, so a shelf one test
+    // counted was still standing in the next one, and what a test proved
+    // depended on the tests that ran before it.
+    "truncate customers, login_codes, carts, stock_alerts, mail_optouts, orders, settings, product_overrides, stock_levels, stock_moves restart identity cascade",
   );
 });
 
@@ -606,9 +610,15 @@ describe("back in stock flow", () => {
   it("waits for the shelf, not for the old manual override", async () => {
     await setFlows({ backstock: true });
     const { move } = await import("@/lib/inventory");
-    // counted, then sold out — with nobody waiting yet, so no letter is due
-    await move({ productId: PRODUCT, variant: "75 мл", delta: 2, reason: "goods_in" });
-    await move({ productId: PRODUCT, variant: "75 мл", delta: -2, reason: "sale_web" });
+    /* Counted, then sold out — with nobody waiting yet, so no letter is due.
+       Every volume this product has, because one empty size out of three is
+       not a shelf that says «нет в наличии»: short of the whole ladder the
+       count has no word about the product and the manual override keeps it
+       (src/lib/inventory.ts stockStates, tests/stock-ladder-partial.test.ts). */
+    for (const size of ["75 мл", "250 мл", "500 мл"]) {
+      await move({ productId: PRODUCT, variant: size, delta: 2, reason: "goods_in" });
+      await move({ productId: PRODUCT, variant: size, delta: -2, reason: "sale_web" });
+    }
     await query("insert into product_overrides (product_id, stock) values ($1, 'in')", [PRODUCT]);
     await addStockAlert({ email: EMAIL, productId: PRODUCT });
 
@@ -617,6 +627,22 @@ describe("back in stock flow", () => {
     // …and the alert is still waiting for the day the shelf really has one
     const rows = await query<{ sent_at: string | null }>("select sent_at from stock_alerts");
     expect(rows.every((r) => r.sent_at === null)).toBe(true);
+  });
+
+  /* …and the mirror of it. One volume of three counted to zero is not a
+     sold-out product: the shop goes on showing it and the checkout goes on
+     selling the two volumes nobody has counted, so the person waiting has to
+     hear about it too. Staying quiet here would have been the sweep telling
+     a different story from the page the shopper is looking at. */
+  it("writes to the person waiting when only part of the ladder is counted out", async () => {
+    await setFlows({ backstock: true });
+    const { move } = await import("@/lib/inventory");
+    await move({ productId: PRODUCT, variant: "75 мл", delta: 2, reason: "goods_in" });
+    await move({ productId: PRODUCT, variant: "75 мл", delta: -2, reason: "sale_web" });
+    await query("insert into product_overrides (product_id, stock) values ($1, 'in')", [PRODUCT]);
+    await addStockAlert({ email: EMAIL, productId: PRODUCT });
+
+    expect((await sweepBackInStock()).sent).toBe(1);
   });
 
   it("sends on the count even when the manual override still says «мало»", async () => {
