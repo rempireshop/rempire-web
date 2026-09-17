@@ -90,6 +90,14 @@ function routes(): RouteCase[] {
   return [
     /* ---- public ---------------------------------------------------------- */
     { deep: true, name: "POST /api/orders/", path: "/api/orders/", method: "POST", exports: ["POST"], load: () => import("@/app/api/orders/route"), body: goodOrder },
+    /* «Этот заказ оплатили?» — the one bit the browser that placed an order may
+       ask about it, to decide whether the basket it parked on the way to the
+       bank may come back. `token` is an HMAC under SESSION_SECRET, so nothing
+       this file sends can ever verify and every case here is the same 404 —
+       which IS the property worth pinning: an order id on its own buys
+       nothing, not even the knowledge that the order exists. The 200 lives in
+       tests/held-cart-r22.test.ts. */
+    { deep: true, name: "POST /api/orders/status/", path: "/api/orders/status/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/orders/status/route"), body: { orderId: "11111111-1111-4111-8111-111111111111", token: "0123456789abcdef0123456789abcdef" } },
     { name: "POST /api/carts/", path: "/api/carts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/carts/route"), body: { email: "fuzz@example.com", lang: "RU", items: [{ id: PRODUCT.id, qty: 2, size: 0 }] } },
     { deep: true, name: "POST /api/promos/check/", path: "/api/promos/check/", method: "POST", exports: ["POST"], load: () => import("@/app/api/promos/check/route"), body: { code: "FUZZ10", subtotal: 100, shipping: 5 } },
     { deep: true, name: "POST /api/giftcards/check/", path: "/api/giftcards/check/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/giftcards/check/route"), body: { code: "RMP-ACDE-FGHJ" } },

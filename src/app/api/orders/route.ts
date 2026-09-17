@@ -22,6 +22,7 @@ import { recordMarketingConsent } from "@/lib/consent";
 import { getCustomer, normalizeEmail, sessionEmail } from "@/lib/customers";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import { createOrder, OrderError } from "@/lib/orders";
+import { orderStatusToken } from "@/lib/payments/order-status";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -134,9 +135,22 @@ export async function POST(req: Request) {
               sent: !!inv.sentAt,
             }
           : undefined;
+        /* `statusToken` — the one thing the browser that placed this order
+           may later prove about it: that it is allowed to ask whether the
+           order was paid (POST /api/orders/status/). It is an HMAC of the id
+           under SESSION_SECRET, not a second id, so it gives this answer away
+           to nobody else and unlocks nothing but that one bit. The shop parks
+           it beside the basket it is about to send to the bank (holdCart() in
+           public/shop2/app.js) — see src/lib/payments/order-status.ts for
+           what it is for. "" on a shop with no SESSION_SECRET, which the shop
+           reads as «there is nothing to ask with» and simply does not ask. */
         return {
           status: 201,
-          body: { ok: true, orderId: order.id, number: order.number, total: order.total, ...(invoice ? { invoice } : {}) },
+          body: {
+            ok: true, orderId: order.id, number: order.number, total: order.total,
+            statusToken: orderStatusToken(order.id),
+            ...(invoice ? { invoice } : {}),
+          },
         };
       } catch (err) {
         /* Caught here rather than thrown on: a refusal is an answer, and

@@ -198,7 +198,16 @@ function openTag(name, attrsRaw) {
   }
   let out = "<a";
   const pid = String(attrs["data-product"] || "").trim();
-  if (PRODUCT_ID_RE.test(pid)) out += ` data-product="${pid}"`;
+  if (PRODUCT_ID_RE.test(pid)) {
+    out += ` data-product="${pid}"`;
+    /* …and whether the price is stored in the marker or filled in as the page
+       is written — the twin of the same two lines in src/lib/blog.ts openTag().
+       This one earns its keep rather than merely mirroring: fillBlogCardPrices()
+       in tools/prerender-shop2.mjs matches on this very attribute, so dropping
+       it here would silently prerender every new-shape card with no price at
+       all. */
+    if (String(attrs["data-price"] || "").trim().toLowerCase() === "live") out += ' data-price="live"';
+  }
   const href = attrs.href ? safeUrl(attrs.href) : null;
   if (href) {
     out += ` href="${escapeUrlAttr(href)}"`;

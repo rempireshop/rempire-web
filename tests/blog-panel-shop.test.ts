@@ -283,6 +283,7 @@ function clean(node: Node, opts: { cards: boolean; live?: string[] }): string {
     ${sliceVar("BLOG_FIG")}
     ${slice("esc")}
     ${slice("blogFigOf")}
+    ${slice("blogLivePrice")}
     ${slice("blogImgUrl")}
     ${slice("blogSafeUrl")}
     function blogProductHTML(id) { return LIVE.indexOf(id) < 0 ? "" : '<button data-go-product="' + id + '"></button>'; }
@@ -295,9 +296,14 @@ function clean(node: Node, opts: { cards: boolean; live?: string[] }): string {
 }
 
 const OIL = "proraso-beard-oil-azur-lime-30ml";
-/** What «Товар» leaves in the body: the words and the price as they were then. */
+/** What «Товар» left in the body until 17.09.2026: the words and the price as
+ *  they were on the day it was pressed. Every article published before that
+ *  is in this shape, and stays in it. */
 const marker = (id: string) =>
   el("A", { "data-product": id, href: "/shop2/p/" + id + "/" }, [text("Proraso Beard Oil — 12,90 €")]);
+/** …and what it leaves now: the words, and a marker where the price was. */
+const liveMarker = (id: string) =>
+  el("A", { "data-product": id, "data-price": "live", href: "/shop2/p/" + id + "/" }, [text("Proraso Beard Oil")]);
 
 describe("an inline product card on the storefront", () => {
   it("becomes the live card while the product is on the shelf", () => {
@@ -322,6 +328,32 @@ describe("an inline product card on the storefront", () => {
     expect(clean(link, { cards: true })).toBe('<a href="https://example.com/a" target="_blank" rel="noopener noreferrer">сайт</a>');
     // the editor cleans the same body with cards off — the owner must still see his card
     expect(clean(marker(OIL), { cards: false })).toContain(`data-product="${OIL}"`);
+  });
+
+  /* The price inside the text stopped being stored on 17.09.2026 — it is
+     filled in by whoever renders the page. The two shapes live side by side
+     for good: the storefront rebuilds the card from the catalogue either way,
+     and the editor must hand back whichever shape it was given. */
+  it("keeps the price-free marker whole when the editor cleans the body", () => {
+    const out = clean(liveMarker(OIL), { cards: false });
+    expect(out).toContain(`data-product="${OIL}"`);
+    expect(out).toContain('data-price="live"');
+    expect(out).toContain("Proraso Beard Oil");
+    expect(out).not.toContain("€");
+  });
+
+  it("is the same live card on the storefront, whichever shape the marker is", () => {
+    const card = `<button data-go-product="${OIL}"></button>`;
+    expect(clean(liveMarker(OIL), { cards: true, live: [OIL] })).toBe(card);
+    expect(clean(marker(OIL), { cards: true, live: [OIL] })).toBe(card);
+  });
+
+  it("writes no data-price where there was none, and none on an ordinary link", () => {
+    expect(clean(marker(OIL), { cards: false })).not.toContain("data-price");
+    // `data-price` means nothing without a product: it is not an attribute
+    // anybody may put on a link in an article
+    const link = el("A", { "data-price": "live", href: "https://example.com/a" }, [text("сайт")]);
+    expect(clean(link, { cards: false })).not.toContain("data-price");
   });
 });
 

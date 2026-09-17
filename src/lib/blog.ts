@@ -324,7 +324,7 @@ export function markdownToHtml(md: string): string {
  * write into, so nothing may be trusted about its shape by the time it is
  * read back.
  *
- *   kept, with attributes:  a[href, data-product]   img[src, alt]
+ *   kept, with attributes:  a[href, data-product, data-price]   img[src, alt]
  *                           figure[data-fig]
  *   kept, bare:             p h2 h3 strong em ul ol li blockquote br
  *   unwrapped:              everything else — the tag goes, its text stays
@@ -446,7 +446,16 @@ function openTag(name: string, attrsRaw: string): string | null {
      the prerendered page and in a feed reader. */
   let out = "<a";
   const pid = String(attrs["data-product"] || "").trim();
-  if (PRODUCT_ID_RE.test(pid)) out += ` data-product="${pid}"`;
+  if (PRODUCT_ID_RE.test(pid)) {
+    out += ` data-product="${pid}"`;
+    /* …and, since 17.09.2026, whether the price belongs to the marker or to
+       the moment it is read. One word, `live`, and nothing else is written —
+       the same discipline data-fig is held to. Absent means the old shape:
+       the price is literal text inside the <a>, frozen on the day the
+       article was written. Both are permanent; see the long note beside
+       fillBlogCardPrices() in src/lib/seo-head.mjs for why. */
+    if (String(attrs["data-price"] || "").trim().toLowerCase() === "live") out += ' data-price="live"';
+  }
   const href = attrs.href ? safeUrl(attrs.href) : null;
   if (href) {
     out += ` href="${escapeUrlAttr(href)}"`;
