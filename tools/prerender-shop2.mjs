@@ -297,8 +297,19 @@ try {
     throw new Error("the lifted dictionary does not translate — check the app.js slices");
   }
 } catch (e) {
-  console.warn("! " + e.message + "\n! falling back to Russian text in every language");
-  trText = s => s;
+  /* FATAL, not a warning. Writing 542 Estonian and English pages in Russian is
+     worse than writing none: the pages look finished, and check-prerender
+     passes them because it validates structure — <html lang>, hreflang,
+     canonicals, JSON-LD — and never asserts that a word was translated. The
+     only signal was one line of stdout starting "! ", which nobody reads on a
+     green build.
+
+     Found 17.09.2026: a refactor moved trText out of the slice, the smoke
+     assertion below threw into this same catch, and the tool reported
+     "813 pages written" and exited 0 with every translated page in Russian. */
+  console.error("x " + e.message);
+  console.error("x refusing to write: every ET and EN page would carry Russian text");
+  process.exit(1);
 }
 const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s), code, !!allowName));
 
