@@ -173,6 +173,10 @@ type RawRow = {
   payment: unknown;
   status: string;
   channel?: string | null;
+  /* The rate this order was sold under, stamped at creation
+     (db/migrations/190_order_vat_rate.sql). Absent when the column has not
+     landed yet; null on every order written before it did. */
+  vat_rate?: string | number | null;
   company?: unknown;
   invoice?: unknown;
 };
@@ -182,35 +186,51 @@ type RawRow = {
  *  refunded, which is still worth a line so the accountant sees the reversal). */
 const REPORTABLE_STATUSES = ["paid", "shipped", "delivered", "refunded"];
 
-let channelColCache: { at: number; has: boolean } | null = null;
-const CHANNEL_CACHE_MS = 5 * 60_000;
+const orderColCache = new Map<string, { at: number; has: boolean }>();
+const COLUMN_CACHE_MS = 5 * 60_000;
 
 /**
- * Whether `orders.channel` exists yet. A plain information_schema lookup
+ * Whether a column of `orders` exists yet. A plain information_schema lookup
  * rather than "run the query and catch the error" — an explicit existence
  * check cannot leave a failed statement's connection state to guess about,
- * and it means the very same SQL runs whether or not the inventory agent's
- * POS work has landed (docs/assistant-work.md has the full story).
+ * and it means the very same SQL runs whether or not the migration that adds
+ * the column has landed (docs/assistant-work.md has the full story).
+ *
+ * Two callers, for two columns that arrived from two different migration
+ * ranges: `channel` (091, the inventory agent's POS work) and `vat_rate`
+ * (190, below). Both are read by an export the accountant runs on a schedule,
+ * and neither is worth a 503 on a deployment that is one migration behind.
  */
-export async function ordersHasChannelColumn(): Promise<boolean> {
+async function ordersHasColumn(column: string): Promise<boolean> {
   const now = Date.now();
-  if (channelColCache && now - channelColCache.at < CHANNEL_CACHE_MS) return channelColCache.has;
+  const hit = orderColCache.get(column);
+  if (hit && now - hit.at < COLUMN_CACHE_MS) return hit.has;
   let has = false;
   try {
     const rows = await query<{ column_name: string }>(
-      `select column_name from information_schema.columns where table_name = 'orders' and column_name = 'channel'`,
+      `select column_name from information_schema.columns where table_name = 'orders' and column_name = $1`,
+      [column],
     );
     has = rows.length > 0;
   } catch {
     has = false;
   }
-  channelColCache = { at: now, has };
+  orderColCache.set(column, { at: now, has });
   return has;
 }
 
+export function ordersHasChannelColumn(): Promise<boolean> {
+  return ordersHasColumn("channel");
+}
+
+/** Whether `orders.vat_rate` exists yet — db/migrations/190_order_vat_rate.sql. */
+export function ordersHasVatRateColumn(): Promise<boolean> {
+  return ordersHasColumn("vat_rate");
+}
+
 /** Tests only — the cache would otherwise survive across a migrate/drop in the same process. */
-export function resetChannelColumnCache(): void {
-  channelColCache = null;
+export function resetOrderColumnCache(): void {
+  orderColCache.clear();
 }
 
 function jsonOf<T>(v: unknown, fallback: T): T {
@@ -255,21 +275,62 @@ function refundedOf(payment: unknown, status: string, total: number): number {
   return Math.min(total, Math.max(0, recorded, whole));
 }
 
-function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
+/**
+ * The VAT rate this one row is reported at — three sources, in the order of
+ * how much authority each has over what the shop actually charged.
+ *
+ * NONE of them is the shop's live `settings.vat_rate`, and that is the whole
+ * point of this function. Until 17.09.2026 the live setting was read once per
+ * request and stamped onto every row of whatever month was asked for, so the
+ * day Estonia moves the rate and the owner corrects the setting, every month
+ * already filed re-exports at the NEW rate — March's sheet and April's copy of
+ * March's sheet disagree, and nothing on either says which one the tax office
+ * has. The rate moved twice in two years (20 → 22 % on 1 January 2024, 22 →
+ * 24 % on 1 July 2025), so this is a thing that happens, not a thing that
+ * could.
+ *
+ *   1. `invoice.vatRate` — the rate the invoice was issued at, frozen in the
+ *      record (src/lib/invoices.ts InvoiceRecord.vatRate). It wins because it
+ *      is the figure PRINTED on a PDF now sitting in the buyer's accounts:
+ *      whatever else the shop believes, the export must not contradict a
+ *      document that has already left the building.
+ *   2. `orders.vat_rate` — the rate in force when the order was created,
+ *      stamped once by createOrder() (db/migrations/190_order_vat_rate.sql),
+ *      the same way `pricing_tier` freezes the tier the customer held that
+ *      moment. Every order written from 190 onwards has one.
+ *   3. DEFAULT_VAT_RATE — the fallback, and the only case worth arguing about.
+ *
+ * WHY THE FALLBACK IS A CONSTANT. An order written before 190 ran recorded
+ * nothing, and no honest reconstruction of its rate exists inside this
+ * codebase: the prices are VAT-INCLUSIVE, so the total is the same number at
+ * any rate and the row cannot be asked what tax was in it. The choice is
+ * therefore only about which wrong-in-principle number to print, and there is
+ * exactly one property that matters — it must not MOVE. A compile-time
+ * constant gives that: re-export a filed month in a year, after any number of
+ * settings edits, and byte for byte the same sheet comes out. `settings.
+ * vat_rate` gives the opposite, and is the defect being fixed.
+ *
+ * It is also very probably right. 190 ships on 17.09.2026, DEFAULT_VAT_RATE is
+ * 24, and 24 % has been Estonia's standard rate since 1 July 2025 — so every
+ * order that can reach this branch and still matter for a filing was sold at
+ * 24 %. Orders from before that date would be restated, and this is the honest
+ * limit of the fix: it makes future exports permanent and stops today's
+ * setting rewriting the past, but it cannot recover a rate nobody wrote down.
+ * A row is never silently stamped with whatever the panel happens to say now.
+ */
+function rateFor(r: RawRow, invoiceRate: unknown): number {
+  if (invoiceRate != null) return resolveVatRate(invoiceRate);
+  if (r.vat_rate != null) return resolveVatRate(r.vat_rate);
+  return DEFAULT_VAT_RATE;
+}
+
+function toReportRow(r: RawRow): ReportOrderRow {
   const shipping = jsonOf<{ country?: string; method?: string }>(r.shipping, {});
   const payment = jsonOf<{ provider?: string; ref?: string; refunds?: unknown }>(r.payment, {});
   const company = jsonOf<{ name?: string; regCode?: string; vatNumber?: string } | null>(r.company, null) ?? {};
   const invoice = jsonOf<{ number?: string; dueAt?: string; vatRate?: unknown } | null>(r.invoice, null) ?? {};
   const total = num(r.total);
-  /* An order that carries an invoice carries the rate that invoice was issued
-     at, frozen in the record (src/lib/invoices.ts InvoiceRecord.vatRate) — and
-     that is the figure printed on the PDF in the company's hands. `vatRate`
-     here is the shop's LIVE setting, so without this line every export of a
-     past month would be restated at today's rate the day Estonia changes it
-     (22 → 24 % on 1 July 2025 already happened once), and the accountant's
-     sheet would disagree with the invoices themselves. An order with no
-     invoice has no frozen rate and takes the live one, as before. */
-  const rate = invoice.vatRate == null ? vatRate : resolveVatRate(invoice.vatRate);
+  const rate = rateFor(r, invoice.vatRate);
   const { net, vat } = vatSplit(total, rate);
   return {
     number: r.number,
@@ -310,8 +371,8 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
  *  code still work when the column is absent" question is a pure, DB-free
  *  test (tests/reports.test.ts) rather than one that has to drop a column
  *  `orders.ts`'s own createOrder() now hard-depends on existing. */
-export function reportOrderColumns(hasChannel: boolean): string {
-  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, loyalty_discount, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}`;
+export function reportOrderColumns(hasChannel: boolean, hasVatRate = false): string {
+  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, loyalty_discount, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}${hasVatRate ? ", vat_rate" : ""}`;
 }
 
 /**
@@ -322,16 +383,23 @@ export function reportOrderColumns(hasChannel: boolean): string {
  * session's zone. That is what makes the window the owner's month whatever the
  * database is set to, and what makes `>= from` and `< to` mean the same thing
  * as the `date` column each row is reported under (shopDay, above).
+ *
+ * TAKES NO VAT RATE, deliberately. It used to take the shop's live
+ * `settings.vat_rate` and hand it to every row, which is how a filed month
+ * came to be restated the moment the owner corrected the setting. Each row now
+ * answers for itself (rateFor, above), and removing the parameter is what
+ * makes that permanent: there is no longer a live rate in scope for a future
+ * edit to pass back in.
  */
-export async function listReportOrders(from: string, to: string, vatRate: number): Promise<ReportOrderRow[]> {
-  const hasChannel = await ordersHasChannelColumn();
+export async function listReportOrders(from: string, to: string): Promise<ReportOrderRow[]> {
+  const [hasChannel, hasVatRate] = await Promise.all([ordersHasChannelColumn(), ordersHasVatRateColumn()]);
   const rows = await query<RawRow>(
-    `select ${reportOrderColumns(hasChannel)} from orders
+    `select ${reportOrderColumns(hasChannel, hasVatRate)} from orders
      where status = any($1) and created_at >= $2 and created_at < $3
      order by created_at asc, number asc`,
     [REPORTABLE_STATUSES, shopDayStart(from), shopDayStart(to)],
   );
-  return rows.map((r) => toReportRow(r, vatRate));
+  return rows.map(toReportRow);
 }
 
 /**

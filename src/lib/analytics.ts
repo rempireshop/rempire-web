@@ -233,10 +233,29 @@ async function qBrandRevenue(from: Date, to: Date) {
   return rows.map((r) => ({ brand: r.brand, revenue: money(r.revenue), orders: int(r.orders) }));
 }
 
+/**
+ * The «Путь до покупки» bars, and the two numbers «Из корзины в заказ» is
+ * divided from.
+ *
+ * `converted_sessions` / `prev_converted_sessions` are NOT the same as
+ * `purchased_sessions`, and the difference is what keeps the KPI honest. Each
+ * counts sessions that bought inside the window AND had also opened the shop
+ * inside the same window — the `exists` clause. Without it, a session that
+ * arrived at 23:55 and paid at 00:05 is counted in the numerator of a window
+ * whose denominator never saw it, and on a shop with a handful of orders a
+ * month one such session is enough to put the ratio over 100 %. With it the
+ * numerator is a subset of `sessions` by construction, so the figure cannot
+ * exceed 100 % — it is not clamped afterwards, it is simply never able to.
+ *
+ * `purchased_sessions` keeps its old meaning because the funnel bar it feeds
+ * («Купили») is answering a different question — how many sessions bought,
+ * full stop — and clipping the straddlers out of it would under-report sales.
+ */
 async function qFunnel(from: Date, to: Date, prevFrom: Date) {
   const rows = await query<{
     sessions: string; viewed_product: string; added_to_cart: string; opened_checkout: string;
     purchased_sessions: string; prev_sessions: string;
+    converted_sessions: string; prev_converted_sessions: string;
   }>(
     `select
        count(distinct sid) filter (where type = 'view' and at >= $1 and at < $2) as sessions,
@@ -244,7 +263,19 @@ async function qFunnel(from: Date, to: Date, prevFrom: Date) {
        count(distinct sid) filter (where type = 'add_to_cart' and at >= $1 and at < $2) as added_to_cart,
        count(distinct sid) filter (where type = 'checkout' and at >= $1 and at < $2) as opened_checkout,
        count(distinct sid) filter (where type = 'purchase' and sid <> 'server' and at >= $1 and at < $2) as purchased_sessions,
-       count(distinct sid) filter (where type = 'view' and at >= $3 and at < $1) as prev_sessions
+       count(distinct sid) filter (where type = 'view' and at >= $3 and at < $1) as prev_sessions,
+       (select count(distinct p.sid) from events p
+         where p.type = 'purchase' and p.sid is not null and p.sid <> 'server'
+           and p.at >= $1 and p.at < $2
+           and exists (select 1 from events v
+                        where v.sid = p.sid and v.type = 'view' and v.at >= $1 and v.at < $2)
+       ) as converted_sessions,
+       (select count(distinct p.sid) from events p
+         where p.type = 'purchase' and p.sid is not null and p.sid <> 'server'
+           and p.at >= $3 and p.at < $1
+           and exists (select 1 from events v
+                        where v.sid = p.sid and v.type = 'view' and v.at >= $3 and v.at < $1)
+       ) as prev_converted_sessions
      from events
      where at >= $3 and at < $2 and sid is not null
        and type in ('view','product','add_to_cart','checkout','purchase')`,
@@ -254,6 +285,7 @@ async function qFunnel(from: Date, to: Date, prevFrom: Date) {
   return {
     sessions: int(r?.sessions), product: int(r?.viewed_product), addToCart: int(r?.added_to_cart),
     checkout: int(r?.opened_checkout), purchase: int(r?.purchased_sessions), prevSessions: int(r?.prev_sessions),
+    converted: int(r?.converted_sessions), prevConverted: int(r?.prev_converted_sessions),
   };
 }
 
@@ -459,8 +491,36 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
 
   const aov = ordersSummary.orders > 0 ? money(ordersSummary.revenue / ordersSummary.orders) : 0;
   const prevAov = ordersSummary.prevOrders > 0 ? money(ordersSummary.prevRevenue / ordersSummary.prevOrders) : 0;
-  const conversion = funnel.sessions > 0 ? ordersSummary.orders / funnel.sessions : 0;
-  const prevConversion = funnel.prevSessions > 0 ? ordersSummary.prevOrders / funnel.prevSessions : 0;
+  /* «Из корзины в заказ», under the caption «Сколько человек из каждых 100
+     зашедших в магазин что-то купили».
+
+     Until 17.09.2026 this divided ordersSummary.orders — EVERY paid order —
+     by funnel.sessions, and the two sides were not counting the same people:
+
+       · the numerator had no channel filter, so a sale rung up on the salon
+         till (channel 'pos', db/migrations/091_pos_channel.sql) counted as
+         somebody who "came into the shop and bought", though that person
+         never opened the site at all;
+       · the denominator is distinct sids on 'view' events, and every 'view'
+         is written by track() in public/shop2/app.js, which returns at its
+         first line without analytics consent. A shopper who declines the
+         banner, or never answers it, buys without ever being counted as
+         having arrived.
+
+     Both errors push the same way — numerator too big, denominator too small
+     — so the figure read above the truth, and with a till sale or two in a
+     quiet month it could read above 100 %, under a caption that says it is a
+     count out of every hundred. Both sides now come from the same consent-
+     gated event stream and the same session identity, which is what makes the
+     caption true as written; the caption is therefore left exactly as it is.
+
+     The number this reports is lower than the old one, and that is the point:
+     it is the share of the people the shop can actually SEE arriving who went
+     on to buy. It ignores salon sales, and it ignores anyone who declined
+     analytics — neither is visible to it, and the honest response to not
+     being able to see someone is not to count them on one side only. */
+  const conversion = funnel.sessions > 0 ? funnel.converted / funnel.sessions : 0;
+  const prevConversion = funnel.prevSessions > 0 ? funnel.prevConverted / funnel.prevSessions : 0;
 
   return {
     range, from: from.toISOString(), to: to.toISOString(),

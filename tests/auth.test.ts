@@ -1,11 +1,18 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  ADMIN_ACCOUNT,
   ADMIN_COOKIE,
   hashPassword,
   isAdmin,
+  LOGIN_DELAY_MAX_MS,
+  loginDelayMs,
   makeSessionToken,
+  noteLoginFailure,
+  pendingLoginDelayMs,
   requireAdmin,
+  resetLoginDelays,
   resetRateLimits,
+  setLoginSleeper,
   verifyPassword,
   verifySessionToken,
 } from "@/lib/auth";
@@ -135,23 +142,103 @@ describe("admin session", () => {
     expect((await me(req(cleared.split(";")[0]))).status).toBe(401);
   });
 
-  it("stops after five wrong passwords a minute", async () => {
-    resetRateLimits();
+  /* ---------- the failed-login backoff -------------------------------------
+   *
+   * What was here until 17.09.2026: "stops after five wrong passwords a
+   * minute", asserting [401 ×5, 429, 429] from rateLimit(). The assertion
+   * passed and the behaviour it described did not exist — one Map in one
+   * serverless instance, a fresh budget of five on every cold start and on
+   * every instance the platform spun up beside it. The test proved the Map
+   * worked, which was never the question. What follows tests the property the
+   * shop actually needs: a guesser is slowed down more the longer it guesses,
+   * and the owner is not. */
+
+  it("the delay is nothing for a typo, then doubles, and stops below the function budget", () => {
+    // the owner's first two misses are free — a soft keyboard is not an attack
+    expect(loginDelayMs(0)).toBe(0);
+    expect(loginDelayMs(1)).toBe(0);
+    expect(loginDelayMs(2)).toBe(0);
+
+    // from the third it doubles every time
+    const ladder = [3, 4, 5, 6, 7, 8].map(loginDelayMs);
+    expect(ladder).toEqual([500, 1000, 2000, 4000, 8000, 16000]);
+    for (let i = 1; i < ladder.length; i++) expect(ladder[i]).toBeGreaterThan(ladder[i - 1]);
+
+    // …and then flattens at the ceiling instead of running away
+    expect(loginDelayMs(9)).toBe(LOGIN_DELAY_MAX_MS);
+    expect(loginDelayMs(50)).toBe(LOGIN_DELAY_MAX_MS);
+    expect(loginDelayMs(100_000)).toBe(LOGIN_DELAY_MAX_MS);
+
+    /* The whole wait happens INSIDE the request, so a ceiling above the
+       platform's budget would not throttle anybody — it would kill the
+       function and answer 500. `maxDuration` tops out at 60 in this repo and
+       the login route declares it. */
+    expect(LOGIN_DELAY_MAX_MS).toBeLessThan(60_000);
+  });
+
+  it("makes each wrong password wait longer than the last, and lets the right one straight in", async () => {
+    resetLoginDelays();
     const { POST: login } = await import("@/app/api/admin/login/route");
-    const attempt = () =>
+
+    // the seam from src/lib/auth.ts: record what the route asked to wait for,
+    // instead of actually spending half a minute climbing the ladder
+    const waited: number[] = [];
+    setLoginSleeper(async (ms) => { waited.push(ms); });
+
+    const attempt = (password: string) =>
       login(
         new Request("https://rempireshop.com/api/admin/login/", {
           method: "POST",
           headers: { "content-type": "application/json", "x-forwarded-for": "198.51.100.7" },
-          body: JSON.stringify({ password: "nope" }),
+          body: JSON.stringify({ password }),
         }),
       );
 
-    const codes: number[] = [];
-    for (let i = 0; i < 7; i++) codes.push((await attempt()).status);
-    expect(codes.slice(0, 5)).toEqual([401, 401, 401, 401, 401]);
-    expect(codes.slice(5)).toEqual([429, 429]);
-    resetRateLimits();
+    try {
+      for (let i = 0; i < 6; i++) expect((await attempt("nope")).status).toBe(401);
+
+      /* Six wrong passwords, and only three waits: a zero delay is not a
+         zero-length sleep, it is no sleep at all (sleepForLogin short-circuits
+         it), so the owner's first two typos never touch a timer. */
+      expect(waited).toEqual([500, 1000, 2000]);
+      for (let i = 1; i < waited.length; i++) expect(waited[i]).toBeGreaterThan(waited[i - 1]);
+
+      // no 429 anywhere: the panel can no longer be told about a limit that
+      // is not the one being enforced (admLogin() in public/shop2/app.js
+      // renders «Слишком много попыток — подождите минуту.» on 429 alone)
+      const refused = await attempt("nope");
+      expect(refused.status).toBe(401);
+      expect(await refused.json()).toEqual({ ok: false, error: "bad_password" });
+
+      /* THE POINT: the owner mistypes his own password repeatedly and then
+         gets it right. He is made to wait; he is never locked out. */
+      const ok = await attempt(PASSWORD);
+      expect(ok.status).toBe(200);
+      expect(ok.headers.get("set-cookie") || "").toContain(`${ADMIN_COOKIE}=v1.`);
+
+      // and the ladder is back at the bottom, so his next visit is free
+      expect(pendingLoginDelayMs(ADMIN_ACCOUNT)).toBe(0);
+      const spent = waited.length;
+      expect((await attempt("nope")).status).toBe(401);
+      expect(waited.length, "the attempt after a success must not wait at all").toBe(spent);
+    } finally {
+      setLoginSleeper(null);
+      resetLoginDelays();
+    }
+  });
+
+  it("forgets the ladder after an hour of quiet", () => {
+    resetLoginDelays();
+    const t0 = Date.parse("2026-09-17T10:00:00.000Z");
+    for (let i = 0; i < 9; i++) noteLoginFailure(ADMIN_ACCOUNT, t0);
+    expect(pendingLoginDelayMs(ADMIN_ACCOUNT, t0)).toBe(LOGIN_DELAY_MAX_MS);
+
+    // 59 minutes later the shop still remembers
+    expect(pendingLoginDelayMs(ADMIN_ACCOUNT, t0 + 59 * 60_000)).toBe(LOGIN_DELAY_MAX_MS);
+    // an hour later it does not — otherwise this morning's typos would still
+    // be charging the owner tonight, for no security anybody could name
+    expect(pendingLoginDelayMs(ADMIN_ACCOUNT, t0 + 61 * 60_000)).toBe(0);
+    resetLoginDelays();
   });
 
   /* A SESSION_SECRET of ten characters is not a secret this shop can sign with

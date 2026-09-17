@@ -15,7 +15,7 @@
  * See docs/testing.md § «Фаззинг API».
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetRateLimits } from "@/lib/auth";
+import { LOGIN_DELAY_MAX_MS, resetLoginDelays, resetRateLimits, setLoginSleeper } from "@/lib/auth";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
 import { PLAN as TEST_PLAN } from "@/lib/testplan";
 import { setupDb, teardownDb } from "./helpers";
@@ -393,7 +393,20 @@ describe("API fuzzing", () => {
     resetRateLimits();
     resetPayRateLimits();
     resetIps();
+    resetLoginDelays();
   });
+
+  /* Every hostile body aimed at POST /api/admin/login/ that is valid JSON is,
+     by definition, a wrong password, so this file climbs the failed-login
+     ladder (src/lib/auth.ts) dozens of times per run. The wait is recorded
+     rather than spent — at the real timings this one route would sleep for
+     minutes and blow the 30-second budget — and what the fuzzer then asserts
+     is the property that actually matters to it: no sequence of hostile
+     input, however long, can drive the delay past the ceiling and turn the
+     route's own throttle into a killed function. */
+  const loginWaits: number[] = [];
+  beforeAll(() => setLoginSleeper(async (ms) => { loginWaits.push(ms); }));
+  afterAll(() => setLoginSleeper(null));
 
   it("survives every hostile body shape on every route", async () => {
     const v = violations();
@@ -731,5 +744,12 @@ describe("API fuzzing", () => {
     expect((await mail.GET(makeRequest("/api/e2e/mail/", { cookie: admin }))).status).toBe(200);
     setEnv("NODE_ENV", nodeEnv);
     setEnv("E2E_BOOTSTRAP", undefined);
+  });
+
+  /* Last, on purpose: it reads what every test above accumulated. */
+  it("cannot be made to sleep past the login route's own function budget", () => {
+    expect(loginWaits.length).toBeGreaterThan(0); // the corpus really does reach the password
+    expect(Math.max(...loginWaits)).toBeLessThanOrEqual(LOGIN_DELAY_MAX_MS);
+    expect(LOGIN_DELAY_MAX_MS).toBeLessThan(60_000); // `maxDuration` on the route
   });
 });

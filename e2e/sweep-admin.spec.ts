@@ -46,14 +46,27 @@ const TABS: Array<[string, string]> = [
 test.describe("sweep — sign in", () => {
   test.use({ extraHTTPHeaders: ipHeaders(150) });
 
-  test("six wrong passwords are refused in Russian and then rate-limited; another address still works", async ({ page, browser }) => {
+  /* Was: "six wrong passwords … and then rate-limited". The sixth attempt used
+     to answer 429 from a per-IP Map that reset on every cold start, which the
+     panel rendered as «Слишком много попыток — подождите минуту.» — a promise
+     about a minute that nothing kept. Since 17.09.2026 a wrong password is a
+     plain, slow 401 and the throttle is a delay that grows, keyed on the
+     account (src/lib/auth.ts, «failed-login backoff»; the ladder's arithmetic
+     is asserted in tests/auth.test.ts).
+     THREE attempts here, not six, and that is the whole cost of this test:
+     the first two misses are free by design and the third is 500 ms, so the
+     spec that used to sit out a lockout now adds about half a second. What it
+     still has to prove is what the OWNER sees — a Russian refusal, a password
+     box that survives it, nothing leaking from behind the card — and that the
+     right password is never locked out, only made to wait. */
+  test("wrong passwords are refused in Russian, and the right one still gets in afterwards", async ({ page, browser }) => {
     const w = watch(page);
     await page.goto(shopUrl("", "/admin/"));
     await waitForLoginCard(page);
     await assertClean(page, w, "login card");
 
     const messages: string[] = [];
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 3; i++) {
       // The card is rebuilt from scratch by every render(), and a render that
       // lands between the keystrokes and the click leaves the field empty —
       // which the panel refuses locally, without ever calling the route, so
@@ -73,17 +86,22 @@ test.describe("sweep — sign in", () => {
       await expect(page.locator("[data-admpw]")).toBeVisible();
       await assertClean(page, w, `wrong password ${i}`);
     }
-    // src/lib/auth.ts rateLimit("login", ip, 5, 60_000): the first five are
-    // "wrong password", the sixth is the lockout — a different sentence.
-    expect(messages.slice(0, 5).every((m) => /парол/i.test(m)), `wrong-password message: ${messages[0]}`).toBe(true);
-    expect(messages[5], "the 6th attempt must say the shop is rate-limiting, not just repeat 'wrong password'")
-      .toMatch(/попыт|подожд/i);
+    /* Every refusal says the same thing, because there is only one thing to
+       say: the password was wrong. No attempt announces a limit — the panel
+       prints «Слишком много попыток — подождите минуту.» on a 429 alone
+       (admLogin() in public/shop2/app.js), and this route no longer produces
+       one, so the sentence about a minute can no longer appear at all. */
+    expect(messages.every((m) => /парол/i.test(m)), `wrong-password message: ${messages[0]}`).toBe(true);
+    expect(messages.some((m) => /попыт|подожд/i.test(m)),
+      "no attempt may claim a limit: the shop enforces a delay, not a lockout").toBe(false);
 
     // Nothing behind the card leaked while it refused.
     await expect(page.locator("[data-admtab]")).toHaveCount(0);
 
-    // A different address is a different caller for the limiter — the correct
-    // password there must still work while this one is locked out.
+    /* The ladder is keyed on the ACCOUNT, so changing address buys a guesser
+       nothing — and the owner is never locked out by one. The correct password
+       must still open the panel after those refusals; it is only made to
+       wait. */
     const other = await browser.newContext({ extraHTTPHeaders: ipHeaders(151) });
     const page2 = await other.newPage();
     const w2 = watch(page2);

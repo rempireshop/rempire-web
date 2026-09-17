@@ -1318,7 +1318,11 @@ customers; test-only doors for the e2e suite.
 `tools/hash-password.mjs`), cookie `rmp_admin = v1.<expiry>.<hmac>` signed with
 `SESSION_SECRET`, 30 days, httpOnly, SameSite=Lax; `requireAdmin()` on every
 `/api/admin/*` route except `login`, `logout`, `me`, `mail/preview` (enforced by
-`tests/fuzz-routes.test.ts`); login 5/min per IP (per-instance map);
+`tests/fuzz-routes.test.ts`); the login is throttled by a delay that doubles
+on consecutive wrong passwords, keyed on the account — not by a per-IP
+limit, which was a per-instance Map that reset on every cold start while the
+route and the panel both presented it as enforced (src/lib/auth.ts,
+«failed-login backoff»);
 `GET /api/admin/me/` reports `configured`. Customers: `rmp_cust` (§11). Test
 doors: `E2E_BOOTSTRAP=1` + non-production → `/api/e2e/bootstrap/` (migrate),
 `/api/e2e/gift-card/` and `/api/e2e/mail/` (both also `requireAdmin`);
@@ -1330,8 +1334,11 @@ fixed hash (`e2e/env.mjs`). Rate limits are in-memory per instance
 **How to test it.** `tests/auth.test.ts`, `tests/fuzz-routes.test.ts` (locks on
 every route, cookie forgery, cross-cookie), `tests/security-*.test.ts`,
 `tests/account-code-e2e-hook.test.ts`; e2e `security.spec.ts`, `sweep-admin.
-spec.ts` (six wrong passwords then 429). Manual: wrong password → «Неверный
-пароль»; six tries → «Слишком много попыток — подождите минуту.».
+spec.ts` (wrong passwords refused, the right one still gets in). Manual:
+every wrong password → «Неверный пароль», each answered a little later than
+the last. No lockout sentence any more: the panel prints «Слишком много
+попыток — подождите минуту.» only on a 429, and this route no longer
+returns one.
 
 **State today.** Works. Open from the audit: no session revocation (M6), per-
 instance limiters on a spoofable header (M3), sequential order numbers (L6),
