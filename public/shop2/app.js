@@ -2305,6 +2305,16 @@
       "+ Обложка": "+ Kaanepilt",
       "Обложка статьи": "Artikli kaanepilt",
       "Удалить обложку": "Kustuta kaanepilt",
+      /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
+      "В списке статей": "Artiklite loendis",
+      "В начале статьи": "Artikli alguses",
+      "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
+        "Nii näeb kaanepilti pood: see mahub aknasse tervikuna, külgedele jääb tühi väli. Kõige ühtlasemalt asetub lai foto 1200×630.",
+      /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
+      "Размер картинки": "Pildi suurus",
+      "Куда сдвинуть картинку": "Kuhu pilti nihutada",
+      "Во всю ширину": "Üle kogu laiuse",
+      "Слева": "Vasakul", "Справа": "Paremal", "Маленькая": "Väike",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "Foto telefonist või lõikelaualt, JPEG/PNG/WebP kuni 12 MB.",
       "вс": "P", "пн": "E", "вт": "T", "ср": "K", "чт": "N", "пт": "R", "сб": "L",
@@ -4899,6 +4909,16 @@
       "+ Обложка": "+ Cover",
       "Обложка статьи": "Article cover",
       "Удалить обложку": "Delete the cover",
+      /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
+      "В списке статей": "In the article list",
+      "В начале статьи": "At the top of the article",
+      "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
+        "This is how the shop will show the cover: it is fitted into the frame whole, with empty space left at the sides. A wide 1200×630 photo sits best.",
+      /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
+      "Размер картинки": "Picture size",
+      "Куда сдвинуть картинку": "Where to move the picture",
+      "Во всю ширину": "Full width",
+      "Слева": "On the left", "Справа": "On the right", "Маленькая": "Small",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "A photo from your phone or the clipboard, JPEG/PNG/WebP up to 12 MB.",
       "вс": "Su", "пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa",
@@ -10104,14 +10124,40 @@
   function blogUrl(slug) {
     return location.origin + blogPath(slug);
   }
+  /* ---- the cover's frame, in the two places a cover is shown --------------
+     The list tile and the top of the article fit the same picture into their
+     own box, and how they fit it — the box's proportions and whether the
+     picture is cropped to fill it or set inside it whole — is a CSS rule
+     (.blog__tileimg / .blog__cover in styles.css), not something written
+     here. This function is only the markup that puts a cover under those two
+     class names.
+
+     It matters that it is ONE function. The panel shows the owner what his
+     cover will look like in both places before he publishes (admBlogPreview
+     HTML), and it draws that preview by calling this — the same markup, under
+     the same two classes, against the same stylesheet, which the admin page
+     has loaded anyway. So the preview is not a picture of the rule, it IS the
+     rule: change .blog__cover to crop instead of fit and the preview starts
+     cropping in the same commit, with nothing to keep in step by hand. That
+     is the whole point — the owner's complaint was that the panel showed him
+     a 16:9 crop (.adm-cover__img, object-fit: cover) while the shop fits the
+     picture whole into a 1200×630 box, so the three pictures never agreed and
+     he had to publish to find out. */
+  var BLOG_COVER_CLS = { list: "blog__tileimg", post: "blog__cover" };
+  function blogCoverFrameHTML(where, url, alt) {
+    var cls = BLOG_COVER_CLS[where] || BLOG_COVER_CLS.post;
+    if (!url) {
+      // the list keeps the box and puts the tower in it; the article shows nothing
+      return where === "list" ? '<span class="' + cls + " " + cls + '--none">' + tower("blog__mark") + "</span>" : "";
+    }
+    return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + '\')" role="img" aria-label="' + esc(alt || "") + '"></span>';
+  }
   /* A real link (href), not a bare <a>: the pointer says «clickable», the
      keyboard reaches it, Ctrl/⌘-click opens a tab — a plain click is caught
      by the [data-go-blog] branch of the click handler and stays in the SPA. */
   function blogTileHTML(p) {
     return '<li><a class="card blog__tile" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">' +
-      (p.coverUrl
-        ? '<span class="blog__tileimg" style="background-image:url(\'' + esc(p.coverUrl) + '\')" role="img" aria-label="' + esc(p.coverAlt || p.title) + '"></span>'
-        : '<span class="blog__tileimg blog__tileimg--none">' + tower("blog__mark") + "</span>") +
+      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title) +
       '<span class="blog__tilebody">' +
         (p.publishedAt ? '<span class="muted blog__date">' + blogDate(p.publishedAt) + "</span>" : "") +
         '<span class="blog__tiletitle">' + esc(p.title) + "</span>" +
@@ -10189,9 +10235,7 @@
      the body is on its way the page already wears the part the list knows,
      and the body's arrival changes nothing above it. */
   function blogHeadHTML(p) {
-    return (p.coverUrl
-        ? '<span class="blog__cover" style="background-image:url(\'' + esc(p.coverUrl) + '\')" role="img" aria-label="' + esc(p.coverAlt || p.title) + '"></span>'
-        : "") +
+    return blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title) +
       '<h1 class="display h1">' + esc(p.title) + "</h1>" +
       '<div class="blog__meta">' +
         (p.publishedAt ? '<span class="muted">' + blogDate(p.publishedAt) + "</span>" : "") +
@@ -10301,6 +10345,19 @@
     BLOCKQUOTE: 1, FIGURE: 1, BR: 1, A: 1, IMG: 1
   };
   var BLOG_ALIAS = { B: "STRONG", I: "EM", H1: "H2", H4: "H3", H5: "H3", H6: "H3" };
+  /* How wide a picture inside the text stands, and on which side the words
+     run down it — `data-fig` on the picture's own <figure>, written by the
+     four buttons the editor shows when a picture is tapped (admFigBarHTML).
+     A closed list of four words: anything else is not written, and a figure
+     with no `data-fig` — which is every picture in every article written
+     before these presets existed — renders exactly as it always did. Keep in
+     step with FIG_VALUES in src/lib/blog.ts (the server's own allowlist) and
+     with the `figure[data-fig]` rules in styles.css and admin.css. */
+  var BLOG_FIG = { full: 1, "half-left": 1, "half-right": 1, small: 1 };
+  function blogFigOf(v) {
+    var s = String(v || "").trim().toLowerCase();
+    return BLOG_FIG[s] ? s : "";
+  }
   var BLOG_TAGS_DROP = {
     SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, NOSCRIPT: 1,
     TEMPLATE: 1, SVG: 1, MATH: 1, HEAD: 1, TITLE: 1
@@ -10377,6 +10434,18 @@
     }
 
     var inner = blogCleanNodes(node, depth + 1, cards);
+    /* The picture's own block, and the one place a preset is stored. The
+       editor draws its control bar inside this figure as [data-figui], but
+       that layer never reaches here: blogBoxHtml() takes it out before the
+       box is read. Cleaning it out here too would be one guard too many —
+       it is a <div> of <button>s, which this allowlist unwraps into its
+       words, and words are exactly what must not end up in the article. So
+       the bar is removed where it is made, not where it is cleaned. */
+    if (tag === "figure") {
+      if (!inner.replace(/<br>/g, "").trim()) return "";
+      var fig = blogFigOf(node.getAttribute("data-fig"));
+      return fig ? '<figure data-fig="' + fig + '">' + inner + "</figure>" : "<figure>" + inner + "</figure>";
+    }
     if (tag === "a") {
       var pid = String(node.getAttribute("data-product") || "").trim();
       var isProduct = BLOG_PRODUCT_ID.test(pid);
@@ -12205,6 +12274,29 @@
     });
   }
   /** The box → the draft. Called after every keystroke and every insert. */
+  /**
+   * What the box holds, as the article — the picture controls taken out
+   * first.
+   *
+   * The size/move bar and the ring around the selected picture are a layer
+   * the panel lays over the text so that the controls can stand against the
+   * picture they belong to. They live inside the contenteditable for that
+   * reason alone, and they are not the article: every path that reads the box
+   * into the draft goes through here, so the bar cannot reach S, the save,
+   * the shop, the prerendered copy or a translation. The fast path returns
+   * innerHTML untouched, which is every keystroke — the clone only happens
+   * while a picture is actually selected.
+   */
+  function blogBoxHtml(el) {
+    if (!el) return "";
+    if (!el.querySelector("[data-figui], .is-figon")) return el.innerHTML;
+    var copy = el.cloneNode(true), i;
+    var ui = copy.querySelectorAll("[data-figui]");
+    for (i = 0; i < ui.length; i++) if (ui[i].parentNode) ui[i].parentNode.removeChild(ui[i]);
+    var on = copy.querySelectorAll(".is-figon");
+    for (i = 0; i < on.length; i++) on[i].removeAttribute("class");
+    return copy.innerHTML;
+  }
   function blogSync() {
     var el = blogBox();
     var rd = richDraft();   // the article, or the newsletter — whichever owns the box on screen
@@ -12219,7 +12311,7 @@
        and the English one was gone with nothing said. Stamped markup makes
        that impossible: the box says what it is holding. */
     var L = blogBoxLang(el) || rd.lang;
-    rd.body[L] = el.innerHTML;
+    rd.body[L] = blogBoxHtml(el);
     // the tab's own «готово · с товарами», without a render()
     if (rd.kind === "news") newsPaintState(); else blogPaintState();
   }
@@ -12257,7 +12349,7 @@
     var tagsEl = document.querySelector("[data-blogtags]");
     if (tagsEl) d.tagsText = tagsEl.value;
     var box = blogBox(), bl = blogBoxLang(box);
-    if (box && bl) d.body[bl] = box.innerHTML;
+    if (box && bl) d.body[bl] = blogBoxHtml(box);
   }
   function blogExec(cmd, arg) {
     if (!blogSelRestore()) return;
@@ -12354,12 +12446,181 @@
     S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = "";
     blogToolDraw(false);
   }
-  /** <figure><img></figure> — a picture is a block, never inline in a sentence. */
+  /** <figure><img></figure> — a picture is a block, never inline in a sentence.
+      It arrives at «во всю ширину», which is both the sensible default and the
+      one preset that has a button already lit when the owner taps the picture. */
   function blogInsertImage(url) {
     var u = blogImgUrl(url);
     if (!u) { toast("Ссылка на картинку должна начинаться с https://"); return; }
     blogToolClose();
-    blogInsertHtml('<figure><img src="' + esc(u) + '" alt="" loading="lazy"></figure><p><br></p>');
+    blogInsertHtml('<figure data-fig="full"><img src="' + esc(u) + '" alt="" loading="lazy"></figure><p><br></p>');
+  }
+
+  /* ---- a picture in the text: how wide, on which side, and how far up ------
+     Renat asked to «resize and move» the pictures in an article. What he got
+     is four sizes and two steps, not a drag handle, and that is the whole
+     design: a dragged layout is a set of numbers that were true on the laptop
+     they were dragged on, and the shop is read on a 375 px phone. A preset is
+     a word — «слева» — and a word survives a screen half the width, because
+     the stylesheet gets to decide what «слева» means there (it means «full
+     width, text underneath»; see the media query in styles.css).
+
+     The four presets live on the picture's own <figure> as `data-fig`. The
+     controls are a bar the panel lays OVER the text, against the picture that
+     was tapped — never markup of the article's own. It is put inside the box
+     so it can sit under the picture without any positioning arithmetic beyond
+     one offsetTop, and it is taken back out of everything that reads the box
+     (blogBoxHtml) — so the draft, the save, the three renderers and the
+     translation never see a button of it.
+
+     Discoverability was the requirement («obvious without a manual»): a tap
+     on a picture rings it and opens the bar, every button carries a drawing
+     of the layout it makes AND the word for it, and a tap anywhere else puts
+     the bar away. There is nothing to learn and nothing to hold down. */
+  var FIG_PRESETS = [["full", "Во всю ширину"], ["half-left", "Слева"], ["half-right", "Справа"], ["small", "Маленькая"]];
+  /** The layout each preset makes, drawn: a block for the picture, rules for
+      the words. A word alone does not say that «слева» means the text runs
+      down beside it; the drawing does, at a glance and in any language. */
+  function figIconSVG(kind) {
+    var pic = function (x, y, w, h) {
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="1" fill="currentColor"></rect>';
+    };
+    var row = function (x, y, w) {
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="1.7" rx=".85" fill="currentColor" opacity=".4"></rect>';
+    };
+    var g;
+    if (kind === "half-left") g = pic(1, 1, 12, 12) + row(15, 1.5, 12) + row(15, 5.2, 12) + row(15, 8.9, 12) + row(1, 15.5, 26) + row(1, 18.5, 17);
+    else if (kind === "half-right") g = pic(15, 1, 12, 12) + row(1, 1.5, 12) + row(1, 5.2, 12) + row(1, 8.9, 12) + row(1, 15.5, 26) + row(1, 18.5, 17);
+    else if (kind === "small") g = pic(1, 1, 8, 8) + row(11, 1.5, 16) + row(11, 5.2, 16) + row(1, 11.5, 26) + row(1, 15, 26) + row(1, 18.5, 17);
+    else g = pic(1, 1, 26, 11) + row(1, 15.5, 26) + row(1, 18.5, 17);
+    return '<svg class="adm-fig__ico" viewBox="0 0 28 21" aria-hidden="true">' + g + "</svg>";
+  }
+  function figMoveSVG(dir) {
+    var d = dir === "up" ? "M12 19V5m-7 7 7-7 7 7" : "M12 5v14m-7-7 7 7 7-7";
+    return '<svg class="adm-fig__ico adm-fig__ico--mv" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"></path></svg>';
+  }
+  /** The picture the bar belongs to — an <img> inside the box, or null. */
+  var FIGSEL = null;
+  /** The <figure> a picture stands in, or null: a picture that came back from
+      a translation before this change, or was pasted, stands bare in a <p>. */
+  function figOfImg(img) {
+    var p = img && img.parentNode;
+    return p && p.tagName === "FIGURE" ? p : null;
+  }
+  /** The top-level block the picture lives in — what «выше»/«ниже» moves. */
+  function figBlockOf(img, box) {
+    var n = figOfImg(img) || img;
+    while (n && n.parentNode && n.parentNode !== box) n = n.parentNode;
+    return n && n.parentNode === box ? n : null;
+  }
+  function figStep(node, dir) {
+    var s = node;
+    do { s = dir === "up" ? s.previousElementSibling : s.nextElementSibling; }
+    while (s && s.hasAttribute && s.hasAttribute("data-figui"));
+    return s;
+  }
+  function admFigBarHTML(cur, canUp, canDown) {
+    var size = FIG_PRESETS.map(function (p) {
+      var on = p[0] === cur;
+      return '<button type="button" class="adm-fig__b' + (on ? " is-on" : "") + '" data-figset="' + p[0] +
+        '" aria-pressed="' + (on ? "true" : "false") + '">' + figIconSVG(p[0]) + "<span>" + p[1] + "</span></button>";
+    }).join("");
+    var move = [["up", "Выше", canUp], ["down", "Ниже", canDown]].map(function (m) {
+      return '<button type="button" class="adm-fig__b adm-fig__b--mv" data-figmove="' + m[0] + '"' +
+        (m[2] ? "" : " disabled") + ">" + figMoveSVG(m[0]) + "<span>" + m[1] + "</span></button>";
+    }).join("");
+    return '<div class="adm-fig" data-figui contenteditable="false">' +
+      '<div class="adm-fig__row" role="group" aria-label="Размер картинки">' + size + "</div>" +
+      '<div class="adm-fig__row adm-fig__row--mv" role="group" aria-label="Куда сдвинуть картинку">' + move + "</div>" +
+      "</div>";
+  }
+  function admFigClose() {
+    var box = blogBox(), i;
+    if (box) {
+      var ui = box.querySelectorAll("[data-figui]");
+      for (i = 0; i < ui.length; i++) if (ui[i].parentNode) ui[i].parentNode.removeChild(ui[i]);
+      var on = box.querySelectorAll(".is-figon");
+      for (i = 0; i < on.length; i++) on[i].removeAttribute("class");
+    }
+    FIGSEL = null;
+  }
+  function admFigOpen(img) {
+    var box = blogBox();
+    if (!box || !img || !box.contains(img)) return;
+    /* Articles only. «Рассылка» writes into this very box — one visual editor,
+       two drafts (richDraft) — but a letter is email HTML, laid out by the
+       mail renderer in src/lib/newsletters.ts, which knows nothing of these
+       presets and could not honour a float if it did. A bar there would show
+       the owner a layout his letter was never going to have, which is the
+       exact complaint this feature exists to answer. */
+    var rd = richDraft();
+    if (!rd || rd.kind !== "blog") return;
+    admFigClose();
+    FIGSEL = img;
+    img.setAttribute("class", "is-figon");
+    var fig = figOfImg(img);
+    var block = figBlockOf(img, box);
+    var holder = document.createElement("div");
+    holder.innerHTML = admFigBarHTML(
+      (fig && blogFigOf(fig.getAttribute("data-fig"))) || "full",
+      !!(block && figStep(block, "up")),
+      !!(block && figStep(block, "down")),
+    );
+    var bar = holder.firstChild;
+    box.appendChild(bar);
+    /* One number, and it is the only positioning here: the bar spans the box
+       from edge to edge, so there is no left/right to work out and nothing
+       that can fall off a narrow screen. .adm-canvas is position:relative, so
+       offsetTop is measured against it. */
+    bar.style.top = (img.offsetTop + img.offsetHeight + 8) + "px";
+    translateTree(bar);
+    /* A tall picture hangs its bar below the fold — and on a phone the fold
+       already has the nav bar drawn over it, so «Ниже» ends up under
+       «Товары» and cannot be pressed at all. `nearest` scrolls the least
+       that makes the whole bar reachable, and the scroll-margins in
+       admin.css are what keep it clear of the nav and the save bar. */
+    try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
+  }
+  /** Re-draw the bar against the picture where it now is — a preset or a move
+      changes both the picture's height and its place, so the bar follows. */
+  function admFigAgain() {
+    var img = FIGSEL;
+    blogSync();
+    admFigOpen(img);
+  }
+  function admFigApply(preset) {
+    var img = FIGSEL, box = blogBox();
+    if (!img || !box || !blogFigOf(preset)) return;
+    var fig = figOfImg(img);
+    if (!fig) {
+      /* A bare picture — what an article translated before this change holds,
+         because the trip through the model carried its pictures as markdown.
+         It gets a <figure> of its own the first time a preset is chosen for
+         it, placed AFTER the paragraph it sat in rather than inside it (a
+         <figure> in a <p> is not a shape the HTML parser keeps), and the
+         paragraph goes if the picture was all it held. */
+      fig = document.createElement("figure");
+      var host = img.parentNode;
+      if (host === box) host.insertBefore(fig, img);
+      else host.parentNode.insertBefore(fig, host.nextSibling);
+      fig.appendChild(img);
+      if (host !== box && !host.querySelector("img") && !host.textContent.replace(/\s| /g, "")) {
+        host.parentNode.removeChild(host);
+      }
+    }
+    fig.setAttribute("data-fig", preset);
+    admFigAgain();
+  }
+  function admFigMove(dir) {
+    var img = FIGSEL, box = blogBox();
+    if (!img || !box) return;
+    var node = figBlockOf(img, box);
+    var sib = node && figStep(node, dir);
+    if (!node || !sib) return;
+    if (dir === "up") box.insertBefore(node, sib);
+    else box.insertBefore(sib, node);
+    admFigAgain();
   }
   /** The «Товар» marker, written out for one language. blogBodyHTML() turns it
       into a real card in the shop; a crawler and a reader without JS follow it
@@ -12544,6 +12805,67 @@
        delete by hand. */
     s = s.replace(BLOG_CARD_MARK_RX, "");
     return tail.length ? s + tail.map(function (a) { return "<p>" + a + "</p>"; }).join("") : s;
+  }
+
+  /* ---- the pictures, carried through a translation -------------------------
+     The same problem the product cards have two paragraphs up, and the same
+     answer. «Перевести на ET и EN» hands the body to the model as text
+     (blogHtmlToText), and a picture flattened to text is one line of markdown
+     with a URL in it: the <figure> around it is gone, and with it the preset
+     the owner chose. An article he had laid out in Russian — a picture on the
+     left, a small one further down — came back from the translation as a
+     column of full-width pictures, and the alt text did not come back at all.
+
+     So the pictures do not go to the model either. blogFigsOut() lifts each
+     one out and leaves a numbered token; blogFigsIn() puts it back where the
+     token came home, with its size, its side and its words intact. `i` in the
+     token so it cannot be mistaken for a card's «[[1]]». A token the model
+     swallowed means the picture is appended at the end of the text rather
+     than lost — the rule the cards already follow, for the same reason.
+
+     Putting a <figure> back where a token stood can leave it inside the <p>
+     the token was a word in. That needs no repair here: the caller runs the
+     result through blogCleanHtml(), which parses it, and a <figure> start tag
+     closes an open <p> by the HTML parser's own rules. */
+  function blogFigMark(n) { return "[[i" + n + "]]"; }
+  var BLOG_FIG_MARK_RX = /\[\[i\d+\]\]/g;
+  function blogFigsOut(html) {
+    var src = String(html || ""), doc = null;
+    if (src.toLowerCase().indexOf("<img") < 0) return { html: src, figs: [] };
+    try { doc = new DOMParser().parseFromString("<body>" + src + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return { html: src, figs: [] };
+    var list = doc.body.querySelectorAll("img"), figs = [], i;
+    for (i = 0; i < list.length; i++) {
+      var img = list[i], fig = figOfImg(img), node = fig || img;
+      if (!node.parentNode) continue;
+      figs.push({
+        src: img.getAttribute("src") || "",
+        alt: img.getAttribute("alt") || "",
+        fig: fig ? blogFigOf(fig.getAttribute("data-fig")) : "",
+      });
+      node.parentNode.replaceChild(doc.createTextNode(blogFigMark(figs.length)), node);
+    }
+    return figs.length ? { html: doc.body.innerHTML, figs: figs } : { html: src, figs: [] };
+  }
+  function blogFigHTML(f) {
+    var u = blogImgUrl(f && f.src);
+    if (!u) return "";
+    var fig = blogFigOf(f.fig);
+    return "<figure" + (fig ? ' data-fig="' + fig + '"' : "") + '><img src="' + esc(u) +
+      '" alt="' + esc(f.alt || "") + '" loading="lazy"></figure>';
+  }
+  function blogFigsIn(html, figs) {
+    var s = String(html || "");
+    if (!figs || !figs.length) return s;
+    var tail = [];
+    figs.forEach(function (f, i) {
+      var mark = blogFigMark(i + 1), h = blogFigHTML(f), at = s.indexOf(mark);
+      if (at < 0) { if (h) tail.push(h); return; }
+      s = s.slice(0, at) + h + s.slice(at + mark.length);
+    });
+    /* Tokens the model invented or repeated are not words the owner wrote. */
+    s = s.replace(BLOG_FIG_MARK_RX, "");
+    return tail.length ? s + tail.join("") : s;
   }
 
   var BLOG_EMPTY3 = { RU: "", ET: "", EN: "" };
@@ -12862,14 +13184,25 @@
     return productsById(wrote.cards.filter(function (id, i) { return wrote.cards.indexOf(id) === i; }));
   }
   /** One target language: the Russian article translated whole, tags kept as
-      they are, product cards lifted out and put back by hand (blogCardsOut). */
+      they are, product cards and pictures lifted out and put back by hand
+      (blogCardsOut / blogFigsOut).
+
+      The pictures are lifted here for the same reason they are on the other
+      translation, though this path reaches them by a different road: it sends
+      HTML and asks for the tags back untouched, which is a request and not a
+      promise — `data-fig` is the first thing a model tidying markup would
+      drop. Today nothing is ever lost in practice, because this runs only
+      straight after «Написать статью целиком» has rewritten the Russian body,
+      and the writer is told to emit no pictures at all (src/lib/ai-prompts.ts).
+      That is a fact about today's prompt, not a property of this function. */
   function blogGenTranslate(d, L) {
     var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
     var src = blogCardsOut(d.body.RU);
+    var figs = blogFigsOut(src.html);
     return apiSend("/api/admin/ai/text/", "POST", {
       task: "post_translate", lang: L,
       input: {
-        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: src.html,
+        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: figs.html,
         tags: blogTags(d), seoTitle: d.seoTitle.RU, seoDescription: d.seoDesc.RU, keepNames: keep
       }
     }).then(function (r) {
@@ -12877,7 +13210,7 @@
       if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
       if (txt(tx.title)) d.title[L] = txt(tx.title).slice(0, 200);
       if (txt(tx.excerpt)) d.excerpt[L] = txt(tx.excerpt).slice(0, 500);
-      if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(txt(tx.body), src.cards, L));
+      if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(blogFigsIn(txt(tx.body), figs.figs), src.cards, L));
       if (tx.seo && txt(tx.seo.title)) d.seoTitle[L] = txt(tx.seo.title).slice(0, 70);
       if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
     });
@@ -18551,13 +18884,43 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
     }).join("") + "</div>";
   }
-  /** The cover. With one: the picture itself, large (16:9, .adm-cover__img),
-      its caption under it when there is one, and the two actions on the
-      panel's paper below — «Заменить обложку» and a quiet «Удалить» — with
-      no hint, because the picture is the explanation. Without one: the dashed
-      drop zone with «+ Обложка» and the hint on what fits. It used to be one
-      grey field for all of it — a thumbnail, two buttons and the hint — and
-      could not be read once a cover was set (Dim, 10.09.2026). The same
+  /**
+   * «Вот так её увидят» — the cover in the two frames the shop really puts it
+   * in, before anything is published.
+   *
+   * Drawn by the shop's own blogCoverFrameHTML(), under the shop's own
+   * .blog__tileimg and .blog__cover, against styles.css — which this page has
+   * loaded anyway, the panel being the same document as the shop. So this is
+   * not a copy of the cropping rule and not a guess at it: it IS the rule. The
+   * day .blog__cover starts cropping its covers instead of fitting them whole,
+   * this block crops in the same commit, with nothing to keep in step by hand.
+   *
+   * What stood here before was a single 16:9 crop of the picture
+   * (.adm-cover__img, object-fit: cover), which is what neither place does —
+   * and that was the complaint: the panel showed one thing, the list showed
+   * another, the top of the article a third, and there was no way to know
+   * before publishing (Renat, 17.09.2026).
+   */
+  function admBlogSeeHTML(url, alt) {
+    var one = function (where, title) {
+      return '<span class="adm-see__one adm-see__one--' + where + '">' +
+        '<span class="adm-see__t">' + title + "</span>" +
+        '<span class="adm-see__f">' + blogCoverFrameHTML(where, url, alt) + "</span></span>";
+    };
+    return '<div class="adm-see">' +
+      one("list", "В списке статей") + one("post", "В начале статьи") +
+      '<span class="adm-hint adm-see__note">Так обложку увидят в магазине: она вписывается в окно целиком, ' +
+        "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.</span>" +
+      "</div>";
+  }
+  /** The cover. With one: the two frames above — the picture as the list and
+      as the top of the article will show it — its caption under them when
+      there is one, and the two actions on the panel's paper below,
+      «Заменить обложку» and a quiet «Удалить», with no hint, because the
+      picture is the explanation. Without one: the dashed drop zone with
+      «+ Обложка» and the hint on what fits. It used to be one grey field for
+      all of it — a thumbnail, two buttons and the hint — and could not be
+      read once a cover was set (Dim, 10.09.2026). The same
       [data-galdrop="blog"]/[data-galup="blog"]/[data-galfile="blog"] upload
       stands behind both, so a photo dropped onto the picture replaces it. */
   function admBlogCoverHTML(d) {
@@ -18568,8 +18931,10 @@
     if (d.coverUrl) {
       var L = S.adminBlogLang || "RU";
       var alt = String(d.coverAlt[L] || d.coverAlt.RU || d.coverAlt.ET || d.coverAlt.EN || "").trim();
+      // the shop's own fallback for a cover with no caption yet: the title
+      var say = alt || String(d.title[L] || d.title.RU || d.title.ET || d.title.EN || "").trim();
       return '<div class="adm-cover" data-galdrop="blog">' +
-        '<img class="adm-cover__img" src="' + esc(d.coverUrl) + '" alt="' + esc(alt) + '" loading="lazy">' +
+        admBlogSeeHTML(d.coverUrl, say) +
         (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
         '<div class="adm-cover__acts">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
@@ -34174,12 +34539,15 @@
          The product cards never make that trip at all — blogCardsOut()
          swaps each one for a numbered token first, and blogCardsIn() below
          puts them back into the translated text, rebuilt for the language
-         they landed in. */
+         they landed in. The pictures go the same way and for the same
+         reason: flattened to text a picture loses the <figure> it stood in,
+         and with it the size and the side the owner chose for it. */
       var trCards = blogCardsOut(bdTr.body[srcLang]);
+      var trFigs = blogFigsOut(trCards.html);
       var jobs = [
         { field: "title", text: bdTr.title[srcLang] },
         { field: "excerpt", text: bdTr.excerpt[srcLang] },
-        { field: "body", text: blogHtmlToText(trCards.html) },
+        { field: "body", text: blogHtmlToText(trFigs.html) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
       Promise.all(jobs.map(function (j) {
@@ -34198,7 +34566,7 @@
               var v = txt(res.r.body.texts[l]);
               if (!v) return;
               bdTr[res.field][l] = res.field === "body"
-                ? blogCleanHtml(blogCardsIn(blogTextToHtml(v), trCards.cards, l))
+                ? blogCleanHtml(blogCardsIn(blogFigsIn(blogTextToHtml(v), trFigs.figs), trCards.cards, l))
                 : v;
               ok = true;
             });
@@ -34664,9 +35032,32 @@
      stays exactly where the owner left it. */
   document.addEventListener("mousedown", function (e) {
     var t = e.target;
-    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload]")) {
+    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove]")) {
       e.preventDefault();
     }
+  });
+
+  /* blog: the picture controls. A tap on a picture in the editor rings it and
+     opens its bar; a tap on a button of that bar resizes or moves it; a tap
+     anywhere else puts the bar away. Its own listener rather than a line in
+     the panel's big click delegate, because the first of those three is not a
+     [data-…] element at all — it is an <img> the owner wrote into his text,
+     and the delegate's closest() over three hundred attributes would never
+     reach it.
+
+     preventDefault on the picture: the browser's own answer to a click on an
+     image inside a contenteditable is to select it and, in some builds, to
+     hang resize handles off it — the free drag this feature exists instead
+     of. The ring and the bar are the answer here. */
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var set = t.closest("[data-figset]");
+    if (set) { e.preventDefault(); admFigApply(set.getAttribute("data-figset")); return; }
+    var mv = t.closest("[data-figmove]");
+    if (mv) { e.preventDefault(); if (!mv.disabled) admFigMove(mv.getAttribute("data-figmove")); return; }
+    if (t.tagName === "IMG" && t.closest("[data-blogbody]")) { e.preventDefault(); admFigOpen(t); return; }
+    if (FIGSEL && !t.closest("[data-figui]")) admFigClose();
   });
 
   /* blog: a paste into the editor. Word and Google Docs put a whole styled

@@ -286,6 +286,14 @@ export function headLinks(base, seg, rest) {
    anchors where it draws buttons. */
 export const PRE_CSS = `
 #prerender .pre__img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; background: var(--page); }
+/* A blog cover is not square. It carries .blog__cover as well as .pre__img,
+   and .blog__cover says 1200/630 — but it says it from styles.css at one
+   class of specificity, and the id above outranks it, so the prerendered
+   article opened with a square cover and app.js then reshaped it to a wide
+   one on hydration. Two different crops of the same picture on the same
+   page, and the second of them arrived as a jump. The rule the shop means
+   wins here too now, which is also the rule the panel previews. */
+#prerender .blog__cover { aspect-ratio: 1200 / 630; }
 #prerender .pre__crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
 #prerender .pre__crumbs a:hover { text-decoration: underline; }
 #prerender .pre__brand { font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }

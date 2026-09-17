@@ -1706,21 +1706,53 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: flex; align-items: center; justify-content: center; gap: 14px;
   font-size: 14px; color: var(--a-muted); padding: 12px; text-align: center;
 }
-/* The blog cover once there is one (admBlogCoverHTML): the picture itself,
-   16:9 and as wide as the column, its caption, and the two actions on the
-   paper under it — «Заменить обложку» a ghost button, «Удалить» a quiet
+/* The blog cover once there is one (admBlogCoverHTML): the picture in the two
+   frames the shop will show it in, its caption, and the two actions on the
+   paper under them — «Заменить обложку» a ghost button, «Удалить» a quiet
    warn-coloured word. Not the dashed zone above with a thumbnail, two
    buttons and a hint sharing one grey field, which could not be read once a
    cover was set (Dim, 10.09.2026). The zone is still a drop target: a photo
    dropped onto the picture replaces it, and .is-over says so. */
 .adm-cover { border: 1px solid var(--a-rule); background: var(--a-paper); }
 .adm-cover.is-over { outline: 1px dashed var(--a-ink); outline-offset: -1px; background: var(--a-tint); }
-.adm-cover__img { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 220px; object-fit: cover; background: var(--a-tint); }
 .adm-cover__alt { display: block; padding: 10px 14px 0; font-size: 13px; line-height: 18px; color: var(--a-muted); }
 .adm-cover__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 14px; }
 .adm-cover__acts .adm-link { min-height: 40px; }
 .adm-cover__note { flex-basis: 100%; }
-@media (min-width: 900px) { .adm-cover__img { max-height: 280px; } }
+
+/* ---- the cover, as the shop will show it (admBlogSeeHTML) ----------------
+   Two frames side by side: the list tile and the top of the article. The
+   frames themselves are the shop's — .blog__tileimg and .blog__cover out of
+   styles.css, which this page has loaded — and nothing here may touch how
+   they fit a picture, or the preview stops being the thing it is previewing.
+   So this block only sizes the boxes those classes are put into, and puts a
+   rule around each one: a cover that does not fill its frame leaves the
+   shop's white page colour at the sides, which against the panel's own white
+   paper would otherwise be invisible, and the width of that white IS what the
+   owner came here to see.
+
+   The list frame is held at the width of a real grid track (240 px), the
+   article frame runs the column: not the same picture twice, but the two
+   sizes it will really be read at. On a phone both run the column, which is
+   also true — there, the shop's list is one tile wide. */
+.adm-see { display: flex; flex-wrap: wrap; gap: 14px 16px; padding: 14px; background: var(--a-tint); }
+.adm-see__one { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+/* Side by side wherever the two fit — the pair is the comparison, and a pair
+   that has wrapped into a column is two pictures instead. 200 px is the
+   narrowest a tile stays worth looking at; the article frame takes the rest. */
+.adm-see__one--list { flex: 0 1 200px; }
+.adm-see__one--post { flex: 1 1 200px; }
+.adm-see__t {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
+}
+.adm-see__f { display: block; border: 1px solid var(--a-rule); background: var(--a-paper); }
+/* the shop's own bottom margin on a tile cover has no job inside a frame */
+.adm-see__f .blog__tileimg, .adm-see__f .blog__cover { margin-bottom: 0; }
+.adm-see__note { flex-basis: 100%; margin: 0; }
+@media (max-width: 719px) {
+  .adm-see { gap: 14px; }
+  .adm-see__one--list, .adm-see__one--post { flex: 1 1 100%; }
+}
 .adm-tools { display: flex; gap: 4px; flex-wrap: wrap; border: 1px solid var(--a-rule); padding: 6px; }
 .adm-tools button {
   height: 40px; min-width: 40px; padding: 0 10px; border: 0; background: var(--a-paper);
@@ -1732,6 +1764,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-canvas {
   border: 1px solid var(--a-rule); padding: 16px; min-height: 280px;
   line-height: 24px; font-size: 16px; background: var(--a-paper);
+  /* the picture bar is absolute against the box — see .adm-fig below */
+  position: relative;
 }
 /* The article as the reader will see it, in the panel's own type — the shop's
    `.acc__rich` sets headings in uppercase letter-spaced Oswald, which is
@@ -1742,6 +1776,86 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-canvas li { margin: 4px 0; }
 .adm-canvas img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
 .adm-canvas figure { margin: 12px 0; }
+/* ---- a picture in the text, in the editor -------------------------------
+   The same four presets the shop lays out (`.blog__body figure[data-fig]` in
+   styles.css) — the editor has to agree with the shop, or the box stops
+   being worth looking at. The two files stay in step by having the same
+   shape written twice against their own measurements, the box being narrower
+   than a reading column and set in the panel's own type.
+
+   As in the shop: a <figure> with no `data-fig` is matched by nothing here,
+   so an article written before the presets existed opens looking exactly as
+   it always has, and a float collapses under the phone breakpoint. */
+.adm-canvas figure[data-fig] { margin: 14px 0; }
+.adm-canvas figure[data-fig] img { width: 100%; margin: 0; }
+.adm-canvas figure[data-fig="half-left"],
+.adm-canvas figure[data-fig="half-right"] { width: 48%; }
+.adm-canvas figure[data-fig="half-left"] { float: left; margin: 4px 18px 8px 0; }
+.adm-canvas figure[data-fig="half-right"] { float: right; margin: 4px 0 8px 18px; }
+.adm-canvas figure[data-fig="small"] { width: 50%; max-width: 220px; }
+.adm-canvas h2, .adm-canvas h3, .adm-canvas blockquote { clear: both; }
+.adm-canvas::after { content: ""; display: block; clear: both; }
+@media (max-width: 767px) {
+  .adm-canvas figure[data-fig="half-left"],
+  .adm-canvas figure[data-fig="half-right"] { float: none; width: 100%; margin: 14px 0; }
+  .adm-canvas figure[data-fig="small"] { width: 62%; max-width: 170px; }
+}
+/* The picture the bar belongs to. A ring, not a tint: the owner is judging
+   the picture, so nothing may be laid over it. */
+.adm-canvas img.is-figon { outline: 2px solid var(--a-ink); outline-offset: 3px; }
+/* The bar itself (admFigBarHTML): a layer over the text, pinned under the
+   picture that was tapped and spanning the box, so there is no left/right to
+   work out and nothing to fall off a 375 px screen. Its `top` is the one
+   number JavaScript sets. */
+.adm-fig {
+  position: absolute; left: 8px; right: 8px; z-index: 3;
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 6px;
+  border: 1px solid var(--a-ink); background: var(--a-paper);
+  box-shadow: 0 6px 20px rgba(28, 26, 0, .14);
+  /* A tall picture puts its bar below the fold, and on a phone the fold has
+     the nav bar sitting over it — «Ниже» under «Товары» is a button that
+     cannot be pressed. admFigOpen() scrolls the bar into view; these two say
+     how much room to leave it, so the scroll clears the nav and the save bar
+     rather than stopping flush against them. */
+  scroll-margin-bottom: calc(var(--a-barh) + 12px);
+  scroll-margin-top: calc(var(--a-hdrh) + 12px);
+}
+/* Two lines, at every width: the four sizes, then the two steps. Not one
+   line that folds when it runs out of room — the same bar in the same shape
+   on a laptop and on a phone is one thing to learn instead of two. */
+.adm-fig__row { display: flex; flex: 1 1 100%; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.adm-fig__row--mv { border-top: 1px solid var(--a-rule); padding-top: 6px; }
+/* The drawing over the word, not beside it: beside it, «Во всю ширину» needs
+   140 px and four of those do not fit the box on a laptop either — the first
+   build of this bar shortened the words to «Во всю ши…», which is the one
+   thing a control that has to explain itself cannot do. */
+.adm-fig__b {
+  display: flex; flex: 1 1 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-width: 0; min-height: 52px; padding: 5px 6px;
+  border: 0; background: var(--a-paper); color: var(--a-ink);
+  font-family: inherit; font-size: 12px; line-height: 15px; text-align: center; cursor: pointer;
+}
+.adm-fig__b > span { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-fig__b:hover { background: var(--a-tint); }
+/* Which size the picture is now: the button is filled, not merely tinted —
+   at a glance, and without relying on colour. */
+.adm-fig__b.is-on { background: var(--a-ink); color: var(--a-paper); }
+.adm-fig__b[disabled] { opacity: .35; cursor: default; }
+.adm-fig__b[disabled]:hover { background: var(--a-paper); }
+.adm-fig__ico { width: 26px; height: 20px; flex: none; }
+.adm-fig__ico--mv { width: 18px; height: 18px; }
+/* A phone: two rows of two for the sizes, so every word stays whole and every
+   target keeps its 44 px. An icon-only bar would be smaller and would need
+   explaining, which is the opposite of the point. */
+@media (max-width: 559px) {
+  .adm-fig { left: 4px; right: 4px; }
+  .adm-fig__row { gap: 4px 2px; }
+  .adm-fig__b { flex: 1 1 calc(50% - 2px); min-height: 56px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .adm-fig { animation: admfig .14s ease-out; }
+  @keyframes admfig { from { opacity: 0; transform: translateY(-3px); } }
+}
 .adm-canvas a { text-decoration: underline; text-underline-offset: 3px; }
 /* the product marker the «Товар» button inserts — a card in the shop, a
    quietly underlined name here, so the sentence around it stays readable */

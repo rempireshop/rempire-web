@@ -325,7 +325,8 @@ export function markdownToHtml(md: string): string {
  * read back.
  *
  *   kept, with attributes:  a[href, data-product]   img[src, alt]
- *   kept, bare:             p h2 h3 strong em ul ol li blockquote figure br
+ *                           figure[data-fig]
+ *   kept, bare:             p h2 h3 strong em ul ol li blockquote br
  *   unwrapped:              everything else — the tag goes, its text stays
  *                           (a Word paste is mostly <span> and <div>)
  *   dropped with contents:  script, style, iframe, object, embed, svg, …
@@ -370,6 +371,20 @@ const TAG_RE = /^<(\/?)([a-zA-Z][a-zA-Z0-9:-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/;
 const ATTR_RE = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s"'>]+))?/g;
 /** A catalogue id, as `<a data-product>` carries it. */
 const PRODUCT_ID_RE = /^[a-z0-9][a-z0-9._-]{0,79}$/i;
+/**
+ * How wide a picture inside the text stands, and which side the words run
+ * down — the four buttons the editor shows when a picture is tapped
+ * (`data-fig` on its `<figure>`; see FIG_PRESETS in public/shop2/app.js and
+ * the `.blog__body figure[data-fig]` rules in public/shop2/styles.css).
+ *
+ * A closed list of four words, not a free string: the value is written into
+ * an attribute, so anything outside this set is simply not written and the
+ * figure falls back to what every figure did before these presets existed —
+ * which is also what an article written before this change carries, since it
+ * has no `data-fig` at all. That is the whole backwards-compatibility story:
+ * absent means "as it always was", and "full" renders identically to absent.
+ */
+const FIG_VALUES = new Set(["full", "half-left", "half-right", "small"]);
 /** `&` that does not already start an entity — the only one worth escaping. */
 const BARE_AMP = /&(?!#\d{1,7};|#[xX][0-9a-fA-F]{1,6};|[a-zA-Z][a-zA-Z0-9]{1,31};)/g;
 
@@ -406,8 +421,17 @@ function parseAttrs(raw: string): Record<string, string> {
 
 /** The open tag to write, or null when there is nothing safe left to write. */
 function openTag(name: string, attrsRaw: string): string | null {
-  if (name !== "a" && name !== "img") return `<${name}>`;
+  if (name !== "a" && name !== "img" && name !== "figure") return `<${name}>`;
   const attrs = parseAttrs(attrsRaw);
+
+  /* The one attribute a figure may carry: which of the four presets the
+     owner chose. Checked against the closed list above, so the attribute is
+     either one of four known words or not written at all — a bare <figure>
+     is exactly what every article before this change holds. */
+  if (name === "figure") {
+    const fig = String(attrs["data-fig"] || "").trim().toLowerCase();
+    return FIG_VALUES.has(fig) ? `<figure data-fig="${fig}">` : "<figure>";
+  }
 
   if (name === "img") {
     const src = safeImageUrl(attrs.src || "");
