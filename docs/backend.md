@@ -128,10 +128,12 @@ because the session is signed with `SESSION_SECRET`, not with the password.
   (`db/migrations/060_promo_codes.sql`, `src/lib/promos.ts`). `code` is the
   primary key (A–Z, 0–9 and `-`, up to 24 characters); `kind` is
   `percent` / `fixed` / `free_shipping`; plus `value`, `min_subtotal`,
-  `starts_at`, `ends_at`, `max_uses`, `used`, `active`, `note`. The uses table
-  is append-only with a unique `(code, order_id)`, so a webhook retry cannot
-  count the same order twice. Nothing is seeded — an empty table means the shop
-  has no codes, which was the truth until Renat made one.
+  `starts_at`, `ends_at`, `max_uses`, `used`, `active`, `note`; and, since
+  `db/migrations/170_promo_scope.sql`, `scope` (`order` / `brand` / `product`)
+  with `scope_value` — the brand name as the catalogue spells it, or a product
+  id. The uses table is append-only with a unique `(code, order_id)`, so a
+  webhook retry cannot count the same order twice. Nothing is seeded — an empty
+  table means the shop has no codes, which was the truth until Renat made one.
 
 ### How a discount code is priced
 
@@ -147,6 +149,45 @@ A `free_shipping` code comes back as a discount **equal to the delivery price**
 rather than as a zeroed shipping line, so `shipping_price` keeps meaning "what
 this parcel costs" and the receipt, the summary and the e-mail all print the
 same three lines.
+
+#### A code narrowed to one brand or one product
+
+`scope` = `brand` or `product` means **the discount comes off the matching lines
+and nothing else** (Renat, 17.09.2026 — he picked this over the whole-basket
+readings so nobody takes ten per cent off a 200 € order by adding one small
+qualifying item). The rules, all in `src/lib/promos.ts`:
+
+- `percent` is arithmetic on the subset: matching total × `value` %.
+- `fixed` is **capped at the matching lines' total** — «−20 € на Davines» on
+  12 € of Davines gives 12 €, never 20. A fixed code that could spill past its
+  own subset would be a whole-basket code wearing a brand's name.
+- `min_subtotal` on a narrowed code is a floor on **that subset**, not on the
+  basket around it. For `scope = order` the two readings are the same number,
+  so no code written before 170 changes meaning.
+- `free_shipping` **may not be scoped at all** — refused by `validatePromo`
+  (`scope_free_shipping`) and by the table's own constraint. There is no
+  matching line to compute: the parcel is one line for the whole basket. The
+  other reading, «free delivery if the basket contains Davines», is a
+  *condition*, and the code already has a condition field.
+- A **gift-card line never matches anything**, whatever the scope says
+  (`promoLineMatches`) — including a `product` code that names the card's own
+  line, which is the one shape the scope made possible. A **set** carries no
+  brand of its own and answers only to a code that names the set itself.
+- A brand/product code cannot be priced without the basket, so
+  `quotePromo(code, subtotal, shipping)` with no `lines` answers `no_match`
+  rather than falling back to the whole basket.
+
+`orders.discount_scope` records what the discount actually came off —
+`{kind, value, base, lines}` — written once when the order is priced and never
+recomputed, so editing a code next week cannot rewrite what a customer was
+charged last week. Null on a whole-basket code, a gift card, a POS percent and
+every order older than the column; the admin card reads a missing value as
+«весь заказ», which is what those orders were.
+
+An edit that never mentions the scope leaves it alone (`upsertPromo`): the
+assistant's `create_promo` builds its body from a whitelist with no scope in
+it, so «продли SUVI10 до конца месяца» must not quietly widen a Davines code
+to the whole shop.
 
 If the card has emptied or the code has run out between checkout and payment,
 the order **stays paid** and the mismatch is written to `admin_audit` as
@@ -208,7 +249,7 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | `POST /api/orders/` | Body `{lang, items:[{id, variant?, qty}], customer:{name,email,phone}, shipping:{method, country, carrier?, pointId?, pointName?, address?}, discountCode?, notes?}` → `{ok, orderId, number, total}`. 10 per minute per IP, body capped at 16 KB (`too_large`, 413). `shipping` is rebuilt from a whitelist: `method` becomes one of `parcel`/`courier`/`pickup`, `country` two letters, `carrier` one of `omniva`/`smartpost`/`dpd`/`venipak` (lower-cased, anything else `null`), `pointId` ≤ 80 chars, `pointName` ≤ 160, `address` only `{addr,street,zip,city,house,flat}` at ≤ 160 chars each. Errors: `empty_order`, `bad_qty`, `bad_name`, `bad_email`, `unknown_item`, `out_of_stock`, `bundle_unknown`, `rate_limited`, `too_large`. |
 | `GET /api/overrides/` | `{ok, overrides, settings}` — everything the storefront needs. `Cache-Control: s-maxage=30`. 503 `db_unavailable` when there is no database. |
 | `GET /api/bundles/` | `{ok, bundles}` — the curated sets («Наборы»), **active only**, in `sort` order, each expanded against the catalogue and the owner's price/stock overrides: `{id, cat, title{RU,ET,EN}, desc{…}, items[{productId, variant, qty, brand, name, sizeLabel, price, stock}], sum, price, save, pct, stock, image, active, sort}`. `Cache-Control: s-maxage=30`, like `/api/overrides/`. 503 `db_unavailable` when there is no database — `app.js` then keeps the static `public/shop/bundles.js` it loaded with. The «Наборы на сайте» switch is *not* applied here: it is a storefront switch delivered with the settings, and keeping the two apart is what lets a set already in somebody's cart still be priced. |
-| `POST /api/promos/check/` | `{code, subtotal?, shipping?}` → `{ok, code, kind, value, discount, freeShipping, minSubtotal}`, or `{ok:false, error}` with `bad_code`, `not_found`, `inactive`, `not_started`, `expired`, `used_up`, `min_subtotal` (which carries `minSubtotal`, so the shop can say «ещё 12 €»), `rate_limited`, `unavailable`. 20 a minute per IP, body capped at 2 KB. Read-only — the use is counted when the payment is confirmed, never here. |
+| `POST /api/promos/check/` | `{code, subtotal?, shipping?, items?}` → `{ok, code, kind, value, discount, freeShipping, minSubtotal}`, or `{ok:false, error}` with `bad_code`, `not_found`, `inactive`, `not_started`, `expired`, `used_up`, `min_subtotal` (which carries `minSubtotal`, so the shop can say «ещё 12 €»), `no_match` (a brand/product code and a basket with none of it in), `rate_limited`, `unavailable`. `items` is the basket line by line — `[{id, brand, sum}]`, gift cards left out — and a narrowed code is priced on it; the BRAND of each line is re-read from the catalogue, never trusted from the body. Every answer carries `scope`/`scopeValue`, refusals included, so the shop can name what the code is for. 20 a minute per IP, body capped at 8 KB. Read-only — the use is counted when the payment is confirmed, never here. |
 
 ### Admin (cookie `rmp_admin`)
 
@@ -221,7 +262,7 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | `POST /api/admin/upload/` | multipart `file`, `kind=product\|hero\|review`, `productId?`/`reviewId?` → `{ok, url, thumbUrl, key, width, height, bytes}`. 60 an hour per session. `DELETE ?key=` removes one object, `GET` says whether the bucket is configured. See docs/media.md. |
 | `PUT /api/admin/settings/` | `{chatbot:false}`, `{hero:{slides:[…],interval}}` or `{hero:null}`, `{flows:{…}}`, `{shipping_rules:{…}}` (docs/shipping.md — writing this key also drops the tariff cache so the next order bills the new price), `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
 | `GET/POST/PATCH/DELETE /api/admin/bundles/` | `GET` → `{ok, bundles}`, hidden ones included, in `sort` order. `POST {id, cat, title{RU,ET,EN}, desc{…}, items:[{productId, variant, qty}], price\|discountPct, image, active, sort}` creates or edits one; validated by `validateBundle()` in `src/lib/bundles.ts` — errors `bad_id`, `bad_cat`, `bad_name`, `bad_desc`, `few_items`, `too_many_items`, `unknown_product`, `dup_item`, `bad_variant`, `bad_qty`, `bad_price`, `price_too_high` (the set must cost less than its parts), `bad_discount`, `bad_image`, `bad_sort`. `PATCH {id, active}` shows or hides one, `PATCH {order:[id,…]}` reorders. `DELETE ?id=` removes one — unlike a promo code a set is a shop-window object, and the order keeps its own frozen copy of the line. Every write leaves an `admin_audit` row (`bundle.set` / `bundle.active` / `bundle.reorder` / `bundle.delete`). |
-| `GET/POST/PATCH /api/admin/promos/` | `GET` → `{ok, promos}`, newest first. `POST {code, kind, value, minSubtotal, startsAt, endsAt, maxUses, active, note}` creates or edits one (`used` is never reset by an edit); errors `bad_code`, `bad_value`, `bad_min`, `bad_date`, `bad_uses`. `PATCH {code, active}` switches one on or off. There is no `DELETE`: a code that has been used is part of the order history. |
+| `GET/POST/PATCH /api/admin/promos/` | `GET` → `{ok, promos}`, newest first. `POST {code, kind, value, minSubtotal, startsAt, endsAt, maxUses, active, note, scope?, scopeValue?}` creates or edits one (`used` is never reset by an edit, and an edit that omits `scope` leaves the scope alone); errors `bad_code`, `bad_value`, `bad_min`, `bad_date`, `bad_uses`, `bad_scope`, `bad_scope_value`, `scope_free_shipping`. `PATCH {code, active}` switches one on or off. There is no `DELETE`: a code that has been used is part of the order history. |
 | `GET /api/admin/orders/?status=&q=&limit=` | Newest first; `q` matches number, e-mail, name or phone. |
 | `GET/PATCH /api/admin/orders/<id>/` | The id is the uuid or the order number. `PATCH {status?, note?}`. |
 | `GET /api/admin/audit/?limit=` | The change log, newest first. |

@@ -1042,6 +1042,28 @@
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
         "Kontrolli soodustuse suurust: protsent 1–90, summa kuni 200 €.",
       "Проверьте дату окончания.": "Kontrolli lõppkuupäeva.",
+      /* ---- «На что действует»: 170_promo_scope ------------------------- */
+      "На что действует": "Millele kehtib",
+      "На что действует промокод": "Millele sooduskood kehtib",
+      "Весь заказ": "Kogu tellimus",
+      "Выберите бренд": "Vali bränd",
+      "Найдите товар — по названию или бренду": "Leia toode — nime või brändi järgi",
+      "Например: Davines шампунь": "Näiteks: Davines šampoon",
+      "Выбрать": "Vali",
+      "Скидка снимется со всего заказа, кроме подарочных карт.":
+        "Soodustus arvestatakse kogu tellimuselt, välja arvatud kinkekaardid.",
+      "Скидка снимется только с подходящих строк заказа — остальное покупатель оплатит полностью.":
+        "Soodustus arvestatakse ainult sobivatelt tellimuse ridadelt — ülejäänu maksab ostja täishinnaga.",
+      "Бесплатная доставка действует на весь заказ. Выбрать для неё бренд или товар нельзя: посылка одна на всю корзину.":
+        "Tasuta tarne kehtib kogu tellimusele. Brändi või toodet sellele valida ei saa: pakk on kogu ostukorvi peale üks.",
+      "Выберите, на что действует код: весь заказ, бренд или товар.":
+        "Vali, millele kood kehtib: kogu tellimus, bränd või toode.",
+      "Выберите бренд или товар — без этого код не на что применить.":
+        "Vali bränd või toode — muidu pole koodil midagi, millele kehtida.",
+      "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.":
+        "Tasuta tarne kehtib kogu tellimusele — brändi või toodet sellele valida ei saa.",
+      "В корзине нет товара, на который действует этот код.":
+        "Ostukorvis pole toodet, millele see kood kehtib.",
       "Число использований должно быть целым и больше нуля.":
         "Kasutuskordade arv peab olema täisarv ja suurem kui null.",
       "Сохранить тарифы": "Salvesta tariifid",
@@ -3636,6 +3658,28 @@
       "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
         "Check the size of the discount: 1–90 per cent, or up to 200 €.",
       "Проверьте дату окончания.": "Check the end date.",
+      /* ---- «На что действует»: 170_promo_scope ------------------------- */
+      "На что действует": "What it applies to",
+      "На что действует промокод": "What the promo code applies to",
+      "Весь заказ": "The whole order",
+      "Выберите бренд": "Choose a brand",
+      "Найдите товар — по названию или бренду": "Find a product — by name or brand",
+      "Например: Davines шампунь": "For example: Davines shampoo",
+      "Выбрать": "Choose",
+      "Скидка снимется со всего заказа, кроме подарочных карт.":
+        "The discount comes off the whole order, gift cards aside.",
+      "Скидка снимется только с подходящих строк заказа — остальное покупатель оплатит полностью.":
+        "The discount comes off the matching lines only — the customer pays full price for the rest.",
+      "Бесплатная доставка действует на весь заказ. Выбрать для неё бренд или товар нельзя: посылка одна на всю корзину.":
+        "Free delivery applies to the whole order. A brand or a product cannot be picked for it: there is one parcel for the whole basket.",
+      "Выберите, на что действует код: весь заказ, бренд или товар.":
+        "Choose what the code applies to: the whole order, a brand or a product.",
+      "Выберите бренд или товар — без этого код не на что применить.":
+        "Choose a brand or a product — without one the code has nothing to apply to.",
+      "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.":
+        "Free delivery applies to the whole order — a brand or a product cannot be picked for it.",
+      "В корзине нет товара, на который действует этот код.":
+        "The basket holds nothing this code applies to.",
       "Число использований должно быть целым и больше нуля.":
         "The number of uses must be a whole number above zero.",
       "Сохранить тарифы": "Save the tariffs",
@@ -5616,6 +5660,38 @@
     [/^([A-Z0-9-]+) — скидка (\d+)%$/, { ET: "$1 — soodustus $2%", EN: "$1 — $2% off" }],
     [/^([A-Z0-9-]+) — скидка (.+)$/, { ET: "$1 — soodustus $2", EN: "$1 — $2 off" }],
     [/^([A-Z0-9-]+) — бесплатная доставка$/, { ET: "$1 — tasuta tarne", EN: "$1 — free delivery" }],
+    /* ---- scoped promo codes (170_promo_scope) ------------------------
+       Each of these is one whole runtime sentence — see promoScopeNote() in
+       the checkout and admOrderDiscountHTML() on the order card, both of
+       which build every branch in a single expression so no «из» tail is
+       left behind untranslated. The «товар» rules come first: a product name
+       lives inside «…», and the brand rule's (.+) would swallow the quotes,
+       and the two «Код действует от …» rules before the whole-basket one
+       below, which would otherwise match them first. */
+    [/^Скидка только на «(.+)»: (.+) из (.+)\.$/,
+      { ET: "Soodustus kehtib ainult tootele «$1»: $2 / $3.",
+        EN: "The discount applies to “$1” only: $2 of $3." }],
+    [/^Скидка только на (.+): (.+) из (.+)\.$/,
+      { ET: "Soodustus kehtib ainult $1 toodetele: $2 / $3.",
+        EN: "The discount applies to $1 only: $2 of $3." }],
+    [/^В корзине нет товаров (.+) — код действует только на них\.$/,
+      { ET: "Ostukorvis pole $1 tooteid — kood kehtib ainult neile.",
+        EN: "The basket holds no $1 products — the code applies to those only." }],
+    [/^Код действует от (.+) товаров (.+) — добавьте ещё на (.+)\.$/,
+      { ET: "Kood kehtib alates $1 eest $2 tooteid — lisa veel $3 eest.",
+        EN: "The code applies from $1 of $2 products — add $3 more." }],
+    [/^Код действует от (.+) по этому товару — добавьте ещё на (.+)\.$/,
+      { ET: "Kood kehtib alates $1 selle toote eest — lisa veel $2 eest.",
+        EN: "The code applies from $1 of this product — add $2 more." }],
+    /* …and the same two facts where the owner reads them: the codes list and
+       the order card. «на бренд X» is the list's one-line meta; the longer
+       one is the order card's second line under «Скидка». */
+    [/^на товар «(.+)»$/, { ET: "tootele «$1»", EN: "on “$1”" }],
+    [/^на бренд (.+)$/, { ET: "brändile $1", EN: "on $1" }],
+    [/^только на товар «(.+)» · (.+) из (.+)$/,
+      { ET: "ainult tootele «$1» · $2 / $3", EN: "on “$1” only · $2 of $3" }],
+    [/^только на бренд (.+) · (.+) из (.+)$/,
+      { ET: "ainult brändile $1 · $2 / $3", EN: "on $1 only · $2 of $3" }],
     [/^Код действует от (.+) — добавьте ещё на (.+)\.$/,
       { ET: "Kood kehtib alates $1 — lisa veel $2 eest.", EN: "The code applies from $1 — add $2 more." }],
     [/^от (.+) · до (.+)$/, { ET: "alates $1 · kuni $2", EN: "from $1 · until $2" }],
@@ -6041,7 +6117,7 @@
   /* .toast is here because «Добавлено: <товар> · 75 мл» names a product:
      without it trText() gets allowName=false and hands the name back
      untouched, so an English shopper read «Added: … — шампунь». */
-  var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
+  var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.cosum__scope,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
     ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r,.toast";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
@@ -7473,6 +7549,11 @@
     promoInfo: null,
     promoErr: "",        // an error code from /api/promos/check, "" when fine
     promoMin: 0,         // what the basket has to reach, when that was why
+    /* …and what the refused code was narrowed to, so «не хватает до 40 €» and
+       «таких товаров нет в корзине» can name the brand or the product rather
+       than leaving the shopper to guess which of the two rules bit. */
+    promoErrScope: "",
+    promoErrValue: "",
     promoBusy: false,
     email: "",
     emailTouched: false,
@@ -7652,6 +7733,10 @@
     admPromoErr: "",
     promoForm: null,    // the code being created or edited, or null
     promoFormErr: "",
+    /* «На что действует → Товар»: what the owner is typing into the product
+       search. Not part of promoForm — it is a way of finding the answer, not
+       the answer, and it is thrown away the moment one is picked. */
+    promoQ: "",
     videoOn: false,      // the product video is a click-to-play embed
     // ---- blog: posts live in their own table, not the demo/undo layer ----
     blogSlug: "",         // which post /blog/<slug>/ is open
@@ -8203,20 +8288,84 @@
     S.cart.forEach(function (l) { if (l.type !== "gift") s += lineUnit(l) * l.qty; });
     return Math.round(s * 100) / 100;
   }
+  /* The basket line by line, the way src/lib/promos.ts reads it — id, brand
+     and what the line costs. Gift cards ride along with their kind so the
+     server folds them out by the one rule that lives there; the preview below
+     skips them for the same reason promoGoods() does. A set has no brand of
+     its own (it is one price the owner typed for the whole set), so it answers
+     only to a code that names the set itself. */
+  function promoLines() {
+    var out = [];
+    S.cart.forEach(function (l) {
+      if (l.type === "gift") return;
+      var p = l.type === "bundle" ? null : byIdOrNull(l.id);
+      out.push({
+        id: l.id,
+        kind: l.type === "bundle" ? "bundle" : "product",
+        brand: p ? p.brand : "",
+        sum: Math.round(lineUnit(l) * l.qty * 100) / 100
+      });
+    });
+    return out;
+  }
+  /** «Kevin.Murphy» and «kevin.murphy  » are one brand; nothing else folds. */
+  function promoBrandKey(v) { return String(v == null ? "" : v).toLowerCase().replace(/\s+/g, " ").trim(); }
+  /** promoLineMatches() in src/lib/promos.ts, in the browser's words. */
+  function promoLineIn(p, l) {
+    if (l.kind === "gift") return false;
+    if (!p || !p.scope || p.scope === "order") return true;
+    var want = String(p.scopeValue == null ? "" : p.scopeValue).trim();
+    if (!want) return false;
+    if (p.scope === "brand") return !!l.brand && promoBrandKey(l.brand) === promoBrandKey(want);
+    return String(l.id) === want;
+  }
+  /* What the code is allowed to take its discount off: the whole goods for a
+     shop-wide code, the matching lines only for one narrowed to a brand or a
+     product (db/migrations/170_promo_scope.sql). The RULE came from the server
+     and the euro figure is recomputed here on every render so it follows a
+     basket the shopper is still editing — and createOrder() prices the same
+     subset from the same catalogue, so the two cannot disagree about what is
+     charged. */
+  function promoBase(p) {
+    if (!p) return 0;
+    if (!p.scope || p.scope === "order") return promoGoods();
+    var s = 0;
+    promoLines().forEach(function (l) { if (promoLineIn(p, l)) s += l.sum; });
+    return Math.round(s * 100) / 100;
+  }
+  /** How many lines of the basket it applies to — «на 2 товара из 5». */
+  function promoMatchCount(p) {
+    if (!p || !p.scope || p.scope === "order") return 0;
+    var n = 0;
+    S.cart.forEach(function (l) {
+      if (l.type === "gift") return;
+      var line = { id: l.id, kind: l.type === "bundle" ? "bundle" : "product", brand: (byIdOrNull(l.id) || {}).brand || "" };
+      if (promoLineIn(p, line)) n += l.qty;
+    });
+    return n;
+  }
   function discount() {
     var p = S.promoInfo;
     if (!p) return 0;
-    var goods = promoGoods();
-    if (p.minSubtotal && goods < p.minSubtotal) return 0;
-    if (p.kind === "free_shipping") return shipCost();
-    var raw = p.kind === "percent" ? goods * p.value / 100 : Math.min(p.value, goods);
-    return Math.round(Math.max(0, Math.min(goods, raw)) * 100) / 100;
+    if (p.kind === "free_shipping") {
+      return promoGoods() >= (p.minSubtotal || 0) ? shipCost() : 0;
+    }
+    var base = promoBase(p);
+    if (p.minSubtotal && base < p.minSubtotal) return 0;
+    // percent: arithmetic on the subset. fixed: capped at the subset's total —
+    // «−20 € на Davines» on 12 € of Davines is 12 €, never 20.
+    var raw = p.kind === "percent" ? base * p.value / 100 : Math.min(p.value, base);
+    return Math.round(Math.max(0, Math.min(base, raw)) * 100) / 100;
   }
   /** The applied code once the basket is big enough for it — else null. */
   function promoLive() {
     var p = S.promoInfo;
     if (!p) return null;
-    return !p.minSubtotal || promoGoods() >= p.minSubtotal ? p : null;
+    if (p.kind === "free_shipping") return promoGoods() >= (p.minSubtotal || 0) ? p : null;
+    var base = promoBase(p);
+    // a narrowed code whose goods left the basket is not «−0 €», it is gone
+    if (p.scope && p.scope !== "order" && !(base > 0)) return null;
+    return !p.minSubtotal || base >= p.minSubtotal ? p : null;
   }
   /* ---- features: gift card at checkout -----------------------------------
      A card pays for goods and delivery both, but never more than the order
@@ -11525,12 +11674,37 @@
     expired: "Срок действия кода вышел.",
     used_up: "Код уже использован полностью.",
     rate_limited: "Слишком много попыток — подождите минуту.",
+    no_match: "В корзине нет товара, на который действует этот код.",
     offline: "Промокоды проверяет сервер — в демонстрации код не применяется.",
     unavailable: "Сейчас не получилось проверить код. Попробуйте позже."
   };
+  /* What the code is narrowed to, in the shopper's words. A brand is its own
+     name; a product is the name off the shelf, in quotes, because a product
+     name is a phrase and a brand is not. The server sends the scope back with
+     every answer, refusals included, so «не хватает» and «нет таких товаров»
+     can both say WHICH. */
+  function promoScopeName(scope, value) {
+    if (scope === "brand") return String(value || "");
+    var p = byIdOrNull(String(value || ""));
+    return p ? p.name : "";
+  }
   function promoErrText() {
+    var scope = S.promoErrScope, name = promoScopeName(scope, S.promoErrValue);
+    if (S.promoErr === "no_match") {
+      if (scope === "brand" && name) return "В корзине нет товаров " + name + " — код действует только на них.";
+      return PROMO_ERRS.no_match;
+    }
     if (S.promoErr === "min_subtotal") {
-      return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + eur(Math.max(0, S.promoMin - promoGoods())) + ".";
+      /* «не хватает до 40 €» has to be about the same euro the code is
+         measured on, or it promises what the till then refuses: for a narrowed
+         code that is the matching lines, not the basket around them. */
+      var have = scope === "brand" || scope === "product"
+        ? promoBase({ scope: scope, scopeValue: S.promoErrValue })
+        : promoGoods();
+      var need = eur(Math.max(0, S.promoMin - have));
+      if (scope === "brand" && name) return "Код действует от " + eur(S.promoMin) + " товаров " + name + " — добавьте ещё на " + need + ".";
+      if (scope === "product") return "Код действует от " + eur(S.promoMin) + " по этому товару — добавьте ещё на " + need + ".";
+      return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + need + ".";
     }
     return PROMO_ERRS[S.promoErr] || PROMO_ERRS.unavailable;
   }
@@ -11539,15 +11713,39 @@
     if (p.kind === "fixed") return p.code + " — скидка " + eur(p.value);
     return p.code + " — скидка " + p.value + "%";
   }
+  /* Why the code took less than the shopper expected, on the line under it.
+     Money rather than a count of items, because money is what the row above
+     shows and needs no plural: «Скидка только на Davines: 61,00 € из 140,00 €»
+     says both what it applied to and how much of the basket that was. */
+  function promoScopeNote(p) {
+    if (!p || !p.scope || p.scope === "order") return "";
+    var name = promoScopeName(p.scope, p.scopeValue);
+    if (!name) return "";
+    /* Each branch is one whole sentence built in one expression — never a
+       shared «… из …» tail glued on afterwards. The tail would be its own text
+       node as far as the dictionary is concerned, and «из» would stay Russian
+       in the middle of an English line (tools/i18n-gaps.mjs, ASSEMBLED). */
+    if (p.scope === "brand") {
+      return "Скидка только на " + name + ": " + eur(promoBase(p)) + " из " + eur(promoGoods()) + ".";
+    }
+    return "Скидка только на «" + name + "»: " + eur(promoBase(p)) + " из " + eur(promoGoods()) + ".";
+  }
   function promoRowHTML() {
     var p = promoLive();
     if (!p) return "";
     var d = discount();
+    var note = promoScopeNote(p);
     // a free-shipping code on a basket that already ships free is honest about
     // taking nothing off, rather than quietly showing «−0 €»
     return '<div class="cosum__row"><span>' + esc(promoLabel(p)) +
       ' <button class="link" data-promooff>убрать</button></span>' +
-      '<span class="num">' + (d > 0 ? "−" + eur(d) : "—") + "</span></div>";
+      '<span class="num">' + (d > 0 ? "−" + eur(d) : "—") + "</span></div>" +
+      // `cosum__scope` carries no styling of its own — it is the marker that
+      // puts this line inside NAME_CTX, so a product name's Russian tail
+      // («… — шампунь») is turned into ET/EN by trName() like every other
+      // place the shop prints one. Without it an English checkout would read
+      // «The discount applies to “… — шампунь” only».
+      (note ? '<div class="cosum__row cosum__row--note"><span class="muted cosum__scope">' + esc(note) + "</span><span></span></div>" : "");
   }
   function applyPromoCode() {
     var code = S.promo.trim();
@@ -11559,21 +11757,32 @@
       // against, so «не хватает до 40 €» cannot promise what the till refuses
       code: code,
       subtotal: promoGoods(),
-      shipping: shipCost()
+      shipping: shipCost(),
+      /* …and the basket line by line, because a code narrowed to one brand or
+         one product is priced on the lines it matches and on nothing else
+         (db/migrations/170_promo_scope.sql). The server re-reads each line's
+         brand out of its own catalogue; only what a line COSTS is taken from
+         here, exactly as `subtotal` above always has been. */
+      items: promoLines()
     }).then(function (res) {
       S.promoBusy = false;
       if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); refocus("[data-applypromo]"); return; }
       apiSeen(true);
       var j = res.body || {};
       if (j.ok) {
-        S.promoInfo = { code: j.code, kind: j.kind, value: Number(j.value) || 0, minSubtotal: Number(j.minSubtotal) || 0 };
-        S.promoErr = ""; S.promoMin = 0;
+        S.promoInfo = {
+          code: j.code, kind: j.kind, value: Number(j.value) || 0, minSubtotal: Number(j.minSubtotal) || 0,
+          scope: j.scope || "order", scopeValue: j.scopeValue || null
+        };
+        S.promoErr = ""; S.promoMin = 0; S.promoErrScope = ""; S.promoErrValue = "";
         // one order, one code — the mirror of applyGiftCode() above
         S.giftErr = ""; S.giftCard = null;
       } else {
         S.promoInfo = null;
         S.promoErr = j.error || "unavailable";
         S.promoMin = Number(j.minSubtotal) || 0;
+        S.promoErrScope = j.scope || "";
+        S.promoErrValue = j.scopeValue || "";
       }
       render(); refocus("[data-applypromo]");
     }).catch(function () {
@@ -16333,6 +16542,7 @@
           (o && !srvDigital(o) ? '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub" style="margin:0">' +
             esc(v.ship) + "</span></span>" +
             '<span class="adm-row__sub" style="margin:0">' + (o.shippingPrice ? eur(o.shippingPrice) : "бесплатно") + "</span></div>" : "") +
+          admOrderDiscountHTML(o) +
           '<div class="adm-total"><span>Итого</span><span class="adm-total__v">' + eur(v.sum) + "</span></div>" +
         "</div></div>" +
       '<div class="adm-stack adm-stack--tight">' +
@@ -16357,6 +16567,44 @@
           esc(orderNoteValue(o)) + "</textarea>" +
           '<div class="adm-acts" style="margin-top:8px" data-admnoteacts>' + orderNoteActsHTML(o) + "</div></div>" : "") +
       "</div></div></div>";
+  }
+  /* What came off the goods, on the order card's «Состав» — the code, the euro
+     it took, and (for a code narrowed to one brand or one product) what it
+     took it OFF. Until this row existed the block listed the goods and the
+     parcel and then printed «Итого», which on any discounted order was simply
+     less than the lines above it added up to: the owner could see that an
+     order was cheap and nowhere why.
+
+     `discountScope` is the record createOrder() wrote when it priced the
+     order (db/migrations/170_promo_scope.sql) — never recomputed here, so a
+     brand code edited next week cannot rewrite what a customer was charged
+     last week. Missing on a whole-basket code, on a gift card, on a POS
+     percent and on every order older than the column, all of which mean «весь
+     заказ» and get no second line. «Баллы» is its own stream on the order
+     (orders.loyalty_discount) and gets its own row for the same reason. */
+  function admOrderDiscountHTML(o) {
+    if (!o) return "";
+    var off = Number(o.discount) || 0;
+    var pts = Number(o.loyaltyDiscount) || 0;
+    if (!(off > 0.004) && !(pts > 0.004)) return "";
+    var sc = o.discountScope && typeof o.discountScope === "object" ? o.discountScope : null;
+    var name = sc ? (sc.kind === "brand" ? String(sc.value || "")
+      : (byIdOrNull(String(sc.value || "")) || {}).name || String(sc.value || "")) : "";
+    // one whole sentence per branch, never a shared tail — see promoScopeNote()
+    var base = Number((sc || {}).base) || 0, sub = Number(o.subtotal) || 0;
+    var note = "";
+    if (sc && name && sc.kind === "brand") note = "только на бренд " + name + " · " + eur(base) + " из " + eur(sub);
+    else if (sc && name) note = "только на товар «" + name + "» · " + eur(base) + " из " + eur(sub);
+    return (off > 0.004
+      ? '<div class="adm-row"><span class="adm-row__body">' +
+          '<span class="adm-row__sub" style="margin:0">' + esc(o.discountCode ? "Скидка · " + o.discountCode : "Скидка") + "</span>" +
+          (note ? '<span class="adm-row__sub" style="margin:0">' + esc(note) + "</span>" : "") +
+        '</span><span class="adm-row__sub" style="margin:0">−' + eur(off) + "</span></div>"
+      : "") +
+      (pts > 0.004
+        ? '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub" style="margin:0">Баллы</span></span>' +
+          '<span class="adm-row__sub" style="margin:0">−' + eur(pts) + "</span></div>"
+        : "");
   }
   /* «Оплата» on the order card — how the shopper meant to pay, through what,
      and where the money stands. Read off orders.payment: the choice is written
@@ -22049,18 +22297,121 @@
     }
   }
   function blankPromo() {
-    return { code: "", kind: "percent", value: 10, minSubtotal: 0, endsAt: "", maxUses: "", note: "", active: true };
+    return {
+      code: "", kind: "percent", value: 10, minSubtotal: 0, endsAt: "", maxUses: "", note: "", active: true,
+      // «На что действует» — 'order' | 'brand' | 'product' (170_promo_scope)
+      scope: "order", scopeValue: ""
+    };
   }
   function promoKindLabel(p) {
     if (p.kind === "free_shipping") return "бесплатная доставка";
     if (p.kind === "fixed") return "−" + eur(p.value);
     return "−" + p.value + "%";
   }
+  /** «на бренд Davines» / «на товар «…»» — nothing at all for a whole-basket code. */
+  function promoScopeLabel(p) {
+    if (!p || !p.scope || p.scope === "order" || !p.scopeValue) return "";
+    if (p.scope === "brand") return "на бренд " + p.scopeValue;
+    var prod = byIdOrNull(String(p.scopeValue));
+    return "на товар «" + (prod ? prod.name : String(p.scopeValue)) + "»";
+  }
   function promoWhen(p) {
     var out = [];
     if (p.minSubtotal) out.push("от " + eur(p.minSubtotal));
     if (p.endsAt) out.push("до " + String(p.endsAt).slice(0, 10).split("-").reverse().join("."));
     return out.join(" · ") || "без условий";
+  }
+  /* ---- «На что действует»: the whole order, one brand, one product --------
+     db/migrations/170_promo_scope.sql. Three chips and then ONE control, never
+     two at once, because Renat fills this in on a phone.
+
+     A brand is a native <select>: twenty-six names, and the phone's own wheel
+     is the best list there is for that — one tap, no scrolling inside a
+     scrolling page, and typing jumps to a letter.
+
+     A product is NOT a select. Two hundred and twenty names in a <select> is
+     the wall this feature was asked not to be, so it is a search box with at
+     most six answers under it — the same shape «Рассылка» and «Статьи» already
+     use for picking a product (admNewsPicksHTML). Once one is picked the
+     search disappears and the chosen product stands there with «Убрать».
+
+     Free delivery has no chips at all, only a sentence saying why: the parcel
+     is one line for the whole basket, so there is no «Davines half» of it to
+     make free. The server refuses the combination too (validatePromo), and the
+     table refuses it under that — this is the explanation, not the guard. */
+  var PROMO_SCOPE_ROWS = [["order", "Весь заказ"], ["brand", "Бренд"], ["product", "Товар"]];
+  var PROMO_PICKS = 6;
+  function promoBrandList() {
+    return brands().map(function (b) { return b.name; }).sort(function (a, b) { return a.localeCompare(b, "en"); });
+  }
+  function promoProductMatches() {
+    var q = String(S.promoQ || "").trim().toLowerCase();
+    if (!q) return [];
+    return CATALOGUE.filter(function (p) {
+      return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, PROMO_PICKS);
+  }
+  function promoScopeFormHTML(f) {
+    if (f.kind === "free_shipping") {
+      return '<div class="adm-hint" style="margin-top:12px">Бесплатная доставка действует на весь заказ. ' +
+        "Выбрать для неё бренд или товар нельзя: посылка одна на всю корзину.</div>";
+    }
+    /* …and the same for a product id the catalogue no longer has: the row is
+       drawn from the id itself rather than falling back to the search box,
+       which would look exactly like «nothing chosen» over a code that has
+       one. «Убрать» is still there for an owner who wants to change it. */
+    var picked = null;
+    if (f.scope === "product" && f.scopeValue) {
+      picked = byIdOrNull(String(f.scopeValue)) ||
+        { id: String(f.scopeValue), brand: "", name: String(f.scopeValue) };
+    }
+    var body = "";
+    if (f.scope === "brand") {
+      var chosen = String(f.scopeValue || "");
+      var list = promoBrandList();
+      /* A code saved for a brand the catalogue no longer carries keeps that
+         brand as an option of its own. Without this the select would open on
+         «Выберите бренд» and the next «Сохранить» would quietly widen the code
+         to the whole shop — an edit the owner never made, to a code he opened
+         only to change its dates. */
+      if (chosen && list.indexOf(chosen) < 0) list = [chosen].concat(list);
+      body = '<label class="adm-field" style="margin-top:10px">Бренд' +
+        '<select class="adm-input" data-promobrand>' +
+        '<option value=""' + (chosen ? "" : " selected") + ">Выберите бренд</option>" +
+        list.map(function (b) {
+          return '<option value="' + esc(b) + '"' + (b === chosen ? " selected" : "") + ">" + esc(b) + "</option>";
+        }).join("") + "</select></label>";
+    } else if (f.scope === "product") {
+      body = picked
+        ? '<div class="adm-list adm-list--flat" style="margin-top:10px"><div class="adm-row">' +
+            // no brand = a product this build's catalogue no longer has, so
+            // there is no picture to draw either — the id is all there is
+            (picked.brand ? '<span class="adm-thumb adm-thumb--sm">' + media(picked, 0, "ph") + "</span>" : "") +
+            '<span class="adm-row__body"><span class="adm-row__nm">' +
+              esc(picked.brand ? picked.brand + " — " + picked.name : picked.name) + "</span></span>" +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoproddel>Убрать</button></div></div>'
+        : '<label class="adm-field" style="margin-top:10px">Найдите товар — по названию или бренду' +
+            '<input class="adm-input" data-promoq value="' + esc(S.promoQ || "") + '" placeholder="Например: Davines шампунь"></label>' +
+          '<div id="admpromopicks">' + promoPicksHTML(promoProductMatches()) + "</div>";
+    }
+    return '<div style="margin-top:14px"><div class="adm-sec__t">На что действует</div>' +
+      '<div class="adm-chips" role="group" aria-label="На что действует промокод">' + PROMO_SCOPE_ROWS.map(function (s) {
+        return '<button class="adm-chip" data-promoscope="' + s[0] + '" aria-current="' + (f.scope === s[0]) + '">' +
+          s[1] + "</button>";
+      }).join("") + "</div>" + body +
+      '<p class="adm-hint" style="margin-top:8px">' + (f.scope === "order"
+        ? "Скидка снимется со всего заказа, кроме подарочных карт."
+        : "Скидка снимется только с подходящих строк заказа — остальное покупатель оплатит полностью.") +
+      "</p></div>";
+  }
+  function promoPicksHTML(matches) {
+    if (!String(S.promoQ || "").trim()) return "";
+    if (!matches.length) return '<div class="adm-hint">Ничего не нашлось — попробуйте другое слово.</div>';
+    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoprodpick="' + esc(p.id) + '">Выбрать</button></div>';
+    }).join("") + "</div>";
   }
   /* The inline form of the spec: a mono uppercase code, three kind chips, the
      value and the minimum order — with the three rarer conditions (until when,
@@ -22088,6 +22439,7 @@
           '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" value="' +
           esc(String(f.minSubtotal)) + '"></label>' +
       "</div>" +
+      promoScopeFormHTML(f) +
       '<details class="adm-fold"><summary class="adm-link" data-promomore>Срок, число использований и заметка</summary>' +
         '<div style="padding-top:12px">' +
           '<label class="adm-field">Действует до — пусто, если бессрочно' +
@@ -22116,7 +22468,10 @@
       (S.promoForm ? promoFormHTML() : "") +
       (list.length
         ? '<div class="adm-list">' + list.map(function (p) {
-            var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
+            // …with «на бренд Davines» right after the size of the discount,
+            // because that is the half of a scoped code the list cannot imply
+            var meta = [promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]
+              .filter(Boolean).join(" · ");
             /* The same three lines as «Письма» (admin.css, .adm-row--lines):
                the code, the grey line of conditions, and a third line with the
                switch on the left and «Удалить» on the right. The row itself
@@ -22156,6 +22511,11 @@
   function promoFormPayload() {
     var f = S.promoForm;
     var text = function (v) { return String(v == null ? "" : v).trim(); };
+    /* «На что действует» travels as a pair, and free delivery never carries
+       one: the server refuses kind+scope together (validatePromo), so sending
+       a scope the owner cannot even see on screen would turn a save he made
+       correctly into a refusal he cannot explain. */
+    var scope = f.kind === "free_shipping" ? "order" : (f.scope || "order");
     var body = {
       code: String(f.code || "").trim().toUpperCase(),
       kind: f.kind,
@@ -22164,7 +22524,9 @@
       endsAt: f.endsAt ? new Date(f.endsAt + "T23:59:59Z").toISOString() : null,
       maxUses: text(f.maxUses),
       note: f.note || "",
-      active: f.active !== false
+      active: f.active !== false,
+      scope: scope,
+      scopeValue: scope === "order" ? null : text(f.scopeValue)
     };
     return body;
   }
@@ -22174,6 +22536,9 @@
     bad_min: "Минимальная сумма заказа выглядит неправдоподобно.",
     bad_date: "Проверьте дату окончания.",
     bad_uses: "Число использований должно быть целым и больше нуля.",
+    bad_scope: "Выберите, на что действует код: весь заказ, бренд или товар.",
+    bad_scope_value: "Выберите бренд или товар — без этого код не на что применить.",
+    scope_free_shipping: "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
   function savePromo() {
@@ -31675,7 +32040,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -33279,6 +33644,27 @@
       if (S.promoForm) { S.promoForm.kind = d.promokind; render(); refocus('[data-promokind="' + d.promokind + '"]'); }
       return;
     }
+    /* «На что действует» — the same chip idiom one row below. Switching away
+       from a brand or a product clears what was chosen there rather than
+       keeping it out of sight: the pair {scope, scopeValue} is one answer, and
+       half of it left behind is what would be saved on the next tap. */
+    if (d.promoscope) {
+      if (S.promoForm) {
+        S.promoForm.scope = d.promoscope;
+        S.promoForm.scopeValue = "";
+        S.promoQ = "";
+        render(); refocus('[data-promoscope="' + d.promoscope + '"]');
+      }
+      return;
+    }
+    if (d.promoprodpick) {
+      if (S.promoForm) { S.promoForm.scopeValue = d.promoprodpick; S.promoQ = ""; render(); }
+      return;
+    }
+    if (d.promoproddel !== undefined) {
+      if (S.promoForm) { S.promoForm.scopeValue = ""; S.promoQ = ""; render(); refocus("[data-promoq]"); }
+      return;
+    }
     if (d.admcamerahelp !== undefined) {
       toast("iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера");
       return;
@@ -33396,8 +33782,11 @@
         S.promoForm = {
           editing: true, code: found.code, kind: found.kind, value: found.value,
           minSubtotal: found.minSubtotal, endsAt: found.endsAt ? String(found.endsAt).slice(0, 10) : "",
-          maxUses: found.maxUses == null ? "" : found.maxUses, note: found.note || "", active: found.active
+          maxUses: found.maxUses == null ? "" : found.maxUses, note: found.note || "", active: found.active,
+          // a code saved before 170 has neither field; both read as «весь заказ»
+          scope: found.scope || "order", scopeValue: found.scopeValue || ""
         };
+        S.promoQ = "";
         S.promoFormErr = ""; render();
       }
       return;
@@ -34115,6 +34504,14 @@
       else S.promoForm[pf] = t.value;
       if (pf === "code" && t.value !== S.promoForm.code) t.value = S.promoForm.code;
     }
+    /* The promo form's product search. Same rule as «Рассылка» next door: the
+       list of answers is repainted in place, the form is not re-rendered, so
+       the caret stays where the owner's thumb left it. */
+    else if (t.matches("[data-promoq]")) {
+      S.promoQ = t.value;
+      var picks = document.getElementById("admpromopicks");
+      if (picks) { picks.innerHTML = promoPicksHTML(promoProductMatches()); translateTree(picks); }
+    }
     /* The set editor, same rule as the promo form above: every field here is
        one the owner is in the middle of typing in, so nothing renders. Only
        the «сумма по отдельности» line is repainted, because that is the
@@ -34376,6 +34773,12 @@
         if (t.value === "fixed" && !(Number(S.promoForm.value) > 0)) S.promoForm.value = 5;
         render();
       }
+    }
+    /* «Бренд» — a native <select> of twenty-six names, so the phone's own
+       wheel does the scrolling. Only the hint under it depends on the choice,
+       and it says the same thing either way, so nothing is re-rendered. */
+    else if (t.matches("[data-promobrand]")) {
+      if (S.promoForm) S.promoForm.scopeValue = t.value;
     }
     /* The set editor's two <select>s. The size decides the price of that
        part, so both redraw — the «сумма по отдельности» hint has to follow. */

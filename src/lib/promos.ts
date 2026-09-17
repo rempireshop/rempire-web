@@ -3,13 +3,17 @@ import { query, withTx } from "@/lib/db";
 /**
  * Promo codes — quote, consume, and the admin's CRUD.
  *
- * Storage: db/migrations/060_promo_codes.sql (promo_codes + promo_code_uses).
+ * Storage: db/migrations/060_promo_codes.sql (promo_codes + promo_code_uses)
+ * and db/migrations/170_promo_scope.sql (scope + scope_value — a code that
+ * applies to one brand or one product rather than to the whole basket).
  *
  * Who calls what
- *   · quotePromo(code, subtotal, shipping) — from createOrder and from the
- *     public POST /api/promos/check. Read-only: it says what the code WOULD
- *     take off this basket. Nothing is spent, so a checkout that is abandoned
- *     on the bank's page costs the shop no usage.
+ *   · quotePromo(code, subtotal, shipping, lines) — from createOrder and from
+ *     the public POST /api/promos/check. Read-only: it says what the code
+ *     WOULD take off this basket. Nothing is spent, so a checkout that is
+ *     abandoned on the bank's page costs the shop no usage. `lines` is the
+ *     basket line by line; a brand/product code is priced on the matching
+ *     lines ONLY and cannot be priced without them.
  *   · consumePromo(code, orderId)          — from src/lib/payments/apply.ts on
  *     the single transition into `paid`, next to the gift-card redeem. One
  *     conditional UPDATE plus a unique (code, order_id) row, so a webhook
@@ -26,11 +30,28 @@ export type PromoKind = "percent" | "fixed" | "free_shipping";
 
 export const PROMO_KINDS: readonly PromoKind[] = ["percent", "fixed", "free_shipping"];
 
+/**
+ * What a code is allowed to touch — db/migrations/170_promo_scope.sql.
+ *
+ *   order    the whole basket, which is every code that existed before 170
+ *   brand    only the lines of one brand, as the catalogue spells it
+ *   product  only the lines of one product id
+ *
+ * A scoped code discounts the MATCHING LINES ONLY. Renat chose that over the
+ * whole-basket readings himself: ten per cent off a 200 € order for adding one
+ * 9 € bottle is not a promotion, it is a hole.
+ */
+export type PromoScope = "order" | "brand" | "product";
+
+export const PROMO_SCOPES: readonly PromoScope[] = ["order", "brand", "product"];
+
 /** Ceilings the admin and the assistant are both held to. */
 export const PROMO_MAX_CODE = 24;
 export const PROMO_MAX_PERCENT = 90;
 export const PROMO_MIN_PERCENT = 1;
 export const PROMO_MAX_FIXED = 200;
+/** A brand name or a product id — both comfortably shorter than this. */
+export const PROMO_MAX_SCOPE_VALUE = 80;
 
 export interface Promo {
   code: string;
@@ -44,6 +65,15 @@ export interface Promo {
   active: boolean;
   note: string | null;
   createdAt: string;
+  /**
+   * 'order' unless the owner narrowed the code — see PromoScope. Optional in
+   * the type, and absent means 'order': every code written before migration
+   * 170, in the database or in a literal, is a whole-basket code, and reading
+   * a missing value as anything narrower would silently stop one working.
+   */
+  scope?: PromoScope;
+  /** The brand name or the product id, null for a whole-basket code. */
+  scopeValue?: string | null;
 }
 
 interface PromoRow {
@@ -58,6 +88,8 @@ interface PromoRow {
   active: boolean;
   note: string | null;
   created_at: Date | string;
+  scope?: string | null;
+  scope_value?: string | null;
 }
 
 const cents = (n: number) => Math.round(n * 100) / 100;
@@ -66,6 +98,12 @@ const iso = (v: Date | string | null) =>
   v == null ? null : v instanceof Date ? v.toISOString() : String(v);
 
 function toPromo(r: PromoRow): Promo {
+  /* A row read back from a database that has not run migration 170 yet (or a
+     literal written in a test before this existed) has no scope at all; that
+     reads as the old meaning, «весь заказ», never as a narrower code nobody
+     asked for. */
+  const scope = PROMO_SCOPES.includes(r.scope as PromoScope) ? (r.scope as PromoScope) : "order";
+  const scopeValue = scope === "order" ? null : (r.scope_value ?? null) || null;
   return {
     code: r.code,
     kind: r.kind,
@@ -78,10 +116,15 @@ function toPromo(r: PromoRow): Promo {
     active: r.active !== false,
     note: r.note ?? null,
     createdAt: iso(r.created_at) as string,
+    /* …and a scope that lost its value is not a code that discounts nothing,
+       it is a whole-basket code — the constraint in 170 makes the pair
+       impossible, so this only ever fires for a hand-edited row. */
+    scope: scopeValue ? scope : "order",
+    scopeValue,
   };
 }
 
-const COLS = `code, kind, value, min_subtotal, starts_at, ends_at, max_uses, used, active, note, created_at`;
+const COLS = `code, kind, value, min_subtotal, starts_at, ends_at, max_uses, used, active, note, created_at, scope, scope_value`;
 
 /* ---------- codes ------------------------------------------------------- */
 
@@ -117,7 +160,30 @@ export type PromoError =
   | "not_started"
   | "expired"
   | "used_up"
-  | "min_subtotal";
+  | "min_subtotal"
+  /** A brand/product code and a basket with none of it in — see promoBaseFor(). */
+  | "no_match";
+
+/**
+ * One basket line as the promo rules see it. Deliberately loose: the order's
+ * own OrderItem satisfies it (src/lib/orders.ts), and so does the much smaller
+ * shape the checkout's preview endpoint builds out of the cart.
+ */
+export interface PromoBasketLine {
+  id?: string | null;
+  /** "product" | "bundle" | "gift" — a gift card never matches anything. */
+  kind?: string | null;
+  brand?: string | null;
+  sum?: number | string | null;
+}
+
+/** What a scoped code actually found in this basket. */
+export interface PromoMatch {
+  /** Euro of matching goods — the base a percent is taken on, and a fixed code's ceiling. */
+  base: number;
+  /** The product ids it matched, for the record kept on the order. */
+  lines: string[];
+}
 
 export interface PromoQuote {
   ok: boolean;
@@ -131,6 +197,14 @@ export interface PromoQuote {
   /** What the basket has to reach — surfaced so the shop can say «ещё 12 €». */
   minSubtotal?: number;
   value?: number;
+  /** 'order' | 'brand' | 'product' — what the code is allowed to touch. */
+  scope?: PromoScope;
+  /** The brand name or product id behind a narrowed code, null otherwise. */
+  scopeValue?: string | null;
+  /** What the discount was computed on — the whole goods for 'order', the matching lines otherwise. */
+  base?: number;
+  /** The matching product ids, so the order can record what it discounted. */
+  lines?: string[];
 }
 
 const NO: (e: PromoError, extra?: Partial<PromoQuote>) => PromoQuote = (e, extra) => ({
@@ -141,31 +215,104 @@ const NO: (e: PromoError, extra?: Partial<PromoQuote>) => PromoQuote = (e, extra
   ...extra,
 });
 
-/** The pure half: a row plus a basket in, a discount out. No I/O. */
+/** «Kevin.Murphy» and «kevin.murphy  » are the same brand; nothing else folds. */
+function brandKey(v: unknown): string {
+  return String(v ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Does this line fall inside the code's scope?
+ *
+ * A GIFT-CARD line never does — not for a brand code, not for a product code,
+ * not even for a whole-basket one. Its face value is money the shop will owe
+ * back in full when the card is spent, so a percent off it is a straight cash
+ * loss the promo repeats for as long as it lives (audit 14.09.2026). The
+ * whole-basket path already gets this right one level up, because createOrder
+ * hands quotePromo a gift-free subtotal; saying it again here is what keeps a
+ * SCOPED code from being the way back in — a product code whose scope_value is
+ * a «gift:100» line would otherwise match it exactly.
+ *
+ * A SET («bundle:…») never matches a brand either: it carries no brand of its
+ * own, it is sold at one price the owner typed for the set as a whole, and
+ * «−10 % на Davines» off a set that happens to contain one Davines bottle is
+ * arithmetic neither the shopper nor the owner could check. It matches a
+ * product code only if the code names the set itself.
+ */
+export function promoLineMatches(
+  scope: PromoScope,
+  scopeValue: string | null | undefined,
+  line: PromoBasketLine | null | undefined,
+): boolean {
+  if (!line) return false;
+  if (line.kind === "gift") return false;
+  if (scope === "order") return true;
+  const want = String(scopeValue ?? "").trim();
+  if (!want) return false;
+  if (scope === "brand") return !!line.brand && brandKey(line.brand) === brandKey(want);
+  return String(line.id ?? "") === want;
+}
+
+/** The matching lines' total, and which they were. Pure; no I/O. */
+export function promoBaseFor(
+  promo: Pick<Promo, "scope" | "scopeValue">,
+  lines: readonly PromoBasketLine[],
+): PromoMatch {
+  let base = 0;
+  const ids: string[] = [];
+  const scope = promo.scope ?? "order";
+  for (const line of lines) {
+    if (!promoLineMatches(scope, promo.scopeValue, line)) continue;
+    const sum = typeof line.sum === "number" ? line.sum : parseFloat(String(line.sum ?? ""));
+    if (Number.isFinite(sum) && sum > 0) base += sum;
+    const id = String(line.id ?? "");
+    if (id && ids.indexOf(id) < 0) ids.push(id);
+  }
+  return { base: Math.max(0, cents(base)), lines: ids };
+}
+
+/**
+ * The pure half: a row plus a basket in, a discount out. No I/O.
+ *
+ * `subtotal` is the goods the code may see — everything except the gift cards,
+ * which the caller has already taken out. `lines` is that same basket, line by
+ * line, and it is what a BRAND or PRODUCT code is priced on: without it such a
+ * code cannot be priced at all and comes back `no_match` rather than falling
+ * back to the whole basket. That direction is deliberate. Pricing a Davines
+ * code against the whole basket because the lines happened to be missing is
+ * exactly the hole the scope was invented to close, and it would open silently.
+ */
 export function quoteFromPromo(
   promo: Promo,
   subtotal: number,
   shipping: number,
   now: Date = new Date(),
+  lines: readonly PromoBasketLine[] | null = null,
 ): PromoQuote {
-  if (!promo.active) return NO("inactive", { code: promo.code });
+  const scope = promo.scope ?? "order";
+  const scopeValue = scope === "order" ? null : (promo.scopeValue ?? null);
+  const where = { scope, scopeValue };
+  if (!promo.active) return NO("inactive", { code: promo.code, ...where });
   if (promo.startsAt && new Date(promo.startsAt).getTime() > now.getTime()) {
-    return NO("not_started", { code: promo.code });
+    return NO("not_started", { code: promo.code, ...where });
   }
   if (promo.endsAt && new Date(promo.endsAt).getTime() <= now.getTime()) {
-    return NO("expired", { code: promo.code });
+    return NO("expired", { code: promo.code, ...where });
   }
   if (promo.maxUses != null && promo.used >= promo.maxUses) {
-    return NO("used_up", { code: promo.code });
+    return NO("used_up", { code: promo.code, ...where });
   }
 
   const goods = Math.max(0, cents(Number(subtotal) || 0));
   const ship = Math.max(0, cents(Number(shipping) || 0));
-  if (promo.minSubtotal > 0 && goods < promo.minSubtotal) {
-    return NO("min_subtotal", { code: promo.code, minSubtotal: promo.minSubtotal });
-  }
 
+  /* A free-delivery code is never scoped (db/migrations/170_promo_scope.sql
+     refuses the row, validatePromo refuses the body) — there is no matching
+     line to find, because the parcel is one line for the whole basket. Its
+     floor is therefore the whole goods subtotal, exactly as it always was. */
   if (promo.kind === "free_shipping") {
+    if (promo.minSubtotal > 0 && goods < promo.minSubtotal) {
+      return NO("min_subtotal", { code: promo.code, minSubtotal: promo.minSubtotal, ...where });
+    }
     return {
       ok: true,
       code: promo.code,
@@ -174,12 +321,43 @@ export function quoteFromPromo(
       freeShipping: true,
       minSubtotal: promo.minSubtotal,
       value: promo.value,
+      scope: "order",
+      scopeValue: null,
+      base: goods,
+      lines: [],
     };
   }
 
-  const raw =
-    promo.kind === "percent" ? (goods * promo.value) / 100 : Math.min(promo.value, goods);
-  const discount = cents(Math.max(0, Math.min(goods, raw)));
+  /* What the discount is computed on. For a whole-basket code that is the
+     goods subtotal the caller passed, unchanged since the codes existed; for a
+     narrowed one it is the matching lines and nothing else. */
+  let base = goods;
+  let matched: string[] = [];
+  if (scope !== "order") {
+    if (!lines) return NO("no_match", { code: promo.code, ...where, base: 0 });
+    const found = promoBaseFor(where, lines);
+    base = Math.min(goods, found.base);
+    matched = found.lines;
+    if (!(base > 0)) return NO("no_match", { code: promo.code, ...where, base: 0 });
+  }
+
+  /* «Минимальный заказ» on a narrowed code is a floor on the PART it applies
+     to, not on the basket around it: «Davines от 40 €» has to mean forty euro
+     of Davines. Reading it as the whole basket would sell the very thing the
+     scope refuses — spend 200 € on anything at all and the one Davines bottle
+     goes cheap. For scope 'order' the two readings are the same number, so no
+     code that exists today changes meaning. */
+  if (promo.minSubtotal > 0 && base < promo.minSubtotal) {
+    return NO("min_subtotal", { code: promo.code, minSubtotal: promo.minSubtotal, ...where, base });
+  }
+
+  /* percent — arithmetic on the subset.
+     fixed   — **capped at the matching lines' total**: «−20 € на Davines» on
+               12 € of Davines is 12 €, never 20. A fixed code that could spill
+               past its own subset would be a whole-basket code wearing a
+               brand's name. */
+  const raw = promo.kind === "percent" ? (base * promo.value) / 100 : Math.min(promo.value, base);
+  const discount = cents(Math.max(0, Math.min(base, raw)));
   return {
     ok: true,
     code: promo.code,
@@ -188,6 +366,10 @@ export function quoteFromPromo(
     freeShipping: false,
     minSubtotal: promo.minSubtotal,
     value: promo.value,
+    scope,
+    scopeValue,
+    base,
+    lines: matched,
   };
 }
 
@@ -202,17 +384,22 @@ export async function getPromo(code: unknown): Promise<Promo | null> {
 /**
  * What this code takes off a basket of `subtotal` goods and `shipping`
  * delivery. Read-only — call consumePromo once the payment is confirmed.
+ *
+ * `lines` is the same basket line by line, and a brand/product code needs it
+ * (see quoteFromPromo). A caller that has no lines to give gets `no_match` for
+ * such a code, never a whole-basket discount by accident.
  */
 export async function quotePromo(
   code: unknown,
   subtotal: number,
   shipping = 0,
+  lines: readonly PromoBasketLine[] | null = null,
 ): Promise<PromoQuote> {
   const norm = normalisePromoCode(code);
   if (!norm) return NO("bad_code");
   const promo = await getPromo(norm);
   if (!promo) return NO("not_found");
-  return quoteFromPromo(promo, subtotal, shipping);
+  return quoteFromPromo(promo, subtotal, shipping, new Date(), lines);
 }
 
 /* ---------- consume ----------------------------------------------------- */
@@ -284,6 +471,9 @@ export interface PromoInput {
   maxUses: number | null;
   active: boolean;
   note: string | null;
+  /** Absent = 'order', the whole basket — see Promo.scope. */
+  scope?: PromoScope;
+  scopeValue?: string | null;
 }
 
 export type PromoValidation =
@@ -367,6 +557,41 @@ export function validatePromo(raw: unknown): PromoValidation {
 
   const note = typeof x.note === "string" ? x.note.replace(/\s+/g, " ").trim().slice(0, 200) || null : null;
 
+  /* «На что действует» — db/migrations/170_promo_scope.sql.
+   *
+   * Three answers, not two. A body that NAMES a scope gets that one; a body
+   * that says nothing leaves both fields `undefined`, which upsertPromo reads
+   * as «не трогать» rather than as «весь заказ». The difference is money: the
+   * assistant's create_promo (src/app/api/assistant/actions.ts) builds its
+   * body from a whitelist that has no scope in it, so editing «−10 % на
+   * Davines» through it would otherwise quietly widen the code to the whole
+   * shop — with nothing on the confirm card to say so.
+   */
+  const rawScope = x.scope ?? x.scope_kind;
+  const said = !blank(rawScope);
+  if (said && !PROMO_SCOPES.includes(rawScope as PromoScope)) return { ok: false, error: "bad_scope" };
+  let scope: PromoScope | undefined = said ? (rawScope as PromoScope) : undefined;
+  let scopeValue: string | null | undefined = said ? null : undefined;
+
+  /* …with one answer that is never «не трогать»: a free-delivery code has no
+     line to apply to, because the parcel is one line for the whole basket. A
+     stated scope on one is refused outright rather than stored and ignored —
+     an owner who picked «Davines» and got a code that ships everything free
+     would have been told nothing — and an unstated one is written as 'order',
+     because a code that has just BECOME free delivery cannot keep a brand it
+     no longer has any arithmetic for (the table's constraint would refuse the
+     row, and a 500 is not an answer to a save). */
+  if (kind === "free_shipping") {
+    if (said && scope !== "order") return { ok: false, error: "scope_free_shipping" };
+    scope = "order";
+    scopeValue = null;
+  } else if (scope && scope !== "order") {
+    const raw = x.scopeValue ?? x.scope_value;
+    const v = typeof raw === "string" ? raw.replace(/\s+/g, " ").trim() : "";
+    if (!v || v.length > PROMO_MAX_SCOPE_VALUE) return { ok: false, error: "bad_scope_value" };
+    scopeValue = v;
+  }
+
   return {
     ok: true,
     value: {
@@ -379,6 +604,8 @@ export function validatePromo(raw: unknown): PromoValidation {
       maxUses,
       active: x.active === undefined ? true : x.active !== false,
       note,
+      scope,
+      scopeValue,
     },
   };
 }
@@ -395,11 +622,18 @@ export async function listPromos(limit = 200): Promise<Promo[]> {
 /**
  * Create or edit one code. `used` is never touched here — editing a code must
  * not hand back the uses it has already spent.
+ *
+ * …and neither does an edit that never mentioned the scope touch THAT. A null
+ * `$10` is «не сказано»: a new row takes 'order' (what every code was before
+ * migration 170), and an existing one keeps the brand or the product it was
+ * made for. Only a caller that names a scope can change one — see
+ * validatePromo, and the assistant's create_promo, which cannot name one.
  */
 export async function upsertPromo(input: PromoInput): Promise<Promo> {
+  const scope = input.scope ?? null;
   const rows = await query<PromoRow>(
-    `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note, scope, scope_value)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, coalesce($10::text, 'order'), $11::text)
      on conflict (code) do update set
        kind = excluded.kind,
        value = excluded.value,
@@ -408,7 +642,9 @@ export async function upsertPromo(input: PromoInput): Promise<Promo> {
        ends_at = excluded.ends_at,
        max_uses = excluded.max_uses,
        active = excluded.active,
-       note = excluded.note
+       note = excluded.note,
+       scope = coalesce($10::text, promo_codes.scope),
+       scope_value = case when $10::text is null then promo_codes.scope_value else $11::text end
      returning ${COLS}`,
     [
       input.code,
@@ -420,6 +656,8 @@ export async function upsertPromo(input: PromoInput): Promise<Promo> {
       input.maxUses,
       input.active,
       input.note,
+      scope,
+      scope && scope !== "order" ? input.scopeValue ?? null : null,
     ],
   );
   return toPromo(rows[0]);
