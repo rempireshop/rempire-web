@@ -10,8 +10,9 @@ import { addReview, approvedReviews, ratingFor, validateReview } from "@/lib/rev
  * POST /api/reviews/  { product, name, rating, text, lang, consent, website }
  *        → { ok: true, status: "pending" }
  *        `website` is the honeypot; `consent` must be true.
- *        Three a hour per IP. Everything lands as 'pending' — the owner
- *        approves it in the admin before anyone else sees it.
+ *        Three STORED reviews a hour per IP (thirty calls of any kind).
+ *        Everything lands as 'pending' — the owner approves it in the admin
+ *        before anyone else sees it.
  *
  * NB: POST to "/api/reviews/" WITH the trailing slash (trailingSlash: true).
  */
@@ -52,9 +53,15 @@ export async function GET(req: Request) {
   }
 }
 
+const HOUR = 60 * 60 * 1000;
+
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  if (rateLimit("review", ip, 3, 60 * 60 * 1000)) {
+  /* Two doors, and the cheap one first: a flood of anything at all, valid or
+     not, stops here, so nothing below is ever reached in bulk. The three-an-
+     hour limit that this endpoint is really about has moved past
+     validateReview — see the comment there. */
+  if (rateLimit("review_flood", ip, 30, HOUR)) {
     return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
   }
 
@@ -88,6 +95,18 @@ export async function POST(req: Request) {
        stored — telling it what gave it away only helps it come back. */
     if (check.error === "bot") return Response.json({ ok: true, status: "pending" });
     return Response.json({ ok: false, error: check.error }, { status: 400 });
+  }
+
+  /* Three a hour per IP — counted here, where a review is about to be STORED,
+     and not at the door. Two of the refusals above cannot be anticipated by
+     the form: a link or an address in the text, and a word on the profanity
+     list. The customer is told to take it out and sends the review again,
+     which used to spend one of the three; two such corrections and the shop
+     answered «Слишком много отзывов подряд — попробуйте через час» to somebody
+     who had not managed to leave a single one. A correction the shop itself
+     refused is not a review. */
+  if (rateLimit("review", ip, 3, HOUR)) {
+    return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
   }
 
   try {

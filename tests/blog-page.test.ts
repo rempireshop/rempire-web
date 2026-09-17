@@ -17,6 +17,7 @@ import { publishPost, upsertPost } from "@/lib/blog";
 import { postsNotPrerendered } from "@/lib/blog-page";
 import { createCustomProduct } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
+import { upsertOverride } from "@/lib/orders";
 import { setupDb, teardownDb } from "./helpers";
 
 const LIVE = "https://rempireshop.com";
@@ -219,6 +220,55 @@ describe("a post's page at request time", () => {
     expect((await postPage("", "no-such-post")).status).toBe(404);
     expect((await postPage("", "x".repeat(200))).status).toBe(404);
   });
+});
+
+/* «Товары из статьи» is the one part of this page a crawler — and a reader
+   with scripts off — takes a PRICE from: the SPA rebuilds the shelf from the
+   live feed, nobody else does. It read catalogue.min and nothing else until
+   17.09.2026, so it was flat where the shop says «от», and built-time where
+   the owner had repriced or switched a product off. */
+describe("«Товары из статьи» prices the shelf the way the shop does", () => {
+  const SIZED = "system-4-bio-botanical-shampoo";   // 75/250/500 мл — 9, 16, 25 €
+  const PLAIN = "easy-rider";                       // one size, 28 €
+
+  beforeEach(async () => {
+    await exec("truncate product_overrides restart identity cascade");
+  });
+
+  async function shelfOf(products: string[], seg: "" | "et" = ""): Promise<string> {
+    const row = await upsertPost({ ...POST, products });
+    await publishPost(row.id);
+    const html = await (await postPage(seg, row.slug)).text();
+    return (html.match(/<section class="sec blog__shelf">[\s\S]*?<\/section>/) || [""])[0];
+  }
+
+  it("says «от» for a product sold from several sizes, like the catalogue card does", async () => {
+    const shelf = await shelfOf([SIZED, PLAIN]);
+    expect(shelf).toContain('<span class="pre__pr num">от 9 €</span>');
+    expect(shelf).toContain('<span class="pre__pr num">28 €</span>');
+    // and in the article's own language
+    const et = await shelfOf([SIZED], "et");
+    expect(et).toContain('<span class="pre__pr num">alates 9 €</span>');
+  });
+
+  it("charges the owner's own price, not the one the last deploy was built with", async () => {
+    await upsertOverride(PLAIN, { price: 33.5 });
+    await upsertOverride(SIZED, { sizes: [{ size: "75 мл", price: 11 }, { size: "250 мл", price: 18 }] });
+    const shelf = await shelfOf([SIZED, PLAIN]);
+    expect(shelf).toContain('<span class="pre__pr num">33,50 €</span>');
+    expect(shelf).toContain('<span class="pre__pr num">от 11 €</span>');
+    expect(shelf).not.toContain(">28 €<");
+    expect(shelf).not.toContain(">от 9 €<");
+  });
+
+  it("leaves out a product the owner has switched off — the /p/ link would answer 404", async () => {
+    await upsertOverride(PLAIN, { hidden: true });
+    const shelf = await shelfOf([SIZED, PLAIN]);
+    expect(shelf).toContain(`href="/shop2/p/${SIZED}/"`);
+    expect(shelf).not.toContain(`href="/shop2/p/${PLAIN}/"`);
+    expect(shelf).not.toContain("Easy.Rider");
+  });
+
 });
 
 describe("the listing at request time", () => {

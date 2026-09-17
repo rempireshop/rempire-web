@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { resetRateLimits } from "@/lib/auth";
 import { exec } from "@/lib/db";
 import {
   addReview,
@@ -231,5 +232,66 @@ describe("review storage and moderation", () => {
       expect(await reviewsByCustomer(SIGNED_IN)).toEqual([]);
       expect((await listReviews()).find((r) => r.id === saved.id)!.email).toBe(null);
     });
+  });
+});
+
+/* ---------- the three-an-hour quota is about reviews, not about calls ----- */
+
+describe("POST /api/reviews/ — what spends one of the three an hour", () => {
+  const PRODUCT = "handmade-soap-666";
+
+  beforeAll(async () => { await setupDb(); });
+  afterAll(teardownDb);
+  beforeEach(async () => {
+    await exec("truncate reviews restart identity");
+    resetRateLimits();
+  });
+
+  async function post(ip: string, over: Record<string, unknown> = {}) {
+    const { POST } = await import("@/app/api/reviews/route");
+    const res = await POST(new Request("https://rempireshop.com/api/reviews/", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      body: JSON.stringify({ product: PRODUCT, name: "Андрей", rating: 5, text: GOOD.text, lang: "RU", consent: true, ...over }),
+    }));
+    return { status: res.status, body: (await res.json()) as { ok: boolean; error?: string; status?: string } };
+  }
+
+  /* A link and a word on the profanity list are the two refusals the form
+     cannot anticipate: the customer is told to take it out and sends the
+     review again. That used to spend one of the three, and two corrections
+     locked the customer out of the shop's review form for the hour. */
+  it("a correction the shop itself refused does not", async () => {
+    const ip = "203.0.113.41";
+    expect((await post(ip, { text: "Отличный шампунь, пишите мне на ivan@example.com за деталями." })).body.error).toBe("links");
+    expect((await post(ip, { text: "Отличный шампунь, а доставка — полная хуйня, честное слово." })).body.error).toBe("profanity");
+    expect((await post(ip, { text: "Слишком коротко" })).body.error).toBe("short_text");
+    // …and the review the customer finally got right is still accepted
+    const good = await post(ip);
+    expect(good.body).toMatchObject({ ok: true, status: "pending" });
+    expect(await listReviews()).toHaveLength(1);
+  });
+
+  it("three stored reviews still close the hour", async () => {
+    const ip = "203.0.113.42";
+    for (let i = 0; i < 3; i++) expect((await post(ip)).body.ok, `review ${i + 1}`).toBe(true);
+    const fourth = await post(ip);
+    expect(fourth.status).toBe(429);
+    expect(fourth.body.error).toBe("rate_limited");
+    expect(await listReviews()).toHaveLength(3);
+  });
+
+  it("…and a flood of refused calls is still stopped, just far higher up", async () => {
+    const ip = "203.0.113.43";
+    let refused = 0;
+    for (let i = 0; i < 40; i++) if ((await post(ip, { text: "нет" })).status === 429) refused++;
+    expect(refused).toBeGreaterThan(0);
+    expect(await listReviews()).toHaveLength(0);
+  });
+
+  it("one IP's hour is not another's", async () => {
+    for (let i = 0; i < 3; i++) await post("203.0.113.44");
+    expect((await post("203.0.113.44")).status).toBe(429);
+    expect((await post("203.0.113.45")).body.ok).toBe(true);
   });
 });

@@ -874,8 +874,7 @@
       "Опубликовать": "Avalda", "Отклонить": "Lükka tagasi",
       "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
         "Klientide arvustused. Poodi ei ilmu midagi iseenesest — kõigepealt loed, siis avaldad. Tagasi lükatud arvustust lihtsalt ei näidata.",
-      "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
-        "Arvustused pole veel saadaval — andmebaasi ühendatakse. Kui see tööle hakkab, ilmuvad uued arvustused siia ise.",
+      "Отзывы не загрузились — попробуйте ещё раз.": "Arvustused ei laadinud — proovi uuesti.",
       "Отзыв опубликован ✓": "Arvustus avaldatud ✓", "Отзыв отклонён ✓": "Arvustus tagasi lükatud ✓",
       "Не получилось — попробуйте ещё раз": "Ei õnnestunud — proovi uuesti",
       // главный баннер (hero) — витрина и редактор в админке
@@ -1006,6 +1005,7 @@
         "Brändid, millega Rempire’i salong töötab. Vajuta brändile — näitame kõike, mis laos on.",
       /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
       "Отзывов пока нет — станьте первым.": "Arvustusi veel pole — ole esimene.",
+      "Отзывы сейчас не загрузились — обновите страницу.": "Arvustusi ei õnnestunud laadida — värskenda lehte.",
       "Проверяем…": "Kontrollime…",
       "убрать": "eemalda",
       "Такого кода не бывает — проверьте написание.": "Sellist koodi ei saa olla — kontrolli kirjapilti.",
@@ -1494,6 +1494,7 @@
         "Kas kindlasti kustutada see artikkel? See läheb mustandisse — tekst jääb alles, kuid poes seda enam ei näe.",
       "Да, удалить": "Jah, kustuta",
       "Не получилось сохранить — попробуйте ещё раз.": "Salvestamine ei õnnestunud — proovi uuesti.",
+      "Не получилось открыть статью — попробуйте ещё раз.": "Artiklit ei õnnestunud avada — proovi uuesti.",
       "Статья слишком длинная — сократите текст и сохраните ещё раз.":
         "Artikkel on liiga pikk — lühenda teksti ja salvesta uuesti.",
       "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
@@ -3581,8 +3582,7 @@
       "Опубликовать": "Publish", "Отклонить": "Reject",
       "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
         "Customer reviews. Nothing appears in the shop by itself — you read first, then publish. A rejected review is simply not shown.",
-      "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
-        "Reviews aren't available yet — the database is being connected. Once it is live, new reviews show up here by themselves.",
+      "Отзывы не загрузились — попробуйте ещё раз.": "The reviews did not load — try again.",
       "Отзыв опубликован ✓": "Review published ✓", "Отзыв отклонён ✓": "Review rejected ✓",
       "Не получилось — попробуйте ещё раз": "That didn't work — please try again",
       // главный баннер (hero) — витрина и редактор в админке
@@ -3713,6 +3713,7 @@
         "The brands the Rempire salon works with. Tap a brand and we will show everything in stock.",
       /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
       "Отзывов пока нет — станьте первым.": "No reviews yet — be the first.",
+      "Отзывы сейчас не загрузились — обновите страницу.": "Reviews could not be loaded — refresh the page.",
       "Проверяем…": "Checking…",
       "убрать": "remove",
       "Такого кода не бывает — проверьте написание.": "That is not a valid code — check the spelling.",
@@ -4179,6 +4180,7 @@
         "Delete this article? It goes back to drafts — the text stays, but it will not be visible in the shop.",
       "Да, удалить": "Yes, delete",
       "Не получилось сохранить — попробуйте ещё раз.": "Could not save — try again.",
+      "Не получилось открыть статью — попробуйте ещё раз.": "Could not open the article — try again.",
       "Статья слишком длинная — сократите текст и сохраните ещё раз.":
         "The article is too long — shorten the text and save again.",
       "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
@@ -8166,10 +8168,13 @@
   }
 
   // ---------- helpers ----------
-  function eur(n) {
+  /** `L` — for the few places whose language is not the shopper's: the blog
+      editor writes a product card into an article in the ARTICLE's language,
+      and that text is stored and served to a crawler as it was written. */
+  function eur(n, L) {
     // ET/RU: «12,90 €»; EN: «€12.90» (whole euros drop the decimals in all three)
     var v = (Math.round(n * 100) / 100).toFixed(2);
-    if (S.lang === "EN") return "€" + v.replace(".00", "");
+    if ((L || S.lang) === "EN") return "€" + v.replace(".00", "");
     return v.replace(".", ",").replace(",00", "") + " €";
   }
   function num1(n) {
@@ -10658,7 +10663,13 @@
    *  in a price line, and the same UI_RX rule the catalogue's prices use. */
   function blogProductPrice(p, L) {
     var pro = proPrice(p, 0);
-    var money = eur(pro != null ? pro : p.price);
+    /* …and the NUMBER in that language too. eur() keys on S.lang, which is the
+       shop's language and not the article's, so the English text of an article
+       written from a Russian panel used to read «from 12,90 €» — the English
+       words around an Estonian-shaped price. The storefront card rebuilds
+       itself and never showed it; the stored marker, the server-rendered
+       article and a reader without JS all do. */
+    var money = eur(pro != null ? pro : p.price, L || "RU");
     return p.priceFrom ? trText("от " + money, L || "RU", false) : money;
   }
   function blogCleanNodes(parent, depth, cards) {
@@ -11643,7 +11654,8 @@
              with nothing yet says so and offers the form. */
           (function () {
             var db = dbReviewsFor(p);
-            var body = (db.length ? dbReviewsHTML(db) : emptyReviewsHTML()) + reviewFormHTML(p);
+            var body = (db.length ? dbReviewsHTML(db)
+              : reviewsUnknown(p) ? unknownReviewsHTML() : emptyReviewsHTML()) + reviewFormHTML(p);
             // «Отзывы (0)» on every young product reads as a verdict; with
             // nothing to show yet the heading is just the invitation
             return acc(db.length ? "Отзывы (" + db.length + ")" : "Отзывы", body, S.revAccOpen, "reviews");
@@ -11723,22 +11735,52 @@
   function emptyReviewsHTML() {
     return '<p class="muted revs__none">Отзывов пока нет — станьте первым.</p>';
   }
+  /* …and the one thing this line must never be said over is a product whose
+     reviews the shop could not read. GET /api/reviews/ answers ok:true with an
+     empty list and degraded:true when the database is out (src/app/api/reviews
+     route.ts) — the product page has to render either way — and the panel used
+     to store that, and a failed fetch, as «no reviews», so a product with a
+     dozen approved reviews invited the shopper to be the first. */
+  function unknownReviewsHTML() {
+    return '<p class="muted revs__none">Отзывы сейчас не загрузились — обновите страницу.</p>';
+  }
 
   /* ---------- features: real reviews from the database ---------------------
      The only reviews the shop shows. Rows that real customers wrote and Renat
      approved, each with a «Проверенный отзыв» badge.
      Read:  GET  /api/reviews/?product=<id>
      Write: POST /api/reviews/  → status «pending» until approved. */
+  /* Three states, not two: an array is the shop's answer, `null` is a request
+     in the air, and `false` is «the shop could not say» — a degraded answer or
+     a fetch that never came back. The third used to be stored as an empty
+     array, which is a claim about the product and not about the request.
+     Unknown is worth asking again; not on every repaint, though, or an outage
+     is met with one request per render. */
+  var REV_RETRY_MS = 30000;
+  var revAskedAt = {};
   function loadReviews(id) {
-    if (!id || S.dbReviews[id] !== undefined) return;
-    S.dbReviews[id] = null;                       // in flight — never asked twice
+    if (!id) return;
+    var have = S.dbReviews[id];
+    if (have === null || Array.isArray(have)) return;       // in flight, or answered
+    if (have === false && Date.now() - (revAskedAt[id] || 0) < REV_RETRY_MS) return;
+    S.dbReviews[id] = null;
+    revAskedAt[id] = Date.now();
     fetch("/api/reviews/?product=" + encodeURIComponent(id))
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        S.dbReviews[id] = (j && j.ok && j.reviews) || [];
-        if (S.screen === "product" && S.productId === id && S.dbReviews[id].length) render();
+        var got = j && j.ok && !j.degraded && j.reviews ? j.reviews : false;
+        S.dbReviews[id] = got;
+        // an empty answer draws exactly what the first paint already drew
+        if (S.screen === "product" && S.productId === id && (got === false || got.length)) render();
       })
-      .catch(function () { S.dbReviews[id] = []; });
+      .catch(function () {
+        S.dbReviews[id] = false;
+        if (S.screen === "product" && S.productId === id) render();
+      });
+  }
+  /** True while the shop cannot say whether this product has reviews. */
+  function reviewsUnknown(p) {
+    return S.dbReviews[p.id] === false;
   }
   function dbReviewsFor(p) {
     var list = S.dbReviews[p.id];
@@ -11756,6 +11798,24 @@
           '<span class="revbadge">Проверенный отзыв</span></div>' +
           '<p class="rev__t">' + esc(r.text) + "</p></div>";
       }).join("") + "</div>";
+  }
+  function revBlankForm() {
+    return { name: "", rating: 0, text: "", website: "", consent: false };
+  }
+  /**
+   * Walking on to another product: the open form, its error line and the
+   * <details> all belong to the product being left — and so does what was
+   * TYPED in it. S.revForm is one global draft and sendReview() files it
+   * against `S.productId` as it reads at send time, so a review written about
+   * a shampoo and not sent, followed by a tap through to a T-shirt, came back
+   * filled in and ready under the T-shirt's «Оставить отзыв» — one press from
+   * being filed against a product it does not describe. Cleared only on a real
+   * change of product: returning to the same page (Back, a second tap on the
+   * same card) must not cost the shopper the words already typed.
+   */
+  function revLeaveProduct(id) {
+    if (S.productId !== id) S.revForm = revBlankForm();
+    S.revOpen = false; S.revState = ""; S.revAccOpen = false;
   }
   function reviewReady() {
     return S.revForm.name.trim().length >= 2 &&
@@ -11845,7 +11905,7 @@
       .then(function (j) {
         if (j && j.ok) {
           S.revState = "sent";
-          S.revForm = { name: "", rating: 0, text: "", website: "", consent: false };
+          S.revForm = revBlankForm();
         } else S.revState = (j && j.error) || "unavailable";
         render();
       })
@@ -12134,22 +12194,45 @@
   }
 
   /* ---------- features: review moderation in the admin ------------------- */
+  /* Tapping «Опубликованные» over «Новые» replaces the whole list — the route
+     answers one status' worth (loadAdminReviews sends S.admRevFilter). Until
+     17.09.2026 the tap only set the filter and asked again, leaving the
+     PREVIOUS status' rows drawing under the new chip until the answer landed
+     — and, when the answer never landed, for good: «a refresh that failed
+     keeps the list» is the right rule for the same list and the wrong one for
+     a different one. The queue in front of the owner then said «Новый» under
+     «Отклонённые». S.admReviews.loading is the difference: the rows are gone,
+     the three counts stay (they are the whole table's, not this chip's), and
+     the skeleton says the screen is still asking. */
+  function admReviewsFilter(status) {
+    if (S.admRevFilter !== status) {
+      S.admRevFilter = status;
+      S.admReviews = { reviews: [], counts: admReviewCounts(), loading: true };
+    }
+    loadAdminReviews(true);
+    render();
+  }
   function loadAdminReviews(force) {
-    if (S.admReviews && !force) return;
-    if (loadAdminReviews._busy) return;
-    loadAdminReviews._busy = true;
-    fetch("/api/admin/reviews/?status=" + encodeURIComponent(S.admRevFilter))
+    if (S.admReviews && !S.admReviews.loading && !force) return;
+    var want = S.admRevFilter;
+    // …and a request already in the air for THIS chip is the one to wait for;
+    // one still in the air for the chip the owner has just left is not
+    if (loadAdminReviews._busy === want) return;
+    loadAdminReviews._busy = want;
+    fetch("/api/admin/reviews/?status=" + encodeURIComponent(want))
       .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
       .then(function (j) {
-        loadAdminReviews._busy = false;
+        if (loadAdminReviews._busy === want) loadAdminReviews._busy = "";
+        if (want !== S.admRevFilter) return;   // an answer about a chip nobody is on
         // a REFRESH that failed keeps the list on screen (loadOverview's rule)
         if (j && j.ok) S.admReviews = j;
-        else if (!S.admReviews) S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: (j && j.error) || "unavailable" };
+        else if (!S.admReviews || S.admReviews.loading) S.admReviews = { reviews: [], counts: admReviewCounts(), error: (j && j.error) || "unavailable" };
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       })
       .catch(function () {
-        loadAdminReviews._busy = false;
-        if (!S.admReviews) S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: "unavailable" };
+        if (loadAdminReviews._busy === want) loadAdminReviews._busy = "";
+        if (want !== S.admRevFilter) return;
+        if (!S.admReviews || S.admReviews.loading) S.admReviews = { reviews: [], counts: admReviewCounts(), error: "unavailable" };
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       });
   }
@@ -12187,6 +12270,22 @@
     if (S.admRevFilter && S.admRevFilter !== status) list.splice(at, 1);
     return true;
   }
+  /* One review, one call at a time — see the `moderate_review` branch of
+     srvPush(). «Опубликовать» and the «Отменить» a second later are two PATCHes
+     on the same row through the same door, with no sequence and no
+     expected-previous-status, and setReviewStatus is an unconditional UPDATE
+     (src/lib/reviews.ts): whichever commits LAST wins. On a stalled connection
+     that can be the first one, and the review the owner took back stays
+     published on the product page. Chained by review id, so the undo leaves
+     only once the call it undoes has settled; the chain link is dropped again
+     when it is the last one, so this never grows. */
+  var REVQ = {};
+  function revQueue(id, run) {
+    var next = (REVQ[id] || Promise.resolve()).then(run, run);
+    REVQ[id] = next;
+    next.then(function () { if (REVQ[id] === next) delete REVQ[id]; });
+    return next;
+  }
   /* Publishing or hiding a review is a quick, reversible edit: it applies at
      once and the toast offers to take it back (README § State). That is why it
      goes through demoApply() as a `moderate_review` action — the journal entry
@@ -12213,10 +12312,14 @@
       return '<button class="adm-chip" data-admrevfilter="' + tt[0] + '" aria-current="' + (S.admRevFilter === tt[0]) + '">' +
         tt[1] + " " + (counts[tt[0]] || 0) + "</button>";
     }).join("") + "</div>";
-    if (!data) return chips + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    if (!data || data.loading) return chips + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    /* «…новые отзывы появятся здесь сами» is what this used to promise, and
+       nothing in the panel schedules that: the queue is fetched once and a
+       failed fetch is never retried on its own. The same line and the same
+       «Повторить» «Блог», «Обзор» and «Заказы» give instead. */
     if (data.error) {
-      return chips + '<div class="adm-empty">Отзывы пока недоступны — база подключается. ' +
-        "Как только она заработает, новые отзывы появятся здесь сами.</div>";
+      return chips + '<div class="adm-error"><span>Отзывы не загрузились — попробуйте ещё раз.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="reviews">Повторить</button></div>';
     }
     if (!data.reviews.length) return chips + '<div class="adm-empty">Отзывов пока нет</div>';
     return chips + '<div class="adm-list">' + data.reviews.map(admReviewRowHTML).join("") + "</div>";
@@ -13165,6 +13268,8 @@
       author: p.author || "Rempire", publishedAt: p.publishedAt || null
     };
   }
+  /** A GET that did not come back is not a save that did not go through. */
+  var BLOG_OPEN_ERR = "Не получилось открыть статью — попробуйте ещё раз.";
   function openBlogEditor(id) {
     if (S.adminBlogEditBusy) return;
     S.adminBlogEditBusy = true; render();
@@ -13183,11 +13288,15 @@
            with a post — a failed one leaves the owner on the list he tapped
            from, and a list that jumps to its top is a second surprise. */
         window.scrollTo({ top: 0 });
-      } else toast("Не получилось сохранить — попробуйте ещё раз.");
+      /* …and when it did not come back, the sentence is about the fetch that
+         failed. This used to say «Не получилось сохранить», which is the one
+         thing that was certainly not happening: nothing had been typed yet,
+         and the owner reading it looks for work he has just lost. */
+      } else toast(BLOG_OPEN_ERR);
       render();
     }).catch(function () {
       S.adminBlogEditBusy = false;
-      toast("Не получилось сохранить — попробуйте ещё раз.");
+      toast(BLOG_OPEN_ERR);
       render();
     });
   }
@@ -13290,8 +13399,21 @@
     return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt,
       d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
   }
-  function blogMarkSaved(d) {
-    S.adminBlogSaved = d ? blogDraftSig(d) : "";
+  var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt",
+    "tagsText", "products", "seoTitle", "seoDesc", "author"];
+  /** The same fields, detached from the draft — what a save compares against
+      once the draft has moved on under it. See saveBlogFields(). */
+  function blogDraftSnap(d) {
+    var out = {}, i, k, v;
+    for (i = 0; i < BLOG_SIG_FIELDS.length; i++) {
+      k = BLOG_SIG_FIELDS[i]; v = d[k];
+      out[k] = v && typeof v === "object" ? JSON.parse(JSON.stringify(v)) : v;
+    }
+    return out;
+  }
+  /** `sig` — the yardstick to keep, when it is not simply the draft as it is now. */
+  function blogMarkSaved(d, sig) {
+    S.adminBlogSaved = typeof sig === "string" ? sig : (d ? blogDraftSig(d) : "");
     S.adminBlogConfirmBack = false;
     S.adminBlogConfirmPublish = "";
   }
@@ -13546,6 +13668,15 @@
        acts on it instead: saveBlogDraft, publishBlogPost, the language bar
        and the way out of the editor. */
     var body = blogFieldsPayload(d);
+    /* What LEFT, not what is in the draft when the answer lands. «Сохранено ✓»
+       is blogDraftSig(d) === S.adminBlogSaved, and that yardstick used to be
+       taken in the response handler — while blogSync() goes on writing every
+       keystroke into the same draft, with no busy check, for as long as the
+       request is in the air. A word typed in that gap was folded into the
+       signature recorded as «saved», so the panel said the article was in step
+       with the server over text the server had never seen, walked out of the
+       editor without asking, and the word was gone. */
+    var sent = blogDraftSnap(d);
     var req = d.id
       ? apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body))
       : apiSend("/api/admin/blog/", "POST", body);
@@ -13553,7 +13684,10 @@
       if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error((r.body && r.body.error) || "save_failed");
       var p = r.body.post;
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
-      if (d === S.adminBlogEdit) blogMarkSaved(d);   // «не сохранено» is answered
+      // …the one field the row decides and not the draft: an auto slug is the
+      // server's word, so the yardstick carries the server's word too
+      sent.slug = p.slug;
+      if (d === S.adminBlogEdit) blogMarkSaved(d, blogDraftSig(sent));   // «не сохранено» is answered
       S.adminBlog = null; // the list is stale now
       blogForget();       // …and so is this tab's copy of the shop's blog
       return p;
@@ -29454,20 +29588,30 @@
     /* «Клиенты → Отзывы»: the moderation call, and the same call with the
        previous status when the toast's «Отменить» sends the entry back. */
     else if (a.type === "moderate_review") {
-      apiSend("/api/admin/reviews/", "PATCH", { id: a.id, status: a.value }).then(function (r) {
-        // it went through and the screen already shows exactly this — the list
-        // is only worth fetching again when the server disagreed with it
-        if (r.status === 200 && r.body.ok) return;
-        toast("Не получилось сохранить отзыв");
-        loadAdminReviews(true);
-      /* The same sentence when the call never came back as JSON at all — a
-         504 HTML page, a dropped connection, a phone that lost the network.
-         apiJson() throws on those, so they landed here, and here said
-         nothing: the green «Отзыв опубликован» stayed on screen over a
-         review the shop had not published. The refetch cannot cover for it
-         either — loadAdminReviews() keeps the list it already has when it
-         fails too, and its _busy guard can swallow this call outright. */
-      }).catch(function () { toast("Не получилось сохранить отзыв"); loadAdminReviews(true); });
+      revQueue(a.id, function () {
+        return apiSend("/api/admin/reviews/", "PATCH", { id: a.id, status: a.value }).then(function (r) {
+          // it went through and the screen already shows exactly this — the
+          // list is only worth fetching again when the server disagreed with it
+          if (r.status === 200 && r.body.ok) {
+            /* …but «Сделать сегодня» counts this review, and that figure lives
+               in the overview cache, which is asked once per session. The first
+               screen of the panel went on saying «2 отзыва ждут проверки» over
+               a queue the owner had just emptied — and it is the screen he
+               opens the panel on. Same door admOrdersChanged() uses. */
+            loadOverview(true);
+            return;
+          }
+          toast("Не получилось сохранить отзыв");
+          loadAdminReviews(true);
+        /* The same sentence when the call never came back as JSON at all — a
+           504 HTML page, a dropped connection, a phone that lost the network.
+           apiJson() throws on those, so they landed here, and here said
+           nothing: the green «Отзыв опубликован» stayed on screen over a
+           review the shop had not published. The refetch cannot cover for it
+           either — loadAdminReviews() keeps the list it already has when it
+           fails too, and its _busy guard can swallow this call outright. */
+        }).catch(function () { toast("Не получилось сохранить отзыв"); loadAdminReviews(true); });
+      });
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
     else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
@@ -33253,11 +33397,12 @@
     if (d.goCat !== undefined) { goCat(d.goCat); return; }
     if (d.goBrand) { goBrand(d.goBrand); return; }
     if (d.goProduct) {
+      // features: the video and the review form belong to the product we left
+      revLeaveProduct(d.goProduct);
       S.productId = d.goProduct; S.size = 0; S.qty = 1;
       var np = byId(d.goProduct);
       S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
-      // features: the video and the review form belong to the product we left
-      S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;
+      S.videoOn = false;
       go("product"); return;
     }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
@@ -33495,6 +33640,7 @@
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
       else if (d.admreload === "blog") loadAdminBlog(true);
+      else if (d.admreload === "reviews") loadAdminReviews(true);
       else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       // the one GET behind «Цены и баллы», «Доставлен» без кнопки and the banks
@@ -35231,7 +35377,7 @@
       return;
     }
     if (d.revsend !== undefined) { sendReview(); return; }
-    if (d.admrevfilter) { S.admRevFilter = d.admrevfilter; loadAdminReviews(true); render(); return; }
+    if (d.admrevfilter) { admReviewsFilter(d.admrevfilter); return; }
     if (d.admrev) {
       var parts = d.admrev.split(":");
       moderateReview(parts[0], parts[1]);
@@ -35778,7 +35924,13 @@
       var bl = blogFieldLang(t) || S.adminBlogLang || "RU";
       if (bf === "author") bd.author = t.value;
       else bd[bf][bl] = t.value;
-      if (bf === "title" && bl === "RU" && bd.slugAuto) {
+      /* …and the address it will be filed under, while there is still no row
+         to file it under. Once the post HAS one, the address is settled: a
+         save with no explicit slug deliberately keeps the row's own
+         (upsertPost, src/lib/blog.ts), so an already-shared link does not move
+         when a typo in the title is fixed. The box went on following the title
+         anyway, and showed the owner an address the article does not have. */
+      if (bf === "title" && bl === "RU" && bd.slugAuto && !bd.id) {
         bd.slug = blogSlugify(t.value);
         var slugEl = document.querySelector("[data-blogslug]");
         if (slugEl) slugEl.value = bd.slug;
@@ -36267,10 +36419,11 @@
       var id = safeDecode(m[1]), found = null;
       CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
       if (found) {
+        revLeaveProduct(found.id);   // features
         S.productId = found.id;
         S.size = 0; S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
-        S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;   // features
+        S.videoOn = false;
         S.screen = "product";
         return true;
       }
