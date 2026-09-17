@@ -126,6 +126,59 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
     }
   });
 
+  /* «+ Размер» and «×» rebuild the sizes pane in place rather than through a
+     render(), and only the size and the price travelled across the rebuild
+     (edSizeRowsRead). «Остаток», «Штрихкод» and «Салон, €» were re-drawn from
+     the warehouse and the saved row — so a count just typed and a code just
+     scanned were gone the moment a volume was added beside them, with nothing
+     on screen to say so. Nothing is saved here: what is being pinned is that
+     the owner's typing survives the button, and the editor is left as it was
+     found. */
+  test("«+ Размер» keeps the count and the code just typed beside it", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const id = azur.id;
+
+    await openAdmin(page);
+    await openEditor(page, id);
+    await edTab(page, "sizes");
+
+    /* One unlabelled volume ⇒ the warehouse key is «<id> » with an empty
+       tail. `.first()` because a volume added before either row has been
+       given a label makes two rows with that same empty tail; row 0 is the
+       one that was typed into. */
+    const qty = page.locator(`[data-edqty="${id} "]`).first();
+    const ean = page.locator(`[data-edean="${id} "]`).first();
+    /* …and the box is dead until the warehouse list has landed: what
+       «Сохранить» sends is the difference between the number typed and the
+       count the row holds, and before the list there is no count — the whole
+       typed number used to go out as a move (a shelf of 7 became 10). */
+    await expect(qty, "«Остаток» never came alive").toBeEnabled({ timeout: 20_000 });
+
+    await qty.fill("7");
+    await ean.fill("4820000000017");
+    // «Салон, €» is only a column while «Партнёры и баллы» is on
+    const salon = page.locator("[data-edproprice]");
+    const hasSalon = (await salon.count()) > 0;
+    if (hasSalon) await salon.fill("11.50");
+
+    await page.locator("[data-edsizeadd]").click();
+    await expect(page.locator('[data-edsz="1"]'), "«+ Размер» added no row").toBeVisible();
+
+    await expect(qty, "the count typed into «Остаток» was thrown away").toHaveValue("7");
+    await expect(ean, "the code typed into «Штрихкод» was thrown away").toHaveValue("4820000000017");
+    if (hasSalon) await expect(salon, "«Салон, €» was thrown away").toHaveValue("11.50");
+
+    // …and «×» must not eat them either
+    await page.locator('[data-edsizedel="1"]').click();
+    await expect(page.locator('[data-edsz="1"]')).toHaveCount(0);
+    await expect(qty, "«×» threw the count away").toHaveValue("7");
+    await expect(ean, "«×» threw the code away").toHaveValue("4820000000017");
+
+    await assertClean(page, w, "«+ Размер» over a typed count and code");
+    // nothing pressed «Сохранить»: the product is exactly as it was found
+  });
+
   test("«Показывать в магазине» takes a product out of the shop and puts it back", async ({ page, browser }) => {
     test.setTimeout(180_000);
     const w = watch(page);
