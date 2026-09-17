@@ -208,6 +208,16 @@ few euro by hand is a better failure than an unpaid-looking paid order.
 - `src/lib/orders.ts` — `createOrder`, `getOrder`, `getOrderByNumber`,
   `setOrderPayment`, `setOrderStatus`, plus `listOrders`, `setOrderNote`,
   `getOverrides`, `upsertOverride`, `getSettings`, `setSetting`, `writeAudit`.
+- `src/lib/idempotency.ts` — `readIdempotencyKey(req)`, `fingerprintOf(body)`
+  and `runOnce({key, route, fingerprint}, work)`, which answers `ran`,
+  `replayed`, `in_flight` or `mismatch` — see «Idempotency» under ## API. The
+  reservation row is written before the work starts and **outside** whatever
+  transaction the work opens; inside it, a second tap would block on the unique
+  index for the whole length of an order instead of being told its twin is
+  already running. Not to be confused with the `idempotencyKey` in
+  `src/lib/mail.ts` or `refundIdempotencyKey` in `src/lib/payments/refund.ts`:
+  those are keys the shop **sends** to Resend and Montonio; this one is the key
+  a client sends to the shop.
 
 ### How an order is priced
 
@@ -241,6 +251,34 @@ already saved.
 All answers are JSON: `{ ok: true, … }` or `{ ok: false, error: "code" }`.
 The site runs with `trailingSlash: true`, so call the paths with the slash
 (`/api/orders/`).
+
+### Idempotency — `Idempotency-Key`
+
+A POST that creates something may carry an `Idempotency-Key` header: a random
+value the client mints per *intention*, not per request. The shop remembers it
+for 48 hours (`idempotency_keys`, `db/migrations/180_idempotency.sql`) and a
+second request with the same key never runs the work twice.
+
+- **replay** — the key finished earlier: the answer is the **original status
+  and body**, byte for byte. A client may treat a replay as the real answer.
+- **409 `in_progress`** — the same key is running right now, which is what two
+  taps two seconds apart look like. Nothing was created; ask again in a moment
+  and the replay above is waiting.
+- **409 `key_reused`** — the key arrived at a different route, or with a
+  different body than the one it earned its answer with. Refused, never run:
+  the point of the key is that it cannot create a second thing.
+- A request that **failed** (4xx/5xx, or a thrown error) releases the key, so a
+  shopper whose address was refused fixes it and sends the corrected order
+  under the same key instead of being handed the old complaint for two days.
+- No header, or a malformed one, behaves exactly as it did before: the work
+  runs, unprotected. Keys are 8–200 chars of `A–Z a–z 0–9 . _ : -`.
+
+The key is what tells a retry from a repeat, and nothing else can. Two `+1
+приход` in a row on the same bottle are two real bottles and both must count;
+two taps on one `+1 приход` are one. The bodies are identical — only the key
+differs. A route therefore never dedupes on content; `fingerprintOf(body)` is
+passed as a *guard* (the same key must still carry the same body), never as
+the thing keys are looked up by.
 
 ### Public
 
