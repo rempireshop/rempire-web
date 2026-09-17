@@ -714,6 +714,7 @@
         "Kood on saadetud e-postile — kuus numbrit, kehtib 15 minutit.",
       "Код отправлен — проверьте почту ✓": "Kood on saadetud — vaata e-posti ✓",
       "Вы вошли ✓": "Oled sisse logitud ✓", "Вы вышли ✓": "Oled välja logitud ✓",
+      "Не получилось выйти": "Välja logimine ebaõnnestus",
       "Войдите ещё раз": "Logi uuesti sisse",
       "Код не подошёл — проверьте цифры": "Kood ei sobinud — kontrolli numbreid",
       "Код не найден — запросите новый": "Koodi ei leitud — küsi uus",
@@ -1789,6 +1790,7 @@
       "Период": "Periood",
       "Страница": "Leht",
       "Список клиентов не загрузился.": "Klientide loend ei laadinud.",
+      "Карточка клиента не загрузилась.": "Kliendi kaart ei laadinud.",
       "← Ко всем клиентам": "← Kõikide klientide juurde",
       // the customer card: what he bought, what he wrote (10.09.2026)
       "Заказов пока нет": "Tellimusi veel pole",
@@ -2745,6 +2747,7 @@
       "Не получилось изменить статус": "Staatuse muutmine ebaõnnestus",
       "Партнёр добавлен · письмо ушло": "Partner lisatud · kiri saadetud", "Партнёр добавлен ✓": "Partner lisatud ✓",
       "Партнёр одобрен · письмо ушло": "Partner kinnitatud · kiri saadetud",
+      "Партнёр одобрен · письмо не ушло": "Partner kinnitatud · kiri ei läinud välja",
       "Сделать партнёром?": "Teha partneriks?", "Перевести в розницу?": "Viia jaemüüki?",
       "Сделать партнёром": "Tee partneriks", "Перевести в розницу": "Vii jaemüüki",
       /* the cabinet's «Стать партнёром» form — what happens next */
@@ -3421,6 +3424,7 @@
         "The code is on its way — six digits, valid for 15 minutes.",
       "Код отправлен — проверьте почту ✓": "Code sent — check your e-mail ✓",
       "Вы вошли ✓": "You are signed in ✓", "Вы вышли ✓": "You are signed out ✓",
+      "Не получилось выйти": "Could not sign you out",
       "Войдите ещё раз": "Please sign in again",
       "Код не подошёл — проверьте цифры": "That code did not match — check the digits",
       "Код не найден — запросите новый": "No code found — ask for a new one",
@@ -4469,6 +4473,7 @@
       "Период": "Period",
       "Страница": "Page",
       "Список клиентов не загрузился.": "The customer list didn't load.",
+      "Карточка клиента не загрузилась.": "The customer card didn't load.",
       "← Ко всем клиентам": "← Back to all customers",
       // the customer card: what he bought, what he wrote (10.09.2026)
       "Заказов пока нет": "No orders yet",
@@ -5418,6 +5423,7 @@
       "Не получилось изменить статус": "Could not change the status",
       "Партнёр добавлен · письмо ушло": "Partner added · letter sent", "Партнёр добавлен ✓": "Partner added ✓",
       "Партнёр одобрен · письмо ушло": "Partner approved · letter sent",
+      "Партнёр одобрен · письмо не ушло": "Partner approved · letter did not go out",
       "Сделать партнёром?": "Make a partner?", "Перевести в розницу?": "Move to retail?",
       "Сделать партнёром": "Make a partner", "Перевести в розницу": "Move to retail",
       /* the cabinet's «Стать партнёром» form — what happens next */
@@ -7979,6 +7985,7 @@
     admCustTier: "",     // "" | "retail" | "pro" | "pending"
     admCustOpen: "",     // opened customer id — "" is the list
     admCustDetail: null, // {customer, history} for the opened card
+    admCustDetailErr: "", // why the card would not load — a skeleton that never fills is not an answer
     admCustBusy: false,
     admCustPoints: "",   // the +/− points field on an open card
     admCustNote: "",     // the points adjustment note field
@@ -8611,7 +8618,11 @@
     if (!S.loyalty || !S.loyalty.settings || !S.loyalty.settings.enabled) return 0;
     var st = S.loyalty.settings;
     if (S.loyalty.balance < st.minRedeem) return 0;
-    var cap = Math.round(cartSum() * st.redeemMaxPct / 100);
+    /* «не больше N % от суммы корзины» is a ceiling, so it floors — rounding
+       to the nearest point let an 11.70 € basket at 30 % redeem 4 points (34 %).
+       Whole cents, so 11.70 * 30 / 100 = 3.5100000000000002 cannot move it.
+       redeemCapPoints() in src/lib/loyalty.ts is the same line on the server. */
+    var cap = Math.floor(Math.round(cartSum() * 100) * st.redeemMaxPct / 10000);
     /* …and never more than the promo or gift card left to pay — one point is
        one euro, so whole euros only. createOrder() (src/lib/orders.ts) draws
        the same two lines, so the total here is the total the server bills,
@@ -14439,9 +14450,24 @@
     var box = document.querySelector("[data-news]");
     if (box) box.checked = S.newsletter;
   }
+  /* «Вы вышли ✓» has to be true by the time it is on screen.
+     The session is a signed token in the `rmp_cust` cookie and nothing on the
+     server remembers it (makeCustomerToken in src/lib/customers.ts), so the
+     one thing that can end it is the Set-Cookie the logout answer carries.
+     Until 17.09.2026 this forgot the account, said «Вы вышли ✓» and only then
+     fired the request — unawaited, unchecked, no keepalive: a phone in a lift
+     or a 503 left the cookie in place, and the next person to open the browser
+     on a shared machine was still signed in as the last one, under a toast
+     that said otherwise. The words wait for the cookie now; a refusal says so
+     and the account stays open, which is the truth and can be tried again. */
   function acctLogout() {
-    acctForget(); render(); toast("Вы вышли ✓");
-    fetch("/api/account/logout/", { method: "POST" }).catch(noop);
+    if (acctLogout._busy) return;
+    acctLogout._busy = true;
+    postJSON("/api/account/logout/", {}).then(function (r) {
+      acctLogout._busy = false;
+      if (r.status !== 200 || !(r.body && r.body.ok)) { toast("Не получилось выйти"); render(); return; }
+      acctForget(); render(); toast("Вы вышли ✓");
+    }).catch(function () { acctLogout._busy = false; toast("Не получилось выйти"); render(); });
   }
 
   /* ---------- wholesale/loyalty: account-screen history + pro request ---- */
@@ -18922,7 +18948,7 @@
     if (!FLOW_COUNTS || !key || FLOW_COUNTS[key] === undefined) return "";
     // the label is its own node: glued to the count it was one Russian string
     var line = " · <span>" + FLOW_COUNT_LABEL[key] + "</span> " + Number(FLOW_COUNTS[key]);
-    /* «Ближайшие 7 дней: 3 подписчиков с датой» (Dim, 10.09.2026) — who the
+    /* «Ждут письма: 3 подписчиков с датой» (Dim, 10.09.2026) — who the
        birthday letter can reach at all: a date on the row AND the tick */
     if (key === "birthdays") line += " <span>подписчиков с датой</span>";
     return line;
@@ -21637,10 +21663,15 @@
       })
       .catch(noop);
   }
+  /* «Ближайшие 7 дней:» until 17.09.2026, when flowCounters() stopped counting
+     a fixed week and started counting the window the run itself uses («за
+     сколько дней» in the settings, today only by default) minus the letters
+     already sent this year. The number is now the same thing the other three
+     are — who this run has a letter for — so it says so. */
   var FLOW_COUNT_LABEL = {
     carts: "Ждут письма:",
     alerts: "Ждут письма:",
-    birthdays: "Ближайшие 7 дней:",
+    birthdays: "Ждут письма:",
     unpaid: "Ждут оплаты:"
   };
   function mailTpl() {
@@ -24120,17 +24151,39 @@
     }).join("") + "</div>";
   }
   var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"], ["news", "Подписаны"]];
+  /* The card's own GET. admCustomerCardHTML() calls it on every render and
+     draws the skeleton until the answer lands, so a refusal has to be said out
+     loud: until 17.09.2026 a 503 (or an offline phone) fell through the two
+     `if`s into `.catch(noop)`, the card stayed grey bars for ever, and every
+     render fired the request again — with nothing to stop two being in flight
+     at once. The list loader beside it has had both an error line and a busy
+     flag all along; this is the same pair. `force` (after a PATCH) clears the
+     error so the card can try again. */
   function loadAdminCustomerDetail(id, force) {
     if (SRV.admin !== true) return;
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
+    if (force) { S.admCustDetailErr = ""; loadAdminCustomerDetail._busy = ""; }
+    else if (S.admCustDetailErr || loadAdminCustomerDetail._busy === id) return;
+    loadAdminCustomerDetail._busy = id;
+    /* Both handlers below answer for the card they were sent for: the owner
+       may have gone back and opened another one in between, and neither the
+       flag nor a refusal belongs to whatever card that is. */
+    var done = function (err) {
+      if (loadAdminCustomerDetail._busy === id) loadAdminCustomerDetail._busy = "";
+      if (S.admCustOpen !== id) return;
+      S.admCustDetailErr = err || "";
+      render();
+    };
     apiJson("/api/admin/customers/" + encodeURIComponent(id) + "/").then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 401) { SRV.admin = false; loadAdminCustomerDetail._busy = ""; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.admCustDetail = { customer: r.body.customer, history: r.body.history || [],
           orders: r.body.orders || [], stats: r.body.stats || null, reviews: r.body.reviews || [] };
-        render();
+        done("");
+        return;
       }
-    }).catch(noop);
+      done("Карточка клиента не загрузилась.");
+    }).catch(function () { done("Сервер не отвечает."); });
   }
   /* «Розница ⇄ Партнёр»: the switch used to throw the card and the list away
      (S.admCustDetail = null) and wait for two fresh requests before it could
@@ -24182,7 +24235,10 @@
     var d = S.admCustDetail;
     var back = admBackHTML("data-admcustclose", "Все клиенты");
     if (!d || d.customer.id !== S.admCustOpen) {
-      return back + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+      // grey bars mean «loading»; a card that will never load says so instead
+      return back + (S.admCustDetailErr
+        ? '<div class="adm-note">' + esc(S.admCustDetailErr) + "</div>"
+        : '<div class="adm-skel"><i></i><i></i><i></i></div>');
     }
     var c = d.customer;
     if (S.admCustNotesDraft === null) S.admCustNotesDraft = c.notes || "";
@@ -24425,7 +24481,11 @@
   function admConsentLine(c) {
     var where = CONSENT_SOURCE[c.marketingSource] || "";
     var parts = [];
-    if (c.optedOut) parts = ["Отписался по ссылке в письме", shortDate(c.marketingOffAt)];
+    /* The link's own date (mail_optouts.at), not marketingOffAt: that stamp
+       only moves on a real on → off flip, so a tick taken off in the cabinet
+       last month stays put when the letter's link is pressed today — and this
+       line was dating the click with the untick. */
+    if (c.optedOut) parts = ["Отписался по ссылке в письме", shortDate(c.optedOutAt || c.marketingOffAt)];
     else if (c.marketing) parts = ["Согласие на скидки и поздравление", shortDate(c.marketingAt), where];
     else if (c.marketingOffAt) parts = ["Отказался от писем", shortDate(c.marketingOffAt)];
     return parts.filter(Boolean).map(function (t) { return "<span>" + esc(t) + "</span>"; }).join(" · ");
@@ -24492,8 +24552,13 @@
            the pair as two underlined words here and as two buttons in the
            other order there). A download is an action, and `.adm-link` in this
            panel means a word: a way back, or a quiet second thought. */
-        '<a class="adm-btn adm-btn--row" href="/api/admin/customers/?format=xlsx" target="_blank" rel="noopener">Скачать XLSX</a>' +
-        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
+        /* `limit` on both, and the route's own ceiling: without it the export
+           took listCustomersAdmin's default of 200 newest rows while the
+           screen above it was fetched with 500, so the file would quietly
+           lose the oldest customers the day this shop passes two hundred —
+           and nothing on the page would say a row was missing. */
+        '<a class="adm-btn adm-btn--row" href="/api/admin/customers/?format=xlsx&amp;limit=1000" target="_blank" rel="noopener">Скачать XLSX</a>' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="/api/admin/customers/?format=csv&amp;limit=1000" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
         '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">' +
@@ -24624,7 +24689,15 @@
     }
     render(); refocus("[data-admapply]");
   }
-  function admCustPatch(id, body, okMsg) {
+  /** `okMsg` is what the toast says when the write went through; `noMailMsg`,
+      where one is given, is what it says instead when the answer carries a
+      letter that did NOT leave. The route sends «Цены для салонов включены»
+      itself on a retail → pro flip and reports the outcome in `mail` — best
+      effort, `sent:false` when Resend refuses — so a fixed «письмо ушло» was
+      the panel telling the owner about a letter it had never looked at
+      (17.09.2026). applyAddPartner() has read `mail.sent` since «+ Партнёр»
+      was written; this is the same reading on the same letter. */
+  function admCustPatch(id, body, okMsg, noMailMsg) {
     if (admCustPatch._busy) return;   // «Одобрить Pro» tapped twice is one approval
     admCustPatch._busy = true;
     apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
@@ -24635,7 +24708,8 @@
         S.admCustDetail = { customer: r.body.customer, history: (S.admCustDetail && S.admCustDetail.history) || [] };
         loadAdminCustomerDetail(id, true);
         loadAdminCustomers(true);
-        toast(okMsg);
+        // no `mail` in the answer means no letter was due — the message stands
+        toast(noMailMsg && r.body.mail && !r.body.mail.sent ? noMailMsg : okMsg);
         render();
         return;
       }
@@ -24643,7 +24717,7 @@
       render();
     }).catch(function () { admCustPatch._busy = false; S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
   }
-  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло"); }
+  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло", "Партнёр одобрен · письмо не ушло"); }
   function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
   function adjustCustomerPoints(id) {
     var delta = Math.trunc(Number(String(S.admCustPoints).replace(",", ".")));
@@ -32742,7 +32816,7 @@
     } else if (top === "order") {
       S.adminOrder = 0;
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
-    } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; }
+    } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
     else if (top === "mail") S.mailOpen = false;
     else if (top === "setpage") S.admSetPage = "";
     return true;
@@ -34682,9 +34756,11 @@
        render() leaving the page exactly where the finger left it. */
     if (d.admcustopen) {
       S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null;
+      // opening a card is also how a card whose GET failed is asked for again
+      S.admCustDetailErr = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
+    if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; render(); return; }
     if (d.admcustapprove) { askCustDecision(admCustById(d.admcustapprove), "approve"); return; }
     if (d.admcustreject) { askCustDecision(admCustById(d.admcustreject), "reject"); return; }
     /* partners: «+ Партнёр», its form, the card's tier switch, and the lead's

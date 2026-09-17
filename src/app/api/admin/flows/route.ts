@@ -1,7 +1,8 @@
 /**
  * GET /api/admin/flows — what the switches in «Письма» are actually holding:
  * how many carts are waiting for a reminder, how many addresses are waiting
- * for a «снова в наличии», how many birthdays fall in the next seven days —
+ * for a «снова в наличии», how many birthdays the next birthday run has a
+ * letter for (its own window, this year's letters already sent left out) —
  * and, since 10.09.2026, when each flow last ran and what it sent
  * (`runs`, from `settings.flow_runs`: the cron's run and the panel's own
  * «Запустить сейчас» alike).
