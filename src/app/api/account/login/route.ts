@@ -15,8 +15,11 @@ import {
   normalizeEmail,
   normalizeLangCode,
   recordLogin,
+  type Customer,
+  type CustomerOrder,
+  type LoginCheck,
 } from "@/lib/customers";
-import { accountLoyaltySummary } from "@/lib/loyalty";
+import { accountLoyaltySummary, type AccountLoyalty } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,30 +61,66 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_email" }, { status: 400 });
   }
 
+  let verdict: LoginCheck;
   try {
-    const verdict = await checkLoginCode(email, String(body.code ?? ""));
-    if (verdict !== "ok") {
-      return Response.json({ ok: false, error: verdict }, { status: STATUS[verdict] ?? 400 });
-    }
-
-    const customer = await recordLogin(email, body.lang ?? normalizeLangCode(undefined));
-    const orders = await listCustomerOrders(email);
-    // wholesale/loyalty: acctApply() in app.js applies this response exactly
-    // like a GET /api/account/me one, so both must carry the same "loyalty" shape.
-    const loyalty = await accountLoyaltySummary(customer.id);
-    const token = makeCustomerToken(email);
-    return Response.json(
-      { ok: true, customer, orders, loyalty },
-      {
-        status: 200,
-        headers: {
-          "set-cookie": customerCookie(req, token),
-          "cache-control": "no-store",
-        },
-      },
-    );
+    verdict = await checkLoginCode(email, String(body.code ?? ""));
   } catch (err) {
-    console.error("[api/account/login] failed:", err);
+    console.error("[api/account/login] code check failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
   }
+  if (verdict !== "ok") {
+    return Response.json({ ok: false, error: verdict }, { status: STATUS[verdict] ?? 400 });
+  }
+
+  /* The code is SPENT the moment the verdict is "ok" — checkLoginCode() deletes
+     the row (src/lib/customers.ts). Nothing after this line may turn a correct
+     code into a refusal: the shopper cannot type it again, a fresh one costs
+     one of three per fifteen minutes, and what he would read in the meantime is
+     «Код не найден». The profile, the orders and the points used to be awaited
+     BEFORE the token was minted, so one slow query answered a correct code with
+     a 503 and no cookie, and the code was already gone (audit).
+     The session is signed first — makeCustomerToken() is pure crypto and cannot
+     fail — and the three reads below are best-effort. */
+  const headers = {
+    "set-cookie": customerCookie(req, makeCustomerToken(email)),
+    "cache-control": "no-store",
+  };
+
+  let customer: Customer | null = null;
+  let orders: CustomerOrder[] = [];
+  // wholesale/loyalty: acctApply() in app.js applies this response exactly
+  // like a GET /api/account/me one, so both must carry the same "loyalty" shape.
+  let loyalty: AccountLoyalty | null = null;
+  try {
+    customer = await recordLogin(email, body.lang ?? normalizeLangCode(undefined));
+    [orders, loyalty] = await Promise.all([listCustomerOrders(email), accountLoyaltySummary(customer.id)]);
+  } catch (err) {
+    /* Signed in on an empty screen, not signed out on a full one. The next
+       GET /api/account/me fills all three in — with the cookie that is already
+       on its way back. Same fallback profile that route falls back to. */
+    console.error("[api/account/login] signed in, profile unavailable:", err);
+  }
+
+  return Response.json(
+    { ok: true, customer: customer ?? fallbackCustomer(email), orders, loyalty },
+    { status: 200, headers },
+  );
+}
+
+/** What the shopper is until the row can be read — the shape GET /api/account/me uses. */
+function fallbackCustomer(email: string) {
+  return {
+    email,
+    name: "",
+    phone: "",
+    lang: "RU",
+    birthday: null,
+    marketing: false,
+    shipPref: null,
+    tier: "retail",
+    company: null,
+    regCode: null,
+    proRequestedAt: null,
+    proApprovedAt: null,
+  };
 }

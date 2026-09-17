@@ -714,6 +714,7 @@
       "Код истёк — запросите новый": "Kood on aegunud — küsi uus",
       "Слишком много попыток — запросите новый код": "Liiga palju katseid — küsi uus kood",
       "Слишком много попыток — подождите немного": "Liiga palju katseid — oota veidi",
+      "Слишком много попыток — попробуйте через 15 минут": "Liiga palju katseid — proovi 15 minuti pärast uuesti",
       "Кабинет заработает, когда магазин подключат к серверу": "Konto hakkab tööle, kui pood on serveriga ühendatud",
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
         "Tellimusi veel ei ole. Kõik, mis selle e-posti aadressiga tellid, ilmub siia.",
@@ -1513,8 +1514,8 @@
       "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
         "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
       "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
-      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
-        "Mitu inimest jõudis igasse sammu. Numbrid kahanevad alati: kõik sisenejad ei vaata kaupa ja kõik vaatajad ei osta. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
+      "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
+        "Mitu inimest jõudis igasse sammu. Tavaliselt numbrid kahanevad, aga sammu saab ka vahele jätta: kauba paneb ostukorvi otse kataloogist, kaardit avamata. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
       "Сколько денег принёс каждый бренд за период.": "Kui palju raha tõi iga bränd perioodi jooksul.",
       "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
         "Neid kaupu avati, aga kordagi ei pandud ostukorvi. Paremal on, mitu korda avati. Tavaliselt aitab teine foto, aus hind või arusaadav kirjeldus.",
@@ -3376,6 +3377,7 @@
       "Код истёк — запросите новый": "The code has expired — ask for a new one",
       "Слишком много попыток — запросите новый код": "Too many tries — ask for a new code",
       "Слишком много попыток — подождите немного": "Too many tries — wait a moment",
+      "Слишком много попыток — попробуйте через 15 минут": "Too many tries — try again in 15 minutes",
       "Кабинет заработает, когда магазин подключат к серверу":
         "The account works once the shop is connected to its server",
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
@@ -4154,8 +4156,8 @@
       "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
         "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
       "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
-      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
-        "How many people reached each step. The numbers always go down: not everyone who comes in looks at a product, and not everyone who looks buys. The biggest step down is where the buyers are lost.",
+      "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
+        "How many people reached each step. The numbers usually go down, but a step can be skipped: a product goes into the basket straight from the catalogue, without opening its page. The biggest step down is where the buyers are lost.",
       "Сколько денег принёс каждый бренд за период.": "How much money each brand brought over the period.",
       "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
         "These products were opened but never put into a basket. On the right — how many times they were opened. Usually a better photo, an honest price or a clear description fixes it.",
@@ -13347,7 +13349,7 @@
       ? apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body))
       : apiSend("/api/admin/blog/", "POST", body);
     return req.then(function (r) {
-      if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error((r.body && r.body.error) || "save_failed");
+      if (!(r.status === 200 && r.body.ok && r.body.post)) throw blogHttpErr(r);
       var p = r.body.post;
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
       if (d === S.adminBlogEdit) blogMarkSaved(d);   // «не сохранено» is answered
@@ -13375,8 +13377,21 @@
      refused now, so the text stays in the box and the sentence says what to
      do with it. */
   var BLOG_ERR_TEXT = {
-    body_too_long: "Статья слишком длинная — сократите текст и сохраните ещё раз."
+    body_too_long: "Статья слишком длинная — сократите текст и сохраните ещё раз.",
+    /* …and the other one «ещё раз» cannot mend: the session ran out. «Блог»
+       was the one screen in the panel whose writes had no 401 branch, so a
+       cookie that expired while the owner was writing answered every save,
+       «Опубликовать», «Снять» and «Удалить» with «Не получилось сохранить —
+       попробуйте ещё раз.», for as long as he kept pressing (audit). The card
+       to sign in comes back instead — blogHttpErr() below — and the draft is
+       still in S.adminBlogEdit when he does, text and all. */
+    unauthorized: "Вы вышли из админки — войдите снова."
   };
+  /** The Error a refused admin answer deserves. 401 first: it is not a retry. */
+  function blogHttpErr(r) {
+    if (r && r.status === 401) { SRV.admin = false; return new Error("unauthorized"); }
+    return new Error((r && r.body && r.body.error) || "save_failed");
+  }
   function blogSaveErrText(e) {
     // typeof, not truthiness: e.message is whatever the route put in `error`,
     // and "constructor"/"toString" would otherwise reach Object.prototype
@@ -13423,7 +13438,7 @@
       if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
         S.adminBlogEdit.status = r.body.post.status; S.adminBlogEdit.publishedAt = r.body.post.publishedAt;
         toast("Статья опубликована ✓");
-      } else blogFail();
+      } else blogFail(blogHttpErr(r));
       S.adminBlog = null; blogForget();
       render();
     }).catch(function (e) {
@@ -13439,7 +13454,7 @@
       if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
         S.adminBlogEdit.status = r.body.post.status;
         toast("Статья снята с публикации ✓");
-      } else blogFail();
+      } else blogFail(blogHttpErr(r));
       S.adminBlog = null; blogForget();
       render();
     }).catch(function () {
@@ -13455,7 +13470,7 @@
       if (r.status === 200 && r.body.ok) {
         toast("Статья удалена ✓");
         S.adminBlog = null; S.adminBlogEdit = null; blogForget();
-      } else blogFail();
+      } else blogFail(blogHttpErr(r));
       render();
     }).catch(function () {
       S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
@@ -13625,7 +13640,7 @@
   };
   var ACCT_ERRS = {
     bad_email: "Проверьте e-mail",
-    rate_limited: "Слишком много попыток — подождите немного",
+    rate_limited: "Слишком много попыток — попробуйте через 15 минут",
     bad_code: "Код не подошёл — проверьте цифры",
     no_code: "Код не найден — запросите новый",
     expired: "Код истёк — запросите новый",
@@ -15825,16 +15840,16 @@
       var had = ANALYTICS[range];
       if (r.status === 200 && r.body.ok) ANALYTICS[range] = { data: r.body, err: null, at: Date.now() };
       /* A refresh that failed keeps the numbers that are on screen — the same
-         rule loadOverview() and loadSrvOrders() follow. Only a first answer
-         that fails has nothing to keep and says so. */
-      else if (!(had && had.data)) ANALYTICS[range] = { data: null, err: (r.body && r.body.error) || "error", at: Date.now() };
-      else had.at = Date.now();
+         rule loadOverview() and loadSrvOrders() follow — and, since the audit,
+         says so over them: `err` is set either way, and admStatsScreen() draws
+         «Аналитика сейчас не отвечает» with «Повторить» above figures that are
+         no longer this minute's. Silence looked exactly like a fresh answer. */
+      else ANALYTICS[range] = { data: (had && had.data) || null, err: (r.body && r.body.error) || "error", at: Date.now() };
       render();
     }).catch(function () {
       loadAnalytics._busy[range] = false;
       var had = ANALYTICS[range];
-      if (!(had && had.data)) ANALYTICS[range] = { data: null, err: "offline", at: Date.now() };
-      else had.at = Date.now();
+      ANALYTICS[range] = { data: (had && had.data) || null, err: "offline", at: Date.now() };
       render();
     });
   }
@@ -15942,11 +15957,14 @@
       if (r.status === 401) { SRV.admin = false; OVERVIEW.asked = false; render(); return; }
       if (r.status === 200 && r.body.ok) { OVERVIEW.data = r.body; OVERVIEW.err = null; }
       /* A REFRESH that failed leaves what is on screen where it is: the
-         figures from a minute ago are worth more than an empty screen. Only a
-         first load that fails has nothing to keep and says so. */
-      else if (!OVERVIEW.data) OVERVIEW.err = (r.body && r.body.error) || "error";
+         figures from a minute ago are worth more than an empty screen. But it
+         says so now — `err` is set whether or not there is something to keep,
+         so «Сводка не отвечает — цифры могут быть неполными.» and «Повторить»
+         stand over the old numbers instead of the panel presenting them as
+         this minute's (audit). A later answer clears it again. */
+      else OVERVIEW.err = (r.body && r.body.error) || "error";
       render();
-    }).catch(function () { if (!OVERVIEW.data) OVERVIEW.err = "offline"; render(); });
+    }).catch(function () { OVERVIEW.err = "offline"; render(); });
   }
 
   /* ======================================================================
@@ -19793,16 +19811,40 @@
       '<div class="adm-kpi__d' + cls + '">' + line + "</div>" +
       (what ? '<div class="adm-kpi__s">' + what + "</div>" : "") + "</div>";
   }
+  /** How many bars each range draws. A fortnight is the ceiling — beyond that
+      the labels stop being readable and the shape stops being the point. */
+  var ADM_BAR_DAYS = { today: 1, "7d": 7, "30d": 14, "90d": 14 };
   /** One bar per day, labelled with its weekday; the last one is today, so it
-      is the ink one. At most a fortnight — beyond that the labels stop being
-      readable and the shape stops being the point. */
-  function admBarsHTML(rows) {
-    var series = rows.slice(-14);
+      is the ink one.
+      Every day of the window gets a slot, including the ones nobody bought
+      anything on. The server's query groups by day and so returns ONLY days
+      that had an order (qRevenueByDay, src/lib/analytics.ts) — with three or
+      four orders a month, `rows.slice(-14)` was three or four bars standing
+      side by side as if they were consecutive days, under a sentence that
+      promises «Один столбик — один день, самый правый — сегодня». The right-
+      most one carried «сегодня» whatever day it actually was, and the gaps
+      between the others were invisible, so the shape the owner read was the
+      shape of the query, not of his month (audit). The «Обзор» strip has laid
+      its seven slots out this way since 14.09.2026; this is the same fill,
+      with the same Tallinn day keys the server names its rows by.
+      The weekday comes from getUTCDay(): `new Date("2026-09-17")` is UTC
+      midnight, so reading it back in the browser's own zone named the day
+      before it anywhere west of Greenwich. */
+  function admBarsHTML(rows, range) {
+    var n = ADM_BAR_DAYS[range] || 14;
+    var byDay = {};
+    (rows || []).forEach(function (r) { byDay[String(r.day).slice(0, 10)] = r.revenue; });
+    var today = admShopDay(new Date());
+    var series = [];
+    for (var i = n - 1; i >= 0; i--) {
+      var key = admShopDayAdd(today, -i);
+      series.push({ day: key, revenue: byDay[key] || 0 });
+    }
     var top = series.reduce(function (a, r) { return Math.max(a, r.revenue); }, 0) || 1;
-    return '<div class="adm-wbars">' + series.map(function (r, i) {
+    return '<div class="adm-wbars">' + series.map(function (r, bi) {
       var d = new Date(r.day);
-      var lbl = isNaN(d.getTime()) ? "" : ADM_WEEKDAYS[d.getDay()];
-      return '<div class="adm-wbar' + (i === series.length - 1 ? " adm-wbar--now" : "") +
+      var lbl = isNaN(d.getTime()) ? "" : ADM_WEEKDAYS[d.getUTCDay()];
+      return '<div class="adm-wbar' + (bi === series.length - 1 ? " adm-wbar--now" : "") +
         '" style="height:' + Math.max(2, Math.round((r.revenue / top) * 100)) + '%" title="' +
         eur(r.revenue) + '"><span>' + lbl + "</span></div>";
     }).join("") + "</div>";
@@ -19838,12 +19880,18 @@
     }
     loadAnalytics(range);
     var rec = ANALYTICS[range], a = rec && rec.data;
+    /* The same card whether or not there is something underneath it. A refresh
+       that failed used to be silent as long as the old numbers were still
+       there, so the screen read as this minute's takings when it was the
+       answer from before the shop stopped responding (audit). */
+    var statsErr = rec && rec.err
+      ? '<div class="adm-error"><span>Аналитика сейчас не отвечает — попробуйте позже.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="stats">Повторить</button></div>'
+      : "";
     if (!a) {
-      return head + (rec && rec.err
-        ? '<div class="adm-error"><span>Аналитика сейчас не отвечает — попробуйте позже.</span>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="stats">Повторить</button></div>'
-        : '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
+      return head + (statsErr || '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
     }
+    head += statsErr;
     var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; };
     return head +
       /* One sentence before the numbers, because two things about this screen
@@ -19865,7 +19913,7 @@
       admColsHTML(
         '<div><div class="adm-sec__t">Выручка по дням</div>' +
           '<p class="adm-hint adm-hint--lead">Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.</p>' +
-          (a.revenueByDay.length ? admBarsHTML(a.revenueByDay) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
+          (a.revenueByDay.length ? admBarsHTML(a.revenueByDay, range) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
         '<div class="adm-sec__t">Топ товаров</div>' +
         '<p class="adm-hint adm-hint--lead">Что принесло больше всего денег за период.</p>' +
         admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
@@ -19889,7 +19937,7 @@
     };
     return '<div class="adm-stack adm-stack--tight">' +
       sec("Путь до покупки",
-        "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.",
+        "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.",
         admPairsHTML(FUNNEL_STAGES.map(function (s) {
           return [s[1], String(a.funnel[s[0]] || 0)];
         }), "Пока нет данных", true)) +

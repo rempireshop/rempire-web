@@ -345,10 +345,32 @@ async function qGiftCards(from: Date, to: Date) {
   };
 }
 
+/* The quiet period that makes a basket an ABANDONED one. Must stay equal to
+   ABANDONED_AFTER_MS in src/lib/flows.ts — the reminder letter's own rule, and
+   the reason «Брошенные корзины» and «Последний запуск: … пропущено» now count
+   the same carts. Declared here rather than imported so that the analytics
+   route does not pull the whole mail stack in behind it;
+   tests/analytics-audit-r21.test.ts asserts the two never drift apart. */
+const ABANDONED_QUIET_MS = 3 * 60 * 60 * 1000;
+
+/**
+ * Baskets left behind: saved, never ordered from, and untouched for three hours.
+ *
+ * The quiet period is the point. Without it this counted the basket a shopper
+ * had put something in a minute ago — one somebody is standing in the middle of
+ * — and the panel called it «Человек оставил почту и собрал корзину, но заказ
+ * так и не оформил» (audit). Three hours is the same wait runAbandonedCarts()
+ * makes before it writes to that address, so this figure and the letter's
+ * «пропущено: корзине ещё нет трёх часов» are now about one set of carts.
+ * Counted from `to`, not from the machine clock: for the ranges the panel asks
+ * for, `to` IS now, and for a window that has closed the right question is
+ * which carts were quiet by the end of it.
+ */
 async function qAbandonedCarts(from: Date, to: Date) {
   const rows = await query<{ n: string }>(
-    "select count(*) as n from carts where updated_at >= $1 and updated_at < $2 and recovered_at is null",
-    [from, to],
+    `select count(*) as n from carts
+     where updated_at >= $1 and updated_at < $2 and updated_at <= $3 and recovered_at is null`,
+    [from, to, new Date(to.getTime() - ABANDONED_QUIET_MS)],
   );
   return int(rows[0]?.n);
 }

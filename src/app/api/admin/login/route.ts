@@ -5,7 +5,7 @@
  * five tries a minute per IP, and a wrong password never says which half was
  * wrong.
  */
-import { adminCookie, clientIp, rateLimit, verifyPassword } from "@/lib/auth";
+import { adminCookie, clientIp, rateLimit, sessionSecretOk, verifyPassword } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -29,8 +29,12 @@ export async function POST(req: Request) {
     console.error("[api/admin/login] ADMIN_PASSWORD_HASH is not set — nobody can sign in.");
     return Response.json({ ok: false, error: "not_configured" }, { status: 500 });
   }
-  if (!process.env.SESSION_SECRET) {
-    console.error("[api/admin/login] SESSION_SECRET is not set — no session can be signed.");
+  /* sessionSecretOk(), not `process.env.SESSION_SECRET` — the same sixteen-character
+     rule makeSessionToken() signs by. A shorter one used to pass this gate and
+     throw two lines below, AFTER the password had been verified: a 500 with no
+     `error` field, read by the login card as «Сервер не отвечает» (audit). */
+  if (!sessionSecretOk()) {
+    console.error("[api/admin/login] SESSION_SECRET is missing or under 16 characters — no session can be signed.");
     return Response.json({ ok: false, error: "not_configured" }, { status: 500 });
   }
 
