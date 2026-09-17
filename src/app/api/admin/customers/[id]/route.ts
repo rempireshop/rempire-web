@@ -198,19 +198,28 @@ export async function PATCH(req: Request, ctx: Ctx) {
        time this address becomes a partner and never again; a genuinely
        returning partner is rare enough for Renat to greet by hand.
 
-       Nothing is put in `mail` when the letter is suppressed: the panel reads
-       a missing `mail` as «no letter was due» and says «Партнёр одобрен»,
-       which is the true thing to say. A `{sent:false}` there would have made
-       it say «письмо не ушло», i.e. report a failure that did not happen. */
+       A suppressed letter is REPORTED, not left out. The first version of this
+       omitted `mail` entirely, on the belief that the panel reads a missing
+       `mail` as «no letter was due» and says «Партнёр одобрен». It does not:
+       admCustPatch()'s fallback message is «Партнёр одобрен · письмо ушло», so
+       leaving `mail` out made the panel state, to the owner, that a letter had
+       gone when this branch had just decided it must not. Found 17.09.2026,
+       the same day it was written, by someone reading the panel rather than
+       the route. `skipped` is the distinction that matters here: «не ушло» is
+       a failure and this is not one. */
     let mail: { sent: boolean; skipped?: boolean; reason?: string } | undefined;
-    if (tierBefore !== "pro" && customer.tier === "pro" && (action === "approve" || tier === "pro") && !welcomedBefore) {
-      const res = await sendPartnerWelcome({
-        email: customer.email,
-        name: customer.name,
-        lang: customer.lang,
-        company: customer.company,
-      });
-      mail = { sent: res.ok, skipped: res.skipped, reason: res.reason };
+    if (tierBefore !== "pro" && customer.tier === "pro" && (action === "approve" || tier === "pro")) {
+      if (welcomedBefore) {
+        mail = { sent: false, skipped: true, reason: "welcomed_before" };
+      } else {
+        const res = await sendPartnerWelcome({
+          email: customer.email,
+          name: customer.name,
+          lang: customer.lang,
+          company: customer.company,
+        });
+        mail = { sent: res.ok, skipped: res.skipped, reason: res.reason };
+      }
     }
 
     return Response.json({ ok: true, customer, ...(mail ? { mail } : {}) }, { headers: { "cache-control": "no-store" } });
