@@ -145,6 +145,18 @@ describe("inventory", () => {
     it("refuses a negative target", async () => {
       await expect(setQty(plain.id, "", -1)).rejects.toBeInstanceOf(InventoryError);
     });
+
+    /* «Шкаф пустой» is a count like any other, and it is the one the shop most
+       needs to hear: until the size is tracked the badge keeps coming from the
+       manual override, so an empty shelf goes on being advertised. Setting it
+       to 0 has to TRACK it, not be treated as «nothing happened». */
+    it("a first count of zero tracks the size and takes it out of stock", async () => {
+      expect(await isTracked(plain.id, "")).toBe(false);
+      const r = await setQty(plain.id, "", 0);
+      expect(r.qtyAfter).toBe(0);
+      expect(await isTracked(plain.id, "")).toBe(true);
+      expect((await productStockStates([plain.id]))[plain.id]).toBe("out");
+    });
   });
 
   describe("byEan", () => {
@@ -154,6 +166,17 @@ describe("inventory", () => {
       expect(hit?.productId).toBe(plain.id);
       expect(hit?.product?.id).toBe(plain.id);
       expect(hit?.product?.brand).toBe(plain.b);
+    });
+
+    /* Binding a barcode makes a row at qty 0 with no ledger line at all
+       (setLevel never touches qty), so «qty» alone cannot tell «шкаф пустой»
+       from «ещё ни разу не считали». The scanner card has to be told which
+       one it is looking at, or a full cupboard reads as «на складе 0». */
+    it("says whether the size has ever actually been counted", async () => {
+      await setLevel(plain.id, "", { ean: "4006381333931" });
+      expect((await byEan("4006381333931"))?.tracked).toBe(false);
+      await move({ productId: plain.id, delta: 6, reason: "goods_in" });
+      expect((await byEan("4006381333931"))?.tracked).toBe(true);
     });
 
     it("is null for an unknown code", async () => {

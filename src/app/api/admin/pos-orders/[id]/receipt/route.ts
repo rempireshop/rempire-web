@@ -14,6 +14,7 @@
  */
 import { esc, normalizeLang } from "@/emails/layout";
 import { requireAdmin } from "@/lib/auth";
+import { SHOP_TZ } from "@/lib/day";
 import { getOrder, getOrderByNumber } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -81,10 +82,27 @@ const T = {
 function eur(n: number): string {
   return (Number(n) || 0).toFixed(2).replace(".", ",") + " €";
 }
+/**
+ * The moment of the sale, on the shop's own clock.
+ *
+ * `timeZone` is not optional here: this function runs on a Vercel Node
+ * function whose process is UTC, so without it the slip printed Tallinn's
+ * evening two or three hours early — and a sale rung up after 21:00 (22:00 in
+ * winter) carried YESTERDAY'S date on the document the customer takes home and
+ * the owner files. Same calendar as every other day-shaped figure in this shop
+ * (src/lib/day.ts).
+ */
 function when(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("ru-RU", {
+    timeZone: SHOP_TZ,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 async function find(id: string) {

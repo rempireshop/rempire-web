@@ -157,6 +157,14 @@ export async function getLevel(productId: string, variant?: string | null): Prom
  */
 export type EanHit = StockLevel & {
   product: { id: string; brand: string; name: string; category: string; price: number } | null;
+  /**
+   * Has this size ever actually been counted (see the module doc)? A barcode
+   * bound by the scanner or by tools/seed-stock.mjs makes a row at qty 0 and
+   * no ledger line at all, so «qty» alone cannot tell «шкаф пустой» from
+   * «ещё ни разу не считали» — and the scanner card, which had to guess,
+   * guessed «на складе 0» and showed an empty shelf for a full one.
+   */
+  tracked: boolean;
 };
 
 /** The level a code is bound to, with no catalogue lookup — what setLevel()'s
@@ -201,7 +209,11 @@ async function productRef(productId: string): Promise<EanHit["product"]> {
 export async function byEan(code: string): Promise<EanHit | null> {
   const level = await levelByEan(code);
   if (!level) return null;
-  return { ...level, product: await productRef(level.productId) };
+  const [product, tracked] = await Promise.all([
+    productRef(level.productId),
+    isTracked(level.productId, level.variant),
+  ]);
+  return { ...level, product, tracked };
 }
 
 /**

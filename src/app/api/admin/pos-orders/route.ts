@@ -272,9 +272,16 @@ export async function POST(req: Request) {
        path uses in src/lib/payments/settle.ts, and the reason the order card
        goes on saying «наличные» rather than only «pos». */
     const paidAt = new Date().toISOString();
-    await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
+    const priced = await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
 
-    const settled = await attachCustomer(order, card);
+    /* …and the ROW that write produced is what goes on, not the snapshot from
+       before it. The e-mailed receipt names how the sale was paid
+       (renderPosReceipt → posMethod in src/lib/mail-hooks.ts), and it read
+       that off the order object this call hands to settlePayment: an object
+       whose `payment` was still the pre-payment one, i.e. nothing. So the
+       slip the owner prints said «наличные» and the letter the customer got
+       said only the amount. */
+    const settled = await attachCustomer(priced ?? order, card);
     let mailed = false;
     try {
       await settlePayment(

@@ -1,0 +1,415 @@
+/**
+ * The shelf, the scanner and the till — the medium findings of the 14.09.2026
+ * audit, pinned so a later tidy-up cannot put any of them back.
+ *
+ * Same technique as tests/inventory-scanner.test.ts and
+ * tests/shop-lost-answer.test.ts: the functions are sliced out of
+ * public/shop2/app.js **by source text** and run against stubs, so this tests
+ * the shop's own code and not a retyped copy that could drift away from it.
+ */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
+const src = readFileSync(APP_JS, "utf8");
+
+/** Cut `function <name>(…) { … }` out of app.js by brace matching. */
+function slice(name: string): string {
+  const start = src.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces around ${name}() in app.js`);
+}
+
+/** …and `var <NAME> = <literal>;`, so the test reads the shipped value. */
+function constant(name: string): string {
+  const m = new RegExp(`\\bvar ${name} = ([^;\\n]+);`).exec(src);
+  if (!m) throw new Error(`public/shop2/app.js no longer declares ${name}`);
+  return `var ${name} = ${m[1]};`;
+}
+
+/** …and `var <NAME> = { … };` spanning as many lines as it likes. */
+function objectConst(name: string): string {
+  const start = src.indexOf(`var ${name} = {`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer declares ${name}`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1) + ";";
+  }
+  throw new Error(`unbalanced braces around ${name} in app.js`);
+}
+
+/* ------------------------------------------------------------------------ *
+ * «Склад» → «Править»: the first count may be zero
+ * ------------------------------------------------------------------------ */
+
+type CommitOut = { toasts: string[]; sent: unknown[] };
+
+/** Runs the real stockCommit() against one shelf row and reports what it sent. */
+async function commit(row: Record<string, unknown>, typed: string): Promise<CommitOut> {
+  const body = `
+    var out = { toasts: [], sent: [] };
+    var S = { stockEdit: "k", stockEditEan: "", stockEditLow: "", stockEditQty: TYPED,
+              stockEditReason: "", stockSaved: "", lang: "RU" };
+    var STOCK_SAVE_ERRS = {};
+    var document = { querySelector: function () { return null; } };
+    function stockFindRow() { return ROW; }
+    function stockLevelSaveDetailed() { return Promise.resolve({ ok: true }); }
+    function stockMoveSend(b) { out.sent.push(b); return Promise.resolve(true); }
+    function stockSaveErrText() { return ""; }
+    function toast(m) { out.toasts.push(m); }
+    function render() {}
+    function refocus() {}
+    function reloadStock() {}
+    function trText(s) { return s; }
+    ${slice("stockQtyValue")}
+    ${slice("stockCommit")}
+    stockCommit("k");
+    return Promise.resolve().then(function () {}).then(function () {}).then(function () { return out; });
+  `;
+  const fn = new Function("ROW", "TYPED", body) as (r: unknown, t: string) => Promise<CommitOut>;
+  return fn(row, typed);
+}
+
+const untracked = { productId: "p", variant: "", ean: "", lowThreshold: 2, tracked: false, qty: 0 };
+const tracked = { productId: "p", variant: "", ean: "", lowThreshold: 2, tracked: true, qty: 0 };
+
+describe("a shelf counted as empty can be recorded as 0", () => {
+  /* A row nobody has counted has no quantity at all — «не учтено», not «0» —
+     so comparing it against 0 made «шкаф пустой» the one count the panel
+     refused to take. The size stayed untracked, and the shop went on
+     advertising the product from the manual override. */
+  it("«Остаток сейчас» = 0 on an untracked row is the first count, not «Изменений нет»", async () => {
+    const out = await commit(untracked, "0");
+    expect(out.toasts).toEqual(["Сохранено ✓"]);
+    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 0, reason: "adjust", ref: undefined }]);
+  });
+
+  it("…and a number still reaches the shelf as an absolute count", async () => {
+    const out = await commit(untracked, "4");
+    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 4, reason: "adjust", ref: undefined }]);
+  });
+
+  /* The other half of the same rule: a row that IS counted and already stands
+     at the typed number has not changed, and must not cost a ledger line. */
+  it("a counted row already at 0 still says «Изменений нет»", async () => {
+    const out = await commit(tracked, "0");
+    expect(out.toasts).toEqual(["Изменений нет"]);
+    expect(out.sent).toEqual([]);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * The scanner card says «не учтено» when the bottle has never been counted
+ * ------------------------------------------------------------------------ */
+
+type Hit = { tracked?: boolean; qty?: number } | null;
+
+/** Runs the real scanLookup() against one answer from the lookup route. */
+async function lookup(hit: Record<string, unknown> | null): Promise<Hit> {
+  const body = `
+    var S = { scanHit: null, scanAssignQ: "x", scanAssignPick: "x", scanBindConfirm: "x" };
+    var SRV = { admin: true };
+    function apiJson() { return Promise.resolve({ status: 200, body: { ok: true, hit: HIT } }); }
+    function scanLookupFailed() {}
+    function scanBeep() {}
+    function loadScanToday() {}
+    function scanRenderPanel() {}
+    function closeScanner() {}
+    function render() {}
+    ${slice("scanLookup")}
+    scanLookup("4006381333931");
+    return Promise.resolve().then(function () {}).then(function () { return S.scanHit; });
+  `;
+  const fn = new Function("HIT", body) as (h: unknown) => Promise<Hit>;
+  return fn(hit);
+}
+
+describe("a bound but never-counted bottle is «не учтено», not «на складе 0»", () => {
+  const base = { productId: "p", variant: "", qty: 0, lowThreshold: 2, ean: "4006381333931", state: "out", product: { id: "p" } };
+
+  /* The card's «не учтено» branch was dead: the panel stored a literal
+     `tracked: true` for every hit, so a barcode bound to a bottle nobody has
+     counted read as an empty shelf. */
+  it("keeps the route's answer when the size has never been counted", async () => {
+    expect((await lookup({ ...base, tracked: false }))?.tracked).toBe(false);
+  });
+
+  it("…and when it has", async () => {
+    expect((await lookup({ ...base, tracked: true, qty: 6, state: "in" }))?.tracked).toBe(true);
+  });
+
+  /* An older deployment whose route does not send the field at all must not
+     start calling every counted bottle «не учтено». */
+  it("treats a missing field as counted, as before", async () => {
+    expect((await lookup({ ...base, qty: 6, state: "in" }))?.tracked).toBe(true);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * The scanner's confirm says what the shelf actually did
+ * ------------------------------------------------------------------------ */
+
+type MoveResult = { appliedDelta?: number; clampedNegative?: boolean; skipped?: boolean };
+
+/** Runs the real scanCommitMove() against one server answer. */
+async function scanCommit(sign: number, qty: number, result: MoveResult | null): Promise<string[]> {
+  const body = `
+    var out = [];
+    var S = { scanBusy: false, scanQty: QTY, scanReady: false,
+              scanHit: { product: { id: "p" }, productId: "p", variant: "", code: "123", tracked: true } };
+    var SCAN = { lastCode: "123" };
+    var SCANEL = null;
+    function stockMoveSend() { return Promise.resolve(RESULT); }
+    function scanRenderPanel() {}
+    function toast(m) { out.push(m); }
+    function scanLookup() {}
+    function scanStockChanged() {}
+    ${slice("scanQtyNow")}
+    ${slice("scanMoveToast")}
+    ${slice("scanCommitMove")}
+    scanCommitMove(SIGN);
+    return Promise.resolve().then(function () {}).then(function () {}).then(function () { return out; });
+  `;
+  const fn = new Function("SIGN", "QTY", "RESULT", body) as (s: number, q: number, r: unknown) => Promise<string[]>;
+  return fn(sign, qty, result);
+}
+
+describe("the scanner's confirm never claims a move that did not happen", () => {
+  it("a plain write-off still says how many left", async () => {
+    expect(await scanCommit(-1, 3, { appliedDelta: -3, clampedNegative: false })).toEqual(["Списание −3 ✓"]);
+  });
+
+  it("goods in still say how many arrived", async () => {
+    expect(await scanCommit(1, 2, { appliedDelta: 2, clampedNegative: false })).toEqual(["Приход +2 ✓"]);
+  });
+
+  /* move() clamps at zero rather than leaving the row negative, and reports
+     what it really applied. The toast used to print the number that was ASKED
+     for, so a −5 against a shelf holding 2 read «Списание −5 ✓». */
+  it("a write-off clamped at zero reports the number that actually left", async () => {
+    expect(await scanCommit(-1, 5, { appliedDelta: -2, clampedNegative: true })).toEqual(["Списание −2 ✓"]);
+  });
+
+  it("…and one clamped to nothing at all says so", async () => {
+    expect(await scanCommit(-1, 5, { appliedDelta: 0, clampedNegative: true })).toEqual([
+      "На складе уже 0 — списывать нечего.",
+    ]);
+  });
+
+  /* «Списать» writes a 'sale_pos' move, and a sale on a size nobody has
+     counted is skipped by the server on purpose — nothing is written and no
+     ledger line appears. The route still answers ok, so the old toast said
+     «Списание −2 ✓» over a shelf that had not moved. */
+  it("a write-off on a size nobody has counted says it was not counted", async () => {
+    expect(await scanCommit(-1, 2, { appliedDelta: 0, skipped: true })).toEqual([
+      "Этот объём ещё не считали — впишите остаток на «Складе».",
+    ]);
+  });
+
+  it("a refusal is still a refusal", async () => {
+    expect(await scanCommit(-1, 2, null)).toEqual(["Не удалось сохранить"]);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * The shelf's clock is the one the owner is standing in
+ * ------------------------------------------------------------------------ */
+
+describe("the stock history is read on the shop's clock, not on UTC", () => {
+  /* The ledger row printed the first sixteen characters of the ISO stamp, so
+     a scan made at 22:40 in Tallinn read «19:40» — and one after midnight
+     read under the previous day. */
+  it("the history row formats the move's instant in the reader's browser", () => {
+    const at = "2026-07-15T19:40:00.000Z";
+    const body = `
+      var S = { stockMoves: [{ at: AT, productId: "p", brand: "A", name: "B", variant: "", delta: -2, reason: "sale_pos", ref: "сканер" }],
+                stockMovesReason: "", stockMovesErr: "", stockMovesBusy: false };
+      var STOCK_MOVE_WORD = { sale_pos: "Продажа в салоне" };
+      function esc(s) { return String(s); }
+      function loadStockMoves() {}
+      ${slice("auditWhen")}
+      ${slice("admStockMovesHTML")}
+      return admStockMovesHTML();
+    `;
+    const html = (new Function("AT", body) as (a: string) => string)(at);
+    // 22:40 in Tallinn, 19:40 in UTC — whichever zone this machine is in, the
+    // row must read the same as every other timestamp the panel prints
+    const expected = new Date(at).toLocaleString("ru-RU", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+    });
+    expect(html).toContain(expected);
+    expect(html).not.toContain("2026-07-15 19:40");
+  });
+
+  /* «Сегодня» under the scanner asked the route for everything since UTC
+     midnight, so an evening scan fell into tomorrow's list and a Tallinn
+     morning still showed yesterday's. */
+  it("«Сегодня» starts at midnight where the owner is standing", () => {
+    const body = `
+      var sinceSeen = "";
+      function apiJson(url) { sinceSeen = decodeURIComponent(String(url).split("since=")[1] || ""); return { then: function () { return { catch: function () {} }; } }; }
+      function noop() {}
+      var SRV = { admin: true }, S = {};
+      function scanRenderPanel() {}
+      ${slice("loadScanToday")}
+      loadScanToday();
+      return sinceSeen;
+    `;
+    // pinned to a zone that is NOT UTC, or the two midnights would coincide
+    // and the test would pass over the bug on a UTC build machine
+    const wasTz = process.env.TZ;
+    process.env.TZ = "Europe/Tallinn";
+    try {
+      const since = new Date((new Function(body) as () => string)());
+      const local = new Date();
+      local.setHours(0, 0, 0, 0);
+      const utc = new Date();
+      utc.setUTCHours(0, 0, 0, 0);
+      expect(local.getTime()).not.toBe(utc.getTime());
+      expect(since.getTime()).toBe(local.getTime());
+    } finally {
+      if (wasTz === undefined) delete process.env.TZ;
+      else process.env.TZ = wasTz;
+    }
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * The register never puts a product it cannot name in the basket
+ * ------------------------------------------------------------------------ */
+
+type Cart = { cart: Array<{ id: string }>; toasts: string[] };
+
+/** Runs a real door into S.posCart with a catalogue of exactly two products. */
+function intoCart(door: "chip" | "scan", id: string): Cart {
+  const body = `
+    var out = { toasts: [] };
+    var CATALOGUE = [{ id: "first", brand: "A", name: "First", price: 10, sizes: [] },
+                     { id: "shelved", brand: "B", name: "Second", price: 20, sizes: [] }];
+    var S = { posCart: [], posQ: "", scanQty: 1,
+              scanHit: { product: { id: ID }, productId: ID, variant: "", code: "123" } };
+    var SCANEL = null;
+    function toast(m) { out.toasts.push(m); }
+    function render() {}
+    function closeScanner() {}
+    function edStockFor() { return null; }
+    ${slice("byId")}
+    ${slice("byIdOrNull")}
+    ${slice("scanQtyNow")}
+    ${constant("POS_GONE")}
+    ${slice("posAddProduct")}
+    ${slice("scanToCart")}
+    if (DOOR === "chip") posAddProduct(ID); else scanToCart();
+    out.cart = S.posCart;
+    return out;
+  `;
+  const fn = new Function("DOOR", "ID", body) as (d: string, i: string) => Cart;
+  return fn(door, id);
+}
+
+describe("a product the shop is not offering cannot reach the till", () => {
+  it("a chip still adds a product the shop carries", () => {
+    expect(intoCart("chip", "shelved").cart).toEqual([{ id: "shelved", variant: "", qty: 1 }]);
+  });
+
+  it("the scanner still adds a product the shop carries", () => {
+    expect(intoCart("scan", "shelved").cart).toEqual([{ id: "shelved", variant: "", qty: 1 }]);
+  });
+
+  /* byId() answers CATALOGUE[0] for an id the shop does not carry, so a bottle
+     switched off «Показывать в магазине» put the FIRST catalogue product's
+     name and price in the basket, the confirm card and the total — and the
+     sale was then refused by the server with a generic message. */
+  it("a chip for a product taken off sale refuses in words", () => {
+    const out = intoCart("chip", "gone");
+    expect(out.cart).toEqual([]);
+    expect(out.toasts).toEqual(["Этот товар снят с продажи — верните его в «Товарах»."]);
+  });
+
+  it("…and so does the scanner", () => {
+    const out = intoCart("scan", "gone");
+    expect(out.cart).toEqual([]);
+    expect(out.toasts).toEqual(["Этот товар снят с продажи — верните его в «Товарах»."]);
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * A refused sale names the field to fix
+ * ------------------------------------------------------------------------ */
+
+describe("the till says what actually went wrong", () => {
+  const err = (code: string | undefined): string => {
+    const body = `
+      ${objectConst("POS_SEND_ERRS")}
+      ${slice("posSendErr")}
+      return posSendErr(CODE);
+    `;
+    return (new Function("CODE", body) as (c: string | undefined) => string)(code);
+  };
+
+  /* A mistyped customer address is the one refusal that never succeeds on
+     retry, and it was the one the cashier could not see: every code but two
+     landed on «попробуйте ещё раз». */
+  it("names the e-mail when the address is malformed", () => {
+    expect(err("bad_email")).toBe("Проверьте e-mail покупателя — адрес набран с ошибкой.");
+  });
+
+  it("names the line when the product is off sale", () => {
+    expect(err("out_of_stock")).toBe("Этот товар снят с продажи — уберите строку из чека.");
+  });
+
+  it("keeps the two it always knew", () => {
+    expect(err("empty_order")).toBe("Добавьте хотя бы один товар.");
+    expect(err("bad_payment_method")).toBe("Выберите способ оплаты.");
+  });
+
+  it("falls back to «попробуйте ещё раз» for a code it has no words for", () => {
+    expect(err("server_error")).toBe("Не удалось оформить продажу — попробуйте ещё раз.");
+    expect(err(undefined)).toBe("Не удалось оформить продажу — попробуйте ещё раз.");
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * «Отменить» on a clamped write-off
+ * ------------------------------------------------------------------------ */
+
+type Entry = { a: unknown; prev: { type: string; delta?: number } | null };
+
+/** Runs the real stockUndoApplied() over one journal entry. */
+function undoAfter(requested: number, result: MoveResult): Entry["prev"] {
+  const body = `
+    var a = { type: "stock_adjust", product_id: "p", variant: "", delta: REQ, reason: "adjust" };
+    var DEMO = { log: [{ a: a, prev: { type: "stock_adjust", product_id: "p", variant: "", delta: -REQ, reason: "adjust" } }] };
+    function demoSave() {}
+    ${slice("stockUndoApplied")}
+    stockUndoApplied(a, RESULT);
+    return DEMO.log[0].prev;
+  `;
+  const fn = new Function("REQ", "RESULT", body) as (r: number, res: unknown) => Entry["prev"];
+  return fn(requested, result);
+}
+
+describe("undo puts back only what left the shelf", () => {
+  it("an unclamped write-off keeps its mirror-image undo", () => {
+    expect(undoAfter(-3, { appliedDelta: -3 })?.delta).toBe(3);
+  });
+
+  /* The journal line is written before the server answers, so its undo was
+     built from the REQUESTED delta: undoing a −5 clamped to −2 put back five
+     bottles, three of which never existed — and the shop then advertised and
+     sold them. */
+  it("a clamped write-off puts back only the clamped amount", () => {
+    expect(undoAfter(-5, { appliedDelta: -2, clampedNegative: true })?.delta).toBe(2);
+  });
+
+  it("a move that applied nothing carries no undo at all", () => {
+    expect(undoAfter(-5, { appliedDelta: 0, skipped: true })).toBeNull();
+  });
+});

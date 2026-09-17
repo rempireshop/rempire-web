@@ -1,7 +1,7 @@
 /** POST /api/admin/pos-orders/ and its receipt — the in-salon quick sale. */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { recordLogin } from "@/lib/customers";
@@ -14,6 +14,15 @@ import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; p: number; s: string };
 const product = (catalogueMin as Min[]).find((p) => p.s === "in")!;
+
+/* The letter is still rendered and captured for real — the hook is only
+   wrapped, so the test can look at the ORDER the receipt is rendered from
+   (the mail sink keeps subjects and links, never the body). Same shape as
+   tests/payments-create.test.ts. */
+vi.mock("@/lib/mail-hooks", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/mail-hooks")>();
+  return { ...actual, onOrderPaid: vi.fn(actual.onOrderPaid) };
+});
 
 const ORIGIN = "https://rempireshop.com";
 
@@ -160,6 +169,32 @@ describe("GET /api/admin/pos-orders/<id>/receipt", () => {
     });
     expect(res.status).toBe(404);
   });
+
+  /* The slip is dated on the shop's clock, not on the server's. Production is
+     a Vercel Node function at UTC, so a sale rung up at half past midnight in
+     Tallinn (21:30 the previous day in UTC) used to print YESTERDAY'S date on
+     the document the customer takes home. TZ is forced here because the
+     developer's own machine is already in Tallinn and would hide it. */
+  it("dates the slip on the Tallinn clock even when the server runs at UTC", async () => {
+    const { orderId } = await makeSale();
+    // 15.07.2026 21:30 UTC is 16.07.2026 00:30 in Tallinn (EEST, +3)
+    await query("update orders set created_at = $2 where id = $1", [orderId, "2026-07-15T21:30:00.000Z"]);
+
+    const wasTz = process.env.TZ;
+    process.env.TZ = "UTC";
+    try {
+      const { GET } = await import("@/app/api/admin/pos-orders/[id]/receipt/route");
+      const res = await GET(get(`/api/admin/pos-orders/${orderId}/receipt/`, admin), {
+        params: Promise.resolve({ id: orderId }),
+      });
+      const html = await res.text();
+      expect(html).toContain("16.07.2026, 00:30");
+      expect(html).not.toContain("15.07.2026");
+    } finally {
+      if (wasTz === undefined) delete process.env.TZ;
+      else process.env.TZ = wasTz;
+    }
+  });
 });
 
 /**
@@ -251,6 +286,14 @@ describe("a salon sale is settled, not just marked paid", () => {
     expect(letters).toHaveLength(1);
     expect(letters[0].to).toEqual([email]);
     expect(letters[0].subject).toMatch(/^Чек R-1\d{5} — Rempire$/);
+    /* …and it can say HOW it was paid. The method is written before the
+       settlement and merged into the row by setOrderPayment(), but the object
+       the mail hook renders from used to be the snapshot from before that
+       write — so the printable slip named the terminal and the customer's own
+       receipt named only the amount (renderPosReceipt → posMethod). */
+    const { onOrderPaid } = await import("@/lib/mail-hooks");
+    const mailed = vi.mocked(onOrderPaid).mock.calls.at(-1)?.[0] as { payment?: { method?: string } };
+    expect(mailed?.payment?.method).toBe("terminal");
     expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(0);
 
     // and the one thing that must not change: the shelf reason

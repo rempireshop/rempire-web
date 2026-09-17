@@ -46,7 +46,20 @@ export async function settlePayment(
     // wholesale/loyalty: loyaltyEarned rides along only on the first arrival
     // (undefined on a retry — settleLoyalty() in apply.ts only ever runs once
     // per order) so the confirmation e-mail can mention points earned.
-    const paid = { ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned };
+    /* `payment` is what the ROW now holds, which is the caller's blob with
+       this settlement's on top — setOrderPayment() merges (`||`), it does not
+       replace, and the letter must see the same thing the order card does.
+       Replacing it wholesale dropped every key applyPaymentResult() does not
+       write: `method` above all, which the till records before it settles
+       (and settleWithoutPayment below does too), and which the in-salon
+       receipt is supposed to name. */
+    const stored = order.payment && typeof order.payment === "object" ? (order.payment as Record<string, unknown>) : {};
+    const paid = {
+      ...order,
+      status: "paid",
+      payment: { ...stored, ...outcome.payment },
+      loyaltyEarned: outcome.pointsEarned,
+    };
     if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
     else await notifyOrderPaid(paid);
   }
