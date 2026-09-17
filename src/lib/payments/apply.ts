@@ -222,7 +222,15 @@ async function redeemQuotedGiftCard(
      that never existed — tell them apart by shape first. A free-shipping promo
      carries a discount of 0 on a free basket, so the promo branch runs on the
      code alone; only the card needs money to redeem. */
-  if (await isPromoCode(code)) return consumeQuotedPromo(order, deps, code, amount);
+  const kind = await codeKind(code);
+  if (kind === "promo") return consumeQuotedPromo(order, deps, code, amount);
+  /* «POS -15 %» is a LABEL, not a code: the till has no promo box, and
+     src/lib/orders.ts folds the cashier's percent into `discount_code` so the
+     order card and the receipt show it with no extra rendering. It matches no
+     promo and no card, so settling it could only ever fail — and it did, on
+     every discounted salon sale, as an English `promo_consume_failed` row in
+     the owner's journal about money that was never at risk. */
+  if (kind === "label") return undefined;
   if (!(amount > 0)) return undefined;
 
   let redeem = deps.redeemGiftCard;
@@ -262,17 +270,22 @@ async function redeemQuotedGiftCard(
 }
 
 /**
- * `RMP-XXXX-XXXX` is a gift card; anything else the checkout accepted is a
- * promo code. Asked of src/lib/promos.ts so the shape lives in one file; if
- * that module is missing the answer is "not a promo", and the old gift-card
- * path runs exactly as before.
+ * What is stored in `discount_code`: `RMP-XXXX-XXXX` is a gift card, anything
+ * the promo rules can normalise is a promo code, and anything else is a
+ * `label` — a note the shop wrote there itself, with nothing to settle.
+ *
+ * Asked of src/lib/promos.ts so the shapes live in one file; if that module is
+ * missing the answer is "gift card", and the old path runs exactly as before.
  */
-async function isPromoCode(code: string): Promise<boolean> {
+type CodeKind = "gift" | "promo" | "label";
+
+async function codeKind(code: string): Promise<CodeKind> {
   try {
     const mod = await import("@/lib/promos");
-    return !mod.looksLikeGiftCode(code);
+    if (mod.looksLikeGiftCode(code)) return "gift";
+    return mod.normalisePromoCode(code) ? "promo" : "label";
   } catch {
-    return false;
+    return "gift";
   }
 }
 
@@ -699,6 +712,19 @@ export async function applyPaymentResult(
     };
   }
   if (result.status === "failed") {
+    /* A finished order is not an unpaid one. Montonio's ABANDONED/EXPIRED
+       ticket for an order the owner (or the unpaid cron) has since cancelled
+       used to move it to `failed` — and `failed` is one of the two statuses
+       the unpaid loop selects (src/lib/flows.ts UNPAID_STATUSES), so the shop
+       then wrote «Заказ ждёт оплаты» to a customer it had already told the
+       order was cancelled, and the order came back to life on the card as
+       «не оплачен». The token is kept on the payment blob either way — the
+       record of what the bank said is not the same thing as the order's own
+       state. (A refunded order never reaches this line: its blob says paid,
+       so the `wasPaid` branch above holds it.) */
+    if (order.status === "cancelled" || order.status === "refunded") {
+      return { status: "unchanged", keptPaid: false, alreadyPaid: false, payment };
+    }
     if (order.status !== "failed") {
       await deps.setOrderStatus(order.id, "failed", `payment:${providerName}`);
     }

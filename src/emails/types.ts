@@ -98,6 +98,13 @@ export interface OrderLike {
   shippingPrice?: Money;
   shipping_total?: Money;
   discountCode?: string | null;
+  /**
+   * `orders.loyalty_discount` (migration 100) — the euro «Использовать баллы»
+   * took off. Its own stream beside `discount`, so the letter's rows foot to
+   * `total`; mapOrder() hands the camelCase name, a raw row the column's.
+   */
+  loyaltyDiscount?: Money;
+  loyalty_discount?: Money;
   total?: Money;
   currency?: string | null;
   status?: string | null;

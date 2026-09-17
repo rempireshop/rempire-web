@@ -132,7 +132,19 @@ async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceS
     return false;
   }
 
-  const stamped: InvoiceRecord = { ...invoice, remindedAt: now.toISOString() };
+  /* Re-read, exactly like cancelOrder() below, and for the same reason: the
+     batch was selected before the walk began, and «Отметить оплаченным» may
+     have been pressed since. saveInvoiceRecord() replaces the whole blob, so
+     stamping `remindedAt` onto the SNAPSHOT would write the old `paidAt: null`
+     back over the payment — the order would read as unpaid again and the
+     company would be nagged for money it had already sent. The stamp goes onto
+     the record as it stands now. */
+  const fresh = await getOrder(order.id);
+  const current = fresh ? invoiceOf(fresh) : null;
+  if (!fresh || fresh.status !== order.status) return false;
+  if (!current || current.paidAt || current.cancelledAt || current.remindedAt) return false;
+
+  const stamped: InvoiceRecord = { ...current, remindedAt: now.toISOString() };
   await saveInvoiceRecord(order.id, stamped);
 
   let sent = false;

@@ -229,6 +229,39 @@ describe("real order rows", () => {
     expect(mail.html).toContain("Allahindlus");
   });
 
+  /* «Использовать баллы» is its own stream on the order beside the promo code
+     (orders.loyalty_discount): total = subtotal + shipping − discount −
+     points. The letter listed the goods, the discount and the delivery and
+     then printed an «Итого» smaller than all of them — the customer could see
+     the order was cheaper and nowhere why. The invoice PDF has printed this
+     line all along (src/lib/invoices.ts invoiceLines). */
+  it("prints the points row, so the rows foot to «Итого»", () => {
+    const order = {
+      number: "R-100077",
+      items: [{ title: "A", qty: 1, price: 40, sum: 40 }],
+      subtotal: 40,
+      shippingPrice: 4.9,
+      discount: 5,
+      loyaltyDiscount: 10,
+      total: 29.9,
+    };
+    const ru = renderOrderConfirmed(order, "ru");
+    expect(ru.text).toContain("Баллы — −10 €");
+    expect(ru.text).toContain("Скидка — −5 €");
+    expect(ru.text).toContain("29,90 €");
+    expectNoHoles("points", ru.subject, ru.html, ru.text);
+    // 40 − 5 − 10 + 4,90 = 29,90: the rows the letter prints add up to its total
+    expect(40 - 5 - 10 + 4.9).toBeCloseTo(order.total, 2);
+
+    const en = renderOrderConfirmed(order, "en");
+    expect(en.text).toContain("Loyalty points — −10 €");
+    expect(en.text).not.toMatch(/[А-Яа-яЁё]/);
+    const et = renderOrderConfirmed(order, "et");
+    expect(et.text).toContain("Boonuspunktid — −10 €");
+    // an order that spent none is untouched
+    expect(renderOrderConfirmed({ ...order, loyaltyDiscount: 0 }, "ru").text).not.toContain("Баллы");
+  });
+
   it("survives a half-empty order", () => {
     const mail = renderOrderConfirmed({}, "en");
     expectNoHoles("empty order", mail.subject, mail.html, mail.text);

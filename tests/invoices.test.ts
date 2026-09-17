@@ -39,9 +39,13 @@ import {
   splitGross,
   tallinnDate,
 } from "@/lib/invoices";
+import { ADMIN_COOKIE, makeSessionToken } from "@/lib/auth";
 import { capturedMail } from "@/lib/mail";
 import { createOrder, getOrder, OrderError, setOrderPayment, setOrderStatus, setSetting } from "@/lib/orders";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
+
+/** The owner's own session — the route is behind requireAdmin(). */
+const adminCookie = () => `${ADMIN_COOKIE}=${makeSessionToken()}`;
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
 const CATALOGUE = catalogueMin as Min[];
@@ -280,6 +284,24 @@ describe("the letter", () => {
       if (lang !== "ru") expect(mail.text).not.toMatch(/[А-Яа-яЁё]/);
     }
   });
+
+  /* The «Счёт на оплату» letter asks a company to transfer `total`, and the
+     rows above that figure are the whole of the shop's explanation for it.
+     `orders.loyalty_discount` was not among them, so on an order that spent
+     points the letter listed goods and a delivery that added up to MORE than
+     the amount it asked for — while the PDF stapled to the same letter
+     (invoiceLines) itemised the points correctly. */
+  it("lists the points, so what it asks to transfer is what its own rows add up to", () => {
+    const order = { ...demoOrder("ru"), subtotal: 95, shipping_price: 0, discount: 0, loyaltyDiscount: 15, total: 80 };
+    const mail = renderInvoice(order, demoInvoice(80), "ru");
+    expect(mail.text).toContain("Баллы — −15 €");
+    expect(mail.text).toContain("80 €");
+    expect(mail.html).not.toContain("undefined");
+    // the same letter in Estonian names the same line the PDF does
+    const et = renderInvoice({ ...demoOrder("et"), loyaltyDiscount: 15, total: 80 }, demoInvoice(80), "et");
+    expect(et.text).toContain("Boonuspunktid — −15 €");
+    expect(et.text).not.toMatch(/[А-Яа-яЁё]/);
+  });
 });
 
 /* ---------- on the database --------------------------------------------- */
@@ -510,5 +532,44 @@ describe("on the database", () => {
     const confirmed = capturedMail().filter((m) => m.template === "order-confirmed");
     expect(confirmed).toHaveLength(1);
     expect(confirmed[0].to).toEqual(["mari@example.com"]);
+  });
+
+  /* The panel's toast said «письмо ушло» because the call had returned — and
+     it returns whether Resend took the letter, refused it, or was never
+     configured at all. The owner was told the customer had been written to
+     and nothing anywhere would have corrected it. */
+  it("reports whether the customer's letter really left, and the route answers with it", async () => {
+    const order = await createOrder(invoiceOrderInput());
+    const refused = await markInvoicePaid(
+      order,
+      { setOrderPayment, setOrderStatus, notify: async () => ({ ok: false, sent: false, reason: "resend_500" }) },
+      "admin",
+    );
+    expect(refused.status).toBe("paid");            // the money is recorded either way
+    expect(refused.mail).toMatchObject({ sent: false, reason: "resend_500" });
+
+    const sent = await markInvoicePaid(
+      await createOrder(invoiceOrderInput()),
+      { setOrderPayment, setOrderStatus, notify: async () => ({ ok: true, sent: true }) },
+      "admin",
+    );
+    expect(sent.mail).toMatchObject({ sent: true });
+
+    /* …and on the route, which is what the card reads. There is no Resend key
+       in this file, so the real hook skips every letter — `sent: false` is the
+       honest answer and the toast must not say otherwise. */
+    const { POST } = await import("@/app/api/admin/orders/[id]/invoice/route");
+    const live = await createOrder(invoiceOrderInput());
+    const res = await POST(
+      new Request(`https://rempireshop.com/api/admin/orders/${live.id}/invoice/`, {
+        method: "POST",
+        headers: { "content-type": "application/json", cookie: adminCookie() },
+        body: JSON.stringify({ action: "paid" }),
+      }),
+      { params: Promise.resolve({ id: live.id }) },
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({ ok: true, alreadyPaid: false, sent: false, skipped: true });
   });
 });

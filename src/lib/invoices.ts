@@ -29,15 +29,24 @@
  *
  * Prices in the shop include VAT, so every figure here is backed out of the
  * gross line: net = gross / (1 + rate), rounded to the cent, VAT = the rest —
- * the same rule as the accountant export (src/lib/reports.ts vatSplit), so
- * the invoice and the month's report never disagree by a cent.
+ * the same formula as the accountant export (src/lib/reports.ts vatSplit),
+ * applied PER LINE and then summed, which is what an invoice must show.
+ *
+ * That is not quite the export's arithmetic, and this comment used to claim it
+ * was: the export backs the VAT out of the order's total in one step, so on a
+ * multi-line order the two can land a cent apart (two 10,00 € lines at 24 %
+ * are 16,12/3,88 here and 16,13/3,87 there). The invoice is the document of
+ * record and per-line is the rule it has to follow; the export's figure is the
+ * same money rounded once instead of twice. Known, and left alone on purpose —
+ * do not "fix" one to the other without deciding which of the two an
+ * accountant is reading.
  */
 import { jsonbParam, query } from "@/lib/db";
 import { mergeContent, type ShopContent } from "@/lib/content";
 import { addShopDays, shopDay } from "@/lib/day";
 import { getSettings, OrderError, writeAuditSafe, type Order } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome } from "@/lib/payments/apply";
-import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { notifyOrderPaid, readOrderMailReport, type OrderMailReport } from "@/lib/payments/mail-hook";
 import { translateProductName, translateVariant } from "@/lib/product-name";
 import { resolveVatRate } from "@/lib/reports";
 
@@ -606,7 +615,16 @@ export interface MarkPaidDeps extends Pick<ApplyDeps, "setOrderPayment" | "setOr
   now?: () => Date;
 }
 
-export type MarkPaidOutcome = ApplyOutcome & { invoice: InvoiceRecord | null };
+export type MarkPaidOutcome = ApplyOutcome & {
+  invoice: InvoiceRecord | null;
+  /**
+   * What became of the customer's «Заказ принят» — null on a second press,
+   * which sends nothing at all. The panel's toast is worded from it: it used
+   * to say «письмо ушло» whenever the call returned, so a shop whose Resend
+   * key had expired told the owner the customer had been written to.
+   */
+  mail: OrderMailReport | null;
+};
 
 /**
  * The money arrived on the bank statement and the owner says so. Exactly the
@@ -620,7 +638,7 @@ export async function markInvoicePaid(
   actor = "admin",
 ): Promise<MarkPaidOutcome> {
   const invoice = invoiceOf(order);
-  const outcome = await applyPaymentResult(
+  const outcome: ApplyOutcome = await applyPaymentResult(
     order,
     {
       orderRef: order.number,
@@ -633,7 +651,7 @@ export async function markInvoicePaid(
     "invoice",
     deps,
   );
-  if (outcome.status !== "paid" || outcome.alreadyPaid) return { ...outcome, invoice };
+  if (outcome.status !== "paid" || outcome.alreadyPaid) return { ...outcome, invoice, mail: null };
 
   let paid: InvoiceRecord | null = invoice;
   if (invoice) {
@@ -644,18 +662,23 @@ export async function markInvoicePaid(
       console.error("[invoices] paidAt not saved:", err);
     }
   }
-  await (deps.notify ?? notifyOrderPaid)({
-    ...order,
-    status: "paid",
-    payment: outcome.payment,
-    invoice: paid,
-    loyaltyEarned: outcome.pointsEarned,
-  });
+  /* Kept, not discarded: the card's toast says whether the customer was
+     written to, and the only thing that knows is this answer. */
+  const mail = readOrderMailReport(
+    await (deps.notify ?? notifyOrderPaid)({
+      ...order,
+      status: "paid",
+      payment: outcome.payment,
+      invoice: paid,
+      loyaltyEarned: outcome.pointsEarned,
+    }),
+  );
   await (deps.writeAudit ?? writeAuditSafe)(actor, "invoice.paid", {
     orderId: order.id,
     number: order.number,
     invoice: invoice?.number ?? null,
     amount: money(Number(order.total) || 0),
+    sent: mail.sent,
   });
-  return { ...outcome, invoice: paid };
+  return { ...outcome, invoice: paid, mail };
 }

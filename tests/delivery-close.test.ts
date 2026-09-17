@@ -62,6 +62,60 @@ describe("«Доставлен» without the button", () => {
     expect(await statusOf(fresh), "a parcel two days out was closed").toBe("shipped");
   });
 
+  /* «через N дней» means N days after the parcel LEFT, and nothing else. The
+     clock used to be read off `updated_at`, which the shipping webhook moves
+     on every carrier status event (saveShipmentOnOrder), which setOrderNote()
+     moves when the owner types a line on the card, and which setOrderPayment()
+     moves too. A parcel Montonio reported on this morning looked one day old
+     however long ago it had been posted. */
+  it("counts from «Отправлен», not from the last thing that touched the row", async () => {
+    const { setOrderNote } = await import("@/lib/orders");
+    await setSetting("delivery", { autoDays: 7, useCarrier: false });
+
+    // posted nine days ago; the carrier pinged this morning and the owner
+    // typed a note on the card five minutes ago
+    const posted = await query<{ id: string }>(
+      `insert into orders (email, name, status, shipping, updated_at)
+       values ($1, $2, 'shipped', $3::jsonb, now())
+       returning id`,
+      ["buyer@example.com", "Тест", JSON.stringify({ method: "parcel", shippedAt: new Date(Date.now() - 9 * DAY).toISOString() })],
+    );
+    await setOrderNote(posted[0].id, "позвонить в понедельник", "admin");
+
+    // …and one posted this morning whose row has not been touched since it was made
+    const today = await query<{ id: string }>(
+      `insert into orders (email, name, status, shipping, updated_at)
+       values ($1, $2, 'shipped', $3::jsonb, now() - interval '30 days')
+       returning id`,
+      ["late@example.com", "Тест", JSON.stringify({ method: "parcel", shippedAt: new Date().toISOString() })],
+    );
+
+    expect(await closeDeliveredOrders()).toMatchObject({ closed: 1 });
+    expect(await statusOf(posted[0].id), "nine days out, closed").toBe("delivered");
+    expect(await statusOf(today[0].id), "posted this morning, left alone").toBe("shipped");
+  });
+
+  it("stamps the shipping date once, on the move into «Отправлен»", async () => {
+    const { setOrderStatus } = await import("@/lib/orders");
+    const rows = await query<{ id: string }>(
+      "insert into orders (email, name, status) values ($1, $2, 'paid') returning id",
+      ["c@example.com", "Тест"],
+    );
+    const id = rows[0].id;
+    const shipped = await setOrderStatus(id, "shipped", "test");
+    const first = (shipped!.shipping as { shippedAt?: string }).shippedAt;
+    expect(first).toBeTruthy();
+
+    // an undo and a second «Отправлен» keep the first date — the parcel left once
+    await setOrderStatus(id, "paid", "test");
+    const again = await setOrderStatus(id, "shipped", "test");
+    expect((again!.shipping as { shippedAt?: string }).shippedAt).toBe(first);
+    // …and the delivery stamp is still its own
+    const delivered = await setOrderStatus(id, "delivered", "test");
+    expect((delivered!.shipping as { deliveredAt?: string }).deliveredAt).toBeTruthy();
+    expect((delivered!.shipping as { shippedAt?: string }).shippedAt).toBe(first);
+  });
+
   it("never touches an order that is not shipped", async () => {
     const paid = await query<{ id: string }>(
       "insert into orders (email, name, status) values ($1, $2, 'paid') returning id",

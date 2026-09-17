@@ -350,6 +350,30 @@ describe("listReportOrders (PGlite)", () => {
     expect(summarize([found]).revenue).toBe(Math.round((order.total - 10) * 100) / 100);
   });
 
+  /* «По счёту — для компаний»: the rate is frozen on the invoice record the
+     day it is issued (src/lib/invoices.ts) precisely so an old invoice is
+     never reprinted differently, and the PDF honours it. The export used to
+     hand the shop's LIVE rate to every row, so the first export run after a
+     rate change restated every past month and disagreed with the invoices
+     already in the companies' hands. */
+  it("splits an issued invoice at the rate frozen on it, not at today's", async () => {
+    const order = await paidOrder();
+    await query(
+      `update orders set invoice = $2::jsonb where id = $1`,
+      [order.id, JSON.stringify({ number: "A-2025-0007", issuedAt: "2025-06-01T09:00:00.000Z", issueDate: "2025-06-01", dueAt: "2025-06-08", dueDays: 7, vatRate: 22 })],
+    );
+    // the shop is on 24 % now; this invoice was issued at 22 %
+    const found = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === order.number)!;
+    expect(found.invoiceNumber).toBe("A-2025-0007");
+    expect(found.vatRate).toBe(22);
+    expect(found.vatAmount).toBeCloseTo(vatSplit(found.total, 22).vat, 2);
+    expect(found.totalExclVat).toBeCloseTo(vatSplit(found.total, 22).net, 2);
+    // an order with no invoice still takes the live rate it is given
+    const plain = await paidOrder({ email: "plain@example.com" });
+    const other = (await listReportOrders("2000-01-01", "2100-01-01", 24)).find((r) => r.number === plain.number)!;
+    expect(other.vatRate).toBe(24);
+  });
+
   it("treats «возврат» marked by hand — no refund entry at all — as the whole total", async () => {
     const order = await paidOrder();
     await setOrderStatus(order.id, "refunded", "test");
