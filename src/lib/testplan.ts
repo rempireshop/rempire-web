@@ -67,11 +67,35 @@ export type TestItem = {
       movement. The page paints these red so nobody runs one by accident on a
       live shop; see public/test/index.html. */
   writes: boolean;
+  /**
+   * What the last round of fixes did to THIS check, when it did anything —
+   * absent on the rows nothing touched, which is most of them.
+   *
+   *   · `redo`     — the shop behaves differently now, so an answer given
+   *                  before `TestPlan.marked` was an answer about the old
+   *                  behaviour and the page stops counting it.
+   *   · `reworded` — only the check's own words moved; the shop is as it was
+   *                  and the answer stands. The mark exists so a tester who
+   *                  remembers the old sentence is told why it changed rather
+   *                  than left wondering whether he misread it.
+   *   · `new`      — the check did not exist when the plan was last answered.
+   *
+   * Only `redo` costs anybody work; see public/test/index.html for how the
+   * three are drawn and how an overtaken answer is shown without being thrown
+   * away.
+   */
+  mark?: "redo" | "reworded" | "new";
   /** The same item in English — every text field, never a subset. */
   en: TestText;
 };
 
-export type TestPlan = { version: number; areas: TestArea[]; items: TestItem[] };
+/**
+ * `marked`: when the marks above were set, as an ISO instant. It is what makes
+ * a `redo` clear itself — an answer newer than this is the tester having
+ * looked again, and needs no second list of "and these ones are done now".
+ * Absent while no row carries a mark.
+ */
+export type TestPlan = { version: number; marked?: string; areas: TestArea[]; items: TestItem[] };
 
 /** The checklist as shipped. Read-only by convention — it is the imported
     JSON module object, which every request in the process shares. */

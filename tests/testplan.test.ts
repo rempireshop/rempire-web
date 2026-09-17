@@ -32,6 +32,8 @@ const WHO = ["renat", "dim", "both"] as const;
 const DEVICE = ["phone", "desktop", "any"] as const;
 const LANG = ["RU", "ET", "EN", "any"] as const;
 const RISK = ["high", "med", "low"] as const;
+/** The optional round marker — see TestItem.mark in src/lib/testplan.ts. */
+const MARK = ["redo", "reworded", "new"] as const;
 
 interface Area {
   id: string;
@@ -51,10 +53,12 @@ interface Item {
   why: string;
   risk: string;
   writes: boolean;
+  mark?: string;
   en: { title: string; steps: string[]; expect: string[]; why: string };
 }
 interface Plan {
   version: number;
+  marked?: string;
   areas: Area[];
   items: Item[];
 }
@@ -199,10 +203,26 @@ describe("testplan.json — the shape the checklist page reads", () => {
     }
   });
 
+  /* `mark` is the one optional field a row may carry, and it is optional on
+     purpose: the 130-odd checks a round did not touch say nothing, so the diff
+     stays readable and the page stays quiet about them. Pinned here because an
+     unknown value would draw a badge with no word in it, and a `redo` with no
+     `marked` instant to date it against would silently go on counting an
+     answer the shop has outgrown. */
+  it("marks only with a word the page can draw, and dates the marks", () => {
+    const marked = plan.items.filter((i) => i.mark !== undefined);
+    for (const it_ of marked) expect(MARK, `${it_.id}.mark`).toContain(it_.mark);
+    if (marked.length) {
+      expect(typeof plan.marked, "items carry a mark but the plan has no `marked` instant").toBe("string");
+      expect(Number.isFinite(Date.parse(plan.marked as string)), `marked: ${plan.marked}`).toBe(true);
+    }
+  });
+
   it("carries no field the renderer does not know about", () => {
     const keys = ["id", "area", "who", "device", "lang", "title", "steps", "expect", "why", "risk", "writes", "en"];
     for (const it_ of plan.items) {
-      expect(Object.keys(it_).sort(), `${it_.id} keys`).toEqual([...keys].sort());
+      const own = Object.keys(it_).filter((k) => k !== "mark");
+      expect(own.sort(), `${it_.id} keys`).toEqual([...keys].sort());
       expect(Object.keys(it_.en).sort(), `${it_.id}.en keys`).toEqual(["expect", "steps", "title", "why"]);
     }
     for (const a of plan.areas) {

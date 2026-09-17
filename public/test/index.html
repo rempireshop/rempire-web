@@ -42,6 +42,11 @@
     --bad-bg: #fbeceb;
     --skip: #6f6b57;
     --skip-bg: #f1efe9;
+    /* The «что изменилось после твоих ответов» colour. Deliberately neither
+       green nor red: a marked check is not a verdict, it is a place to look. */
+    --mark: #8a5a00;
+    --mark-bg: #fdf4e3;
+    --mark-rule: rgba(138, 90, 0, .35);
     --sans: "Golos Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
     --serif: "Literata", Georgia, serif;
     --gutter: 14px;
@@ -128,6 +133,9 @@
   .item[data-status="ok"]   { border-left-color: var(--ok);   background: var(--ok-bg); }
   .item[data-status="bad"]  { border-left-color: var(--bad);  background: var(--bad-bg); }
   .item[data-status="skip"] { border-left-color: var(--skip); background: var(--skip-bg); }
+  /* After the three verdicts on purpose: a row whose answer was overtaken by
+     a change reads as «нужна работа», not as the green it used to be. */
+  .item[data-stale="1"] { border-left-color: var(--mark); background: var(--mark-bg); }
   .item[hidden] { display: none; }
   .item h3 { font-size: 1.05rem; line-height: 1.25; margin: .35rem 0 .5rem; scroll-margin-top: 4.5rem; }
 
@@ -138,8 +146,25 @@
   }
   .tag--high { border-color: var(--bad); color: var(--bad); }
   .tag--writes { border-color: var(--bad); background: var(--bad); color: #fff; }
+  /* The round-22 marks. «Проверить заново» is the only one that costs the
+     tester work, so it is the only one that is filled in — the other two are
+     outlined, because a page where every badge shouts has no badges. */
+  .tag--redo { border-color: var(--mark); background: var(--mark); color: #fff; }
+  .tag--reworded { border-color: var(--mark); color: var(--mark); }
+  .tag--new { border-color: var(--ok); color: var(--ok); }
 
   .warns { margin: 0 0 .6rem; padding: .5rem .6rem; background: var(--bad-bg); border: 1px solid rgba(140, 26, 15, .35); color: var(--bad); font-size: .88rem; }
+
+  /* What the mark means, in a sentence, on the card — a legend at the top of
+     a 173-row page is a legend nobody scrolls back to. */
+  .marks { margin: 0 0 .6rem; padding: .5rem .6rem; background: var(--mark-bg); border: 1px solid var(--mark-rule); color: var(--mark); font-size: .88rem; }
+
+  /* The answer that no longer counts. Not deleted, not pretended away: it is
+     still his answer and still on the server — it just does not tick this row
+     off any more. */
+  .stale { margin: 0 0 .6rem; font-size: .85rem; color: var(--muted); }
+  .stale b { color: var(--mark); font-weight: 600; }
+  .stale i { display: block; font-style: normal; margin-top: .15rem; }
 
   .steps { margin: 0 0 .6rem; padding-left: 1.2rem; }
   .steps li { margin-bottom: .25rem; }
@@ -264,6 +289,10 @@
       <span class="filters__label" id="f-open" data-t="fOpen">Что показывать</span>
       <div class="chips" role="group" aria-labelledby="f-open">
         <button type="button" class="chip" data-tp-only aria-pressed="false" data-t="onlyOpen">Только без ответа</button>
+        <!-- One tap to the checks the last round of fixes moved. It sits here
+             rather than in a legend because the whole point of it is not
+             having to scroll a 173-row page looking for badges. -->
+        <button type="button" class="chip" data-tp-marked aria-pressed="false" data-t="onlyMarked">Только изменённые</button>
       </div>
     </div>
   </section>
@@ -335,6 +364,12 @@
      check must give the same result whichever language the page is showing. */
   var VERDICTS = { ok: 1, bad: 1, skip: 1 };
 
+  /* The three marks a row may carry, as values — same reason as VERDICTS, plus
+     one of its own: the plan is replaced wholesale by another hand, and a mark
+     this page does not know must be ignored rather than drawn as an empty
+     badge. */
+  var MARKS = { redo: 1, reworded: 1, "new": 1 };
+
   /* The request that never left, as a code rather than as a sentence: what is
      kept in `state.error` outlives the language it was written in, and a
      Russian «нет сети» frozen into an English page is exactly the kind of
@@ -380,6 +415,7 @@
       fAll: "Все",
       fOpen: "Что показывать",
       onlyOpen: "Только без ответа",
+      onlyMarked: "Только изменённые",
       reportH: "Забрать ответы текстом",
       reportSub: "Готовый список ответов и замечаний — переслать в чат или вставить в письмо.",
       copy: "Скопировать ответы",
@@ -394,6 +430,19 @@
       status: { ok: "работает", bad: "не работает", skip: "пропущено" },
       tagLang: "язык ",
       tagWrites: "создаёт данные",
+
+      /* The three marks a row can carry (`mark` in src/data/testplan.json).
+         The badge is the word on the card; the sentence under it says what it
+         costs the tester, because «проверить заново» on its own does not say
+         whether the old answer is wrong or just out of date. */
+      mark: { redo: "проверить заново", reworded: "текст поправлен", new: "новый пункт" },
+      markWhy: {
+        redo: "Магазин изменился после твоего ответа — этот пункт надо пройти ещё раз.",
+        reworded: "Здесь поправлен только текст проверки. Магазин работает как раньше, ответ остаётся в силе.",
+        "new": "Новый пункт — его ещё никто не проходил."
+      },
+      staleA: "Прежний ответ: ",
+      staleB: " — он больше не в счёт.",
 
       verdictAria: "Оценка пункта",
       btnOk: "Работает",
@@ -458,6 +507,7 @@
       fAll: "All",
       fOpen: "What to show",
       onlyOpen: "Unanswered only",
+      onlyMarked: "Changed only",
       reportH: "Take the answers as text",
       reportSub: "A ready-made list of answers and remarks — to forward in a chat or paste into an e-mail.",
       copy: "Copy answers",
@@ -472,6 +522,15 @@
       status: { ok: "works", bad: "broken", skip: "skipped" },
       tagLang: "lang ",
       tagWrites: "creates data",
+
+      mark: { redo: "run again", reworded: "wording fixed", "new": "new check" },
+      markWhy: {
+        redo: "The shop changed after this was answered — run the check again.",
+        reworded: "Only the check's wording was fixed. The shop behaves as before, so the answer stands.",
+        "new": "A new check — nobody has run it yet."
+      },
+      staleA: "Previous answer: ",
+      staleB: " — it no longer counts.",
 
       verdictAria: "Verdict on this check",
       btnOk: "Works",
@@ -549,6 +608,7 @@
     who: "",
     filter: "all",
     onlyOpen: false,
+    onlyMarked: false,
     dirty: false,
     busy: false,
     /* Bumped by every answer. A save that finishes may only report "nothing
@@ -660,6 +720,40 @@
 
   function tag(text, cls) { return el("span", { "class": "tag" + (cls ? " tag--" + cls : ""), text: text }); }
 
+  /* ---------- «что изменилось с прошлого раза» --------------------------- */
+  /*
+   * A row may carry `mark` (src/data/testplan.json): "redo" when the shop's
+   * behaviour changed under it, "reworded" when only the check's own words
+   * did, "new" when the check did not exist before. The 130-odd rows nothing
+   * touched carry nothing at all, and the page stays quiet about them.
+   *
+   * Only "redo" costs an answer. The plan's `marked` instant says when the
+   * marks were set, so an answer given BEFORE it was an answer to the old
+   * behaviour and an answer given after it is the tester having looked again.
+   * That is the whole of the rule, and it is why the marks never have to be
+   * cleared by hand: the moment he presses a verdict the row goes back to
+   * being an ordinary answered row, badge and all.
+   *
+   * What a stale answer is NOT: deleted. It stays in the document, it still
+   * syncs, it is still shown on the card and in the copied report — it simply
+   * stops ticking the row off. Discarding it would be the page deciding, on a
+   * plan file's say-so, that something a tester wrote never happened.
+   */
+  function markOf(item) {
+    return item && MARKS[item.mark] ? item.mark : "";
+  }
+
+  function isStale(id) {
+    if (markOf(state.items[id]) !== "redo") return false;
+    var a = state.answers[id];
+    if (!a) return false;
+    var since = state.plan && typeof state.plan.marked === "string" ? state.plan.marked : "";
+    /* No `marked` in the plan (an older cached copy) — then nothing can be
+       shown to be older than it, and an answer keeps counting. Erring the
+       other way would blank a checklist over a missing field. */
+    return !!since && (!a.at || a.at < since);
+  }
+
   /* One line reads as a sentence; several read as a list of things to
      check off one at a time. The plan always carries an array — see
      src/lib/testplan.ts — and the difference here is only how it looks. */
@@ -681,8 +775,12 @@
        `device`, `writes` and the item id itself never change with the
        language, which is what lets one answer belong to both testers. */
     var said = say(item);
+    var mark = markOf(item);
 
+    /* The mark goes first in the row of badges: it is the one thing on this
+       card that was not true the last time he read it. */
     var tags = el("div", { "class": "tags" }, [
+      mark ? tag(t("mark." + mark), mark) : null,
       tag(t("risk." + item.risk) || item.risk, item.risk === "high" ? "high" : null),
       tag(t("who." + item.who) || item.who),
       tag(t("device." + item.device) || item.device),
@@ -702,10 +800,15 @@
 
     var area = el("article", {
       "class": "item", id: "i-" + item.id, "data-tp-item": item.id,
-      "data-who": item.who, "data-status": "", "data-writes": item.writes ? "1" : "0"
+      "data-who": item.who, "data-status": "", "data-writes": item.writes ? "1" : "0",
+      "data-mark": mark || null, "data-stale": "0"
     }, [
       tags,
       el("h3", { text: said.title }),
+      mark ? el("p", { "class": "marks", text: t("markWhy." + mark) }) : null,
+      /* Filled in by paintItem — only a «проверить заново» row that already
+         carries an answer ever has anything to say here. */
+      mark === "redo" ? el("p", { "class": "stale", "data-tp-stale": item.id, hidden: "" }) : null,
       item.writes ? el("p", { "class": "warns", text: t("writesWarn") }) : null,
       steps,
       expectBlock(said.expect),
@@ -788,16 +891,41 @@
     var node = state.nodes[id];
     if (!node) return;
     var a = state.answers[id];
-    node.setAttribute("data-status", a ? a.status : "");
+    /* An answer the shop has outgrown is shown, but it is not worn: no green
+       card, no pressed button, no «Ренат · работает» under the buttons. All of
+       that would be the page saying this row is done, and it is not. */
+    var stale = isStale(id);
+    var live = stale ? null : a;
+
+    node.setAttribute("data-status", live ? live.status : "");
+    node.setAttribute("data-stale", stale ? "1" : "0");
     var buttons = node.querySelectorAll("[data-tp-set]");
     for (var i = 0; i < buttons.length; i++) {
-      var on = !!a && buttons[i].getAttribute("data-tp-set") === a.status;
+      var on = !!live && buttons[i].getAttribute("data-tp-set") === live.status;
       buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
     }
     var box = node.querySelector("[data-tp-note]");
-    if (box && document.activeElement !== box) box.value = a ? a.note : "";
+    /* The old comment moves into the stale line rather than staying in the
+       box: a comment left in the box is one stray keystroke away from making
+       the old verdict look freshly given. It is not lost — it is two lines up,
+       and it comes back into the box the moment a verdict is pressed. */
+    if (box && document.activeElement !== box) box.value = live ? live.note : "";
+
+    var old = node.querySelector("[data-tp-stale]");
+    if (old) {
+      old.textContent = "";
+      old.hidden = !stale;
+      if (stale) {
+        old.appendChild(el("b", { text: t("staleA") }));
+        old.appendChild(document.createTextNode(
+          [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") + t("staleB")
+        ));
+        if (a.note) old.appendChild(el("i", { text: "«" + a.note + "»" }));
+      }
+    }
+
     var by = node.querySelector("[data-tp-by]");
-    if (by) by.textContent = a ? [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") : "";
+    if (by) by.textContent = live ? [t("who." + live.by) || live.by || t("someone"), t("status." + live.status), when(live.at)].filter(Boolean).join(" · ") : "";
   }
 
   function when(iso) {
@@ -820,7 +948,10 @@
     }
     var total = state.ids.length, answered = 0, ok = 0, bad = 0, skip = 0;
     for (var i = 0; i < total; i++) {
-      var a = state.answers[state.ids[i]];
+      /* A stale answer is not counted here for the same reason it is not
+         painted: «Отвечено 170 из 173» over a shop that has moved under
+         twenty of them is the one number this page must not show. */
+      var a = isStale(state.ids[i]) ? null : state.answers[state.ids[i]];
       if (!a) continue;
       answered++;
       if (a.status === "ok") ok++; else if (a.status === "bad") bad++; else skip++;
@@ -881,8 +1012,12 @@
       var id = state.ids[i], node = state.nodes[id], item = state.items[id];
       if (!node) continue;
       var mine = state.filter === "all" || item.who === state.filter || item.who === "both";
-      var open = !state.onlyOpen || !state.answers[id];
-      node.hidden = !(mine && open);
+      /* «Только без ответа» counts a stale answer as no answer — the two
+         filters have to agree with the number in the bar, or one of them is
+         lying to somebody working down the list. */
+      var open = !state.onlyOpen || !state.answers[id] || isStale(id);
+      var marked = !state.onlyMarked || !!markOf(item);
+      node.hidden = !(mine && open && marked);
     }
     /* A section whose every item is filtered away hides its heading too —
        otherwise a phone screen fills with headings and nothing under them. */
@@ -1108,8 +1243,16 @@
 
   function line(item) {
     var a = state.answers[item.id];
-    var head = "[" + (a ? t("status." + a.status) : t("reportNoAnswer")) + "] " + say(item).title;
-    if (a && a.by) head += " — " + (t("who." + a.by) || a.by);
+    var mark = markOf(item);
+    var stale = isStale(item.id);
+    /* The pasted text says the same thing the card does, including about the
+       answer that stopped counting: this is what gets forwarded to the other
+       one, and a report that reads «работает» about a check nobody has run
+       since the shop changed is worse than no report. */
+    var head = "[" + (stale || !a ? t("reportNoAnswer") : t("status." + a.status)) + "] " + say(item).title;
+    if (mark) head += " (" + t("mark." + mark) + ")";
+    if (a && !stale && a.by) head += " — " + (t("who." + a.by) || a.by);
+    if (stale) head += "\n    " + t("staleA") + [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") + t("staleB");
     if (a && a.note) head += "\n    " + a.note.replace(/\n/g, "\n    ");
     return head;
   }
@@ -1210,6 +1353,14 @@
     if (only) {
       state.onlyOpen = !state.onlyOpen;
       only.setAttribute("aria-pressed", state.onlyOpen ? "true" : "false");
+      applyFilters();
+      return;
+    }
+
+    var marked = hit.closest("[data-tp-marked]");
+    if (marked) {
+      state.onlyMarked = !state.onlyMarked;
+      marked.setAttribute("aria-pressed", state.onlyMarked ? "true" : "false");
       applyFilters();
       return;
     }

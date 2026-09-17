@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "marked": "2026-09-17T13:35:00.000Z",
   "areas": [
     {
       "id": "shop",
@@ -461,7 +462,7 @@
       "expect": [
         "Другой объём — другая цена.",
         "Больший объём не дешевле меньшего.",
-        "Надпись о наличии тоже меняется.",
+        "Надпись о наличии общая для товара и от объёма не меняется.",
         "Фотографии листаются пальцем.",
         "Описание на русском.",
         "Описание видно целиком, не обрезано."
@@ -469,6 +470,7 @@
       "why": "Цена, которая не поменялась вместе с объёмом, — это спор на кассе, а литр дешевле флакона — ваш убыток.",
       "risk": "med",
       "writes": false,
+      "mark": "redo",
       "en": {
         "title": "A product with several sizes",
         "steps": [
@@ -480,7 +482,7 @@
         "expect": [
           "A different size shows a different price.",
           "A bigger size is never cheaper than a smaller one.",
-          "The in-stock line changes too.",
+          "The in-stock line belongs to the whole product and does not follow the size.",
           "The photos swipe with a finger.",
           "The description is in Russian.",
           "The whole description is there, not cut off."
@@ -579,12 +581,14 @@
       "expect": [
         "У набора написано, из каких товаров он состоит.",
         "Написана цена набора.",
-        "Написано, сколько те же товары стоят по отдельности.",
-        "Цена набора ниже этой суммы."
+        "Если набор выгоднее, написано, сколько те же товары стоят по отдельности.",
+        "Тогда цена набора ниже этой суммы, и рядом стоит «выгода».",
+        "Если набор перестал быть выгодным, ни этой суммы, ни «−N %» нет."
       ],
       "why": "Набор дороже своих частей — это обман, который покупатель посчитает за минуту.",
       "risk": "med",
       "writes": false,
+      "mark": "redo",
       "en": {
         "title": "Sets",
         "steps": [
@@ -595,8 +599,9 @@
         "expect": [
           "The set says which products are in it.",
           "The set's own price is shown.",
-          "It also shows what those products cost separately.",
-          "The set price is the lower of the two."
+          "If the set is a saving, it says what those products cost separately.",
+          "Then the set price is below that sum, with a «выгода» chip beside it.",
+          "If a set stopped being a saving, no sum and no «−N %» are shown."
         ],
         "why": "A set that costs more than its parts is a con the buyer spots."
       }
@@ -609,7 +614,7 @@
       "lang": "RU",
       "title": "В наборе кончился один товар",
       "steps": [
-        "В панели снять с продажи один товар из набора.",
+        "В панели поставить одному товару из набора «Нет в наличии».",
         "Открыть этот набор в магазине, ничего не перезагружая.",
         "Вернуть товар в продажу."
       ],
@@ -623,10 +628,11 @@
       "why": "Проданный набор без одной баночки — это заказ, который вы не соберёте.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "One product in a set has run out",
         "steps": [
-          "In the panel take one of the set's products off sale.",
+          "In the panel set one of the set's products to «Нет в наличии».",
           "Open that set in the shop, reloading nothing.",
           "Put the product back on sale."
         ],
@@ -1134,6 +1140,46 @@
       }
     },
     {
+      "id": "panel-login-slow",
+      "area": "panel",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Подбор пароля к панели",
+      "steps": [
+        "Открыть вход в панель и ввести неверный пароль шесть раз подряд.",
+        "Засечь, сколько идёт ответ на четвёртый, пятый и шестой раз.",
+        "Ввести верный пароль."
+      ],
+      "expect": [
+        "Каждый раз пишет «Неверный пароль» — и внутрь не пускает.",
+        "Первые три раза ответ приходит сразу.",
+        "Дальше каждый следующий ответ идёт заметно дольше предыдущего.",
+        "Про «слишком много попыток» нигде не написано — вход не запирается.",
+        "Верный пароль пускает сразу, без ожидания."
+      ],
+      "why": "Пароль, который можно подбирать быстро, подберут; вход, который запирается, запрёт и вас самих.",
+      "risk": "high",
+      "writes": false,
+      "mark": "new",
+      "en": {
+        "title": "Guessing at the panel password",
+        "steps": [
+          "Open the panel sign-in and enter a wrong password six times in a row.",
+          "Time the answer on the fourth, fifth and sixth try.",
+          "Enter the right password."
+        ],
+        "expect": [
+          "Every time it says «Неверный пароль» and does not let you in.",
+          "The first three answers come back at once.",
+          "After that each answer takes noticeably longer than the one before.",
+          "Nothing anywhere says «слишком много попыток» — the sign-in never locks.",
+          "The right password lets you in at once, with no wait."
+        ],
+        "why": "A password that can be guessed fast will be; a sign-in that locks out locks you out too."
+      }
+    },
+    {
       "id": "panel-install",
       "area": "panel",
       "who": "renat",
@@ -1186,9 +1232,10 @@
         "Надписей об ошибке нет.",
         "«Назад» закрывает экран, а не выкидывает из панели."
       ],
-      "why": "Раздел, не открывающийся на телефоне, — это работа с компьютера.",
+      "why": "Раздел, не открывающийся на телефоне, — это работа с компьютера. Надпись об ошибке на «Обзоре» или «Аналитике» значит, что не ответил сервер, а не что сломалась панель.",
       "risk": "low",
       "writes": false,
+      "mark": "reworded",
       "en": {
         "title": "Every panel section opens",
         "steps": [
@@ -1202,7 +1249,7 @@
           "There are no error messages.",
           "Back closes the screen instead of throwing you out."
         ],
-        "why": "A section that fails on the phone is work for the computer."
+        "why": "A section that fails on the phone is work for the computer. An error line on «Обзор» or «Аналитика» means the server did not answer, not that the panel is broken."
       }
     },
     {
@@ -1354,9 +1401,10 @@
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто."
       ],
-      "why": "Неработающий код в рассылке выглядит как обман.",
+      "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "Creating a promo code",
         "steps": [
@@ -1372,7 +1420,7 @@
           "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered."
         ],
-        "why": "A code that does not work in a mailing looks like a swindle."
+        "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       }
     },
     {
@@ -1422,7 +1470,7 @@
       "steps": [
         "«Ещё» → «Маркетинг» → «Подарочные карты».",
         "Посмотреть список «Выпущенные карты» справа.",
-        "У одной карты нажать «Карта PDF ↗»."
+        "У одной живой карты нажать «Карта PDF ↗»."
       ],
       "expect": [
         "У каждой карты виден её код.",
@@ -1431,15 +1479,16 @@
         "Над списком стоит общая сумма непотраченных карт.",
         "«Карта PDF ↗» открывает карту."
       ],
-      "why": "Не видя суммы непотраченных карт, вы не знаете, сколько товара уже оплачено.",
+      "why": "Не видя суммы непотраченных карт, вы не знаете, сколько товара уже оплачено. У аннулированной карты этой кнопки нет.",
       "risk": "med",
       "writes": false,
+      "mark": "reworded",
       "en": {
         "title": "The list of issued gift cards",
         "steps": [
           "«Ещё» → «Маркетинг» → «Подарочные карты».",
           "Look at the «Выпущенные карты» (issued cards) list on the right.",
-          "On one card press «Карта PDF ↗»."
+          "On one live card press «Карта PDF ↗»."
         ],
         "expect": [
           "Every card shows its code.",
@@ -1448,7 +1497,7 @@
           "Above the list is the total left unspent.",
           "«Карта PDF ↗» opens the card."
         ],
-        "why": "Without the unspent total you cannot tell how much stock is paid for."
+        "why": "Without the unspent total you cannot tell how much stock is paid for. A cancelled card has no such button."
       }
     },
     {
@@ -2587,7 +2636,8 @@
       ],
       "expect": [
         "Видно экран «Заказ не оплачен», а не «Платёж обрабатывается».",
-        "Написано, что деньги не списаны и заказ сохранён.",
+        "Написано, что заказ сохранён и о списании придёт письмо.",
+        "Обещания «деньги не списаны» на этом экране нет.",
         "Товары снова в корзине, вместе с промокодом.",
         "На экране есть выбор способа и кнопка «Оплатить ещё раз».",
         "Оплата проходит по тому же заказу, второго заказа не появилось."
@@ -2595,6 +2645,7 @@
       "why": "Человек, у которого после отмены пустая корзина и некуда нажать, уходит навсегда.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Cancelling at the bank and paying afterwards",
         "steps": [
@@ -2605,7 +2656,8 @@
         ],
         "expect": [
           "You see «Заказ не оплачен», not «Платёж обрабатывается».",
-          "It says no money was taken and the order is kept.",
+          "It says the order is kept and that a letter follows if money is taken.",
+          "It does not promise that no money was taken.",
           "The goods are back in the cart, with the promo code.",
           "The screen offers the methods and an «Оплатить ещё раз» button.",
           "The payment closes that same order; no second order appeared."
@@ -2633,9 +2685,10 @@
         "Он там есть, хотя в кабинет ни разу не входил.",
         "В карточке клиента написано, когда и где дано согласие: дата и «на кассе»."
       ],
-      "why": "Письмо тому, кто согласия не давал, — это штраф.",
+      "why": "Письмо тому, кто согласия не давал, — это штраф. Гостевой заказ больше не снимает чужой адрес со стоп-листа: это может только вход в кабинет на тот же ящик.",
       "risk": "high",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "The «Хочу получать скидки и поздравление» tick box",
         "steps": [
@@ -2651,7 +2704,7 @@
           "They are there though they never signed into an account.",
           "The customer card says when and where consent was given: a date and «на кассе»."
         ],
-        "why": "A letter to somebody who never consented is a fine."
+        "why": "A letter to somebody who never consented is a fine. A guest order no longer lifts a stranger off the stop list: only signing into that mailbox can."
       }
     },
     {
@@ -3244,30 +3297,37 @@
         "Открыть небольшой заказ, оплаченный картой или банком.",
         "Нажать «Вернуть деньги».",
         "Проверить сумму в окошке — там весь остаток — и подтвердить.",
-        "Обновить карточку через минуту."
+        "Обновить карточку через минуту, а с настоящим банком — когда он подтвердит.",
+        "Открыть кабинет этого покупателя и найти блок с баллами."
       ],
       "expect": [
         "Под «Оплата» появилась строка «Возвращено X из Y».",
-        "У заказа теперь стоит «возврат».",
-        "Товары из заказа вернулись на склад.",
-        "Покупателю ушло письмо «Деньги возвращены»."
+        "Покупателю сразу ушло письмо «Деньги возвращены».",
+        "С настоящим банком там же написано «Возврат … в обработке у Montonio».",
+        "Когда банк подтвердил возврат, у заказа стоит «возврат».",
+        "Тогда же товары из заказа вернулись на склад.",
+        "В баллах покупателя появилась строка «Корректировка»."
       ],
       "why": "Ошибка здесь стоит ровно столько, сколько написано в поле суммы.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Refunding the whole amount",
         "steps": [
           "Open a small order paid by card or by bank.",
           "Press «Вернуть деньги» (refund).",
           "Check the amount in the box — the whole balance — and confirm.",
-          "Refresh the card a minute later."
+          "Refresh the card a minute later — with the real bank, once it confirms.",
+          "Open that buyer's account and find the points block."
         ],
         "expect": [
           "A «Возвращено X из Y» line appears under «Оплата».",
-          "The order now carries the «возврат» state.",
-          "The goods from the order are back in stock.",
-          "The buyer has had the «Деньги возвращены» letter."
+          "The buyer gets the «Деньги возвращены» letter straight away.",
+          "With the real bank it also says «Возврат … в обработке у Montonio».",
+          "Once the bank confirms the refund, the order carries «возврат».",
+          "The goods from the order go back into stock at that point.",
+          "The buyer's points gain a «Корректировка» line."
         ],
         "why": "A mistake here costs exactly what is typed in the amount field."
       }
@@ -3289,11 +3349,13 @@
         "Вернулась ровно та сумма, которую вписали.",
         "Заказ так и остался оплаченным.",
         "Товары на склад не вернулись.",
-        "Сумму больше остатка магазин не принимает."
+        "Сумму больше остатка магазин не принимает.",
+        "Баллы за этот заказ остались как были — их возвращает только полный возврат."
       ],
       "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Refunding part of the money",
         "steps": [
@@ -3306,7 +3368,8 @@
           "Exactly the amount typed comes back.",
           "The order stays paid.",
           "The goods do not go back into stock.",
-          "The shop refuses an amount above the balance."
+          "The shop refuses an amount above the balance.",
+          "The order's points are untouched — only a full refund moves them."
         ],
         "why": "Refunding more than was paid is a gift of money."
       }
@@ -3442,13 +3505,14 @@
         "Первый возврат отказан: «…уже потрачена на … — вернуть заказ целиком нельзя».",
         "Окошко показывает «Вернём на подарочную карту» всю сумму, «на счёт покупателя: 0 €».",
         "Заказ стал «возврат», в «Оплата» — «На подарочную карту … вернулось …».",
-        "Теперь заказ с картой возвращается; у кода стоит «Аннулирована», «Карта PDF» пропала.",
+        "Теперь заказ с картой возвращается: банк подтвердил — у кода «Аннулирована», «Карта PDF» пропала.",
         "На кассе код больше не принимается.",
         "Покупателю ушло письмо «Деньги возвращены» с названием карты."
       ],
       "why": "Возврат на карту, которую уже потратили, — двойные деньги; карта без возврата — деньги в никуда.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "«Вернуть деньги» with a gift card",
         "steps": [
@@ -3462,7 +3526,7 @@
           "The first refund is refused: «…уже потрачена на … — вернуть заказ целиком нельзя».",
           "The box shows the whole sum under «Вернём на подарочную карту», «на счёт покупателя: 0 €».",
           "The order is «возврат», and «Оплата» says «На подарочную карту … вернулось …».",
-          "Now the card's order refunds; the code shows «Аннулирована», «Карта PDF» is gone.",
+          "Now the card's order refunds: once the bank confirms, «Аннулирована» and no PDF.",
           "The checkout no longer accepts the code.",
           "The buyer got the «Деньги возвращены» letter naming the card."
         ],
@@ -3633,29 +3697,32 @@
       "steps": [
         "Включив «Партнёры и баллы», войти в кабинет покупателя с оплаченным заказом.",
         "Найти блок с баллами.",
-        "Посчитать 5 % от суммы товаров в заказе, без доставки."
+        "Посчитать 5 % от того, что за товары реально заплачено: без доставки, минус скидки и баллы."
       ],
       "expect": [
         "За оплаченные заказы баллы начислены.",
         "Число совпадает с процентом из «Цены и баллы».",
-        "По умолчанию это 5 % от товаров, без доставки.",
-        "Баллы округлены до целого числа."
+        "По умолчанию это 5 % от того, что реально заплачено за товары.",
+        "Баллы округлены до целого числа.",
+        "Промокод, потраченные баллы и подарочная карта начисление уменьшают."
       ],
       "why": "Обещанные и не начисленные баллы — это покупатель, считающий себя обманутым.",
       "risk": "med",
       "writes": false,
+      "mark": "redo",
       "en": {
         "title": "Points in the account",
         "steps": [
           "With «Партнёры и баллы» switched on, sign into the account of a buyer who has a paid order.",
           "Find the points block.",
-          "Work out 5 % of the goods in that order, delivery excluded."
+          "Work out 5 % of what was actually paid for the goods: no delivery, less discount and points."
         ],
         "expect": [
           "Points have been credited for the paid orders.",
           "The number matches the percentage in «Цены и баллы».",
-          "By default that is 5 % of goods, delivery excluded.",
-          "Points are rounded to a whole number."
+          "By default that is 5 % of what was actually paid for the goods.",
+          "Points are rounded to a whole number.",
+          "A promo code, spent points and a gift card all make it smaller."
         ],
         "why": "Points promised and not credited make a buyer feel cheated."
       }
@@ -4146,7 +4213,7 @@
       "lang": "RU",
       "title": "Письмо «Цены для салонов включены»",
       "steps": [
-        "Одобрить заявку партнёра в разделе «Клиенты».",
+        "Одобрить в разделе «Клиенты» заявку партнёра, которого одобряют впервые.",
         "Открыть почту этого партнёра."
       ],
       "expect": [
@@ -4154,13 +4221,14 @@
         "В письме скидка названа в процентах.",
         "Этот процент такой же, как в настройках магазина."
       ],
-      "why": "Партнёр со скидкой не той, что в письме, позвонит вам сегодня же.",
+      "why": "Партнёр со скидкой не той, что в письме, позвонит вам сегодня же. Второе одобрение того же человека письма не шлёт.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "The «Цены для салонов включены» letter",
         "steps": [
-          "Approve a partner application in the «Клиенты» section.",
+          "In «Клиенты», approve an application from somebody being approved for the first time.",
           "Open that partner's mailbox."
         ],
         "expect": [
@@ -4168,7 +4236,7 @@
           "The letter names the discount as a percentage.",
           "That percentage matches the one in the shop settings."
         ],
-        "why": "A partner whose discount differs from the letter's calls you the same day."
+        "why": "A partner whose discount differs from the letter's calls you the same day. Approving the same person again sends no letter."
       }
     },
     {
@@ -4182,32 +4250,37 @@
         "Открыть «Ещё» → «Маркетинг» → «Письма» и включить «Товар снова в наличии».",
         "Убедиться, что на закончившийся товар вы подписались из магазина.",
         "В панели вернуть этот товар в наличие.",
-        "Проверить почту."
+        "Проверить почту.",
+        "Повторить с товаром, у которого на «Складе» посчитан ноль."
       ],
       "expect": [
         "Письмо пришло сразу, как товар вернулся в наличие.",
         "В письме название товара и цена.",
         "Есть ссылка на сам товар.",
         "Внизу есть «Отписаться»: страница открывается и сама снимает ожидание этого товара.",
-        "Если вместо подтверждения видна кнопка «Отписаться» — нажмите её."
+        "Если вместо подтверждения видна кнопка «Отписаться» — нажмите её.",
+        "Если на складе посчитан ноль, письмо не уходит совсем."
       ],
       "why": "Если переключатель выключен, все собранные подписки пропадают зря.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "The «Товар снова в наличии» letter",
         "steps": [
           "Open «Ещё» → «Маркетинг» → «Письма» and switch on «Товар снова в наличии».",
           "Make sure you subscribed to the out-of-stock product from the shop.",
           "In the panel put that product back in stock.",
-          "Check your mail."
+          "Check your mail.",
+          "Repeat with a product counted down to zero on «Склад»."
         ],
         "expect": [
           "The letter arrives as soon as the product is back.",
           "It carries the product's name and price.",
           "There is a link to the product itself.",
           "«Отписаться» at the bottom opens a page that cancels the wait itself.",
-        "If you see an «Отписаться» button instead of the confirmation, press it."
+          "If you see an «Отписаться» button instead of the confirmation, press it.",
+          "With a counted zero on the shelf no letter goes at all."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       }
@@ -4410,9 +4483,10 @@
         "Потом по счёту приходит письмо об отмене.",
         "Оплаченному заказу и оплаченному счёту писем не приходит."
       ],
-      "why": "Отмена, задевшая оплаченный заказ, отнимает покупку у того, кто заплатил.",
+      "why": "Отмена, задевшая оплаченный заказ, отнимает покупку у того, кто заплатил. Заказы, просроченные ещё до того, как переключатель включили, магазин отменяет молча.",
       "risk": "high",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "Letters about unpaid orders and invoices",
         "steps": [
@@ -4428,7 +4502,7 @@
           "Then the invoice gets its own cancellation letter.",
           "A paid order and a paid invoice get no letters."
         ],
-        "why": "A cancellation that catches a paid order robs somebody who already paid."
+        "why": "A cancellation that catches a paid order robs somebody who already paid. Orders already overdue when the switch was first turned on are cancelled silently."
       }
     },
     {
@@ -4551,29 +4625,34 @@
         "Открыть иконку «Сканер» и войти по паролю.",
         "Навести камеру на штрихкод товара, у которого код уже привязан.",
         "Нажать «+» до нужного числа и нажать «Принять +N».",
+        "Нажать «Принять +N» второй раз подряд, быстро.",
         "Сканировать следующий товар."
       ],
       "expect": [
-        "Появилась карточка «Найдено» с названием, объёмом и остатком.",
+        "Появилась карточка «Найдено» с названием и объёмом.",
+        "Рядом остаток — или «не учтено», если этот объём ещё не считали.",
         "После приёмки внизу выскочило подтверждение.",
-        "Остаток вырос ровно на N.",
+        "Остаток вырос ровно на N, а не на два раза по N.",
         "Число рядом с «+» снова стало 1."
       ],
       "why": "Приёмка руками по одной баночке съедает вечер.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Taking goods in by barcode",
         "steps": [
           "Open the «Сканер» (scanner) icon and sign in with the password.",
           "Point the camera at the barcode of a product whose code is already bound.",
           "Press «+» up to the number you need and press «Принять +N» (take in +N).",
+          "Press «Принять +N» a second time straight away.",
           "Scan the next product."
         ],
         "expect": [
-          "The «Найдено» card shows the name, size and stock.",
+          "The «Найдено» card shows the name and the size.",
+          "Beside them the stock — or «не учтено» if nobody has counted that size.",
           "A confirmation pops up at the bottom after taking in.",
-          "The stock has gone up by exactly N.",
+          "The stock has gone up by exactly N, not by twice N.",
           "The number next to «+» is back to 1."
         ],
         "why": "Taking goods in by hand, one bottle at a time, eats an evening."
@@ -4741,25 +4820,32 @@
       "steps": [
         "В сканере найти товар.",
         "Нажать «−» до нужного числа и нажать «Списать −N».",
-        "Открыть «Товары» → «Склад» и найти этот товар."
+        "Открыть «Товары» → «Склад» и найти этот товар.",
+        "Проделать то же самое с объёмом, которого никто не считал."
       ],
       "expect": [
-        "Внизу появилось подтверждение о списании.",
-        "В списке склада остаток уменьшился ровно на N."
+        "Внизу появилось подтверждение «Списание −N ✓».",
+        "В списке склада остаток уменьшился ровно на N.",
+        "У непосчитанного объёма внизу написано, что его ещё не считали.",
+        "Остаток у него при этом не изменился."
       ],
       "why": "Списание — это брак или потеря; проведённая так продажа пропадёт из отчётов.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Writing off damaged goods",
         "steps": [
           "Find the product in the scanner.",
           "Press «−» down to the number you need and press «Списать −N» (write off −N).",
-          "Open «Товары» → «Склад» and find that product."
+          "Open «Товары» → «Склад» and find that product.",
+          "Do the same on a size nobody has counted."
         ],
         "expect": [
-          "A confirmation of the write-off appears at the bottom.",
-          "On «Склад» the stock is down by exactly N."
+          "A «Списание −N ✓» confirmation appears at the bottom.",
+          "On «Склад» the stock is down by exactly N.",
+          "For an uncounted size the line says nobody has counted it yet.",
+          "Its own stock did not move at all."
         ],
         "why": "A write-off is breakage or loss; a sale run this way vanishes from reports."
       }
@@ -4775,30 +4861,35 @@
         "Открыть «Товары» → «Склад».",
         "Нажать по очереди «Все», «Мало», «Нет», «Не учтено».",
         "Пролистать список до конца, нажимая «Показать ещё».",
-        "Нажать у одного товара «−», потом сразу «Отменить» внизу экрана."
+        "Нажать у одного товара «−», потом сразу «Отменить» внизу экрана.",
+        "Найти на «Складе» объём, который убрали из карточки товара."
       ],
       "expect": [
         "Каждая кнопка сверху оставляет в списке только свои товары.",
         "«Показать ещё» дописывает следующие строки в конец.",
         "Список не прыгает в начало.",
-        "«Отменить» возвращает остаток обратно."
+        "«Отменить» возвращает остаток обратно.",
+        "Объём, убранный из карточки товара, остаётся на «Складе» своей строкой."
       ],
       "why": "Список, который прыгает в начало, не даёт пересчитать склад с телефона.",
       "risk": "low",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "The stock list",
         "steps": [
           "Open «Товары» → «Склад».",
           "Press «Все», «Мало», «Нет» and «Не учтено» in turn.",
           "Scroll the list to the end, pressing «Показать ещё» (show more).",
-          "On one product press «−», then «Отменить» at the bottom straight away."
+          "On one product press «−», then «Отменить» at the bottom straight away.",
+          "Find on «Склад» a size that was removed from the product card."
         ],
         "expect": [
           "Each button at the top leaves only its own products.",
           "«Показать ещё» adds the next rows at the end.",
           "The list does not jump back to the top.",
-          "«Отменить» puts the stock back."
+          "«Отменить» puts the stock back.",
+          "A size removed from the product card stays on «Склад» as its own row."
         ],
         "why": "A list that jumps back to the top makes a phone stock-take impossible."
       }
@@ -4968,6 +5059,44 @@
       }
     },
     {
+      "id": "pos-double-tap",
+      "area": "stock",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Второе нажатие «Терминал»",
+      "steps": [
+        "Оформить продажу в «Салоне» до экрана «Продажа оформлена».",
+        "Не уходя с этого экрана, нажать «Терминал» ещё раз и подтвердить.",
+        "Открыть «Заказы» → «Все», потом «Товары» → «Склад»."
+      ],
+      "expect": [
+        "Второй раз показан тот же чек, а не новый.",
+        "В «Заказах» один заказ, а не два.",
+        "Остаток списался один раз.",
+        "Клиенту ушёл один чек, а не два."
+      ],
+      "why": "Второй заказ на ту же покупку — это дважды списанный остаток и второй чек клиенту.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "en": {
+        "title": "A second press of «Терминал»",
+        "steps": [
+          "Put a sale through «Салон» as far as the «Продажа оформлена» screen.",
+          "Without leaving that screen, press «Терминал» again and confirm.",
+          "Open «Заказы» → «Все», then «Товары» → «Склад»."
+        ],
+        "expect": [
+          "The second press shows the same receipt, not a new one.",
+          "«Заказы» holds one order, not two.",
+          "The stock came down once.",
+          "The customer got one receipt, not two."
+        ],
+        "why": "A second order for one purchase is stock taken twice and a second receipt to the customer."
+      }
+    },
+    {
       "id": "pos-receipt",
       "area": "stock",
       "who": "renat",
@@ -5102,9 +5231,10 @@
         "Новый объём виден в магазине со своей ценой, его можно положить в корзину.",
         "После удаления объём пропал со страницы товара, выбрать его больше нельзя."
       ],
-      "why": "Объём, который есть на полке, но не в магазине, — потерянная продажа.",
+      "why": "Объём, который есть на полке, но не в магазине, — потерянная продажа. Убранный объём остаётся строкой на «Складе» — вместе с остатком и штрихкодом.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "Adding and removing a size",
         "steps": [
@@ -5122,7 +5252,7 @@
           "The new size shows in the shop at its own price and goes into the cart.",
           "After deleting, the size is gone from the product page and cannot be chosen."
         ],
-        "why": "A size on the shelf but not in the shop is a lost sale."
+        "why": "A size on the shelf but not in the shop is a lost sale. A removed size stays as a row on «Склад» — with its stock and its barcode."
       }
     },
     {
@@ -5176,29 +5306,38 @@
       "lang": "RU",
       "title": "Ручная отметка наличия",
       "steps": [
+        "Взять товар, который на «Складе» ещё не считали.",
         "Поставить «Нет в наличии» на вкладке «Основное» и сохранить.",
         "Открыть товар в магазине.",
-        "Поставить «Мало», потом «В наличии»."
+        "Поставить «Мало», потом «В наличии».",
+        "То же самое проделать с товаром, у которого остаток посчитан."
       ],
       "expect": [
-        "Надпись в магазине меняется вслед за отметкой.",
+        "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
         "При «нет в наличии» кнопка «В корзину» пропадает.",
-        "Вместо неё появляется «Сообщить о наличии»."
+        "Вместо неё появляется «Сообщить о наличии».",
+        "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
+        "А «Мало» и «В наличии» у него перебиваются тем, что посчитано."
       ],
       "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Setting availability by hand",
         "steps": [
+          "Take a product nobody has counted on «Склад».",
           "In the product editor, on the «Основное» tab, set «Нет в наличии» (out of stock) and save.",
           "Open the product in the shop.",
-          "Set «Мало» (low), then «В наличии» (in stock)."
+          "Set «Мало» (low), then «В наличии» (in stock).",
+          "Do the same on a product whose stock has been counted."
         ],
         "expect": [
-          "The line in the shop changes with the setting.",
+          "On an uncounted product the line in the shop follows the setting.",
           "With «нет в наличии» the «В корзину» button goes.",
-          "«Сообщить о наличии» appears in its place."
+          "«Сообщить о наличии» appears in its place.",
+          "On a counted product «Нет в наличии» stops the sale too.",
+          "But its «Мало» and «В наличии» are overruled by the count."
         ],
         "why": "Without it you cannot stop sales of stock nobody has counted yet."
       }
@@ -5339,7 +5478,7 @@
       "title": "Собрать набор",
       "steps": [
         "Открыть «Товары» → «Наборы» и нажать «Новый набор».",
-        "Дать название и добавить два-три товара.",
+        "Дать название и добавить два-три товара из каталога.",
         "Вписать цену набора и посмотреть подсказку с суммой товаров.",
         "Сохранить и открыть набор в магазине."
       ],
@@ -5350,14 +5489,15 @@
         "В корзину он ложится одной строкой.",
         "На телефоне «Сохранить» и «Отмена» — в шапке экрана; «Удалить набор» — в конце формы."
       ],
-      "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине.",
+      "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине. Свои товары в набор пока не добавить — только из каталога.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "Building a set",
         "steps": [
           "«Товары» → the «Наборы» tab → «Новый набор» (new set).",
-          "Give it a name and add two or three products.",
+          "Give it a name and add two or three catalogue products.",
           "Type in the set price and look at the hint with the sum of the products.",
           "Save and open the set in the shop."
         ],
@@ -5368,7 +5508,7 @@
           "It goes into the cart as a single line.",
           "On the phone «Сохранить» and «Отмена» sit in the header; «Удалить набор» ends the form."
         ],
-        "why": "A set dearer than its parts turns the buyer away."
+        "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
       }
     },
     {
@@ -5587,28 +5727,33 @@
         "Открыть «Клиенты» и нажать «Заявки Pro».",
         "Нажать «Одобрить Pro» и прочитать окошко с вопросом.",
         "Подтвердить.",
-        "Войти в кабинет этого покупателя и посмотреть цены товаров."
+        "Войти в кабинет этого покупателя и посмотреть цены товаров.",
+        "Вернуть этого партнёра на обычные цены и одобрить его снова."
       ],
       "expect": [
         "Перед одобрением выходит окошко с вопросом.",
         "После одобрения партнёру ушло письмо.",
-        "В его кабинете стоят цены для салонов."
+        "В его кабинете стоят цены для салонов.",
+        "Второе одобрение того же человека письма уже не шлёт."
       ],
       "why": "Одобрение навсегда включает оптовые цены и отправляет письмо, которое не вернуть.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "Approving a partner",
         "steps": [
           "Open «Клиенты» and press the «Заявки Pro» chip.",
           "Press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
           "Confirm.",
-          "Sign into that buyer's account and look at the product prices."
+          "Sign into that buyer's account and look at the product prices.",
+          "Put that partner back on retail prices and approve them again."
         ],
         "expect": [
           "A box asks you to confirm before approving.",
           "After approval a letter has gone to the partner.",
-          "In their account the salon prices are shown."
+          "In their account the salon prices are shown.",
+          "Approving the same person a second time sends no letter."
         ],
         "why": "Approval turns on wholesale prices for good and sends a letter you cannot recall."
       }
@@ -6436,35 +6581,38 @@
       "steps": [
         "«Ещё» → «Настройки» → «О компании», найти «Отчёт для бухгалтера».",
         "Выбрать месяц и нажать «Скачать CSV», потом «Скачать XLSX».",
-        "Открыть файл и сверить итог с оплаченными заказами месяца.",
-        "Найти в файле столбцы про НДС и про счёт компании."
+        "Открыть файл, сложить столбец Total и вычесть из него столбец Refunded.",
+        "Сверить это с плитками наверху и найти колонки «VAT %» и про счёт компании."
       ],
       "expect": [
         "Оба файла скачались и открылись в Excel.",
-        "Итог в файле сошёлся с суммой оплаченных заказов.",
-        "В файле есть номер заказа, дата, суммы и доставка.",
-        "НДС 24 % посчитан отдельной колонкой.",
-        "У заказов по счёту стоят реквизиты компании."
+        "Столбец Total минус столбец Refunded сошёлся с плиткой «Выручка».",
+        "В файле есть свои колонки: номер заказа, дата, суммы, доставка, Points, Refunded.",
+        "НДС посчитан отдельной колонкой «VAT %» — по ставке самого заказа.",
+        "У заказов по счёту стоят реквизиты компании.",
+        "Если в месяце был возврат, на карточке есть плитка «Возвращено»."
       ],
-      "why": "Неверный НДС в этом файле — это штраф от налоговой.",
+      "why": "Неверный НДС в этом файле — это штраф от налоговой. Ставка берётся из самого заказа, поэтому уже сданный месяц выгружается второй раз точно таким же.",
       "risk": "high",
       "writes": false,
+      "mark": "redo",
       "en": {
         "title": "The report for the accountant",
         "steps": [
           "«Ещё» → «Настройки» → «О компании», find «Отчёт для бухгалтера».",
           "Choose a month, press «Скачать CSV», then «Скачать XLSX».",
-          "Open the file and check its total against the month's paid orders.",
-          "Find the columns for VAT and for invoice orders."
+          "Open the file, add up the Total column and take the Refunded column off it.",
+          "Check that against the tiles above, and find the «VAT %» and company columns."
         ],
         "expect": [
           "Both files download and open in Excel.",
-          "The total in the file matches the paid orders.",
-          "The file holds order number, date, sums and delivery.",
-          "VAT at 24 % has its own column.",
-          "Invoice orders carry the company's details."
+          "The Total column less the Refunded column matches the «Выручка» tile.",
+          "The file has its own columns: order number, date, sums, delivery, Points, Refunded.",
+          "VAT has its own «VAT %» column — at the order's own rate.",
+          "Invoice orders carry the company's details.",
+          "If the month had a refund, a «Возвращено» tile is on the card."
         ],
-        "why": "A wrong VAT figure in this file means a fine."
+        "why": "A wrong VAT figure in this file means a fine. The rate comes from the order itself, so a month already filed exports identically the second time."
       }
     },
     {
@@ -6717,13 +6865,15 @@
       "expect": [
         "Деньги вернулись на вашу карту или счёт.",
         "В карточке заказа стоит «Возвращено».",
-        "Заказ числится возвратом, а не продажей.",
-        "Товары вернулись на склад.",
+        "Сначала там же написано «Возврат … в обработке у Montonio».",
+        "Когда Montonio подтвердил, заказ числится возвратом, а не продажей.",
+        "Тогда же товары вернулись на склад.",
         "Покупателю ушло письмо о возврате."
       ],
       "why": "Без рабочего возврата легко вернуть одному человеку деньги дважды.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
       "en": {
         "title": "The first refund of real money",
         "steps": [
@@ -6735,8 +6885,9 @@
         "expect": [
           "The money is back on your card or account.",
           "The order card says «Возвращено».",
-          "The order counts as a refund, not a sale.",
-          "The goods are back in stock.",
+          "At first it also says «Возврат … в обработке у Montonio».",
+          "Once Montonio confirms, the order counts as a refund, not a sale.",
+          "The goods go back into stock at that point.",
           "A refund letter went to the buyer."
         ],
         "why": "Without a working refund it is easy to pay someone twice."
