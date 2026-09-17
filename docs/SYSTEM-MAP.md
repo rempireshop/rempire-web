@@ -1321,8 +1321,12 @@ customers; test-only doors for the e2e suite.
 `tests/fuzz-routes.test.ts`); the login is throttled by a delay that doubles
 on consecutive wrong passwords, keyed on the account — not by a per-IP
 limit, which was a per-instance Map that reset on every cold start while the
-route and the panel both presented it as enforced (src/lib/auth.ts,
-«failed-login backoff»);
+route and the panel both presented it as enforced. Since 17.09.2026 the count
+itself is in Postgres too: `admin.login.failed` rows since the last
+`admin.login`, which the route was already writing, so a cold start no longer
+hands out a fresh ladder (src/lib/auth.ts, «failed-login backoff»;
+`191_login_ladder_index.sql`). A read that fails or drags falls back on the
+in-instance Map — never on zero, never on the ceiling;
 `GET /api/admin/me/` reports `configured`. Customers: `rmp_cust` (§11). Test
 doors: `E2E_BOOTSTRAP=1` + non-production → `/api/e2e/bootstrap/` (migrate),
 `/api/e2e/gift-card/` and `/api/e2e/mail/` (both also `requireAdmin`);

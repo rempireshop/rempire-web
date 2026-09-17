@@ -725,11 +725,18 @@ the shipping whitelist, `computeShipping(…, carrier)`, gift-card timing),
 
 ### Still open — ranked, with why they were left
 
-- **M3 — per-instance limiters on a spoofable header.** The real fix is a
-  database-backed counter for the login route plus a documented XFF rule; that
-  is a migration and a schema decision, not a patch. The limiters added above
-  are the same best-effort kind the rest of the app uses, and they are honest
-  about it. **Do this before the shop is advertised anywhere.**
+- **M3 — per-instance limiters on a spoofable header.** *The login half is
+  done (17.09.2026).* The per-IP budget on `/api/admin/login/` is gone and the
+  throttle is an escalating delay counted in Postgres — failed logins since the
+  last accepted password, out of the `admin_audit` rows the route already
+  writes, so no new table and no new write (`191_login_ladder_index.sql`,
+  src/lib/auth.ts «failed-login backoff»). It survives cold starts and is keyed
+  on the account rather than on the caller's address, which also disposes of
+  the XFF half *for this route*: `clientIp()` is now only what gets recorded in
+  the audit row, not what decides whether a password is accepted. **Still open
+  for the others** — `src/lib/payments/ratelimit.ts` and every `rateLimit()`
+  caller are unchanged, per-instance and keyed on the first XFF entry, so the
+  header rule still wants writing down before the shop is advertised anywhere.
 - **M6 — 30-day sessions, no revocation.** Needs a `session_epoch` setting, a
   `v2` token format and a documented password-change procedure. Worth doing at
   the same time as M3.
@@ -754,8 +761,13 @@ the shipping whitelist, `computeShipping(…, carrier)`, gift-card timing),
 - **L7 — `GET /api/assistant` discloses `{enabled, v, model}`.** The storefront
   reads it on boot to decide whether to show the chat; removing the model name
   is a two-line change nobody has asked for yet.
-- **L9 — failed logins write an unauthenticated row.** Keep the forensics; the
-  bound comes from M3's durable limiter, and the retention job is its own task.
+- **L9 — failed logins write an unauthenticated row.** Keep the forensics —
+  they are now the counter itself, not a by-product (M3). The bound arrived
+  with it: past the third miss the ladder holds a guesser to three attempts a
+  minute, so the rows they can write are bounded by the ceiling instead of by
+  `5/min × instances`. The retention job is still its own task, and now has a
+  second reason to be careful: deleting `admin.login`/`admin.login.failed` rows
+  inside the last hour deletes the throttle along with them.
 - The **honeypot** on `/api/submit` and `/api/feedback` is enforced server-side
   only. The two forms are JS-driven rather than plain HTML, so a hidden input
   would add nothing that the rate limit does not already cover — worth adding

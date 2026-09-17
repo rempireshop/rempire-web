@@ -2,9 +2,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   ADMIN_ACCOUNT,
   ADMIN_COOKIE,
+  clearLoginFailures,
   hashPassword,
   isAdmin,
   LOGIN_DELAY_MAX_MS,
+  LOGIN_READ_TIMEOUT_MS,
+  loginDelayFor,
   loginDelayMs,
   makeSessionToken,
   noteLoginFailure,
@@ -16,7 +19,8 @@ import {
   verifyPassword,
   verifySessionToken,
 } from "@/lib/auth";
-import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
+import { exec, type Querier } from "@/lib/db";
+import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const PASSWORD = "correct horse battery staple";
 
@@ -172,8 +176,11 @@ describe("admin session", () => {
     /* The whole wait happens INSIDE the request, so a ceiling above the
        platform's budget would not throttle anybody — it would kill the
        function and answer 500. `maxDuration` tops out at 60 in this repo and
-       the login route declares it. */
+       the login route declares it. The counter read is inside the same
+       request, so it is the SUM that has to fit — with scrypt, the audit
+       write and a cold start still to pay for out of what is left. */
     expect(LOGIN_DELAY_MAX_MS).toBeLessThan(60_000);
+    expect(LOGIN_DELAY_MAX_MS + LOGIN_READ_TIMEOUT_MS).toBeLessThan(30_000);
   });
 
   it("makes each wrong password wait longer than the last, and lets the right one straight in", async () => {
@@ -238,6 +245,200 @@ describe("admin session", () => {
     // an hour later it does not — otherwise this morning's typos would still
     // be charging the owner tonight, for no security anybody could name
     expect(pendingLoginDelayMs(ADMIN_ACCOUNT, t0 + 61 * 60_000)).toBe(0);
+    resetLoginDelays();
+  });
+
+  /* ---------- the ladder that survives a cold start -------------------------
+   *
+   * The delay above was built on a Map inside one serverless instance, which
+   * meant a cold start handed a guesser a fresh ladder — the exact weakness it
+   * was meant to close. Since 17.09.2026 the count comes out of admin_audit:
+   * the rows the login route was already writing, read back instead of merely
+   * filed. What follows is the property that buys, and the price.
+   *
+   * None of these tests spend the delay. The route's sleeper is the recorder
+   * from src/lib/auth.ts, and loginDelayFor() is asked what it would charge. */
+
+  /** The whole route, with a recorder in place of the timer. */
+  async function loginRig() {
+    const { POST: login } = await import("@/app/api/admin/login/route");
+    const waited: number[] = [];
+    setLoginSleeper(async (ms) => { waited.push(ms); });
+    // A fresh address for every attempt, counted rather than random so a
+    // failure is reproducible: the ladder must not notice either way.
+    let nth = 0;
+    return {
+      waited,
+      attempt: (password: string) =>
+        login(
+          new Request("https://rempireshop.com/api/admin/login/", {
+            method: "POST",
+            headers: { "content-type": "application/json", "x-forwarded-for": `198.51.100.${++nth}` },
+            body: JSON.stringify({ password }),
+          }),
+        ),
+    };
+  }
+
+  it("keeps the ladder across a cold start — and across a change of address", async () => {
+    await truncateAll();
+    resetLoginDelays();
+    const { waited, attempt } = await loginRig();
+    try {
+      /* Five misses, every one of them from a DIFFERENT address, because the
+         ladder is keyed on the account and moving house must buy a guesser
+         nothing. The first two are free, then it doubles. */
+      for (let i = 0; i < 5; i++) expect((await attempt("nope")).status).toBe(401);
+      expect(waited).toEqual([500, 1000]);
+
+      /* THE COLD START. The instance that served those five dies and the
+         platform starts an empty one — which is all resetLoginDelays() is
+         here: the Map, gone. Until today that was a fresh ladder, free. */
+      resetLoginDelays();
+      expect(pendingLoginDelayMs(ADMIN_ACCOUNT), "the Map really is empty").toBe(0);
+
+      // …and the shop remembers anyway, because the count was never in the Map
+      expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(2000);
+
+      // the route charges it, on the new instance, from a sixth address
+      expect((await attempt("nope")).status).toBe(401);
+      expect(waited).toEqual([500, 1000, 2000]);
+    } finally {
+      setLoginSleeper(null);
+      resetLoginDelays();
+    }
+  });
+
+  it("puts the ladder back on the floor for every instance when the password is right", async () => {
+    await truncateAll();
+    resetLoginDelays();
+    const { attempt } = await loginRig();
+    try {
+      for (let i = 0; i < 5; i++) expect((await attempt("nope")).status).toBe(401);
+      expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(2000);
+
+      /* NEVER A LOCKOUT: the right password is made to wait and is then let
+         in, however far the ladder has climbed. */
+      expect((await attempt(PASSWORD)).status).toBe(200);
+
+      // a cold start after that must not resurrect the misses it cleared
+      resetLoginDelays();
+      expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(0);
+    } finally {
+      setLoginSleeper(null);
+      resetLoginDelays();
+    }
+  });
+
+  it("forgets the durable ladder after an hour of quiet", async () => {
+    await truncateAll();
+    resetLoginDelays();
+
+    const misses = (ago: string, n: number) =>
+      exec(
+        `insert into admin_audit (at, actor, action)
+         select now() - interval '${ago}', 'ip:203.0.113.9', 'admin.login.failed'
+           from generate_series(1, ${n})`,
+      );
+
+    // nine misses two hours ago: enough for the ceiling, and long past caring
+    await misses("2 hours", 9);
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(0);
+
+    // still inside the window at fifty-nine minutes
+    await truncateAll();
+    await misses("59 minutes", 9);
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(LOGIN_DELAY_MAX_MS);
+  });
+
+  /* THE PRICE OF A DURABLE COUNTER: a database read now sits on the login
+     path, and it can fail or drag. The decision and the argument for it are
+     written out at loginDelayFor() in src/lib/auth.ts; this is that decision
+     held to. */
+  it("falls back on this instance's ladder when the counter cannot be read", async () => {
+    await truncateAll();
+    resetLoginDelays();
+    const broken: Querier = async () => { throw new Error("database unavailable"); };
+
+    // NOT failing closed: an unreadable database is not a reason to make the
+    // owner — who has mistyped nothing — stand at his own door for twenty
+    // seconds on the one day the shop is already having a bad one
+    expect(await loginDelayFor(ADMIN_ACCOUNT, { q: broken })).toBe(0);
+
+    /* NOT failing open either. The Map is still written on every miss whether
+       the database answers or not, so an outage degrades the ladder to the
+       per-instance one the shop ran on yesterday — not to none of it. */
+    for (let i = 0; i < 5; i++) noteLoginFailure(ADMIN_ACCOUNT);
+    expect(await loginDelayFor(ADMIN_ACCOUNT, { q: broken })).toBe(2000);
+    expect(await loginDelayFor(ADMIN_ACCOUNT, { q: broken })).toBeLessThan(LOGIN_DELAY_MAX_MS);
+
+    // and the right password still clears it instantly, outage or no outage
+    clearLoginFailures(ADMIN_ACCOUNT);
+    expect(await loginDelayFor(ADMIN_ACCOUNT, { q: broken })).toBe(0);
+    resetLoginDelays();
+  });
+
+  it("does not let a slow counter hold the login open", async () => {
+    resetLoginDelays();
+    for (let i = 0; i < 5; i++) noteLoginFailure(ADMIN_ACCOUNT);
+
+    const hangs: Querier = () => new Promise(() => {}); // never answers at all
+    const t0 = Date.now();
+    const ms = await loginDelayFor(ADMIN_ACCOUNT, { q: hangs, timeoutMs: 50 });
+    const spent = Date.now() - t0;
+
+    expect(ms, "the Map answered instead").toBe(2000);
+    expect(spent, "a sick database must not decide how long the owner waits").toBeLessThan(2_000);
+    resetLoginDelays();
+  });
+
+  /* A read that succeeds may only ever ADD rungs. The two counters agree in
+     the ordinary case and part in two: after a cold start the database
+     remembers more than the Map, and during an outage the Map remembers more
+     than the database can be asked. Neither may be rounded down to the other. */
+  it("takes whichever counter is higher", async () => {
+    await truncateAll();
+    resetLoginDelays();
+    await exec(
+      `insert into admin_audit (at, actor, action)
+       select now(), 'ip:203.0.113.9', 'admin.login.failed' from generate_series(1, 4)`,
+    );
+
+    // database 4, Map 0 — the cold start case
+    expect(pendingLoginDelayMs(ADMIN_ACCOUNT)).toBe(0);
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(loginDelayMs(4));
+
+    // database 4, Map 6 — an instance that saw misses the database did not
+    for (let i = 0; i < 6; i++) noteLoginFailure(ADMIN_ACCOUNT);
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(loginDelayMs(6));
+    resetLoginDelays();
+  });
+
+  /* writeAuditSafe() swallows its own failures, so the "admin.login" row that
+     clears the ladder for everybody can silently fail to be written — a
+     database taking writes badly and reads fine. The owner would then keep
+     paying a wait he had already cleared by getting the password RIGHT, which
+     is the one thing this design promised never to charge for. What this
+     instance watched happen says so instead (clearLoginFailures). */
+  it("honours a success this instance saw even when its audit row was lost", async () => {
+    await truncateAll();
+    resetLoginDelays();
+    await exec(
+      `insert into admin_audit (at, actor, action)
+       select now(), 'ip:203.0.113.9', 'admin.login.failed' from generate_series(1, 9)`,
+    );
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(LOGIN_DELAY_MAX_MS);
+
+    // the right password, and no "admin.login" row to show for it
+    clearLoginFailures(ADMIN_ACCOUNT);
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(0);
+
+    // …and the ladder starts climbing again from the floor, not from nine
+    await exec(
+      `insert into admin_audit (at, actor, action)
+       select now(), 'ip:203.0.113.9', 'admin.login.failed' from generate_series(1, 4)`,
+    );
+    expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(loginDelayMs(4));
     resetLoginDelays();
   });
 
