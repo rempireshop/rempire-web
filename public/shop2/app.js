@@ -860,6 +860,10 @@
         "Video üleslaadimine pole veel seadistatud — tuleb hoidla ühendada.",
       "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
         "Fail on suurem kui 60 MB — tee lühem klipp või pakenda see kokku.",
+      "Ролик слишком большой для сервера — снимите короче или сожмите его.":
+        "Klipp on serveri jaoks liiga suur — tee lühem või pakenda see kokku.",
+      "Не удалось загрузить видео — попробуйте ещё раз.":
+        "Videot ei õnnestunud üles laadida — proovi uuesti.",
       "Такой файл не подходит: нужен MP4 или MOV.": "See fail ei sobi: vaja on MP4 või MOV.",
       "Открыть в Instagram": "Ava Instagramis",
       "Отзывы": "Arvustused", "Новые": "Uued", "Опубликованные": "Avaldatud", "Отклонённые": "Tagasi lükatud",
@@ -3523,6 +3527,10 @@
         "Video upload is not set up yet — the storage has to be connected.",
       "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
         "The file is over 60 MB — record a shorter clip or compress it.",
+      "Ролик слишком большой для сервера — снимите короче или сожмите его.":
+        "The clip is too big for the server — record a shorter one or compress it.",
+      "Не удалось загрузить видео — попробуйте ещё раз.":
+        "The video could not be uploaded — please try again.",
       "Такой файл не подходит: нужен MP4 или MOV.": "That file will not do: MP4 or MOV, please.",
       "Открыть в Instagram": "Open on Instagram",
       "Отзывы": "Reviews", "Новые": "New", "Опубликованные": "Published", "Отклонённые": "Rejected",
@@ -24871,8 +24879,16 @@
     return VID.url !== null ? VID.url : ((DEMO.video && DEMO.video[p.id]) || p.video || "");
   }
   function vidReset() { VID.id = ""; VID.url = null; }
+  /* Every code uploadVideo() can throw needs a line HERE. vidFail() falls back
+     to mediaErrText(), whose every sentence begins «Не удалось загрузить
+     фото» — so a video that failed used to be reported as a photo that
+     failed. `payload_too_large` is the common one: the platform refuses a
+     body over its own cap (4,5 МБ on a Vercel function, docs/HOSTING.md § 4)
+     before any code of ours runs, and answers 413 with no JSON in it. */
   var VIDEO_ERR = {
     too_large: "Файл больше 60 МБ — снимите ролик короче или сожмите его.",
+    payload_too_large: "Ролик слишком большой для сервера — снимите короче или сожмите его.",
+    upload_failed: "Не удалось загрузить видео — попробуйте ещё раз.",
     bad_video_type: "Такой файл не подходит: нужен MP4 или MOV.",
     storage_not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище.",
     not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище.",
@@ -24890,7 +24906,10 @@
     fd.append("productId", productId || "");
     return fetch("/api/admin/upload/", { method: "POST", body: fd }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (j) {
-        if (!res.ok || j.ok !== true) throw new Error(j.error || "upload_failed");
+        // a 413 with no JSON in it is the platform's own body cap, not the
+        // route's — same reading as uploadPhoto(), and VIDEO_ERR has the
+        // sentence for it
+        if (!res.ok || j.ok !== true) throw new Error(j.error || (res.status === 413 ? "payload_too_large" : "upload_failed"));
         return j;
       });
     }, function () { throw new Error("network"); });

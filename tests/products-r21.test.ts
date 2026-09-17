@@ -1,6 +1,6 @@
 /**
- * Round 21 — six things the shop said that were not true, five of them about
- * a set and one about a barcode.
+ * Round 21 — ten places where the shop or the panel showed something that was
+ * not so, in the order the sections below follow.
  *
  *  1. A set the owner DELETED can still be in somebody's cart: loadBundles()
  *     carries it over from the static public/shop/bundles.js (which still
@@ -28,6 +28,15 @@
  *     became 10.
  *  6. The products search box promised «штрихкод» and admCatalogRows() never
  *     looked at one.
+ *  7. The photo picked for one volume lived in an `aria-current` attribute and
+ *     nowhere else, and every photo button ends in a render() that rewrote it.
+ *  8. expand() multiplies a part's price by its qty when it adds the «было»
+ *     sum up, and no screen ever said there were two of anything.
+ *  9. The set editor's picker offered the owner's own products, which
+ *     src/lib/bundles.ts then refused on save as `unknown_product`.
+ * 10. A video upload that failed was reported in the photo's words, and the
+ *     commonest failure of all — the platform's own body cap, a 413 with no
+ *     JSON — had no sentence at all.
  *
  * The storefront is a vanilla-JS IIFE with no DOM here, so the functions are
  * sliced out of public/shop2/app.js by source text and run against stubs —
@@ -462,5 +471,52 @@ describe("«Наборы» — the product picker inside the set editor", () => 
       ) => string)(catalogue);
     expect(hint([file])).toBe("");
     expect(hint([file, own])).toContain("Свои товары");
+  });
+});
+
+/* ---------- 10. a video upload that failed ------------------------------- */
+
+describe("«Загрузить видео» when the upload does not go through", () => {
+  const VIDEO_ERR = new Function(`${sliceVar("VIDEO_ERR")} return VIDEO_ERR;`)() as Record<string, string>;
+
+  /** What uploadVideo() throws for one answer from /api/admin/upload/. */
+  async function codeFor(status: number, body: unknown): Promise<string> {
+    const run = new Function(
+      "FormData",
+      "fetch",
+      "file",
+      `${slice("uploadVideo")}
+       return uploadVideo(file, "some-product");`,
+    ) as (...a: unknown[]) => Promise<unknown>;
+    const fd = function () {
+      return { append() {} };
+    };
+    const res = {
+      ok: status >= 200 && status < 300,
+      status,
+      json: () => (body === undefined ? Promise.reject(new Error("no json")) : Promise.resolve(body)),
+    };
+    try {
+      await run(fd, () => Promise.resolve(res), { name: "clip.mp4" });
+    } catch (err) {
+      return (err as Error).message;
+    }
+    return "";
+  }
+
+  it("reads a 413 with no JSON as the platform's body cap, like a photo does", async () => {
+    // docs/HOSTING.md § 4: 4.5 MB on a Vercel function, refused before the
+    // route runs — the commonest way a real clip fails
+    expect(await codeFor(413, undefined)).toBe("payload_too_large");
+    // …and the route's own refusal still speaks for itself
+    expect(await codeFor(413, { ok: false, error: "too_large" })).toBe("too_large");
+    expect(await codeFor(500, undefined)).toBe("upload_failed");
+  });
+
+  it("has a sentence about VIDEO for every code that can reach it", async () => {
+    for (const code of ["payload_too_large", "upload_failed", "too_large", "bad_video_type", "network"]) {
+      expect(VIDEO_ERR[code], `VIDEO_ERR has no line for ${code}`).toBeTruthy();
+      expect(VIDEO_ERR[code], `«${code}» is worded as a photo`).not.toMatch(/фото/i);
+    }
   });
 });
