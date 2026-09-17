@@ -12,6 +12,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
+import { cartSnapshot } from "@/lib/customers";
 import { query } from "@/lib/db";
 import { getLevels, move } from "@/lib/inventory";
 import { cleanSizes, createOrder, getOverrides, OrderError, overrideLadder, upsertOverride } from "@/lib/orders";
@@ -148,6 +149,38 @@ describe("product_overrides.sizes / .hidden", () => {
     const o = (await getOverrides([plain.id]))[plain.id];
     expect(o.hidden).toBe(true);
     expect(o.sizes).toHaveLength(2);
+  });
+
+  /* ---- and the reminder letter quotes those same prices ------------------
+     cartSnapshot() is what «Брошенная корзина» prints and what its «Итого»
+     adds up. It used to read `price` alone — the owner's ladder was invisible
+     to it, and a single-value override replaced a rung's price outright
+     instead of keeping the rung's premium over the base — so the letter could
+     quote a figure far below the one the customer is charged when he follows
+     the link back. */
+
+  it("the abandoned-cart letter prices a saved rung exactly as the till charges it", async () => {
+    await upsertOverride(sized.id, { sizes: [{ size: "A", price: 5 }, { size: "B", price: 6 }] });
+    const snap = await cartSnapshot([{ id: sized.id, variant: "B", qty: 2 }]);
+    const made = await createOrder(order([{ id: sized.id, variant: "B", qty: 2 }]));
+    expect(snap.items[0].variant).toBe("B");
+    expect(snap.items[0].price).toBe(made.items[0].price);
+    expect(snap.total).toBe(made.items[0].sum);
+    expect(snap.items[0].price).toBe(6);
+  });
+
+  it("the abandoned-cart letter keeps a rung's premium over a single-value override", async () => {
+    const ladder = VARIANTS[sized.id];
+    const top = ladder.sizes.length - 1;
+    await upsertOverride(sized.id, { sizes: null, price: sized.p - 2 });
+    const snap = await cartSnapshot([{ id: sized.id, size: top, qty: 1 }]);
+    const made = await createOrder(order([{ id: sized.id, variant: ladder.sizes[top], qty: 1 }]));
+    expect(snap.items[0].variant).toBe(ladder.sizes[top]);
+    expect(snap.items[0].price).toBe(made.items[0].price);
+    // the override replaced the BASE, not the top rung: «−2 € on the small one»
+    // must not hand away the whole premium on the big one
+    expect(snap.items[0].price).toBe(ladder.prices[top] - 2);
+    expect(snap.items[0].price).not.toBe(sized.p - 2);
   });
 
   /* ---- the sanitiser ---------------------------------------------------- */

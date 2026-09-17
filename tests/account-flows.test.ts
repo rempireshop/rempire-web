@@ -10,7 +10,7 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { shopDay } from "@/lib/day";
-import { recordMarketingConsent } from "@/lib/consent";
+import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 import {
@@ -415,6 +415,45 @@ describe("abandoned cart flow", () => {
     expect((await runAbandonedCarts()).sent).toBe(0);
     expect(sent).toHaveLength(0);
   });
+
+  /* The tick is not what this letter runs on — a guest who typed an address
+     at the checkout has no customers row at all and still gets it. But
+     somebody who went into «Кабинет» and switched the tick OFF has said no to
+     marketing mail in the only place the shop offers, and this letter carries
+     the marketing unsubscribe link. It used to arrive anyway: withdrawing
+     writes no mail_optouts row and the cart sweep read nothing else. */
+  it("stops for somebody who unticked the box in «Кабинет»", async () => {
+    await setFlows({ abandoned: true });
+    await recordLogin(EMAIL, "RU");
+    await recordMarketingConsent(EMAIL, "RU", "account");
+    await withdrawMarketingConsent(EMAIL, "account");
+    await abandon(4 * HOUR);
+
+    expect(await runAbandonedCarts()).toMatchObject({ sent: 0, skips: { opted_out: 1 } });
+    expect(sent).toHaveLength(0);
+    // stamped all the same, so the next run does not re-select and re-count it
+    const [row] = await query<{ reminded_at: string | null }>("select reminded_at from carts");
+    expect(row.reminded_at).not.toBeNull();
+  });
+
+  it("still reminds somebody who simply never ticked it", async () => {
+    await setFlows({ abandoned: true });
+    await recordLogin(EMAIL, "RU"); // a row with marketing = false and no off-stamp
+    await abandon(4 * HOUR);
+    expect((await runAbandonedCarts()).sent).toBe(1);
+    expect(sent).toHaveLength(1);
+  });
+
+  it("reminds again once the tick goes back on", async () => {
+    await setFlows({ abandoned: true });
+    await recordLogin(EMAIL, "RU");
+    await recordMarketingConsent(EMAIL, "RU", "account");
+    await withdrawMarketingConsent(EMAIL, "account");
+    // the latest expression of will wins — the off-stamp stays, the tick is on
+    await recordMarketingConsent(EMAIL, "RU", "account");
+    await abandon(4 * HOUR);
+    expect((await runAbandonedCarts()).sent).toBe(1);
+  });
 });
 
 describe("the resume token", () => {
@@ -468,6 +507,32 @@ describe("back in stock flow", () => {
     await addStockAlert({ email: EMAIL, productId: PRODUCT });
     expect(await runBackInStock(PRODUCT)).toMatchObject({ sent: 0, reason: "disabled" });
     expect(sent).toHaveLength(0);
+  });
+
+  /* The whole waiting list used to be burned by a send that never happened:
+     sent_at was stamped before the letter went out and nothing took it off
+     again, so a shop with no Resend key marked every «сообщите, когда
+     появится» as answered and nobody ever heard anything. The birthday flow
+     has always un-stamped a skipped send; this is the same rule. */
+  it("keeps the subscription when the letter never left the building", async () => {
+    await setFlows({ backstock: true });
+    await addStockAlert({ email: EMAIL, productId: PRODUCT, lang: "RU" });
+
+    const key = process.env.RESEND_API_KEY;
+    delete process.env.RESEND_API_KEY;
+    try {
+      expect(await runBackInStock(PRODUCT)).toMatchObject({ sent: 0, skipped: 1 });
+    } finally {
+      process.env.RESEND_API_KEY = key;
+    }
+    expect(sent).toHaveLength(0);
+    const [row] = await query<{ sent_at: string | null }>("select sent_at from stock_alerts");
+    expect(row.sent_at).toBeNull();
+
+    // …so the letter goes out the day the key arrives
+    expect((await runBackInStock(PRODUCT)).sent).toBe(1);
+    expect(sent).toHaveLength(1);
+    expect(sent[0].to).toEqual([EMAIL]);
   });
 
   it("fires from the admin's own stock switch", async () => {

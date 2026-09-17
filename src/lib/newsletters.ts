@@ -588,6 +588,18 @@ async function claim(id: string, leaseMs: number): Promise<Newsletter> {
           params,
         );
       }
+      /* A draft that already carries rows is one that came back from a run
+         where every address was refused (see sendNewsletterBatch's
+         `nothingSent`). The insert above cannot touch them — the primary key
+         is (newsletter_id, email) and `on conflict do nothing` leaves a
+         'failed' row exactly as it is — so this is what makes «отправить
+         ещё раз» actually send anything. Only 'failed' rows: a 'sent' one is
+         history and must never go out twice. */
+      await q(
+        `update newsletter_sends set status = 'queued', error = null, message_id = null, sent_at = null
+          where newsletter_id = $1 and status = 'failed'`,
+        [id],
+      );
       await q(
         `update newsletters set status = 'sending', audience_count = $2, sending_at = now(), updated_at = now() where id = $1`,
         [id, rowsToQueue.length],
@@ -599,6 +611,35 @@ async function claim(id: string, leaseMs: number): Promise<Newsletter> {
     }
     return n;
   });
+}
+
+/**
+ * Everybody still queued who has since said no, taken off the list.
+ *
+ * The audience is frozen into `newsletter_sends` by claim() and never looked
+ * at again, which is right for «send each address once» and wrong for
+ * consent: a send that stalls on Monday and is continued on Thursday used to
+ * mail every address that pressed «Отписаться» in between. The tick and the
+ * stop list are read again at the top of every call, against the rows that
+ * have not gone out yet — the ones already sent are history and are left
+ * alone.
+ *
+ * The row is deleted rather than marked: `newsletter_sends.status` is
+ * queued/sent/failed (160_newsletters.sql) and this is none of the three —
+ * the address is simply not in the audience any more, so the totals the
+ * panel shows shrink to the audience that is really left. Leaving the rows
+ * queued instead would be worse than the bug: `left` would never reach zero
+ * and the panel would loop on «Продолжить» for ever.
+ */
+async function dropWithdrawn(id: string): Promise<void> {
+  await query(
+    `delete from newsletter_sends s
+      where s.newsletter_id = $1
+        and s.status = 'queued'
+        and (exists (select 1 from mail_optouts mo where mo.email = s.email)
+             or not exists (select 1 from customers c where c.email = s.email and c.marketing = true))`,
+    [id],
+  );
 }
 
 async function counts(id: string): Promise<{ sent: number; failed: number; left: number; total: number }> {
@@ -638,6 +679,7 @@ export async function sendNewsletterBatch(
   const n = await claim(id, o.leaseMs);
   let retryAfterMs: number | undefined;
   try {
+    await dropWithdrawn(id);
     await loadNewsletterBrand();
     const cards = await newsletterCards(n.products);
     // the languages are few and the letters differ only in the footer's
@@ -723,9 +765,21 @@ export async function sendNewsletterBatch(
 
   const c = await counts(id);
   const done = c.left === 0;
+  /* Nothing at all left the building — every single address was refused (an
+     unverified sending domain, a key that is not this shop's). The batch IS
+     finished, so `done` stays true and the panel stops calling; but calling
+     the letter «отправлено» would be untrue and, worse, final: updateNewsletter
+     and deleteNewsletter only touch a draft and claim() refuses a sent letter,
+     so the owner could neither fix it, delete it nor send it again. It goes
+     back to the draft it effectively still is; claim() requeues the failed
+     rows when he presses «Отправить» again. A run where even one letter got
+     through is a real send and keeps its «отправлено». */
+  const nothingSent = c.sent === 0 && c.failed > 0;
   if (done) {
     await query(
-      `update newsletters set status = 'sent', sent_at = now(), sent_count = $2, failed_count = $3, updated_at = now() where id = $1 and status <> 'sent'`,
+      nothingSent
+        ? `update newsletters set status = 'draft', sent_count = $2, failed_count = $3, updated_at = now() where id = $1 and status <> 'sent'`
+        : `update newsletters set status = 'sent', sent_at = now(), sent_count = $2, failed_count = $3, updated_at = now() where id = $1 and status <> 'sent'`,
       [id, c.sent, c.failed],
     );
     await writeAuditSafe("admin", "newsletter.sent", {

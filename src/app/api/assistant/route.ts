@@ -172,11 +172,20 @@ async function stockSummaryForPrompt(): Promise<string> {
    — «баллы», «клиент», «партнёр» — so most admin calls never pay for this
    block at all (keep prompts small, matching the blogLines/stockSummary
    posture above). Lets the model resolve a name the owner typed to the
-   e-mail adjust_points now accepts (src/app/api/assistant/actions.ts
+   customer id adjust_points takes (src/app/api/assistant/actions.ts
    sanitizePointsAdjust), instead of only ever working from an already-open
    customer card. Dynamically imported and best-effort, same posture as
    every other optional neighbour: a customers-list hiccup must never be the
-   reason the assistant stops answering. */
+   reason the assistant stops answering.
+
+   The id, not the e-mail. This block is the one place in the whole prompt
+   where a customer's own details would leave the shop, and it went to
+   api.openai.com on any admin message carrying the word «клиент» — while the
+   privacy policy tells the shopper «Тексты помощника готовит OpenAI — без
+   передачи ему ваших персональных данных» (public/shop/legal.ru.js). The row
+   id is an opaque uuid that means nothing outside this database, and
+   adjust_points has always accepted it (customerId), so nothing the owner
+   can ask for is lost by sending it instead of the mailbox. */
 /* orders: the parcels waiting to go out, fetched fresh on every admin call —
    the queue «Обзор» counts as «N заказов ждут отправки» (src/lib/analytics.ts
    qAttention, `to_ship`), now by name as well as by number.
@@ -252,7 +261,7 @@ async function customersSummaryForPrompt(): Promise<string> {
     const rows = await listCustomersAdmin({ limit: 15 });
     if (!rows.length) return "";
     return rows
-      .map((c) => `${c.name || "(без имени)"}|${c.email}|${c.tier}|${c.pointsBalance}`)
+      .map((c) => `${c.name || "(без имени)"}|${c.id}|${c.tier}|${c.pointsBalance}`)
       .join("\n");
   } catch {
     return "";
@@ -333,7 +342,7 @@ function adminPrompt(
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
 ${customersSummary ? `
-CUSTOMERS — up to 15 most recently created (name|e-mail|tier retail-or-pro|points balance). Use this ONLY to find the e-mail of a customer the owner named, for adjust_points below — never invent an e-mail not listed here, and never quote this list back to the owner as a report.
+CUSTOMERS — up to 15 most recently created (name|id|tier retail-or-pro|points balance). Use this ONLY to find the id of a customer the owner named, for adjust_points below — never invent an id not listed here, and never quote this list or an id back to the owner as a report.
 ${customersSummary}
 ` : ""}${blogLines ? `
 BLOG POSTS as they are right now (slug|draft-or-published|Russian title) — the slugs publish_post and set_post_cover take; never invent a slug not listed here:
@@ -396,7 +405,7 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   (When the owner talks about a photo but none is attached to this conversation, ask him to attach it with the «Фото» button next to the question box — there is no photo action without one.)`}
   {"type":"export_report","month":"YYYY-MM"} — accountant order report for one calendar month, CSV/XLSX with VAT split (current month if the owner did not name one) («выгрузи отчёт за август», «отчёт для бухгалтера», «сколько НДС за месяц»)
   {"type":"set_pricing","value":{"proDiscountPct":25,"proMinOrder":0,"loyalty":{"enabled":true,"earnPct":5,"redeemMaxPct":30,"minRedeem":5}}} — wholesale pricing and the loyalty programme. Send ONLY the fields that change — this is a patch, merged over the current settings, so «подними скидку для салонов до 25 %» is {"proDiscountPct":25} and nothing else («выключи баллы», «баллы начисляем 8 %», «сделай оптовую скидку 30 % от 200 евро»)
-  {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} OR {"type":"adjust_points","customerEmail":"<e-mail>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. Use customerId when the owner is looking at that customer's card in «Клиенты» and the id is visible in this conversation; otherwise use customerEmail, but ONLY an address copied from the CUSTOMERS list above — never guess or invent either one
+  {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. customerId is the id on that customer's card in «Клиенты» when it is visible in this conversation, otherwise the id copied from the CUSTOMERS list above — never guess or invent one, and never put an e-mail address in this action
   {"type":"stock_adjust","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","delta":6,"reason":"goods_in|adjust|return"} — a RELATIVE stock move, real numbers not the mало/нет badge («приход 6 штук масла Proraso» is delta:6, reason:"goods_in"; «спишите 2 штуки, разбились» is delta:-2, reason:"adjust"; «вернули 1 шампунь» is delta:1, reason:"return"). delta is the change, never the new total. reason defaults to "adjust" when the owner does not say why.
   {"type":"stock_set","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","qty":10} — an ABSOLUTE count after a physical recount («на полке на самом деле 10 штук» → qty:10), not a delta.
   {"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"…","ET":"…","EN":"…"}} — add a NEW product the shop does not have yet («добавь товар», «заведи новый товар», «новый бальзам Proraso за 14,90»). Never for a product already in the CATALOGUE above — change that one with set_price/set_stock instead. brand and name as the owner said them; name = the line and the type, with the Russian type tail the catalogue uses («Beard Balm — бальзам для бороды»). cat is exactly one of hair|styling|beard|face|body|perfume|merch. price 1–500 €. sizes ONLY when the owner named volumes, each with its own price; otherwise leave sizes out and give one price. description: all three languages, two to four plain sentences each. It is the product page's own text and its opening is what Google shows, so the first sentence names the type and the brand the way a customer searches for them («Бальзам для бороды Proraso …») and says what it does; then who it is for. Only what the owner said — never an invented ingredient, result, award or medical claim. Leave it out entirely rather than pad it. Photos are NOT part of this action: after the owner confirms, the panel creates the product and opens it on its «Фото и видео» tab, so say in the reply that the photos are added there.

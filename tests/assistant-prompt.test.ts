@@ -19,7 +19,9 @@ import { createCustomProduct } from "@/lib/custom-products";
 /* The Tallinn calendar, never getUTC*: a date built in UTC passes on a machine
    set to Tallinn and fails on the build server three hours away. */
 import { addShopDays, shopDay, shopDayStart } from "@/lib/day";
+import { recordLogin } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
+import { listCustomersAdmin } from "@/lib/loyalty";
 import { createOrder } from "@/lib/orders";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
@@ -120,6 +122,30 @@ describe("the admin prompt tells the truth about the panel", () => {
     const { POST } = await import("@/app/api/assistant/route");
     const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй" }] }, admin))).json();
     expect(body.action).toBeNull();
+  });
+
+  /* The CUSTOMERS block is the one place in the whole prompt where a shopper's
+     own details would leave the shop — and it went out on any admin message
+     carrying «балл», «клиент» or «партнёр», while the privacy policy tells that
+     same shopper «Тексты помощника готовит OpenAI — без передачи ему ваших
+     персональных данных» (public/shop/legal.ru.js). adjust_points has always
+     taken the row id, so the id is what the model is given. */
+  it("names a customer to the model by id, never by e-mail", async () => {
+    await recordLogin("marta@example.com", "RU");
+    await query("update customers set name = 'Марта' where email = $1", ["marta@example.com"]);
+    const [row] = await listCustomersAdmin({ limit: 1 });
+
+    const sent = stubOpenAI({ reply: "ок", product_ids: [] });
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "начисли Марте 50 баллов" }] }, admin));
+    expect(res.status).toBe(200);
+    const prompt = sent[0].messages[0].content;
+
+    // the block really was included, and it names her by row id
+    expect(prompt).toContain(`Марта|${row.id}|retail|0`);
+    // …and no address of hers reached OpenAI
+    expect(prompt).not.toContain("marta@example.com");
+    expect(prompt).not.toContain("@example.com");
   });
 
   /* «Набор» vs «промокод» — Dim, 07.09.2026: he asked for a set of products

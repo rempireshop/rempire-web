@@ -11,12 +11,15 @@
  *
  * Resend is a stubbed fetch — the same idiom as tests/consent.test.ts.
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderNewsletter } from "@/emails/newsletter";
 import { AiInputError, buildPrompt } from "@/lib/ai-prompts";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
-import { optOut, recordMarketingConsent } from "@/lib/consent";
+import { optOut, recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import { recordLogin } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
 import {
@@ -30,6 +33,7 @@ import {
   NewsletterError,
   readyLangs,
   sendNewsletterBatch,
+  updateNewsletter,
 } from "@/lib/newsletters";
 import { listAudit } from "@/lib/orders";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
@@ -416,6 +420,62 @@ describe("sendNewsletterBatch", () => {
     expect((audit!.payload as { line: string }).line).toBe("Рассылка «Сентябрь»: отправлено 2, ошибок 2");
   });
 
+  /* Every address refused — an unverified sending domain is the usual
+     reason. The letter used to be stamped «отправлено» all the same, and
+     «отправлено» is final: updateNewsletter and deleteNewsletter only touch a
+     draft and claim() refuses a sent letter, so the owner was left with a
+     letter he could not fix, delete or send, and nobody had received it. */
+  it("a letter every address refused stays a draft the owner can fix and send again", async () => {
+    await seedAudience();
+    mockResend();
+    for (const a of ["anna@example.com", "boris@example.com", "kalev@example.com", "john@example.com"]) {
+      answers.set(a, 422);
+    }
+    const n = await createNewsletter(draftInput());
+    const { progress } = await sendNewsletterBatch(n.id, { perSecond: 1000 });
+    expect(progress).toMatchObject({ done: true, sent: 0, failed: 4, left: 0 });
+    expect((await getNewsletter(n.id))!.status).toBe("draft");
+
+    // so the editor is open again…
+    const edited = await updateNewsletter(n.id, draftInput({ title: "Сентябрь, ещё раз" }));
+    expect(edited.title).toBe("Сентябрь, ещё раз");
+
+    // …and pressing «Отправить» once the domain is verified really sends
+    sent.length = 0;
+    answers.clear();
+    const again = await sendNewsletterBatch(n.id, { perSecond: 1000 });
+    expect(again.progress).toMatchObject({ done: true, sent: 4, failed: 0, left: 0 });
+    expect(sent.map((s) => s.to[0]).sort()).toEqual([
+      "anna@example.com", "boris@example.com", "john@example.com", "kalev@example.com",
+    ]);
+    expect((await getNewsletter(n.id))!.status).toBe("sent");
+  });
+
+  /* The audience is frozen into newsletter_sends by the first call and never
+     looked at again. A send that stalls on Monday and is continued on
+     Thursday used to mail everybody who said no in between — both ways of
+     saying it: «Отписаться» in a letter, and the tick in «Кабинет». */
+  it("does not mail somebody who said no while the send was stopped", async () => {
+    await seedAudience();
+    mockResend();
+    const n = await createNewsletter(draftInput());
+    // a send that started and stopped: four addresses queued, no lease alive
+    await query("update newsletters set status = 'sending', audience_count = 4 where id = $1", [n.id]);
+    for (const e of ["anna@example.com", "boris@example.com", "kalev@example.com", "john@example.com"]) {
+      await query("insert into newsletter_sends (newsletter_id, email, lang) values ($1, $2, 'RU')", [n.id, e]);
+    }
+
+    await optOut("anna@example.com", "marketing", "link");
+    await withdrawMarketingConsent("boris@example.com", "account");
+
+    const { progress } = await sendNewsletterBatch(n.id, { perSecond: 1000 });
+    expect(progress).toMatchObject({ done: true, sent: 2, failed: 0, left: 0, total: 2 });
+    expect(sent.map((s) => s.to[0]).sort()).toEqual(["john@example.com", "kalev@example.com"]);
+    const rows = await query<{ email: string }>(
+      "select email from newsletter_sends where newsletter_id = $1 order by email", [n.id]);
+    expect(rows.map((r) => r.email)).toEqual(["john@example.com", "kalev@example.com"]);
+  });
+
   it("refuses an empty letter, a letter with no subject, a letter with nobody to send to", async () => {
     mockResend();
     const empty = await createNewsletter(draftInput({ body: {} }));
@@ -560,5 +620,39 @@ describe("the newsletter AI task", () => {
     expect(body.text.body).toContain(`<a data-product="${PRODUCT}">`);
     expect(body.text.body).not.toContain("invented-thing");
     expect(body.text.body).not.toContain("<script");
+  });
+});
+
+/* ---------- what the panel tells the owner when a send ends -------------- */
+
+/* newsDoneLine() out of public/shop2/app.js — the toast and the journal line
+   at the end of a send — sliced and evaluated the way tests/i18n-rules.test.ts
+   reads the translation tables: the function itself, never a copy kept in
+   step by hand. */
+describe("the line the panel ends a send with", () => {
+  const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
+  const src = readFileSync(APP_JS, "utf8");
+  const at = src.indexOf("function newsDoneLine(");
+  if (at < 0) throw new Error("public/shop2/app.js no longer has newsDoneLine()");
+  // to the matching brace, so the slice survives the function being rewritten
+  // from a one-liner into a block or back (no braces inside its strings)
+  let depth = 0;
+  let end = -1;
+  for (let i = src.indexOf("{", at); i < src.length && end < 0; i++) {
+    if (src[i] === "{") depth += 1;
+    else if (src[i] === "}" && --depth === 0) end = i + 1;
+  }
+  if (end < 0) throw new Error("newsDoneLine() in public/shop2/app.js has no closing brace");
+  const newsDoneLine = runInNewContext("(" + src.slice(at, end) + ")") as (sent: number, failed: number) => string;
+
+  it("says «письмо ушло ✓» only when something really went out", () => {
+    expect(newsDoneLine(4, 0)).toBe("Письмо ушло — отправлено 4, ошибок 0 ✓");
+    expect(newsDoneLine(2, 2)).toContain("Письмо ушло");
+    /* Nothing went out — an unverified sending domain, the usual reason. The
+       tick and «ушло» are the one message that makes the owner stop looking,
+       and the letter is back to being a draft he has to send again. */
+    expect(newsDoneLine(0, 4)).not.toContain("✓");
+    expect(newsDoneLine(0, 4)).not.toMatch(/^Письмо ушло/);
+    expect(newsDoneLine(0, 4)).toContain("черновик");
   });
 });
