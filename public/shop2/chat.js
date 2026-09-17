@@ -45,7 +45,10 @@
   /* When /api/assistant/ has an OpenAI key behind it, the chat talks to the
      real model; without one, the rule-based demo below answers. The probe is
      lazy (first open) and a network failure just means rules. */
-  var aiEnabled = null, convo = [];
+  // `convoGen` counts the conversations this panel has had: bumped whenever
+  // the log and `convo` are thrown away, so an answer still in flight can tell
+  // that the conversation it was asked in no longer exists (reply() below).
+  var aiEnabled = null, convo = [], convoGen = 0;
   function probeAI() {
     if (aiEnabled !== null) return;
     aiEnabled = false;
@@ -329,6 +332,14 @@
     wait.className = "sbot__msg sbot__msg--bot";
     wait.textContent = "…";
     log.appendChild(wait); log.scrollTop = log.scrollHeight;
+    /* Which conversation this question belongs to. paintPanel() throws the log
+       and `convo` away when the shop's language changed under the widget, and
+       an answer still in the air belongs to the conversation that is gone: it
+       came back in the language the question was asked in, landed under a
+       greeting in the new one — and ran its action, so «в корзину» or
+       «оформить заказ» happened in a panel the shopper had just reset. A reply
+       to a conversation that no longer exists is dropped, action and all. */
+    var gen = convoGen;
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -337,6 +348,7 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
         wait.remove();
+        if (gen !== convoGen) return;
         /* A reply that is not a sentence is not a reply. The route already
            answers "" for anything that is not a string, and the admin side
            checks again on arrival (app.js askAdminAI) — this is the same door
@@ -354,7 +366,7 @@
         bubble("bot", esc(text) + cards);
         runAction(j.action);
       })
-      .catch(function () { wait.remove(); rulesReply(q); });
+      .catch(function () { wait.remove(); if (gen === convoGen) rulesReply(q); });
   }
   function refreshHint() {
     var h = root.querySelector("[data-bh]");
@@ -398,7 +410,7 @@
     }).join("");
     refreshHint();
     if (!log.childNodes.length || uiLang !== lang()) {
-      if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; }
+      if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; convoGen++; }
       bubble("bot", t.hello);
     }
     uiLang = lang();

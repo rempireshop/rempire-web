@@ -1313,6 +1313,11 @@
       // i18n pass 2 — admin: the content editor's own words
       "название компании": "ettevõtte nimi",
       "рег. номер": "registrikood",
+      /* The checkout's company field and the customer card label it with a
+         capital (invoiceBlockHTML, admCustFactRow). Without a key of its own
+         the line fell to the rule /^Рег\. (.+)$/, whose «номер» is in no
+         dictionary — so the Estonian checkout asked for a «Reg-kood номер». */
+      "Рег. номер": "Registrikood",
       "номер KMKR": "KMKR-number",
       "адрес": "aadress",
       "почта": "e-post",
@@ -1329,6 +1334,8 @@
       "самовывоз": "järeletulek",
       // i18n pass 2 — admin: toasts
       "Черновик готов — проверьте и сохраните": "Mustand on valmis — kontrolli ja salvesta",
+      // …and the same button when only part of the article came back translated
+      "Перевелось не всё — проверьте и допишите": "Kõike ei tõlgitud — kontrolli ja kirjuta puuduv juurde",
       "Сохранено ✓ · отмена — в журнале": "Salvestatud ✓ · tagasivõtmine on logis",
       "Изменений нет": "Muudatusi ei ole",
       "Применено ✓ · журнал в «Настройках»": "Rakendatud ✓ · logi on jaotises „Seaded“",
@@ -3967,6 +3974,8 @@
       // i18n pass 2 — admin: the content editor's own words
       "название компании": "company name",
       "рег. номер": "registry code",
+      // the capitalised label of the same field — see the ET table above
+      "Рег. номер": "Registry code",
       "номер KMKR": "VAT number",
       "адрес": "address",
       "почта": "e-mail",
@@ -3983,6 +3992,7 @@
       "самовывоз": "pickup",
       // i18n pass 2 — admin: toasts
       "Черновик готов — проверьте и сохраните": "The draft is ready — check it and save",
+      "Перевелось не всё — проверьте и допишите": "Not all of it was translated — check it and write the rest",
       "Сохранено ✓ · отмена — в журнале": "Saved ✓ · undo is in the log",
       "Изменений нет": "No changes",
       "Применено ✓ · журнал в «Настройках»": "Applied ✓ · the log is under “Settings”",
@@ -5605,7 +5615,16 @@
     [/^⚠ Пришло (.+) вместо (.+) — проверьте в Montonio$/,
       { ET: "⚠ Laekus $1, mitte $2 — kontrolli Montonios", EN: "⚠ $1 arrived instead of $2 — check in Montonio" }],
     [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
+    /* One is one. The rules below carry a single ET and EN wording for any
+       number, which is right from two up — Estonian takes the partitive and
+       English the plural — and wrong at exactly 1: a search with one hit
+       counted «1 products» / «1 toodet» on the shopper's own screen. A
+       literal-«1» rule ahead of each general one, because trText() takes the
+       first that matches. 21 stays plural in both («21 products», «21
+       toodet»), which is why the rule is /^1 …$/ and not \d*1. */
+    [/^Показаны все 1 товар$/, { ET: "Kuvatud kõik 1 toode", EN: "All 1 product shown" }],
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
+    [/^1 товар$/, { ET: "1 toode", EN: "1 product" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
     [/^Корзина \((\d+)\)$/, { ET: "Ostukorv ($1)", EN: "Cart ($1)" }],
     [/^До бесплатной доставки \((.+), от (.+)\) — ещё (.+)$/, { ET: "Tasuta tarneni ($1, alates $2) — veel $3", EN: "$3 more to free delivery ($1, from $2)" }],
@@ -5643,6 +5662,7 @@
     [/^Код сдачи посылки: (.+)$/, { ET: "Paki üleandmise kood: $1", EN: "Drop-off code: $1" }],
     [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
     // the picker sheet counts on its own line
+    [/^1 точка$/, { ET: "1 punkt", EN: "1 location" }],
     [/^(\d+) (?:точка|точки|точек)$/, { ET: "$1 punkti", EN: "$1 locations" }],
     [/^Всё, что есть в наличии от (.+) — во всех разделах магазина\.$/,
       { ET: "Kõik brändi $1 tooted, mis on laos — kõigist poe osadest.", EN: "Everything in stock from $1 — across every section." }],
@@ -5739,6 +5759,8 @@
     [/^Объём — (.+)$/, { ET: "Maht — $1", EN: "Volume — $1" }],
     [/^Размер — (.+)$/, { ET: "Suurus — $1", EN: "Size — $1" }],
     [/^Фото (\d+)$/, { ET: "Foto $1", EN: "Photo $1" }],
+    // ET keeps «toodet» here — «näita» takes the partitive whatever the count
+    [/^Показать 1 товар$/, { ET: "Näita 1 toodet", EN: "Show 1 product" }],
     [/^Показать (\d+) товар(?:|а|ов)$/, { ET: "Näita $1 toodet", EN: "Show $1 products" }],
     [/^Оплатить (.+)$/, { ET: "Maksa $1", EN: "Pay $1" }],
     [/^Пакомат или пункт выдачи по умолчанию — (\d+) (?:точка|точки|точек)$/,
@@ -5774,6 +5796,7 @@
     [/^([-+][\d.,]+%) к прошлому периоду$/, { ET: "$1 võrreldes eelmise perioodiga", EN: "$1 vs. previous period" }],
     // wholesale/loyalty — the account screen's points balance («15 баллов»)
     // and the checkout's redeem toggle («Использовать баллы — доступно 15»)
+    [/^1 балл$/, { ET: "1 punkt", EN: "1 point" }],
     [/^(\d+) (?:балл|балла|баллов)$/, { ET: "$1 punkti", EN: "$1 points" }],
     [/^Использовать баллы — доступно (\d+)$/, { ET: "Kasuta punkte — saadaval $1", EN: "Use points — $1 available" }],
     // the account screen's loyalty rates paragraph — earnPct and redeemMaxPct
@@ -5869,6 +5892,13 @@
     [/^Ожидает оплаты по счёту №(.+) · до (.+)$/, { ET: "Ootab arve nr $1 tasumist · tähtaeg $2", EN: "Awaiting payment of invoice $1 · due $2" }],
     [/^Оплачен по счёту №(.+) · (.+)$/, { ET: "Makstud arve nr $1 alusel · $2", EN: "Paid by invoice $1 · $2" }],
     [/^Счёт №(.+)$/, { ET: "Arve nr $1", EN: "Invoice $1" }],
+    /* The newsletter's own «Письмо ушло — …» line stands above the invoice's
+       «Письмо ушло <дата>», not down with the rest of the newsletter rules:
+       trText() takes the FIRST rule that matches, and the date rule's greedy
+       capture swallowed the whole tail, so a send on the English panel read
+       «Letter sent — отправлено 5, ошибок 0 ✓». */
+    [/^Письмо ушло — отправлено (\d+), ошибок (\d+) ✓$/,
+      { ET: "Kiri läks välja — saadetud $1, vigu $2 ✓", EN: "The letter has gone — $1 sent, $2 failed ✓" }],
     [/^Письмо ушло (.+)$/, { ET: "Kiri läks välja $1", EN: "Letter sent $1" }],
     [/^Письмо со счётом не ушло \((.+)\) — нажмите «Отправить счёт ещё раз»\.$/,
       { ET: "Arvega kiri ei läinud välja ($1) — vajutage «Saada arve uuesti».", EN: "The invoice letter did not go out ($1) — press “Send the invoice again”." }],
@@ -5894,8 +5924,8 @@
     [/^Отправить (\d+) подписчикам$/, { ET: "Saada $1 tellijale", EN: "Send to $1 subscribers" }],
     [/^Отправлено (\d+) из (\d+)…$/, { ET: "Saadetud $1 / $2…", EN: "Sent $1 of $2…" }],
     [/^Отправлено (\d+) из (\d+) · ошибок (\d+)$/, { ET: "Saadetud $1 / $2 · vigu $3", EN: "Sent $1 of $2 · $3 failed" }],
-    [/^Письмо ушло — отправлено (\d+), ошибок (\d+) ✓$/,
-      { ET: "Kiri läks välja — saadetud $1, vigu $2 ✓", EN: "The letter has gone — $1 sent, $2 failed ✓" }],
+    // «Письмо ушло — отправлено …» is up with the invoice rules, above the
+    // greedy /^Письмо ушло (.+)$/ that used to shadow it
     [/^Письмо не ушло — ошибок (\d+)\. Оно осталось черновиком, попробуйте ещё раз\.$/,
       { ET: "Kiri ei läinud välja — vigu $1. See jäi mustandiks, proovige uuesti.",
         EN: "The letter did not go out — $1 failed. It is still a draft, try again." }],
@@ -6146,13 +6176,25 @@
     // infinite scroll until the shopper switched language.
     var d = UI[lang];
     if (!d) return s;
-    if (d[s]) return d[s];
+    /* UI.ET and UI.EN are plain object literals, so a bare `d[key]` walks up
+       to Object.prototype: d["constructor"] and d["toString"] are functions,
+       d["__proto__"] is an object — all truthy, and String.replace() turns
+       whatever the lookup hands back into text. The keys looked up are not
+       always ours: the empty-search line carries the shopper's own query, so
+       searching the English shop for «constructor» used to answer «Nothing
+       found for “function Object() { [native code] }”». Own keys only —
+       written out here rather than in a helper because tools/prerender-shop2
+       lifts THIS function out of app.js by source text to build the static
+       pages, and a helper left behind is a page of Russian. */
+    var own = function (key) { return Object.prototype.hasOwnProperty.call(d, key) ? d[key] : ""; };
+    var exact = own(s);
+    if (exact) return exact;
     for (var i = 0; i < UI_RX.length; i++) {
       var m = s.match(UI_RX[i][0]);
       if (m) {
         return UI_RX[i][1][lang].replace(/\$(\d)/g, function (_, n) {
           var piece = m[+n];
-          return d[piece] || (allowName ? trName(piece, lang) : piece) || piece;
+          return own(piece) || (allowName ? trName(piece, lang) : piece) || piece;
         });
       }
     }
@@ -6197,7 +6239,11 @@
       var tr = trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
     }
-    var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title]") : [];
+    /* [label] is in the list because TR_ATTRS is: an <optgroup> carries its
+       heading there and nowhere else, so without it the four group headings
+       of the banner editor's «Куда ведёт кнопка» stayed Russian on the ET and
+       EN panel although both dictionaries had them. */
+    var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title],[label]") : [];
     for (var i = 0; i < els.length; i++) {
       for (var a = 0; a < TR_ATTRS.length; a++) {
         var v = els[i].getAttribute(TR_ATTRS[a]);
@@ -21440,13 +21486,20 @@
     ["track", "Трек-номер"], ["code", "Код — промокод или код для входа"],
     ["product", "Название товара"], ["shop", "Название магазина"]
   ];
+  /* The flag is a «do not ask twice», not a «never ask again»: nothing but a
+     load fills MAIL_TEXTS, admMailEditorHTML() draws a skeleton while it is
+     null, and the «Письма» editor has no «Повторить» button of its own — so a
+     single refused request (a phone that lost the network for a second) left
+     the owner looking at three grey bars for as long as the page stayed open.
+     Cleared on every failure, so the next render asks again. */
   function loadMailTexts(force) {
     if (mailTextsAsked && !force) return;
     mailTextsAsked = true;
+    var again = function () { mailTextsAsked = false; };
     fetch("/api/admin/mail/preview/?format=texts")
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { if (j && j.ok) { MAIL_TEXTS = j; render(); } })
-      .catch(noop);
+      .then(function (j) { if (j && j.ok) { MAIL_TEXTS = j; render(); } else again(); })
+      .catch(again);
   }
   function mailLangCode(lang) { return String(lang || "RU").toLowerCase(); }
   function mailLimit(field) {
@@ -34702,10 +34755,17 @@
         }).then(function (r) { return { field: j.field, r: r }; });
       })).then(function (results) {
         tbtn.disabled = false; tbtn.textContent = tlabel;
-        var ok = false, authFail = false, limited2 = false;
+        /* Title, excerpt and body are three separate requests, and any one of
+           them can come back 502 or rate-limited on its own. Counted per
+           field and per target: «Черновик готов» is the answer only when every
+           field landed in every language it was asked for — a body that never
+           arrived used to be announced as a finished draft, with the Russian
+           still sitting in the box. */
+        var okN = 0, authFail = false, limited2 = false;
         results.forEach(function (res) {
           if (res.r.status === 401) { authFail = true; return; }
           if (res.r.body && res.r.body.error === "rate_limited") limited2 = true;
+          var got = 0;
           if (res.r.status === 200 && res.r.body.ok && res.r.body.texts) {
             targets.forEach(function (l) {
               var v = txt(res.r.body.texts[l]);
@@ -34713,12 +34773,14 @@
               bdTr[res.field][l] = res.field === "body"
                 ? blogCleanHtml(blogCardsIn(blogFigsIn(blogTextToHtml(v), trFigs.figs), trCards.cards, l))
                 : v;
-              ok = true;
+              got++;
             });
           }
+          if (got === targets.length) okN++;
         });
         if (authFail) { SRV.admin = false; }
-        else if (ok) toast("Черновик готов — проверьте и сохраните");
+        else if (okN === jobs.length) toast("Черновик готов — проверьте и сохраните");
+        else if (okN) toast("Перевелось не всё — проверьте и допишите");
         else toast(limited2 ? "Слишком много запросов — попробуйте позже" : "Не получилось — попробуйте ещё раз");
         render();
       }).catch(function () { tbtn.disabled = false; tbtn.textContent = tlabel; toast("Не получилось — попробуйте ещё раз"); render(); });
