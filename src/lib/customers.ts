@@ -20,6 +20,11 @@ import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
+// The cart-write counter below is a per-DAY counter, and a day in this shop is
+// the Tallinn calendar day — never the database's zone and never the machine's
+// (src/lib/day.ts carries the whole reasoning). day.ts imports nothing, so
+// this keeps the module the leaf it has always been.
+import { addShopDays, shopDay } from "@/lib/day";
 // «Хочу вернуть заказ» — the window and the stamps, in one place for the
 // account screen and the route alike. src/lib/returns.ts imports nothing but
 // the database, which is what keeps this module the leaf it has always been.
@@ -792,6 +797,84 @@ export async function saveCart(input: { email: string; lang?: unknown; items?: u
     [addr, normalizeLangCode(input.lang), jsonbParam(snap.items), snap.total],
   );
   return snap;
+}
+
+/* ---------- how often an unproven poster may write a cart ------------------
+ *
+ * Dim, 17.09.2026: the abandoned-cart reminder stays — it exists for the guest
+ * who has never signed in, and a version of it that only writes to known
+ * customers has no audience left — but the exposure is bounded per ADDRESS
+ * instead of per IP.
+ *
+ * What POST /api/carts had was `rateLimit("carts", clientIp(req), 30, 60_000)`:
+ * a Map in one Node process. On Vercel that is not a bound at all — a cold
+ * start begins with an empty Map, two instances never see each other's counts,
+ * and an IP address is the cheapest thing an abuser can change. Meanwhile the
+ * thing actually at risk — somebody else's mailbox, which anybody may type
+ * into the checkout — was counted by nothing.
+ *
+ * So the counter lives in the database, keyed on the address, and rolls over
+ * on the Tallinn calendar day (db/migrations/181_cart_writes.sql). It is its
+ * own table on purpose: emptying a basket deletes the `carts` row, so a
+ * counter kept there could be reset through the door it is meant to bound.
+ *
+ * What it does NOT have to do: stop a second letter. That was already true
+ * before this — `carts.email` is unique, so one address is one cart, and
+ * `reminded_at` is stamped the first time a reminder goes out and is cleared
+ * only by an order actually arriving from that address (markCartRecovered).
+ * One letter per address is the shape of the table. This is about everything
+ * else an unbounded write gives away: overwriting a real shopper's basket,
+ * pushing `updated_at` forward for ever so their reminder never fires, and
+ * filling the table.
+ */
+
+/** Unproven writes one address tolerates in a Tallinn day. Generous for a
+ *  shopper editing a basket at the checkout (each change files a snapshot),
+ *  far too small to be a tool. */
+export const CART_WRITES_PER_DAY = 30;
+
+/** How long a day's counter is kept before the flows run prunes it. */
+export const CART_WRITES_KEEP_DAYS = 30;
+
+/**
+ * Counts one unproven write to `email` and says whether it may go ahead.
+ *
+ * One statement, so two requests racing cannot both read "29". The count is
+ * incremented even when the answer is no: a client that keeps hammering keeps
+ * being refused, rather than being handed a free write per attempt.
+ *
+ * Throws what the database throws — the caller is about to write a cart into
+ * the same database, so there is nothing to fall back to and the route's own
+ * 503 is the honest answer. Fails CLOSED by never having allowed the write.
+ */
+export async function allowGuestCartWrite(email: string, now: number = Date.now()): Promise<boolean> {
+  const addr = normalizeEmail(email);
+  if (!isEmail(addr)) return false;
+  const rows = await query<{ n: number | string }>(
+    `insert into cart_writes (email, day, n) values ($1, $2, 1)
+     on conflict (email) do update set
+       day = $2,
+       n = case when cart_writes.day = $2 then cart_writes.n + 1 else 1 end
+     returning n`,
+    [addr, shopDay(now)],
+  );
+  return (Number(rows[0]?.n) || 0) <= CART_WRITES_PER_DAY;
+}
+
+/**
+ * Drops counters for days long past. Best effort, called once a day from the
+ * flows run: a bound that never forgets would be a table that only grows.
+ */
+export async function pruneCartWrites(now: number = Date.now()): Promise<number> {
+  const before = addShopDays(shopDay(now), -CART_WRITES_KEEP_DAYS);
+  if (!before) return 0;
+  try {
+    const rows = await query<{ email: string }>("delete from cart_writes where day < $1 returning email", [before]);
+    return rows.length;
+  } catch (err) {
+    console.warn("[carts] old write counters not pruned:", (err as Error)?.message);
+    return 0;
+  }
 }
 
 /** An order was placed — the cart is no longer abandoned. */

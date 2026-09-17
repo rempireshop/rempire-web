@@ -9,7 +9,7 @@
  */
 import { clientIp, rateLimit } from "@/lib/auth";
 import { recordMarketingConsent } from "@/lib/consent";
-import { getCustomer, sessionEmail } from "@/lib/customers";
+import { getCustomer, normalizeEmail, sessionEmail } from "@/lib/customers";
 import { createOrder, OrderError } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -51,9 +51,14 @@ export async function POST(req: Request) {
      both for pro pricing and to stamp orders.customer_id, so a signed-in
      shopper's order is theirs even before this page existed to say so. */
   let customerId: string | null = null;
+  /* …and, separately, WHICH mailbox that session belongs to. The lookup above
+     can fail (a database hiccup prices the order as a guest and says so); the
+     address itself comes straight off the signed cookie and is the only proof
+     this route has that the person typing an address into the checkout owns
+     it. Read before createOrder, used after it — see the consent note below. */
+  const signedInAs = sessionEmail(req);
   try {
-    const email = sessionEmail(req);
-    if (email) customerId = (await getCustomer(email))?.id ?? null;
+    if (signedInAs) customerId = (await getCustomer(signedInAs))?.id ?? null;
   } catch (err) {
     console.error("[api/orders] customer lookup failed, pricing as a guest:", err);
   }
@@ -78,9 +83,20 @@ export async function POST(req: Request) {
        helper swallows its own errors), stamped «checkout», and it only ever
        switches the consent ON: not ticking a box at a checkout is not a
        withdrawal — the shopper may have said yes in their account last month,
-       and an order is no place to revoke that silently (src/lib/consent.ts). */
+       and an order is no place to revoke that silently (src/lib/consent.ts).
+
+       `proven` is the whole of Dim's answer of 17.09.2026. This door is open
+       to guests by design, and it asks for no proof that the address in the
+       box is the poster's — so a tick here may record a consent but may NOT
+       take an address off the stop list somebody else put it on. Only a
+       shopper signed in ON THAT MAILBOX has proved it is theirs; the
+       comparison is against the signed cookie and against nothing in the
+       body, which is the same reasoning that makes createOrder() take
+       `customerId` from the session and never from the JSON. */
     if ((body as { newsletter?: unknown }).newsletter === true) {
-      await recordMarketingConsent(order.email, (body as { lang?: unknown }).lang, "checkout");
+      await recordMarketingConsent(order.email, (body as { lang?: unknown }).lang, "checkout", {
+        proven: !!signedInAs && normalizeEmail(signedInAs) === normalizeEmail(order.email),
+      });
     }
 
     const inv = order.invoice;

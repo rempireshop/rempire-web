@@ -25,8 +25,22 @@
 -- in the account takes the address out again: the latest expression of will
 -- wins (src/lib/consent.ts).
 --
+-- AMENDED 17.09.2026 — the sentence above is no longer the whole rule, and a
+-- reader who stops there will be misled. The latest expression of will wins
+-- FROM THE PERSON WHOSE ADDRESS IT IS. POST /api/orders is open to guests by
+-- design (a first order comes from somebody who has never signed in) and asks
+-- for no proof that the address in the box belongs to whoever typed it — so
+-- «a later tick at the checkout» was a tick anybody could send on anybody's
+-- behalf, and it deleted the mail_optouts row of a stranger who had pressed
+-- «Отписаться». Dim's answer: the consent is still recorded either way, and
+-- the stop list is cleared only when the tick is proven — a customer session
+-- on that same mailbox, the account form, or the owner in the panel. The
+-- table below is unchanged; what changed is who may take a row out of it.
+-- See recordMarketingConsent(..., { proven }) in src/lib/consent.ts.
+--
 -- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
--- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- twice and must never be edited once it has run anywhere — the amendment
+-- above is a comment and changes nothing this file DOES. Runs on Postgres
 -- 13+ and on PGlite.
 
 alter table customers add column if not exists marketing_at timestamptz;

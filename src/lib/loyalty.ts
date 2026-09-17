@@ -1079,6 +1079,12 @@ export interface PartnerResult {
   created: boolean;
   /** The tier actually flipped retail → pro here (a letter is due). */
   promoted: boolean;
+  /**
+   * This address had already been a partner before this call — it carries a
+   * `pro_approved_at` stamp from an earlier promotion. The welcome letter has
+   * gone to it once already, so `promoted` alone is not enough to send.
+   */
+  welcomed: boolean;
 }
 
 /**
@@ -1143,6 +1149,14 @@ export async function upsertPartner(input: PartnerInput): Promise<PartnerResult 
        paying retail prices. The window is microseconds; the letter is a
        promise to a customer, so it follows the tier that is really there. */
     promoted: tier === "pro" && customer.tier === "pro" && (!before || before.tier !== "pro"),
+    /* Has this address been a partner before today? `pro_approved_at` is
+       stamped on the first promotion and survives every demotion after it, so
+       it is the shop's memory of having sent «Цены для салонов включены»
+       once. Read off `before` — the row as it was when this call opened,
+       because the write above stamps it. The route sends on `promoted &&
+       !welcomed`: a partner who left and came back is greeted by hand (Dim,
+       17.09.2026), never by a second copy of the same letter. */
+    welcomed: !!before?.proApprovedAt,
   };
 }
 
