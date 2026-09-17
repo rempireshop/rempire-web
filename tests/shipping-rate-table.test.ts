@@ -407,14 +407,14 @@ describe("the parcel column is not stored", () => {
       methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
     }));
     for (const c of ["DE", "PL", "AT", "SK", "GR", "HU", "RO", "ES", "IT"]) {
-      expect(quoteFromRules(dropped, c, "parcel", null, 10))
-        .toStrictEqual(quoteFromRules(withCells, c, "parcel", null, 10));
+      const q = { country: c, method: "parcel" as const, subtotal: 10 };
+      expect(quoteFromRules(dropped, q).price).toBe(quoteFromRules(withCells, q).price);
     }
   });
 
   it("leaves nothing below cost for the removed guard to have caught", () => {
     const clean = parseShippingRules(cleanShippingRules({ methods: { parcel: { DE: 0.01 } } }));
     expect(belowCostCells(clean).filter((c) => c.method === "parcel" && c.country === "DE")).toEqual([]);
-    expect(quoteFromRules(clean, "DE", "parcel", null, 10).price).not.toBe(0.01);
+    expect(quoteFromRules(clean, { country: "DE", method: "parcel", subtotal: 10 }).price).not.toBe(0.01);
   });
 });
