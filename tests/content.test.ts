@@ -108,6 +108,17 @@ describe("sanitizeContentPatch", () => {
     expect(out!.legal).toBeUndefined();
   });
 
+  /* r21, assistant: the model answering «10-19» for «во вторник с 10 до 19»
+     sanitised to "" — and "" is what merge() writes over the stored day, so a
+     patch that promised new hours took the day off the site instead. The
+     confirm card says only «часы работы», so nothing on screen showed it. */
+  it("leaves the day alone when the hours cannot be read, and still honours a blank as «не публиковать»", () => {
+    const bad = sanitizeContentPatch({ hours: { tue: "10-19", wed: "с утра до вечера", thu: 7 } });
+    expect(bad).toBeNull();
+    const mixed = sanitizeContentPatch({ hours: { mon: "10:00-19:00", tue: "10-19", fri: "" } });
+    expect(mixed!.hours).toEqual({ mon: "10:00–19:00", fri: "" });
+  });
+
   it("returns null when there is nothing to change", () => {
     expect(sanitizeContentPatch(null)).toBeNull();
     expect(sanitizeContentPatch("phone: 123")).toBeNull();
@@ -172,6 +183,13 @@ describe("mergeContent", () => {
     const c = mergeContent({ company: "Rempire", hours: 7, announcement: [] });
     expect(c.company.legalName).toBe("Rempire Store OÜ");
     expect(c.announcement.on).toBe(true);
+  });
+
+  it("an unreadable hours value cannot erase the day the shop already publishes", () => {
+    const c = mergeContent({ hours: { tue: "10:00–19:00" } }, { hours: { tue: "10-19" } });
+    expect(c.hours.tue).toBe("10:00–19:00");
+    // …and the owner emptying the field still takes the day off the site
+    expect(mergeContent({ hours: { tue: "10:00–19:00" } }, { hours: { tue: "" } }).hours.tue).toBe("");
   });
 
   it("drops a legal override once every language is blank again", () => {

@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(24);   // r20: the shop prompt gained the «never offer what you do not hand over» line
+    expect(body.v).toBe(25);   // r21: the undo promise names the actions the journal does not carry
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
@@ -133,6 +133,38 @@ describe("the admin prompt tells the truth about the panel", () => {
     const { POST } = await import("@/app/api/assistant/route");
     const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй" }] }, admin))).json();
     expect(body.action).toBeNull();
+  });
+
+  /* r21, assistant: the prompt stated as a fact that every confirmed action
+     «lands in the change journal — «Настройки → Журнал» — where «Вернуть»
+     takes it back», and told the model to say «отменить можно в журнале». The
+     panel applies a stock move and a blog post OUTSIDE that layer — no
+     demoApply, no entry, no «Вернуть» — so the owner was sent looking in the
+     journal for a way back that was never written. The two halves are checked
+     together here: what the panel does, and what the prompt says about it. */
+  it("promises the journal only for the actions that reach it", async () => {
+    // the panel's own two: neither writes a journal line of any kind
+    for (const name of ["applyStockAction", "applyBlogAction"]) {
+      const body = sliceFn(name);
+      for (const write of ["demoApply", "journalNote", "DEMO.log"]) {
+        expect(body, `${name}() writes to the journal after all — the prompt may promise it`).not.toContain(write);
+      }
+    }
+
+    const sent = stubOpenAI({ reply: "ок", action: null });
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(req({ mode: "admin", messages: [{ role: "user", content: "приход 6 штук масла" }] }, admin));
+    const intro = sent[0].messages[0].content
+      .split("\n")
+      .find((l) => l.startsWith("You can CHANGE things via the optional")) ?? "";
+    expect(intro, "the actions preamble is no longer where it was").not.toBe("");
+    // no blanket promise any more…
+    expect(intro).not.toContain("and lands in the change journal");
+    // …and the ones the panel applies outside the journal are named
+    for (const t of ["stock_adjust", "stock_set", "draft_post", "publish_post", "set_bundle"]) {
+      expect(intro, `${t} is applied outside the journal and the prompt does not say so`).toContain(t);
+    }
+    expect(intro).toContain("«Настройки → Журнал»");
   });
 
   /* The CUSTOMERS block is the one place in the whole prompt where a shopper's

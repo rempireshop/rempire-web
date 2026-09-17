@@ -32,7 +32,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 24; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 25; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -447,7 +447,7 @@ ANSWER IN ${(LANG_NAME[lang] ?? "Russian").toUpperCase()}. That is the language 
 
 What the panel really does (say so when relevant, and never promise more): photos are stored exactly as uploaded and shown on a white background — there is no automatic background removal and no watermark (a per-photo «Убрать фон» button exists only when the shop has switched it on); texts — product descriptions, Google titles, blog articles — can be written in Russian, Estonian and English, by you here or by the editor's own buttons; every destructive action asks for confirmation first.
 
-You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute) and lands in the change journal — «Настройки → Журнал» — where «Вернуть» takes it back; say «отменить можно в журнале» when it fits, never that a change is a demo. Available actions:
+You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute), and MOST actions land in the change journal — «Настройки → Журнал» — where «Вернуть» takes them back: for those, say «отменить можно в журнале» when it fits. THESE DO NOT GO THROUGH THE JOURNAL, so never promise «Вернуть» or «отменить можно в журнале» for them: stock_adjust and stock_set (the shelf keeps a ledger of movements instead — a wrong figure is corrected by another movement, and the reply should say that: «поправим ещё одним приходом/списанием»), draft_post and publish_post (an article is edited and unpublished in «Блог»), set_bundle and delete_bundle (the journal keeps a line about them, but there is no button that puts them back). Never call a change a demo. Available actions:
   {"type":"set_price","id":"<catalogue id>","value":<number 1..500>} — change a product's price
   {"type":"set_stock","id":"<catalogue id>","value":"in|low|out"} — availability
   {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace the product's Google title and meta description (Russian unless the owner asks otherwise). title: AT MOST 60 characters including spaces — count them — and it must carry the brand, the product type and the volume the way a customer types them into Google («Proraso масло для бороды, 30 мл»); no keyword stuffing, no trailing «| Rempire» (the site appends it). description: AT MOST 155 characters including spaces — what the product is and one concrete reason to buy it, never a repeat of the title, never an invented ingredient, result or claim.
@@ -627,7 +627,14 @@ export async function POST(req: NextRequest) {
   }
 
   const lastUser = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
-  const isMini = (body as { debug?: string }).debug === "mini";
+  /* `debug:"mini"` swaps both system prompts for a two-line generic one — no
+     catalogue, no «steer back to the shop», no security rules. It is a
+     development hatch, and it was read straight off the body: a POST with no
+     Origin and {"debug":"mini"} turned the endpoint into a general-purpose
+     model on the shop's OpenAI key, with only the 10-per-minute limiter in
+     front of it. Same door as mode:"admin" (audit H1): the admin cookie, which
+     was checked a few lines above. */
+  const isMini = isAdmin && (body as { debug?: string }).debug === "mini";
   // photos attached in the panel (keys the upload route answered with)
   const attachments = isAdmin ? briefAttachments(body.attachments) : [];
   /* «набор» or «промокод» — read off the owner's own words before the model

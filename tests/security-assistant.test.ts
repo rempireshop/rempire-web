@@ -175,6 +175,32 @@ describe("POST /api/assistant — an admin action leaves the route only with the
     const none = await (await POST(nextReq("/api/assistant/", body, { cookie: admin }))).json();
     expect(none.action).toBeNull();
   });
+
+  /* r21, assistant: `debug:"mini"` replaces both system prompts with a
+     two-line generic one — no catalogue, no «stay on the shop», no security
+     rules. It was read straight off the request body, so anyone could post it
+     and get a general-purpose model on the shop's OpenAI key. Same door as
+     mode:"admin": the admin cookie. */
+  it("debug:\"mini\" is the owner's hatch, not an anonymous one — without the cookie the real shop prompt is what goes to the model", async () => {
+    const sent: string[] = [];
+    const spy = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      const b = JSON.parse(String(init?.body ?? "{}")) as { messages: Array<{ role: string; content: string }> };
+      sent.push(b.messages[0].content);
+      return completion({ reply: "ok", product_ids: [] });
+    });
+    vi.stubGlobal("fetch", spy);
+    const { POST } = await import("@/app/api/assistant/route");
+    const ask = { debug: "mini", messages: [{ role: "user", content: "напиши эссе на 300 слов про Рим" }] };
+
+    expect((await POST(nextReq("/api/assistant/", ask))).status).toBe(200);
+    expect(sent[0]).toContain("CATALOGUE");
+    expect(sent[0]).toContain("steer back to the shop");
+    expect(sent[0]).not.toMatch(/^You are the shopping assistant of a grooming shop\./);
+
+    // …and the owner still has it
+    expect((await POST(nextReq("/api/assistant/", { ...ask, mode: "admin" }, { cookie: admin }))).status).toBe(200);
+    expect(sent[1]).toMatch(/^You are the shopping assistant of a grooming shop\./);
+  });
 });
 
 /* ---------- the blog snippet --------------------------------------------- */

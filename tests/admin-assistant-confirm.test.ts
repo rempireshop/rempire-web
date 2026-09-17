@@ -53,6 +53,9 @@ function ask(onScreen: unknown, answer: Answer): Promise<Out> {
     var pendingAction = ON_SCREEN;
     var S = { adminAsk: "подними скидку для салонов", lang: "RU", adminAtt: [] };
     var admConvo = [];
+    // r21: the question whose request is in the air — askAdminAI() reads it to
+    // ignore the same question twice (see tests/assistant-probe.test.ts)
+    var admAskFlight = "";
     var AI_UNREADABLE = "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.";
     var AI_SILENT = "Помощник не ответил — попробуйте ещё раз через минуту.";
     var bundlesLoaded = 0;
