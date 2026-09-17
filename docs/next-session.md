@@ -96,9 +96,10 @@ had half the idempotency, the 7-day unpaid cancel was already built).
   wrong.** Dim was told a database counter meant a write per login attempt. It
   does not: `writeAuditSafe(…, "admin.login.failed")` already writes every
   failure to Postgres on the existing path, so a durable ladder that survives a
-  cold start costs one SELECT and zero extra writes. The delay as built is still
-  per-instance, which is the weakness it was meant to fix. Offered to Dim; he has
-  not answered.
+  cold start costs one SELECT and zero extra writes. Told this, **Dim chose the
+  database counter on 17.09** — being built on branch `r22-login`, which also has
+  to settle the “Слишком много попыток” string in `app.js` that the delay left
+  unreachable.
 - **The conversion figure is now reported by the browser**, not read from the
   orders table, so someone loading a receipt URL could add to it. Consent-gated
   and rate-limited, and it is a vanity KPI rather than an accounting figure — but
