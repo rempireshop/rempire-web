@@ -729,7 +729,7 @@ the shipping whitelist, `computeShipping(…, carrier)`, gift-card timing),
   done (17.09.2026).* The per-IP budget on `/api/admin/login/` is gone and the
   throttle is an escalating delay counted in Postgres — failed logins since the
   last accepted password, out of the `admin_audit` rows the route already
-  writes, so no new table and no new write (`191_login_ladder_index.sql`,
+  writes, so no new table and no new write (`192_login_ladder_index.sql`,
   src/lib/auth.ts «failed-login backoff»). It survives cold starts and is keyed
   on the account rather than on the caller's address, which also disposes of
   the XFF half *for this route*: `clientIp()` is now only what gets recorded in

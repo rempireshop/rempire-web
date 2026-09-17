@@ -1325,7 +1325,7 @@ route and the panel both presented it as enforced. Since 17.09.2026 the count
 itself is in Postgres too: `admin.login.failed` rows since the last
 `admin.login`, which the route was already writing, so a cold start no longer
 hands out a fresh ladder (src/lib/auth.ts, «failed-login backoff»;
-`191_login_ladder_index.sql`). A read that fails or drags falls back on the
+`192_login_ladder_index.sql`). A read that fails or drags falls back on the
 in-instance Map — never on zero, never on the ceiling;
 `GET /api/admin/me/` reports `configured`. Customers: `rmp_cust` (§11). Test
 doors: `E2E_BOOTSTRAP=1` + non-production → `/api/e2e/bootstrap/` (migrate),

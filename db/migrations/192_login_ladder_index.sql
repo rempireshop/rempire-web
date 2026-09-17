@@ -1,4 +1,4 @@
--- 191_login_ladder_index.sql — make "how many failed logins since T" cheap
+-- 192_login_ladder_index.sql — make "how many failed logins since T" cheap
 --
 -- The failed-login delay (src/lib/auth.ts, «failed-login backoff») counted
 -- misses in a Map inside one serverless instance. A cold start emptied it, so

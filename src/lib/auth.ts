@@ -281,7 +281,7 @@ export function resetRateLimits(): void {
  * password ALREADY writes a row, `writeAuditSafe(…, "admin.login.failed")` in
  * the login route, and every accepted one writes "admin.login" beside it. The
  * ladder was in the table the whole time and nothing was reading it, so the
- * durable version costs one SELECT and no write at all (191_login_ladder_index.sql
+ * durable version costs one SELECT and no write at all (192_login_ladder_index.sql
  * adds the two partial indexes that make the SELECT cheap, and is honest
  * there about the one b-tree entry a login row now maintains).
  *
@@ -436,7 +436,7 @@ export const LOGIN_READ_TIMEOUT_MS = 1_500;
  * for — the success whose row was lost.
  *
  * An elapsed hour, not a calendar day, so src/lib/day.ts and Tallinn do not
- * come into it (see 191_login_ladder_index.sql).
+ * come into it (see 192_login_ladder_index.sql).
  */
 export async function loginFailuresSince(
   account: string,
