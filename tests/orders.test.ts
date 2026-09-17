@@ -174,6 +174,22 @@ describe("createOrder", () => {
     expect(await getOrder("not-a-uuid")).toBeNull();
   });
 
+  /* The order's language column decides which letters the buyer gets and
+     which language a bundle or gift-card line is titled in. The checkout only
+     ever sends RU, ET or EN — but the column took whatever a body carried,
+     five characters of it, so a hand-built POST could store a language no
+     title table has and normalizeLang() then read "es-ES" back as Estonian. */
+  it("stores RU, ET or EN and nothing else as the order's language", async () => {
+    const stored = async (lang: unknown) => (await createOrder(order({ lang }))).lang;
+    expect(await stored("et")).toBe("ET");
+    expect(await stored("et-EE")).toBe("ET");
+    expect(await stored("EN")).toBe("EN");
+    expect(await stored("es-ES")).toBe("RU");
+    expect(await stored("klingon")).toBe("RU");
+    expect(await stored(undefined)).toBe("RU");
+    expect(await stored(42)).toBe("RU");
+  });
+
   it("records status changes in admin_audit and merges payment payloads", async () => {
     const o = await createOrder(order());
     const paid = await setOrderStatus(o.id, "paid", "admin");

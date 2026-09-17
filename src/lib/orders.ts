@@ -21,6 +21,10 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
+/* One pure function, for the order's own language column. src/lib/customers.ts
+   reaches back this way round only through a run-time `await import()`, so a
+   plain import here adds no cycle. */
+import { normalizeLangCode } from "@/lib/customers";
 // Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
 // this same build, unlike the optional neighbours below: no try/catch needed.
 import {
@@ -1445,7 +1449,13 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
     throw new OrderError("bad_email");
   }
 
-  const lang = String(input.lang ?? "RU").toUpperCase().slice(0, 5);
+  /* RU, ET or EN and nothing else. The column decides which letters the buyer
+     gets and which language a bundle or gift-card line is titled in, and the
+     checkout only ever sends one of the three — but a hand-built POST stored
+     whatever it liked, and the row then read back as a language no title
+     table has. Narrowed through the same door a customer's language goes
+     through (src/lib/customers.ts). */
+  const lang: string = normalizeLangCode(input.lang);
 
   /* «По счёту — для компаний» (src/lib/invoices.ts, migration 141): the web
      checkout's fourth payment method. The company block is rebuilt from a

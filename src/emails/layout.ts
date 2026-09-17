@@ -207,8 +207,10 @@ export function normalizeLang(v: unknown): Lang {
   const s = String(v ?? "").trim().toLowerCase();
   if (!s) return "ru";
   if (s.startsWith("ru")) return "ru";
-  if (s.startsWith("et") || s.startsWith("ee") || s.startsWith("es"))
-    return "et";
+  /* "est", not "es". The bare two letters were there for ISO 639-2 "est" and
+     swept up Spanish with it — "es-ES" asked the shop for Estonian letters.
+     "ee" stays: that is the country code people write for the language. */
+  if (s.startsWith("et") || s.startsWith("ee") || s.startsWith("est")) return "et";
   if (s.startsWith("en")) return "en";
   return "ru";
 }
