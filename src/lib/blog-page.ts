@@ -369,7 +369,15 @@ async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
     if (!m) continue;
     const o = overrides[id];
     if (o?.hidden) continue;
-    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : (VARIANTS[id]?.prices ?? []);
+    /* The file's ladder only speaks for the price where it actually spreads.
+       Since 18.09.2026 catalogue.variants.json also carries the 29 products
+       sold in ONE named size, whose single price is catalogue.min.json's own
+       `p` — taking it here would quietly out-vote the owner's «Цена» in
+       «Товары» and put the pre-override number under an article. The owner's
+       own saved ladder still decides outright: every rung of it carries the
+       price he typed (migration 147). */
+    const fileLadder = VARIANTS[id]?.prices ?? [];
+    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : fileLadder.length > 1 ? fileLadder : [];
     const base = o?.price ?? m.p;
     const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
     out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });
