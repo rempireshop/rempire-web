@@ -146,7 +146,7 @@
   }
   .tag--high { border-color: var(--bad); color: var(--bad); }
   .tag--writes { border-color: var(--bad); background: var(--bad); color: #fff; }
-  /* The round-22 marks. «Проверить заново» is the only one that costs the
+  /* The round marks. «Проверить заново» is the only one that costs the
      tester work, so it is the only one that is filled in — the other two are
      outlined, because a page where every badge shouts has no badges. */
   .tag--redo { border-color: var(--mark); background: var(--mark); color: #fff; }
@@ -156,7 +156,7 @@
   .warns { margin: 0 0 .6rem; padding: .5rem .6rem; background: var(--bad-bg); border: 1px solid rgba(140, 26, 15, .35); color: var(--bad); font-size: .88rem; }
 
   /* What the mark means, in a sentence, on the card — a legend at the top of
-     a 173-row page is a legend nobody scrolls back to. */
+     a 181-row page is a legend nobody scrolls back to. */
   .marks { margin: 0 0 .6rem; padding: .5rem .6rem; background: var(--mark-bg); border: 1px solid var(--mark-rule); color: var(--mark); font-size: .88rem; }
 
   /* The answer that no longer counts. Not deleted, not pretended away: it is
@@ -289,9 +289,11 @@
       <span class="filters__label" id="f-open" data-t="fOpen">Что показывать</span>
       <div class="chips" role="group" aria-labelledby="f-open">
         <button type="button" class="chip" data-tp-only aria-pressed="false" data-t="onlyOpen">Только без ответа</button>
-        <!-- One tap to the checks the last round of fixes moved. It sits here
-             rather than in a legend because the whole point of it is not
-             having to scroll a 173-row page looking for badges. -->
+        <!-- One tap to every check a round of fixes has moved — not only the
+             newest round, since each of them now carries the date it changed
+             and they no longer share one. It sits here rather than in a legend
+             because the whole point of it is not having to scroll a 181-row
+             page looking for badges. -->
         <button type="button" class="chip" data-tp-marked aria-pressed="false" data-t="onlyMarked">Только изменённые</button>
       </div>
     </div>
@@ -335,7 +337,7 @@
  * up. The one thing this page may not do is lose an answer.
  *
  * Two languages, one page. Renat tests in Russian, Dim reads English, and both
- * answer the same 164 checks into the same document: the switch in the header
+ * answer the same 181 checks into the same document: the switch in the header
  * chooses which half of each row (`en` in src/data/testplan.json) and which
  * half of TEXT below is drawn, and nothing else about the page changes — same
  * item ids, same localStorage keys, same PUT. A second translated page would
@@ -442,8 +444,17 @@
         reworded: "Здесь поправлен только текст проверки. Магазин работает как раньше, ответ остаётся в силе.",
         "new": "Новый пункт — его ещё никто не проходил."
       },
+      /* Said instead of markWhy.redo once the answer is newer than the change:
+         the badge stays, because the check did change, but the page has no
+         business telling him to go and do a thing he has already done. */
+      markDone: "Ты прошёл этот пункт уже после изменения — ответ в силе.",
       staleA: "Прежний ответ: ",
       staleB: " — он больше не в счёт.",
+      /* Which change overtook it. With one date for the whole plan this was
+         obvious; with a date per пункт it is the only way he can see why this
+         row lost its answer and the one under it kept one. */
+      staleWhenA: "Пункт изменился ",
+      staleWhenB: ".",
 
       verdictAria: "Оценка пункта",
       btnOk: "Работает",
@@ -531,8 +542,11 @@
         reworded: "Only the check's wording was fixed. The shop behaves as before, so the answer stands.",
         "new": "A new check — nobody has run it yet."
       },
+      markDone: "You ran this check after the change — the answer stands.",
       staleA: "Previous answer: ",
       staleB: " — it no longer counts.",
+      staleWhenA: "The check changed ",
+      staleWhenB: ".",
 
       verdictAria: "Verdict on this check",
       btnOk: "Works",
@@ -726,15 +740,27 @@
   /*
    * A row may carry `mark` (src/data/testplan.json): "redo" when the shop's
    * behaviour changed under it, "reworded" when only the check's own words
-   * did, "new" when the check did not exist before. The 130-odd rows nothing
+   * did, "new" when the check did not exist before. The 140-odd rows nothing
    * touched carry nothing at all, and the page stays quiet about them.
    *
-   * Only "redo" costs an answer. The plan's `marked` instant says when the
-   * marks were set, so an answer given BEFORE it was an answer to the old
-   * behaviour and an answer given after it is the tester having looked again.
-   * That is the whole of the rule, and it is why the marks never have to be
-   * cleared by hand: the moment he presses a verdict the row goes back to
-   * being an ordinary answered row, badge and all.
+   * Only "redo" costs an answer. Each marked row carries its own `markedAt` —
+   * the instant THAT check changed — so an answer given before it was an
+   * answer to the old behaviour and an answer given after it is the tester
+   * having looked again. That is the whole of the rule, and it is why the
+   * marks never have to be cleared by hand: the moment he presses a verdict
+   * the row goes back to being an ordinary answered row, badge and all.
+   *
+   * The date is per row rather than per plan because two rounds overlap. On
+   * 18.09.2026 the owner re-answered 21 checks in the morning and round 23
+   * landed through the afternoon, changing the behaviour behind some of them
+   * and not others. One instant for the whole plan can only move for all of
+   * them or for none: moving it would have stale-marked the checks he had just
+   * re-run — charging him for having done the work — and leaving it would have
+   * kept a green answer on a check the shop outgrew an hour later.
+   *
+   * A row with no `markedAt` falls back to the plan's `marked`, which is what
+   * every row marked before this field existed does. Landing the per-item date
+   * therefore changed no row's meaning.
    *
    * What a stale answer is NOT: deleted. It stays in the document, it still
    * syncs, it is still shown on the card and in the copied report — it simply
@@ -745,15 +771,33 @@
     return item && MARKS[item.mark] ? item.mark : "";
   }
 
+  /** When this row last changed: its own instant, else the plan's, else "".
+      Empty means nothing can be shown to be older than the change, so the
+      answer keeps counting — erring the other way would blank a checklist
+      over a missing field, and an older cached plan has neither field. */
+  function markedSince(item) {
+    if (item && typeof item.markedAt === "string" && item.markedAt) return item.markedAt;
+    var plan = state.plan;
+    return plan && typeof plan.marked === "string" ? plan.marked : "";
+  }
+
+  /** a before b, as instants. Both are ISO and compare correctly as strings,
+      but only while they are written the same way — `…:00Z` sorts after
+      `…:00.000Z`, which would stale an answer given at the very second the
+      check changed. So: numbers when both parse, the string order otherwise. */
+  function older(a, b) {
+    var x = Date.parse(a), y = Date.parse(b);
+    if (isNaN(x) || isNaN(y)) return String(a) < String(b);
+    return x < y;
+  }
+
   function isStale(id) {
-    if (markOf(state.items[id]) !== "redo") return false;
+    var item = state.items[id];
+    if (markOf(item) !== "redo") return false;
     var a = state.answers[id];
     if (!a) return false;
-    var since = state.plan && typeof state.plan.marked === "string" ? state.plan.marked : "";
-    /* No `marked` in the plan (an older cached copy) — then nothing can be
-       shown to be older than it, and an answer keeps counting. Erring the
-       other way would blank a checklist over a missing field. */
-    return !!since && (!a.at || a.at < since);
+    var since = markedSince(item);
+    return !!since && (!a.at || older(a.at, since));
   }
 
   /* One line reads as a sentence; several read as a list of things to
@@ -807,7 +851,9 @@
     }, [
       tags,
       el("h3", { text: said.title }),
-      mark ? el("p", { "class": "marks", text: t("markWhy." + mark) }) : null,
+      /* Its wording is repainted for a «проверить заново» row that has since
+         been re-run — see paintItem. */
+      mark ? el("p", { "class": "marks", "data-tp-why": item.id, text: t("markWhy." + mark) }) : null,
       /* Filled in by paintItem — only a «проверить заново» row that already
          carries an answer ever has anything to say here. */
       mark === "redo" ? el("p", { "class": "stale", "data-tp-stale": item.id, hidden: "" }) : null,
@@ -922,8 +968,21 @@
         old.appendChild(document.createTextNode(
           [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") + t("staleB")
         ));
+        /* The date that overtook it, on its own line. Two rows answered the
+           same morning can now disagree about whether that answer still
+           counts, and this is the line that says why. */
+        var since = when(markedSince(state.items[id]));
+        if (since) old.appendChild(el("i", { text: t("staleWhenA") + since + t("staleWhenB") }));
         if (a.note) old.appendChild(el("i", { text: "«" + a.note + "»" }));
       }
+    }
+
+    /* «Магазин изменился — пройди ещё раз» is true of the check and false of
+       the tester the moment he has run it again. The badge stays; the sentence
+       under it stops nagging. */
+    var why = node.querySelector("[data-tp-why]");
+    if (why && markOf(state.items[id]) === "redo") {
+      why.textContent = live ? t("markDone") : t("markWhy.redo");
     }
 
     var by = node.querySelector("[data-tp-by]");
@@ -1269,7 +1328,14 @@
     var head = "[" + (stale || !a ? t("reportNoAnswer") : t("status." + a.status)) + "] " + say(item).title;
     if (mark) head += " (" + t("mark." + mark) + ")";
     if (a && !stale && a.by) head += " — " + (t("who." + a.by) || a.by);
-    if (stale) head += "\n    " + t("staleA") + [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") + t("staleB");
+    if (stale) {
+      head += "\n    " + t("staleA") + [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") + t("staleB");
+      /* The card names the change that overtook the answer, so the text
+         somebody forwards does too — otherwise the two say different things
+         about the same row, and the pasted one is the one that gets read. */
+      var since = when(markedSince(item));
+      if (since) head += "\n    " + t("staleWhenA") + since + t("staleWhenB");
+    }
     if (a && a.note) head += "\n    " + a.note.replace(/\n/g, "\n    ");
     return head;
   }
