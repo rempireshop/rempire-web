@@ -87,14 +87,15 @@ function prerenderedRewrites() {
   // below (it needs at least one segment), so a local /shop2/ used to 404
   out.push({ source: "/shop2", destination: "/shop2/index.html" });
   /* The hand-written pages under public/ that are not part of the shop:
-     /guide/ (what the rebuild does), /cards/ (the product-card options) and
-     /test/ (the acceptance checklist Renat and Dim fill in). Vercel resolves
-     <dir>/index.html for these on its own; `next dev` and `next start` do not
-     (see this function's own comment), so locally they answered only at
-     .../index.html — which is not the address anybody is given, and not an
-     address an e2e can drive. One line each, no build step, and local now
-     matches production. */
-  for (const page of ["guide", "cards", "test"]) {
+     /guide/ (what the rebuild does), /cards/ (the product-card options),
+     /test/ (the acceptance checklist Renat and Dim fill in) and /golive/
+     (what is left before launch, and the lock on the domain switch). Vercel
+     resolves <dir>/index.html for these on its own; `next dev` and `next
+     start` do not (see this function's own comment), so locally they answered
+     only at .../index.html — which is not the address anybody is given, and
+     not an address an e2e can drive. One line each, no build step, and local
+     now matches production. */
+  for (const page of ["guide", "cards", "test", "golive"]) {
     if (existsSync(path.join(PUBLIC, page, "index.html"))) {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
     }

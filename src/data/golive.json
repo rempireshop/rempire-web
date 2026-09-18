@@ -1,0 +1,563 @@
+{
+  "version": 1,
+  "source": "docs/go-live.md",
+  "asOf": "2026-09-18",
+  "phases": [
+    {
+      "id": "a",
+      "name": "Шаг A — всё на diipsolutions",
+      "note": "Всё, что делается и проверяется на стенде. Пока здесь не закрыт каждый обязательный пункт, к шагу B переходить нельзя.",
+      "en": {
+        "name": "Phase A — everything on diipsolutions",
+        "note": "Everything that is done and proved on staging. Until every blocking item here is done, phase B does not start."
+      }
+    },
+    {
+      "id": "b",
+      "name": "Шаг B — переключение на живой домен",
+      "note": "День запуска и первый живой час. Открывается сам, когда закрыт шаг A.",
+      "en": {
+        "name": "Phase B — the switch to the live domain",
+        "note": "The day of the cutover and the first hour live. It opens by itself once phase A is closed."
+      }
+    }
+  ],
+  "areas": [
+    {
+      "id": "start",
+      "phase": "a",
+      "name": "Перед всем остальным",
+      "note": "Два пункта, без которых остальное необратимо.",
+      "en": { "name": "Before anything else", "note": "Two items, without which the rest is irreversible." }
+    },
+    {
+      "id": "montonio",
+      "phase": "a",
+      "name": "Montonio — от него зависит больше всего",
+      "note": "Почти всё это — одна встреча. Пока её нет, несколько пунктов ниже нельзя закончить, а два нельзя даже проверить.",
+      "en": {
+        "name": "Montonio, which gates the most",
+        "note": "Most of this is one meeting. Until it happens, several items below cannot be finished and two cannot even be tested."
+      }
+    },
+    {
+      "id": "renat",
+      "phase": "a",
+      "name": "Что знает только Ренат",
+      "note": "Ни ключами, ни кодом это не добывается.",
+      "en": { "name": "What only Renat knows", "note": "No key and no code gets at this." }
+    },
+    {
+      "id": "code",
+      "phase": "a",
+      "name": "Код — это всё на Клоде",
+      "note": "Дима сюда не заходит. Здесь видно, что уже делается, а что стоит в очереди.",
+      "en": {
+        "name": "The code, all of it Claude's",
+        "note": "Dim does not come in here. It shows what is being built and what is queued behind it."
+      }
+    },
+    {
+      "id": "open",
+      "phase": "a",
+      "name": "Решено не решать — запуску не мешает",
+      "note": "Ничего из этого не держит шаг B. Лежит здесь, чтобы не всплыло в последний день.",
+      "en": {
+        "name": "Undecided, and not blocking",
+        "note": "None of this holds phase B. It is here so it does not surface on the last day."
+      }
+    },
+    {
+      "id": "switches",
+      "phase": "b",
+      "name": "Переключатели — в день запуска",
+      "note": "По порядку. Несколько из них правильны только вместе.",
+      "en": {
+        "name": "The switches, the day itself",
+        "note": "In order. Several of these are only correct together."
+      }
+    },
+    {
+      "id": "firsthour",
+      "phase": "b",
+      "name": "Первый живой час",
+      "note": "То, что нельзя доказать нигде, кроме живого магазина.",
+      "en": { "name": "The first hour live", "note": "What cannot be proved anywhere but on the live shop." }
+    }
+  ],
+  "items": [
+    {
+      "id": "snapshot",
+      "area": "start",
+      "who": ["dim"],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Railway",
+      "title": "Снять снимок базы на Railway и убедиться, что он есть",
+      "detail": "Не «запустить снятие», а проверить, что снимок существует и из него можно восстановиться. Всё, что ниже, отменяется только через него.",
+      "en": {
+        "title": "Take a Railway snapshot and verify it exists",
+        "detail": "Not «start one» — confirm it is there and restorable. Everything below is reversible only from this."
+      }
+    },
+    {
+      "id": "same-db",
+      "area": "start",
+      "who": ["dim"],
+      "status": "done",
+      "blocking": true,
+      "title": "Проверить, что боевая база — тот же Railway, что у стенда",
+      "detail": "На 18.09 это так. В день переключения стоит переспросить ещё раз.",
+      "en": {
+        "title": "Confirm the production database is the same Railway instance staging uses",
+        "detail": "It is, as of 18.09 — worth re-confirming on the day itself."
+      }
+    },
+
+    {
+      "id": "montonio-keys",
+      "area": "montonio",
+      "who": ["dim", "renat"],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Montonio",
+      "title": "Завести аккаунт Montonio до конца и получить боевые ключи",
+      "detail": "Запланировано на воскресенье вместе с Ренатом. От этого пункта тянется половина списка.",
+      "en": {
+        "title": "Finish the Montonio account and obtain live API keys",
+        "detail": "Planned for Sunday with Renat. Half of this list hangs off it."
+      }
+    },
+    {
+      "id": "refunds-live",
+      "area": "montonio",
+      "who": ["dim"],
+      "status": "blocked",
+      "blocking": true,
+      "outside": "Montonio",
+      "needs": ["montonio-keys"],
+      "title": "Включить «Refundable bank payments» в боевом режиме",
+      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе.",
+      "en": {
+        "title": "Activate «Refundable bank payments» in live mode",
+        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance."
+      }
+    },
+    {
+      "id": "dpd-pin",
+      "area": "montonio",
+      "who": ["dim"],
+      "status": "todo",
+      "blocking": true,
+      "outside": "DPD",
+      "title": "Включить услугу PIN на аккаунте DPD",
+      "detail": "Без неё код для сдачи посылки не выдаётся.",
+      "en": {
+        "title": "Enable the PIN service on the DPD carrier account",
+        "detail": "Without it the drop-off code does not issue."
+      }
+    },
+    {
+      "id": "smartposti-size",
+      "area": "montonio",
+      "who": ["dim"],
+      "status": "todo",
+      "blocking": true,
+      "outside": "SmartPosti",
+      "title": "Задать defaultLockerSize в договоре SmartPosti",
+      "detail": "Без него и без размера в самой отправке код на посылку не выдаётся вообще — на это Ренат жаловался 13.09. Выбор размера для каждой отправки сейчас делается в коде; это страховка под ним.",
+      "en": {
+        "title": "Set `defaultLockerSize` on the SmartPosti contract",
+        "detail": "Without it, and without a per-shipment size, no drop-off code is issued at all — Renat's complaint of 13.09. The per-shipment choice is being built; this is the safety net under it."
+      }
+    },
+    {
+      "id": "tariff-mirror",
+      "area": "montonio",
+      "who": ["claude"],
+      "status": "blocked",
+      "blocking": true,
+      "needs": ["montonio-keys"],
+      "title": "Пересобрать зеркало тарифов — уже с ключами",
+      "detail": "Чтобы цены посылочных автоматов брались из подтипа parcelMachine, а не из строки без подтипа с недокументированного адреса. tools/fetch-montonio-tariffs.mjs уже предпочитает нужный тариф — он просто ни разу не запускался с доступами.",
+      "en": {
+        "title": "Rebuild the tariff mirror with keys",
+        "detail": "So locker prices come from the `parcelMachine` subtype instead of a subtype-blind row from an undocumented endpoint. `tools/fetch-montonio-tariffs.mjs` already prefers the right rate — it has only ever run without credentials."
+      }
+    },
+    {
+      "id": "pricing-grid",
+      "area": "montonio",
+      "who": ["claude"],
+      "status": "doing",
+      "blocking": true,
+      "needs": ["tariff-mirror"],
+      "title": "Собрать таблицу цен: страна × вес × размер ячейки — и точку безубыточности по зонам",
+      "detail": "Инструмент и docs/delivery-pricing.md пишутся сейчас. Без ключей таблица соберётся по вчерашним числам, поэтому она ждёт зеркало.",
+      "en": {
+        "title": "Produce the pricing grid — country × weight band × locker size — and the break-even flat price per zone",
+        "detail": "The tool and `docs/delivery-pricing.md` are being built now. Without keys the grid is built on yesterday's numbers, so it waits for the mirror."
+      }
+    },
+    {
+      "id": "flat-price",
+      "area": "montonio",
+      "who": ["renat", "dim"],
+      "status": "blocked",
+      "blocking": true,
+      "needs": ["pricing-grid", "weigh-products"],
+      "title": "Выбрать единую цену на зону по этой таблице",
+      "detail": "Ренат берёт одну цену за страну и разницу гасит сам — это решение про его маржу, и принимать его надо по настоящим числам, а не на глаз.",
+      "en": {
+        "title": "Choose the flat price per zone from that grid",
+        "detail": "Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses."
+      }
+    },
+
+    {
+      "id": "weigh-products",
+      "area": "renat",
+      "who": ["renat"],
+      "status": "todo",
+      "blocking": true,
+      "title": "Взвесить товар",
+      "detail": "В каталоге нет веса ни у одного из 220 товаров; у 113 есть только объём. Международная цена зависит от веса, и пока веса нет, единая цена на зону — ставка на каждый тяжёлый заказ. У 14 своих товаров публичных данных нет по определению. Открыто с 14.09.",
+      "en": {
+        "title": "Weigh the products",
+        "detail": "The catalogue holds no weight for any of 220 items; 113 carry a volume and nothing else. International prices move with weight, so until this exists a flat price per zone is a bet on every heavy order. The 14 own-brand products have no public data by definition. Open since 14.09."
+      }
+    },
+    {
+      "id": "aerosols",
+      "area": "renat",
+      "who": ["renat"],
+      "status": "todo",
+      "blocking": true,
+      "title": "Сказать, какие спреи Kevin.Murphy — аэрозоли под давлением",
+      "detail": "Перевозчики их ограничивают. От этого зависит, можно ли их вообще отправлять за границу, — отдельно от цены. Открыто с 14.09.",
+      "en": {
+        "title": "Which Kevin.Murphy sprays are pressurised aerosols",
+        "detail": "Carriers restrict them — this decides whether they may be shipped abroad at all, separately from price. Open since 14.09."
+      }
+    },
+    {
+      "id": "shopify-import",
+      "area": "renat",
+      "who": ["renat"],
+      "status": "todo",
+      "blocking": false,
+      "optional": true,
+      "title": "Решить, давать ли доступ к Shopify, чтобы перенести товары и покупателей",
+      "detail": "Не обязательно, запуск этого не ждёт. Если давать: перенесённые покупатели приходят без согласия на рассылку (Дима, 18.09) — и это не то же самое, что отказ. Они просто ни разу не соглашались.",
+      "en": {
+        "title": "Whether to give Shopify collaborator access to import existing products and customers",
+        "detail": "Optional; the launch does not wait for it. If it happens: imported customers arrive with no marketing consent (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in."
+      }
+    },
+
+    {
+      "id": "code-shipping",
+      "area": "code",
+      "who": ["claude"],
+      "status": "doing",
+      "blocking": true,
+      "title": "Четыре решения по доставке из восьми отвеченных",
+      "detail": "Читать флаг обязательных габаритов и объявлять коробку; выбирать размер ячейки в момент печати наклейки, с автоматической заготовкой; открыть остальную Европу списком, который можно править; показывать отказ в регистрации, а не рапортовать об успехе.",
+      "en": {
+        "title": "The four shipping ones of the eight answered go-live decisions",
+        "detail": "Read the required-dimensions flag and declare a carton; choose locker size at label time with an automated default; open the rest of Europe as an editable list; show a refused registration instead of reporting success."
+      }
+    },
+    {
+      "id": "code-payments",
+      "area": "code",
+      "who": ["claude"],
+      "status": "todo",
+      "blocking": true,
+      "title": "Четыре решения по платежам",
+      "detail": "Держать недоплаченный заказ недоплаченным, а не помечать оплаченным; ужесточить две проверки уведомлений и переспрашивать Montonio при расхождении; подбирать заказы, застрявшие неоплаченными из-за непришедшего уведомления. Стоит в очереди за доставкой.",
+      "en": {
+        "title": "The four payment decisions",
+        "detail": "Hold an order paid short instead of marking it paid; tighten the two webhook checks and ask Montonio on a mismatch; sweep for orders stuck unpaid because a notification never arrived. Queued behind the shipping four."
+      }
+    },
+    {
+      "id": "code-untested",
+      "area": "code",
+      "who": ["claude"],
+      "status": "doing",
+      "blocking": true,
+      "title": "Укрепить всё, что песочница не проверяет, и написать docs/montonio-untested.md",
+      "detail": "Честный перечень того, что ни разу не работало и что придётся проверить руками в первый живой час.",
+      "en": {
+        "title": "Harden every path the sandbox cannot exercise, and write `docs/montonio-untested.md`",
+        "detail": "The honest inventory of what has never run and what must be checked by hand in the first live hour."
+      }
+    },
+    {
+      "id": "code-e2e",
+      "area": "code",
+      "who": ["claude"],
+      "status": "doing",
+      "blocking": true,
+      "title": "Починить 13 падающих браузерных тестов, которые уже есть на main",
+      "detail": "Модульные тесты всё это время зелёные — 3834 штуки. Браузерные тихо красные, и никто не смотрел.",
+      "en": {
+        "title": "Fix the 13 end-to-end failures that already exist on main",
+        "detail": "The unit suite has been green throughout at 3834 tests; the browser suite has been quietly red and nobody was looking."
+      }
+    },
+    {
+      "id": "code-reset",
+      "area": "code",
+      "who": ["claude"],
+      "status": "doing",
+      "blocking": true,
+      "title": "Инструмент обнуления перед запуском и docs/go-live-reset.md",
+      "detail": "По умолчанию сухой прогон, чистка только по отдельному подтверждению, и проверка, что список сохраняемого уцелел.",
+      "en": {
+        "title": "The go-live reset tool and `docs/go-live-reset.md`",
+        "detail": "Dry run by default, explicit confirmation to clear, asserts the keep-list survived."
+      }
+    },
+    {
+      "id": "code-legal",
+      "area": "code",
+      "who": ["claude"],
+      "status": "todo",
+      "blocking": true,
+      "title": "Заменить public/shop/legal.js",
+      "detail": "Запасная политика конфиденциальности до сих пор называет обработчиком данных Shopify. Сегодня до неё не добраться, на живом магазине — стыдно.",
+      "en": {
+        "title": "Replace `public/shop/legal.js`",
+        "detail": "The fallback privacy policy still names Shopify as the data processor. Unreachable today, embarrassing on a live shop."
+      }
+    },
+    {
+      "id": "code-balance-copy",
+      "area": "code",
+      "who": ["claude"],
+      "status": "todo",
+      "blocking": true,
+      "title": "Исправить в кабинете «проверьте баланс в его панели»",
+      "detail": "Эта фраза называет единственную причину отказа в возврате, которая невозможна. Точная замена уже написана.",
+      "en": {
+        "title": "Correct the panel's «проверьте баланс в его панели»",
+        "detail": "It names the one cause of a refused refund that is impossible. The exact replacement is already written."
+      }
+    },
+    {
+      "id": "code-final",
+      "area": "code",
+      "who": ["claude"],
+      "status": "todo",
+      "blocking": true,
+      "needs": [
+        "code-shipping",
+        "code-payments",
+        "code-untested",
+        "code-e2e",
+        "code-reset",
+        "code-legal",
+        "code-balance-copy"
+      ],
+      "title": "Последний проход: пересобрать бандл и страницы, прогнать всё, запушить",
+      "detail": "И убедиться, что в index.html нет ни одного localhost: и ровно две ссылки на boot.js.",
+      "en": {
+        "title": "Final pass: regenerate the bundle and the prerender, full suite, push",
+        "detail": "And confirm `index.html` carries no `localhost:` and exactly two `boot.js` references."
+      }
+    },
+
+    {
+      "id": "hidden-stock",
+      "area": "open",
+      "who": ["renat"],
+      "status": "todo",
+      "blocking": false,
+      "optional": true,
+      "title": "Скрытый товар больше не напоминает о себе в «Складе» — оставляем так?",
+      "detail": "Скрытый из каталога товар теперь выпадает из «Мало» и «Нет», из счётчика вкладки «Склад» и из ответа помощника про остатки. Сделано намеренно и откатывается строк в пять, если Ренат не согласен.",
+      "en": {
+        "title": "A hidden product no longer nags from «Склад» — leave it that way?",
+        "detail": "A hidden catalogue product now drops out of «Мало»/«Нет», the «Склад» tab count and the assistant's low-stock answer, where before it nagged. Deliberate, and reversible in about five lines if Renat disagrees."
+      }
+    },
+    {
+      "id": "fable-passes",
+      "area": "open",
+      "who": ["claude"],
+      "status": "todo",
+      "blocking": false,
+      "optional": true,
+      "title": "Два прохода Fable 5.1, о которых договорились 17.09",
+      "detail": "Разбор диффа на регрессии и проверка готовности к запуску. Ждут повторной проверки отмеченных пунктов владельцем. Этот список сильно пересекается со вторым проходом, но прогнать его всё равно стоит: он читает написанное, а не задуманное.",
+      "en": {
+        "title": "The two Fable 5.1 passes agreed on 17.09",
+        "detail": "A regression review of the diff, and a go-live readiness pass. Waiting on the owner's re-test of the marked checks. This list overlaps the second one heavily; the review is still worth running because it reads what was written, not what was intended."
+      }
+    },
+
+    {
+      "id": "live-keys-env",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "needs": ["montonio-keys"],
+      "title": "Поставить боевые ключи Montonio и флаг окружения — вместе",
+      "detail": "Половина этой пары хуже, чем ни одной.",
+      "en": {
+        "title": "Set the live Montonio keys and the environment flag together",
+        "detail": "Half of this pair is worse than neither."
+      }
+    },
+    {
+      "id": "public-base-url",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "title": "Поставить PUBLIC_BASE_URL",
+      "detail": "Без него страницы пересобираются с боевыми адресами, но с «noindex, nofollow» — сегодня они именно такие, а robots.txt стендовый.",
+      "en": {
+        "title": "Set `PUBLIC_BASE_URL`",
+        "detail": "Without it the prerender writes live URLs carrying `noindex` — the pages say «noindex, nofollow» today and `robots.txt` is the staging policy."
+      }
+    },
+    {
+      "id": "session-secret",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "title": "Поставить SESSION_SECRET",
+      "detail": "Он теперь держит токен статуса заказа, по которому возвращается брошенная корзина. Без него всё закрывается молча: возврат корзины просто не работает, и никто об этом не скажет.",
+      "en": {
+        "title": "Set `SESSION_SECRET`",
+        "detail": "It is now load-bearing for the order-status token that recovers an abandoned basket. Unset, it fails closed silently: basket recovery simply never works and nothing says so."
+      }
+    },
+    {
+      "id": "regenerate",
+      "area": "switches",
+      "who": ["claude"],
+      "status": "todo",
+      "needs": ["public-base-url"],
+      "title": "Пересобрать страницы и выложить, чтобы они несли боевую политику для поисковиков",
+      "detail": "Строго после того, как выставлен PUBLIC_BASE_URL, не раньше. Иначе в боевые адреса снова уедет «noindex».",
+      "en": {
+        "title": "Regenerate and deploy so the pages carry the production robots policy",
+        "detail": "Must happen after `PUBLIC_BASE_URL` is set, not before. Otherwise `noindex` rides out on the live URLs again."
+      }
+    },
+    {
+      "id": "run-reset",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "needs": ["snapshot", "code-reset"],
+      "title": "Запустить инструмент обнуления",
+      "detail": "Сначала сухой прогон, прочитать его, и только потом подтвердить.",
+      "en": {
+        "title": "Run the reset tool",
+        "detail": "Dry run first, read it, then confirm."
+      }
+    },
+    {
+      "id": "unpaid-flow",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "optional": true,
+      "title": "Включить, если нужно, обработку неоплаченных заказов",
+      "detail": "Она отменяет их через 7 дней и молча отпускает накопившийся хвост — так решили 17.09. Сегодня выключена.",
+      "en": {
+        "title": "Switch on the unpaid-payment flow if wanted",
+        "detail": "It cancels after 7 days and releases the historic backlog silently, which is the behaviour chosen on 17.09. It is off today."
+      }
+    },
+    {
+      "id": "domain-dns",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "title": "Направить домен на Vercel",
+      "detail": "DNS лежит в ASCIO.",
+      "en": { "title": "Point the domain at Vercel", "detail": "DNS is at ASCIO." }
+    },
+    {
+      "id": "region-fra1",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "done",
+      "title": "Проверить, что регион функций всё ещё fra1",
+      "detail": "Задан в vercel.json и в панели; они совпадают. Проверено 14.09.",
+      "en": {
+        "title": "Verify the function region is still `fra1`",
+        "detail": "Set in `vercel.json` and in the dashboard; they agree. Done 14.09."
+      }
+    },
+    {
+      "id": "crons",
+      "area": "switches",
+      "who": ["dim"],
+      "status": "todo",
+      "title": "Проверить два расписания в vercel.json",
+      "detail": "Это то, что должно работать на живых покупателях?",
+      "en": {
+        "title": "Confirm the two cron schedules in `vercel.json`",
+        "detail": "Are they what you want running against real customers?"
+      }
+    },
+
+    {
+      "id": "untested-by-hand",
+      "area": "firsthour",
+      "who": ["dim"],
+      "status": "todo",
+      "needs": ["code-untested", "domain-dns"],
+      "title": "Пройти docs/montonio-untested.md руками",
+      "detail": "Он существует потому, что эти пути нельзя доказать в песочнице: настоящий возврат, настоящий отказ перевозчика в регистрации, настоящий PDF наклейки, проверка телефона и адреса, которую песочница пропускает целиком.",
+      "en": {
+        "title": "Work through `docs/montonio-untested.md` by hand",
+        "detail": "It exists because these paths cannot be proved in a sandbox: a real refund, a carrier actually refusing a registration, a real label PDF, phone and address validation the sandbox skips entirely."
+      }
+    },
+    {
+      "id": "real-order",
+      "area": "firsthour",
+      "who": ["dim"],
+      "status": "todo",
+      "needs": ["domain-dns"],
+      "title": "Сделать один настоящий заказ от начала до конца и вернуть за него деньги",
+      "detail": "Возвраты в этот момент отработают впервые в жизни.",
+      "en": {
+        "title": "Place one real order, end to end, and refund it",
+        "detail": "This is the first time refunds will ever have run."
+      }
+    },
+    {
+      "id": "smoke-live",
+      "area": "firsthour",
+      "who": ["claude"],
+      "status": "todo",
+      "needs": ["domain-dns"],
+      "title": "Прогнать смоук по живому сайту и сравнить со стендом",
+      "detail": "Тот же набор проверок, что по стенду, — разница и есть отчёт.",
+      "en": {
+        "title": "Smoke the live site and compare against staging",
+        "detail": "The same set of checks as staging — the difference is the report."
+      }
+    },
+    {
+      "id": "webhook-alarm",
+      "area": "firsthour",
+      "who": ["dim"],
+      "status": "todo",
+      "title": "Убедиться, что что-то сообщает, когда уведомление об оплате не дошло",
+      "detail": "Молчание в этом месте выглядит ровно как «заказов нет».",
+      "en": {
+        "title": "Confirm something tells you when a payment webhook fails",
+        "detail": "Silence here looks exactly like «no orders»."
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The link-preview cards for the three hand-written pages under public/ —
- * /test/, /cards/ and /guide/ — the ones Dim actually pastes into Telegram.
+ * The link-preview cards for the hand-written pages under public/ — /test/,
+ * /cards/, /guide/ and /golive/ — the ones Dim actually pastes into Telegram.
  *
  *   node tools/og-pages.mjs
  *
@@ -49,8 +49,10 @@ const MUTED = "#5F5B45";
 /* ---------- the facts, read rather than typed --------------------------- */
 const plan = JSON.parse(await readFile(path.join(ROOT, "src/data/testplan.json"), "utf8"));
 const catalogue = JSON.parse(await readFile(path.join(ROOT, "src/data/catalogue.min.json"), "utf8"));
+const golive = JSON.parse(await readFile(path.join(ROOT, "src/data/golive.json"), "utf8"));
 const CHECKS = plan.items.length;
 const PRODUCTS = (Array.isArray(catalogue) ? catalogue : catalogue.items).length;
+const LAUNCH = golive.items.length;
 
 /** Russian plural for a count: 164 пункта, 1 пункт, 5 пунктов. */
 function plural(n, one, few, many) {
@@ -130,6 +132,16 @@ const PAGES = [
     badges: ["ВЫБРАНО 09.09", "ЗОНЫ НАЖАТИЯ", "ЦВЕТА САЙТА"],
   },
   {
+    file: "og-golive.png",
+    head: "ЗАПУСК",
+    sub: ["Что осталось до запуска —", "и что держит переключение домена."],
+    badges: [
+      `${LAUNCH} ${plural(LAUNCH, "ПУНКТ", "ПУНКТА", "ПУНКТОВ")}`,
+      "ШАГ A → ШАГ B",
+      "КЛОД · ДИМА · РЕНАТ",
+    ],
+  },
+  {
     file: "og-guide.png",
     head: "ЧТО УЖЕ ГОТОВО",
     sub: ["Магазин, корзина, кабинет", "и админка — по-русски."],
@@ -154,4 +166,4 @@ for (const p of PAGES) {
     .toFile(out);
   console.log(`  /brand/${p.file}  ${p.head} · ${p.badges.join(" · ")}`);
 }
-console.log(`drawn from the data: ${CHECKS} checks, ${PRODUCTS} products`);
+console.log(`drawn from the data: ${CHECKS} checks, ${PRODUCTS} products, ${LAUNCH} launch items`);
