@@ -42,7 +42,7 @@ finished, and two cannot even be tested.
 | D | **Set `defaultLockerSize` on the SmartPosti contract.** Without it, and without a per-shipment size, *no drop-off code is issued at all* — Renat's complaint of 13.09. The per-shipment choice is being built; this is the safety net under it. | to do |
 | C | Rebuild the tariff mirror **with keys**, so locker prices come from the `parcelMachine` subtype instead of a subtype-blind row from an undocumented endpoint. `tools/fetch-montonio-tariffs.mjs` already prefers the right rate — it has only ever run without credentials. | ready, needs keys |
 | C | Produce the pricing grid — country × weight band × locker size — and the break-even flat price per zone. Tool and `docs/delivery-pricing.md` being built now. | in progress |
-| R D | **Choose the flat price per zone** from that grid. Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses. | blocked on the grid |
+| R D | **Choose the flat price per zone** from that grid. Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses. The tool names three candidates per country — break-even at a typical order, midpoint, and never-loses — and says which order size each one starts losing at. | blocked on the grid |
 
 ---
 
@@ -50,7 +50,7 @@ finished, and two cannot even be tested.
 
 | | | status |
 |---|---|---|
-| R | **Weigh the products.** The catalogue holds no weight for any of 220 items; 113 carry a volume and nothing else. International prices move with weight, so until this exists a flat price per zone is a bet on every heavy order. The 14 own-brand products have no public data by definition. | open since 14.09 |
+| ~~R~~ | ~~Weigh the products.~~ **Cancelled 18.09** — the owner's decision, and the reasoning is worth keeping. Montonio bills `max(actualWeight, volumetricWeight)` and volumetric is dimensions ÷ 5000, so a 30×30×30 carton is 5.4 kg *whatever is inside it*. At this shop's parcel sizes the declared box is what gets paid for, not the contents. A small default carton captures nearly all of the saving with none of the work, and the rare heavy order is an accepted loss taken deliberately in exchange for one stable price. Nothing waits on this any more. | cancelled |
 | R | **Which Kevin.Murphy sprays are pressurised aerosols.** Carriers restrict them — this decides whether they may be shipped abroad at all, separately from price. | open since 14.09 |
 | R | Whether to give **Shopify collaborator access** to import existing products and customers. Optional. If it happens: **imported customers arrive with no marketing consent** (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in. | undecided |
 
@@ -60,7 +60,7 @@ finished, and two cannot even be tested.
 
 | | | status |
 |---|---|---|
-| C | The eight answered go-live decisions. Four shipping ones are being built now: read the required-dimensions flag and declare a carton, choose locker size at label time with an automated default, open the rest of Europe as an editable list, and show a refused registration instead of reporting success. | in progress |
+| C | The eight answered go-live decisions. Four shipping ones are being built now: declare a **small** default carton and read the required-dimensions flag, choose locker size at label time with an automated default, open the rest of Europe as an editable list, and show a refused registration instead of reporting success. No weight modelling — decided against on 18.09, see Stage 2. The per-shipment override is the safety valve and has to be one tap. | in progress |
 | C | The four payment ones: hold an order paid short instead of marking it paid, tighten the two webhook checks and ask Montonio on a mismatch, and sweep for orders stuck unpaid because a notification never arrived. | queued |
 | C | Harden every path the sandbox cannot exercise, and write `docs/montonio-untested.md` — the honest inventory of what has never run and what must be checked by hand in the first live hour. | in progress |
 | C | Fix the **13 end-to-end failures** that already exist on main. The unit suite has been green throughout at 3834 tests; the browser suite has been quietly red and nobody was looking. | in progress |
