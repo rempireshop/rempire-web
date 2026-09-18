@@ -8643,6 +8643,34 @@
     for (var i = 0; i < sizes.length; i++) if (!sizeOut(p, i)) return i;
     return 0;
   }
+  /* Nothing on this product can be bought — the one question the `Product`
+     offer in setHead() has to answer. It is the same three-way
+     screenProduct() makes (`prodGone`), and it is here so the head and the
+     page read one fact instead of two:
+       · the owner's own «Наличие» says out;
+       · every rung of the ladder has been counted to zero — for a product
+         with one volume or none that is the single row of `soloGone`.
+
+     Usually the server has already reached the same answer and `p.stock` is
+     "out" on its own: stockStates() in src/lib/inventory.ts sets the product
+     word to "out" once every counted size is out AND they cover the ladder,
+     and it treats a ladder it cannot vouch for as covered. What it cannot
+     catch is a product carrying two shelf rows for the same bottle — the
+     «One bottle, two rows» state db/migrations/194 exists to clean up —
+     where the product word stays "in" while the size the page shows is gone.
+     Then the page printed «нет в наличии» and the markup said InStock.
+
+     Absent is still not «out» (the 17.09.2026 decision): a product with no
+     map, or a ladder nobody has counted, returns false here and keeps the
+     owner's word, exactly as sizeStockOf() does. */
+  function soldOut(p) {
+    if (!p) return false;
+    if (p.stock === "out") return true;
+    if (!p.stockVar) return false;
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    for (var i = 0; i < sizes.length; i++) if (!sizeOut(p, i)) return false;
+    return true;
+  }
   /* «объём» for cosmetics, «размер» for a t-shirt — the same split the size
      picker and the editor already make, kept in one place so the sentence the
      page prints and the one the toast says can never drift apart. Each half
@@ -33998,7 +34026,11 @@
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
       var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
-      var stockText = trText(p.stock === "out" ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
+      /* soldOut(), not `p.stock === "out"`: a product whose whole size ladder
+         has been counted to zero prints «нет в наличии» on the page and has
+         no buy row, so the snippet must not offer it either. */
+      var pGoneSeo = soldOut(p);
+      var stockText = trText(pGoneSeo ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
       t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
@@ -34027,7 +34059,11 @@
         offers: {
           "@type": "Offer", priceCurrency: "EUR",
           price: String(p.price),
-          availability: "https://schema.org/" + (p.stock === "out" ? "OutOfStock" : "InStock"),
+          /* An offer that says InStock for something the page refuses to sell
+             is worse than no markup at all: Google drops the product from the
+             merchant surfaces and the shopper bounces. soldOut() is the same
+             question screenProduct() asks before it swaps the buy row out. */
+          availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock"),
           itemCondition: "https://schema.org/NewCondition",
           url: pUrl,
           seller: { "@type": "Organization", name: "REMPIRE" }
