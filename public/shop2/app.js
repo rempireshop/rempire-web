@@ -21942,7 +21942,9 @@
     });
   }
   function admShipPreviewHTML() {
-    return '<details class="adm-fold adm-preview" style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
+    /* data-fold: this fold's open state is S.shipPreviewOpen, so the markup
+       below states it both ways and admMorphAttrs() must obey both. */
+    return '<details class="adm-fold adm-preview" data-fold style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
       '<summary data-shippreview><span class="adm-link">Что увидит покупатель</span>' +
         '<span class="adm-row__sub">та же таблица, что на странице «Доставка и оплата»</span></summary>' +
       '<div style="padding-top:12px" data-shippreviewbody>' + admShipPreviewTableHTML() + "</div>" +
@@ -22165,7 +22167,11 @@
    * not a layout question, so the fold says «только курьер» until it is taken.
    */
   function admShipEuropeHTML() {
-    return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
+    /* data-fold: the open state is S.shipEuOpen, not the browser's own — so
+       the markup states it both ways and admMorphAttrs() obeys both. The same
+       <summary> opens and closes it; the `›` beside the title turns to point
+       down while it is open (.adm-fold[open] > summary::before). */
+    return '<details class="adm-fold adm-fold--sub" data-fold' + (S.shipEuOpen ? " open" : "") + '>' +
       /* the title is the link, the caption beside it is not: `text-decoration`
          propagates into every in-flow descendant, so an underline on the
          <summary> itself would underline the caption too */
@@ -33454,9 +33460,15 @@
     var i, a;
     for (i = from.attributes.length - 1; i >= 0; i--) {
       a = from.attributes[i];
-      // a <details> the owner opened by hand stays open across renders — the
-      // markup never carries `open`, so removing it here would snap it shut
-      if (a.name === "open" && from.tagName === "DETAILS") continue;
+      /* a <details> the owner opened by hand stays open across renders — the
+         markup never carries `open`, so removing it here would snap it shut.
+         `data-fold` is the exception, and it is what a fold whose open state
+         lives in S wears: there the markup IS the answer, both ways. Without
+         it the attribute could only ever be ADDED — «Цены по странам Европы»
+         and «Что увидит покупатель» opened on the first tap and no tap ever
+         shut them again, because the render that set S back to false could
+         not take the attribute off the node (Renat, 18.09.2026). */
+      if (a.name === "open" && from.tagName === "DETAILS" && !to.hasAttribute("data-fold")) continue;
       /* data-sx is measured, not written: admScrollers() puts it on a chip
          row or a tab row to say which ends still have something behind them,
          and it is never in the markup — so stripping it here would take the
