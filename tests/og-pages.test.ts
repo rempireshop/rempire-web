@@ -27,6 +27,7 @@ const PAGES = [
   ["test", "og-test.png"],
   ["cards", "og-cards.png"],
   ["guide", "og-guide.png"],
+  ["golive", "og-golive.png"],
 ] as const;
 
 const html = (page: string) => readFileSync(path.join(PUB, page, "index.html"), "utf8");

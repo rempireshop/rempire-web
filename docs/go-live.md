@@ -18,6 +18,14 @@ Nothing here is a surprise: every item comes from reading Montonio's own
 documentation against our code, from the owner's acceptance testing, or from the
 audit. Where an item is already built, it says so.
 
+This list is also a page — **`/golive/`** on the staging domain. Same items, the
+owner shown on each one, the dependencies drawn, and the whole of stage 4 and 5
+shut behind stage 0–3 because that is the rule: everything done on diipsolutions
+before the domain moves. It is built from `src/data/golive.json`, which is
+written out of this file, so this document stays the spine — but the page is
+what gets worked from a phone, and it is where Claude ticks an item off as the
+work lands (`PUT /api/golive/`). Change this file and the page's file together.
+
 ---
 
 ## Stage 0 — before anything else
