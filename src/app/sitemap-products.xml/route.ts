@@ -37,7 +37,7 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import { getOverrides } from "@/lib/orders";
-import { baseFrom, LANGS, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapUrlEntry } from "@/lib/seo-head.mjs";
+import { baseFrom, forSale, LANGS, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapUrlEntry } from "@/lib/seo-head.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,7 +73,10 @@ export async function GET(): Promise<Response> {
   for (const lang of LANGS as Array<{ seg: string }>) {
     for (const p of CATALOGUE) {
       const o = all[p.id];
-      if (o?.hidden) continue;
+      /* The same call tools/prerender-shop2.mjs makes before it writes a grid
+         tile. If this file stops naming a product, no page written by that
+         build may still link to it — that pair was the leak of 18.09.2026. */
+      if (!forSale(o)) continue;
       const stock = o?.stock || p.s;
       const lastmod = o?.updatedAt ? String(o.updatedAt).slice(0, 10) : today;
       entries.push(sitemapUrlEntry(base, "/p/" + encodeURIComponent(p.id) + "/", lang.seg, stock === "out" ? "0.4" : "0.7", lastmod));

@@ -28,7 +28,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { cleanSizes } from "@/lib/orders";
-import { cheapestPrice, overriddenPrice } from "@/lib/seo-head.mjs";
+import { cheapestPrice, forSale, overriddenPrice } from "@/lib/seo-head.mjs";
 import { fetchProductOverrides, overrideRow } from "../tools/lib/overrides-export.mjs";
 
 /* ---------- the rule both renderers share ------------------------------- */
@@ -157,9 +157,9 @@ function shelfProduct(catalogue: CatProduct[], overrides: Record<string, Row>, i
     ${slice("blogShelfProduct")}
     return blogShelfProduct(ID);
   `;
-  return (new Function("CATALOGUE", "PRODUCT_OVERRIDES", "overriddenPrice", "ID", body) as
-    (c: CatProduct[], o: Record<string, Row>, f: typeof overriddenPrice, id: string) => Shelf)(
-    catalogue, overrides, overriddenPrice, id,
+  return (new Function("CATALOGUE", "PRODUCT_OVERRIDES", "overriddenPrice", "forSale", "ID", body) as
+    (c: CatProduct[], o: Record<string, Row>, f: typeof overriddenPrice, s: typeof forSale, id: string) => Shelf)(
+    catalogue, overrides, overriddenPrice, forSale, id,
   );
 }
 
@@ -169,8 +169,10 @@ function offSale(catalogue: CatProduct[], overrides: Record<string, Row>, id: st
     ${slice("blogOffSale")}
     return blogOffSale(ID);
   `;
-  return (new Function("CATALOGUE", "PRODUCT_OVERRIDES", "ID", body) as
-    (c: CatProduct[], o: Record<string, Row>, id: string) => boolean)(catalogue, overrides, id);
+  return (new Function("CATALOGUE", "PRODUCT_OVERRIDES", "forSale", "ID", body) as
+    (c: CatProduct[], o: Record<string, Row>, s: typeof forSale, id: string) => boolean)(
+    catalogue, overrides, forSale, id,
+  );
 }
 
 const SHAMPOO = "system-4-bio-botanical-shampoo";
@@ -264,9 +266,13 @@ describe("tools/prerender-shop2.mjs blogOffSale()", () => {
 });
 
 describe("tools/prerender-shop2.mjs wiring", () => {
-  it("reads the overrides, and only when there is an article to read them for", () => {
+  /* Read on every run since 18.09.2026, not only when there is an article:
+     the storefront's own grids turned out to need the same table, and those
+     are written whether or not the shop has published anything
+     (tests/grid-hidden-r26.test.ts). */
+  it("reads the overrides, on every run", () => {
     expect(prerender).toContain('from "./lib/overrides-export.mjs"');
-    expect(prerender).toContain("BLOG_POSTS.length ? await fetchProductOverrides() : {}");
+    expect(prerender).toContain("const PRODUCT_OVERRIDES = await fetchProductOverrides();");
   });
 
   /* The eight are the first eight the owner PICKED and then whatever of those

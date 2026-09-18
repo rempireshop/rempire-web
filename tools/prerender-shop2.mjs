@@ -65,9 +65,10 @@ import { coverImgStyle, fetchPublishedPosts, focusCrop, pickLang, renderPostBody
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
-/* «Цена» and «Показывать в магазине» as the owner last saved them, for the
-   blog's product links — see tools/lib/overrides-export.mjs for why the blog
-   is the only page here that reads them. */
+/* «Цена» and «Показывать в магазине» as the owner last saved them. Every list
+   of products this file writes — an article's shelf and every grid on the
+   storefront — is a set of links into /p/ addresses, and a hidden product's
+   address answers 404. See tools/lib/overrides-export.mjs. */
 import { fetchProductOverrides } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
@@ -87,7 +88,7 @@ import {
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice
+  fillBlogCardPrices, overriddenPrice, forSale, onlyForSale
 } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -129,6 +130,33 @@ if (!BASE_ENV) {
 const catSrc = await readFile(path.join(SHOP, "catalogue2.js"), "utf8");
 const CATALOGUE = new Function(catSrc + "\nreturn CATALOGUE;")();
 const CAT_NAMES = new Function(catSrc + "\nreturn CAT_NAMES;")();
+
+/* «Цена» and «Показывать в магазине» as the owner last saved them. `{}` with
+   no DATABASE_URL, which is the file's own products and prices, which is what
+   this ran on before the table was read at all — so a local run writes exactly
+   the pages it wrote before.
+
+   One query, read on every run. It was the blog's alone until 18.09.2026 and
+   was skipped when a shop had no articles; there is a grid on every home,
+   category and brand page and under every product, and those are written
+   whether or not anything has been published. */
+const PRODUCT_OVERRIDES = await fetchProductOverrides();
+
+/* The catalogue a SHOPPER may be shown: every storefront grid, shelf,
+   ItemList and brand count below is built from this, never from CATALOGUE.
+   An article's own shelf goes through blogShelfProduct(), which asks the same
+   forSale() one id at a time because it also prices what it keeps.
+
+   CATALOGUE itself still writes the 660 product pages. A hidden product keeps
+   its file — the middleware withholds it and sitemap-products.xml stops
+   naming it, both the moment the owner flips the switch and both without a
+   deploy — so the page is there again the moment he flips it back. What must
+   not survive the build is a LINK into that address from a page that has no
+   second chance to correct itself: the shop's own grids are redrawn from the
+   live feed as soon as app.js runs, but Google and a reader without scripts
+   only ever see what is written here. */
+const ON_SALE = onlyForSale(CATALOGUE, PRODUCT_OVERRIDES);
+const HIDDEN_COUNT = CATALOGUE.length - ON_SALE.length;
 
 const loadObj = async (file, name) => {
   try { return new Function(await readFile(path.join(SHOP, file), "utf8") + "\nreturn " + name + ";")(); }
@@ -260,13 +288,6 @@ if (!BLOG_POSTS.length) {
     : "  (DATABASE_URL not set — no /blog/ pages this run)");
 }
 
-/* «Цена» and «Показывать в магазине», for the products an article links to.
-   Read only when there is an article to link from — with no DATABASE_URL
-   there are no /blog/ pages and this is one query nobody would read. `{}`
-   otherwise, which is the file's own prices, which is what this ran on
-   before. See tools/lib/overrides-export.mjs. */
-const PRODUCT_OVERRIDES = BLOG_POSTS.length ? await fetchProductOverrides() : {};
-
 /**
  * One product an article links to, as the panel has it TODAY — or null when
  * the owner has hidden it, or when the id is not the catalogue's.
@@ -278,15 +299,18 @@ const PRODUCT_OVERRIDES = BLOG_POSTS.length ? await fetchProductOverrides() : {}
  * not in the file here either; the shop draws their card the moment app.js
  * runs, exactly as it did before.
  *
- * The rule for the price itself is overriddenPrice() in src/lib/seo-head.mjs,
- * the same call src/lib/blog-page.ts makes for the same article at request
- * time — so the static copy and the live one print the same number.
+ * Neither rule is written here. «Показывать в магазине» is forSale() and the
+ * price is overriddenPrice(), both in src/lib/seo-head.mjs — the same two
+ * calls src/lib/blog-page.ts makes for the same article at request time, and
+ * the same forSale() ON_SALE above puts every storefront grid through. So the
+ * static copy, the live one and a category page cannot disagree about which
+ * products still have a page or what they cost.
  */
 function blogShelfProduct(id) {
   const p = CATALOGUE.find(x => x.id === id);
   if (!p) return null;
   const row = PRODUCT_OVERRIDES[id];
-  if (row && row.hidden) return null;
+  if (!forSale(row)) return null;
   const { price, from } = overriddenPrice(p.price, p.prices, row);
   return { ...p, price, priceFrom: from };
 }
@@ -312,7 +336,7 @@ function blogShelfProduct(id) {
  */
 function blogOffSale(id) {
   const row = PRODUCT_OVERRIDES[id];
-  if (row && row.hidden) return true;
+  if (!forSale(row)) return true;
   return !String(id).startsWith("c-") && !CATALOGUE.some(x => x.id === id);
 }
 
@@ -877,7 +901,11 @@ function productPage(p, lang) {
           p.prices && p.prices.length ? p.prices[Math.min(i, p.prices.length - 1)] : p.price)) + "</span></li>").join("") + "</ul>"
     : "";
 
-  const others = CATALOGUE.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 8);
+  /* The shelf under the product. From ON_SALE even when `p` itself is hidden:
+     this page is still written for the day the owner switches it back on, and
+     until then the middleware withholds it — but nothing must leave it for an
+     address that answers 404 today. */
+  const others = ON_SALE.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 8);
 
   const content = '<div class="wrap">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
@@ -922,12 +950,29 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     [heading, null]
   ];
   const first = list[0];
+  /* A section with nothing in it for the moment. Until 18.09.2026 `list` was
+     a slice of the catalogue file and could not be empty; it is
+     «Показывать в магазине» that can empty it — a brand the shop stocks one
+     product of, switched off for an afternoon (see ON_SALE above).
+
+     The page stays: its address is in the sitemap this same build writes, the
+     section fills again the moment the owner switches the product back on,
+     and a brand slug with no file behind it falls through to the shell at
+     200, which is the soft 404 src/lib/notfound-page.ts exists to prevent.
+     What goes is the grid, which has no tiles, and the ItemList, which would
+     promise Google a list of nothing. The words are the shop's own, through
+     the dictionary lifted from app.js, so the static page and the SPA do not
+     word the same state twice. */
+  const empty = !list.length;
   const content = '<div class="wrap">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       '<p class="sec__intro">' + esc(desc) + "</p>" +
-      grid(list, seg, code, t, true) +
+      (empty
+        ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
+          (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
+        : grid(list, seg, code, t, true)) +
     "</section>" +
     langNav(seg, rest, t) +
     "</div>";
@@ -939,7 +984,11 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
       imageAlt: heading, ogType: "website",
       jsonld: [
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
-        {
+        /* No ItemList for an empty section: the rows are the same /p/
+           addresses the tiles link to, so an ItemList built from the whole
+           catalogue would hand Google the very links the grid stopped
+           showing. */
+        ...(empty ? [] : [{
           "@context": "https://schema.org", "@type": "ItemList",
           name: heading, numberOfItems: list.length,
           itemListElement: list.slice(0, 50).map((p, i) => ({
@@ -947,7 +996,7 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
             url: abs(langPath(seg, "/p/" + encodeURIComponent(p.id) + "/")),
             name: p.brand + " " + tr(p.name, code, true)
           }))
-        }
+        }]),
       ],
       content
     }
@@ -971,7 +1020,7 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
    crawlable path from here to all 26 brand pages. */
 
 const BRANDS_INTRO = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
-const BRAND_COUNT = new Map(BRANDS.map(b => [b, CATALOGUE.filter(p => p.brand === b).length]));
+const BRAND_COUNT = new Map(BRANDS.map(b => [b, ON_SALE.filter(p => p.brand === b).length]));
 
 function brandsPage(lang) {
   const { code, seg } = lang;
@@ -1025,7 +1074,7 @@ function homePage(lang) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const rest = "/";
-  const featured = CATALOGUE.filter(p => p.stock !== "out").slice(0, 12);
+  const featured = ON_SALE.filter(p => p.stock !== "out").slice(0, 12);
   const content = '<div class="wrap">' +
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(t.base) + "</h1>" +
@@ -1279,11 +1328,18 @@ function setPage(b, lang) {
     [heading, null]
   ];
 
+  /* What is in the box, and what of it still has a page. A набор the owner
+     has left on sale can hold a product he has switched off since; the row
+     stays — the box does contain it, and its name and share of the price are
+     what the shopper is being asked to pay for — but the link goes, because
+     that address answers 404 (see ON_SALE above). */
   const items = b.items.map(it => {
     const p = CATALOGUE.find(x => x.id === it.id);
     const nm = p ? p.brand + " " + tr(p.name, code, true) : (it.brand + " " + it.name).trim();
-    return '<li><a href="' + href(seg, "/p/" + encodeURIComponent(it.id) + "/") + '">' +
-      esc(nm) + '</a> <span class="num">' + esc(eur(it.price)) + "</span></li>";
+    const shown = forSale(PRODUCT_OVERRIDES[it.id])
+      ? '<a href="' + href(seg, "/p/" + encodeURIComponent(it.id) + "/") + '">' + esc(nm) + "</a>"
+      : esc(nm);
+    return "<li>" + shown + ' <span class="num">' + esc(eur(it.price)) + "</span></li>";
   }).join("");
 
   const content = '<div class="wrap">' +
@@ -1707,7 +1763,7 @@ for (const lang of LANGS) {
   pages.push(homePage(lang));
 
   for (const c of ["all", ...CATS]) {
-    const list = c === "all" ? CATALOGUE : CATALOGUE.filter(p => p.cat === c);
+    const list = c === "all" ? ON_SALE : ON_SALE.filter(p => p.cat === c);
     const heading = c === "all" ? t.all : tr(CAT_NAMES[c], lang.code, false);
     pages.push(listingPage({
       lang, kind: "c", id: c, heading, list,
@@ -1718,7 +1774,7 @@ for (const lang of LANGS) {
   }
 
   for (const b of BRANDS) {
-    const list = CATALOGUE.filter(p => p.brand === b);
+    const list = ON_SALE.filter(p => p.brand === b);
     pages.push(listingPage({
       lang, kind: "b", id: BRAND_SLUG.get(b), heading: b, list,
       rest: "/b/" + BRAND_SLUG.get(b) + "/",
@@ -1955,6 +2011,9 @@ console.log(
   `           ${LANGS.length} languages × ${perLang}: ${CATALOGUE.length} products + ${CATS.length + 1} categories + ` +
     `${BRANDS.length} brands + 1 brands landing + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift + ` +
     `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
+  /* Only when there is something to say: a run with no database hides
+     nothing and its line stays the one everybody knows. */
+  (HIDDEN_COUNT ? `           «Показывать в магазине» off for ${HIDDEN_COUNT} of ${CATALOGUE.length}: page written, no grid links to it\n` : "") +
   `           base ${BASE}  robots "${ROBOTS}"  robots.txt = ${LIVE ? "production" : "staging"}  assets ?v=${ASSET_V}\n` +
   `           og cards: ${OG_CARDS.size} on disk (${cardsMade} drawn this run)  every og:image ${OG_W}×${OG_H}\n` +
   `           sitemap: ${entries.length} urls in ${sitemapFiles.length} file(s) + ${SITEMAP_PRODUCTS} (the app's, ` +

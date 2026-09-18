@@ -206,7 +206,15 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
   const body = (html.match(/<div id="prerender">([\s\S]*?)<\/div><!-- prerender:end -->/) || [])[1] || "";
   if (body.length < minBody) fail(file, `prerendered body is ${body.length} chars — nothing meaningful inside #app`);
   if (!/<h1[^>]*>[^<]/.test(body)) fail(file, "no <h1> in the prerendered body");
-  if (needImg && !/<img [^>]*alt="[^"]+"/.test(body)) fail(file, "no <img> with a non-empty alt");
+  /* A category or a brand page can legitimately have no photograph on it: the
+     owner has «Показывать в магазине» off for everything that section holds,
+     so the build draws no tiles and says so instead (`sec__empty` in
+     listingPage(), tools/prerender-shop2.mjs). The page keeps its heading,
+     its intro, its crumbs and its og:image — what it has not got is a product
+     to photograph, and demanding one would mean linking to a product whose
+     address answers 404. */
+  const emptySection = /class="[^"]*sec__empty/.test(body);
+  if (needImg && !emptySection && !/<img [^>]*alt="[^"]+"/.test(body)) fail(file, "no <img> with a non-empty alt");
   if (!/<a href="\/shop2/.test(body)) fail(file, "no crawlable /shop2 links");
   if (product) {
     if (!/pdp__price/.test(body)) fail(file, "no price on the product page");

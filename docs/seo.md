@@ -542,6 +542,38 @@ product is still served, which is the whole thing being fixed — and it fails
 open: a database that cannot answer within 2.5 s means the page is served, the
 behaviour this layer inherited.
 
+### The other half: nothing may still link to it
+
+Withholding the page closes the address. It does not stop the rest of the shop
+pointing at it, and until 18.09.2026 nothing did. Every page
+`tools/prerender-shop2.mjs` writes with a list of products on it — 3 home
+pages, 27 category pages, 78 brand pages, the shelf under each of 660 product
+pages, the «Что внутри» list of every набор and the brand counts on
+`/brands/` — was built from `public/shop/catalogue2.js` and from nothing else.
+So a grid tile went on carrying `<a href="/shop2/p/<id>/">` into an address the
+middleware answers 404 for, and the grid offered a product the sitemap route
+beside it had already withdrawn. The static layer serves those files before any
+route runs, so for a crawler and for a reader without scripts that dead link
+*was* the page; the shop's own grids are redrawn from the live feed the moment
+`app.js` arrives, which is why nobody with a browser ever saw it.
+
+A product page correcting its own head is not a defence here. `setHead()` does
+rewrite the head of the page it runs on — that is why the static product pages
+are still written for all 220 products, hidden or not, and why the sitemap and
+not the build decides which of them are offered. It covers that one page. A
+grid on *another* page linking into it has no second pass at all, and neither
+has «Товары из статьи» under an article.
+
+So the build reads the table too — `tools/lib/overrides-export.mjs`, the way it
+already reads the set prices from `bundles` — and every list on every page is
+built from `ON_SALE`: the catalogue minus what `forSale()` in
+`src/lib/seo-head.mjs` rejects. That is the same call
+`src/app/sitemap-products.xml/route.ts`, `src/lib/product-page.ts` and
+`src/lib/blog-page.ts` make, so what a page links to and what the sitemap
+offers cannot drift apart. With no `DATABASE_URL` the table is `{}` and the
+build writes exactly the pages it wrote before. `tests/grid-hidden-r26.test.ts`
+runs the build's own list expressions over a hidden product.
+
 ---
 
 ## At the switch
@@ -733,14 +765,6 @@ Two places deliberately still read the product word alone:
   is the one field Merchant Center suspends accounts over. Before it is
   submitted it needs the live base and a decision about where its stock comes
   from; `docs/merchant-feed.md` has the submission steps.
-- **The prerendered blog pages build «Товары из статьи» from the build-time
-  catalogue only** (`tools/prerender-shop2.mjs`, the `featured` list in the
-  blog post builder): no `product_overrides`, so the prices in a static
-  article are as old as the deploy, and there is no `hidden` filter, so a
-  static article can link to a `/p/<id>/` that now answers 404 `noindex`. The
-  request-time page does both correctly (`src/lib/blog-page.ts` `shelfProducts()`,
-  17.09.2026) — and the static copy is the one Vercel's static layer serves in
-  preference to the route, so the fixed path is the one that rarely runs.
 - **Product cards the assistant writes into an article have no `href`.**
   `src/lib/ai-prompts.ts` tells the model to emit `<a data-product="ID"></a>`
   with no href and no text; `src/lib/blog-html.mjs` `openTag()` only keeps an

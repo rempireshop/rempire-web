@@ -300,6 +300,35 @@ export function fillBlogCardPrices(html, priceOf, opts) {
   });
 }
 
+/* ---------- «Показывать в магазине» ---------------------------------------
+ *
+ * One `product_overrides` row, one question: may this catalogue product be
+ * shown to anybody? The column is `hidden` (db/migrations/147) and the owner
+ * flips it between deploys, which is why the answer is worth having in one
+ * place rather than four: src/middleware.ts, src/lib/product-page.ts,
+ * src/app/sitemap-products.xml/route.ts and src/lib/blog-page.ts each wrote
+ * their own until 18.09.2026, and tools/prerender-shop2.mjs — the one that
+ * writes every page with a grid on it — wrote none at all.
+ *
+ * That is the point of putting it here instead of in a tool or a route. Two
+ * decisions have to agree or the shop publishes a dead link: whether an
+ * address answers (the middleware 404s a hidden product and the sitemap
+ * stops naming it) and whether anything still LINKS to that address. Linking
+ * to a 404 of our own making is worse than never mentioning the product.
+ *
+ * `row` is what mapOverride() in src/lib/orders.ts hands a live page and what
+ * overrideRow() in tools/lib/overrides-export.mjs hands the build — the same
+ * `hidden: r.hidden === true` on both sides. No row means the owner has never
+ * touched the product, which is the shop's normal state and is for sale; so
+ * is a shop with no database to ask, which is the direction that shows too
+ * much rather than too little and matches what every reader here did before.
+ */
+export const forSale = row => !(row && row.hidden === true);
+
+/** The members of `list` still for sale, given the `{ id: row }` map. */
+export const onlyForSale = (list, overrides) =>
+  list.filter(p => forSale(overrides && overrides[p.id]));
+
 /* ---------- copy, one table per language -------------------------------- */
 
 /* Mirrors the strings setHead() in app.js uses, so the tab title does not

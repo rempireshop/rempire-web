@@ -43,6 +43,7 @@ import {
   crumbs,
   esc,
   eur,
+  forSale,
   headBlock,
   href,
   langBySeg,
@@ -220,7 +221,7 @@ function html(body: string, status: number, cacheControl: string): Response {
     means no hidden products, which is the safe direction for a shop page. */
 async function isHiddenProduct(id: string): Promise<boolean> {
   try {
-    return (await getOverrides([id]))[id]?.hidden === true;
+    return !forSale((await getOverrides([id]))[id]);
   } catch {
     return false;
   }

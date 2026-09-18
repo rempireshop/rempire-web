@@ -46,6 +46,7 @@ import {
   eur,
   fillBlogCardPrices,
   fitTitle,
+  forSale,
   headBlock,
   href,
   langBySeg,
@@ -426,9 +427,12 @@ async function shelfProducts(
       continue;
     }
     const o = overrides[id];
-    /* «Показывать в магазине» off. `overrides` is empty when the query threw,
-       so this cannot fire on a hiccup — it fires only on a row that said so. */
-    if (o?.hidden) {
+    /* «Показывать в магазине» off — forSale() in seo-head.mjs, the same call
+       the build makes before it draws a grid tile, so an article and a
+       category page cannot disagree about which products still have a page.
+       `overrides` is empty when the query threw, so this cannot fire on a
+       hiccup — it fires only on a row that said so. */
+    if (!forSale(o)) {
       offSale.add(id);
       continue;
     }
