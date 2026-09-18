@@ -7,6 +7,8 @@
  * each of them is allowed to become. Pure functions, no model, no network:
  * src/app/api/assistant/intent.ts.
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { discountIntent, intentConflicts, intentPromptBlock } from "@/app/api/assistant/intent";
 
@@ -137,5 +139,49 @@ describe("what the model is told about the two", () => {
     expect(intentPromptBlock("promo")).toContain("propose_bundle and set_bundle are forbidden for this message");
     expect(intentPromptBlock("ask")).toContain("Do NOT choose");
     expect(intentPromptBlock("")).not.toContain("forbidden for this message");
+  });
+});
+
+/* ------------------------------------------------------------------------ *
+ * The shelf-picking table exists twice, and both copies answer the shopper
+ * ------------------------------------------------------------------------ */
+
+describe("CAT_KW and chat.js's CATS_KW are one table", () => {
+  /* `src/lib/catalogue-slice.ts` picks the section when the shop has an OpenAI
+     key and slices the catalogue for the model; `public/shop2/chat.js` does the
+     same job in the browser when there is no key. Two copies with no build step
+     between them, and by 19.09.2026 they had drifted: «маска для лица» landed
+     in a different section depending on a setting the shopper cannot see, and
+     «лак», «лосьон», «перхоть», «усы» and an EDT matched nothing at all in the
+     browser copy (audit § 9.6). */
+  const read = (file: string) =>
+    readFileSync(fileURLToPath(new URL(file, import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
+
+  /** Every `[/…/i, "cat"]` row of the named table, as `cat → source`. */
+  function table(src: string, name: string): Record<string, string> {
+    const from = src.indexOf(name);
+    expect(from, `${name} is gone`).toBeGreaterThan(-1);
+    const body = src.slice(from, src.indexOf("];", from));
+    const out: Record<string, string> = {};
+    for (const [, re, cat] of body.matchAll(/\[\/(.+?)\/i,\s*"([a-z]+)"\]/g)) out[cat] = re;
+    return out;
+  }
+
+  it("matches row for row, pattern for pattern", () => {
+    const server = table(read("../src/lib/catalogue-slice.ts"), "const CAT_KW");
+    const client = table(read("../public/shop2/chat.js"), "var CATS_KW");
+    expect(Object.keys(server).length).toBeGreaterThanOrEqual(7);
+    expect(client).toEqual(server);
+  });
+
+  it("puts the words that had drifted in the same section on both sides", () => {
+    const server = table(read("../src/lib/catalogue-slice.ts"), "const CAT_KW");
+    const client = table(read("../public/shop2/chat.js"), "var CATS_KW");
+    const where = (t: Record<string, string>, word: string) =>
+      Object.entries(t).find(([, re]) => new RegExp(re, "i").test(word))?.[0] ?? "";
+    for (const word of ["маска для лица", "лак для волос", "лосьон", "перхоть", "усы", "edt"]) {
+      expect(where(client, word), word).toBe(where(server, word));
+      expect(where(server, word), `${word} matches nothing at all`).not.toBe("");
+    }
   });
 });

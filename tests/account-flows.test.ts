@@ -601,6 +601,25 @@ describe("back in stock flow", () => {
     expect((await sweepBackInStock()).sent).toBe(1);
   });
 
+  it("sends at «мало» too — the hook always did, and the rule is «not at a counted zero»", async () => {
+    /* The owner's decision of 17.09.2026 is that the letter does not go at a
+       counted ZERO. «Мало» is something on the shelf, and it is what the person
+       who asked to be told actually asked for. runBackInStock() — the hook the
+       stock switch calls — has always sent here; this sweep required «in» and
+       held the letter back, so whether a waiting customer heard anything
+       depended on which of the two noticed the stock move first (audit F42). */
+    await setFlows({ backstock: true });
+    const { move } = await import("@/lib/inventory");
+    for (const size of ["75 мл", "250 мл", "500 мл"]) {
+      await move({ productId: PRODUCT, variant: size, delta: 1, reason: "goods_in" });
+    }
+    await addStockAlert({ email: EMAIL, productId: PRODUCT });
+
+    const { productStockStates } = await import("@/lib/inventory");
+    expect((await productStockStates([PRODUCT]))[PRODUCT], "the fixture is not at «мало»").toBe("low");
+    expect((await sweepBackInStock()).sent).toBe(1);
+  });
+
   /* The sweep decided on product_overrides.stock alone, while the storefront's
      own badge comes from the count the moment anybody has counted the product
      (productStockStates → getOverrides). A product at 0 whose old manual value

@@ -115,14 +115,21 @@
     }
   };
 
+  /* The same table as CAT_KW in src/lib/catalogue-slice.ts, and it has to be:
+     this copy picks the shelf when the shop answers WITHOUT an OpenAI key,
+     and that one does it when there is one. They had drifted, so «маска для
+     лица» landed in a different section depending on a setting the shopper
+     cannot see, and «лак», «лосьон», «перхоть», «усы» and an EDT found
+     nothing at all here (audit § 9.6). Keep the two in step; there is no
+     build step between them. */
   var CATS_KW = [
-    [/бород|habe|beard|shav|брить/i, "beard"],
-    [/волос|шампун|кондиционер|juuks|šampoon|palsam|hair|shampoo|conditioner/i, "hair"],
-    [/стайлинг|уклад|паст|воск|гел|пудр|soeng|stiliseer|styling|wax|paste|clay|pomade/i, "styling"],
-    [/лиц|кож[аи]|тоник|nägu|näo|face|skin|toner/i, "face"],
-    [/тел|мыл|keha|seep|body|soap/i, "body"],
-    [/парфюм|аромат|духи|parfüüm|lõhn|perfume|fragrance|cologne|edp/i, "perfume"],
-    [/футболк|мерч|särk|merch|shirt|tee/i, "merch"]
+    [/бород|habe|beard|усы|moustache|брить|raseer|shav/i, "beard"],
+    [/волос|шампун|кондиционер|маск|juuks|šampoon|palsam|hair|shampoo|conditioner|scalp|перхот/i, "hair"],
+    [/стайлинг|уклад|паст|воск|гел|пудр|лак|viimistl|soeng|styling|wax|paste|clay|pomade|gel/i, "styling"],
+    [/лиц|кож[аеиу]|тоник|крем|сыворот|nägu|näo|nahk|face|skin|toner|serum|patch/i, "face"],
+    [/тел|мыл|keha|seep|body|soap|лосьон/i, "body"],
+    [/парфюм|аромат|духи|parfüüm|lõhn|perfume|fragrance|cologne|edp|edt/i, "perfume"],
+    [/футболк|мерч|särk|merch|shirt|tee|декор|decor/i, "merch"]
   ];
   var TYPE_KW = [
     [/шампун|šampoon|shampoo/i, /шампунь/],

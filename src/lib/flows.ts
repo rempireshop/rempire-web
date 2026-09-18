@@ -706,7 +706,15 @@ export async function sweepBackInStock(): Promise<FlowRun> {
     // «Снять с продажи» and beats any count; otherwise the count wins, and
     // an uncounted product falls back to the override, then to the file
     const stock = manual === "out" ? "out" : (counted.get(a.product_id) ?? manual ?? p.stock);
-    return stock === "in";
+    /* «not out», not «in» — the same rule runBackInStock() applies, and the
+       owner's decision of 17.09.2026 says it in those words: the letter does
+       not go at a counted ZERO. «Мало» is something on the shelf, and telling
+       somebody who asked to be told that the last bottle is there is exactly
+       what they asked for. The two halves disagreed until 19.09.2026: the hook
+       sent at «мало» and this sweep held the letter back, so whether a waiting
+       customer heard anything depended on which of the two happened to notice
+       the stock move first (audit F42). */
+    return stock !== "out";
   });
   return sendStockAlerts(ready, products);
 }
