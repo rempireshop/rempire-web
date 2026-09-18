@@ -329,6 +329,35 @@ export const forSale = row => !(row && row.hidden === true);
 export const onlyForSale = (list, overrides) =>
   list.filter(p => forSale(overrides && overrides[p.id]));
 
+/**
+ * «Наличие» as the owner last saved it, over the file's own word.
+ *
+ * The third override, and the one the build ignored until 19.09.2026: it read
+ * the price and «Показывать в магазине» and left the stock word to
+ * `catalogue2.js`, so a product marked «нет в наличии» in the panel was
+ * written into static HTML as «В наличии», with schema.org/InStock beside it,
+ * and only corrected once app.js had booted and rewritten the head. Google
+ * runs JavaScript; a reader with none, the first paint, and anything reading
+ * the markup rather than the page do not (audit F31).
+ *
+ * The live fold is getOverrides() in src/lib/orders.ts, where a counted
+ * quantity outranks this word. The build has no counts, so the manual word is
+ * the whole of what it can honour — which is exactly the half the owner sets
+ * by hand and therefore the half he expects to see.
+ */
+export const overriddenStock = (fileStock, row) =>
+  (row && (row.stock === "in" || row.stock === "low" || row.stock === "out") ? row.stock : fileStock);
+
+/** `list` with the owner's word folded in wherever he has set one. The build
+    applies this once, at load, so that every reader downstream — the chip on
+    the page, the Product JSON-LD, the meta description, the featured row, the
+    sets — is looking at the same answer. */
+export const withOwnerStock = (list, overrides) =>
+  list.map(p => {
+    const stock = overriddenStock(p.stock, overrides && overrides[p.id]);
+    return stock === p.stock ? p : { ...p, stock };
+  });
+
 /* ---------- copy, one table per language -------------------------------- */
 
 /* Mirrors the strings setHead() in app.js uses, so the tab title does not

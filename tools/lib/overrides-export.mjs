@@ -94,10 +94,15 @@ export function overrideRow(r) {
        src/lib/orders.ts makes it agree for the live page. */
     sizes: sizes && price != null ? sizes.map((s, i) => (i === 0 ? { size: s.size, price } : s)) : sizes,
     hidden: r.hidden === true,
+    /* «Наличие» as he set it by hand. The build has no counted quantities,
+       so this word is the whole of the stock truth it can carry; a counted
+       zero still only reaches the page when app.js boots. Read from
+       19.09.2026 — audit F31. */
+    stock: r.stock === "in" || r.stock === "low" || r.stock === "out" ? r.stock : null,
   };
 }
 
-/** `{ id: { price, sizes, hidden } }` for the rows that exist. */
+/** `{ id: { price, sizes, hidden, stock } }` for the rows that exist. */
 export async function fetchProductOverrides() {
   const url = process.env.DATABASE_URL;
   if (!url) return {};
@@ -113,7 +118,7 @@ export async function fetchProductOverrides() {
   const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
   try {
     await client.connect();
-    const res = await client.query("select product_id, price, sizes, hidden from product_overrides");
+    const res = await client.query("select product_id, price, sizes, hidden, stock from product_overrides");
     const out = {};
     for (const r of res.rows) out[r.product_id] = overrideRow(r);
     return out;

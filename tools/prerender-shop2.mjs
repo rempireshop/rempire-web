@@ -88,7 +88,7 @@ import {
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice, forSale, onlyForSale
+  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale
 } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -128,19 +128,30 @@ if (!BASE_ENV) {
 /* ---------- catalogue + content ---------------------------------------- */
 
 const catSrc = await readFile(path.join(SHOP, "catalogue2.js"), "utf8");
-const CATALOGUE = new Function(catSrc + "\nreturn CATALOGUE;")();
+const CATALOGUE_FILE = new Function(catSrc + "\nreturn CATALOGUE;")();
 const CAT_NAMES = new Function(catSrc + "\nreturn CAT_NAMES;")();
 
-/* «Цена» and «Показывать в магазине» as the owner last saved them. `{}` with
-   no DATABASE_URL, which is the file's own products and prices, which is what
-   this ran on before the table was read at all — so a local run writes exactly
-   the pages it wrote before.
+/* «Цена», «Показывать в магазине» и «Наличие» as the owner last saved them.
+   `{}` with no DATABASE_URL, which is the file's own products and prices,
+   which is what this ran on before the table was read at all — so a local run
+   writes exactly the pages it wrote before.
 
    One query, read on every run. It was the blog's alone until 18.09.2026 and
    was skipped when a shop had no articles; there is a grid on every home,
    category and brand page and under every product, and those are written
    whether or not anything has been published. */
 const PRODUCT_OVERRIDES = await fetchProductOverrides();
+
+/* The owner's stock word, folded in once, here, so that every reader below
+   gets it: the product page's chip, the Product JSON-LD's availability, the
+   meta description, the featured row, the sets.
+   `product_overrides.stock` is folded live by getOverrides() and was the one
+   override this build ignored — it read price and hidden and left stock to
+   `catalogue2.js`, so a product the owner had marked «нет в наличии» was
+   served as «В наличии» and as schema.org/InStock in static HTML until
+   app.js booted and rewrote the head. Google renders JavaScript; a no-JS
+   reader, the first paint and every feed reader do not (audit F31). */
+const CATALOGUE = withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES);
 
 /* The catalogue a SHOPPER may be shown: every storefront grid, shelf,
    ItemList and brand count below is built from this, never from CATALOGUE.
