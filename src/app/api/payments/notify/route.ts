@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { query } from "@/lib/db";
 import { readRefundStatusDescription } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, getOrderByPaymentRef, writeAuditSafe } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
@@ -234,15 +235,47 @@ async function refund(provider: PaymentProvider, req: Request) {
     console.error(
       `payments/notify: refund ${note.refundRef} on ${order.number} — ${note.status} · ${note.statusDescription}`,
     );
-    await writeAuditSafe("system", "order.refund_stuck", {
-      orderId: order.id,
-      number: order.number,
-      amount,
-      ref: note.refundRef,
-      code: note.statusDescription,
-      reason: why.reason,
-      status: note.status,
-    });
+    /* Once per refund and reason, not once per delivery. This row is written
+       BEFORE the settle below on purpose — the settle can throw, this answers
+       503, and Montonio redelivers, and the one row that explains a stuck
+       refund must survive that rather than depend on it. The cost was that
+       every redelivery wrote it again (audit F19), so the owner opened a
+       journal with «Возврат не дошёл до покупателя» three times over for one
+       refund. Asked, then written; a read that fails writes anyway, because a
+       duplicated explanation is better than a missing one. */
+    let already = false;
+
+    try {
+
+      const [seen] = await query<{ n: number }>(
+
+        "select count(*)::int as n from admin_audit where action = 'order.refund_stuck'" +
+
+          " and payload->>'ref' = $1 and payload->>'code' = $2",
+
+        [note.refundRef, note.statusDescription],
+
+      );
+
+      already = Number(seen?.n) > 0;
+
+    } catch (err) {
+
+      console.error("payments/notify: could not check for an earlier refund_stuck row", err);
+
+    }
+
+    if (!already) {
+      await writeAuditSafe("system", "order.refund_stuck", {
+        orderId: order.id,
+        number: order.number,
+        amount,
+        ref: note.refundRef,
+        code: note.statusDescription,
+        reason: why.reason,
+        status: note.status,
+      });
+    }
   }
 
   try {

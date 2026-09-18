@@ -19,7 +19,7 @@ import variants from "@/data/catalogue.variants.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin } from "@/lib/customers";
 import { exec, query } from "@/lib/db";
-import { createOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
+import { createOrder, getOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
 import {
   adjustLoyaltyPoints,
   approveProCustomer,
@@ -407,6 +407,36 @@ describe("loyalty ledger — a refund takes the points back with the money", () 
     const earn = (await getLoyaltyHistory(id)).find((h) => h.reason === "earn" && h.orderId === o.id);
     expect(await getLoyaltyBalance(id)).toBe(afterPaid + o.loyaltyDiscount - (earn?.delta ?? 0));
     expect(await getLoyaltyBalance(id)).toBe(30);
+  });
+
+  it("gives the points back when the order was CANCELLED first and refunded after", async () => {
+    /* The order Renat actually does them in: «Отменить заказ», then «Вернуть
+       деньги». A cancelled order can never move to «возврат», and the reversal
+       hung off exactly that move — so the money went back and the ledger did
+       not: the customer kept the points the order earned and never saw the
+       points they had spent on it, at 1 point = 1 € (audit § 9.4). The gift
+       cards were moved onto the refund itself in r22 for this same reason and
+       the points were left behind; they now ride the same door. */
+    const { id, order: o } = await paidOrderFor("refund-cancelled@example.com", true);
+    expect(o.loyaltyDiscount).toBeGreaterThan(0);
+    const afterPaid = await getLoyaltyBalance(id);
+
+    await setOrderStatus(o.id, "cancelled", "admin");
+    expect(await getLoyaltyBalance(id), "a cancel alone still holds the money").toBe(afterPaid);
+
+    const { settleRefund } = await import("@/lib/payments/settle");
+    await settleRefund((await getOrder(o.id))!, {
+      ref: "cancelled-then-refunded-1",
+      amount: o.total,
+      status: "done",
+      at: new Date().toISOString(),
+      by: "admin",
+    });
+
+    const earn = (await getLoyaltyHistory(id)).find((h) => h.reason === "earn" && h.orderId === o.id);
+    expect(await getLoyaltyBalance(id)).toBe(afterPaid + o.loyaltyDiscount - (earn?.delta ?? 0));
+    // …and the order stays cancelled, which is what the customer was told
+    expect((await getOrder(o.id))!.status).toBe("cancelled");
   });
 
   it("does not post the reversal twice, and leaves a cancellation alone", async () => {

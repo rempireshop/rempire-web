@@ -156,6 +156,51 @@ export async function settleRefund(
      comes back through this same door and voids then. */
   const voided = fully ? await voidSoldCards(order, entry.by || "system") : [];
 
+  /* The points go back on the same door, and for the same reason the cards do.
+     The reversal lives in setOrderStatus() (src/lib/orders.ts, «loyalty
+     (14.09.2026)»), hanging off the move into «возврат» — the move an order
+     that was CANCELLED first can never make. So «Отменить заказ» and then
+     «Вернуть деньги», the order Renat actually does them in, gave the money
+     back and left the ledger untouched: the customer kept the points the order
+     earned and never got back the points they spent on it, at 1 point = 1 €
+     (audit 18.09.2026, § 9.4). Exactly the bug the card void was moved here to
+     fix, still open for the points.
+     Called here AND left where it was: refundLoyaltyPoints() is idempotent per
+     order and answers `already`, so the move's own call is then a no-op, the
+     same shape voidGiftCards() promises just above. Best effort either way — a
+     points hiccup must never stop a refund being recorded. */
+  if (fully) {
+
+    try {
+
+      const { refundLoyaltyPoints } = await import("@/lib/loyalty");
+
+      const back = await refundLoyaltyPoints(order.id, `возврат заказа ${order.number}`);
+
+      if (back.ok && back.points && !back.already) {
+
+        await writeAuditSafe(entry.by || "system", "loyalty.refunded", {
+
+          id: order.id,
+
+          number: order.number,
+
+          points: back.points,
+
+        });
+
+      }
+
+    } catch (err) {
+
+      console.error("[payments/settle] returning the points of a refunded order failed:", err);
+
+    }
+
+  }
+
+
+
   let status = String(order.status ?? "");
   if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
     const moved = await setOrderStatus(order.id, "refunded", entry.by || "system");

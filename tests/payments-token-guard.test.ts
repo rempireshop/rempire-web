@@ -380,4 +380,39 @@ describe("POST /api/payments/notify/ with a token that fails a check", () => {
     expect(res.body.error).toBe("unconfirmed");
     expect((await getOrder(order.id))?.status).toBe("new");
   });
+
+  /* The one row that ever explains a stuck refund — and Montonio redelivers
+     a webhook up to thirteen times over 48 hours. */
+  it("writes «возврат не дошёл» once, however many times the webhook arrives", async () => {
+    const order = await place();
+    await setOrderPayment(order.id, { ref: OURS, status: "paid" });
+    const token = signHs256(
+      {
+        accessKey: ACCESS,
+        orderUuid: OURS,
+        refundUuid: "refund-uuid-1",
+        refundStatus: "PENDING",
+        refundStatusDescription: "INSUFFICIENT_FUNDS",
+        refundAmount: 10,
+      },
+      SECRET,
+      { expiresInSeconds: 600 },
+    );
+    const post = async () => {
+      const { POST } = await import("@/app/api/payments/notify/route");
+      const res = await POST(makeRequest("/api/payments/notify/", { method: "POST", body: { refundToken: token } }));
+      return { status: res.status, body: (await res.json()) as Record<string, unknown> };
+    };
+
+    const first = await post();
+    expect(first.status, JSON.stringify(first.body)).toBe(200);
+    const second = await post();
+    expect(second.status).toBe(200);
+
+    const stuck = await query<{ payload: Record<string, unknown> }>(
+      "select payload from admin_audit where action = 'order.refund_stuck' order by id",
+    );
+    expect(stuck).toHaveLength(1);
+    expect(stuck[0].payload).toMatchObject({ ref: "refund-uuid-1", code: "INSUFFICIENT_FUNDS" });
+  });
 });
