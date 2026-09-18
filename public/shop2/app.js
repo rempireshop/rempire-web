@@ -523,6 +523,20 @@
         "Tellimuse staatus",
       "Заметка к заказу":
         "Märkus tellimuse juurde",
+      "Счёт отменён":
+        "Arve tühistatud",
+      "Напоминание по счёту":
+        "Arve meeldetuletus",
+      "Возврат денег":
+        "Raha tagastus",
+      "Подарочные карты аннулированы":
+        "Kinkekaardid tühistatud",
+      "Возврат обработан":
+        "Tagastus töödeldud",
+      "Отметка в списке запуска":
+        "Märge käivitusnimekirjas",
+      "Отметка в плане проверки":
+        "Märge kontrollnimekirjas",
       "Этикетка создана":
         "Silt on loodud",
       "Шаг «этикетка» изменён":
@@ -681,6 +695,16 @@
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
+      "Одного из товаров больше нет в продаже — уберите его из корзины":
+        "Üht toodet ei ole enam müügil — eemaldage see ostukorvist",
+      "Одна из строк корзины повреждена — уберите её и добавьте заново":
+        "Üks ostukorvi rida on vigane — eemaldage see ja lisage uuesti",
+      "Проверьте количество в корзине":
+        "Kontrollige ostukorvis olevat kogust",
+      "Слишком много разных товаров в одном заказе — разделите его":
+        "Liiga palju erinevaid tooteid ühes tellimuses — jagage see kaheks",
+      "Такой подарочной карты нет — выберите другую сумму":
+        "Sellist kinkekaarti ei ole — valige teine summa",
       "Этого размера больше нет — выберите другой в корзине": "Seda suurust enam ei ole — vali ostukorvis teine",
       "Этого набора больше нет в продаже — уберите его из корзины":
         "Seda komplekti enam ei müüda — eemalda see ostukorvist",
@@ -3333,6 +3357,20 @@
         "Order status",
       "Заметка к заказу":
         "Order note",
+      "Счёт отменён":
+        "Invoice cancelled",
+      "Напоминание по счёту":
+        "Invoice reminder",
+      "Возврат денег":
+        "Money refunded",
+      "Подарочные карты аннулированы":
+        "Gift cards voided",
+      "Возврат обработан":
+        "Return handled",
+      "Отметка в списке запуска":
+        "Mark in the launch list",
+      "Отметка в плане проверки":
+        "Mark in the test plan",
       "Этикетка создана":
         "Label created",
       "Шаг «этикетка» изменён":
@@ -3491,6 +3529,16 @@
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
+      "Одного из товаров больше нет в продаже — уберите его из корзины":
+        "One of the products is no longer on sale — remove it from the basket",
+      "Одна из строк корзины повреждена — уберите её и добавьте заново":
+        "One basket line is broken — remove it and add it again",
+      "Проверьте количество в корзине":
+        "Check the quantity in the basket",
+      "Слишком много разных товаров в одном заказе — разделите его":
+        "Too many different products in one order — split it in two",
+      "Такой подарочной карты нет — выберите другую сумму":
+        "There is no such gift card — choose another amount",
       "Этого размера больше нет — выберите другой в корзине": "That size is gone — pick another one in the basket",
       "Этого набора больше нет в продаже — уберите его из корзины":
         "This set is no longer on sale — remove it from the basket",
@@ -16081,6 +16129,16 @@
     rate_limited: "Слишком много попыток — подождите минуту",
     bad_email: "Проверьте e-mail",
     out_of_stock: "Товара не хватает на складе",
+    /* Five codes src/lib/orders.ts throws that had no sentence of their own,
+       so a basket that could never be paid for was answered «попробуйте ещё
+       раз» — the same loop the bundle_unknown sentence below was written to
+       break (audit F38). `unknown_item` is the reachable one: a product the
+       owner deleted while its line sat in somebody's localStorage. */
+    unknown_item: "Одного из товаров больше нет в продаже — уберите его из корзины",
+    bad_item: "Одна из строк корзины повреждена — уберите её и добавьте заново",
+    bad_qty: "Проверьте количество в корзине",
+    too_many_items: "Слишком много разных товаров в одном заказе — разделите его",
+    gift_unknown: "Такой подарочной карты нет — выберите другую сумму",
     /* The size on the line is not on the product any more — the owner took a
        rung off the ladder while the basket sat in localStorage. lineVariant()
        clamps the stale index to the rung the cart is already SHOWING, so this
@@ -23062,6 +23120,13 @@
     "order.refund_stuck": "Возврат не дошёл до покупателя",
     "shipment.registration_failed": "Перевозчик не принял посылку",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
+    "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
+    /* Seven actions the server writes and this table did not name, so the
+       journal printed the raw code — «order.refund: R-100042» — in a panel
+       whose whole rule is plain Russian. Two of them are money (audit F37). */
+    "order.refund": "Возврат денег", "giftcards.voided": "Подарочные карты аннулированы",
+    "return.handled": "Возврат обработан",
+    "golive.save": "Отметка в списке запуска", "testplan.save": "Отметка в плане проверки",
     "mail.send": "Письмо клиенту отправлено",
     "setting.set": "Настройка изменена",
     "promo.set": "Промокод сохранён", "promo.active": "Промокод включён или выключен",
@@ -23097,7 +23162,19 @@
     if (typeof p.line === "string" && p.line) return admPiecesHTML(p.line);
     var word = AUDIT_WORDS[row.action] || row.action;
     var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
-    return "<span>" + esc(word) + "</span>" + (what ? ": " + esc(what) : "");
+    /* And WHY, when the row carries it. Every trilingual explanation this
+       shop composes — Montonio refusing a refund, a carrier refusing a
+       parcel — was shown once, in a toast that clears itself after 2,6
+       seconds, and then existed only inside the audit JSON. The owner was
+       told to look in the journal and found «Возврат не прошёл: R-100042»
+       (audit F16). `detail` is the provider quoted verbatim and is a name,
+       not our prose, so it is left exactly as it arrived; `reason` is our
+       own token and is only worth printing when there is nothing better. */
+    var why = typeof p.detail === "string" && p.detail ? p.detail
+      : typeof p.reason === "string" && p.reason && p.reason !== "unknown" ? p.reason : "";
+    if (why === what) why = "";
+    return "<span>" + esc(word) + "</span>" + (what ? ": " + esc(what) : "") +
+      (why ? '<span class="aud__why">' + esc(why) + "</span>" : "");
   }
   /** One entry of this browser's own list, as HTML.
 

@@ -2108,6 +2108,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-jrow__x { flex: 1 1 200px; min-width: 0; }
 .adm-jrow__l { display: block; }
 .adm-jrow__l + .adm-jrow__l { font-size: 13px; color: var(--a-muted); }
+/* Why it failed, when the row knows: Montonio's own sentence about a refund it
+   would not make, or a carrier's about a parcel it would not take. It used to
+   live for 2,6 seconds in a toast and then only inside the audit JSON, so the
+   owner was sent to a journal that showed him a label and a number (F16). Own
+   line, quieter than the label, and it wraps: some of these are a paragraph. */
+.adm-jrow__x .aud__why { display: block; font-size: 13px; color: var(--a-muted); overflow-wrap: anywhere; }
 /* who the server recorded — the second list of «Журнал изменений» */
 .adm-jrow__who { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-narrow { max-width: 720px; }
