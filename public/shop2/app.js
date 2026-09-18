@@ -2347,8 +2347,8 @@
         "Avaldatud. Muudatused ilmuvad poodi kohe pärast salvestamist.",
       "Черновик. В магазине его пока не видно.": "Mustand. Poes seda veel ei näe.",
       "Сохранить и обновить": "Salvesta ja uuenda",
-      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
-        "Kas kustutada artikkel? Tekst jääb mustanditesse, aga poes seda enam ei näe.",
+      "Точно удалить статью? Она исчезнет из списка и из магазина, вернуть её будет нельзя.":
+        "Kas kustutada artikkel? See kaob nimekirjast ja poest, tagasi seda enam ei saa.",
       "Удалить статью": "Kustuta artikkel",
       "уход за бородой зимой": "habemehooldus talvel",
       "Написать черновик по теме": "Kirjuta teema põhjal mustand",
@@ -2398,6 +2398,8 @@
       "Не получилось убрать фон — ставлю фото как есть": "Tausta ei õnnestunud eemaldada — panen foto nii, nagu on",
       "Статья не найдена — проверьте адрес в «Блоге»": "Artiklit ei leitud — kontrolli aadressi «Blogis»",
       "Обложка поставлена ✓": "Kaanepilt pandud ✓",
+      "Фото добавлено в конец статьи ✓": "Foto lisatud artikli lõppu ✓",
+      "Фото добавлено в конец статьи — сохраните": "Foto lisatud artikli lõppu — salvesta",
       "Сначала впишите, о чём полоска — хотя бы по-русски": "Kirjuta kõigepealt, millest riba räägib — kasvõi vene keeles",
       "Сначала впишите код": "Kirjuta kõigepealt kood",
       "Сначала впишите название — как на упаковке": "Kirjuta kõigepealt nimi — nagu pakendil",
@@ -2407,6 +2409,8 @@
       "Заменить обложку": "Vaheta kaanepilt",
       "+ Обложка": "+ Kaanepilt",
       "Обложка статьи": "Artikli kaanepilt",
+      "Встанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.":
+        "Tuleb teksti lõppu, artikli kõigis keeltes. Liigutada või eemaldada saab blogi redaktoris.",
       "Удалить обложку": "Kustuta kaanepilt",
       /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
       "В списке статей": "Artiklite loendis",
@@ -5124,8 +5128,8 @@
         "Published. Changes appear in the shop as soon as you save.",
       "Черновик. В магазине его пока не видно.": "A draft. Not visible in the shop yet.",
       "Сохранить и обновить": "Save and update",
-      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
-        "Delete this article? The text stays in the drafts, but the shop will not show it.",
+      "Точно удалить статью? Она исчезнет из списка и из магазина, вернуть её будет нельзя.":
+        "Delete this article? It leaves the list and the shop, and cannot be brought back.",
       "Удалить статью": "Delete the article",
       "уход за бородой зимой": "beard care in winter",
       "Написать черновик по теме": "Draft one from a topic",
@@ -5175,6 +5179,8 @@
       "Не получилось убрать фон — ставлю фото как есть": "Could not remove the background — using the photo as it is",
       "Статья не найдена — проверьте адрес в «Блоге»": "Article not found — check its address in “Blog”",
       "Обложка поставлена ✓": "Cover set ✓",
+      "Фото добавлено в конец статьи ✓": "Photo added at the end of the article ✓",
+      "Фото добавлено в конец статьи — сохраните": "Photo added at the end of the article — save it",
       "Сначала впишите, о чём полоска — хотя бы по-русски": "First write what the strip is about — in Russian at least",
       "Сначала впишите код": "First type the code",
       "Сначала впишите название — как на упаковке": "First type the name — as on the packaging",
@@ -5184,6 +5190,8 @@
       "Заменить обложку": "Replace the cover",
       "+ Обложка": "+ Cover",
       "Обложка статьи": "Article cover",
+      "Встанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.":
+        "It goes at the end of the text, in every language the article has. Move or remove it in the blog editor.",
       "Удалить обложку": "Delete the cover",
       /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
       "В списке статей": "In the article list",
@@ -6304,6 +6312,7 @@
     [/^Главное фото «(.+)»$/, { ET: "Peafoto «$1»", EN: "The main photo of “$1”" }],
     [/^Ещё одно фото «(.+)»$/, { ET: "Veel üks foto «$1»", EN: "One more photo of “$1”" }],
     [/^Обложка статьи «(.+)»(.*)$/, { ET: "Artikli «$1» kaanepilt$2", EN: "The cover of the article “$1”$2" }],
+    [/^Фото в статью «(.+)»$/, { ET: "Foto artiklisse «$1»", EN: "A photo into the article “$1”" }],
     [/^Описание «(.+)» обновлено$/, { ET: "Kirjeldus «$1» uuendatud", EN: "The description of “$1” was updated" }],
     [/^Отчёт для бухгалтера за (.+)$/, { ET: "Raamatupidaja aruanne — $1", EN: "The bookkeeper's report for $1" }],
     [/^Отзыв (.+): (.+)$/, { ET: "Arvustus $1: $2", EN: "Review $1: $2" }],
@@ -6400,7 +6409,7 @@
     [/^Промокод (.+): бесплатная доставка(.*)$/,
       { ET: "Sooduskood $1: tasuta tarne$2", EN: "Promo code $1: free delivery$2" }],
     [/^Промокод удалён: (.+)$/, { ET: "Sooduskood kustutatud: $1", EN: "Promo code deleted: $1" }],
-    [/^Черновик статьи «(.+)»(.*)$/, { ET: "Artikli «$1» mustand$2", EN: "A draft of the article “$1”$2" }],
+    [/^Новая статья «(.+)»(.*)$/, { ET: "Uus artikkel «$1»$2", EN: "A new article “$1”$2" }],
     /* The catch-alls of the block above, LAST of all: a line whose tail is a
        price, a country code or a date rather than a word still gets its
        template translated, and the value is handed back untouched. */
@@ -6411,8 +6420,12 @@
     [/^Тексты писем: (.+)$/, { ET: "Kirjade tekstid: $1", EN: "Letter texts: $1" }],
     [/^Промокод (.+): (.+)$/, { ET: "Sooduskood $1: $2", EN: "Promo code $1: $2" }],
     [/^Удалить набор «(.+)»(.*)$/, { ET: "Kustutada komplekt «$1»$2", EN: "Delete the set “$1”$2" }],
-    [/^Статья целиком на тему «(.+)»(.*)$/,
-      { ET: "Terve artikkel teemal «$1»$2", EN: "A whole article on “$1”$2" }],
+    /* «Новая», said out loud on the card: draft_post always makes another
+       article, never an edit of the one the owner is reading, and a card that
+       did not say so was the last chance to notice before a second draft
+       appeared in the list (Renat, 18.09.2026). */
+    [/^Новая статья целиком на тему «(.+)»(.*)$/,
+      { ET: "Uus terve artikkel teemal «$1»$2", EN: "A new whole article on “$1”$2" }],
     [/^Новый товар «(.+)» · (.+)$/, { ET: "Uus toode «$1» · $2", EN: "A new product “$1” · $2" }],
     [/^бренд: (.+)$/, { ET: "kaubamärk: $1", EN: "brand: $1" }],
     [/^название: (.+)$/, { ET: "nimi: $1", EN: "name: $1" }],
@@ -20405,8 +20418,8 @@
             '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
         (d.id
           ? (S.adminBlogConfirmDelete
-            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Текст останется в черновиках, ' +
-              "но в магазине её будет не увидеть.</div>" +
+            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Она исчезнет из списка и из ' +
+              "магазина, вернуть её будет нельзя.</div>" +
               '<button class="adm-btn adm-btn--warn" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button>" +
               '<button class="adm-link adm-link--muted" data-admblogdelno>Отмена</button>'
             : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
@@ -32375,6 +32388,14 @@
     if (a.type === "set_post_cover") {
       return "Обложка статьи «" + (txt(a.title) || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
     }
+    /* …and the picture in the text. The card says WHERE it lands, because
+       nobody chose the place: the editor puts a picture where the cursor is
+       and the chat has no cursor. Not journalled, like the other two blog
+       actions — the way back is the picture's own «×» in the editor. */
+    if (a.type === "add_post_photo") {
+      return "Фото в статью «" + a.slug + "»" +
+        "\nВстанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.";
+    }
     // assistant-work
     if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
     if (a.type === "export_report") return "Отчёт для бухгалтера за " + monthLabelRu(a.month);
@@ -32404,12 +32425,12 @@
     if (a.type === "draft_post" && a.topic && !a.title) {
       // txt(): the model is asked for one Russian line and sometimes sends
       // {RU,ET,EN} — «на тему «[object Object]»» is not a topic
-      return "Статья целиком на тему «" + txt(a.topic) + "»" + (txt(a.hint) ? " · " + txt(a.hint) : "") +
+      return "Новая статья целиком на тему «" + txt(a.topic) + "»" + (txt(a.hint) ? " · " + txt(a.hint) : "") +
         "\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.";
     }
     if (a.type === "draft_post") {
       var bTitle = txt(a.title) || "—";
-      return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
+      return "Новая статья «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
         (a.seo ? " · заголовок и описание для Google" : "");
     }
     if (a.type === "publish_post") {
@@ -33074,6 +33095,30 @@
     // \x22 is the double quote: a quote inside a regex literal trips tools/i18n-gaps.mjs's tokeniser
     return c === "{" || c === "[" || t.indexOf("```") === 0 || /\x22(reply|action|product_ids|tab)\x22\s*:/.test(t);
   }
+  /* ---- which article the question is about --------------------------------
+     «it also loses the context and each time creates a new blog post, instead
+     of updating an already created blog post» — Renat, 18.09.2026. The chat was
+     sent the banner, the shop's details and the week's takings, and nothing at
+     all about the blog editor standing open on the same screen — so «sorry,
+     make it shorter» and «add a photo here» reached the model with no article
+     attached to them, and the one blog action it had, draft_post, writes a NEW
+     one. Every follow-up was another draft in his list.
+
+     So the panel says which article it has open, the way it already says what
+     the banner holds (heroForAI) and what the shop's telephone is
+     (contentForAI). A slug only once the article exists on the server: an
+     unsaved new draft has nothing an action could name, and «the article he is
+     looking at» would then be a promise the route could not keep. The route
+     trims it again (briefOpenPost in src/app/api/assistant/actions.ts). */
+  function blogOpenForAI() {
+    var d = S.adminBlogEdit;
+    if (!d || !d.id || !d.slug) return null;
+    return {
+      slug: String(d.slug),
+      title: String(d.title.RU || d.title.ET || d.title.EN || ""),
+      status: d.status === "published" ? "published" : "draft"
+    };
+  }
   /** The uploaded photos, as the route wants them told: key and file name. */
   function attachmentsForAI() {
     return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err; })
@@ -33099,7 +33144,7 @@
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), post: blogOpenForAI() })
     })
       .then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
@@ -33259,6 +33304,99 @@
       render();
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
   }
+  /* ---- a photo INSIDE the article, through the assistant --------------------
+     «assistant is not able to add cover photos or photos to articles although
+     it says it does» — Renat, 18.09.2026. The cover had an action; a picture in
+     the text had none at all, so the model wrote the sentence and sent nothing,
+     and «добавил фото в статью» was simply not true. `add_post_photo` is that
+     missing half (src/app/api/assistant/actions.ts sanitizeAddPostPhoto).
+
+     The picture goes in as the very same <figure data-fig="full"> the editor's
+     own «Фото» button writes — blogInsertImage() above — so it is the same
+     object from here on: the owner taps it and gets the four sizes and the two
+     arrows, exactly as if he had put it there himself.
+
+     WHERE. At the end of the text, in every language the article is written in,
+     and the card and the toast both say so. The editor places a picture at the
+     caret; the chat has no caret, and guessing a paragraph would be a place
+     nobody chose dressed up as one that somebody did. The arrows on the
+     picture's own bar are how it moves.
+
+     TWO ROADS, one outcome. With the article open in the editor the picture
+     goes into the draft on screen and the owner saves it with everything else
+     he has been typing — writing the server copy underneath him would quietly
+     drop that. Otherwise it is read, changed and written back whole, like the
+     cover. The toast says which of the two happened, because «сохраните» is a
+     thing he has to do and «✓» is not. */
+  function blogFigureHtml(url) {
+    return '<figure data-fig="full"><img src="' + esc(url) + '" alt="" loading="lazy"></figure>';
+  }
+  /** Does this language have an article at all? A body with only a picture in
+      it has no words but is not empty — a second picture belongs under it. */
+  function blogBodyWritten(html) {
+    var s = String(html || "");
+    return !!(blogTextLen(s) || /<img\b/i.test(s));
+  }
+  /** All three languages, with the picture at the end of each one that has an
+      article — the reader sees it whichever page he opens. Russian alone when
+      none of the three is written yet: a picture has to land somewhere, and
+      Russian is the language this blog is written in first.
+
+      All three EVERY time, and untouched where nothing was added: the blog
+      PATCH replaces every field it is given, and trilingual() in src/lib/blog.ts
+      reads a language the body does not mention as an empty one. An object
+      carrying only the languages that changed would erase the other two. */
+  function blogBodies3WithFigure(body, url) {
+    var out = {}, any = false;
+    LANGS.forEach(function (l) {
+      var cur = String((body && body[l[0]]) || ""), written = blogBodyWritten(cur);
+      out[l[0]] = written ? cur + blogFigureHtml(url) : cur;
+      if (written) any = true;
+    });
+    if (!any) out.RU = blogFigureHtml(url);
+    return out;
+  }
+  function applyPostPhoto(a) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    var url = blogImgUrl(att.url);
+    if (!url) { toast("Ссылка на картинку должна начинаться с https://"); return; }
+    var d = S.adminBlogEdit;
+    /* The editor is open on this very article: the draft wins, unsaved words
+       and all. blogReadForm() first, or the picture would be appended to the
+       text as it was before the last keystroke and the box would paint over it. */
+    if (d && d.slug === a.slug) {
+      blogReadForm();
+      var next = blogBodies3WithFigure(d.body, url);
+      LANGS.forEach(function (l) { d.body[l[0]] = next[l[0]]; });
+      admAttFiled(a.key);
+      toast("Фото добавлено в конец статьи — сохраните");
+      render();
+      return;
+    }
+    apiJson("/api/admin/blog/?slug=" + encodeURIComponent(a.slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) { toast("Статья не найдена — проверьте адрес в «Блоге»"); return; }
+      var p = r.body.post;
+      return apiSend("/api/admin/blog/", "PATCH", {
+        /* blogBody3ToHtml() first: a post written before the visual editor is
+           still markdown in the row, and a <figure> glued onto markdown flips
+           looksLikeHtmlBody() (src/lib/blog-html.mjs) — the article would then
+           be rendered as HTML and lose every paragraph break it had. This is
+           the same one-time conversion the editor does in blogDraftFromPost(). */
+        id: p.id, title: p.title, excerpt: p.excerpt,
+        body: blogBodies3WithFigure(blogBody3ToHtml(p.body), url),
+        coverUrl: p.coverUrl || null, coverAlt: p.coverAlt, coverFocus: p.coverFocus || null,
+        tags: p.tags, products: p.products, seoTitle: p.seoTitle, seoDesc: p.seoDesc, author: p.author
+      }).then(function (res) {
+        if (!(res.status === 200 && res.body.ok)) { toast("Не получилось сохранить — попробуйте ещё раз."); return; }
+        admAttFiled(a.key);
+        S.adminBlog = null; blogForget();
+        toast("Фото добавлено в конец статьи ✓");
+        render();
+      });
+    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
+  }
+
   /** The post read whole and written back with the one field changed — a PATCH here replaces every field it carries. */
   function blogPatchCover(slug, url) {
     return apiJson("/api/admin/blog/?slug=" + encodeURIComponent(slug)).then(function (r) {
@@ -36659,6 +36797,8 @@
           applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
         }
         if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        // …and the same photo inside the text rather than above the title
+        if (pa.type === "add_post_photo") { applyPostPhoto(pa); return; }
         /* «Наборы»: the proposal opens the editor (no price is set for the
            owner), the change goes straight to POST /api/admin/bundles */
         if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }

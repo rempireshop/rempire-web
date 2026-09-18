@@ -5,7 +5,15 @@ import { briefContent, mergeContent } from "@/lib/content";
 import { listAllPosts, listPublished } from "@/lib/blog";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
 import { catalogueLines, relevantProducts, rowLine, type CatRow } from "@/lib/catalogue-slice";
-import { briefAnalytics, briefAttachments, briefHero, sanitizeAction, type AttachmentBrief } from "./actions";
+import {
+  briefAnalytics,
+  briefAttachments,
+  briefHero,
+  briefOpenPost,
+  sanitizeAction,
+  type AttachmentBrief,
+  type OpenPostBrief,
+} from "./actions";
 import {
   ASK_WHICH,
   ASK_WHICH_REPLY,
@@ -32,7 +40,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 25; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 26; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -56,6 +64,18 @@ const CUT_REPLY: Record<string, string> = {
   RU: "Ответ получился слишком длинным и оборвался. Спросите ещё раз — или разбейте просьбу на две.",
   ET: "Vastus tuli liiga pikk ja jäi pooleli. Küsi uuesti — või jaga palve kaheks.",
   EN: "The answer ran too long and was cut off. Ask again — or split the request in two.",
+};
+/* «assistant is not able to add cover photos or photos to articles although it
+   says it does» — Renat, 18.09.2026. The sentence and the action are written
+   by the same model in the same breath, and when the action is dropped here —
+   an invented slug, a photo key from no conversation, an article that no longer
+   exists — the sentence was still printed on its own, saying the photo was in.
+   He read it and moved on. So the reply is corrected rather than trusted: the
+   same posture the cut-off answer already has a few lines below. */
+const PHOTO_MISSED: Record<string, string> = {
+  RU: "Фото я не поставил: не понял, к какой статье. Откройте её в «Блоге» и попросите ещё раз — прямо оттуда.",
+  ET: "Fotot ma ei lisanud: ei saanud aru, millise artikli juurde. Ava see «Blogi» all ja palu uuesti — otse sealt.",
+  EN: "I did not add the photo: I could not tell which article. Open it under “Blog” and ask again from there.",
 };
 
 const ALLOWED_HOSTS = new Set([
@@ -402,6 +422,7 @@ function adminPrompt(
   intent: DiscountIntent = "",
   toShipSummary = "",
   weekSummary = "",
+  openPost: OpenPostBrief | null = null,
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -411,6 +432,10 @@ ${customersSummary}
 ` : ""}${blogLines ? `
 BLOG POSTS as they are right now (slug|draft-or-published|Russian title) — the slugs publish_post and set_post_cover take; never invent a slug not listed here:
 ${blogLines}
+` : ""}${openPost ? `
+THE ARTICLE THE OWNER IS LOOKING AT RIGHT NOW — it is open in the blog editor on his screen while he types to you:
+${openPost.slug}|${openPost.status}|${openPost.title || openPost.slug}
+This is what «эта статья», «она», «сюда», «в неё» mean, and what a message with no article named at all is about. Every action below that takes a post slug MUST use «${openPost.slug}» unless the owner clearly names a different article from the BLOG POSTS list. NEVER answer a request about this article with draft_post: draft_post makes a NEW article, and a second draft of something he is already reading is the mistake he complains about most. There is no action that rewrites the text of an article that exists — when he asks to shorten it, lengthen it, change the title or fix a paragraph, say plainly that you cannot rewrite it from here and that the text is edited in the blog editor he already has open (its «Написать статью целиком» rewrites the whole thing from a topic). Do not promise an edit and do not send an action for one.
 ` : ""}${bundleLines ? `
 SETS («наборы») as they are right now (id|Russian title|price|shown-or-hidden|the products inside). set_bundle may only use an id from this list; propose_bundle is for a set that does not exist yet:
 ${bundleLines}
@@ -447,7 +472,7 @@ ANSWER IN ${(LANG_NAME[lang] ?? "Russian").toUpperCase()}. That is the language 
 
 What the panel really does (say so when relevant, and never promise more): photos are stored exactly as uploaded and shown on a white background — there is no automatic background removal and no watermark (a per-photo «Убрать фон» button exists only when the shop has switched it on); texts — product descriptions, Google titles, blog articles — can be written in Russian, Estonian and English, by you here or by the editor's own buttons; every destructive action asks for confirmation first.
 
-You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute), and MOST actions land in the change journal — «Настройки → Журнал» — where «Вернуть» takes them back: for those, say «отменить можно в журнале» when it fits. THESE DO NOT GO THROUGH THE JOURNAL, so never promise «Вернуть» or «отменить можно в журнале» for them: stock_adjust and stock_set (the shelf keeps a ledger of movements instead — a wrong figure is corrected by another movement, and the reply should say that: «поправим ещё одним приходом/списанием»), draft_post and publish_post (an article is edited and unpublished in «Блог»), set_bundle and delete_bundle (the journal keeps a line about them, but there is no button that puts them back). Never call a change a demo. Available actions:
+You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute), and MOST actions land in the change journal — «Настройки → Журнал» — where «Вернуть» takes them back: for those, say «отменить можно в журнале» when it fits. THESE DO NOT GO THROUGH THE JOURNAL, so never promise «Вернуть» or «отменить можно в журнале» for them: stock_adjust and stock_set (the shelf keeps a ledger of movements instead — a wrong figure is corrected by another movement, and the reply should say that: «поправим ещё одним приходом/списанием»), draft_post, publish_post and add_post_photo (an article is edited, and a picture in it deleted, in «Блог»), set_bundle and delete_bundle (the journal keeps a line about them, but there is no button that puts them back). Never call a change a demo. Available actions:
   {"type":"set_price","id":"<catalogue id>","value":<number 1..500>} — change a product's price
   {"type":"set_stock","id":"<catalogue id>","value":"in|low|out"} — availability
   {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace the product's Google title and meta description (Russian unless the owner asks otherwise). title: AT MOST 60 characters including spaces — count them — and it must carry the brand, the product type and the volume the way a customer types them into Google («Proraso масло для бороды, 30 мл»); no keyword stuffing, no trailing «| Rempire» (the site appends it). description: AT MOST 155 characters including spaces — what the product is and one concrete reason to buy it, never a repeat of the title, never an invented ingredient, result or claim.
@@ -462,11 +487,13 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"toggle_promo","code":"SUVI10","value":false} — switch an existing promo code off (or back on)
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
-  {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a new blog article written: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
+  {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a NEW blog article written, one that does not exist yet: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Only ever for a new article — never to change, shorten, extend, retitle or illustrate one that is already there, and never twice in one conversation about the same article: a second draft_post is a second article in the owner's list, which is the thing he has to clean up by hand. Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
   {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${attachments.length ? `
   {"type":"add_product_photo","id":"<catalogue id>","key":"<a key from PHOTOS above>","main":true|false} — put one of the attached PHOTOS onto a product's page («вот фото для Bio Botanical Shampoo, сделай главным» → main:true; «добавь это фото к маслу Proraso» → main:false). One photo per action; several photos are several replies.
-  {"type":"set_post_cover","slug":"<post slug from BLOG POSTS>","key":"<a key from PHOTOS above>"} — make one of the attached PHOTOS a blog post's cover («это обложка для статьи про бороду»).` : `
-  (When the owner talks about a photo but none is attached to this conversation, ask him to attach it with the «Фото» button next to the question box — there is no photo action without one.)`}
+  {"type":"set_post_cover","slug":"<post slug from BLOG POSTS${openPost ? `, or «${openPost.slug}» — the article he has open` : ""}>","key":"<a key from PHOTOS above>"} — make one of the attached PHOTOS a blog post's COVER, the picture above the title and in the blog list («это обложка для статьи про бороду», «поставь сюда обложку»).
+  {"type":"add_post_photo","slug":"<post slug${openPost ? `, «${openPost.slug}» unless he names another` : " from BLOG POSTS"}>","key":"<a key from PHOTOS above>"} — put one of the attached PHOTOS INSIDE the article's text («добавь это фото в статью», «вставь фото в текст»). It goes at the END of the article, in every language it is written in, and the owner moves it with the arrows on the picture's own bar in the editor. Say exactly that — «поставлю в конец статьи, передвинуть можно в редакторе» — and never claim a place you did not choose. One photo per action.
+  Both of these need a slug. If you cannot tell which article the owner means — nothing open on his screen, nothing in BLOG POSTS that matches his words — ASK which article, and say plainly that you have not added the photo yet. Never write a sentence that says a photo is in when you are sending no action.` : `
+  (When the owner talks about a photo but none is attached to this conversation, there is NO photo action at all: you cannot add a cover and you cannot add a picture to an article. Say so plainly — you have not added anything — and ask him to attach the photo with the «Фото» button next to the question box. Never say a photo is added, set, or in the article when none was attached.)`}
   {"type":"export_report","month":"YYYY-MM"} — accountant order report for one calendar month, CSV/XLSX with VAT split (current month if the owner did not name one) («выгрузи отчёт за август», «отчёт для бухгалтера», «сколько НДС за месяц»)
   {"type":"set_pricing","value":{"proDiscountPct":25,"proMinOrder":0,"loyalty":{"enabled":true,"earnPct":5,"redeemMaxPct":30,"minRedeem":5}}} — wholesale pricing and the loyalty programme. Send ONLY the fields that change — this is a patch, merged over the current settings, so «подними скидку для салонов до 25 %» is {"proDiscountPct":25} and nothing else («выключи баллы», «баллы начисляем 8 %», «сделай оптовую скидку 30 % от 200 евро»)
   {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. customerId is the id on that customer's card in «Клиенты» when it is visible in this conversation, otherwise the id copied from the CUSTOMERS list above — never guess or invent one, and never put an e-mail address in this action
@@ -571,7 +598,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
   if (limited(ip)) return NextResponse.json({ error: "rate" }, { status: 429 });
 
-  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown };
+  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown; post?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -637,6 +664,11 @@ export async function POST(req: NextRequest) {
   const isMini = isAdmin && (body as { debug?: string }).debug === "mini";
   // photos attached in the panel (keys the upload route answered with)
   const attachments = isAdmin ? briefAttachments(body.attachments) : [];
+  /* …and the article the owner is looking at while he asks. The panel sends it
+     with every admin question (blogOpenForAI() in public/shop2/app.js); it is
+     what «сделай короче», «добавь сюда фото», «опубликуй» are about when the
+     blog editor is open, and until today the chat had no way to know that. */
+  const openPost = isAdmin ? briefOpenPost(body.post) : null;
   /* «набор» or «промокод» — read off the owner's own words before the model
      sees them (src/app/api/assistant/intent.ts). It goes into the prompt as a
      plain instruction AND is checked again against whatever the model
@@ -695,7 +727,7 @@ export async function POST(req: NextRequest) {
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary, openPost)
         : shopPrompt(lang, lastUser, blogLines, custom.rows, liveRows);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -774,7 +806,18 @@ export async function POST(req: NextRequest) {
     rawAction = null;
     cutAction = true;
   }
-  let action = sanitizeAction(rawAction, known, isAdmin, { attachedKeys: new Set(attachments.map((a) => a.key)) });
+  /* Every slug the model was shown, plus the one on the owner's screen even
+     when the list did not reach as far as it (adminBlogLinesForPrompt caps at
+     20). A photo action may name one of these and nothing else. */
+  const postSlugs = new Set(
+    adminBlogLines.split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean),
+  );
+  if (openPost) postSlugs.add(openPost.slug);
+  let action = sanitizeAction(rawAction, known, isAdmin, {
+    attachedKeys: new Set(attachments.map((a) => a.key)),
+    openPostSlug: openPost?.slug ?? "",
+    postSlugs,
+  });
 
   let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
   let retry = false;
@@ -788,6 +831,20 @@ export async function POST(req: NextRequest) {
        and no word about why is the panel telling the owner something untrue. */
     reply += (/[.!?…»)]$/.test(reply) ? " " : "… ") + CUT_REPLY[lang];
     retry = true;
+  }
+
+  /* The photo the reply says is in, and the action that would have put it
+     there — dropped just above because the slug was invented, the key belongs
+     to no conversation, or there was no article to point at. The sentence is
+     the owner's whole evidence either way, so it is corrected rather than left
+     to stand on its own: «assistant is not able to add cover photos or photos
+     to articles although it says it does» (Renat, 18.09.2026). Only when the
+     model really did reach for a blog photo action — a reply that merely
+     mentions a photo is not touched. */
+  const PHOTO_TYPES = new Set(["set_post_cover", "add_post_photo"]);
+  if (isAdmin && !action && rawAction && typeof rawAction === "object"
+      && PHOTO_TYPES.has(String((rawAction as { type?: unknown }).type))) {
+    reply += (/[.!?…»)]$/.test(reply) ? " " : ". ") + (PHOTO_MISSED[lang] ?? PHOTO_MISSED.RU);
   }
 
   /* The last door on «набор» vs «промокод». The model was told which of the

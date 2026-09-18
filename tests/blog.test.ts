@@ -454,15 +454,39 @@ describe("blog storage", () => {
     expect(republished?.publishedAt).toBe(firstPublishedAt); // not bumped to now()
   });
 
-  it("soft-deletes: back to draft AND forgets publishedAt, unlike unpublish", async () => {
+  /* «blog articles cannot be deleted» — Renat, 18.09.2026. Until then this
+     test said the opposite of what he needed and passed: delete meant
+     `status = 'draft'`, the row stayed readable, and the article sat in his
+     list wearing «черновик». Migration 195 and the header of src/lib/blog.ts
+     say what it means now. */
+  it("deletes: the article is gone from every read, list and lookup alike", async () => {
     const created = await upsertPost({ title: { RU: "Заголовок" } });
     await publishPost(created.id);
     const deleted = await deletePost(created.id);
     expect(deleted?.status).toBe("draft");
     expect(deleted?.publishedAt).toBeNull();
-    // the row survives — it can be published again, unlike a hard delete
-    const again = await getPostById(created.id);
-    expect(again).not.toBeNull();
+
+    expect(await getPostById(created.id)).toBeNull();
+    expect(await getPostBySlug(created.slug)).toBeNull();
+    expect(await getPublishedBySlug(created.slug)).toBeNull();
+    expect((await listAllPosts()).map((p) => p.id)).not.toContain(created.id);
+    expect((await listPublished(1, 50)).posts.map((p) => p.id)).not.toContain(created.id);
+    // …and nothing puts it back: a second delete, a publish and an edit all miss it
+    expect(await deletePost(created.id)).toBeNull();
+    expect(await publishPost(created.id)).toBeNull();
+    expect(await unpublishPost(created.id)).toBeNull();
+    await expect(upsertPost({ id: created.id, title: { RU: "Снова" } })).rejects.toThrow("not_found");
+  });
+
+  /* The row and its slug stay behind on purpose — 070_blog.sql promises a slug
+     is never reused for a different article, so a link shared before the delete
+     can never open somebody else's text. */
+  it("keeps a deleted article's slug taken, so the next article of that name gets its own", async () => {
+    const first = await upsertPost({ title: { RU: "Уход за бородой зимой" } });
+    expect(first.slug).toBe("uhod-za-borodoy-zimoy");
+    await deletePost(first.id);
+    const second = await upsertPost({ title: { RU: "Уход за бородой зимой" } });
+    expect(second.slug).toBe("uhod-za-borodoy-zimoy-2");
   });
 
   it("publishPost/unpublishPost/deletePost return null for an id that does not exist", async () => {
@@ -735,7 +759,7 @@ describe("admin blog API — CRUD", () => {
     });
   }
 
-  it("creates a draft, edits it, publishes it, unpublishes it, then soft-deletes it", async () => {
+  it("creates a draft, edits it, publishes it, unpublishes it, then deletes it for good", async () => {
     const { GET, POST, PATCH, DELETE } = await import("@/app/api/admin/blog/route");
 
     const created = await POST(send("POST", { title: { RU: "Заголовок" }, body: { RU: "текст" } }));
@@ -763,7 +787,20 @@ describe("admin blog API — CRUD", () => {
 
     const list = await GET(new Request(`${ORIGIN}/api/admin/blog/`, { headers: { cookie: admin } }));
     const posts = (await list.json()).posts;
-    expect(posts.map((p: { id: string }) => p.id)).toContain(post.id); // soft delete keeps the row
+    // «Блог» is the list the owner reads, and the article he deleted is not in it
+    expect(posts.map((p: { id: string }) => p.id)).not.toContain(post.id);
+
+    // …and every door back in is shut: the editor's own GET, the assistant's
+    // GET by slug, a second DELETE and a publish
+    const reopen = await GET(new Request(`${ORIGIN}/api/admin/blog/?id=${post.id}`, { headers: { cookie: admin } }));
+    expect(reopen.status).toBe(404);
+    const bySlug = await GET(new Request(`${ORIGIN}/api/admin/blog/?slug=${post.slug}`, { headers: { cookie: admin } }));
+    expect(bySlug.status).toBe(404);
+    const again = await DELETE(
+      new Request(`${ORIGIN}/api/admin/blog/?id=${post.id}`, { method: "DELETE", headers: { cookie: admin } }),
+    );
+    expect(again.status).toBe(404);
+    expect((await PATCH(send("PATCH", { id: post.id, publish: true }))).status).toBe(404);
   });
 
   it("GET ?id= and ?slug= both return the full post, 404 for an unknown one", async () => {

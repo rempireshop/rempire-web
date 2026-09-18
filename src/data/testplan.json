@@ -6003,6 +6003,49 @@
       }
     },
     {
+      "id": "blog-delete",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Удалить статью",
+      "steps": [
+        "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
+        "Написать заголовок «Проверка удаления» и пару слов текста, сохранить черновик.",
+        "Нажать «Удалить статью», прочитать вопрос и подтвердить «Да, удалить».",
+        "Посмотреть список статей.",
+        "Завести ещё одну статью с тем же заголовком «Проверка удаления» и сохранить."
+      ],
+      "expect": [
+        "Вопрос говорит, что статья исчезнет из списка и из магазина и вернуть её будет нельзя.",
+        "После «Да, удалить» панель возвращает к списку и пишет «Статья удалена ✓».",
+        "Удалённой статьи в списке больше нет — ни как черновика, ни как-либо ещё.",
+        "Новая статья с тем же заголовком заводится и получает свой адрес, а не чужой."
+      ],
+      "why": "Раньше «Удалить» просто переводило статью в черновики: она оставалась в списке навсегда, и удалить её было нельзя вообще ничем. Чужой адрес у новой статьи — это старая ссылка, которая открывает не тот текст.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:40:00.000Z",
+      "en": {
+        "title": "Deleting an article",
+        "steps": [
+          "Open «Ещё» → «Блог» and press «+ Статья».",
+          "Write the title «Проверка удаления» and a couple of words, save the draft.",
+          "Press «Удалить статью», read the question and confirm with «Да, удалить».",
+          "Look at the list of articles.",
+          "Create another article with the same title «Проверка удаления» and save it."
+        ],
+        "expect": [
+          "The question says the article leaves the list and the shop and cannot be brought back.",
+          "After «Да, удалить» the panel returns to the list and says «Статья удалена ✓».",
+          "The deleted article has gone from the list — not even as a draft.",
+          "The new article of the same title gets its own address, not the old one."
+        ],
+        "why": "«Удалить» used to mean «back to drafts»: the article stayed in the list for ever and nothing could remove it. An address handed on to a new article is an old link opening the wrong text."
+      }
+    },
+    {
       "id": "people-list",
       "area": "people",
       "who": "renat",
@@ -6545,6 +6588,55 @@
           "The card itself reads Estonian — the name and «alates», no Russian words."
         ],
         "why": "A translation that lost its product links turns a selling article into just text."
+      }
+    },
+    {
+      "id": "ai-blog-photo",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Помощник ставит фото в ту статью, что открыта",
+      "steps": [
+        "«Блог» → открыть любую статью (или написать новую и дождаться, пока она сохранится).",
+        "Не выходя из редактора, открыть помощника и спросить: «добавь фото».",
+        "Прикрепить фотографию кнопкой «Фото» и попросить: «это обложка».",
+        "Подтвердить «Применить» и посмотреть на обложку статьи.",
+        "Тем же фото попросить: «а теперь добавь фото в текст статьи», подтвердить.",
+        "Спросить «сделай статью короче» и прочитать ответ."
+      ],
+      "expect": [
+        "Без прикреплённого фото помощник говорит, что ничего не добавил, и просит прикрепить снимок.",
+        "В карточке подтверждения названа та самая статья, что открыта, а не другая.",
+        "Обложка встаёт у открытой статьи; новой статьи в списке не появляется.",
+        "Фото в текст встаёт в конец статьи — карточка предупреждает об этом заранее.",
+        "На «сделай короче» помощник честно отвечает: текст правят в редакторе, не в чате.",
+        "После всех просьб статья в списке по-прежнему одна."
+      ],
+      "why": "Помощник отвечал «добавил фото» и не добавлял, а каждая следующая просьба заводила ещё один черновик. Фраза, которой верят, хуже отказа: вы идёте дальше, а сделано ничего.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:40:00.000Z",
+      "en": {
+        "title": "The assistant puts a photo into the article you have open",
+        "steps": [
+          "«Блог» → open any article (or write a new one and wait for it to save).",
+          "Without leaving the editor, open the assistant and ask «добавь фото».",
+          "Attach a photo with the «Фото» button and ask «это обложка».",
+          "Confirm with «Применить» and look at the article's cover.",
+          "With the same photo ask «а теперь добавь фото в текст статьи» and confirm.",
+          "Ask «сделай статью короче» and read the answer."
+        ],
+        "expect": [
+          "With no photo attached the assistant says it added nothing and asks for the photo.",
+          "The confirm card names the article you have open, not another one.",
+          "The cover lands on the open article; no new article appears in the list.",
+          "The in-text photo goes at the end of the article — the card says so beforehand.",
+          "For «сделай короче» it says it cannot rewrite the text here, and points at the editor.",
+          "After all of it there is still exactly one article in the list."
+        ],
+        "why": "The assistant answered «photo added» and added nothing, and every follow-up started another draft. A sentence you believe is worse than a refusal: you move on and nothing was done."
       }
     },
     {

@@ -215,6 +215,8 @@ function inFlight(questions: string[]): Promise<FlightOut> {
     function contentForAI() { return {}; }
     function analyticsForAI() { return null; }
     function attachmentsForAI() { return []; }
+    // r25: which article is open in the blog editor — none, in this rig
+    function blogOpenForAI() { return null; }
     function fetch(_url, init) {
       sent.push(JSON.parse(init.body).messages.slice(-1)[0].content);
       return new Promise(function (ok) {
