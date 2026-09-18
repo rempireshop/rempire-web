@@ -462,7 +462,7 @@
       "expect": [
         "Другой объём — другая цена.",
         "Больший объём не дешевле меньшего.",
-        "Надпись о наличии общая для товара и от объёма не меняется.",
+        "Надпись о наличии вверху — про весь товар; про объём говорит его кнопка.",
         "Фотографии листаются пальцем.",
         "Описание на русском.",
         "Описание видно целиком, не обрезано."
@@ -482,12 +482,60 @@
         "expect": [
           "A different size shows a different price.",
           "A bigger size is never cheaper than a smaller one.",
-          "The in-stock line belongs to the whole product and does not follow the size.",
+          "The top in-stock line is about the product; the size speaks through its button.",
           "The photos swipe with a finger.",
           "The description is in Russian.",
           "The whole description is there, not cut off."
         ],
         "why": "A price that did not follow the size is an argument at the till, and a cheaper litre is your loss."
+      }
+    },
+    {
+      "id": "shop-size-out",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Кончился один объём из двух",
+      "steps": [
+        "Взять товар с двумя объёмами — например YOUNG.AGAIN DRY CONDITIONER, 100 и 250 мл.",
+        "На «Складе» выписать одному из них ноль, второй не трогать.",
+        "Открыть этот товар в магазине и нажать на пустой объём.",
+        "Нажать на второй объём.",
+        "Вернуться в раздел и посмотреть карточку этого товара.",
+        "Вернуть остаток на место."
+      ],
+      "expect": [
+        "Товар из магазина не пропал — он по-прежнему в разделе и открывается.",
+        "Пустой объём зачёркнут и серый, но нажать на него можно.",
+        "Вместо «В корзину» написано, что этого объёма нет и надо выбрать другой.",
+        "На втором объёме «В корзину» на месте и товар кладётся в корзину.",
+        "Карточка в разделе показывает цену того объёма, который ещё есть.",
+        "Объём, который на «Складе» ни разу не считали, остаётся обычным — он продаётся."
+      ],
+      "why": "Пустой объём, который выглядит как полный, — это оплаченный заказ, который вы не соберёте: до сих пор покупатель узнавал об этом только на кассе, отказом. А объём, который просто не считали, — это не пустой объём: погасить его значило бы перестать продавать половину магазина.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "en": {
+        "title": "One of two sizes has run out",
+        "steps": [
+          "Take a product with two sizes — YOUNG.AGAIN DRY CONDITIONER in 100 and 250 ml, say.",
+          "On «Склад» write a zero against one of them and leave the other alone.",
+          "Open that product in the shop and tap the empty size.",
+          "Tap the other size.",
+          "Go back to the section and look at that product's card.",
+          "Put the stock back."
+        ],
+        "expect": [
+          "The product has not vanished — it is still in the section and still opens.",
+          "The empty size is greyed and struck through, but can still be tapped.",
+          "In place of «В корзину» it says this size is out and to pick another.",
+          "On the other size «В корзину» is there and the product goes into the cart.",
+          "The card in the section quotes the price of the size that is still there.",
+          "A size the warehouse has never counted stays normal — it is still on sale."
+        ],
+        "why": "An empty size that looks full is a paid order you cannot pack: until now the buyer only found out at the checkout, by being refused. And a size nobody has counted is not an empty size — greying those out would stop half the shop from selling."
       }
     },
     {
