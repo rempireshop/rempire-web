@@ -291,6 +291,31 @@ function blogShelfProduct(id) {
   return { ...p, price, priceFrom: from };
 }
 
+/**
+ * Is this id one there is CERTAINLY no page to link to — `/shop2/p/<id>/`
+ * answering 404 with a noindex shell?
+ *
+ * The other half of blogShelfProduct()'s «no card»: that one says no for two
+ * quite different reasons, and a card inside the text has to tell them apart.
+ * A hidden product is off sale and its address is 404 (src/middleware.ts); an
+ * id that is not the catalogue's and is not one of the owner's is 404 too
+ * (src/lib/product-page.ts). But `c-…`, the owner's own, is NOT here: it has
+ * never had a static page and is not in the file, and its address is answered
+ * by the route at request time — the marker keeps its link and the shop fills
+ * the card in the moment app.js runs.
+ *
+ * A build whose overrides query came back empty — no DATABASE_URL, no `pg`,
+ * a database that did not answer — knows nothing about hidden and says so by
+ * saying no: a link that stays is the behaviour this tool has always had, and
+ * taking one off an article over a timed-out query would be worse than the
+ * stale price such a run already prints.
+ */
+function blogOffSale(id) {
+  const row = PRODUCT_OVERRIDES[id];
+  if (row && row.hidden) return true;
+  return !String(id).startsWith("c-") && !CATALOGUE.some(x => x.id === id);
+}
+
 /* ---------- translation tables, borrowed from app.js -------------------
 
    The dictionaries live in app.js and only there. Rather than keep a second
@@ -1562,10 +1587,14 @@ function blogPostPage(post, lang) {
      writes into the body and the same one grid() prints under the article.
 
      A product the owner made in the panel (`c-…`) is not in the file and has
-     no static page at all; its marker stays as it is here and the shop fills
-     it in the moment app.js runs. So does a hidden one — blogShelfProduct()
-     gives no price for it, and a marker with no price is left alone, which
-     is how a hidden product ends up with no link rather than a dead one.
+     no static page at all; its marker stays exactly as it is here, link and
+     all, and the shop fills the card in the moment app.js runs.
+
+     A HIDDEN one is the opposite case and `blogOffSale` is what tells the two
+     apart: it has no price here either, but its address answers 404, so its
+     card is written back without its href. The «Товар» button's marker is the
+     one that needed saying — its href is stored in the body, so until now a
+     hidden product lost only its price and went on linking to that 404.
 
      `bodyHtml` itself is left alone: #blogpost below is the shape
      /api/blog/<slug>/ answers, and hydrateBlog() builds its own cards. */
@@ -1581,6 +1610,7 @@ function blogPostPage(post, lang) {
         const p = blogShelfProduct(id);
         return p ? tr(p.brand + " " + p.name, code, true) : "";
       },
+      offSale: blogOffSale,
     },
   );
   // the Google pair is per language (pickLang: this language, else Russian),

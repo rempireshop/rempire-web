@@ -250,24 +250,49 @@ export function blogCardIds(html) {
  *     given this page's own language segment, which is the language the
  *     reader is reading it in.
  *
- * A marker whose product the caller cannot price — it left the catalogue, the
- * owner has hidden it, or the database that holds his own products did not
- * answer — is returned untouched: the «Товар» button's card keeps its name
- * and loses only its price, and the assistant's bare one stays the empty
- * anchor it was, which is the right answer for a hidden product. A card is a
- * recommendation to buy, and a link to a page that answers 404 is worse than
- * no link at all.
+ * A marker whose product the caller simply cannot price — the database that
+ * holds the owner's own products did not answer, the build read no overrides
+ * — is returned untouched, keeping its words and getting no price rather than
+ * a made-up one. An article is not worth losing over a query that timed out.
+ *
+ * `opts.offSale(id)` is the caller saying something stronger than «I could
+ * not price it»: «it is not for sale, and its /p/ address answers 404». Only
+ * the caller can tell those two apart, being the side that knows whether the
+ * owner has hidden the product, whether the id is the catalogue's at all, and
+ * whether the query it asked actually came back — so it says so, and nothing
+ * here guesses. Such a marker loses its LINK as well: it is written back as
+ * its id, its `data-price="live"` and its words, with no href and no other
+ * attribute — the shape the assistant's bare marker already has, and the same
+ * answer the storefront reaches by dropping the card altogether
+ * (blogProductHTML() in public/shop2/app.js, for a product rebuildCatalogue()
+ * has taken out of the shop). The words stay because a card may stand inside
+ * a sentence and taking it out of one would leave a hole.
+ *
+ * That last part is the whole of the «Товар» button's case: its href is
+ * STORED in the body, so until now a hidden product's card lost its price and
+ * went on linking to a page that answers 404 noindex. A card is a
+ * recommendation to buy, and a dead link in a published article a crawler
+ * keeps coming back to is worse than no link at all.
  */
 export function fillBlogCardPrices(html, priceOf, opts) {
   const src = String(html || "");
   if (!src.includes(BLOG_CARD_HINT)) return src;
   const seg = (opts && opts.seg) || "";
   const nameOf = (opts && opts.nameOf) || null;
+  const offSale = (opts && opts.offSale) || null;
   return src.replace(new RegExp(BLOG_CARD_SRC, "g"), (whole, id, live, rest, text) => {
     if (!isLiveCard(live, rest)) return whole;
-    const price = String(priceOf(id) || "").trim();
-    if (!price) return whole;
     const stored = String(text || "").trim();
+    const price = String(priceOf(id) || "").trim();
+    if (!price) {
+      /* Nothing to take away from a marker that carries no href of its own —
+         the assistant's bare one is already the answer a hidden product gets,
+         and `live` is always set on the one that does carry an href, since a
+         marker with an href and no `data-price` is the old shape and was
+         returned whole above. */
+      if (!rest || !offSale || !offSale(id)) return whole;
+      return '<a data-product="' + id + '" data-price="live">' + stored + "</a>";
+    }
     const words = stored || (nameOf ? esc(String(nameOf(id) || "").trim()) : "");
     return '<a data-product="' + id + '" data-price="live"' +
       (rest || ' href="' + href(seg, "/p/" + encodeURIComponent(id) + "/") + '"') + ">" +

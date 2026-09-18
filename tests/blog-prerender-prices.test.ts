@@ -163,6 +163,16 @@ function shelfProduct(catalogue: CatProduct[], overrides: Record<string, Row>, i
   );
 }
 
+/** blogOffSale() as the build defines it — the real lines, the same way. */
+function offSale(catalogue: CatProduct[], overrides: Record<string, Row>, id: string): boolean {
+  const body = `
+    ${slice("blogOffSale")}
+    return blogOffSale(ID);
+  `;
+  return (new Function("CATALOGUE", "PRODUCT_OVERRIDES", "ID", body) as
+    (c: CatProduct[], o: Record<string, Row>, id: string) => boolean)(catalogue, overrides, id);
+}
+
 const SHAMPOO = "system-4-bio-botanical-shampoo";
 const CAT: CatProduct[] = [
   { id: SHAMPOO, brand: "System 4", name: "Bio Botanical Shampoo — шампунь", price: 9, prices: [9, 16, 25] },
@@ -213,6 +223,46 @@ describe("tools/prerender-shop2.mjs blogShelfProduct()", () => {
   });
 });
 
+/**
+ * blogShelfProduct() says «no card» for two quite different reasons, and a
+ * card INSIDE the text has to tell them apart: one of them means the address
+ * answers 404 and the card must stop linking, the other means the build knows
+ * nothing and must leave the link where the owner put it.
+ */
+describe("tools/prerender-shop2.mjs blogOffSale()", () => {
+  it("says so for a product switched off in «Товары»", () => {
+    expect(offSale(CAT, { [SHAMPOO]: row({ hidden: true }) }, SHAMPOO)).toBe(true);
+  });
+
+  it("says so for an id the shop has never had", () => {
+    expect(offSale(CAT, {}, "no-such-product")).toBe(true);
+  });
+
+  /* The owner's own products have never had a static page and are not in the
+     file; their address is answered by the route at request time, so their
+     card keeps its link and the shop fills the rest in when app.js runs. */
+  it("does not say so for one of the owner's own products", () => {
+    expect(offSale(CAT, {}, "c-own-product")).toBe(false);
+    expect(offSale(CAT, { "c-own-product": row({ price: 9 }) }, "c-own-product")).toBe(false);
+  });
+
+  it("does not say so for a product that is on sale, repriced or not", () => {
+    expect(offSale(CAT, {}, SHAMPOO)).toBe(false);
+    expect(offSale(CAT, { [SHAMPOO]: row({ price: 21.4 }) }, SHAMPOO)).toBe(false);
+    expect(offSale(CAT, { [SHAMPOO]: row({ hidden: false }) }, SHAMPOO)).toBe(false);
+  });
+
+  /* A run that read no overrides at all — no DATABASE_URL, no `pg`, a database
+     that did not answer (fetchProductOverrides answers {} for each) — knows
+     nothing about «Показывать в магазине» and must not take a link off over
+     it. The file's own prices are what such a run prints; the file's own links
+     are what it leaves. */
+  it("says nothing about hidden when the overrides came back empty", () => {
+    expect(offSale(CAT, {}, SHAMPOO)).toBe(false);
+    expect(offSale(CAT, {}, "one-size")).toBe(false);
+  });
+});
+
 describe("tools/prerender-shop2.mjs wiring", () => {
   it("reads the overrides, and only when there is an article to read them for", () => {
     expect(prerender).toContain('from "./lib/overrides-export.mjs"');
@@ -229,5 +279,11 @@ describe("tools/prerender-shop2.mjs wiring", () => {
 
   it("prices the cards inside the text from the same lookup", () => {
     expect(prerender).toContain("const p = blogShelfProduct(id);\n      return p ? priceLabel(p, t) : \"\";");
+  });
+
+  /* …and tells them WHICH of the unpriced ones has no page to link to, which
+     is the half a price alone cannot say. */
+  it("hands the cards inside the text the off-sale rule as well", () => {
+    expect(prerender).toContain("offSale: blogOffSale,");
   });
 });

@@ -32,7 +32,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { publishPost, renderPostBody, sanitizeHtml, upsertPost } from "@/lib/blog";
-import { createCustomProduct } from "@/lib/custom-products";
+import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
 import { upsertOverride } from "@/lib/orders";
 import { blogCardIds, fillBlogCardPrices } from "@/lib/seo-head.mjs";
@@ -226,6 +226,78 @@ describe("fillBlogCardPrices: the assistant's bare marker comes out the same car
   });
 });
 
+/* ---------- a product that is not for sale, 18.09.2026 ------------------ */
+
+/**
+ * The gap the bare marker's change did not close, and it predates it.
+ *
+ * The «Товар» button STORES its href in the body, so a card the caller could
+ * not price kept that link while losing only its figure. For a hidden product
+ * the link goes to `/shop2/p/<id>/`, which the middleware answers 404 noindex
+ * (docs/seo.md) — a dead link sitting in a published article that a crawler
+ * keeps coming back to.
+ *
+ * `opts.offSale(id)` is how the caller says «not for sale», as against «I
+ * could not price it»: only it knows whether the owner hid the product,
+ * whether the id is the catalogue's, and whether the query it asked came
+ * back. Both callers do, and neither guesses — src/lib/blog-page.ts through
+ * shelfProducts(), tools/prerender-shop2.mjs through blogOffSale().
+ */
+describe("fillBlogCardPrices: a card for a product that is not for sale loses its link", () => {
+  const noPrice = () => "";
+  const nameOf = (id: string) => (id === SHAMPOO ? "System 4 Bio Botanical Shampoo — шампунь" : "");
+  const offSale = (id: string) => id === SHAMPOO;
+
+  it("takes the href off the «Товар» button's card and keeps the words", () => {
+    expect(fillBlogCardPrices(renderPostBody(liveMarker(SHAMPOO)), noPrice, { seg: "", nameOf, offSale }))
+      .toBe(`<p><a data-product="${SHAMPOO}" data-price="live">Bio Botanical Shampoo</a></p>`);
+  });
+
+  /* The words stay because a card may stand inside a sentence, and taking one
+     out of a sentence would leave a hole in it. */
+  it("leaves that same card alone when the caller only failed to price it", () => {
+    const stored = renderPostBody(liveMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf })).toBe(stored);
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale: () => false })).toBe(stored);
+  });
+
+  it("never takes the link off a product it could price", () => {
+    expect(fillBlogCardPrices(renderPostBody(liveMarker(SHAMPOO)), () => "от 14,50 €", { seg: "", nameOf, offSale }))
+      .toContain(`href="/shop2/p/${SHAMPOO}/"`);
+  });
+
+  /* The assistant's marker has no href to take, and gets none: that is the
+     answer it has had for a hidden product since 18.09.2026, and this rule is
+     the «Товар» button's card catching up with it. */
+  it("leaves the assistant's bare marker exactly as it is", () => {
+    const stored = renderPostBody(bareMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale })).toBe(stored);
+  });
+
+  /* The branch that carries every article published before 17.09.2026. It is
+     frozen, and «the product is off sale» does not unfreeze it. */
+  it("still does not touch a marker of the old shape, off sale or not", () => {
+    const stored = renderPostBody(oldMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale })).toBe(stored);
+  });
+
+  /* Whatever the href brought with it goes with it: an absolute one is
+     sanitised into `target`/`rel` as well, and those mean nothing without it. */
+  it("drops target and rel with the href rather than leaving them behind", () => {
+    const external = renderPostBody(
+      `<p><a data-product="${SHAMPOO}" data-price="live" href="https://example.com/">Имя</a></p>`,
+    );
+    expect(external).toContain('target="_blank"');
+    expect(fillBlogCardPrices(external, noPrice, { seg: "", nameOf, offSale }))
+      .toBe(`<p><a data-product="${SHAMPOO}" data-price="live">Имя</a></p>`);
+  });
+
+  it("works on a body the build's own sanitiser wrote", () => {
+    expect(fillBlogCardPrices(exportRenderPostBody(liveMarker(SHAMPOO)), noPrice, { seg: "", nameOf, offSale }))
+      .not.toContain("href");
+  });
+});
+
 /* ---------- 4: the request-time article -------------------------------- */
 
 const LIVE_BASE = "https://rempireshop.com";
@@ -338,14 +410,41 @@ describe("the article as it is served: the price is the shop's, not the article'
     expect(articleBody(await postPage("", post.slug))).toContain("Acme Wax — от 9 €");
   });
 
-  /* A product the owner has switched off is not priced — the card keeps its
-     words and shows no figure, rather than quoting something withdrawn. */
-  it("shows no price for a product that has left the shop", async () => {
+  /* A product the owner has switched off loses BOTH: no figure, rather than
+     quoting something withdrawn, and no link, because the address that href
+     points at answers 404 noindex (src/middleware.ts). Until 18.09.2026 the
+     card lost only the price and went on linking — the «Товар» button stores
+     its href in the body, so leaving the marker alone left the link standing. */
+  it("takes the price AND the link off a product that has left the shop", async () => {
     await upsertOverride(SHAMPOO, { hidden: true });
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" });
     const body = articleBody(await postPage("", post.slug));
     expect(body).toContain("Bio Botanical Shampoo");
     expect(body).not.toContain("€");
+    expect(body).not.toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(body).toContain(`<a data-product="${SHAMPOO}" data-price="live">`);
+  });
+
+  /* And the same article in Estonian, where the href the button stored is the
+     Russian one either way — the link goes whichever language is being read. */
+  it("takes it off in every language the article is read in", async () => {
+    await upsertOverride(SHAMPOO, { hidden: true });
+    const post = await publish({ RU: liveMarker(SHAMPOO), ET: liveMarker(SHAMPOO), EN: "" });
+    expect(articleBody(await postPage("et", post.slug))).not.toContain("href=\"/shop2/p/");
+  });
+
+  /* One of the owner's OWN products, switched off: src/lib/product-page.ts
+     answers its address 404 for exactly that, so it is off sale in the same
+     sense a hidden catalogue product is, and its card loses the link too. */
+  it("takes the link off one of the owner's own products he has switched off", async () => {
+    const wax = await createCustomProduct({
+      brand: "Acme", name: "Gone", cat: "styling", sizes: ["50 мл"], prices: [9],
+    });
+    await setCustomProductActive(wax.id, false);
+    const post = await publish({ RU: liveMarker(wax.id, "Acme Gone"), ET: "", EN: "" });
+    const body = articleBody(await postPage("", post.slug));
+    expect(body).toContain("Acme Gone");
+    expect(body).not.toContain(`href="/shop2/p/${wax.id}/"`);
   });
 
   /* An article the assistant wrote, served: the card it put in the text is a

@@ -757,7 +757,8 @@
         "Открыть одну статью.",
         "Пролистать её до конца.",
         "Нажать на товар внутри статьи, если он там есть.",
-        "Сверить цену под статьёй («Товары из статьи») с ценой этого товара в «Товарах»."
+        "Сверить цену под статьёй («Товары из статьи») с ценой этого товара в «Товарах».",
+        "Выключить «Показывать в магазине» у товара, который стоит внутри текста статьи, и открыть статью заново."
       ],
       "expect": [
         "В списке статьи с картинками.",
@@ -765,13 +766,13 @@
         "Картинки внутри статьи на месте.",
         "Ссылка на товар открывает этот товар.",
         "Цена под статьёй — та же, что в «Товарах» сейчас.",
-        "Товара, у которого выключено «Показывать в магазине», под статьёй нет."
+        "Снятый с продажи товар: под статьёй его нет, в тексте название без ссылки."
       ],
       "why": "Статьи приводят людей из Google бесплатно; сломанная — никого.",
       "risk": "low",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-18T18:00:00.000Z",
+      "markedAt": "2026-09-18T19:30:00.000Z",
       "en": {
         "title": "The blog",
         "steps": [
@@ -779,7 +780,8 @@
           "Open one article.",
           "Scroll it to the end.",
           "Tap the product inside the article, if there is one.",
-          "Compare the price under the article («Товары из статьи») with that product's price in «Товары»."
+          "Compare the price under the article («Товары из статьи») with that product's price in «Товары».",
+          "Switch «Показывать в магазине» off on a product that stands inside the article's text, then open the article again."
         ],
         "expect": [
           "The list shows articles with pictures.",
@@ -787,7 +789,7 @@
           "The pictures inside the article are there.",
           "The product link opens that product.",
           "The price under the article is the one «Товары» shows right now.",
-          "A product with «Показывать в магазине» off is not under the article at all."
+          "A product off sale: not under the article, its name in the text no longer links."
         ],
         "why": "Articles bring people from Google for free; a broken one brings nobody."
       }
