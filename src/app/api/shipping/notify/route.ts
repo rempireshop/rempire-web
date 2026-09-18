@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getOrderByNumber, getOrderByShipmentId, setOrderStatus, type Order } from "@/lib/orders";
+import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
+import { getOrderByNumber, getOrderByShipmentId, setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { montonioShippingConfig, saveShipmentOnOrder } from "@/lib/shipping/montonio";
 import {
@@ -125,6 +126,27 @@ export async function POST(req: Request) {
   } catch (err) {
     // Worth recording, not worth a redelivery: the vocabulary already has it.
     console.error("shipping/notify: could not store the status on the order", err);
+  }
+
+  /* `shipment.registrationFailed` — the carrier turned the parcel down.
+     recordShipmentStatus() writes the WORD to the journal, and only the first
+     time it is ever seen, which is right for a vocabulary and wrong for this:
+     the news here is the ORDER, every single time. Without this row a refused
+     parcel booked asynchronously is one word in a settings blob and nothing
+     else, and the owner finds out when the customer asks where the parcel is.
+     Sandbox never sends this event — it calls no carriers at all
+     (docs/montonio-untested.md, S1). */
+  if (String(seen.word).toLowerCase() === "registrationfailed") {
+    console.error(`shipping/notify: carrier refused the parcel for ${order.number}`);
+    await writeAuditSafe("system", "shipment.registration_failed", {
+      orderId: order.id,
+      number: order.number,
+      provider: "montonio",
+      shipmentId: event.shipmentId || undefined,
+      code: seen.word,
+      reason: shipmentRegistrationFailed(seen.word).reason,
+      event: event.event || undefined,
+    });
   }
 
   /* The white-list fallback, doing the one thing it is trusted with. Only from

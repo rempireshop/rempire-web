@@ -53,9 +53,22 @@
  * into an `order.refund_failed` audit row. The code alone is not actionable —
  * Montonio documents five distinct refusals and the panel's one sentence named
  * none of them (docs/montonio-payments-audit.md § A1).
+ *
+ * On top of the code, since 18.09.2026, the body carries `reason` and
+ * `messages` (RU/ET/EN): each documented refusal has its own sentence saying
+ * what the owner must do, and a refusal this shop has not been taught quotes
+ * Montonio verbatim rather than inventing a cause — src/lib/montonio-problems.ts.
+ * The panel prints `messages[<its language>]` and falls back to its own map.
+ *
+ * A refund that Montonio only *started* — `refundStatus: "pending"`, which is
+ * what an under-funded refund looks like at the counter — says so in
+ * `pendingMessages` and writes an `order.refund_pending` journal row. That
+ * state used to be reported as «возврат ушёл», and it can sit for ten days
+ * before Montonio cancels it (docs/montonio-untested.md, P6–P7).
  */
 import { requireAdmin } from "@/lib/auth";
 import { creditGiftCard, getGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
+import { readRefundRefusal, refundPendingText } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, writeAuditSafe, type Order } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { notifyOrderClosed } from "@/lib/payments/mail-hook";
@@ -287,15 +300,27 @@ export async function POST(req: Request, ctx: Ctx) {
          Read-only, best effort, and after the fact: it cannot stop a refund
          that would have worked, and a lookup that fails changes nothing. */
       const montonio = await refundRefusalContext(provider, providerRef);
+      /* Montonio's own sentence → one of its five documented refusals → three
+         sentences the owner can act on. An unrecognised refusal quotes
+         Montonio rather than guessing: the whole point of this branch is that
+         a confident wrong cause is worse than a foreign true one
+         (src/lib/montonio-problems.ts). Only `reason` goes into the journal —
+         the three sentences belong on the screen, not in an audit row. */
+      const refusal = code === "provider_rejected" ? readRefundRefusal(detail) : null;
       await writeAuditSafe("admin", "order.refund_failed", {
         orderId: order.id,
         number: order.number,
         amount: split.money,
         error: code,
+        reason: refusal?.reason,
         detail,
         ...montonio,
       });
-      return bad(code, 502, { detail, ...montonio });
+      return bad(code, 502, {
+        detail,
+        ...(refusal ? { reason: refusal.reason, messages: refusal.messages } : {}),
+        ...montonio,
+      });
     }
   }
 
@@ -386,11 +411,33 @@ export async function POST(req: Request, ctx: Ctx) {
       );
     }
 
+    /* «Отправлено» is not «возвращено». Montonio answers 200 with
+       `status: "PENDING"` for a refund it has only accepted — including the
+       one case the panel used to blame out loud, a settlement account with
+       nothing in it, whose real reason (`INSUFFICIENT_FUNDS`) arrives days
+       later on the refund webhook. The guide gives that retry ten days and
+       then cancels the refund, so a pending one that nobody looks at is money
+       the customer never receives and the shop believes it has sent.
+       The journal row is what makes it findable afterwards; `pendingMessages`
+       is what the panel says instead of «письмо ушло». */
+    if (moneyResult && moneyResult.status === "pending") {
+      await writeAuditSafe("admin", "order.refund_pending", {
+        orderId: order.id,
+        number: order.number,
+        amount: money(moneyResult.amount || split.money),
+        ref: moneyResult.ref,
+        detail: moneyResult.detail,
+      });
+    }
+
     const fresh = (await getOrder(order.id)) ?? current;
     return Response.json(
       {
         ok: true,
         amount: refundedNow,
+        ...(moneyResult && moneyResult.status === "pending"
+          ? { pendingMessages: refundPendingText(0) }
+          : {}),
         gift: giftBack,
         money: moneyResult ? money(moneyResult.amount || split.money) : 0,
         giftCode: giftBack > 0 && giftCard ? giftCard.code : undefined,

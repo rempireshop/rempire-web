@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getOrder, getOrderByNumber, getOrderByPaymentRef } from "@/lib/orders";
+import { readRefundStatusDescription } from "@/lib/montonio-problems";
+import { getOrder, getOrderByNumber, getOrderByPaymentRef, writeAuditSafe } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { canRefund, refundableAmount, refundsOf, type RefundNotification } from "@/lib/payments/refund";
@@ -191,6 +192,32 @@ async function refund(provider: PaymentProvider, req: Request) {
      that in must leave the amount where it was rather than zero it. */
   const others = refundsOf(order.payment).filter((r) => r.ref !== note.refundRef);
   const amount = Math.min(note.amount, refundableAmount(await refundValue(order), { refunds: others }));
+
+  /* The reason a refund did not reach the customer, and the only place it is
+     ever said. `POST /refunds` answers 200 PENDING for a refund it cannot fund
+     and explains nothing; days later this webhook arrives carrying
+     `refundStatusDescription` — INSUFFICIENT_FUNDS, DECLINED,
+     EXPIRED_OR_CANCELLED_CARD … — and until 18.09.2026 the word went into the
+     ledger entry's `detail` and nowhere a human would look. Now it is a
+     journal row of its own, with a code the panel can translate.
+     Only when there IS something to explain: the guide prints `null` for a
+     refund that simply worked, and a SUCCESSFUL refund with a description is
+     still worth recording (a partial success has a story). */
+  if (note.statusDescription) {
+    const why = readRefundStatusDescription(note.statusDescription);
+    console.error(
+      `payments/notify: refund ${note.refundRef} on ${order.number} — ${note.status} · ${note.statusDescription}`,
+    );
+    await writeAuditSafe("system", "order.refund_stuck", {
+      orderId: order.id,
+      number: order.number,
+      amount,
+      ref: note.refundRef,
+      code: note.statusDescription,
+      reason: why.reason,
+      status: note.status,
+    });
+  }
 
   try {
     const out = await settleRefund(

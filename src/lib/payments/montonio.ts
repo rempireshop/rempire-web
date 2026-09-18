@@ -236,7 +236,8 @@ export interface MontonioOrderSnapshot {
 interface RefundTokenClaims {
   refundUuid?: string;
   refundStatus?: string;
-  refundStatusDescription?: string;
+  /** `null` on a refund that simply worked — the guide's own example prints it. */
+  refundStatusDescription?: string | null;
   accessKey?: string;
   refundAmount?: number | string;
   orderUuid?: string;
@@ -567,6 +568,14 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
       amount: money(Number(claims.refundAmount ?? 0)),
       detail:
         [claims.refundStatus, claims.refundStatusDescription].filter(Boolean).join(" · ") || undefined,
+      /* Documented as `null` on a refund that worked, so an empty string and a
+         null both mean «nothing to explain». The raw word travels on its own
+         because it is the one field that says WHY a refund is stuck — the
+         create call answered 200 PENDING and named nothing at all. */
+      statusDescription:
+        typeof claims.refundStatusDescription === "string" && claims.refundStatusDescription.trim()
+          ? claims.refundStatusDescription.trim()
+          : undefined,
     };
   }
 

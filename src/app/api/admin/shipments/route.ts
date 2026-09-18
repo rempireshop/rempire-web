@@ -27,8 +27,31 @@
  * the FIRST one is still inside Montonio — the timed-out tap on the owner's
  * phone — is answered `in_progress` rather than booking a second one: the slot
  * on the order row is claimed before the call (claimShipmentSlot).
+ *
+ * **A parcel the carrier refused is not a success** (since 18.09.2026,
+ * docs/montonio-shipping-audit.md § 1.4). We book with `synchronous: true`, so
+ * Montonio answers with the final registration status — `registered` **or**
+ * `registrationFailed` — and this route used to store either one, write
+ * «этикетка создана» to the journal and answer `ok: true`. The owner saw
+ * «Этикетка готова ✓» for a parcel that will never move, and the label call
+ * after it failed with nothing to explain itself.
+ *
+ * Now a `registrationFailed` reply is:
+ *   · **stored anyway** — the shipment really does exist at Montonio, and
+ *     forgetting it would let the next press book (and pay for) a second one;
+ *   · answered `502 registration_failed`, with `reason` and RU/ET/EN
+ *     `messages` naming what to fix (src/lib/montonio-problems.ts);
+ *   · written to the journal as `shipment.registration_failed`, not as
+ *     `shipment.create`.
+ * A second press on the same order repeats that refusal rather than reporting
+ * «Этикетка снова на месте ✓». The documented repair is `PATCH /shipments/{id}`
+ * with the corrected receiver, which this shop does not have yet — so the
+ * messages say to pass the correction on rather than to press again.
+ * Sandbox cannot produce this state at all: it never calls a carrier
+ * (docs/montonio-untested.md, S1).
  */
 import { requireAdmin } from "@/lib/auth";
+import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
 import {
   MontonioShippingError,
@@ -37,6 +60,7 @@ import {
   releaseShipmentSlot,
   saveShipmentOnOrder,
   shipmentOnOrder,
+  type MontonioShipment,
 } from "@/lib/shipping/montonio";
 
 export const runtime = "nodejs";
@@ -44,6 +68,33 @@ export const dynamic = "force-dynamic";
 
 /** Which failures are the operator's fault (400) and which are ours (502). */
 const CLIENT_ERRORS = new Set(["not_shippable", "point_unresolved", "no_courier_service"]);
+
+/**
+ * The one status that means «the carrier said no» — overview § Shipment
+ * lifecycle, and the only non-`registered` outcome a synchronous booking can
+ * answer with (shipments guide § Creating a shipment synchronously).
+ */
+const REGISTRATION_FAILED = "registrationfailed";
+
+function registrationRefused(shipment: Pick<MontonioShipment, "status">): boolean {
+  return String(shipment.status ?? "").trim().toLowerCase() === REGISTRATION_FAILED;
+}
+
+/** The same answer whether the refusal has just arrived or is already stored. */
+function refusedResponse(shipment: MontonioShipment) {
+  const reading = shipmentRegistrationFailed(shipment.status);
+  return Response.json(
+    {
+      ok: false,
+      error: "registration_failed",
+      reason: reading.reason,
+      messages: reading.messages,
+      detail: shipment.status,
+      shipment,
+    },
+    { status: 502, headers: { "cache-control": "no-store" } },
+  );
+}
 
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
@@ -77,6 +128,11 @@ export async function POST(req: Request) {
 
   const existing = shipmentOnOrder(order);
   if (existing) {
+    /* A refused registration is stored so nobody books a second parcel — but
+       it is still a refusal, and answering «reused: true» would paint the
+       label step green for a parcel the carrier turned down. Same words every
+       time it is asked for. */
+    if (registrationRefused(existing)) return refusedResponse(existing);
     if (existing.dismissed) {
       try {
         await saveShipmentOnOrder(order.id, { dismissed: false });
@@ -124,7 +180,21 @@ export async function POST(req: Request) {
     if (err instanceof MontonioShippingError) {
       const status = err.code === "not_configured" ? 501 : CLIENT_ERRORS.has(err.code) ? 400 : 502;
       console.error("[api/admin/shipments] montonio refused:", err.code, err.detail);
-      return Response.json({ ok: false, error: err.code, detail: err.detail }, { status });
+      /* Only for the refusals whose cause is inside Montonio's own words —
+         `rejected` carries «400 {…}» from the transport. The codes the panel
+         already has a sentence for (not_shippable, point_unresolved,
+         no_courier_service, not_configured) keep theirs: they are ours, they
+         are right, and two sources for one message is how they drift. */
+      const reading = err.code === "rejected" ? shipmentRegistrationFailed(err.detail) : null;
+      return Response.json(
+        {
+          ok: false,
+          error: err.code,
+          detail: err.detail,
+          ...(reading ? { reason: reading.reason, messages: reading.messages } : {}),
+        },
+        { status },
+      );
     }
     console.error("[api/admin/shipments] create failed:", err);
     return Response.json({ ok: false, error: "shipment_failed" }, { status: 502 });
@@ -138,6 +208,25 @@ export async function POST(req: Request) {
     // report it with the tracking code so nobody books it twice.
     console.error("[api/admin/shipments] could not store the shipment:", err);
     return Response.json({ ok: false, error: "store_failed", shipment }, { status: 500 });
+  }
+
+  /* Stored, and then refused. The order of these two is the whole point: the
+     shipment exists at Montonio whatever its status, so it is written down
+     first and only then reported as the failure it is. */
+  if (registrationRefused(shipment)) {
+    console.error(
+      `[api/admin/shipments] carrier refused ${order.number}: ${shipment.carrier} ${shipment.status}`,
+    );
+    await writeAuditSafe("admin", "shipment.registration_failed", {
+      orderId: order.id,
+      number: order.number,
+      provider: "montonio",
+      shipmentId: shipment.shipmentId,
+      carrier: shipment.carrier,
+      code: shipment.status,
+      reason: shipmentRegistrationFailed(shipment.status).reason,
+    });
+    return refusedResponse(shipment);
   }
 
   await writeAuditSafe("admin", "shipment.create", {

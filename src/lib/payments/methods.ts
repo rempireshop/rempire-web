@@ -213,3 +213,69 @@ export async function fetchPaymentMethods(
   g.__rempirePayMethods = { at: Date.now(), data };
   return data;
 }
+
+/* ---------- which products this store actually has ------------------------ */
+
+/**
+ * The enabled payment methods, by name — the nearest thing Montonio has to an
+ * «activated products» endpoint, and the reason this function is separate from
+ * the cached, public-facing one above.
+ *
+ * What the documentation gives us, exactly:
+ *
+ *   · `GET /stores/payment-methods` returns **only the methods the store has
+ *     enabled**, each as a key of `paymentMethods`: `paymentInitiation`,
+ *     `cardPayments`, `mobilePay`, `blik`, `bnpl`, `hirePurchase`. The guide
+ *     says what an empty answer means and nothing else: «if empty that means
+ *     the paymentMethods have not been enabled for you store, contact customer
+ *     support». So a key that is present IS the activation signal.
+ *   · There is **no endpoint at all** for the rest. The API reference
+ *     documents six paths — `/stores/payment-methods`, `/orders`,
+ *     `/orders/:orderUuid`, `/refunds`, `/payment-links`, `/sessions` — and no
+ *     store, product or activation resource among them. In particular
+ *     **«Refundable bank payments» cannot be read from anywhere**: the only
+ *     trace it leaves in the API is `isRefundableType` on a single paid order
+ *     (`MontonioProvider.fetchOrder`), which is why the readiness route probes
+ *     one real order rather than asking a question that has no endpoint.
+ *
+ * Uncached and admin-only: a readiness screen wants today's answer, and the
+ * six-hour cache above exists for the checkout's hot path, not for this.
+ * `null` — never a throw — on anything.
+ */
+export async function fetchEnabledPaymentMethods(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<string[] | null> {
+  const config = montonioConfigFromEnv(env);
+  if (!config) return null;
+
+  let res: Response;
+  try {
+    res = await fetch(`${montonioBaseUrl(config.env)}/stores/payment-methods`, {
+      headers: { accept: "application/json", authorization: `Bearer ${authToken(config)}` },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("[montonio payment-methods] products unreachable —", err);
+    return null;
+  }
+  if (!res.ok) {
+    console.error("[montonio payment-methods] products", res.status, (await res.text()).slice(0, 400));
+    return null;
+  }
+
+  let raw: { paymentMethods?: Record<string, unknown> };
+  try {
+    raw = (await res.json()) as typeof raw;
+  } catch {
+    return null;
+  }
+  const methods = raw?.paymentMethods;
+  if (!methods || typeof methods !== "object" || Array.isArray(methods)) return [];
+  /* A key whose value is null is not an enabled product — the shape is
+     «present and an object» for everything the store has. */
+  return Object.entries(methods)
+    .filter(([, v]) => !!v && typeof v === "object")
+    .map(([k]) => k)
+    .sort();
+}
