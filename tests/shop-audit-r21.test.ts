@@ -195,6 +195,12 @@ describe("upsellHTML: the price it quotes is the price the «+» adds", () => {
       ${slice("proPrice")}
       ${slice("shownPrice")}
       ${slice("cardSizes")}
+      /* per-size stock (r23): cardSizeIdx() passes over a volume the warehouse
+         has counted to zero, so its two helpers come along. No fixture here
+         carries a stockVar map, which is the «nobody has counted this» case —
+         so every case below prices exactly as it did before. */
+      ${slice("sizeStockOf")}
+      ${slice("sizeOut")}
       ${slice("cardSizeIdx")}
       ${slice("cardPriceText")}
       ${slice("upsellHTML")}
@@ -257,6 +263,9 @@ describe("sortByShown: the grid's order and the grid's prices agree", () => {
       ${slice("proPrice")}
       ${slice("shownPrice")}
       ${slice("cardSizes")}
+      // per-size stock (r23) — see the note at upsellHTML's own slice above
+      ${slice("sizeStockOf")}
+      ${slice("sizeOut")}
       ${slice("cardSizeIdx")}
       ${slice("sortByShown")}
       return sortByShown(CATALOGUE.slice(), DIR).map(function (p) { return p.id; });

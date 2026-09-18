@@ -7,13 +7,13 @@
  * GET    /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (full, for the editor)
  * GET    /api/admin/blog/?slug=<slug>    → { ok, post: Post }            (same, by slug — the assistant knows slugs, not ids)
  * POST   /api/admin/blog/  { title?, excerpt?, body?, coverUrl?, coverAlt?,
- *                             tags?, products?, seoTitle?, seoDesc?, author? }
+ *                             coverFocus?, tags?, products?, seoTitle?, seoDesc?, author? }
  *                                         → { ok, post: Post }            (new post, always created as a draft)
  * PATCH  /api/admin/blog/  { id | slug, publish: true|false }
  *                                         → { ok, post: Post }            (publish / unpublish — publishedAt kept)
  * PATCH  /api/admin/blog/  { id, ...same fields as POST }
  *                                         → { ok, post: Post }            (edit an existing post; status untouched)
- * DELETE /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (soft delete — see deletePost in @/lib/blog)
+ * DELETE /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (the article is gone — see deletePost in @/lib/blog)
  *
  * NB: trailing slash on every path — next.config has trailingSlash: true.
  *
@@ -99,6 +99,10 @@ function fieldsOf(body: Record<string, unknown>): PostInput {
     body: body.body,
     coverUrl: body.coverUrl,
     coverAlt: body.coverAlt,
+    /* `"<mode> <x> <y>"` — writeCoverFocus() in src/lib/blog-cover.mjs is the
+       door, and anything it does not recognise is stored as null, which is
+       what a cover with nothing chosen already is. */
+    coverFocus: body.coverFocus,
     tags: body.tags,
     products: body.products,
     seoTitle: body.seoTitle,

@@ -27,6 +27,7 @@ import {
   mergePoints,
   montonioShippingBaseUrl,
   resetMontonioCarriersCache,
+  resetMontonioMethodsCache,
   resetMontonioPointsCache,
   shippingAuthToken,
   splitPhone,
@@ -115,6 +116,33 @@ function withKeys() {
   process.env.MONTONIO_SECRET_KEY = SECRET;
   process.env.MONTONIO_ENV = "sandbox";
 }
+/**
+ * The `POST /shipments` out of a recorded call list, found rather than
+ * indexed.
+ *
+ * Since 18.09.2026 a booking also asks `GET /shipping-methods` — that is where
+ * `constraints.parcelDimensionsRequired` lives, and the reference's own Note
+ * says to read it before deciding whether dimensions are required. So the
+ * booking is no longer reliably `calls[0]`, and counting the calls before it
+ * is a test that breaks every time the client gets one step cleverer without
+ * anything about the request changing.
+ */
+function booking(calls: Array<{ url: string; init?: RequestInit }>): { url: string; init?: RequestInit } {
+  const hit = calls.find((c) => /\/shipments$/.test(c.url) && c.init?.method === "POST");
+  if (!hit) throw new Error(`no POST /shipments among ${calls.map((c) => c.url).join(", ")}`);
+  return hit;
+}
+/**
+ * …and its decoded body, which is what nearly every assertion below wants.
+ * Typed loosely on purpose: this is a wire payload and the assertions reach
+ * into it (`body.receiver.streetAddress`), exactly as they did when each of
+ * them wrote its own `JSON.parse`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function bookingBody(calls: Array<{ url: string; init?: RequestInit }>): any {
+  return JSON.parse(String(booking(calls).init?.body));
+}
+
 function withoutKeys() {
   delete process.env.MONTONIO_ACCESS_KEY;
   delete process.env.MONTONIO_SECRET_KEY;
@@ -124,6 +152,7 @@ function withoutKeys() {
 beforeEach(() => {
   resetMontonioPointsCache();
   resetMontonioCarriersCache();
+  resetMontonioMethodsCache();
   resetPointsCache();
 });
 afterEach(() => {
@@ -131,6 +160,7 @@ afterEach(() => {
   vi.unstubAllEnvs();   // SHIPPING_PROVIDER=mock and the e2e mail sink must not leak into the next test
   resetMontonioPointsCache();
   resetMontonioCarriersCache();
+  resetMontonioMethodsCache();
   resetPointsCache();
   withoutKeys();
 });
@@ -577,9 +607,9 @@ describe("creating a shipment", () => {
 
     const shipment = await createMontonioShipment(order);
 
-    expect(calls[0].url).toBe(`${BASE}/shipments`);
-    expect(calls[0].init?.method).toBe("POST");
-    const body = JSON.parse(String(calls[0].init?.body));
+    expect(booking(calls).url).toBe(`${BASE}/shipments`);
+    expect(booking(calls).init?.method).toBe("POST");
+    const body = bookingBody(calls);
     expect(body).toMatchObject({
       merchantReference: "R-100001",
       shippingMethod: { type: "pickupPoint", id: POINT_UUID },
@@ -627,7 +657,7 @@ describe("creating a shipment", () => {
       items: order.items.map((i) => ({ ...i, qty: 5000 })),
     });
 
-    const body = JSON.parse(String(calls[0].init?.body));
+    const body = bookingBody(calls);
     expect(body.products).toEqual([
       { sku: "free-hold", name: "Free.Hold", quantity: 999, price: 11, currency: "EUR" },
     ]);
@@ -661,7 +691,7 @@ describe("creating a shipment", () => {
     expect(calls[0].url).toBe(
       `${BASE}/shipping-methods/courier-services?carrierCode=dpd&countryCode=EE`,
     );
-    const body = JSON.parse(String(calls[1].init?.body));
+    const body = bookingBody(calls);
     expect(body.shippingMethod).toEqual({ type: "courier", id: "e580d125-53eb-4c76-a6ed-c909765262a3" });
     expect(body.receiver).toMatchObject({
       streetAddress: "Kai 11",
@@ -683,7 +713,7 @@ describe("creating a shipment", () => {
       shipping: { ...order.shipping, pointId: "omniva-96067", pointName: "Laagri Coop Maksimarketi pakiautomaat" },
     });
     expect(calls[0].url).toContain("pickup-points");
-    expect(JSON.parse(String(calls[1].init?.body)).shippingMethod.id).toBe(POINT_UUID);
+    expect((bookingBody(calls).shippingMethod as { id: string }).id).toBe(POINT_UUID);
   });
 
   it("refuses a point Montonio has never heard of, and a pickup order", async () => {
@@ -809,11 +839,18 @@ describe("creating a shipment", () => {
       },
     });
 
+    /* The point of this test is that the carrier is NOT chosen by walking
+       Montonio's candidate list: `courier-services` is asked for venipak by
+       name and nothing else decides. `/shipping-methods` is still fetched —
+       since 18.09.2026 it is where `constraints.parcelDimensionsRequired` is
+       read from — so what is asserted is that it is not being used to pick a
+       carrier, rather than that it is never called. */
     expect(calls.map((c) => c.url)).toEqual([
       `${BASE}/shipping-methods/courier-services?carrierCode=venipak&countryCode=EE`,
+      `${BASE}/shipping-methods`,
       `${BASE}/shipments`,
     ]);
-    expect(JSON.parse(String(calls[1].init?.body)).shippingMethod).toEqual({ type: "courier", id: "svc-venipak" });
+    expect(bookingBody(calls).shippingMethod).toEqual({ type: "courier", id: "svc-venipak" });
     expect(shipment.carrier).toBe("venipak");
   });
 

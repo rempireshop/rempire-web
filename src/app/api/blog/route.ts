@@ -1,7 +1,7 @@
 /**
  * GET /api/blog/?lang=RU&page=1 — the published article list.
  *
- * `{ ok, posts: [{slug,title,excerpt,coverUrl,coverAlt,tags,publishedAt}],
+ * `{ ok, posts: [{slug,title,excerpt,coverUrl,coverAlt,coverFocus,tags,publishedAt}],
  *    total, page, perPage }`. `lang` picks which language's title/excerpt
  * come back (falling back to Russian, `pickLang()` in @/lib/blog); `page` is
  * 1-based, 10 posts per page. Cached for a minute — a new post needs a
@@ -28,6 +28,9 @@ export async function GET(req: Request) {
           excerpt: pickLang(p.excerpt, lang),
           coverUrl: p.coverUrl,
           coverAlt: pickLang(p.coverAlt, lang),
+          /* The tile crops its cover the way the article does — same point,
+             same rule, src/lib/blog-cover.mjs. */
+          coverFocus: p.coverFocus,
           tags: p.tags,
           publishedAt: p.publishedAt,
         })),

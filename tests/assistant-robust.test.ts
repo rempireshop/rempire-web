@@ -81,7 +81,7 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(25);   // r21: the undo promise names the actions the journal does not carry
+    expect(body.v).toBe(26);   // r25: the article open in the editor, and the photo action for its text
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);
@@ -274,7 +274,7 @@ describe("POST /api/assistant — photos and posts in the prompt", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("an attached photo is named in the prompt with the two photo actions, and its action passes the door", async () => {
+  it("an attached photo is named in the prompt with the three photo actions, and its action passes the door", async () => {
     const sent = stubOpenAI(JSON.stringify({
       reply: "Ставлю фото главным — подтвердите.", product_ids: [], tab: "goods",
       action: { type: "add_product_photo", id: "system-4-bio-botanical-shampoo", key: KEY, main: true },
@@ -291,6 +291,8 @@ describe("POST /api/assistant — photos and posts in the prompt", () => {
     expect(system).toContain(`${KEY} | IMG_4321.jpg`);
     expect(system).toContain('"type":"add_product_photo"');
     expect(system).toContain('"type":"set_post_cover"');
+    // …and the one that was missing: a picture INSIDE an article (18.09.2026)
+    expect(system).toContain('"type":"add_post_photo"');
   });
 
   it("without an attachment the photo actions are not offered, and one proposed anyway is refused", async () => {
@@ -303,7 +305,14 @@ describe("POST /api/assistant — photos and posts in the prompt", () => {
     expect((await res.json()).action).toBeNull();
     const system = sent[0].messages[0].content;
     expect(system).not.toContain('"type":"add_product_photo"');
-    expect(system).toMatch(/ask him to attach it/);
+    expect(system).not.toContain('"type":"add_post_photo"');
+    /* «assistant is not able to add cover photos or photos to articles although
+       it says it does» — Renat, 18.09.2026. The old line asked the model to
+       request a photo; it did not forbid the sentence that says one is already
+       in, which is what he was reading. */
+    expect(system).toMatch(/there is NO photo action at all/);
+    expect(system).toMatch(/Never say a photo is added/);
+    expect(system).toMatch(/attach the photo with the «Фото» button/);
   });
 
   it("a key the panel did not upload is refused even when another one was", async () => {
@@ -329,5 +338,131 @@ describe("POST /api/assistant — photos and posts in the prompt", () => {
     const sent2 = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "" }));
     await POST(req({ mode: "admin", messages: [{ role: "user", content: "какая выручка" }] }, admin));
     expect(sent2[0].messages[0].content).not.toContain("chernovik-pro-borodu");
+  });
+});
+
+/**
+ * «it also loses the context and each time creates a new blog post, instead of
+ * updating an already created blog post» — Renat, 18.09.2026.
+ *
+ * The panel now says which article is open in the blog editor while he types,
+ * and that is what a follow-up is about. These cover the round trip: the block
+ * reaches the prompt, an action with no slug of its own lands on that article,
+ * and a photo action that could not be aimed leaves the reply saying so rather
+ * than claiming the photo is in.
+ */
+describe("assistant — the article the owner has open", () => {
+  const HOST_ = HOST;
+  const KEY = "blog/1757000000001-cover.webp";
+  let admin = "";
+  const savedKey = process.env.OPENAI_API_KEY;
+
+  beforeAll(async () => {
+    process.env.SESSION_SECRET = TEST_SECRET;
+    process.env.ADMIN_PASSWORD_HASH = hashPassword("a long enough password");
+    process.env.OPENAI_API_KEY = "sk-test-dummy";
+    await setupDb();
+    admin = `${ADMIN_COOKIE}=${makeSessionToken()}`;
+  });
+  afterAll(async () => {
+    await teardownDb();
+    if (savedKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = savedKey;
+  });
+  beforeEach(async () => {
+    resetRateLimits();
+    await truncateAll();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("names the open article in the prompt and forbids a second draft of it", async () => {
+    const sent = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "blog" }));
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "сделай короче" }],
+      post: { slug: "uhod-za-borodoy", title: "Уход за бородой", status: "draft" },
+    }, admin));
+    const system = sent[0].messages[0].content;
+    expect(system).toContain("uhod-za-borodoy|draft|Уход за бородой");
+    expect(system).toMatch(/NEVER answer a request about this article with draft_post/);
+    // …and it is honest about the one thing it cannot do from the chat
+    expect(system).toMatch(/There is no action that rewrites the text of an article that exists/);
+  });
+
+  it("puts a cover on the open article when the model named no slug", async () => {
+    await upsertPost({ title: { RU: "Уход за бородой" }, slug: "uhod-za-borodoy" });
+    stubOpenAI(JSON.stringify({
+      reply: "Ставлю обложку — подтвердите.", product_ids: [], tab: "blog",
+      action: { type: "set_post_cover", key: KEY },
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "вот обложка" }],
+      attachments: [{ key: KEY, name: "IMG.jpg" }],
+      post: { slug: "uhod-za-borodoy", title: "Уход за бородой", status: "draft" },
+    }, admin));
+    const body = await res.json();
+    expect(body.action).toEqual({ type: "set_post_cover", slug: "uhod-za-borodoy", key: KEY });
+    // the sentence is left alone: the photo really is going in
+    expect(body.reply).toBe("Ставлю обложку — подтвердите.");
+  });
+
+  it("adds a photo inside the open article", async () => {
+    await upsertPost({ title: { RU: "Уход за бородой" }, slug: "uhod-za-borodoy" });
+    stubOpenAI(JSON.stringify({
+      reply: "Поставлю в конец статьи.", product_ids: [], tab: "blog",
+      action: { type: "add_post_photo", key: KEY },
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "добавь это фото в статью" }],
+      attachments: [{ key: KEY, name: "IMG.jpg" }],
+      post: { slug: "uhod-za-borodoy", title: "Уход за бородой", status: "draft" },
+    }, admin));
+    expect((await res.json()).action).toEqual({ type: "add_post_photo", slug: "uhod-za-borodoy", key: KEY });
+  });
+
+  /* The sentence and the action are written together; when the action is
+     dropped the sentence is all the owner has, and it used to say the photo
+     was in. */
+  it("says the photo was NOT added when the action could not be aimed", async () => {
+    await upsertPost({ title: { RU: "Уход за бородой" }, slug: "uhod-za-borodoy" });
+    stubOpenAI(JSON.stringify({
+      reply: "Добавил фото в статью.", product_ids: [], tab: "blog",
+      action: { type: "add_post_photo", slug: "statya-kotoroy-net", key: KEY },
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "добавь фото в статью" }],
+      attachments: [{ key: KEY, name: "IMG.jpg" }],
+    }, admin));
+    const body = await res.json();
+    expect(body.action).toBeNull();
+    expect(body.reply).toContain("Фото я не поставил");
+  });
+
+  it("leaves an ordinary reply alone — only a real photo action is corrected", async () => {
+    stubOpenAI(JSON.stringify({
+      reply: "Фото лучше прикрепить кнопкой «Фото».", product_ids: [], tab: "blog", action: null,
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "добавь фото" }] }, admin));
+    const body = await res.json();
+    expect(body.reply).toBe("Фото лучше прикрепить кнопкой «Фото».");
+  });
+
+  it("ignores a post the panel could not name properly", async () => {
+    const sent = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "" }));
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "что по заказам" }],
+      post: { slug: "../escape", title: "x" },
+    }, admin));
+    expect(sent[0].messages[0].content).not.toMatch(/THE ARTICLE THE OWNER IS LOOKING AT/);
   });
 });

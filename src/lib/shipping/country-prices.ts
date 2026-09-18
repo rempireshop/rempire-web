@@ -131,6 +131,55 @@ export const CHIP_ONLY_CARRIERS: readonly string[] = ["novapost"];
  */
 export const CARRIER_CHOICE_COUNTRIES: readonly string[] = ["EE", "LV", "LT", "FI"];
 
+/**
+ * Every country the shop can put a parcel into a pickup point in — «открыть
+ * все страны, куда возит DPD» (Ренат, 18.09.2026).
+ *
+ * Derived, not typed: the countries the mirror prices a `parcel` row for from
+ * a carrier that may be a **basis** (see `rowsFor()`), which today is DPD
+ * everywhere outside the Baltics and Finland. So it is exactly «every country
+ * DPD serves», and it stays exactly that when the mirror is rebuilt with live
+ * keys rather than needing a second edit here.
+ *
+ * Two countries are deliberately not in it and it is not an oversight:
+ * **Hungary and Romania** have a locker Montonio prices, but only Nova Post's
+ * — `CHIP_ONLY_CARRIERS` — and offering Nova Post outside the Baltics is its
+ * own decision (Montonio International Shipping, no returns at all; see the
+ * head of this file and docs/shipping.md). **Greece** has no pickup point at
+ * any carrier.
+ *
+ * This is the list before the owner narrows it. What the checkout actually
+ * offers is this minus `ShippingRules.pickupOff`, which is a setting — see
+ * `pickupOffered()` in src/lib/shipping.ts.
+ *
+ * ## What the *price* of one of these is, and what is uncertain about it
+ *
+ * Nothing new: `countryPriceTable().parcel` has had a cell for every one of
+ * them since 07.09.2026, because `costBasis()` prices a parcel the same way
+ * whether or not a checkout offers it. Opening a country changes what the
+ * shopper can pick, not what it costs.
+ *
+ * What IS uncertain is the number itself, and it is worth being plain about
+ * it: with no API keys the mirror is built from `contract-prices`, which takes
+ * a single `shippingMethod=pickupPoint` and answers **one** price, while the
+ * documented `POST /shipping-methods/rates` splits that into per-subtype rates
+ * — `parcelMachine`, `parcelShop`, `postOffice` — each with its own. So
+ * today's number for a country outside the Baltics may be the parcel-shop
+ * tier where the shop is actually selling a locker. It is a cost, so a wrong
+ * tier lands on the margin and never on the customer, who pays one fixed
+ * price per country either way. See docs/montonio-shipping-audit.md § 3.1.
+ */
+export const PICKUP_POINT_COUNTRIES: readonly string[] = [
+  ...new Set(
+    RATES.filter(
+      (r) =>
+        r.method === "parcel" &&
+        SHOP_CARRIERS.includes(r.carrier) &&
+        !CHIP_ONLY_CARRIERS.includes(r.carrier),
+    ).map((r) => r.country.toUpperCase()),
+  ),
+].sort();
+
 /** Destinations Montonio will not quote at all — HTTP 400 no_applicable_tier. */
 export const MONTONIO_NOT_SERVED: readonly string[] =
   (montonioTariffsData as { notServed?: string[] }).notServed ?? [];

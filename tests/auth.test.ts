@@ -19,7 +19,7 @@ import {
   verifyPassword,
   verifySessionToken,
 } from "@/lib/auth";
-import { exec, type Querier } from "@/lib/db";
+import { exec, query, type Querier } from "@/lib/db";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const PASSWORD = "correct horse battery staple";
@@ -429,8 +429,17 @@ describe("admin session", () => {
     );
     expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(LOGIN_DELAY_MAX_MS);
 
-    // the right password, and no "admin.login" row to show for it
-    clearLoginFailures(ADMIN_ACCOUNT);
+    /* The right password, and no "admin.login" row to show for it. The instant
+       comes from the DATABASE, not from Date.now(): every failure row above and
+       below is stamped by the database's clock, and nothing orders the two
+       clocks against each other. Taken from the JS side, the four rows below
+       can land on the floor's wrong side and the ladder reads zero — which is
+       how this test failed in a full parallel run on 18.09.2026 while passing
+       alone. One clock throughout, and it is deterministic. (The product is
+       right either way: a success clears what came before it, and the only real
+       cost is that a miss in the same millisecond as a success is forgiven.) */
+    const [{ t }] = await query<{ t: string }>("select now() as t");
+    clearLoginFailures(ADMIN_ACCOUNT, new Date(t).getTime());
     expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(0);
 
     // …and the ladder starts climbing again from the floor, not from nine

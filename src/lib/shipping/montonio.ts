@@ -33,6 +33,7 @@ import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
 /* A leaf module (it imports the tariff mirror and nothing else), so this adds
    no cycle — see the header of src/lib/shipping/country-prices.ts. */
 import { basisCost } from "@/lib/shipping/country-prices";
+import { getParcelSettings, parcelMetres, takesLockerSize, toLockerSize } from "@/lib/shipping/parcel";
 import type { ParcelPoint } from "@/lib/parcel-points";
 import type { Order } from "@/lib/orders";
 // SHIPPING_PROVIDER=mock — the e2e suite's carrier; see that file's header.
@@ -137,10 +138,30 @@ export class MontonioShippingError extends Error {
 export interface CreateShipmentOptions {
   /** Parcel weight in kg. Default: estimated from the line count. */
   weight?: number;
-  /** Metres, two decimals. Only sent when given — some carriers demand them. */
+  /**
+   * Metres, two decimals — `POST /shipments` is metric where
+   * `POST /shipping-methods/rates` is centimetres, and both are right.
+   *
+   * Given explicitly, they always go out. Left out, they are filled from the
+   * shop's declared carton (`settings.shipping_parcel`, src/lib/shipping/parcel.ts)
+   * **only where Montonio says the route requires them** —
+   * `constraints.parcelDimensionsRequired`. A route that does not require them
+   * is still sent a parcel without them, exactly as before, so nothing this
+   * adds can move a size tier on a booking that already worked.
+   */
   length?: number;
   width?: number;
   height?: number;
+  /**
+   * `XS | S | M | L | XL` — the locker door, chosen at label time.
+   *
+   * Only ever sent for a `pickupPoint` shipment whose carrier takes it
+   * (Unisend, Latvian Post, SmartPosti — `takesLockerSize()`). Omitted, the
+   * contract's own `defaultLockerSize` applies; with neither, SmartPosti
+   * issues no drop-off code at all, which is the blank line Renat reported on
+   * 13.09.2026.
+   */
+  lockerSize?: string;
   /** Overrides the carrier stored on the order (see carrierHint). */
   carrier?: string;
   /** Montonio Payments order uuid, so Montonio links parcel ↔ payment. */
@@ -312,6 +333,86 @@ const cache: Map<string, CacheEntry> = (g.__rempireMontonioPoints ??= new Map())
 
 export function resetMontonioPointsCache(): void {
   cache.clear();
+}
+
+/* ---------- constraints: does this route demand a measured box? ------------
+ *
+ * `GET /shipping-methods` carries, on every carrier/method row, a
+ * `constraints.parcelDimensionsRequired` boolean, and the reference's own Note
+ * beside it is an instruction: *«Always check the flag in the API response for
+ * accurate requirements … conditionally require dimension inputs»*. Where it
+ * is true, `POST /shipments` without `length`/`width`/`height` is a 400 and
+ * the parcel never books. Nothing here read it until 18.09.2026
+ * (docs/montonio-shipping-audit.md § 1.6), so those routes simply did not work.
+ *
+ * The answer is one document for the whole store — every country, every
+ * carrier — so it is cached whole rather than per route, on the same
+ * globalThis and the same six hours as the pickup points above: what a
+ * carrier requires changes when Montonio re-cuts a contract, not between two
+ * labels.
+ */
+type MethodRow = {
+  type?: string;
+  constraints?: { parcelDimensionsRequired?: unknown };
+};
+type CountryRow = {
+  countryCode?: string;
+  carriers?: Array<{ carrierCode?: string; shippingMethods?: MethodRow[] }>;
+};
+type MethodsCache = { at: number; countries: CountryRow[] };
+const mg = globalThis as unknown as { __rempireMontonioMethods?: MethodsCache };
+
+/** Forgets the cached `/shipping-methods` document — the tests set another. */
+export function resetMontonioMethodsCache(): void {
+  mg.__rempireMontonioMethods = undefined;
+}
+
+async function shippingMethodRows(config: MontonioConfig): Promise<CountryRow[]> {
+  const hit = mg.__rempireMontonioMethods;
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.countries;
+  const body = await call<{ countries?: CountryRow[] }>(config, "/shipping-methods");
+  const countries = body.countries ?? [];
+  mg.__rempireMontonioMethods = { at: Date.now(), countries };
+  return countries;
+}
+
+/**
+ * Must this carrier be given the box's measurements on this route?
+ *
+ * `null` — never a throw — when the question cannot be answered: no keys, a
+ * carrier the store has not activated there, or Montonio not replying. The
+ * caller treats `null` as «leave it out», which is exactly what the shop did
+ * before this function existed, so a network blip cannot start sending
+ * dimensions on a route that never had them and cannot move a size tier.
+ */
+export async function parcelDimensionsRequired(
+  carrier: string,
+  country: string,
+  type: "pickupPoint" | "courier",
+): Promise<boolean | null> {
+  const config = montonioShippingConfig();
+  if (!config) return null;
+  const cc = String(country || "").toUpperCase();
+  const code = String(carrier || "").trim().toLowerCase();
+  if (!code) return null;
+  try {
+    const countries = await shippingMethodRows(config);
+    const row = countries.find((c) => str(c?.countryCode).toUpperCase() === cc);
+    if (!row) return null;
+    /* Both sides lower-cased, which is how every other reader in this file
+       compares a carrierCode: Montonio spells one of them `novaPost` on the
+       wire and the shop spells it `novapost` everywhere else. */
+    const carrierRow = (row.carriers ?? []).find(
+      (c) => str(c?.carrierCode).toLowerCase() === code,
+    );
+    if (!carrierRow) return null;
+    const method = (carrierRow.shippingMethods ?? []).find((m) => str(m?.type) === type);
+    if (!method) return null;
+    return method.constraints?.parcelDimensionsRequired === true;
+  } catch (err) {
+    console.error("[montonio shipping] shipping-methods constraints failed —", err);
+    return null;
+  }
 }
 
 /**
@@ -1037,9 +1138,16 @@ export async function createMontonioShipment(
     return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
   }
   let carrier = hint;
-  let shippingMethod: { type: "pickupPoint" | "courier"; id: string };
+  let shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
   if (method === "parcel") {
     shippingMethod = { type: "pickupPoint", id: await resolvePickupPointId(order, hint) };
+    /* The door, chosen over the packed box rather than fixed in a constant —
+       it is a price tier, so one default for every parcel is one tier paid for
+       every parcel (Ренат, 18.09.2026). The panel pre-selects it and posts
+       whatever is on screen; a carrier that does not know the field is sent
+       without it, because an unknown field is a 400 and not a courtesy. */
+    const size = toLockerSize(opts.lockerSize);
+    if (size && takesLockerSize(carrier)) shippingMethod.lockerSize = size;
   } else {
     const service = await resolveCourierService(config, hint, country);
     shippingMethod = { type: "courier", id: service.id };
@@ -1063,9 +1171,39 @@ export async function createMontonioShipment(
   const parcel: Record<string, number> = {
     weight: round2(opts.weight && opts.weight > 0 ? opts.weight : estimateWeightKg(order)),
   };
+  let measured = false;
   for (const dim of ["length", "width", "height"] as const) {
     const v = opts[dim];
-    if (typeof v === "number" && v > 0) parcel[dim] = round2(v);
+    if (typeof v === "number" && v > 0) {
+      parcel[dim] = round2(v);
+      measured = true;
+    }
+  }
+  /* The declared carton, in **metres**, and only where Montonio says this
+     route needs one.
+     `constraints.parcelDimensionsRequired` is a per carrier/method/country
+     flag on `GET /shipping-methods` with a Note beside it telling us to read
+     it; we never did, so every route that has it set was a booking that 400s
+     (docs/montonio-shipping-audit.md § 1.6). The catalogue has no dimensions
+     and no weight for any of its 220 products, so there is nothing to measure
+     and nothing to derive — Ренат's answer of 18.09.2026 was «one default
+     parcel size, overridable», which is settings.shipping_parcel.
+     Sent only when the flag is `true`, never when it is `false` and never
+     when the question could not be answered. Dimensions are a size tier and a
+     size tier is money: a route that books today without them has to keep
+     booking without them, or a network blip could quietly reprice it.
+     Sending nothing is also the CHEAPER default, which is worth knowing:
+     Montonio bills `max(actualWeight, volumetricWeight)`, so a declared box is
+     a floor under the bill. The default carton is 25 × 18 × 10 cm — about 1.1
+     kg — for exactly that reason; see src/lib/shipping/parcel.ts. */
+  if (!measured) {
+    const needed = await parcelDimensionsRequired(carrier, country, shippingMethod.type);
+    if (needed) {
+      const box = parcelMetres(await getParcelSettings());
+      parcel.length = box.length;
+      parcel.width = box.width;
+      parcel.height = box.height;
+    }
   }
 
   /* Every bound here is Montonio's own (reference § Create Shipment →
@@ -1305,6 +1443,108 @@ export async function claimShipmentSlot(orderId: string): Promise<boolean> {
 /** Give the slot back — the booking failed, so the next press may try again. */
 export async function releaseShipmentSlot(orderId: string): Promise<void> {
   await saveShipmentOnOrder(orderId, { bookingAt: null });
+}
+
+/* ---------- what this store is actually signed up for --------------------- */
+
+/** One row of `GET /carriers`, reduced to what a readiness screen needs. */
+export interface MontonioCarrierContract {
+  code: string;
+  name: string;
+  /** «hasMontonioContract» — the carrier is available on Montonio's own deal. */
+  montonioContract: boolean;
+  /** Countries the shop has its OWN contract for — `contracts[].country`. */
+  ownCountries: string[];
+}
+
+/**
+ * `GET /carriers` — which carriers this store may actually book with.
+ *
+ * The same endpoint `fetchMontonioCarriers()` above reads for the checkout's
+ * logos, and a separate function on purpose: this one is **uncached** (a
+ * readiness screen wants today's answer, not one from six hours ago) and it
+ * keeps the two fields the logo reader throws away — which is also why they
+ * are not simply added to `MontonioCarrier`, whose shape is served to every
+ * shopper by `GET /api/shipping/carriers/`. What this store is contracted for
+ * is the owner's business, not the storefront's.
+ *
+ * Unlike the payments side, the shipping API *does* answer the activation
+ * question, and it answers it twice over: `hasMontonioContract` says the
+ * carrier is reachable on Montonio's own agreement, and `contracts[]` lists
+ * the shop's own per-country deals. A carrier the checkout offers and this
+ * list does not name is a booking that will fail on the first live order.
+ *
+ * Read-only, admin-only, and `null` — never a throw — on anything, like every
+ * other probe: a readiness screen that cannot load must say «не смогли
+ * спросить», not take the shop down.
+ */
+export async function fetchMontonioCarrierContracts(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<MontonioCarrierContract[] | null> {
+  const config = montonioShippingConfig(env);
+  if (!config) return null;
+  try {
+    const body = await call<{
+      carriers?: Array<{
+        code?: unknown;
+        name?: unknown;
+        hasMontonioContract?: unknown;
+        contracts?: Array<{ country?: unknown }> | null;
+      }>;
+    }>(config, "/carriers");
+    const rows = Array.isArray(body.carriers) ? body.carriers : [];
+    return rows
+      .map((c) => ({
+        code: str(c.code).toLowerCase(),
+        name: str(c.name) || str(c.code),
+        montonioContract: c.hasMontonioContract === true,
+        ownCountries: (Array.isArray(c.contracts) ? c.contracts : [])
+          .map((x) => str(x?.country).toUpperCase())
+          .filter(Boolean),
+      }))
+      .filter((c) => !!c.code);
+  } catch (err) {
+    console.error("[montonio shipping] GET /carriers —", err);
+    return null;
+  }
+}
+
+/** One registered webhook — `GET /webhooks` returns them under `data`. */
+export interface MontonioWebhook {
+  id: string;
+  url: string;
+  events: string[];
+}
+
+/**
+ * `GET /webhooks` — whether Montonio has been told where to send parcel events.
+ *
+ * This one is registered **by hand**, unlike the payment webhook whose
+ * `notificationUrl` rides on every order (docs/shipping.md). Nothing in this
+ * shop can tell that it was forgotten: parcels book, labels print, and the
+ * orders simply never close by themselves. So the panel asks.
+ *
+ * `null` — never a throw — on anything.
+ */
+export async function fetchMontonioWebhooks(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<MontonioWebhook[] | null> {
+  const config = montonioShippingConfig(env);
+  if (!config) return null;
+  try {
+    const body = await call<{
+      data?: Array<{ id?: unknown; url?: unknown; enabledEvents?: unknown }>;
+    }>(config, "/webhooks");
+    const rows = Array.isArray(body.data) ? body.data : [];
+    return rows.map((w) => ({
+      id: str(w.id),
+      url: str(w.url),
+      events: Array.isArray(w.enabledEvents) ? w.enabledEvents.map((e) => str(e)).filter(Boolean) : [],
+    }));
+  } catch (err) {
+    console.error("[montonio shipping] GET /webhooks —", err);
+    return null;
+  }
 }
 
 /** What we stored earlier for this order, if anything. */

@@ -181,6 +181,14 @@
       "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
+      /* per-size stock (r23): the product's own word and one size's word are
+         two different sentences and may disagree — «мало» on the product while
+         the 500 мл is at zero. Each is a whole text node of its own, because
+         translateTree() rewrites nodes, not fragments. */
+      "Этого объёма сейчас нет": "Seda mahtu praegu ei ole",
+      "Этого размера сейчас нет": "Seda suurust praegu ei ole",
+      "Выберите другой объём.": "Valige mõni teine maht.",
+      "Выберите другой размер.": "Valige mõni teine suurus.",
       "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
@@ -521,6 +529,14 @@
         "Sammu «silt» muudetud",
       "Новый статус посылки":
         "Uus saadetise staatus",
+      "Возврат не прошёл":
+        "Tagasimakse ei läinud läbi",
+      "Возврат отправлен, деньги ещё не у покупателя":
+        "Tagasimakse on saadetud, raha ei ole veel kliendini jõudnud",
+      "Возврат не дошёл до покупателя":
+        "Tagasimakse ei jõudnud kliendini",
+      "Перевозчик не принял посылку":
+        "Vedaja ei võtnud pakki vastu",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -1994,8 +2010,8 @@
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "Tellimuse kinkekaardi saab tagastada ainult koos kogu tellimuse jäägiga.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "Raha ei õnnestunud kinkekaardile tagastada — kontrollige seda jaotises «Kinkekaardid».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio ei vasta — proovige minuti pärast.",
-      "Montonio отказал в возврате — проверьте баланс в его панели.":
-        "Montonio keeldus tagasimaksest — kontrollige tema töölaual saldot.",
+      "Montonio не принял возврат. Причина — в журнале заказа.":
+        "Montonio ei võtnud tagasimakset vastu. Põhjus on tellimuse päevikus.",
       "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
         "Raha läks välja, aga kirje ei salvestunud — avage tellimus uuesti ja kontrollige.",
       /* «Письма»: the three new rows and the two intervals behind them */
@@ -2331,8 +2347,8 @@
         "Avaldatud. Muudatused ilmuvad poodi kohe pärast salvestamist.",
       "Черновик. В магазине его пока не видно.": "Mustand. Poes seda veel ei näe.",
       "Сохранить и обновить": "Salvesta ja uuenda",
-      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
-        "Kas kustutada artikkel? Tekst jääb mustanditesse, aga poes seda enam ei näe.",
+      "Точно удалить статью? Она исчезнет из списка и из магазина, вернуть её будет нельзя.":
+        "Kas kustutada artikkel? See kaob nimekirjast ja poest, tagasi seda enam ei saa.",
       "Удалить статью": "Kustuta artikkel",
       "уход за бородой зимой": "habemehooldus talvel",
       "Написать черновик по теме": "Kirjuta teema põhjal mustand",
@@ -2382,6 +2398,8 @@
       "Не получилось убрать фон — ставлю фото как есть": "Tausta ei õnnestunud eemaldada — panen foto nii, nagu on",
       "Статья не найдена — проверьте адрес в «Блоге»": "Artiklit ei leitud — kontrolli aadressi «Blogis»",
       "Обложка поставлена ✓": "Kaanepilt pandud ✓",
+      "Фото добавлено в конец статьи ✓": "Foto lisatud artikli lõppu ✓",
+      "Фото добавлено в конец статьи — сохраните": "Foto lisatud artikli lõppu — salvesta",
       "Сначала впишите, о чём полоска — хотя бы по-русски": "Kirjuta kõigepealt, millest riba räägib — kasvõi vene keeles",
       "Сначала впишите код": "Kirjuta kõigepealt kood",
       "Сначала впишите название — как на упаковке": "Kirjuta kõigepealt nimi — nagu pakendil",
@@ -2391,12 +2409,26 @@
       "Заменить обложку": "Vaheta kaanepilt",
       "+ Обложка": "+ Kaanepilt",
       "Обложка статьи": "Artikli kaanepilt",
+      "Встанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.":
+        "Tuleb teksti lõppu, artikli kõigis keeltes. Liigutada või eemaldada saab blogi redaktoris.",
       "Удалить обложку": "Kustuta kaanepilt",
       /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
       "В списке статей": "Artiklite loendis",
       "В начале статьи": "Artikli alguses",
       "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
         "Nii näeb kaanepilti pood: see mahub aknasse tervikuna, külgedele jääb tühi väli. Kõige ühtlasemalt asetub lai foto 1200×630.",
+      /* …and the size and the point the owner chooses for it (admBlogSeeHTML) */
+      "В соцсетях": "Sotsiaalmeedias",
+      "Вся фотография": "Kogu foto",
+      "Заполнить рамку": "Täida raam",
+      "Как стоит обложка": "Kuidas kaanepilt seisab",
+      "Двигать фотографию": "Liiguta fotot",
+      "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.":
+        "Foto täidab akna, servad lõigatakse ära. Tõmmake seda sõrmega — valige, mis jääb näha.",
+      "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.":
+        "Ruut läheb sotsiaalmeedia lingile: see lõigatakse alati, ükskõik kuidas kaanepilt poes seisab.",
+      "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
+        "Kuni ruutu pole tõmmatud, lõikab pood selle pildi ise — nagu välja tuleb.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Pildi suurus",
       "Куда сдвинуть картинку": "Kuhu pilti nihutada",
@@ -2857,6 +2889,36 @@
       "Письмо удалено ✓": "Kiri kustutatud ✓",
       "Отправить письмо?": "Saata kiri?",
       "Рассылка отправлена": "Uudiskiri saadetud",
+      /* r24 — «Коробка магазина», «Размер ячейки» и «Где предлагать пакомат» */
+      "Размер ячейки": "Kapi suurus",
+      "Коробка магазина": "Poe karp",
+      "Длина, см": "Pikkus, cm",
+      "Ширина, см": "Laius, cm",
+      "Высота, см": "Kõrgus, cm",
+      "Размер ячейки по умолчанию": "Kapi vaikesuurus",
+      "Пока этикеток не было — при первой будет предложен этот размер.":
+        "Silte pole veel olnud — esimese juures pakutakse seda suurust.",
+      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
+        "Kontrolli Montonio kabinetis kahte lülitit: SmartPostil kapi vaikesuurus, DPD-l PIN-teenus. Ilma nendeta võib pakil üleandmiskoodi mitte olla ja A4-lehel jääb see rida tühjaks.",
+      "Сторона коробки — от 1 до 200 см.": "Karbi külg on 1 kuni 200 cm.",
+      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "Pakiautomaadi hind nendes riikides tuleb selle riigi «Pakiautomaadi» veerust, eraldi vedajahinda siin ei ole. Hinna all on see, mis pood võtab, kui väli tühjendada, ja millise vedajaga pakk läheb.",
+      "Где предлагать пакомат": "Kus pakiautomaati pakkuda",
+      "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
+        "Montonio viib pakiautomaatidesse ja pakipunktidesse kõigis neis riikides. Lülita riik välja — ja kassas jääb sellele ainult kuller.",
+      "только курьер": "ainult kuller",
+      "пакомат и курьер": "pakiautomaat ja kuller",
+      "Предлагать пакомат": "Pakkuda pakiautomaati",
+      "Не предлагать пакомат": "Mitte pakkuda pakiautomaati",
+      "Коробка": "Karp",
+      "Другая коробка": "Teine karp",
+      "Это только для этой посылки — коробка магазина не меняется.":
+        "See kehtib ainult sellele pakile — poe karp ei muutu.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
+        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Montonio arvestab kahest suurema järgi: tegelik kaal ja karbi mahu järgi arvutatud kaal. Seepärast on väiksem karp otsene kokkuhoid igalt pakilt.",
+      "по умолчанию": "vaikimisi",
+      "как в прошлый раз": "nagu eelmisel korral",
+      "чаще всего": "kõige sagedamini",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -2948,6 +3010,11 @@
       "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
+      // per-size stock (r23) — see the Estonian table for why each is whole
+      "Этого объёма сейчас нет": "This size is out of stock",
+      "Этого размера сейчас нет": "This size is out of stock",
+      "Выберите другой объём.": "Please pick another size.",
+      "Выберите другой размер.": "Please pick another size.",
       "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
       "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Delivery & returns",
       "Похожие товары": "Similar products", "Вместе лучше": "Better together",
@@ -3272,6 +3339,14 @@
         "The label step changed",
       "Новый статус посылки":
         "A new parcel status",
+      "Возврат не прошёл":
+        "The refund did not go through",
+      "Возврат отправлен, деньги ещё не у покупателя":
+        "The refund was sent, the money is not with the customer yet",
+      "Возврат не дошёл до покупателя":
+        "The refund did not reach the customer",
+      "Перевозчик не принял посылку":
+        "The carrier would not take the parcel",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -4717,8 +4792,8 @@
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "A gift card from an order can only be refunded together with the whole of what is left of the order.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "The money could not be put back on the gift card — check it under «Gift cards».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio is not answering — try again in a minute.",
-      "Montonio отказал в возврате — проверьте баланс в его панели.":
-        "Montonio refused the refund — check the balance in its panel.",
+      "Montonio не принял возврат. Причина — в журнале заказа.":
+        "Montonio did not accept the refund. The reason is in the order journal.",
       "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
         "The money left, but the record did not save — open the order again and check.",
       "Заказ ждёт оплаты": "Order awaiting payment",
@@ -5053,8 +5128,8 @@
         "Published. Changes appear in the shop as soon as you save.",
       "Черновик. В магазине его пока не видно.": "A draft. Not visible in the shop yet.",
       "Сохранить и обновить": "Save and update",
-      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
-        "Delete this article? The text stays in the drafts, but the shop will not show it.",
+      "Точно удалить статью? Она исчезнет из списка и из магазина, вернуть её будет нельзя.":
+        "Delete this article? It leaves the list and the shop, and cannot be brought back.",
       "Удалить статью": "Delete the article",
       "уход за бородой зимой": "beard care in winter",
       "Написать черновик по теме": "Draft one from a topic",
@@ -5104,6 +5179,8 @@
       "Не получилось убрать фон — ставлю фото как есть": "Could not remove the background — using the photo as it is",
       "Статья не найдена — проверьте адрес в «Блоге»": "Article not found — check its address in “Blog”",
       "Обложка поставлена ✓": "Cover set ✓",
+      "Фото добавлено в конец статьи ✓": "Photo added at the end of the article ✓",
+      "Фото добавлено в конец статьи — сохраните": "Photo added at the end of the article — save it",
       "Сначала впишите, о чём полоска — хотя бы по-русски": "First write what the strip is about — in Russian at least",
       "Сначала впишите код": "First type the code",
       "Сначала впишите название — как на упаковке": "First type the name — as on the packaging",
@@ -5113,12 +5190,26 @@
       "Заменить обложку": "Replace the cover",
       "+ Обложка": "+ Cover",
       "Обложка статьи": "Article cover",
+      "Встанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.":
+        "It goes at the end of the text, in every language the article has. Move or remove it in the blog editor.",
       "Удалить обложку": "Delete the cover",
       /* the cover in the two frames the shop shows it in (admBlogSeeHTML) */
       "В списке статей": "In the article list",
       "В начале статьи": "At the top of the article",
       "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
         "This is how the shop will show the cover: it is fitted into the frame whole, with empty space left at the sides. A wide 1200×630 photo sits best.",
+      /* …and the size and the point the owner chooses for it (admBlogSeeHTML) */
+      "В соцсетях": "On social media",
+      "Вся фотография": "The whole photo",
+      "Заполнить рамку": "Fill the frame",
+      "Как стоит обложка": "How the cover stands",
+      "Двигать фотографию": "Move the photo",
+      "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.":
+        "The photo fills the frame and the edges are cut off. Drag it with a finger to choose what stays visible.",
+      "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.":
+        "The square goes into the link preview on social media: it is always cropped, however the cover stands in the shop.",
+      "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
+        "Until the square is dragged, the shop crops this picture itself — however it turns out.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Picture size",
       "Куда сдвинуть картинку": "Where to move the picture",
@@ -5574,6 +5665,36 @@
       "Письмо удалено ✓": "Letter deleted ✓",
       "Отправить письмо?": "Send the letter?",
       "Рассылка отправлена": "Newsletter sent",
+      /* r24 — the declared carton, the locker door and the pickup-point list */
+      "Размер ячейки": "Locker size",
+      "Коробка магазина": "The shop's box",
+      "Длина, см": "Length, cm",
+      "Ширина, см": "Width, cm",
+      "Высота, см": "Height, cm",
+      "Размер ячейки по умолчанию": "Default locker size",
+      "Пока этикеток не было — при первой будет предложен этот размер.":
+        "No labels yet — this size will be offered on the first one.",
+      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
+        "Check two switches in your Montonio account: a default locker size for SmartPosti, and the PIN service for DPD. Without them a parcel may get no drop-off code, and that line on the A4 sheet stays blank.",
+      "Сторона коробки — от 1 до 200 см.": "A side of the box is 1 to 200 cm.",
+      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "The pickup-point price in these countries comes from that country's «Pickup point» column; there is no separate per-carrier price here. Under the price is what the shop charges if the box is cleared, and which carrier the parcel goes with.",
+      "Где предлагать пакомат": "Where to offer a pickup point",
+      "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
+        "Montonio delivers to lockers and pickup points in every one of these countries. Switch a country off and its checkout keeps the courier alone.",
+      "только курьер": "courier only",
+      "пакомат и курьер": "pickup point and courier",
+      "Предлагать пакомат": "Offer a pickup point",
+      "Не предлагать пакомат": "Do not offer a pickup point",
+      "Коробка": "Box",
+      "Другая коробка": "A different box",
+      "Это только для этой посылки — коробка магазина не меняется.":
+        "This is for this parcel only — the shop's box does not change.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
+        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Montonio charges the greater of two: the real weight and the weight worked out from the box's volume. So a smaller box is a direct saving on every parcel.",
+      "по умолчанию": "by default",
+      "как в прошлый раз": "as last time",
+      "чаще всего": "most often",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -5658,6 +5779,25 @@
     [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
         EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
+    /* r24 — the four lines about the carton and the locker door that carry a
+       size, a dimension or a count. Each is one text node in the markup, so
+       each needs a rule rather than a key. */
+    [/^Нажмите «Создать этикетку» — поедет ячейка (.+)\. Другой размер — нажмите на него\.$/,
+      { ET: "Vajuta «Loo silt» — läheb kapp $1. Teine suurus — vajuta sellele.",
+        EN: "Press «Create label» — locker $1 goes out. For another size, tap it." }],
+    [/^Чаще всего вы отправляете (.+) — этот размер и будет предложен\.$/,
+      { ET: "Kõige sagedamini saadad sa $1 — seda suurust pakutaksegi.",
+        EN: "You most often ship $1 — that is the size that will be offered." }],
+    [/^(.+) × (.+) × (.+) см · около (.+) кг$/,
+      { ET: "$1 × $2 × $3 cm · umbes $4 kg", EN: "$1 × $2 × $3 cm · about $4 kg" }],
+    [/^Montonio посчитает эту коробку примерно как (.+) кг\.$/,
+      { ET: "Montonio arvestab selle karbi umbes $1 kg järgi.",
+        EN: "Montonio will count this box as roughly $1 kg." }],
+    [/^Пакомат включён: (\d+) из (\d+)\.$/,
+      { ET: "Pakiautomaat sees: $1 riigis $2-st.", EN: "Pickup point on: $1 of $2." }],
+    [/^Коробка магазина: (.+) × (.+) × (.+) см · ячейка (.+)$/,
+      { ET: "Poe karp: $1 × $2 × $3 cm · kapp $4",
+        EN: "The shop's box: $1 × $2 × $3 cm · locker $4" }],
     /* the switch on a promo-code row is named after the code it belongs to */
     // ([^:]+), not (.+): «Промокод SUMMER: скидка 15%» is the journal's own
     // line and belongs to the rules further down — this one is the bare code,
@@ -5678,6 +5818,15 @@
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
     [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
+    /* …and the other two chips of that same strip once they carry a count.
+       «В пути» is new (18.09.2026); «Возвраты N» has been counting since r16
+       and stayed Russian on the ET/EN panel all that time — the bare labels
+       are in both dictionaries, but the label and its number are ONE text
+       node and nothing matched it. i18n-gaps cannot see either of them: the
+       label comes out of ADM_ORDER_FILTERS, so the tool reads the chip as two
+       holes glued together and has nothing to test. */
+    [/^В пути (\d+)$/, { ET: "Teel $1", EN: "On the way $1" }],
+    [/^Возвраты (\d+)$/, { ET: "Tagastused $1", EN: "Returns $1" }],
     // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
     [/^(.+) доставлен$/, { ET: "$1 kohale toimetatud", EN: "$1 delivered" }],
     [/^(.+) выдан клиенту$/, { ET: "$1 kliendile üle antud", EN: "$1 handed to the customer" }],
@@ -6163,6 +6312,7 @@
     [/^Главное фото «(.+)»$/, { ET: "Peafoto «$1»", EN: "The main photo of “$1”" }],
     [/^Ещё одно фото «(.+)»$/, { ET: "Veel üks foto «$1»", EN: "One more photo of “$1”" }],
     [/^Обложка статьи «(.+)»(.*)$/, { ET: "Artikli «$1» kaanepilt$2", EN: "The cover of the article “$1”$2" }],
+    [/^Фото в статью «(.+)»$/, { ET: "Foto artiklisse «$1»", EN: "A photo into the article “$1”" }],
     [/^Описание «(.+)» обновлено$/, { ET: "Kirjeldus «$1» uuendatud", EN: "The description of “$1” was updated" }],
     [/^Отчёт для бухгалтера за (.+)$/, { ET: "Raamatupidaja aruanne — $1", EN: "The bookkeeper's report for $1" }],
     [/^Отзыв (.+): (.+)$/, { ET: "Arvustus $1: $2", EN: "Review $1: $2" }],
@@ -6259,7 +6409,7 @@
     [/^Промокод (.+): бесплатная доставка(.*)$/,
       { ET: "Sooduskood $1: tasuta tarne$2", EN: "Promo code $1: free delivery$2" }],
     [/^Промокод удалён: (.+)$/, { ET: "Sooduskood kustutatud: $1", EN: "Promo code deleted: $1" }],
-    [/^Черновик статьи «(.+)»(.*)$/, { ET: "Artikli «$1» mustand$2", EN: "A draft of the article “$1”$2" }],
+    [/^Новая статья «(.+)»(.*)$/, { ET: "Uus artikkel «$1»$2", EN: "A new article “$1”$2" }],
     /* The catch-alls of the block above, LAST of all: a line whose tail is a
        price, a country code or a date rather than a word still gets its
        template translated, and the value is handed back untouched. */
@@ -6270,8 +6420,12 @@
     [/^Тексты писем: (.+)$/, { ET: "Kirjade tekstid: $1", EN: "Letter texts: $1" }],
     [/^Промокод (.+): (.+)$/, { ET: "Sooduskood $1: $2", EN: "Promo code $1: $2" }],
     [/^Удалить набор «(.+)»(.*)$/, { ET: "Kustutada komplekt «$1»$2", EN: "Delete the set “$1”$2" }],
-    [/^Статья целиком на тему «(.+)»(.*)$/,
-      { ET: "Terve artikkel teemal «$1»$2", EN: "A whole article on “$1”$2" }],
+    /* «Новая», said out loud on the card: draft_post always makes another
+       article, never an edit of the one the owner is reading, and a card that
+       did not say so was the last chance to notice before a second draft
+       appeared in the list (Renat, 18.09.2026). */
+    [/^Новая статья целиком на тему «(.+)»(.*)$/,
+      { ET: "Uus terve artikkel teemal «$1»$2", EN: "A new whole article on “$1”$2" }],
     [/^Новый товар «(.+)» · (.+)$/, { ET: "Uus toode «$1» · $2", EN: "A new product “$1” · $2" }],
     [/^бренд: (.+)$/, { ET: "kaubamärk: $1", EN: "brand: $1" }],
     [/^название: (.+)$/, { ET: "nimi: $1", EN: "name: $1" }],
@@ -6755,6 +6909,13 @@
        to at all — an order there could be paid for and never posted. Renat can
        switch any of them back on in Настройки → Доставка. */
     countriesOff: ["CH", "CY", "GB", "IS", "LI", "MT", "NO"],
+    /* Где пакомата НЕ предлагать. Ренат, 18.09.2026: «open every country DPD
+       serves» — so the default is empty and every country with a locker
+       Montonio prices gets one (CARRIERS_BY_COUNTRY below). Written down as
+       the exceptions, like countriesOff above, so narrowing the list later is
+       a setting and not a deploy, and a country the tariff mirror gains opens
+       by itself. Mirrors ShippingRules.pickupOff in src/lib/shipping.ts. */
+    pickupOff: [],
     /* One price per carrier, because that is how Montonio bills a parcel
        machine and the shopper is the one who picks the chip.
        Ренат, 13.09.2026: «we get prices from Montonio and we should use
@@ -6860,7 +7021,8 @@
     freeFromByCountry: cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry),
     methods: { parcel: {}, courier: {}, pickup: {} },
     carriers: {},
-    countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff)
+    countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff),
+    pickupOff: cloneRules(SHIP_RULES_DEFAULT.pickupOff)
   };
   var SHIP_STORED = cloneRules(SHIP_STORED_DEFAULT);
   var DELIVERY = [
@@ -6898,6 +7060,22 @@
     LV: ["omniva", "dpd", "unisend", "novapost"],
     LT: ["omniva", "dpd", "unisend", "novapost"],
     FI: ["smartpost", "dpd"],
+    /* 18.09.2026 — Ренат: «open every country DPD serves». DPD has lockers and
+       far more parcel shops in every one of these, Montonio prices the route,
+       and a DPD locker in Italy books exactly as an Estonian one does:
+       `{type:"pickupPoint", id:<the point's uuid>}`. `parcelMachine` was never
+       a shipping method — it is a subtype — so nothing in the API was ever in
+       the way (docs/montonio-shipping-audit.md, answer 1).
+       DPD alone, deliberately. Nova Post has a locker Montonio prices in nine
+       of them too, and in HU and RO it is the only carrier that does — which
+       is why neither is on this list. Offering Nova Post outside the Baltics
+       is its own decision: it is Montonio International Shipping and it has no
+       returns at all (docs/shipping.md). Nobody has taken it.
+       Which of these the checkout actually draws is SHIP_RULES.pickupOff —
+       one list the owner edits in Настройки → Доставка. */
+    AT: ["dpd"], BE: ["dpd"], BG: ["dpd"], CZ: ["dpd"], DE: ["dpd"], DK: ["dpd"],
+    ES: ["dpd"], FR: ["dpd"], HR: ["dpd"], IE: ["dpd"], IT: ["dpd"], LU: ["dpd"],
+    NL: ["dpd"], PL: ["dpd"], PT: ["dpd"], SE: ["dpd"], SI: ["dpd"], SK: ["dpd"],
     EU: []
   };
 
@@ -6945,8 +7123,35 @@
     /* the parcel cell: the method price — or, where the owner priced a
        carrier of this country on its own, «от» the cheapest of them; a
        country with no parcel carrier at all gets a dash, not a price */
+    /* The «Другие страны Европы» row's own pakomat price — the cheapest of the
+       countries behind it that actually offer one.
+       Until 18.09.2026 this row was a dash: the checkout drew a locker in four
+       countries and nowhere else. Ренат opened every country DPD serves, so
+       the row has a price again — and it has to be «от», like the courier
+       column beside it, because the countries behind it run from 13,69 €
+       (Швеция) to 59,59 € (Хорватия) and one number would be a promise the
+       till does not keep. The exact price appears the moment the country is
+       picked. A country the owner switched off (rules.pickupOff) is not
+       counted, because its price is not one anybody can be charged. */
+    function zonePickupFloor() {
+      var keys = rows.map(function (r) { return r[0]; });
+      var off = (rules && rules.pickupOff) || [];
+      var table = (rules.methods && rules.methods.parcel) || {};
+      var min = null;
+      Object.keys(carriers).forEach(function (c) {
+        if (c === "default" || keys.indexOf(c) >= 0) return;
+        if (!(carriers[c] || []).length || off.indexOf(c) >= 0) return;
+        var v = table[c];
+        if (typeof v === "number" && isFinite(v) && v > 0 && (min === null || v < min)) min = v;
+      });
+      return min;
+    }
     function parcelCell(c) {
       var list = carriers[c] || [];
+      if (c === "EU") {
+        var pf = zonePickupFloor();
+        return pf === null ? "—" : '<span class="num">' + tr("от " + eur(pf)) + "</span>";
+      }
       if (!list.length) return "—";
       var base = priceOf(rules.methods && rules.methods.parcel, c);
       var seen = [];
@@ -7177,6 +7382,13 @@
         .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
         .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
     }
+    /* …and where the pakomat is switched off, the same way: an array is
+       authoritative, `[]` means «пакомат везде, где он есть». */
+    if (Array.isArray(raw.pickupOff)) {
+      SHIP_RULES.pickupOff = raw.pickupOff
+        .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
+        .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    }
     /* `raw.markup` is read by nothing since 14.09.2026 and is ignored on the
        way in — the same as parseShippingRules() does on the server. Every row
        written before then carries the key (the panel saved the whole table),
@@ -7252,6 +7464,11 @@
         .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
         .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
     }
+    if (Array.isArray(raw.pickupOff)) {
+      out.pickupOff = raw.pickupOff
+        .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
+        .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    }
     /* `raw.markup` is read by nothing since 14.09.2026 and is ignored here as
        it is in parseShippingRules() on the server. */
     return out;
@@ -7281,6 +7498,7 @@
        which is the shape Ренат asked to be rid of. */
     SHIP_RULES.carriers = live.carriers;
     SHIP_RULES.countriesOff = live.countriesOff;
+    SHIP_RULES.pickupOff = live.pickupOff;
     refreshShipThresholds();
   }
   var shipRulesAsked = false;
@@ -7340,9 +7558,25 @@
     for (var i = 0; i < avail.length; i++) if (avail[i].k === S.ship.method) return S.ship.method;
     return avail.length ? avail[0].k : "courier";
   }
+  /**
+   * Does the shop offer a pickup point in this country at all?
+   *
+   * Two conditions, and the server asks the same two — `pickupOffered()` in
+   * src/lib/shipping.ts: there has to be a carrier with points there
+   * (CARRIERS_BY_COUNTRY), and the owner must not have switched the country
+   * off (SHIP_RULES.pickupOff, «Где предлагать пакомат» in the panel).
+   * tests/shipping-admin-mirror.test.ts fails if the two lists disagree.
+   */
+  function pickupOpen(country) {
+    var cc = country || S.country;
+    if (!(CARRIERS_BY_COUNTRY[cc] || []).length) return false;
+    var off = SHIP_RULES.pickupOff;
+    return !(off && off.indexOf(cc) >= 0);
+  }
   /** Carriers worth offering: the country's list, minus any that came back empty. */
   function carriersFor(country) {
     var cc = country || S.country;
+    if (!pickupOpen(cc)) return [];
     return (CARRIERS_BY_COUNTRY[cc] || []).filter(function (c) {
       return !POINTS.empty[c + ":" + cc];
     });
@@ -7432,7 +7666,8 @@
     // The brand marks travel with the machine lists: same step, same one shot,
     // and the chips they belong to are drawn from the same block.
     loadCarrierLogos();
-    var all = CARRIERS_BY_COUNTRY[S.country] || [];
+    // a country the owner switched off is not one to download 12 000 points for
+    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [];
     for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
   }
   /* How many carrier feeds for the selected country are still in flight —
@@ -7440,7 +7675,7 @@
      (and anyone debugging) can tell "the block will be rewritten again in a
      moment" from "this is the final delivery list". */
   function pointsLoadingCount() {
-    var all = CARRIERS_BY_COUNTRY[S.country] || [], n = 0;
+    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [], n = 0;
     for (var i = 0; i < all.length; i++) if (POINTS.loading[all[i] + ":" + S.country]) n++;
     return n;
   }
@@ -8175,6 +8410,10 @@
     partnerErr: "",      // why the form was not sent (a bad address, a server refusal)
     partnerBusy: false,
     // ---- admin «Настройки» → «Цены и лояльность» ----
+    parcelLoaded: null,  // settings.shipping_parcel — the declared carton + locker history
+    lockerSize: "",      // the door picked on the open order card; "" means «предложенный»
+    boxOpen: false,      // «Другая коробка» — the three fields for THIS parcel are showing
+    boxOverride: null,   // {length,width,height} in cm, this parcel only; never stored
     pricingLoaded: null, // the full settings.pricing as last read from the server (admin-only)
     pricingDraft: null,  // working copy while the card is being edited
     pricingErr: "",      // why the last value typed into the card was not stored
@@ -8392,6 +8631,77 @@
   function sizePrice(p, i) {
     if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
     return p.price;
+  }
+  /* ---- per-size stock (r23) ---------------------------------------------
+     The shelf's word for ONE size — "in" / "low" / "out" — or null where
+     there is none. The server has been publishing this on /api/overrides/ as
+     `stockByVariant` since the 17.09.2026 decision («show the product, hide
+     the empty size») and no client read it: setting a size to 0 changed
+     nothing on its page, and the shopper only found out at the checkout,
+     where createOrder() refuses the line (Renat, 18.09.2026).
+
+     null is the load-bearing case. A size nobody has counted is ABSENT from
+     the map, and absent is not empty — the shop has no opinion about it and
+     the owner's own «Наличие» stands, exactly as the server treats it. The
+     same goes for a product with no map at all. Reading absence as «out»
+     would grey out most of the shop, which is the opposite of what was
+     approved. */
+  function sizeStockOf(p, i) {
+    var m = p && p.stockVar;
+    if (!m) return null;
+    var sizes = p.sizes && p.sizes.length ? p.sizes : null;
+    /* Keyed by the LABEL, and by '' for a product with no sizes — the key an
+       order line carries (normVariant in src/lib/inventory.ts, which trims).
+       An index past the end reads the last rung, as sizePrice() does. */
+    var key = sizes ? String(sizes[Math.min(i, sizes.length - 1)] || "").trim() : "";
+    var st = m[key];
+    return st === "in" || st === "low" || st === "out" ? st : null;
+  }
+  /** True only for a size somebody has actually counted down to zero. */
+  function sizeOut(p, i) { return sizeStockOf(p, i) === "out"; }
+  /** The first size still on the shelf — what a product page opens on. */
+  function firstSizeIdx(p) {
+    var sizes = (p && p.sizes) || [];
+    for (var i = 0; i < sizes.length; i++) if (!sizeOut(p, i)) return i;
+    return 0;
+  }
+  /* Nothing on this product can be bought — the one question the `Product`
+     offer in setHead() has to answer. It is the same three-way
+     screenProduct() makes (`prodGone`), and it is here so the head and the
+     page read one fact instead of two:
+       · the owner's own «Наличие» says out;
+       · every rung of the ladder has been counted to zero — for a product
+         with one volume or none that is the single row of `soloGone`.
+
+     Usually the server has already reached the same answer and `p.stock` is
+     "out" on its own: stockStates() in src/lib/inventory.ts sets the product
+     word to "out" once every counted size is out AND they cover the ladder,
+     and it treats a ladder it cannot vouch for as covered. What it cannot
+     catch is a product carrying two shelf rows for the same bottle — the
+     «One bottle, two rows» state db/migrations/194 exists to clean up —
+     where the product word stays "in" while the size the page shows is gone.
+     Then the page printed «нет в наличии» and the markup said InStock.
+
+     Absent is still not «out» (the 17.09.2026 decision): a product with no
+     map, or a ladder nobody has counted, returns false here and keeps the
+     owner's word, exactly as sizeStockOf() does. */
+  function soldOut(p) {
+    if (!p) return false;
+    if (p.stock === "out") return true;
+    if (!p.stockVar) return false;
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    for (var i = 0; i < sizes.length; i++) if (!sizeOut(p, i)) return false;
+    return true;
+  }
+  /* «объём» for cosmetics, «размер» for a t-shirt — the same split the size
+     picker and the editor already make, kept in one place so the sentence the
+     page prints and the one the toast says can never drift apart. Each half
+     is one whole literal: translateTree() rewrites text nodes, not pieces. */
+  function sizeGoneText(p) {
+    return p && p.cat === "merch" ? "Этого размера сейчас нет" : "Этого объёма сейчас нет";
+  }
+  function sizePickOtherText(p) {
+    return p && p.cat === "merch" ? "Выберите другой размер." : "Выберите другой объём.";
   }
   /* ---- wholesale/loyalty: pro (salon) pricing --------------------------
      S.pro is filled in by loadProPricing() once signed in on a 'pro'
@@ -9805,10 +10115,26 @@
   function cardSizeIdx(id) {
     var p = byId(id), sizes = (p && p.sizes) || [];
     if (sizes.length < 2) return 0;
-    var best = 0, bestPr = shownPrice(p, 0);
-    for (var i = 1; i < sizes.length; i++) {
+    /* The cheapest volume — of the ones that can actually be SOLD (r23). The
+       card prints one price and its «В корзину» baskets that very volume
+       (addToCart), so quoting the 75 мл that was counted to zero this morning
+       is a price on a bottle the shop cannot hand over: the tap would bounce
+       off the backstop and the shopper would never learn that the 250 мл is
+       there. Only a counted-out size is passed over — an uncounted one is a
+       size the shelf has no opinion about and is priced exactly as before.
+       With every size gone the product's own word is «нет в наличии» and the
+       card shows no button at all, so the first rung is as good as any. */
+    var best = -1, bestPr = 0;
+    for (var i = 0; i < sizes.length; i++) {
+      if (sizeOut(p, i)) continue;
       var pr = shownPrice(p, i);
-      if (pr < bestPr) { best = i; bestPr = pr; }
+      if (best < 0 || pr < bestPr) { best = i; bestPr = pr; }
+    }
+    if (best >= 0) return best;
+    best = 0; bestPr = shownPrice(p, 0);
+    for (var j = 1; j < sizes.length; j++) {
+      var pr2 = shownPrice(p, j);
+      if (pr2 < bestPr) { best = j; bestPr = pr2; }
     }
     return best;
   }
@@ -10600,20 +10926,56 @@
      picture whole into a 1200×630 box, so the three pictures never agreed and
      he had to publish to find out. */
   var BLOG_COVER_CLS = { list: "blog__tileimg", post: "blog__cover" };
-  function blogCoverFrameHTML(where, url, alt) {
+  /* ---- and which part of the picture the frame keeps ----------------------
+     One point per post — `coverFocus`, the column 193_blog_cover_focus.sql
+     adds, carried by /api/blog/ and by #blogdata/#blogpost. Two words and two
+     numbers, `"fill 62 28"`: `fill` means the picture fills the frame and is
+     cropped, `fit` (and an absent value, which is every article written
+     before this) means it stands in the frame whole, which is what the two
+     rules in styles.css already do on their own.
+
+     A deliberate twin of readCoverFocus()/coverBgStyle() in
+     src/lib/blog-cover.mjs — the same third copy blogCleanHtml() is of the
+     sanitiser, and for the same reason: this file is loaded by the browser
+     with no build step and cannot import that one. tests/blog-cover.test.ts
+     lifts these two functions out of this file and runs them against the
+     module, so the twin cannot drift the way the sanitiser's did. */
+  var BLOG_FOCUS_RX = /^(fit|fill)(?:\s+(\d{1,3})\s+(\d{1,3}))?$/;
+  function blogCoverFocus(raw) {
+    var m = BLOG_FOCUS_RX.exec(String(raw == null ? "" : raw).trim().toLowerCase());
+    if (!m) return null;
+    var x = m[2] === undefined ? 50 : Number(m[2]);
+    var y = m[3] === undefined ? 50 : Number(m[3]);
+    if (x > 100 || y > 100) return null;
+    return { fill: m[1] === "fill", x: x, y: y };
+  }
+  /** …and back to the one shape that is stored — writeCoverFocus()'s twin. */
+  function blogCoverWrite(fill, x, y) {
+    var cx = Math.max(0, Math.min(100, Math.round(x)));
+    var cy = Math.max(0, Math.min(100, Math.round(y)));
+    return (fill ? "fill" : "fit") + " " + cx + " " + cy;
+  }
+  /** The two properties that crop — nothing at all when the picture stands whole. */
+  function blogCoverBgStyle(focus) {
+    var f = typeof focus === "string" || focus == null ? blogCoverFocus(focus) : focus;
+    return f && f.fill ? "background-size:cover;background-position:" + f.x + "% " + f.y + "%" : "";
+  }
+  function blogCoverFrameHTML(where, url, alt, focus) {
     var cls = BLOG_COVER_CLS[where] || BLOG_COVER_CLS.post;
     if (!url) {
       // the list keeps the box and puts the tower in it; the article shows nothing
       return where === "list" ? '<span class="' + cls + " " + cls + '--none">' + tower("blog__mark") + "</span>" : "";
     }
-    return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + '\')" role="img" aria-label="' + esc(alt || "") + '"></span>';
+    var crop = blogCoverBgStyle(focus);
+    return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + "')" + (crop ? ";" + crop : "") +
+      '" role="img" aria-label="' + esc(alt || "") + '"></span>';
   }
   /* A real link (href), not a bare <a>: the pointer says «clickable», the
      keyboard reaches it, Ctrl/⌘-click opens a tab — a plain click is caught
      by the [data-go-blog] branch of the click handler and stays in the SPA. */
   function blogTileHTML(p) {
     return '<li><a class="card blog__tile" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">' +
-      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title) +
+      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title, p.coverFocus) +
       '<span class="blog__tilebody">' +
         (p.publishedAt ? '<span class="muted blog__date">' + blogDate(p.publishedAt) + "</span>" : "") +
         '<span class="blog__tiletitle">' + esc(p.title) + "</span>" +
@@ -10691,7 +11053,7 @@
      the body is on its way the page already wears the part the list knows,
      and the body's arrival changes nothing above it. */
   function blogHeadHTML(p) {
-    return blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title) +
+    return blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title, p.coverFocus) +
       '<h1 class="display h1">' + esc(p.title) + "</h1>" +
       '<div class="blog__meta">' +
         (p.publishedAt ? '<span class="muted">' + blogDate(p.publishedAt) + "</span>" : "") +
@@ -11044,6 +11406,21 @@
       var who = [m.name, m.email].filter(Boolean).join(" · ");
       return '<span class="cline__parts">' + (who ? esc(who) + "<br>" : "") +
         "<span>Действует год со дня покупки</span></span>";
+    }
+    /* per-size stock (r23): a line basketed days ago, whose volume has been
+       counted to zero since. POST /api/orders already refuses it — «Товара не
+       хватает на складе» — but only at the very end, after the address and
+       the delivery method have been filled in, and with nothing to say WHICH
+       of three lines is the problem. Said here instead, on the line itself,
+       where «Убрать» is one tap away.
+       Said, not enforced: the line is left in the basket and the checkout
+       still refuses it. Dropping it silently would be the worse bug of the
+       two — a shopper who put something in a basket is owed the news, not a
+       basket that quietly empties itself — and the server stays the one place
+       that decides what may be bought. */
+    var cp = byIdOrNull(l.id);
+    if (cp && sizeOut(cp, l.size || 0)) {
+      return '<span class="cline__parts cline__gone">' + sizeGoneText(cp) + "</span>";
     }
     return "";
   }
@@ -11810,6 +12187,27 @@
     var sizes = p.sizes && p.sizes.length ? p.sizes : [];
     var pro = proPrice(p, S.size);
     var unitPrice = pro != null ? pro : sizePrice(p, S.size);
+    /* per-size stock (r23): the size the shopper is looking at, counted to
+       zero on a product that is otherwise on sale. The product's own word
+       above (`p.stock`) is a different sentence and MAY DISAGREE with this
+       one — «мало» on the product while the 500 мл is empty is the normal
+       reading of a half-sold ladder, not a bug. `p.stock === "out"` still
+       wins outright: when the whole ladder is counted out the server says so
+       on the product itself and the page keeps the one block it always had,
+       with the «Сообщить о наличии» form. There is deliberately no such form
+       per size — POST /api/stock-alerts is keyed by product and knows nothing
+       about volumes, so a letter promised for «the 500 мл» would never come.
+
+       …and «выберите другой» needs another one to exist. A product with one
+       volume, or none at all, whose single shelf row is at zero is simply not
+       for sale, so it gets the product's own block and the working, product-
+       keyed alert. It is reachable: stockStates() withholds the product word
+       unless it can vouch for the whole ladder, and one of the owner's own
+       products (migration 131) that has never had a ladder saved is exactly
+       the case it cannot vouch for — knownLadder() returns null for it. */
+    var soloGone = sizes.length < 2 && sizeOut(p, S.size);
+    var prodGone = p.stock === "out" || soloGone;
+    var volGone = !prodGone && sizeOut(p, S.size);
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
@@ -11839,7 +12237,7 @@
           variantPicker(p, sizes) +
           // the card hides its add button for stock:"out" — the product page
           // must agree, or a shopper "pays" for an item the shop cannot ship
-          (p.stock === "out"
+          (prodGone
             ? '<div class="pdp__oos"><p>Товара сейчас нет. Оставьте почту — напишем, когда появится.</p>' +
               /* account-flows: the button used to be a toast with nothing
                  behind it (audit top-15 #12). It now opens a one-field form
@@ -11849,6 +12247,12 @@
                 ? '<div class="pdp__oosrow"><input class="input input--box" type="email" inputmode="email" autocomplete="email" data-notifyf aria-label="E-mail для уведомления" placeholder="you@example.com" value="' + esc(S.notifyEmail) + '">' +
                   '<button class="btn btn--ghost" data-notifysend="' + p.id + '"' + (S.notifyBusy ? " disabled" : "") + ">" + (S.notifyBusy ? "Отправляем…" : "Сообщить") + "</button></div></div>"
                 : '<button class="btn btn--ghost" data-notify="' + p.id + '">Сообщить о наличии</button></div>')
+            // per-size stock (r23): two sentences, two text nodes — the
+            // second names what to do about it, and both are whole literals
+            // for translateTree() to swap
+            : volGone
+            ? '<div class="pdp__oos pdp__oos--size"><p>' + sizeGoneText(p) + "</p>" +
+              '<p class="muted">' + sizePickOtherText(p) + "</p></div>"
             : '<div class="pdp__buy">' +
                 '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num" data-qtynum>' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
                 '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
@@ -11895,7 +12299,9 @@
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         complementsFor(p).map(cardHTML).join("") +
       "</div></section></div>" +
-      (p.stock === "out" ? "" :
+      // …and the bar that follows the shopper down the page goes with it: it
+      // carries its own «В корзину» for the size now chosen (r23)
+      (prodGone || volGone ? "" :
         '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(unitPrice * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
   }
   /* `open`/`id` are optional — every call site but Reviews still gets a
@@ -13491,7 +13897,7 @@
     return {
       id: "", slug: "", slugAuto: true, status: "draft",
       title: { RU: "", ET: "", EN: "" }, excerpt: { RU: "", ET: "", EN: "" }, body: { RU: "", ET: "", EN: "" },
-      coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" },
+      coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" }, coverFocus: "",
       tagsText: "", products: [],
       seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" },
       author: "Rempire", publishedAt: null
@@ -13504,6 +13910,7 @@
       // the editor works in HTML; an older markdown body is converted here, once
       body: blogBody3ToHtml(Object.assign({}, BLOG_EMPTY3, p.body)),
       coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
+      coverFocus: p.coverFocus || "",
       tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
       seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
       author: p.author || "Rempire", publishedAt: p.publishedAt || null
@@ -13552,6 +13959,11 @@
          what is stored is what the shop will show. */
       body: blogBody3ToHtml(d.body),
       coverUrl: d.coverUrl || null, coverAlt: d.coverAlt,
+      /* One point for all four frames — «fill 62 28» or nothing at all.
+         writeCoverFocus() in src/lib/blog-cover.mjs measures it again on the
+         way into the row, so a word this vocabulary does not have is stored
+         as null, which is what a cover nobody has dragged already is. */
+      coverFocus: d.coverFocus || null,
       tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
       products: d.products,
       seoTitle: d.seoTitle, seoDesc: d.seoDesc,
@@ -13637,10 +14049,10 @@
   }
   /** Everything «Сохранить» would send — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
-    return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt,
+    return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt, d.coverFocus,
       d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
   }
-  var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt",
+  var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt", "coverFocus",
     "tagsText", "products", "seoTitle", "seoDesc", "author"];
   /** The same fields, detached from the draft — what a save compares against
       once the draft has moved on under it. See saveBlogFields(). */
@@ -14145,20 +14557,37 @@
       return '<div class="pdp__vol">' + (p.cat === "merch" ? "Размер — " : "Объём — ") + esc(sizes[0]) + "</div>";
     }
     if (sizes.length < 2) return "";
+    /* per-size stock (r23): a size counted down to zero is greyed and marked
+       aria-disabled, but stays PRESSABLE on purpose. Tapping it swaps the buy
+       row for «Этого объёма сейчас нет» (screenProduct) instead of doing
+       nothing at all, which on a phone is indistinguishable from a broken
+       button — and the shopper still gets to see its price. Nothing can be
+       basketed from there: the buy row is gone and addToCart() refuses it
+       anyway. A size nobody counted is left exactly as it was. */
     var sv = splitVariants(sizes);
     if (!sv) {
       return '<div class="field"><span class="field__label">' + (p.cat === "merch" ? "Размер" : "Объём") +
         '</span><div class="sizes">' + sizes.map(function (sz, i) {
-          return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + esc(sz) + "</button>";
+          return '<button class="size' + (sizeOut(p, i) ? " size--out" : "") + '" data-size="' + i +
+            '" aria-current="' + (i === S.size) + '"' + (sizeOut(p, i) ? ' aria-disabled="true"' : "") + ">" + esc(sz) + "</button>";
         }).join("") + "</div></div>";
     }
     var cur = sizes[Math.min(S.size, sizes.length - 1)].split(" / ");
+    /* Merch is a grid of colour × size, so a COLOUR is gone only when every
+       size printed on it is counted to zero — one shirt left in white L keeps
+       white on offer. A SIZE is judged against the colour now chosen. */
+    function colourOut(c) {
+      return sv.sizes.every(function (s2) { return sizeOut(p, variantIndex(sizes, c, s2)); });
+    }
     return '<div class="field"><span class="field__label">Цвет принта — <span data-colourname>' + esc(colourRu(cur[0])) +
       '</span></span><div class="sizes">' + sv.colours.map(function (c) {
-        return '<button class="size" data-vcolour="' + esc(c) + '" aria-current="' + (c === cur[0]) + '">' + esc(colourRu(c)) + "</button>";
+        return '<button class="size' + (colourOut(c) ? " size--out" : "") + '" data-vcolour="' + esc(c) +
+          '" aria-current="' + (c === cur[0]) + '"' + (colourOut(c) ? ' aria-disabled="true"' : "") + ">" + esc(colourRu(c)) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="field"><span class="field__label">Размер</span><div class="sizes">' + sv.sizes.map(function (s2) {
-        return '<button class="size" data-vsize="' + esc(s2) + '" aria-current="' + (s2 === cur[1]) + '">' + esc(s2) + "</button>";
+        var gone = sizeOut(p, variantIndex(sizes, cur[0], s2));
+        return '<button class="size' + (gone ? " size--out" : "") + '" data-vsize="' + esc(s2) +
+          '" aria-current="' + (s2 === cur[1]) + '"' + (gone ? ' aria-disabled="true"' : "") + ">" + esc(s2) + "</button>";
       }).join("") + "</div></div>";
   }
 
@@ -16562,6 +16991,28 @@
     };
   }
   var GSC = null;
+  /* «Что Montonio умеет прямо сейчас» — GET /api/admin/montonio/.
+     `rows` arrives ready, one entry per thing worth a row, each with its name
+     and sentence in all three languages: they are built on the server
+     (src/lib/montonio-problems.ts montonioReadinessRows) because they are
+     about Montonio's state, not the shop's, and the dictionary in this file
+     cannot be kept in step with an API. The row that matters is «Возврат
+     денег покупателю»: «Bank payments» can be on while «Refundable bank
+     payments» is off, and then the shop looks perfect until the first
+     customer asks for money back (docs/montonio-untested.md). */
+  var MONTONIO = null;
+  function loadMontonio(force) {
+    if (SRV.admin !== true || loadMontonio._busy) return;
+    if (MONTONIO && !force) return;
+    loadMontonio._busy = true;
+    apiJson("/api/admin/montonio/").then(function (r) {
+      loadMontonio._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200) MONTONIO = r.body;
+      else if (!MONTONIO) MONTONIO = { rows: [] };
+      render();
+    }).catch(function () { loadMontonio._busy = false; if (!MONTONIO) MONTONIO = { rows: [] }; render(); });
+  }
   /* What the server saw in the key variable — its shape, never its contents
      — so «Подключения» can say what to re-paste. Each sentence is its own
      text node (a <span>) so the translator finds it by key. */
@@ -17076,8 +17527,8 @@
        queue a new review and a partner request arrive in — the shop has one
        way of telling Renat that somebody is waiting for him, and this is it.
        Since r16 the row leads to «Возвраты» — its own chip on «Заказы», which
-       holds nothing else — instead of dropping him into «В пути» among every
-       parcel that ever left. The names under it still say whose. */
+       holds nothing else — instead of dropping him into «В пути» among all the
+       other parcels. The names under it still say whose. */
     if (retN) tasks += admTaskRow(retN,
       pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
       names(retList, function (v) { return v.who; }),
@@ -17166,7 +17617,7 @@
      boxes an order was in before he could find it; what he actually does is
      two things — send what has not gone yet, and look at what is already on
      its way. So: «Отправить N» (paid, still on the shelf, label or no label),
-     «В пути» (gone: shipped and delivered together) and «Все». «По счёту»
+     «В пути N» (`shipped` — gone and not there yet) and «Все». «По счёту»
      stays beside them because it is not a step of the same journey — it is an
      invoice waiting for a bank transfer, and it belongs to the invoice flow.
      Salon sales, unpaid and cancelled orders are all under «Все», which is
@@ -17200,13 +17651,38 @@
     // «Отправить» is the parcel queue: a digital order has no parcel and is
     // found under «Все» (v.toShip, admOrderVM)
     if (f === "new" || f === "label") return v.toShip;
-    // …and everything that has: «Отправлен» and «Доставлен» are one answer to
-    // «где посылка» — the row itself says which of the two it is
-    if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;
+    /* …and «В пути» is what has gone and has NOT arrived: `shipped` alone.
+       It held `shipped || delivered` from 07.09.2026 (735c666, the same commit
+       that taught the shop to close orders by itself) until Renat, 18.09.2026:
+       «в «Заказах» чип «в пути» вроде не считает то, что в пути». Two places in
+       this codebase already promised the narrower set and were simply wrong:
+       the delivery card's own hint — «Заказ просто перестаёт висеть в «В пути»»
+       (admDeliveryCloseHTML) — and src/lib/delivery.ts, «the order stops
+       appearing in «В пути» and Renat stops looking at it». Neither happened:
+       a parcel the nightly sweep or the carrier's webhook closed stayed on this
+       list for ever, so «В пути» was «всё, что когда-либо уехало». Harmless
+       while nothing ever became `delivered` — the shipping webhook was thrown
+       away unread until today — and wrong the moment it did.
+       A parcel the carrier sent back is deliberately still `shipped`
+       (looksReturned leaves it open), so it stays here: it is in transit, to
+       Renat rather than to the customer, and it is his to deal with. */
+    if (f === "shipped") return v.shipped;
+    // «delivered» is not a chip any more, but the key is still understood —
+    // and it means what it says, as it did before the six chips became three
+    if (f === "delivered") return v.delivered;
     // «По счёту»: the invoices still waiting for their transfer
     if (f === "invoice") return !!v.invoice && v.unpaid;
     if (f === "salon") return v.pos;
     return true;
+  }
+  /** «В пути N» — the parcels that have left and have not arrived.
+      Read from admOrders(), which is the very list the rows are drawn from
+      (admOrderRows), and filtered by admOrderMatches() itself, so the number
+      on the chip and the rows behind it cannot say different things — the one
+      difference the owner cannot see from the outside. Same shape as
+      admLiveToShip() beside it, demo list and all. */
+  function admOnTheWay() {
+    return admOrders().map(admOrderVM).filter(function (v) { return admOrderMatches(v, "shipped"); });
   }
   /** The invoice orders waiting for a transfer — the chip's count and the overview's row. */
   function admInvoicesWaiting() {
@@ -17239,9 +17715,14 @@
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          // «Отправить N» counts everything still on the shelf, labelled or not;
-          // «Возвраты N» the requests nobody has answered yet (admReturnsAsked)
+          /* «Отправить N» counts everything still on the shelf, labelled or not;
+             «В пути N» the parcels that have left and not arrived (admOnTheWay);
+             «Возвраты N» the requests nobody has answered yet (admReturnsAsked).
+             «В пути» had no number at all until 18.09.2026 — four chips, three
+             of them counting, and the one the owner watches a parcel on was the
+             silent one. */
           var n = x[0] === "new" ? split.fresh + split.labeled
+            : x[0] === "shipped" ? admOnTheWay().length
             : x[0] === "invoice" ? admInvoicesWaiting().length
             : x[0] === "returns" ? admReturnsAsked().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
@@ -17413,6 +17894,106 @@
     if (v.paid) return '<button class="' + cls + '" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     if (v.shipped) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Доставлен</button>';
     return "";
+  }
+  /* ---------- «Размер ячейки» — the one thing decided at label time --------
+   *
+   * `lockerSize` is a field on Montonio's Create Shipment, which means it is
+   * decided at the moment Renat presses «Создать этикетку» — standing over the
+   * box he has just packed. It is a **price tier**, so one fixed size in a
+   * constant would be one tier paid for every parcel whatever is inside it.
+   *
+   * Ренат, 18.09.2026: «use recommended, but we have also option that some
+   * default is set and used + automate it — maybe each package will be almost
+   * always at same size.» So both halves, and the automation is the point:
+   * the door he has been using is already selected, the line under it says
+   * why, and pressing the button confirms it. He is interrupted only if he
+   * wants to change it — one tap on another chip.
+   *
+   * Drawn only where the field means something: a parcel going to a pickup
+   * point, on a carrier that takes the field at all (Unisend, SmartPosti —
+   * `LOCKER_CARRIERS`), and only while the label is still to be made. A
+   * courier parcel and an Omniva locker never see it, because Montonio would
+   * refuse the field and because an Estonian Omniva drop-off pin is a copy of
+   * the parcel id anyway.
+   *
+   * What the shop cannot do from here, and the hint says so: SmartPosti's
+   * contract default and DPD's PIN service are switches in Montonio's own
+   * Partner System. With neither a request value nor a contract default,
+   * SmartPosti issues no drop-off code at all — the blank line on the A4 slip
+   * Renat reported on 13.09.2026 — which is exactly why this strip sends one.
+   */
+  var LOCKER_CARRIERS = ["unisend", "smartpost"];
+  /** The door this order will be booked with: what he tapped, else the suggestion. */
+  function admLockerPick() {
+    return LOCKER_SIZES.indexOf(S.lockerSize) >= 0 ? S.lockerSize : suggestLocker();
+  }
+  /** Is this order one where the door is ours to choose? */
+  function admLockerOrder(v) {
+    if (!v || !v.paid || v.labeled || v.pickup || v.digital) return false;
+    var sh = v.srv && v.srv.shipping;
+    if (!sh) return false;
+    var m = String(sh.method || "").toLowerCase();
+    if (m !== "parcel" && !sh.pointId) return false;
+    return LOCKER_CARRIERS.indexOf(String(sh.carrier || "").toLowerCase()) >= 0;
+  }
+  /**
+   * Is this order still waiting for a label at all? Then the two things
+   * decided at label time belong on its card: the box and the locker door.
+   */
+  function admShipPrep(v) {
+    return !!v && v.paid && !v.labeled && !v.pickup && !v.digital;
+  }
+  /** The box this parcel will be declared as — his override, else the shop's. */
+  function admBoxPick() {
+    var b = S.boxOverride;
+    return b && b.length && b.width && b.height ? b : parcelConf();
+  }
+  /** Did he actually change it? An untouched override is not one. */
+  function admBoxChanged() {
+    var b = S.boxOverride, p = parcelConf();
+    return !!b && (b.length !== p.length || b.width !== p.width || b.height !== p.height);
+  }
+  function admShipPrepHTML(v) {
+    if (!admShipPrep(v)) return "";
+    loadAdminPricing(false);   // the same GET /api/admin/settings every card makes
+    var box = admBoxPick();
+    var pick = admLockerPick();
+    /* The box, first, because it is the one that costs money on every parcel:
+       Montonio bills the greater of the real weight and the weight of the box,
+       so a smaller carton is the cheapest lever the shop has. The declared one
+       is shown, and «Другая коробка» is one tap away — for THIS parcel, saving
+       nothing, changing no setting. Ренат, 18.09.2026: «In any case if needed
+       we have the possibility to override and adjust along the way.» */
+    var boxBlock = '<div class="adm-ship__row"><span class="adm-sec__t">Коробка</span>' +
+      '<span class="adm-hint">' + admBoxLine(box.length, box.width, box.height, parcelVolKg(box)) + "</span></div>" +
+      (S.boxOpen
+        ? '<div class="adm-parcel">' +
+            ["length", "width", "height"].map(function (f, i) {
+              return '<label class="adm-field"><span>' + ["Длина, см", "Ширина, см", "Высота, см"][i] + "</span>" +
+                '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+                  'data-shipbox="' + f + '" value="' + esc(String(box[f])) + '"></label>';
+            }).join("") +
+          "</div>" +
+          '<div class="adm-hint">Это только для этой посылки — коробка магазина не меняется.</div>'
+        : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-shipboxopen>Другая коробка</button>');
+    return '<div class="adm-locker">' + boxBlock +
+      (admLockerOrder(v)
+        ? '<div class="adm-ship__row" style="margin-top:4px"><span class="adm-sec__t">Размер ячейки</span>' +
+            '<span class="adm-hint">' + lockerReason() + "</span></div>" +
+          '<div class="adm-chips" role="group" aria-label="Размер ячейки">' +
+            LOCKER_SIZES.map(function (k) {
+              return '<button class="adm-chip adm-chip--size" type="button" data-lockersize="' + k + '"' +
+                ' aria-current="' + (k === pick ? "true" : "false") + '">' + k + "</button>";
+            }).join("") +
+          "</div>" +
+          '<div class="adm-hint">Нажмите «Создать этикетку» — поедет ячейка ' + esc(pick) +
+            ". Другой размер — нажмите на него.</div>"
+        : "") +
+      "</div>";
+  }
+  /** «25 × 18 × 10 см · около 1,1 кг» — one text node, so it stays translatable. */
+  function admBoxLine(l, w, h, kg) {
+    return l + " × " + w + " × " + h + " см · около " + kgNum(kg) + " кг";
   }
   /** The printable receipt of a salon sale — the POS screen's own link,
       repeated on the order so it can be found again a week later. */
@@ -17778,6 +18359,7 @@
       (showSteps ? admOrderSteps(v) : "") +
       admReturnStateHTML(v) +
       admInvoiceStateHTML(v) +
+      (showSteps ? admShipPrepHTML(v) : "") +
       (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
       (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
       (showSteps ? admShipmentBoxHTML(v) : "") +
@@ -18153,12 +18735,18 @@
       to lowStock() — the manual «мало / нет» flag on the static catalogue —
       so the same badge said one thing before the shelf list arrived and a
       different one after, and neither said which. On a real panel there is
-      no number until the list is here (the same rule as «Ждут письма»). */
+      no number until the list is here (the same rule as «Ждут письма»).
+
+      `offSale` rows are out of it, and have to be: this badge is a count of
+      the «Мало» and «Нет» chips, which leave them out too (stockFiltered
+      below, getLevels in src/lib/inventory.ts). A product taken out of the
+      shop does not need reordering, and a badge saying «3» over a list of two
+      is worse than either number alone. */
   function admLowCount() {
     var rows = S.stockLevels;
     if (rows) {
       var n = 0;
-      for (var i = 0; i < rows.length; i++) if (rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) n++;
+      for (var i = 0; i < rows.length; i++) if (rows[i].tracked && !rows[i].offSale && (rows[i].state === "low" || rows[i].state === "out")) n++;
       return n;
     }
     return SRV.admin === true ? 0 : lowStock().length;
@@ -19839,8 +20427,8 @@
             '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
         (d.id
           ? (S.adminBlogConfirmDelete
-            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Текст останется в черновиках, ' +
-              "но в магазине её будет не увидеть.</div>" +
+            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Она исчезнет из списка и из ' +
+              "магазина, вернуть её будет нельзя.</div>" +
               '<button class="adm-btn adm-btn--warn" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button>" +
               '<button class="adm-link adm-link--muted" data-admblogdelno>Отмена</button>'
             : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
@@ -19903,17 +20491,98 @@
    * another, the top of the article a third, and there was no way to know
    * before publishing (Renat, 17.09.2026).
    */
-  function admBlogSeeHTML(url, alt) {
+  /* ---- and how it stands in them ------------------------------------------
+     «возможность редактировать размер или двигать фото для обложки» — Renat,
+     round 20 and again 18.09.2026, written onto a screenshot of this very
+     screen. Two words on a segmented control and a point under a thumb.
+
+     `fit` is what every cover does today: the picture whole in the frame,
+     empty field at the sides. `fill` crops it to the frame. A closed pair,
+     checked here and again on the way into the row (writeCoverFocus,
+     src/lib/blog-cover.mjs) — the discipline the four `data-fig` presets a
+     picture inside the text are held to.
+
+     The point is ONE point for all three frames. A crop rectangle would be
+     right for one shape and wrong for the other two: they are 1200×630 and
+     1:1, and no rectangle is both. */
+  var BLOG_COVER_FITS = [["fit", "Вся фотография"], ["fill", "Заполнить рамку"]];
+  /* One key each, whole sentences: translateTree() rewrites a text node only
+     when the node's whole value is a key, and on one line so a test can lift
+     them out the way it lifts every other `var X = ` table here. */
+  var BLOG_COVER_FILL_NOTE = "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.";
+  var BLOG_COVER_OG_NOTE = "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.";
+  var BLOG_COVER_OG_GUESS = "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.";
+
+  function admBlogSeeHTML(url, alt, focus) {
+    var f = blogCoverFocus(focus);
+    var fill = !!(f && f.fill);
+    /* Only a frame that actually crops is worth a thumb. In «Вся фотография»
+       the two shop frames show the whole picture and there is nothing under
+       the finger to move; the square crops whatever the page does, so it is
+       draggable always — which is the answer to the complaint underneath the
+       complaint, a face that survived the page and came back halved from
+       WhatsApp. */
+    /* Both openings written out whole rather than assembled from pieces:
+       translateTree() reads an aria-label off a finished attribute, and
+       tools/i18n-gaps.mjs can only see one in a literal that is a whole tag. */
+    var pan = function (on, inner) {
+      return (on
+        ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag tabindex="0" aria-label="Двигать фотографию">'
+        : '<span class="adm-see__f">') + inner + "</span>";
+    };
+    /* The two shop frames are drawn by the shop's own blogCoverFrameHTML()
+       under the shop's own classes, against styles.css — so this is not a
+       copy of the cropping rule, it IS the rule (see the note above). The
+       square is not: that card is drawn by sharp on the server, not by any
+       rule this page could borrow, so its frame is the panel's own and its
+       shape — 518×518 in src/lib/og-card.ts — is the one thing here that has
+       to be kept in step with that file by hand. */
     var one = function (where, title) {
       return '<span class="adm-see__one adm-see__one--' + where + '">' +
         '<span class="adm-see__t">' + title + "</span>" +
-        '<span class="adm-see__f">' + blogCoverFrameHTML(where, url, alt) + "</span></span>";
+        pan(fill, blogCoverFrameHTML(where, url, alt, f)) + "</span>";
     };
+    var square = '<span class="adm-see__one adm-see__one--og">' +
+      '<span class="adm-see__t">В соцсетях</span>' +
+      pan(true, '<span class="adm-see__og" style="background-image:url(\'' + esc(url) + "')" +
+        (f ? ";background-position:" + f.x + "% " + f.y + "%" : "") +
+        '" role="img" aria-label="' + esc(alt || "") + '"></span>') + "</span>";
     return '<div class="adm-see">' +
-      one("list", "В списке статей") + one("post", "В начале статьи") +
-      '<span class="adm-hint adm-see__note">Так обложку увидят в магазине: она вписывается в окно целиком, ' +
-        "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.</span>" +
+      one("list", "В списке статей") + one("post", "В начале статьи") + square +
+      '<span class="adm-hint adm-see__note">' +
+        (fill
+          ? BLOG_COVER_FILL_NOTE
+          : "Так обложку увидят в магазине: она вписывается в окно целиком, " +
+            "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.") +
+      "</span>" +
+      '<span class="adm-hint adm-see__note" data-covernote>' + (f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS) + "</span>" +
       "</div>";
+  }
+  /* The frames repaint themselves while a thumb is on one of them. A render()
+     here would rebuild the editor under the finger and take the pointer
+     capture with it — the picture would stop following the thumb halfway
+     through the first drag — which is the same reason paintMailPreview() and
+     blogPaintState() exist. Only the two properties that move are written;
+     the markup, and the note that goes with the mode, are render()'s. */
+  function admBlogPaintCover() {
+    var d = S.adminBlogEdit;
+    if (!d) return;
+    var f = blogCoverFocus(d.coverFocus);
+    var frames = document.querySelectorAll(".adm-see .blog__tileimg, .adm-see .blog__cover, .adm-see .adm-see__og");
+    for (var i = 0; i < frames.length; i++) {
+      var el = frames[i];
+      // the square crops whatever the page does; the shop's two only when asked
+      var crop = el.className.indexOf("adm-see__og") >= 0 || !!(f && f.fill);
+      el.style.backgroundSize = crop ? "cover" : "";
+      el.style.backgroundPosition = crop && f ? f.x + "% " + f.y + "%" : "";
+    }
+    /* …and the one line that stops being true the moment the square is
+       dragged: until then it says the shop is choosing the crop itself. */
+    var note = document.querySelector("[data-covernote]");
+    if (note) {
+      note.textContent = f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS;
+      translateTree(note);
+    }
   }
   /** The cover. With one: the two frames above — the picture as the list and
       as the top of the article will show it — its caption under them when
@@ -19936,9 +20605,15 @@
       // the shop's own fallback for a cover with no caption yet: the title
       var say = alt || String(d.title[L] || d.title.RU || d.title.ET || d.title.EN || "").trim();
       return '<div class="adm-cover" data-galdrop="blog">' +
-        admBlogSeeHTML(d.coverUrl, say) +
+        admBlogSeeHTML(d.coverUrl, say, d.coverFocus) +
         (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
         '<div class="adm-cover__acts">' +
+          /* «размер»: the two ways one photograph can stand in a frame. It
+             sits with «Заменить» and «Удалить» because it is the third thing
+             that can be done to the cover, and above the frames would put a
+             control between the owner and the picture it is about. */
+          admSegHTML("data-coverfit", BLOG_COVER_FITS,
+            (blogCoverFocus(d.coverFocus) || {}).fill ? "fill" : "fit", "Как стоит обложка") +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
             (UP.busy ? upBusyText() : "Заменить обложку") + "</button>" + file +
           '<button class="adm-link adm-link--warn" data-admblogcoverdel aria-label="Удалить обложку">Удалить</button>' +
@@ -21154,6 +21829,24 @@
           : "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.",
       act: admAI === false ? admDevLink() : "" });
 
+    /* The Montonio rows go under the payment and delivery ones, because they
+       answer a different question: not «работает ли» but «что вообще
+       включено». Their text is the server's, printed as it came — see
+       loadMontonio(). A row the server could not decide is grey («quiet»),
+       never green: «мы не смогли спросить» and «выключено» are different
+       facts and a square that merges them is the bug this screen is for. */
+    var mont = (MONTONIO && MONTONIO.rows) || [];
+    for (var mi = 0; mi < mont.length; mi++) {
+      var mr = mont[mi];
+      rows.push({
+        name: esc(String(mr.name[S.lang] || mr.name.RU || "Montonio")),
+        ok: mr.ok !== false,
+        quiet: mr.quiet === true,
+        sub: esc(String(mr.sub[S.lang] || mr.sub.RU || "")),
+        act: mr.ok === false ? admDevLink() : ""
+      });
+    }
+
     var cam = scanSupportInfo().camera;
     rows.push({ name: "Сканер · камера телефона", ok: cam,
       sub: cam
@@ -21163,7 +21856,7 @@
     return rows;
   }
   function admAppsHTML() {
-    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadAnalytics("7d"); }
+    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadMontonio(); loadAnalytics("7d"); }
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Подключения", "") +
       /* `--lines`, like every other list in the panel (admin.css § «one shape
@@ -21483,8 +22176,82 @@
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
         "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
       admBanksHTML() +
+      admParcelBoxHTML() +
       admDeliveryCloseHTML() +
       "</div>";
+  }
+  /**
+   * «Коробка магазина» — settings.shipping_parcel.
+   *
+   * Montonio asks some carriers for the parcel's measurements and refuses the
+   * booking without them (`constraints.parcelDimensionsRequired`); the shop
+   * never read the flag and never sent the numbers, so those routes simply did
+   * not work. The catalogue has no dimensions and no weight for any of its 220
+   * products, so there is nothing to measure — Ренат, 18.09.2026: «one default
+   * parcel size, overridable». This is that box.
+   *
+   * 25 × 18 × 10 cm to start with, and small on purpose: Montonio bills
+   * `max(actualWeight, volumetricWeight)` and the volumetric half is the box's
+   * own volume, so at this shop's parcel sizes the carton — not what is in it
+   * — is what gets paid for. The line under the boxes prints what Montonio
+   * will count this one as, so a bigger carton costs visibly more before it is
+   * saved. Centimetres, because that is what a tape measure says; the metres
+   * Montonio wants are converted once, on the server.
+   *
+   * The locker door beside it is only the seed. What is actually pre-selected
+   * on an order card is what he has been shipping — see admShipPrepHTML().
+   *
+   * Saved on the spot with an undo, like «Доставлен сам» below it, and not
+   * through the tariff table's «Сохранить»: it is a different settings row and
+   * it moves no price.
+   */
+  function admParcelBoxHTML() {
+    loadAdminPricing(false);
+    var p = parcelConf();
+    var used = p.recent.length;
+    return '<div class="adm-sec__t" style="margin-top:24px">Коробка магазина</div>' +
+      '<p class="adm-hint" style="margin:0 0 10px">Некоторые перевозчики не примут посылку без размеров. ' +
+        "Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. " +
+        "Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. " +
+        "Поэтому коробка поменьше — это прямая экономия на каждой посылке.</p>" +
+      '<div class="adm-parcel">' +
+        '<label class="adm-field"><span>Длина, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="length" value="' + esc(String(p.length)) + '"></label>' +
+        '<label class="adm-field"><span>Ширина, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="width" value="' + esc(String(p.width)) + '"></label>' +
+        '<label class="adm-field"><span>Высота, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="height" value="' + esc(String(p.height)) + '"></label>' +
+      "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">' + admParcelVolLine(parcelVolKg(p)) + "</p>" +
+      '<label class="adm-field" style="margin-top:12px"><span>Размер ячейки по умолчанию</span>' +
+        '<select class="adm-input" data-parcelsize>' +
+        LOCKER_SIZES.map(function (k) {
+          return '<option value="' + k + '"' + (k === p.lockerSize ? " selected" : "") + ">" + k + "</option>";
+        }).join("") + "</select></label>" +
+      '<p class="adm-hint" style="margin-top:8px">' +
+        (used
+          ? admParcelLearnedLine(suggestLocker(p))
+          : "Пока этикеток не было — при первой будет предложен этот размер.") +
+        "</p>" +
+      /* The two switches that are not ours to throw, named rather than
+         quietly worked around. Montonio's Partner System is the owner's
+         account; a panel that pretended otherwise would be a panel that lies
+         about why a drop-off code is blank. */
+      '<p class="adm-hint" style="margin-top:8px">В кабинете Montonio проверьте два переключателя: ' +
+        "у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. " +
+        "Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.</p>";
+  }
+  /** «Чаще всего вы отправляете L — этот размер и будет предложен.»
+      One text node, and no declining noun in it: translateTree() rewrites a
+      whole node, and a plural that changes with the count would need three
+      dictionary keys to say one thing. */
+  /** «Montonio посчитает эту коробку примерно как 1,1 кг.» One text node. */
+  function admParcelVolLine(kg) { return "Montonio посчитает эту коробку примерно как " + kgNum(kg) + " кг."; }
+  function admParcelLearnedLine(size) {
+    return "Чаще всего вы отправляете " + size + " — этот размер и будет предложен.";
   }
   /* ---- «Слишком много банков» (Ренат, 07.09.2026) -------------------------
      Montonio отдаёт весь список банков магазина и убрать из него один банк у
@@ -21665,7 +22432,9 @@
     });
   }
   function admShipPreviewHTML() {
-    return '<details class="adm-fold adm-preview" style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
+    /* data-fold: this fold's open state is S.shipPreviewOpen, so the markup
+       below states it both ways and admMorphAttrs() must obey both. */
+    return '<details class="adm-fold adm-preview" data-fold style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
       '<summary data-shippreview><span class="adm-link">Что увидит покупатель</span>' +
         '<span class="adm-row__sub">та же таблица, что на странице «Доставка и оплата»</span></summary>' +
       '<div style="padding-top:12px" data-shippreviewbody>' + admShipPreviewTableHTML() + "</div>" +
@@ -21882,26 +22651,34 @@
    * of them, so the five carrier columns would be a hundred and five dashes.
    * The line above the list says that once instead.
    *
-   * Nine of the twenty-one — AT, CZ, DE, ES, HU, IT, PL, RO, SK — do have a
-   * Nova Post locker Montonio prices, and Hungary and Romania have no other
-   * carrier at all. Offering them is a decision about what the customer sees,
-   * not a layout question, so the fold says «только курьер» until it is taken.
+   * 18.09.2026 — the fold no longer says «только курьер». Ренат opened every
+   * country DPD serves, so eighteen of these twenty-one now offer a pickup
+   * point too, and «Где предлагать пакомат» below is the list he narrows it
+   * with. The three that do not are Hungary, Romania and Greece: the first two
+   * have a locker at Nova Post only, which is Montonio International Shipping
+   * and has no returns at all, and Greece has none anywhere. Whether to add
+   * Nova Post's is still a decision of its own and nobody has taken it.
    */
   function admShipEuropeHTML() {
-    return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
+    /* data-fold: the open state is S.shipEuOpen, not the browser's own — so
+       the markup states it both ways and admMorphAttrs() obeys both. The same
+       <summary> opens and closes it; the `›` beside the title turns to point
+       down while it is open (.adm-fold[open] > summary::before). */
+    return '<details class="adm-fold adm-fold--sub" data-fold' + (S.shipEuOpen ? " open" : "") + '>' +
       /* the title is the link, the caption beside it is not: `text-decoration`
          propagates into every in-flow descendant, so an underline on the
          <summary> itself would underline the caption too */
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Пакоматов магазин в этих странах не предлагает — только курьер. ' +
+        '<p class="adm-hint" style="margin:0 0 10px">Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. ' +
           "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
         '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
           "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
         SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
           .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], false); }).join("") +
+        admShipPickupHTML() +
         admShipUnservedHTML() +
       "</div></details>";
   }
@@ -21913,6 +22690,48 @@
    * is no tariff to put in them. Renat can switch one back on; what he does
    * then is his own arrangement with the customer.
    */
+  /**
+   * «Где предлагать пакомат» — one list, and the one the owner narrows.
+   *
+   * Ренат, 18.09.2026: «open every country DPD serves». That is the default
+   * and it is derived rather than typed — every country the tariff mirror
+   * prices a pickup point for with a carrier the shop can bill from, which is
+   * DPD everywhere outside the Baltics (PICKUP_POINT_COUNTRIES in
+   * src/lib/shipping/country-prices.ts, CARRIERS_BY_COUNTRY here). What is
+   * stored is the *exceptions*, so switching a country off is a setting and
+   * not a deploy, and a country the mirror gains later opens by itself.
+   *
+   * A switch that is ON is the ordinary state and says so; a switch that is
+   * OFF says what the customer will see instead, which is the courier line
+   * the country had before.
+   *
+   * Nothing here moves a price. The «Пакомат» cell of every one of these
+   * countries has existed since 07.09.2026 — `costBasis()` prices a locker
+   * whether or not a checkout offers one — so opening a country changes what
+   * can be picked and not what it costs.
+   */
+  function admShipPickupHTML() {
+    var open = SHIP_PICKUP_COUNTRIES.slice();
+    if (!open.length) return "";
+    var on = open.filter(function (c) { return !shipPickupOff(c); }).length;
+    return '<div class="adm-sec__t" style="margin-top:20px">Где предлагать пакомат</div>' +
+      '<p class="adm-hint" style="margin:4px 0 4px">Montonio возит в пакоматы и пункты выдачи во всех этих странах. ' +
+        "Выключите страну — и в кассе для неё останется только курьер.</p>" +
+      '<p class="adm-hint" style="margin:0 0 10px">' + admShipPickupCountLine(on, open.length) + "</p>" +
+      '<div class="adm-list adm-list--flat">' +
+        open.map(function (c) { return [c, countryName(c)]; })
+          .sort(function (a, b) { return a[1].localeCompare(b[1]); })
+          .map(function (r) {
+            var off = shipPickupOff(r[0]);
+            return '<div class="adm-swrow"><span>' + esc(r[1]) +
+              '<span class="adm-row__sub">' + (off ? "только курьер" : "пакомат и курьер") + "</span></span>" +
+              admSwitch('data-shippickup="' + r[0] + '"', !off,
+                off ? "Предлагать пакомат" : "Не предлагать пакомат") + "</div>";
+          }).join("") +
+      "</div>";
+  }
+  /** «Пакомат включён: 22 из 22.» — one text node, and no declining noun. */
+  function admShipPickupCountLine(on, all) { return "Пакомат включён: " + on + " из " + all + "."; }
   function admShipUnservedHTML() {
     return '<div class="adm-sec__t" style="margin-top:20px">Куда Montonio не возит</div>' +
       '<p class="adm-hint" style="margin:4px 0 10px">Montonio не берёт посылки в эти страны ни одним перевозчиком. ' +
@@ -22231,6 +23050,17 @@
        word nobody had seen before arrived from the carrier, and the word
        itself is what the line ends with (payload `code`, see auditTextHTML). */
     "shipment.status": "Новый статус посылки",
+    /* The four rows that used to be silences. `order.refund_failed` arrived
+       with the payments audit and never got a word, so the journal printed
+       the raw key; the other three are new (r23-live-ready) and each one is a
+       thing that used to happen with nothing written down at all: a refund
+       Montonio only accepted, a refund it later could not pay, and a parcel
+       the carrier refused. Every word here is a dictionary key — see the note
+       under this table. */
+    "order.refund_failed": "Возврат не прошёл",
+    "order.refund_pending": "Возврат отправлен, деньги ещё не у покупателя",
+    "order.refund_stuck": "Возврат не дошёл до покупателя",
+    "shipment.registration_failed": "Перевозчик не принял посылку",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "mail.send": "Письмо клиенту отправлено",
     "setting.set": "Настройка изменена",
@@ -23198,6 +24028,76 @@
       useCarrier: r.useCarrier === undefined ? true : r.useCarrier !== false
     };
   }
+  /* ---------- «Коробка магазина» — settings.shipping_parcel ---------------
+     Mirrors src/lib/shipping/parcel.ts: the one carton the shop declares when
+     Montonio asks a route for dimensions, and the locker door to pre-select at
+     label time. Centimetres here and everywhere the owner can see them —
+     `POST /shipments` is metres and the conversion happens once, on the
+     server, in parcelMetres().
+     `recent` is not a form field: the label route appends one size per label
+     and this is what LOCKER_SIZES below suggests from. The panel carries it
+     through untouched so that saving the boxes cannot erase the history the
+     suggestion is learned from (the server holds the same line — mergeParcel).
+     The default is SMALL on purpose. Montonio bills
+     `max(actualWeight, volumetricWeight)` and volumetric weight is the box's
+     own volume, so at this shop's parcel sizes the carton — not what is in it
+     — is what gets paid for. 25 × 18 × 10 cm is about 1,1 kg; the 30 × 30 × 30
+     of REFERENCE_PARCEL would be five to seven. Ренат, 18.09.2026: «use a
+     smaller default box then and we don't bother with weights». */
+  var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
+  var PARCEL_DEFAULT = { length: 25, width: 18, height: 10, lockerSize: "M", recent: [] };
+  /** «около 1,1 кг» — volumetricKg() in src/lib/shipping/parcel.ts. */
+  function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }
+  /* 1.1 → «1,1». A REGEX and not a string literal on purpose: tools/i18n-gaps.mjs
+     re-joins `+`-glued string literals to reproduce what reaches the DOM, so a
+     `.replace(".", ",")` written inline splices two stray literals into the
+     middle of a translatable sentence and the sentence stops matching its own
+     UI_RX rule. Regex literals are skipped by that tokeniser. */
+  function kgNum(n) { return String(n).replace(/\./, ","); }
+  function normaliseParcel(raw) {
+    var r = raw && typeof raw === "object" ? raw : {};
+    function cm(v, d) {
+      var x = Number(v);
+      if (!isFinite(x) || x <= 0) return d;
+      return Math.round(Math.min(200, Math.max(1, x)) * 10) / 10;
+    }
+    var recent = [];
+    if (Array.isArray(r.recent)) {
+      for (var i = 0; i < r.recent.length && recent.length < 20; i++) {
+        var one = String(r.recent[i] == null ? "" : r.recent[i]).trim().toUpperCase();
+        if (LOCKER_SIZES.indexOf(one) >= 0) recent.push(one);
+      }
+    }
+    var size = String(r.lockerSize == null ? "" : r.lockerSize).trim().toUpperCase();
+    return {
+      length: cm(r.length, PARCEL_DEFAULT.length),
+      width: cm(r.width, PARCEL_DEFAULT.width),
+      height: cm(r.height, PARCEL_DEFAULT.height),
+      lockerSize: LOCKER_SIZES.indexOf(size) >= 0 ? size : PARCEL_DEFAULT.lockerSize,
+      recent: recent
+    };
+  }
+  function parcelConf() { return S.parcelLoaded || normaliseParcel(null); }
+  /** The door to pre-select — suggestedLockerSize() in src/lib/shipping/parcel.ts.
+      The commonest of the last twenty labels, a tie going to the most recent
+      (`recent` is newest-first and the walk keeps the first winner it meets);
+      with no history at all, the owner's own default. */
+  function suggestLocker(p) {
+    var conf = p || parcelConf(), counts = {}, best = "", bestN = 0;
+    conf.recent.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    conf.recent.forEach(function (x) {
+      if (counts[x] > bestN) { best = x; bestN = counts[x]; }
+    });
+    return best || conf.lockerSize;
+  }
+  /** Why that door is offered — one short phrase, its own text node. */
+  function lockerReason(p) {
+    var conf = p || parcelConf();
+    if (!conf.recent.length) return "по умолчанию";
+    var want = suggestLocker(conf), same = 0;
+    conf.recent.forEach(function (x) { if (x === want) same++; });
+    return conf.recent[0] === want && same === 1 ? "как в прошлый раз" : "чаще всего";
+  }
   function normalisePricing(raw) {
     var r = raw && typeof raw === "object" ? raw : {};
     var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
@@ -23269,6 +24169,12 @@
         S.deliveryLoaded = normaliseDelivery(st0.delivery);
         // «Какие банки показывать» — settings.payment_banks, from the same map
         S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
+        /* «Коробка магазина» — settings.shipping_parcel, same map, same read.
+           The order card needs it to pre-select the locker door, so it is read
+           here rather than on the settings screen: the owner opens «Заказы»
+           far more often than «Настройки», and a card that asked would be a
+           question where there should be a confirmation. */
+        S.parcelLoaded = normaliseParcel(st0.shipping_parcel);
         S.pricingLoadErr = false;
         render();
       }
@@ -23583,6 +24489,15 @@
   var SHIP_EU_COUNTRIES = ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "HU", "IE", "IT",
     "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
   var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
+  /* Every country that HAS a pickup point to offer — derived from
+     CARRIERS_BY_COUNTRY rather than typed a second time, so the switch list
+     and the checkout can never disagree about which countries exist. «EU» is
+     a zone and not a country, and it is the one key of that table with no
+     carriers behind it. Which of these is actually offered is
+     SHIP_RULES.pickupOff — see admShipPickupHTML(). */
+  var SHIP_PICKUP_COUNTRIES = Object.keys(CARRIERS_BY_COUNTRY).filter(function (c) {
+    return c !== "EU" && (CARRIERS_BY_COUNTRY[c] || []).length > 0;
+  });
   /* The carrier columns of the rate table: the carriers Montonio quotes a
      pickup-point price for — one price per carrier per country, whether the
      shopper then picks a machine or one of that carrier's manned counters
@@ -23663,7 +24578,8 @@
       by: r.freeFromByCountry || {},
       methods: r.methods || {},
       carriers: r.carriers && Object.keys(r.carriers).length ? r.carriers : null,
-      off: (r.countriesOff || []).slice().sort()
+      off: (r.countriesOff || []).slice().sort(),
+      pickOff: (r.pickupOff || []).slice().sort()
     });
   }
   /** Does the table show prices the shop is not yet charging? Against the
@@ -23730,6 +24646,20 @@
   function shipCountryOff(c) {
     var off = shipDraft().countriesOff;
     return !!off && off.indexOf(c) >= 0;
+  }
+  /** Is the pakomat switched off for this country in the draft? */
+  function shipPickupOff(c) {
+    var off = shipDraft().pickupOff;
+    return !!off && off.indexOf(c) >= 0;
+  }
+  /** Offer a pakomat here, or stop offering it. «Сохранить» is what tells the shop. */
+  function toggleShipPickup(c) {
+    var d = shipDraft();
+    if (!Array.isArray(d.pickupOff)) d.pickupOff = [];
+    var i = d.pickupOff.indexOf(c);
+    if (i >= 0) d.pickupOff.splice(i, 1);
+    else d.pickupOff.push(c);
+    d.pickupOff.sort();
   }
   /** Flip one country on or off in the draft. «Сохранить» is what tells the shop. */
   function toggleShipCountry(c) {
@@ -25899,7 +26829,10 @@
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
     uploadPhoto(files[0], "blog").then(function (r) {
       UP.busy = 0; UP.total = 0;
-      if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = r.url;
+      /* A new photograph, so the point that was dragged onto the old one
+         goes with it: 62% across one picture is not 62% across another, and
+         a crop nobody chose is worse than the frames' own centring. */
+      if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = r.url; S.adminBlogEdit.coverFocus = ""; }
       render();
       toast("Картинка загружена ✓");
     }).catch(upFail);
@@ -27317,8 +28250,17 @@
            магазине» keeps its count, its barcode and a working ± here while
            the shop drops it from the catalogue, the search and the sets and
            answers its page with 404. «Каталог» has always marked it; now so
-           does «Склад», with the same word and the same badge. */
-        (shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
+           does «Склад», with the same word and the same badge.
+
+           Both switches, and they come from two different places on purpose.
+           `r.offSale` is the server's answer (getLevels, src/lib/inventory.ts)
+           and is the only one that knows about custom_products.active —
+           shopHidden() reads DEMO.hidden, which is product_overrides and
+           nothing else. shopHidden() stays in front of it because it is the
+           LIVE one: flipping the switch in the editor repaints this badge at
+           once, while the shelf copy is whatever the last
+           /api/admin/inventory/ answer said. */
+        (r.offSale || shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
         // «один объём» is the editor's own word for a product with no sizes
         '<span class="adm-row__sz">' + (r.variant ? esc(r.variant) : "один объём") + "</span>" +
         '<span class="adm-step-qty">' +
@@ -27346,8 +28288,15 @@
     var words = q ? q.split(" ") : [];
     var f = S.stockFilter || "all";
     var rows = (S.stockLevels || []).filter(function (r) {
-      if (f === "low" && !(r.tracked && r.state === "low")) return false;
-      if (f === "out" && !(r.tracked && r.state === "out")) return false;
+      /* «Мало» and «Нет» are the reorder list, so a product that is not for
+         sale is not on it — the same rule the server applies to the same two
+         filters and to the assistant's low-stock answer (getLevels and
+         lowStockSummary, src/lib/inventory.ts). It is still findable under
+         «Все» and by search, badged «Скрыт». «Не учтено» keeps it: «which
+         shelves has nobody counted» is a fair question about a hidden product
+         too. */
+      if (f === "low" && !(r.tracked && !r.offSale && r.state === "low")) return false;
+      if (f === "out" && !(r.tracked && !r.offSale && r.state === "out")) return false;
       if (f === "untracked" && r.tracked) return false;
       if (!words.length) return true;
       var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
@@ -27356,6 +28305,11 @@
       return true;
     }).slice();
     rows.sort(function (a, b) {
+      /* This list is «what is running out» first, so the emptiest shelf is at
+         the top — and an off-sale product at 0 is not a shelf that is running
+         out, it is one that was put away on purpose. It would otherwise sit
+         above every bottle Renat actually has to reorder. */
+      if (!a.offSale !== !b.offSale) return a.offSale ? 1 : -1;
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
       return qa - qb;
     });
@@ -27857,7 +28811,13 @@
        CATALOGUE[0]. Scanning such a bottle put a DIFFERENT product's name and
        price in the basket. Refused here, in words, rather than surfacing as
        the server's generic refusal after the money was counted out. */
-    if (!byIdOrNull(h.productId)) { toast(POS_GONE); return; }
+    var sold = byIdOrNull(h.productId);
+    if (!sold) { toast(POS_GONE); return; }
+    /* …and the same product-level refusal the chips give (posAddProduct). A
+       bottle the shop calls «нет в наличии» is refused by createOrder()
+       whatever door it came through, so letting the scanner drop it in the
+       basket only moved the «нет» to after the money was counted out. */
+    if (sold.stock === "out") { toast("Нет на складе"); return; }
     var qty = scanQtyNow(), variant = h.variant || "";
     for (var i = 0; i < S.posCart.length; i++) {
       if (S.posCart[i].id === h.productId && (S.posCart[i].variant || "") === variant) {
@@ -28942,6 +29902,13 @@
     // number a salon sale must not go behind, and the chip is already muted
     var lv = edStockFor(p, variant);
     if (lv && lv.tracked && lv.qty <= 0) { toast("Нет на складе"); return; }
+    /* …and the product's own word, for the same reason. A bottle the shop
+       calls «нет в наличии» is refused by createOrder() (out_of_stock,
+       src/lib/orders.ts), so a line built from one is money counted out over
+       a sale that cannot go through. It is reachable here now that a barcode
+       finds its bottle whatever the badge says (posCodeHit), and this is
+       where it has to be told, in the same words the chip is muted with. */
+    if (p.stock === "out") { toast("Нет на складе"); return; }
     for (var k = 0; k < S.posCart.length; k++) {
       if (S.posCart[k].id === p.id && (S.posCart[k].variant || "") === variant) { S.posCart[k].qty++; render(); return; }
     }
@@ -28952,21 +29919,60 @@
   /* One row per product, one 44-px chip per size — «150 мл · 21,60 €». The
      chip is the whole control: no «Добавить» button, no size select, one tap
      from the search box to a line in the cart. */
-  /** productId → every barcode bound to any of its sizes, as one folded
-      string. Built once per «Склад» copy: the register's list is redrawn on
-      every keystroke, and walking ~320 shelf rows per product per keystroke
-      is work nobody asked for. */
-  var POS_EAN = { src: null, map: null };
+  /** The shelf's barcodes, twice over: `byProduct` is productId → every code
+      bound to any of its sizes, as one string for the fuzzy haystack below,
+      and `byCode` is one FOLDED code → the exact bottle it names. Built once
+      per «Склад» copy: the register's list is redrawn on every keystroke, and
+      walking ~320 shelf rows per product per keystroke is work nobody asked
+      for. */
+  var POS_EAN = { src: null, ix: null };
   function posEanIndex() {
     var rows = S.stockLevels || [];
-    if (POS_EAN.src === rows && POS_EAN.map) return POS_EAN.map;
-    var map = {};
+    if (POS_EAN.src === rows && POS_EAN.ix) return POS_EAN.ix;
+    var ix = { byProduct: {}, byCode: {} };
     for (var i = 0; i < rows.length; i++) {
-      if (!rows[i].ean) continue;
-      map[rows[i].productId] = (map[rows[i].productId] ? map[rows[i].productId] + " " : "") + rows[i].ean;
+      var code = rows[i].ean;
+      if (!code) continue;
+      ix.byProduct[rows[i].productId] = (ix.byProduct[rows[i].productId] ? ix.byProduct[rows[i].productId] + " " : "") + code;
+      /* Folded, because that is the shape the typed query arrives in: the box
+         lower-cases it and pulls dashes apart (scanFold), so an own code like
+         «RMP-0042» has to be folded on this side too or it never matches itself. */
+      ix.byCode[scanFold(code)] = { productId: rows[i].productId, variant: rows[i].variant || "" };
     }
-    POS_EAN.src = rows; POS_EAN.map = map;
-    return map;
+    POS_EAN.src = rows; POS_EAN.ix = ix;
+    return ix;
+  }
+  /**
+   * The ONE bottle a whole barcode names — the product and the size the code
+   * is bound to — or null when what was typed is not a code the shelf knows.
+   *
+   * A barcode is not a search term: it is printed on one bottle and the
+   * warehouse binds it to one product AND one size (stock_levels). The
+   * register used to fold every code of a product into its name haystack, so
+   * the code of the «1000 мл» offered all three sizes and the cashier picked
+   * whichever chip was nearest — the wrong bottle at the wrong price. And it
+   * looked at that haystack only for products the shop currently calls «в
+   * наличии», so the very code that finds a bottle on «Склад» found nothing
+   * here: «I had a product with scanned code, then I went to salon -> scan,
+   * scanned the same product and it did not find it» (Renat, 13.09.2026 and
+   * again 18.09.2026). The scanner's own door into this basket (scanToCart)
+   * has always named the exact size and never asked the badge; this is the
+   * same answer for the code typed — or wedged — into the box.
+   *
+   * `p: null` means the code is bound to something the shop is not offering
+   * at all — the caller says so in words rather than «Ничего не найдено».
+   */
+  function posCodeHit(folded) {
+    var owner = folded ? posEanIndex().byCode[folded] : null;
+    if (!owner) return null;
+    var p = byIdOrNull(owner.productId);
+    if (!p) return { p: null, only: -1 };
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    var i = sizes.indexOf(owner.variant || "");
+    /* A code bound to a volume this product no longer has (renamed in the
+       editor, «×»-ed away) still names the product — all of its sizes, as
+       before, rather than nothing at all. */
+    return { p: p, only: i >= 0 ? i : -1 };
   }
   function posSearchResultsHTML() {
     /* The box says «Название, бренд или штрихкод» and the hint under it says
@@ -28975,22 +29981,34 @@
        all, while «Склад» one tab away searched the shelf rows, which do. So
        the very code that finds a bottle in «Склад» found nothing in «Салон»
        — «I had a product with scanned code, then I went to salon -> scan,
-       scanned the same product and it did not find it» (Renat). Both screens
-       search the same two places now, with the same folding, so «kevin
-       murphy», «un tangled 40» and a typed-in EAN all behave the same in
-       both. */
+       scanned the same product and it did not find it» (Renat). The codes
+       went into the haystack that day and the folding was made the same, so
+       «kevin murphy», «un tangled 40» and a typed-in EAN read alike — but the
+       line above them survived, and it hid every product the shop calls «нет
+       в наличии» from the code search too. The bottle was in the owner's hand
+       and the till still said «Ничего не найдено», which is why he wrote the
+       same sentence again on 18.09.2026. A code is answered by the warehouse
+       now (posCodeHit), where «Склад» and the scanner get their answer; the
+       badge only decides what a NAME search offers. */
     var q = scanFold(S.posQ);
     var words = q ? q.split(" ") : [];
     var eans = posEanIndex();
-    var list = words.length
+    /* A whole barcode is answered by the warehouse, not by the catalogue
+       search: it names one bottle, and it names it whatever the shop's badge
+       says — see posCodeHit(). Everything else is still the name/brand/size
+       search, and that one still leaves out what the shop is not selling. */
+    var coded = posCodeHit(q);
+    var list = coded
+      ? [coded]
+      : words.length
       ? CATALOGUE.filter(function (p) {
           if (p.stock === "out") return false;
           var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " +
-            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans[p.id] || ""));
+            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans.byProduct[p.id] || ""));
           var hayWords = hay.split(" ");
           for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
           return true;
-        })
+        }).map(function (p) { return { p: p, only: -1 }; })
       : [];
     if (!q) {
       if (S.posCart.length) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
@@ -28999,14 +30017,22 @@
         '<div class="adm-empty__s">Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. ' +
         'Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».</div></div>';
     }
+    /* The code is bound, but to a bottle the shop is not offering — «Показывать
+       в магазине» off, or an own product set inactive. The same sentence the
+       scanner's own door into this basket gives it (scanToCart), because from
+       the till's side it is exactly the same refusal. */
+    if (coded && !coded.p) return '<div class="adm-empty">' + POS_GONE + "</div>";
     if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
-    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (p) {
+    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (row) {
+      var p = row.p;
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
       return '<div class="adm-row adm-row--chips">' +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<span class="adm-poschips">' + sizes.map(function (sz, i) {
+          // a barcode names one volume: the others are not on offer for it
+          if (row.only >= 0 && i !== row.only) return "";
           var lv = edStockFor(p, sz);
-          var none = !!(lv && lv.tracked && lv.qty <= 0);
+          var none = !!(lv && lv.tracked && lv.qty <= 0) || p.stock === "out";
           return '<button class="adm-poschip' + (none ? " is-none" : "") + '" data-posadd="' + esc(p.id) + ":" + i + '">' +
             (sz ? esc(sz) + " · " : "") + eur(posVariantPrice(p, sz)) + "</button>";
         }).join("") + "</span></div>";
@@ -29461,6 +30487,19 @@
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
+    /* per-size stock (r23): the shelf's word for each SIZE, per product id —
+       {«75 мл»: "in", «500 мл»: "out"}, '' for a product with no sizes, keyed
+       by the label exactly as an order line carries it (getOverrides →
+       `stockByVariant` in src/lib/orders.ts). A size NOBODY HAS COUNTED is
+       absent from the map, and absent is not «out»: it means the shelf has no
+       opinion and the owner's own «Наличие» stands, which is the whole of the
+       17.09.2026 decision. The map itself is absent for a product nobody has
+       counted at all.
+       Unlike DEMO.stock beside it this is never restored from localStorage
+       below: the owner's manual word is his own edit and belongs in the
+       offline copy, while this is derived server truth, and a day-old copy of
+       it would grey out sizes that have been back on the shelf since. */
+    stockVar: {},
     // migration 147: the whole size ladder the owner saved, per product id,
     // and the products he switched off «Показывать в магазине»
     sizes: {}, hidden: {},
@@ -29798,6 +30837,8 @@
       // from the global discount", same convention as product_overrides.pro_price
       p.proPrice = (DEMO.proPrice && DEMO.proPrice[p.id] != null) ? DEMO.proPrice[p.id] : null;
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
+      // per-size stock (r23): null where nobody has counted this product
+      p.stockVar = (DEMO.stockVar && DEMO.stockVar[p.id]) || null;
       // p.seo stays the catalogue's own (English) pair; the owner's per-language
       // pairs sit beside it and win in seoFor()
       p.seoOv = DEMO.seo[p.id] || b.seoOv || null;   // product creation: a custom row's own pairs underneath
@@ -29919,6 +30960,7 @@
       return l.type === "bundle" || l.type === "gift" || String(l.id).indexOf("c-") !== 0 || !!byIdOrNull(l.id);
     });
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
+    DEMO.stockVar = {};   // per-size stock (r23)
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
     DEMO.proPrice = {};   // wholesale/loyalty
@@ -29931,6 +30973,11 @@
       if (o.hidden === true) DEMO.hidden[id] = true;
       if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
+      /* per-size stock (r23): already on this feed — publicOverrides() in
+         src/app/api/overrides/route.ts strips the pro price and nothing else
+         — and until now no client read it. Taken as it comes, because only
+         the keys the shelf actually counted are on it. */
+      if (o.stockByVariant && typeof o.stockByVariant === "object") DEMO.stockVar[id] = o.stockByVariant;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
       // per-language Google pairs (`seo`), or the one Russian pair an older
       // server still answers with
@@ -30048,6 +31095,17 @@
       adoptServer(r.body);
       demoSave();
       applyDemoOverrides();
+      /* per-size stock (r23): the shelf's per-size word arrives with THIS
+         answer, and a page opened before it landed chose its size without it
+         — a direct visit to /shop2/p/… restores the screen from the address
+         at boot. Land on a sold-out volume and the page the shopper finally
+         sees says «Этого объёма сейчас нет» about a product with three other
+         volumes on the shelf. Nudged once, here, and only off a size that is
+         really counted out: firstSizeIdx() leaves an uncounted or a stocked
+         one exactly where the shopper put it. */
+      if (S.screen === "product" && sizeOut(byId(S.productId), S.size)) {
+        S.size = firstSizeIdx(byId(S.productId));
+      }
       // On checkout, adoptServer()'s prices/stock/ship-rules only ever move
       // the delivery block and the summary — never the contact block, so
       // never a full render() (same reasoning as loadShipRules() above,
@@ -30277,6 +31335,11 @@
     else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
     // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
     else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
+    /* «Коробка магазина»: the whole object travels, `recent` included, so the
+       size history the suggestion learns from survives a save of the boxes.
+       The server holds the same line for a request that omits it
+       (mergeParcel), but the panel has the row in hand and sends it. */
+    else if (a.type === "set_parcel") srvSaved(apiSend(st, "PUT", { shipping_parcel: normaliseParcel(S.parcelLoaded) }));
     /* «Какие банки показывать» — the whole array of codes, so undo re-sends it.
        …and the checkout is then asked for the list again: it draws
        PAYMETHODS.banks, which is fetched once per page load, and the panel and
@@ -30734,6 +31797,18 @@
       toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
     }).catch(function () { toast("Сервер не отвечает"); });
   }
+  /* The server's own sentence for an answer, in the panel's language.
+     `messages` is {RU,ET,EN} and it is built on the SERVER
+     (src/lib/montonio-problems.ts), not here, for two reasons: these
+     sentences are about Montonio's failures rather than the shop's, and they
+     change when Montonio changes — which the RU-source dictionary in this
+     file cannot follow. Printing them adds no Russian literal here, so
+     tools/i18n-gaps.mjs stays at zero. "" when the server sent none, and then
+     the maps below answer as they always did. */
+  function srvMsg(body) {
+    var m = body && body.messages;
+    return m ? String(m[S.lang] || m.RU || "") : "";
+  }
   /* ---------- «Вернуть деньги» — the card's own server call -----------------
      POST /api/admin/orders/<id>/refund/ sends the money back through the
      provider that took it and records what it said (docs/payments.md § 11).
@@ -30749,7 +31824,13 @@
     bad_amount: "Проверьте сумму — вернуть можно не больше остатка.",
     order_closed: "Заказ закрыт — возврат не оформить.",
     provider_unreachable: "Montonio не отвечает — попробуйте через минуту.",
-    provider_rejected: "Montonio отказал в возврате — проверьте баланс в его панели.",
+    /* Montonio names five distinct refusals and the server turns each one
+       into its own actionable sentence (srvMsg above). This is only the
+       fallback for a body that carried none — and it no longer blames the
+       balance, which by Montonio's own refunds guide cannot produce an HTTP
+       refusal at all: a refund with no money behind it is answered
+       200 PENDING. docs/montonio-payments-audit.md § A1. */
+    provider_rejected: "Montonio не принял возврат. Причина — в журнале заказа.",
     recorded_failed: "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.",
     /* gift cards (10.09.2026): a card this order sold is refunded whole or not
        at all, and never once somebody has spent from it (the used one names
@@ -30827,17 +31908,25 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var gift = Number(r.body.gift) || 0;
+        /* «Отправлено» is not «возвращено». Montonio answers 200 with
+           `status: "PENDING"` for a refund it has only ACCEPTED — including
+           one it cannot fund — and cancels it after ten days if the money
+           never arrives. The server sends the sentence for that state
+           (pendingMessages); it is appended rather than substituted, so the
+           amount and the order number still lead the toast. */
+        var pend = r.body.pendingMessages;
+        var wait = pend ? "\n" + String(pend[S.lang] || pend.RU || "") : "";
         /* The toast (and the journal) name the card's part when there is one:
            «письмо ушло» alone would send the owner to Montonio for money
            that is on a card */
         if (gift > 0.004) {
           journalNote("Заказ " + number + ": возврат " + eur(r.body.amount) + ", на карту " + eur(gift));
-          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " · на карту " + eur(gift) + " — письмо ушло"
-            : number + " · вернули часть, " + eur(r.body.amount) + " · на карту " + eur(gift));
+          toast((r.body.fully ? number + " · возврат " + eur(r.body.amount) + " · на карту " + eur(gift) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount) + " · на карту " + eur(gift)) + wait);
         } else {
           journalNote("Заказ " + number + ": возврат " + eur(r.body.amount));
-          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
-            : number + " · вернули часть, " + eur(r.body.amount));
+          toast((r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount)) + wait);
         }
         admOrdersChanged();
         return;
@@ -30847,7 +31936,11 @@
         var usedCode = admRefundCode(r.body);
         toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
       } else {
-        toast(REFUND_ERR[err] || "Не удалось оформить возврат");
+        /* The server named which of Montonio's five refusals this is and what
+           to do about it; an unrecognised one quotes Montonio rather than us.
+           Its sentence wins over the map above, which is now only the
+           fallback for an answer that carried none. */
+        toast(srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат");
       }
       render();
     }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
@@ -30904,11 +31997,46 @@
     if (!c || c === "EU") return "В заказе не указана страна — покупатель выбрал «Другая страна Европы». Уточните страну у покупателя и отправьте вручную.";
     return "Курьера Montonio в " + countryName(c) + " нет — отправьте другим способом.";
   }
+  /**
+   * What «Создать этикетку» posts.
+   *
+   * The order, plus the two things that can only be decided with the packed
+   * box in hand: the locker door (always, for a carrier that takes one — the
+   * server picks the same default when it is absent) and, only if he actually
+   * typed one, this parcel's own measurements in centimetres.
+   *
+   * Its own function so the booking call stays one line and so the panel's
+   * tests can slice it out on its own (tests/admin-order-card-r21.test.ts).
+   */
+  function admShipBody(id, row) {
+    var body = { orderId: id };
+    if (admLockerOrder(row)) body.lockerSize = admLockerPick();
+    if (admBoxChanged()) body.box = admBoxPick();
+    return body;
+  }
+  /** Forget this parcel's door and box. Opening another order does this: both
+      are about the box in his hands right now, and carrying either across
+      would book the next parcel with the previous one's measurements. */
+  function admShipClear() {
+    S.lockerSize = "";
+    S.boxOpen = false;
+    S.boxOverride = null;
+  }
+  /** The label is made: the same reset, plus a re-read — the suggestion has
+      just learned this size and the server, not the panel, decides what
+      «чаще всего» now means. */
+  function admShipSpent() { admShipClear(); loadAdminPricing(true); }
   function srvCreateShipment(id) {
     if (SRV.shipBusy) return;
     var row = admOrderById(id);
     SRV.shipBusy = true; render();
-    apiSend("/api/admin/shipments/", "POST", { orderId: id }).then(function (r) {
+    /* The locker door travels with the booking. The server picks the same
+       default when this field is absent (suggestedLockerSize, and the same
+       history), so a panel that has not read the settings yet still books the
+       size he has been shipping — this is the confirmation, not the source of
+       truth. It is only meaningful for a pickup-point parcel on a carrier that
+       takes the field; everywhere else Montonio never sees it. */
+    apiSend("/api/admin/shipments/", "POST", admShipBody(id, row)).then(function (r) {
       SRV.shipBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -30916,11 +32044,22 @@
           type: "order_label", id: String(id), number: row ? row.number : String(id), value: true, done: true
         });
         toast(r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
+        /* The size is spent: the next order starts from the suggestion again,
+           and the suggestion has just learned this one. Re-read rather than
+           patched locally — the server decides what `recent` says. */
+        admShipSpent();
         loadSrvOrders(true);
         return;
       }
       var shipErr = r.body && r.body.error;
-      toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail) : SHIP_ERR[shipErr] || "Не удалось создать этикетку");
+      /* `registration_failed` — the carrier turned the parcel down. The
+         server sends the sentence (srvMsg): the parcel EXISTS at Montonio
+         unregistered, a second press repeats the same refusal by design, and
+         the fix is a corrected phone or address passed on, not a retry.
+         Sandbox can never produce this — it calls no carriers at all
+         (docs/montonio-untested.md § S1). */
+      toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail)
+        : srvMsg(r.body) || SHIP_ERR[shipErr] || "Не удалось создать этикетку");
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
@@ -31223,6 +32362,10 @@
       return "Доставлен сам: " + (dv.useCarrier ? "спрашивать перевозчика" : "не спрашивать перевозчика") + " · " +
         (dv.autoDays ? "через " + dv.autoDays + " " + pl(dv.autoDays, "день", "дня", "дней") : "по времени не закрывать");
     }
+    if (a.type === "set_parcel") {
+      var pv = normaliseParcel(a.value);
+      return "Коробка магазина: " + pv.length + " × " + pv.width + " × " + pv.height + " см · ячейка " + pv.lockerSize;
+    }
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
     /* «Наборы»: the assistant's two set actions (Dim, 07.09.2026). A proposal
@@ -31283,6 +32426,14 @@
     if (a.type === "set_post_cover") {
       return "Обложка статьи «" + (txt(a.title) || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
     }
+    /* …and the picture in the text. The card says WHERE it lands, because
+       nobody chose the place: the editor puts a picture where the cursor is
+       and the chat has no cursor. Not journalled, like the other two blog
+       actions — the way back is the picture's own «×» in the editor. */
+    if (a.type === "add_post_photo") {
+      return "Фото в статью «" + a.slug + "»" +
+        "\nВстанет в конец текста, на всех языках статьи. Передвинуть или убрать — в редакторе блога.";
+    }
     // assistant-work
     if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
     if (a.type === "export_report") return "Отчёт для бухгалтера за " + monthLabelRu(a.month);
@@ -31312,12 +32463,12 @@
     if (a.type === "draft_post" && a.topic && !a.title) {
       // txt(): the model is asked for one Russian line and sometimes sends
       // {RU,ET,EN} — «на тему «[object Object]»» is not a topic
-      return "Статья целиком на тему «" + txt(a.topic) + "»" + (txt(a.hint) ? " · " + txt(a.hint) : "") +
+      return "Новая статья целиком на тему «" + txt(a.topic) + "»" + (txt(a.hint) ? " · " + txt(a.hint) : "") +
         "\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.";
     }
     if (a.type === "draft_post") {
       var bTitle = txt(a.title) || "—";
-      return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
+      return "Новая статья «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
         (a.seo ? " · заголовок и описание для Google" : "");
     }
     if (a.type === "publish_post") {
@@ -31607,6 +32758,13 @@
       entry.prev = { type: "set_delivery", value: normaliseDelivery(S.deliveryLoaded) };
       S.deliveryLoaded = normaliseDelivery(a.value);
     }
+    /* «Коробка магазина»: settings.shipping_parcel has no demo layer either —
+       S.parcelLoaded IS the last known server value and the whole object
+       travels, so undo puts the previous carton back. */
+    else if (a.type === "set_parcel") {
+      entry.prev = { type: "set_parcel", value: normaliseParcel(S.parcelLoaded) };
+      S.parcelLoaded = normaliseParcel(a.value);
+    }
     /* «Какие банки показывать»: settings.payment_banks is a plain array of
        codes with no demo layer either — S.banksLoaded IS the last known
        server value, and the whole array travels, so undo puts it back. */
@@ -31793,6 +32951,7 @@
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
     else if (a.type === "set_flow_pct") DEMO.flows.birthdayPercent = a.value;
     else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
+    else if (a.type === "set_parcel") S.parcelLoaded = normaliseParcel(a.value);
     else if (a.type === "set_banks") S.banksLoaded = Array.isArray(a.value) ? a.value.slice() : [];
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
@@ -31814,7 +32973,7 @@
       else delete DEMO.gallery[a.id];
     }
     else if (a.type === "set_product_gallery") { customSetGallery(a.id, a.list || []); }
-    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = a.url || ""; }
+    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) { S.adminBlogEdit.coverUrl = a.url || ""; S.adminBlogEdit.coverFocus = ""; } }
     else if (a.type === "set_description") {   // assistant-work
       if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
       else delete DEMO.desc[a.id];
@@ -31974,6 +33133,30 @@
     // \x22 is the double quote: a quote inside a regex literal trips tools/i18n-gaps.mjs's tokeniser
     return c === "{" || c === "[" || t.indexOf("```") === 0 || /\x22(reply|action|product_ids|tab)\x22\s*:/.test(t);
   }
+  /* ---- which article the question is about --------------------------------
+     «it also loses the context and each time creates a new blog post, instead
+     of updating an already created blog post» — Renat, 18.09.2026. The chat was
+     sent the banner, the shop's details and the week's takings, and nothing at
+     all about the blog editor standing open on the same screen — so «sorry,
+     make it shorter» and «add a photo here» reached the model with no article
+     attached to them, and the one blog action it had, draft_post, writes a NEW
+     one. Every follow-up was another draft in his list.
+
+     So the panel says which article it has open, the way it already says what
+     the banner holds (heroForAI) and what the shop's telephone is
+     (contentForAI). A slug only once the article exists on the server: an
+     unsaved new draft has nothing an action could name, and «the article he is
+     looking at» would then be a promise the route could not keep. The route
+     trims it again (briefOpenPost in src/app/api/assistant/actions.ts). */
+  function blogOpenForAI() {
+    var d = S.adminBlogEdit;
+    if (!d || !d.id || !d.slug) return null;
+    return {
+      slug: String(d.slug),
+      title: String(d.title.RU || d.title.ET || d.title.EN || ""),
+      status: d.status === "published" ? "published" : "draft"
+    };
+  }
   /** The uploaded photos, as the route wants them told: key and file name. */
   function attachmentsForAI() {
     return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err; })
@@ -31999,7 +33182,7 @@
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), post: blogOpenForAI() })
     })
       .then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
@@ -32154,11 +33337,104 @@
       var post = r.body.post;
       var entry = demoApply({ type: "set_post_cover", slug: a.slug, url: att.url, prevUrl: post.coverUrl || "", title: post.title && (post.title.RU || post.title.ET || post.title.EN) });
       admAttFiled(a.key);
-      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = att.url;
+      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) { S.adminBlogEdit.coverUrl = att.url; S.adminBlogEdit.coverFocus = ""; }
       toast("Обложка поставлена ✓", entry);
       render();
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
   }
+  /* ---- a photo INSIDE the article, through the assistant --------------------
+     «assistant is not able to add cover photos or photos to articles although
+     it says it does» — Renat, 18.09.2026. The cover had an action; a picture in
+     the text had none at all, so the model wrote the sentence and sent nothing,
+     and «добавил фото в статью» was simply not true. `add_post_photo` is that
+     missing half (src/app/api/assistant/actions.ts sanitizeAddPostPhoto).
+
+     The picture goes in as the very same <figure data-fig="full"> the editor's
+     own «Фото» button writes — blogInsertImage() above — so it is the same
+     object from here on: the owner taps it and gets the four sizes and the two
+     arrows, exactly as if he had put it there himself.
+
+     WHERE. At the end of the text, in every language the article is written in,
+     and the card and the toast both say so. The editor places a picture at the
+     caret; the chat has no caret, and guessing a paragraph would be a place
+     nobody chose dressed up as one that somebody did. The arrows on the
+     picture's own bar are how it moves.
+
+     TWO ROADS, one outcome. With the article open in the editor the picture
+     goes into the draft on screen and the owner saves it with everything else
+     he has been typing — writing the server copy underneath him would quietly
+     drop that. Otherwise it is read, changed and written back whole, like the
+     cover. The toast says which of the two happened, because «сохраните» is a
+     thing he has to do and «✓» is not. */
+  function blogFigureHtml(url) {
+    return '<figure data-fig="full"><img src="' + esc(url) + '" alt="" loading="lazy"></figure>';
+  }
+  /** Does this language have an article at all? A body with only a picture in
+      it has no words but is not empty — a second picture belongs under it. */
+  function blogBodyWritten(html) {
+    var s = String(html || "");
+    return !!(blogTextLen(s) || /<img\b/i.test(s));
+  }
+  /** All three languages, with the picture at the end of each one that has an
+      article — the reader sees it whichever page he opens. Russian alone when
+      none of the three is written yet: a picture has to land somewhere, and
+      Russian is the language this blog is written in first.
+
+      All three EVERY time, and untouched where nothing was added: the blog
+      PATCH replaces every field it is given, and trilingual() in src/lib/blog.ts
+      reads a language the body does not mention as an empty one. An object
+      carrying only the languages that changed would erase the other two. */
+  function blogBodies3WithFigure(body, url) {
+    var out = {}, any = false;
+    LANGS.forEach(function (l) {
+      var cur = String((body && body[l[0]]) || ""), written = blogBodyWritten(cur);
+      out[l[0]] = written ? cur + blogFigureHtml(url) : cur;
+      if (written) any = true;
+    });
+    if (!any) out.RU = blogFigureHtml(url);
+    return out;
+  }
+  function applyPostPhoto(a) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    var url = blogImgUrl(att.url);
+    if (!url) { toast("Ссылка на картинку должна начинаться с https://"); return; }
+    var d = S.adminBlogEdit;
+    /* The editor is open on this very article: the draft wins, unsaved words
+       and all. blogReadForm() first, or the picture would be appended to the
+       text as it was before the last keystroke and the box would paint over it. */
+    if (d && d.slug === a.slug) {
+      blogReadForm();
+      var next = blogBodies3WithFigure(d.body, url);
+      LANGS.forEach(function (l) { d.body[l[0]] = next[l[0]]; });
+      admAttFiled(a.key);
+      toast("Фото добавлено в конец статьи — сохраните");
+      render();
+      return;
+    }
+    apiJson("/api/admin/blog/?slug=" + encodeURIComponent(a.slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) { toast("Статья не найдена — проверьте адрес в «Блоге»"); return; }
+      var p = r.body.post;
+      return apiSend("/api/admin/blog/", "PATCH", {
+        /* blogBody3ToHtml() first: a post written before the visual editor is
+           still markdown in the row, and a <figure> glued onto markdown flips
+           looksLikeHtmlBody() (src/lib/blog-html.mjs) — the article would then
+           be rendered as HTML and lose every paragraph break it had. This is
+           the same one-time conversion the editor does in blogDraftFromPost(). */
+        id: p.id, title: p.title, excerpt: p.excerpt,
+        body: blogBodies3WithFigure(blogBody3ToHtml(p.body), url),
+        coverUrl: p.coverUrl || null, coverAlt: p.coverAlt, coverFocus: p.coverFocus || null,
+        tags: p.tags, products: p.products, seoTitle: p.seoTitle, seoDesc: p.seoDesc, author: p.author
+      }).then(function (res) {
+        if (!(res.status === 200 && res.body.ok)) { toast("Не получилось сохранить — попробуйте ещё раз."); return; }
+        admAttFiled(a.key);
+        S.adminBlog = null; blogForget();
+        toast("Фото добавлено в конец статьи ✓");
+        render();
+      });
+    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
+  }
+
   /** The post read whole and written back with the one field changed — a PATCH here replaces every field it carries. */
   function blogPatchCover(slug, url) {
     return apiJson("/api/admin/blog/?slug=" + encodeURIComponent(slug)).then(function (r) {
@@ -32965,7 +34241,11 @@
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
       var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
-      var stockText = trText(p.stock === "out" ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
+      /* soldOut(), not `p.stock === "out"`: a product whose whole size ladder
+         has been counted to zero prints «нет в наличии» on the page and has
+         no buy row, so the snippet must not offer it either. */
+      var pGoneSeo = soldOut(p);
+      var stockText = trText(pGoneSeo ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
       t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
@@ -32994,7 +34274,11 @@
         offers: {
           "@type": "Offer", priceCurrency: "EUR",
           price: String(p.price),
-          availability: "https://schema.org/" + (p.stock === "out" ? "OutOfStock" : "InStock"),
+          /* An offer that says InStock for something the page refuses to sell
+             is worse than no markup at all: Google drops the product from the
+             merchant surfaces and the shopper bounces. soldOut() is the same
+             question screenProduct() asks before it swaps the buy row out. */
+          availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock"),
           itemCondition: "https://schema.org/NewCondition",
           url: pUrl,
           seller: { "@type": "Organization", name: "REMPIRE" }
@@ -33099,9 +34383,15 @@
     var i, a;
     for (i = from.attributes.length - 1; i >= 0; i--) {
       a = from.attributes[i];
-      // a <details> the owner opened by hand stays open across renders — the
-      // markup never carries `open`, so removing it here would snap it shut
-      if (a.name === "open" && from.tagName === "DETAILS") continue;
+      /* a <details> the owner opened by hand stays open across renders — the
+         markup never carries `open`, so removing it here would snap it shut.
+         `data-fold` is the exception, and it is what a fold whose open state
+         lives in S wears: there the markup IS the answer, both ways. Without
+         it the attribute could only ever be ADDED — «Цены по странам Европы»
+         and «Что увидит покупатель» opened on the first tap and no tap ever
+         shut them again, because the render that set S back to false could
+         not take the attribute off the node (Renat, 18.09.2026). */
+      if (a.name === "open" && from.tagName === "DETAILS" && !to.hasAttribute("data-fold")) continue;
       /* data-sx is measured, not written: admScrollers() puts it on a chip
          row or a tab row to say which ends still have something behind them,
          and it is never in the markup — so stripping it here would take the
@@ -33487,6 +34777,20 @@
     var p = byId(S.productId);
     var price = document.querySelector("[data-price]");
     if (!price) { render(); return; }
+    /* per-size stock (r23): the buy row is the one thing here that cannot be
+       patched — a size counted to zero replaces it with «Этого объёма сейчас
+       нет», and stepping back to a size that is on the shelf has to bring the
+       stepper, «В корзину» and the sticky bar back. Only that flip costs a
+       full render; every ordinary tap still patches in place and keeps the
+       focused button, which is what this function exists for.
+       The same three-way screenProduct() makes, and made the same way: a lone
+       volume at zero is the PRODUCT being gone, not a volume, and gets the
+       block with the «Сообщить о наличии» form instead. */
+    var pSizes = p.sizes && p.sizes.length ? p.sizes : [];
+    var pGone = p.stock === "out" || (pSizes.length < 2 && sizeOut(p, S.size));
+    if ((!pGone && sizeOut(p, S.size)) !== !!document.querySelector(".pdp__oos--size")) {
+      render(); return;
+    }
     var pro = proPrice(p, S.size);
     var unitPrice = pro != null ? pro : sizePrice(p, S.size);
     price.textContent = eur(unitPrice);
@@ -33510,6 +34814,15 @@
     });
     document.querySelectorAll("[data-vsize]").forEach(function (b) {
       b.setAttribute("aria-current", String(b.dataset.vsize === cur[1]));
+      /* …and these are the only buttons whose availability MOVES: a merch
+         size is judged against the colour now chosen, so «L» can be gone in
+         white and on the shelf in black. The volume and colour rows are fixed
+         per button and need no patching (r23). */
+      if (cur.length === 2) {
+        var gone = sizeOut(p, variantIndex(sizes, cur[0], b.dataset.vsize));
+        b.classList.toggle("size--out", gone);
+        if (gone) b.setAttribute("aria-disabled", "true"); else b.removeAttribute("aria-disabled");
+      }
     });
     var cn = document.querySelector("[data-colourname]");
     if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
@@ -34191,6 +35504,14 @@
     var si = sizeIdx === undefined
       ? (S.productId === id && S.screen === "product" ? S.size : cardSizeIdx(id))
       : sizeIdx;
+    /* per-size stock (r23): the same backstop one size down. The product word
+       above says «в наличии» while any single size is left, so it lets through
+       exactly the line createOrder() then refuses — a 500 мл counted to zero
+       on a product whose 75 мл is on the shelf. Every button in the shop that
+       can basket something comes through here, so this is the one place it
+       has to be said. A size nobody has counted is not refused, here or on
+       the server. */
+    if (sizeOut(byId(id), si)) { toast(sizeGoneText(byId(id))); return; }
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
     S.cart.forEach(function (l) { if (l.id === id && l.size === si) line = l; });
@@ -34370,7 +35691,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -34420,8 +35741,14 @@
     if (d.goProduct) {
       // features: the video and the review form belong to the product we left
       revLeaveProduct(d.goProduct);
-      S.productId = d.goProduct; S.size = 0; S.qty = 1;
       var np = byId(d.goProduct);
+      /* per-size stock (r23): opening on the first size STILL ON THE SHELF,
+         not blindly on the first rung. Landing on a sold-out 75 мл would show
+         «Этого объёма сейчас нет» over a product whose other volumes are
+         there for the buying — the product would read as gone, which is
+         precisely the loss the 17.09.2026 decision was meant to stop. With
+         nothing counted, or nothing left, this is 0 exactly as before. */
+      S.productId = d.goProduct; S.size = firstSizeIdx(np); S.qty = 1;
       S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
       S.videoOn = false;
       go("product"); return;
@@ -34681,6 +36008,10 @@
       S.adminTab = S.admCustOpen ? "people" : "orders";
       // assistant-work: a fresh order gets a fresh reply panel
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      /* …and a fresh parcel. The locker door and «Другая коробка» are about
+         the box in his hands right now: carrying either to the next order
+         would book that one with the previous parcel's measurements. */
+      admShipClear();
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admlogin !== undefined) {
@@ -34703,6 +36034,17 @@
        «Выдан клиенту» for a pickup) is the last step, applied at once with an
        undo on the toast; «Написать» opens the order on its message card.
        Every step lands in the journal with a way back. */
+    /* One tap on another door. Nothing is sent: the size travels with
+       «Создать этикетку», which is the press that books the parcel. */
+    if (d.lockersize) { S.lockerSize = d.lockersize; render(); refocus('[data-lockersize="' + d.lockersize + '"]'); return; }
+    /* «Другая коробка»: the three fields for this one parcel. Seeded from the
+       shop's own carton, so closing them again without typing is a no-op. */
+    if (d.shipboxopen !== undefined) {
+      S.boxOpen = true;
+      var bx = parcelConf();
+      S.boxOverride = { length: bx.length, width: bx.width, height: bx.height };
+      render(); refocus('[data-shipbox="length"]'); return;
+    }
     if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
     if (d.admdelivered) {
       var dRow = admOrderById(d.admdelivered);
@@ -35493,6 +36835,8 @@
           applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
         }
         if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        // …and the same photo inside the text rather than above the title
+        if (pa.type === "add_post_photo") { applyPostPhoto(pa); return; }
         /* «Наборы»: the proposal opens the editor (no price is set for the
            owner), the change goes straight to POST /api/admin/bundles */
         if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }
@@ -35866,6 +37210,14 @@
       toggleShipCountry(d.shipcountry);
       S.shipEuOpen = true;
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
+    }
+    /* «Где предлагать пакомат» — a draft change like every other cell on this
+       screen, so it lights the same «Сохранить» and travels in the same PUT.
+       Nothing is offered or withdrawn until he presses it. */
+    if (d.shippickup) {
+      toggleShipPickup(d.shippickup);
+      S.shipEuOpen = true;
+      render(); refocus('[data-shippickup="' + d.shippickup + '"]'); return;
     }
     /* Same as «Что увидит покупатель» below, and for the same reason: a
        <summary> carries an activation behaviour of its own, and the browser
@@ -36613,7 +37965,18 @@
       }
       render(); return;
     }
-    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = ""; render(); return; }
+    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = ""; S.adminBlogEdit.coverFocus = ""; } render(); return; }
+    if (d.coverfit) {
+      var ced = S.adminBlogEdit;
+      if (ced) {
+        /* The point survives the switch — it is the same spot on the same
+           photograph, and the social card goes on cropping to it whichever
+           way the picture stands on the page. */
+        var cf = blogCoverFocus(ced.coverFocus);
+        ced.coverFocus = blogCoverWrite(d.coverfit === "fill", cf ? cf.x : 50, cf ? cf.y : 50);
+      }
+      render(); return;
+    }
     if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
     if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
     if (d.admblogpublishyes !== undefined) { publishBlogPost(true); return; }
@@ -37150,6 +38513,43 @@
        is ticked. `change` and not the click delegate: the box is inside its
        label, so a tap on the words never reaches the input's own attribute. */
     else if (t.matches("[data-acctreturn]")) { acctReturnSubmit(t.getAttribute("data-acctreturn")); }
+    /* «Другая коробка» on the order card — this parcel's own measurements.
+       Nothing is saved and no setting moves: the numbers travel with «Создать
+       этикетку» and are gone the moment the label is made. */
+    else if (t.matches("[data-shipbox]")) {
+      var sbNum = Number(String(t.value).replace(",", "."));
+      if (!isFinite(sbNum) || sbNum <= 0 || sbNum > 200) {
+        render(); toast("Сторона коробки — от 1 до 200 см."); return;
+      }
+      if (!S.boxOverride) S.boxOverride = { length: 0, width: 0, height: 0 };
+      S.boxOverride[t.getAttribute("data-shipbox")] = Math.round(sbNum * 10) / 10;
+      render(); return;
+    }
+    /* «Коробка магазина» — settings.shipping_parcel, saved on `change` (the
+       field is left, not on every keystroke) with the same undo as the two
+       settings below it. The whole object travels, `recent` included, so the
+       size history is never the casualty of a typed dimension. */
+    else if (t.matches("[data-parcelbox]") || t.matches("[data-parcelsize]")) {
+      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
+      var pcCur = parcelConf();
+      var pcNext = {
+        length: pcCur.length, width: pcCur.width, height: pcCur.height,
+        lockerSize: pcCur.lockerSize, recent: pcCur.recent.slice()
+      };
+      if (t.matches("[data-parcelsize]")) pcNext.lockerSize = t.value;
+      else {
+        var pcField = t.getAttribute("data-parcelbox");
+        var pcNum = Number(String(t.value).replace(",", "."));
+        /* Out of the box's range is ignored and the field put back, the same
+           way a rate cell is: a 0 here would be a parcel Montonio refuses. */
+        if (!isFinite(pcNum) || pcNum <= 0 || pcNum > 200) {
+          render(); toast("Сторона коробки — от 1 до 200 см."); return;
+        }
+        pcNext[pcField] = Math.round(pcNum * 10) / 10;
+      }
+      var pcEntry = demoApply({ type: "set_parcel", value: pcNext });
+      render(); toast("Сохранено ✓", pcEntry); return;
+    }
     /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
     else if (t.matches("[data-delivdays]")) {
       // same gate as the switch beside it — the whole object travels
@@ -37269,6 +38669,86 @@
       srvLoadReportSummary(S.reportMonth);
       render();
     }
+  });
+
+  /* ---- the cover under a thumb -------------------------------------------
+     «двигать фото для обложки». What moves is one point on the photograph,
+     stored on the post and read by every frame that draws a cover
+     (src/lib/blog-cover.mjs); the picture following the finger is that point
+     changing.
+
+     POINTER events, not touch ones: one handler then serves the finger on
+     the iPhone the panel is worked from and the mouse on the laptop it is
+     occasionally opened on, and setPointerCapture keeps the picture
+     following a finger that has slid off the small frame it started on —
+     which on a 132 px square is most of the drag. `touch-action: none` on
+     the frame (admin.css) is what stops the editor scrolling underneath
+     instead.
+
+     A drag across the whole width of a frame sweeps the point from one edge
+     of the picture to the other. So the wide article frame is fine and the
+     small square is coarse, which is the right way round: the frame you want
+     to be exact in is the one you are looking at. Dragging any of the three
+     moves all three, because it is one point — that is how the owner finds
+     out, without publishing, that the square does not keep what the page
+     keeps. */
+  var COVERDRAG = null;
+  function coverDragTo(clientX, clientY) {
+    var d = S.adminBlogEdit;
+    if (!COVERDRAG || !d) return;
+    d.coverFocus = blogCoverWrite(
+      COVERDRAG.fill,
+      COVERDRAG.x - (COVERDRAG.w ? ((clientX - COVERDRAG.px) / COVERDRAG.w) * 100 : 0),
+      COVERDRAG.y - (COVERDRAG.h ? ((clientY - COVERDRAG.py) / COVERDRAG.h) * 100 : 0),
+    );
+    admBlogPaintCover();
+  }
+  document.addEventListener("pointerdown", function (e) {
+    var z = e.target && e.target.closest ? e.target.closest("[data-coverdrag]") : null;
+    if (!z || !S.adminBlogEdit) return;
+    var r = z.getBoundingClientRect();
+    /* Nothing chosen yet and the thumb is on the square: the page keeps
+       standing the way it does («fit»), and only the card stops guessing. */
+    var f = blogCoverFocus(S.adminBlogEdit.coverFocus);
+    COVERDRAG = {
+      px: e.clientX, py: e.clientY, w: r.width, h: r.height,
+      fill: !!(f && f.fill), x: f ? f.x : 50, y: f ? f.y : 50,
+    };
+    if (z.setPointerCapture) { try { z.setPointerCapture(e.pointerId); } catch (err) { /* no capture, the document listeners still see the move */ } }
+    /* No preventDefault() here on purpose: it would keep the frame from
+       taking focus, and focus is how the arrow keys below reach it. What
+       preventDefault would have been for — a drag selecting the text around
+       the frame — is `user-select: none` in admin.css instead. */
+  });
+  document.addEventListener("pointermove", function (e) {
+    if (!COVERDRAG) return;
+    coverDragTo(e.clientX, e.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  function coverDragEnd() {
+    if (!COVERDRAG) return;
+    COVERDRAG = null;
+    /* The note under the frames and the state of the two words change with
+       the mode, not with the point, so only the «не сохранено» line has
+       anything to say after a drag. */
+    blogPaintState();
+  }
+  document.addEventListener("pointerup", coverDragEnd);
+  document.addEventListener("pointercancel", coverDragEnd);
+  /* …and without a pointer at all. Two per cent a press: a frame is about 50
+     steps across, which is enough to land on a face and few enough to get
+     there. */
+  var COVER_KEY_STEP = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] };
+  document.addEventListener("keydown", function (e) {
+    var z = e.target && e.target.closest ? e.target.closest("[data-coverdrag]") : null;
+    var step = z && COVER_KEY_STEP[e.key];
+    var d = S.adminBlogEdit;
+    if (!step || !d) return;
+    var f = blogCoverFocus(d.coverFocus);
+    d.coverFocus = blogCoverWrite(!!(f && f.fill), (f ? f.x : 50) + step[0], (f ? f.y : 50) + step[1]);
+    admBlogPaintCover();
+    blogPaintState();
+    e.preventDefault();
   });
 
   /* media: drag-and-drop onto the same zone. Desktop only in practice — a
@@ -37471,7 +38951,8 @@
       if (found) {
         revLeaveProduct(found.id);   // features
         S.productId = found.id;
-        S.size = 0; S.qty = 1;
+        // per-size stock (r23): as in the click above — the first size left
+        S.size = firstSizeIdx(found); S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
         S.videoOn = false;
         S.screen = "product";

@@ -66,6 +66,17 @@ export interface RefundNotification {
   status: RefundStatus;
   amount: number;
   detail?: string;
+  /**
+   * Montonio's `refundStatusDescription`, raw — `INSUFFICIENT_FUNDS`,
+   * `DECLINED`, `EXPIRED_OR_CANCELLED_CARD`, … or `null` on a refund that
+   * simply worked (refunds guide § Refund status descriptions).
+   *
+   * Kept beside `detail` rather than buried in it because this is the ONLY
+   * place the real reason for a stuck refund ever appears: the create call
+   * answered 200 PENDING and said nothing. src/lib/montonio-problems.ts turns
+   * it into a sentence; the raw word is what goes into the journal.
+   */
+  statusDescription?: string;
 }
 
 /** A provider that can send money back. Montonio and the mock bank can. */

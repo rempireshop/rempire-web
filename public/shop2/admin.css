@@ -563,6 +563,17 @@
   user-select: all; -webkit-user-select: all; overflow-wrap: anywhere;
 }
 .adm-ship__links { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; }
+/* The two things decided at label time — the declared box and the five locker
+   doors — framed like .adm-ship beside it, because they are part of the same
+   «Отправление» story and sit on the same card, just above «Создать
+   этикетку». */
+.adm-locker { border: 1px solid var(--a-rule); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+/* 44 px and not the chip row's 40: this one is tapped with a thumb while the
+   other hand holds the box, on the owner's iPhone. */
+.adm-chip--size { height: 44px; min-width: 44px; padding: 0 12px; font-variant-numeric: tabular-nums; }
+/* «Коробка магазина» — three dimensions side by side where there is room and
+   stacked on a phone, so a 360 px screen never gets three 40 px boxes. */
+.adm-parcel { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
 .adm-copy {
   height: 40px; padding: 0 14px; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
   font-size: 14px; font-weight: 500; white-space: nowrap; flex: none;
@@ -1745,7 +1756,25 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-see__t {
   font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
 }
+/* The third frame: the square a link preview is cut to. Unlike the two
+   beside it there is no shop class to borrow — that card is drawn by sharp on
+   the server (src/lib/og-card.ts fits the photo into a 518×518 box beside the
+   title), not by any rule this page has loaded. So this frame is the panel's
+   own, and its shape is the one thing here that has to be kept in step with
+   that file by hand. It crops always, whatever the page does, which is the
+   whole reason it is on screen: a cover the owner approved wide came back
+   from WhatsApp with the face halved. */
+.adm-see__one--og { flex: 0 0 132px; }
+.adm-see__og { display: block; aspect-ratio: 1; background: var(--page) center / cover no-repeat; }
 .adm-see__f { display: block; border: 1px solid var(--a-rule); background: var(--a-paper); }
+/* A frame a thumb may move the picture in. `touch-action: none` is what keeps
+   the editor still under the finger — without it a drag down the frame
+   scrolls the page instead of moving the photograph; `user-select: none` is
+   what the pointerdown handler deliberately does not preventDefault() for,
+   so the frame can still take focus and answer the arrow keys. */
+.adm-see__f--pan { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.adm-see__f--pan:active { cursor: grabbing; }
+.adm-see__f--pan:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 /* the shop's own bottom margin on a tile cover has no job inside a frame */
 .adm-see__f .blog__tileimg, .adm-see__f .blog__cover { margin-bottom: 0; }
 .adm-see__note { flex-basis: 100%; margin: 0; }

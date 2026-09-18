@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Запуск магазина — что осталось · REMPIRE</title>
+<meta name="description" content="Список того, что осталось сделать до запуска Rempire: кто за что отвечает, что чем держится и когда можно переключать домен.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="REMPIRE">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://rempireshop.diipsolutions.eu/golive/">
+<meta property="og:title" content="Запуск магазина — что осталось">
+<meta property="og:description" content="Шаг A — всё на стенде. Шаг B — переключение домена, и он закрыт, пока не закрыт шаг A.">
+<meta property="og:image" content="https://rempireshop.diipsolutions.eu/brand/og-golive.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rempireshop.diipsolutions.eu/brand/og-golive.png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+
+<style>
+  /* The shop's own palette (public/shop2/styles.css), painted explicitly and
+     in one theme — the same decision as /test/: this is a work tool read in a
+     bright room on a phone, and a launch list that changes colour with the
+     phone's night mode is a list whose red warnings stop reading as warnings. */
+  :root {
+    --ink: #1c1a00;
+    --soft: #4a4738;
+    --muted: #6f6b57;
+    --page: #ffffff;
+    --paper: #fdfcf9;
+    --shell: #edeae1;
+    --rule: rgba(28, 26, 0, .16);
+    --hair: rgba(28, 26, 0, .10);
+    --done: #2f6a3f;
+    --done-bg: #eef5ef;
+    --doing: #1d4f78;
+    --doing-bg: #eaf1f7;
+    --blocked: #8c1a0f;
+    --blocked-bg: #fbeceb;
+    --todo: #6f6b57;
+    --todo-bg: #f6f4ef;
+    /* The lock. Neither green nor red on purpose: a closed phase B is not a
+       failure, it is a door that is not due to open yet. */
+    --lock: #8a5a00;
+    --lock-bg: #fdf4e3;
+    --lock-rule: rgba(138, 90, 0, .35);
+    --sans: "Golos Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    --serif: "Literata", Georgia, serif;
+    --gutter: 14px;
+    /* Nothing a finger has to hit is ever smaller than this — WCAG 2.2 asks
+       for 24 px and Apple for 44; this page is all buttons, so it gets the
+       generous number, exactly like /test/. */
+    --tap: 46px;
+  }
+  @media (min-width: 720px) { :root { --gutter: 24px; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 0 var(--gutter); }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; margin: 0; }
+
+  /* ---------- header ---------- */
+  .top { background: var(--shell); border-bottom: 1px solid var(--rule); padding: 26px 0 22px; }
+  .kicker { margin: 0; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-size: 1.6rem; line-height: 1.15; margin: .35rem 0 .5rem; text-wrap: balance; }
+  .lede { margin: 0; color: var(--soft); }
+  .lede + .lede { margin-top: .5rem; }
+
+  .me { margin-top: 1rem; }
+  .me + .me { margin-top: .8rem; }
+  .me__label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: .35rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip {
+    font: inherit; font-size: .92rem; min-height: var(--tap); padding: .4rem .9rem;
+    background: var(--page); color: var(--ink); border: 1px solid var(--rule); border-radius: 0;
+    cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+
+  /* ---------- sticky progress ---------- */
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--page); border-bottom: 1px solid var(--rule);
+    padding: .55rem 0 .6rem;
+  }
+  .bar__grid { display: flex; flex-wrap: wrap; gap: .2rem 1rem; align-items: baseline; }
+  .bar__count { font-size: .95rem; font-weight: 500; }
+  .bar__state { font-size: .82rem; color: var(--muted); margin: 0; flex: 1 1 100%; }
+  .bar__state--warn { color: var(--blocked); }
+  .track { flex: 1 1 100%; height: 6px; background: var(--shell); margin-top: .45rem; }
+  .track i { display: block; height: 100%; background: var(--done); width: 0; transition: width .2s; }
+
+  /* ---------- blocks ---------- */
+  section { padding: 1.4rem 0; border-bottom: 1px solid var(--hair); }
+  h2 { font-size: 1.15rem; margin-bottom: .2rem; }
+  .h2sub { margin: .1rem 0 .9rem; color: var(--muted); font-size: .9rem; }
+  p { margin: 0 0 .7rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .howto { background: var(--paper); }
+  .howto ol { margin: 0; padding-left: 1.2rem; }
+  .howto li { margin-bottom: .35rem; }
+
+  .filters { padding: 1rem 0; }
+  .filters__row + .filters__row { margin-top: .6rem; }
+  .filters__label { display: block; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
+
+  /* ---------- the two phases ---------- */
+  .phase { border-bottom: none; padding-bottom: 0; }
+  .phase__head { border-top: 3px solid var(--ink); padding-top: .9rem; }
+  .phase h2 { font-size: 1.45rem; }
+  .phase--locked .phase__head { border-top-color: var(--lock); }
+  .phase--locked h2 { color: var(--lock); }
+
+  /* The lock panel. It is not a hint and it is not styled like one: it names
+     the rows that are holding the door and it is the only thing between the
+     heading and the list. */
+  .lock {
+    background: var(--lock-bg); border: 1px solid var(--lock-rule); color: var(--lock);
+    padding: .8rem .8rem .9rem; margin: .8rem 0 0;
+  }
+  .lock h3 { font-size: 1.05rem; margin-bottom: .3rem; }
+  .lock p { font-size: .92rem; margin-bottom: .5rem; }
+  .lock ol { margin: 0; padding-left: 1.2rem; font-size: .92rem; }
+  /* Room around each line rather than a min-height on the link: a title here
+     wraps onto two lines on a phone, and an inline-block link with a height
+     drops its list marker down to the last one. */
+  .lock li { margin-bottom: .3rem; padding: .25rem 0; }
+  .lock a { padding: .15rem 0; }
+  .lock--open { background: var(--done-bg); border-color: rgba(47, 106, 63, .35); color: var(--done); }
+
+  .peek { margin-top: 1rem; }
+  .peek > summary {
+    cursor: pointer; min-height: var(--tap); display: flex; align-items: center;
+    font-size: .95rem; color: var(--muted);
+  }
+
+  /* ---------- the list ---------- */
+  .area { padding-top: 1.4rem; }
+  .area > h3 { font-size: 1.05rem; scroll-margin-top: 4.5rem; }
+  .area > .h2sub { margin-top: .15rem; }
+  .item {
+    border: 1px solid var(--rule); border-left-width: 4px; border-left-color: var(--rule);
+    padding: .9rem; margin-top: 1rem; background: var(--page); scroll-margin-top: 5rem;
+  }
+  .item[data-status="done"]    { border-left-color: var(--done);    background: var(--done-bg); }
+  .item[data-status="doing"]   { border-left-color: var(--doing);   background: var(--doing-bg); }
+  .item[data-status="blocked"] { border-left-color: var(--blocked); background: var(--blocked-bg); }
+  .item[data-status="todo"]    { border-left-color: var(--todo);    background: var(--todo-bg); }
+  .item[hidden] { display: none; }
+  .item h4 { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; line-height: 1.25; margin: .35rem 0 .5rem; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .tag {
+    font-size: .72rem; letter-spacing: .04em; text-transform: uppercase;
+    border: 1px solid var(--rule); padding: .1rem .4rem; color: var(--muted); white-space: nowrap;
+  }
+  .tag--claude { border-color: var(--doing); color: var(--doing); }
+  .tag--dim { border-color: var(--ink); color: var(--ink); }
+  .tag--renat { border-color: var(--lock); color: var(--lock); }
+  /* The one badge that is filled in: this row is what phase B is waiting for. */
+  .tag--blocks { border-color: var(--lock); background: var(--lock); color: #fff; }
+  .tag--outside { border-color: var(--muted); }
+
+  .detail { font-size: .95rem; color: var(--soft); margin-bottom: .6rem; }
+
+  /* «Ждёт» — the dependencies, named. A row that is waiting says what for,
+     with the thing it is waiting for one tap away. */
+  .deps { margin: 0 0 .6rem; padding: .45rem .6rem; background: var(--paper); border: 1px solid var(--hair); font-size: .88rem; }
+  .deps b { font-weight: 600; }
+  .deps a { padding: .2rem 0; }
+  /* Done while something under it is not. The one contradiction on this page
+     worth shouting about — the reset run before the snapshot is exactly this. */
+  .deps--early { background: var(--blocked-bg); border-color: rgba(140, 26, 15, .35); color: var(--blocked); }
+
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .verdict button {
+    font: inherit; font-size: .95rem; min-height: var(--tap); padding: .5rem .4rem;
+    background: var(--page); color: var(--ink); border: 1px solid var(--rule); cursor: pointer;
+  }
+  .verdict button[aria-pressed="true"][data-gl-set="done"]    { background: var(--done);    border-color: var(--done);    color: #fff; }
+  .verdict button[aria-pressed="true"][data-gl-set="doing"]   { background: var(--doing);   border-color: var(--doing);   color: #fff; }
+  .verdict button[aria-pressed="true"][data-gl-set="blocked"] { background: var(--blocked); border-color: var(--blocked); color: #fff; }
+  .verdict button[aria-pressed="true"][data-gl-set="todo"]    { background: var(--todo);    border-color: var(--todo);    color: #fff; }
+
+  .note { display: block; margin-top: .7rem; }
+  .note span { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .25rem; }
+  .note textarea {
+    font: inherit; font-size: 16px; /* under 16px iOS Safari zooms the page on focus */
+    width: 100%; min-height: 3.2rem; padding: .5rem;
+    border: 1px solid var(--rule); background: var(--page); color: var(--ink); resize: vertical;
+  }
+  .by { margin: .4rem 0 0; font-size: .8rem; color: var(--muted); min-height: 1.1rem; }
+
+  /* A phase-B card while the door is shut: readable, and nothing on it to
+     press. Not «disabled buttons» — no buttons at all, because a greyed
+     control under a thumb in a hurry is a control that gets pressed. */
+  .item--shut { opacity: .72; }
+  .item--shut .shut {
+    margin: .2rem 0 0; font-size: .85rem; color: var(--lock); border-top: 1px solid var(--hair); padding-top: .5rem;
+  }
+
+  /* ---------- report ---------- */
+  .report textarea { font: inherit; font-size: 14px; width: 100%; min-height: 9rem; padding: .5rem; border: 1px solid var(--rule); }
+  .btn {
+    font: inherit; min-height: var(--tap); padding: .5rem 1rem; cursor: pointer;
+    background: var(--ink); color: var(--page); border: 1px solid var(--ink);
+  }
+  .btn--ghost { background: var(--page); color: var(--ink); border-color: var(--rule); }
+  .btns { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+  footer { padding: 1.6rem 0 3rem; color: var(--muted); font-size: .9rem; }
+
+  @media (min-width: 720px) {
+    body { font-size: 17px; }
+    h1 { font-size: 2.1rem; }
+    .verdict { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="kicker" data-t="kicker">REMPIRE · запуск</p>
+    <h1 data-t="h1">Что осталось до запуска</h1>
+    <p class="lede" data-t-lede>Два шага. <b>Шаг A</b> — всё, что делается на стенде diipsolutions. <b>Шаг B</b> — переключение на живой домен, и он закрыт, пока в шаге A есть незакрытые пункты.</p>
+    <p class="lede" data-t="lede2">У каждого пункта есть хозяин. Нажми «только моё» — и на экране останется то, что действительно на тебе.</p>
+    <div class="me">
+      <span class="me__label" id="lang-label" data-t="langLabel">Язык страницы</span>
+      <div class="chips" role="group" aria-labelledby="lang-label">
+        <button type="button" class="chip" data-gl-lang="ru" aria-pressed="true" lang="ru">Русский</button>
+        <button type="button" class="chip" data-gl-lang="en" aria-pressed="false" lang="en">English</button>
+      </div>
+    </div>
+    <div class="me">
+      <span class="me__label" id="who-label" data-t="whoLabel">Кто отмечает — чтобы было видно, чья отметка</span>
+      <div class="chips" role="group" aria-labelledby="who-label">
+        <button type="button" class="chip" data-gl-who="dim" aria-pressed="false" data-t="who.dim">Дима</button>
+        <button type="button" class="chip" data-gl-who="renat" aria-pressed="false" data-t="who.renat">Ренат</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap bar__grid">
+    <strong class="bar__count" data-gl-progress>Загружаю список…</strong>
+    <p class="bar__state" data-gl-state></p>
+    <div class="track" aria-hidden="true"><i data-gl-track></i></div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="howto">
+    <h2 data-t="howtoH">Как это работает</h2>
+    <ol>
+      <li data-t="howto1">Отметь вверху, кто ты — Дима или Ренат.</li>
+      <li data-t="howto2">Под каждым пунктом четыре кнопки: сделано, делается, ждёт, не начато.</li>
+      <li data-t="howto3">Пункты Клода он отмечает сам, по мере того как работа доходит до конца. Их можно не трогать.</li>
+      <li data-t="howto4">Шаг B откроется сам, когда в шаге A не останется ни одного незакрытого обязательного пункта.</li>
+      <li data-t-howto5>Чтобы отметки увидел второй, надо быть в кабинете магазина: <a href="/shop2/admin/">/shop2/admin/</a>. Если ты не вошёл — отмечай спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь.</li>
+    </ol>
+  </section>
+
+  <section class="filters">
+    <div class="filters__row">
+      <span class="filters__label" id="f-who" data-t="fWho">Чьи пункты показывать</span>
+      <div class="chips" role="group" aria-labelledby="f-who">
+        <button type="button" class="chip" data-gl-filter="all" aria-pressed="true" data-t="fAll">Все</button>
+        <button type="button" class="chip" data-gl-filter="claude" aria-pressed="false" data-t="who.claude">Клод</button>
+        <button type="button" class="chip" data-gl-filter="dim" aria-pressed="false" data-t="who.dim">Дима</button>
+        <button type="button" class="chip" data-gl-filter="renat" aria-pressed="false" data-t="who.renat">Ренат</button>
+      </div>
+    </div>
+    <div class="filters__row">
+      <span class="filters__label" id="f-open" data-t="fShow">Что показывать</span>
+      <div class="chips" role="group" aria-labelledby="f-open">
+        <button type="button" class="chip" data-gl-only aria-pressed="false" data-t="onlyOpen">Только несделанное</button>
+        <button type="button" class="chip" data-gl-blocks aria-pressed="false" data-t="onlyBlocks">Только то, что держит шаг B</button>
+      </div>
+    </div>
+  </section>
+
+  <div data-gl-list></div>
+
+  <section class="report">
+    <h2 data-t="reportH">Забрать список текстом</h2>
+    <p class="h2sub" data-t="reportSub">Готовый срез — переслать в чат или вставить в письмо.</p>
+    <div class="btns">
+      <button type="button" class="btn" data-gl-copy data-t="copy">Скопировать список</button>
+      <button type="button" class="btn btn--ghost" data-gl-sync data-t="syncNow">Сохранить на сервер сейчас</button>
+    </div>
+    <p class="h2sub" data-gl-copied hidden data-t="copied">Скопировано.</p>
+    <textarea data-gl-report rows="10" readonly hidden aria-label="Список текстом" data-ta="reportAria"></textarea>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p data-t-footer>Список написан по docs/go-live.md. Приёмка магазина: <a href="/test/">/test/</a> · обзор: <a href="/guide/">/guide/</a> · сам магазин: <a href="/shop2/">/shop2/</a></p>
+</footer>
+
+<script>
+/*
+ * The go-live page. Static file, no build step, no framework — the same shape
+ * as /test/, /guide/ and /cards/, which is what lets one address be opened on
+ * a phone and worked from.
+ *
+ * Where the marks live, in order of preference:
+ *
+ *   1. the server, in one `settings` row behind the admin session
+ *      (src/app/api/golive/route.ts). This is the copy Claude writes into from
+ *      a terminal as work lands, and the copy the other person reads.
+ *   2. localStorage on this device, ALWAYS, whether or not anyone is signed
+ *      in — written before the network is even asked.
+ *
+ * So a save never blocks on the network, a failed save is retried and said out
+ * loud, and the moment a signed-in session appears the local copy is pushed
+ * up. The one thing this page may not do is lose a mark.
+ *
+ * THE LOCK. Phase B is shut while any blocking phase-A row is not done. The
+ * rule is written once, in src/lib/golive.ts `gate()`, and mirrored here in
+ * `gate()` below for the same reason the merge rule is mirrored in /test/:
+ * this page has to be right with no network, in the second between a tap and
+ * a response, and on a phone that has not been signed in at all. The two
+ * implementations are the same four lines and the route ships its own answer
+ * on every response, so a drift shows up as the lock changing when the page
+ * syncs — which is the loud failure, not the quiet one.
+ *
+ * A shut phase B is readable and not operable: the cards are drawn, with no
+ * buttons on them at all. Greying a control out is not the same thing — a
+ * greyed control under a thumb in a hurry is a control that gets pressed.
+ */
+(function () {
+  "use strict";
+
+  var API = "/api/golive/";
+  var LS_STATES = "rempire-golive-v1";
+  var LS_PLAN = "rempire-golive-plan-v1";
+  var LS_WHO = "rempire-golive-who";
+  var LS_LANG = "rempire-golive-lang";
+
+  /* The four states as *values*, kept apart from the words for them: this is
+     what a stored mark is checked against when it is read back, and that check
+     must give the same result whichever language the page is showing. */
+  var STATUSES = { todo: 1, doing: 1, blocked: 1, done: 1 };
+  /* The order the buttons sit in, and the order a card is read in: the one
+     anybody presses most is first. */
+  var BUTTONS = ["done", "doing", "blocked", "todo"];
+  var OWNERS = { claude: 1, dim: 1, renat: 1 };
+
+  /* The request that never left, as a code rather than as a sentence — what is
+     kept in `state.error` outlives the language it was written in. No route
+     answers with this word. */
+  var OFFLINE = "offline";
+
+  /*
+   * Everything this page says, in both languages. Russian is what the markup
+   * above carries too, so a page whose script never ran is still readable.
+   */
+  var TEXT = {
+    ru: {
+      title: "Запуск магазина — что осталось · REMPIRE",
+      kicker: "REMPIRE · запуск",
+      h1: "Что осталось до запуска",
+      lede1: ["Два шага. ", { b: "Шаг A" }, " — всё, что делается на стенде diipsolutions. ", { b: "Шаг B" }, " — переключение на живой домен, и он закрыт, пока в шаге A есть незакрытые пункты."],
+      lede2: "У каждого пункта есть хозяин. Нажми «только моё» — и на экране останется то, что действительно на тебе.",
+      langLabel: "Язык страницы",
+      whoLabel: "Кто отмечает — чтобы было видно, чья отметка",
+      howtoH: "Как это работает",
+      howto1: "Отметь вверху, кто ты — Дима или Ренат.",
+      howto2: "Под каждым пунктом четыре кнопки: сделано, делается, ждёт, не начато.",
+      howto3: "Пункты Клода он отмечает сам, по мере того как работа доходит до конца. Их можно не трогать.",
+      howto4: "Шаг B откроется сам, когда в шаге A не останется ни одного незакрытого обязательного пункта.",
+      howto5: ["Чтобы отметки увидел второй, надо быть в кабинете магазина: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". Если ты не вошёл — отмечай спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь."],
+      fWho: "Чьи пункты показывать",
+      fAll: "Все",
+      fShow: "Что показывать",
+      onlyOpen: "Только несделанное",
+      onlyBlocks: "Только то, что держит шаг B",
+      reportH: "Забрать список текстом",
+      reportSub: "Готовый срез — переслать в чат или вставить в письмо.",
+      copy: "Скопировать список",
+      reportPart: "(здесь только то, что было видно на экране — список был отфильтрован)\n",
+      syncNow: "Сохранить на сервер сейчас",
+      copied: "Скопировано.",
+      reportAria: "Список текстом",
+      footer: ["Список написан по docs/go-live.md. Приёмка магазина: ", { a: "/test/", href: "/test/" }, " · обзор: ", { a: "/guide/", href: "/guide/" }, " · сам магазин: ", { a: "/shop2/", href: "/shop2/" }],
+
+      who: { claude: "Клод", dim: "Дима", renat: "Ренат" },
+      st: { todo: "не начато", doing: "делается", blocked: "ждёт", done: "сделано" },
+      btn: { todo: "Не начато", doing: "Делается", blocked: "Ждёт", done: "Сделано" },
+      tagBlocks: "держит шаг B",
+      tagOptional: "не обязательно",
+      tagOutsideA: "не в коде — ",
+
+      verdictAria: "Состояние пункта",
+      waitOne: "Ждёт: ",
+      earlyOne: "Отмечено сделанным, хотя не закрыто: ",
+      shutNote: "Откроется, когда закроется шаг A.",
+      noteLabel: "Заметка — что именно осталось",
+      notePlaceholder: "Ключи в воскресенье…",
+      someone: "кто-то",
+      otherArea: "Остальное",
+
+      lockH: "Шаг B закрыт",
+      /* Two leads, because «Осталось 1» is not a sentence in Russian — and the
+         one-item state is the one that will be on screen at the moment this
+         page matters most. */
+      lockLeadOne: "Сначала надо закрыть шаг A. Остался один пункт:",
+      lockLeadA: "Сначала надо закрыть шаг A. Осталось ",
+      lockLeadB: " — вот что именно:",
+      lockMoreA: "… и ещё ",
+      lockMoreB: " — ниже, в шаге A.",
+      openH: "Шаг A закрыт",
+      openLead: "Можно переключать домен. Пункты ниже — по порядку, несколько из них правильны только вместе.",
+      peek: "Показать, что будет в шаге B",
+
+      loading: "Загружаю список…",
+      loadFailed: "Не удалось загрузить список — открой страницу ещё раз, когда будет связь",
+      empty: "В списке пока нет пунктов",
+      progA: "Шаг A: сделано ",
+      progOf: " из ",
+      progDoing: " · делается ",
+      progBlocked: " · ждёт ",
+      progB: " · шаг B: ",
+
+      errUnknownItem: "список на сервере уже другой — перезагрузи страницу",
+      errTooLarge: "слишком много текста",
+      errRateLimited: "слишком часто, подожди минуту",
+      errDbDown: "база магазина не отвечает",
+      errNoLink: "нет связи",
+      errOffline: "нет сети",
+
+      stNoStore: "Устройство не даёт сохранить отметки у себя (частный режим?). Не закрывай вкладку, пока вверху не появится «сохранено на сервере».",
+      stLocalOnly: "Отметки только на этом устройстве — войди в кабинет, и они улетят сами.",
+      stStoppedA: "Сервер не принимает отметки (",
+      stStoppedB: "). Всё сохранено на устройстве — нажми «Скопировать список» и пришли его Диме.",
+      stBusy: "Сохраняю…",
+      stRetry: "Пока не сохранилось на сервере, пробую ещё раз. Отметки на устройстве.",
+      stPending: "Есть несохранённое, сейчас отправлю.",
+      stSavedA: "Сохранено на сервере в ",
+      stSavedB: ".",
+      stSignedIn: "Вошёл в кабинет — отметки сохраняются на сервер.",
+      stCache: "Список показан из памяти устройства — сервер не ответил. ",
+
+      reportHead: "REMPIRE — запуск магазина, ",
+      reportLocked: "Шаг B закрыт. Не закрыто:",
+      reportOpen: "Шаг B открыт."
+    },
+    en: {
+      title: "Going live — what is left · REMPIRE",
+      kicker: "REMPIRE · going live",
+      h1: "What is left before launch",
+      lede1: ["Two phases. ", { b: "Phase A" }, " — everything that happens on the diipsolutions staging site. ", { b: "Phase B" }, " — the switch to the live domain, and it stays shut while phase A has open items."],
+      lede2: "Every item has an owner. Press «only mine» and what is left on screen is what is genuinely yours.",
+      langLabel: "Page language",
+      whoLabel: "Who is marking — so it is clear whose mark it is",
+      howtoH: "How this works",
+      howto1: "Mark at the top who you are — Dim or Renat.",
+      howto2: "Four buttons under every item: done, in progress, waiting, not started.",
+      howto3: "Claude's items are marked by Claude, as the work lands. You can leave them alone.",
+      howto4: "Phase B opens by itself once phase A has no blocking item left open.",
+      howto5: ["For the other person to see your marks you have to be signed into the shop's panel: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". If you are not signed in, mark away — everything stays on the device and goes up to the server by itself the moment you sign in."],
+      fWho: "Whose items to show",
+      fAll: "All",
+      fShow: "What to show",
+      onlyOpen: "Unfinished only",
+      onlyBlocks: "Only what holds phase B",
+      reportH: "Take the list as text",
+      reportSub: "A ready-made slice — to forward in a chat or paste into an e-mail.",
+      copy: "Copy the list",
+      reportPart: "(only what was on screen — the list was filtered)\n",
+      syncNow: "Save to the server now",
+      copied: "Copied.",
+      reportAria: "The list as text",
+      footer: ["Written from docs/go-live.md. Shop acceptance: ", { a: "/test/", href: "/test/" }, " · overview: ", { a: "/guide/", href: "/guide/" }, " · the shop itself: ", { a: "/shop2/", href: "/shop2/" }],
+
+      who: { claude: "Claude", dim: "Dim", renat: "Renat" },
+      st: { todo: "not started", doing: "in progress", blocked: "waiting", done: "done" },
+      btn: { todo: "Not started", doing: "In progress", blocked: "Waiting", done: "Done" },
+      tagBlocks: "holds phase B",
+      tagOptional: "optional",
+      tagOutsideA: "not in the code — ",
+
+      verdictAria: "State of this item",
+      waitOne: "Waiting on: ",
+      earlyOne: "Marked done although this is not closed: ",
+      shutNote: "Opens once phase A is closed.",
+      noteLabel: "Note — what exactly is left",
+      notePlaceholder: "Keys on Sunday…",
+      someone: "somebody",
+      otherArea: "Other",
+
+      lockH: "Phase B is shut",
+      lockLeadOne: "Phase A has to be closed first. One item left:",
+      lockLeadA: "Phase A has to be closed first. ",
+      lockLeadB: " left — here they are:",
+      lockMoreA: "… and ",
+      lockMoreB: " more — below, in phase A.",
+      openH: "Phase A is closed",
+      openLead: "The domain can be switched. The items below are in order, and several are only correct together.",
+      peek: "Show what is in phase B",
+
+      loading: "Loading the list…",
+      loadFailed: "Could not load the list — open the page again when there is a connection",
+      empty: "No items in the list yet",
+      progA: "Phase A: done ",
+      progOf: " of ",
+      progDoing: " · in progress ",
+      progBlocked: " · waiting ",
+      progB: " · phase B: ",
+
+      errUnknownItem: "the list on the server is a different one now — reload the page",
+      errTooLarge: "too much text",
+      errRateLimited: "too often, wait a minute",
+      errDbDown: "the shop's database is not answering",
+      errNoLink: "no connection",
+      errOffline: "no network",
+
+      stNoStore: "This device will not let the marks be kept on it (private mode?). Do not close the tab until the line above says «saved on the server».",
+      stLocalOnly: "The marks are on this device only — sign into the panel and they will go up by themselves.",
+      stStoppedA: "The server is not taking the marks (",
+      stStoppedB: "). Everything is saved on the device — press «Copy the list» and send it to Dim.",
+      stBusy: "Saving…",
+      stRetry: "Not saved on the server yet, trying again. The marks are on the device.",
+      stPending: "There is something unsaved, sending it now.",
+      stSavedA: "Saved on the server at ",
+      stSavedB: ".",
+      stSignedIn: "Signed into the panel — the marks are saved to the server.",
+      stCache: "The list is shown from this device's memory — the server did not answer. ",
+
+      reportHead: "REMPIRE — going live, ",
+      reportLocked: "Phase B is shut. Not closed yet:",
+      reportOpen: "Phase B is open."
+    }
+  };
+
+  /** One string in the language now on screen. Dotted keys reach into the
+      small maps (`who.dim`), so a word used both on a chip and on a badge is
+      written once. */
+  function t(key) {
+    var node = TEXT[state.lang] || TEXT.ru;
+    var parts = key.split(".");
+    for (var i = 0; i < parts.length && node !== undefined; i++) node = node[parts[i]];
+    return node === undefined ? "" : node;
+  }
+
+  /** The Russian row, or its English half when the page is in English. Rows
+      carry both (`en` in src/data/golive.json); anything without one falls
+      through to the Russian, which is a row somebody can still act on. */
+  function say(row) {
+    return state.lang === "en" && row && row.en ? row.en : row;
+  }
+
+  var state = {
+    lang: "ru",
+    plan: null,
+    ids: [],            // item ids in plan order — also the filter for what we send up
+    items: {},          // id -> plan item
+    areas: [],          // the plan's areas plus any «Остальное» render() had to invent
+    phaseOf: {},        // item id -> phase id
+    states: {},         // id -> {status, note, at, by}
+    nodes: {},          // id -> <article>
+    signedIn: false,
+    who: "",
+    filter: "all",
+    onlyOpen: false,
+    onlyBlocks: false,
+    /* Whether the «показать, что будет в шаге B» fold is open. Kept here
+       because a status change redraws the whole page, and a fold that shuts
+       itself every time somebody ticks a box is a fold nobody opens twice. */
+    peekOpen: false,
+    dirty: false,
+    busy: false,
+    /* Bumped by every mark. A save that finishes may only report «nothing left
+       to send» if this is still what it was when the request left. */
+    rev: 0,
+    stopped: false,
+    noStore: false,
+    tries: 0,
+    timer: 0,
+    savedAt: null,
+    error: "",
+    fromCache: false,
+    loadFailed: false,
+    lastCheck: 0
+  };
+
+  /* ---------- tiny DOM helpers ------------------------------------------ */
+  /* Everything is built with createElement/textContent rather than innerHTML:
+     the list is our own file today, but it is exactly the kind of document
+     that later gets filled in by somebody else. */
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
+    }
+    if (kids) for (var i = 0; i < kids.length; i++) if (kids[i]) n.appendChild(kids[i]);
+    return n;
+  }
+  function $(sel) { return document.querySelector(sel); }
+
+  /** A sentence with a bold word or a link in the middle of it, as data. They
+      are rebuilt rather than assigned, because switching the language replaces
+      the sentence around the markup, not just the words in it. */
+  function rich(parts) {
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (typeof p === "string") out.push(document.createTextNode(p));
+      else if (p.b) out.push(el("b", { text: p.b }));
+      else if (p.a) out.push(el("a", { href: p.href, text: p.a }));
+    }
+    return out;
+  }
+  function fill(node, parts) {
+    if (!node) return;
+    node.textContent = "";
+    var kids = rich(parts);
+    for (var i = 0; i < kids.length; i++) node.appendChild(kids[i]);
+  }
+
+  /* ---------- localStorage (never allowed to throw) --------------------- */
+
+  function lsGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function lsSet(key, value) { try { localStorage.setItem(key, value); return true; } catch (e) { return false; } }
+  function readJson(key) {
+    var raw = lsGet(key);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+  }
+  function saveLocal() {
+    if (!lsSet(LS_STATES, JSON.stringify(state.states))) {
+      /* Private-mode Safari and a full disk both land here. The marks are
+         still in memory and still go to the server, but whoever is holding
+         the phone has to know that closing the tab loses whatever did not. */
+      state.noStore = true;
+      paintState();
+    }
+  }
+
+  /* ---------- merging --------------------------------------------------- */
+  /* The same rule the server applies (src/lib/golive.ts mergeStates): per item
+     id, the newer `at` wins. ISO instants compare correctly as strings. */
+
+  function merge(base, incoming) {
+    var out = {}, id;
+    for (id in base) if (Object.prototype.hasOwnProperty.call(base, id)) out[id] = base[id];
+    for (id in incoming) if (Object.prototype.hasOwnProperty.call(incoming, id)) {
+      if (!out[id] || incoming[id].at >= out[id].at) out[id] = incoming[id];
+    }
+    return out;
+  }
+
+  /** What we are willing to send: only ids the list we are showing knows. */
+  function outgoing() {
+    var out = {};
+    for (var i = 0; i < state.ids.length; i++) {
+      var id = state.ids[i];
+      if (state.states[id]) out[id] = state.states[id];
+    }
+    return out;
+  }
+
+  /* ---------- the state of a row, and the lock -------------------------- */
+
+  /**
+   * The status to believe: what somebody last marked, and failing that what
+   * the committed list says (src/lib/golive.ts `statusOf`). Reading
+   * `state.states[id]` directly would make a page nobody has touched claim
+   * that nothing at all has been done — including the two rows the document
+   * already marks done.
+   */
+  function statusOf(id) {
+    var mark = state.states[id];
+    if (mark && STATUSES[mark.status]) return mark.status;
+    var item = state.items[id];
+    return item && STATUSES[item.status] ? item.status : "todo";
+  }
+
+  /** The ids in `needs` that are not done yet — what is holding this row. */
+  function holdUps(item) {
+    var out = [], needs = (item && item.needs) || [];
+    for (var i = 0; i < needs.length; i++) {
+      if (state.items[needs[i]] && statusOf(needs[i]) !== "done") out.push(needs[i]);
+    }
+    return out;
+  }
+
+  /**
+   * The owner's rule: «before that switch to live domain, we need to get all
+   * items done in the diipsolution environment». The server computes the same
+   * thing in src/lib/golive.ts `gate()` and ships its answer on every
+   * response; this copy exists so the lock is right offline and in the second
+   * between a tap and a save.
+   */
+  function gate() {
+    var blockers = [];
+    for (var i = 0; i < state.ids.length; i++) {
+      var id = state.ids[i], item = state.items[id];
+      if (state.phaseOf[id] !== "a" || !item.blocking) continue;
+      if (statusOf(id) !== "done") blockers.push(id);
+    }
+    return blockers;
+  }
+
+  function locked() { return gate().length > 0; }
+
+  /* ---------- rendering ------------------------------------------------- */
+
+  function tag(text, cls) { return el("span", { "class": "tag" + (cls ? " tag--" + cls : ""), text: text }); }
+
+  /** A «ждёт: …» line whose named rows are one tap away. */
+  function depLine(ids, label, cls) {
+    var p = el("p", { "class": "deps" + (cls ? " " + cls : "") }, [el("b", { text: label })]);
+    for (var i = 0; i < ids.length; i++) {
+      if (i) p.appendChild(document.createTextNode(" · "));
+      var dep = state.items[ids[i]];
+      p.appendChild(el("a", { href: "#i-" + ids[i], text: say(dep).title }));
+    }
+    return p;
+  }
+
+  function itemNode(item, shut) {
+    var said = say(item);
+    var who = el("div", { "class": "tags" });
+    for (var w = 0; w < item.who.length; w++) {
+      if (OWNERS[item.who[w]]) who.appendChild(tag(t("who." + item.who[w]), item.who[w]));
+    }
+    if (item.blocking && state.phaseOf[item.id] === "a") who.appendChild(tag(t("tagBlocks"), "blocks"));
+    if (item.optional) who.appendChild(tag(t("tagOptional")));
+    if (item.outside) who.appendChild(tag(t("tagOutsideA") + item.outside, "outside"));
+
+    var verdict = null;
+    if (!shut) {
+      verdict = el("div", { "class": "verdict", role: "group", "aria-label": t("verdictAria") });
+      for (var b = 0; b < BUTTONS.length; b++) {
+        verdict.appendChild(el("button", {
+          type: "button", "data-gl-set": BUTTONS[b], "data-gl-id": item.id,
+          "aria-pressed": "false", text: t("btn." + BUTTONS[b])
+        }));
+      }
+    }
+
+    return el("article", {
+      "class": "item" + (shut ? " item--shut" : ""), id: "i-" + item.id, "data-gl-item": item.id,
+      "data-status": ""
+    }, [
+      who,
+      el("h4", { text: said.title }),
+      said.detail ? el("p", { "class": "detail", text: said.detail }) : null,
+      /* Filled in by paintItem — a row with nothing under it says nothing. */
+      el("span", { "data-gl-deps": item.id }),
+      verdict,
+      shut ? el("p", { "class": "shut", text: t("shutNote") }) : el("label", { "class": "note" }, [
+        el("span", { text: t("noteLabel") }),
+        el("textarea", { "data-gl-note": item.id, rows: "2", placeholder: t("notePlaceholder") })
+      ]),
+      shut ? null : el("p", { "class": "by", "data-gl-by": item.id })
+    ]);
+  }
+
+  /** The panel between a phase-B heading and its list. It is the only thing
+      that says whether the door is open, and it names what is holding it. */
+  function lockPanel(blockers) {
+    if (!blockers.length) {
+      return el("div", { "class": "lock lock--open" }, [
+        el("h3", { text: t("openH") }),
+        el("p", { text: t("openLead") })
+      ]);
+    }
+    var panel = el("div", { "class": "lock" }, [
+      el("h3", { text: t("lockH") }),
+      el("p", { text: blockers.length === 1 ? t("lockLeadOne") : t("lockLeadA") + blockers.length + t("lockLeadB") })
+    ]);
+    var ol = el("ol");
+    /* Six, then a count. A list of twenty above the fold is a list nobody
+       reads — and the twenty are all on the same page, a scroll away. */
+    var shown = Math.min(blockers.length, 6);
+    for (var i = 0; i < shown; i++) {
+      var item = state.items[blockers[i]];
+      ol.appendChild(el("li", null, [
+        el("a", { href: "#i-" + blockers[i], text: say(item).title }),
+        document.createTextNode(" — " + t("st." + statusOf(blockers[i])))
+      ]));
+    }
+    panel.appendChild(ol);
+    if (blockers.length > shown) {
+      panel.appendChild(el("p", { text: t("lockMoreA") + (blockers.length - shown) + t("lockMoreB") }));
+    }
+    return panel;
+  }
+
+  function render() {
+    var host = $("[data-gl-list]");
+    host.textContent = "";
+    state.nodes = {};
+    state.ids = [];
+    state.items = {};
+    state.phaseOf = {};
+
+    var plan = state.plan || { phases: [], areas: [], items: [] };
+    var phases = plan.phases || [], areas = plan.areas || [], items = plan.items || [];
+    var i, j;
+
+    var areaById = {};
+    for (i = 0; i < areas.length; i++) areaById[areas[i].id] = areas[i];
+
+    /* An item whose area the file does not declare still has to appear — the
+       list is replaced wholesale by another hand, and a typo in `area` must
+       cost a misplaced heading, never a launch item nobody ever sees. It gets
+       an «Остальное» heading of its own in the FIRST phase: phase A is the
+       one that is never behind the lock, so an item that fell through here can
+       still be read and still be ticked off. `state.areas` is what both the
+       screen and «Скопировать список» walk, so neither can lose it. */
+    state.areas = areas.slice();
+    var byArea = {};
+    for (i = 0; i < items.length; i++) {
+      var it = items[i];
+      state.ids.push(it.id);
+      state.items[it.id] = it;
+      if (!areaById[it.area]) {
+        areaById[it.area] = {
+          id: it.area, phase: phases[0] ? phases[0].id : "a",
+          name: t("otherArea"), note: "", en: { name: t("otherArea"), note: "" }
+        };
+        state.areas.push(areaById[it.area]);
+      }
+      state.phaseOf[it.id] = areaById[it.area].phase;
+      if (!byArea[it.area]) byArea[it.area] = [];
+      byArea[it.area].push(it);
+    }
+    areas = state.areas;
+
+    var blockers = gate();
+    var shut = blockers.length > 0;
+
+    for (i = 0; i < phases.length; i++) {
+      var phase = phases[i];
+      /* Everything after the first phase is behind the gate. There are two
+         phases today and the rule is about the first one — «all items done in
+         the diipsolution environment» — so a third phase added later would be
+         shut by it too, which is the safe direction. */
+      var isB = i > 0;
+      var said = say(phase);
+      var sec = el("section", {
+        "class": "phase" + (isB && shut ? " phase--locked" : ""),
+        "data-gl-phase": phase.id
+      }, [
+        el("div", { "class": "phase__head" }, [
+          el("h2", { id: "p-" + phase.id, text: said.name }),
+          el("p", { "class": "h2sub", text: said.note })
+        ])
+      ]);
+
+      /* The lock, before anything it locks. */
+      if (isB) sec.appendChild(lockPanel(blockers));
+
+      var body = el("div");
+      var drew = false;
+      for (j = 0; j < areas.length; j++) {
+        if (areas[j].phase !== phase.id) continue;
+        var group = byArea[areas[j].id];
+        if (!group || !group.length) continue;
+        var meta = say(areas[j]);
+        var block = el("section", { "class": "area", "data-gl-area": areas[j].id }, [
+          el("h3", { id: "a-" + areas[j].id, text: meta.name }),
+          meta.note ? el("p", { "class": "h2sub", text: meta.note }) : null
+        ]);
+        for (var k = 0; k < group.length; k++) {
+          var node = itemNode(group[k], isB && shut);
+          state.nodes[group[k].id] = node;
+          block.appendChild(node);
+        }
+        body.appendChild(block);
+        drew = true;
+      }
+
+      if (!drew) { host.appendChild(sec); continue; }
+      if (isB && shut) {
+        /* Readable, not operable, and behind one tap: a shut phase B is not a
+           secret — the owner has to be able to plan it — it just must not look
+           like something he can start. */
+        var peek = el("details", { "class": "peek", open: state.peekOpen ? "" : null }, [
+          el("summary", { text: t("peek") })
+        ]);
+        peek.addEventListener("toggle", function () { state.peekOpen = this.open; });
+        peek.appendChild(body);
+        sec.appendChild(peek);
+      } else {
+        sec.appendChild(body);
+      }
+      host.appendChild(sec);
+    }
+
+    for (i = 0; i < state.ids.length; i++) paintItem(state.ids[i]);
+    paintProgress();
+    applyFilters();
+  }
+
+  function paintItem(id) {
+    var node = state.nodes[id];
+    if (!node) return;
+    var item = state.items[id];
+    var mark = state.states[id];
+    var status = statusOf(id);
+
+    node.setAttribute("data-status", status);
+    var buttons = node.querySelectorAll("[data-gl-set]");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-pressed", buttons[i].getAttribute("data-gl-set") === status ? "true" : "false");
+    }
+    var box = node.querySelector("[data-gl-note]");
+    if (box && document.activeElement !== box) box.value = mark ? mark.note : "";
+
+    var slot = node.querySelector("[data-gl-deps]");
+    if (slot) {
+      slot.textContent = "";
+      var waiting = holdUps(item);
+      if (waiting.length) {
+        /* Done on top of something that is not: the contradiction is shown,
+           not smoothed over. Running the reset before the snapshot exists is
+           exactly this shape, and it is the one mistake on this page that
+           cannot be undone. */
+        slot.appendChild(status === "done"
+          ? depLine(waiting, t("earlyOne"), "deps--early")
+          : depLine(waiting, t("waitOne")));
+      }
+    }
+
+    var by = node.querySelector("[data-gl-by]");
+    if (by) by.textContent = mark ? [t("who." + mark.by) || mark.by || t("someone"), t("st." + mark.status), when(mark.at)].filter(Boolean).join(" · ") : "";
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+
+  function countPhase(phase) {
+    var out = { total: 0, done: 0, doing: 0, blocked: 0, todo: 0 };
+    for (var i = 0; i < state.ids.length; i++) {
+      if (state.phaseOf[state.ids[i]] !== phase) continue;
+      out.total++;
+      out[statusOf(state.ids[i])]++;
+    }
+    return out;
+  }
+
+  function paintProgress() {
+    var node = $("[data-gl-progress]");
+    if (!state.plan) {
+      node.textContent = state.loadFailed ? t("loadFailed") : t("loading");
+      $("[data-gl-track]").style.width = "0";
+      return;
+    }
+    var phases = state.plan.phases || [];
+    var a = countPhase(phases[0] ? phases[0].id : "a");
+    var b = phases[1] ? countPhase(phases[1].id) : null;
+    if (!a.total) { node.textContent = t("empty"); $("[data-gl-track]").style.width = "0"; return; }
+
+    /* The bar counts phase A, because phase A is the only thing anybody can
+       act on until it is finished. Phase B rides along as one number. */
+    var line = t("progA") + a.done + t("progOf") + a.total;
+    if (a.doing) line += t("progDoing") + a.doing;
+    if (a.blocked) line += t("progBlocked") + a.blocked;
+    if (b && b.total) line += t("progB") + b.done + t("progOf") + b.total;
+    node.textContent = line;
+    $("[data-gl-track]").style.width = Math.round((a.done / a.total) * 100) + "%";
+  }
+
+  /** A route error code in words somebody can act on. */
+  function why(code) {
+    if (code === "unknown_item") return t("errUnknownItem");
+    if (code === "too_large") return t("errTooLarge");
+    if (code === "rate_limited") return t("errRateLimited");
+    if (code === "db_unavailable") return t("errDbDown");
+    if (code === OFFLINE) return t("errOffline");
+    return code || t("errNoLink");
+  }
+
+  /** The save line. This is the only place the page says where the marks are,
+      so it never says «saved» about anything that is not. */
+  function paintState() {
+    var node = $("[data-gl-state]");
+    var warn = false, text;
+    if (state.noStore) { text = t("stNoStore"); warn = true; }
+    else if (!state.signedIn) { text = t("stLocalOnly"); }
+    else if (state.stopped) { text = t("stStoppedA") + why(state.error) + t("stStoppedB"); warn = true; }
+    else if (state.busy) { text = t("stBusy"); }
+    else if (state.dirty) { text = state.error ? t("stRetry") : t("stPending"); warn = !!state.error; }
+    else if (state.savedAt) { text = t("stSavedA") + when(state.savedAt.toISOString()) + t("stSavedB"); }
+    else { text = t("stSignedIn"); }
+    if (state.fromCache) text = t("stCache") + text;
+    node.textContent = text;
+    node.className = "bar__state" + (warn ? " bar__state--warn" : "");
+  }
+
+  /* The one predicate the screen and «Скопировать список» both ask — the
+     /test/ page learned this the hard way: a filtered screen and an unfiltered
+     copy meant the filter was lost at the moment of sending. */
+  function isShown(id) {
+    var item = state.items[id];
+    if (!item) return false;
+    var mine = state.filter === "all" || item.who.indexOf(state.filter) >= 0;
+    var open = !state.onlyOpen || statusOf(id) !== "done";
+    var blocks = !state.onlyBlocks || (state.phaseOf[id] === "a" && !!item.blocking && statusOf(id) !== "done");
+    return mine && open && blocks;
+  }
+
+  function applyFilters() {
+    for (var i = 0; i < state.ids.length; i++) {
+      var id = state.ids[i], node = state.nodes[id];
+      if (!node) continue;
+      node.hidden = !isShown(id);
+    }
+    /* An area whose every item is filtered away hides its heading too —
+       otherwise a phone screen fills with headings and nothing under them. */
+    var areas = document.querySelectorAll("[data-gl-area]");
+    for (var s = 0; s < areas.length; s++) {
+      areas[s].hidden = areas[s].querySelectorAll(".item:not([hidden])").length === 0;
+    }
+  }
+
+  /* ---------- marking ---------------------------------------------------- */
+
+  function touch(id, patch) {
+    var prev = state.states[id] || { status: statusOf(id), note: "", at: "", by: "" };
+    state.states[id] = {
+      status: patch.status !== undefined ? patch.status : prev.status,
+      note: patch.note !== undefined ? patch.note : prev.note,
+      at: new Date().toISOString(),
+      by: state.who || prev.by || ""
+    };
+    saveLocal();               // first, always, before the network is asked
+    state.dirty = true;
+    state.rev++;
+    state.stopped = false;     // a new mark deserves a fresh attempt
+    /* A status change can open or shut phase B and can change what other rows
+       are waiting on, so the whole page is redrawn rather than one card. A
+       note cannot, so typing stays cheap. */
+    if (patch.status !== undefined) render(); else { paintItem(id); paintProgress(); }
+    paintState();
+    schedule(patch.note !== undefined ? 1200 : 350);
+  }
+
+  function schedule(delay) {
+    clearTimeout(state.timer);
+    state.timer = setTimeout(syncUp, delay);
+  }
+
+  function syncUp() {
+    if (!state.signedIn || !state.dirty || state.stopped) { paintState(); return; }
+    if (state.busy) return;    // already in the air; `dirty` will reschedule it
+    state.busy = true;
+    var sent = state.rev;
+    paintState();
+
+    fetch(API, {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ states: outgoing() })
+    }).then(function (r) {
+      return r.json().then(function (body) { return { status: r.status, body: body }; },
+                           function () { return { status: r.status, body: null }; });
+    }).then(function (res) {
+      state.busy = false;
+      if (res.status === 200 && res.body && res.body.ok) {
+        state.tries = 0; state.error = ""; state.savedAt = new Date();
+        if (state.rev === sent) state.dirty = false;   // nothing arrived mid-flight
+        adopt(res.body.states);
+        paintState();
+        if (state.dirty) schedule(300);
+        return;
+      }
+      if (res.status === 401) {
+        /* The session ran out mid-way. Nothing is lost — everything is on the
+           device — and the line above now says so. */
+        state.signedIn = false; state.error = ""; state.tries = 0; paintState(); return;
+      }
+      var code = (res.body && res.body.error) || ("http " + res.status);
+      /* Retrying a body the server refuses on its contents just burns battery.
+         Retry what can pass later; stop on what never will. */
+      if (code === "unknown_item" || code === "too_large" || code === "bad_body" || code === "bad_json") {
+        state.stopped = true; state.error = code; paintState(); return;
+      }
+      failed(code);
+    }).catch(function () {
+      state.busy = false;
+      failed(OFFLINE);
+    });
+  }
+
+  function failed(code) {
+    state.error = code;
+    state.tries++;
+    paintState();
+    schedule(Math.min(30000, 2000 * Math.pow(2, Math.min(state.tries, 4))));
+  }
+
+  /** Takes the server's merged map. The note being typed into right now is
+      left alone — nothing is more infuriating than a field that rewrites
+      itself under the thumb. A row whose status moved redraws the page,
+      because Claude ticking something off can be what opens phase B. */
+  function adopt(server) {
+    if (!server) return;
+    var focused = document.activeElement;
+    var typing = focused && focused.getAttribute ? focused.getAttribute("data-gl-note") : null;
+    var changed = [], statusMoved = false;
+    for (var id in server) if (Object.prototype.hasOwnProperty.call(server, id)) {
+      if (id === typing) continue;
+      var mine = state.states[id];
+      if (!mine || server[id].at > mine.at) {
+        if (statusOf(id) !== server[id].status) statusMoved = true;
+        state.states[id] = server[id];
+        changed.push(id);
+      }
+    }
+    if (!changed.length) return;
+    saveLocal();
+    if (statusMoved) { render(); return; }
+    for (var i = 0; i < changed.length; i++) paintItem(changed[i]);
+    paintProgress();
+  }
+
+  /* ---------- loading ---------------------------------------------------- */
+
+  /* localStorage is a text file the phone's owner can edit and a place a
+     half-written value survives a crash. Read it back the way the server reads
+     its own row (src/lib/golive.ts getGoliveStates): whatever is not a mark is
+     not a mark. */
+  function saneStates(raw) {
+    var out = {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+    for (var id in raw) if (Object.prototype.hasOwnProperty.call(raw, id)) {
+      var s = raw[id];
+      if (!s || typeof s !== "object" || !STATUSES[s.status]) continue;
+      out[id] = {
+        status: s.status,
+        note: typeof s.note === "string" ? s.note : "",
+        at: typeof s.at === "string" ? s.at : "",
+        by: typeof s.by === "string" ? s.by : ""
+      };
+    }
+    return out;
+  }
+
+  function boot() {
+    /* The language before anything is drawn, so the first paint is already the
+       right one. */
+    setLang(lsGet(LS_LANG), true);
+    state.states = saneStates(readJson(LS_STATES));
+    var who = lsGet(LS_WHO);
+    if (OWNERS[who]) setWho(who, true);
+
+    fetch(API, { credentials: "same-origin", headers: { accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        if (!body || !body.plan) throw new Error("no plan");
+        state.plan = body.plan;
+        state.signedIn = !!body.signedIn;
+        lsSet(LS_PLAN, JSON.stringify(body.plan));
+        if (body.states) state.states = merge(state.states, body.states);
+        render();
+        /* The whole reason the local copy exists: the moment there is a
+           session, whatever this device collected alone goes up. */
+        if (state.signedIn && Object.keys(state.states).length) { state.dirty = true; schedule(200); }
+        paintState();
+      })
+      .catch(function () {
+        /* No network, or a server that could not answer. The list we saw last
+           time is enough to keep working — and the lock is computed here, so
+           it is still right. */
+        var cached = readJson(LS_PLAN);
+        state.fromCache = true;
+        if (cached) { state.plan = cached; render(); }
+        else { state.loadFailed = true; paintProgress(); }
+        paintState();
+      });
+  }
+
+  /** Did somebody sign into the panel in another tab? Cheap enough to ask
+      whenever the page comes back to the front, throttled so a tab being
+      flipped through does not become traffic. */
+  function recheck() {
+    if (state.signedIn) { if (state.dirty) schedule(200); return; }
+    var now = Date.now();
+    if (now - state.lastCheck < 10000) return;
+    state.lastCheck = now;
+    fetch(API, { credentials: "same-origin", headers: { accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        if (!body || !body.signedIn) return;
+        state.signedIn = true;
+        state.fromCache = false;
+        if (body.states) adopt(body.states);
+        if (Object.keys(state.states).length) { state.dirty = true; schedule(200); }
+        paintState();
+      })
+      .catch(function () { /* still offline; the line already says so */ });
+  }
+
+  /* ---------- report ----------------------------------------------------- */
+
+  function reportText() {
+    var plan = state.plan || { phases: [], areas: [], items: [] };
+    var out = [t("reportHead") + when(new Date().toISOString())];
+    out.push($("[data-gl-progress]").textContent);
+    var blockers = gate();
+    if (blockers.length) {
+      /* Named, not counted. This text is pasted into a chat, and «держат: 4»
+         makes the person reading it ask which four — which is the question the
+         page exists to answer. */
+      out.push(t("reportLocked"));
+      for (var n = 0; n < blockers.length; n++) out.push("  - " + say(state.items[blockers[n]]).title);
+    } else {
+      out.push(t("reportOpen"));
+    }
+    out.push("");
+    var narrowed = state.filter !== "all" || state.onlyOpen || state.onlyBlocks;
+    if (narrowed) out.push(t("reportPart"));
+
+    /* state.areas, not plan.areas: an item under an area the file never
+       declared is drawn under «Остальное» on screen, and a report that quietly
+       left it out would be the filter bug of 18.09 all over again. */
+    var phases = plan.phases || [], areas = state.areas, items = plan.items || [], i, j, k;
+    for (i = 0; i < phases.length; i++) {
+      var head = [];
+      for (j = 0; j < areas.length; j++) {
+        if (areas[j].phase !== phases[i].id) continue;
+        var rows = [];
+        for (k = 0; k < items.length; k++) {
+          if (items[k].area === areas[j].id && isShown(items[k].id)) rows.push(items[k]);
+        }
+        if (!rows.length) continue;
+        head.push("### " + say(areas[j]).name);
+        for (k = 0; k < rows.length; k++) head.push(line(rows[k]));
+        head.push("");
+      }
+      if (!head.length) continue;
+      out.push("## " + say(phases[i]).name);
+      out = out.concat(head);
+    }
+    return out.join("\n");
+  }
+
+  function line(item) {
+    var mark = state.states[item.id];
+    var head = "[" + t("st." + statusOf(item.id)) + "] " + say(item).title;
+    var owners = [];
+    for (var i = 0; i < item.who.length; i++) owners.push(t("who." + item.who[i]) || item.who[i]);
+    if (owners.length) head += " — " + owners.join(" · ");
+    var waiting = holdUps(item);
+    if (waiting.length) {
+      var names = [];
+      for (var j = 0; j < waiting.length; j++) names.push(say(state.items[waiting[j]]).title);
+      head += "\n    " + t("waitOne") + names.join(" · ");
+    }
+    if (mark && mark.note) head += "\n    " + mark.note.replace(/\n/g, "\n    ");
+    return head;
+  }
+
+  /* ---------- events ----------------------------------------------------- */
+
+  function setWho(value, quiet) {
+    state.who = value;
+    var chips = document.querySelectorAll("[data-gl-who]");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute("aria-pressed", chips[i].getAttribute("data-gl-who") === value ? "true" : "false");
+    }
+    if (!quiet) lsSet(LS_WHO, value);
+  }
+
+  /** Everything on the page that is not a list row. */
+  function paintChrome() {
+    var nodes = document.querySelectorAll("[data-t]"), i;
+    for (i = 0; i < nodes.length; i++) nodes[i].textContent = t(nodes[i].getAttribute("data-t"));
+    nodes = document.querySelectorAll("[data-ta]");
+    for (i = 0; i < nodes.length; i++) nodes[i].setAttribute("aria-label", t(nodes[i].getAttribute("data-ta")));
+    fill($("[data-t-lede]"), t("lede1"));
+    fill($("[data-t-howto5]"), t("howto5"));
+    fill($("[data-t-footer]"), t("footer"));
+    document.title = t("title");
+    document.documentElement.setAttribute("lang", state.lang);
+  }
+
+  /**
+   * The language this device reads the list in. Russian by default and after
+   * anything unrecognised. The switch redraws; it never reloads and never
+   * re-fetches, so it works with no network.
+   */
+  function setLang(value, quiet) {
+    state.lang = TEXT[value] ? value : "ru";
+    var chips = document.querySelectorAll("[data-gl-lang]");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute("aria-pressed", chips[i].getAttribute("data-gl-lang") === state.lang ? "true" : "false");
+    }
+    if (!quiet) lsSet(LS_LANG, state.lang);
+    paintChrome();
+    if (state.plan) render(); else paintProgress();
+    if (state.plan || state.loadFailed) paintState();
+  }
+
+  document.addEventListener("click", function (e) {
+    /* `hit`, not `t`: `t()` is the translation lookup, and a local called `t`
+       here would shadow it for the whole handler. */
+    var hit = e.target;
+    if (!hit || !hit.closest) return;
+
+    var set = hit.closest("[data-gl-set]");
+    if (set) {
+      touch(set.getAttribute("data-gl-id"), { status: set.getAttribute("data-gl-set") });
+      return;
+    }
+
+    var who = hit.closest("[data-gl-who]");
+    if (who) { setWho(who.getAttribute("data-gl-who")); return; }
+
+    var lang = hit.closest("[data-gl-lang]");
+    if (lang) { setLang(lang.getAttribute("data-gl-lang")); return; }
+
+    var filter = hit.closest("[data-gl-filter]");
+    if (filter) {
+      state.filter = filter.getAttribute("data-gl-filter");
+      var chips = document.querySelectorAll("[data-gl-filter]");
+      for (var i = 0; i < chips.length; i++) {
+        chips[i].setAttribute("aria-pressed", chips[i] === filter ? "true" : "false");
+      }
+      applyFilters();
+      return;
+    }
+
+    var only = hit.closest("[data-gl-only]");
+    if (only) {
+      state.onlyOpen = !state.onlyOpen;
+      only.setAttribute("aria-pressed", state.onlyOpen ? "true" : "false");
+      applyFilters();
+      return;
+    }
+
+    var blocks = hit.closest("[data-gl-blocks]");
+    if (blocks) {
+      state.onlyBlocks = !state.onlyBlocks;
+      blocks.setAttribute("aria-pressed", state.onlyBlocks ? "true" : "false");
+      applyFilters();
+      return;
+    }
+
+    if (hit.closest("[data-gl-sync]")) {
+      state.stopped = false; state.tries = 0;
+      if (!state.signedIn) { state.lastCheck = 0; recheck(); } else { state.dirty = true; schedule(0); }
+      return;
+    }
+
+    if (hit.closest("[data-gl-copy]")) {
+      var text = reportText();
+      var box = $("[data-gl-report]");
+      box.hidden = false;
+      box.value = text;
+      var said = $("[data-gl-copied]");
+      var done = function () { said.hidden = false; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { box.focus(); box.select(); });
+      } else { box.focus(); box.select(); }
+      return;
+    }
+  });
+
+  document.addEventListener("input", function (e) {
+    var box = e.target;
+    if (!box || !box.getAttribute) return;
+    var id = box.getAttribute("data-gl-note");
+    if (!id) return;
+    touch(id, { note: box.value });
+  });
+
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) recheck(); });
+  window.addEventListener("focus", recheck);
+
+  boot();
+})();
+</script>
+
+</body>
+</html>

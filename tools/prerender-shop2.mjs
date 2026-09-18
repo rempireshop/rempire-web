@@ -61,7 +61,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
-import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+import { coverImgStyle, fetchPublishedPosts, focusCrop, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
@@ -696,10 +696,20 @@ async function drawCard(file, sources) {
    composite — it is downloaded once and cropped to the card size instead.
    A root-relative cover (the sample posts use a catalogue photo under
    /shop/img/) is read off disk instead: fetch() has no origin to resolve it
-   against in a build script. "attention" picks the most detailed region
-   rather than a plain centre crop, which matters for a cover shot at an odd
-   aspect ratio. */
-async function drawBlogCard(file, coverUrl) {
+   against in a build script.
+
+   WHICH PART OF IT. The post's own point when it has one (`cover_focus`,
+   src/lib/blog-cover.mjs), worked out as an extract() — sharp's `position`
+   takes a gravity or one of its strategies, never «62% across». Without one,
+   "attention", exactly as before: it picks the most detailed region rather
+   than a plain centre crop, which is better than nothing for a cover shot at
+   an odd aspect ratio and is what every card on disk was drawn with.
+
+   This card is 1200×630 and the one drawn at request time
+   (src/lib/og-card.ts) fits the photo into a 518×518 square beside the
+   title — two different shapes for the same cover, which is exactly why the
+   owner is given a point and not a rectangle. */
+async function drawBlogCard(file, coverUrl, coverFocus) {
   let buf;
   if (coverUrl.startsWith("/")) {
     buf = await readFile(path.join(PUB, coverUrl.replace(/^\/+/, "").split("?")[0]));
@@ -709,7 +719,17 @@ async function drawBlogCard(file, coverUrl) {
     buf = Buffer.from(await res.arrayBuffer());
   }
   await mkdir(path.dirname(file), { recursive: true });
-  await sharp(buf).resize(OG_W, OG_H, { fit: "cover", position: "attention" }).jpeg({ quality: 84 }).toFile(file);
+  let pipe = sharp(buf).rotate();
+  if (coverFocus) {
+    // metadata() reads the file, which a phone stores sideways with the turn
+    // in EXIF; 5–8 are the quarter turns, and the point is a percentage of
+    // the picture as a reader sees it (same reasoning as src/lib/og-card.ts)
+    const meta = await sharp(buf).metadata();
+    const turned = (meta.orientation || 0) >= 5;
+    const rect = focusCrop(turned ? meta.height : meta.width, turned ? meta.width : meta.height, OG_W, OG_H, coverFocus);
+    if (rect) pipe = pipe.extract(rect);
+  }
+  await pipe.resize(OG_W, OG_H, { fit: "cover", position: "attention" }).jpeg({ quality: 84 }).toFile(file);
   cardsMade++;
 }
 
@@ -745,7 +765,7 @@ if (sharp) {
     if (!post.coverUrl) continue;
     const f = path.join(OGDIR, "blog-" + post.slug + ".jpg");
     if (existsSync(f)) continue;
-    try { await drawBlogCard(f, post.coverUrl); }
+    try { await drawBlogCard(f, post.coverUrl, post.coverFocus); }
     catch (e) { console.warn("! og card for blog/" + post.slug + ": " + e.message); }
   }
 }
@@ -1391,6 +1411,14 @@ function giftPage(lang) {
    moment it is published, redeploy or not. */
 
 const dmy = iso => String(iso || "").slice(0, 10).split("-").reverse().join(".");
+/* Which part of the cover this frame keeps — the post's own point, read by
+   src/lib/blog-cover.mjs, which the request-time page (src/lib/blog-page.ts)
+   reads with the same call. Nothing written at all for a cover nobody has
+   chosen for, so every article written before this keeps the bytes it has. */
+const coverStyle = focus => {
+  const css = coverImgStyle(focus);
+  return css ? ' style="' + css + '"' : "";
+};
 
 function blogTile(post, seg, code, t, i) {
   const title = pickLang(post.title, code) || post.slug;
@@ -1398,7 +1426,7 @@ function blogTile(post, seg, code, t, i) {
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
     (post.coverUrl
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="400" height="400">'
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="400" height="400"' + coverStyle(post.coverFocus) + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
@@ -1423,7 +1451,8 @@ function blogJsonScript(id, obj) {
 function blogListItem(p, code) {
   return {
     slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
-    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), tags: p.tags, publishedAt: p.publishedAt
+    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
+    tags: p.tags, publishedAt: p.publishedAt
   };
 }
 const blogStamp = post => Date.parse(post.updatedAt || post.publishedAt || "") || 0;
@@ -1531,7 +1560,7 @@ function blogPostPage(post, lang) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<article class="sec blog__post blog__read">' +
       (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630">'
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
@@ -1548,7 +1577,7 @@ function blogPostPage(post, lang) {
     langNav(seg, rest, t) +
     blogJsonScript("blogpost", { lang: code, stamp: blogStamp(post), post: {
       slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
-      tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
+      coverFocus: post.coverFocus, tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
       author: post.author, publishedAt: post.publishedAt
     } }) +
     "</div>";

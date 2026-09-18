@@ -13,6 +13,7 @@ import {
   setOrderStatus,
   upsertOverride,
 } from "@/lib/orders";
+import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -20,7 +21,12 @@ const CATALOGUE = catalogueMin as Min[];
 const VARIANTS = variants as Record<string, { sizes: string[]; prices: number[] }>;
 
 const plain = CATALOGUE.find((p) => p.s === "in" && !VARIANTS[p.id])!;
-const sized = CATALOGUE.find((p) => p.s === "in" && VARIANTS[p.id])!;
+/* Three volumes, because that is what the tests below buy: `variant: 2` and
+   `v.sizes[2]`. "Has an entry in the variants table" stopped meaning "has
+   more than one volume" on 18.09.2026, when the 29 products sold in a single
+   named size joined it — before that this line happened to pick a three-rung
+   shampoo and would now be one index from the end of a one-rung ladder. */
+const sized = CATALOGUE.find((p) => p.s === "in" && (VARIANTS[p.id]?.sizes.length ?? 0) > 2)!;
 const outStock = CATALOGUE.find((p) => p.s === "out")!;
 
 const customer = { name: "Мария Тамм", email: "Maria@Example.COM", phone: "+372 5555 5555" };
@@ -140,12 +146,20 @@ describe("createOrder", () => {
     const courier = await createOrder(order({ items: [{ id: plain.id, qty: 1 }], shipping: { method: "courier", country: "EE" } }));
     const abroad = await createOrder(order({ items: [{ id: plain.id, qty: 1 }], shipping: { method: "courier", country: "LV" } }));
     const pickup = await createOrder(order({ items: [{ id: plain.id, qty: 1 }], shipping: { method: "pickup", country: "EE" } }));
-    const free = await createOrder(order({ items: [{ id: plain.id, qty: 3 }], shipping: { method: "parcel", country: "EE" } }));
+    /* Counted from the threshold, not guessed at. `plain` is whichever
+       product the catalogue happens to list first without a size ladder, and
+       a hard-coded «3 of it» was a 84 € basket until 18.09.2026 and a 45 €
+       one the moment the variants table gained the 29 one-size products and
+       moved the pick to a cheaper wax — which is a free-shipping test that
+       stops testing free shipping without saying so. */
+    const freeFrom = DEFAULT_SHIPPING_RULES.freeFrom ?? 59;
+    const freeQty = Math.ceil(freeFrom / plain.p);
+    const free = await createOrder(order({ items: [{ id: plain.id, qty: freeQty }], shipping: { method: "parcel", country: "EE" } }));
     expect(cheap.shippingPrice).toBe(5.47);
     expect(courier.shippingPrice).toBe(10.84);
     expect(abroad.shippingPrice).toBe(9.9);
     expect(pickup.shippingPrice).toBe(0);
-    expect(free.subtotal).toBeGreaterThanOrEqual(59);
+    expect(free.subtotal).toBeGreaterThanOrEqual(freeFrom);
     expect(free.shippingPrice).toBe(0);
   });
 

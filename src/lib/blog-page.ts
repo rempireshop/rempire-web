@@ -30,6 +30,7 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
+import { coverImgStyle } from "@/lib/blog-cover.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
 import { getOverrides } from "@/lib/orders";
@@ -81,6 +82,16 @@ export function postsNotPrerendered<P extends { slug: string }>(posts: P[], prer
 /* ---------- pieces shared by the two pages ------------------------------ */
 
 const dmy = (iso: string | null) => String(iso || "").slice(0, 10).split("-").reverse().join(".");
+/** ` style="object-fit:cover;object-position:…"`, or nothing at all when the
+    owner never chose — src/lib/blog-cover.mjs owns the words. Written on the
+    element rather than into a class because it is one photo's setting, not a
+    rule: there is no stylesheet for «this article's cover sits a third of the
+    way down». It beats `#prerender .pre__img { object-fit: contain }`, which
+    is an id selector and outranks every class this page could reach for. */
+const coverStyle = (focus: string | null) => {
+  const css = coverImgStyle(focus);
+  return css ? ' style="' + css + '"' : "";
+};
 const stampOf = (p: { updatedAt?: string | null; publishedAt?: string | null }) =>
   Date.parse(p.updatedAt || p.publishedAt || "") || 0;
 
@@ -92,7 +103,8 @@ function jsonScript(id: string, obj: unknown): string {
 function listItem(p: PostSummary, code: string) {
   return {
     slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
-    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), tags: p.tags, publishedAt: p.publishedAt,
+    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
+    tags: p.tags, publishedAt: p.publishedAt,
   };
 }
 
@@ -111,7 +123,7 @@ function tile(post: PostSummary, seg: string, code: string): string {
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
     (post.coverUrl
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="400" height="400">'
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="400" height="400"' + coverStyle(post.coverFocus) + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
@@ -184,7 +196,7 @@ export function renderBlogPostPage(
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<article class="sec blog__post blog__read">' +
       (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630">'
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
@@ -203,6 +215,7 @@ export function renderBlogPostPage(
     // /api/blog/ answer, so hydrateBlog() paints the article at once
     jsonScript("blogpost", { lang: code, stamp: stampOf(post), post: {
       slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
+      coverFocus: post.coverFocus,
       tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
       author: post.author, publishedAt: post.publishedAt,
     } }) +
@@ -356,7 +369,15 @@ async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
     if (!m) continue;
     const o = overrides[id];
     if (o?.hidden) continue;
-    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : (VARIANTS[id]?.prices ?? []);
+    /* The file's ladder only speaks for the price where it actually spreads.
+       Since 18.09.2026 catalogue.variants.json also carries the 29 products
+       sold in ONE named size, whose single price is catalogue.min.json's own
+       `p` — taking it here would quietly out-vote the owner's «Цена» in
+       «Товары» and put the pre-override number under an article. The owner's
+       own saved ladder still decides outright: every rung of it carries the
+       price he typed (migration 147). */
+    const fileLadder = VARIANTS[id]?.prices ?? [];
+    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : fileLadder.length > 1 ? fileLadder : [];
     const base = o?.price ?? m.p;
     const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
     out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });

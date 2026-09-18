@@ -1,0 +1,45 @@
+-- 195_blog_deleted.sql — «Удалить статью» actually removes it (migration range 190–199)
+--
+-- «blog articles cannot be deleted» — Renat, 18.09.2026. He is right, and the
+-- button is not broken: DELETE /api/admin/blog reached deletePost() in
+-- src/lib/blog.ts, which set status back to 'draft' and forgot published_at.
+-- The row stayed, listAllPosts() had no filter, and «Блог» answered «Статья
+-- удалена ✓» with the article still in the list — now wearing «черновик»,
+-- which is exactly what «Снять с публикации» does one button higher. Two
+-- controls, one outcome, and no way to get rid of anything.
+--
+-- WHY NOT `delete from posts`. The slug. 070_blog.sql promises that a slug is
+-- never reused for a different article once it has been public, so an old link
+-- never lands on someone else's text — and uniqueSlug() keeps that promise by
+-- asking whether any row holds the slug. A hard delete frees the slug, and the
+-- next article called «Уход за бородой зимой» takes it, so a link shared in
+-- January opens a different article in March. It would also throw away the text
+-- itself with nothing to undo it, from a red button on a phone.
+--
+-- So: the row stays, the slug stays reserved, and the article is gone from
+-- every list and every page. deleted_at is the one door — every read in
+-- src/lib/blog.ts carries `deleted_at is null` (the admin list, both lookups,
+-- the public list and page, publish and unpublish), and slugExists() is the
+-- one query that deliberately does NOT, because that is what keeps the slug.
+--
+-- NULLABLE, NO DEFAULT: null is every article that exists today and means
+-- «not deleted», which is what they all are.
+--
+-- The prerendered copy of a published article stays on disk until the next
+-- deploy — tools/prerender-shop2.mjs wrote /shop2/{,et/,en/}blog/<slug>/
+-- index.html at build time and Vercel's static layer answers it before any
+-- route runs (src/lib/blog-page.ts says why). The API 404s at once, so the
+-- shop repaints the page as «статья не найдена» and the list loses the tile;
+-- a crawler and a reader without scripts see the old HTML until the build runs
+-- again. That is the same deferred gap an unpublish already has and is not
+-- what this migration is about.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite (the test suite).
+
+alter table posts add column if not exists deleted_at timestamptz;
+
+-- The admin list — every post that still exists, newest edited first. The
+-- older posts_admin_idx stays: it serves the same order for the whole table.
+create index if not exists posts_live_idx on posts (updated_at desc) where deleted_at is null;

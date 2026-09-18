@@ -588,6 +588,28 @@ behaviour this layer inherited.
 6. Redirects from the old Shopify URLs: **done, 07.09.2026** — see below and
    `docs/audit/2026-09-07-seo.md`. Nothing to do at the switch beyond the
    `curl` sweep in that document's last section.
+7. **Check one product's offer against the shelf, on the live site.** The
+   availability a crawler reads is written by `setHead()` after the script
+   runs, so `curl` cannot see it and neither can a static check — this is the
+   one thing in here that has to be looked at in a browser:
+   - Pick a product the panel shows as sold out, open its page, and in the
+     console run `JSON.parse(document.getElementById("ldjson").textContent)
+     .offers.availability`. It must end in `OutOfStock`, and the page must be
+     showing «нет в наличии» with «Сообщить о наличии» rather than a buy
+     button. Then do the same for one that is on the shelf and expect
+     `InStock`.
+   - Paste that product's URL into Google's Rich Results Test, which renders
+     the page the way Googlebot does. Expect one `Product` with an offer and
+     one `BreadcrumbList`, and **no second `Product`** — two would mean the
+     prerendered block and the rewritten one are both present, which is what
+     `id="ldjson"` exists to prevent.
+   - Search Console → Shopping / Merchant listings, a week later: an
+     "availability mismatch" warning there means the shelf and the head have
+     drifted apart again. Nothing else reports it.
+
+   Note that the Google Shopping **feed** is a separate, hand-run artifact and
+   is not covered by any of this — see the first of the gaps below before
+   submitting it.
 
 ## The old Shopify addresses
 
@@ -630,8 +652,123 @@ walks all of them and asserts this code does better;
 `/products/x/` before any middleware runs, so an old link is a 308 → 301 chain.
 Every `/shop/…` redirect in `next.config.ts` has always behaved this way.
 
+## What the `Offer` may claim — availability
+
+An offer that says `InStock` about something the page will not sell is the one
+piece of structured data that is worse than none: Google drops the item from
+the merchant surfaces, and a shopper who clicks an "in stock" result onto a
+page with no buy button bounces. So the availability in the `Product` block is
+held to one rule — **it says `OutOfStock` exactly when the shopper cannot buy
+the product in any size** — and that rule is decided in three places that have
+to keep agreeing.
+
+| layer | file | what it decides |
+|---|---|---|
+| the shelf | `src/lib/inventory.ts` `stockStates()` | `byProduct` (the product's word) and `byVariant` (each size's), from one query |
+| the feed | `src/lib/orders.ts` `getOverrides()` | merges those with the owner's manual «Наличие» and publishes `stock` + `stockByVariant` on `/api/overrides/` |
+| the head | `public/shop2/app.js` `soldOut()` → `setHead()` | the `availability` in `#ldjson`, and the stock words in the meta description |
+
+**The shelf already does most of the work, and this is the part that is easy to
+get wrong twice.** `stockStates()` sets a product's word to `out` only when
+every *counted* size is out **and** those sizes cover the whole ladder
+(`inventory.ts`, the `allOut` loop) — with `!ladder ||` in front of the
+coverage test, so a product whose ladder nobody can vouch for still reads
+`out`. That means a one-size product counted to zero normally arrives at the
+browser with `stock: "out"` already, and `p.stock === "out"` was a *nearly*
+correct rule for the offer all along. Two things make it only nearly:
+
+- a product carrying **more than one shelf row for the same bottle** — the
+  «One bottle, two rows» state `db/migrations/194_one_size_stock_rows.sql`
+  exists to clean up — has one row out and one not, so `byProduct` says `in`
+  while `stockByVariant` says the size is gone. The page prints «нет в
+  наличии» (`soloGone` in `screenProduct()`); the head used to print
+  `InStock`;
+- the head and the page were reading **different facts about the same
+  bottle**, so nothing stopped them drifting apart again.
+
+`soldOut()` is the page's own rule, moved where the head can use it: the
+owner's «Наличие», or every rung of the ladder counted to zero. It is
+deliberately the same three-way `screenProduct()` makes before it swaps the
+buy row for «Сообщить о наличии».
+
+**Absent is not empty.** A size nobody has counted is missing from
+`stockByVariant`, and `soldOut()` returns false for it — the 17.09.2026
+decision, and the failure mode that would cost the most if it were reversed:
+reading absence as «out» would publish `OutOfStock` for most of the catalogue,
+and nobody would notice until the impressions went.
+`tests/size-stock-storefront.test.ts` pins both directions.
+
+**The static file is a build-time snapshot; the rendered DOM is the truth.**
+`tools/prerender-shop2.mjs` has no shelf to read — it writes the catalogue's
+own `stock` into the page it saves. `setHead()` rewrites `#ldjson` in place on
+every product render from the live feed, and Googlebot indexes the rendered
+DOM, so the corrected offer is the one that is read. The request-time pages
+(`src/lib/product-page.ts`, for the owner's `c-…` products) have the feed in
+front of them and apply the same ladder rule directly.
+
+What must not break: **`#ldjson` keeps its id.** `setHead()` rewrites that one
+element and *removes* it on every screen that is not a catalogue product, so a
+block that carries `id="ldjson"` anywhere else is deleted on boot, and a
+product block that does not carry it is never corrected. `check-prerender.mjs`
+asserts the split both ways.
+
+Two places deliberately still read the product word alone:
+
+- `src/app/sitemap-products.xml/route.ts` sets `priority` 0.4 for an out
+  product and 0.7 otherwise from `Override.stock`. `priority` is advisory and
+  Google ignores it, and reading the ladder here would mean a second data
+  dependency on the sitemap's hottest path for a hint nobody consumes.
+- `tools/build-merchant-feed.mjs` — see the gaps below; it is a hand-run
+  snapshot and is not wired into `prebuild` at all.
+
 ## Known gaps
 
+- **The Google Shopping feed is a hand-run snapshot pinned to staging.**
+  `tools/build-merchant-feed.mjs` hardcodes `BASE =
+  https://rempireshop.diipsolutions.eu`, reads `stock` off `catalogue2.js`
+  alone (no `product_overrides`, no shelf, no per-size stock) and is **not in
+  `prebuild`** — so `public/feed/google-shopping.xml` is only ever as fresh as
+  the last time somebody ran it by hand. Submitting it as it stands would
+  point every `g:link` at a `noindex` staging host, and its `g:availability`
+  is the one field Merchant Center suspends accounts over. Before it is
+  submitted it needs the live base and a decision about where its stock comes
+  from; `docs/merchant-feed.md` has the submission steps.
+- **The prerendered blog pages build «Товары из статьи» from the build-time
+  catalogue only** (`tools/prerender-shop2.mjs`, the `featured` list in the
+  blog post builder): no `product_overrides`, so the prices in a static
+  article are as old as the deploy, and there is no `hidden` filter, so a
+  static article can link to a `/p/<id>/` that now answers 404 `noindex`. The
+  request-time page does both correctly (`src/lib/blog-page.ts` `shelfProducts()`,
+  17.09.2026) — and the static copy is the one Vercel's static layer serves in
+  preference to the route, so the fixed path is the one that rarely runs.
+- **Product cards the assistant writes into an article have no `href`.**
+  `src/lib/ai-prompts.ts` tells the model to emit `<a data-product="ID"></a>`
+  with no href and no text; `src/lib/blog-html.mjs` `openTag()` only keeps an
+  href that was already there. Such a card is an empty anchor to a crawler and
+  to a reader with no JavaScript — only `blogProductHTML()` in `app.js` fills
+  it in. Cards inserted with the editor's «Товар» button carry a real href and
+  `data-price="live"` and are fine. The blog is the shop's only organic
+  surface that is not competing on brand name, and these are its internal
+  links to the catalogue.
+- **`og:type` is `article` on a post page, but no `article:*` meta is
+  emitted** — no `article:published_time`, `article:modified_time`,
+  `article:author`, `article:tag`. `headBlock()` in `src/lib/seo-head.mjs`
+  writes a fixed tag set with no hook for per-type extras; the values are all
+  in hand at the call site. The `BlogPosting` JSON-LD carries the same facts,
+  which is what Google reads, so this is a link-preview nicety rather than a
+  ranking one.
+- **A Markdown post body can publish a second `<h1>`.** The legal pages demote
+  their headings and the blog body does not: an HTML body is safe because
+  `sanitizeHtml` maps `h1 → h2`, but `renderBlock()` in `src/lib/blog-html.mjs`
+  emits `<h1>` for a `# Heading` line, and `renderPostBody()` takes the
+  Markdown branch for any body that does not open with a block tag. No post in
+  the repository today is shaped that way — it is an open path, not a current
+  defect.
+- **Three merch products share one meta description in each language.** The
+  «Three Elements» t-shirts (fire / water / air) have identical body copy, and
+  `descFrom()` cuts the description from that copy without the product's own
+  name, so the three pages are indistinguishable to a search engine. Fixing it
+  is a content decision — see the note at the end of this section.
 - **Two fields are missing from every `Offer` on purpose**, and both would put
   an extra line under a search result. `hasMerchantReturnPolicy` («Free 30-day
   returns») cannot be published while the refund text promises a 30-day window
@@ -690,6 +827,36 @@ Every `/shop/…` redirect in `next.config.ts` has always behaved this way.
   `screenContact()`, instead of from the 2019 Shopify page in `legal.js` (which
   carried a stylesheet link to Shopify's CDN and a contact form that goes
   nowhere). The other four info slugs are still the policy texts.
+
+### Meta descriptions: what is generated and what is a decision
+
+Worth stating plainly, because it gets asked every time: **no page is missing a
+meta description.** All 813 carry one, none is empty, and none exceeds 160
+characters once HTML entities are decoded — which is how `check-prerender.mjs`
+measures them, and the only honest way to, since `&amp;` is one character to a
+reader and five in the file. The same goes for titles at 60. A sweep of the
+generated pages on 18.09.2026 found **three** duplicate descriptions in the
+whole catalogue (the «Three Elements» t-shirts) and no duplicate at all across
+the other 217 products.
+
+So the thing that would look like the obvious win — "write 220 unique
+descriptions" — is not a gap to be closed by generating text. Where a
+description is weak it is because **the product's own copy is weak**, and
+inventing 220 replacements in code would ship filler that reads like filler and
+that nobody has approved. If the owner wants them rewritten, the rule to agree
+on first is:
+
+> Lead with what the product *is* and who it is for, in the shopper's own
+> words, then the differentiator, then the price and stock tail the builder
+> already appends. Never repeat the title. Never a sentence that would be true
+> of any product in the same section.
+
+That is a content brief, not a code change. The machinery to carry it already
+exists and needs no work: the product editor's «Google» tab holds a
+title/description pair **per language** (below), the assistant can propose one
+with `set_seo`, and a pair somebody wrote is used exactly as written with
+nothing appended. The three t-shirts are where to start, because they are the
+only case where the shop actively tells Google that three pages are the same.
 
 ## Title and description per language (admin override)
 

@@ -17,6 +17,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { LOGIN_DELAY_MAX_MS, resetLoginDelays, resetRateLimits, setLoginSleeper } from "@/lib/auth";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
+import { PLAN as GOLIVE_PLAN } from "@/lib/golive";
 import { PLAN as TEST_PLAN } from "@/lib/testplan";
 import { setupDb, teardownDb } from "./helpers";
 import {
@@ -73,6 +74,8 @@ const BODIES = hostileBodies();
 const PAGINATION = ["?limit=0", "?limit=-1", "?limit=1e9", "?limit=abc", "?limit=1&limit=2", "?limit=" + "9".repeat(400)];
 /** An id the checklist really has — see the /api/testplan/ rows below. */
 const TESTPLAN_ITEM = TEST_PLAN.items[0].id;
+/** An id the go-live list really has — see the /api/golive/ rows below. */
+const GOLIVE_ITEM = GOLIVE_PLAN.items[0].id;
 
 function routes(): RouteCase[] {
   const admin = { cookie: adminCookieHeader() };
@@ -128,6 +131,10 @@ function routes(): RouteCase[] {
        wholesale, and a hardcoded id here would quietly stop fuzzing the
        validation and start fuzzing the "unknown id" branch only. */
     { name: "GET /api/testplan/", path: "/api/testplan/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route") },
+    /* The go-live list at /golive/, the same shape: GET is public (the owner
+       has to see what is left before he signs in anywhere), PUT is the admin
+       half and is listed with the locked routes below. */
+    { name: "GET /api/golive/", path: "/api/golive/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/golive/route") },
     // search: the storefront's last-resort «what does this phrase mean» call.
     // With no OPENAI_API_KEY (which is the suite) it never reaches the model —
     // the body is still read and checked first, so this walks the validation.
@@ -189,6 +196,10 @@ function routes(): RouteCase[] {
     /* The answers half of /api/testplan/ — the same route as the public GET
        above, so it is listed here for its lock rather than for its path. */
     { name: "PUT /api/testplan/", path: "/api/testplan/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route"), auth: "admin", req: admin, body: { answers: { [TESTPLAN_ITEM]: { status: "ok", note: "работает, но кнопка мелкая", at: "2026-09-08T10:00:00.000Z", by: "renat" } } } },
+    /* The marks half of /api/golive/ — the same route as the public GET above,
+       so it is listed here for its lock rather than for its path. This is also
+       the call Claude makes from a terminal to tick an item off. */
+    { name: "PUT /api/golive/", path: "/api/golive/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/golive/route"), auth: "admin", req: admin, body: { states: { [GOLIVE_ITEM]: { status: "done", note: "снимок есть, проверил", at: "2026-09-17T10:00:00.000Z", by: "claude" } } } },
     { name: "GET /api/admin/bundles/", path: "/api/admin/bundles/", method: "GET", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin },
     { deep: true, name: "POST /api/admin/bundles/", path: "/api/admin/bundles/", method: "POST", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "fuzz-set", cat: "beard", title: { RU: "Фазз", ET: "F", EN: "F" }, desc: { RU: "о" }, items: [{ productId: PRODUCT.id, variant: 0, qty: 1 }, { productId: PRODUCT_2.id, variant: 0, qty: 1 }], price: 1, image: null, active: true, sort: 10 } },
     { name: "PATCH /api/admin/bundles/", path: "/api/admin/bundles/", method: "PATCH", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "beard-start", active: false, order: ["beard-start"] } },
@@ -226,6 +237,10 @@ function routes(): RouteCase[] {
     { name: "POST /api/admin/flows/run/", path: "/api/admin/flows/run/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/flows/run/route"), auth: "admin", req: admin, body: { flow: "abandoned" } },
     { name: "GET /api/admin/reports/orders/", path: "/api/admin/reports/orders/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/reports/orders/route"), auth: "admin", req: admin, jsonBody: false, queries: ["?month=2026-09", "?month=nope", "?from=2026-01-01&to=2026-12-31&format=csv", "?month=2026-09&format=xlsx", "?month=2026-09&format=exe", "?from=2026-12-31&to=2026-01-01", "?month=9999-12", "?month=0000-00", "?month=0000-01", "?month=1000-01", "?from=0000-01-01&to=9999-12-31", "?from=2026-02-30&to=2026-02-31"] },
     { name: "GET /api/admin/shipping/rates/", path: "/api/admin/shipping/rates/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/shipping/rates/route"), auth: "admin", req: admin, queries: ["?country=EE", "?country=zz", "?country="] },
+    /* «Что Montonio умеет прямо сейчас». No keys in the fuzz environment, so
+       every shape answers the `configured: false` body without touching the
+       network — which is exactly the state this route must survive. */
+    { name: "GET /api/admin/montonio/", path: "/api/admin/montonio/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/montonio/route"), auth: "admin", req: admin },
     { name: "POST /api/admin/shipments/", path: "/api/admin/shipments/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/shipments/route"), auth: "admin", req: admin, body: { orderId: F.paidOrderId, weight: 1, carrier: "omniva" } },
     { name: "GET /api/admin/shipments/[id]/label/", path: "/api/admin/shipments/x/label/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/shipments/[id]/label/route"), auth: "admin", req: admin, params: { id: "" }, jsonBody: false },
     { deep: true, name: "POST /api/admin/pos-orders/", path: "/api/admin/pos-orders/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/pos-orders/route"), auth: "admin", req: admin, body: { items: [{ id: PRODUCT.id, variant: null, qty: 1 }], customer: { name: "Гость", email: "", phone: "" }, payment: { method: "cash" }, discountPercent: 10 } },

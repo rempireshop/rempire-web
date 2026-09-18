@@ -129,7 +129,13 @@ export function renderCustomProductPage(
   row: CustomProduct,
   lang: Lang,
   shell: string,
-  opts: { base: string; robots: string; override?: { price?: number | null; stock?: string | null } | null },
+  opts: {
+    base: string; robots: string;
+    override?: {
+      price?: number | null; stock?: string | null;
+      stockByVariant?: Record<string, string> | null;
+    } | null;
+  },
 ): string {
   const { base, robots } = opts;
   const code = lang.code;
@@ -140,7 +146,16 @@ export function renderCustomProductPage(
   const body = pickDescription(row.description, code) ?? pickDescription(row.description, "RU") ?? "";
   const photos = cp.gallery ?? [];
   const o = opts.override;
-  const stock: Stock = o?.stock === "out" || o?.stock === "low" ? o.stock : "in";
+  /* Per-size stock decides this too, exactly as soldOut() does in app.js: a
+     ladder counted to zero all the way down is a product nobody can buy, and
+     the `Product` offer below must not say InStock about it. An unmapped size
+     is not an empty one (the 17.09.2026 decision), so a product with no map
+     keeps the owner's own word. A `c-…` product usually has one row keyed by
+     "" — the key an order line carries (normVariant in src/lib/inventory.ts). */
+  const ladder = cp.sizes && cp.sizes.length ? cp.sizes : [""];
+  const byVariant = o?.stockByVariant;
+  const ladderOut = !!byVariant && ladder.every((s) => byVariant[String(s).trim()] === "out");
+  const stock: Stock = o?.stock === "out" || ladderOut ? "out" : o?.stock === "low" ? "low" : "in";
   const price = o?.price != null && Number.isFinite(o.price) ? o.price : cp.price;
 
   const spec = productSpec({

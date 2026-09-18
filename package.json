@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "migrate": "node tools/migrate.mjs",
     "seed:stock": "node tools/seed-stock.mjs",
+    "delivery:pricing": "node tools/delivery-pricing.mjs",
     "build:variants": "node tools/build-catalogue-variants.mjs",
     "build:bundles": "node tools/build-bundles.mjs",
     "test": "vitest run",

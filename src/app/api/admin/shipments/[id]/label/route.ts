@@ -26,6 +26,7 @@
  * has no page to spare.
  */
 import { requireAdmin } from "@/lib/auth";
+import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber } from "@/lib/orders";
 import { labelSlipFor, normaliseLabelPdf } from "@/lib/shipping/label-pdf";
 import {
@@ -59,6 +60,20 @@ export async function GET(req: Request, ctx: Ctx) {
 
   const shipment = shipmentOnOrder(order);
   if (!shipment) return Response.json({ ok: false, error: "no_shipment" }, { status: 404 });
+
+  /* A parcel the carrier refused has no label and never will: `POST
+     /label-files` on an unregistered shipment fails somewhere inside
+     Montonio, and the owner was shown «Не удалось» with nothing behind it.
+     Refused here instead, with the same words «Создать этикетку» gives — the
+     fix is a corrected receiver sent to Montonio (`PATCH /shipments/{id}`),
+     not another press. docs/montonio-untested.md § S1/S8. */
+  if (String(shipment.status ?? "").trim().toLowerCase() === "registrationfailed") {
+    const reading = shipmentRegistrationFailed(shipment.status);
+    return Response.json(
+      { ok: false, error: "registration_failed", reason: reading.reason, messages: reading.messages },
+      { status: 409 },
+    );
+  }
 
   const size: "A4" | "A6" = new URL(req.url).searchParams.get("size") === "A6" ? "A6" : "A4";
   // a label stored before sizes were recorded was an A6 one

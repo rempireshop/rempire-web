@@ -333,7 +333,7 @@
       ],
       "expect": [
         "Кнопок объёма на карточке нет.",
-        "Цена на карточке — самая дешёвая из цен этого товара.",
+        "Цена на карточке — самая дешёвая из тех, что можно купить.",
         "«В корзину» кладёт именно этот объём.",
         "Подсказка называет объём: «Добавлено: … · 75 мл».",
         "В корзине у строки написан тот же объём.",
@@ -342,6 +342,7 @@
       "why": "Раз выбора на карточке больше нет, цена должна отвечать за тот объём, который туда и ложится.",
       "risk": "med",
       "writes": false,
+      "mark": "reworded",
       "en": {
         "title": "The price on a card in a product list",
         "steps": [
@@ -353,7 +354,7 @@
         ],
         "expect": [
           "There are no size buttons on the card.",
-          "The card's price is the lowest of that product's prices.",
+          "The card's price is the lowest of those that can be bought.",
           "«В корзину» baskets exactly that size.",
           "The toast names the size: «Добавлено: … · 75 мл».",
           "The cart line carries the same size.",
@@ -373,6 +374,7 @@
         "Открыть «Все товары» на телефоне.",
         "Посмотреть на два соседних товара в ряду.",
         "Найти товар с длинным названием.",
+        "Найти в ряду товар с меткой «нет в наличии».",
         "Пролистать список вниз."
       ],
       "expect": [
@@ -380,17 +382,20 @@
         "Цена и кнопка у соседей стоят на одной линии.",
         "Длинное название занимает две строки и обрывается многоточием.",
         "Между товарами нет разделительных линий.",
+        "Метки на фотографии не вылезают за край карточки.",
         "«В корзину» написано словами, а не значком сумки."
       ],
       "why": "Ровный ряд читается с одного взгляда, а рваный выглядит сломанным.",
       "risk": "low",
       "writes": false,
+      "mark": "reworded",
       "en": {
         "title": "How a row of products looks",
         "steps": [
           "Open «Все товары» (all products) on a phone.",
           "Look at two products side by side in one row.",
           "Find a product with a long name.",
+          "Find a product in the row carrying the «нет в наличии» label.",
           "Scroll the list down."
         ],
         "expect": [
@@ -398,6 +403,7 @@
           "Price and button sit on one line across neighbours.",
           "A long name takes two lines and ends in dots.",
           "There are no dividing lines between products.",
+          "The labels on the photo do not run outside the card.",
           "«В корзину» is words, not a bag icon."
         ],
         "why": "An even row reads at a glance; a ragged one looks broken."
@@ -462,7 +468,7 @@
       "expect": [
         "Другой объём — другая цена.",
         "Больший объём не дешевле меньшего.",
-        "Надпись о наличии общая для товара и от объёма не меняется.",
+        "Надпись о наличии вверху — про весь товар, а не про выбранный объём.",
         "Фотографии листаются пальцем.",
         "Описание на русском.",
         "Описание видно целиком, не обрезано."
@@ -482,12 +488,61 @@
         "expect": [
           "A different size shows a different price.",
           "A bigger size is never cheaper than a smaller one.",
-          "The in-stock line belongs to the whole product and does not follow the size.",
+          "The top in-stock line is about the product, not the chosen size.",
           "The photos swipe with a finger.",
           "The description is in Russian.",
           "The whole description is there, not cut off."
         ],
         "why": "A price that did not follow the size is an argument at the till, and a cheaper litre is your loss."
+      }
+    },
+    {
+      "id": "shop-size-out",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Кончился один объём из двух",
+      "steps": [
+        "Взять товар с двумя объёмами — например YOUNG.AGAIN DRY CONDITIONER, 100 и 250 мл.",
+        "На «Складе» выписать ноль меньшему из них, второй не трогать.",
+        "Открыть товар в магазине и нажать на пустой объём; если ещё старое — обновить через полминуты.",
+        "Нажать на второй объём.",
+        "Вернуться в раздел и посмотреть карточку этого товара.",
+        "Вернуть остаток на место — «не учтено» у этого объёма уже не вернётся."
+      ],
+      "expect": [
+        "Товар из магазина не пропал — он по-прежнему в разделе и открывается.",
+        "Пустой объём зачёркнут и серый, но нажать на него можно.",
+        "Вместо «В корзину» написано, что этого объёма нет и надо выбрать другой.",
+        "На втором объёме «В корзину» на месте и товар кладётся в корзину.",
+        "Карточка в разделе показывает цену того объёма, который ещё есть.",
+        "Объём, который на «Складе» ни разу не считали, остаётся обычным — он продаётся."
+      ],
+      "why": "Пустой объём, который выглядит как полный, — это оплаченный заказ, который вы не соберёте: до сих пор покупатель узнавал об этом только на кассе, отказом. А объём, который просто не считали, — это не пустой объём: погасить его значило бы перестать продавать половину магазина.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T11:26:00.000Z",
+      "en": {
+        "title": "One of two sizes has run out",
+        "steps": [
+          "Take a product with two sizes — YOUNG.AGAIN DRY CONDITIONER in 100 and 250 ml, say.",
+          "On «Склад» write a zero against the cheaper one and leave the other alone.",
+          "Open the product in the shop and tap the empty size; if it still looks old, reload after half a minute.",
+          "Tap the other size.",
+          "Go back to the section and look at that product's card.",
+          "Put the stock back — «не учтено» will not come back for that size."
+        ],
+        "expect": [
+          "The product has not vanished — it is still in the section and still opens.",
+          "The empty size is greyed and struck through, but can still be tapped.",
+          "In place of «В корзину» it says this size is out and to pick another.",
+          "On the other size «В корзину» is there and the product goes into the cart.",
+          "The card in the section quotes the price of the size that is still there.",
+          "A size the warehouse has never counted stays normal — it is still on sale."
+        ],
+        "why": "An empty size that looks full is a paid order you cannot pack: until now the buyer only found out at the checkout, by being refused. And a size nobody has counted is not an empty size — greying those out would stop half the shop from selling."
       }
     },
     {
@@ -575,7 +630,7 @@
       "title": "Наборы",
       "steps": [
         "Открыть «Наборы» в меню.",
-        "Открыть любой набор.",
+        "Открыть любой набор и посмотреть список «Что внутри».",
         "Сложить цены тех же товаров по отдельности."
       ],
       "expect": [
@@ -583,17 +638,19 @@
         "Написана цена набора.",
         "Если набор выгоднее, написано, сколько те же товары стоят по отдельности.",
         "Тогда цена набора ниже этой суммы, и рядом стоит «выгода».",
-        "Если набор перестал быть выгодным, ни этой суммы, ни «−N %» нет."
+        "Если набор перестал быть выгодным, ни этой суммы, ни «−N %» нет.",
+        "Между товарами в «Что внутри» серых линий нет — только одна под заголовком."
       ],
       "why": "Набор дороже своих частей — это обман, который покупатель посчитает за минуту.",
       "risk": "med",
       "writes": false,
       "mark": "redo",
+      "markedAt": "2026-09-18T12:20:00.000Z",
       "en": {
         "title": "Sets",
         "steps": [
           "Open «Наборы» (sets) in the menu.",
-          "Open any set.",
+          "Open any set and look at the «Что внутри» list.",
           "Add up the prices of the same products bought separately."
         ],
         "expect": [
@@ -601,7 +658,8 @@
           "The set's own price is shown.",
           "If the set is a saving, it says what those products cost separately.",
           "Then the set price is below that sum, with a «выгода» chip beside it.",
-          "If a set stopped being a saving, no sum and no «−N %» are shown."
+          "If a set stopped being a saving, no sum and no «−N %» are shown.",
+          "Inside «Что внутри» no grey rules between rows — one under the heading."
         ],
         "why": "A set that costs more than its parts is a con the buyer spots."
       }
@@ -1544,48 +1602,89 @@
       }
     },
     {
+      "id": "panel-delivery-folds",
+      "area": "panel",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Складные блоки в «Доставке и оплате»",
+      "steps": [
+        "«Ещё» → «Настройки» → «Доставка и оплата».",
+        "Раскрыть «Цены по странам Европы», потом нажать на заголовок ещё раз.",
+        "То же самое с «Что увидит покупатель».",
+        "Снова раскрыть список стран и переключить «Доставляем сюда» у любой страны."
+      ],
+      "expect": [
+        "Первое нажатие раскрывает блок, второе закрывает его.",
+        "Так ведут себя оба блока, а не один.",
+        "Переключение страны список под руками не захлопывает."
+      ],
+      "why": "Список из двадцати одной страны, который нельзя закрыть, прячет под собой всю остальную страницу — включая «Сохранить».",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-18T12:20:00.000Z",
+      "en": {
+        "title": "The folding blocks in «Доставка и оплата»",
+        "steps": [
+          "«Ещё» → «Настройки» → «Доставка и оплата».",
+          "Open «Цены по странам Европы», then press its heading again.",
+          "Do the same with «Что увидит покупатель».",
+          "Open the country list again and flip «Доставляем сюда» on any country."
+        ],
+        "expect": [
+          "The first press opens the block, the second closes it.",
+          "Both blocks behave that way, not just one.",
+          "Flipping a country does not snap the list shut under your hand."
+        ],
+        "why": "A twenty-one-country list that will not close hides the rest of the page under it — «Сохранить» included."
+      }
+    },
+    {
       "id": "panel-montonio-fill",
       "area": "panel",
       "who": "dim",
       "device": "desktop",
       "lang": "RU",
-      "title": "Кнопка «Заполнить по тарифам Montonio»",
+      "title": "Кнопка «Везде взять цены Montonio»",
       "steps": [
         "На той же странице выписать текущие цены Эстонии.",
-        "Оставить «Разрешить снижать текущие цены» выключенным.",
-        "Нажать «Заполнить по тарифам Montonio».",
-        "Нажать её ещё раз и сравнить цены.",
-        "Опустить одну цену ниже тарифа под ней, нажать «Сохранить», потом «Отменить правки»."
+        "Нажать «Везде взять цены Montonio».",
+        "Посмотреть, что стало с полями и с подписями под ними.",
+        "Нажать «Отменить правки», ничего не сохраняя.",
+        "Вписать своё число в одно поле и нажать на серую цену под ним."
       ],
       "expect": [
-        "Кнопка поднимает только те цены, что ниже тарифа Montonio.",
-        "Цены выше тарифа не меняются, второе нажатие ничего не даёт.",
-        "Под каждой ценой подсказка с ценой перевозчика.",
-        "Сохранить цену ниже тарифа магазин не даёт и называет оба числа.",
-        "Рядом с «Сохранить» — «Не сохранено» (на компьютере — «…: Тарифы доставки»).",
-        "«Отменить правки» возвращает старые цены, ничего не сохранив."
+        "Кнопка очищает все поля цен — остаются цены Montonio под полями.",
+        "«Бесплатно от» кнопка не трогает.",
+        "Вверху страницы написано, что пустое поле — это цена Montonio.",
+        "Рядом с «Сохранить» появилось «Не сохранено».",
+        "«Отменить правки» возвращает ваши цены, ничего не сохранив.",
+        "Нажатие на серую цену под полем очищает это одно поле."
       ],
-      "why": "Одно нажатие может опустить доставку ниже себестоимости сразу везде.",
+      "why": "Одно нажатие стирает все ваши цены сразу, и покупатель увидит их только после «Сохранить» — значит смотреть надо до него.",
       "risk": "high",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-09-18T12:20:00.000Z",
       "en": {
-        "title": "The «Заполнить по тарифам Montonio» button",
+        "title": "The «Везде взять цены Montonio» button",
         "steps": [
           "On the same page write down Estonia's current prices.",
-          "Leave «Разрешить снижать текущие цены» (allow lowering current prices) switched off.",
-          "Press «Заполнить по тарифам Montonio» (fill in from Montonio's rates).",
-          "Press it a second time and compare the prices.",
-          "Drop one price below the rate printed under it, press «Сохранить», then «Отменить правки»."
+          "Press «Везде взять цены Montonio» (use Montonio prices everywhere).",
+          "Look at what happened to the boxes and to the lines under them.",
+          "Press «Отменить правки» (discard changes) without saving anything.",
+          "Type your own number into one box and press the grey price under it."
         ],
         "expect": [
-          "The button raises only the prices that are below Montonio's own rate.",
-          "Prices above the rate do not move, and a second press changes nothing.",
-          "Under each price is the carrier's own rate.",
-          "A price below the rate will not save; the shop names both numbers.",
-          "Next to «Сохранить» — «Не сохранено» (on a computer «…: Тарифы доставки»).",
-          "«Отменить правки» brings the old prices back, saving nothing."
+          "The button empties every price box — Montonio's prices stay underneath.",
+          "It does not touch «Бесплатно от».",
+          "The top of the page says an empty box means Montonio's price.",
+          "Next to «Сохранить» the words «Не сохранено» appear.",
+          "«Отменить правки» brings your prices back, saving nothing.",
+          "Pressing the grey price under a box empties that one box."
         ],
-        "why": "One press can drop delivery below cost in every country at once."
+        "why": "One press wipes every price you set, and a shopper only sees the result after «Сохранить» — so the looking has to happen before it."
       }
     },
     {
@@ -2827,6 +2926,45 @@
       }
     },
     {
+      "id": "order-onway-chip",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«В пути»: сколько посылок сейчас едет",
+      "steps": [
+        "Открыть «Заказы» и посмотреть на чип «В пути».",
+        "Нажать его и пересчитать заказы в списке.",
+        "Найти в «Все» заказ со значком «Доставлен» и вернуться в «В пути»."
+      ],
+      "expect": [
+        "У «В пути» стоит число.",
+        "Заказов в списке ровно столько, сколько написано на чипе.",
+        "Все они со значком «Отправлен».",
+        "Доставленного заказа в этом списке нет — он остался в «Все»."
+      ],
+      "why": "Это ваш список «где посылка»: закрытые заказы в нём только мешают считать.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:10:00.000Z",
+      "en": {
+        "title": "«В пути»: how many parcels are travelling now",
+        "steps": [
+          "Open «Заказы» and look at the «В пути» chip.",
+          "Press it and count the orders in the list.",
+          "Find an order badged «Доставлен» under «Все», then go back to «В пути»."
+        ],
+        "expect": [
+          "«В пути» carries a number.",
+          "The list holds exactly as many orders as the chip says.",
+          "Every one of them is badged «Отправлен».",
+          "The delivered order is not in this list — it stayed under «Все»."
+        ],
+        "why": "This is your «where is the parcel» list: closed orders in it only spoil the count."
+      }
+    },
+    {
       "id": "order-search-server",
       "area": "orders",
       "who": "renat",
@@ -3074,12 +3212,15 @@
       ],
       "expect": [
         "Заказ сразу закрылся.",
+        "Он пропал из списка «В пути», а число у чипа стало меньше на один.",
         "Покупателю никакого письма не пришло.",
         "«Отменить» возвращает заказ обратно в «В пути»."
       ],
       "why": "Пока заказ не закрыт, он висит в списке дел.",
       "risk": "low",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-18T17:10:00.000Z",
       "en": {
         "title": "Marking an order delivered",
         "steps": [
@@ -3089,6 +3230,7 @@
         ],
         "expect": [
           "The order closes at once.",
+          "It leaves the «В пути» list, and the chip's number drops by one.",
           "No letter reaches the buyer.",
           "«Отменить» puts the order back into «В пути»."
         ],
@@ -5084,6 +5226,8 @@
       "why": "Продажа, не списавшая товар, — это вторая продажа той же бутылки.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-18T15:50:00.000Z",
       "en": {
         "title": "A website sale takes stock down",
         "steps": [
@@ -5097,6 +5241,43 @@
           "Cancelling the order puts the stock back."
         ],
         "why": "A sale that leaves stock untouched sells the same bottle twice."
+      }
+    },
+    {
+      "id": "stock-web-sale-one-size",
+      "area": "stock",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Продажа товара с одним объёмом списывает остаток",
+      "steps": [
+        "Открыть «Склад» и найти Touchable — у него один объём, «250 мл».",
+        "Выписать его остаток именно у строки «250 мл».",
+        "Купить Touchable в магазине и оплатить.",
+        "Вернуться на «Склад» и посмотреть остаток этой же строки."
+      ],
+      "expect": [
+        "Остаток строки «250 мл» уменьшился ровно на купленное количество.",
+        "Второй строки того же товара — без объёма — на «Складе» не появилось."
+      ],
+      "why": "Двадцать девять товаров продаются в одном объёме, и магазин не передаёт его название. Их продажа списывалась по пустому ключу, то есть не списывалась вовсе.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T15:50:00.000Z",
+      "en": {
+        "title": "A sale of a one-size product takes stock down",
+        "steps": [
+          "Open «Склад» and find Touchable — it has one size, «250 мл».",
+          "Write down the stock on that «250 мл» row.",
+          "Buy Touchable in the shop and pay.",
+          "Go back to «Склад» and look at that same row."
+        ],
+        "expect": [
+          "The «250 мл» row is down by exactly the quantity bought.",
+          "No second row for that product — one with no size — has appeared on «Склад»."
+        ],
+        "why": "Twenty-nine products are sold in one size and the shop does not send its name. Their sales were written off against the empty key, which is to say not written off at all."
       }
     },
     {
@@ -5115,15 +5296,16 @@
       ],
       "expect": [
         "Поиск кассы находит товар по вписанному штрихкоду.",
+        "Кнопка под ним одна — того объёма, к которому привязан код.",
         "Появился экран «Продажа оформлена».",
         "На нём видно число товаров и способ оплаты.",
         "Там же сказано, что остатки списаны и чек отправлен.",
-        "Заказ появился в «Заказы» → «Все».",
-        "У заказа есть ссылка на чек."
+        "Заказ появился в «Заказы» → «Все», и у него есть ссылка на чек."
       ],
       "why": "Продажа с полки, не списавшая остаток, продаст ту же бутылку в интернете.",
       "risk": "high",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "A sale in the salon",
         "steps": [
@@ -5135,11 +5317,11 @@
         ],
         "expect": [
           "The register's search finds the product by the barcode you typed.",
+          "Under it there is one button — the size the code is bound to.",
           "The «Продажа оформлена» (sale completed) screen appears.",
           "It shows the number of items and the payment method.",
           "It says the stock is down and the receipt has gone.",
-          "The order is there under «Заказы» → «Все».",
-          "The order has a link to the receipt."
+          "The order is under «Заказы» → «Все» and has a link to the receipt."
         ],
         "why": "A shelf sale that leaves stock untouched sells the same bottle online."
       }
@@ -5236,12 +5418,13 @@
       ],
       "expect": [
         "Кнопка этого объёма серая.",
-        "На ней написано, что на складе такого нет.",
-        "Нажатие ничего не добавляет в корзину."
+        "Нажатие ничего не добавляет в корзину.",
+        "Вместо этого внизу выскочило «Нет на складе»."
       ],
       "why": "Проданная с полки бутылка, которой нет, уводит остаток в минус.",
       "risk": "med",
       "writes": false,
+      "mark": "reworded",
       "en": {
         "title": "The salon has no stock of a product",
         "steps": [
@@ -5250,10 +5433,55 @@
         ],
         "expect": [
           "The button for that size is grey.",
-          "It says the size is not in stock.",
-          "Pressing it adds nothing to the cart."
+          "Pressing it adds nothing to the cart.",
+          "Instead «Нет на складе» pops up at the bottom."
         ],
         "why": "A bottle sold off the shelf that does not exist drives the stock negative."
+      }
+    },
+    {
+      "id": "pos-code-offsale",
+      "area": "stock",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Штрихкод товара, снятого с продажи",
+      "steps": [
+        "Поставить одному товару «Нет в наличии» в «Товарах» и запомнить его штрихкод.",
+        "Открыть «Салон» и вписать этот штрихкод в поиск.",
+        "Нажать на кнопку с объёмом.",
+        "Другому товару выключить «Показывать в магазине» и вписать его штрихкод.",
+        "Вернуть обе отметки на место."
+      ],
+      "expect": [
+        "Товар с «Нет в наличии» находится по штрихкоду, а не пропадает.",
+        "Его кнопка серая, и нажатие пишет внизу «Нет на складе».",
+        "Продать такой товар нельзя, пока не вернёте «В наличии» в «Товарах».",
+        "На штрихкод спрятанного товара касса пишет, что он снят с продажи.",
+        "«Ничего не найдено» не появляется ни в одном из двух случаев."
+      ],
+      "why": "Бутылка в руке, которую касса не находит, — это продажа мимо магазина и остаток, который потом не сойдётся. Находит, но продать не даёт — это то же самое, если не сказать, где это чинится.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T12:20:00.000Z",
+      "en": {
+        "title": "The barcode of a product taken off sale",
+        "steps": [
+          "In «Товары» set one product to «Нет в наличии» and note its barcode.",
+          "Open «Салон» and type that barcode into the search.",
+          "Press the size button.",
+          "On another product switch «Показывать в магазине» off and type its barcode.",
+          "Put both settings back."
+        ],
+        "expect": [
+          "A product marked «Нет в наличии» is still found by its barcode.",
+          "Its button is grey, and pressing it says «Нет на складе» below.",
+          "It cannot be sold until «В наличии» goes back in «Товары».",
+          "For a hidden product's barcode the till says it is off sale.",
+          "«Ничего не найдено» appears in neither case."
+        ],
+        "why": "A bottle in your hand the till cannot find is a sale outside the shop and a count that will not add up later. Finding it and still refusing it is the same thing, unless somebody says where that is fixed."
       }
     },
     {
@@ -5353,18 +5581,22 @@
         "Открыть адрес этого товара в магазине.",
         "Поискать его в магазине через поиск и в разделе.",
         "В панели открыть «Товары» и нажать чип «Скрытые».",
+        "Перейти на вкладку «Склад» и нажать «Мало», потом «Нет».",
         "Вернуть переключатель обратно."
       ],
       "expect": [
         "По старой ссылке открывается «Страница не найдена».",
-        "Поиск в магазине его не находит.",
-        "В разделе каталога и в наборах его тоже нет.",
+        "Ни поиск, ни раздел каталога, ни наборы его больше не показывают.",
         "В панели он остался в списке с пометкой «Скрыт».",
-        "Чип «Скрытые» с числом находит его в два касания."
+        "Чип «Скрытые» с числом находит его в два касания.",
+        "На «Складе» его строка тоже осталась, с пометкой «Скрыт» и в самом низу.",
+        "В «Мало» и «Нет» его больше нет, и вкладка «Склад» его не считает."
       ],
       "why": "Снятый товар, купленный по старой ссылке, — это заказ, который нечем собрать.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-18T12:20:00.000Z",
       "en": {
         "title": "Taking a product off sale",
         "steps": [
@@ -5372,14 +5604,16 @@
           "Open that product's address in the shop.",
           "Look for it in the search and in its catalogue section.",
           "In the panel open «Товары» and press the «Скрытые» chip.",
+          "Go to the «Склад» tab and press «Мало», then «Нет».",
           "Switch the toggle back on."
         ],
         "expect": [
           "The old link answers «Страница не найдена».",
-          "The shop's search does not find it.",
-          "It is gone from its section and from the sets.",
+          "Neither the search, nor the section, nor the sets show it any more.",
           "In the panel it stays in the list marked «Скрыт» (hidden).",
-          "The «Скрытые» chip carries a count and finds it in two taps."
+          "The «Скрытые» chip carries a count and finds it in two taps.",
+          "On «Склад» its row also stays, marked «Скрыт», at the very bottom.",
+          "It is gone from «Мало» and «Нет», and the «Склад» tab stops counting it."
         ],
         "why": "A withdrawn product bought through an old link is an order you cannot pack."
       }
@@ -5650,7 +5884,7 @@
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
-        "С обложкой видна сама картинка во всю ширину, под ней «Заменить обложку» и «Удалить».",
+        "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
         "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
         "Статья видна в блоге магазина вместе с обложкой.",
         "Карточка товара в тексте открывает сам товар."
@@ -5658,6 +5892,7 @@
       "why": "Неопубликованная статья не приводит из Google никого.",
       "risk": "low",
       "writes": true,
+      "mark": "reworded",
       "en": {
         "title": "Writing and publishing an article",
         "steps": [
@@ -5669,12 +5904,57 @@
         ],
         "expect": [
           "When a product is inserted the panel says which language it went into.",
-          "With a cover the picture shows full width; under it «Заменить обложку» and «Удалить».",
+          "With a cover you see three frames: the blog, the article and social.",
           "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
           "The post is visible in the shop's blog with its cover.",
           "The product card in the text opens the product itself."
         ],
         "why": "An article that did not publish brings nobody from Google."
+      }
+    },
+    {
+      "id": "blog-cover-frame",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Как обложка статьи встанет в рамку",
+      "steps": [
+        "Открыть «Ещё» → «Блог» и любую статью с обложкой.",
+        "Под обложкой нажать «Заполнить рамку».",
+        "Потянуть пальцем по каждой из трёх рамок.",
+        "Сохранить и открыть эту статью в магазине.",
+        "Нажать «Вся фотография» и сохранить снова."
+      ],
+      "expect": [
+        "Под обложкой есть выбор: «Вся фотография» или «Заполнить рамку».",
+        "Рамок три: в списке статей, в начале статьи и в соцсетях.",
+        "В «Заполнить рамку» фотография двигается пальцем во всех трёх.",
+        "В магазине обложка стоит так же, как в рамке «В начале статьи».",
+        "«Вся фотография» показывает снимок целиком в списке и в статье."
+      ],
+      "why": "Обложка обрезается по-разному в трёх местах сразу, и увидеть это можно было только опубликовав статью. Лицо, срезанное посередине, — это статья, которую не открывают.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T12:20:00.000Z",
+      "en": {
+        "title": "How an article's cover sits in its frame",
+        "steps": [
+          "Open «Ещё» → «Блог» and any article that has a cover.",
+          "Under the cover press «Заполнить рамку» (fill the frame).",
+          "Drag a finger across each of the three frames.",
+          "Save and open that article in the shop.",
+          "Press «Вся фотография» (the whole photo) and save again."
+        ],
+        "expect": [
+          "Under the cover is a choice: «Вся фотография» or «Заполнить рамку».",
+          "There are three frames: the blog list, the article top and social.",
+          "In «Заполнить рамку» the photo moves under a finger in all three.",
+          "In the shop the cover sits as it does in the «В начале статьи» frame.",
+          "«Вся фотография» shows the whole photo in the list and the article."
+        ],
+        "why": "A cover is cropped three different ways at once, and the only way to see that was to publish the article. A face cut through the middle is an article nobody opens."
       }
     },
     {
@@ -5720,6 +6000,49 @@
           "It warns that an Estonian reader will see Russian."
         ],
         "why": "Text that vanishes when you switch language puts you off blogging."
+      }
+    },
+    {
+      "id": "blog-delete",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Удалить статью",
+      "steps": [
+        "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
+        "Написать заголовок «Проверка удаления» и пару слов текста, сохранить черновик.",
+        "Нажать «Удалить статью», прочитать вопрос и подтвердить «Да, удалить».",
+        "Посмотреть список статей.",
+        "Завести ещё одну статью с тем же заголовком «Проверка удаления» и сохранить."
+      ],
+      "expect": [
+        "Вопрос говорит, что статья исчезнет из списка и из магазина и вернуть её будет нельзя.",
+        "После «Да, удалить» панель возвращает к списку и пишет «Статья удалена ✓».",
+        "Удалённой статьи в списке больше нет — ни как черновика, ни как-либо ещё.",
+        "Новая статья с тем же заголовком заводится и получает свой адрес, а не чужой."
+      ],
+      "why": "Раньше «Удалить» просто переводило статью в черновики: она оставалась в списке навсегда, и удалить её было нельзя вообще ничем. Чужой адрес у новой статьи — это старая ссылка, которая открывает не тот текст.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:40:00.000Z",
+      "en": {
+        "title": "Deleting an article",
+        "steps": [
+          "Open «Ещё» → «Блог» and press «+ Статья».",
+          "Write the title «Проверка удаления» and a couple of words, save the draft.",
+          "Press «Удалить статью», read the question and confirm with «Да, удалить».",
+          "Look at the list of articles.",
+          "Create another article with the same title «Проверка удаления» and save it."
+        ],
+        "expect": [
+          "The question says the article leaves the list and the shop and cannot be brought back.",
+          "After «Да, удалить» the panel returns to the list and says «Статья удалена ✓».",
+          "The deleted article has gone from the list — not even as a draft.",
+          "The new article of the same title gets its own address, not the old one."
+        ],
+        "why": "«Удалить» used to mean «back to drafts»: the article stayed in the list for ever and nothing could remove it. An address handed on to a new article is an old link opening the wrong text."
       }
     },
     {
@@ -6265,6 +6588,55 @@
           "The card itself reads Estonian — the name and «alates», no Russian words."
         ],
         "why": "A translation that lost its product links turns a selling article into just text."
+      }
+    },
+    {
+      "id": "ai-blog-photo",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Помощник ставит фото в ту статью, что открыта",
+      "steps": [
+        "«Блог» → открыть любую статью (или написать новую и дождаться, пока она сохранится).",
+        "Не выходя из редактора, открыть помощника и спросить: «добавь фото».",
+        "Прикрепить фотографию кнопкой «Фото» и попросить: «это обложка».",
+        "Подтвердить «Применить» и посмотреть на обложку статьи.",
+        "Тем же фото попросить: «а теперь добавь фото в текст статьи», подтвердить.",
+        "Спросить «сделай статью короче» и прочитать ответ."
+      ],
+      "expect": [
+        "Без прикреплённого фото помощник говорит, что ничего не добавил, и просит прикрепить снимок.",
+        "В карточке подтверждения названа та самая статья, что открыта, а не другая.",
+        "Обложка встаёт у открытой статьи; новой статьи в списке не появляется.",
+        "Фото в текст встаёт в конец статьи — карточка предупреждает об этом заранее.",
+        "На «сделай короче» помощник честно отвечает: текст правят в редакторе, не в чате.",
+        "После всех просьб статья в списке по-прежнему одна."
+      ],
+      "why": "Помощник отвечал «добавил фото» и не добавлял, а каждая следующая просьба заводила ещё один черновик. Фраза, которой верят, хуже отказа: вы идёте дальше, а сделано ничего.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:40:00.000Z",
+      "en": {
+        "title": "The assistant puts a photo into the article you have open",
+        "steps": [
+          "«Блог» → open any article (or write a new one and wait for it to save).",
+          "Without leaving the editor, open the assistant and ask «добавь фото».",
+          "Attach a photo with the «Фото» button and ask «это обложка».",
+          "Confirm with «Применить» and look at the article's cover.",
+          "With the same photo ask «а теперь добавь фото в текст статьи» and confirm.",
+          "Ask «сделай статью короче» and read the answer."
+        ],
+        "expect": [
+          "With no photo attached the assistant says it added nothing and asks for the photo.",
+          "The confirm card names the article you have open, not another one.",
+          "The cover lands on the open article; no new article appears in the list.",
+          "The in-text photo goes at the end of the article — the card says so beforehand.",
+          "For «сделай короче» it says it cannot rewrite the text here, and points at the editor.",
+          "After all of it there is still exactly one article in the list."
+        ],
+        "why": "The assistant answered «photo added» and added nothing, and every follow-up started another draft. A sentence you believe is worse than a refusal: you move on and nothing was done."
       }
     },
     {
@@ -6943,6 +7315,7 @@
       "lang": "RU",
       "title": "Первый возврат настоящих денег",
       "steps": [
+        "Проверить, что в кабинете Montonio включены возвраты для банковских ссылок.",
         "Открыть заказ из предыдущей проверки.",
         "Нажать «Вернуть деньги», вернуть всю сумму, подтвердить.",
         "Следить за кабинетом Montonio и выпиской пару дней.",
@@ -6963,6 +7336,7 @@
       "en": {
         "title": "The first refund of real money",
         "steps": [
+          "Check that refunds for bank payments are switched on in the Montonio account.",
           "Open the order from the previous check.",
           "Press «Вернуть деньги», refund the whole sum, confirm.",
           "Watch the Montonio account and the bank statement for two days.",
@@ -7069,11 +7443,15 @@
       "expect": [
         "Пакомат принял посылку по коду сдачи.",
         "Трек-номер настоящий: по нему видно, где посылка.",
-        "Покупатель забрал заказ."
+        "Покупатель забрал заказ.",
+        "После этого заказ сам перешёл в «Доставлен».",
+        "И сам ушёл из «В пути» — число у чипа стало меньше."
       ],
       "why": "Примет ли автомат настоящую этикетку, покажет только настоящая посылка.",
       "risk": "high",
       "writes": true,
+      "mark": "reworded",
+      "markedAt": "2026-09-18T17:10:00.000Z",
       "en": {
         "title": "A real label and a real parcel",
         "steps": [
@@ -7085,7 +7463,9 @@
         "expect": [
           "The locker took the parcel against the code.",
           "The tracking number is real and shows where the parcel is.",
-          "The buyer collected the order."
+          "The buyer collected the order.",
+          "After that the order moved itself to «Доставлен».",
+          "And left «В пути» by itself — the chip's number went down."
         ],
         "why": "Only a real parcel shows whether the machine takes the label."
       }

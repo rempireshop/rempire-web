@@ -513,3 +513,64 @@ describe("the review form's stars", () => {
     expect(tapStar(5, { ...FILLED, text: "коротко" }).disabled).toBe(true);
   });
 });
+
+/**
+ * A photo the assistant puts INSIDE an article (r25, 18.09.2026).
+ *
+ * «assistant is not able to add cover photos or photos to articles although it
+ * says it does» — Renat. There was no in-article photo action at all, so the
+ * model wrote the sentence and sent nothing. `add_post_photo` is that missing
+ * half; these are the two decisions it makes about the text before it writes
+ * anything back, sliced out of app.js like everything else in this file.
+ */
+describe("a photo added at the end of an article (add_post_photo)", () => {
+  const rig = new Function(
+    "body", "url",
+    [
+      "var LANGS = [[\"RU\"], [\"ET\"], [\"EN\"]];",
+      "function esc(x) { return String(x).replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\").replace(/\"/g, \"&quot;\"); }",
+      "function stripTags(h) { return String(h).replace(/<[^>]*>/g, \" \"); }",
+      slice("blogTextLen"),
+      slice("blogFigureHtml"),
+      slice("blogBodyWritten"),
+      slice("blogBodies3WithFigure"),
+      "return blogBodies3WithFigure(body, url);",
+    ].join("\n"),
+  ) as (body: unknown, url: string) => Record<string, string>;
+
+  const URL_ = "https://media.rempireshop.com/blog/1757-x.webp";
+  const FIG = '<figure data-fig="full"><img src="' + URL_ + '" alt="" loading="lazy"></figure>';
+
+  /* One article, three pages: a reader in Tallinn opening the Estonian one
+     must see the picture the owner added, not a paragraph where it should be. */
+  it("puts the picture at the end of every language that has an article", () => {
+    const out = rig({ RU: "<p>русский</p>", ET: "<p>eesti</p>", EN: "<p>english</p>" }, URL_);
+    expect(out.RU).toBe("<p>русский</p>" + FIG);
+    expect(out.ET).toBe("<p>eesti</p>" + FIG);
+    expect(out.EN).toBe("<p>english</p>" + FIG);
+  });
+
+  /* The blog PATCH replaces every field it is given and trilingual() in
+     src/lib/blog.ts reads an unmentioned language as an empty one — so a body
+     that carried only the languages that changed would erase the others. */
+  it("carries an unwritten language through untouched rather than leaving it out", () => {
+    const out = rig({ RU: "<p>текст</p>", ET: "", EN: "   " }, URL_);
+    expect(Object.keys(out).sort()).toEqual(["EN", "ET", "RU"]);
+    expect(out.ET).toBe("");
+    expect(out.EN).toBe("   ");
+    expect(out.RU).toContain("<figure");
+  });
+
+  it("treats a body that is only a picture as written, so a second one goes under it", () => {
+    const out = rig({ RU: FIG, ET: "", EN: "" }, URL_);
+    expect(out.RU).toBe(FIG + FIG);
+  });
+
+  /* A picture has to land somewhere. An article with nothing in it yet is the
+     one case with no language to choose, and Russian is the one this blog is
+     written in first (pickLang() serves it to the other two anyway). */
+  it("falls back to Russian when nothing is written at all", () => {
+    expect(rig({ RU: "", ET: "", EN: "" }, URL_).RU).toBe(FIG);
+    expect(rig(null, URL_).RU).toBe(FIG);
+  });
+});

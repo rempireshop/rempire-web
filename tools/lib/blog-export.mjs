@@ -44,6 +44,7 @@
    of fallback that have never drifted and that the renderer does not need.
    The other two are the query, which is the actual job of this file. */
 
+import { writeCoverFocus } from "../../src/lib/blog-cover.mjs";
 import { sslFor } from "../migrate.mjs";
 export {
   looksLikeHtmlBody,
@@ -51,6 +52,8 @@ export {
   renderPostBody,
   sanitizeHtml,
 } from "../../src/lib/blog-html.mjs";
+/* …and the cover's own one-file module, for the same reason. */
+export { coverImgStyle, focusCrop } from "../../src/lib/blog-cover.mjs";
 
 const LANGS = ["RU", "ET", "EN"];
 const EMPTY3 = { RU: "", ET: "", EN: "" };
@@ -73,6 +76,14 @@ function toPost(r) {
     body: { ...EMPTY3, ...(r.body || {}) },
     coverUrl: r.cover_url || null,
     coverAlt: { ...EMPTY3, ...(r.cover_alt || {}) },
+    /* Read raw, then through writeCoverFocus() in src/lib/blog-cover.mjs, so
+       a row this vocabulary does not recognise arrives here as null — the
+       same answer src/lib/blog.ts gives the live page for the same row. This
+       is the field the build dropped on the floor for a whole round the last
+       time a copy of a renderer lived here (see the header): the prerendered
+       article would have fitted the picture whole while the live one cropped
+       it, and nobody would have seen the difference without publishing. */
+    coverFocus: writeCoverFocus(r.cover_focus),
     tags: Array.isArray(r.tags) ? r.tags : [],
     products: Array.isArray(r.products) ? r.products : [],
     seoTitle: { ...EMPTY3, ...(r.seo_title || {}) },
@@ -105,7 +116,7 @@ export async function fetchPublishedPosts() {
   try {
     await client.connect();
     const res = await client.query(
-      `select id, slug, title, excerpt, body, cover_url, cover_alt, tags, products,
+      `select id, slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products,
               seo_title, seo_desc, author, published_at, updated_at
          from posts
         where status = 'published'

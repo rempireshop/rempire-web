@@ -290,7 +290,10 @@ test.describe("admin — the order chips, and the steps behind them", () => {
     await expect(chips, "the chip strip is not the five of r16").toHaveCount(5);
     await expect(chips.nth(0)).toHaveText("Все");
     await expect(chips.nth(1)).toContainText("Отправить");
-    await expect(chips.nth(2)).toHaveText("В пути");
+    /* toContainText since 18.09.2026: «В пути» carries a count now, like the
+       three queue chips beside it, so its text is «В пути» or «В пути N»
+       depending on what this shared database happens to hold. */
+    await expect(chips.nth(2)).toContainText("В пути");
     await expect(chips.nth(3)).toContainText("По счёту");
     await expect(chips.nth(4)).toContainText("Возвраты");
     await expect(page.locator('[data-admfilter="all"]'), "the screen does not open on «Все»")

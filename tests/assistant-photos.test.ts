@@ -1,5 +1,6 @@
 /**
- * The assistant's photo actions (add_product_photo, set_post_cover), the
+ * The assistant's photo actions (add_product_photo, set_post_cover,
+ * add_post_photo), the
  * attachments brief that gates them, and the short form of draft_post —
  * pure functions over a JSON blob, like tests/assistant-actions.test.ts.
  *
@@ -10,7 +11,13 @@
  */
 import { describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { ATTACHMENTS_MAX, briefAttachments, sanitizeAction, sanitizeDraftTopic } from "@/app/api/assistant/actions";
+import {
+  ATTACHMENTS_MAX,
+  briefAttachments,
+  briefOpenPost,
+  sanitizeAction,
+  sanitizeDraftTopic,
+} from "@/app/api/assistant/actions";
 
 const known = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
 const someId = (catalogueMin as Array<{ id: string }>)[0].id;
@@ -76,6 +83,78 @@ describe("set_post_cover", () => {
     expect(sanitizeAction({ type: "set_post_cover", slug: "../x", key: KEY }, known, true, { attachedKeys: attached })).toBeNull();
     expect(sanitizeAction({ type: "set_post_cover", slug: "post", key: "blog/9-not-mine.webp" }, known, true, { attachedKeys: attached })).toBeNull();
     expect(sanitizeAction({ type: "set_post_cover", slug: "post", key: KEY }, known, false, { attachedKeys: attached })).toBeNull();
+  });
+});
+
+/* «it also loses the context and each time creates a new blog post» — Renat,
+   18.09.2026. The slug was the model's whole memory of which article was being
+   worked on, and it had to copy one out of a list that did not yet name the
+   article the panel had just written. These four are the two doors that
+   replaced the guess: the article open on his screen, and the refusal of a
+   slug that belongs to no article at all. */
+describe("which article a photo action is about", () => {
+  const open = "uhod-za-borodoy";
+  const slugs = new Set([open, "vybor-shampunya"]);
+
+  it("takes the open article when the model named no slug at all", () => {
+    expect(sanitizeAction({ type: "set_post_cover", key: "blog/1757000000001-cover.webp" }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs }))
+      .toEqual({ type: "set_post_cover", slug: open, key: "blog/1757000000001-cover.webp" });
+    expect(sanitizeAction({ type: "add_post_photo", key: KEY }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs }))
+      .toEqual({ type: "add_post_photo", slug: open, key: KEY });
+  });
+
+  it("lets the model name a different article, as long as the shop has one", () => {
+    expect(sanitizeAction({ type: "add_post_photo", slug: "Vybor-Shampunya", key: KEY }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs }))
+      .toEqual({ type: "add_post_photo", slug: "vybor-shampunya", key: KEY });
+  });
+
+  /* An invented slug used to survive as far as «Применить» and fail there,
+     under a reply that had already said the photo was in. */
+  it("refuses a slug no article has, even with one open, so the route can say so", () => {
+    expect(sanitizeAction({ type: "set_post_cover", slug: "kak-vybrat-borodu", key: "blog/1757000000001-cover.webp" }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs })).toBeNull();
+    expect(sanitizeAction({ type: "add_post_photo", slug: "kak-vybrat-borodu", key: KEY }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs })).toBeNull();
+  });
+
+  it("refuses a photo action with no article to point at", () => {
+    expect(sanitizeAction({ type: "add_post_photo", key: KEY }, known, true, { attachedKeys: attached })).toBeNull();
+    expect(sanitizeAction({ type: "set_post_cover", key: "blog/1757000000001-cover.webp" }, known, true, { attachedKeys: attached })).toBeNull();
+  });
+
+  /* The list the prompt carries stops at 20; the article on his screen may be
+     older than that, and the route adds it back. With no list at all nothing is
+     checked against one — the behaviour before today, unchanged. */
+  it("checks against the listed slugs only when there are any", () => {
+    expect(sanitizeAction({ type: "add_post_photo", slug: "staraya-statya", key: KEY }, known, true,
+      { attachedKeys: attached }))
+      .toEqual({ type: "add_post_photo", slug: "staraya-statya", key: KEY });
+  });
+
+  it("still refuses a foreign key, a broken slug and a shopper", () => {
+    expect(sanitizeAction({ type: "add_post_photo", key: "blog/9-not-mine.webp" }, known, true,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs })).toBeNull();
+    expect(sanitizeAction({ type: "add_post_photo", slug: "../x", key: KEY }, known, true,
+      { attachedKeys: attached, postSlugs: new Set() })).toBeNull();
+    expect(sanitizeAction({ type: "add_post_photo", key: KEY }, known, false,
+      { attachedKeys: attached, openPostSlug: open, postSlugs: slugs })).toBeNull();
+  });
+});
+
+describe("briefOpenPost — the article on the owner's screen", () => {
+  it("keeps a slug-shaped article with a one-line title and a known status", () => {
+    expect(briefOpenPost({ slug: " Uhod-Za-Borodoy ", title: " Уход\nза  бородой ", status: "published" }))
+      .toEqual({ slug: "uhod-za-borodoy", title: "Уход за бородой", status: "published" });
+    expect(briefOpenPost({ slug: "x-1" })).toEqual({ slug: "x-1", title: "", status: "draft" });
+  });
+  it("is nothing at all without a usable slug", () => {
+    expect(briefOpenPost(null)).toBeNull();
+    expect(briefOpenPost({})).toBeNull();
+    expect(briefOpenPost({ slug: "../escape" })).toBeNull();
+    expect(briefOpenPost("uhod-za-borodoy")).toBeNull();
   });
 });
 
