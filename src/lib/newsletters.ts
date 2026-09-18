@@ -411,7 +411,13 @@ export async function newsletterCards(ids: string[]): Promise<NewsletterCard[]> 
     if (!m) continue;
     const o = overrides[id];
     if (o?.hidden) continue;
-    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : (VARIANTS[id]?.prices ?? []);
+    /* One rung is a label, not a price — see the same three lines in
+       src/lib/blog-page.ts. catalogue.variants.json carries the 29 one-size
+       products since 18.09.2026, and their single price IS catalogue.min.json's
+       `p`, so reading it here would send a letter quoting the price the owner
+       has already overridden in «Товары». */
+    const fileLadder = VARIANTS[id]?.prices ?? [];
+    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : fileLadder.length > 1 ? fileLadder : [];
     const base = o?.price ?? m.p;
     const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
     const photo = o?.gallery?.[0];

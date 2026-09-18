@@ -35,6 +35,14 @@
    19.9
   ]
  },
+ "touchable": {
+  "sizes": [
+   "250 мл"
+  ],
+  "prices": [
+   27
+  ]
+ },
  "repair-me-wash": {
   "sizes": [
    "40 мл",
@@ -131,6 +139,14 @@
    19.9
   ]
  },
+ "kevin-murphy-motion-lotion": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   26
+  ]
+ },
  "sim-sensitive-system-4-chitosan-hair-repair-r": {
   "sizes": [
    "50 мл",
@@ -215,6 +231,46 @@
    19.9
   ]
  },
+ "kevin-murphy-killer-twirls": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   26
+  ]
+ },
+ "easy-rider": {
+  "sizes": [
+   "100 г"
+  ],
+  "prices": [
+   28
+  ]
+ },
+ "gatsby-moving-rubber-wild-shake-15g": {
+  "sizes": [
+   "80 г"
+  ],
+  "prices": [
+   15
+  ]
+ },
+ "killer-curls": {
+  "sizes": [
+   "200 мл"
+  ],
+  "prices": [
+   33
+  ]
+ },
+ "super-goo": {
+  "sizes": [
+   "100 г"
+  ],
+  "prices": [
+   28
+  ]
+ },
  "body-builder": {
   "sizes": [
    "100 мл",
@@ -223,6 +279,182 @@
   "prices": [
    18,
    27
+  ]
+ },
+ "paul-mitchell-mitch-construction-paste-flexible-styling-paste": {
+  "sizes": [
+   "75 мл"
+  ],
+  "prices": [
+   23
+  ]
+ },
+ "paul-mitchell-super-skinny-serum": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   35
+  ]
+ },
+ "paul-mitchell-clear-styling-glaze": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   26
+  ]
+ },
+ "paul-mitchell-mitch-steady-grip-styling-gel": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   23
+  ]
+ },
+ "powder-puff": {
+  "sizes": [
+   "14 г"
+  ],
+  "prices": [
+   30
+  ]
+ },
+ "kevin-murphy-full-again": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   27
+  ]
+ },
+ "hair-resort": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   26
+  ]
+ },
+ "davines-pasta-love-strong-hold-mat-clay": {
+  "sizes": [
+   "50 мл"
+  ],
+  "prices": [
+   24.5
+  ]
+ },
+ "captain-fawcett-beard-oil-cf-332-private-stock": {
+  "sizes": [
+   "10 мл"
+  ],
+  "prices": [
+   17
+  ]
+ },
+ "davines-pre-shaving-beard-oil": {
+  "sizes": [
+   "50 мл"
+  ],
+  "prices": [
+   22
+  ]
+ },
+ "davines-softening-shaving-gel": {
+  "sizes": [
+   "200 мл"
+  ],
+  "prices": [
+   23.5
+  ]
+ },
+ "davines-non-foaming-transparent-shaving-gel": {
+  "sizes": [
+   "150 мл"
+  ],
+  "prices": [
+   24.5
+  ]
+ },
+ "davines-medium-hold-styling-paste": {
+  "sizes": [
+   "125 мл"
+  ],
+  "prices": [
+   24.5
+  ]
+ },
+ "cosrx-advanced-snail-92-all-in-one-cream": {
+  "sizes": [
+   "100 г"
+  ],
+  "prices": [
+   22.99
+  ]
+ },
+ "cosrx-advanced-snail-96-mucin-power-essence": {
+  "sizes": [
+   "100 мл"
+  ],
+  "prices": [
+   21.99
+  ]
+ },
+ "lumin-skin-recovery-oil": {
+  "sizes": [
+   "8 мл"
+  ],
+  "prices": [
+   21.95
+  ]
+ },
+ "lumin-skin-wrinkle-defense-serum": {
+  "sizes": [
+   "15 мл"
+  ],
+  "prices": [
+   21.95
+  ]
+ },
+ "lumin-skin-charcoal-scrub-deep-detox": {
+  "sizes": [
+   "30 мл"
+  ],
+  "prices": [
+   18.95
+  ]
+ },
+ "lumin-skin-charcoal-face-wash-daily-detox": {
+  "sizes": [
+   "100 мл"
+  ],
+  "prices": [
+   18.95
+  ]
+ },
+ "lumin-skin-dark-circle-defense-balm": {
+  "sizes": [
+   "20 мл"
+  ],
+  "prices": [
+   32.95
+  ]
+ },
+ "anua-heartleaf-77-soothing-toner": {
+  "sizes": [
+   "40 мл"
+  ],
+  "prices": [
+   6.99
+  ]
+ },
+ "davines-hair-beard-body-wash": {
+  "sizes": [
+   "300 мл"
+  ],
+  "prices": [
+   24.5
   ]
  },
  "oversized-t-shirt-unisex": {

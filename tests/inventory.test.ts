@@ -23,7 +23,14 @@ type Min = { id: string; b: string; n: string; c: string; p: number; s: string }
 const CATALOGUE = catalogueMin as Min[];
 const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number[] }>;
 
-const plain = CATALOGUE.find((p) => !VARIANTS[p.id])!;
+/* No size ladder — its shelf row is the unlabelled one — and something the
+   shop will still sell: two of the tests below put it through createOrder(),
+   which refuses an `s: "out"` product. Spelled out rather than left to the
+   catalogue's order: the pick used to land on a «low» product by luck, and
+   on 18.09.2026 the variants table gained the 29 one-size products and moved
+   it onto a sold-out wax, where the failure read «out_of_stock» and said
+   nothing about the fixture. */
+const plain = CATALOGUE.find((p) => p.s !== "out" && !VARIANTS[p.id])!;
 const sized = CATALOGUE.find((p) => VARIANTS[p.id] && VARIANTS[p.id].sizes.length > 1)!;
 
 /* A set made of two real products — one with no volumes, one bought at its
@@ -458,6 +465,29 @@ describe("inventory", () => {
       expect(row).toBeTruthy();
       expect(row?.tracked).toBe(false);
       expect(row?.qty).toBe(0);
+    });
+
+    /* Twenty-nine products are sold in exactly ONE named volume — Touchable is
+       «250 мл», and its product page has always printed it. Until 18.09.2026
+       tools/build-catalogue-variants.mjs dropped every ladder shorter than two
+       rungs, so catalogueUniverse() gave each of them an unlabelled «один
+       объём» row while the panel bound barcodes and wrote counts under the
+       label. Both rows were drawn — the empty one from the universe, the real
+       one from the orphan rescue below — which is where 351 rows for 322
+       barcodes came from. One product, one volume, one row. */
+    it("gives a product sold in one named volume that volume's row, and only it", async () => {
+      const single = CATALOGUE.find((p) => VARIANTS[p.id]?.sizes.length === 1)!;
+      expect(single, "no one-volume product in the catalogue — the check would be vacuous").toBeTruthy();
+      const label = VARIANTS[single.id].sizes[0];
+
+      /* Written the way the panel writes it: against the label the browser's
+         catalogue shows, which is the whole point of the pair agreeing. */
+      await move({ productId: single.id, variant: label, delta: 3, reason: "goods_in" });
+
+      const mine = (await getLevels({ q: single.id })).filter((r) => r.productId === single.id);
+      expect(mine.map((r) => r.variant)).toEqual([label]);
+      expect(mine[0].qty).toBe(3);
+      expect(mine[0].tracked).toBe(true);
     });
 
     it("filters to low/out/untracked", async () => {
