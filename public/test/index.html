@@ -419,6 +419,7 @@
       reportH: "Забрать ответы текстом",
       reportSub: "Готовый список ответов и замечаний — переслать в чат или вставить в письмо.",
       copy: "Скопировать ответы",
+      reportPart: "(здесь только то, что было видно на экране — список был отфильтрован)\n",
       syncNow: "Сохранить на сервер сейчас",
       copied: "Скопировано.",
       reportAria: "Ответы текстом",
@@ -511,6 +512,7 @@
       reportH: "Take the answers as text",
       reportSub: "A ready-made list of answers and remarks — to forward in a chat or paste into an e-mail.",
       copy: "Copy answers",
+      reportPart: "(only what was on screen — the list was filtered)\n",
       syncNow: "Save to the server now",
       copied: "Copied.",
       reportAria: "Answers as text",
@@ -1007,17 +1009,27 @@
     node.className = "bar__state" + (warn ? " bar__state--warn" : "");
   }
 
+  /* The one predicate the screen and «Скопировать ответы» both ask. They used
+     to disagree: the list narrowed to 26 rows and the copy still pasted all
+     177, so the whole point of the filter was lost at the moment of sending
+     (Dim, 18.09.2026). Anything that filters must go in here, not beside it. */
+  function isShown(id) {
+    var item = state.items[id];
+    if (!item) return false;
+    var mine = state.filter === "all" || item.who === state.filter || item.who === "both";
+    /* «Только без ответа» counts a stale answer as no answer — the two
+       filters have to agree with the number in the bar, or one of them is
+       lying to somebody working down the list. */
+    var open = !state.onlyOpen || !state.answers[id] || isStale(id);
+    var marked = !state.onlyMarked || !!markOf(item);
+    return mine && open && marked;
+  }
+
   function applyFilters() {
     for (var i = 0; i < state.ids.length; i++) {
-      var id = state.ids[i], node = state.nodes[id], item = state.items[id];
+      var id = state.ids[i], node = state.nodes[id];
       if (!node) continue;
-      var mine = state.filter === "all" || item.who === state.filter || item.who === "both";
-      /* «Только без ответа» counts a stale answer as no answer — the two
-         filters have to agree with the number in the bar, or one of them is
-         lying to somebody working down the list. */
-      var open = !state.onlyOpen || !state.answers[id] || isStale(id);
-      var marked = !state.onlyMarked || !!markOf(item);
-      node.hidden = !(mine && open && marked);
+      node.hidden = !isShown(id);
     }
     /* A section whose every item is filtered away hides its heading too —
        otherwise a phone screen fills with headings and nothing under them. */
@@ -1223,17 +1235,22 @@
     out.push($("[data-tp-progress]").textContent);
     out.push("");
     var areas = plan.areas || [], items = plan.items || [], i, j;
+    /* Only what is on the screen right now. And say so at the top: a report
+       that silently holds 26 of 177 checks, with no line admitting it, reads
+       to whoever receives it as the whole shop having been tested. */
+    var narrowed = state.filter !== "all" || state.onlyOpen || state.onlyMarked;
+    if (narrowed) out.push(t("reportPart"));
     var seen = {};
     for (i = 0; i < areas.length; i++) {
       var rows = [];
-      for (j = 0; j < items.length; j++) if (items[j].area === areas[i].id) { rows.push(items[j]); seen[items[j].id] = 1; }
+      for (j = 0; j < items.length; j++) if (items[j].area === areas[i].id && isShown(items[j].id)) { rows.push(items[j]); seen[items[j].id] = 1; }
       if (!rows.length) continue;
       out.push("## " + say(areas[i]).name);
       for (j = 0; j < rows.length; j++) out.push(line(rows[j]));
       out.push("");
     }
     var rest = [];
-    for (j = 0; j < items.length; j++) if (!seen[items[j].id]) rest.push(items[j]);
+    for (j = 0; j < items.length; j++) if (!seen[items[j].id] && isShown(items[j].id)) rest.push(items[j]);
     if (rest.length) {
       out.push(t("reportOther"));
       for (j = 0; j < rest.length; j++) out.push(line(rest[j]));
