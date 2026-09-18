@@ -17,6 +17,7 @@ import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
 import { cleanDelivery } from "@/lib/delivery";
+import { mergeParcel } from "@/lib/shipping/parcel";
 import { cleanBankFilter } from "@/lib/payments/methods";
 import { stampUnpaidFloor } from "@/lib/flows";
 
@@ -129,6 +130,15 @@ export async function PUT(req: Request) {
          nobody closed is closed anyway (0 = never), and whether the carrier's
          own status may close it — src/lib/delivery.ts. Same first door. */
       if (key === "delivery") value = cleanDelivery(value);
+      /* «Коробка магазина»: the one carton the shop declares when Montonio
+         asks for dimensions, plus the locker door to pre-select. Clamped to a
+         real box (1–200 cm) and to Montonio's own five sizes before anything
+         is stored — src/lib/shipping/parcel.ts. `recent` is the panel's
+         read-only half: it is written by the label route, not by a form, so a
+         save that does not mention it keeps what is stored rather than
+         erasing the very history the suggestion is learned from. Same first
+         door. */
+      if (key === "shipping_parcel") value = await mergeParcel(value);
       /* «Какие банки показывать»: the bank codes the checkout may draw as
          chips. Montonio offers no way to shorten its own list, so the list is
          shortened here — an array of its codes, uppercased, de-duplicated and

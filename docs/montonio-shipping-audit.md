@@ -507,9 +507,30 @@ Recommended, not implemented — each needs a decision, or moves money:
 
 1. Act on `shipment.registrationFailed` and expose `PATCH /shipments/{id}`
    (1.4, 1.5). Highest value now that the webhook payload is readable.
-2. Read `constraints.parcelDimensionsRequired` and declare a carton (1.6).
-3. Set `defaultLockerSize` on the SmartPosti contract, or send `lockerSize`, or
-   the drop-off code on the A4 slip will stay blank (§4).
+2. ~~Read `constraints.parcelDimensionsRequired` and declare a carton (1.6).~~
+   **Done on `r24-shipping`, 18.09.2026.** The flag is read per
+   carrier/method/country (`parcelDimensionsRequired()` in
+   `src/lib/shipping/montonio.ts`) and, where it is true, the shop's declared
+   carton goes out in metres. The carton is `settings.shipping_parcel`
+   (`src/lib/shipping/parcel.ts`), 25 × 18 × 10 cm by default and editable in
+   the panel, with a one-tap per-parcel override on the order card.
+3. ~~Set `defaultLockerSize` on the SmartPosti contract, or send `lockerSize`~~
+   **Half done on `r24-shipping`.** `lockerSize` is now sent, chosen at label
+   time from a default derived from the last twenty labels. The contract's own
+   `defaultLockerSize` is still worth setting as the safety net and the panel
+   says so — that half is in Montonio's Partner System and is the owner's.
 4. Rebuild the tariff mirror **with keys**, so locker prices come from the
    `parcelMachine` subtype rather than a subtype-blind `contract-prices` row
-   (3.1). Do this before offering lockers outside the Baltics.
+   (3.1). ~~Do this before offering lockers outside the Baltics.~~ The lockers
+   were opened first, on the owner's decision of 18.09.2026 knowing the prices
+   are approximate — a wrong tier lands on the margin and never on the
+   customer, because the shop charges one fixed price per country. It is still
+   the first thing to re-check once the keys land.
+5. **New, found while doing 2.** `fetchMontonioRates()` discards
+   `calculationDetails.estimatedParcels[]`, and that block is where Montonio
+   states `chargeableWeight` as *«max of actual and volumetricWeight»*. The
+   reference's own worked example is 20 × 15 × 10 cm → `volumetricWeight` 0.75
+   kg, which is 3000 cm³ over 4000 — or over 5000 with the documented
+   `bufferApplied` on top. Either way the divisor is **not** documented, only
+   the example. Reading that block would let the shop see what it is actually
+   billed for instead of inferring it.

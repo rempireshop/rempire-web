@@ -38,6 +38,13 @@ import {
   saveShipmentOnOrder,
   shipmentOnOrder,
 } from "@/lib/shipping/montonio";
+import {
+  getParcelSettings,
+  noteLockerSize,
+  suggestedLockerSize,
+  takesLockerSize,
+  toLockerSize,
+} from "@/lib/shipping/parcel";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,11 +52,39 @@ export const dynamic = "force-dynamic";
 /** Which failures are the operator's fault (400) and which are ours (502). */
 const CLIENT_ERRORS = new Set(["not_shippable", "point_unresolved", "no_courier_service"]);
 
+/**
+ * `{ length, width, height }` in centimetres from the panel → metres for
+ * Montonio, or `null` when the body carries no usable box.
+ *
+ * All three sides or none: two of them describe nothing, and a parcel with a
+ * length and no height is a 400 from Montonio rather than a smaller one.
+ * Bounds are the same 1–200 cm the panel's fields carry, so a value that got
+ * past the screen is still refused here.
+ */
+function cleanBox(raw: unknown): { length: number; width: number; height: number } | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const out: Record<string, number> = {};
+  for (const side of ["length", "width", "height"] as const) {
+    const cm = Number(x[side]);
+    if (!Number.isFinite(cm) || cm <= 0 || cm > 200) return null;
+    out[side] = Math.round((cm / 100) * 100) / 100;
+  }
+  return out as { length: number; width: number; height: number };
+}
+
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
-  let body: { orderId?: unknown; order?: unknown; weight?: unknown; carrier?: unknown };
+  let body: {
+    orderId?: unknown;
+    order?: unknown;
+    weight?: unknown;
+    carrier?: unknown;
+    lockerSize?: unknown;
+    box?: unknown;
+  };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -112,11 +147,37 @@ export async function POST(req: Request) {
   }
   if (!claimed) return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
 
+  /* The locker door, and the only place it can honestly be decided: the owner
+     is standing over the box he has just packed. The panel pre-selects one and
+     posts it, so pressing the button is a confirmation and not a question —
+     but the *default* is the server's, not the panel's, so a press from a tab
+     that never loaded the settings (or from the assistant, or from a test)
+     still books with the size he has been shipping rather than with none at
+     all. Ренат, 18.09.2026: «use recommended, but we have also option that
+     some default is set and used + automate it». */
+  const parcel = await getParcelSettings();
+  const lockerSize = toLockerSize(body.lockerSize) ?? suggestedLockerSize(parcel);
+
+  /* «Другая коробка» — this parcel's own measurements, in **centimetres**,
+     which is what the three fields on the card say and what the owner reads
+     off a tape. They are converted once, here, because `POST /shipments` is
+     metric (reference § Create Shipment → parcels) while
+     `POST /shipping-methods/rates` is centimetric; both are right and neither
+     is to be made to agree with the other.
+     An explicit box always goes out. The shop's *declared* carton does not —
+     createMontonioShipment() fills that in only where Montonio says the route
+     requires dimensions, so nothing this adds can move a size tier on a
+     booking that already worked. This one is the owner saying «эта посылка
+     другая», and it is honoured. */
+  const box = cleanBox(body.box);
+
   let shipment;
   try {
     shipment = await createMontonioShipment(order, {
       weight: typeof body.weight === "number" && body.weight > 0 ? body.weight : undefined,
       carrier: typeof body.carrier === "string" && body.carrier ? body.carrier : undefined,
+      lockerSize,
+      ...(box ?? {}),
     });
   } catch (err) {
     // nothing was booked, so the button must work again at once
@@ -140,6 +201,15 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "store_failed", shipment }, { status: 500 });
   }
 
+  /* What he actually pressed, remembered, so the next label offers it without
+     being asked. Only for a shipment that could carry a size at all — a
+     courier parcel and an Omniva locker never take one, and counting them
+     would teach the suggestion a number nobody chose. Best effort: the parcel
+     is booked, and a forgotten size is not a failed label. */
+  if (shipment.method === "pickupPoint" && takesLockerSize(shipment.carrier)) {
+    await noteLockerSize(lockerSize);
+  }
+
   await writeAuditSafe("admin", "shipment.create", {
     orderId: order.id,
     number: order.number,
@@ -147,6 +217,7 @@ export async function POST(req: Request) {
     shipmentId: shipment.shipmentId,
     carrier: shipment.carrier,
     trackingCode: shipment.trackingCode,
+    lockerSize: shipment.method === "pickupPoint" && takesLockerSize(shipment.carrier) ? lockerSize : undefined,
   });
 
   // The status is the order's own: still `paid` (or whatever it was) — see the header.

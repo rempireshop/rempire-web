@@ -148,8 +148,13 @@ describe("the toast after «Отметить оплаченным»", () => {
 async function makeLabel(answer: Reply): Promise<string[]> {
   const toasts: string[] = [];
   const shipErr = src.slice(src.indexOf("var SHIP_ERR = {"), src.indexOf("};", src.indexOf("var SHIP_ERR = {")) + 2);
+  /* `admShipBody` and `admShipSpent` are the label's two label-time extras —
+     the locker door and «Другая коробка» — and both read panel state this
+     harness has none of, so they are stubbed rather than sliced. What is under
+     test here is the toast, and the toast does not depend on either. */
   const run = new Function(
     "SRV", "admOrderById", "render", "apiSend", "demoApply", "toast", "loadSrvOrders", "countryName",
+    "admShipBody", "admShipSpent",
     [shipErr, slice("shipCourierErr"), slice("srvCreateShipment"), "return srvCreateShipment;"].join("\n"),
   )(
     { shipBusy: false },
@@ -160,6 +165,8 @@ async function makeLabel(answer: Reply): Promise<string[]> {
     (m: string) => toasts.push(m),
     () => {},
     (c: string) => c,
+    (id: string) => ({ orderId: id }),
+    () => {},
   ) as (id: string) => void;
   run("ord-1");
   await flush();
