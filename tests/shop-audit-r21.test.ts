@@ -102,15 +102,29 @@ describe("resumeCart: the abandoned-cart link and stock", () => {
     return `${Buffer.from(JSON.stringify({ i: items }), "utf8").toString("base64url")}.sig`;
   }
 
-  /** The real resumeCart() over a two-product catalogue, one of them out. */
+  /** The real resumeCart() over a three-product catalogue: one on sale, one the
+      owner has marked out, and one whose SECOND volume has been counted to
+      zero while the product itself is still for sale. `sizeStockOf` and
+      `sizeOut` are sliced in rather than stubbed — they are the two lines the
+      per-size backstop is, and a stub here would test the stub. */
   function run(items: Array<{ id: string; q?: number; s?: number }>) {
     const CATALOGUE: Product[] = [
       { id: "in", brand: "B", name: "In", cat: "hair", stock: "in", price: 10 },
       { id: "gone", brand: "B", name: "Gone", cat: "hair", stock: "out", price: 10 },
+      {
+        id: "half",
+        brand: "B",
+        name: "Half",
+        cat: "hair",
+        stock: "in",
+        price: 10,
+        sizes: ["250 мл", "500 мл"],
+        stockVar: { "250 мл": "in", "500 мл": "out" },
+      } as Product,
     ];
     const S = { cart: [] as Array<{ id: string; size: number; qty: number }> };
     const toasts: string[] = [];
-    const body = `${slice("resumeCart")} resumeCart();`;
+    const body = `${slice("sizeStockOf")} ${slice("sizeOut")} ${slice("resumeCart")} resumeCart();`;
     new Function("location", "CATALOGUE", "S", "CART_MAX_QTY", "persist", "history", "render", "toast", body)(
       { search: `?resume=${encodeURIComponent(token(items))}`, pathname: "/shop2/" },
       CATALOGUE,
@@ -137,6 +151,24 @@ describe("resumeCart: the abandoned-cart link and stock", () => {
     const out = run([{ id: "gone", q: 1 }]);
     expect(out.cart).toEqual([]);
     expect(out.toasts).toEqual([]);
+  });
+
+  it("drops the VOLUME that sold out and keeps the one that did not", () => {
+    /* The letter is written when the basket is abandoned and read days later,
+       so a volume can easily go in between. addToCart() grew this check on
+       18.09.2026 and resumeCart() did not, although its comment claims «the
+       same backstop addToCart() has» — two branches, merged without a conflict
+       (audit F32). Until then the 500 мл came back, sat in the basket looking
+       ordinary, and the checkout refused the whole order at the last tap. */
+    expect(run([{ id: "half", q: 1, s: 1 }]).cart).toEqual([]);
+    expect(run([{ id: "half", q: 1, s: 0 }]).cart).toEqual([{ id: "half", size: 0, qty: 1 }]);
+  });
+
+  it("keeps a volume nobody has counted — absent is not «out»", () => {
+    /* The 17.09.2026 decision, and the reason sizeStockOf() is sliced in here
+       rather than stubbed: a product with no `stockVar` at all keeps the
+       owner's word, and every line of such a letter still comes back. */
+    expect(run([{ id: "in", q: 1, s: 3 }]).cart).toEqual([{ id: "in", size: 3, qty: 1 }]);
   });
 });
 
