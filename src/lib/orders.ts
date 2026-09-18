@@ -849,7 +849,32 @@ function variantOf(
 ): { label: string | null; price: number | null } {
   // a custom product carries its own size ladder (customLookup); the file's otherwise
   const v = table ?? VARIANTS[productId];
-  if (variant == null || variant === "") return { label: null, price: null };
+  /* No size on the line. A ladder with exactly ONE named rung has no choice
+     to make, so the rung is the answer rather than a shrug — and it has to
+     be, because the shelf row, the ledger, the barcode and the panel's
+     «Остаток» are all keyed on that label (ladderOf() in src/lib/inventory.ts,
+     db/migrations/194_one_size_stock_rows.sql). The twenty-nine one-size
+     products reach the server with no size at all: public/shop/catalogue2.js
+     gives them `sizes` and no `prices`, and lineVariant() in
+     public/shop2/app.js only speaks in price-ladder indexes. Left nameless
+     the line said '' while everything that counts the bottle said «250 мл» —
+     move() then found no tracking rows under '' and skipped the sale in
+     silence, so a paid web order never came off «Склад» and a refund never
+     put it back. This is the same rule bundlePartVariant() has always applied
+     to a set's parts.
+
+     The price does not move: for all twenty-nine the one rung's price IS the
+     base price the line was charged at before (and where the owner has typed
+     his own, the `ownLadder` branch in priceItems() already charged rung one).
+
+     Two rungs are a real choice and the server has no business picking one:
+     that line stays nameless, exactly as before. So does a rung with no label
+     at all — «один объём» IS the '' row, which is what overrideLadder() and
+     ladderLabels() both already say. */
+  if (variant == null || variant === "") {
+    const only = v && v.sizes.length === 1 && v.sizes[0] ? v : null;
+    return only ? { label: only.sizes[0], price: num(only.prices[0], NaN) } : { label: null, price: null };
+  }
   if (!v) return { label: String(variant), price: null };
 
   // an index ("0", 2) or the label itself ("500 мл")

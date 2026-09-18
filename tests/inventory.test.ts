@@ -16,7 +16,7 @@ import {
   setQty,
 } from "@/lib/inventory";
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
-import { createOrder, getOverrides, setOrderStatus, upsertOverride } from "@/lib/orders";
+import { createOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type OrderLike } from "@/lib/payments/apply";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
@@ -825,6 +825,100 @@ describe("inventory", () => {
         channel: "pos",
       } as Parameters<typeof createOrder>[0]);
       expect(till.items[0].variant).toBe(sizes[1]);
+    });
+  });
+
+  /* Twenty-nine products are sold in exactly ONE named size — Touchable is
+     «250 мл» and nothing else (f1ee6c3, and db/migrations/194_one_size_stock_rows.sql
+     for the rows the two halves of the shop had already written). Their shelf
+     row, their ledger and the panel's barcode all key on that label. The
+     browser sends no size at all for them: public/shop/catalogue2.js gives
+     them `sizes` and no `prices`, and lineVariant() in public/shop2/app.js
+     only speaks in price-ladder indexes, so the line reaches the server with
+     `variant: null`.
+
+     That is a key mismatch, not a missing size — the rung is written down and
+     there is only one of it. Left unresolved the order line says '' while
+     everything that counts the bottle says «250 мл», and a paid web sale was
+     skipped by move() as a sale on an untracked variant with nothing but a
+     console line to show for it. */
+  describe("a product sold in ONE named size is keyed by that name, not by ''", () => {
+    const oneRung = CATALOGUE.find((p) => p.s === "in" && VARIANTS[p.id]?.sizes.length === 1)!;
+    const rung = VARIANTS[oneRung.id].sizes[0];
+
+    it("prices the line at the rung and stores the rung's label on it", async () => {
+      const { lines } = await priceItems([{ id: oneRung.id, qty: 1 }]);
+      expect(lines[0].variant).toBe(rung);
+      // the one rung's price IS the base price for all twenty-nine: resolving
+      // the label must not move a single cent of what the shopper is charged
+      expect(lines[0].price).toBe(oneRung.p);
+    });
+
+    /* The browser sends no size; the decrement is the real payment
+       transition, not setOrderStatus() — «paid» typed by hand moves nothing,
+       because by then applyPaymentResult() already has. */
+    async function buyTwo(email: string) {
+      const order = await createOrder({
+        items: [{ id: oneRung.id, qty: 2 }], // exactly what the browser sends: no size
+        customer: { name: "Т", email, phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await applyPaymentResult(
+        { id: order.id, number: order.number, status: "new", total: order.total, items: order.items },
+        { orderRef: order.number, status: "paid", providerRef: "x", amount: Number(order.total), currency: "EUR" },
+        "mock",
+        { setOrderPayment: async () => ({}), setOrderStatus: async () => ({}) },
+      );
+      return order;
+    }
+
+    it("takes a paid web sale off the labelled shelf row", async () => {
+      await move({ productId: oneRung.id, variant: rung, delta: 10, reason: "goods_in" });
+      const order = await buyTwo("onesize@example.com");
+
+      expect((await getLevel(oneRung.id, rung))?.qty).toBe(8);
+      // and nothing was written under the '' key the shop used to move against
+      expect(await getLevel(oneRung.id, "")).toBeNull();
+      const moves = await listMoves({ productId: oneRung.id, reason: "sale_web" });
+      expect(moves).toHaveLength(1);
+      expect(moves[0].delta).toBe(-2);
+      expect(moves[0].ref).toBe(order.number);
+    });
+
+    /* The way back, for an order placed from here on: the label is on the
+       line, so the refund puts the bottles on the same row the sale took them
+       from, and never conjures the '' row back into existence. Paid through
+       setOrderStatus() here, which does not decrement (the payment transition
+       has that job), so the ten on the shelf become twelve — the arithmetic
+       the refund tests above use; what is being pinned is the KEY.
+
+       An order paid BEFORE migration 194 carries '' and is skipped instead:
+       that is deliberate and stays that way — 194 re-keyed the history, and
+       recreating an orphan row under '' would be worse than returning
+       nothing. */
+    it("puts a refunded one-size order back on that same row", async () => {
+      await move({ productId: oneRung.id, variant: rung, delta: 10, reason: "goods_in" });
+      const order = await createOrder({
+        items: [{ id: oneRung.id, qty: 2 }],
+        customer: { name: "Т", email: "onesize-refund@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await setOrderStatus(order.id, "paid", "test");
+      await setOrderStatus(order.id, "refunded", "test");
+
+      expect((await getLevel(oneRung.id, rung))?.qty).toBe(12);
+      expect(await getLevel(oneRung.id, "")).toBeNull();
+      const back = await listMoves({ productId: oneRung.id, reason: "return" });
+      expect(back).toHaveLength(1);
+      expect(back[0].delta).toBe(2);
+    });
+
+    /* The other half of the same rule. Two rungs are a real choice and the
+       server has no business picking one: a line that names no size stays
+       nameless, exactly as before. */
+    it("still refuses to guess a size on a ladder with more than one rung", async () => {
+      const { lines } = await priceItems([{ id: sized.id, qty: 1 }]);
+      expect(lines[0].variant).toBeNull();
     });
   });
 

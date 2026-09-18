@@ -5183,6 +5183,8 @@
       "why": "Продажа, не списавшая товар, — это вторая продажа той же бутылки.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-18T15:50:00.000Z",
       "en": {
         "title": "A website sale takes stock down",
         "steps": [
@@ -5196,6 +5198,43 @@
           "Cancelling the order puts the stock back."
         ],
         "why": "A sale that leaves stock untouched sells the same bottle twice."
+      }
+    },
+    {
+      "id": "stock-web-sale-one-size",
+      "area": "stock",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Продажа товара с одним объёмом списывает остаток",
+      "steps": [
+        "Открыть «Склад» и найти Touchable — у него один объём, «250 мл».",
+        "Выписать его остаток именно у строки «250 мл».",
+        "Купить Touchable в магазине и оплатить.",
+        "Вернуться на «Склад» и посмотреть остаток этой же строки."
+      ],
+      "expect": [
+        "Остаток строки «250 мл» уменьшился ровно на купленное количество.",
+        "Второй строки того же товара — без объёма — на «Складе» не появилось."
+      ],
+      "why": "Двадцать девять товаров продаются в одном объёме, и магазин не передаёт его название. Их продажа списывалась по пустому ключу, то есть не списывалась вовсе.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T15:50:00.000Z",
+      "en": {
+        "title": "A sale of a one-size product takes stock down",
+        "steps": [
+          "Open «Склад» and find Touchable — it has one size, «250 мл».",
+          "Write down the stock on that «250 мл» row.",
+          "Buy Touchable in the shop and pay.",
+          "Go back to «Склад» and look at that same row."
+        ],
+        "expect": [
+          "The «250 мл» row is down by exactly the quantity bought.",
+          "No second row for that product — one with no size — has appeared on «Склад»."
+        ],
+        "why": "Twenty-nine products are sold in one size and the shop does not send its name. Their sales were written off against the empty key, which is to say not written off at all."
       }
     },
     {
