@@ -360,7 +360,13 @@ export const withOwnerStock = (list, overrides) =>
 
 /* ---------- copy, one table per language -------------------------------- */
 
-/* Mirrors the strings setHead() in app.js uses, so the tab title does not
+/* Four cells of this table had drifted from app.js by 04.09.2026 and were
+   corrected on 19.09.2026 (audit § 9.3): ET «vähe»/«pole saadaval» against the
+   shop's «viimased»/«otsas», and both tax lines. The static Estonian page said
+   a product was «pole saadaval» and the rendered DOM said «otsas» a moment
+   later, in the same place, about the same bottle. Nothing compares the two
+   tables; when you touch either, touch both.
+   Mirrors the strings setHead() in app.js uses, so the tab title does not
    change under the shopper when the script takes over. */
 export const T = {
   RU: {
@@ -418,9 +424,9 @@ export const T = {
       "Tarne üle Eesti ja Baltikumi, järeletulek Tallinnas Mardi 1.",
     catsTitle: "Osakonnad", brandsTitle: "Brändid",
     sizes: "Suurused", description: "Kirjeldus",
-    inStock: "Laos", low: "vähe", out: "pole saadaval",
+    inStock: "Laos", low: "viimased", out: "otsas",
     from: "alates ",
-    tax: "Hinnad sisaldavad makse. Tarne arvutatakse vormistamisel.",
+    tax: "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
     lang: "Keel", loading: "Laeme poodi…",
     catDesc: c => `${c} Rempire'i poes Tallinnas. Tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
@@ -453,7 +459,7 @@ export const T = {
     sizes: "Sizes", description: "Description",
     inStock: "In stock", low: "low stock", out: "out of stock",
     from: "from ",
-    tax: "Taxes included. Shipping is calculated at checkout.",
+    tax: "Taxes included. Delivery is calculated at checkout.",
     lang: "Language", loading: "Loading the shop…",
     catDesc: c => `${c} at Rempire, Tallinn. Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,

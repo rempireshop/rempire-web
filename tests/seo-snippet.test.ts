@@ -70,7 +70,10 @@ describe("the meta description says what it is and why to buy it", () => {
 
   it("says «нет в наличии» when there is none, in every language", () => {
     expect(descFrom("Воск для укладки", T.RU, "15 €", T.RU.out)).toContain("· нет в наличии ·");
-    expect(descFrom("Viimistlusvaha", T.ET, "15 €", T.ET.out)).toContain("· pole saadaval · tarne Eestis ja Baltikumis");
+    /* «otsas», not «pole saadaval»: this table had drifted from the shop's own
+       dictionary, so the static Estonian page said one word and the DOM said
+       the other a moment later about the same bottle (audit § 9.3). */
+    expect(descFrom("Viimistlusvaha", T.ET, "15 €", T.ET.out)).toContain("· otsas · tarne Eestis ja Baltikumis");
     expect(descFrom("Styling wax", T.EN, "15 €", T.EN.out)).toContain("· out of stock · delivery across Estonia and the Baltics");
   });
 
@@ -155,6 +158,36 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
     expect(app).toContain("unentity(stripTags(descFor(p))).slice(0, 500)");
     /* And the title's third rung. */
     expect(app).toContain('fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText)');
+  });
+
+  /* The words themselves, not only the shape of the sentence. Four cells of
+     this table had drifted from app.js by 04.09.2026 and nothing compared
+     them: the static Estonian page said a bottle was «pole saadaval» and the
+     DOM said «otsas» a moment later, in the same place, about the same bottle
+     (audit § 9.3). Bounded the way tools/i18n-gaps.mjs bounds the dictionary. */
+  it("uses the shop's own words for stock and tax, in ET and EN", () => {
+    const dict = app.slice(app.indexOf("var UI = {"), app.indexOf("var UI_RX = ["));
+    const enAt = dict.indexOf("EN: {");
+    const half = { ET: dict.slice(dict.indexOf("ET: {"), enAt), EN: dict.slice(enAt) };
+    const TAX = "Налоги включены. Доставка рассчитается при оформлении.";
+
+    /** What app.js translates `ru` to, in that half of the dictionary. */
+    const says = (lang: "ET" | "EN", ru: string): string => {
+      const at = half[lang].indexOf(`${JSON.stringify(ru)}:`);
+      expect(at, `${lang} has no entry for «${ru}»`).toBeGreaterThan(-1);
+      const after = half[lang].slice(at + JSON.stringify(ru).length + 1);
+      const open = after.indexOf('"');
+      return JSON.parse(after.slice(open, after.indexOf('",', open) + 1)) as string;
+    };
+
+    for (const lang of ["ET", "EN"] as const) {
+      expect(T[lang].inStock, `${lang}.inStock`).toBe(says(lang, "В наличии"));
+      expect(T[lang].low, `${lang}.low`).toBe(says(lang, "мало"));
+      expect(T[lang].out, `${lang}.out`).toBe(says(lang, "нет в наличии"));
+      expect(T[lang].tax, `${lang}.tax`).toBe(says(lang, TAX));
+    }
+    // …and the Russian side is the keys themselves
+    expect([T.RU.inStock, T.RU.low, T.RU.out, T.RU.tax]).toEqual(["В наличии", "мало", "нет в наличии", TAX]);
   });
 
   it("clips at a word the way clip() does", () => {

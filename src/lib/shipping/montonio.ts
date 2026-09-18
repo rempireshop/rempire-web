@@ -39,6 +39,7 @@ import {
   parcelMetres,
   takesLockerSize,
   toLockerSize,
+  type LockerSize,
 } from "@/lib/shipping/parcel";
 import type { ParcelPoint } from "@/lib/parcel-points";
 import type { Order } from "@/lib/orders";
@@ -207,6 +208,18 @@ export interface MontonioShipment {
   trackingUrl: string;
   /** parcels[0].dropOffPin — hand the parcel over without a printed label. */
   dropOffPin: string;
+  /**
+   * The door size actually SENT on `shippingMethod.lockerSize`, or undefined.
+   *
+   * Reported rather than re-derived, because the two sides disagreed. The
+   * request sends a size only when the carrier HINT takes one; the route that
+   * records the choice and teaches the suggestion asked the same question of
+   * the carrier in Montonio's REPLY. An order whose stored carrier is empty
+   * and whose point is a Montonio UUID books SmartPosti with no size at all
+   * and was then recorded as having chosen one, in the audit row too (audit
+   * F28.2). What was sent is knowable exactly here and nowhere else.
+   */
+  lockerSize?: LockerSize;
   labelUrl?: string;
   /** The page the stored labelUrl was made for — a request for the other
       size makes a new file rather than serving this one. */
@@ -1222,6 +1235,7 @@ export async function createMontonioShipment(
   }
   let carrier = hint;
   let shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
+  let sentLockerSize: LockerSize | undefined;
   if (method === "parcel") {
     shippingMethod = { type: "pickupPoint", id: await resolvePickupPointId(order, hint) };
     /* The door, chosen over the packed box rather than fixed in a constant —
@@ -1231,6 +1245,7 @@ export async function createMontonioShipment(
        without it, because an unknown field is a 400 and not a courtesy. */
     const size = toLockerSize(opts.lockerSize);
     if (size && takesLockerSize(carrier)) shippingMethod.lockerSize = size;
+    sentLockerSize = shippingMethod.lockerSize ? size ?? undefined : undefined;
   } else {
     const service = await resolveCourierService(config, hint, country);
     shippingMethod = { type: "courier", id: service.id };
@@ -1371,6 +1386,7 @@ export async function createMontonioShipment(
     carrier: str(body.shippingMethod?.carrierCode) || carrier,
     country: (str(body.shippingMethod?.countryCode) || country).toUpperCase(),
     method: shippingMethod.type,
+    lockerSize: sentLockerSize,
     trackingCode: str(first?.carrierParcelId),
     trackingUrl: str(first?.trackingLink),
     dropOffPin: str(first?.dropOffPin),

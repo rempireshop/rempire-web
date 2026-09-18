@@ -66,7 +66,6 @@ import {
   getParcelSettings,
   noteLockerSize,
   suggestedLockerSize,
-  takesLockerSize,
   toLockerSize,
 } from "@/lib/shipping/parcel";
 
@@ -295,8 +294,15 @@ export async function POST(req: Request) {
      courier parcel and an Omniva locker never take one, and counting them
      would teach the suggestion a number nobody chose. Best effort: the parcel
      is booked, and a forgotten size is not a failed label. */
-  if (shipment.method === "pickupPoint" && takesLockerSize(shipment.carrier)) {
-    await noteLockerSize(lockerSize);
+  /* …and only a size that was really DECLARED. `shipment.lockerSize` is what
+     the request actually put on the wire; until 19.09.2026 this asked whether
+     the carrier in Montonio's REPLY takes a size, while the request had asked
+     the same of the carrier HINT. An order with an empty stored carrier and a
+     Montonio point UUID books SmartPosti with no size at all — and was then
+     recorded as having chosen one, teaching the suggestion a door nobody
+     picked, with an audit row claiming it too (audit F28.2). */
+  if (shipment.method === "pickupPoint" && shipment.lockerSize) {
+    await noteLockerSize(shipment.lockerSize);
   }
 
   await writeAuditSafe("admin", "shipment.create", {
@@ -306,7 +312,7 @@ export async function POST(req: Request) {
     shipmentId: shipment.shipmentId,
     carrier: shipment.carrier,
     trackingCode: shipment.trackingCode,
-    lockerSize: shipment.method === "pickupPoint" && takesLockerSize(shipment.carrier) ? lockerSize : undefined,
+    lockerSize: shipment.lockerSize,
   });
 
   // The status is the order's own: still `paid` (or whatever it was) — see the header.
