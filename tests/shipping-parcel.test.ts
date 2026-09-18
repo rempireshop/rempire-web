@@ -208,6 +208,32 @@ describe("public/shop2/app.js says the same thing", () => {
     expect(literal("LOCKER_SIZES")).toEqual([...LOCKER_SIZES]);
   });
 
+  /**
+   * The panel prints «около N кг» beside the three boxes from its own copy of
+   * the formula (`parcelVolKg`), and since 19.09.2026 that same number is what
+   * `POST /shipments` declares as the parcel's weight. Two copies of an
+   * arithmetic nobody can look up — the reference prints no formula, only the
+   * worked example 20 × 15 × 10 → 0.75 kg — is exactly the pair that drifts
+   * quietly. So they are held equal here rather than in a comment.
+   */
+  it("prints the same volumetric weight in the panel as the shop declares", () => {
+    const at = app.indexOf("function parcelVolKg(");
+    expect(at, "public/shop2/app.js no longer has parcelVolKg()").toBeGreaterThan(-1);
+    const mirror = new Function(
+      `${app.slice(at, app.indexOf("\n", at))} return parcelVolKg;`,
+    )() as (b: { length: number; width: number; height: number }) => number;
+
+    for (const box of [
+      PARCEL_DEFAULTS,
+      { length: 20, width: 15, height: 10 }, // the reference's own worked example
+      { length: 30, width: 30, height: 30 }, // REFERENCE_PARCEL, the expensive one
+      { length: 1, width: 1, height: 1 },
+      { length: 200, width: 200, height: 200 },
+    ]) {
+      expect(mirror(box), `${box.length}×${box.width}×${box.height}`).toBe(volumetricKg(box));
+    }
+  });
+
   it("offers a pickup point in exactly the countries the server prices one for", () => {
     const by = literal("CARRIERS_BY_COUNTRY") as Record<string, string[]>;
     const open = Object.keys(by).filter((c) => c !== "EU" && by[c].length > 0).sort();
