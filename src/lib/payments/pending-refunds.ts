@@ -15,10 +15,16 @@
  * Montonio quietly cancels ten days later. `pendingRefunds()` is what makes it
  * findable: one query, read-only, admin-only, no writes and no decisions.
  *
- * The clock runs from the refund entry's own `at` — the last thing the shop
- * heard about it, which a PENDING→PENDING webhook refreshes and a
- * PENDING→SUCCESSFUL one takes out of this list entirely (the entry stops
- * being `pending`).
+ * The clock runs from the entry's `since` — when the refund was FIRST written
+ * down. It used to run from `at`, the last thing the shop heard, and that is
+ * the one stamp it cannot run on: Montonio retries an under-funded refund by
+ * itself, every notice carries a fresh `at`, and «десять дней» measured that
+ * way means «ten days since the last notice». A refund Montonio nudged every
+ * few days could never become overdue — which is precisely the refund the flag
+ * exists for. `at` is still what the panel shows as «последний ответ».
+ *
+ * Entries written before 19.09.2026 carry no `since` and fall back to `at`,
+ * exactly as before.
  */
 import { query } from "@/lib/db";
 import { REFUND_PENDING_GIVEUP_DAYS, REFUND_PENDING_WATCH_HOURS } from "@/lib/montonio-problems";
@@ -32,7 +38,9 @@ export interface PendingRefund {
   amount: number;
   /** ISO stamp of the last thing we heard about it. */
   at: string;
-  /** Whole hours since then, for the panel's «висит N дней». */
+  /** ISO stamp of when it was first recorded — what `hours` counts from. */
+  since: string;
+  /** Whole hours since `since`, for the panel's «висит N дней». */
   hours: number;
   /** Past Montonio's own ten days: it has given up, the money stayed here. */
   overdue: boolean;
@@ -87,7 +95,8 @@ export async function pendingRefunds(
   for (const row of rows) {
     for (const r of refundsOf(row.payment)) {
       if (r.status !== "pending") continue;
-      const hours = hoursSince(r.at, now);
+      const since = r.since || r.at;
+      const hours = hoursSince(since, now);
       if (hours < minHours) continue;
       out.push({
         orderId: row.id,
@@ -95,6 +104,7 @@ export async function pendingRefunds(
         ref: r.ref,
         amount: r.amount,
         at: r.at,
+        since,
         hours,
         overdue: hours >= REFUND_PENDING_GIVEUP_DAYS * 24,
         to: r.to,

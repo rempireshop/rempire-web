@@ -101,6 +101,22 @@ export interface RefundEntry {
   status: RefundStatus;
   /** ISO timestamp of the last thing we heard about this refund. */
   at: string;
+  /**
+   * When this refund was FIRST written down — the clock Montonio's ten days
+   * run on, and the one `at` cannot be.
+   *
+   * `at` is the last thing we HEARD, and a PENDING→PENDING webhook (Montonio
+   * retries an under-funded refund, and every notice carries a fresh stamp)
+   * moves it forward. The countdown in src/lib/payments/pending-refunds.ts was
+   * therefore measuring «ten days since the last notice» rather than «ten days
+   * since the refund» — a refund Montonio nudges every few days could never
+   * become overdue at all, which is the one case the flag was built for.
+   *
+   * Set by foldRefund() the first time a `ref` is seen and never moved after
+   * that. Absent on every entry written before 19.09.2026, so every reader
+   * falls back to `at` the way it always did.
+   */
+  since?: string;
   /** `admin` for the order card, `webhook` for one made in Montonio's portal. */
   by?: string;
   detail?: string;
@@ -140,6 +156,7 @@ export function refundsOf(payment: unknown): RefundEntry[] {
       amount: money(num(r.amount)),
       status: refundStatus(r.status),
       at: typeof r.at === "string" ? r.at : "",
+      since: typeof r.since === "string" && r.since ? r.since : undefined,
       by: typeof r.by === "string" ? r.by : undefined,
       detail: typeof r.detail === "string" ? r.detail : undefined,
       to: r.to === "giftcard" ? ("giftcard" as const) : undefined,
@@ -164,6 +181,75 @@ export function giftRefundedTotal(payment: unknown): number {
       .filter((r) => r.status !== "failed" && r.to === "giftcard")
       .reduce((sum, r) => sum + r.amount, 0),
   );
+}
+
+/** What a gift card paid for one order — src/lib/giftcards.ts GiftPaid. */
+export interface GiftPaidOnOrder {
+  code: string;
+  /** The positive rows of the card's ledger for this order. Never shrinks. */
+  amount: number;
+}
+
+/**
+ * What each card that paid for an order is still owed — READ OFF
+ * `orders.payment` AND NOTHING ELSE.
+ *
+ * This is the whole of the 18.09.2026 «возврат дважды» finding. The split
+ * between the card and the bank used to be clamped by the CARD LEDGER's own
+ * answer as well (`giftPaidByOrder().left`, gift_card_uses net of refunds),
+ * on the reasoning that the smaller of two ledgers can never over-credit a
+ * card. It is a sound reason and the wrong ledger, because the two are written
+ * in separate transactions: creditGiftCard() commits, and the line in
+ * `orders.payment` is a LATER statement. Between the two the card ledger has
+ * moved and the payment blob has not — and that is exactly the state a retry
+ * arrives in.
+ *
+ * Read from the card ledger, the retry of a 30 € card credit sees 0 € still
+ * owed to the card and quietly re-splits the SAME refund as 30 € of real money
+ * through Montonio, under a key derived from a sequence that has not moved
+ * either. 100 € order, 100 € refunded, 130 € out.
+ *
+ * Read from `orders.payment`, every input the reference is derived from —
+ * `refundsOf().length` for the sequence, this for the split — comes from ONE
+ * blob, written in ONE statement. Either the whole refund is recorded or none
+ * of it is, so a retry derives the same split, the same money key and the same
+ * card ref, whatever happened in between. The card cannot be credited twice
+ * because that ref is refused by the card ledger (191_gift_loyalty_once.sql),
+ * and it cannot be credited past its face value either (creditGiftCard's own
+ * conditional UPDATE) — the two guards that were doing the work all along.
+ *
+ * Per card rather than in one lump: one code per order in practice, and a
+ * `giftcard` entry that names no card (nothing in this shop writes one, but
+ * the ledger is jsonb and old rows are forever) comes off the tab all the
+ * same, oldest card first.
+ */
+export function giftOwedByCard<T extends GiftPaidOnOrder>(
+  paid: readonly T[],
+  payment: unknown,
+): Array<{ code: string; amount: number; owed: number }> {
+  const byCode = new Map<string, number>();
+  let loose = 0;
+  for (const r of refundsOf(payment)) {
+    if (r.status === "failed" || r.to !== "giftcard") continue;
+    if (r.code) byCode.set(r.code, money((byCode.get(r.code) ?? 0) + r.amount));
+    else loose = money(loose + r.amount);
+  }
+  const out = paid.map((g) => {
+    const amount = money(g.amount);
+    return { code: g.code, amount, owed: Math.max(0, money(amount - (byCode.get(g.code) ?? 0))) };
+  });
+  for (const row of out) {
+    if (!(loose > 0)) break;
+    const take = Math.min(row.owed, loose);
+    row.owed = money(row.owed - take);
+    loose = money(loose - take);
+  }
+  return out;
+}
+
+/** The same in one number: what a refund may still put back onto cards. */
+export function giftOwedTotal<T extends GiftPaidOnOrder>(paid: readonly T[], payment: unknown): number {
+  return money(giftOwedByCard(paid, payment).reduce((sum, r) => sum + r.owed, 0));
 }
 
 /**
@@ -217,7 +303,16 @@ export function foldRefund(
 ): { refunds: RefundEntry[]; refundedTotal: number; applied: boolean } {
   const list = refundsOf(payment);
   const at = list.findIndex((r) => r.ref === entry.ref);
-  const next = at < 0 ? [...list, entry] : list.map((r, i) => (i === at ? { ...r, ...entry } : r));
+  /* `since` is set once and never moved again: it is the only stamp on the
+     entry that a repeat notice cannot push forward, and the ten-day countdown
+     has to run on it (see RefundEntry.since). Written last so that a caller
+     passing `since: undefined` — every caller does, it is not theirs to set —
+     cannot spread it over the one the first notice left. */
+  const since = at < 0 ? entry.since || entry.at : list[at].since || list[at].at || entry.since || entry.at;
+  const next =
+    at < 0
+      ? [...list, { ...entry, since }]
+      : list.map((r, i) => (i === at ? { ...r, ...entry, since } : r));
   const folded = { refunds: next, refundedTotal: refundedTotal({ refunds: next }), applied: at < 0 };
   return folded;
 }
@@ -280,6 +375,13 @@ export function refundIdempotencyKey(orderId: string, seq: number, amount: numbe
  * left behind is the one the retry counts, so the same tap twice derives the
  * same ref, and a SECOND, deliberate partial refund of the same amount counts
  * one line further and derives a different one.
+ *
+ * That holds only while `amount` moves with `seq`, and until 19.09.2026 it did
+ * not: the split feeding `amount` was clamped by the card ledger, which the
+ * first attempt HAD already moved. Same order, same tap, different amount,
+ * different ref — and on a mixed card + bank order the remainder went to
+ * Montonio as real money. `amount` now comes off `orders.payment` too
+ * (giftOwedByCard above), so both halves of the derivation read one blob.
  *
  * Kept behind the `gc:` prefix it has always had, so the ledger, the order
  * card and docs/payments.md § 11 go on reading the way they did.

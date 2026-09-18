@@ -124,17 +124,24 @@ const REFUND_TEXT: Record<Exclude<RefundRefusal, "unknown">, (v: RefundRefusalRe
      This is the one refusal that means the OPPOSITE of failure: our
      idempotency key is derived from the order, so the same key coming back
      refused says the first attempt went through. Pressing again is the wrong
-     move; reloading the order is the right one. */
+     move; reloading the order is the right one.
+
+     This wording is the one the route may use only when the amount really IS
+     on the order — the refund route now reads Montonio's own refund list in
+     the same breath and writes down anything it is missing. Until 19.09.2026
+     it was said unconditionally, and the retry after a lost answer sent the
+     owner to look at a list that was empty precisely because nothing had been
+     recorded (F4). See duplicateKeyUnrecordedText() for the other half. */
   duplicate_key: () => ({
     RU:
       "Этот возврат уже принят Montonio — второй раз деньги не уйдут. " +
-      "Закройте карточку и откройте заказ заново: сумма должна быть в списке возвратов. Кнопку больше не нажимайте.",
+      "Сумма записана в заказ: закройте карточку и откройте заказ заново — она будет в списке возвратов. Кнопку больше не нажимайте.",
     ET:
       "Montonio on selle tagasimakse juba vastu võtnud — raha teist korda ei lähe. " +
-      "Sulgege kaart ja avage tellimus uuesti: summa peab olema tagasimaksete loendis. Ärge nuppu enam vajutage.",
+      "Summa on tellimusele kirja pandud: sulgege kaart ja avage tellimus uuesti — see on tagasimaksete loendis. Ärge nuppu enam vajutage.",
     EN:
       "Montonio has already accepted this refund — the money will not go out twice. " +
-      "Close the card and open the order again: the amount should be in the refund list. Do not press the button again.",
+      "The amount is on the order: close the card and open the order again and it will be in the refund list. Do not press the button again.",
   }),
 
   /* 400 — Refund amount [X] exceeds the total amount refundable [0].
@@ -232,14 +239,50 @@ function refundUnknownText(montonio: string): Trilingual {
 }
 
 /**
+ * «Первый возврат прошёл, но записать его не удалось» — the duplicate key
+ * refused while the order's own refund list still has nothing in it.
+ *
+ * Never a guess: the refund route only reaches this wording when it has asked
+ * `GET /orders/:orderUuid` and either could not read it or could not write
+ * what it read. Telling the owner to go and look at a list that is empty is
+ * how «Вернуть деньги» talked him into making a second refund with a different
+ * amount (F4), so the sentence has to say the list is empty and that the
+ * answer is in Montonio's own panel.
+ */
+function duplicateKeyUnrecordedText(): Trilingual {
+  return {
+    RU:
+      "Этот возврат Montonio уже принял — второй раз деньги не уйдут. " +
+      "Но записать его в заказ не удалось: в списке возвратов суммы пока нет, и это не значит, что деньги не ушли. " +
+      "Другую сумму не вводите. Откройте заказ в панели Montonio и покажите его Диму.",
+    ET:
+      "Montonio on selle tagasimakse juba vastu võtnud — raha teist korda ei lähe. " +
+      "Kuid seda ei õnnestunud tellimusele kirja panna: tagasimaksete loendis summat veel ei ole, ja see ei tähenda, et raha poleks läinud. " +
+      "Ärge sisestage teist summat. Avage tellimus Montonio paneelis ja näidake see Dimile.",
+    EN:
+      "Montonio has already accepted this refund — the money will not go out twice. " +
+      "But it could not be written onto the order: the refund list does not show it yet, and that does not mean the money stayed. " +
+      "Do not enter a different amount. Open the order in Montonio's own panel and show it to Dim.",
+  };
+}
+
+/**
  * Montonio's refusal of `POST /refunds` → a reason the owner can act on.
  *
  * `detail` is `PaymentError.detail` — «HTTP 400 · <Montonio's message>».
  * Matching is on Montonio's own wording, which is why the patterns look
  * verbose: they are the documented sentences, not invented codes. The HTTP
  * status is only consulted where the body may be empty (401/403).
+ *
+ * `recorded` is the caller's answer to the one question `duplicate_key`'s
+ * sentence asks on the owner's behalf — is the amount on the order? The refund
+ * route knows, because it has just read Montonio's refund list and written
+ * down what was missing; nothing else calls this with a duplicate key.
  */
-export function readRefundRefusal(detail: string | undefined | null): RefundRefusalReading {
+export function readRefundRefusal(
+  detail: string | undefined | null,
+  opts: { recorded?: boolean } = {},
+): RefundRefusalReading {
   const { status, message } = splitMontonioDetail(detail);
   const line = String(detail ?? "").trim();
   const base: RefundRefusalReading = {
@@ -272,6 +315,7 @@ export function readRefundRefusal(detail: string | undefined | null): RefundRefu
   }
 
   if (base.reason !== "unknown") base.messages = REFUND_TEXT[base.reason](base);
+  if (base.reason === "duplicate_key" && !opts.recorded) base.messages = duplicateKeyUnrecordedText();
   return base;
 }
 
