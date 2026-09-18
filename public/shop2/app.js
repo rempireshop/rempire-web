@@ -813,7 +813,7 @@
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Ära oota ajakava", "Запустить сейчас": "Käivita kohe", "Запускаем…": "Käivitame…",
       "Ещё не запускалось": "Pole veel käivitatud", "Последний запуск:": "Viimane käivitus:",
-      "отправлено": "saadetud", "пропущено": "vahele jäetud", "письмо было выключено": "kiri oli välja lülitatud",
+      "пропущено": "vahele jäetud", "письмо было выключено": "kiri oli välja lülitatud",
       "почта не подключена": "post pole ühendatud",
       /* why a run sent nothing — FLOW_SKIP_WORDS, one phrase per code the server counts */
       "нет адреса": "aadressi pole", "запуск не удался": "käivitamine ebaõnnestus",
@@ -1887,7 +1887,6 @@
       "Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.":
         "Tühi — tootelehel kuvatakse poe tavatekst (näha vihjena välja all). Selle keele oma kirjeldus ilmub saidile selle asemel.",
       "продажа на сайте": "müük veebis",
-      "продажа в салоне": "müük salongis",
       "приход": "sissetulek",
       "ручная правка": "käsitsi parandus",
       "правка карточки": "kaardi muudatus",
@@ -2142,8 +2141,6 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "Üks hind kogu tootele. Kui mahtusid on mitu — vajuta «+ Suurus» ja kirjuta igale hind.",
-      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
-        "Jääk on punane, kui see ei ületa selle mahu «vähe» piiri. «pole arvestatud» — seda mahtu pole kordagi loetud; kirjuta number ja see ilmub «Laos».",
       "Фото — после первого сохранения": "Fotod — pärast esimest salvestamist",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Täida «Põhiline», kirjuta hind ja vajuta «Salvesta toode» — toode ilmub ja siia saab lisada fotod telefonist.",
@@ -3656,7 +3653,7 @@
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Don't wait for the schedule", "Запустить сейчас": "Run now", "Запускаем…": "Running…",
       "Ещё не запускалось": "Never run yet", "Последний запуск:": "Last run:",
-      "отправлено": "sent", "пропущено": "skipped", "письмо было выключено": "the letter was off",
+      "пропущено": "skipped", "письмо было выключено": "the letter was off",
       "почта не подключена": "mail not connected",
       /* why a run sent nothing — FLOW_SKIP_WORDS, one phrase per code the server counts */
       "нет адреса": "no address", "запуск не удался": "the run failed",
@@ -4702,7 +4699,6 @@
       "Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.":
         "Empty — the product page shows the shop's own text (visible as the field's hint). Your own description for this language appears on the site instead.",
       "продажа на сайте": "web sale",
-      "продажа в салоне": "in-store sale",
       "приход": "goods in",
       "ручная правка": "manual correction",
       "правка карточки": "card change",
@@ -4955,8 +4951,6 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Every size has its own price. The customer sees the first size first.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "One price for the whole product. If there are several sizes, press «+ Size» and give each one a price.",
-      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
-        "The count turns red once it is at or below this size's «low» threshold. «not counted» means this size has never been counted; type a number and it appears in «Stock».",
       "Фото — после первого сохранения": "Photos — after the first save",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Fill in «Basics», type the price and press «Save the product» — the product appears, and photos from the phone can be added here.",
