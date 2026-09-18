@@ -132,13 +132,27 @@ export interface PaymentProvider {
   verifyNotification(req: Request): Promise<VerifyResult>;
 }
 
-/** Thrown by providers; the code is what the API returns as `error`. */
+/**
+ * Thrown by providers; the code is what the API returns as `error`.
+ *
+ * `detail` is the provider's OWN words about the refusal — the HTTP status and
+ * the message body it answered with — kept beside the code rather than in
+ * `message`, which stays equal to the code so that every existing caller (and
+ * every test that matches on it) reads the same string it always did.
+ *
+ * It exists because a code alone is not actionable. Montonio's refunds guide
+ * documents five distinct refusals — a duplicate idempotency key, an amount
+ * over what is refundable, an amount under 0.05 €, a wrong access key
+ * (401 STORE_NOT_FOUND) and a wrong secret key (403 INVALID_TOKEN) — and until
+ * 18.09.2026 all five arrived at the owner as one sentence that named none of
+ * them and blamed a sixth thing that cannot produce an HTTP error at all.
+ */
 export class PaymentError extends Error {
   constructor(
     public readonly code: string,
-    message?: string,
+    public readonly detail?: string,
   ) {
-    super(message ?? code);
+    super(code);
     this.name = "PaymentError";
   }
 }

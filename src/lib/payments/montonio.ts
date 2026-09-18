@@ -40,6 +40,8 @@ const LIVE_BASE = "https://stargate.montonio.com/api";
 
 /** JWT lifetime on the order token. Montonio's docs say 10 minutes. */
 const TOKEN_TTL_SECONDS = 600;
+/** …and 1 hour on a GET's Bearer token (API reference → Authentication). */
+const GET_TOKEN_TTL_SECONDS = 3600;
 const REQUEST_TIMEOUT_MS = 15_000;
 
 /** locale values Montonio accepts (docs: Order data structure → locale). */
@@ -74,6 +76,55 @@ export function montonioBaseUrl(env: "sandbox" | "live"): string {
 /** EUR with 2 decimals — JSON floats otherwise ship 99.98999999999999. */
 function money(n: number): number {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * What Montonio actually said when it refused — the HTTP status plus its own
+ * message, as one short line for the order journal and the admin panel.
+ *
+ * Every refusal this file can meet is documented and every one of them names
+ * itself. The refunds guide lists, verbatim:
+ *
+ *   400 Order uuid [...] already has a refund with same idempotency key
+ *   400 Refund amount [1000] exceeds the total amount refundable [10]
+ *   400 amount is under the min allowed amount: 0.05EUR
+ *   401 STORE_NOT_FOUND - double check your access key
+ *   403 INVALID_TOKEN - double check your secret key
+ *
+ * Until 18.09.2026 all five were collapsed into the bare code
+ * `provider_rejected`, whose one Russian sentence in the panel told the owner
+ * to check his BALANCE — the one cause that cannot produce any of them: a
+ * refund with nothing behind it is answered 200 with `status: "PENDING"`, and
+ * the reason follows later on the refund webhook as
+ * `refundStatusDescription: "INSUFFICIENT_FUNDS"`. Never an HTTP error.
+ *
+ * Montonio's error bodies are not one shape, so try the usual keys and fall
+ * back to the raw text. Truncated: this ends up in a log line and a JSON field,
+ * not in a report.
+ */
+export function montonioErrorText(status: number, body: string): string {
+  const raw = String(body ?? "").trim();
+  let message = "";
+  if (raw.startsWith("{") || raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      for (const key of ["message", "error", "detail", "description"]) {
+        const v = parsed?.[key];
+        if (typeof v === "string" && v.trim()) {
+          message = v.trim();
+          break;
+        }
+        if (Array.isArray(v) && typeof v[0] === "string") {
+          message = v.join("; ");
+          break;
+        }
+      }
+    } catch {
+      /* not JSON after all — the raw text below is all there is */
+    }
+  }
+  if (!message) message = raw;
+  return `HTTP ${status}${message ? ` · ${message.slice(0, 300)}` : ""}`;
 }
 
 /**
@@ -163,6 +214,23 @@ function splitName(full: string | undefined): { firstName?: string; lastName?: s
   if (!parts.length) return {};
   if (parts.length === 1) return { firstName: parts[0] };
   return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
+/**
+ * What `GET /orders/:orderUuid` says about a payment — the fields that decide
+ * whether a refund can be asked for at all, and nothing else.
+ */
+export interface MontonioOrderSnapshot {
+  uuid: string;
+  /** PENDING | PAID | VOIDED | PARTIALLY_REFUNDED | REFUNDED | ABANDONED | AUTHORIZED */
+  paymentStatus: string;
+  grandTotal: number;
+  currency: string;
+  /** What may still be refunded right now. 0 until the funds have settled. */
+  availableForRefund: number;
+  /** `false` = refunds are not switched on for this method/store. Absent = not said. */
+  isRefundableType?: boolean;
+  refunds: Array<{ uuid: string; amount: number; status: string }>;
 }
 
 interface RefundTokenClaims {
@@ -281,8 +349,9 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
 
     const text = await res.text();
     if (!res.ok) {
-      console.error("montonio create failed", res.status, text.slice(0, 500));
-      throw new PaymentError("provider_rejected");
+      const detail = montonioErrorText(res.status, text);
+      console.error(`montonio create failed for ${order.number}: ${detail}`);
+      throw new PaymentError("provider_rejected", detail);
     }
 
     let body: { uuid?: string; paymentUrl?: string };
@@ -309,6 +378,22 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
    * The answer is a refund that has only *started*: `status` is PENDING until
    * Montonio has the balance to send it. That is not a failure and must not be
    * shown as one — see mapMontonioRefundStatus() above.
+   *
+   * Two preconditions live on Montonio's side, and neither is anything this
+   * code can arrange (refunds guide, checked 18.09.2026):
+   *
+   *   1. the payment method must support refunds. Cards, Apple Pay, Google
+   *      Pay, MobilePay, BLIK, BNPL and Financing do by default; **Payment
+   *      Initiation is EUR only and needs «Bank payment refunds» enabled in
+   *      the Partner System** — which is the bank link, the method most of
+   *      this shop's customers use;
+   *   2. «the funds have arrived to the merchant's settlement account in
+   *      Montonio. This typically takes 1 business day.»
+   *
+   * Until either holds, `GET /orders/:orderUuid` reports `availableForRefund:
+   * 0` and this call is answered `400 Refund amount [X] exceeds the total
+   * amount refundable [0]` — which is an HTTP refusal, thrown below as
+   * `provider_rejected` with Montonio's own sentence attached.
    */
   async refundPayment(req: RefundRequest): Promise<RefundResult> {
     const amount = money(req.amount);
@@ -340,8 +425,11 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
 
     const text = await res.text();
     if (!res.ok) {
-      console.error("montonio refund failed", res.status, text.slice(0, 500));
-      throw new PaymentError("provider_rejected");
+      const detail = montonioErrorText(res.status, text);
+      console.error(
+        `montonio refund failed for order ${req.orderNumber ?? req.providerRef}: ${detail}`,
+      );
+      throw new PaymentError("provider_rejected", detail);
     }
 
     let body: { uuid?: string; amount?: number | string; status?: string; currency?: string; type?: string };
@@ -358,6 +446,87 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
       status: mapMontonioRefundStatus(body.status),
       currency: typeof body.currency === "string" ? body.currency : (req.currency ?? "EUR"),
       detail: [body.type, body.status].filter(Boolean).join(" · ") || undefined,
+    };
+  }
+
+  /**
+   * `GET /orders/:orderUuid` — what Montonio itself believes about a payment.
+   *
+   * The one endpoint this integration never called, and the one that answers
+   * the question the panel could not: why a refund was refused. Its response
+   * carries, by Montonio's own reference page:
+   *
+   *   · `availableForRefund` — what may still be sent back RIGHT NOW. It is 0
+   *     until «the funds have arrived to the merchant's settlement account in
+   *     Montonio», which its refunds guide says «typically takes 1 business
+   *     day». A refund asked for before that is answered
+   *     `400 Refund amount [X] exceeds the total amount refundable [0]`.
+   *   · `isRefundableType` — «will be true if you enabled refunds in montonio
+   *     (and the user paid with a refundable method)». False is the Partner
+   *     System switch, not the code: Payment Initiation refunds are EUR-only
+   *     and need «Bank payment refunds» turned on.
+   *   · `paymentStatus`, `grandTotal` and the `refunds` array as Montonio has
+   *     them — the authority our own ledger is a copy of.
+   *
+   * Read-only, and used ONLY to explain a refusal after the fact (see
+   * src/app/api/admin/orders/[id]/refund/). It never gates a refund: an
+   * answer this shop could not fetch must not be the reason a customer's
+   * money stays here. `null` — never a throw — on anything at all.
+   *
+   * Auth is the Bearer JWT of `{ accessKey, exp }` the API reference
+   * prescribes for GET endpoints («GET endpoints require a JWT in the
+   * Authorization header»), the same recipe as GET /stores/payment-methods.
+   */
+  async fetchOrder(orderUuid: string): Promise<MontonioOrderSnapshot | null> {
+    const uuid = String(orderUuid ?? "").trim();
+    if (!uuid) return null;
+
+    const token = signHs256({ accessKey: this.config.accessKey }, this.config.secretKey, {
+      expiresInSeconds: GET_TOKEN_TTL_SECONDS,
+    });
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.base}/orders/${encodeURIComponent(uuid)}`, {
+        headers: { accept: "application/json", authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        cache: "no-store",
+      });
+    } catch (err) {
+      console.error(`[montonio] GET /orders/${uuid} unreachable —`, err);
+      return null;
+    }
+    const text = await res.text();
+    if (!res.ok) {
+      console.error(`[montonio] GET /orders/${uuid}: ${montonioErrorText(res.status, text)}`);
+      return null;
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+    if (!body || typeof body !== "object") return null;
+
+    const refunds = Array.isArray(body.refunds) ? body.refunds : [];
+    return {
+      uuid: typeof body.uuid === "string" ? body.uuid : uuid,
+      paymentStatus: typeof body.paymentStatus === "string" ? body.paymentStatus : "",
+      grandTotal: money(Number(body.grandTotal ?? 0)),
+      currency: typeof body.currency === "string" ? body.currency : "EUR",
+      availableForRefund: money(Number(body.availableForRefund ?? 0)),
+      /* Absent is not false: a field this shop cannot see must not be reported
+         as «refunds are switched off». Only an explicit `false` says that. */
+      isRefundableType: typeof body.isRefundableType === "boolean" ? body.isRefundableType : undefined,
+      refunds: refunds
+        .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
+        .map((r) => ({
+          uuid: String(r.uuid ?? ""),
+          amount: money(Number(r.amount ?? 0)),
+          status: typeof r.status === "string" ? r.status : "",
+        })),
     };
   }
 

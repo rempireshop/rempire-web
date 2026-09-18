@@ -171,7 +171,11 @@ describe("POST /refunds — the envelope Montonio's guide asks for", () => {
   });
 
   it("a refusal and an unreachable gateway are told apart", async () => {
-    stub(422, { error: "no balance" });
+    /* A documented refusal, not «no balance»: an empty settlement account is
+       answered 200 PENDING, never an HTTP error (refunds guide; the wrong
+       assumption that lived in this stub is what the panel's «проверьте
+       баланс» came from — see tests/payments-montonio-refusal.test.ts). */
+    stub(400, { message: "Refund amount [5] exceeds the total amount refundable [0]" });
     await expect(provider.refundPayment({ providerRef: "o", amount: 5, idempotencyKey: "k" })).rejects.toThrow(
       "provider_rejected",
     );

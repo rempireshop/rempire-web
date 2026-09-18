@@ -230,8 +230,14 @@ export function foldRefund(
  * on, so refunding the same amount a second time deliberately is a different
  * key and a different refund.
  *
- * Shaped as a v4 UUID because that is what Montonio's refunds guide asks for
- * (docs/payments.md § 11) — the bits, not the randomness, are what it checks.
+ * Shaped as a v4 UUID because that is what Montonio's refunds guide
+ * RECOMMENDS — its exact words are «How you generate the keys is up to you but
+ * we recommend using V4 UUIDs», so the shape is a courtesy and the uniqueness
+ * is the contract. The key is scoped to the order on Montonio's side too: a
+ * repeat comes back as `400 Order uuid […] already has a refund with same
+ * idempotency key`, which is a REFUSAL rather than a replay of the first
+ * refund — so that message means «the first attempt worked, reload the order»,
+ * not «it failed». (docs/payments.md § 11, docs/montonio-payments-audit.md A3.)
  */
 export function refundIdempotencyKey(orderId: string, seq: number, amount: number): string {
   const h = createHash("sha256").update(`rempire-refund|${orderId}|${seq}|${money(amount).toFixed(2)}`).digest("hex");
