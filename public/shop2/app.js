@@ -27848,7 +27848,13 @@
        CATALOGUE[0]. Scanning such a bottle put a DIFFERENT product's name and
        price in the basket. Refused here, in words, rather than surfacing as
        the server's generic refusal after the money was counted out. */
-    if (!byIdOrNull(h.productId)) { toast(POS_GONE); return; }
+    var sold = byIdOrNull(h.productId);
+    if (!sold) { toast(POS_GONE); return; }
+    /* …and the same product-level refusal the chips give (posAddProduct). A
+       bottle the shop calls «нет в наличии» is refused by createOrder()
+       whatever door it came through, so letting the scanner drop it in the
+       basket only moved the «нет» to after the money was counted out. */
+    if (sold.stock === "out") { toast("Нет на складе"); return; }
     var qty = scanQtyNow(), variant = h.variant || "";
     for (var i = 0; i < S.posCart.length; i++) {
       if (S.posCart[i].id === h.productId && (S.posCart[i].variant || "") === variant) {
@@ -28933,6 +28939,13 @@
     // number a salon sale must not go behind, and the chip is already muted
     var lv = edStockFor(p, variant);
     if (lv && lv.tracked && lv.qty <= 0) { toast("Нет на складе"); return; }
+    /* …and the product's own word, for the same reason. A bottle the shop
+       calls «нет в наличии» is refused by createOrder() (out_of_stock,
+       src/lib/orders.ts), so a line built from one is money counted out over
+       a sale that cannot go through. It is reachable here now that a barcode
+       finds its bottle whatever the badge says (posCodeHit), and this is
+       where it has to be told, in the same words the chip is muted with. */
+    if (p.stock === "out") { toast("Нет на складе"); return; }
     for (var k = 0; k < S.posCart.length; k++) {
       if (S.posCart[k].id === p.id && (S.posCart[k].variant || "") === variant) { S.posCart[k].qty++; render(); return; }
     }
@@ -28943,21 +28956,60 @@
   /* One row per product, one 44-px chip per size — «150 мл · 21,60 €». The
      chip is the whole control: no «Добавить» button, no size select, one tap
      from the search box to a line in the cart. */
-  /** productId → every barcode bound to any of its sizes, as one folded
-      string. Built once per «Склад» copy: the register's list is redrawn on
-      every keystroke, and walking ~320 shelf rows per product per keystroke
-      is work nobody asked for. */
-  var POS_EAN = { src: null, map: null };
+  /** The shelf's barcodes, twice over: `byProduct` is productId → every code
+      bound to any of its sizes, as one string for the fuzzy haystack below,
+      and `byCode` is one FOLDED code → the exact bottle it names. Built once
+      per «Склад» copy: the register's list is redrawn on every keystroke, and
+      walking ~320 shelf rows per product per keystroke is work nobody asked
+      for. */
+  var POS_EAN = { src: null, ix: null };
   function posEanIndex() {
     var rows = S.stockLevels || [];
-    if (POS_EAN.src === rows && POS_EAN.map) return POS_EAN.map;
-    var map = {};
+    if (POS_EAN.src === rows && POS_EAN.ix) return POS_EAN.ix;
+    var ix = { byProduct: {}, byCode: {} };
     for (var i = 0; i < rows.length; i++) {
-      if (!rows[i].ean) continue;
-      map[rows[i].productId] = (map[rows[i].productId] ? map[rows[i].productId] + " " : "") + rows[i].ean;
+      var code = rows[i].ean;
+      if (!code) continue;
+      ix.byProduct[rows[i].productId] = (ix.byProduct[rows[i].productId] ? ix.byProduct[rows[i].productId] + " " : "") + code;
+      /* Folded, because that is the shape the typed query arrives in: the box
+         lower-cases it and pulls dashes apart (scanFold), so an own code like
+         «RMP-0042» has to be folded on this side too or it never matches itself. */
+      ix.byCode[scanFold(code)] = { productId: rows[i].productId, variant: rows[i].variant || "" };
     }
-    POS_EAN.src = rows; POS_EAN.map = map;
-    return map;
+    POS_EAN.src = rows; POS_EAN.ix = ix;
+    return ix;
+  }
+  /**
+   * The ONE bottle a whole barcode names — the product and the size the code
+   * is bound to — or null when what was typed is not a code the shelf knows.
+   *
+   * A barcode is not a search term: it is printed on one bottle and the
+   * warehouse binds it to one product AND one size (stock_levels). The
+   * register used to fold every code of a product into its name haystack, so
+   * the code of the «1000 мл» offered all three sizes and the cashier picked
+   * whichever chip was nearest — the wrong bottle at the wrong price. And it
+   * looked at that haystack only for products the shop currently calls «в
+   * наличии», so the very code that finds a bottle on «Склад» found nothing
+   * here: «I had a product with scanned code, then I went to salon -> scan,
+   * scanned the same product and it did not find it» (Renat, 13.09.2026 and
+   * again 18.09.2026). The scanner's own door into this basket (scanToCart)
+   * has always named the exact size and never asked the badge; this is the
+   * same answer for the code typed — or wedged — into the box.
+   *
+   * `p: null` means the code is bound to something the shop is not offering
+   * at all — the caller says so in words rather than «Ничего не найдено».
+   */
+  function posCodeHit(folded) {
+    var owner = folded ? posEanIndex().byCode[folded] : null;
+    if (!owner) return null;
+    var p = byIdOrNull(owner.productId);
+    if (!p) return { p: null, only: -1 };
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    var i = sizes.indexOf(owner.variant || "");
+    /* A code bound to a volume this product no longer has (renamed in the
+       editor, «×»-ed away) still names the product — all of its sizes, as
+       before, rather than nothing at all. */
+    return { p: p, only: i >= 0 ? i : -1 };
   }
   function posSearchResultsHTML() {
     /* The box says «Название, бренд или штрихкод» and the hint under it says
@@ -28966,22 +29018,34 @@
        all, while «Склад» one tab away searched the shelf rows, which do. So
        the very code that finds a bottle in «Склад» found nothing in «Салон»
        — «I had a product with scanned code, then I went to salon -> scan,
-       scanned the same product and it did not find it» (Renat). Both screens
-       search the same two places now, with the same folding, so «kevin
-       murphy», «un tangled 40» and a typed-in EAN all behave the same in
-       both. */
+       scanned the same product and it did not find it» (Renat). The codes
+       went into the haystack that day and the folding was made the same, so
+       «kevin murphy», «un tangled 40» and a typed-in EAN read alike — but the
+       line above them survived, and it hid every product the shop calls «нет
+       в наличии» from the code search too. The bottle was in the owner's hand
+       and the till still said «Ничего не найдено», which is why he wrote the
+       same sentence again on 18.09.2026. A code is answered by the warehouse
+       now (posCodeHit), where «Склад» and the scanner get their answer; the
+       badge only decides what a NAME search offers. */
     var q = scanFold(S.posQ);
     var words = q ? q.split(" ") : [];
     var eans = posEanIndex();
-    var list = words.length
+    /* A whole barcode is answered by the warehouse, not by the catalogue
+       search: it names one bottle, and it names it whatever the shop's badge
+       says — see posCodeHit(). Everything else is still the name/brand/size
+       search, and that one still leaves out what the shop is not selling. */
+    var coded = posCodeHit(q);
+    var list = coded
+      ? [coded]
+      : words.length
       ? CATALOGUE.filter(function (p) {
           if (p.stock === "out") return false;
           var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " +
-            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans[p.id] || ""));
+            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans.byProduct[p.id] || ""));
           var hayWords = hay.split(" ");
           for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
           return true;
-        })
+        }).map(function (p) { return { p: p, only: -1 }; })
       : [];
     if (!q) {
       if (S.posCart.length) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
@@ -28990,14 +29054,22 @@
         '<div class="adm-empty__s">Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. ' +
         'Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».</div></div>';
     }
+    /* The code is bound, but to a bottle the shop is not offering — «Показывать
+       в магазине» off, or an own product set inactive. The same sentence the
+       scanner's own door into this basket gives it (scanToCart), because from
+       the till's side it is exactly the same refusal. */
+    if (coded && !coded.p) return '<div class="adm-empty">' + POS_GONE + "</div>";
     if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
-    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (p) {
+    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (row) {
+      var p = row.p;
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
       return '<div class="adm-row adm-row--chips">' +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<span class="adm-poschips">' + sizes.map(function (sz, i) {
+          // a barcode names one volume: the others are not on offer for it
+          if (row.only >= 0 && i !== row.only) return "";
           var lv = edStockFor(p, sz);
-          var none = !!(lv && lv.tracked && lv.qty <= 0);
+          var none = !!(lv && lv.tracked && lv.qty <= 0) || p.stock === "out";
           return '<button class="adm-poschip' + (none ? " is-none" : "") + '" data-posadd="' + esc(p.id) + ":" + i + '">' +
             (sz ? esc(sz) + " · " : "") + eur(posVariantPrice(p, sz)) + "</button>";
         }).join("") + "</span></div>";
