@@ -45,6 +45,7 @@ import {
   eur,
   fillBlogCardPrices,
   fitTitle,
+  forSale,
   headBlock,
   href,
   langBySeg,
@@ -368,7 +369,7 @@ async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
     const m = CATALOGUE.get(id);
     if (!m) continue;
     const o = overrides[id];
-    if (o?.hidden) continue;
+    if (!forSale(o)) continue;
     /* The file's ladder only speaks for the price where it actually spreads.
        Since 18.09.2026 catalogue.variants.json also carries the 29 products
        sold in ONE named size, whose single price is catalogue.min.json's own
