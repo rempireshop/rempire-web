@@ -896,8 +896,14 @@ Authorization: Bearer <HS256 { accessKey, exp }>
   Отдельно: у Nova Post **есть** свои автоматы, вопреки тому, что можно
   подумать по `/shipping-methods/contract-prices` — тот отвечает 400 на
   `shippingMethod=parcelMachine` для `novaPost` в любой стране и даёт цену
-  только на `pickupPoint`. Это про **способ**, которым Montonio продаёт
-  перевозчика, а не про железо за ним.
+  только на `pickupPoint`. Так и должно быть, и это верно для любого
+  перевозчика, включая DPD в Эстонии с её 358 автоматами: `parcelMachine`
+  никогда не был способом доставки. В справочнике у `shippingMethod.type`
+  ровно два значения — `courier` и `pickupPoint`, — а `parcelMachine` лежит
+  уровнем ниже, как `subtypes[].code` и как собственный `type` точки. Так что
+  400 — про параметр, а не про железо за перевозчиком. Автомат бронируется как
+  `{ type: "pickupPoint", id: <UUID точки> }` и тарифицируется по своей ставке
+  подтипа `parcelMachine`. Подробнее — `docs/montonio-shipping-audit.md` § 1.
 
 - **Координат в ответе Montonio нет вообще.** Ни `latitude`, ни `longitude` —
   проверено по списку полей в справочнике. Поэтому у точек Montonio `lat` и
@@ -926,20 +932,44 @@ Authorization: Bearer <HS256 { accessKey, exp }>
 должен увидеть трек-номер на экране, а не через вебхук. Поэтому вебхуков
 Montonio Shipping долго не было вовсе; **с 08.09.2026 зарегистрирован один —
 `shipment.statusUpdated`** (следующий раздел). Остальные — `shipment.registered`,
-`shipment.registrationFailed`, `shipment.labelsCreated`, `labelFile.ready`,
-`labelFile.creationFailed` — по-прежнему не нужны: этикетка приходит в ответе
-на нажатие. Всего на магазин их можно завести до десяти.
+`shipment.labelsCreated`, `labelFile.ready`, `labelFile.creationFailed` — не
+нужны, пока бронируем синхронно: этикетка приходит в ответе на нажатие. Всего
+на магазин их можно завести до десяти, и Montonio советует один адрес на все
+события сразу, а не по вебхуку на событие.
+
+**Кроме `shipment.registrationFailed`.** Он нужен, и его отсутствие — дыра,
+описанная в `docs/montonio-shipping-audit.md` § 1.4–1.5: при синхронной
+брони Montonio возвращает финальный статус, а `POST /api/admin/shipments` его
+не смотрит и отвечает `ok`, так что владелец видит «этикетка создана» на
+посылке, от которой перевозчик отказался. Документированное лечение —
+`PATCH /shipments/{id}`, который сам перерегистрирует отправление; у нас его
+нет. Решать, отказывать ли в брони или показывать красный шаг на карточке,
+ещё предстоит.
 
 ### Вебхук `shipment.statusUpdated` — узнать словарь статусов
 
 **Зачем.** `src/lib/delivery.ts` решает, что заказ доставлен, сверяя `status`
-перевозчика с белым списком из шести слов, — потому что **словаря этого поля в
-доступной нам документации нет**: справочник называет состояния самого
-отправления (`pending`, `registered`, `registrationFailed`, `inTransit`,
-`awaitingCollection`, `delivered`, `returned`), но не говорит, какое из них
-несёт вебхук и не проходит ли туда собственное слово перевозчика. Дим,
-08.09.2026: зарегистрировать `shipment.statusUpdated` и **посмотреть, что
-приходит на самом деле**, вместо того чтобы гадать дальше.
+перевозчика с белым списком из шести слов. Здесь раньше стояло, что **словаря
+этого поля в доступной нам документации нет**, — это неверно, и 18.09.2026
+исправлено (`docs/montonio-shipping-audit.md` § 5.2). Словарь есть: страница
+Overview печатает весь жизненный цикл (`pending`, `registered`,
+`registrationFailed`, `labelsCreated`, `inTransit`, `awaitingCollection`,
+`delivered`, `returned`), а руководство по отправлениям прямо говорит, какие из
+них несёт вебхук: «the status can change from registered to inTransit,
+awaitingCollection, delivered, or returned… We will send a webhook notification
+for all status updates». Белый список этому словарю соответствует: `delivered`
+и `returned` в нём есть, `awaitingCollection` — намеренно нет, посылка в
+автомате ещё не у покупателя.
+
+Чего документация действительно не обещает — что в это поле никогда не пройдёт
+собственное слово перевозчика. Поэтому запись словаря остаётся: Дим,
+08.09.2026, зарегистрировать `shipment.statusUpdated` и **посмотреть, что
+приходит на самом деле**.
+
+**Важно:** до 18.09.2026 сюда не приходило ничего. `readEvent()` искал `status`
+и `merchantReference` в корне токена, а Montonio кладёт их в `data`, — роут
+отвечал 200 «no_status» и выбрасывал событие. Словарь не наполнялся, заказы
+сами не закрывались. Исправлено, подробности — в аудите § 1.1.
 
 ```
 POST https://<ваш-домен>/api/shipping/notify/
