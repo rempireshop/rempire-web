@@ -26,7 +26,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
-import { InventoryError, LEDGER_REASONS, MOVE_REASONS, listMoves, move, setQty, type LedgerReason, type MoveReason } from "@/lib/inventory";
+import { InventoryError, LEDGER_REASONS, MOVE_REASONS, listMoves, move, setQty, shelfKey, type LedgerReason, type MoveReason } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -85,7 +85,18 @@ export async function POST(req: Request) {
 
   const productId = String(body.productId ?? body.product_id ?? "").trim();
   if (!productId) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
-  const variant = body.variant == null ? "" : String(body.variant);
+  /* THE SHELF ROW, NOT THE WORD THE CALLER HAPPENED TO SEND. A body with no
+     size at all used to be written through as '' , which for the twenty-nine
+     products sold in one named volume is a row that db/migrations/194 exists
+     to have removed: it comes back the moment somebody counts into it, and
+     «Склад» shows one bottle twice while every web sale of it, keyed to the
+     label, is skipped as untracked. The panel's own «Остаток» and the scanner
+     always send the label; the assistant's «приход 6 штук Touchable» cannot,
+     because the model is never shown a rung for these. The read side has
+     resolved this since 18.09.2026 and the write side had not — this is the
+     same rule, on the same ladder (audit 18.09.2026, F9). A named size is
+     passed through untouched, as before. */
+  const variant = await shelfKey(productId, body.variant == null ? "" : String(body.variant));
   const ref = typeof body.ref === "string" && body.ref.trim() ? body.ref.trim().slice(0, 200) : null;
 
   /* At most once per key — and a DIFFERENT key with this very same body is a

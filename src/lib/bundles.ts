@@ -174,6 +174,26 @@ function partPrice(productId: string, variant: number, o: Override | undefined):
   return { label: v.label, price: o?.price != null ? money(num(o.price) + premium) : money(base) };
 }
 
+/**
+ * What one part of a set can promise: the switch, then the count for the very
+ * volume the set names, then the product's own word, then the catalogue's.
+ *
+ * The middle one is the fix of 19.09.2026 — see the note at its call site.
+ * `sizeLabel` is the label the shelf keys on ('' for a product with no
+ * volumes), and a label the count has never heard of leaves this exactly where
+ * it was before.
+ */
+function partStock(sizeLabel: string, o: Override | undefined, p: MinProduct | undefined): StockState {
+  if (o?.hidden) return "out";
+  const word = (o?.stock ?? (p?.s as StockState | undefined) ?? "in") as StockState;
+  /* A count may say a product is gone; it may never say it is on sale again —
+     the same rule getOverrides() applies one level up, and the one «Снять с
+     продажи» depends on. */
+  if (word === "out") return "out";
+  const counted = o?.stockByVariant?.[sizeLabel];
+  return counted === "in" || counted === "low" || counted === "out" ? counted : word;
+}
+
 /** in < low < out — the worst part decides what the whole set can promise. */
 function worstStock(list: StockState[]): StockState {
   if (list.includes("out")) return "out";
@@ -263,8 +283,19 @@ function expand(row: BundleRow, overrides: Record<string, Override>): Bundle {
          from the catalogue and src/lib/orders.ts refuses a line of it with
          «нет в наличии». A set holding it has to say the same thing, or the
          one product the owner took off sale goes on being shown and sold
-         inside every set that carries it. */
-      stock: (o?.hidden ? "out" : (o?.stock ?? (p?.s as StockState | undefined) ?? "in")) as StockState,
+         inside every set that carries it.
+
+         And below it, the count for THIS VOLUME. `o.stock` is the product's
+         one word, which says «в наличии» while any single volume of it is
+         left (stockStates() in src/lib/inventory.ts) — the right answer for a
+         product card and the wrong one for a set, which names one volume and
+         is assembled out of that one row. A 250 мл counted to zero was shown
+         as «в наличии» inside every set holding it for as long as the 500 мл
+         had bottles, and sold (audit 18.09.2026, F2). `stockByVariant` is
+         keyed by the size LABEL, which is what partPrice() just returned, and
+         a volume nobody has counted is simply absent from it — absent is not
+         empty, so the owner's own word still stands. */
+      stock: partStock(part.label, o, p),
     });
   }
 

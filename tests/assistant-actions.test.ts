@@ -5,10 +5,20 @@
  */
 import { describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
+import variantData from "@/data/catalogue.variants.json";
 import { briefHero, sanitizeAction, sanitizeHero } from "@/app/api/assistant/actions";
 
 const known = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
 const someId = (catalogueMin as Array<{ id: string }>)[0].id;
+/** One of the twenty-nine sold in a single NAMED volume — read off the shipped
+    ladder, so this fails as a missing fixture rather than passing quietly if
+    the file ever stops carrying them. */
+const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number[] }>;
+const [oneRungId, oneRung] = (() => {
+  const hit = Object.entries(VARIANTS).find(([, v]) => v.sizes.length === 1 && v.sizes[0]);
+  if (!hit) throw new Error("tests/assistant-actions.test.ts: no one-volume product in the ladder file");
+  return [hit[0], hit[1].sizes[0]] as const;
+})();
 
 const goodSlide = {
   id: "s1",
@@ -374,6 +384,30 @@ describe("stock_adjust", () => {
       true,
     );
     expect(out).toMatchObject({ variant: "75 мл", reason: "return" });
+  });
+
+  /* «Приход 6 штук Touchable» names no volume, and the model has none to name:
+     the CATALOGUE block this route puts in front of it lists sizes only for
+     the owner's own goods, while twenty-nine catalogue products are sold in
+     exactly one named volume. Left empty the count landed on ('touchable','') —
+     the row db/migrations/194_one_size_stock_rows.sql folded away — so «Склад»
+     drew one bottle as two rows again and every web sale of it, keyed to the
+     label, was skipped as untracked (audit 18.09.2026, F9). */
+  it("names the one volume a product is sold in when the model named none", () => {
+    expect(
+      sanitizeAction({ type: "stock_adjust", product_id: oneRungId, delta: 6, reason: "goods_in" }, known, true),
+    ).toMatchObject({ variant: oneRung });
+    expect(sanitizeAction({ type: "stock_set", product_id: oneRungId, qty: 4 }, known, true)).toMatchObject({
+      variant: oneRung,
+    });
+  });
+
+  it("still leaves a product with a real ladder on the '' row", () => {
+    // two rungs are a choice nothing here may make for the owner
+    expect(VARIANTS[someId].sizes.length).toBeGreaterThan(1);
+    expect(
+      sanitizeAction({ type: "stock_adjust", product_id: someId, delta: 6, reason: "goods_in" }, known, true),
+    ).toMatchObject({ variant: "" });
   });
 
   it("refuses an unknown product, a zero delta, and a delta that is not a number", () => {

@@ -429,12 +429,59 @@ export type StockUnit = { productId: string; variant: string; qty: number };
  * the '' row — most of the catalogue — and a ladder of two rungs still holds a
  * choice nothing here is entitled to make. Same predicate as variantOf(): one
  * rung, and that rung has a name.
+ *
+ * Exported for the two doors that WRITE a count with no size on it — see
+ * shelfKey() just below, which is the one to call from anywhere that can wait
+ * for a query.
  */
-function shelfVariant(productId: string, variant: unknown): string {
+export function shelfVariant(productId: string, variant: unknown): string {
   const named = normVariant(variant);
   if (named) return named;
   const ladder = VARIANTS[productId];
   return ladder && ladder.sizes.length === 1 && ladder.sizes[0] ? ladder.sizes[0] : "";
+}
+
+/**
+ * The same question asked from the WRITE side, where the owner's own ladder
+ * can be read as well: which shelf row does «приход 6 штук Touchable», with no
+ * volume named at all, belong on?
+ *
+ * Migration 194 folded the twenty-nine products' '' rows onto their labels and
+ * promised that «from here on both halves key on the label». The read side
+ * kept that promise — variantOf() names the rung on the order line,
+ * stockUnitsOf() names it at the moment the goods move — and the write side
+ * did not: POST /api/admin/inventory/moves/ passed the body's size through
+ * untouched, applyMove() creates a row for whatever it is given, and the
+ * assistant has no rung to name for these products because the CATALOGUE block
+ * it is shown lists sizes only for the owner's own goods. So «приход 6 штук
+ * Touchable» by chat or by voice landed on ('touchable','') , made that row
+ * tracked, and «Склад» had two rows for one bottle again — with web sales,
+ * keyed to «250 мл», skipped while the rung stood untracked. The bug 194
+ * exists to fix, recreated from the panel (audit 18.09.2026, F9).
+ *
+ * Owner's ladder first and the file's below it, which is knownLadder()'s order
+ * and therefore the key «Склад» draws its row under. A ladder of two rungs is
+ * a choice this cannot make, and a count with no size on it stays on the ''
+ * row — the same two things shelfVariant() refuses to move. Best effort: no
+ * table, no column, no change from the file's answer.
+ */
+export async function shelfKey(productId: string, variant?: string | null): Promise<string> {
+  const named = normVariant(variant);
+  if (named) return named;
+  const pid = String(productId ?? "").trim();
+  if (!pid) return "";
+  let saved: string[] | null = null;
+  try {
+    const rows = await query<{ sizes: unknown }>(
+      "select sizes from product_overrides where product_id = $1 and sizes is not null",
+      [pid],
+    );
+    if (rows.length) saved = ladderLabels(rows[0].sizes);
+  } catch (err) {
+    console.error("[inventory] saved size ladder unavailable, using the catalogue file:", err);
+  }
+  if (!saved) return shelfVariant(pid, variant);
+  return saved.length === 1 && saved[0] ? saved[0] : "";
 }
 
 /**
@@ -831,13 +878,28 @@ export function ladderLabels(sizes: unknown): string[] | null {
   }
   if (!Array.isArray(list) || !list.length) return null;
   const labels = list.map((x) => normVariant((x as { size?: unknown })?.size));
-  /* One rung with no label is «один объём» — the product has no volumes at
-     all and its shelf row is the unlabelled one, exactly as the storefront
-     paints it (applyDemoOverrides in public/shop2/app.js) and exactly the
-     rule overrideLadder() applies in src/lib/orders.ts. Any other ladder is
-     taken rung for rung, unfiltered, so that the shelf's universe is the
-     same list the cart and the till price against. */
-  return labels.length === 1 && !labels[0] ? [""] : labels;
+  /* One rung with no label is «один объём» — and «один объём» is NOT A LADDER,
+     which is the whole of what overrideLadder() in src/lib/orders.ts says
+     about the same rows: it returns null and the line prices and is named
+     through the catalogue file. This used to answer `[""]` instead, and those
+     two readings of one saved ladder split the shop in half on the twenty-nine
+     products sold in a single named volume: «Склад» built its row under '' ,
+     the cart wrote «250 мл» on the line, and the paid sale went looking for a
+     count under a name nobody had used — move() found the rung untracked,
+     skipped the sale in silence, and the 5 under '' never moved (audit
+     18.09.2026, F35). The editor produces the shape on its own: «×» on the
+     last row leaves {size: "", price: ""} behind (public/shop2/app.js).
+
+     Saying «no usable ladder» here is what puts both halves back on one key —
+     knownLadder() then reads the file's, which is where the cart already was.
+     Nothing is lost for a product that really has no volumes: the file has no
+     ladder for it either, and knownLadder() answers [""] for exactly those.
+     Any other ladder is taken rung for rung, unfiltered, so that the shelf's
+     universe is the same list the cart and the till price against.
+     db/migrations/196_one_volume_ladder_rows.sql carries across the counts
+     the split had already written under ''. */
+  if (labels.length === 1 && !labels[0]) return null;
+  return labels;
 }
 
 /** The owner's saved ladders, as the shelf needs them: id → size LABELS.

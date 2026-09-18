@@ -1028,19 +1028,36 @@ export async function priceItems(
      variantStockStates() in src/lib/inventory.ts. Best effort and dynamically
      imported like every other inventory call here: with no inventory module
      the product-level gate below is still in force, exactly as before. */
+  /* Read BEFORE the per-size map below, because a «bundle:<id>» basket line is
+     not a product: what leaves the shelf is the set's PARTS, and their ids are
+     only in the set's definition. */
+  const bundles = items.some((it) => typeof it?.id === "string" && it.id.startsWith("bundle:"))
+    ? await bundleDefs()
+    : {};
   let variantStates: Record<string, Record<string, StockState>> = {};
   if (ctx.channel !== "pos") {
     try {
       const { variantStockStates } = await import("@/lib/inventory");
-      const ids = items.map((it) => (typeof it?.id === "string" ? it.id : "")).filter(Boolean);
-      if (ids.length) variantStates = await variantStockStates(ids);
+      const ids = new Set<string>();
+      for (const it of items) {
+        const id = typeof it?.id === "string" ? it.id : "";
+        if (!id) continue;
+        if (id.startsWith("bundle:")) {
+          /* A set's own id has no shelf row and never had one; the bottles it
+             is made of do, one per part and at the part's own volume. Asking
+             for them here is what lets the gate in the set branch below be the
+             same gate a plain line gets (audit 18.09.2026, F2). */
+          const def = bundles[id.slice("bundle:".length)];
+          if (def) for (const part of bundleParts(def)) ids.add(part.id);
+        } else {
+          ids.add(id);
+        }
+      }
+      if (ids.size) variantStates = await variantStockStates([...ids]);
     } catch (err) {
       console.error("[orders] per-size stock states unavailable, product-level gate only:", err);
     }
   }
-  const bundles = items.some((it) => typeof it?.id === "string" && it.id.startsWith("bundle:"))
-    ? await bundleDefs()
-    : {};
   // product creation: the owner's own products, by id — empty for a catalogue-only basket
   const custom = await customLookup(items.map((it) => it?.id));
 
@@ -1100,9 +1117,26 @@ export async function priceItems(
            here, while the set's definition is in hand: the line itself only
            ever carries «bundle:<id>», and a set edited between the order and
            the payment would otherwise write off the wrong goods. */
+        const partVariant = bundlePartVariant(part.id, part.variant ?? part.size, o);
+        /* …and now the shelf, for THAT volume — the same gate the plain line
+           below gets, and for the same reason. The word tested just above is
+           the PRODUCT's, which says «в наличии» while any one of its volumes
+           is left; a set names one volume, so a 250 мл counted to zero went on
+           being sold inside every set holding it as long as the 500 мл had
+           bottles. The set line carries the rung, so the paid decrement then
+           landed on the empty row, was clamped at 0 and wrote a «sale» of
+           nothing — a paid order for a bottle that was not in the room, found
+           when the set was packed (audit 18.09.2026, F2; decision D12 «a
+           counted-empty size is unbuyable», closed for plain lines only).
+
+           Empty for the till, exactly as below: `variantStates` is not read
+           at all for channel 'pos', where the goods are in the seller's hand
+           and it is the count that lags. A volume nobody has counted is not
+           refused — absent is not empty, everywhere here. */
+        if (variantStates[part.id]?.[partVariant] === "out") throw new OrderError("out_of_stock", part.id);
         parts.push({
           id: part.id,
-          variant: bundlePartVariant(part.id, part.variant ?? part.size, o),
+          variant: partVariant,
           qty: Math.max(1, Math.trunc(num(part.qty, 1))),
         });
       }
@@ -1874,6 +1908,53 @@ export async function claimOrderPaid(id: string, actor = "system"): Promise<Orde
 }
 
 /**
+ * The size each shelf row's goods are named by ON THE ORDER LINE ITSELF —
+ * product id → the stored label, '' where the line carries none.
+ *
+ * stockUnitsOf() answers the other question, which row the goods actually come
+ * off; the two differ only where the ladder had to name a row the line did not
+ * (a one-volume product on a line written before 18.09.2026). The refund needs
+ * to tell those apart — see the comment at its guard. Keyed by product id
+ * because a set may not hold the same product twice (validateBundle: dup_item).
+ */
+function storedSizesOf(item: OrderItem): Map<string, string> {
+  const out = new Map<string, string>();
+  if (item.kind === "bundle" && Array.isArray(item.parts)) {
+    for (const part of item.parts) {
+      out.set(String(part?.id ?? "").trim(), String(part?.variant ?? "").trim());
+    }
+    return out;
+  }
+  out.set(String(item.id ?? "").trim(), String(item.variant ?? "").trim());
+  return out;
+}
+
+/**
+ * One order's stock ledger, per shelf row, read at most once each and always
+ * as it stood BEFORE this status change writes anything.
+ *
+ * Both halves below walk the order line by line, and two lines can name one
+ * row — the same bottle bought loose and again inside a set. Asking the
+ * database again after the first move would answer about a shelf this very
+ * loop has already moved, and the second line would be silently dropped.
+ */
+async function orderLedgerReader(
+  refLedger: (ref: string, productId: string, variant?: string | null) => Promise<{ net: number; returns: number }>,
+  ref: string,
+): Promise<(productId: string, variant: string) => Promise<{ net: number; returns: number }>> {
+  const seen = new Map<string, { net: number; returns: number }>();
+  return async (productId: string, variant: string) => {
+    const key = productId + "\u0000" + variant;
+    let led = seen.get(key);
+    if (!led) {
+      led = await refLedger(ref, productId, variant);
+      seen.set(key, led);
+    }
+    return led;
+  };
+}
+
+/**
  * `opts.unless` — the statuses this move must refuse to make, checked inside
  * the UPDATE itself rather than against a snapshot read before it.
  *
@@ -1961,14 +2042,34 @@ export async function setOrderStatus(
   const wasPaid = (PAID_ORDER_STATUSES as readonly string[]).includes(before.status);
   if (wasPaid && (status === "refunded" || status === "cancelled")) {
     try {
-      const { move, isTracked, stockUnitsOf } = await import("@/lib/inventory");
+      const { move, isTracked, refLedger, stockUnitsOf } = await import("@/lib/inventory");
+      /* This order's own history, read once per shelf row and BEFORE anything
+         is written: two lines can name the same row (a bottle bought loose and
+         again inside a set), and every question below is about the order as it
+         stood before this refund. */
+      const ledger = await orderLedgerReader(refLedger, after.number);
       for (const item of before.items) {
+        const storedSizes = storedSizesOf(item);
         for (const unit of stockUnitsOf(item)) {
           /* Only a counted shelf gets the bottle back. The sale of an uncounted
              variant was skipped (move() — "tracked"), so there is nothing to
              return; a +N here made the variant tracked at N and the shop said
              «мало» about a product the owner never counted. */
           if (!(await isTracked(unit.productId, unit.variant))) continue;
+          /* The line whose size the LADDER named, not the line. Only the
+             twenty-nine one-volume products reach here that way, and only on
+             an order written before 18.09.2026 (variantOf() names the rung on
+             every line since). Such an order was paid by the old code, which
+             moved against '' — and where '' was the seeder's untracked zero,
+             the sale was skipped and the shelf never lost the bottle. Putting
+             it back on «250 мл» would hand the owner a bottle he still has,
+             for good, on every such refund (audit 18.09.2026, F8). So for a
+             line we are re-keying, the ledger has to show this order actually
+             took the goods off that row — migration 194 re-keyed the history
+             with the counts, so a sale that DID land is there under the new
+             name. Every other line is unchanged: its size is its own. */
+          const stored = storedSizes.get(unit.productId) ?? "";
+          if (!stored && unit.variant && (await ledger(unit.productId, unit.variant)).net >= 0) continue;
           await move({
             productId: unit.productId,
             variant: unit.variant,
@@ -2027,21 +2128,34 @@ export async function setOrderStatus(
   if (!wasPaid && (before.status === "cancelled" || before.status === "refunded")
       && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
     try {
-      const { move, refLedger } = await import("@/lib/inventory");
+      const { move, refLedger, stockUnitsOf } = await import("@/lib/inventory");
+      /* THE SAME ROWS THE RETURN ABOVE GAVE BACK, and that is the whole point.
+         Until 19.09.2026 this loop walked `kind === "product"` lines with the
+         raw stored size while its own mirror above expanded every line through
+         stockUnitsOf() — so a set was returned as its parts and then never
+         taken off again, and a one-volume line written before 18.09.2026 was
+         looked for under '' and never found. One wrong «Отменить заказ» on an
+         order with a набор in it, undone a second later, and «Склад» was
+         overstated by the whole set for good: «остатки не сходятся» on
+         everything sold in sets, and a later real refund added the parts a
+         second time (audit 18.09.2026, F3). The two halves are one rule and
+         they now read one function. */
+      const ledger = await orderLedgerReader(refLedger, after.number);
       for (const item of before.items) {
-        if (item.kind !== "product" || !item.qty) continue;
-        const led = await refLedger(after.number, item.id, item.variant ?? "");
-        if (!led.returns || led.net < 0) continue;
-        await move({
-          productId: item.id,
-          variant: item.variant ?? "",
-          delta: -Math.abs(item.qty),
-          // the ledger says where the sale happened, as it does for the
-          // original decrement (src/app/api/admin/pos-orders/route.ts)
-          reason: before.channel === "pos" ? "sale_pos" : "sale_web",
-          ref: after.number,
-          actor,
-        });
+        for (const unit of stockUnitsOf(item)) {
+          const led = await ledger(unit.productId, unit.variant);
+          if (!led.returns || led.net < 0) continue;
+          await move({
+            productId: unit.productId,
+            variant: unit.variant,
+            delta: -Math.abs(unit.qty),
+            // the ledger says where the sale happened, as it does for the
+            // original decrement (src/app/api/admin/pos-orders/route.ts)
+            reason: before.channel === "pos" ? "sale_pos" : "sale_web",
+            ref: after.number,
+            actor,
+          });
+        }
       }
     } catch (err) {
       console.error("[orders] re-taking the stock of a re-opened order failed:", err);

@@ -19,6 +19,7 @@ import {
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { createOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type OrderLike } from "@/lib/payments/apply";
+import { query } from "@/lib/db";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -762,6 +763,39 @@ describe("inventory", () => {
       expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(14); // 10 + 2×2
     });
 
+    /* …and the way back from THAT. The cancellation gave the parts back
+       through stockUnitsOf(); «Изменить статус вручную → оплачен» on the same
+       card has to take the same parts off again. Until 19.09.2026 the undo
+       walked only `kind === "product"` lines, so a set's parts were returned
+       once per cancel and never taken back: one wrong tap on an order with a
+       набор in it, undone a second later, and «Склад» was overstated by the
+       whole set for good — «остатки не сходятся» on every product sold in
+       sets (audit 18.09.2026, F3). */
+    it("the undo of a cancelled order with a set in it takes its parts off again", async () => {
+      await seedTestSet();
+      await move({ productId: setPartA.id, delta: 10, reason: "goods_in" });
+      await move({ productId: setPartB.id, variant: setPartBSize, delta: 10, reason: "goods_in" });
+      const order = await createOrder({
+        items: [{ id: `bundle:${SET_ID}`, qty: 2 }],
+        customer: { name: "Т", email: "set-undo@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await setOrderStatus(order.id, "paid", "test");
+      await setOrderStatus(order.id, "cancelled", "test");
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(12);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(14);
+
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(10);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(10);
+
+      // …and however many times the owner changes his mind, as for a plain line
+      await setOrderStatus(order.id, "cancelled", "test");
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(10);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(10);
+    });
+
     it("cancelling a NEW order (never paid) returns nothing — it never took stock", async () => {
       const order = await createOrder({
         items: [{ id: plain.id, qty: 2 }],
@@ -914,6 +948,54 @@ describe("inventory", () => {
       expect(back[0].delta).toBe(2);
     });
 
+    /* «Один объём» — one rung with no label, what the editor leaves behind
+       when «×» takes the last named row away — used to split this product in
+       two all over again: ladderLabels() read it as the '' row and «Склад»
+       offered that row to count into, while overrideLadder() read it as «not
+       a ladder» and the cart fell through to the file's named rung. The count
+       said '' , the order line said «250 мл», and the paid sale went looking
+       for a count under a name nobody had used — skipped in silence, with the
+       five still sitting on the other row (audit 18.09.2026, F35). Both halves
+       now say «that is not a ladder» and read the file's rung. */
+    describe("an owner ladder of ONE UNLABELLED rung", () => {
+      beforeEach(async () => {
+        await upsertOverride(oneRung.id, { sizes: [{ size: "", price: 30 }] });
+      });
+
+      it("leaves «Склад» with one row, under the volume the product is sold in", async () => {
+        const rows = (await getLevels({})).filter((r) => r.productId === oneRung.id);
+        expect(rows.map((r) => r.variant)).toEqual([rung]);
+      });
+
+      it("is the same row the order line names, so the sale is not skipped", async () => {
+        // counted where «Склад» offers the row, which is the whole question
+        const shelf = (await getLevels({})).filter((r) => r.productId === oneRung.id);
+        await move({ productId: oneRung.id, variant: shelf[0].variant, delta: 5, reason: "goods_in" });
+        const order = await createOrder({
+          items: [{ id: oneRung.id, qty: 1 }],
+          customer: { name: "Т", email: "one-volume@example.com", phone: "+372 5555 5555" },
+          shipping: { method: "pickup", country: "EE" },
+        });
+        expect(order.items[0].variant).toBe(rung);
+        await applyPaymentResult(
+          { id: order.id, number: order.number, status: "new", total: order.total, items: order.items },
+          { orderRef: order.number, status: "paid", providerRef: "x", amount: Number(order.total), currency: "EUR" },
+          "mock",
+          { setOrderPayment: async () => ({}), setOrderStatus: async () => ({}) },
+        );
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(4);
+        expect(await getLevel(oneRung.id, "")).toBeNull();
+      });
+
+      /* …and the thing that must not move with it: a rung he NAMED is his key
+         and stays the key, file or no file. */
+      it("still follows a rung the owner named himself", async () => {
+        await upsertOverride(oneRung.id, { sizes: [{ size: "флакон", price: 30 }] });
+        const rows = (await getLevels({})).filter((r) => r.productId === oneRung.id);
+        expect(rows.map((r) => r.variant)).toEqual(["флакон"]);
+      });
+    });
+
     /* The other half of the same rule. Two rungs are a real choice and the
        server has no business picking one: a line that names no size stays
        nameless, exactly as before. */
@@ -976,6 +1058,73 @@ describe("inventory", () => {
         expect(stockUnitsOf({ kind: "product", id: sized.id, variant: null, qty: 1 })).toEqual([
           { productId: sized.id, variant: "", qty: 1 },
         ]);
+      });
+
+      /** The row createOrder() wrote for these before 18.09.2026: no size at all. */
+      async function orderWithNoSizeOnTheLine(email: string, qty: number) {
+        const order = await createOrder({
+          items: [{ id: oneRung.id, qty }],
+          customer: { name: "Т", email, phone: "+372 5555 5555" },
+          shipping: { method: "pickup", country: "EE" },
+        });
+        const items = order.items.map((i) => ({ ...i, variant: null }));
+        await query("update orders set items = $1::jsonb where id = $2", [JSON.stringify(items), order.id]);
+        return { ...order, items };
+      }
+
+      /* Two halves of one rule, and the undo was the half that was never
+         widened (audit 18.09.2026, F3). The cancellation gives the bottle
+         back through stockUnitsOf() — onto «250 мл», the row the sale took it
+         from — and «Изменить статус вручную → оплачен» then looked for the
+         sale under the line's own empty size, found nothing there and took
+         nothing off. Every cancel/undo cycle handed the shelf a bottle. */
+      it("the undo of a cancellation takes such a line off the labelled row again", async () => {
+        await move({ productId: oneRung.id, variant: rung, delta: 5, reason: "goods_in" });
+        const order = await orderWithNoSizeOnTheLine("onesize-undo@example.com", 1);
+
+        const { setOrderPayment, setOrderStatus: realSetStatus } = await import("@/lib/orders");
+        await applyPaymentResult(
+          { id: order.id, number: order.number, status: "new", total: order.total, items: order.items },
+          { orderRef: order.number, status: "paid", providerRef: "x", amount: Number(order.total), currency: "EUR" },
+          "mock",
+          { setOrderPayment, setOrderStatus: realSetStatus },
+        );
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(4);
+
+        await setOrderStatus(order.id, "cancelled", "test");
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(5);
+
+        await setOrderStatus(order.id, "paid", "admin");
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(4);
+        expect(await listMoves({ productId: oneRung.id, reason: "sale_web" })).toHaveLength(2);
+        expect(await getLevel(oneRung.id, "")).toBeNull();
+      });
+
+      /* And the one that must NOT come back (audit 18.09.2026, F8). An order
+         paid BEFORE migration 194 moved against '' — which in the state 194
+         describes as typical was the seeder's untracked zero, so move()
+         skipped the sale and the shelf never lost the bottle. The refund now
+         resolves the same line onto «250 мл», which IS counted, and would
+         hand the shelf a bottle it still has. Nothing was taken, so nothing
+         comes back. */
+      it("a refund gives nothing back when the sale of that line was skipped", async () => {
+        await move({ productId: oneRung.id, variant: rung, delta: 5, reason: "goods_in" });
+        const order = await orderWithNoSizeOnTheLine("onesize-old-refund@example.com", 1);
+        await setOrderStatus(order.id, "paid", "test");
+        // the pre-194 decrement, exactly as it ran: against '' , and skipped
+        const skipped = await move({
+          productId: oneRung.id,
+          variant: "",
+          delta: -1,
+          reason: "sale_web",
+          ref: order.number,
+        });
+        expect(skipped.skipped).toBe(true);
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(5);
+
+        await setOrderStatus(order.id, "refunded", "test");
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(5);
+        expect(await listMoves({ productId: oneRung.id, reason: "return" })).toHaveLength(0);
       });
     });
   });
