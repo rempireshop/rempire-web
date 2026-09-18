@@ -17,6 +17,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { runFlows } from "@/lib/flows";
+import { reconcileUnpaidOrders } from "@/lib/payments/reconcile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,7 +47,25 @@ export async function GET(req: Request) {
   }
   try {
     const report = await runFlows();
-    return Response.json({ ok: true, ...report }, { headers: NO_STORE });
+    /* …and, on the same daily trip, the lost-webhook sweep
+       (/api/cron/payments-reconcile, src/lib/payments/reconcile.ts). It rides
+       here because Vercel's Hobby plan allows exactly two cron jobs and both
+       slots are taken (docs/HOSTING.md); the route of its own exists so that
+       moving to Pro is a `vercel.json` line and nothing else.
+
+       Entirely separate from the letters above — it shares no settings, no
+       stamps and no queries with them, and in particular nothing with the
+       seven-day «unpaid» cancel, which is a different feature and is off.
+       Its own failure must never cost Renat his morning letters, so it is
+       caught here rather than in the handler's catch. */
+    let reconciled;
+    try {
+      reconciled = await reconcileUnpaidOrders();
+    } catch (err) {
+      console.error("[api/cron/flows] the payment sweep failed:", err);
+      reconciled = { error: "failed" };
+    }
+    return Response.json({ ok: true, ...report, payments: reconciled }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/cron/flows] failed:", err);
     return Response.json({ ok: false, error: "server_error" }, { status: 500, headers: NO_STORE });

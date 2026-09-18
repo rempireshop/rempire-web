@@ -309,6 +309,7 @@ function routes(): RouteCase[] {
     { name: "POST /api/assistant/", path: "/api/assistant/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true, headers: { origin: "https://rempireshop.com" } }, body: { messages: [{ role: "user", content: "привет" }], lang: "RU", mode: "shop" }, jsonBody: false },
     { name: "GET /api/cron/flows/", path: "/api/cron/flows/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/cron/flows/route"), auth: "cron", req: cron },
     { name: "GET /api/cron/events-retention/", path: "/api/cron/events-retention/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/cron/events-retention/route"), auth: "cron", req: cron },
+    { name: "GET /api/cron/payments-reconcile/", path: "/api/cron/payments-reconcile/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/cron/payments-reconcile/route"), auth: "cron", req: cron },
     { name: "GET /api/e2e/bootstrap/", path: "/api/e2e/bootstrap/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/bootstrap/route") },
     { name: "GET /api/e2e/gift-card/", path: "/api/e2e/gift-card/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/gift-card/route"), req: admin, queries: [`?order=${F.orderId}`, "?order=", "?order=%00"] },
     { name: "GET /api/e2e/mail/", path: "/api/e2e/mail/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/mail/route"), req: admin, queries: ["?template=order-confirmed", "?to=fuzz@example.com", "?template=&to=", "?template=%00&to=%00"] },
@@ -667,10 +668,11 @@ describe("API fuzzing", () => {
   it("refuses the cron routes when no CRON_SECRET is configured at all", async () => {
     const flows = await import("@/app/api/cron/flows/route");
     const retention = await import("@/app/api/cron/events-retention/route");
+    const reconcile = await import("@/app/api/cron/payments-reconcile/route");
     const saved = process.env.CRON_SECRET;
     setEnv("CRON_SECRET", undefined);
     try {
-      for (const route of [flows, retention]) {
+      for (const route of [flows, retention, reconcile]) {
         const attempts: Record<string, string>[] = [{}, { authorization: `Bearer ${CRON_SECRET}` }, { authorization: "Bearer " }];
         for (const headers of attempts) {
           const res = await route.GET(makeRequest("/api/cron/x/", { headers }));

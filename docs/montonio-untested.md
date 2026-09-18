@@ -52,8 +52,8 @@ not from our own output.
 | P6 | **A refund webhook carrying `refundStatusDescription`** | It only arrives after a real refund. `INSUFFICIENT_FUNDS` in particular can never be produced in sandbox. | The refunds guide's own decoded `refundToken`, signed fresh — `tests/montonio-docs-payloads.test.ts`, including the `PENDING / INSUFFICIENT_FUNDS` variant |
 | P7 | **A refund cancelled after ten days of PENDING** | Nothing pends in sandbox | `refundPendingText()` counts the clock down; `pendingRefunds()` lists them; `tests/montonio-problems.test.ts` |
 | P8 | **`VOIDED`** — a bank taking back a payment it had reported as PAID | Only happens with real Payment Initiation | `mapMontonioStatus("VOIDED") → failed` in `tests/payments-montonio.test.ts`, and the refusal to downgrade a paid order in `tests/fuzz-money.test.ts` |
-| P9 | **An underpaid order** (`payment.amountMismatch`) | The sandbox always pays the asked amount | `tests/payments-apply.test.ts`. **Behaviour is still «flag it and fulfil it» — see Part 5, D2** |
-| P10 | **A lost webhook** and the order that stays unpaid because of it | Sandbox delivers everything | Nothing runs. `GET /orders/:orderUuid` is implemented and unused — see Part 5, D3 |
+| P9 | **An underpaid order** (`payment.amountMismatch`) | The sandbox always pays the asked amount | `tests/payments-apply.test.ts` and `tests/payments-underpaid.test.ts`. **Decided 18.09.2026 and implemented 19.09.2026 (r27-pay-decisions): the order is HELD, not fulfilled** — see Part 5, D2 |
+| P10 | **A lost webhook** and the order that stays unpaid because of it | Sandbox delivers everything | `tests/payments-reconcile.test.ts` drives the nightly sweep against a scripted `GET /orders/:orderUuid`. **Decided 18.09.2026, implemented 19.09.2026** — see Part 5, D3 |
 | P11 | **`ABANDONED`** after `expiresIn` | We never send `expiresIn`, and sandbox orders are paid immediately | `mapMontonioStatus` handles the word. See Part 5, D4 |
 | P12 | **The real enabled-methods list** | Depends entirely on which products this store has activated | `GET /api/admin/montonio/` reads it live; the guide's own response is pinned in `tests/montonio-docs-payloads.test.ts` |
 
@@ -260,9 +260,9 @@ from a webhook, or what the shop charges.
 
 | # | Open question | Written up in |
 |---|---|---|
-| D1 | Strict `accessKey` / `uuid` checks on the order token | payments audit § A4 |
-| D2 | **Hold an underpaid order instead of fulfilling it** (P9) | payments audit § A6 |
-| D3 | A reconcile pass over `GET /orders/:orderUuid` for lost webhooks (P10) | payments audit § B1 |
+| ~~D1~~ | ~~Strict `accessKey` / `uuid` checks on the order token~~ · **done 19.09.2026** (r27-pay-decisions). Both checks tightened; a mismatch asks `GET /orders/:uuid` instead of refusing — `src/lib/payments/token-guard.ts`, `tests/payments-token-guard.test.ts` | payments audit § A4 |
+| ~~D2~~ | ~~**Hold an underpaid order instead of fulfilling it** (P9)~~ · **done 19.09.2026**. `payment.held` + an `order.payment_held` journal row; no stock, no cards, no letter — `src/lib/payments/apply.ts`, `tests/payments-underpaid.test.ts` | payments audit § A6 |
+| ~~D3~~ | ~~A reconcile pass over `GET /orders/:orderUuid` for lost webhooks (P10)~~ · **done 19.09.2026**. Nightly, through the same `settlePayment()` door — `src/lib/payments/reconcile.ts`, `/api/cron/payments-reconcile/`, `tests/payments-reconcile.test.ts` | payments audit § B1 |
 | D4 | Send `expiresIn`, matched to the unpaid-order cron (P11) | payments audit § B2 |
 | D5 | Enforce Montonio's own 0.05 € refund floor in the panel | payments audit § C3 |
 | D6 | Read `constraints.parcelDimensionsRequired` and declare a carton (S6) | shipping audit § 1.6 |

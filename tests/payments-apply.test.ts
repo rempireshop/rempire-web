@@ -137,25 +137,112 @@ describe("idempotency — the webhook and the return race by design", () => {
 });
 
 describe("amount checking", () => {
-  it("flags a payment that does not match the order total", async () => {
+  /* Dim's decision of 18.09.2026. Montonio's own help centre warns that
+     reusing an order can let a customer «complete orders by paying a smaller
+     amount than intended»; until now this code flagged that and fulfilled the
+     order anyway. A parcel that has gone cannot come back. */
+  it("HOLDS a payment smaller than the order total instead of fulfilling it", async () => {
     const d = deps();
     const out = await applyPaymentResult(order, result({ amount: 9.99 }), "montonio", d);
-    // the money arrived, so the order is paid…
-    expect(out.status).toBe("paid");
-    // …but the difference is recorded rather than swallowed
+
+    // the order does not move, so nothing downstream of the paid transition
+    // runs: no stock off the shelf, no gift card minted, no receipt letter
+    expect(out.status).toBe("unchanged");
+    expect(out.alreadyPaid).toBe(false);
+    expect(d.setOrderStatus).not.toHaveBeenCalled();
+
+    // …and what happened is written down twice over: on the payment blob for
+    // the order card, and in the journal for Renat
     expect(out.payment.amountMismatch).toEqual({ expected: 99.99, got: 9.99 });
+    expect(out.payment.held).toMatchObject({
+      reason: "underpaid",
+      expected: 99.99,
+      got: 9.99,
+      shortfall: 90,
+      currency: "EUR",
+      providerStatus: "paid",
+    });
+    /* `pending`, never `paid`: the blob is what alreadyPaid() and
+       halfSettled() read, and a blob saying paid on an order that never moved
+       is exactly what those two call «a settlement that died half-way» and
+       finish off — which would undo the hold on Montonio's next retry. */
+    expect(out.payment.status).toBe("pending");
+    expect(d.setOrderPayment.mock.calls[0][1]).toMatchObject({ status: "pending" });
+  });
+
+  it("holds it by a single cent, and says so in cents", async () => {
+    const d = deps();
+    const out = await applyPaymentResult(order, result({ amount: 99.98 }), "montonio", d);
+    expect(out.status).toBe("unchanged");
+    expect(out.payment.held).toMatchObject({ reason: "underpaid", shortfall: 0.01 });
+  });
+
+  it("holds money that arrived in a currency the order is not priced in", async () => {
+    const d = deps();
+    const out = await applyPaymentResult(
+      order,
+      result({ amount: 99.99, currency: "PLN" }),
+      "montonio",
+      d,
+    );
+    expect(out.status).toBe("unchanged");
+    expect(out.payment.held).toMatchObject({
+      reason: "currency",
+      currency: "EUR",
+      paidCurrency: "PLN",
+      shortfall: 0,
+    });
+  });
+
+  it("takes an OVERpayment, flags it, and fulfils the order", async () => {
+    const d = deps();
+    const out = await applyPaymentResult(order, result({ amount: 109.99 }), "montonio", d);
+    // the customer has paid for their goods and more; holding the parcel over
+    // the shop's good luck would be absurd
+    expect(out.status).toBe("paid");
+    expect(out.payment.held).toBeUndefined();
+    expect(out.payment.amountMismatch).toEqual({ expected: 99.99, got: 109.99 });
+  });
+
+  it("cannot hold what the provider did not say — a ticket with no amount", async () => {
+    const d = deps();
+    const out = await applyPaymentResult(order, result({ amount: undefined }), "montonio", d);
+    expect(out.status).toBe("paid");
+    expect(out.payment.held).toBeUndefined();
+  });
+
+  it("never un-pays an order that is already paid, however short the late ticket", async () => {
+    const d = deps();
+    const paid: OrderLike = { ...order, status: "paid" };
+    const out = await applyPaymentResult(paid, result({ amount: 1 }), "montonio", d);
+    // paid is a floor (see the top of apply.ts) and a hold must not breach it
+    expect(out.alreadyPaid).toBe(true);
+    expect(out.payment.held).toBeUndefined();
+    expect(out.payment.status).toBe("paid");
+  });
+
+  it("a held order stays held when Montonio retries the same webhook", async () => {
+    const d = deps();
+    const first = await applyPaymentResult(order, result({ amount: 9.99 }), "montonio", d);
+    // the order as the row now holds it: blob written, status never moved
+    const held: OrderLike = { ...order, payment: first.payment };
+    const again = await applyPaymentResult(held, result({ amount: 9.99 }), "montonio", deps());
+    expect(again.status).toBe("unchanged");
+    expect(again.payment.held).toBeDefined();
   });
 
   it("ignores rounding noise", async () => {
     const d = deps();
     const out = await applyPaymentResult(order, result({ amount: 99.99 }), "montonio", d);
     expect(out.payment.amountMismatch).toBeUndefined();
+    expect(out.payment.held).toBeUndefined();
   });
 
   it("copes with a numeric total that arrived as a string", async () => {
     const d = deps();
     const out = await applyPaymentResult({ ...order, total: "99.99" }, result(), "montonio", d);
     expect(out.payment.amountMismatch).toBeUndefined();
+    expect(out.payment.held).toBeUndefined();
   });
 });
 

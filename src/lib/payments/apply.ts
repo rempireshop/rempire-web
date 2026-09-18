@@ -27,6 +27,8 @@ export interface OrderLike {
   number: string;
   status?: string | null;
   total?: number | string | null;
+  /** EUR everywhere today; read by the short-payment check below. */
+  currency?: string | null;
   payment?: unknown;
   /** Quoted at checkout, spent here — see redeemQuotedGiftCard() below. */
   discount?: number | string | null;
@@ -72,6 +74,21 @@ export type PaymentBlob = {
   at: string;
   /** Set when the provider's amount disagrees with the order total. */
   amountMismatch?: { expected: number; got: number };
+  /**
+   * The order is NOT fulfilled and is waiting for Renat to look at it.
+   *
+   * Written instead of the move into paid, never beside it: an order carrying
+   * this has had no stock taken, no gift card minted and no receipt sent, and
+   * `status` on this same blob says `pending`, not `paid`, precisely so that
+   * neither alreadyPaid() nor halfSettled() can mistake it for a settlement
+   * that died half-way and finish it off. See shortPayment() below.
+   *
+   * `null` is how the hold is LIFTED: setOrderPayment() merges top-level keys
+   * (jsonb `||`), so the only way to take a key back off the blob is to write
+   * a null over it. That happens on the paid transition — Renat pressed
+   * «Оплачен», or the customer paid again, and in full.
+   */
+  held?: HeldPayment | null;
   /** A status the order refused to take, kept for the admin to look at. */
   rejected?: { status: PaymentStatus; at: string; detail?: string };
   /**
@@ -81,6 +98,28 @@ export type PaymentBlob = {
    */
   repeat?: PaymentBlob;
 };
+
+/** @see PaymentBlob.held */
+export interface HeldPayment {
+  /**
+   * `underpaid` — less money arrived than the order is worth.
+   * `currency` — money arrived in a currency the order is not priced in, so
+   * «less» and «enough» cannot be told apart at all.
+   */
+  reason: "underpaid" | "currency";
+  /** `orders.total`, in the order's own currency. */
+  expected: number;
+  /** What the provider says was actually paid. */
+  got: number;
+  /** expected − got, and 0 when the two are not in the same currency. */
+  shortfall: number;
+  /** The order's currency, and the payment's — equal unless `reason` says so. */
+  currency: string;
+  paidCurrency: string;
+  at: string;
+  /** What the provider's own ticket claimed, which is normally `paid`. */
+  providerStatus: PaymentStatus;
+}
 
 export interface ApplyDeps {
   /** Merges into the stored blob — top-level keys only (src/lib/orders.ts). */
@@ -554,8 +593,108 @@ function paymentSaysPaid(order: OrderLike): boolean {
   return (
     typeof p === "object" &&
     p !== null &&
-    (p as { status?: unknown }).status === "paid"
+    (p as { status?: unknown }).status === "paid" &&
+    /* A held payment is money that arrived and was NOT accepted as payment for
+       this order (shortPayment below). It already writes `status: "pending"`,
+       so this is belt-and-braces — but it is the line that stops a held order
+       from ever reading as paid, or as half-settled, to anything downstream.
+       Without it Montonio's next retry of the very same webhook would see
+       «the blob says paid and the order never moved», call that a settlement
+       that died half-way, and finish the fulfilment the hold exists to stop. */
+    !heldOf(order)
   );
+}
+
+/** The hold already stored on the order, if it is holding one. */
+function heldOf(order: OrderLike): HeldPayment | undefined {
+  const p = order.payment;
+  if (typeof p !== "object" || p === null) return undefined;
+  const held = (p as { held?: unknown }).held;
+  return held && typeof held === "object" ? (held as HeldPayment) : undefined;
+}
+
+/** Integer cents — money is never compared as a float. */
+function cents(v: number): number {
+  return Math.round(v * 100);
+}
+
+/**
+ * Did LESS money arrive than the order is worth?
+ *
+ * Montonio's own help centre, on reusing an order under the same
+ * `merchantReference`: «Reusing orders while changing the amount may allow
+ * your customers to complete orders by paying a smaller amount than
+ * intended.» Until 19.09.2026 this shop flagged that on the payment blob and
+ * then fulfilled the order anyway — stock off the shelf, gift cards minted and
+ * e-mailed, receipt sent. Dim's decision of 18.09.2026: hold it and tell him.
+ * Nothing about a parcel that has gone can be undone; a gift card held back can
+ * be reissued in seconds, and he would rather look at five orders a month than
+ * post one for nothing.
+ *
+ * Compared in the same currency, in integer cents, with a tolerance of zero:
+ * a short payment is any shortfall at all. Both figures are already rounded to
+ * the cent before they get here (`orders.total` is numeric(10,2); Montonio's
+ * are put through money()), so there is no rounding noise for a tolerance to
+ * absorb — and a tolerance is exactly what an attacker aims at.
+ *
+ * Undefined — no hold — when the provider does not say what was paid. A shop
+ * that cannot see the amount is no worse off than it was before this existed,
+ * and refusing to fulfil on a missing field would hold every order.
+ *
+ * An OVERpayment is left alone deliberately: it is flagged (`amountMismatch`)
+ * and fulfilled, because the customer has paid for their goods and more, and
+ * holding their parcel over the shop's good luck would be absurd.
+ */
+function shortPayment(order: OrderLike, result: VerifyResult, at: string): HeldPayment | undefined {
+  const expected = toNumber(order.total);
+  if (expected === null) return undefined;
+  const got = result.amount;
+  if (typeof got !== "number" || !Number.isFinite(got)) return undefined;
+
+  const currency = String(order.currency ?? "EUR").trim().toUpperCase() || "EUR";
+  /* A provider that says nothing about the currency is talking about the
+     order's own — that is what every one of them has always meant. */
+  const paidCurrency = String(result.currency ?? currency).trim().toUpperCase() || currency;
+
+  /* Not in the decision as written, and held anyway: the shop prices in EUR
+     only (src/lib/payments/order.ts), so money arriving in something else is
+     not a sum this code can compare — 100 PLN is not 100 €, and calling them
+     equal is the one arithmetic an underpayment would love. «Compare in the
+     same currency» has no answer here, so the order waits for a human. */
+  const reason: HeldPayment["reason"] | null =
+    paidCurrency !== currency ? "currency" : cents(got) < cents(expected) ? "underpaid" : null;
+  if (!reason) return undefined;
+
+  return {
+    reason,
+    expected,
+    got,
+    shortfall: reason === "underpaid" ? Math.round((expected - got) * 100) / 100 : 0,
+    currency,
+    paidCurrency,
+    at,
+    providerStatus: result.status,
+  };
+}
+
+/**
+ * Tell Renat. The order card reads this out of `payment.held`; the journal row
+ * is what makes it findable afterwards, and what «Что случилось» prints.
+ * Best effort, like every other audit writer here: a journal hiccup must never
+ * be the reason a payment goes unrecorded.
+ */
+async function auditHeld(order: OrderLike, held: HeldPayment, deps: ApplyDeps): Promise<void> {
+  try {
+    const write =
+      deps.writeAudit ?? ((await import("@/lib/orders")).writeAuditSafe as ApplyDeps["writeAudit"]);
+    await write?.("system", "order.payment_held", {
+      orderId: order.id,
+      number: order.number,
+      ...held,
+    });
+  } catch (err) {
+    console.error("[payments] order.payment_held not audited", err);
+  }
 }
 
 function alreadyPaid(order: OrderLike): boolean {
@@ -696,6 +835,25 @@ export async function applyPaymentResult(
     );
   }
 
+  /* …and when the difference is a SHORTFALL, the order is held rather than
+     fulfilled (Dim, 18.09.2026 — see shortPayment above). Only on the way in:
+     an order that is already paid keeps the floor it has, and a late short
+     ticket for it is recorded as the mismatch it is, exactly as before. The
+     blob it writes says `pending`, so the paid side effects below are not
+     merely skipped this time — they are unreachable on every retry too. */
+  const held = result.status === "paid" && !wasPaid ? shortPayment(order, result, now) : undefined;
+  if (held) {
+    payment.status = "pending";
+    payment.held = held;
+  } else if (result.status === "paid" && heldOf(order)) {
+    /* …and the hold is lifted the moment the order is genuinely paid: the full
+       amount arrived on a second attempt, or Renat pressed «Оплачен» and the
+       admin route sent this same ticket through. Written as an explicit null
+       because the blob is merged, never replaced — without it the order card
+       would keep warning about a shortfall that has been settled. */
+    payment.held = null;
+  }
+
   /* A SECOND payment, not a retry of the first: the order is paid and this
      token carries a different provider reference.
 
@@ -731,6 +889,22 @@ export async function applyPaymentResult(
   }
 
   await record(payment);
+
+  if (held) {
+    /* The money arrived and the order does not move. No stock comes off the
+       shelf, no gift card is minted, no receipt letter goes out — the three
+       things the paid transition below does and that the shop cannot take
+       back. The order stays «не оплачен» to every other screen, carries
+       `payment.held` for the order card, and gets one journal row.
+       Renat's way out of it is the panel's own «Оплачен» button, which moves
+       the order by hand and settles it properly; or «Отменить заказ» and a
+       refund of what did arrive. Neither needs code that does not exist. */
+    if (!heldOf(order)) await auditHeld(order, held, deps);
+    console.error(
+      `[payments] ${order.number} held: ${held.reason} — expected ${held.expected} ${held.currency}, got ${held.got} ${held.paidCurrency}`,
+    );
+    return { status: "unchanged", keptPaid: false, alreadyPaid: false, payment };
+  }
 
   if (result.status === "paid") {
     // Already paid: a retry, not a payment. Write the blob, touch nothing else

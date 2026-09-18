@@ -69,7 +69,12 @@ Other env names: `SESSION_SECRET`, `ADMIN_PASSWORD_HASH`, `CRON_SECRET`,
 "process\.env\.[A-Z0-9_]+" src tools e2e next.config.ts playwright.config.ts`.
 
 **Scheduled jobs** (`vercel.json`): `/api/cron/flows/` daily `0 7 * * *` UTC;
-`/api/cron/events-retention/` daily `30 3 * * *`. Hobby allows one run a day.
+`/api/cron/events-retention/` daily `30 3 * * *`. Hobby allows one run a day,
+and two jobs in total — which is why the third one,
+`/api/cron/payments-reconcile/` (the lost-webhook sweep,
+`src/lib/payments/reconcile.ts`), has a route but **no `vercel.json` entry** and
+rides at the end of `/api/cron/flows/`. On Pro, give it an hourly entry of its
+own.
 
 **Where things live.**
 

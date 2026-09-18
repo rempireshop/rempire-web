@@ -4,6 +4,7 @@ import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { giftLinks, receiptUrl, type ReceiptState } from "@/lib/payments/receipt";
 import { settlePayment } from "@/lib/payments/settle";
+import { guardTokenChecks } from "@/lib/payments/token-guard";
 
 /**
  * GET /api/payments/return/ — where the provider sends the shopper back.
@@ -100,6 +101,26 @@ async function handle(req: Request, params: URLSearchParams) {
   }
   if (!order) return done(base, result.orderRef, "failed");
 
+  /* The same two documented checks the webhook runs, on the same door — the
+     shopper's browser is the easier of the two to replay a token at, because
+     `order-token` travels in a URL and lands in history, in a Referer and in
+     any log that keeps query strings (src/lib/payments/token-guard.ts). */
+  try {
+    const guard = await guardTokenChecks(order, result, provider);
+    if (guard.verdict === "unknown") {
+      /* Nothing settled, and the shopper is told the truth: the shop is
+         checking. The webhook is the authority on money and is still coming. */
+      return done(base, order.number, "pending", { orderId: order.id, ...retry(order) });
+    }
+    if (guard.verdict === "refused") {
+      return done(base, order.number, "failed", { orderId: order.id, ...retry(order) });
+    }
+    result = guard.result;
+  } catch (err) {
+    console.error("payments/return: token checks failed to run", err);
+    return done(base, order.number, "pending", { orderId: order.id, ...retry(order) });
+  }
+
   let outcome;
   try {
     // The confirmation e-mail must not hold up the redirect, and must not be
@@ -119,12 +140,21 @@ async function handle(req: Request, params: URLSearchParams) {
     });
   }
 
+  /* A held order is one the money did NOT settle: less arrived than the order
+     is worth, so nothing was fulfilled and Renat has to look at it
+     (src/lib/payments/apply.ts shortPayment). The token still says «paid», so
+     without this line the shopper would be shown a paid receipt for an order
+     that has no gift cards, no parcel coming and a total they did not pay.
+     «Платёж обрабатывается» is the honest screen: the money is here, the shop
+     has not accepted it yet. */
   const state: ReceiptState =
     outcome.keptPaid || outcome.status === "paid"
       ? "paid"
-      : outcome.status === "failed"
-        ? "failed"
-        : result.status;
+      : outcome.payment.held
+        ? "pending"
+        : outcome.status === "failed"
+          ? "failed"
+          : result.status;
   // The cards exist by now: settlePayment() awaited the hook, and it mints
   // before it mails.
   const gift = state === "paid" ? await giftLinks(order.id) : "";
@@ -149,6 +179,16 @@ async function handle(req: Request, params: URLSearchParams) {
        after the redirect, and its own checkout state has reset to Estonia. */
     country: countryOf(order),
   });
+}
+
+/**
+ * What «Оплатить ещё раз» needs to start where the shopper left off — the way
+ * they chose, the bank they picked and the country whose banks to offer. The
+ * three fields the receipt already carries on every non-paid screen, gathered
+ * so the early returns above spell them once rather than four times.
+ */
+function retry(order: { payment?: unknown; shipping?: unknown }) {
+  return { method: methodOf(order), bank: bankOf(order), country: countryOf(order) };
 }
 
 /** `bank` | `card` | `wallet` off the order's payment blob, or nothing. */

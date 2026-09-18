@@ -335,11 +335,36 @@ describe("verifyReturn / verifyNotification", () => {
     await expect(provider.verifyReturn(params)).rejects.toMatchObject({ code: "token_signature" });
   });
 
-  it("refuses a validly signed token for another store", async () => {
+  /* Until 19.09.2026 this threw `token_foreign` here, inside the provider.
+     Dim's decision of 18.09.2026 moved the verdict one step out: the provider
+     reports what the documented checks found and the caller asks Montonio
+     about it, because refusing on the spot is how a customer who really paid
+     gets told they have not (tests/payments-token-guard.test.ts is where the
+     refusal now lives). The signature check is untouched and still throws. */
+  it("flags a validly signed token for another store instead of deciding alone", async () => {
     const params = new URLSearchParams({
       "order-token": montonioToken({ accessKey: "another-store" }),
     });
-    await expect(provider.verifyReturn(params)).rejects.toMatchObject({ code: "token_foreign" });
+    const out = await provider.verifyReturn(params);
+    expect(out.tokenChecks).toEqual({ accessKey: "foreign" });
+  });
+
+  /* The hole this closes: the comparison used to run only `if (claims.accessKey)`,
+     so a validly signed token that carried no accessKey claim at all passed as
+     ours without anybody noticing. */
+  it("flags a token that carries no accessKey claim at all", async () => {
+    const params = new URLSearchParams({
+      "order-token": montonioToken({ accessKey: undefined }),
+    });
+    const out = await provider.verifyReturn(params);
+    expect(out.tokenChecks).toEqual({ accessKey: "absent" });
+  });
+
+  it("says nothing is wrong with a token carrying our own accessKey", async () => {
+    const out = await provider.verifyReturn(
+      new URLSearchParams({ "order-token": montonioToken({}) }),
+    );
+    expect(out.tokenChecks).toEqual({ accessKey: "ok" });
   });
 
   it("refuses a return with no token at all", async () => {

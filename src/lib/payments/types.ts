@@ -117,6 +117,32 @@ export interface VerifyResult {
    * ever (Dim, 07.09.2026).
    */
   refunded?: "full" | "partial";
+  /**
+   * What the two documented token checks found — Montonio's orders guide
+   * («Validating the returned Order Token») checks `paymentStatus`, `uuid` and
+   * `accessKey`, and until 19.09.2026 this shop checked one and a half of them.
+   *
+   * The provider fills this in and does NOT refuse on its own: the order this
+   * token is about lives in the database, not in the token, so only the caller
+   * can compare the `uuid`. Both money routes hand the result to
+   * guardTokenChecks() (src/lib/payments/token-guard.ts) before they settle
+   * anything — a mismatch there is a QUESTION for Montonio, not a verdict, and
+   * an answer of «this order is paid» is what lets it through.
+   *
+   * Absent = a provider that has no such claims (the mock bank), and nothing
+   * to check.
+   */
+  tokenChecks?: TokenChecks;
+}
+
+/** @see VerifyResult.tokenChecks */
+export interface TokenChecks {
+  /**
+   * The token's `accessKey` claim against the one this shop is configured
+   * with: `ok` matched, `absent` was not sent at all (which used to pass
+   * silently), `foreign` named another store.
+   */
+  accessKey: "ok" | "absent" | "foreign";
 }
 
 export interface PaymentProvider {
