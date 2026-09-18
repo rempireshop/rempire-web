@@ -3072,6 +3072,8 @@
       "why": "Заказ, который покупатель называет по телефону, обычно старый — он-то в сотне последних и не лежит.",
       "risk": "med",
       "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-17T13:58:37.000Z",
       "en": {
         "title": "The order search looks through the whole shop",
         "steps": [
@@ -3579,6 +3581,8 @@
       "why": "Счётчик, который умеет только расти, через месяц показывает не работу, а историю.",
       "risk": "med",
       "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-17T13:58:37.000Z",
       "en": {
         "title": "A return: the «Обработано» button",
         "steps": [
@@ -4623,6 +4627,8 @@
       "why": "Второе письмо про ту же корзину надоедает, и человек отписывается.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-17T12:38:35.000Z",
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
@@ -4670,6 +4676,8 @@
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-17T12:38:35.000Z",
       "en": {
         "title": "The birthday letter",
         "steps": [
