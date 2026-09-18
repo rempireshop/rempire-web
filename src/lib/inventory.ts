@@ -721,6 +721,14 @@ export type CatalogueLevelRow = {
   state: StockState;
   /** Has at least one stock_moves row — see the module doc. */
   tracked: boolean;
+  /**
+   * «Показывать в магазине» is off for this product — whichever of the two
+   * switches it is: product_overrides.hidden for a catalogue product,
+   * custom_products.active for one of the owner's own. The row is still on
+   * «Склад», badged «Скрыт», and still countable and correctable; what it
+   * never does is ask to be restocked. See getLevels() below.
+   */
+  offSale: boolean;
   updatedAt: string | null;
 };
 
@@ -826,15 +834,22 @@ function catalogueUniverse(owned: Map<string, string[]>): Array<{ productId: str
 
 /* product creation: the owner's own rows (src/lib/custom-products.ts) join
    the universe, so «Склад» and the editor's Остаток column can count them
-   like any catalogue product. Best effort — a missing table leaves the
-   catalogue exactly as it was. */
-type Universe = { rows: Array<{ productId: string; variant: string }>; byId: Map<string, MinProduct> };
+   like any catalogue product. The ones switched OFF join it too, marked —
+   getLevels() below says why a product taken out of the shop keeps its shelf
+   row. Best effort — a missing table leaves the catalogue exactly as it was. */
+type Universe = {
+  rows: Array<{ productId: string; variant: string }>;
+  byId: Map<string, MinProduct>;
+  /** ids whose custom_products.active is false */
+  offSale: Set<string>;
+};
 async function customUniverse(): Promise<Universe> {
-  const out: Universe = { rows: [], byId: new Map() };
+  const out: Universe = { rows: [], byId: new Map(), offSale: new Set() };
   try {
-    const { listCustomMin } = await import("@/lib/custom-products");
-    for (const { min, variants } of await listCustomMin()) {
+    const { listCustomShelf } = await import("@/lib/custom-products");
+    for (const { min, variants, active } of await listCustomShelf()) {
       out.byId.set(min.id, min);
+      if (!active) out.offSale.add(min.id);
       if (variants && variants.sizes.length) {
         for (const size of variants.sizes) out.rows.push({ productId: min.id, variant: size });
       } else {
@@ -843,6 +858,24 @@ async function customUniverse(): Promise<Universe> {
     }
   } catch (err) {
     console.error("[inventory] custom products not loaded:", err);
+  }
+  return out;
+}
+
+/** The catalogue ids the owner has switched off in the product editor
+    (product_overrides.hidden, db/migrations/147_override_sizes_hidden.sql) —
+    the other half of «не в продаже». A query of its own rather than a column
+    on ownerLadders(): that one reads the rows that saved a size ladder, which
+    a hidden product usually has not. Index-backed (147) and best effort, like
+    every other read on this path — no answer means nothing is off sale, which
+    is how the shelf behaved before the flag existed. */
+async function hiddenIds(): Promise<Set<string>> {
+  const out = new Set<string>();
+  try {
+    const rows = await query<{ product_id: string }>("select product_id from product_overrides where hidden");
+    for (const r of rows) out.add(r.product_id);
+  } catch (err) {
+    console.error("[inventory] hidden switches unavailable, nothing counts as off sale:", err);
   }
   return out;
 }
@@ -923,13 +956,34 @@ async function trackedKeys(): Promise<Set<string>> {
  * productStockStates(), so an orphan at 5 kept a product reading «в наличии»
  * while every volume it really has sat at zero — and there was no screen on
  * which it could be found, let alone written off.
+ *
+ * …and the products that are OFF SALE, both kinds of them. A catalogue
+ * product hidden in the editor (product_overrides.hidden) always kept its row
+ * here; one of the owner's OWN products switched off (custom_products.active)
+ * used to drop out of the universe altogether, and the rescue loop below could
+ * not save it either — that loop only reaches a variant of a product some
+ * OTHER variant of which is listed, and a switched-off product has none. So
+ * its count, its «мало» threshold and its barcode disappeared from the one
+ * screen that can correct them, and from the register's barcode index, while
+ * byEan() went on finding the very same code. Two switches that both mean
+ * «не в продаже» behaved differently for no reason anyone had written down.
+ * Both kinds stay now, flagged `offSale`, so «Склад» badges them «Скрыт»
+ * exactly as «Каталог» already does.
+ *
+ * What off sale DOES mean here is that the row stops asking to be restocked:
+ * it is out of the «Мало» and «Нет» filters, out of lowStockSummary() — the
+ * assistant's low-stock context and the «Склад» tab's own badge — and last in
+ * the sort. Reordering a product the owner has taken out of the shop is not
+ * work he has to do, and before the flag there was no way for him to say so
+ * short of putting the product back on sale.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
-  const [dbRows, tracked, custom, owned] = await Promise.all([
+  const [dbRows, tracked, custom, owned, hidden] = await Promise.all([
     query<StockLevelRow>("select * from stock_levels"),
     trackedKeys(),
     customUniverse(),
     ownerLadders(),
+    hiddenIds(),
   ]);
   const universe = catalogueUniverse(owned).concat(custom.rows);
 
@@ -974,6 +1028,7 @@ export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?
       ean: row?.ean ?? null,
       state: deriveState(qty, lowThreshold),
       tracked: tracked.has(key),
+      offSale: hidden.has(productId) || custom.offSale.has(productId),
       updatedAt: row?.updated_at ? new Date(row.updated_at as string).toISOString() : null,
     };
   });
@@ -982,21 +1037,29 @@ export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?
   if (q) {
     rows = rows.filter((r) => (r.brand + " " + r.name + " " + r.productId + " " + (r.ean || "")).toLowerCase().includes(q));
   }
-  if (opts.filter === "low") rows = rows.filter((r) => r.tracked && r.state === "low");
-  else if (opts.filter === "out") rows = rows.filter((r) => r.tracked && r.state === "out");
+  /* «Мало» and «Нет» are the list of what has to be reordered, so a product
+     that is not for sale is not on it — see the off-sale paragraph above.
+     «Не учтено» is a different question («which shelves has nobody counted»),
+     and one asked about a hidden product just as much as about a live one. */
+  if (opts.filter === "low") rows = rows.filter((r) => r.tracked && !r.offSale && r.state === "low");
+  else if (opts.filter === "out") rows = rows.filter((r) => r.tracked && !r.offSale && r.state === "out");
   else if (opts.filter === "untracked") rows = rows.filter((r) => !r.tracked);
 
-  const rank = (r: CatalogueLevelRow) => (!r.tracked ? 1 : r.state === "out" ? 0 : r.state === "low" ? 0.5 : 2);
+  const rank = (r: CatalogueLevelRow) =>
+    r.offSale ? 3 : !r.tracked ? 1 : r.state === "out" ? 0 : r.state === "low" ? 0.5 : 2;
   rows.sort((a, b) => rank(a) - rank(b) || (a.brand + a.name).localeCompare(b.brand + b.name, "ru"));
 
   const limit = Math.min(Math.max(Number(opts.limit) || 500, 1), 1000);
   return rows.slice(0, limit);
 }
 
-/** Tracked and not «в наличии» — the assistant's low-stock context and the admin's own summary. */
+/** Tracked, on sale and not «в наличии» — the assistant's low-stock context
+    and the admin's own summary. `offSale` is the whole point of the filter:
+    this is the «what do I have to reorder» list, and a product the owner has
+    switched off in the shop is not on it (see getLevels above). */
 export async function lowStockSummary(limit = 15): Promise<CatalogueLevelRow[]> {
   const rows = await getLevels({ filter: "all" });
-  return rows.filter((r) => r.tracked && r.state !== "in").slice(0, limit);
+  return rows.filter((r) => r.tracked && !r.offSale && r.state !== "in").slice(0, limit);
 }
 
 /* ---------- the ledger ----------------------------------------------------- */
