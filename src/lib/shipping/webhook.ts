@@ -143,7 +143,9 @@ function readEvent(claims: Record<string, unknown>): ShipmentEvent {
  * and a webhook we could not read would be recorded as nothing at all.
  *
  * Throws on anything unusable — the route turns that into a 4xx, which is the
- * one answer Montonio must not retry for 48 hours.
+ * one answer a retry could never fix. (The «48 hours» this comment used to
+ * claim is the payments guide's; the shipping one documents no retry policy at
+ * all — audit F27.)
  */
 export function verifyShipmentWebhook(body: unknown, config: MontonioConfig): ShipmentEvent {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw new ShipmentWebhookError("bad_body");

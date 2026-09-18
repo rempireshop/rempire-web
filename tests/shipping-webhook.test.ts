@@ -384,6 +384,34 @@ describe("the shipment webhook, spoken the way Montonio speaks it", () => {
     });
   });
 
+  it("writes the journal row off the event NAME, even when the status word is still `pending`", async () => {
+    /* The fixture above is the one Montonio publishes — `shipment.registered`
+       with `data.status: "registered"` — edited by hand to say the opposite,
+       because Montonio prints no sample of a failure at all. So reading the
+       refusal off `data.status` is an inference, and this is the body that
+       inference gets wrong: the failure named in `eventType`, which the owner
+       ticks by name when he registers the webhook, and a shipment still
+       sitting at `pending` (audit F23). Before 19.09.2026 no journal row was
+       written here and the owner heard it from the customer. */
+    const id = await shippedOrder();
+
+    const res = await POST(
+      hook({
+        payload: guideToken({
+          eventType: "shipment.registrationFailed",
+          data: { status: "pending" },
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+
+    const rows = await journal("shipment.registration_failed");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].payload).toMatchObject({ number: NUMBER, event: "shipment.registrationFailed" });
+    // and still nothing moved: a refusal is news, not a transition
+    expect(await statusOf(id)).toBe("shipped");
+  });
+
   it("records `awaitingCollection` without calling a waiting parcel delivered", async () => {
     const id = await shippedOrder();
     const res = await POST(hook({ payload: guideToken({ data: { status: "awaitingCollection" } }) }));

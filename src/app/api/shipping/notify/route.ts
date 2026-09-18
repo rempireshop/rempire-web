@@ -20,11 +20,19 @@ import {
  *     secret, HS256 only, and refused if it names another store's accessKey —
  *     src/lib/shipping/webhook.ts, which follows the payment provider's
  *     verifyToken() line for line;
- *   · Montonio retries a failed delivery for 48 hours and expects 200/201, so
- *     this answers 200 for anything it has understood — including a repeat, and
- *     including an event about a shipment this shop has no order for. It
- *     answers 4xx only when the token itself is unusable, which retrying cannot
- *     fix, and 503 when our own database is the thing that failed;
+ *   · a 200 for anything it has understood — including a repeat, and including
+ *     an event about a shipment this shop has no order for; 4xx only when the
+ *     token itself is unusable, which no retry can fix; 503 when our own
+ *     database is the thing that failed. NOTE, because this file's own header
+ *     says a guess is the bug: «Montonio retries for 48 hours and expects
+ *     200/201» is the STARGATE webhooks guide, about payments. The Shipping v2
+ *     webhooks guide documents the envelope, the signature, two source IPs and
+ *     a ten-webhook limit, and says nothing about retries, attempt counts or
+ *     the expected response code (checked twice — audit F27). So the 503 may
+ *     buy a redelivery or may simply lose the event. What saves us either way
+ *     is that delivered and returned are re-derived by the nightly poll
+ *     (src/lib/delivery.ts) and a lost registrationFailed is moot while
+ *     bookings are synchronous. Ask Montonio and delete this paragraph;
  *   · nothing here is written twice. The status word goes into
  *     `settings.shipping_statuses` under its own name, and the order only
  *     changes on the one transition that has not happened yet.
@@ -135,8 +143,20 @@ export async function POST(req: Request) {
      parcel booked asynchronously is one word in a settings blob and nothing
      else, and the owner finds out when the customer asks where the parcel is.
      Sandbox never sends this event — it calls no carriers at all
-     (docs/montonio-untested.md, S1). */
-  if (String(seen.word).toLowerCase() === "registrationfailed") {
+     (docs/montonio-untested.md, S1).
+
+     TWO ways in, because only one of them is documented. Montonio's webhooks
+     guide prints exactly one sample — `shipment.registered`, with
+     `data.status: "registered"` — so reading the failure off `data.status` was
+     an inference, and every fixture we have for it is that sample edited by
+     hand (audit F23). The event NAME is the half Montonio actually promises:
+     `shipment.registrationFailed` is one of the events the owner ticks when he
+     registers the webhook. If the live body carries the shipment at `pending`
+     with the failure only in `eventType`, the word test alone would write no
+     journal row at all and he would hear it from the customer. */
+  const failedWord = String(seen.word).toLowerCase() === "registrationfailed";
+  const failedEvent = String(event.event || "").toLowerCase() === "shipment.registrationfailed";
+  if (failedWord || failedEvent) {
     console.error(`shipping/notify: carrier refused the parcel for ${order.number}`);
     await writeAuditSafe("system", "shipment.registration_failed", {
       orderId: order.id,
