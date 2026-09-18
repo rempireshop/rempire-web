@@ -54,6 +54,7 @@ interface Item {
   risk: string;
   writes: boolean;
   mark?: string;
+  markedAt?: string;
   en: { title: string; steps: string[]; expect: string[]; why: string };
 }
 interface Plan {
@@ -203,25 +204,50 @@ describe("testplan.json — the shape the checklist page reads", () => {
     }
   });
 
-  /* `mark` is the one optional field a row may carry, and it is optional on
-     purpose: the 130-odd checks a round did not touch say nothing, so the diff
-     stays readable and the page stays quiet about them. Pinned here because an
-     unknown value would draw a badge with no word in it, and a `redo` with no
-     `marked` instant to date it against would silently go on counting an
-     answer the shop has outgrown. */
-  it("marks only with a word the page can draw, and dates the marks", () => {
-    const marked = plan.items.filter((i) => i.mark !== undefined);
-    for (const it_ of marked) expect(MARK, `${it_.id}.mark`).toContain(it_.mark);
-    if (marked.length) {
-      expect(typeof plan.marked, "items carry a mark but the plan has no `marked` instant").toBe("string");
-      expect(Number.isFinite(Date.parse(plan.marked as string)), `marked: ${plan.marked}`).toBe(true);
+  /* `mark` is one of the two optional fields a row may carry, and it is
+     optional on purpose: the 140-odd checks a round did not touch say nothing,
+     so the diff stays readable and the page stays quiet about them. Pinned
+     here because an unknown value would draw a badge with no word in it. */
+  it("marks only with a word the page can draw", () => {
+    for (const it_ of plan.items.filter((i) => i.mark !== undefined)) {
+      expect(MARK, `${it_.id}.mark`).toContain(it_.mark);
+    }
+  });
+
+  /* The other optional field, and the one that costs a tester his morning if
+     it is wrong. A `redo` stops counting an answer older than the instant the
+     check changed — so every `redo` must HAVE such an instant, or it would go
+     on counting an answer the shop has outgrown.
+
+     The instant is per item since round 24. It used to be the plan's single
+     `marked`, which could only ever be moved for every marked row at once:
+     on 18.09.2026 that would have meant either stale-marking the 21 checks the
+     owner had re-answered that morning, or leaving a green answer on the ones
+     round 23 changed after he gave it. A row with no `markedAt` still falls
+     back to `plan.marked`, which is why landing the field flipped nothing —
+     and why that fallback is pinned here rather than assumed. */
+  it("dates every «проверить заново», per item or by the plan's fallback", () => {
+    const iso = (v: unknown, where: string) => {
+      expect(typeof v, `${where} is not a string: ${JSON.stringify(v)}`).toBe("string");
+      expect(Number.isFinite(Date.parse(v as string)), `${where} is not a date: ${v}`).toBe(true);
+    };
+    if (plan.marked !== undefined) iso(plan.marked, "plan.marked");
+    for (const it_ of plan.items) {
+      if (it_.markedAt === undefined) continue;
+      iso(it_.markedAt, `${it_.id}.markedAt`);
+      expect(it_.mark, `${it_.id} is dated but carries no mark`).toBeDefined();
+    }
+    for (const it_ of plan.items.filter((i) => i.mark === "redo")) {
+      const dated = typeof it_.markedAt === "string" || typeof plan.marked === "string";
+      expect(dated, `${it_.id} says redo with no instant to date an answer against`).toBe(true);
     }
   });
 
   it("carries no field the renderer does not know about", () => {
     const keys = ["id", "area", "who", "device", "lang", "title", "steps", "expect", "why", "risk", "writes", "en"];
+    const optional = ["mark", "markedAt"];
     for (const it_ of plan.items) {
-      const own = Object.keys(it_).filter((k) => k !== "mark");
+      const own = Object.keys(it_).filter((k) => !optional.includes(k));
       expect(own.sort(), `${it_.id} keys`).toEqual([...keys].sort());
       expect(Object.keys(it_.en).sort(), `${it_.id}.en keys`).toEqual(["expect", "steps", "title", "why"]);
     }
@@ -280,6 +306,67 @@ describe("public/test/index.html — one Russian, written twice", () => {
       expect(ruBlock, `«${text}» is in the markup as ${key} but not in TEXT.ru`).toContain(entry);
       expect(enBlock, `${key} has no English`).toContain(`${leaf}: "`);
     }
+  });
+
+  /* The staling rule, run rather than read. It is four functions of plain
+     ES5 with no DOM in them, so they are lifted out of the page as text and
+     exercised here — the same trick tests/size-stock-storefront.test.ts uses
+     on the shop's own bundle, and for the same reason: the rule decides
+     whether a tester's morning counts, and «the source still contains this
+     line» is not the same claim as «an answer given after the change still
+     counts». A page that went back to one date for the whole plan would pass
+     a text check and stale the wrong twenty rows. */
+  const staling = (() => {
+    const from = page.indexOf("  function markOf(item) {");
+    const to = page.indexOf("  function expectBlock(lines) {");
+    expect(from, "markOf() was not found in the page").toBeGreaterThan(0);
+    expect(to, "expectBlock() was not found in the page").toBeGreaterThan(from);
+    const src = page.slice(from, to);
+    const make = new Function(
+      "state",
+      'var MARKS = { redo: 1, reworded: 1, "new": 1 };\n' + src + "\nreturn isStale;",
+    ) as (state: unknown) => (id: string) => boolean;
+    return (plan: { marked?: string }, item: Record<string, unknown>, at?: string) =>
+      make({ plan, items: { x: { id: "x", ...item } }, answers: at ? { x: { at, status: "ok" } } : {} })("x");
+  })();
+
+  const PLAN_DATE = "2026-09-17T13:35:00.000Z";
+  const OWN_DATE = "2026-09-18T11:26:00.000Z";
+
+  it("stales a redo whose answer predates the item's own date", () => {
+    const item = { mark: "redo", markedAt: OWN_DATE };
+    expect(staling({ marked: PLAN_DATE }, item, "2026-09-18T06:00:00.000Z")).toBe(true);
+    expect(staling({ marked: PLAN_DATE }, item, "2026-09-18T15:00:00.000Z")).toBe(false);
+  });
+
+  /* The backward-compatible half, and the reason nothing flipped meaning when
+     the field landed: every row marked by an earlier round carries no date of
+     its own and goes on being judged by the plan's. */
+  it("falls back to the plan's date for a row that has none", () => {
+    const item = { mark: "redo" };
+    expect(staling({ marked: PLAN_DATE }, item, "2026-09-16T10:00:00.000Z")).toBe(true);
+    expect(staling({ marked: PLAN_DATE }, item, "2026-09-18T06:00:00.000Z")).toBe(false);
+    /* An item's own date OVERRIDES the plan's in both directions — a later
+       one stales an answer the plan's would have let stand, and an earlier
+       one lets stand an answer the plan's would have staled. */
+    expect(staling({ marked: PLAN_DATE }, { mark: "redo", markedAt: "2026-09-10T00:00:00.000Z" }, "2026-09-16T10:00:00.000Z")).toBe(false);
+  });
+
+  it("never stales an unanswered row, another mark, or a plan with no date", () => {
+    expect(staling({ marked: PLAN_DATE }, { mark: "redo", markedAt: OWN_DATE })).toBe(false);
+    expect(staling({ marked: PLAN_DATE }, { mark: "reworded", markedAt: OWN_DATE }, "2026-09-01T00:00:00.000Z")).toBe(false);
+    expect(staling({ marked: PLAN_DATE }, { mark: "new", markedAt: OWN_DATE }, "2026-09-01T00:00:00.000Z")).toBe(false);
+    expect(staling({}, { mark: "redo" }, "2026-09-01T00:00:00.000Z")).toBe(false);
+  });
+
+  /* An instant written by hand into the plan file and one written by
+     `new Date().toISOString()` do not have to be spelled the same way, and
+     `…:00Z` sorts AFTER `…:00.000Z` as a string — which would have stale-
+     marked an answer given at the very second the check changed. */
+  it("compares instants as instants, not as strings", () => {
+    const item = { mark: "redo", markedAt: "2026-09-18T11:26:00Z" };
+    expect(staling({}, item, "2026-09-18T11:26:00.000Z")).toBe(false);
+    expect(staling({}, item, "2026-09-18T11:25:59.000Z")).toBe(true);
   });
 
   it("keeps the default Russian and the two keys the answers live under", () => {

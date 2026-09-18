@@ -72,8 +72,8 @@ export type TestItem = {
    * absent on the rows nothing touched, which is most of them.
    *
    *   · `redo`     — the shop behaves differently now, so an answer given
-   *                  before `TestPlan.marked` was an answer about the old
-   *                  behaviour and the page stops counting it.
+   *                  before `markedAt` was an answer about the old behaviour
+   *                  and the page stops counting it.
    *   · `reworded` — only the check's own words moved; the shop is as it was
    *                  and the answer stands. The mark exists so a tester who
    *                  remembers the old sentence is told why it changed rather
@@ -85,15 +85,45 @@ export type TestItem = {
    * away.
    */
   mark?: "redo" | "reworded" | "new";
+  /**
+   * When THIS check last stopped meaning what it used to, as an ISO instant —
+   * the date a `redo` is judged against, and the reason the field exists.
+   *
+   * Which of two dates it is, when they differ: the LATER of «the shop moved
+   * under this row» and «this row's own words caught up with the shop». Both
+   * make an older answer an answer to a different question. `panel-montonio-
+   * fill` is the case that shows why — its button was taken away on 14.09 and
+   * the check went on asking for it until 18.09, so an answer given in
+   * between was given while reading instructions for a screen that was not
+   * there, and it is dated 18.09 rather than 14.09.
+   *
+   * It used to be one date for the whole plan (`TestPlan.marked`), and one
+   * date stopped working the moment two rounds overlapped. On 18.09.2026 the
+   * owner re-answered 21 checks in the morning; round 23 landed through the
+   * afternoon and changed the behaviour behind SOME of them. A single instant
+   * can only be moved for all of them or none: moving it would have thrown
+   * away the morning's work, and leaving it would have kept a green answer on
+   * a check the shop had outgrown an hour later. So the instant belongs to the
+   * check that changed, not to the round that changed it.
+   *
+   * Absent means "use `TestPlan.marked`" — every row the older rounds marked
+   * keeps meaning exactly what it meant before this field existed. On a
+   * `reworded` or a `new` row it decides nothing at all (neither can stale an
+   * answer) and is there only to say when the row last moved.
+   */
+  markedAt?: string;
   /** The same item in English — every text field, never a subset. */
   en: TestText;
 };
 
 /**
- * `marked`: when the marks above were set, as an ISO instant. It is what makes
- * a `redo` clear itself — an answer newer than this is the tester having
- * looked again, and needs no second list of "and these ones are done now".
- * Absent while no row carries a mark.
+ * `marked`: the fallback instant, for rows carrying a mark but no `markedAt`
+ * of their own. It is what makes a `redo` clear itself — an answer newer than
+ * the instant that applies to the row is the tester having looked again, and
+ * needs no second list of "and these ones are done now".
+ *
+ * Kept for the rows marked before `TestItem.markedAt` existed, so that landing
+ * the per-item date changed no row's meaning. New marks date themselves.
  */
 export type TestPlan = { version: number; marked?: string; areas: TestArea[]; items: TestItem[] };
 
