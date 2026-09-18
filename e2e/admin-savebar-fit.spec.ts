@@ -162,19 +162,37 @@ for (const width of WIDTHS) {
       await expect(page.locator("[data-admshipsave]")).toBeVisible();
       assertFits(await fit(page), `${width}/${lang}/saved`);
 
-      /* Put Estonia's Omniva PRICE back. Every spec in this run shares one
-         in-memory database (playwright.config.ts, workers: 1), so a 3,49 €
+      /* Take Estonia's Omniva override back out. Every spec in this run shares
+         one in-memory database (playwright.config.ts, workers: 1), so a 3,49 €
          left behind here is a 3,49 € the checkout specs would price against.
-         «вернуть» clears the override and the second save writes the table
-         without it — after which the box reads 3,19, not empty: a full save
-         sends the whole draft, and parseShippingRules() merges Montonio's own
-         prices in underneath, so the cell comes back materialised at exactly
-         the number an empty box charges. Same money, spelled out. */
+         «вернуть» clears the cell and the second save writes the table without
+         it — after which the box is EMPTY, not 3,19. That is the r22 contract
+         (17.09.2026, «пустая клетка в тарифах остаётся пустой»,
+         cleanShippingRules() in src/lib/shipping.ts): the screen shows and
+         saves the owner's OWN row, and a cell he never filled in is absent
+         from it rather than written down at whatever Montonio charged that
+         day. Before that the save seeded every missing cell from the defaults
+         and the box came back materialised at 3,19.
+
+         Both halves are asserted, because an empty box is also what a save
+         that quietly dropped the whole row would look like: the stored row
+         must no longer carry this cell at all, and the money is unchanged —
+         quoteFromRules() reads Montonio's own 3,19 € when the row says
+         nothing about the cell. */
       await page.locator('[data-shipclear="c:omniva:EE"]').first().click();
       await page.locator("[data-admshipsave]").first().click();
       await page.locator("[data-admapply]").first().click();
       await expect(page.locator("[data-admapply]")).toHaveCount(0);
-      await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toHaveValue("3.19");
+      await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toHaveValue("");
+      await expect
+        .poll(async () => {
+          const feed = await page.request.get(`/api/overrides/?t=${Date.now()}`);
+          const stored = (await feed.json()) as {
+            settings?: { shipping_rules?: { carriers?: Record<string, Record<string, number>> } };
+          };
+          return stored.settings?.shipping_rules?.carriers?.omniva?.EE;
+        }, { message: "the 3,49 € override outlived the test" })
+        .toBeUndefined();
     });
   }
 }

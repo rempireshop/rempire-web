@@ -49,8 +49,8 @@ test-only doors" below. WebKit is a one-time `npx playwright install
 webkit` away: the permanent `mobile-safari` project runs the storefront on
 it (see "Safari" below — and CI's `safari` job does the same on every
 push), and the config also adds a `webkit-local` project (Desktop Safari,
-every spec) whenever it finds the browser installed, for poking at
-something by hand.
+the same customer-facing specs) whenever it finds the browser installed, for
+poking at something by hand.
 
 Nothing is left running afterwards and nothing is written outside this repo:
 the database is in memory, the app runs on port 3417 (picked to stay clear of
@@ -280,6 +280,18 @@ three Chromium shards in CI therefore name their projects explicitly, and a
 separate `safari` job installs WebKit and runs this one project
 (`.github/workflows/ci.yml`). Locally it is ~17 minutes; run the file you are
 working on.
+
+`webkit-local` (Desktop Safari, only when the browser is installed) runs the
+**same** list — one `SAFARI_SPECS` constant in `playwright.config.ts` feeds
+both, so the two WebKit projects cannot drift apart on the rule that matters:
+the admin stays Chromium-only. Until 18.09.2026 it had no `testMatch` at all
+and ran all sixty spec files, which left four permanently red on it and on
+nothing else — two in `admin-sections.spec.ts` that ask Desktop Safari for a
+phone's bottom nav and for a button to take focus from a click (WebKit
+deliberately does not give it one), and `visual.spec.ts`'s three, which have
+no baseline for this project by the decision recorded in
+`docs/audit/2026-09-07-storefront.md` § 5. CI never runs `webkit-local` — its
+jobs name their projects — so nobody saw them.
 
 Four things were wrong on WebKit and right on Chromium, all fixed in the
 app, none by loosening a test:

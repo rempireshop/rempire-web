@@ -50,6 +50,34 @@ function body(fig: string | null): string {
   return p(1) + picture + p(2) + p(3) + "<h2>Чем мыть</h2>" + p(4);
 }
 
+/**
+ * Every post this file writes, so that none of them outlives the test that
+ * wrote it.
+ *
+ * The whole suite shares one in-memory database (playwright.config.ts,
+ * `workers: 1`) and the blog listing's first page holds ten articles. This
+ * file publishes five per run and used to delete none, and it runs on three
+ * projects — so by the second one the eleven articles it had left behind had
+ * pushed all three seeded ones off page 1, and `e2e/blog.spec.ts`, which
+ * opens them by slug from that listing, went red on `tablet` and nowhere
+ * else. Nothing in the file itself was wrong, and nothing in blog.spec.ts
+ * was either; the mess was simply not cleared up.
+ *
+ * CI cannot see this: its four shards each take a third of the spec files
+ * into a database of their own, so the file that makes the articles and the
+ * file that trips over them need not meet.
+ */
+const made: string[] = [];
+
+test.afterEach(async ({ page }) => {
+  while (made.length) {
+    const id = made.pop() as string;
+    /* Best effort: a post the test already deleted answers 404, and a
+       cleanup that threw would report the wrong test as broken. */
+    await page.request.delete(`/api/admin/blog/?id=${encodeURIComponent(id)}`).catch(() => undefined);
+  }
+});
+
 async function makePost(page: Page, title: string, fig: string | null, cover = COVER_URL) {
   const r = await page.request.post("/api/admin/blog/", {
     data: {
@@ -61,7 +89,9 @@ async function makePost(page: Page, title: string, fig: string | null, cover = C
     },
   });
   expect(r.status(), "the post was not created").toBe(200);
-  return (await r.json()).post as { id: string; slug: string };
+  const post = (await r.json()).post as { id: string; slug: string };
+  made.push(post.id);
+  return post;
 }
 
 async function publish(page: Page, id: string) {

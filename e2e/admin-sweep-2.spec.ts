@@ -138,7 +138,12 @@ test.describe("admin sweep 2 — the orders list", () => {
     await expect(page.locator("#orderlist [data-admorder]")).toHaveCount(1);
     await expect(page.locator("#orderlist")).toContainText(number);
     await page.locator("[data-admorderq]").fill("nobody-" + email);
-    await expect(page.locator("#orderlist")).toContainText("Таких заказов нет");
+    /* «Таких заказов нет» is the empty CHIP; a search that found nothing says
+       what it looked at instead (17.09.2026, admOrderEmptyHTML in app.js) —
+       the four fields listOrders() matches on, so a phone number spelt with
+       spaces reads as a second way to spell it and not as a missing order. */
+    await expect(page.locator("#orderlist")).toContainText("Ничего не нашли.");
+    await expect(page.locator("#orderlist")).toContainText("номеру заказа, имени, телефону и почте");
   });
 });
 
@@ -192,11 +197,14 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
       await page.locator("[data-closetoast]").click();
-      /* Back to Montonio's own price, not to nothing: a cell the owner has
-         cleared is read back as what an empty cell charges (parseShippingRules
-         merges carrierPriceTable() in underneath), which is the same number the
+      /* Nothing, not Montonio's number written down. Since r22 (17.09.2026,
+         cleanShippingRules() in src/lib/shipping.ts) the row stores the
+         owner's own cells and nothing beside them, so a cleared cell is ABSENT
+         from it — which is what makes «пустое поле — цена Montonio» survive a
+         save. The money is unchanged: quoteFromRules() reads Montonio's own
+         table for a cell the row does not mention, which is the number the
          line under the box promised. */
-      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(LV_DPD);
+      await expect.poll(async () => (await rules())?.carriers?.dpd?.LV).toBeUndefined();
 
       // …and the reset below needs a price to put back, so out of step again
       await lv.fill("6,49");
@@ -219,8 +227,11 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
-      // back to the shipped default, which is Montonio's own price to the cent
-      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(LV_DPD);
+      /* Back to the shipped default, which since r22 means «никаких своих
+         цен» rather than today's price list: SHIP_STORED_DEFAULT carries the
+         two decisions that are the owner's — how much delivery to give away
+         and where the shop delivers — and not one price. */
+      await expect.poll(async () => (await rules())?.carriers?.dpd?.LV).toBeUndefined();
     } finally {
       await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
     }

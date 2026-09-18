@@ -29,6 +29,26 @@ import { adminPasswordHash, E2E_BASE_URL, E2E_PORT, E2E_SESSION_SECRET } from ".
  *     moment. See docs/testing.md for the tradeoff.
  */
 
+/**
+ * What Safari runs — the customer-facing specs, on BOTH WebKit projects.
+ *
+ * One constant rather than one regex per project, because the rule is one
+ * rule: «the admin stays Chromium-only» (docs/testing.md § «Safari»). It was
+ * written on `mobile-safari` only, and `webkit-local` — added earlier, for
+ * poking at the shop by hand — went on running all sixty spec files. Four of
+ * them cannot hold on that project and have been red there since the day they
+ * were written: `admin-sections.spec.ts` asks Desktop Safari for a phone's
+ * bottom nav, and for a button to take focus from a click, which WebKit
+ * deliberately does not give it; `visual.spec.ts` compares against baselines
+ * that exist for the three viewport projects and, by the decision of
+ * docs/audit/2026-09-07-storefront.md § 5, not for this one. Nothing in CI
+ * runs `webkit-local` (.github/workflows/ci.yml names its projects), so those
+ * four were red only on the machine of whoever had WebKit installed, and only
+ * in a run that named no --project at all.
+ */
+const SAFARI_SPECS =
+  /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|account-settings|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/;
+
 const webkitInstalled = (() => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -196,11 +216,14 @@ export default defineConfig({
          so the engine that has to keep its answers between reloads is the one
          he actually uses — Safari, whose private mode is also the browser that
          refuses localStorage outright. */
-      testMatch:
-        /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|account-settings|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/,
+      testMatch: SAFARI_SPECS,
     },
+    /* Desktop Safari, when the browser happens to be installed: the storefront
+       on the engine, at a laptop's width, for poking at something by hand. The
+       same specs as mobile-safari and for the same reason — see SAFARI_SPECS
+       above for what ran here before and why it could not pass. */
     ...(webkitInstalled
-      ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]
+      ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] }, testMatch: SAFARI_SPECS }]
       : []),
   ],
 });

@@ -315,6 +315,18 @@ test.describe("sweep — delivery prices", () => {
     const before = await (await page.request.get("/api/admin/settings/")).json();
     const originalRules = before.settings.shipping_rules ?? null;
 
+    /* The row the shop is really running on. Every assertion below polls it
+       rather than reading it once: the panel toasts «Тарифы доставки
+       сохранены» the moment the confirm card is answered, before the PUT has
+       replied, so a single read can outrun the write — measured against a
+       busy dev server where the PUT took 1,1 s and the read came back 500 ms
+       into it with the row from before the save. */
+    const storedShip = async () =>
+      (await (await page.request.get("/api/admin/settings/")).json())
+        .settings.shipping_rules as
+        | { carriers?: Record<string, Record<string, number>>; methods?: Record<string, Record<string, number>> }
+        | undefined;
+
     try {
       /* The Estonian Omniva locker: a carrier column of the rate table, which
          since 14.09.2026 is the only kind of parcel box the screen has. The
@@ -330,8 +342,7 @@ test.describe("sweep — delivery prices", () => {
         await parcelEE.fill(bad);
         await saveTariffs(page);
         await clearToast(page);
-        const now = await (await page.request.get("/api/admin/settings/")).json();
-        const value = now.settings.shipping_rules?.carriers?.omniva?.EE;
+        const value = (await storedShip())?.carriers?.omniva?.EE;
         if (value != null) {
           expect(Number(value), `"${bad}" was stored as a delivery price`).toBeGreaterThanOrEqual(0);
           expect(Number(value), `"${bad}" was stored as a delivery price`).toBeLessThanOrEqual(99);
@@ -348,9 +359,9 @@ test.describe("sweep — delivery prices", () => {
       await saveTariffs(page);
       expect(await toastText(page)).toMatch(/[Тт]ариф/);
       await clearToast(page);
-      let now = await (await page.request.get("/api/admin/settings/")).json();
-      expect(Number(now.settings.shipping_rules.carriers.omniva.EE), "«4,20» was not read as 4.20").toBeCloseTo(4.2, 2);
-      expect(Number(now.settings.shipping_rules.methods.courier.EE)).toBeCloseTo(13.37, 2);
+      await expect.poll(async () => (await storedShip())?.carriers?.omniva?.EE,
+        { message: "«4,20» was not read as 4.20" }).toBeCloseTo(4.2, 2);
+      await expect.poll(async () => (await storedShip())?.methods?.courier?.EE).toBeCloseTo(13.37, 2);
       await assertClean(page, w, "shipping table saved");
 
       // What the table says is what the checkout charges.
@@ -379,16 +390,17 @@ test.describe("sweep — delivery prices", () => {
       await expect(parcelEE).toHaveValue("");
       await saveTariffs(page);
       await clearToast(page);
-      now = await (await page.request.get("/api/admin/settings/")).json();
-      /* Back to Montonio's own prices — a cleared cell is read back as what an
-         empty cell charges, which is the number the line under the box
-         promised (3,19 € for an Estonian Omniva locker, 6,89 € for the
-         courier). Not «undefined»: parseShippingRules() merges Montonio's
-         table in underneath every stored row. */
-      expect(Number(now.settings.shipping_rules.carriers.omniva.EE),
-        "clearing the table left the owner's own locker price behind").toBe(3.19);
-      expect(Number(now.settings.shipping_rules.methods.courier.EE),
-        "clearing the table left the owner's own courier price behind").toBe(6.89);
+      /* Gone from the row, not rewritten at Montonio's number. Since r22
+         (17.09.2026, cleanShippingRules() in src/lib/shipping.ts) the stored
+         row holds the owner's own cells and nothing else, so clearing the
+         table empties it — and the money does not move, because
+         parseShippingRules() merges Montonio's table in underneath on the way
+         OUT (3,19 € for an Estonian Omniva locker, 6,89 € for the courier,
+         which is what the line under each box promised). */
+      await expect.poll(async () => (await storedShip())?.carriers?.omniva?.EE,
+        { message: "clearing the table left the owner's own locker price behind" }).toBeUndefined();
+      await expect.poll(async () => (await storedShip())?.methods?.courier?.EE,
+        { message: "clearing the table left the owner's own courier price behind" }).toBeUndefined();
       await assertClean(page, w, "montonio clear-all");
 
       // An emptied cell removes the override rather than storing a blank.
