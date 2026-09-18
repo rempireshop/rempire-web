@@ -403,6 +403,41 @@ async function fireBackInStock(productId: string): Promise<void> {
 export type StockUnit = { productId: string; variant: string; qty: number };
 
 /**
+ * Which shelf row an order line's size names — the line's own label, or, when
+ * it carries none, the single rung of a product that has exactly one.
+ *
+ * variantOf() in src/lib/orders.ts applies the same rule when the line is
+ * WRITTEN, so everything ordered from 18.09.2026 already arrives here named.
+ * This is for the lines written before it did: twenty-nine products are sold
+ * in one named volume and the storefront sends no size for them
+ * (public/shop/catalogue2.js gives them `sizes` and no `prices`, and
+ * lineVariant() speaks only in price-ladder indexes), so their stored lines
+ * say ''. Nothing will ever go back and edit those, and an order placed
+ * before the fix but PAID after it would go to '' , find no tracking rows —
+ * db/migrations/194_one_size_stock_rows.sql moved them all onto the label —
+ * and be skipped in silence, on an order the shop had already been paid for.
+ * The key is read off the line at the moment the goods move, so reading it
+ * through the ladder closes that for the decrement, the refund and the till
+ * at once.
+ *
+ * Only ever the FILE's ladder, because this function is pure and the owner's
+ * saved ladders live in a table. That is not a gap: migration 194 deliberately
+ * left owner-laddered products alone, because knownLadder() has always read
+ * his rung first, so their counts were never under '' to begin with.
+ *
+ * Both of the things that must not move: a product with no volumes at all IS
+ * the '' row — most of the catalogue — and a ladder of two rungs still holds a
+ * choice nothing here is entitled to make. Same predicate as variantOf(): one
+ * rung, and that rung has a name.
+ */
+function shelfVariant(productId: string, variant: unknown): string {
+  const named = normVariant(variant);
+  if (named) return named;
+  const ladder = VARIANTS[productId];
+  return ladder && ladder.sizes.length === 1 && ladder.sizes[0] ? ladder.sizes[0] : "";
+}
+
+/**
  * The shelf rows ONE order line moves — what the paid transition decrements
  * (src/lib/payments/apply.ts, the POS route) and what a refund puts back
  * (src/lib/orders.ts setOrderStatus).
@@ -425,7 +460,7 @@ export function stockUnitsOf(line: {
   if (!qty) return [];
   if (line?.kind === "product") {
     const productId = String(line.id ?? "").trim();
-    return productId ? [{ productId, variant: normVariant(line.variant), qty }] : [];
+    return productId ? [{ productId, variant: shelfVariant(productId, line.variant), qty }] : [];
   }
   if (line?.kind === "bundle" && Array.isArray(line.parts)) {
     const out: StockUnit[] = [];
@@ -433,7 +468,7 @@ export function stockUnitsOf(line: {
       const productId = String(part?.id ?? "").trim();
       const each = Math.abs(Math.trunc(Number(part?.qty) || 0));
       if (!productId || !each) continue;
-      out.push({ productId, variant: normVariant(part?.variant), qty: qty * each });
+      out.push({ productId, variant: shelfVariant(productId, part?.variant), qty: qty * each });
     }
     return out;
   }

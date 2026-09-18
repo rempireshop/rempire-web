@@ -14,6 +14,7 @@ import {
   productStockStates,
   setLevel,
   setQty,
+  stockUnitsOf,
 } from "@/lib/inventory";
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { createOrder, getOverrides, priceItems, setOrderStatus, upsertOverride } from "@/lib/orders";
@@ -919,6 +920,63 @@ describe("inventory", () => {
     it("still refuses to guess a size on a ladder with more than one rung", async () => {
       const { lines } = await priceItems([{ id: sized.id, qty: 1 }]);
       expect(lines[0].variant).toBeNull();
+    });
+
+    /* …and the lines that were already written down before variantOf() learned
+       the rule. They carry no size, and nothing will ever go back and edit
+       them: an order placed before the fix and PAID after it would have gone
+       to '' , found no tracking rows there (194 re-keyed them) and been
+       skipped — the same silent miss, on an order the shop had already taken
+       money for. The shelf key is read off the line at the moment the goods
+       move, so reading it through the ladder closes that window for the
+       decrement, the refund and the till at once. */
+    describe("a line written down before the rule existed", () => {
+      it("resolves a stored empty size to the one rung", () => {
+        expect(stockUnitsOf({ kind: "product", id: oneRung.id, variant: null, qty: 2 })).toEqual([
+          { productId: oneRung.id, variant: rung, qty: 2 },
+        ]);
+      });
+
+      it("takes such a paid line off the labelled row, not off ''", async () => {
+        await move({ productId: oneRung.id, variant: rung, delta: 10, reason: "goods_in" });
+        const order: OrderLike = {
+          id: "3f7c0d3e-3333-4444-8888-aaaaaaaaaaaa",
+          number: "R-900003",
+          status: "new",
+          total: 99,
+          // exactly the shape createOrder() stored for these before the fix
+          items: [{ id: oneRung.id, kind: "product", variant: null, qty: 3 }],
+        };
+        await applyPaymentResult(
+          order,
+          { orderRef: order.number, status: "paid", providerRef: "x", amount: 99, currency: "EUR" },
+          "mock",
+          { setOrderPayment: async () => ({}), setOrderStatus: async () => ({}) },
+        );
+        expect((await getLevel(oneRung.id, rung))?.qty).toBe(7);
+        expect(await getLevel(oneRung.id, "")).toBeNull();
+      });
+
+      it("resolves a set's part the same way", () => {
+        expect(
+          stockUnitsOf({ kind: "bundle", id: "bundle:x", qty: 2, parts: [{ id: oneRung.id, variant: null, qty: 1 }] }),
+        ).toEqual([{ productId: oneRung.id, variant: rung, qty: 2 }]);
+      });
+
+      /* The two things that must NOT move. A product with no volumes at all
+         IS the '' row — that is most of the catalogue — and a ladder with two
+         rungs still has a choice the shelf cannot make for it. */
+      it("leaves a product with no size ladder on the '' row", () => {
+        expect(stockUnitsOf({ kind: "product", id: plain.id, variant: null, qty: 1 })).toEqual([
+          { productId: plain.id, variant: "", qty: 1 },
+        ]);
+      });
+
+      it("leaves a multi-rung product on the '' row rather than guessing rung one", () => {
+        expect(stockUnitsOf({ kind: "product", id: sized.id, variant: null, qty: 1 })).toEqual([
+          { productId: sized.id, variant: "", qty: 1 },
+        ]);
+      });
     });
   });
 
