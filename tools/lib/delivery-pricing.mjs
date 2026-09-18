@@ -23,13 +23,20 @@
  *
  * 1. **Nobody has weighed the products.** `src/data/catalogue.min.json` holds
  *    220 items with `b c id n p s` — brand, category, id, name, price, slug —
- *    and no weight and no dimensions. The shop already guesses, in exactly one
- *    place: `estimateWeightKg()` (`src/lib/shipping/montonio.ts:847`) declares
- *    `0.4 kg × units + 0.2` to Montonio on every real shipment. `unitsToKg()`
- *    below is that same formula, restated, so the tool's weights are the ones
- *    the shop is already posting rather than a fresh invention — and the input
- *    is **units, not kilograms**, because how many jars go in a typical order
- *    is a thing Renat knows and 1.4 kg is not.
+ *    and no weight and no dimensions. The shop's one guess at what a basket
+ *    weighs is `estimateWeightKg()` (`src/lib/shipping/montonio.ts`):
+ *    `0.4 kg × units + 0.2`. `unitsToKg()` below is that same formula,
+ *    restated, so the tool's weights are the shop's own rather than a fresh
+ *    invention — and the input is **units, not kilograms**, because how many
+ *    jars go in a typical order is a thing Renat knows and 1.4 kg is not.
+ *
+ *    It is a weight to *study tariffs with*, not the weight the shop declares.
+ *    Since 19.09.2026 `POST /shipments` carries `declaredWeightKg()` — the
+ *    volumetric weight of the carton in `settings.shipping_parcel`, the same
+ *    number on every parcel (Ренат, 18.09.2026: «no weight modelling»; audit
+ *    18.09.2026, F24). So a band here answers «what would a real parcel of N
+ *    jars cost», which is exactly the question this tool exists for, and it is
+ *    no longer also a description of what goes out on the wire.
  * 2. **A hole is a hole.** `/shipping-methods/rates` — reference, Note —
  *    *"only returns rates for carriers with Montonio contracts. Carriers that
  *    only support Direct contracts will not be included in the response."* An
@@ -90,8 +97,9 @@ export function roundUpToX9(n) {
  * The production function takes an order and counts its non-gift units; this
  * takes the count directly, because the whole point of the tool is to ask
  * «предположим, в заказе N банок» and watch the answer move. Same clamp
- * (0.3–30 kg), same 0.4/0.2, so a band here is a weight the shop really does
- * declare on a shipment of that size.
+ * (0.3–30 kg), same 0.4/0.2, so a band here is the shop's own estimate of what
+ * a parcel of that size weighs — not the weight it declares, which since
+ * 19.09.2026 is the carton and nothing else (`declaredWeightKg()`).
  */
 export function unitsToKg(units) {
   const n = Math.max(0, Number(units) || 0);

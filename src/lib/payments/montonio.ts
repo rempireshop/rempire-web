@@ -230,6 +230,21 @@ export interface MontonioOrderSnapshot {
   availableForRefund: number;
   /** `false` = refunds are not switched on for this method/store. Absent = not said. */
   isRefundableType?: boolean;
+  /**
+   * How the customer actually paid, in Montonio's spelling —
+   * `paymentInitiation` (a bank link), `cardPayments`, `mobilePay`, `blik`,
+   * `bnpl`, `hirePurchase`. Absent = not said.
+   *
+   * It is here because `isRefundableType` cannot be read without it. The
+   * reference's own gloss is «will be true if you enabled refunds in montonio
+   * **(and the user paid with a refundable method)**», and the refunds guide
+   * says cards and wallets are refundable by default while Payment Initiation
+   * needs «Bank payment refunds» switched on separately. So `false` beside
+   * `cardPayments` and `false` beside `paymentInitiation` are two different
+   * facts, and the readiness screen used to report them as one (audit
+   * 18.09.2026, F12).
+   */
+  paymentMethodType?: string;
   refunds: Array<{ uuid: string; amount: number; status: string }>;
 }
 
@@ -466,6 +481,9 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
    *     (and the user paid with a refundable method)». False is the Partner
    *     System switch, not the code: Payment Initiation refunds are EUR-only
    *     and need «Bank payment refunds» turned on.
+   *   · `paymentMethodType` — which method that was, without which the
+   *     parenthesis above cannot be honoured. The reference prints it on the
+   *     same order as `isRefundableType`, one line apart.
    *   · `paymentStatus`, `grandTotal` and the `refunds` array as Montonio has
    *     them — the authority our own ledger is a copy of.
    *
@@ -521,6 +539,12 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
       /* Absent is not false: a field this shop cannot see must not be reported
          as «refunds are switched off». Only an explicit `false` says that. */
       isRefundableType: typeof body.isRefundableType === "boolean" ? body.isRefundableType : undefined,
+      /* …and the flag above cannot be read without knowing which method was
+         used, which is why this one is carried rather than dropped. */
+      paymentMethodType:
+        typeof body.paymentMethodType === "string" && body.paymentMethodType.trim()
+          ? body.paymentMethodType.trim()
+          : undefined,
       refunds: refunds
         .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
         .map((r) => ({
