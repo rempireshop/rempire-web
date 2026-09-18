@@ -32,7 +32,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { publishPost, renderPostBody, sanitizeHtml, upsertPost } from "@/lib/blog";
-import { createCustomProduct } from "@/lib/custom-products";
+import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
 import { upsertOverride } from "@/lib/orders";
 import { blogCardIds, fillBlogCardPrices } from "@/lib/seo-head.mjs";
@@ -50,6 +50,13 @@ const oldMarker = (id: string, words = "Bio Botanical Shampoo — от 12,90 €
 /** …and what it writes now: the words, and a marker where the price was. */
 const liveMarker = (id: string, words = "Bio Botanical Shampoo") =>
   `<p><a data-product="${id}" data-price="live" href="/shop2/p/${id}/">${words}</a></p>`;
+/** What the ASSISTANT writes — the id and nothing else. src/lib/ai-prompts.ts
+    asks the model for exactly this («no href, no other attribute, no text of
+    your own») and src/lib/blog-cards.ts inserts the same for a card the model
+    left out, so it is the shape most of the shop's articles will be born in.
+    Until 18.09.2026 it reached the page as an EMPTY ANCHOR: no name, no
+    price, no link — nothing a crawler or a reader without JS could see. */
+const bareMarker = (id: string) => `<p><a data-product="${id}"></a></p>`;
 
 /* ---------- 1 + 2: what may be stored, in both sanitisers ---------------- */
 
@@ -77,6 +84,14 @@ describe("sanitizeHtml: the marker may say that its price is not its own", () =>
         const out = clean(oldMarker(SHAMPOO));
         expect(out).toContain("Bio Botanical Shampoo — от 12,90 €");
         expect(out).not.toContain("data-price");
+      });
+
+      /* The assistant's marker is stored exactly as it is written, which is
+         what lets an article published before 18.09.2026 come right at the
+         next render with nothing migrated: the id is the whole card, and the
+         href, the words and the price are the renderer's. */
+      it("stores the assistant's bare marker as the bare id it is", () => {
+        expect(clean(bareMarker(SHAMPOO))).toBe(`<p><a data-product="${SHAMPOO}"></a></p>`);
       });
 
       it("is a closed list of one word, and means nothing without a product", () => {
@@ -144,6 +159,142 @@ describe("fillBlogCardPrices: the price is written as the page is written", () =
   it("works on a body the build's own sanitiser wrote", () => {
     expect(fillBlogCardPrices(exportRenderPostBody(liveMarker(SHAMPOO)), priceOf))
       .toContain("Bio Botanical Shampoo — от 14,50 €");
+  });
+});
+
+/* ---------- the assistant's bare marker, 18.09.2026 --------------------- */
+
+describe("fillBlogCardPrices: the assistant's bare marker comes out the same card", () => {
+  const priceOf = (id: string) => (id === SHAMPOO ? "от 14,50 €" : "");
+  const nameOf = (id: string) => (id === SHAMPOO ? "System 4 Bio Botanical Shampoo — шампунь" : "");
+  const fill = (html: string, seg = "") => fillBlogCardPrices(renderPostBody(html), priceOf, { seg, nameOf });
+
+  it("is named as a card at all — it was invisible to blogCardIds() before", () => {
+    expect(blogCardIds(renderPostBody(bareMarker(SHAMPOO)))).toEqual([SHAMPOO]);
+  });
+
+  it("gets the link, the name and the price the «Товар» button would have written", () => {
+    expect(fill(bareMarker(SHAMPOO))).toBe(
+      `<p><a data-product="${SHAMPOO}" data-price="live" href="/shop2/p/${SHAMPOO}/">` +
+      "System 4 Bio Botanical Shampoo — шампунь — от 14,50 €</a></p>",
+    );
+  });
+
+  it("links to the product page of the language the article is read in", () => {
+    expect(fill(bareMarker(SHAMPOO), "et")).toContain(`href="/shop2/et/p/${SHAMPOO}/"`);
+    expect(fill(bareMarker(SHAMPOO), "en")).toContain(`href="/shop2/en/p/${SHAMPOO}/"`);
+  });
+
+  /* The «Товар» button bakes the right language into the href when the card
+     is inserted, so a card standing in the Estonian text keeps its own. */
+  it("never rewrites an href a marker already carries", () => {
+    expect(fill(liveMarker(SHAMPOO), "et")).toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(fill(liveMarker(SHAMPOO), "et")).not.toContain("/et/p/");
+  });
+
+  /* A hidden product is not priced, and an unpriced bare marker stays the
+     empty anchor it was — which is the right answer: its /p/ address answers
+     404 noindex, and no link beats a dead one in a published article. */
+  it("stays an empty anchor — not a dead link — when the product cannot be priced", () => {
+    const stored = renderPostBody(bareMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, () => "", { seg: "", nameOf })).toBe(stored);
+    expect(fillBlogCardPrices(stored, () => "", { seg: "", nameOf })).not.toContain("href");
+  });
+
+  it("escapes a name out of the catalogue, and leaves stored words alone", () => {
+    const amp = fillBlogCardPrices(renderPostBody(bareMarker(SHAMPOO)), priceOf, {
+      seg: "", nameOf: () => "Proraso & Co",
+    });
+    expect(amp).toContain("Proraso &amp; Co — от 14,50 €");
+    // the words in a stored marker have been escaped once already
+    expect(fill(liveMarker(SHAMPOO, "Proraso &amp; Co"))).toContain("Proraso &amp; Co — от 14,50 €");
+  });
+
+  it("gives the price alone when the caller offers no name", () => {
+    expect(fillBlogCardPrices(renderPostBody(bareMarker(SHAMPOO)), priceOf))
+      .toContain(`href="/shop2/p/${SHAMPOO}/">от 14,50 €</a>`);
+  });
+
+  it("still leaves a marker of the old shape byte for byte", () => {
+    const stored = renderPostBody(oldMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, priceOf, { seg: "et", nameOf })).toBe(stored);
+  });
+
+  it("works on a body the build's own sanitiser wrote", () => {
+    expect(fillBlogCardPrices(exportRenderPostBody(bareMarker(SHAMPOO)), priceOf, { seg: "", nameOf }))
+      .toContain(`href="/shop2/p/${SHAMPOO}/"`);
+  });
+});
+
+/* ---------- a product that is not for sale, 18.09.2026 ------------------ */
+
+/**
+ * The gap the bare marker's change did not close, and it predates it.
+ *
+ * The «Товар» button STORES its href in the body, so a card the caller could
+ * not price kept that link while losing only its figure. For a hidden product
+ * the link goes to `/shop2/p/<id>/`, which the middleware answers 404 noindex
+ * (docs/seo.md) — a dead link sitting in a published article that a crawler
+ * keeps coming back to.
+ *
+ * `opts.offSale(id)` is how the caller says «not for sale», as against «I
+ * could not price it»: only it knows whether the owner hid the product,
+ * whether the id is the catalogue's, and whether the query it asked came
+ * back. Both callers do, and neither guesses — src/lib/blog-page.ts through
+ * shelfProducts(), tools/prerender-shop2.mjs through blogOffSale().
+ */
+describe("fillBlogCardPrices: a card for a product that is not for sale loses its link", () => {
+  const noPrice = () => "";
+  const nameOf = (id: string) => (id === SHAMPOO ? "System 4 Bio Botanical Shampoo — шампунь" : "");
+  const offSale = (id: string) => id === SHAMPOO;
+
+  it("takes the href off the «Товар» button's card and keeps the words", () => {
+    expect(fillBlogCardPrices(renderPostBody(liveMarker(SHAMPOO)), noPrice, { seg: "", nameOf, offSale }))
+      .toBe(`<p><a data-product="${SHAMPOO}" data-price="live">Bio Botanical Shampoo</a></p>`);
+  });
+
+  /* The words stay because a card may stand inside a sentence, and taking one
+     out of a sentence would leave a hole in it. */
+  it("leaves that same card alone when the caller only failed to price it", () => {
+    const stored = renderPostBody(liveMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf })).toBe(stored);
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale: () => false })).toBe(stored);
+  });
+
+  it("never takes the link off a product it could price", () => {
+    expect(fillBlogCardPrices(renderPostBody(liveMarker(SHAMPOO)), () => "от 14,50 €", { seg: "", nameOf, offSale }))
+      .toContain(`href="/shop2/p/${SHAMPOO}/"`);
+  });
+
+  /* The assistant's marker has no href to take, and gets none: that is the
+     answer it has had for a hidden product since 18.09.2026, and this rule is
+     the «Товар» button's card catching up with it. */
+  it("leaves the assistant's bare marker exactly as it is", () => {
+    const stored = renderPostBody(bareMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale })).toBe(stored);
+  });
+
+  /* The branch that carries every article published before 17.09.2026. It is
+     frozen, and «the product is off sale» does not unfreeze it. */
+  it("still does not touch a marker of the old shape, off sale or not", () => {
+    const stored = renderPostBody(oldMarker(SHAMPOO));
+    expect(fillBlogCardPrices(stored, noPrice, { seg: "", nameOf, offSale })).toBe(stored);
+  });
+
+  /* Whatever the href brought with it goes with it: an absolute one is
+     sanitised into `target`/`rel` as well, and those mean nothing without it. */
+  it("drops target and rel with the href rather than leaving them behind", () => {
+    const external = renderPostBody(
+      `<p><a data-product="${SHAMPOO}" data-price="live" href="https://example.com/">Имя</a></p>`,
+    );
+    expect(external).toContain('target="_blank"');
+    expect(fillBlogCardPrices(external, noPrice, { seg: "", nameOf, offSale }))
+      .toBe(`<p><a data-product="${SHAMPOO}" data-price="live">Имя</a></p>`);
+  });
+
+  it("works on a body the build's own sanitiser wrote", () => {
+    expect(fillBlogCardPrices(exportRenderPostBody(liveMarker(SHAMPOO)), noPrice, { seg: "", nameOf, offSale }))
+      .not.toContain("href");
   });
 });
 
@@ -259,14 +410,77 @@ describe("the article as it is served: the price is the shop's, not the article'
     expect(articleBody(await postPage("", post.slug))).toContain("Acme Wax — от 9 €");
   });
 
-  /* A product the owner has switched off is not priced — the card keeps its
-     words and shows no figure, rather than quoting something withdrawn. */
-  it("shows no price for a product that has left the shop", async () => {
+  /* A product the owner has switched off loses BOTH: no figure, rather than
+     quoting something withdrawn, and no link, because the address that href
+     points at answers 404 noindex (src/middleware.ts). Until 18.09.2026 the
+     card lost only the price and went on linking — the «Товар» button stores
+     its href in the body, so leaving the marker alone left the link standing. */
+  it("takes the price AND the link off a product that has left the shop", async () => {
     await upsertOverride(SHAMPOO, { hidden: true });
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" });
     const body = articleBody(await postPage("", post.slug));
     expect(body).toContain("Bio Botanical Shampoo");
     expect(body).not.toContain("€");
+    expect(body).not.toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(body).toContain(`<a data-product="${SHAMPOO}" data-price="live">`);
+  });
+
+  /* And the same article in Estonian, where the href the button stored is the
+     Russian one either way — the link goes whichever language is being read. */
+  it("takes it off in every language the article is read in", async () => {
+    await upsertOverride(SHAMPOO, { hidden: true });
+    const post = await publish({ RU: liveMarker(SHAMPOO), ET: liveMarker(SHAMPOO), EN: "" });
+    expect(articleBody(await postPage("et", post.slug))).not.toContain("href=\"/shop2/p/");
+  });
+
+  /* One of the owner's OWN products, switched off: src/lib/product-page.ts
+     answers its address 404 for exactly that, so it is off sale in the same
+     sense a hidden catalogue product is, and its card loses the link too. */
+  it("takes the link off one of the owner's own products he has switched off", async () => {
+    const wax = await createCustomProduct({
+      brand: "Acme", name: "Gone", cat: "styling", sizes: ["50 мл"], prices: [9],
+    });
+    await setCustomProductActive(wax.id, false);
+    const post = await publish({ RU: liveMarker(wax.id, "Acme Gone"), ET: "", EN: "" });
+    const body = articleBody(await postPage("", post.slug));
+    expect(body).toContain("Acme Gone");
+    expect(body).not.toContain(`href="/shop2/p/${wax.id}/"`);
+  });
+
+  /* An article the assistant wrote, served: the card it put in the text is a
+     real link with the product's name on it, in the reader's language — and
+     not the empty anchor it was until 18.09.2026. */
+  it("turns the assistant's bare marker into a real link with name and price", async () => {
+    await repriced(21.4);
+    const post = await publish({ RU: bareMarker(SHAMPOO), ET: bareMarker(SHAMPOO), EN: "" });
+
+    const ru = articleBody(await postPage("", post.slug));
+    expect(ru).toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(ru).toContain("System 4 Bio Botanical Shampoo — шампунь — 21,40 €");
+
+    const et = articleBody(await postPage("et", post.slug));
+    expect(et).toContain(`href="/shop2/et/p/${SHAMPOO}/"`);
+    expect(et).toContain("21,40 €");
+  });
+
+  /* The card a crawler follows must never be a 404: a hidden product's /p/
+     address answers 404 noindex, so its card stays the anchor with no href. */
+  it("leaves the assistant's marker unlinked for a product that has left the shop", async () => {
+    await upsertOverride(SHAMPOO, { hidden: true });
+    const post = await publish({ RU: bareMarker(SHAMPOO), ET: "", EN: "" });
+    const body = articleBody(await postPage("", post.slug));
+    expect(body).toContain(`data-product="${SHAMPOO}"`);
+    expect(body).not.toContain(`href="/shop2/p/${SHAMPOO}/"`);
+  });
+
+  /* …and the stored body is untouched by any of it, so #blogpost still
+     carries what the panel saved and app.js still rebuilds its own cards. */
+  it("stores the bare marker unchanged while serving it filled in", async () => {
+    await repriced(21.4);
+    const post = await publish({ RU: bareMarker(SHAMPOO), ET: "", EN: "" });
+    const html = await postPage("", post.slug);
+    expect(String(blogpostJson(html).bodyHtml)).toBe(`<p><a data-product="${SHAMPOO}"></a></p>`);
+    expect(articleBody(html)).toContain("21,40 €");
   });
 
   /* «Товары из статьи» is the shelf UNDER the article and was fixed in its own

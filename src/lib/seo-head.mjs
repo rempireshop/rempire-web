@@ -124,31 +124,90 @@ export function fitTitle(core, full, alt) {
 
 export const langPath = (seg, rest) => "/shop2" + (seg ? "/" + seg : "") + rest;
 
+/* ---------- what a catalogue product costs TODAY --------------------------
+ *
+ * The generated file (public/shop/catalogue2.js, src/data/catalogue.min.json)
+ * is a snapshot of the day of the deploy; `product_overrides` is what the
+ * owner has done to the price since. Every page that prints a price outside
+ * the shop's own render has to put the two together, and the two that print
+ * a blog article's prices are the request-time page (src/lib/blog-page.ts,
+ * through getOverrides) and the build (tools/prerender-shop2.mjs, through
+ * tools/lib/overrides-export.mjs). They read the same table from two
+ * different sides of the deployment, so the RULE lives here, in the one
+ * module both of them already import — a second copy of these six lines is
+ * exactly the kind of drift the header of src/lib/blog-html.mjs is about.
+ */
+
+/** The lowest real price in a ladder, and whether the shop says «от». */
+export function cheapestPrice(prices, fallback) {
+  const list = (prices || []).map(p => Number(p)).filter(p => Number.isFinite(p) && p > 0);
+  if (!list.length) return { price: fallback, from: false };
+  return { price: Math.min(...list), from: new Set(list).size > 1 };
+}
+
+/**
+ * `{ price, from }` for one catalogue product, given the file's own price,
+ * the file's own ladder and the owner's `product_overrides` row (or nothing).
+ *
+ * The owner's saved ladder decides outright: every rung of it carries the
+ * price he typed (migration 147). The FILE's ladder only speaks where it
+ * actually spreads — since 18.09.2026 the file also carries the 29 products
+ * sold in ONE named size, whose single price is the file's own `price`, and
+ * reading that as a ladder would quietly out-vote the owner's «Цена» in
+ * «Товары» and put the pre-override number under an article.
+ */
+export function overriddenPrice(filePrice, fileLadder, row) {
+  const own = row && row.sizes && row.sizes.length ? row.sizes.map(r => r.price) : null;
+  const file = Array.isArray(fileLadder) && fileLadder.length > 1 ? fileLadder : [];
+  const ladder = own || file;
+  const base = row && row.price != null ? row.price : filePrice;
+  return ladder.length ? cheapestPrice(ladder, base) : { price: base, from: false };
+}
+
 /* ---------- the product card INSIDE an article ---------------------------
  *
  * The «Товар» button puts a marker into the body: an <a> carrying the
  * product's id, which the storefront swaps for a real card and which a
  * crawler (and a reader with no JS) follows as the ordinary product link it
- * is. There are TWO shapes of it in the database, and both must keep working
- * for good — the owner's decision of 17.09.2026 was explicitly that already
- * published articles are left exactly as they are, not migrated:
+ * is. There are THREE shapes of it in the database, and all three must keep
+ * working for good — the owner's decision of 17.09.2026 was explicitly that
+ * already published articles are left exactly as they are, not migrated:
  *
  *   old   <a data-product="ID" href="…">Имя — от 12,90 €</a>
  *         The price is literal text, written on the day the article was
  *         written, and it stays whatever the owner does to the price
  *         afterwards. Nothing below touches it: a marker with no
- *         `data-price` is copied through untouched, exactly as it has been
- *         since the marker existed. DO NOT "tidy" this branch away — every
- *         article published before 17.09.2026 is in it.
+ *         `data-price` AND an href of its own is copied through untouched,
+ *         exactly as it has been since the marker existed. DO NOT "tidy"
+ *         this branch away — every article published before 17.09.2026 is
+ *         in it.
  *
  *   new   <a data-product="ID" data-price="live" href="…">Имя</a>
- *         No price is stored at all. Each renderer fills in today's price as
- *         it writes the page: the request-time article (src/lib/blog-page.ts),
- *         the prerendered one (tools/prerender-shop2.mjs) and the shop itself
- *         (blogProductHTML() in public/shop2/app.js, which has rebuilt the
- *         whole card from the live catalogue all along and therefore needed
- *         no change). Google, the first paint and a reader without JS finally
- *         see the same figure the shop charges.
+ *         What the «Товар» button writes. No price is stored at all. Each
+ *         renderer fills in today's price as it writes the page: the
+ *         request-time article (src/lib/blog-page.ts), the prerendered one
+ *         (tools/prerender-shop2.mjs) and the shop itself (blogProductHTML()
+ *         in public/shop2/app.js, which has rebuilt the whole card from the
+ *         live catalogue all along and therefore needed no change). Google,
+ *         the first paint and a reader without JS finally see the same
+ *         figure the shop charges.
+ *
+ *   bare  <a data-product="ID"></a>
+ *         What the ASSISTANT writes — the shape src/lib/ai-prompts.ts asks
+ *         the model for («no href, no other attribute, no text of your
+ *         own») and the shape src/lib/blog-cards.ts inserts the cards the
+ *         model left out. It carries an id and nothing else, so until
+ *         18.09.2026 it was skipped here and reached the page as an EMPTY
+ *         ANCHOR: invisible to a crawler and to a reader with no JS, and a
+ *         link only once app.js had swapped it. It is now read as a live
+ *         card exactly like the shape above — the id is the whole marker,
+ *         and the href, the name and the price are all the renderer's to
+ *         write. Nothing about it is stored differently: an article already
+ *         published comes right at the next render, with no migration.
+ *
+ * `live` is therefore «carries data-price="live", or carries nothing at all
+ * beside its id» — an href with no `data-price` is the old shape and is the
+ * one thing that must not be touched.
  *
  * The pattern is keyed to the sanitiser's own output — openTag() in
  * src/lib/blog.ts writes `data-product` first, then `data-price`, then the
@@ -156,8 +215,10 @@ export const langPath = (seg, rest) => "/shop2" + (seg ? "/" + seg : "") + rest;
  * A body that has been through sanitizeHtml() cannot carry these attributes
  * in any other order or spelling.
  */
-const BLOG_CARD_SRC = '<a data-product="([^"]+)" data-price="live"([^>]*)>([^<]*)</a>';
-const BLOG_CARD_HINT = 'data-price="live"';
+const BLOG_CARD_SRC = '<a data-product="([^"]+)"( data-price="live")?([^>]*)>([^<]*)</a>';
+const BLOG_CARD_HINT = "data-product";
+/** A marker whose price, link and words belong to the moment it is read. */
+const isLiveCard = (live, rest) => !!live || !rest;
 
 /** Every product a live-price marker in this body names, in order, once each. */
 export function blogCardIds(html) {
@@ -166,28 +227,75 @@ export function blogCardIds(html) {
   if (!src.includes(BLOG_CARD_HINT)) return out;
   const rx = new RegExp(BLOG_CARD_SRC, "g");
   let m;
-  while ((m = rx.exec(src))) if (!out.includes(m[1])) out.push(m[1]);
+  while ((m = rx.exec(src))) if (isLiveCard(m[2], m[3]) && !out.includes(m[1])) out.push(m[1]);
   return out;
 }
 
 /**
- * Today's price written into every live-price marker. `priceOf(id)` gives the
- * whole label — «от 12,90 €», «alates 12,90 €», «from 12,90 €» — because the
- * word in front of it is this language's and the caller is the one that knows
- * both the language and where the shop's current prices come from.
+ * Today's card written into every live-price marker. `priceOf(id)` gives the
+ * whole price label — «от 12,90 €», «alates 12,90 €», «from 12,90 €» —
+ * because the word in front of it is this language's and the caller is the
+ * one that knows both the language and where the shop's current prices come
+ * from.
  *
- * A marker whose product the caller cannot price — it left the catalogue, or
- * the database that holds the owner's own products did not answer — keeps its
- * name and gets no price, rather than a made-up one.
+ * `opts.nameOf(id)` and `opts.seg` are what the assistant's bare marker needs
+ * and the «Товар» button's does not, since that one already carries both:
+ *
+ *   · the words inside the marker are kept when it has any, so a card the
+ *     owner wrote or edited reads exactly as he left it. Only an empty one
+ *     is given the product's name — from the caller, unescaped, because the
+ *     catalogue is not HTML while the stored words already are;
+ *   · the href is kept when it has one, so a card inserted from the Estonian
+ *     text goes on pointing at /shop2/et/p/…/. Only a marker with none is
+ *     given this page's own language segment, which is the language the
+ *     reader is reading it in.
+ *
+ * A marker whose product the caller simply cannot price — the database that
+ * holds the owner's own products did not answer, the build read no overrides
+ * — is returned untouched, keeping its words and getting no price rather than
+ * a made-up one. An article is not worth losing over a query that timed out.
+ *
+ * `opts.offSale(id)` is the caller saying something stronger than «I could
+ * not price it»: «it is not for sale, and its /p/ address answers 404». Only
+ * the caller can tell those two apart, being the side that knows whether the
+ * owner has hidden the product, whether the id is the catalogue's at all, and
+ * whether the query it asked actually came back — so it says so, and nothing
+ * here guesses. Such a marker loses its LINK as well: it is written back as
+ * its id, its `data-price="live"` and its words, with no href and no other
+ * attribute — the shape the assistant's bare marker already has, and the same
+ * answer the storefront reaches by dropping the card altogether
+ * (blogProductHTML() in public/shop2/app.js, for a product rebuildCatalogue()
+ * has taken out of the shop). The words stay because a card may stand inside
+ * a sentence and taking it out of one would leave a hole.
+ *
+ * That last part is the whole of the «Товар» button's case: its href is
+ * STORED in the body, so until now a hidden product's card lost its price and
+ * went on linking to a page that answers 404 noindex. A card is a
+ * recommendation to buy, and a dead link in a published article a crawler
+ * keeps coming back to is worse than no link at all.
  */
-export function fillBlogCardPrices(html, priceOf) {
+export function fillBlogCardPrices(html, priceOf, opts) {
   const src = String(html || "");
   if (!src.includes(BLOG_CARD_HINT)) return src;
-  return src.replace(new RegExp(BLOG_CARD_SRC, "g"), (whole, id, rest, text) => {
+  const seg = (opts && opts.seg) || "";
+  const nameOf = (opts && opts.nameOf) || null;
+  const offSale = (opts && opts.offSale) || null;
+  return src.replace(new RegExp(BLOG_CARD_SRC, "g"), (whole, id, live, rest, text) => {
+    if (!isLiveCard(live, rest)) return whole;
+    const stored = String(text || "").trim();
     const price = String(priceOf(id) || "").trim();
-    if (!price) return whole;
-    const words = String(text || "").trim();
-    return '<a data-product="' + id + '" data-price="live"' + rest + ">" +
+    if (!price) {
+      /* Nothing to take away from a marker that carries no href of its own —
+         the assistant's bare one is already the answer a hidden product gets,
+         and `live` is always set on the one that does carry an href, since a
+         marker with an href and no `data-price` is the old shape and was
+         returned whole above. */
+      if (!rest || !offSale || !offSale(id)) return whole;
+      return '<a data-product="' + id + '" data-price="live">' + stored + "</a>";
+    }
+    const words = stored || (nameOf ? esc(String(nameOf(id) || "").trim()) : "");
+    return '<a data-product="' + id + '" data-price="live"' +
+      (rest || ' href="' + href(seg, "/p/" + encodeURIComponent(id) + "/") + '"') + ">" +
       (words ? words + " — " : "") + esc(price) + "</a>";
   });
 }
