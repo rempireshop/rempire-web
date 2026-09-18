@@ -2,14 +2,16 @@
  * `shipment.statusUpdated` — the carrier's own word for where the parcel is.
  *
  * Why this exists. src/lib/delivery.ts decides an order was delivered by
- * matching the carrier's `status` against a white list of six words, because
- * **the vocabulary of that field is not in the reference we have**: the
- * shipping guide names a shipment's own states (pending, registered,
- * registrationFailed, inTransit, awaitingCollection, delivered, returned) but
- * never says which of them a `statusUpdated` webhook carries, nor whether a
- * carrier's own wording is passed through. Dim's answer, 08.09.2026: register
- * the webhook and watch what actually arrives, so the real vocabulary can be
- * read off production instead of guessed at.
+ * matching the carrier's `status` against a white list of six words. This file
+ * used to say **«the vocabulary of that field is not in the reference we
+ * have»**, and that was wrong: the overview page prints the whole lifecycle
+ * (pending, registered, registrationFailed, labelsCreated, inTransit,
+ * awaitingCollection, delivered, returned) and the shipments guide repeats it —
+ * «the status can change from registered to inTransit, awaitingCollection,
+ * delivered, or returned». What the docs genuinely do not promise is whether a
+ * carrier's own wording is ever passed through instead. Dim's answer,
+ * 08.09.2026: register the webhook and watch what actually arrives, so the real
+ * vocabulary can be read off production rather than assumed.
  *
  * So this module does two things, and keeps them apart on purpose:
  *
@@ -81,30 +83,54 @@ function str(v: unknown): string {
   return typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "";
 }
 
+function obj(v: unknown): Record<string, unknown> {
+  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+}
+
 /**
- * The claim names below are read defensively on purpose. Montonio's webhook
- * guide lists the events and the envelope (`{ payload: <JWT> }`, signed with
- * the same secret) but does not print a sample of the claims, so each field is
- * looked for under the spellings the rest of its API uses for the same thing —
- * `shipmentId`/`id`, `status`/`shipmentStatus`, `merchantReference`/
- * `orderReference`. Whichever one arrives is stored verbatim; nothing is
- * renamed, because the point of this endpoint is to find out what really comes.
+ * The claims of one webhook → our five fields.
+ *
+ * **The shipment is inside `data`, and that is not a guess.** The webhooks
+ * guide prints a whole decoded token:
+ *
+ *   { eventId, shipmentId, created, eventType, iat, exp,
+ *     data: { id, status, merchantReference, shippingMethod, receiver,
+ *             parcels: [{ carrierParcelId, trackingLink, … }], … } }
+ *
+ * Only `eventType` and `shipmentId` live at the top level. Until 18.09.2026
+ * this function looked at the top level and at a `claims.shipment` object that
+ * has never existed, so `status` and `merchantReference` came back empty on
+ * every real notification and the route answered «no_status» and threw the
+ * event away — silently, with a 200, for months. The comment that used to
+ * stand here said the guide «does not print a sample of the claims», which is
+ * how a guess became a fixture (tests/shipping-webhook.test.ts) and the fixture
+ * made the guess look right. It prints one.
+ *
+ * The alternative spellings are kept: they cost nothing, a flat token still
+ * works, and Montonio's own example token encodes `orderId` where the
+ * pretty-printed copy beside it says `merchantReference`. Whichever arrives is
+ * stored verbatim — nothing is renamed, because the point of this endpoint is
+ * still to find out what really comes.
  */
 function readEvent(claims: Record<string, unknown>): ShipmentEvent {
-  const nested = (claims.shipment && typeof claims.shipment === "object" ? claims.shipment : {}) as Record<string, unknown>;
+  const data = obj(claims.data);
+  const scopes = [claims, data, obj(claims.shipment)];
   const pick = (...keys: string[]): string => {
     for (const k of keys) {
-      const v = str(claims[k]) || str(nested[k]);
-      if (v) return v;
+      for (const scope of scopes) {
+        const v = str(scope[k]);
+        if (v) return v;
+      }
     }
     return "";
   };
+  const parcel = obj(Array.isArray(data.parcels) ? data.parcels[0] : undefined);
   return {
     event: pick("event", "eventType", "type", "topic"),
     shipmentId: pick("shipmentId", "id"),
-    orderRef: pick("merchantReference", "orderReference", "orderNumber"),
+    orderRef: pick("merchantReference", "orderReference", "orderNumber", "orderId"),
     status: pick("status", "shipmentStatus", "state"),
-    trackingCode: pick("trackingCode", "carrierParcelId"),
+    trackingCode: pick("trackingCode", "carrierParcelId") || str(parcel.carrierParcelId),
   };
 }
 

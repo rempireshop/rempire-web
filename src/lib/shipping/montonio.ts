@@ -753,28 +753,84 @@ export function enrichCoordinates(points: MontonioPoint[], feed: MontonioPoint[]
 
 /* ---------- shipments ---------------------------------------------------- */
 
-const PHONE_PREFIX: Record<string, string> = { EE: "372", LV: "371", LT: "370", FI: "358" };
+/**
+ * Every destination the checkout can send a parcel to, with its calling code.
+ *
+ * `receiver.phoneCountryCode` is **required** on every shipment, pickup point
+ * or courier (reference § Create Shipment → receiver), and the shipments guide
+ * names the cost of getting it wrong: «A common issue causing
+ * [registrationFailed] is an incorrect receiver phone number».
+ *
+ * Until 18.09.2026 this held four rows — EE, LV, LT, FI — and everything else
+ * fell through to "372". The shop sells to thirty-two countries
+ * (tools/fetch-montonio-tariffs.mjs DESTINATIONS), so a German customer was
+ * booked as +372 with a German number, an Italian likewise. It had never been
+ * noticed because **the sandbox does not check**: «The POST /shipments endpoint
+ * skips phone number and address validation» (sandbox guide). Live does.
+ */
+const PHONE_PREFIX: Record<string, string> = {
+  EE: "372", LV: "371", LT: "370", FI: "358",
+  AT: "43", BE: "32", BG: "359", CH: "41", CY: "357", CZ: "420", DE: "49", DK: "45",
+  ES: "34", FR: "33", GB: "44", GR: "30", HR: "385", HU: "36", IE: "353", IS: "354",
+  IT: "39", LI: "423", LU: "352", MT: "356", NL: "31", NO: "47", PL: "48", PT: "351",
+  RO: "40", SE: "46", SI: "386", SK: "421",
+};
+
+/** Estonia: the shop's own country, and the only sane guess for a country we do not serve. */
+const DEFAULT_PHONE_PREFIX = "372";
+
+/**
+ * The four prefixes a **bare** number is scanned for.
+ *
+ * Deliberately not the whole table above. Scanning a plain digit string for
+ * any of thirty-two calling codes starts eating real subscriber numbers: an
+ * eight-digit Danish number may begin "45", an Italian mobile begins "39", and
+ * both would be read as their own country code and truncated. The Baltic four
+ * were safe to scan for and have been scanned for since this function was
+ * written, so they stay exactly as they were; every other country is only
+ * split when the customer actually wrote the number in international form.
+ */
+const BARE_PREFIXES = ["372", "371", "370", "358"];
 
 /**
  * Montonio wants the country code and the rest of the number in two fields.
- * A local number ("58107505") keeps the delivery country's prefix; a prefixed
- * one ("+372 5810 7505") is split. The six-digit floor stops a short landline
- * that merely starts with "372" from losing its first three digits.
+ *
+ * A number written internationally ("+49 151 23456789", "0049 151 …") is split
+ * on the longest calling code it starts with. Anything else keeps the delivery
+ * country's code, except for the four Baltic/Finnish prefixes, which are still
+ * recognised bare ("372 5810 7505"). The digit floors — six for a bare prefix,
+ * four after an explicit "+" — stop a short landline that merely starts with
+ * "372" from losing its first three digits.
+ *
+ * What this deliberately does NOT do is touch a national trunk "0". Germany
+ * drops it ("0151…" → "+49 151…"), Italy keeps it ("06…" → "+39 06…"), and
+ * guessing per country is exactly the kind of invention that put "372" on a
+ * German parcel in the first place.
  */
 export function splitPhone(raw: unknown, country: string): {
   phoneCountryCode: string;
   phoneNumber: string;
 } {
-  const digits = String(raw ?? "")
-    .replace(/\D+/g, "")
-    .replace(/^00/, "");
-  for (const cc of Object.values(PHONE_PREFIX)) {
-    if (digits.startsWith(cc) && digits.length - cc.length >= 6) {
-      return { phoneCountryCode: cc, phoneNumber: digits.slice(cc.length) };
+  const text = String(raw ?? "");
+  const international = /^\s*(?:\+|00)/.test(text);
+  const digits = text.replace(/\D+/g, "").replace(/^00/, "");
+
+  if (international) {
+    let best = "";
+    for (const cc of Object.values(PHONE_PREFIX)) {
+      if (cc.length > best.length && digits.startsWith(cc) && digits.length - cc.length >= 4) best = cc;
+    }
+    if (best) return { phoneCountryCode: best, phoneNumber: digits.slice(best.length) };
+  } else {
+    for (const cc of BARE_PREFIXES) {
+      if (digits.startsWith(cc) && digits.length - cc.length >= 6) {
+        return { phoneCountryCode: cc, phoneNumber: digits.slice(cc.length) };
+      }
     }
   }
+
   return {
-    phoneCountryCode: PHONE_PREFIX[String(country || "").toUpperCase()] ?? "372",
+    phoneCountryCode: PHONE_PREFIX[String(country || "").toUpperCase()] ?? DEFAULT_PHONE_PREFIX,
     phoneNumber: digits,
   };
 }
@@ -1012,13 +1068,20 @@ export async function createMontonioShipment(
     if (typeof v === "number" && v > 0) parcel[dim] = round2(v);
   }
 
+  /* Every bound here is Montonio's own (reference § Create Shipment →
+     products): sku 100, name 255, quantity «Max value is 999». The quantity
+     ceiling was missing until 18.09.2026, and it is not cosmetic — one line
+     over 999 makes Montonio answer 400 and **the whole shipment fails to
+     book**. This array is pick-list and tracking-page metadata, not the
+     carrier's declaration, so an absurd count losing its exact value is much
+     cheaper than the parcel losing its booking. */
   const products = (order.items ?? [])
     .filter((i) => i.kind !== "gift")
     .slice(0, 100)
     .map((i) => ({
       sku: String(i.id).slice(0, 100),
       name: String(i.title || i.id).slice(0, 255),
-      quantity: Math.max(1, Math.round(Number(i.qty) || 1)),
+      quantity: Math.min(999, Math.max(1, Math.round(Number(i.qty) || 1))),
       price: round2(Number(i.price) || 0),
       currency: order.currency || "EUR",
     }));
@@ -1065,11 +1128,15 @@ export async function createMontonioShipment(
   };
 }
 
-/* `GET /shipments/<id>` — re-reading one shipment to pick up a late tracking
-   code — was written and never called: nothing in the panel refreshes a
-   shipment, and `shipmentOnOrder()` below reads what createMontonioShipment()
-   stored. Removed 07.09.2026 (docs/audit/2026-09-07-cleanup.md); in git at
-   448cbd7 if a refresh button is ever built. */
+/* This spot used to carry a note saying `GET /shipments/<id>` «was written and
+   never called» and was «removed 07.09.2026». Both halves are false, and have
+   been since the day after: the function is defined immediately below and has
+   two callers — src/lib/delivery.ts (the nightly close asks whether the parcel
+   came back) and src/app/api/admin/shipments/[id]/label/route.ts (filling in a
+   drop-off pin the booking reply did not carry). The reference recommends this
+   very endpoint for that second job: «Wait for the registered status (via the
+   registration webhook or by polling GET /shipments/{id})». Corrected
+   18.09.2026, docs/montonio-shipping-audit.md § 5.1. */
 
 /** One shipment as Montonio currently has it — used to pick up a late tracking code. */
 export async function getMontonioShipment(shipmentId: string): Promise<MontonioShipment> {
@@ -1145,7 +1212,14 @@ export async function getMontonioLabel(
    simply asks for the label again. Removed 07.09.2026
    (docs/audit/2026-09-07-cleanup.md); in git at 448cbd7. */
 
-/** The PDF itself. The URL is a pre-signed S3 link — no Authorization header. */
+/**
+ * The PDF itself. The URL is a pre-signed S3 link — no Authorization header —
+ * and it **lives five minutes**: «Once the label is created, the label URL will
+ * last 5 minutes, after which it will no longer be accessible. To get a fresh
+ * URL, make a new request» (reference § Create a label file). So the copy
+ * stored on the order is a cache that is almost always stale; the label route
+ * tries it, and falls through to a fresh POST /label-files on any failure.
+ */
 export async function fetchLabelPdf(url: string): Promise<ArrayBuffer> {
   if (url.startsWith(MOCK_LABEL_PREFIX)) {
     // a mock label can only have been stored by a mock run; outside one it is junk, not a fetch
