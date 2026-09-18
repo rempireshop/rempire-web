@@ -510,9 +510,22 @@ body:has(.stickybar) .ftr {
 /* A set's crossed-out old price steps aside on the narrowest phones — the
    «−13 %» flag on the picture already says the same thing. */
 @media (max-width: 360px) { .card__price .bwas { display: none; } }
-/* stock / salon-price flags live on the photo, not beside the price */
-.card__flags { position: absolute; left: 6px; top: 6px; display: flex; gap: 4px; pointer-events: none; }
-.card__flag { background: var(--page); }
+/* stock / salon-price flags live on the photo, not beside the price.
+   A partner sees TWO of them at once — «Цена для салонов» beside «нет в
+   наличии» — and the row used to be bounded on the left only, so the pair
+   was squeezed into whatever the photo happened to be: at 375px that is
+   152px for 252px of chip, and «НЕТ В НАЛИЧИИ» ran out through its own
+   border (Renat, 18.09.2026). `right` gives the row an end, `wrap` lets the
+   second chip drop to its own line at full width instead of being crushed,
+   and `max-width` keeps a chip that is wider than the photo wrapping its
+   text rather than hanging off the side. Russian is the long one — «Цена для
+   салонов» wants 136px of the 152 on its own — so it is the language that
+   decides this rule; ET and EN fit inside whatever it allows. */
+.card__flags {
+  position: absolute; left: 6px; top: 6px; right: 6px;
+  display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none;
+}
+.card__flag { background: var(--page); max-width: 100%; }
 
 .chip {
   display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
@@ -1956,9 +1969,17 @@ button, a, summary, label { touch-action: manipulation; }
    draws a full-width line under the heading. The two together read as a thick
    black rule with a grey one stuck to it (Renat, 13.09.2026). */
 .bitems { margin-bottom: 20px; }
+/* …and no rule under the rows either, for the same reason one turn later:
+   «Что внутри» already draws a line, and the grey one under every part
+   repeated it three more times — the last of them separating the list from
+   the «В корзину» button and so separating nothing (Renat, 18.09.2026). The
+   photo and the 20px between rows are what keep the parts apart. Removed
+   here rather than from `--rule-soft`, which half the shop uses: `.bitem`
+   is built in one place only (screenBundle), so this is the set page and
+   nothing else. */
 .bitem {
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--rule-soft);
+  padding: 10px 0;
 }
 .bitem__ph { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
 .bitem__nm {
