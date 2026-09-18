@@ -1,133 +1,103 @@
-# Where we stopped — 17.09.2026
+# Where we stopped — evening of 18.09.2026
 
-Rounds 19 to 22 are merged and pushed. `origin/main` is `7dc8d44`: 160 test
-files, 3496 tests, 0 failures, `tsc` clean, 814 prerendered pages with 0
-failures. Everything described below as done is live on staging.
+`origin/main` is `78ceb7a`. **180 test files, 4171 tests, 0 failures** on the last
+full run. The browser suite was verified clean for the first time: 694 passing,
+and all 28 apparent failures proved to be a cold-server race, not the product.
 
-## What happened on 17.09
+This replaces the 17.09 version of this file; rounds 19–22 are long since merged.
 
-**Dim answered all twenty owner-only questions** from the third decision page
-(https://claude.ai/artifact/WFi2yVUHHHdkkNncCHWVcn, collection `decisions`, docs
-`q1`..`q20`). He took every recommendation, tapping them one at a time over eight
-minutes. What each one means in code is in the `rempire-r22-decisions` memory;
-the short version is below.
+## Tomorrow's first job — three decisions the owner made and nobody built
 
-Merged and pushed:
+He answered these on 18.09. They were queued behind the payments hardening and
+never started. He was told, and said to finish them on 19.09. They are the only
+part of his twenty-eight decisions that is not implemented.
 
-| | |
-|---|---|
-| The page build now **fails** when the translation lift fails | It used to write 542 ET and EN pages in Russian and exit 0 |
-| A repeated tap no longer creates a second order, sale or stock movement | Key minted at commitment, reused on retry, three routes wired |
-| One sold-out counted size no longer hides a whole product | «нет в наличии» now needs the whole size ladder counted |
-| A guest order no longer lifts a stranger off the marketing stop list | Only a shopper signed in on that mailbox has proved it is theirs |
-| Abandoned-cart reminders survive, bounded per address in the database | An in-memory bound gives a fresh budget on every cold start |
-| «Снова в наличии» no longer sends when the counted stock is zero | The shop was contradicting itself in writing |
-| The partner welcome letter goes on the first approval only | Two doors send it; both are gated now |
-| Unsubscribing ignores robots and still costs a human one press | Three test-plan checks reworded to match |
-| The VAT rate is stamped on the order | A filed month re-exports byte-identically forever |
-| «Из корзины в заказ» is counted honestly | The figure is much lower than it was; the caption is now true |
-| Failed logins meet a growing delay instead of a refusal | Still per-instance — see the correction below |
-| Search phrases are named in the privacy text | The «Искали, но не нашли» report stays |
+All three are spelled out, with the exact change, in
+`docs/montonio-payments-audit.md` and `docs/montonio-untested.md` Part 5 — the
+agent that found them deliberately did not implement them, because each changes
+what counts as paid, what is refunded, or what is trusted from a webhook.
 
-## Branches finished but NOT merged
+1. **An order paid short is still marked paid.** Stock comes off, gift cards are
+   minted, the receipt letter goes. Montonio's own help centre warns their order
+   reuse can let a customer pay less than the total. **His answer: hold the order
+   and tell him** — nothing ships and no card is minted until he looks. He was
+   explicit that the middle option, mark paid but hold the cards, is the worst of
+   the three: it lets the parcel go, which cannot be undone, while holding the
+   gift card, which could be reissued in seconds.
+2. **Two documented webhook checks we skip.** The signature is verified correctly
+   — that part was always right. But the store key is compared only when present,
+   and the order id in the notification is never checked against the order we
+   started. **His answer: tighten both, and ask Montonio on a mismatch** rather
+   than refusing outright. The strict reading trades a small hole for a bigger
+   one — a paid customer told they have not paid — and `fetchOrder()` now exists,
+   so a mismatch can be a question instead of a verdict. That call did not exist
+   when the audit was written.
+3. **Nothing asks Montonio when a notification never arrives.** The money is
+   taken and the order sits in «ждёт оплаты» for ever. **His answer: a scheduled
+   sweep of orders stuck unpaid.** At 3–5 orders a month it costs almost nothing,
+   and it is the only one of the two options that works while he is asleep.
 
-- **`r22-shop`** — the public order-status endpoint and safe basket recovery
-  (question 13), and blog price markers for new articles (question 16). Pushed,
-  3552 tests green.
-- **`r22-blogfig`** — on top of `r22-shop`, done, 3615 tests green. Fixes a real
-  regression found while in there. `tools/lib/blog-export.mjs`, the sanitizer the
-  prerenderer uses for articles, had **no `data-fig` handling at all**, because
-  one line in its `openTag()` rewrote every tag but `a` and `img` bare — so
-  `<figure data-fig="half-left">`, `"small"` and the default all came out as the
-  same bare `<figure>`. Every CSS rule that gives those presets meaning is keyed
-  on that attribute, so the picture sizes and placement Renat asked for in round
-  20 rendered as one full-width picture for Google, for no-JS readers and on
-  everybody's first paint, then visibly reflowed once the SPA repainted from the
-  real renderer. Second time that hand-kept twin has drifted.
+Standing rules that apply: the test plan follows the code (187 checks in
+`src/data/testplan.json`; mark what changes, and spend a re-test only where
+behaviour genuinely changed for the tester), and run `node tools/og-pages.mjs`
+afterwards — the link card bakes the check count in and nothing enforces it.
 
-  **Recommended follow-up, not done:** extract the two sanitizers into one shared
-  module. `blog-export.mjs`'s own header has long argued this is impossible — it
-  is wrong, and `src/lib/seo-head.mjs` is exact precedent: a plain `.mjs` under
-  `src/lib/` imported by both strict TypeScript and the bare-node build. The
-  47-body corpus test on this branch guards today's behaviour but cannot contain
-  tomorrow's attribute, which is what both drifts actually were. Note that this
-  unifies two of three: `blogCleanHtml()` in `app.js` is a DOMParser version with
-  no build step and genuinely cannot share code.
+## Running when we stopped
 
-## Branches still building when the session ended
+**The Fable 5.1 audit**, started by Dim on the evening of 18.09, scoped to
+`b6cbe37..9b7f48d` — everything since 14.09, 170 commits, 290 files. Its brief is
+`docs/audit-2026-09-18-brief.md` and is self-contained. It will find the three
+decisions above missing; that is expected and correct.
 
-`r22-panel` (rename «Топ товаров»/«Бренды» to the value of goods, server-side
-order search, the «Обработано» button for returns, the rate screen editing the
-stored row), `r22-idem-rest` (the seven remaining idempotency sites),
-`r22-testplan` (all 173 checks brought level with the code). Check whether they
-pushed before you assume they did not.
+It was asked for `docs/audit-2026-09-18-findings.md`, every finding carrying one
+of four verdicts — **new**, **known-deferred**, **contradicts a decision**,
+**already fixed** — so the output sorts itself. Read the known-deferred ones
+against `docs/audit-2026-09-14-deferred.md` before acting on any of them.
 
-## First job next session
+## Waiting on the owner, not on us
 
-Merge those branches, regenerate (`minify-shop2` → `prerender-shop2` →
-`check-prerender`), run the full suite, push. **`public/shop2/app.js` has had
-two writers** — `r22-panel` and `r22-shop` both touch it, the second unavoidably
-edits one line in the admin half — so expect a conflict there and resolve it by
-keeping both sides, not by taking one whole. That mistake nearly reverted
-question 5 during this round's merge and nothing would have failed to say so.
+- **Sunday 21.09, with Renat:** finish the Montonio account and get **live API
+  keys**. That one meeting unlocks the real price table
+  (`node tools/delivery-pricing.mjs --units 3`, see `docs/delivery-pricing.md`),
+  which produces the break-even figures Renat needs to set his flat prices. The
+  locker option currently looks dearer than the courier in most of the new
+  countries **because the table was quoted for a 30×30×30 box**, and the box the
+  shop now declares is a fraction of that. Rebuilding it is what makes the
+  feature worth having.
+- **Monday 22.09, Harri at Montonio:** the draft sits in Dim's Gmail, in the
+  thread, needing only the time. The first block is the one that matters —
+  refunds and bank payments cannot be exercised in the sandbox at all, so how
+  does a merchant validate them before a real customer's money is involved?
+- **Renat, open since 14.09:** which Kevin.Murphy sprays are pressurised
+  aerosols. Decides whether they may ship abroad at all, separately from price.
+  (Weighing the products was **cancelled** on 18.09 — see `docs/go-live.md`.)
+- **Three open decisions:** whether to list on Google Shopping at all (the feed
+  must not be submitted as it stands), whether a *pending* refund should still
+  tell the customer their money is back, and whether a hidden catalogue product
+  should keep nagging in the low-stock counts.
 
-## Then: Dim re-tests, then two Fable 5.1 passes
+## Smaller things, none blocking
 
-The test plan marks each changed check so he can find them: **re-run** (behaviour
-changed), **reworded** (text moved, his answer stands) and **new**. He is not
-re-running all 173 — only the marked ones. **The Claude Design hand-off is
-cancelled; he says the design is fine.**
+- Several e2e specs wait 8 s for the login card where the suite's own helper
+  waits 60. A cold `next dev` compiles routes on demand, so CI will keep
+  producing false failures until those specs use the helper.
+- One intermittent unit failure appeared once in four full runs on 18.09 and did
+  not reproduce. Not identified.
+- `public/shop/legal.js` still names Shopify as the data processor. Unreachable
+  today; on the go-live list.
 
-Once he reports the re-test is clean, run **two separate Fable 5.1 passes**, in
-this order:
+## Traps that cost real time this week
 
-1. **A regression review of the diff** since 14.09 — about 250 changes landed
-   through heavy parallel merging, and merging is where this project bleeds. On
-   17.09 alone: two branches fixed the same bug and git merged both without a
-   conflict so both now run; the same pattern earlier in the round would have
-   taken stock off twice on a cancel. No subsystem audit looks for this.
-2. **A go-live readiness pass.** Not a code audit, and the more important of the
-   two. The shop has run as staging and going live flips switches nobody has ever
-   exercised. At least: the pages say `noindex, nofollow` and `robots.txt` is the
-   staging policy; `PUBLIC_BASE_URL` unset makes the prerender write live URLs
-   carrying noindex; Montonio sandbox versus live keys, the webhook URL and the
-   shipping contract; `SESSION_SECRET` is now load-bearing for the order-status
-   token and fails closed silently if unset, so basket recovery would never work
-   and nothing would say so; `flows.unpaid` is still **off**; cron schedules; the
-   `fra1` region; Railway backups; whether anything tells Dim when a payment
-   webhook fails; the stale `public/shop/legal.js`, which still names Shopify as
-   the data processor; DNS at ASCIO.
-
-Do **not** run a fresh 22-subsystem audit. The 14.09 one is measurably stale —
-three times on 17.09 an agent found it wrong about current code (the till was
-rated HIGH for having no protection it has had since 07.09, the checkout already
-had half the idempotency, the 7-day unpaid cancel was already built).
-
-## Corrections worth carrying forward
-
-- **The reason question 19 chose a growing delay over a shared counter was
-  wrong.** Dim was told a database counter meant a write per login attempt. It
-  does not: `writeAuditSafe(…, "admin.login.failed")` already writes every
-  failure to Postgres on the existing path, so a durable ladder that survives a
-  cold start costs one SELECT and zero extra writes. Told this, **Dim chose the
-  database counter on 17.09** — being built on branch `r22-login`, which also has
-  to settle the “Слишком много попыток” string in `app.js` that the delay left
-  unreachable.
-- **The conversion figure is now reported by the browser**, not read from the
-  orders table, so someone loading a receipt URL could add to it. Consent-gated
-  and rate-limited, and it is a vanity KPI rather than an accounting figure — but
-  it is no longer tied to real orders.
-- **The robot-proof unsubscribe does not close the whole class.** A scanner that
-  opens links in a real headless browser (Defender for Office 365 does) would run
-  the script and complete the unsubscribe. Closing that needs a click, which Dim
-  rejected.
-- **71 admin screenshots survive** in the session scratchpad under `handoff/shots`
-  from 04.09. Irrelevant now that the hand-off is cancelled.
-
-## Still open, nobody blocked on them
-
-Thirty-odd deferred findings from rounds 19 and 21 that nobody has picked up; the
-three content routes in `r22-idem-rest` do nothing until `app.js` mints keys for
-them; AI-placed blog cards write empty anchors with no words or link, invisible
-to a crawler; a custom product in a prerendered article shows its name with no
-price, because the build's catalogue holds no owner-created products.
+- `public/shop2/app.js` is stored **CRLF**. Anything slicing it by source text
+  and searching for `";\n"` silently matches the wrong place — four false
+  failures on 18.09.
+- `src/lib/og-card.ts` holds 418 NUL bytes: **grep prints no matching lines at
+  all**. A search of it that finds nothing has proved nothing. Use `grep -a`.
+- Two branches fixing one bug **merge without a conflict** — there is no shared
+  line to conflict on and nothing in the tooling notices. It happened three times
+  this week; once it would have taken stock off twice on a cancel. Two sessions
+  also picked migration `191` independently. Talk before building.
+- `git stash` is shared across every worktree in this repository.
+- Regenerate the prerender with `PUBLIC_BASE_URL` **unset** — the committed
+  `index.html` is that build, and setting the staging base yields 24 lines of
+  unrelated diff.
