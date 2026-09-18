@@ -602,7 +602,28 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
     return this.verifyToken(token);
   }
 
-  /** Verify a signed token from either channel and read the order out of it. */
+  /**
+   * Verify a signed token from either channel and read the order out of it.
+   *
+   * The signature is the security boundary and is checked here, in constant
+   * time, for HS256 only — that part has always been right. The two checks
+   * Montonio's own guide adds to it,
+   *
+   *   decoded.uuid === montonioOrderId && decoded.accessKey === 'MY_ACCESS_KEY'
+   *
+   * are **reported**, not enforced, and this is deliberate (Dim, 18.09.2026).
+   * Enforcing them here would trade a small hole for a bigger one: a token
+   * that fails one of them is refused, the settlement never happens, and a
+   * customer who really did pay is told they have not. Since `fetchOrder()`
+   * exists, a mismatch can be a question instead — «Montonio, what is this
+   * order's real status?» — and the answer decides. That asking is
+   * guardTokenChecks() (src/lib/payments/token-guard.ts), which BOTH money
+   * routes run before they settle anything; `uuid` is compared there because
+   * only the caller holds the order row this token is supposed to be about.
+   *
+   * So: nothing here refuses a token on `accessKey` any more. If you add a
+   * third caller of this method, it must run the guard too.
+   */
   verifyToken(token: string): VerifyResult {
     let claims: OrderTokenClaims;
     try {
@@ -612,10 +633,14 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
         err instanceof JwtError ? `token_${err.code.replace("jwt_", "")}` : "token_invalid",
       );
     }
-    // A valid signature from *another* Montonio store is still not ours.
-    if (claims.accessKey && claims.accessKey !== this.config.accessKey) {
-      throw new PaymentError("token_foreign");
-    }
+    /* «Only when present» was the hole: a validly signed token carrying no
+       `accessKey` claim at all passed as ours without anyone noticing. Absent
+       is now its own answer, told apart from a key that names another store. */
+    const accessKey = !claims.accessKey
+      ? "absent"
+      : claims.accessKey === this.config.accessKey
+        ? "ok"
+        : "foreign";
     const orderRef = claims.merchantReference;
     if (!orderRef) throw new PaymentError("token_no_reference");
 
@@ -623,6 +648,7 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
       orderRef: String(orderRef),
       status: mapMontonioStatus(claims.paymentStatus),
       providerRef: String(claims.uuid ?? ""),
+      tokenChecks: { accessKey },
       amount: typeof claims.grandTotal === "number" ? money(claims.grandTotal) : undefined,
       currency: typeof claims.currency === "string" ? claims.currency : undefined,
       detail:

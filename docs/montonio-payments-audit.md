@@ -221,7 +221,19 @@ refunds guide asks for". The guide *recommends* it. Corrected on this branch.
 
 ---
 
-### A4. The order token's `uuid` is never checked against the order we started · **[DECIDE]**
+### A4. The order token's `uuid` is never checked against the order we started · **[DECIDED 18.09.2026 — done, differently]**
+
+> **Outcome.** Dim's answer was «tighten both, and on a mismatch ask Montonio
+> rather than refuse». The strict version written out below was **not** the one
+> applied: refusing a token that fails a check is how a customer who really paid
+> is told they have not, and `fetchOrder()` — which did not exist when this
+> recommendation was written — lets a mismatch be a question instead. Both
+> checks are now made, both report rather than throw, and
+> `guardTokenChecks()` (`src/lib/payments/token-guard.ts`) asks
+> `GET /orders/:orderUuid` and acts on the answer: confirmed → settle on
+> Montonio's own figures; not paid → ignore (200); no answer → 503 so the
+> webhook is redelivered. The mismatch is journalled as `order.token_mismatch`
+> either way. Tests: `tests/payments-token-guard.test.ts`.
 
 > ```js
 > if (
@@ -327,7 +339,17 @@ client for it (`montonio.ts:480`). See B1 for where else to use it.
 
 ---
 
-### A6. An underpaid order is marked paid and flagged, not held · **[DECIDE]**
+### A6. An underpaid order is marked paid and flagged, not held · **[DECIDED 18.09.2026 — done]**
+
+> **Outcome.** Dim chose to hold the order and be told; he turned down the
+> middle option (mark paid, hold only the cards) by name, because it lets the
+> parcel go, which cannot be undone, while holding a card that could be
+> reissued in seconds. Implemented in `src/lib/payments/apply.ts` — and **not**
+> in the shape sketched below, which writes `status: "paid"` on the blob: that
+> would make `halfSettled()` read the held order as a settlement that died
+> half-way and finish the fulfilment off on Montonio's very next retry. The
+> blob says `pending` and carries `held`. Tests:
+> `tests/payments-underpaid.test.ts`.
 
 `src/lib/payments/apply.ts:685-697`: when the signed token's `grandTotal` differs from
 `orders.total` by more than a cent, the code writes `payment.amountMismatch`, logs, and then
@@ -380,12 +402,12 @@ not — a webhook lost for 48 hours, a shopper who closed the tab, an order stuc
 
 **Not wired (deliberate, [DECIDE]):**
 
-- **A reconcile pass.** For every order in `new`/`failed` with a `payment.ref` older than N
-  minutes, `GET /orders/:uuid`; if `paymentStatus === "PAID"`, run it through the existing
-  `settlePayment()` door. This is the safety net for a lost webhook and it is worth having
-  before go-live. It is not in this branch because it can *create* a paid order — it must be
-  reviewed as a money path, and it needs a cron slot in `vercel.json` (which today has only
-  `/api/cron/flows/` and `/api/cron/events-retention/`).
+- **A reconcile pass** · **[DECIDED 18.09.2026 — done 19.09.2026]**. Built exactly as
+  described: `src/lib/payments/reconcile.ts`, `/api/cron/payments-reconcile/`, settling through
+  the existing `settlePayment()` door and nothing else. The cron slot turned out not to be
+  available — Vercel's Hobby plan allows two jobs and both are taken (`docs/HOSTING.md`) — so
+  the sweep rides at the end of `/api/cron/flows/` and the route stands ready for its own
+  hourly entry on Pro. Tests: `tests/payments-reconcile.test.ts`.
 - **A pre-flight check in `POST /api/payments/create/`.** Before starting a payment on an
   order that already has a `payment.ref`, ask Montonio whether that order is already `PAID`.
   Given A5 this is belt-and-braces (Montonio would refuse the create anyway), and it puts a
@@ -695,6 +717,9 @@ payments; if the reconcile pass of B1 is built, it needs a `crons` entry.
 (hold an underpaid order), B1 (reconcile pass), B2 (`expiresIn`), B3 (`payment.repeat.ref`
 lookup), C1 (`requireExp`), C2 (drop non-EUR banks), C3 (0.05 € floor), and the two
 `public/shop2/app.js` lines in A1.
+
+**Decided 18.09.2026 and implemented 19.09.2026 on `r27-pay-decisions`:** A4, A6 and B1's
+reconcile pass — see the outcome note under each. B2, B3, C1, C2 and C3 are still open.
 
 ---
 

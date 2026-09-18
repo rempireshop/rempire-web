@@ -61,6 +61,13 @@ function handedOver(status: string): boolean {
   return status === "shipped" || status === "delivered";
 }
 
+/** The provider's own id for this payment, when the order has one. */
+function providerRefOf(order: Order): string {
+  const p = order.payment as { ref?: unknown } | null | undefined;
+  const ref = p && typeof p === "object" ? p.ref : undefined;
+  return typeof ref === "string" ? ref.trim() : "";
+}
+
 /**
  * Whether the order's money has already arrived and stayed — its payment
  * record says so, whatever the status column says now. A cancelled or
@@ -193,7 +200,12 @@ export async function PATCH(req: Request, ctx: Ctx) {
         {
           orderRef: order.number,
           status: "paid",
-          providerRef: "manual",
+          /* «manual» unless the order already carries a provider's own id.
+             An order held for a short payment (src/lib/payments/apply.ts) is
+             marked paid from this button by design, and it is still a Montonio
+             order: writing «manual» over `payment.ref` would throw away the
+             one id «Вернуть деньги» can send the money back through. */
+          providerRef: providerRefOf(order) || "manual",
           amount: Number(order.total),
           currency: "EUR",
           detail: "отмечено оплаченным в админке",

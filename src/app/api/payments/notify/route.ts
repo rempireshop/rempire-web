@@ -5,6 +5,7 @@ import { getProvider } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { canRefund, refundableAmount, refundsOf, type RefundNotification } from "@/lib/payments/refund";
 import { refundValue, settlePayment, settleRefund } from "@/lib/payments/settle";
+import { guardTokenChecks } from "@/lib/payments/token-guard";
 import { PaymentError, type PaymentProvider } from "@/lib/payments/types";
 
 /**
@@ -77,6 +78,31 @@ export async function POST(req: Request) {
     console.error("payments/notify: unknown order", result.orderRef);
     return NextResponse.json({ ok: true, ignored: "unknown_order" });
   }
+
+  /* Montonio's own two extra checks — the store access key and the order uuid
+     — run here rather than inside the token, because only this side holds the
+     order they are supposed to match (src/lib/payments/token-guard.ts). A
+     mismatch is a question for Montonio, never a refusal on its own: the
+     answer decides, and the mismatch is journalled either way. */
+  let guard;
+  try {
+    guard = await guardTokenChecks(order, result, provider);
+  } catch (err) {
+    console.error("payments/notify: token checks failed to run", err);
+    return NextResponse.json({ ok: false, error: "guard_failed" }, { status: 503 });
+  }
+  if (guard.verdict === "unknown") {
+    /* The shop does not know, and must not guess. 503 is the one answer that
+       buys another attempt: Montonio retries for 48 hours, 13 times, and by
+       then `GET /orders/:uuid` will almost certainly answer. */
+    return NextResponse.json({ ok: false, error: "unconfirmed" }, { status: 503 });
+  }
+  if (guard.verdict === "refused") {
+    // Montonio itself says this is not a paid order of ours. 200: a retry of
+    // the same token would be refused for the same reason.
+    return NextResponse.json({ ok: true, ignored: "token_mismatch" });
+  }
+  result = guard.result;
 
   let outcome;
   try {
