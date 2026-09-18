@@ -442,10 +442,21 @@ describe("admin session", () => {
     clearLoginFailures(ADMIN_ACCOUNT, new Date(t).getTime());
     expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(0);
 
-    // …and the ladder starts climbing again from the floor, not from nine
+    /* …and the ladder starts climbing again from the floor, not from nine.
+       A SECOND later, not «now»: the floor is `t` truncated to a whole
+       millisecond, and four inserts on a warm database land inside the same
+       millisecond often enough to matter. When they do, every one of them sits
+       at or below the floor, the ladder counts none of them and this line reads
+       0 instead of 1000 — which is how the test failed in a full run on
+       19.09.2026 while passing alone, a month's worth of «flaky» in one
+       assertion. The 18.09 fix put both clocks in the database and left this
+       edge; a whole second is unambiguous on any machine, and a failed attempt
+       one second after a success is the ordinary case anyway.
+       The product is right either way: a miss in the same millisecond as a
+       success is forgiven, which is what clearLoginFailures() promises. */
     await exec(
       `insert into admin_audit (at, actor, action)
-       select now(), 'ip:203.0.113.9', 'admin.login.failed' from generate_series(1, 4)`,
+       select now() + interval '1 second', 'ip:203.0.113.9', 'admin.login.failed' from generate_series(1, 4)`,
     );
     expect(await loginDelayFor(ADMIN_ACCOUNT)).toBe(loginDelayMs(4));
     resetLoginDelays();

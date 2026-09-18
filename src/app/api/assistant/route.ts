@@ -456,7 +456,7 @@ ${weekSummary || "(not available right now — say so rather than guessing, and 
 SALES, last 30 days, real numbers from the shop's own database (analytics agent):
 ${analytics
     ? `revenue ${analytics.revenue} €, ${analytics.orders} orders, average order ${analytics.aov} €, conversion ${analytics.conversionPct}%.
-Best-selling by revenue: ${analytics.topProducts.length ? analytics.topProducts.map((p) => `${p.brand} ${p.name} (${p.revenue} €)`).join(", ") : "(no paid orders yet)"}.
+Top products by the VALUE OF GOODS in orders — not money received: discounts, points, gift cards and delivery are NOT subtracted, so this figure is higher than the revenue above and the two are not comparable. The panel was renamed to say exactly this on 17.09.2026 («Топ товаров» → цена товаров в заказах); say it the same way and never call this revenue. ${analytics.topProducts.length ? analytics.topProducts.map((p) => `${p.brand} ${p.name} (${p.revenue} €)`).join(", ") : "(no paid orders yet)"}.
 Top internal search terms: ${analytics.topSearchTerms.length ? analytics.topSearchTerms.map((t) => `"${t.term}" (${t.count})`).join(", ") : "(no searches yet)"}.`
     : "(the 30-day window is not open in this panel right now — the week above still stands, so answer from it and point to «Аналитика» for the longer view; never guess a 30-day figure, a conversion or a search term)"}
 

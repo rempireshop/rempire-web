@@ -466,6 +466,44 @@ describe("the admin prompt tells the truth about the panel", () => {
       }
     });
 
+    it("never calls the top-products figure «revenue» — the panel stopped calling it money", async () => {
+      /* Decision D2 of 17.09.2026: «Топ товаров» and «Бренды» were renamed to
+         the value of goods in orders, with a hint saying «…а не полученные
+         деньги». The model was still handed the same list under the heading
+         «Best-selling by revenue», so Renat could ask the assistant «что
+         приносит больше всего денег» and be told, in euros and as revenue, the
+         number the panel had just been relabelled to stop calling money — on an
+         order with a 20 % promo the two differ by exactly the discount
+         (audit F25). */
+      /* The 30-day block only exists when the panel has already fetched it,
+         so this request carries what analyticsForAI() posts. */
+      nth += 1;
+      const sent = stubOpenAI({ reply: "ok", product_ids: [], tab: "", action: null });
+      const { POST } = await import("@/app/api/assistant/route");
+      await POST(
+        new NextRequest(`${ORIGIN}/api/assistant/`, {
+          method: "POST",
+          headers: { "content-type": "application/json", host: HOST, origin: ORIGIN, cookie: admin, "x-real-ip": `10.0.9.${nth}` },
+          body: JSON.stringify({
+            mode: "admin",
+            messages: [{ role: "user", content: "что приносит больше всего денег?" }],
+            analytics: {
+              revenue: 480, orders: 12, aov: 40, conversionPct: 2.5,
+              topProducts: [{ brand: "System 4", name: "Bio Botanical Serum", revenue: 120 }],
+              topSearchTerms: [],
+            },
+          }),
+        }),
+      );
+      const prompt = sent[0].messages[0].content as string;
+      vi.unstubAllGlobals();
+
+      expect(prompt, "the 30-day block did not reach the model at all").toContain("SALES, last 30 days");
+      expect(prompt).not.toContain("Best-selling by revenue");
+      expect(prompt).toContain("VALUE OF GOODS");
+      expect(prompt).toContain("never call this revenue");
+    });
+
     it("no longer tells the model to answer that the figures are not available", async () => {
       const prompt = await promptFor("сколько продали за неделю?");
       // the sentence the assistant was reading out to him, gone
