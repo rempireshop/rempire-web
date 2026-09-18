@@ -164,7 +164,7 @@ test.describe("account — «Хочу вернуть заказ»", () => {
     //    «Сделать сегодня» on «Обзор», which leads to the order's own card.
     await page.goto(shopUrl("", "/admin/"));
     // r16: the row leads to «Возвраты» — the chip that holds nothing else —
-    // instead of «В пути», which is every parcel that ever left
+    // instead of «В пути», among all the other parcels
     const queueRow = page.locator('.adm-row--click[data-admfilter="returns"]');
     await expect(queueRow, "«Обзор» never listed the return request").toBeVisible();
     await expect(queueRow).toContainText("заявка на возврат");

@@ -5810,6 +5810,15 @@
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
     [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
+    /* …and the other two chips of that same strip once they carry a count.
+       «В пути» is new (18.09.2026); «Возвраты N» has been counting since r16
+       and stayed Russian on the ET/EN panel all that time — the bare labels
+       are in both dictionaries, but the label and its number are ONE text
+       node and nothing matched it. i18n-gaps cannot see either of them: the
+       label comes out of ADM_ORDER_FILTERS, so the tool reads the chip as two
+       holes glued together and has nothing to test. */
+    [/^В пути (\d+)$/, { ET: "Teel $1", EN: "On the way $1" }],
+    [/^Возвраты (\d+)$/, { ET: "Tagastused $1", EN: "Returns $1" }],
     // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
     [/^(.+) доставлен$/, { ET: "$1 kohale toimetatud", EN: "$1 delivered" }],
     [/^(.+) выдан клиенту$/, { ET: "$1 kliendile üle antud", EN: "$1 handed to the customer" }],
@@ -17496,8 +17505,8 @@
        queue a new review and a partner request arrive in — the shop has one
        way of telling Renat that somebody is waiting for him, and this is it.
        Since r16 the row leads to «Возвраты» — its own chip on «Заказы», which
-       holds nothing else — instead of dropping him into «В пути» among every
-       parcel that ever left. The names under it still say whose. */
+       holds nothing else — instead of dropping him into «В пути» among all the
+       other parcels. The names under it still say whose. */
     if (retN) tasks += admTaskRow(retN,
       pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
       names(retList, function (v) { return v.who; }),
@@ -17586,7 +17595,7 @@
      boxes an order was in before he could find it; what he actually does is
      two things — send what has not gone yet, and look at what is already on
      its way. So: «Отправить N» (paid, still on the shelf, label or no label),
-     «В пути» (gone: shipped and delivered together) and «Все». «По счёту»
+     «В пути N» (`shipped` — gone and not there yet) and «Все». «По счёту»
      stays beside them because it is not a step of the same journey — it is an
      invoice waiting for a bank transfer, and it belongs to the invoice flow.
      Salon sales, unpaid and cancelled orders are all under «Все», which is
@@ -17620,13 +17629,38 @@
     // «Отправить» is the parcel queue: a digital order has no parcel and is
     // found under «Все» (v.toShip, admOrderVM)
     if (f === "new" || f === "label") return v.toShip;
-    // …and everything that has: «Отправлен» and «Доставлен» are one answer to
-    // «где посылка» — the row itself says which of the two it is
-    if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;
+    /* …and «В пути» is what has gone and has NOT arrived: `shipped` alone.
+       It held `shipped || delivered` from 07.09.2026 (735c666, the same commit
+       that taught the shop to close orders by itself) until Renat, 18.09.2026:
+       «в «Заказах» чип «в пути» вроде не считает то, что в пути». Two places in
+       this codebase already promised the narrower set and were simply wrong:
+       the delivery card's own hint — «Заказ просто перестаёт висеть в «В пути»»
+       (admDeliveryCloseHTML) — and src/lib/delivery.ts, «the order stops
+       appearing in «В пути» and Renat stops looking at it». Neither happened:
+       a parcel the nightly sweep or the carrier's webhook closed stayed on this
+       list for ever, so «В пути» was «всё, что когда-либо уехало». Harmless
+       while nothing ever became `delivered` — the shipping webhook was thrown
+       away unread until today — and wrong the moment it did.
+       A parcel the carrier sent back is deliberately still `shipped`
+       (looksReturned leaves it open), so it stays here: it is in transit, to
+       Renat rather than to the customer, and it is his to deal with. */
+    if (f === "shipped") return v.shipped;
+    // «delivered» is not a chip any more, but the key is still understood —
+    // and it means what it says, as it did before the six chips became three
+    if (f === "delivered") return v.delivered;
     // «По счёту»: the invoices still waiting for their transfer
     if (f === "invoice") return !!v.invoice && v.unpaid;
     if (f === "salon") return v.pos;
     return true;
+  }
+  /** «В пути N» — the parcels that have left and have not arrived.
+      Read from admOrders(), which is the very list the rows are drawn from
+      (admOrderRows), and filtered by admOrderMatches() itself, so the number
+      on the chip and the rows behind it cannot say different things — the one
+      difference the owner cannot see from the outside. Same shape as
+      admLiveToShip() beside it, demo list and all. */
+  function admOnTheWay() {
+    return admOrders().map(admOrderVM).filter(function (v) { return admOrderMatches(v, "shipped"); });
   }
   /** The invoice orders waiting for a transfer — the chip's count and the overview's row. */
   function admInvoicesWaiting() {
@@ -17659,9 +17693,14 @@
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          // «Отправить N» counts everything still on the shelf, labelled or not;
-          // «Возвраты N» the requests nobody has answered yet (admReturnsAsked)
+          /* «Отправить N» counts everything still on the shelf, labelled or not;
+             «В пути N» the parcels that have left and not arrived (admOnTheWay);
+             «Возвраты N» the requests nobody has answered yet (admReturnsAsked).
+             «В пути» had no number at all until 18.09.2026 — four chips, three
+             of them counting, and the one the owner watches a parcel on was the
+             silent one. */
           var n = x[0] === "new" ? split.fresh + split.labeled
+            : x[0] === "shipped" ? admOnTheWay().length
             : x[0] === "invoice" ? admInvoicesWaiting().length
             : x[0] === "returns" ? admReturnsAsked().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
