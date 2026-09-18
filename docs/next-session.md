@@ -1,103 +1,128 @@
-# Where we stopped — evening of 18.09.2026
+# Where we stopped — the night of 18→19.09.2026
 
-`origin/main` is `78ceb7a`. **180 test files, 4171 tests, 0 failures** on the last
-full run. The browser suite was verified clean for the first time: 694 passing,
-and all 28 apparent failures proved to be a cold-server race, not the product.
+`origin/main` is `7d788e9`. **186 test files, 4317 tests, 0 failures**, `tsc`
+clean, 814 prerendered pages with 0 failures, `untranslated: 0` at ET/EN parity.
+27 commits overnight, four agent branches merged, everything pushed.
 
-This replaces the 17.09 version of this file; rounds 19–22 are long since merged.
+This replaces the plan written at 22:40; `docs/night-plan-2026-09-19.md` is what
+was intended, this is what happened.
 
-## Tomorrow's first job — three decisions the owner made and nobody built
+## The three payment decisions are done
 
-He answered these on 18.09. They were queued behind the payments hardening and
-never started. He was told, and said to finish them on 19.09. They are the only
-part of his twenty-eight decisions that is not implemented.
+The only part of Dim's twenty-eight decisions that was still unbuilt.
 
-All three are spelled out, with the exact change, in
-`docs/montonio-payments-audit.md` and `docs/montonio-untested.md` Part 5 — the
-agent that found them deliberately did not implement them, because each changes
-what counts as paid, what is refunded, or what is trusted from a webhook.
+- **An order paid short is held, not paid.** No stock moves, no gift card is
+  minted, no receipt letter goes; the order card warns in three languages,
+  naming both figures and the one button that ends it. The agent refused the
+  audit's own recommended shape and was right to: it wrote `status: "paid"` on
+  the blob while leaving the order at `new`, which is exactly the shape the code
+  already calls «a settlement that died half-way», so Montonio's next retry
+  would have completed the fulfilment the hold exists to prevent.
+- **Both webhook checks are tightened, and a mismatch asks Montonio.** The store
+  key was compared only when present; the order id was never compared at all.
+  On a mismatch the shop now asks `GET /orders/:uuid` and acts on the answer —
+  503 when Montonio cannot be reached, so the webhook comes back.
+- **A nightly sweep finds payments whose notification was lost.** Its own route
+  exists; it also rides the existing flows cron, because Vercel Hobby allows two
+  scheduled jobs and both slots are taken. That makes the Pro upgrade a go-live
+  item — it already was, for a different reason: Hobby forbids commercial use.
 
-1. **An order paid short is still marked paid.** Stock comes off, gift cards are
-   minted, the receipt letter goes. Montonio's own help centre warns their order
-   reuse can let a customer pay less than the total. **His answer: hold the order
-   and tell him** — nothing ships and no card is minted until he looks. He was
-   explicit that the middle option, mark paid but hold the cards, is the worst of
-   the three: it lets the parcel go, which cannot be undone, while holding the
-   gift card, which could be reissued in seconds.
-2. **Two documented webhook checks we skip.** The signature is verified correctly
-   — that part was always right. But the store key is compared only when present,
-   and the order id in the notification is never checked against the order we
-   started. **His answer: tighten both, and ask Montonio on a mismatch** rather
-   than refusing outright. The strict reading trades a small hole for a bigger
-   one — a paid customer told they have not paid — and `fetchOrder()` now exists,
-   so a mismatch can be a question instead of a verdict. That call did not exist
-   when the audit was written.
-3. **Nothing asks Montonio when a notification never arrives.** The money is
-   taken and the order sits in «ждёт оплаты» for ever. **His answer: a scheduled
-   sweep of orders stuck unpaid.** At 3–5 orders a month it costs almost nothing,
-   and it is the only one of the two options that works while he is asleep.
+**A trap that came with it, closed the same night:** a held order keeps the
+status «новый», and the 7-day unpaid cancel selects exactly that status. The
+flow is off today and Dim's decision of 17.09 is that it goes on — so the moment
+it did, an order somebody really paid for, just not in full, would have been
+chased for a week and then cancelled. One predicate, in the one place all three
+queries read it, proved by reverting it and watching the test fail.
 
-Standing rules that apply: the test plan follows the code (187 checks in
-`src/data/testplan.json`; mark what changes, and spend a re-test only where
-behaviour genuinely changed for the tester), and run `node tools/og-pages.mjs`
-afterwards — the link card bakes the check count in and nothing enforces it.
+## The audit: 39 of 56 findings closed
 
-## Running when we stopped
+Including the only MED-HIGH and nine of the ten MEDs. The ones worth naming:
 
-**The Fable 5.1 audit**, started by Dim on the evening of 18.09, scoped to
-`b6cbe37..9b7f48d` — everything since 14.09, 170 commits, 290 files. Its brief is
-`docs/audit-2026-09-18-brief.md` and is self-contained. It will find the three
-decisions above missing; that is expected and correct.
+- **«Вернуть деньги» paid twice** on a mixed card + bank order after a failed
+  fold. Both references now derive from one blob written in one statement. 15
+  new tests, 14 of which fail on the old code.
+- **A refund whose answer was lost** is now found: the retry asks Montonio,
+  adopts anything its `refunds[]` shows that we never recorded, and says so.
+- **A set was sold with a part counted to zero.** The id list handed to the
+  per-size map contained `bundle:<id>`, which has no shelf row, so the map never
+  held a single part of any set. The gate was there; it had nothing to read.
+- **«Оплачен» after a cancel never re-took a set's parts** — «остатки не
+  сходятся» permanently on everything sold in sets. This is the audit's answer
+  to «find the fourth merge», and it was real.
+- **The readiness screen told the truth** about wrong keys, about refunds being
+  off, and about a parcel webhook pointing anywhere at all. This is what Dim
+  will be looking at on Sunday when the live keys go in.
+- **Loyalty points now come back when you cancel first and refund after** — the
+  order Renat actually does them in. The customer had been keeping the points
+  the sale earned and losing the ones they spent, at 1 point = 1 €.
+- **Both candidates for the intermittent failure are closed.** Nine test files
+  set the fuzz environment and never installed the fetch stub, so every paid
+  order carrying a gift card made a real signed PUT to a fake R2 host on every
+  run, including CI. The other was a test measuring the machine's clock.
 
-It was asked for `docs/audit-2026-09-18-findings.md`, every finding carrying one
-of four verdicts — **new**, **known-deferred**, **contradicts a decision**,
-**already fixed** — so the output sorts itself. Read the known-deferred ones
-against `docs/audit-2026-09-14-deferred.md` before acting on any of them.
+Plus the two owner answers of 22:55: **the return window is 30 days everywhere**
+(three places said 14, in three languages, including the prerendered delivery
+page) and **the per-unit weight estimate is gone** — the declared parcel is the
+carton, one number, whatever the line count.
 
-## Waiting on the owner, not on us
+## What is still open from the audit
 
-- **Sunday 21.09, with Renat:** finish the Montonio account and get **live API
-  keys**. That one meeting unlocks the real price table
-  (`node tools/delivery-pricing.mjs --units 3`, see `docs/delivery-pricing.md`),
-  which produces the break-even figures Renat needs to set his flat prices. The
-  locker option currently looks dearer than the courier in most of the new
-  countries **because the table was quoted for a 30×30×30 box**, and the box the
-  shop now declares is a fraction of that. Rebuilding it is what makes the
-  feature worth having.
-- **Monday 22.09, Harri at Montonio:** the draft sits in Dim's Gmail, in the
-  thread, needing only the time. The first block is the one that matters —
-  refunds and bank payments cannot be exercised in the sandbox at all, so how
-  does a merchant validate them before a real customer's money is involved?
+Nothing here is urgent; each is written up in
+`docs/audit-2026-09-18-findings.md` under its own number.
+
+- **F5** — a synchronous carrier registration has a 10-second client timeout,
+  and a timeout after Montonio registered the parcel orphans it with no way to
+  find it again. Needs Montonio's answer on registration latency before a number
+  can be chosen; it is on the Monday list.
+- **F6** — after a lost answer the scanner cannot tell a retry from the next
+  identical bottle, so a genuine +1 replays the old one while the screen says ✓.
+  Needs a real decision about what the scanner should do, not a patch.
+- **F7, F10, F11** — the idempotency lease can take over a live request, and a
+  reload after a lost answer can make a second order (and, for «По счёту», a
+  second numbered invoice). All need design, all are low-probability.
+- **F21** — the label normaliser has no size sanity check. Unverifiable until a
+  real label exists, which is Sunday at the earliest.
+- **F25** — the panel renamed «Топ товаров» to the value of goods; the admin
+  assistant is still told the same list is «revenue». A contradiction with
+  decision D2, small and worth doing.
+- **F26, F29, F40, F53, F55, F56** — noise, coverage gaps and one account screen
+  offering fewer carriers than the checkout.
+- **§ 9.5** — three duplicate keys remain in the ET/EN dictionaries; the later
+  value silently wins, and today the later value is the right one.
+
+## Waiting on Dim, not on us
+
+- **Sunday 21.09, with Renat:** the live Montonio keys. Then rebuild the tariff
+  table (`node tools/delivery-pricing.mjs --units 3`) — the locker prices are
+  still quoted for a 30×30×30 box and the shop now declares a fraction of that.
+- **Monday 22.09, Harri at Montonio:** the draft is in Gmail and needs the time.
+  Six questions were added to it overnight, all from reading the code against
+  the documentation — the volumetric divisor (`/4000` reproduces their one
+  worked example, `/5000` does not), what `bufferApplied` is applied to, whether
+  a valid key with no Shipping product answers 200-with-nothing or 401, whether
+  Montonio normalises a stored webhook URL, whether `shipment.statusUpdated` can
+  ever carry a registration failure, and whether `paymentMethodType` is stable.
+  **And the one that decides the parcel weight:** whether `actualWeight` means
+  what we declared or what the carrier's scale reads.
 - **Renat, open since 14.09:** which Kevin.Murphy sprays are pressurised
-  aerosols. Decides whether they may ship abroad at all, separately from price.
-  (Weighing the products was **cancelled** on 18.09 — see `docs/go-live.md`.)
-- **Three open decisions:** whether to list on Google Shopping at all (the feed
-  must not be submitted as it stands), whether a *pending* refund should still
-  tell the customer their money is back, and whether a hidden catalogue product
-  should keep nagging in the low-stock counts.
+  aerosols.
+- **Three decisions:** Google Shopping, the pending-refund letter, hidden
+  products in the low-stock counts.
 
-## Smaller things, none blocking
+## The test plan: 191 checks
 
-- Several e2e specs wait 8 s for the login card where the suite's own helper
-  waits 60. A cold `next dev` compiles routes on demand, so CI will keep
-  producing false failures until those specs use the helper.
-- One intermittent unit failure appeared once in four full runs on 18.09 and did
-  not reproduce. Not identified.
-- `public/shop/legal.js` still names Shopify as the data processor. Unreachable
-  today; on the go-live list.
+Four new ones — the second press of «Вернуть деньги», an order paid short, the
+nightly reconcile, and cancelling an order with a set and putting it back — plus
+marks and new expectations on seven existing checks. Its own rules refused four
+of my drafts (six expected results per item, sixteen words per line), so the
+script that writes it now checks them before writing.
 
-## Traps that cost real time this week
+## One behaviour change worth a conversation
 
-- `public/shop2/app.js` is stored **CRLF**. Anything slicing it by source text
-  and searching for `";\n"` silently matches the wrong place — four false
-  failures on 18.09.
-- `src/lib/og-card.ts` holds 418 NUL bytes: **grep prints no matching lines at
-  all**. A search of it that finds nothing has proved nothing. Use `grep -a`.
-- Two branches fixing one bug **merge without a conflict** — there is no shared
-  line to conflict on and nothing in the tooling notices. It happened three times
-  this week; once it would have taken stock off twice on a cancel. Two sessions
-  also picked migration `191` independently. Talk before building.
-- `git stash` is shared across every worktree in this repository.
-- Regenerate the prerender with `PUBLIC_BASE_URL` **unset** — the committed
-  `index.html` is that build, and setting the staging base yields 24 lines of
-  unrelated diff.
+A **failed** refund attempt now reads Montonio's own `refunds[]` and writes down
+anything this shop has no record of. If that covers the order's full value the
+order flips to «возврат», the gift cards it sold are voided and the customer is
+mailed — as a side effect of a button that answered «не удалось». That is
+exactly what the lost webhook would have done and the money really did leave, so
+it is true rather than surprising. It should still not be a surprise on the
+first live refund.
