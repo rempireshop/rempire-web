@@ -40,6 +40,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import fontkit, { type Font } from "@pdf-lib/fontkit";
 import { getPublishedBySlug, pickLang } from "@/lib/blog";
+import { focusCrop } from "@/lib/blog-cover.mjs";
 import { getCustomProduct, isCustomId } from "@/lib/custom-products";
 import { loadSharp, MAX_PIXELS, MAX_UPLOAD_BYTES } from "@/lib/images";
 import { eur, OG_H, OG_W } from "@/lib/seo-head.mjs";
@@ -218,6 +219,19 @@ export type CardSpec = {
   photo: Buffer | null;
   /** `inside`: a cutout, whole, on white. `cover`: a cover shot, cropped to fill the box. */
   fit: "inside" | "cover";
+  /**
+   * Which part of a `cover` photo the square keeps — the post's own
+   * `cover_focus` (src/lib/blog-cover.mjs). Absent is every article written
+   * before the owner had anything to drag, and keeps the crop those cards
+   * have always had: sharp's `attention`, a guess at where the detail is.
+   *
+   * This box is a SQUARE and the article's own frame is 1200×630, so the two
+   * never see the same part of a photo however it is cropped. That is the
+   * whole complaint — a cover checked on the page came back from WhatsApp
+   * with the face cut — and it is why one point is stored rather than one
+   * rectangle: the point is the only thing both shapes can obey.
+   */
+  focus?: string | null;
 };
 
 const PHOTO = { left: 56, top: 56, size: 518 };
@@ -236,8 +250,28 @@ export async function drawCard(spec: CardSpec): Promise<Buffer> {
   let photoPlaced = false;
   if (spec.photo) {
     try {
-      const img = await sharp(spec.photo, { limitInputPixels: MAX_PIXELS, failOn: "none" })
-        .rotate()
+      /* A chosen point is an extract() worked out here, not a `position`
+         handed to resize(): sharp's position takes a gravity or one of its
+         two strategies, never «62% across, 28% down». With no point the
+         resize below is untouched, `attention` and all — that is what every
+         card drawn before this looked like. */
+      let pipeline = sharp(spec.photo, { limitInputPixels: MAX_PIXELS, failOn: "none" }).rotate();
+      if (spec.fit === "cover" && spec.focus) {
+        /* .extract() standing after .rotate() crops the picture the right way
+           up, but metadata() reads the FILE, which a phone stores sideways
+           with the quarter turn in EXIF. Orientations 5–8 are those turns,
+           and the point is a percentage of the picture as a READER sees it,
+           so the two sides are swapped before the rect is worked out. */
+        const meta = await sharp(spec.photo, { limitInputPixels: MAX_PIXELS, failOn: "none" }).metadata();
+        const turned = (meta.orientation || 0) >= 5;
+        const rect = focusCrop(
+          turned ? meta.height : meta.width,
+          turned ? meta.width : meta.height,
+          PHOTO.size, PHOTO.size, spec.focus,
+        );
+        if (rect) pipeline = pipeline.extract(rect);
+      }
+      const img = await pipeline
         .resize(PHOTO.size, PHOTO.size, spec.fit === "cover" ? { fit: "cover", position: "attention" } : { fit: "inside", withoutEnlargement: false })
         .png()
         .toBuffer({ resolveWithObject: true });
@@ -365,7 +399,7 @@ export async function blogPostCard(slug: string, lang: string, base: string): Pr
   if (!post) return null;
   const code = lang === "ET" || lang === "EN" ? lang : "RU";
   const title = pickLang(post.title, code) || post.slug;
-  const key = cardKey("b", post.slug, code, post.updatedAt, post.coverUrl);
+  const key = cardKey("b", post.slug, code, post.updatedAt, post.coverUrl, post.coverFocus);
   return {
     key,
     png: () =>
@@ -376,6 +410,7 @@ export async function blogPostCard(slug: string, lang: string, base: string): Pr
           foot: "",
           photo: await fetchPhoto(post.coverUrl, base),
           fit: "cover",
+          focus: post.coverFocus,
         }),
       ),
   };

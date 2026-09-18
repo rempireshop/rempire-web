@@ -1745,7 +1745,25 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-see__t {
   font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
 }
+/* The third frame: the square a link preview is cut to. Unlike the two
+   beside it there is no shop class to borrow — that card is drawn by sharp on
+   the server (src/lib/og-card.ts fits the photo into a 518×518 box beside the
+   title), not by any rule this page has loaded. So this frame is the panel's
+   own, and its shape is the one thing here that has to be kept in step with
+   that file by hand. It crops always, whatever the page does, which is the
+   whole reason it is on screen: a cover the owner approved wide came back
+   from WhatsApp with the face halved. */
+.adm-see__one--og { flex: 0 0 132px; }
+.adm-see__og { display: block; aspect-ratio: 1; background: var(--page) center / cover no-repeat; }
 .adm-see__f { display: block; border: 1px solid var(--a-rule); background: var(--a-paper); }
+/* A frame a thumb may move the picture in. `touch-action: none` is what keeps
+   the editor still under the finger — without it a drag down the frame
+   scrolls the page instead of moving the photograph; `user-select: none` is
+   what the pointerdown handler deliberately does not preventDefault() for,
+   so the frame can still take focus and answer the arrow keys. */
+.adm-see__f--pan { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.adm-see__f--pan:active { cursor: grabbing; }
+.adm-see__f--pan:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 /* the shop's own bottom margin on a tile cover has no job inside a frame */
 .adm-see__f .blog__tileimg, .adm-see__f .blog__cover { margin-bottom: 0; }
 .adm-see__note { flex-basis: 100%; margin: 0; }
