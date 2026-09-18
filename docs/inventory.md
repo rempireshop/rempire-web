@@ -123,6 +123,15 @@
 объёма, по умолчанию 2. Порог меняется кнопкой «Править» в той же строке.
 Такое же правило теперь и в «Товаре» → «Размеры и цены».
 
+**Значок «Скрыт»** в строке значит, что товар снят с продажи: в его карточке
+выключено «Показывать в магазине». Это работает одинаково и для товаров из
+каталога, и для ваших собственных. Полка у такого товара остаётся: остаток,
+штрихкод и кнопки +/− работают как обычно, и пересчитать его можно в любой
+момент. Но в фильтры «Мало» и «Нет» он не попадает, в число на вкладке
+«Склад» не считается и в ответах помощника «что заканчивается» не
+появляется — заказывать то, что вы сами убрали из магазина, не нужно. Найти
+его можно через «Все» и поиск; в списке такие строки идут последними.
+
 ## Как продать в салоне
 
 1. «Салон» → впишите название, бренд или штрихкод в верхнее поле.
@@ -402,6 +411,17 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   product editor's grid uses the same rule now (`edStockLow()`); it used to
   redden at a flat «3 or fewer», in the code and in its own hint, which
   disagreed with the «Мало» chip one screen away.
+- `r.offSale` — «Показывать в магазине» is off, by whichever of the two
+  switches it is: `product_overrides.hidden` for a catalogue product,
+  `custom_products.active` for one of the owner's own. It comes off the server
+  (`getLevels()`), because only the server knows the second one — `shopHidden()`
+  reads `DEMO.hidden`, which is `product_overrides` and nothing else, so the
+  badge is drawn on either. The row keeps its «Скрыт» badge, its count, its
+  barcode and its ±, and drops out of «Мало», «Нет», `admLowCount()` and
+  `lowStockSummary()`; it sorts last. Before the flag, an OWN product switched
+  off fell out of `getLevels()`'s universe entirely — its count and its barcode
+  gone from the one screen that could correct them, while `byEan()` went on
+  finding the very same code for the scanner.
 - `admStockMovesHTML()` — the ledger sub-view (`S.stockMovesOpen`).
 - `admSalonHTML()` / `posSearchResultsHTML()` / `admPosReceiptHTML()` — the
   register, redesigned in phase 2 into two columns: a 52-h ink-bordered search

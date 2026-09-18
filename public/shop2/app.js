@@ -18144,12 +18144,18 @@
       to lowStock() — the manual «мало / нет» flag on the static catalogue —
       so the same badge said one thing before the shelf list arrived and a
       different one after, and neither said which. On a real panel there is
-      no number until the list is here (the same rule as «Ждут письма»). */
+      no number until the list is here (the same rule as «Ждут письма»).
+
+      `offSale` rows are out of it, and have to be: this badge is a count of
+      the «Мало» and «Нет» chips, which leave them out too (stockFiltered
+      below, getLevels in src/lib/inventory.ts). A product taken out of the
+      shop does not need reordering, and a badge saying «3» over a list of two
+      is worse than either number alone. */
   function admLowCount() {
     var rows = S.stockLevels;
     if (rows) {
       var n = 0;
-      for (var i = 0; i < rows.length; i++) if (rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) n++;
+      for (var i = 0; i < rows.length; i++) if (rows[i].tracked && !rows[i].offSale && (rows[i].state === "low" || rows[i].state === "out")) n++;
       return n;
     }
     return SRV.admin === true ? 0 : lowStock().length;
@@ -27308,8 +27314,17 @@
            магазине» keeps its count, its barcode and a working ± here while
            the shop drops it from the catalogue, the search and the sets and
            answers its page with 404. «Каталог» has always marked it; now so
-           does «Склад», with the same word and the same badge. */
-        (shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
+           does «Склад», with the same word and the same badge.
+
+           Both switches, and they come from two different places on purpose.
+           `r.offSale` is the server's answer (getLevels, src/lib/inventory.ts)
+           and is the only one that knows about custom_products.active —
+           shopHidden() reads DEMO.hidden, which is product_overrides and
+           nothing else. shopHidden() stays in front of it because it is the
+           LIVE one: flipping the switch in the editor repaints this badge at
+           once, while the shelf copy is whatever the last
+           /api/admin/inventory/ answer said. */
+        (r.offSale || shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
         // «один объём» is the editor's own word for a product with no sizes
         '<span class="adm-row__sz">' + (r.variant ? esc(r.variant) : "один объём") + "</span>" +
         '<span class="adm-step-qty">' +
@@ -27337,8 +27352,15 @@
     var words = q ? q.split(" ") : [];
     var f = S.stockFilter || "all";
     var rows = (S.stockLevels || []).filter(function (r) {
-      if (f === "low" && !(r.tracked && r.state === "low")) return false;
-      if (f === "out" && !(r.tracked && r.state === "out")) return false;
+      /* «Мало» and «Нет» are the reorder list, so a product that is not for
+         sale is not on it — the same rule the server applies to the same two
+         filters and to the assistant's low-stock answer (getLevels and
+         lowStockSummary, src/lib/inventory.ts). It is still findable under
+         «Все» and by search, badged «Скрыт». «Не учтено» keeps it: «which
+         shelves has nobody counted» is a fair question about a hidden product
+         too. */
+      if (f === "low" && !(r.tracked && !r.offSale && r.state === "low")) return false;
+      if (f === "out" && !(r.tracked && !r.offSale && r.state === "out")) return false;
       if (f === "untracked" && r.tracked) return false;
       if (!words.length) return true;
       var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
@@ -27347,6 +27369,11 @@
       return true;
     }).slice();
     rows.sort(function (a, b) {
+      /* This list is «what is running out» first, so the emptiest shelf is at
+         the top — and an off-sale product at 0 is not a shelf that is running
+         out, it is one that was put away on purpose. It would otherwise sit
+         above every bottle Renat actually has to reorder. */
+      if (!a.offSale !== !b.offSale) return a.offSale ? 1 : -1;
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
       return qa - qb;
     });

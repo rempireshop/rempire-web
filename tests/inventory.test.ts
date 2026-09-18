@@ -9,12 +9,13 @@ import {
   InventoryError,
   isTracked,
   listMoves,
+  lowStockSummary,
   move,
   productStockStates,
   setLevel,
   setQty,
 } from "@/lib/inventory";
-import { createCustomProduct } from "@/lib/custom-products";
+import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { createOrder, getOverrides, setOrderStatus, upsertOverride } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type OrderLike } from "@/lib/payments/apply";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
@@ -23,7 +24,14 @@ type Min = { id: string; b: string; n: string; c: string; p: number; s: string }
 const CATALOGUE = catalogueMin as Min[];
 const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number[] }>;
 
-const plain = CATALOGUE.find((p) => !VARIANTS[p.id])!;
+/* No size ladder — its shelf row is the unlabelled one — and something the
+   shop will still sell: two of the tests below put it through createOrder(),
+   which refuses an `s: "out"` product. Spelled out rather than left to the
+   catalogue's order: the pick used to land on a «low» product by luck, and
+   on 18.09.2026 the variants table gained the 29 one-size products and moved
+   it onto a sold-out wax, where the failure read «out_of_stock» and said
+   nothing about the fixture. */
+const plain = CATALOGUE.find((p) => p.s !== "out" && !VARIANTS[p.id])!;
 const sized = CATALOGUE.find((p) => VARIANTS[p.id] && VARIANTS[p.id].sizes.length > 1)!;
 
 /* A set made of two real products — one with no volumes, one bought at its
@@ -209,6 +217,80 @@ describe("inventory", () => {
       await move({ productId: own.id, delta: 5, reason: "goods_in", actor: "test" });
       const moves = await listMoves({ productId: own.id });
       expect(moves[0]).toMatchObject({ brand: "Kevin.Murphy", name: "Beard balm" });
+    });
+  });
+
+  /* ---- «Показывать в магазине» off, on either kind of product ------------
+   *
+   * Two switches mean «не в продаже»: product_overrides.hidden for a
+   * catalogue product and custom_products.active for one of the owner's own.
+   * They used to behave differently on the shelf for no stated reason. A
+   * hidden CATALOGUE product kept its «Склад» row and its «Скрыт» badge; an
+   * own product switched off fell out of the universe getLevels() builds
+   * (customUniverse() read only the active rows) and could not be rescued by
+   * the orphan-row loop either, since that loop only reaches a variant of a
+   * product some OTHER variant of which is listed. Its stock_levels row, its
+   * count and its barcode were simply gone from the one screen that could
+   * correct them — while byEan() went on answering the very same code, so the
+   * scanner found a bottle «Склад» swore did not exist.
+   *
+   * Both stay now, flagged `offSale`, and the flag is what keeps them out of
+   * the reorder list: «Мало», «Нет» and lowStockSummary() are the work the
+   * owner has to do, and a product he has taken out of the shop is not on it.
+   */
+  describe("a product taken off sale keeps its shelf, and stops nagging", () => {
+    it("keeps the owner's own product on «Склад» after «Показывать в магазине» goes off", async () => {
+      const own = await createCustomProduct({ brand: "Kevin.Murphy", name: "Beard balm", cat: "beard", price: 24 });
+      await setLevel(own.id, "", { ean: "4820000000017" });
+      await setQty(own.id, "", 3);
+      await setCustomProductActive(own.id, false);
+
+      const row = (await getLevels({ q: own.id })).find((r) => r.productId === own.id);
+      expect(row).toMatchObject({ variant: "", qty: 3, ean: "4820000000017", tracked: true, offSale: true });
+      // …and it is still the product, not a bare id: the name comes along for the row
+      expect(row).toMatchObject({ brand: "Kevin.Murphy", name: "Beard balm" });
+      // the scanner never stopped finding it; now the shelf agrees with the scanner
+      expect((await byEan("4820000000017"))?.productId).toBe(own.id);
+    });
+
+    it("marks a hidden CATALOGUE product the same way", async () => {
+      await setQty(plain.id, "", 4);
+      await upsertOverride(plain.id, { hidden: true });
+      const row = (await getLevels({ q: plain.id })).find((r) => r.productId === plain.id && r.variant === "");
+      expect(row).toMatchObject({ qty: 4, offSale: true });
+    });
+
+    it("leaves a product that is still on sale unflagged", async () => {
+      const own = await createCustomProduct({ brand: "Proraso", name: "Wax", cat: "styling", price: 9 });
+      await setQty(own.id, "", 1);
+      const rows = await getLevels({ q: own.id });
+      expect(rows.find((r) => r.productId === own.id)).toMatchObject({ qty: 1, offSale: false });
+    });
+
+    it("drops it out of «Мало», «Нет» and the assistant's low-stock list", async () => {
+      const own = await createCustomProduct({ brand: "Kevin.Murphy", name: "Beard balm", cat: "beard", price: 24 });
+      await setQty(own.id, "", 1); // low — the threshold defaults to 2
+      // a counted catalogue shelf, emptied: «Нет» while it is on sale
+      await move({ productId: plain.id, delta: 3, reason: "goods_in", actor: "test" });
+      await setQty(plain.id, "", 0);
+      expect((await getLevels({ filter: "low" })).map((r) => r.productId)).toContain(own.id);
+      expect((await getLevels({ filter: "out" })).map((r) => r.productId)).toContain(plain.id);
+
+      // …and now both of them go off sale, by their own switch each
+      await setCustomProductActive(own.id, false);
+      await upsertOverride(plain.id, { hidden: true });
+      expect((await getLevels({ filter: "low" })).map((r) => r.productId)).not.toContain(own.id);
+      expect((await getLevels({ filter: "out" })).map((r) => r.productId)).not.toContain(plain.id);
+      const nag = (await lowStockSummary()).map((r) => r.productId);
+      expect(nag).not.toContain(own.id);
+      expect(nag).not.toContain(plain.id);
+    });
+
+    it("still answers «which shelves has nobody counted» about it", async () => {
+      const own = await createCustomProduct({ brand: "Proraso", name: "Shave cream", cat: "beard", price: 12 });
+      await setCustomProductActive(own.id, false);
+      const untracked = (await getLevels({ filter: "untracked" })).map((r) => r.productId);
+      expect(untracked).toContain(own.id);
     });
   });
 
@@ -458,6 +540,29 @@ describe("inventory", () => {
       expect(row).toBeTruthy();
       expect(row?.tracked).toBe(false);
       expect(row?.qty).toBe(0);
+    });
+
+    /* Twenty-nine products are sold in exactly ONE named volume — Touchable is
+       «250 мл», and its product page has always printed it. Until 18.09.2026
+       tools/build-catalogue-variants.mjs dropped every ladder shorter than two
+       rungs, so catalogueUniverse() gave each of them an unlabelled «один
+       объём» row while the panel bound barcodes and wrote counts under the
+       label. Both rows were drawn — the empty one from the universe, the real
+       one from the orphan rescue below — which is where 351 rows for 322
+       barcodes came from. One product, one volume, one row. */
+    it("gives a product sold in one named volume that volume's row, and only it", async () => {
+      const single = CATALOGUE.find((p) => VARIANTS[p.id]?.sizes.length === 1)!;
+      expect(single, "no one-volume product in the catalogue — the check would be vacuous").toBeTruthy();
+      const label = VARIANTS[single.id].sizes[0];
+
+      /* Written the way the panel writes it: against the label the browser's
+         catalogue shows, which is the whole point of the pair agreeing. */
+      await move({ productId: single.id, variant: label, delta: 3, reason: "goods_in" });
+
+      const mine = (await getLevels({ q: single.id })).filter((r) => r.productId === single.id);
+      expect(mine.map((r) => r.variant)).toEqual([label]);
+      expect(mine[0].qty).toBe(3);
+      expect(mine[0].tracked).toBe(true);
     });
 
     it("filters to low/out/untracked", async () => {

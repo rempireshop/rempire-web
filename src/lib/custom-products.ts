@@ -507,7 +507,20 @@ export async function customMinByIds(ids: string[]): Promise<Map<string, MinWith
   return out;
 }
 
-/** Every active custom product in the checkout's shape — the inventory universe and the assistant's prompt. */
+/** Every active custom product in the checkout's shape — the assistant's prompt. */
 export async function listCustomMin(): Promise<MinWithVariants[]> {
   return (await listCustomProducts({ activeOnly: true })).map(toMin);
+}
+
+/**
+ * The same shape for the SHELF, and there the switched-off ones count too:
+ * `active` false means «not for sale», not «not on the shelf». Its stock row,
+ * its count and its barcode all still exist — byEan() goes on finding the
+ * code — so «Склад» has to go on listing it, or the one screen that could
+ * correct that count cannot see it (see getLevels() in src/lib/inventory.ts).
+ * The flag rides along so the shelf can mark the row «Скрыт», exactly as
+ * «Каталог» already marks it.
+ */
+export async function listCustomShelf(): Promise<Array<MinWithVariants & { active: boolean }>> {
+  return (await listCustomProducts()).map((p) => ({ ...toMin(p), active: p.active }));
 }
