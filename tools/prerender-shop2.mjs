@@ -1958,10 +1958,16 @@ await writeFile(path.join(PUB, "sitemap.xml"),
 /* /shop2/scan/ is the admin's standalone barcode scanner (docs/inventory.md),
    admin-only and useless without a session — it belongs on this list next to
    /shop2/admin/ for exactly the same reason. */
+/* The three at the end are ours, not the shop's: /test/ is the owner's
+   acceptance list, /guide/ the manual written for him, /golive/ the launch
+   checklist. Each carries a `noindex` meta of its own, which is the
+   authoritative half — this list is what keeps them out of the crawl in the
+   first place. They were missing until 19.09.2026, and the launch list is the
+   one that mattered: audit F18. */
 const NO_INDEX_PATHS = [
   "/shop2/admin", "/shop2/scan", "/shop2/checkout", "/shop2/cart", "/shop2/account", "/shop2/done", "/shop2/search",
   "/shop2/*/admin", "/shop2/*/scan", "/shop2/*/checkout", "/shop2/*/cart", "/shop2/*/account", "/shop2/*/done", "/shop2/*/search",
-  "/api/"
+  "/api/", "/test/", "/guide/", "/golive/"
 ];
 const CLOSED_BOTS = ["facebookexternalhit", "meta-externalagent", "WhatsApp", "Twitterbot", "LinkedInBot",
   "TelegramBot", "Slackbot-LinkExpanding", "Slackbot", "Discordbot", "Applebot", "SkypeUriPreview", "vkShare"];

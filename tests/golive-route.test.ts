@@ -313,19 +313,23 @@ describe("progress — counted the same way on both sides", () => {
 });
 
 describe("GET /api/golive/", () => {
-  it("hands the list to a reader with no session at all, gate and all", async () => {
+  it("hands a reader with no session nothing at all — not even the list", async () => {
+    /* This test asserted the opposite until 19.09.2026, and the route was
+       written to match: the list was public because the page had to work
+       before anyone signed in. Audit F18 read what the rows actually say —
+       which safeguards are unset and fail silently, that the live database is
+       the stand's, where the domain is registered — and that is not a list to
+       publish in launch week. The page's «before sign-in» case is its own
+       localStorage copy, which this route never had to feed. */
     const { GET } = await import("@/app/api/golive/route");
     const res = await GET(get());
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("forbidden");
     expect(body.signedIn).toBe(false);
-    expect(body.plan.items.length).toBe(PLAN.items.length);
-    expect(body.states).toEqual({});
-    /* The lock travels to a signed-out reader too, and it is the pessimistic
-       one: a stored mark can only ever move a row towards done. */
-    expect(body.gate.locked).toBe(true);
-    expect(body.gate.blockers.length).toBeGreaterThan(0);
+    expect(body.plan).toBeUndefined();
+    expect(body.states).toBeUndefined();
   });
 
   it("adds the marks once there is a session, and never before", async () => {
@@ -333,7 +337,7 @@ describe("GET /api/golive/", () => {
     await PUT(put({ states: { [FIRST.id]: { status: "doing", note: "видно только своим", at: "", by: "dim" } } }, admin));
 
     const anonymous = await (await GET(get())).json();
-    expect(anonymous.states).toEqual({});
+    expect(anonymous.states).toBeUndefined();
 
     const signedIn = await (await GET(get(admin))).json();
     expect(signedIn.signedIn).toBe(true);
@@ -379,6 +383,55 @@ describe("PUT /api/golive/", () => {
     const settings = await getSettings();
     expect(Object.keys(settings)).toEqual([STATES_KEY]);
     expect(await getGoliveStates()).toEqual(body.states);
+  });
+
+  /* The lock on phase B lived only in public/golive/index.html until
+     19.09.2026, so the terminal the route header invites — «a curl, a script,
+     Claude marking an item off» — could walk straight past the owner's one
+     rule. These three say the rule is the route's now. */
+  it("refuses to mark a phase-B row done while a blocking phase-A row is open", async () => {
+    const { PUT } = await import("@/app/api/golive/route");
+    const phaseB = PLAN.items.find((i) => phaseOf(i) === "b");
+    expect(phaseB).toBeDefined();
+    const res = await PUT(
+      put({ states: { [phaseB!.id]: { status: "done", note: "", at: "2026-09-17T10:00:00.000Z", by: "claude" } } }, admin),
+    );
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toBe("phase_b_locked");
+    expect(body.detail).toContain(phaseB!.id);
+    expect(body.gate.locked).toBe(true);
+    expect(await getGoliveStates()).toEqual({});
+  });
+
+  it("still takes a note on a phase-B row while it is locked — that is what a locked phase is for", async () => {
+    const { PUT } = await import("@/app/api/golive/route");
+    const phaseB = PLAN.items.find((i) => phaseOf(i) === "b")!;
+    const res = await PUT(
+      put({ states: { [phaseB.id]: { status: "todo", note: "ждём ключи", at: "2026-09-17T10:00:00.000Z", by: "dim" } } }, admin),
+    );
+    expect(res.status).toBe(200);
+    expect((await getGoliveStates())[phaseB.id].note).toBe("ждём ключи");
+  });
+
+  it("lets one body close the last phase-A row and open phase B in the same breath", async () => {
+    const { PUT } = await import("@/app/api/golive/route");
+    const phaseB = PLAN.items.find((i) => phaseOf(i) === "b")!;
+    const res = await PUT(
+      put(
+        {
+          states: {
+            ...allClear(),
+            [phaseB.id]: { status: "doing", note: "", at: "2026-09-17T10:00:00.000Z", by: "claude" },
+          },
+        },
+        admin,
+      ),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.gate.locked).toBe(false);
+    expect(body.states[phaseB.id].status).toBe("doing");
   });
 
   it("merges instead of replacing — Claude's terminal does not erase the owner's phone", async () => {

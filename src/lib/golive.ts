@@ -241,6 +241,13 @@ export function statusOfId(id: string, states: StateMap): Status | null {
   return item ? statusOf(item, states) : null;
 }
 
+/** The phase an id sits in, `""` for an id the list does not know. The route
+    needs this to hold the phase-B lock against a caller that is not the page. */
+export function phaseOfId(id: string): string {
+  const item = ITEM_BY_ID.get(id);
+  return item ? phaseOf(item) : "";
+}
+
 /** The ids in `item.needs` that are not done yet — what is holding this row,
     named. Empty for a row nothing is waiting on. */
 export function holdUps(item: GoliveItem, states: StateMap): string[] {

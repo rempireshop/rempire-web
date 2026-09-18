@@ -51,6 +51,9 @@ type Report = {
   guard: { live: Money; paid: Money; orphan: Money; blocked: boolean };
   look: {
     consents: Array<{ email: string; source: string; at: string }>;
+    quiet: Array<{ email: string; at: string }>;
+    quietTotal: number;
+    alerts: string[];
     approvedReviews: number;
     stockMoves: Array<{ reason: string; n: number }>;
     invoicedOrders: number;
@@ -331,6 +334,23 @@ describe("dry run", () => {
     expect(text).toContain("mail_optouts is NOT touched");
     expect(text).toContain("goods_in 1");
     expect(text).toContain("sale_web 1");
+  });
+
+  it("names the people it deletes who never gave consent, not only the ones who did", async () => {
+    /* The consent list answers «whose permission am I throwing away». This
+       answers «who am I deleting», and it is the bigger set: the owner's own
+       rule for the Shopify import is that a customer arrives with NO marketing
+       consent, which is not opted out. Before 19.09.2026 the dry run selected
+       `marketing = true` and nothing else, so a real account with no consent
+       went silently (audit F47). */
+    const report = await run({});
+    expect(report.look.quiet.map((c) => c.email)).toContain("guest.test@example.com");
+    expect(report.look.quietTotal).toBeGreaterThanOrEqual(1);
+    expect(report.look.consents.map((c) => c.email)).not.toContain("guest.test@example.com");
+
+    const text = formatReport(report, {});
+    expect(text).toContain("customers WITHOUT marketing consent, also deleted");
+    expect(text).toContain("guest.test@example.com");
   });
 
   it("warns that --stock takes the hand-scanned barcodes with it", async () => {

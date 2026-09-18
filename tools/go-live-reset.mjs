@@ -502,6 +502,26 @@ async function eyeballs(db) {
     `select email, marketing_source, to_char(marketing_at, 'YYYY-MM-DD') as marketing_day
        from customers where marketing = true order by email limit 50`,
   );
+  /* Everybody ELSE this run deletes. The consent list above answers «whose
+     permission am I throwing away», which is not the same question as «who am
+     I deleting» — and the second one has the bigger answer, because a customer
+     who never ticked the box is still a real person with a real account. The
+     owner's own rule for the Shopify import says exactly that: an imported
+     customer arrives with NO marketing consent, which is not opted out. Until
+     19.09.2026 those rows were invisible in the dry run by construction: it
+     selected `marketing = true` and nothing else. Audit F47. */
+  const quiet = await rows(
+    db,
+    `select email, to_char(created_at, 'YYYY-MM-DD') as created_day
+       from customers where marketing is distinct from true order by email limit 50`,
+  );
+  const quietTotal = await one(db, "select count(*)::int as n from customers where marketing is distinct from true");
+  /* «Сообщите, когда появится» — an address someone typed to be told about one
+     bottle. It was printed as a bare count and deleted with everything else. */
+  const alerts = await rows(
+    db,
+    "select distinct email from stock_alerts where email is not null order by email limit 50",
+  );
   const approved = await one(db, "select count(*)::int as n from reviews where status = 'approved'");
   const stockMoves = await rows(
     db,
@@ -519,6 +539,12 @@ async function eyeballs(db) {
       source: r.marketing_source == null ? "" : String(r.marketing_source),
       at: r.marketing_day == null ? "" : String(r.marketing_day),
     })),
+    quiet: quiet.map((r) => ({
+      email: String(r.email),
+      at: r.created_day == null ? "" : String(r.created_day),
+    })),
+    quietTotal: Number(quietTotal.n || 0),
+    alerts: alerts.map((r) => String(r.email)),
     approvedReviews: Number(approved.n || 0),
     stockMoves: stockMoves.map((r) => ({ reason: String(r.reason), n: Number(r.n) })),
     invoicedOrders: Number(invoices.n || 0),
@@ -692,8 +718,21 @@ export async function goLiveReset(db, opts = {}) {
     ].filter(Boolean));
   }
 
-  await db.query("begin");
+  /* REPEATABLE READ, and the before-picture is taken INSIDE it.
+     Until 19.09.2026 `before` was the snapshot taken above, outside any
+     transaction, and `verify()` compared it with an after-picture taken
+     inside. Anything that committed in between — the owner signing in, which
+     writes one admin_audit row; Dim ticking an item on /golive/ from his
+     phone while the tool runs; any setting saved — made a KEEP table «change
+     size» and rolled the whole clear back with «NOTHING WAS CHANGED». Safe,
+     but on the morning of the launch it reads as a failure of the tool rather
+     than as somebody having touched the panel (audit F46). With one snapshot
+     for the whole transaction, both pictures are of the same instant and the
+     comparison means what it says. */
+  await db.query("begin isolation level repeatable read");
   try {
+    const beforeTx = await snapshot(db, settingsKeysGoing);
+
     for (const t of DELETE_ORDER) await db.query(`delete from ${t}`);
     if (stock) for (const t of STOCK_ORDER) await db.query(`delete from ${t}`);
 
@@ -728,7 +767,7 @@ export async function goLiveReset(db, opts = {}) {
 
     const after = await snapshot(db, settingsKeysGoing);
     report.after = after;
-    const problems = verify(before, after, { stock });
+    const problems = verify(beforeTx, after, { stock });
     if (problems.length) {
       await db.query("rollback");
       report.after = null;
@@ -853,6 +892,14 @@ export function formatReport(report, { url } = {}) {
   L.push(`  orders carrying an invoice number: ${report.look.invoicedOrders}`);
   L.push(`  customers with marketing = true: ${report.look.consents.length}${report.look.consents.length === 50 ? "+ (first 50)" : ""}`);
   for (const c of report.look.consents) L.push(`      ${c.email}${c.source ? `  (${c.source}${c.at ? ", " + c.at : ""})` : ""}`);
+  /* Printed with the same weight as the consents, because deleting somebody
+     who never agreed to anything is still deleting somebody. */
+  L.push(`  customers WITHOUT marketing consent, also deleted: ${report.look.quietTotal}${report.look.quiet.length === 50 ? " (first 50 shown)" : ""}`);
+  for (const c of report.look.quiet) L.push(`      ${c.email}${c.at ? `  (${c.at})` : ""}`);
+  if (report.look.alerts.length) {
+    L.push(`  «сообщите, когда появится» addresses, also deleted: ${report.look.alerts.length}${report.look.alerts.length === 50 ? "+ (first 50)" : ""}`);
+    for (const e of report.look.alerts) L.push(`      ${e}`);
+  }
   L.push("  Their consent is deleted with them. If one of these is a real person, they must tick the box again.");
   L.push("  mail_optouts is NOT touched: a refusal outlives the account it was given from.");
   L.push("");

@@ -403,10 +403,10 @@
       "Бесплатно": "Tasuta", "Бесплатная доставка применена ✓": "Tasuta tarne rakendatud ✓",
       "Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek aadressil Mardi 1. Tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Оплата через банк — данные карты магазин не видит": "Makse toimub panga kaudu — pood ei näe kaardiandmeid",
-      "14 дней на возврат по закону ЕС": "14-päevane tagastusõigus EL-i seaduse järgi",
+      "30 дней на возврат": "30-päevane tagastusõigus",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
-      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-päevane tagastusõigus EL-i seaduse järgi. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
-      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-päevane tagastusõigus EL-i seaduse järgi. Särki võib proovida ja tagastada, kui see ei sobi.",
+      "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-päevane tagastusõigus. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
+      "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-päevane tagastusõigus. Särki võib proovida ja tagastada, kui see ei sobi.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Päris poes tuleb siia tellimuse number, arve e-postile ja paki jälgimisnumber.",
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel.",
       "Добавлено в корзину ✓": "Lisatud ostukorvi ✓",
@@ -2775,8 +2775,8 @@
         "Tarneajad on vedajate hinnang; jälgimisnumber tuleb kirjaga, kui pakk on vedajale üle antud.",
       "Код карты вводится в корзине — в поле «Промокод или подарочная карта».": "Kaardi kood sisestatakse ostukorvis — väljale „Sooduskood või kinkekaart“.",
       "Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.": "Makse toimub Montonio turvalisel lehel — pood kaardiandmeid ei näe.",
-      "У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
-        "Teil on kättesaamisest 14 päeva, et tagastada kasutamata toode originaalpakendis — põhjust selgitamata.",
+      "У вас есть 30 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
+        "Teil on kättesaamisest 30 päeva, et tagastada kasutamata toode originaalpakendis — põhjust selgitamata.",
       "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
         "Kirjutage meile e-kiri koos tellimuse numbriga — saadame juhised ja aadressi; raha tagastame samal viisil 10 tööpäeva jooksul pärast kontrolli.",
       "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
@@ -3213,10 +3213,10 @@
       "Бесплатно": "Free", "Бесплатная доставка применена ✓": "Free delivery applied ✓",
       "Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. Your order waits 7 days, then €1.50 per day.",
       "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
-      "14 дней на возврат по закону ЕС": "14-day returns under EU law",
+      "30 дней на возврат": "30-day returns",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
-      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-day returns under EU law. Opened cosmetics cannot be returned for hygiene reasons.",
-      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-day returns under EU law. You can try the tee on and return it if it doesn't fit.",
+      "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-day returns. Opened cosmetics cannot be returned for hygiene reasons.",
+      "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-day returns. You can try the tee on and return it if it doesn't fit.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed once the contracts are signed.",
       "Добавлено в корзину ✓": "Added to cart ✓",
@@ -5551,8 +5551,8 @@
         "Times are the carriers' estimates; the tracking number arrives by e-mail once the parcel is handed over.",
       "Код карты вводится в корзине — в поле «Промокод или подарочная карта».": "Enter the card code in the cart — in the “Promo code or gift card” field.",
       "Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.": "Payment happens on Montonio's secure page — the shop never sees your card details.",
-      "У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
-        "You have 14 days from receipt to return an unused item in its original packaging — no reason needed.",
+      "У вас есть 30 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
+        "You have 30 days from receipt to return an unused item in its original packaging — no reason needed.",
       "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
         "E-mail us with the order number — we send the instructions and the address; the refund goes back the same way within 10 working days after the check.",
       "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Opened cosmetics cannot be returned, for reasons of hygiene.",
@@ -7272,7 +7272,7 @@
         : "") +
       "</ul>" +
       '<p class="dlv__note">' + t("Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.") + "</p>";
-    var returns = "<p>" + t("У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.") + " " +
+    var returns = "<p>" + t("У вас есть 30 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.") + " " +
       t("Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.") + " " +
       t("Вскрытая косметика возврату не подлежит по гигиеническим причинам.") + "</p>" +
       "<p>" + ctx.link("returns", tr("Полные условия возврата")) + "</p>";
@@ -12269,16 +12269,16 @@
           (descFor(p)
             ? acc("Описание", '<div class="acc__rich">' + descFor(p) + "</div>") +
               (p.cat === "merch"
-                ? acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.")
-                : acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
+                ? acc("Доставка и возврат", "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.")
+                : acc("Доставка и возврат", "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
             : p.cat === "merch"
             ? acc("Описание", "Фирменная футболка Rempire с принтом нашего художника. Плотный хлопок, печать держит стирку.") +
               acc("Размеры и уход", "Стирать при 30° наизнанку, не сушить в машине, гладить не по принту. Сомневаетесь в размере — берите больший.") +
-              acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.")
+              acc("Доставка и возврат", "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.")
             : acc("Описание", "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.") +
               acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
               acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
-              acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.")) +
+              acc("Доставка и возврат", "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.")) +
           /* Only real reviews. The deterministic demo pool that used to render
              here (public/shop/reviews-pool.js) was invented text on a selling
              page — an EU Omnibus / consumer-protection problem, not a cosmetic
@@ -16723,7 +16723,7 @@
           "</section>" +
           '<ul class="cotrust">' +
             "<li>Оплата через банк — данные карты магазин не видит</li>" +
-            "<li>14 дней на возврат по закону ЕС</li>" +
+            "<li>30 дней на возврат</li>" +
             (cQuestionsLine() ? "<li>" + cQuestionsLine() + "</li>" : "") +
           "</ul>" +
         "</div>" +
