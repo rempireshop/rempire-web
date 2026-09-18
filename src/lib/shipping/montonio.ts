@@ -1307,6 +1307,108 @@ export async function releaseShipmentSlot(orderId: string): Promise<void> {
   await saveShipmentOnOrder(orderId, { bookingAt: null });
 }
 
+/* ---------- what this store is actually signed up for --------------------- */
+
+/** One row of `GET /carriers`, reduced to what a readiness screen needs. */
+export interface MontonioCarrierContract {
+  code: string;
+  name: string;
+  /** «hasMontonioContract» — the carrier is available on Montonio's own deal. */
+  montonioContract: boolean;
+  /** Countries the shop has its OWN contract for — `contracts[].country`. */
+  ownCountries: string[];
+}
+
+/**
+ * `GET /carriers` — which carriers this store may actually book with.
+ *
+ * The same endpoint `fetchMontonioCarriers()` above reads for the checkout's
+ * logos, and a separate function on purpose: this one is **uncached** (a
+ * readiness screen wants today's answer, not one from six hours ago) and it
+ * keeps the two fields the logo reader throws away — which is also why they
+ * are not simply added to `MontonioCarrier`, whose shape is served to every
+ * shopper by `GET /api/shipping/carriers/`. What this store is contracted for
+ * is the owner's business, not the storefront's.
+ *
+ * Unlike the payments side, the shipping API *does* answer the activation
+ * question, and it answers it twice over: `hasMontonioContract` says the
+ * carrier is reachable on Montonio's own agreement, and `contracts[]` lists
+ * the shop's own per-country deals. A carrier the checkout offers and this
+ * list does not name is a booking that will fail on the first live order.
+ *
+ * Read-only, admin-only, and `null` — never a throw — on anything, like every
+ * other probe: a readiness screen that cannot load must say «не смогли
+ * спросить», not take the shop down.
+ */
+export async function fetchMontonioCarrierContracts(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<MontonioCarrierContract[] | null> {
+  const config = montonioShippingConfig(env);
+  if (!config) return null;
+  try {
+    const body = await call<{
+      carriers?: Array<{
+        code?: unknown;
+        name?: unknown;
+        hasMontonioContract?: unknown;
+        contracts?: Array<{ country?: unknown }> | null;
+      }>;
+    }>(config, "/carriers");
+    const rows = Array.isArray(body.carriers) ? body.carriers : [];
+    return rows
+      .map((c) => ({
+        code: str(c.code).toLowerCase(),
+        name: str(c.name) || str(c.code),
+        montonioContract: c.hasMontonioContract === true,
+        ownCountries: (Array.isArray(c.contracts) ? c.contracts : [])
+          .map((x) => str(x?.country).toUpperCase())
+          .filter(Boolean),
+      }))
+      .filter((c) => !!c.code);
+  } catch (err) {
+    console.error("[montonio shipping] GET /carriers —", err);
+    return null;
+  }
+}
+
+/** One registered webhook — `GET /webhooks` returns them under `data`. */
+export interface MontonioWebhook {
+  id: string;
+  url: string;
+  events: string[];
+}
+
+/**
+ * `GET /webhooks` — whether Montonio has been told where to send parcel events.
+ *
+ * This one is registered **by hand**, unlike the payment webhook whose
+ * `notificationUrl` rides on every order (docs/shipping.md). Nothing in this
+ * shop can tell that it was forgotten: parcels book, labels print, and the
+ * orders simply never close by themselves. So the panel asks.
+ *
+ * `null` — never a throw — on anything.
+ */
+export async function fetchMontonioWebhooks(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<MontonioWebhook[] | null> {
+  const config = montonioShippingConfig(env);
+  if (!config) return null;
+  try {
+    const body = await call<{
+      data?: Array<{ id?: unknown; url?: unknown; enabledEvents?: unknown }>;
+    }>(config, "/webhooks");
+    const rows = Array.isArray(body.data) ? body.data : [];
+    return rows.map((w) => ({
+      id: str(w.id),
+      url: str(w.url),
+      events: Array.isArray(w.enabledEvents) ? w.enabledEvents.map((e) => str(e)).filter(Boolean) : [],
+    }));
+  } catch (err) {
+    console.error("[montonio shipping] GET /webhooks —", err);
+    return null;
+  }
+}
+
 /** What we stored earlier for this order, if anything. */
 export function shipmentOnOrder(order: Order): (MontonioShipment & Record<string, unknown>) | null {
   const raw = (order.shipping as unknown as { montonio?: unknown } | null)?.montonio;
