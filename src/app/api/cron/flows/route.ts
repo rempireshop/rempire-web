@@ -2,9 +2,19 @@
  * GET /api/cron/flows — the only scheduled job the shop has.
  *
  * Runs the three automatic letters (`src/lib/flows.ts`) and answers with what
- * it did. Idempotent: every send stamps its row before the letter leaves, so
- * calling this twice in a minute sends nothing twice, and a missed run catches
- * up on the next one.
+ * it did. Calling it twice in a minute sends nothing twice, and a missed run
+ * catches up on the next one.
+ *
+ * What makes that true is worth naming exactly, because the answer is not the
+ * one this comment used to give. The row stamps (`reminded_at`,
+ * `birthday_sent_year`, `unpaidRemindedAt`) are unconditional updates AFTER a
+ * shared SELECT, so two overlapping runs both select the same rows. The thing
+ * that stops the second letter is the `Idempotency-Key` on the send itself
+ * (`src/lib/mail.ts`: `cart:<id>`, `bday:<id>:<year>`, `stock:<id>`,
+ * `unpaid:<number>`) and Resend's 24-hour window behind it. The unpaid CANCEL
+ * is genuinely atomic — it goes through setOrderStatus()'s `unless` guard. At
+ * 3-5 orders a month none of this bites; it is written down so the next person
+ * does not lean on a guarantee we do not have (audit F48).
  *
  * Auth is a shared secret in the header:
  *

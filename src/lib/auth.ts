@@ -244,6 +244,17 @@ export function resetRateLimits(): void {
  * mechanism; the exact constants matter much less than the fact that one side
  * is flat and the other is exponential.
  *
+ * WHAT «three guesses a minute» ACTUALLY BOUNDS, corrected 19.09.2026 (audit
+ * F45): one connection, not one attacker. The delay is read BEFORE the
+ * password is checked and the failure row is written AFTER it, and there is
+ * deliberately no 429 — so *k* requests sent in parallel each read the same
+ * count, each wait the same ≤ 20 s, and each is one guess: *k* × 3 a minute.
+ * What actually caps a parallel attacker is scrypt's ~100 ms of CPU per guess
+ * and the platform's concurrency, not this ladder. The ladder buys time
+ * against a sequential guesser and keeps the owner out of a lockout; the real
+ * protection is a password long enough not to be guessed. `tests/auth.test.ts`
+ * measures sequential attempts only, which is why this went unnoticed.
+ *
  * THE CEILING IS A HARD REQUIREMENT, not a preference. The wait happens inside
  * the request, so a delay longer than the platform's function budget does not
  * throttle anybody — it just kills the function and answers 500. LOGIN_DELAY_MAX_MS

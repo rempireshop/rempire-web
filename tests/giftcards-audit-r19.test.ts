@@ -8,7 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
 import {
   getGiftCard,
@@ -82,6 +82,25 @@ beforeEach(async () => {
 });
 
 /* ---------- 1. a promo code must not discount a gift card ---------------- */
+
+describe("the harness itself", () => {
+  it("has stubbed fetch, so a paid order's gift-card PDF never leaves this machine", async () => {
+    /* `setFuzzEnv()` hands the shop an R2 account, a mail key and an OpenAI
+       key. Every test in this file settles a paid order carrying a gift card,
+       which reaches storeGiftCardPdf() → putObject() → a genuinely signed PUT
+       to https://fuzz-account.r2.cloudflarestorage.com — awaited by the route,
+       with no timeout on it. This file set the env and never installed the
+       stub, so on every run, including CI, that request really went out; it
+       only looked harmless because the host refuses the TLS handshake at once
+       (audit F50). The stub belongs to the env now, and this is the assertion
+       that says so. */
+    const { unexpectedFetches } = await import("./fuzz-harness");
+    expect(vi.isMockFunction(globalThis.fetch), "fetch is not stubbed — setFuzzEnv() no longer installs it").toBe(true);
+    const res = await fetch("https://fuzz-account.r2.cloudflarestorage.com/gift/x.pdf", { method: "PUT" });
+    expect(res.status).toBe(200);
+    expect([...unexpectedFetches], "a host the stub does not know").toEqual([]);
+  });
+});
 
 describe("a promo code and a gift card in one basket", () => {
   const goods = { lang: "RU", customer: CUSTOMER, shipping: { method: "pickup", country: "EE" } };

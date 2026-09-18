@@ -305,6 +305,36 @@ const marker = (id: string) =>
 const liveMarker = (id: string) =>
   el("A", { "data-product": id, "data-price": "live", href: "/shop2/p/" + id + "/" }, [text("Proraso Beard Oil")]);
 
+describe("the two sanitisers are one rule", () => {
+  /* There are two: `src/lib/blog-html.mjs`, which the server and the build run,
+     and `blogCleanNode()` in app.js, a DOMParser version with no build step
+     that genuinely cannot share the code. A deliberate twin still has to agree,
+     and it has drifted three times — once silently stripping the owner's
+     picture presets from every prerendered article for months, because nothing
+     ever fed one body through both. `XML` was the live half of it on
+     19.09.2026: on the server list, missing from the client's, so a bare <xml>
+     block kept its text in the editor preview and lost it in the saved
+     article (audit F36). Comparing the tables is what stops the next one. */
+  const serverSrc = readFileSync(
+    fileURLToPath(new URL("../src/lib/blog-html.mjs", import.meta.url)),
+    "utf8",
+  ).replace(/\r\n?/g, "\n");
+
+  it("drops exactly the same tags on both sides", () => {
+    const serverList = serverSrc.slice(serverSrc.indexOf("const HTML_DROP = new Set(["));
+    const server = new Set(
+      (serverList.slice(0, serverList.indexOf("]")).match(/"([a-z]+)"/g) ?? []).map((q) =>
+        q.replace(/"/g, "").toUpperCase(),
+      ),
+    );
+    const client = new Set(
+      Object.keys(new Function(`${sliceVar("BLOG_TAGS_DROP")} return BLOG_TAGS_DROP;`)() as Record<string, number>),
+    );
+    expect(server.size).toBeGreaterThan(5);
+    expect([...client].sort()).toEqual([...server].sort());
+  });
+});
+
 describe("an inline product card on the storefront", () => {
   it("becomes the live card while the product is on the shelf", () => {
     expect(clean(marker(OIL), { cards: true, live: [OIL] })).toBe(`<button data-go-product="${OIL}"></button>`);

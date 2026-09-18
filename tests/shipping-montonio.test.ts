@@ -921,8 +921,19 @@ describe("creating a shipment", () => {
     expect(splitPhone("0048 512 345 678", "PL")).toEqual({ phoneCountryCode: "48", phoneNumber: "512345678" });
     // the longest code wins: 372 is a country, 37 is not
     expect(splitPhone("+37258107505", "DE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
-    // …and a "+" number whose code we do not know keeps the destination's
-    expect(splitPhone("+9715551234", "DE")).toEqual({ phoneCountryCode: "49", phoneNumber: "9715551234" });
+    /* The codes a customer of this shop plausibly carries are split too, even
+       though the shop does not DELIVER to those countries — somebody standing
+       in Tallinn with a Russian, Ukrainian or Emirati number is an ordinary
+       customer. Until 19.09.2026 this line asserted the opposite and was the
+       fallback written in as the contract: «+971 555 1234» to Germany became
+       `49 / 9715551234`, which Montonio answers with registrationFailed, or
+       the carrier texts the collection code to nobody (audit F22). */
+    expect(splitPhone("+9715551234", "DE")).toEqual({ phoneCountryCode: "971", phoneNumber: "5551234" });
+    expect(splitPhone("+7 999 123-45-67", "EE")).toEqual({ phoneCountryCode: "7", phoneNumber: "9991234567" });
+    expect(splitPhone("+380 67 123 4567", "EE")).toEqual({ phoneCountryCode: "380", phoneNumber: "671234567" });
+    expect(splitPhone("+375 29 123 45 67", "EE")).toEqual({ phoneCountryCode: "375", phoneNumber: "291234567" });
+    // …and a code nobody here has ever dialled still keeps the destination's
+    expect(splitPhone("+2995551234", "DE")).toEqual({ phoneCountryCode: "49", phoneNumber: "2995551234" });
   });
 
   /**

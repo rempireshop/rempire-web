@@ -325,8 +325,23 @@ export function setFuzzEnv(): () => void {
   process.env.ADMIN_PASSWORD_HASH = hashPassword("a long enough password");
   for (const [k, v] of Object.entries(FUZZ_ENV)) process.env[k] = v;
   for (const k of FUZZ_ENV_OFF) delete process.env[k];
+  /* The env and the stub are one thing, and pretending otherwise cost us real
+     network calls. These variables tell the shop it HAS an object store, a
+     mail service and an OpenAI key; `installFetchStub()` is the only reason
+     that is safe. Nine files set the env and never installed the stub, so a
+     paid order carrying a gift card reached storeGiftCardPdf() → putObject()
+     and made a genuinely signed PUT to https://fuzz-account.r2.cloudflarestorage.com,
+     awaited, with no timeout. It is green here only because that host refuses
+     the TLS handshake at once; on a network that drops the connection instead,
+     the test waits for the TCP timeout and trips the 30 s testTimeout — the
+     best candidate for the intermittent failure nobody could reproduce
+     (audit F50). A file that wants its own answers still stubs fetch after
+     this and wins, as flows-run and payments-refund do.
+     Restoring puts the globals back too, so the stub's life is the env's. */
+  installFetchStub();
   return () => {
     for (const [k, v] of saved) setEnv(k, v);
+    vi.unstubAllGlobals();
   };
 }
 

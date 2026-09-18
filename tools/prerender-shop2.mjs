@@ -357,8 +357,12 @@ function blogOffSale(id) {
    copy here that would quietly drift, lift the four declarations and the two
    functions that use them straight out of the source and evaluate them: they
    are plain literals and pure functions. If app.js is ever reshaped so the
-   slices no longer come out, the tool says so and falls back to Russian for
-   all three languages instead of writing wrong text. */
+   slices no longer come out, the tool REFUSES TO WRITE: process.exit(1), no
+   pages at all. It used to fall back to Russian for all three languages, and
+   that is how 542 Estonian and English pages were once written in Russian
+   behind one warning and an exit code of 0 — the whole reason the guard below
+   exists. The delivery-page and returns-paragraph lifts further down still
+   warn and fall back, and are meant to (audit F43). */
 
 const appSrc = await readFile(path.join(SHOP2, "app.js"), "utf8");
 // the file is CRLF on disk; the anchors below are end-of-line exact
@@ -1265,6 +1269,10 @@ function infoPage(slug, lang) {
       montonio: DELIVERY.montonio,
       address: c.address, hoursHTML: contactHours(code), phoneHTML, mailHTML,
       logos: PAYLOGOS, banks: null, loyalty: LOYALTY_LIVE,
+      /* No `invoiceHint`: the payment term is settings.invoice.dueDays and this
+         build reads no settings, so the page keeps the default seven days and
+         app.js rewrites the line with the real figure the moment it boots. The
+         shop passes it; we deliberately do not. */
       link: (s, label) => '<a href="' + href(seg, infoRest(s)) + '">' + esc(label) + "</a>",
       legalHtml: body
     });

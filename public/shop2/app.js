@@ -7332,7 +7332,7 @@
       payRow(bankLogo, "Банковская ссылка", "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке") +
       payRow((logos.visa || "") + (logos.mastercard || ""), "Банковская карта", "Visa, Mastercard") +
       payRow((logos.applepay || "") + (logos.gpay || ""), "Apple Pay / Google Pay", "Оплата в одно касание") +
-      payRow(ICON_INVOICE, "По счёту — для компаний", "Счёт на почту, оплата в течение 7 дней") +
+      payRow(ICON_INVOICE, "По счёту — для компаний", ctx.invoiceHint || "Счёт на почту, оплата в течение 7 дней") +
       payRow(ICON_GIFT, "Подарочная карта", "Код карты вводится в корзине — в поле «Промокод или подарочная карта».") +
       (ctx.loyalty && ctx.loyalty.enabled
         ? payRow(ICON_POINTS, "Баллы", "Начисляем " + ctx.loyalty.earnPct + " % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе.")
@@ -11258,7 +11258,12 @@
   }
   var BLOG_TAGS_DROP = {
     SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, NOSCRIPT: 1,
-    TEMPLATE: 1, SVG: 1, MATH: 1, HEAD: 1, TITLE: 1
+    /* XML is on the server list (HTML_DROP in src/lib/blog-html.mjs) and was
+       missing here, so a bare <xml> block kept its text in the editor preview
+       and lost it in the saved article. Small on its own; the point is that
+       the two lists are one rule, and this is the third time the twin has
+       drifted (audit F36). */
+    TEMPLATE: 1, SVG: 1, MATH: 1, HEAD: 1, TITLE: 1, XML: 1
   };
   /* Blocks that are worth dropping when they came out empty — a Word paste
      is full of <p>&nbsp;</p>. A <p><br></p> is NOT empty: that is the blank
@@ -12134,6 +12139,12 @@
         address: c.company.address, hoursHTML: cHoursRows(), phoneHTML: cPhoneHTML(), mailHTML: cMailHTML(),
         logos: typeof PAYLOGOS !== "undefined" ? PAYLOGOS : {}, banks: PAYMETHODS.banks,
         loyalty: LOYALTY_PUBLIC,
+        /* The payment term is a SETTING (settings.invoice.dueDays) and was
+           printed here as a constant «7 дней», so a shop that had changed it
+           contradicted its own checkout and its own invoice. The build cannot
+           read settings, so it passes nothing and keeps the default — see the
+           note beside its own call in tools/prerender-shop2.mjs. */
+        invoiceHint: invoiceHint(),
         link: function (slug, label) { return '<button class="link" data-page="' + slug + '">' + label + "</button>"; },
         legalHtml: legalHtml
       }) +
@@ -22295,7 +22306,11 @@
       '<div class="adm-sec__t" style="margin-top:24px">Оплата</div>' +
       '<div class="adm-list">' + PAYS.map(function (p) {
         return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + p.l + "</span>" +
-          '<span class="adm-row__sub">' + p.h + "</span></span>" +
+          /* The same resolution the checkout makes at :16625. `p.h` is the
+             default seven days; the real term is settings.invoice.dueDays, and
+             a screen headed «Так увидит клиент» that prints a different number
+             from the one the client sees is worse than no screen. */
+          '<span class="adm-row__sub">' + (p.k === "invoice" ? invoiceHint() : p.h) + "</span></span>" +
           '<span class="adm-badge adm-badge--ok">включено</span></div>';
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +

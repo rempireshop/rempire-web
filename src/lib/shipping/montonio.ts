@@ -940,6 +940,32 @@ const DEFAULT_PHONE_PREFIX = "372";
 const BARE_PREFIXES = ["372", "371", "370", "358"];
 
 /**
+ * The calling codes an **explicitly international** number is split on.
+ *
+ * Wider than PHONE_PREFIX on purpose. That table is the thirty-two countries
+ * the shop DELIVERS to, and until 19.09.2026 it was also the whole of what a
+ * "+…" number was scanned for — so a Russian, Ukrainian or Belarusian mobile
+ * typed by a customer standing in Tallinn found no match and was booked as
+ * `372 79991234567`: the destination's code with the foreign one still inside
+ * the subscriber number. Montonio answers that with `registrationFailed`, or
+ * the carrier sends its collection SMS to nobody (audit F22). The shop sells
+ * to Estonia; the people who live there do not all carry Estonian numbers.
+ *
+ * Still not exhaustive — there are some two hundred of these — and it does not
+ * need to be: a country nobody here has ever dialled falls through to the
+ * destination's code exactly as before, which is no worse than it was. What is
+ * listed is everywhere a customer of this shop plausibly carries a number
+ * from. Longest match wins, so "372" is never read as "37".
+ */
+const INTL_EXTRA_PREFIXES = [
+  "7", "380", "375", "373", "995", "374", "994", "998", "996", "992", "993",
+  "1", "90", "972", "971", "966", "20", "355", "376", "377", "378", "381",
+  "382", "383", "387", "389", "212", "216", "234", "254", "27", "51", "52",
+  "54", "55", "56", "57", "58", "60", "61", "62", "63", "64", "65", "66",
+  "81", "82", "84", "86", "91", "92", "94", "98",
+];
+
+/**
  * Montonio wants the country code and the rest of the number in two fields.
  *
  * A number written internationally ("+49 151 23456789", "0049 151 …") is split
@@ -964,7 +990,7 @@ export function splitPhone(raw: unknown, country: string): {
 
   if (international) {
     let best = "";
-    for (const cc of Object.values(PHONE_PREFIX)) {
+    for (const cc of [...Object.values(PHONE_PREFIX), ...INTL_EXTRA_PREFIXES]) {
       if (cc.length > best.length && digits.startsWith(cc) && digits.length - cc.length >= 4) best = cc;
     }
     if (best) return { phoneCountryCode: best, phoneNumber: digits.slice(best.length) };
