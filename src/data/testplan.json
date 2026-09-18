@@ -2926,6 +2926,45 @@
       }
     },
     {
+      "id": "order-onway-chip",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«В пути»: сколько посылок сейчас едет",
+      "steps": [
+        "Открыть «Заказы» и посмотреть на чип «В пути».",
+        "Нажать его и пересчитать заказы в списке.",
+        "Найти в «Все» заказ со значком «Доставлен» и вернуться в «В пути»."
+      ],
+      "expect": [
+        "У «В пути» стоит число.",
+        "Заказов в списке ровно столько, сколько написано на чипе.",
+        "Все они со значком «Отправлен».",
+        "Доставленного заказа в этом списке нет — он остался в «Все»."
+      ],
+      "why": "Это ваш список «где посылка»: закрытые заказы в нём только мешают считать.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-18T17:10:00.000Z",
+      "en": {
+        "title": "«В пути»: how many parcels are travelling now",
+        "steps": [
+          "Open «Заказы» and look at the «В пути» chip.",
+          "Press it and count the orders in the list.",
+          "Find an order badged «Доставлен» under «Все», then go back to «В пути»."
+        ],
+        "expect": [
+          "«В пути» carries a number.",
+          "The list holds exactly as many orders as the chip says.",
+          "Every one of them is badged «Отправлен».",
+          "The delivered order is not in this list — it stayed under «Все»."
+        ],
+        "why": "This is your «where is the parcel» list: closed orders in it only spoil the count."
+      }
+    },
+    {
       "id": "order-search-server",
       "area": "orders",
       "who": "renat",
@@ -3173,12 +3212,15 @@
       ],
       "expect": [
         "Заказ сразу закрылся.",
+        "Он пропал из списка «В пути», а число у чипа стало меньше на один.",
         "Покупателю никакого письма не пришло.",
         "«Отменить» возвращает заказ обратно в «В пути»."
       ],
       "why": "Пока заказ не закрыт, он висит в списке дел.",
       "risk": "low",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-18T17:10:00.000Z",
       "en": {
         "title": "Marking an order delivered",
         "steps": [
@@ -3188,6 +3230,7 @@
         ],
         "expect": [
           "The order closes at once.",
+          "It leaves the «В пути» list, and the chip's number drops by one.",
           "No letter reaches the buyer.",
           "«Отменить» puts the order back into «В пути»."
         ],
@@ -7309,12 +7352,14 @@
         "Пакомат принял посылку по коду сдачи.",
         "Трек-номер настоящий: по нему видно, где посылка.",
         "Покупатель забрал заказ.",
-        "После этого заказ сам перешёл в «Доставлен»."
+        "После этого заказ сам перешёл в «Доставлен».",
+        "И сам ушёл из «В пути» — число у чипа стало меньше."
       ],
       "why": "Примет ли автомат настоящую этикетку, покажет только настоящая посылка.",
       "risk": "high",
       "writes": true,
       "mark": "reworded",
+      "markedAt": "2026-09-18T17:10:00.000Z",
       "en": {
         "title": "A real label and a real parcel",
         "steps": [
@@ -7327,7 +7372,8 @@
           "The locker took the parcel against the code.",
           "The tracking number is real and shows where the parcel is.",
           "The buyer collected the order.",
-          "After that the order moved itself to «Доставлен»."
+          "After that the order moved itself to «Доставлен».",
+          "And left «В пути» by itself — the chip's number went down."
         ],
         "why": "Only a real parcel shows whether the machine takes the label."
       }
