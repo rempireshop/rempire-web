@@ -13,6 +13,7 @@
  */
 
 import { sanitizeContentPatch } from "@/lib/content";
+import { shelfVariant } from "@/lib/inventory";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
@@ -28,6 +29,29 @@ export const STOCK_ADJUST_REASONS = ["goods_in", "adjust", "return"] as const;
 /** One line the panel can print: no control or format characters, collapsed whitespace, capped. */
 function oneLine(v: unknown, max: number): string {
   return typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+}
+
+/**
+ * Which shelf row a stock action means, when the model named no volume.
+ *
+ * Twenty-nine products are sold in exactly one named volume — Touchable is
+ * «250 мл» — and the CATALOGUE block this route puts in front of the model
+ * lists sizes only for the owner's own goods, so for those twenty-nine there
+ * is no rung it could name even when it wants to. Left empty the action said
+ * ('touchable','') , which is the row db/migrations/194_one_size_stock_rows.sql
+ * folded away: it comes back the moment a count lands in it, «Склад» draws one
+ * bottle as two rows again, and web sales keyed to the label are skipped as
+ * untracked (audit 18.09.2026, F9).
+ *
+ * The same rule the order line and the shelf both already read, so the card
+ * the owner is asked to confirm names the row the move will really go to.
+ * POST /api/admin/inventory/moves/ — where the panel applies this — resolves
+ * it once more and has the last word, because it can also read a ladder the
+ * owner saved himself; here it is the catalogue's, which is what these
+ * twenty-nine need and all this can see without a query.
+ */
+function stockRow(productId: string, variant: unknown): string {
+  return shelfVariant(productId, oneLine(variant, 120));
 }
 
 /* ---- the home-page banner (set_hero) ----------------------------------- */
@@ -1108,13 +1132,13 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
     const delta = Math.trunc(Number(x.delta));
     if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > 10_000) return null;
     const reason = (STOCK_ADJUST_REASONS as readonly string[]).includes(String(x.reason)) ? String(x.reason) : "adjust";
-    const variant = oneLine(x.variant, 120);
+    const variant = stockRow(x.product_id, x.variant);
     return { type: t, product_id: x.product_id, variant, delta, reason };
   }
   if (t === "stock_set" && typeof x.product_id === "string" && known.has(x.product_id)) {
     const qty = Math.trunc(Number(x.qty));
     if (!Number.isFinite(qty) || qty < 0 || qty > 100_000) return null;
-    const variant = oneLine(x.variant, 120);
+    const variant = stockRow(x.product_id, x.variant);
     return { type: t, product_id: x.product_id, variant, qty };
   }
   /* product creation: a new row in custom_products — no demo layer, the

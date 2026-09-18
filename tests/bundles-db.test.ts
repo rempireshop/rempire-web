@@ -482,6 +482,118 @@ describe("an order with a set in it", () => {
 });
 
 /**
+ * A set is not a side door onto a volume that has been counted to zero
+ * (audit 18.09.2026, F2).
+ *
+ * The 17.09.2026 decision is «show the product, hide the empty size», and the
+ * checkout has enforced it on a plain line since: createOrder() asks
+ * variantStockStates() for the size the line actually names and refuses it
+ * («a 500 мл counted down to zero was sold and paid for whenever the 75 мл
+ * still had bottles»). A set went in through a different door. Its parts were
+ * gated on the PRODUCT's one word — which says «в наличии» while any one size
+ * is left — so the very same bottle was sold, inside a set, for as long as
+ * some other volume of it was on the shelf. The set line carries the part's
+ * rung, so the paid decrement then landed on the empty row, was clamped at 0
+ * and wrote a «sale» of nothing; the order was paid, and the bottle was found
+ * missing when the set was packed.
+ *
+ * Both halves are pinned here: what the shop is allowed to SHOW (expand(), so
+ * the set card and the admin say «нет в наличии»), and what the checkout is
+ * allowed to TAKE MONEY FOR, which is the one that protects the order.
+ */
+describe("a set whose part's own volume has been counted to zero", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  /** The second rung of a multi-volume product — the set points at this one. */
+  const RUNG_IDX = 1;
+  const RUNG = VARIANTS[SIZED.id].sizes[RUNG_IDX];
+
+  beforeEach(async () => {
+    await dropTestSets();
+    await query("delete from stock_moves");
+    await query("delete from stock_levels");
+  });
+
+  /** Counted in, then sold out: tracked, and at zero — the state the rule is about. */
+  async function emptyTheRung(): Promise<void> {
+    const { move } = await import("@/lib/inventory");
+    await move({ productId: SIZED.id, variant: RUNG, delta: 1, reason: "goods_in", actor: "test" });
+    await move({ productId: SIZED.id, variant: RUNG, delta: -1, reason: "sale_web", actor: "test" });
+  }
+
+  async function seedSet(): Promise<void> {
+    await upsertBundle(
+      valid({ items: [{ productId: A.id }, { productId: SIZED.id, variant: RUNG_IDX }], price: 5 }),
+    );
+  }
+
+  it("the product's own word is still «в наличии» — which is why the set word must not be", async () => {
+    await seedSet();
+    await emptyTheRung();
+    // the whole premise: only THIS volume is gone, so the aggregate stays «in»
+    const { variantStockStates, productStockStates } = await import("@/lib/inventory");
+    expect((await variantStockStates([SIZED.id]))[SIZED.id]?.[RUNG]).toBe("out");
+    expect((await productStockStates([SIZED.id]))[SIZED.id]).not.toBe("out");
+
+    const set = (await getBundle("test-set"))!;
+    const part = set.items[1];
+    expect(part.productId).toBe(SIZED.id);
+    expect(part.sizeLabel).toBe(RUNG);
+    expect(part.stock).toBe("out");
+    expect(set.stock).toBe("out");
+  });
+
+  it("is refused at the checkout, exactly as a plain line of that volume is", async () => {
+    await seedSet();
+    await emptyTheRung();
+    // the rule the set has to obey too, on the line the shop already refuses
+    await expect(
+      createOrder({ lang: "ru", items: [{ id: SIZED.id, variant: RUNG, qty: 1 }], customer, shipping: ship }),
+    ).rejects.toMatchObject({ code: "out_of_stock" } as OrderError);
+    await expect(
+      createOrder({ lang: "ru", items: [{ id: "bundle:test-set", qty: 1 }], customer, shipping: ship }),
+    ).rejects.toMatchObject({ code: "out_of_stock" } as OrderError);
+  });
+
+  it("still sells the set while that volume is merely low, or never counted", async () => {
+    await seedSet();
+    const { move } = await import("@/lib/inventory");
+    await move({ productId: SIZED.id, variant: RUNG, delta: 1, reason: "goods_in", actor: "test" });
+    // counted, and one left: «мало» is not «нет»
+    expect((await getBundle("test-set"))!.stock).not.toBe("out");
+    const order = await createOrder({
+      lang: "ru",
+      items: [{ id: "bundle:test-set", qty: 1 }],
+      customer,
+      shipping: ship,
+    });
+    expect(order.items[0].parts?.find((p) => p.id === SIZED.id)?.variant).toBe(RUNG);
+
+    // and a volume nobody has counted is not «нет» either — absent is not empty
+    await query("delete from stock_moves");
+    await query("delete from stock_levels");
+    expect((await getBundle("test-set"))!.stock).not.toBe("out");
+    await expect(
+      createOrder({ lang: "ru", items: [{ id: "bundle:test-set", qty: 1 }], customer: { ...customer, email: "b@example.com" }, shipping: ship }),
+    ).resolves.toBeTruthy();
+  });
+
+  it("gates the OTHER volumes of the same product as before", async () => {
+    // the set points at rung 1; rung 0 at zero says nothing about it
+    await seedSet();
+    const { move } = await import("@/lib/inventory");
+    const other = VARIANTS[SIZED.id].sizes[0];
+    await move({ productId: SIZED.id, variant: other, delta: 1, reason: "goods_in", actor: "test" });
+    await move({ productId: SIZED.id, variant: other, delta: -1, reason: "sale_web", actor: "test" });
+    expect((await getBundle("test-set"))!.stock).not.toBe("out");
+    await expect(
+      createOrder({ lang: "ru", items: [{ id: "bundle:test-set", qty: 1 }], customer, shipping: ship }),
+    ).resolves.toBeTruthy();
+  });
+});
+
+/**
  * The browser half of the same promise.
  *
  * A product the owner takes off sale with «Показывать в магазине» is REMOVED

@@ -21,8 +21,9 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import variants from "@/data/catalogue.variants.json";
+import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { exec, query } from "@/lib/db";
-import { setupDb, teardownDb } from "./helpers";
+import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 const MIGRATION = "194_one_size_stock_rows.sql";
 
@@ -179,5 +180,187 @@ describe("194_one_size_stock_rows", () => {
     await replay();
     const rows = await query<{ n: string }>("select count(*)::text as n from stock_levels");
     expect(rows[0].n).toBe("0");
+  });
+});
+
+/**
+ * db/migrations/196_one_volume_ladder_rows.sql — the rows 194 had to leave
+ * behind (audit 18.09.2026, F35).
+ *
+ * 194 skipped every product whose ladder the owner had typed himself, on the
+ * stated grounds that knownLadder() reads his ladder first «so their counts
+ * were never under '' to begin with». True of every saved ladder except one:
+ * «один объём», a single rung with no label, which the editor leaves behind
+ * when «×» takes the last named row away. ladderLabels() read that as the ''
+ * row and overrideLadder() read it as «not a ladder» and fell through to the
+ * file, whose one rung is named — so «Склад» counted under '' while the cart
+ * wrote «250 мл», and the paid sale went looking for a count under a name
+ * nobody had used and was skipped in silence.
+ *
+ * ladderLabels() now says «not a ladder» too, so both halves read the file's
+ * rung; 196 carries the counts the split had already written across, with
+ * 194's own arithmetic.
+ */
+describe("196_one_volume_ladder_rows", () => {
+  const M196 = "196_one_volume_ladder_rows.sql";
+
+  beforeAll(async () => {
+    await setupDb();
+  });
+  afterAll(teardownDb);
+
+  beforeEach(async () => {
+    await exec("truncate stock_levels, stock_moves, product_overrides restart identity cascade");
+  });
+
+  async function replay196() {
+    await query("delete from _migrations where name = $1", [M196]);
+    const applied = await setupDb();
+    expect(applied, "196 did not replay").toContain(M196);
+  }
+
+  async function saveLadder(productId: string, sizes: Array<{ size: string | null; price: number }>) {
+    await query("insert into product_overrides (product_id, sizes) values ($1, $2::jsonb)", [
+      productId,
+      JSON.stringify(sizes),
+    ]);
+  }
+
+  it("moves the «один объём» count onto the volume the product is actually sold in", async () => {
+    await saveLadder(ONE, [{ size: "", price: 27 }]);
+    await seedLevel(ONE, "", 5, 3, "4900000000011");
+    await replay196();
+
+    expect(await levels(ONE)).toEqual([
+      { product_id: ONE, variant: rung(ONE), qty: 5, low_threshold: 3, ean: "4900000000011" },
+    ]);
+  });
+
+  it("adds the two counts together, and re-keys the history that explains them", async () => {
+    await saveLadder(TWO, [{ size: null, price: 19 }]);
+    await seedLevel(TWO, rung(TWO), 4, 2, null);
+    await seedLevel(TWO, "", 3, 9, null);
+    await query(
+      "insert into stock_moves (product_id, variant, delta, reason, actor) values ($1, '', 3, 'goods_in', 'test')",
+      [TWO],
+    );
+    await replay196();
+
+    expect(await levels(TWO)).toEqual([
+      { product_id: TWO, variant: rung(TWO), qty: 7, low_threshold: 2, ean: null },
+    ]);
+    // trackedKeys() reads the ledger to decide whether a row is counted at all
+    const moves = await query<{ variant: string }>("select variant from stock_moves where product_id = $1", [TWO]);
+    expect(moves.map((m) => m.variant)).toEqual([rung(TWO)]);
+  });
+
+  it("leaves a ladder whose rungs the owner NAMED exactly where it is", async () => {
+    // his label is the key both halves already read — nothing to move, and
+    // moving it would be this migration inventing a rung he did not type
+    await saveLadder(ONE, [{ size: "флакон", price: 27 }]);
+    await seedLevel(ONE, "", 9, 2, null);
+    await replay196();
+
+    expect(await levels(ONE)).toEqual([
+      { product_id: ONE, variant: "", qty: 9, low_threshold: 2, ean: null },
+    ]);
+  });
+
+  it("leaves a product with a real ladder in the file alone, saved or not", async () => {
+    await saveLadder(MULTI, [{ size: "", price: 12 }]);
+    await seedLevel(MULTI, "", 3, 2, null);
+    await replay196();
+
+    expect(await levels(MULTI)).toEqual([
+      { product_id: MULTI, variant: "", qty: 3, low_threshold: 2, ean: null },
+    ]);
+  });
+
+  it("is a no-op where nobody saved «один объём»", async () => {
+    await seedLevel(ONE, rung(ONE), 4, 2, null);
+    await replay196();
+    expect(await levels(ONE)).toEqual([
+      { product_id: ONE, variant: rung(ONE), qty: 4, low_threshold: 2, ean: null },
+    ]);
+  });
+});
+
+/**
+ * …and the two doors that could write the row back (audit 18.09.2026, F9).
+ *
+ * 194 promised that «from here on both halves key on the label». The READ side
+ * kept it — variantOf() names the rung on the order line, stockUnitsOf() names
+ * it at the moment the goods move — and the WRITE side did not: the raw moves
+ * route passed the body's size through untouched and applyMove() creates a row
+ * for whatever it is handed. «Приход 6 штук Touchable» typed or spoken into
+ * the assistant names no volume, because the CATALOGUE block the model is
+ * shown lists sizes only for the owner's own goods — so it landed on
+ * ('touchable','') , that row became tracked, «Склад» drew one bottle twice
+ * and every web sale of it, keyed to «250 мл», was skipped as untracked.
+ */
+describe("a count with no volume on it lands on the volume the product has", () => {
+  const ORIGIN = "https://rempireshop.com";
+  let admin = "";
+
+  beforeAll(async () => {
+    process.env.SESSION_SECRET = TEST_SECRET;
+    process.env.ADMIN_PASSWORD_HASH = hashPassword("a long enough password");
+    await setupDb();
+    admin = `${ADMIN_COOKIE}=${makeSessionToken()}`;
+  });
+  afterAll(teardownDb);
+
+  beforeEach(async () => {
+    resetRateLimits();
+    await exec("truncate stock_levels, stock_moves, product_overrides, idempotency_keys restart identity cascade");
+  });
+
+  function post(body: unknown) {
+    return new Request(`${ORIGIN}/api/admin/inventory/moves/`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: admin, "x-forwarded-for": "203.0.113.7" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  it("POST /api/admin/inventory/moves/ with no size writes the labelled row", async () => {
+    const { POST } = await import("@/app/api/admin/inventory/moves/route");
+    const res = await POST(post({ productId: ONE, delta: 6, reason: "goods_in", ref: "чат" }));
+    expect(res.status).toBe(200);
+
+    expect(await levels(ONE)).toEqual([
+      { product_id: ONE, variant: rung(ONE), qty: 6, low_threshold: 2, ean: null },
+    ]);
+  });
+
+  it("…and «останется N штук» the same way", async () => {
+    const { POST } = await import("@/app/api/admin/inventory/moves/route");
+    expect((await POST(post({ productId: ONE, qty: 4, reason: "adjust" }))).status).toBe(200);
+    expect((await levels(ONE)).map((r) => [r.variant, r.qty])).toEqual([[rung(ONE), 4]]);
+  });
+
+  it("leaves a product with a real ladder on the '' row, as before", async () => {
+    // two rungs are a choice nothing here may make for the owner
+    const { POST } = await import("@/app/api/admin/inventory/moves/route");
+    expect((await POST(post({ productId: MULTI, delta: 2, reason: "goods_in" }))).status).toBe(200);
+    expect((await levels(MULTI)).map((r) => r.variant)).toEqual([""]);
+  });
+
+  it("follows the owner's own ladder above the file's", async () => {
+    // his single named rung is the key «Склад» draws the row under
+    await query("insert into product_overrides (product_id, sizes) values ($1, $2::jsonb)", [
+      MULTI,
+      JSON.stringify([{ size: "500 мл", price: 25 }]),
+    ]);
+    const { POST } = await import("@/app/api/admin/inventory/moves/route");
+    expect((await POST(post({ productId: MULTI, delta: 2, reason: "goods_in" }))).status).toBe(200);
+    expect((await levels(MULTI)).map((r) => r.variant)).toEqual(["500 мл"]);
+  });
+
+  it("passes a named size through untouched", async () => {
+    const { POST } = await import("@/app/api/admin/inventory/moves/route");
+    const size = TABLE[MULTI].sizes[1];
+    expect((await POST(post({ productId: MULTI, variant: size, delta: 1, reason: "goods_in" }))).status).toBe(200);
+    expect((await levels(MULTI)).map((r) => r.variant)).toEqual([size]);
   });
 });
