@@ -38,7 +38,13 @@ import { PICKUP_POINT_COUNTRIES } from "@/lib/shipping/country-prices";
 import { DEFAULT_SHIPPING_RULES, cleanShippingRules, parseShippingRules, pickupOffered } from "@/lib/shipping";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
-const app = readFileSync(APP_JS, "utf8");
+/* Line endings normalised on the way in. app.js is stored CRLF, and the
+   lifter below looks for a semicolon followed by a newline — against CRLF
+   that match lands somewhere far down the file and slices nonsense, which
+   surfaces as a SyntaxError rather than as a disagreement. Found 18.09.2026,
+   when four of these mirrors failed on a checkout whose app.js had CRLF
+   while the branch they were written on had LF. */
+const app = readFileSync(APP_JS, "utf8").replace(/\r\n/g, "\n");
 
 /* ---------- the declared box -------------------------------------------- */
 
