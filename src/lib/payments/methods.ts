@@ -14,9 +14,14 @@
  * field: `uuid` on one, `id` on the other — we do not read either).
  *
  * Auth is a Bearer JWT of only `{ accessKey, exp }`, the same shape
- * src/lib/shipping/montonio.ts uses for the Shipping API — confirmed by
- * Montonio's own sample responses (a wrong/missing token comes back 401
- * `STORE_NOT_FOUND`), not by the Orders API's signed-body pattern.
+ * src/lib/shipping/montonio.ts uses for the Shipping API. Inferred from sample
+ * responses when this was written; **confirmed by the documentation since** —
+ * the API reference's Authentication section now states it outright: «GET
+ * endpoints require a JWT in the Authorization header … the minimum required
+ * payload: accessKey, exp … We recommend setting this to 1 hour», which is the
+ * TTL below. The Orders API's signed-body pattern is for POST endpoints only.
+ * The same recipe is used by MontonioProvider.fetchOrder() for
+ * GET /orders/:orderUuid (src/lib/payments/montonio.ts).
  */
 
 import { signHs256 } from "./jwt";

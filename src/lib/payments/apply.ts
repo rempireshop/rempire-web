@@ -697,10 +697,22 @@ export async function applyPaymentResult(
   }
 
   /* A SECOND payment, not a retry of the first: the order is paid and this
-     token carries a different provider reference. POST /api/payments/create/
-     will start a fresh payment for an order whose first one is still in
-     flight, so a shopper CAN pay twice. setOrderPayment() merges top-level
-     keys, so writing the blob would put this reference over the first one's —
+     token carries a different provider reference.
+
+     With Montonio this cannot happen, and the claim that once stood here —
+     «POST /api/payments/create/ will start a fresh payment … so a shopper CAN
+     pay twice» — was wrong. `merchantReference` is our order number, and
+     Montonio's orders guide says it «must be unique for each order of a store.
+     If you use the same value for multiple orders, the existing order will be
+     updated»; its help centre adds that an unpaid order is replaced and given a
+     new payment URL, and that «if an order with this merchantReference has
+     already been paid for, the API will throw an error». So a second create
+     returns the SAME uuid, and there is no second payment to take.
+
+     The branch stays for a provider that does not behave that way, and because
+     the consequence if one ever did is the worst kind. setOrderPayment() merges
+     top-level keys, so writing the blob would put this reference over the first
+     one's —
      and `payment.ref` is the only id «Вернуть деньги» can send money back
      through (src/app/api/admin/orders/[id]/refund/). The payment that actually
      took the money would become unrefundable and untraceable. So the second

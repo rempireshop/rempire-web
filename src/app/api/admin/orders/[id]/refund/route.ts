@@ -45,12 +45,21 @@
  *   gift_used        — a card this order bought has been spent (in part)
  *   gift_whole       — a partial refund that reaches into the cards' value
  *   provider_unreachable / provider_rejected — Montonio said no
+ *
+ * A `provider_rejected` body carries Montonio's own words as `detail` («HTTP
+ * 400 · Refund amount [30] exceeds the total amount refundable [0]») and, when
+ * it can be read, what `GET /orders/:orderUuid` says right now:
+ * `montonioStatus`, `availableForRefund`, `isRefundableType`. The same keys go
+ * into an `order.refund_failed` audit row. The code alone is not actionable —
+ * Montonio documents five distinct refusals and the panel's one sentence named
+ * none of them (docs/montonio-payments-audit.md § A1).
  */
 import { requireAdmin } from "@/lib/auth";
 import { creditGiftCard, getGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
-import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, type Order } from "@/lib/orders";
+import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, writeAuditSafe, type Order } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { notifyOrderClosed } from "@/lib/payments/mail-hook";
+import { MontonioProvider } from "@/lib/payments/montonio";
 import {
   canRefund,
   giftRefundedTotal,
@@ -76,6 +85,35 @@ function bad(error: string, status = 400, extra: Record<string, unknown> = {}) {
 
 function money(n: number): number {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * What Montonio itself says about the payment a refund was just refused for.
+ *
+ * `{}` for anything that is not the Montonio provider, and `{}` whenever the
+ * lookup does not come back: this is an explanation, never a gate. The keys
+ * ride on the 502 body and into the audit row, so the next time «Вернуть
+ * деньги» is refused the answer is in the panel's own journal rather than in
+ * a Vercel log nobody can open on a phone.
+ */
+async function refundRefusalContext(
+  provider: unknown,
+  providerRef: string,
+): Promise<Record<string, unknown>> {
+  if (!(provider instanceof MontonioProvider) || !providerRef) return {};
+  try {
+    const snap = await provider.fetchOrder(providerRef);
+    if (!snap) return {};
+    return {
+      montonioStatus: snap.paymentStatus,
+      availableForRefund: snap.availableForRefund,
+      isRefundableType: snap.isRefundableType,
+      montonioRefunds: snap.refunds.length,
+    };
+  } catch (err) {
+    console.error("[api/admin/orders/:id/refund] refusal lookup failed:", err);
+    return {};
+  }
 }
 
 /** Whether the money for this order ever arrived — the same test the card uses. */
@@ -231,8 +269,33 @@ export async function POST(req: Request, ctx: Ctx) {
       });
     } catch (err) {
       const code = err instanceof PaymentError ? err.code : "refund_failed";
-      console.error("[api/admin/orders/:id/refund] provider refused:", code, err);
-      return bad(code, 502);
+      const detail = err instanceof PaymentError ? err.detail : undefined;
+      console.error(
+        `[api/admin/orders/:id/refund] provider refused ${order.number}: ${code}${detail ? ` · ${detail}` : ""}`,
+        err,
+      );
+      /* Why this asks Montonio a second question after it has already said no.
+         «Вернуть деньги» refused three times on 18.09.2026 and the owner was
+         told to «проверьте баланс в его панели» — which, by Montonio's own
+         refunds guide, is the one thing that cannot cause a refusal: a refund
+         with no money behind it is answered 200 PENDING /
+         INSUFFICIENT_FUNDS, never an HTTP error. The five refusals that DO
+         exist are all about the request, and two of them are settings on
+         Montonio's side that only GET /orders/:orderUuid can show — whether
+         the funds have settled yet (`availableForRefund`) and whether refunds
+         are switched on for this payment method at all (`isRefundableType`).
+         Read-only, best effort, and after the fact: it cannot stop a refund
+         that would have worked, and a lookup that fails changes nothing. */
+      const montonio = await refundRefusalContext(provider, providerRef);
+      await writeAuditSafe("admin", "order.refund_failed", {
+        orderId: order.id,
+        number: order.number,
+        amount: split.money,
+        error: code,
+        detail,
+        ...montonio,
+      });
+      return bad(code, 502, { detail, ...montonio });
     }
   }
 
