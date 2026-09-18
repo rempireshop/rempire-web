@@ -129,13 +129,32 @@ describe("readRefundRefusal — each documented refusal gets its own words", () 
     expect(zero.messages.EN).toContain("Refundable bank payments");
   });
 
+  /* The one refusal that means the opposite of failure — and the one whose
+     sentence used to send the owner to a list that was empty. The route reads
+     Montonio's own refund list in the same breath and writes down what it is
+     missing, so it can now say WHICH of the two happened; both sentences say
+     the money will not leave twice, and neither invites another press. */
   it("reads the duplicate key as «первая попытка прошла», not as a failure", () => {
-    const read = readRefundRefusal(
-      montonioErrorText(400, JSON.stringify({ message: `Order uuid [${ORDER_UUID}] already has a refund with same idempotency key` })),
+    const detail = montonioErrorText(
+      400,
+      JSON.stringify({ message: `Order uuid [${ORDER_UUID}] already has a refund with same idempotency key` }),
     );
-    expect(read.reason).toBe("duplicate_key");
-    expect(read.messages.RU).toMatch(/уже принят|не нажимайте/i);
-    expect(read.messages.EN).toMatch(/already accepted/i);
+    const recorded = readRefundRefusal(detail, { recorded: true });
+    expect(recorded.reason).toBe("duplicate_key");
+    expect(recorded.messages.RU).toMatch(/уже принят|не нажимайте/i);
+    expect(recorded.messages.RU).toContain("Сумма записана в заказ");
+    expect(recorded.messages.EN).toMatch(/already accepted/i);
+
+    /* …and the shop could NOT write it down: «должна быть в списке возвратов»
+       about a list that has nothing in it is what talked the owner into a
+       second refund with a different amount (audit 18.09.2026, F4). */
+    const missing = readRefundRefusal(detail);
+    expect(missing.reason).toBe("duplicate_key");
+    expect(missing.messages.RU).toMatch(/уже принял|второй раз деньги не уйдут/i);
+    expect(missing.messages.RU).toContain("записать его в заказ не удалось");
+    expect(missing.messages.RU).not.toMatch(/должна быть в списке/i);
+    expect(missing.messages.EN).toMatch(/already accepted/i);
+    for (const lang of MONTONIO_LANGS) expect(missing.messages[lang]).toBeTruthy();
   });
 
   it("classifies 401 and 403 even when the body says nothing at all", () => {

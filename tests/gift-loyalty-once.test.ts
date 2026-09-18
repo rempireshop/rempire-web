@@ -260,14 +260,23 @@ describe("«Вернуть деньги»: the reference the card refund is reco
     expect((after.payment as { refundedTotal?: number }).refundedTotal).toBe(gift);
   });
 
-  /* The other half of the route's own protection, and the one the September
-     brief did not know about: the CARD LEDGER already refuses a sequential
-     second credit on its own. `giftPaidByOrder()` reads gift_card_uses net of
-     refunds, so once the credit is written there is nothing left on the
-     order's tab to send back — even when the line in `orders.payment` is gone,
-     which is the state a request killed between the two writes leaves. Pinned
-     here so nobody removes it believing the ref now covers it. */
-  it("and the card ledger alone already refuses the sequential retry", async () => {
+  /* The retry after that, and what it is now ALLOWED to be.
+
+     The card ledger refuses the second credit on its own — `giftPaidByOrder()`
+     reads gift_card_uses net of refunds, so once the credit is written there
+     is nothing left on the order's tab — and until 19.09.2026 the route asked
+     it, which is why this used to end in a 409 with nothing refunded. That
+     refusal was a dead end on a card-only order and a DOUBLE PAYMENT on a
+     mixed one: the card's share of the split shrank by what had already been
+     credited and the remainder went to Montonio as real money
+     (tests/payments-refund-window.ts, audit F1). The split is read off
+     `orders.payment` now, which is the blob the sequence is counted from, so
+     the retry derives the same `gc:` ref, the card refuses THAT — `already` —
+     and the line the first attempt never wrote is finally written.
+
+     The retry finishes the refund instead of arguing about it; the card is
+     still credited exactly once, which is what this file is here for. */
+  it("and the retry finishes the refund the lost line left half-written", async () => {
     const code = await card(100, 100);
     const a = await cardPaidOrder(code);
     await cardPaidOrder(code); // a second order off the same card: room under the ceiling
@@ -275,14 +284,19 @@ describe("«Вернуть деньги»: the reference the card refund is reco
     const first = await refund(a.id);
     expect(first.status, JSON.stringify(first.body)).toBe(200);
     const afterFirst = await balanceOf(code);
+    const ref = refundsOf((await getOrder(a.id))!.payment)[0].ref;
 
     /* …the answer is lost and the line in `orders.payment` never lands. */
     await loseTheRecord(a.id);
     const retry = await refund(a.id);
 
-    // refused — there is nothing left on this order's tab for the card
-    expect(retry.status).toBe(409);
-    expect(retry.body.gift).toBe(0);
+    expect(retry.status, JSON.stringify(retry.body)).toBe(200);
+    expect(retry.body.gift).toBe(first.body.gift);
+    expect(retry.body.money).toBe(0);
+    // the same reference, so the card was not touched a second time
+    const entries = refundsOf((await getOrder(a.id))!.payment);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].ref).toBe(ref);
     expect(await balanceOf(code)).toBe(afterFirst);
     expect((await ledger(code)).filter((l) => l.kind === "refund")).toHaveLength(1);
   });

@@ -64,7 +64,34 @@
  * what an under-funded refund looks like at the counter — says so in
  * `pendingMessages` and writes an `order.refund_pending` journal row. That
  * state used to be reported as «возврат ушёл», and it can sit for ten days
- * before Montonio cancels it (docs/montonio-untested.md, P6–P7).
+ * before Montonio cancels it (docs/montonio-untested.md, P6–P7). Both now ride
+ * the `gift_credit_failed` 409 as well: the money can be in flight while the
+ * card is the half that refused, and the owner must not read «карта не
+ * приняла» as «ничего не ушло».
+ *
+ * PRESSING IT TWICE, which is the whole of the 18.09.2026 audit's F1 and F4.
+ *
+ * Every write this route makes is its own statement — Montonio's refund, the
+ * line for it in `orders.payment`, the credit on the card, the line for THAT —
+ * and the owner presses the button again whenever he is told it failed. The
+ * second press is only safe while it derives the same references as the first,
+ * and both derivations now read ONE ledger, `orders.payment`: the sequence
+ * (refundIdempotencyKey, giftRefundRef) and the split between card and bank
+ * (giftOwedByCard) move together or not at all. The card ledger is no longer
+ * asked what the split should be — it had already moved when the retry read
+ * it, and the answer was a re-split that sent the card's share to the bank as
+ * real money. Its job is the one it does well: refusing the same `gc:` ref
+ * twice (191_gift_loyalty_once.sql).
+ *
+ * And a refund whose answer was LOST is written down before the 502 goes back.
+ * The catch block already asks `GET /orders/:orderUuid` to explain the
+ * refusal, and that answer carries Montonio's own refund list; anything in it
+ * this shop has no line for goes through settleRefund() as `by: "montonio"`.
+ * Without that the money had left, nothing recorded it, the card offered the
+ * whole amount again and the retry's refusal sent the owner to look for the
+ * amount in a list that was empty because of the very failure he was retrying
+ * — where a DIFFERENT amount was a second real refund. The 502 body carries
+ * `recorded: [{ ref, amount, status }]` for what was written.
  */
 import { requireAdmin } from "@/lib/auth";
 import { creditGiftCard, getGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
@@ -72,10 +99,10 @@ import { readRefundRefusal, refundPendingText } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, writeAuditSafe, type Order } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { notifyOrderClosed } from "@/lib/payments/mail-hook";
-import { MontonioProvider } from "@/lib/payments/montonio";
+import { MontonioProvider, mapMontonioRefundStatus, type MontonioOrderSnapshot } from "@/lib/payments/montonio";
 import {
   canRefund,
-  giftRefundedTotal,
+  giftOwedByCard,
   giftRefundRef,
   refundableAmount,
   refundedTotal,
@@ -109,24 +136,101 @@ function money(n: number): number {
  * деньги» is refused the answer is in the panel's own journal rather than in
  * a Vercel log nobody can open on a phone.
  */
-async function refundRefusalContext(
+async function refusalSnapshot(
   provider: unknown,
   providerRef: string,
-): Promise<Record<string, unknown>> {
-  if (!(provider instanceof MontonioProvider) || !providerRef) return {};
+): Promise<MontonioOrderSnapshot | null> {
+  if (!(provider instanceof MontonioProvider) || !providerRef) return null;
   try {
-    const snap = await provider.fetchOrder(providerRef);
-    if (!snap) return {};
-    return {
-      montonioStatus: snap.paymentStatus,
-      availableForRefund: snap.availableForRefund,
-      isRefundableType: snap.isRefundableType,
-      montonioRefunds: snap.refunds.length,
-    };
+    return await provider.fetchOrder(providerRef);
   } catch (err) {
     console.error("[api/admin/orders/:id/refund] refusal lookup failed:", err);
-    return {};
+    return null;
   }
+}
+
+/** The snapshot's answer, flattened for the 502 body and the audit row. */
+function refusalContext(snap: MontonioOrderSnapshot | null): Record<string, unknown> {
+  if (!snap) return {};
+  return {
+    montonioStatus: snap.paymentStatus,
+    availableForRefund: snap.availableForRefund,
+    isRefundableType: snap.isRefundableType,
+    montonioRefunds: snap.refunds.length,
+  };
+}
+
+/**
+ * Refunds Montonio HAS and this shop has never written down — recorded here,
+ * in the catch block, before the 502 goes back.
+ *
+ * The case this exists for. `POST /refunds` is given fifteen seconds
+ * (src/lib/payments/montonio.ts REQUEST_TIMEOUT_MS); the call is made, the
+ * answer is lost, and the shop throws `provider_unreachable`. The money HAS
+ * left. Until 19.09.2026 the catch wrote an audit row and a 502 and NO LEDGER
+ * ENTRY, and everything downstream believed the refund had not happened: the
+ * card offered the whole amount again, `pendingRefunds()` could not see it, no
+ * letter went to the customer, and the retry — which correctly derived the
+ * same key and was correctly refused — told the owner «сумма должна быть в
+ * списке возвратов», where it was not. A *different* amount then derived a
+ * different key off a sequence that had not moved: a second, real refund.
+ *
+ * The answer was already in this block. The lookup above reads
+ * `GET /orders/:orderUuid`, whose `refunds` array carries every refund
+ * Montonio holds for this payment with its `uuid`, `amount` and `status` — the
+ * uuid being the same `ref` the refund webhook would eventually arrive with.
+ * So: anything in that array we have no entry for is money that left and the
+ * shop has not recorded, and it goes through settleRefund(), the one door both
+ * this route and the webhook use. foldRefund() matches on `ref`, so the
+ * webhook — whenever it turns up, PENDING or SUCCESSFUL — lands on this very
+ * line instead of appending a twin.
+ *
+ * It also picks up a refund Renat made in Montonio's own portal whose webhook
+ * was lost, which is the one refund this shop could never see at all. That is
+ * the same fact from the same source, and the alternative is leaving it out of
+ * a ledger the owner is about to be told to look at.
+ *
+ * Best effort and never a gate: the provider call has already failed and the
+ * 502 goes back either way. A `done` refund gets the customer's letter (the
+ * money really is back); a `pending` one does not — «Деньги возвращены» for
+ * money Montonio has only accepted is the lie this shop spent September
+ * removing.
+ */
+async function adoptMontonioRefunds(
+  order: Order,
+  snap: MontonioOrderSnapshot | null,
+): Promise<Array<{ ref: string; amount: number; status: RefundEntry["status"] }>> {
+  const adopted: Array<{ ref: string; amount: number; status: RefundEntry["status"] }> = [];
+  if (!snap || !snap.refunds.length) return adopted;
+  const at = new Date().toISOString();
+  let current: Order = order;
+  for (const r of snap.refunds) {
+    const ref = String(r.uuid ?? "").trim();
+    const amount = money(Number(r.amount) || 0);
+    if (!ref || !(amount > 0)) continue;
+    if (refundsOf(current.payment).some((e) => e.ref === ref)) continue;
+    const status = mapMontonioRefundStatus(r.status);
+    try {
+      await settleRefund(
+        current,
+        {
+          ref,
+          amount,
+          status,
+          at,
+          by: "montonio",
+          detail: `Montonio уже принял этот возврат (${r.status || "?"}); записан при следующей попытке`,
+        },
+        { notify: status === "done" },
+      );
+      current = (await getOrder(order.id)) ?? current;
+      adopted.push({ ref, amount, status });
+    } catch (err) {
+      console.error("[api/admin/orders/:id/refund] could not record Montonio's refund", ref, err);
+      break;
+    }
+  }
+  return adopted;
 }
 
 /** Whether the money for this order ever arrived — the same test the card uses. */
@@ -208,20 +312,34 @@ export async function POST(req: Request, ctx: Ctx) {
     }
   }
 
-  /* The split: the card first, the provider for the rest. `left` on each card
-     is the ledger's own answer (what it paid minus what already went back to
-     it), and the payment blob's giftcard entries are the same fact from the
-     other side — the smaller of the two is what may still go to a card, so a
-     ledger the two disagree on can never credit a card twice. One card per
-     order in practice (the checkout takes one code): the first with anything
-     left on the order's tab is the one credited. */
-  const giftPaidTotal = money(giftPaid.reduce((sum, g) => sum + g.amount, 0));
-  const giftLeftTotal = Math.min(
-    money(giftPaid.reduce((sum, g) => sum + g.left, 0)),
-    money(giftPaidTotal - giftRefundedTotal(order.payment)),
-  );
+  /* The split: the card first, the provider for the rest. What a card may
+     still be handed back is what it paid for this order minus what
+     `orders.payment` says has already gone back to it — the SAME blob the
+     sequence below is counted from, and deliberately not the card's own
+     ledger.
+
+     Until 19.09.2026 it was the smaller of the two, on the reasoning that a
+     ledger the two disagree on can never credit a card twice. The reasoning is
+     sound and the ledgers are the wrong pair: creditGiftCard() commits in its
+     own transaction and the line in `orders.payment` is a later statement, so
+     between them the card ledger has moved and the payment blob has not. A
+     retry landing in that window re-split the same refund — the card's share
+     shrank by what had already been credited and the remainder went to
+     Montonio as REAL MONEY under a fresh key, because `seq` had not moved
+     either. 100 € = 30 € card + 70 € bank, refunded in full, the fold lost:
+     130 € out (audit 18.09.2026, F1).
+
+     One blob now feeds both halves of the derivation, so a retry asks for the
+     same split whatever state the card ledger is in; the card ledger's job is
+     the one it is good at — refusing the same `ref` twice
+     (191_gift_loyalty_once.sql) and refusing a credit past face value.
+
+     One card per order in practice (the checkout takes one code): the first
+     with anything still owed on the order's tab is the one credited. */
+  const giftOwed = giftOwedByCard(giftPaid, order.payment);
+  const giftLeftTotal = money(giftOwed.reduce((sum, g) => sum + g.owed, 0));
   const split = splitRefund(amount, Math.max(0, giftLeftTotal));
-  const giftCard = split.gift > 0 ? giftPaid.find((g) => g.left > 0.004) : undefined;
+  const giftCard = split.gift > 0 ? giftOwed.find((g) => g.owed > 0.004) : undefined;
   if (split.gift > 0 && !giftCard) return bad("bad_amount", 400, { left });
 
   /* Ask the card whether it can take its share BEFORE a cent leaves the bank.
@@ -299,14 +417,26 @@ export async function POST(req: Request, ctx: Ctx) {
          are switched on for this payment method at all (`isRefundableType`).
          Read-only, best effort, and after the fact: it cannot stop a refund
          that would have worked, and a lookup that fails changes nothing. */
-      const montonio = await refundRefusalContext(provider, providerRef);
+      const snap = await refusalSnapshot(provider, providerRef);
+      const montonio = refusalContext(snap);
+      /* …and the same answer says whether the money went anyway. A refund
+         Montonio holds that this shop has no line for is written down now —
+         the fifteen-second timeout above is a LOST ANSWER, not a refusal, and
+         a refund nobody records is one the owner is invited to make twice
+         (F4). */
+      const known = new Set(refundsOf(order.payment).map((e) => e.ref));
+      const adopted = await adoptMontonioRefunds(order, snap);
+      const inList =
+        adopted.length > 0 || (snap?.refunds ?? []).some((r) => known.has(String(r.uuid ?? "").trim()));
       /* Montonio's own sentence → one of its five documented refusals → three
          sentences the owner can act on. An unrecognised refusal quotes
          Montonio rather than guessing: the whole point of this branch is that
          a confident wrong cause is worse than a foreign true one
-         (src/lib/montonio-problems.ts). Only `reason` goes into the journal —
-         the three sentences belong on the screen, not in an audit row. */
-      const refusal = code === "provider_rejected" ? readRefundRefusal(detail) : null;
+         (src/lib/montonio-problems.ts). `inList` is what makes «сумма должна
+         быть в списке возвратов» a statement about this order rather than a
+         hope. Only `reason` goes into the journal — the three sentences belong
+         on the screen, not in an audit row. */
+      const refusal = code === "provider_rejected" ? readRefundRefusal(detail, { recorded: inList }) : null;
       await writeAuditSafe("admin", "order.refund_failed", {
         orderId: order.id,
         number: order.number,
@@ -315,11 +445,15 @@ export async function POST(req: Request, ctx: Ctx) {
         reason: refusal?.reason,
         detail,
         ...montonio,
+        ...(adopted.length ? { recorded: adopted } : {}),
       });
       return bad(code, 502, {
         detail,
         ...(refusal ? { reason: refusal.reason, messages: refusal.messages } : {}),
         ...montonio,
+        /* What the panel must put on the screen before the owner presses
+           anything: these refunds are on the order now. */
+        ...(adopted.length ? { recorded: adopted } : {}),
       });
     }
   }
@@ -348,6 +482,30 @@ export async function POST(req: Request, ctx: Ctx) {
       );
       voided.push(...out.voided);
       current = (await getOrder(order.id)) ?? current;
+
+      /* «Отправлено» is not «возвращено». Montonio answers 200 with
+         `status: "PENDING"` for a refund it has only accepted — including the
+         one case the panel used to blame out loud, a settlement account with
+         nothing in it, whose real reason (`INSUFFICIENT_FUNDS`) arrives days
+         later on the refund webhook. The guide gives that retry ten days and
+         then cancels the refund, so a pending one that nobody looks at is
+         money the customer never receives and the shop believes it has sent.
+         The journal row is what makes it findable afterwards.
+
+         Written HERE, with the entry it describes, rather than at the end of
+         the happy path where it used to live: a card that refuses its share
+         below returns 409 from the middle of this block, and a pending money
+         half that had already gone out then left no row and no sentence at all
+         (F29). The row belongs to the money, not to the route finishing. */
+      if (moneyResult.status === "pending") {
+        await writeAuditSafe("admin", "order.refund_pending", {
+          orderId: order.id,
+          number: order.number,
+          amount: money(moneyResult.amount || split.money),
+          ref: moneyResult.ref,
+          detail: moneyResult.detail,
+        });
+      }
     }
 
     /* 2. the card's part, back onto the card. A card that cannot take it
@@ -371,7 +529,17 @@ export async function POST(req: Request, ctx: Ctx) {
       const credited = await creditGiftCard(giftCard.code, split.gift, order.id, { ref: giftRef });
       if (!credited.ok) {
         console.error("[api/admin/orders/:id/refund] card credit refused:", credited.error, giftCard.code);
-        return bad("gift_credit_failed", 409, { code: giftCard.code, detail: credited.error, moneyRefunded: split.money });
+        return bad("gift_credit_failed", 409, {
+          code: giftCard.code,
+          detail: credited.error,
+          moneyRefunded: split.money,
+          /* The money half may already be on its way and merely accepted: the
+             owner is being told the card refused, and must not read that as
+             «ничего не ушло» (F29). */
+          ...(moneyResult && moneyResult.status === "pending"
+            ? { refundStatus: "pending" as const, pendingMessages: refundPendingText(0) }
+            : {}),
+        });
       }
       /* `already` is the retry arriving: the first attempt credited the card
          and died before it could write the line below. Not an error and not a
@@ -409,25 +577,6 @@ export async function POST(req: Request, ctx: Ctx) {
           giftCode: giftBack > 0 && giftCard ? giftCard.code : undefined,
         },
       );
-    }
-
-    /* «Отправлено» is not «возвращено». Montonio answers 200 with
-       `status: "PENDING"` for a refund it has only accepted — including the
-       one case the panel used to blame out loud, a settlement account with
-       nothing in it, whose real reason (`INSUFFICIENT_FUNDS`) arrives days
-       later on the refund webhook. The guide gives that retry ten days and
-       then cancels the refund, so a pending one that nobody looks at is money
-       the customer never receives and the shop believes it has sent.
-       The journal row is what makes it findable afterwards; `pendingMessages`
-       is what the panel says instead of «письмо ушло». */
-    if (moneyResult && moneyResult.status === "pending") {
-      await writeAuditSafe("admin", "order.refund_pending", {
-        orderId: order.id,
-        number: order.number,
-        amount: money(moneyResult.amount || split.money),
-        ref: moneyResult.ref,
-        detail: moneyResult.detail,
-      });
     }
 
     const fresh = (await getOrder(order.id)) ?? current;
