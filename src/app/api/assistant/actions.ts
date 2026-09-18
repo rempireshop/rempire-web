@@ -570,7 +570,8 @@ export function sanitizePublishPost(raw: unknown): object | null {
   return { slug, publish: x.publish };
 }
 
-/* ---- photos the owner attached in the chat (add_product_photo, set_post_cover)
+/* ---- photos the owner attached in the chat
+ *      (add_product_photo, set_post_cover, add_post_photo)
  *
  * The panel uploads a photo through POST /api/admin/upload the moment it is
  * attached, and sends the resulting keys along with the question
@@ -609,6 +610,30 @@ export function briefAttachments(raw: unknown): AttachmentBrief[] {
   return out;
 }
 
+export type OpenPostBrief = { slug: string; title: string; status: string };
+
+/**
+ * The article the owner has open in the blog editor, as the panel reports it
+ * (blogOpenForAI() in public/shop2/app.js). This is the assistant's answer to
+ * «which article are we talking about» — the one thing the chat could not know
+ * before, and the reason every follow-up started a new draft.
+ *
+ * Slug-shaped or nothing: a title the panel invented is a label for the prompt,
+ * but the slug is what an action is allowed to act on, so it goes through the
+ * same gate a model-written one does.
+ */
+export function briefOpenPost(raw: unknown): OpenPostBrief | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
+  if (!BLOG_SLUG_RE.test(slug)) return null;
+  return {
+    slug,
+    title: oneLine(x.title, 120).replace(/[`|]/g, " ").trim(),
+    status: x.status === "published" ? "published" : "draft",
+  };
+}
+
 export function sanitizeAddProductPhoto(raw: unknown, known: Set<string>, attached: Set<string>): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const x = raw as Record<string, unknown>;
@@ -619,11 +644,73 @@ export function sanitizeAddProductPhoto(raw: unknown, known: Set<string>, attach
   return { id, key, main: x.main === true };
 }
 
-export function sanitizeSetPostCover(raw: unknown, attached: Set<string>): object | null {
+/* ---- WHICH article a photo action is about -------------------------------
+ *
+ * «it also loses the context and each time creates a new blog post, instead of
+ * updating an already created blog post» — Renat, 18.09.2026. The slug was the
+ * whole of the model's memory: it had to copy one out of the BLOG POSTS block
+ * and copy it right, one turn after the panel had written a brand-new article
+ * that block did not yet name. It guessed, and a cover set on the wrong post is
+ * indistinguishable from a cover that was never set — which is the other half
+ * of «assistant is not able to add cover photos … although it says it does».
+ *
+ * Two doors close that, both here:
+ *   · `openSlug` — the article the owner has open in the blog editor right
+ *     now, sent by the panel with the question (blogOpenForAI() in
+ *     public/shop2/app.js) and named in the prompt. A photo action that
+ *     carries no slug at all is about THAT article, which is the plain reading
+ *     of «поставь сюда обложку» while looking at it.
+ *   · `postSlugs` — every slug the prompt's BLOG POSTS block listed. A slug
+ *     outside it was invented, and an invented slug used to survive all the way
+ *     to «Применить» and fail there, under a reply that had already said the
+ *     photo was in. Refused here instead, so the route can tell the owner the
+ *     photo was NOT added (see route.ts, PHOTO_MISSED).
+ * An empty `postSlugs` means the block was never fetched, so nothing is
+ * checked against it — the older behaviour, unchanged.
+ */
+function postSlugOf(x: Record<string, unknown>, openSlug: string, postSlugs: Set<string>): string {
+  const raw = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
+  const slug = raw || openSlug;
+  if (!BLOG_SLUG_RE.test(slug)) return "";
+  if (postSlugs.size && !postSlugs.has(slug)) return "";
+  return slug;
+}
+
+export function sanitizeSetPostCover(
+  raw: unknown,
+  attached: Set<string>,
+  openSlug = "",
+  postSlugs: Set<string> = new Set(),
+): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const x = raw as Record<string, unknown>;
-  const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
-  if (!BLOG_SLUG_RE.test(slug)) return null;
+  const slug = postSlugOf(x, openSlug, postSlugs);
+  if (!slug) return null;
+  const key = attachKey(x.key);
+  if (!key || !attached.has(key)) return null;
+  return { slug, key };
+}
+
+/**
+ * A photo INSIDE the article, as opposed to its cover — «добавь это фото в
+ * статью». Until today there was no such action at all: the model had a cover
+ * action and nothing else, so an in-article photo was a sentence saying it was
+ * done and an `action: null` under it. The picture goes in as the very same
+ * <figure> the editor's own «Фото» button writes, at the END of the text, and
+ * both the confirm card and the reply say so — the owner moves it with the
+ * arrows on the picture's own control bar (applyPostPhoto in
+ * public/shop2/app.js).
+ */
+export function sanitizeAddPostPhoto(
+  raw: unknown,
+  attached: Set<string>,
+  openSlug = "",
+  postSlugs: Set<string> = new Set(),
+): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const slug = postSlugOf(x, openSlug, postSlugs);
+  if (!slug) return null;
   const key = attachKey(x.key);
   if (!key || !attached.has(key)) return null;
   return { slug, key };
@@ -867,6 +954,10 @@ export function sanitizePointsAdjust(raw: unknown): object | null {
 export interface SanitizeOptions {
   /** The photo keys the panel uploaded for this conversation — the only ones a photo action may name. */
   attachedKeys?: Set<string>;
+  /** The article open in the blog editor — what a photo action with no slug of its own is about. */
+  openPostSlug?: string;
+  /** Every slug the prompt's BLOG POSTS block listed; empty when it was never fetched. */
+  postSlugs?: Set<string>;
 }
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean, opts: SanitizeOptions = {}): object | null {
@@ -874,6 +965,8 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   const x = a as Record<string, unknown>;
   const t = x.type;
   const attached = opts.attachedKeys ?? new Set<string>();
+  const openPostSlug = typeof opts.openPostSlug === "string" ? opts.openPostSlug : "";
+  const postSlugs = opts.postSlugs ?? new Set<string>();
   if (!isAdmin) {
     if (t === "add_to_cart") {
       const ids2 = Array.isArray(x.ids) ? x.ids.filter((i): i is string => typeof i === "string" && known.has(i)).slice(0, 5) : [];
@@ -975,8 +1068,13 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
     return photo ? { type: t, ...photo } : null;
   }
   if (t === "set_post_cover") {
-    const cover = sanitizeSetPostCover(x, attached);
+    const cover = sanitizeSetPostCover(x, attached, openPostSlug, postSlugs);
     return cover ? { type: t, ...cover } : null;
+  }
+  // …and the same photo inside the article rather than on top of it
+  if (t === "add_post_photo") {
+    const photo = sanitizeAddPostPhoto(x, attached, openPostSlug, postSlugs);
+    return photo ? { type: t, ...photo } : null;
   }
   // assistant-work: the accountant export — «выгрузи отчёт за август» hands
   // back a month, the panel turns it into a download link

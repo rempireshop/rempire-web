@@ -13,7 +13,7 @@
  *                                         → { ok, post: Post }            (publish / unpublish — publishedAt kept)
  * PATCH  /api/admin/blog/  { id, ...same fields as POST }
  *                                         → { ok, post: Post }            (edit an existing post; status untouched)
- * DELETE /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (soft delete — see deletePost in @/lib/blog)
+ * DELETE /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (the article is gone — see deletePost in @/lib/blog)
  *
  * NB: trailing slash on every path — next.config has trailingSlash: true.
  *

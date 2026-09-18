@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(25);   // r21: the undo promise names the actions the journal does not carry
+    expect(body.v).toBe(26);   // r25: the article open in the editor, and the photo action for its text
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];

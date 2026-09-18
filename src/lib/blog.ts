@@ -10,12 +10,22 @@
  * and the prerender tool can never disagree about it.
  *
  * `status` is the only publication switch: 'draft' never appears on the
- * public API or in a prerendered page, 'published' is live. There is no hard
- * delete — `deletePost()` sets status back to 'draft', same as
- * `unpublishPost()`, except it also forgets `publishedAt`, so a post that was
- * genuinely deleted no longer shows up as "was live until…" anywhere. The
- * row and its slug are never gone — an admin who deleted by mistake finds it
- * in the drafts list and can publish it again.
+ * public API or in a prerendered page, 'published' is live.
+ *
+ * `deleted_at` is the other one, and it is not the same thing (migration 195).
+ * «Удалить статью» used to be `status = 'draft'` and nothing more — the same
+ * outcome as «Снять с публикации» one button higher — so the article stayed in
+ * «Блог» for ever and Renat's reading of it was the plain one: articles cannot
+ * be deleted (18.09.2026). `deletePost()` stamps `deleted_at` now, and EVERY
+ * read below carries `deleted_at is null`: the admin list, both lookups, the
+ * public list and page, publish and unpublish. The article is gone from the
+ * panel and from the shop.
+ *
+ * The row itself stays, and `slugExists()` is the one query that deliberately
+ * does not filter, because the slug is the reason: 070_blog.sql promises a slug
+ * is never reused for a different article, so a link shared in January can
+ * never open somebody else's text in March. Nothing reads a deleted row back —
+ * bringing one back is a hand-written `update posts set deleted_at = null`.
  *
  * The body is HTML now. The admin editor is a small visual box (a
  * contenteditable in `public/shop2/app.js`), so what it saves is a handful of
@@ -166,6 +176,10 @@ export function slugify(text: string, fallback = "post"): string {
   return out || fallback;
 }
 
+/* The ONE read of `posts` with no `deleted_at is null` on it, and the reason
+   migration 195 keeps the row instead of deleting it: a deleted article's slug
+   stays taken, so the next article with the same title becomes «…-2» and a link
+   shared before the delete can never open somebody else's text. */
 async function slugExists(slug: string, excludeId?: string): Promise<boolean> {
   const rows = excludeId
     ? await query<{ n: number }>("select 1 as n from posts where slug = $1 and id <> $2 limit 1", [slug, excludeId])
@@ -327,25 +341,28 @@ export async function listPublished(
   const size = Math.min(50, Math.max(1, Math.trunc(perPage) || 10));
   const [rows, countRows] = await Promise.all([
     query<PostRow>(
-      `select ${SUMMARY_COLS} from posts where status = 'published'
+      `select ${SUMMARY_COLS} from posts where status = 'published' and deleted_at is null
        order by published_at desc nulls last, created_at desc
        limit $1 offset $2`,
       [size, (p - 1) * size],
     ),
-    query<{ n: string | number }>("select count(*) as n from posts where status = 'published'"),
+    query<{ n: string | number }>("select count(*) as n from posts where status = 'published' and deleted_at is null"),
   ]);
   return { posts: rows.map(toSummary), total: Number(countRows[0]?.n || 0), page: p, perPage: size };
 }
 
 export async function getPublishedBySlug(slug: string): Promise<Post | null> {
-  const rows = await query<PostRow>(`select ${FULL_COLS} from posts where slug = $1 and status = 'published'`, [slug]);
+  const rows = await query<PostRow>(
+    `select ${FULL_COLS} from posts where slug = $1 and status = 'published' and deleted_at is null`,
+    [slug],
+  );
   return rows.length ? toPost(rows[0]) : null;
 }
 
-/** Admin list — every post, newest edited first. No body: the list is a table, not a reader. */
+/** Admin list — every post that still exists, newest edited first. No body: the list is a table, not a reader. */
 export async function listAllPosts(limit = 200): Promise<PostSummary[]> {
   const rows = await query<PostRow>(
-    `select ${SUMMARY_COLS} from posts order by updated_at desc limit $1`,
+    `select ${SUMMARY_COLS} from posts where deleted_at is null order by updated_at desc limit $1`,
     [Math.min(500, Math.max(1, limit))],
   );
   return rows.map(toSummary);
@@ -359,12 +376,12 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export async function getPostById(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
-  const rows = await query<PostRow>(`select ${FULL_COLS} from posts where id = $1`, [id]);
+  const rows = await query<PostRow>(`select ${FULL_COLS} from posts where id = $1 and deleted_at is null`, [id]);
   return rows.length ? toPost(rows[0]) : null;
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const rows = await query<PostRow>(`select ${FULL_COLS} from posts where slug = $1`, [slug]);
+  const rows = await query<PostRow>(`select ${FULL_COLS} from posts where slug = $1 and deleted_at is null`, [slug]);
   return rows.length ? toPost(rows[0]) : null;
 }
 
@@ -409,7 +426,10 @@ export async function upsertPost(input: PostInput): Promise<Post> {
     if (typeof input.slug === "string" && input.slug.trim()) {
       wantedSlug = input.slug;
     } else {
-      const current = await query<{ slug: string }>("select slug from posts where id = $1", [input.id]);
+      const current = await query<{ slug: string }>(
+        "select slug from posts where id = $1 and deleted_at is null",
+        [input.id],
+      );
       if (!current.length) throw new BlogError("not_found");
       wantedSlug = current[0].slug;
     }
@@ -439,7 +459,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
          slug = $1, title = $2::jsonb, excerpt = $3::jsonb, body = $4::jsonb,
          cover_url = $5, cover_alt = $6::jsonb, cover_focus = $7, tags = $8, products = $9,
          seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12, updated_at = now()
-       where id = $13
+       where id = $13 and deleted_at is null
        returning ${FULL_COLS}`,
       [...params, input.id],
     );
@@ -461,7 +481,7 @@ export async function publishPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
     `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now()
-     where id = $1 returning ${FULL_COLS}`,
+     where id = $1 and deleted_at is null returning ${FULL_COLS}`,
     [id],
   );
   return rows.length ? toPost(rows[0]) : null;
@@ -471,23 +491,31 @@ export async function publishPost(id: string): Promise<Post | null> {
 export async function unpublishPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
-    `update posts set status = 'draft', updated_at = now() where id = $1 returning ${FULL_COLS}`,
+    `update posts set status = 'draft', updated_at = now() where id = $1 and deleted_at is null returning ${FULL_COLS}`,
     [id],
   );
   return rows.length ? toPost(rows[0]) : null;
 }
 
 /**
- * Soft delete: back to a plain, never-published-looking draft. Unlike
- * `unpublishPost`, this also forgets `publishedAt` — the difference between
- * "take it down for now" and "get rid of it" is exactly that trace. The row,
- * the slug and the text are kept, so a mistaken delete is one «Опубликовать»
- * away from being fixed, in the drafts list.
+ * Delete: the article leaves «Блог» and leaves the shop.
+ *
+ * Until 18.09.2026 this was `status = 'draft'` and a forgotten `publishedAt` —
+ * which is «Снять с публикации» with a redder button, so the article the owner
+ * had just deleted was still sitting in his list. See migration 195 and the
+ * header of this file.
+ *
+ * `deleted_at` is stamped, every read filters on it, and the row and its slug
+ * stay behind so a shared link can never be handed to a different article.
+ * `status` and `published_at` are cleared with it, so nothing that reads a row
+ * without knowing about `deleted_at` — a hand-written query, tools/lib/
+ * blog-export.mjs at build time — can mistake it for something to publish.
  */
 export async function deletePost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
-    `update posts set status = 'draft', published_at = null, updated_at = now() where id = $1 returning ${FULL_COLS}`,
+    `update posts set status = 'draft', published_at = null, deleted_at = now(), updated_at = now()
+     where id = $1 and deleted_at is null returning ${FULL_COLS}`,
     [id],
   );
   return rows.length ? toPost(rows[0]) : null;

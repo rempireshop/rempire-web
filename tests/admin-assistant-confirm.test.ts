@@ -66,6 +66,8 @@ function ask(onScreen: unknown, answer: Answer): Promise<Out> {
     function contentForAI() { return {}; }
     function analyticsForAI() { return null; }
     function attachmentsForAI() { return []; }
+    // r25: which article is open in the blog editor — none, in this rig
+    function blogOpenForAI() { return null; }
     function fetch() {
       return Promise.resolve({ ok: true, json: function () { return Promise.resolve(ANSWER); } });
     }
