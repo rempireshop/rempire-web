@@ -563,6 +563,17 @@
   user-select: all; -webkit-user-select: all; overflow-wrap: anywhere;
 }
 .adm-ship__links { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; }
+/* The two things decided at label time — the declared box and the five locker
+   doors — framed like .adm-ship beside it, because they are part of the same
+   «Отправление» story and sit on the same card, just above «Создать
+   этикетку». */
+.adm-locker { border: 1px solid var(--a-rule); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+/* 44 px and not the chip row's 40: this one is tapped with a thumb while the
+   other hand holds the box, on the owner's iPhone. */
+.adm-chip--size { height: 44px; min-width: 44px; padding: 0 12px; font-variant-numeric: tabular-nums; }
+/* «Коробка магазина» — three dimensions side by side where there is room and
+   stacked on a phone, so a 360 px screen never gets three 40 px boxes. */
+.adm-parcel { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
 .adm-copy {
   height: 40px; padding: 0 14px; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
   font-size: 14px; font-weight: 500; white-space: nowrap; flex: none;

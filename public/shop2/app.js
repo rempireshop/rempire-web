@@ -2885,6 +2885,36 @@
       "Письмо удалено ✓": "Kiri kustutatud ✓",
       "Отправить письмо?": "Saata kiri?",
       "Рассылка отправлена": "Uudiskiri saadetud",
+      /* r24 — «Коробка магазина», «Размер ячейки» и «Где предлагать пакомат» */
+      "Размер ячейки": "Kapi suurus",
+      "Коробка магазина": "Poe karp",
+      "Длина, см": "Pikkus, cm",
+      "Ширина, см": "Laius, cm",
+      "Высота, см": "Kõrgus, cm",
+      "Размер ячейки по умолчанию": "Kapi vaikesuurus",
+      "Пока этикеток не было — при первой будет предложен этот размер.":
+        "Silte pole veel olnud — esimese juures pakutakse seda suurust.",
+      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
+        "Kontrolli Montonio kabinetis kahte lülitit: SmartPostil kapi vaikesuurus, DPD-l PIN-teenus. Ilma nendeta võib pakil üleandmiskoodi mitte olla ja A4-lehel jääb see rida tühjaks.",
+      "Сторона коробки — от 1 до 200 см.": "Karbi külg on 1 kuni 200 cm.",
+      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "Pakiautomaadi hind nendes riikides tuleb selle riigi «Pakiautomaadi» veerust, eraldi vedajahinda siin ei ole. Hinna all on see, mis pood võtab, kui väli tühjendada, ja millise vedajaga pakk läheb.",
+      "Где предлагать пакомат": "Kus pakiautomaati pakkuda",
+      "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
+        "Montonio viib pakiautomaatidesse ja pakipunktidesse kõigis neis riikides. Lülita riik välja — ja kassas jääb sellele ainult kuller.",
+      "только курьер": "ainult kuller",
+      "пакомат и курьер": "pakiautomaat ja kuller",
+      "Предлагать пакомат": "Pakkuda pakiautomaati",
+      "Не предлагать пакомат": "Mitte pakkuda pakiautomaati",
+      "Коробка": "Karp",
+      "Другая коробка": "Teine karp",
+      "Это только для этой посылки — коробка магазина не меняется.":
+        "See kehtib ainult sellele pakile — poe karp ei muutu.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
+        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Montonio arvestab kahest suurema järgi: tegelik kaal ja karbi mahu järgi arvutatud kaal. Seepärast on väiksem karp otsene kokkuhoid igalt pakilt.",
+      "по умолчанию": "vaikimisi",
+      "как в прошлый раз": "nagu eelmisel korral",
+      "чаще всего": "kõige sagedamini",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -5627,6 +5657,36 @@
       "Письмо удалено ✓": "Letter deleted ✓",
       "Отправить письмо?": "Send the letter?",
       "Рассылка отправлена": "Newsletter sent",
+      /* r24 — the declared carton, the locker door and the pickup-point list */
+      "Размер ячейки": "Locker size",
+      "Коробка магазина": "The shop's box",
+      "Длина, см": "Length, cm",
+      "Ширина, см": "Width, cm",
+      "Высота, см": "Height, cm",
+      "Размер ячейки по умолчанию": "Default locker size",
+      "Пока этикеток не было — при первой будет предложен этот размер.":
+        "No labels yet — this size will be offered on the first one.",
+      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
+        "Check two switches in your Montonio account: a default locker size for SmartPosti, and the PIN service for DPD. Without them a parcel may get no drop-off code, and that line on the A4 sheet stays blank.",
+      "Сторона коробки — от 1 до 200 см.": "A side of the box is 1 to 200 cm.",
+      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
+        "The pickup-point price in these countries comes from that country's «Pickup point» column; there is no separate per-carrier price here. Under the price is what the shop charges if the box is cleared, and which carrier the parcel goes with.",
+      "Где предлагать пакомат": "Where to offer a pickup point",
+      "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
+        "Montonio delivers to lockers and pickup points in every one of these countries. Switch a country off and its checkout keeps the courier alone.",
+      "только курьер": "courier only",
+      "пакомат и курьер": "pickup point and courier",
+      "Предлагать пакомат": "Offer a pickup point",
+      "Не предлагать пакомат": "Do not offer a pickup point",
+      "Коробка": "Box",
+      "Другая коробка": "A different box",
+      "Это только для этой посылки — коробка магазина не меняется.":
+        "This is for this parcel only — the shop's box does not change.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
+        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Montonio charges the greater of two: the real weight and the weight worked out from the box's volume. So a smaller box is a direct saving on every parcel.",
+      "по умолчанию": "by default",
+      "как в прошлый раз": "as last time",
+      "чаще всего": "most often",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -5711,6 +5771,25 @@
     [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
         EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
+    /* r24 — the four lines about the carton and the locker door that carry a
+       size, a dimension or a count. Each is one text node in the markup, so
+       each needs a rule rather than a key. */
+    [/^Нажмите «Создать этикетку» — поедет ячейка (.+)\. Другой размер — нажмите на него\.$/,
+      { ET: "Vajuta «Loo silt» — läheb kapp $1. Teine suurus — vajuta sellele.",
+        EN: "Press «Create label» — locker $1 goes out. For another size, tap it." }],
+    [/^Чаще всего вы отправляете (.+) — этот размер и будет предложен\.$/,
+      { ET: "Kõige sagedamini saadad sa $1 — seda suurust pakutaksegi.",
+        EN: "You most often ship $1 — that is the size that will be offered." }],
+    [/^(.+) × (.+) × (.+) см · около (.+) кг$/,
+      { ET: "$1 × $2 × $3 cm · umbes $4 kg", EN: "$1 × $2 × $3 cm · about $4 kg" }],
+    [/^Montonio посчитает эту коробку примерно как (.+) кг\.$/,
+      { ET: "Montonio arvestab selle karbi umbes $1 kg järgi.",
+        EN: "Montonio will count this box as roughly $1 kg." }],
+    [/^Пакомат включён: (\d+) из (\d+)\.$/,
+      { ET: "Pakiautomaat sees: $1 riigis $2-st.", EN: "Pickup point on: $1 of $2." }],
+    [/^Коробка магазина: (.+) × (.+) × (.+) см · ячейка (.+)$/,
+      { ET: "Poe karp: $1 × $2 × $3 cm · kapp $4",
+        EN: "The shop's box: $1 × $2 × $3 cm · locker $4" }],
     /* the switch on a promo-code row is named after the code it belongs to */
     // ([^:]+), not (.+): «Промокод SUMMER: скидка 15%» is the journal's own
     // line and belongs to the rules further down — this one is the bare code,
@@ -6808,6 +6887,13 @@
        to at all — an order there could be paid for and never posted. Renat can
        switch any of them back on in Настройки → Доставка. */
     countriesOff: ["CH", "CY", "GB", "IS", "LI", "MT", "NO"],
+    /* Где пакомата НЕ предлагать. Ренат, 18.09.2026: «open every country DPD
+       serves» — so the default is empty and every country with a locker
+       Montonio prices gets one (CARRIERS_BY_COUNTRY below). Written down as
+       the exceptions, like countriesOff above, so narrowing the list later is
+       a setting and not a deploy, and a country the tariff mirror gains opens
+       by itself. Mirrors ShippingRules.pickupOff in src/lib/shipping.ts. */
+    pickupOff: [],
     /* One price per carrier, because that is how Montonio bills a parcel
        machine and the shopper is the one who picks the chip.
        Ренат, 13.09.2026: «we get prices from Montonio and we should use
@@ -6913,7 +6999,8 @@
     freeFromByCountry: cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry),
     methods: { parcel: {}, courier: {}, pickup: {} },
     carriers: {},
-    countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff)
+    countriesOff: cloneRules(SHIP_RULES_DEFAULT.countriesOff),
+    pickupOff: cloneRules(SHIP_RULES_DEFAULT.pickupOff)
   };
   var SHIP_STORED = cloneRules(SHIP_STORED_DEFAULT);
   var DELIVERY = [
@@ -6951,6 +7038,22 @@
     LV: ["omniva", "dpd", "unisend", "novapost"],
     LT: ["omniva", "dpd", "unisend", "novapost"],
     FI: ["smartpost", "dpd"],
+    /* 18.09.2026 — Ренат: «open every country DPD serves». DPD has lockers and
+       far more parcel shops in every one of these, Montonio prices the route,
+       and a DPD locker in Italy books exactly as an Estonian one does:
+       `{type:"pickupPoint", id:<the point's uuid>}`. `parcelMachine` was never
+       a shipping method — it is a subtype — so nothing in the API was ever in
+       the way (docs/montonio-shipping-audit.md, answer 1).
+       DPD alone, deliberately. Nova Post has a locker Montonio prices in nine
+       of them too, and in HU and RO it is the only carrier that does — which
+       is why neither is on this list. Offering Nova Post outside the Baltics
+       is its own decision: it is Montonio International Shipping and it has no
+       returns at all (docs/shipping.md). Nobody has taken it.
+       Which of these the checkout actually draws is SHIP_RULES.pickupOff —
+       one list the owner edits in Настройки → Доставка. */
+    AT: ["dpd"], BE: ["dpd"], BG: ["dpd"], CZ: ["dpd"], DE: ["dpd"], DK: ["dpd"],
+    ES: ["dpd"], FR: ["dpd"], HR: ["dpd"], IE: ["dpd"], IT: ["dpd"], LU: ["dpd"],
+    NL: ["dpd"], PL: ["dpd"], PT: ["dpd"], SE: ["dpd"], SI: ["dpd"], SK: ["dpd"],
     EU: []
   };
 
@@ -6998,8 +7101,35 @@
     /* the parcel cell: the method price — or, where the owner priced a
        carrier of this country on its own, «от» the cheapest of them; a
        country with no parcel carrier at all gets a dash, not a price */
+    /* The «Другие страны Европы» row's own pakomat price — the cheapest of the
+       countries behind it that actually offer one.
+       Until 18.09.2026 this row was a dash: the checkout drew a locker in four
+       countries and nowhere else. Ренат opened every country DPD serves, so
+       the row has a price again — and it has to be «от», like the courier
+       column beside it, because the countries behind it run from 13,69 €
+       (Швеция) to 59,59 € (Хорватия) and one number would be a promise the
+       till does not keep. The exact price appears the moment the country is
+       picked. A country the owner switched off (rules.pickupOff) is not
+       counted, because its price is not one anybody can be charged. */
+    function zonePickupFloor() {
+      var keys = rows.map(function (r) { return r[0]; });
+      var off = (rules && rules.pickupOff) || [];
+      var table = (rules.methods && rules.methods.parcel) || {};
+      var min = null;
+      Object.keys(carriers).forEach(function (c) {
+        if (c === "default" || keys.indexOf(c) >= 0) return;
+        if (!(carriers[c] || []).length || off.indexOf(c) >= 0) return;
+        var v = table[c];
+        if (typeof v === "number" && isFinite(v) && v > 0 && (min === null || v < min)) min = v;
+      });
+      return min;
+    }
     function parcelCell(c) {
       var list = carriers[c] || [];
+      if (c === "EU") {
+        var pf = zonePickupFloor();
+        return pf === null ? "—" : '<span class="num">' + tr("от " + eur(pf)) + "</span>";
+      }
       if (!list.length) return "—";
       var base = priceOf(rules.methods && rules.methods.parcel, c);
       var seen = [];
@@ -7230,6 +7360,13 @@
         .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
         .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
     }
+    /* …and where the pakomat is switched off, the same way: an array is
+       authoritative, `[]` means «пакомат везде, где он есть». */
+    if (Array.isArray(raw.pickupOff)) {
+      SHIP_RULES.pickupOff = raw.pickupOff
+        .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
+        .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    }
     /* `raw.markup` is read by nothing since 14.09.2026 and is ignored on the
        way in — the same as parseShippingRules() does on the server. Every row
        written before then carries the key (the panel saved the whole table),
@@ -7305,6 +7442,11 @@
         .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
         .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
     }
+    if (Array.isArray(raw.pickupOff)) {
+      out.pickupOff = raw.pickupOff
+        .map(function (c) { return String(c == null ? "" : c).trim().toUpperCase(); })
+        .filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    }
     /* `raw.markup` is read by nothing since 14.09.2026 and is ignored here as
        it is in parseShippingRules() on the server. */
     return out;
@@ -7334,6 +7476,7 @@
        which is the shape Ренат asked to be rid of. */
     SHIP_RULES.carriers = live.carriers;
     SHIP_RULES.countriesOff = live.countriesOff;
+    SHIP_RULES.pickupOff = live.pickupOff;
     refreshShipThresholds();
   }
   var shipRulesAsked = false;
@@ -7393,9 +7536,25 @@
     for (var i = 0; i < avail.length; i++) if (avail[i].k === S.ship.method) return S.ship.method;
     return avail.length ? avail[0].k : "courier";
   }
+  /**
+   * Does the shop offer a pickup point in this country at all?
+   *
+   * Two conditions, and the server asks the same two — `pickupOffered()` in
+   * src/lib/shipping.ts: there has to be a carrier with points there
+   * (CARRIERS_BY_COUNTRY), and the owner must not have switched the country
+   * off (SHIP_RULES.pickupOff, «Где предлагать пакомат» in the panel).
+   * tests/shipping-admin-mirror.test.ts fails if the two lists disagree.
+   */
+  function pickupOpen(country) {
+    var cc = country || S.country;
+    if (!(CARRIERS_BY_COUNTRY[cc] || []).length) return false;
+    var off = SHIP_RULES.pickupOff;
+    return !(off && off.indexOf(cc) >= 0);
+  }
   /** Carriers worth offering: the country's list, minus any that came back empty. */
   function carriersFor(country) {
     var cc = country || S.country;
+    if (!pickupOpen(cc)) return [];
     return (CARRIERS_BY_COUNTRY[cc] || []).filter(function (c) {
       return !POINTS.empty[c + ":" + cc];
     });
@@ -7485,7 +7644,8 @@
     // The brand marks travel with the machine lists: same step, same one shot,
     // and the chips they belong to are drawn from the same block.
     loadCarrierLogos();
-    var all = CARRIERS_BY_COUNTRY[S.country] || [];
+    // a country the owner switched off is not one to download 12 000 points for
+    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [];
     for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
   }
   /* How many carrier feeds for the selected country are still in flight —
@@ -7493,7 +7653,7 @@
      (and anyone debugging) can tell "the block will be rewritten again in a
      moment" from "this is the final delivery list". */
   function pointsLoadingCount() {
-    var all = CARRIERS_BY_COUNTRY[S.country] || [], n = 0;
+    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [], n = 0;
     for (var i = 0; i < all.length; i++) if (POINTS.loading[all[i] + ":" + S.country]) n++;
     return n;
   }
@@ -8228,6 +8388,10 @@
     partnerErr: "",      // why the form was not sent (a bad address, a server refusal)
     partnerBusy: false,
     // ---- admin «Настройки» → «Цены и лояльность» ----
+    parcelLoaded: null,  // settings.shipping_parcel — the declared carton + locker history
+    lockerSize: "",      // the door picked on the open order card; "" means «предложенный»
+    boxOpen: false,      // «Другая коробка» — the three fields for THIS parcel are showing
+    boxOverride: null,   // {length,width,height} in cm, this parcel only; never stored
     pricingLoaded: null, // the full settings.pricing as last read from the server (admin-only)
     pricingDraft: null,  // working copy while the card is being edited
     pricingErr: "",      // why the last value typed into the card was not stored
@@ -17642,6 +17806,106 @@
     if (v.shipped) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Доставлен</button>';
     return "";
   }
+  /* ---------- «Размер ячейки» — the one thing decided at label time --------
+   *
+   * `lockerSize` is a field on Montonio's Create Shipment, which means it is
+   * decided at the moment Renat presses «Создать этикетку» — standing over the
+   * box he has just packed. It is a **price tier**, so one fixed size in a
+   * constant would be one tier paid for every parcel whatever is inside it.
+   *
+   * Ренат, 18.09.2026: «use recommended, but we have also option that some
+   * default is set and used + automate it — maybe each package will be almost
+   * always at same size.» So both halves, and the automation is the point:
+   * the door he has been using is already selected, the line under it says
+   * why, and pressing the button confirms it. He is interrupted only if he
+   * wants to change it — one tap on another chip.
+   *
+   * Drawn only where the field means something: a parcel going to a pickup
+   * point, on a carrier that takes the field at all (Unisend, SmartPosti —
+   * `LOCKER_CARRIERS`), and only while the label is still to be made. A
+   * courier parcel and an Omniva locker never see it, because Montonio would
+   * refuse the field and because an Estonian Omniva drop-off pin is a copy of
+   * the parcel id anyway.
+   *
+   * What the shop cannot do from here, and the hint says so: SmartPosti's
+   * contract default and DPD's PIN service are switches in Montonio's own
+   * Partner System. With neither a request value nor a contract default,
+   * SmartPosti issues no drop-off code at all — the blank line on the A4 slip
+   * Renat reported on 13.09.2026 — which is exactly why this strip sends one.
+   */
+  var LOCKER_CARRIERS = ["unisend", "smartpost"];
+  /** The door this order will be booked with: what he tapped, else the suggestion. */
+  function admLockerPick() {
+    return LOCKER_SIZES.indexOf(S.lockerSize) >= 0 ? S.lockerSize : suggestLocker();
+  }
+  /** Is this order one where the door is ours to choose? */
+  function admLockerOrder(v) {
+    if (!v || !v.paid || v.labeled || v.pickup || v.digital) return false;
+    var sh = v.srv && v.srv.shipping;
+    if (!sh) return false;
+    var m = String(sh.method || "").toLowerCase();
+    if (m !== "parcel" && !sh.pointId) return false;
+    return LOCKER_CARRIERS.indexOf(String(sh.carrier || "").toLowerCase()) >= 0;
+  }
+  /**
+   * Is this order still waiting for a label at all? Then the two things
+   * decided at label time belong on its card: the box and the locker door.
+   */
+  function admShipPrep(v) {
+    return !!v && v.paid && !v.labeled && !v.pickup && !v.digital;
+  }
+  /** The box this parcel will be declared as — his override, else the shop's. */
+  function admBoxPick() {
+    var b = S.boxOverride;
+    return b && b.length && b.width && b.height ? b : parcelConf();
+  }
+  /** Did he actually change it? An untouched override is not one. */
+  function admBoxChanged() {
+    var b = S.boxOverride, p = parcelConf();
+    return !!b && (b.length !== p.length || b.width !== p.width || b.height !== p.height);
+  }
+  function admShipPrepHTML(v) {
+    if (!admShipPrep(v)) return "";
+    loadAdminPricing(false);   // the same GET /api/admin/settings every card makes
+    var box = admBoxPick();
+    var pick = admLockerPick();
+    /* The box, first, because it is the one that costs money on every parcel:
+       Montonio bills the greater of the real weight and the weight of the box,
+       so a smaller carton is the cheapest lever the shop has. The declared one
+       is shown, and «Другая коробка» is one tap away — for THIS parcel, saving
+       nothing, changing no setting. Ренат, 18.09.2026: «In any case if needed
+       we have the possibility to override and adjust along the way.» */
+    var boxBlock = '<div class="adm-ship__row"><span class="adm-sec__t">Коробка</span>' +
+      '<span class="adm-hint">' + admBoxLine(box.length, box.width, box.height, parcelVolKg(box)) + "</span></div>" +
+      (S.boxOpen
+        ? '<div class="adm-parcel">' +
+            ["length", "width", "height"].map(function (f, i) {
+              return '<label class="adm-field"><span>' + ["Длина, см", "Ширина, см", "Высота, см"][i] + "</span>" +
+                '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+                  'data-shipbox="' + f + '" value="' + esc(String(box[f])) + '"></label>';
+            }).join("") +
+          "</div>" +
+          '<div class="adm-hint">Это только для этой посылки — коробка магазина не меняется.</div>'
+        : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-shipboxopen>Другая коробка</button>');
+    return '<div class="adm-locker">' + boxBlock +
+      (admLockerOrder(v)
+        ? '<div class="adm-ship__row" style="margin-top:4px"><span class="adm-sec__t">Размер ячейки</span>' +
+            '<span class="adm-hint">' + lockerReason() + "</span></div>" +
+          '<div class="adm-chips" role="group" aria-label="Размер ячейки">' +
+            LOCKER_SIZES.map(function (k) {
+              return '<button class="adm-chip adm-chip--size" type="button" data-lockersize="' + k + '"' +
+                ' aria-current="' + (k === pick ? "true" : "false") + '">' + k + "</button>";
+            }).join("") +
+          "</div>" +
+          '<div class="adm-hint">Нажмите «Создать этикетку» — поедет ячейка ' + esc(pick) +
+            ". Другой размер — нажмите на него.</div>"
+        : "") +
+      "</div>";
+  }
+  /** «25 × 18 × 10 см · около 1,1 кг» — one text node, so it stays translatable. */
+  function admBoxLine(l, w, h, kg) {
+    return l + " × " + w + " × " + h + " см · около " + kgNum(kg) + " кг";
+  }
   /** The printable receipt of a salon sale — the POS screen's own link,
       repeated on the order so it can be found again a week later. */
   function admReceiptLink(v, row) {
@@ -18006,6 +18270,7 @@
       (showSteps ? admOrderSteps(v) : "") +
       admReturnStateHTML(v) +
       admInvoiceStateHTML(v) +
+      (showSteps ? admShipPrepHTML(v) : "") +
       (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
       (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
       (showSteps ? admShipmentBoxHTML(v) : "") +
@@ -21822,8 +22087,82 @@
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
         "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
       admBanksHTML() +
+      admParcelBoxHTML() +
       admDeliveryCloseHTML() +
       "</div>";
+  }
+  /**
+   * «Коробка магазина» — settings.shipping_parcel.
+   *
+   * Montonio asks some carriers for the parcel's measurements and refuses the
+   * booking without them (`constraints.parcelDimensionsRequired`); the shop
+   * never read the flag and never sent the numbers, so those routes simply did
+   * not work. The catalogue has no dimensions and no weight for any of its 220
+   * products, so there is nothing to measure — Ренат, 18.09.2026: «one default
+   * parcel size, overridable». This is that box.
+   *
+   * 25 × 18 × 10 cm to start with, and small on purpose: Montonio bills
+   * `max(actualWeight, volumetricWeight)` and the volumetric half is the box's
+   * own volume, so at this shop's parcel sizes the carton — not what is in it
+   * — is what gets paid for. The line under the boxes prints what Montonio
+   * will count this one as, so a bigger carton costs visibly more before it is
+   * saved. Centimetres, because that is what a tape measure says; the metres
+   * Montonio wants are converted once, on the server.
+   *
+   * The locker door beside it is only the seed. What is actually pre-selected
+   * on an order card is what he has been shipping — see admShipPrepHTML().
+   *
+   * Saved on the spot with an undo, like «Доставлен сам» below it, and not
+   * through the tariff table's «Сохранить»: it is a different settings row and
+   * it moves no price.
+   */
+  function admParcelBoxHTML() {
+    loadAdminPricing(false);
+    var p = parcelConf();
+    var used = p.recent.length;
+    return '<div class="adm-sec__t" style="margin-top:24px">Коробка магазина</div>' +
+      '<p class="adm-hint" style="margin:0 0 10px">Некоторые перевозчики не примут посылку без размеров. ' +
+        "Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. " +
+        "Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. " +
+        "Поэтому коробка поменьше — это прямая экономия на каждой посылке.</p>" +
+      '<div class="adm-parcel">' +
+        '<label class="adm-field"><span>Длина, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="length" value="' + esc(String(p.length)) + '"></label>' +
+        '<label class="adm-field"><span>Ширина, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="width" value="' + esc(String(p.width)) + '"></label>' +
+        '<label class="adm-field"><span>Высота, см</span>' +
+          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+            'data-parcelbox="height" value="' + esc(String(p.height)) + '"></label>' +
+      "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">' + admParcelVolLine(parcelVolKg(p)) + "</p>" +
+      '<label class="adm-field" style="margin-top:12px"><span>Размер ячейки по умолчанию</span>' +
+        '<select class="adm-input" data-parcelsize>' +
+        LOCKER_SIZES.map(function (k) {
+          return '<option value="' + k + '"' + (k === p.lockerSize ? " selected" : "") + ">" + k + "</option>";
+        }).join("") + "</select></label>" +
+      '<p class="adm-hint" style="margin-top:8px">' +
+        (used
+          ? admParcelLearnedLine(suggestLocker(p))
+          : "Пока этикеток не было — при первой будет предложен этот размер.") +
+        "</p>" +
+      /* The two switches that are not ours to throw, named rather than
+         quietly worked around. Montonio's Partner System is the owner's
+         account; a panel that pretended otherwise would be a panel that lies
+         about why a drop-off code is blank. */
+      '<p class="adm-hint" style="margin-top:8px">В кабинете Montonio проверьте два переключателя: ' +
+        "у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. " +
+        "Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.</p>";
+  }
+  /** «Чаще всего вы отправляете L — этот размер и будет предложен.»
+      One text node, and no declining noun in it: translateTree() rewrites a
+      whole node, and a plural that changes with the count would need three
+      dictionary keys to say one thing. */
+  /** «Montonio посчитает эту коробку примерно как 1,1 кг.» One text node. */
+  function admParcelVolLine(kg) { return "Montonio посчитает эту коробку примерно как " + kgNum(kg) + " кг."; }
+  function admParcelLearnedLine(size) {
+    return "Чаще всего вы отправляете " + size + " — этот размер и будет предложен.";
   }
   /* ---- «Слишком много банков» (Ренат, 07.09.2026) -------------------------
      Montonio отдаёт весь список банков магазина и убрать из него один банк у
@@ -22223,10 +22562,13 @@
    * of them, so the five carrier columns would be a hundred and five dashes.
    * The line above the list says that once instead.
    *
-   * Nine of the twenty-one — AT, CZ, DE, ES, HU, IT, PL, RO, SK — do have a
-   * Nova Post locker Montonio prices, and Hungary and Romania have no other
-   * carrier at all. Offering them is a decision about what the customer sees,
-   * not a layout question, so the fold says «только курьер» until it is taken.
+   * 18.09.2026 — the fold no longer says «только курьер». Ренат opened every
+   * country DPD serves, so eighteen of these twenty-one now offer a pickup
+   * point too, and «Где предлагать пакомат» below is the list he narrows it
+   * with. The three that do not are Hungary, Romania and Greece: the first two
+   * have a locker at Nova Post only, which is Montonio International Shipping
+   * and has no returns at all, and Greece has none anywhere. Whether to add
+   * Nova Post's is still a decision of its own and nobody has taken it.
    */
   function admShipEuropeHTML() {
     /* data-fold: the open state is S.shipEuOpen, not the browser's own — so
@@ -22240,13 +22582,14 @@
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Пакоматов магазин в этих странах не предлагает — только курьер. ' +
+        '<p class="adm-hint" style="margin:0 0 10px">Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. ' +
           "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
         '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
           "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
         SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
           .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], false); }).join("") +
+        admShipPickupHTML() +
         admShipUnservedHTML() +
       "</div></details>";
   }
@@ -22258,6 +22601,48 @@
    * is no tariff to put in them. Renat can switch one back on; what he does
    * then is his own arrangement with the customer.
    */
+  /**
+   * «Где предлагать пакомат» — one list, and the one the owner narrows.
+   *
+   * Ренат, 18.09.2026: «open every country DPD serves». That is the default
+   * and it is derived rather than typed — every country the tariff mirror
+   * prices a pickup point for with a carrier the shop can bill from, which is
+   * DPD everywhere outside the Baltics (PICKUP_POINT_COUNTRIES in
+   * src/lib/shipping/country-prices.ts, CARRIERS_BY_COUNTRY here). What is
+   * stored is the *exceptions*, so switching a country off is a setting and
+   * not a deploy, and a country the mirror gains later opens by itself.
+   *
+   * A switch that is ON is the ordinary state and says so; a switch that is
+   * OFF says what the customer will see instead, which is the courier line
+   * the country had before.
+   *
+   * Nothing here moves a price. The «Пакомат» cell of every one of these
+   * countries has existed since 07.09.2026 — `costBasis()` prices a locker
+   * whether or not a checkout offers one — so opening a country changes what
+   * can be picked and not what it costs.
+   */
+  function admShipPickupHTML() {
+    var open = SHIP_PICKUP_COUNTRIES.slice();
+    if (!open.length) return "";
+    var on = open.filter(function (c) { return !shipPickupOff(c); }).length;
+    return '<div class="adm-sec__t" style="margin-top:20px">Где предлагать пакомат</div>' +
+      '<p class="adm-hint" style="margin:4px 0 4px">Montonio возит в пакоматы и пункты выдачи во всех этих странах. ' +
+        "Выключите страну — и в кассе для неё останется только курьер.</p>" +
+      '<p class="adm-hint" style="margin:0 0 10px">' + admShipPickupCountLine(on, open.length) + "</p>" +
+      '<div class="adm-list adm-list--flat">' +
+        open.map(function (c) { return [c, countryName(c)]; })
+          .sort(function (a, b) { return a[1].localeCompare(b[1]); })
+          .map(function (r) {
+            var off = shipPickupOff(r[0]);
+            return '<div class="adm-swrow"><span>' + esc(r[1]) +
+              '<span class="adm-row__sub">' + (off ? "только курьер" : "пакомат и курьер") + "</span></span>" +
+              admSwitch('data-shippickup="' + r[0] + '"', !off,
+                off ? "Предлагать пакомат" : "Не предлагать пакомат") + "</div>";
+          }).join("") +
+      "</div>";
+  }
+  /** «Пакомат включён: 22 из 22.» — one text node, and no declining noun. */
+  function admShipPickupCountLine(on, all) { return "Пакомат включён: " + on + " из " + all + "."; }
   function admShipUnservedHTML() {
     return '<div class="adm-sec__t" style="margin-top:20px">Куда Montonio не возит</div>' +
       '<p class="adm-hint" style="margin:4px 0 10px">Montonio не берёт посылки в эти страны ни одним перевозчиком. ' +
@@ -23554,6 +23939,76 @@
       useCarrier: r.useCarrier === undefined ? true : r.useCarrier !== false
     };
   }
+  /* ---------- «Коробка магазина» — settings.shipping_parcel ---------------
+     Mirrors src/lib/shipping/parcel.ts: the one carton the shop declares when
+     Montonio asks a route for dimensions, and the locker door to pre-select at
+     label time. Centimetres here and everywhere the owner can see them —
+     `POST /shipments` is metres and the conversion happens once, on the
+     server, in parcelMetres().
+     `recent` is not a form field: the label route appends one size per label
+     and this is what LOCKER_SIZES below suggests from. The panel carries it
+     through untouched so that saving the boxes cannot erase the history the
+     suggestion is learned from (the server holds the same line — mergeParcel).
+     The default is SMALL on purpose. Montonio bills
+     `max(actualWeight, volumetricWeight)` and volumetric weight is the box's
+     own volume, so at this shop's parcel sizes the carton — not what is in it
+     — is what gets paid for. 25 × 18 × 10 cm is about 1,1 kg; the 30 × 30 × 30
+     of REFERENCE_PARCEL would be five to seven. Ренат, 18.09.2026: «use a
+     smaller default box then and we don't bother with weights». */
+  var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
+  var PARCEL_DEFAULT = { length: 25, width: 18, height: 10, lockerSize: "M", recent: [] };
+  /** «около 1,1 кг» — volumetricKg() in src/lib/shipping/parcel.ts. */
+  function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }
+  /* 1.1 → «1,1». A REGEX and not a string literal on purpose: tools/i18n-gaps.mjs
+     re-joins `+`-glued string literals to reproduce what reaches the DOM, so a
+     `.replace(".", ",")` written inline splices two stray literals into the
+     middle of a translatable sentence and the sentence stops matching its own
+     UI_RX rule. Regex literals are skipped by that tokeniser. */
+  function kgNum(n) { return String(n).replace(/\./, ","); }
+  function normaliseParcel(raw) {
+    var r = raw && typeof raw === "object" ? raw : {};
+    function cm(v, d) {
+      var x = Number(v);
+      if (!isFinite(x) || x <= 0) return d;
+      return Math.round(Math.min(200, Math.max(1, x)) * 10) / 10;
+    }
+    var recent = [];
+    if (Array.isArray(r.recent)) {
+      for (var i = 0; i < r.recent.length && recent.length < 20; i++) {
+        var one = String(r.recent[i] == null ? "" : r.recent[i]).trim().toUpperCase();
+        if (LOCKER_SIZES.indexOf(one) >= 0) recent.push(one);
+      }
+    }
+    var size = String(r.lockerSize == null ? "" : r.lockerSize).trim().toUpperCase();
+    return {
+      length: cm(r.length, PARCEL_DEFAULT.length),
+      width: cm(r.width, PARCEL_DEFAULT.width),
+      height: cm(r.height, PARCEL_DEFAULT.height),
+      lockerSize: LOCKER_SIZES.indexOf(size) >= 0 ? size : PARCEL_DEFAULT.lockerSize,
+      recent: recent
+    };
+  }
+  function parcelConf() { return S.parcelLoaded || normaliseParcel(null); }
+  /** The door to pre-select — suggestedLockerSize() in src/lib/shipping/parcel.ts.
+      The commonest of the last twenty labels, a tie going to the most recent
+      (`recent` is newest-first and the walk keeps the first winner it meets);
+      with no history at all, the owner's own default. */
+  function suggestLocker(p) {
+    var conf = p || parcelConf(), counts = {}, best = "", bestN = 0;
+    conf.recent.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    conf.recent.forEach(function (x) {
+      if (counts[x] > bestN) { best = x; bestN = counts[x]; }
+    });
+    return best || conf.lockerSize;
+  }
+  /** Why that door is offered — one short phrase, its own text node. */
+  function lockerReason(p) {
+    var conf = p || parcelConf();
+    if (!conf.recent.length) return "по умолчанию";
+    var want = suggestLocker(conf), same = 0;
+    conf.recent.forEach(function (x) { if (x === want) same++; });
+    return conf.recent[0] === want && same === 1 ? "как в прошлый раз" : "чаще всего";
+  }
   function normalisePricing(raw) {
     var r = raw && typeof raw === "object" ? raw : {};
     var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
@@ -23625,6 +24080,12 @@
         S.deliveryLoaded = normaliseDelivery(st0.delivery);
         // «Какие банки показывать» — settings.payment_banks, from the same map
         S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
+        /* «Коробка магазина» — settings.shipping_parcel, same map, same read.
+           The order card needs it to pre-select the locker door, so it is read
+           here rather than on the settings screen: the owner opens «Заказы»
+           far more often than «Настройки», and a card that asked would be a
+           question where there should be a confirmation. */
+        S.parcelLoaded = normaliseParcel(st0.shipping_parcel);
         S.pricingLoadErr = false;
         render();
       }
@@ -23939,6 +24400,15 @@
   var SHIP_EU_COUNTRIES = ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "HU", "IE", "IT",
     "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
   var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
+  /* Every country that HAS a pickup point to offer — derived from
+     CARRIERS_BY_COUNTRY rather than typed a second time, so the switch list
+     and the checkout can never disagree about which countries exist. «EU» is
+     a zone and not a country, and it is the one key of that table with no
+     carriers behind it. Which of these is actually offered is
+     SHIP_RULES.pickupOff — see admShipPickupHTML(). */
+  var SHIP_PICKUP_COUNTRIES = Object.keys(CARRIERS_BY_COUNTRY).filter(function (c) {
+    return c !== "EU" && (CARRIERS_BY_COUNTRY[c] || []).length > 0;
+  });
   /* The carrier columns of the rate table: the carriers Montonio quotes a
      pickup-point price for — one price per carrier per country, whether the
      shopper then picks a machine or one of that carrier's manned counters
@@ -24019,7 +24489,8 @@
       by: r.freeFromByCountry || {},
       methods: r.methods || {},
       carriers: r.carriers && Object.keys(r.carriers).length ? r.carriers : null,
-      off: (r.countriesOff || []).slice().sort()
+      off: (r.countriesOff || []).slice().sort(),
+      pickOff: (r.pickupOff || []).slice().sort()
     });
   }
   /** Does the table show prices the shop is not yet charging? Against the
@@ -24086,6 +24557,20 @@
   function shipCountryOff(c) {
     var off = shipDraft().countriesOff;
     return !!off && off.indexOf(c) >= 0;
+  }
+  /** Is the pakomat switched off for this country in the draft? */
+  function shipPickupOff(c) {
+    var off = shipDraft().pickupOff;
+    return !!off && off.indexOf(c) >= 0;
+  }
+  /** Offer a pakomat here, or stop offering it. «Сохранить» is what tells the shop. */
+  function toggleShipPickup(c) {
+    var d = shipDraft();
+    if (!Array.isArray(d.pickupOff)) d.pickupOff = [];
+    var i = d.pickupOff.indexOf(c);
+    if (i >= 0) d.pickupOff.splice(i, 1);
+    else d.pickupOff.push(c);
+    d.pickupOff.sort();
   }
   /** Flip one country on or off in the draft. «Сохранить» is what tells the shop. */
   function toggleShipCountry(c) {
@@ -30732,6 +31217,11 @@
     else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
     // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
     else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
+    /* «Коробка магазина»: the whole object travels, `recent` included, so the
+       size history the suggestion learns from survives a save of the boxes.
+       The server holds the same line for a request that omits it
+       (mergeParcel), but the panel has the row in hand and sends it. */
+    else if (a.type === "set_parcel") srvSaved(apiSend(st, "PUT", { shipping_parcel: normaliseParcel(S.parcelLoaded) }));
     /* «Какие банки показывать» — the whole array of codes, so undo re-sends it.
        …and the checkout is then asked for the list again: it draws
        PAYMETHODS.banks, which is fetched once per page load, and the panel and
@@ -31389,11 +31879,46 @@
     if (!c || c === "EU") return "В заказе не указана страна — покупатель выбрал «Другая страна Европы». Уточните страну у покупателя и отправьте вручную.";
     return "Курьера Montonio в " + countryName(c) + " нет — отправьте другим способом.";
   }
+  /**
+   * What «Создать этикетку» posts.
+   *
+   * The order, plus the two things that can only be decided with the packed
+   * box in hand: the locker door (always, for a carrier that takes one — the
+   * server picks the same default when it is absent) and, only if he actually
+   * typed one, this parcel's own measurements in centimetres.
+   *
+   * Its own function so the booking call stays one line and so the panel's
+   * tests can slice it out on its own (tests/admin-order-card-r21.test.ts).
+   */
+  function admShipBody(id, row) {
+    var body = { orderId: id };
+    if (admLockerOrder(row)) body.lockerSize = admLockerPick();
+    if (admBoxChanged()) body.box = admBoxPick();
+    return body;
+  }
+  /** Forget this parcel's door and box. Opening another order does this: both
+      are about the box in his hands right now, and carrying either across
+      would book the next parcel with the previous one's measurements. */
+  function admShipClear() {
+    S.lockerSize = "";
+    S.boxOpen = false;
+    S.boxOverride = null;
+  }
+  /** The label is made: the same reset, plus a re-read — the suggestion has
+      just learned this size and the server, not the panel, decides what
+      «чаще всего» now means. */
+  function admShipSpent() { admShipClear(); loadAdminPricing(true); }
   function srvCreateShipment(id) {
     if (SRV.shipBusy) return;
     var row = admOrderById(id);
     SRV.shipBusy = true; render();
-    apiSend("/api/admin/shipments/", "POST", { orderId: id }).then(function (r) {
+    /* The locker door travels with the booking. The server picks the same
+       default when this field is absent (suggestedLockerSize, and the same
+       history), so a panel that has not read the settings yet still books the
+       size he has been shipping — this is the confirmation, not the source of
+       truth. It is only meaningful for a pickup-point parcel on a carrier that
+       takes the field; everywhere else Montonio never sees it. */
+    apiSend("/api/admin/shipments/", "POST", admShipBody(id, row)).then(function (r) {
       SRV.shipBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -31401,6 +31926,10 @@
           type: "order_label", id: String(id), number: row ? row.number : String(id), value: true, done: true
         });
         toast(r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
+        /* The size is spent: the next order starts from the suggestion again,
+           and the suggestion has just learned this one. Re-read rather than
+           patched locally — the server decides what `recent` says. */
+        admShipSpent();
         loadSrvOrders(true);
         return;
       }
@@ -31714,6 +32243,10 @@
       var dv = normaliseDelivery(a.value);
       return "Доставлен сам: " + (dv.useCarrier ? "спрашивать перевозчика" : "не спрашивать перевозчика") + " · " +
         (dv.autoDays ? "через " + dv.autoDays + " " + pl(dv.autoDays, "день", "дня", "дней") : "по времени не закрывать");
+    }
+    if (a.type === "set_parcel") {
+      var pv = normaliseParcel(a.value);
+      return "Коробка магазина: " + pv.length + " × " + pv.width + " × " + pv.height + " см · ячейка " + pv.lockerSize;
     }
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
@@ -32099,6 +32632,13 @@
       entry.prev = { type: "set_delivery", value: normaliseDelivery(S.deliveryLoaded) };
       S.deliveryLoaded = normaliseDelivery(a.value);
     }
+    /* «Коробка магазина»: settings.shipping_parcel has no demo layer either —
+       S.parcelLoaded IS the last known server value and the whole object
+       travels, so undo puts the previous carton back. */
+    else if (a.type === "set_parcel") {
+      entry.prev = { type: "set_parcel", value: normaliseParcel(S.parcelLoaded) };
+      S.parcelLoaded = normaliseParcel(a.value);
+    }
     /* «Какие банки показывать»: settings.payment_banks is a plain array of
        codes with no demo layer either — S.banksLoaded IS the last known
        server value, and the whole array travels, so undo puts it back. */
@@ -32285,6 +32825,7 @@
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
     else if (a.type === "set_flow_pct") DEMO.flows.birthdayPercent = a.value;
     else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
+    else if (a.type === "set_parcel") S.parcelLoaded = normaliseParcel(a.value);
     else if (a.type === "set_banks") S.banksLoaded = Array.isArray(a.value) ? a.value.slice() : [];
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
@@ -34899,7 +35440,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -35216,6 +35757,10 @@
       S.adminTab = S.admCustOpen ? "people" : "orders";
       // assistant-work: a fresh order gets a fresh reply panel
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      /* …and a fresh parcel. The locker door and «Другая коробка» are about
+         the box in his hands right now: carrying either to the next order
+         would book that one with the previous parcel's measurements. */
+      admShipClear();
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admlogin !== undefined) {
@@ -35238,6 +35783,17 @@
        «Выдан клиенту» for a pickup) is the last step, applied at once with an
        undo on the toast; «Написать» opens the order on its message card.
        Every step lands in the journal with a way back. */
+    /* One tap on another door. Nothing is sent: the size travels with
+       «Создать этикетку», which is the press that books the parcel. */
+    if (d.lockersize) { S.lockerSize = d.lockersize; render(); refocus('[data-lockersize="' + d.lockersize + '"]'); return; }
+    /* «Другая коробка»: the three fields for this one parcel. Seeded from the
+       shop's own carton, so closing them again without typing is a no-op. */
+    if (d.shipboxopen !== undefined) {
+      S.boxOpen = true;
+      var bx = parcelConf();
+      S.boxOverride = { length: bx.length, width: bx.width, height: bx.height };
+      render(); refocus('[data-shipbox="length"]'); return;
+    }
     if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
     if (d.admdelivered) {
       var dRow = admOrderById(d.admdelivered);
@@ -36401,6 +36957,14 @@
       toggleShipCountry(d.shipcountry);
       S.shipEuOpen = true;
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
+    }
+    /* «Где предлагать пакомат» — a draft change like every other cell on this
+       screen, so it lights the same «Сохранить» and travels in the same PUT.
+       Nothing is offered or withdrawn until he presses it. */
+    if (d.shippickup) {
+      toggleShipPickup(d.shippickup);
+      S.shipEuOpen = true;
+      render(); refocus('[data-shippickup="' + d.shippickup + '"]'); return;
     }
     /* Same as «Что увидит покупатель» below, and for the same reason: a
        <summary> carries an activation behaviour of its own, and the browser
@@ -37696,6 +38260,43 @@
        is ticked. `change` and not the click delegate: the box is inside its
        label, so a tap on the words never reaches the input's own attribute. */
     else if (t.matches("[data-acctreturn]")) { acctReturnSubmit(t.getAttribute("data-acctreturn")); }
+    /* «Другая коробка» on the order card — this parcel's own measurements.
+       Nothing is saved and no setting moves: the numbers travel with «Создать
+       этикетку» and are gone the moment the label is made. */
+    else if (t.matches("[data-shipbox]")) {
+      var sbNum = Number(String(t.value).replace(",", "."));
+      if (!isFinite(sbNum) || sbNum <= 0 || sbNum > 200) {
+        render(); toast("Сторона коробки — от 1 до 200 см."); return;
+      }
+      if (!S.boxOverride) S.boxOverride = { length: 0, width: 0, height: 0 };
+      S.boxOverride[t.getAttribute("data-shipbox")] = Math.round(sbNum * 10) / 10;
+      render(); return;
+    }
+    /* «Коробка магазина» — settings.shipping_parcel, saved on `change` (the
+       field is left, not on every keystroke) with the same undo as the two
+       settings below it. The whole object travels, `recent` included, so the
+       size history is never the casualty of a typed dimension. */
+    else if (t.matches("[data-parcelbox]") || t.matches("[data-parcelsize]")) {
+      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
+      var pcCur = parcelConf();
+      var pcNext = {
+        length: pcCur.length, width: pcCur.width, height: pcCur.height,
+        lockerSize: pcCur.lockerSize, recent: pcCur.recent.slice()
+      };
+      if (t.matches("[data-parcelsize]")) pcNext.lockerSize = t.value;
+      else {
+        var pcField = t.getAttribute("data-parcelbox");
+        var pcNum = Number(String(t.value).replace(",", "."));
+        /* Out of the box's range is ignored and the field put back, the same
+           way a rate cell is: a 0 here would be a parcel Montonio refuses. */
+        if (!isFinite(pcNum) || pcNum <= 0 || pcNum > 200) {
+          render(); toast("Сторона коробки — от 1 до 200 см."); return;
+        }
+        pcNext[pcField] = Math.round(pcNum * 10) / 10;
+      }
+      var pcEntry = demoApply({ type: "set_parcel", value: pcNext });
+      render(); toast("Сохранено ✓", pcEntry); return;
+    }
     /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
     else if (t.matches("[data-delivdays]")) {
       // same gate as the switch beside it — the whole object travels

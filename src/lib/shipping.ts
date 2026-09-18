@@ -6,6 +6,7 @@ import {
   countryPriceTable,
   methodPrice,
   MONTONIO_NOT_SERVED,
+  PICKUP_POINT_COUNTRIES,
   SHOP_CARRIERS,
 } from "@/lib/shipping/country-prices";
 
@@ -79,6 +80,30 @@ export interface ShippingRules {
    * not carry. Use `countryOff()` to ask.
    */
   countriesOff?: string[];
+  /**
+   * Countries where the checkout must **not** offer a pickup point, even
+   * though Montonio has one and the mirror prices it.
+   *
+   * Ренат, 18.09.2026: «open every country DPD serves». Until that day the
+   * checkout drew a locker only in EE, LV, LT and FI and every other country
+   * got one courier line — not because Montonio blocks it (it does not:
+   * `parcelMachine` is a *subtype*, and a DPD locker in Italy books as
+   * `{type:"pickupPoint", id:<point uuid>}`, which is what this shop already
+   * sends) but because nobody had opened them. `PICKUP_POINT_COUNTRIES` is now
+   * the whole list, derived from the tariff mirror.
+   *
+   * Written down as the **exceptions**, exactly like `countriesOff` beside it,
+   * and for one reason: it is the shape that lets him narrow the list without
+   * a deploy while still letting a country the mirror gains later open by
+   * itself. An inclusion list frozen into a stored row would do neither.
+   * Empty — the default — means every country on that list is open.
+   *
+   * A *storefront* switch, like `countriesOff`: `quoteFromRules()` still
+   * prices a parcel machine for a country that is off, because the price of a
+   * delivery is not the question of whether it is offered, and an order that
+   * somehow carries one is priced rather than refused.
+   */
+  pickupOff?: string[];
   /* `markup` — percent + fixed, added to a Montonio tariff on the way to a
      shelf price — was a key here until 14.09.2026. Ренат: «it seems to me that
      this delivery is a bit over engineered». It was: its boxes changed no
@@ -212,6 +237,10 @@ export const DEFAULT_SHIPPING_RULES: ShippingRules = {
      the point of the switch: the shop stops promising what it cannot do, and
      the decision stays his. */
   countriesOff: [...MONTONIO_NOT_SERVED],
+  /* Nothing switched off: every country the mirror prices a pickup point for
+     is offered. «Open every country DPD serves» is the default rather than a
+     new hard-coded list, so narrowing it is a setting and not a deploy. */
+  pickupOff: [],
 };
 
 const SETTINGS_KEY = "shipping_rules";
@@ -304,6 +333,7 @@ export function cleanShippingRules(value: unknown): ShippingRules {
     methods: { parcel: {}, courier: {}, pickup: {} },
     carriers: {},
     countriesOff: [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])],
+    pickupOff: [...(DEFAULT_SHIPPING_RULES.pickupOff ?? [])],
   };
 
   if (raw.freeFrom === null) rules.freeFrom = null;
@@ -379,6 +409,17 @@ export function cleanShippingRules(value: unknown): ShippingRules {
       .filter((c) => /^[A-Z]{2}$/.test(c)))].sort();
   }
 
+  /* Same shape and the same rule as countriesOff above: an array is
+     authoritative, empty included — «предлагать пакомат везде» is a real
+     answer and has to survive a save. Only the countries the mirror actually
+     prices a pickup point for are kept, because switching off a country that
+     never had one is a row that looks like a decision and is not. */
+  if (Array.isArray(raw.pickupOff)) {
+    rules.pickupOff = [...new Set(raw.pickupOff
+      .map((c) => String(c ?? "").trim().toUpperCase())
+      .filter((c) => PICKUP_POINT_COUNTRIES.includes(c)))].sort();
+  }
+
   return rules;
 }
 
@@ -421,6 +462,7 @@ export function parseShippingRules(value: unknown): ShippingRules {
       pickup: { ...DEFAULT_SHIPPING_RULES.methods.pickup },
     },
     countriesOff: [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])],
+    pickupOff: [...(DEFAULT_SHIPPING_RULES.pickupOff ?? [])],
   };
 
   if (raw.freeFrom === null) rules.freeFrom = null;
@@ -503,6 +545,22 @@ export function parseShippingRules(value: unknown): ShippingRules {
         off
           .map((c) => String(c ?? "").trim().toUpperCase())
           .filter((c) => /^[A-Z]{2}$/.test(c)),
+      ),
+    ].sort();
+  }
+
+  /* …and the pickup-point exceptions, the same way: an array is authoritative,
+     `[]` means «пакомат везде, где он есть», and a missing key keeps the
+     default (which is also `[]`). Filtered to the countries that have a
+     pickup point at all, so a stale code cannot make `pickupOffered()` answer
+     about a country the mirror does not price. */
+  const pickupOff = raw.pickupOff;
+  if (Array.isArray(pickupOff)) {
+    rules.pickupOff = [
+      ...new Set(
+        pickupOff
+          .map((c) => String(c ?? "").trim().toUpperCase())
+          .filter((c) => PICKUP_POINT_COUNTRIES.includes(c)),
       ),
     ].sort();
   }
@@ -699,6 +757,28 @@ export function countryOff(rules: ShippingRules, country: string): boolean {
   const c = String(country || "").toUpperCase();
   const off = rules.countriesOff ?? DEFAULT_SHIPPING_RULES.countriesOff ?? [];
   return off.includes(c);
+}
+
+/**
+ * Does the checkout offer a pickup point in this country?
+ *
+ * Two conditions, and both have to hold: the tariff mirror prices a locker
+ * there with a carrier the shop can bill from (`PICKUP_POINT_COUNTRIES`), and
+ * the owner has not switched it off (`ShippingRules.pickupOff`). The
+ * storefront asks the same question of its own copy — `pickupOpen()` in
+ * public/shop2/app.js — and `tests/shipping-admin-mirror.test.ts` keeps the
+ * two answering alike for every country the shop sells to.
+ *
+ * A country with no Montonio pickup point at all can never be turned on here:
+ * a chip with nothing behind it is worse than no chip. HU and RO have one, at
+ * Nova Post only, and Nova Post outside the Baltics is a separate decision —
+ * see PICKUP_POINT_COUNTRIES.
+ */
+export function pickupOffered(rules: ShippingRules, country: string): boolean {
+  const c = String(country || "").toUpperCase();
+  if (!PICKUP_POINT_COUNTRIES.includes(c)) return false;
+  const off = rules.pickupOff ?? DEFAULT_SHIPPING_RULES.pickupOff ?? [];
+  return !off.includes(c);
 }
 
 /** The pure half: rules in, price out. No I/O, so it is trivially testable. */
