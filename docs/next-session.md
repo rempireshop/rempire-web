@@ -1,8 +1,8 @@
 # Where we stopped — the night of 18→19.09.2026
 
-`origin/main` is `7d788e9`. **186 test files, 4317 tests, 0 failures**, `tsc`
+`origin/main` is `12a396b`. **186 test files, 4318 tests, 0 failures**, `tsc`
 clean, 814 prerendered pages with 0 failures, `untranslated: 0` at ET/EN parity.
-27 commits overnight, four agent branches merged, everything pushed.
+29 commits overnight, four agent branches merged, everything pushed.
 
 This replaces the plan written at 22:40; `docs/night-plan-2026-09-19.md` is what
 was intended, this is what happened.
@@ -34,7 +34,7 @@ it did, an order somebody really paid for, just not in full, would have been
 chased for a week and then cancelled. One predicate, in the one place all three
 queries read it, proved by reverting it and watching the test fail.
 
-## The audit: 39 of 56 findings closed
+## The audit: 41 of 56 findings closed
 
 Including the only MED-HIGH and nine of the ten MEDs. The ones worth naming:
 
@@ -55,10 +55,23 @@ Including the only MED-HIGH and nine of the ten MEDs. The ones worth naming:
 - **Loyalty points now come back when you cancel first and refund after** — the
   order Renat actually does them in. The customer had been keeping the points
   the sale earned and losing the ones they spent, at 1 point = 1 €.
-- **Both candidates for the intermittent failure are closed.** Nine test files
-  set the fuzz environment and never installed the fetch stub, so every paid
-  order carrying a gift card made a real signed PUT to a fake R2 host on every
-  run, including CI. The other was a test measuring the machine's clock.
+- **The intermittent failure had THREE causes, not the two the audit named,
+  and all three are closed.** Nine test files set the fuzz environment and
+  never installed the fetch stub, so every paid order carrying a gift card
+  made a real signed PUT to a fake R2 host on every run, including CI. The
+  second was a test measuring the machine's clock. The third showed itself at
+  02:14 in a full run: the login-ladder test, which had already been fixed on
+  18.09 for a clock race. That fix was right — it stopped comparing Node's
+  clock with Postgres's — but underneath it the «success» floor is a
+  timestamp truncated to a whole millisecond, and four failure rows inserted
+  with `now()` land inside that same millisecond often enough to matter. When
+  they do the ladder counts none of them and reads 0 instead of 1000. They go
+  in a second later now.
+- **The assistant stopped calling the goods figure «revenue».** The panel was
+  renamed on 17.09 to say the value of goods in orders, and the model was
+  still handed that same list as «Best-selling by revenue» — so «что приносит
+  больше всего денег» was answered with the number the panel had just stopped
+  calling money (F25).
 
 Plus the two owner answers of 22:55: **the return window is 30 days everywhere**
 (three places said 14, in three languages, including the prerendered delivery
@@ -82,9 +95,6 @@ Nothing here is urgent; each is written up in
   second numbered invoice). All need design, all are low-probability.
 - **F21** — the label normaliser has no size sanity check. Unverifiable until a
   real label exists, which is Sunday at the earliest.
-- **F25** — the panel renamed «Топ товаров» to the value of goods; the admin
-  assistant is still told the same list is «revenue». A contradiction with
-  decision D2, small and worth doing.
 - **F26, F29, F40, F53, F55, F56** — noise, coverage gaps and one account screen
   offering fewer carriers than the checkout.
 - **§ 9.5** — three duplicate keys remain in the ET/EN dictionaries; the later
