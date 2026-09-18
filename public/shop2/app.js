@@ -529,6 +529,14 @@
         "Sammu «silt» muudetud",
       "Новый статус посылки":
         "Uus saadetise staatus",
+      "Возврат не прошёл":
+        "Tagasimakse ei läinud läbi",
+      "Возврат отправлен, деньги ещё не у покупателя":
+        "Tagasimakse on saadetud, raha ei ole veel kliendini jõudnud",
+      "Возврат не дошёл до покупателя":
+        "Tagasimakse ei jõudnud kliendini",
+      "Перевозчик не принял посылку":
+        "Vedaja ei võtnud pakki vastu",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -2002,8 +2010,8 @@
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "Tellimuse kinkekaardi saab tagastada ainult koos kogu tellimuse jäägiga.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "Raha ei õnnestunud kinkekaardile tagastada — kontrollige seda jaotises «Kinkekaardid».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio ei vasta — proovige minuti pärast.",
-      "Montonio отказал в возврате — проверьте баланс в его панели.":
-        "Montonio keeldus tagasimaksest — kontrollige tema töölaual saldot.",
+      "Montonio не принял возврат. Причина — в журнале заказа.":
+        "Montonio ei võtnud tagasimakset vastu. Põhjus on tellimuse päevikus.",
       "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
         "Raha läks välja, aga kirje ei salvestunud — avage tellimus uuesti ja kontrollige.",
       /* «Письма»: the three new rows and the two intervals behind them */
@@ -3297,6 +3305,14 @@
         "The label step changed",
       "Новый статус посылки":
         "A new parcel status",
+      "Возврат не прошёл":
+        "The refund did not go through",
+      "Возврат отправлен, деньги ещё не у покупателя":
+        "The refund was sent, the money is not with the customer yet",
+      "Возврат не дошёл до покупателя":
+        "The refund did not reach the customer",
+      "Перевозчик не принял посылку":
+        "The carrier would not take the parcel",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -4742,8 +4758,8 @@
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "A gift card from an order can only be refunded together with the whole of what is left of the order.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "The money could not be put back on the gift card — check it under «Gift cards».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio is not answering — try again in a minute.",
-      "Montonio отказал в возврате — проверьте баланс в его панели.":
-        "Montonio refused the refund — check the balance in its panel.",
+      "Montonio не принял возврат. Причина — в журнале заказа.":
+        "Montonio did not accept the refund. The reason is in the order journal.",
       "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
         "The money left, but the record did not save — open the order again and check.",
       "Заказ ждёт оплаты": "Order awaiting payment",
@@ -16752,6 +16768,28 @@
     };
   }
   var GSC = null;
+  /* «Что Montonio умеет прямо сейчас» — GET /api/admin/montonio/.
+     `rows` arrives ready, one entry per thing worth a row, each with its name
+     and sentence in all three languages: they are built on the server
+     (src/lib/montonio-problems.ts montonioReadinessRows) because they are
+     about Montonio's state, not the shop's, and the dictionary in this file
+     cannot be kept in step with an API. The row that matters is «Возврат
+     денег покупателю»: «Bank payments» can be on while «Refundable bank
+     payments» is off, and then the shop looks perfect until the first
+     customer asks for money back (docs/montonio-untested.md). */
+  var MONTONIO = null;
+  function loadMontonio(force) {
+    if (SRV.admin !== true || loadMontonio._busy) return;
+    if (MONTONIO && !force) return;
+    loadMontonio._busy = true;
+    apiJson("/api/admin/montonio/").then(function (r) {
+      loadMontonio._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200) MONTONIO = r.body;
+      else if (!MONTONIO) MONTONIO = { rows: [] };
+      render();
+    }).catch(function () { loadMontonio._busy = false; if (!MONTONIO) MONTONIO = { rows: [] }; render(); });
+  }
   /* What the server saw in the key variable — its shape, never its contents
      — so «Подключения» can say what to re-paste. Each sentence is its own
      text node (a <span>) so the translator finds it by key. */
@@ -21437,6 +21475,24 @@
           : "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.",
       act: admAI === false ? admDevLink() : "" });
 
+    /* The Montonio rows go under the payment and delivery ones, because they
+       answer a different question: not «работает ли» but «что вообще
+       включено». Their text is the server's, printed as it came — see
+       loadMontonio(). A row the server could not decide is grey («quiet»),
+       never green: «мы не смогли спросить» and «выключено» are different
+       facts and a square that merges them is the bug this screen is for. */
+    var mont = (MONTONIO && MONTONIO.rows) || [];
+    for (var mi = 0; mi < mont.length; mi++) {
+      var mr = mont[mi];
+      rows.push({
+        name: esc(String(mr.name[S.lang] || mr.name.RU || "Montonio")),
+        ok: mr.ok !== false,
+        quiet: mr.quiet === true,
+        sub: esc(String(mr.sub[S.lang] || mr.sub.RU || "")),
+        act: mr.ok === false ? admDevLink() : ""
+      });
+    }
+
     var cam = scanSupportInfo().camera;
     rows.push({ name: "Сканер · камера телефона", ok: cam,
       sub: cam
@@ -21446,7 +21502,7 @@
     return rows;
   }
   function admAppsHTML() {
-    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadAnalytics("7d"); }
+    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadMontonio(); loadAnalytics("7d"); }
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Подключения", "") +
       /* `--lines`, like every other list in the panel (admin.css § «one shape
@@ -22520,6 +22576,17 @@
        word nobody had seen before arrived from the carrier, and the word
        itself is what the line ends with (payload `code`, see auditTextHTML). */
     "shipment.status": "Новый статус посылки",
+    /* The four rows that used to be silences. `order.refund_failed` arrived
+       with the payments audit and never got a word, so the journal printed
+       the raw key; the other three are new (r23-live-ready) and each one is a
+       thing that used to happen with nothing written down at all: a refund
+       Montonio only accepted, a refund it later could not pay, and a parcel
+       the carrier refused. Every word here is a dictionary key — see the note
+       under this table. */
+    "order.refund_failed": "Возврат не прошёл",
+    "order.refund_pending": "Возврат отправлен, деньги ещё не у покупателя",
+    "order.refund_stuck": "Возврат не дошёл до покупателя",
+    "shipment.registration_failed": "Перевозчик не принял посылку",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "mail.send": "Письмо клиенту отправлено",
     "setting.set": "Настройка изменена",
@@ -31122,6 +31189,18 @@
       toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
     }).catch(function () { toast("Сервер не отвечает"); });
   }
+  /* The server's own sentence for an answer, in the panel's language.
+     `messages` is {RU,ET,EN} and it is built on the SERVER
+     (src/lib/montonio-problems.ts), not here, for two reasons: these
+     sentences are about Montonio's failures rather than the shop's, and they
+     change when Montonio changes — which the RU-source dictionary in this
+     file cannot follow. Printing them adds no Russian literal here, so
+     tools/i18n-gaps.mjs stays at zero. "" when the server sent none, and then
+     the maps below answer as they always did. */
+  function srvMsg(body) {
+    var m = body && body.messages;
+    return m ? String(m[S.lang] || m.RU || "") : "";
+  }
   /* ---------- «Вернуть деньги» — the card's own server call -----------------
      POST /api/admin/orders/<id>/refund/ sends the money back through the
      provider that took it and records what it said (docs/payments.md § 11).
@@ -31137,7 +31216,13 @@
     bad_amount: "Проверьте сумму — вернуть можно не больше остатка.",
     order_closed: "Заказ закрыт — возврат не оформить.",
     provider_unreachable: "Montonio не отвечает — попробуйте через минуту.",
-    provider_rejected: "Montonio отказал в возврате — проверьте баланс в его панели.",
+    /* Montonio names five distinct refusals and the server turns each one
+       into its own actionable sentence (srvMsg above). This is only the
+       fallback for a body that carried none — and it no longer blames the
+       balance, which by Montonio's own refunds guide cannot produce an HTTP
+       refusal at all: a refund with no money behind it is answered
+       200 PENDING. docs/montonio-payments-audit.md § A1. */
+    provider_rejected: "Montonio не принял возврат. Причина — в журнале заказа.",
     recorded_failed: "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.",
     /* gift cards (10.09.2026): a card this order sold is refunded whole or not
        at all, and never once somebody has spent from it (the used one names
@@ -31215,17 +31300,25 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var gift = Number(r.body.gift) || 0;
+        /* «Отправлено» is not «возвращено». Montonio answers 200 with
+           `status: "PENDING"` for a refund it has only ACCEPTED — including
+           one it cannot fund — and cancels it after ten days if the money
+           never arrives. The server sends the sentence for that state
+           (pendingMessages); it is appended rather than substituted, so the
+           amount and the order number still lead the toast. */
+        var pend = r.body.pendingMessages;
+        var wait = pend ? "\n" + String(pend[S.lang] || pend.RU || "") : "";
         /* The toast (and the journal) name the card's part when there is one:
            «письмо ушло» alone would send the owner to Montonio for money
            that is on a card */
         if (gift > 0.004) {
           journalNote("Заказ " + number + ": возврат " + eur(r.body.amount) + ", на карту " + eur(gift));
-          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " · на карту " + eur(gift) + " — письмо ушло"
-            : number + " · вернули часть, " + eur(r.body.amount) + " · на карту " + eur(gift));
+          toast((r.body.fully ? number + " · возврат " + eur(r.body.amount) + " · на карту " + eur(gift) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount) + " · на карту " + eur(gift)) + wait);
         } else {
           journalNote("Заказ " + number + ": возврат " + eur(r.body.amount));
-          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
-            : number + " · вернули часть, " + eur(r.body.amount));
+          toast((r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount)) + wait);
         }
         admOrdersChanged();
         return;
@@ -31235,7 +31328,11 @@
         var usedCode = admRefundCode(r.body);
         toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
       } else {
-        toast(REFUND_ERR[err] || "Не удалось оформить возврат");
+        /* The server named which of Montonio's five refusals this is and what
+           to do about it; an unrecognised one quotes Montonio rather than us.
+           Its sentence wins over the map above, which is now only the
+           fallback for an answer that carried none. */
+        toast(srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат");
       }
       render();
     }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
@@ -31308,7 +31405,14 @@
         return;
       }
       var shipErr = r.body && r.body.error;
-      toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail) : SHIP_ERR[shipErr] || "Не удалось создать этикетку");
+      /* `registration_failed` — the carrier turned the parcel down. The
+         server sends the sentence (srvMsg): the parcel EXISTS at Montonio
+         unregistered, a second press repeats the same refusal by design, and
+         the fix is a corrected phone or address passed on, not a retry.
+         Sandbox can never produce this — it calls no carriers at all
+         (docs/montonio-untested.md § S1). */
+      toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail)
+        : srvMsg(r.body) || SHIP_ERR[shipErr] || "Не удалось создать этикетку");
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
