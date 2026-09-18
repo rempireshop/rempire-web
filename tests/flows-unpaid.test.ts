@@ -171,6 +171,30 @@ describe("the reminder", () => {
     expect((await getOrder(till.id))!.status).toBe("new");
   });
 
+  it("never goes to an order that was HELD for paying short — that customer did pay", async () => {
+    /* A short payment is held rather than fulfilled (the owner's decision of
+       18.09.2026): nothing ships, no gift card is minted, and the order keeps
+       the status «новый» because nothing has happened to it yet. That status
+       is one of the two this loop selects, so without a predicate of its own
+       the shop would write «Заказ ждёт оплаты» to somebody whose money is
+       sitting in Montonio, and then cancel the order under them a week later.
+       Never seen only because this flow is switched off — and the decision of
+       17.09.2026 is that it gets switched on. */
+    const held = await place();
+    await setOrderPayment(held.id, {
+      provider: "montonio",
+      ref: "held-1",
+      status: "pending",
+      at: new Date().toISOString(),
+      held: { expected: 4990, got: 1000, currency: "EUR", reason: "short" },
+    } as Parameters<typeof setOrderPayment>[1]);
+    await age(held.id, 30);
+
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 0, cancelled: 0 });
+    expect(sent).toHaveLength(0);
+    expect((await getOrder(held.id))!.status).toBe("new");
+  });
+
   /* …and a cancelled order stays cancelled when the bank's ticket finally
      turns up. Montonio marks an unfinished payment ABANDONED long after the
      shopper walked away — by then this order had been closed and the customer

@@ -1171,7 +1171,17 @@ const UNPAID_STATUSES = "('new','failed')";
    note at the top); the type check at the call site is what keeps the two
    vocabularies in step. */
 const STILL_UNPAID_ONLY = ["paid", "shipped", "delivered", "cancelled", "refunded"] as const;
-const NOT_PAID = "coalesce(payment->>'status','') <> 'paid'";
+/* «Not paid» is two things, and the second one arrived on 19.09.2026: an order
+   whose money HAS arrived but came up short is deliberately held (`payment.held`
+   — src/lib/payments/apply.ts, the owner's decision of 18.09.2026). It keeps
+   the status «новый», because nothing has been fulfilled, so every query in
+   this file would have picked it up: a customer who really did pay would get
+   «Заказ ждёт оплаты» for a week and then have the order cancelled under them.
+   That flow is switched off today (`flows.unpaid`), which is the only reason
+   this was never seen — and the owner's decision of 17.09.2026 is that it goes
+   on. A trap behind a switch the go-live list turns on is still a trap, so the
+   predicate closes it here, once, where all three queries read it. */
+const NOT_PAID = "coalesce(payment->>'status','') <> 'paid' and payment->'held' is null";
 /* «По счёту» is not this loop's business. An invoice order carries its own
    clock — src/lib/invoice-dunning.ts, counted from the invoice's due date
    rather than from when the order was placed — and both loops select the
