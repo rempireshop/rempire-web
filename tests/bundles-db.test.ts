@@ -623,6 +623,10 @@ describe("what the shop shows for a set whose part was taken off sale", () => {
     const body = `
       function bundleItemProduct(it) { return IN_CATALOGUE ? { id: it.id, stock: "in" } : null; }
       function shopHidden(id) { return HIDDEN.indexOf(id) >= 0; }
+      /* These three cases are about the hidden-switch fallback, where no
+         volume is counted at all — so the map is empty and the helper falls
+         through to the product word, which is what they assert. */
+      function sizeStockOf() { return null; }
       ${slice("bundleItemStock")}
       return bundleItemStock(PART);
     `;

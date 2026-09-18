@@ -531,8 +531,6 @@
         "Raha tagastus",
       "Подарочные карты аннулированы":
         "Kinkekaardid tühistatud",
-      "Возврат обработан":
-        "Tagastus töödeldud",
       "Отметка в списке запуска":
         "Märge käivitusnimekirjas",
       "Отметка в плане проверки":
@@ -547,6 +545,14 @@
         "Tagasimakse ei läinud läbi",
       "Возврат отправлен, деньги ещё не у покупателя":
         "Tagasimakse on saadetud, raha ei ole veel kliendini jõudnud",
+      "Заплатили меньше — заказ придержан":
+        "Maksti vähem — tellimus on ootel",
+      "Уведомление банка не сошлось — переспросили Montonio":
+        "Panga teade ei klappinud — küsisime Montoniolt üle",
+      "Оплата нашлась при ночной сверке":
+        "Makse leidis öine kontroll",
+      "Montonio считает заказ возвращённым, а он не оплачен":
+        "Montonio peab tellimust tagastatuks, aga see ei ole makstud",
       "Возврат не дошёл до покупателя":
         "Tagasimakse ei jõudnud kliendini",
       "Перевозчик не принял посылку":
@@ -2060,6 +2066,8 @@
       "Отмена — от 2 до 60 дней": "Tühistamine — 2 kuni 60 päeva",
       "Напоминание должно быть раньше отмены": "Meeldetuletus peab tulema enne tühistamist",
       "без оплаты — к оплате было 0 €": "makseta — maksta oli 0 €", "ждёт оплаты": "ootab makset",
+      "⚠ Заплатили в другой валюте — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке":
+        "⚠ Maksti teises valuutas — tellimus on ootel: kaupa ei kantud maha, kinkekaarte ei väljastatud, kirja ei saadetud. Kontrolli Montonios ja vajuta «Makstud», kui kõik on korras",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ Hiljem saatis pank «maksmata» — tellimus jäi makstuks, kontrolli Montonios",
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
@@ -3365,8 +3373,6 @@
         "Money refunded",
       "Подарочные карты аннулированы":
         "Gift cards voided",
-      "Возврат обработан":
-        "Return handled",
       "Отметка в списке запуска":
         "Mark in the launch list",
       "Отметка в плане проверки":
@@ -3381,6 +3387,14 @@
         "The refund did not go through",
       "Возврат отправлен, деньги ещё не у покупателя":
         "The refund was sent, the money is not with the customer yet",
+      "Заплатили меньше — заказ придержан":
+        "Paid less — the order is on hold",
+      "Уведомление банка не сошлось — переспросили Montonio":
+        "The bank's notice did not match — we asked Montonio",
+      "Оплата нашлась при ночной сверке":
+        "The night check found the payment",
+      "Montonio считает заказ возвращённым, а он не оплачен":
+        "Montonio calls the order refunded, but it is not paid",
       "Возврат не дошёл до покупателя":
         "The refund did not reach the customer",
       "Перевозчик не принял посылку":
@@ -4865,6 +4879,8 @@
       "Отмена — от 2 до 60 дней": "Cancellation — 2 to 60 days",
       "Напоминание должно быть раньше отмены": "The reminder has to come before the cancellation",
       "без оплаты — к оплате было 0 €": "no payment — there was 0 € to pay", "ждёт оплаты": "awaiting payment",
+      "⚠ Заплатили в другой валюте — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке":
+        "⚠ Paid in a different currency — the order is on hold: no stock taken, no gift cards issued, no letter sent. Check in Montonio and press «Paid» if it is fine",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ The bank later sent «not paid» — the order stayed paid, check in Montonio",
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
@@ -5975,6 +5991,9 @@
     // the order card's «Оплата» block: the provider paid a different amount
     [/^⚠ Пришло (.+) вместо (.+) — проверьте в Montonio$/,
       { ET: "⚠ Laekus $1, mitte $2 — kontrolli Montonios", EN: "⚠ $1 arrived instead of $2 — check in Montonio" }],
+    [/^⚠ Заплатили (.+) вместо (.+) — заказ придержан: товар не списан, карты не выпущены, письмо не ушло\. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке$/,
+      { ET: "⚠ Maksti $1, mitte $2 — tellimus on ootel: kaupa ei kantud maha, kinkekaarte ei väljastatud, kirja ei saadetud. Kontrolli Montonios ja vajuta «Makstud», kui kõik on korras",
+        EN: "⚠ $1 paid instead of $2 — the order is on hold: no stock taken, no gift cards issued, no letter sent. Check in Montonio and press «Paid» if it is fine" }],
     [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
     /* One is one. The rules below carry a single ET and EN wording for any
        number, which is right from two up — Estonian takes the partitive and
@@ -10324,7 +10343,20 @@
        The server refuses that order (priceItems), and this is the same answer
        on the screen, without waiting for a reload. */
     if (!p && shopHidden(it.id)) return "out";
-    return (p && p.stock) || it.stock || "in";
+    var word = (p && p.stock) || it.stock || "in";
+    /* A count may say a product is gone; it may never say it is on sale
+       again — the same order partStock() applies in src/lib/bundles.ts. */
+    if (word === "out") return "out";
+    /* …and the count for THIS volume. `p.stock` is the product's one word and
+       says «в наличии» while any one of its volumes is left, so a 250 мл
+       counted to zero went on being offered inside every set holding it for
+       as long as the 500 мл had bottles (audit F2). Since 19.09.2026 the
+       server refuses that order, so without this the shopper finds out at the
+       checkout instead of on the set. `it.size` is the volume index the set
+       stores, the one sizeStockOf() reads; a volume nobody has counted is
+       absent from the map and null here — absent is not empty, as everywhere. */
+    var vol = p ? sizeStockOf(p, it.size || 0) : null;
+    return vol || word;
   }
   /** The worst of them — the same rule the server applies (worstStock() in
       src/lib/bundles.ts): one part missing and the set cannot be assembled. */
@@ -18073,7 +18105,7 @@
         : "") +
       "</div>";
   }
-  /** «25 × 18 × 10 см · около 1,1 кг» — one text node, so it stays translatable. */
+  /** «25 × 18 × 10 см · около 1,13 кг» — one text node, so it stays translatable. */
   function admBoxLine(l, w, h, kg) {
     return l + " × " + w + " × " + h + " см · около " + kgNum(kg) + " кг";
   }
@@ -18573,6 +18605,12 @@
     var notes = "";
     if (p.amountMismatch) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
     if (p.rejected) notes += '<br><span class="adm-err">⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio</span>';
+    /* …and the third, new on 19.09.2026: the bank paid LESS than the order is
+       worth, so nothing was fulfilled at all. This is not a warning beside a
+       paid order — it is the reason the order is not paid, and it names the
+       two figures and the one button that ends it. */
+    if (p.held && p.held.reason === "currency") notes += '<br><span class="adm-err">⚠ Заплатили в другой валюте — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>';
+    else if (p.held) notes += '<br><span class="adm-err">⚠ Заплатили ' + eur(p.held.got) + " вместо " + eur(p.held.expected) + " — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>";
     /* A third: a second payment arrived for an order the first one had
        already paid for — the shopper paid twice (src/lib/payments/apply.ts
        keeps it beside the first one, never on top of it, so the reference the
@@ -21925,7 +21963,12 @@
         ok: mr.ok !== false,
         quiet: mr.quiet === true,
         sub: esc(String(mr.sub[S.lang] || mr.sub.RU || "")),
-        act: mr.ok === false ? admDevLink() : ""
+        /* Only the keys are Dim's: they live in the server's environment.
+           Bank links, refunds, carriers and the parcel webhook are all
+           switched on by Renat himself in the Partner System, and offering
+           «Написать Диму» there sends him to wait for someone who cannot
+           do it for him. */
+        act: mr.key === "keys" ? admDevLink() : ""
       });
     }
 
@@ -22330,7 +22373,7 @@
       One text node, and no declining noun in it: translateTree() rewrites a
       whole node, and a plural that changes with the count would need three
       dictionary keys to say one thing. */
-  /** «Montonio посчитает эту коробку примерно как 1,1 кг.» One text node. */
+  /** «Montonio посчитает эту коробку примерно как 1,13 кг.» One text node. */
   function admParcelVolLine(kg) { return "Montonio посчитает эту коробку примерно как " + kgNum(kg) + " кг."; }
   function admParcelLearnedLine(size) {
     return "Чаще всего вы отправляете " + size + " — этот размер и будет предложен.";
@@ -23142,6 +23185,12 @@
     "order.refund_failed": "Возврат не прошёл",
     "order.refund_pending": "Возврат отправлен, деньги ещё не у покупателя",
     "order.refund_stuck": "Возврат не дошёл до покупателя",
+    /* Four the payments work of 19.09.2026 writes. The first is the one he
+       will actually meet: a bank that paid less than the order is worth. */
+    "order.payment_held": "Заплатили меньше — заказ придержан",
+    "order.token_mismatch": "Уведомление банка не сошлось — переспросили Montonio",
+    "order.payment_recovered": "Оплата нашлась при ночной сверке",
+    "order.payment_odd": "Montonio считает заказ возвращённым, а он не оплачен",
     "shipment.registration_failed": "Перевозчик не принял посылку",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
@@ -24147,7 +24196,8 @@
      smaller default box then and we don't bother with weights». */
   var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
   var PARCEL_DEFAULT = { length: 25, width: 18, height: 10, lockerSize: "M", recent: [] };
-  /** «около 1,1 кг» — volumetricKg() in src/lib/shipping/parcel.ts. */
+  /** «около 1,13 кг» — volumetricKg() in src/lib/shipping/parcel.ts, and the
+      figure this shop DECLARES to Montonio on every label since 19.09.2026. */
   function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }
   /* 1.1 → «1,1». A REGEX and not a string literal on purpose: tools/i18n-gaps.mjs
      re-joins `+`-glued string literals to reproduce what reaches the DOM, so a
@@ -32033,6 +32083,17 @@
         return;
       }
       var err = r.body && r.body.error;
+      /* A refusal can now carry money. When the answer to the first attempt
+         was lost, the retry asks Montonio, finds the refund it had already
+         made and writes it onto the order before refusing the duplicate —
+         so the list behind this card is stale the moment this toast appears,
+         and the owner was being told to reopen an order he is already looking
+         at (audit F4). Say what was found, then refresh. */
+      var found = (r.body && r.body.recorded) || [];
+      for (var fi = 0; fi < found.length; fi++) {
+        journalNote("Заказ " + number + ": Montonio уже сделал возврат " + eur(Number(found[fi].amount) || 0) + " — записали в заказ");
+      }
+      if (found.length) admOrdersChanged();
       if (err === "gift_used") {
         var usedCode = admRefundCode(r.body);
         toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
@@ -32041,7 +32102,13 @@
            to do about it; an unrecognised one quotes Montonio rather than us.
            Its sentence wins over the map above, which is now only the
            fallback for an answer that carried none. */
-        toast(srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат");
+        /* …and the pending sentence rides a refusal as well as a success:
+           on `gift_credit_failed` the MONEY half has already gone to
+           Montonio and is only waiting, so «карта не приняла» on its own
+           reads as «ничего не ушло». */
+        var fpend = r.body && r.body.pendingMessages;
+        var fwait = fpend ? "\n" + String(fpend[S.lang] || fpend.RU || "") : "";
+        toast((srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат") + fwait);
       }
       render();
     }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });

@@ -674,35 +674,42 @@
       "steps": [
         "В панели поставить одному товару из набора «Нет в наличии».",
         "Открыть этот набор в магазине, ничего не перезагружая.",
-        "Вернуть товар в продажу."
+        "Вернуть товар в продажу.",
+        "На «Складе» выписать ноль тому объёму товара, который записан в наборе; второй объём не трогать.",
+        "Открыть набор в магазине ещё раз."
       ],
       "expect": [
         "Набор по-прежнему виден в магазине.",
         "Кнопки «В корзину» у него нет.",
         "Вместо неё строчка, что одного товара сейчас нет.",
         "В списке «Что внутри» на строке того товара стоит «нет в наличии».",
-        "Всё это видно без перезагрузки страницы."
+        "Всё это видно без перезагрузки страницы.",
+        "Набор снова без «В корзину»: «нет в наличии» стоит на строке этого объёма."
       ],
       "why": "Проданный набор без одной баночки — это заказ, который вы не соберёте.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "One product in a set has run out",
         "steps": [
           "In the panel set one of the set's products to «Нет в наличии».",
           "Open that set in the shop, reloading nothing.",
-          "Put the product back on sale."
+          "Put the product back on sale.",
+          "On «Склад» write zero for the volume the set names; leave the other volume alone.",
+          "Open the set in the shop again."
         ],
         "expect": [
           "The set is still visible in the shop.",
           "It has no «В корзину» button.",
           "In its place, a line saying one product is missing.",
           "In the «Что внутри» list that product's own line says «нет в наличии».",
-          "All of this shows without reloading the page."
+          "All of this shows without reloading the page.",
+          "The set loses «В корзину» again: the out-of-stock line is on that volume."
         ],
         "why": "A set sold without one of its bottles is an order you cannot pack."
-      }
+      },
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "shop-gift-page",
@@ -2846,7 +2853,8 @@
           "The payment closes that same order; no second order appeared."
         ],
         "why": "Somebody left with an empty cart and nothing to press after cancelling never comes back."
-      }
+      },
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "checkout-newsletter",
@@ -3110,7 +3118,8 @@
         "Там же видно, прошёл платёж или нет.",
         "Есть ссылка на этот платёж у банка.",
         "В «Состав» те же товары, что покупали.",
-        "Сумма в «Состав» совпадает с суммой в корзине."
+        "Сумма в «Состав» совпадает с суммой в корзине.",
+        "Если денег пришло меньше, чем стоит заказ, в «Оплате» стоит предупреждение и заказ НЕ оплачен."
       ],
       "why": "Когда покупатель спорит про деньги, ответить ему можно только с этого экрана.",
       "risk": "med",
@@ -3127,9 +3136,100 @@
           "It also shows whether the payment went through.",
           "There is a link to that payment at the bank.",
           "«Состав» holds the same products that were bought.",
-          "The total in «Состав» matches the cart's total."
+          "The total in «Состав» matches the cart's total.",
+          "If less money arrived than the order costs, «Оплата» warns and the order is NOT paid."
         ],
         "why": "When a buyer argues about money, this screen is your only answer."
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T00:00:00.000Z"
+    },
+    {
+      "id": "order-paid-short",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Заказ, за который заплатили не полностью",
+      "steps": [
+        "Найти заказ с предупреждением «Заплатили меньше».",
+        "Посмотреть «Склад»: товар из этого заказа должен быть на месте.",
+        "Проверить, что подарочные карты по этому заказу не выпущены и письмо покупателю не ушло.",
+        "Найти платёж в Montonio по номеру из карточки заказа.",
+        "Если всё в порядке — нажать «Оплачен»."
+      ],
+      "expect": [
+        "Заказ не был оплачен сам: ничего не списалось, карты не выпущены, письмо не ушло.",
+        "Предупреждение называет обе суммы: сколько пришло и сколько стоит заказ.",
+        "После «Оплачен» предупреждение исчезло, товар списался, письмо ушло.",
+        "Кнопка «Вернуть деньги» работает — номер платежа Montonio не потерялся.",
+        "Покупатель увидел «Платёж обрабатывается», а не «Заказ оплачен»."
+      ],
+      "why": "Montonio разрешает доплатить по старой ссылке меньше, чем стоит заказ. Отправленную посылку не вернуть, а карту — можно выпустить заново.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T00:00:00.000Z",
+      "en": {
+        "title": "An order somebody paid short",
+        "steps": [
+          "Find an order warning that less was paid.",
+          "Look at «Склад»: the goods from that order must still be there.",
+          "Check that no gift cards were issued for it and no letter went to the customer.",
+          "Find the payment in Montonio by the number on the order card.",
+          "If it is fine, press «Оплачен»."
+        ],
+        "expect": [
+          "The order did not pay itself: no stock moved, no cards, no letter.",
+          "The warning names both figures: what arrived and what the order costs.",
+          "After «Оплачен» the warning is gone, the stock moved and the letter went.",
+          "«Вернуть деньги» works — the Montonio payment number was not lost.",
+          "The customer saw the payment being processed, not «Заказ оплачен»."
+        ],
+        "why": "Montonio lets a customer pay less than the order is worth on a reused link. A parcel that has gone cannot come back; a gift card can be issued again."
+      }
+    },
+    {
+      "id": "order-cancel-undo-set",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Отменить заказ с набором и вернуть его обратно",
+      "steps": [
+        "Оплатить заказ, в котором есть набор.",
+        "Записать остатки товаров из набора на «Складе».",
+        "Отменить заказ и посмотреть «Склад».",
+        "Вернуть заказ в «оплачен» через «Изменить статус вручную».",
+        "Посмотреть «Склад» ещё раз."
+      ],
+      "expect": [
+        "После отмены части набора вернулись на склад.",
+        "После «оплачен» они снова ушли со склада.",
+        "Остаток равен тому, что был до отмены.",
+        "Сколько бы раз ни менять решение, число не растёт."
+      ],
+      "why": "Отмена по ошибке и возврат её обратно раньше навсегда завышали остаток по всему, что продаётся наборами.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T00:00:00.000Z",
+      "en": {
+        "title": "Cancel an order with a set, then put it back",
+        "steps": [
+          "Pay an order that contains a set.",
+          "Write down the stock of the products in that set.",
+          "Cancel the order and look at «Склад».",
+          "Put the order back to paid with «Изменить статус вручную».",
+          "Look at «Склад» again."
+        ],
+        "expect": [
+          "The cancel put the set's parts back on the shelf.",
+          "«Оплачен» took them off again.",
+          "The figure equals what it was before the cancel.",
+          "However many times the decision changes, the number does not grow."
+        ],
+        "why": "A cancel by mistake, undone, used to overstate the stock of everything sold in sets, permanently."
       }
     },
     {
@@ -3180,7 +3280,8 @@
         "Открыть оплаченный заказ с пакоматом.",
         "Нажать «Создать этикетку» и подождать пару секунд.",
         "Нажать «Открыть PDF (A4) ↗».",
-        "Вернуться и нажать «A6 для термопринтера ↗»."
+        "Вернуться и нажать «A6 для термопринтера ↗».",
+        "Посмотреть вес на этикетке: это коробка магазина, а не число товаров."
       ],
       "expect": [
         "Появилось «Отправление»: перевозчик, пакомат, трек-номер и код сдачи.",
@@ -3199,7 +3300,8 @@
           "Open a paid order going to a parcel locker.",
           "Press «Создать этикетку» (create label) and wait a couple of seconds.",
           "Press «Открыть PDF (A4) ↗».",
-          "Go back and press «A6 для термопринтера ↗»."
+          "Go back and press «A6 для термопринтера ↗».",
+          "Look at the weight on the label: it is the shop's box, not the item count."
         ],
         "expect": [
           "«Отправление» appears: carrier, locker, tracking number and drop-off code.",
@@ -3210,7 +3312,9 @@
           "The order stays at the same step."
         ],
         "why": "A label that will not print is a parcel you cannot hand over today."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "order-shipped",
@@ -3646,6 +3750,50 @@
           "The buyer's points gain a «Корректировка» line."
         ],
         "why": "A mistake here costs exactly what is typed in the amount field."
+      },
+      "markedAt": "2026-09-19T00:00:00.000Z"
+    },
+    {
+      "id": "order-refund-retry",
+      "area": "orders",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Нажать «Вернуть деньги» второй раз",
+      "steps": [
+        "Открыть заказ, оплаченный подарочной картой и банком вместе.",
+        "Вернуть часть суммы — столько, чтобы хватило одной карты.",
+        "Дождаться ответа и нажать «Вернуть деньги» ещё раз на ту же сумму.",
+        "Открыть «Оплата» и посмотреть список возвратов.",
+        "Открыть эту карту в «Подарочных картах»."
+      ],
+      "expect": [
+        "Второе нажатие не создало второй возврат — строка одна.",
+        "На счёт покупателя не ушло ни цента: всё вернулось на карту.",
+        "Баланс карты не вырос второй раз.",
+        "Сумма «Возвращено X из Y» после второго нажатия не изменилась."
+      ],
+      "why": "Кнопка, которая сказала «не удалось», — это кнопка, на которую нажмут ещё раз.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T00:00:00.000Z",
+      "en": {
+        "title": "Press «Вернуть деньги» a second time",
+        "steps": [
+          "Open an order paid with a gift card and a bank link together.",
+          "Refund part of it — enough that one card covers it.",
+          "Wait for the answer, then press «Вернуть деньги» again for the same amount.",
+          "Open «Оплата» and look at the list of refunds.",
+          "Open that card in «Подарочные карты»."
+        ],
+        "expect": [
+          "The second press made no second refund — there is one line.",
+          "Not a cent went to the customer's account: it all went back on the card.",
+          "The card's balance did not grow a second time.",
+          "«Возвращено X из Y» did not change after the second press."
+        ],
+        "why": "A button that said «it did not work» is a button somebody presses again."
       }
     },
     {
@@ -3847,7 +3995,8 @@
           "The buyer got the «Деньги возвращены» letter naming the card."
         ],
         "why": "A refund onto a card already spent is double money; a card never refunded is money lost."
-      }
+      },
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "acct-code-login",
@@ -7335,7 +7484,9 @@
         "Под каждой строкой — понятная фраза, а не код ошибки.",
         "Красным горит только то, что действительно не работает.",
         "Строка про письма говорит, дошёл ли тестовый лист.",
-        "У каждой красной строки есть кнопка «Написать Диму»."
+        "У каждой красной строки есть кнопка «Написать Диму».",
+        "Строка «Ключи Montonio» зелёная; если нет — названо, какой из двух ключей не подошёл.",
+        "Есть строки про банковские ссылки, перевозчиков и посылки; строка про посылки печатает нужный адрес."
       ],
       "why": "Зелёный кружок напротив неработающей оплаты откроет магазин неготовым.",
       "risk": "med",
@@ -7351,10 +7502,14 @@
           "Under each line is a plain sentence, not an error code.",
           "Only what genuinely does not work shows red.",
           "The mail line says whether a test letter got through.",
-          "Every red line carries a «Написать Диму» button."
+          "Every red line carries a «Написать Диму» button.",
+          "The «Ключи Montonio» row is green; if not, it names which key was refused.",
+          "There are rows for bank links, carriers and parcels; the parcel row prints its address."
         ],
         "why": "A green dot beside broken payment opens the shop unready."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "live-bank-order",
@@ -7443,7 +7598,8 @@
           "A refund letter went to the buyer."
         ],
         "why": "Without a working refund it is easy to pay someone twice."
-      }
+      },
+      "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
       "id": "live-apple-pay",
@@ -7572,11 +7728,13 @@
       "steps": [
         "В боевом магазине бросить корзину и оставить заказ неоплаченным.",
         "Ничего руками не запускать.",
-        "Через сутки открыть почту и «Маркетинг» → «Письма»."
+        "Через сутки открыть почту и «Маркетинг» → «Письма».",
+        "Оставить неоплаченный заказ, за который деньги на самом деле ушли, и посмотреть его на следующий день."
       ],
       "expect": [
         "Письма пришли сами, без единого нажатия.",
-        "Счётчики «Ждут письма» сдвинулись."
+        "Счётчики «Ждут письма» сдвинулись.",
+        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж."
       ],
       "why": "Расписание одно на все автоматические письма: не запустилось — не ушло ни одно.",
       "risk": "high",
@@ -7586,13 +7744,52 @@
         "steps": [
           "On the live shop, abandon a cart and leave an order unpaid.",
           "Start nothing by hand.",
-          "A day later open the mail and «Маркетинг» → «Письма»."
+          "A day later open the mail and «Маркетинг» → «Письма».",
+          "Leave an unpaid order the money really left for; look at it next day."
         ],
         "expect": [
           "The letters arrived on their own, with nothing pressed.",
-          "The «Ждут письма» counters have moved."
+          "The «Ждут письма» counters have moved.",
+          "The order became paid by itself: the nightly check asked Montonio and found the payment."
         ],
         "why": "One schedule carries every automatic letter: if it stops, none go."
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T00:00:00.000Z"
+    },
+    {
+      "id": "live-reconcile",
+      "area": "live",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Ночная сверка оплат",
+      "steps": [
+        "Позвать GET /api/cron/payments-reconcile/ с заголовком CRON_SECRET.",
+        "Посмотреть ответ и журнал заказов."
+      ],
+      "expect": [
+        "Ответ {ok:true} и числа: сколько заказов проверили и сколько закрыли.",
+        "Заказ с потерянным уведомлением стал оплаченным; в журнале это названо сверкой.",
+        "Без заголовка CRON_SECRET маршрут отвечает отказом."
+      ],
+      "why": "Уведомление может не дойти. Тогда деньги у Montonio, а заказ висит «ждёт оплаты», и никто об этом не узнает.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T00:00:00.000Z",
+      "en": {
+        "title": "The nightly payment check",
+        "steps": [
+          "Call GET /api/cron/payments-reconcile/ with the CRON_SECRET header.",
+          "Read the answer and the order journal."
+        ],
+        "expect": [
+          "{ok:true} and the counts: how many orders were checked and how many were closed.",
+          "An order whose notification was lost is now paid; the journal calls it the check.",
+          "Without the CRON_SECRET header the route refuses."
+        ],
+        "why": "A notification can go missing. The money is then with Montonio while the order waits for payment and nobody hears about it."
       }
     }
   ]
