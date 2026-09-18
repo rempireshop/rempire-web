@@ -722,8 +722,15 @@ test.describe("blog — the whole article", () => {
     await expect(cards, "the article the assistant wrote has not got its two product cards").toHaveCount(2);
     await expect(cards.first()).toHaveAttribute("data-product", PRODUCT.id);
     await expect(cards.first(), "the card does not link to the Russian product page").toHaveAttribute("href", `/shop2/p/${PRODUCT.id}/`);
-    await expect(cards.first(), "the panel never wrote the name and the price the model was not given").toContainText(PRODUCT.brand);
-    await expect(cards.first()).toContainText("€");
+    await expect(cards.first(), "the panel never wrote the name the model was not given").toContainText(PRODUCT.brand);
+    /* The PRICE is not in the card's words — it is `data-price="live"`, the
+       marker each of the three renderers fills in as it draws (blogProductHTML
+       in app.js, src/lib/blog-page.ts at request time, prerender at build).
+       Dim, 17.09.2026: a price written into the article said what the product
+       cost on the day it was written for ever after, and Google, the first
+       paint and every reader without JS got that old figure. */
+    await expect(cards.first(), "the card does not carry the live-price marker")
+      .toHaveAttribute("data-price", "live");
     await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
     await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/p/${PRODUCT_2.id}/`);
     await expect(cards.nth(1)).toContainText(PRODUCT_2.brand);
@@ -1300,7 +1307,11 @@ test.describe("blog — the product cards survive a translation", () => {
        not. */
     const etCard = (await cards.nth(0).innerText()).trim();
     expect(etCard, `the Estonian card is still Russian: ${etCard}`).toContain("šampoon");
-    expect(etCard).toContain("alates");
+    /* «alates 9,00 €» used to be part of those words. Since 17.09.2026 the
+       price is not written into the card at all — `data-price="live"` says so
+       and the renderer fills it in — so what has to be Estonian here is the
+       name, and what has to be gone is the Russian «от». */
+    await expect(cards.nth(0)).toHaveAttribute("data-price", "live");
     expect(etCard).not.toContain("шампунь");
     expect(etCard).not.toMatch(/(^|\s)от\s/);
     await expect(langState(page, "data-admbloglang", "ET"), "the Estonian tab still says it has no products").toContainText("с товарами");

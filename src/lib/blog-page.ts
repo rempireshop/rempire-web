@@ -39,6 +39,7 @@ import {
   baseFrom,
   blogCardIds,
   breadcrumbLD,
+  cheapestPrice,
   clip,
   crumbs,
   esc,
@@ -52,6 +53,7 @@ import {
   langNav,
   langPath,
   noindexShell,
+  overriddenPrice,
   patchShell,
   robotsFor,
   stripTags,
@@ -159,7 +161,11 @@ export function renderBlogPostPage(
   list: { posts: PostSummary[]; total: number },
   lang: Lang,
   shell: string,
-  opts: { base: string; robots: string; products: ShelfProduct[]; inline?: ShelfProduct[] },
+  opts: {
+    base: string; robots: string; products: ShelfProduct[]; inline?: ShelfProduct[];
+    /** Ids whose /p/ address answers 404 — see shelfProducts(). */
+    offSale?: ReadonlySet<string>;
+  },
 ): string {
   const { base, robots } = opts;
   const code = lang.code;
@@ -177,11 +183,35 @@ export function renderBlogPostPage(
      and builds its own cards from the live catalogue, so a price written in
      here would be a figure nobody reads and one more thing to keep in step.
      `bodyText` feeds the meta description, which has no business carrying a
-     price either. A body of the old shape comes back byte for byte. */
-  const bodyShown = fillBlogCardPrices(bodyHtml, (id: string) => {
-    const p = (opts.inline ?? []).find((x) => x.id === id);
-    return p ? priceLabel(p, t) : "";
-  });
+     price either. A body of the old shape comes back byte for byte.
+
+     `seg` and the name go with the price because the marker the ASSISTANT
+     writes carries neither an href nor any words — see the three shapes
+     beside fillBlogCardPrices() in seo-head.mjs. The name is this shelf's
+     own «brand + name», so a card inside the text reads exactly like the
+     card under the article.
+
+     `offSale` is the other half of the same question, and it is why the
+     shelf answers in two parts: a product the owner has HIDDEN cannot be
+     priced either, but its card must also stop linking — the «Товар» button
+     stores its href in the body, so leaving that card alone left a live link
+     to an address the middleware answers 404 for. */
+  const inlineOf = (id: string) => (opts.inline ?? []).find((x) => x.id === id);
+  const bodyShown = fillBlogCardPrices(
+    bodyHtml,
+    (id: string) => {
+      const p = inlineOf(id);
+      return p ? priceLabel(p, t) : "";
+    },
+    {
+      seg,
+      nameOf: (id: string) => {
+        const p = inlineOf(id);
+        return p ? p.brand + " " + p.name : "";
+      },
+      offSale: (id: string) => !!opts.offSale?.has(id),
+    },
+  );
   // the Google pair is per language (pickLang: this language, else Russian);
   // the excerpt, then the text, stand in only when neither was written — the
   // same ladder setHead() in app.js runs once the SPA takes the page over
@@ -302,12 +332,10 @@ function html(body: string, status: number, cacheControl: string): Response {
   return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
 }
 
-/** The lowest price of a ladder, and whether the ladder holds more than one. */
-function cheapest(prices: Array<number | null | undefined>, fallback: number): { price: number; from: boolean } {
-  const list = prices.map((p) => Number(p)).filter((p) => Number.isFinite(p) && p > 0);
-  if (!list.length) return { price: fallback, from: false };
-  return { price: Math.min(...list), from: new Set(list).size > 1 };
-}
+/** The lowest price of a ladder, and whether the ladder holds more than one.
+    In seo-head.mjs, because the build prices the same articles from the same
+    table and must reach the same number — see the note above it there. */
+const cheapest = cheapestPrice as (prices: Array<number | null | undefined>, fallback: number) => { price: number; from: boolean };
 
 /**
  * The products under an article: catalogue rows by id, the owner's own rows
@@ -334,13 +362,26 @@ function cheapest(prices: Array<number | null | undefined>, fallback: number): {
  * takes the first `max` of `ids` and the body takes its own. One call for
  * both: a page that named eight products under the article and three in the
  * text would otherwise ask the overrides table twice for one render.
+ *
+ * It answers in two parts, because a card inside the text needs to know WHY a
+ * product is not on the shelf. `offSale` holds the ids this call is CERTAIN
+ * have no page to link to — `/shop2/{,et/,en/}p/<id>/` answers 404 noindex
+ * for each of them (src/middleware.ts for a hidden catalogue product,
+ * src/lib/product-page.ts for an unknown id and for one of the owner's own
+ * that is gone or switched off). A product the query could not speak for is
+ * deliberately NOT in it: a database that did not answer costs the price, and
+ * a price is all it costs.
  */
-async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
+async function shelfProducts(
+  ids: string[],
+  max = 8,
+): Promise<{ products: ShelfProduct[]; offSale: Set<string> }> {
   const want = ids.slice(0, max);
   const catIds = want.filter((id) => CATALOGUE.has(id));
   const customIds = want.filter((id) => !CATALOGUE.has(id) && id.startsWith("c-"));
 
   let overrides: Awaited<ReturnType<typeof getOverrides>> = {};
+  let customAnswered = true;
   if (catIds.length) {
     try {
       overrides = await getOverrides(catIds);
@@ -353,37 +394,55 @@ async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
     try {
       custom = await customMinByIds(customIds);
     } catch (err) {
+      customAnswered = false;
       console.error("[blog-page] custom products unavailable:", err);
     }
   }
 
   const out: ShelfProduct[] = [];
+  const offSale = new Set<string>();
   for (const id of want) {
     const c = custom.get(id);
     if (c) {
-      if (c.min.s === "out") continue;
+      /* `s` on one of the owner's own rows is `active`, not a stock count
+         (toMin() in src/lib/custom-products.ts) — «out» means he has switched
+         it off, and src/lib/product-page.ts answers its address 404 for
+         exactly that. Off sale, then, in the same sense `hidden` is below. */
+      if (c.min.s === "out") {
+        offSale.add(id);
+        continue;
+      }
       const { price, from } = cheapest(c.variants?.prices ?? [c.min.p], c.min.p);
       out.push({ id, brand: c.min.b, name: c.min.n, price, priceFrom: from });
       continue;
     }
     const m = CATALOGUE.get(id);
-    if (!m) continue;
+    if (!m) {
+      /* Not in the file. One of the owner's own that the table did not hand
+         back is gone or switched off — but only when the table answered at
+         all, or a hiccup would take the link off a product that is on sale.
+         Anything else is not a product id the shop has ever had. */
+      if (!id.startsWith("c-")) offSale.add(id);
+      else if (customAnswered) offSale.add(id);
+      continue;
+    }
     const o = overrides[id];
-    if (!forSale(o)) continue;
-    /* The file's ladder only speaks for the price where it actually spreads.
-       Since 18.09.2026 catalogue.variants.json also carries the 29 products
-       sold in ONE named size, whose single price is catalogue.min.json's own
-       `p` — taking it here would quietly out-vote the owner's «Цена» in
-       «Товары» and put the pre-override number under an article. The owner's
-       own saved ladder still decides outright: every rung of it carries the
-       price he typed (migration 147). */
-    const fileLadder = VARIANTS[id]?.prices ?? [];
-    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : fileLadder.length > 1 ? fileLadder : [];
-    const base = o?.price ?? m.p;
-    const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
+    /* «Показывать в магазине» off — forSale() in seo-head.mjs, the same call
+       the build makes before it draws a grid tile, so an article and a
+       category page cannot disagree about which products still have a page.
+       `overrides` is empty when the query threw, so this cannot fire on a
+       hiccup — it fires only on a row that said so. */
+    if (!forSale(o)) {
+      offSale.add(id);
+      continue;
+    }
+    /* The owner's ladder over the file's, and the file's only where it really
+       spreads — overriddenPrice() in seo-head.mjs owns that rule, so the
+       build reaches the same number for the same article. */
+    const { price, from } = overriddenPrice(m.p, VARIANTS[id]?.prices ?? [], o);
     out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });
   }
-  return out;
+  return { products: out, offSale };
 }
 
 /** GET /shop2/{,et/,en/}blog/<slug>/ for a slug the prerender did not write. */
@@ -413,7 +472,10 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
      to be rendered, and only a body of the new shape names any at all. */
   const inlineIds = blogCardIds(renderPostBody(pickLang(post.body, lang.code)));
   const shelfIds = post.products.slice(0, SHELF_MAX);
-  const resolved = await shelfProducts([...new Set([...shelfIds, ...inlineIds])], SHELF_MAX + INLINE_MAX);
+  const { products: resolved, offSale } = await shelfProducts(
+    [...new Set([...shelfIds, ...inlineIds])],
+    SHELF_MAX + INLINE_MAX,
+  );
   const byId = new Map(resolved.map((p) => [p.id, p]));
   const pick = (ids: string[]) => ids.map((id) => byId.get(id)).filter((p): p is ShelfProduct => !!p);
 
@@ -421,7 +483,7 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
   const robots = robotsFor(process.env.PUBLIC_BASE_URL);
   return html(
     renderBlogPostPage(post, list, lang, shell, {
-      base, robots, products: pick(shelfIds), inline: pick(inlineIds.slice(0, INLINE_MAX)),
+      base, robots, products: pick(shelfIds), inline: pick(inlineIds.slice(0, INLINE_MAX)), offSale,
     }),
     200,
     PAGE_CACHE,

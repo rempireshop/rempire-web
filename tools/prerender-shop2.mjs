@@ -65,9 +65,10 @@ import { coverImgStyle, fetchPublishedPosts, focusCrop, pickLang, renderPostBody
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
-/* «Показывать в магазине» as the owner last saved it. Every grid this file
-   writes is a link into a /p/ address, and a hidden product's address answers
-   404 — see tools/lib/overrides-export.mjs. */
+/* «Цена» and «Показывать в магазине» as the owner last saved them. Every list
+   of products this file writes — an article's shelf and every grid on the
+   storefront — is a set of links into /p/ addresses, and a hidden product's
+   address answers 404. See tools/lib/overrides-export.mjs. */
 import { fetchProductOverrides } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
@@ -87,7 +88,7 @@ import {
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, forSale, onlyForSale
+  fillBlogCardPrices, overriddenPrice, forSale, onlyForSale
 } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -130,16 +131,21 @@ const catSrc = await readFile(path.join(SHOP, "catalogue2.js"), "utf8");
 const CATALOGUE = new Function(catSrc + "\nreturn CATALOGUE;")();
 const CAT_NAMES = new Function(catSrc + "\nreturn CAT_NAMES;")();
 
-/* What the owner has switched off since the file was generated. `{}` with no
-   DATABASE_URL, so a local run writes exactly the pages it wrote before.
+/* «Цена» and «Показывать в магазине» as the owner last saved them. `{}` with
+   no DATABASE_URL, which is the file's own products and prices, which is what
+   this ran on before the table was read at all — so a local run writes exactly
+   the pages it wrote before.
 
-   Unconditional, unlike the blog's query: there is a grid on every home,
-   category and brand page and under every product, and those are written on
-   every run whether or not this shop has any articles. */
+   One query, read on every run. It was the blog's alone until 18.09.2026 and
+   was skipped when a shop had no articles; there is a grid on every home,
+   category and brand page and under every product, and those are written
+   whether or not anything has been published. */
 const PRODUCT_OVERRIDES = await fetchProductOverrides();
 
-/* The catalogue a SHOPPER may be shown: every grid, shelf and ItemList below
-   is built from this, and never from CATALOGUE.
+/* The catalogue a SHOPPER may be shown: every storefront grid, shelf,
+   ItemList and brand count below is built from this, never from CATALOGUE.
+   An article's own shelf goes through blogShelfProduct(), which asks the same
+   forSale() one id at a time because it also prices what it keeps.
 
    CATALOGUE itself still writes the 660 product pages. A hidden product keeps
    its file — the middleware withholds it and sitemap-products.xml stops
@@ -280,6 +286,58 @@ if (!BLOG_POSTS.length) {
   console.log(process.env.DATABASE_URL
     ? "  (no published posts — no /blog/ pages this run)"
     : "  (DATABASE_URL not set — no /blog/ pages this run)");
+}
+
+/**
+ * One product an article links to, as the panel has it TODAY — or null when
+ * the owner has hidden it, or when the id is not the catalogue's.
+ *
+ * Both of those are the same answer: no card. A hidden product's /p/ address
+ * answers 404 with a noindex shell (the middleware, docs/seo.md), so a card
+ * for it is a dead link in an article that a crawler will keep coming back
+ * to. `c-…`, the owner's own products, have never had a static page and are
+ * not in the file here either; the shop draws their card the moment app.js
+ * runs, exactly as it did before.
+ *
+ * Neither rule is written here. «Показывать в магазине» is forSale() and the
+ * price is overriddenPrice(), both in src/lib/seo-head.mjs — the same two
+ * calls src/lib/blog-page.ts makes for the same article at request time, and
+ * the same forSale() ON_SALE above puts every storefront grid through. So the
+ * static copy, the live one and a category page cannot disagree about which
+ * products still have a page or what they cost.
+ */
+function blogShelfProduct(id) {
+  const p = CATALOGUE.find(x => x.id === id);
+  if (!p) return null;
+  const row = PRODUCT_OVERRIDES[id];
+  if (!forSale(row)) return null;
+  const { price, from } = overriddenPrice(p.price, p.prices, row);
+  return { ...p, price, priceFrom: from };
+}
+
+/**
+ * Is this id one there is CERTAINLY no page to link to — `/shop2/p/<id>/`
+ * answering 404 with a noindex shell?
+ *
+ * The other half of blogShelfProduct()'s «no card»: that one says no for two
+ * quite different reasons, and a card inside the text has to tell them apart.
+ * A hidden product is off sale and its address is 404 (src/middleware.ts); an
+ * id that is not the catalogue's and is not one of the owner's is 404 too
+ * (src/lib/product-page.ts). But `c-…`, the owner's own, is NOT here: it has
+ * never had a static page and is not in the file, and its address is answered
+ * by the route at request time — the marker keeps its link and the shop fills
+ * the card in the moment app.js runs.
+ *
+ * A build whose overrides query came back empty — no DATABASE_URL, no `pg`,
+ * a database that did not answer — knows nothing about hidden and says so by
+ * saying no: a link that stays is the behaviour this tool has always had, and
+ * taking one off an article over a timed-out query would be worse than the
+ * stale price such a run already prints.
+ */
+function blogOffSale(id) {
+  const row = PRODUCT_OVERRIDES[id];
+  if (!forSale(row)) return true;
+  return !String(id).startsWith("c-") && !CATALOGUE.some(x => x.id === id);
 }
 
 /* ---------- translation tables, borrowed from app.js -------------------
@@ -1572,25 +1630,45 @@ function blogPostPage(post, lang) {
   const excerpt = pickLang(post.excerpt, code);
   const bodyHtml = renderPostBody(pickLang(post.body, code));
   const bodyText = stripTags(bodyHtml);
-  /* The cards inside the text, priced as this build found the catalogue —
-     `data-price="live"` markers only, which is every article written from
-     17.09.2026 on. An article written before that carries its price as
-     literal text and comes back from here byte for byte; both shapes are
-     permanent, see fillBlogCardPrices() in src/lib/seo-head.mjs.
+  /* The cards inside the text, priced from the panel — the live markers and
+     the assistant's bare `<a data-product="ID"></a>`, which until 18.09.2026
+     was left here as an empty anchor that no crawler and no reader without
+     JS could see. An article written before 17.09.2026 carries its price as
+     literal text and comes back from here byte for byte; all three shapes
+     are permanent, see fillBlogCardPrices() in src/lib/seo-head.mjs.
 
-     From CATALOGUE, the same file every other card on every prerendered page
-     is priced from, so a static page is at worst as old as the deploy that
-     wrote it instead of as old as the article. A product the owner made in
-     the panel (`c-…`) is not in that file and is not in a static page at
-     all — its marker keeps its name and shows no price here; the shop fills
-     it in the moment app.js runs.
+     `seg` and the name are what that bare marker has neither of: the href it
+     gets is this language's product page, and the words are the catalogue's
+     own «brand + name» in this language — the same pair the «Товар» button
+     writes into the body and the same one grid() prints under the article.
+
+     A product the owner made in the panel (`c-…`) is not in the file and has
+     no static page at all; its marker stays exactly as it is here, link and
+     all, and the shop fills the card in the moment app.js runs.
+
+     A HIDDEN one is the opposite case and `blogOffSale` is what tells the two
+     apart: it has no price here either, but its address answers 404, so its
+     card is written back without its href. The «Товар» button's marker is the
+     one that needed saying — its href is stored in the body, so until now a
+     hidden product lost only its price and went on linking to that 404.
 
      `bodyHtml` itself is left alone: #blogpost below is the shape
      /api/blog/<slug>/ answers, and hydrateBlog() builds its own cards. */
-  const bodyShown = fillBlogCardPrices(bodyHtml, id => {
-    const p = CATALOGUE.find(x => x.id === id);
-    return p ? priceLabel(p, t) : "";
-  });
+  const bodyShown = fillBlogCardPrices(
+    bodyHtml,
+    id => {
+      const p = blogShelfProduct(id);
+      return p ? priceLabel(p, t) : "";
+    },
+    {
+      seg,
+      nameOf: id => {
+        const p = blogShelfProduct(id);
+        return p ? tr(p.brand + " " + p.name, code, true) : "";
+      },
+      offSale: blogOffSale,
+    },
+  );
   // the Google pair is per language (pickLang: this language, else Russian),
   // and the excerpt, then the text, stand in only when neither was written —
   // the same ladder setHead() in app.js runs once the SPA takes the page over
@@ -1600,10 +1678,18 @@ function blogPostPage(post, lang) {
   const blogLabel = tr("Блог", code, false);
   const crumbItems = [[t.home, langPath(seg, "/")], [blogLabel, langPath(seg, "/blog/")], [title, null]];
 
+  /* «Товары из статьи»: the panel's price, and nothing the owner has hidden.
+     Read from the file alone until 18.09.2026, which put the prices of the
+     last deploy under every static article and went on linking to products
+     that had been switched off — see blogShelfProduct() above. The eight are
+     the same eight src/lib/blog-page.ts takes for the same post: the first
+     eight the owner PICKED, then whatever of those is still for sale — so a
+     hidden product leaves a gap rather than pulling a ninth one up, and the
+     static shelf and the live one hold the same products in the same order. */
   const featured = (post.products || [])
-    .map(id => CATALOGUE.find(p => p.id === id))
-    .filter(Boolean)
-    .slice(0, 8);
+    .slice(0, 8)
+    .map(id => blogShelfProduct(id))
+    .filter(Boolean);
 
   const tagsHtml = post.tags && post.tags.length
     ? '<ul class="blog__tags">' + post.tags.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>"

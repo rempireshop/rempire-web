@@ -1411,7 +1411,8 @@ into the bundle — see `docs/testing.md`), `DB_DRIVER=pglite`,
 `E2E_EXPOSE_LOGIN_CODE=1`, no OpenAI/Resend keys; readiness URL is the bootstrap
 route (migrates the in-memory DB). Projects: `desktop` 1280, `tablet`, `mobile`
 375 (all Chromium), `mobile-safari` (WebKit iPhone 13, customer specs only),
-`webkit-local`. `workers: 1`, serial, every mutating spec reverts what it
+`webkit-local` (WebKit Desktop Safari, local only, the same customer specs —
+one `SAFARI_SPECS` constant feeds both). `workers: 1`, serial, every mutating spec reverts what it
 changed; per-spec fake IPs beat the rate limits; `e2e/fixtures.ts` holds
 `PRODUCT`/`PRODUCT_2`/`BUNDLE` and the RU→ET/EN lookups. **CI**
 (`.github/workflows/ci.yml`): `checks` (typecheck + vitest), `e2e` in 4 shards

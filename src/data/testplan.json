@@ -746,6 +746,43 @@
       }
     },
     {
+      "id": "shop-gift-amounts-en",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "EN",
+      "title": "Суммы подарочных карт по-английски",
+      "steps": [
+        "Переключить магазин на English.",
+        "Открыть главную и найти плитку подарочной карты.",
+        "Открыть страницу подарочной карты и посмотреть на суммы там же."
+      ],
+      "expect": [
+        "Все суммы написаны одинаково: €25, €50, €100.",
+        "Ни одна не стоит наоборот, вроде «50 €».",
+        "На плитке и на странице карты вид одинаковый."
+      ],
+      "why": "Список сумм собирался так, что первая сумма получала язык, а остальные — свой номер по порядку. По-русски и по-эстонски это выглядело правильно, поэтому ошибку никто не видел, а по-английски выходило «€25, 50 €, 100 €».",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-18T19:10:00.000Z",
+      "en": {
+        "title": "Gift card amounts in English",
+        "steps": [
+          "Switch the shop to English.",
+          "Open the home page and find the gift card tile.",
+          "Open the gift card page and look at the amounts there too."
+        ],
+        "expect": [
+          "Every amount is written the same way: €25, €50, €100.",
+          "None is back to front, like «50 €».",
+          "The tile and the gift card page look the same."
+        ],
+        "why": "The list of amounts was built so the first one got the language and the rest got their position in the list. In Russian and Estonian that looked right, which is why nobody saw it; in English it came out «€25, 50 €, 100 €»."
+      }
+    },
+    {
       "id": "shop-blog",
       "area": "shop",
       "who": "renat",
@@ -756,30 +793,40 @@
         "Открыть «Блог».",
         "Открыть одну статью.",
         "Пролистать её до конца.",
-        "Нажать на товар внутри статьи, если он там есть."
+        "Нажать на товар внутри статьи, если он там есть.",
+        "Сверить цену под статьёй («Товары из статьи») с ценой этого товара в «Товарах».",
+        "Выключить «Показывать в магазине» у товара, который стоит внутри текста статьи, и открыть статью заново."
       ],
       "expect": [
         "В списке статьи с картинками.",
         "Статья открывается и читается целиком.",
         "Картинки внутри статьи на месте.",
-        "Ссылка на товар открывает этот товар."
+        "Ссылка на товар открывает этот товар.",
+        "Цена под статьёй — та же, что в «Товарах» сейчас.",
+        "Снятый с продажи товар: под статьёй его нет, в тексте название без ссылки."
       ],
       "why": "Статьи приводят людей из Google бесплатно; сломанная — никого.",
       "risk": "low",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-09-18T19:30:00.000Z",
       "en": {
         "title": "The blog",
         "steps": [
           "Open «Блог».",
           "Open one article.",
           "Scroll it to the end.",
-          "Tap the product inside the article, if there is one."
+          "Tap the product inside the article, if there is one.",
+          "Compare the price under the article («Товары из статьи») with that product's price in «Товары».",
+          "Switch «Показывать в магазине» off on a product that stands inside the article's text, then open the article again."
         ],
         "expect": [
           "The list shows articles with pictures.",
           "The article opens and reads to the end.",
           "The pictures inside the article are there.",
-          "The product link opens that product."
+          "The product link opens that product.",
+          "The price under the article is the one «Товары» shows right now.",
+          "A product off sale: not under the article, its name in the text no longer links."
         ],
         "why": "Articles bring people from Google for free; a broken one brings nobody."
       }
@@ -1195,6 +1242,43 @@
           "Five buttons along the bottom: «Обзор», «Заказы», «Товары», «Салон», «Ещё»."
         ],
         "why": "A sign-in that lets you past without a password leaks every buyer's address."
+      }
+    },
+    {
+      "id": "panel-settings-fast",
+      "area": "panel",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Две настройки подряд, не дожидаясь",
+      "steps": [
+        "«Ещё» → «Настройки» → «Письма».",
+        "Включить «Скидка ко дню рождения».",
+        "Сразу, не дожидаясь «Сохранено ✓», выбрать «за 3 дня».",
+        "Обновить страницу и посмотреть на оба поля."
+      ],
+      "expect": [
+        "Обе настройки на месте: галочка стоит и выбрано «за 3 дня».",
+        "«за 3 дня» не сбросилось обратно."
+      ],
+      "why": "Каждое сохранение отправляет все настройки целиком. Две записи подряд обгоняли друг друга, и побеждала та, что раньше легла в базу, а не та, что позже отправлена — при этом панель уже написала «Сохранено ✓» про пропавшую.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-18T19:10:00.000Z",
+      "en": {
+        "title": "Two settings in a row, without waiting",
+        "steps": [
+          "«Ещё» → «Настройки» → «Письма».",
+          "Switch «Скидка ко дню рождения» on.",
+          "At once, without waiting for «Сохранено ✓», pick «за 3 дня».",
+          "Reload the page and look at both fields."
+        ],
+        "expect": [
+          "Both settings are there: the switch is on and «за 3 дня» is picked.",
+          "«за 3 дня» has not fallen back."
+        ],
+        "why": "Every save sends the whole settings map. Two in a row overtook each other and the one that reached the database first won, not the one sent last — while the panel had already said «Сохранено ✓» about the one that vanished."
       }
     },
     {

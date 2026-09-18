@@ -244,6 +244,35 @@ describe("tools/prerender-shop2.mjs — wiring", () => {
   it("still writes a static page for every catalogue product, hidden or not", () => {
     expect(prerender).toContain("for (const p of CATALOGUE) pages.push(productPage(p, lang));");
   });
+
+  /* An article's shelf and a category tile are the same question about the
+     same column, and the blog asked it first (blogShelfProduct(),
+     blogOffSale(), 18.09.2026). One call, or the two answers drift — which is
+     how the storefront came to link to what the blog had already stopped
+     linking to. */
+  it("asks it of an article's shelf through the same function", () => {
+    expect(prerender).toContain("if (!forSale(row)) return null;");
+    expect(prerender).toContain("if (!forSale(row)) return true;");
+    expect(prerender).not.toContain("row && row.hidden");
+  });
+});
+
+/* Every reader of `product_overrides.hidden` outside the mapper that builds
+   the row. src/middleware.ts is the one that cannot join them: it asks
+   /api/overrides/hidden/, which does the filtering in SQL (`where hidden`). */
+describe("forSale — who calls it", () => {
+  const readers = [
+    "src/lib/product-page.ts",
+    "src/lib/blog-page.ts",
+    "src/app/sitemap-products.xml/route.ts",
+  ];
+  for (const rel of readers) {
+    it(rel + " asks it rather than reading the column itself", () => {
+      const src = readFileSync(fileURLToPath(new URL("../" + rel, import.meta.url)), "utf8");
+      expect(src).toContain("forSale(");
+      expect(src).not.toMatch(/\?\.hidden\b|\.hidden === true/);
+    });
+  }
 });
 
 /* ---------- the grids and the sitemap, one answer ------------------------ */

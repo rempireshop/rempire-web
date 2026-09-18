@@ -944,7 +944,19 @@ test.describe("admin sections — the banner editor keeps its place", () => {
   });
 });
 
-/** Playwright has no first-class "is this the mobile project" flag. */
+/**
+ * Playwright has no first-class "is this the mobile project" flag, so the
+ * projects that draw the panel in its narrow layout are NAMED here.
+ *
+ * This used to read «not desktop», which quietly called every future project a
+ * phone — and one arrived: `webkit-local` is Desktop Safari at 1280 × 720, so
+ * the save-bar test demanded a bottom nav of a browser that correctly draws the
+ * laptop header, and read the top bar's `top: 0` as the phone nav's top edge.
+ * An allowlist fails the safe way round: a project nobody listed is treated as
+ * a desktop, which is what an unnamed project most likely is.
+ */
 function testProjectIsMobile(info: { project: { name: string } }): boolean {
-  return info.project.name !== "desktop";
+  return info.project.name === "tablet"
+    || info.project.name === "mobile"
+    || info.project.name === "mobile-safari";
 }

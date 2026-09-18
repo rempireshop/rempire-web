@@ -765,14 +765,6 @@ Two places deliberately still read the product word alone:
   is the one field Merchant Center suspends accounts over. Before it is
   submitted it needs the live base and a decision about where its stock comes
   from; `docs/merchant-feed.md` has the submission steps.
-- **The prerendered blog pages build «Товары из статьи» from the build-time
-  catalogue only** (`tools/prerender-shop2.mjs`, the `featured` list in the
-  blog post builder): no `product_overrides`, so the prices in a static
-  article are as old as the deploy, and there is no `hidden` filter, so a
-  static article can link to a `/p/<id>/` that now answers 404 `noindex`. The
-  request-time page does both correctly (`src/lib/blog-page.ts` `shelfProducts()`,
-  17.09.2026) — and the static copy is the one Vercel's static layer serves in
-  preference to the route, so the fixed path is the one that rarely runs.
 - **Product cards the assistant writes into an article have no `href`.**
   `src/lib/ai-prompts.ts` tells the model to emit `<a data-product="ID"></a>`
   with no href and no text; `src/lib/blog-html.mjs` `openTag()` only keeps an
