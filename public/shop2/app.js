@@ -277,8 +277,8 @@
          floor to name, so the clause is gone (pdpShipLine, ftrShipLine). */
       "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
         "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · järeletulek aadressil Mardi 1",
-      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
-        "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · 230 pakiautomaati 4 riigis",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · пакоматы и пункты выдачи по Европе":
+        "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva Eestis · pakiautomaadid ja pakipunktid üle Euroopa",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
@@ -3119,8 +3119,8 @@
          floor to name, so the clause is gone (pdpShipLine, ftrShipLine). */
       "Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1":
         "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · pickup at Mardi 1",
-      "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах":
-        "DPD, Omniva, SmartPosti and courier · 1–3 days · 230 parcel lockers in 4 countries",
+      "DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · пакоматы и пункты выдачи по Европе":
+        "DPD, Omniva, SmartPosti and courier · 1–3 days in Estonia · parcel lockers and pickup points across Europe",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day.",
@@ -6006,8 +6006,8 @@
     [/^(.+) · (\d+(?:[.,]\d+)?) мл × (\d+)$/, { ET: "$1 · $2 ml × $3", EN: "$1 · $2 ml × $3" }],
     [/^(.+) · (\d+(?:[.,]\d+)?) г × (\d+)$/, { ET: "$1 · $2 g × $3", EN: "$1 · $2 g × $3" }],
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
-    [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
-      { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
+    [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · бесплатно от (.+) · пакоматы и пункты выдачи по Европе$/,
+      { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva Eestis · tasuta alates $1 · pakiautomaadid ja pakipunktid üle Euroopa", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days in Estonia · free from $1 · parcel lockers and pickup points across Europe" }],
     /* The picker's heading and the summary's delivery line. Three shapes, and
        the widest one first: «Пакомат или пункт выдачи Nova Post» tops a list
        that really does hold both, «Пункт выдачи Nova Post» names the counter
@@ -6866,8 +6866,8 @@
   }
   function ftrShipLine() {
     return THRESH.EE == null
-      ? "DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах"
-      : "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах";
+      ? "DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · пакоматы и пункты выдачи по Европе"
+      : "DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · бесплатно от " + THRESH.EE + " € · пакоматы и пункты выдачи по Европе";
   }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
   /* «Другая страна Европы» prices the parcel (the EU row of the rules), but a

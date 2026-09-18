@@ -340,7 +340,10 @@ describe("the sentences that quote «бесплатно от» stop quoting it w
     const m = marketing({ ...SHIPPED, freeFromByCountry: { EE: 39, EU: 200 } });
     expect(m.thresh.EE).toBe(39);
     expect(m.pdp).toContain("по Эстонии бесплатно от 39 €");
-    expect(m.ftr).toContain("по Эстонии бесплатно от 39 €");
+    /* The footer says «по Эстонии» once now, about the 1–3 days, so the
+       threshold clause beside it is just «бесплатно от 39 €» — reworded
+       19.09.2026 when the «230 пакоматов в 4 странах» claim was dropped. */
+    expect(m.ftr).toContain("1–3 дня по Эстонии · бесплатно от 39 €");
     expect(m.announce("Бесплатная доставка по Эстонии от {EE} €")).toBe("Бесплатная доставка по Эстонии от 39 €");
   });
 
@@ -353,7 +356,7 @@ describe("the sentences that quote «бесплатно от» stop quoting it w
     expect(m.pdp).not.toContain("бесплатно");
     expect(m.ftr).not.toContain("бесплатно");
     expect(m.pdp).toBe("Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · самовывоз на Mardi 1");
-    expect(m.ftr).toBe("DPD, Omniva, SmartPosti и курьер · 1–3 дня · 230 пакоматов в 4 странах");
+    expect(m.ftr).toBe("DPD, Omniva, SmartPosti и курьер · 1–3 дня по Эстонии · пакоматы и пункты выдачи по Европе");
   });
 
   it("drops the announcement strip rather than printing «от {EE} €» at a shopper", () => {
