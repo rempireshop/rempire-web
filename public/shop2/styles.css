@@ -925,6 +925,9 @@ body:has(.stickybar) .ftr {
 .pdp__oos p { margin: 0 0 12px; font-size: 13.5px; }
 .pdp__oosrow { display: flex; gap: 8px; }
 .pdp__oosrow .input { flex: 1; min-height: 48px; }
+/* the same box for one empty VOLUME (r23) — two lines and no form, so the
+   last of them does not need the 12px that separates a sentence from an input */
+.pdp__oos--size p:last-child { margin-bottom: 0; }
 .sizes { display: flex; gap: 8px; flex-wrap: wrap; }
 .size {
   min-height: 46px; padding: 0 16px; border: 1px solid var(--ink);
@@ -933,6 +936,22 @@ body:has(.stickybar) .ftr {
 }
 .size:hover { background: var(--shell); }
 .size[aria-current="true"] { background: var(--ink); color: var(--paper); }
+/* per-size stock (r23): a volume somebody counted down to zero. Greyed and
+   struck through rather than removed — the shopper who came for the 500 мл
+   has to see that it exists and is empty, not wonder whether this shop sells
+   it at all. Still 46px tall and still pressable (variantPicker says why): an
+   inert button on a phone reads as a broken one, so it stays tappable and the
+   buy row it selects says what is wrong. `opacity` is deliberately not used —
+   it would take the label under the 4.5:1 contrast the rest of the shop
+   holds, and this is text a shopper has to be able to read. */
+.size--out { border-color: var(--rule); color: var(--muted); text-decoration: line-through; }
+.size--out:hover { background: transparent; }
+.size--out[aria-current="true"] { background: var(--shell); color: var(--muted); }
+/* …and the same news on a basket line whose volume has gone since (r23). Two
+   classes on purpose: .cline__parts is declared further down this file and
+   paints itself --muted, so a single .cline__gone here would lose the cascade
+   on source order and the warning would read as one more grey caption. */
+.cline__parts.cline__gone { color: var(--error); }
 .pdp__buy { display: flex; gap: 12px; align-items: center; margin: 18px 0; }
 .pdp__add { flex: 1; }
 .pdp__alt { text-align: center; margin-bottom: 20px; }

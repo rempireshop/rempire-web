@@ -181,6 +181,14 @@
       "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
+      /* per-size stock (r23): the product's own word and one size's word are
+         two different sentences and may disagree — «мало» on the product while
+         the 500 мл is at zero. Each is a whole text node of its own, because
+         translateTree() rewrites nodes, not fragments. */
+      "Этого объёма сейчас нет": "Seda mahtu praegu ei ole",
+      "Этого размера сейчас нет": "Seda suurust praegu ei ole",
+      "Выберите другой объём.": "Valige mõni teine maht.",
+      "Выберите другой размер.": "Valige mõni teine suurus.",
       "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
@@ -2948,6 +2956,11 @@
       "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
+      // per-size stock (r23) — see the Estonian table for why each is whole
+      "Этого объёма сейчас нет": "This size is out of stock",
+      "Этого размера сейчас нет": "This size is out of stock",
+      "Выберите другой объём.": "Please pick another size.",
+      "Выберите другой размер.": "Please pick another size.",
       "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
       "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Delivery & returns",
       "Похожие товары": "Similar products", "Вместе лучше": "Better together",
@@ -8393,6 +8406,49 @@
     if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
     return p.price;
   }
+  /* ---- per-size stock (r23) ---------------------------------------------
+     The shelf's word for ONE size — "in" / "low" / "out" — or null where
+     there is none. The server has been publishing this on /api/overrides/ as
+     `stockByVariant` since the 17.09.2026 decision («show the product, hide
+     the empty size») and no client read it: setting a size to 0 changed
+     nothing on its page, and the shopper only found out at the checkout,
+     where createOrder() refuses the line (Renat, 18.09.2026).
+
+     null is the load-bearing case. A size nobody has counted is ABSENT from
+     the map, and absent is not empty — the shop has no opinion about it and
+     the owner's own «Наличие» stands, exactly as the server treats it. The
+     same goes for a product with no map at all. Reading absence as «out»
+     would grey out most of the shop, which is the opposite of what was
+     approved. */
+  function sizeStockOf(p, i) {
+    var m = p && p.stockVar;
+    if (!m) return null;
+    var sizes = p.sizes && p.sizes.length ? p.sizes : null;
+    /* Keyed by the LABEL, and by '' for a product with no sizes — the key an
+       order line carries (normVariant in src/lib/inventory.ts, which trims).
+       An index past the end reads the last rung, as sizePrice() does. */
+    var key = sizes ? String(sizes[Math.min(i, sizes.length - 1)] || "").trim() : "";
+    var st = m[key];
+    return st === "in" || st === "low" || st === "out" ? st : null;
+  }
+  /** True only for a size somebody has actually counted down to zero. */
+  function sizeOut(p, i) { return sizeStockOf(p, i) === "out"; }
+  /** The first size still on the shelf — what a product page opens on. */
+  function firstSizeIdx(p) {
+    var sizes = (p && p.sizes) || [];
+    for (var i = 0; i < sizes.length; i++) if (!sizeOut(p, i)) return i;
+    return 0;
+  }
+  /* «объём» for cosmetics, «размер» for a t-shirt — the same split the size
+     picker and the editor already make, kept in one place so the sentence the
+     page prints and the one the toast says can never drift apart. Each half
+     is one whole literal: translateTree() rewrites text nodes, not pieces. */
+  function sizeGoneText(p) {
+    return p && p.cat === "merch" ? "Этого размера сейчас нет" : "Этого объёма сейчас нет";
+  }
+  function sizePickOtherText(p) {
+    return p && p.cat === "merch" ? "Выберите другой размер." : "Выберите другой объём.";
+  }
   /* ---- wholesale/loyalty: pro (salon) pricing --------------------------
      S.pro is filled in by loadProPricing() once signed in on a 'pro'
      account — {tier, proDiscountPct, proMinOrder, proPrices}. Mirrors
@@ -9805,10 +9861,26 @@
   function cardSizeIdx(id) {
     var p = byId(id), sizes = (p && p.sizes) || [];
     if (sizes.length < 2) return 0;
-    var best = 0, bestPr = shownPrice(p, 0);
-    for (var i = 1; i < sizes.length; i++) {
+    /* The cheapest volume — of the ones that can actually be SOLD (r23). The
+       card prints one price and its «В корзину» baskets that very volume
+       (addToCart), so quoting the 75 мл that was counted to zero this morning
+       is a price on a bottle the shop cannot hand over: the tap would bounce
+       off the backstop and the shopper would never learn that the 250 мл is
+       there. Only a counted-out size is passed over — an uncounted one is a
+       size the shelf has no opinion about and is priced exactly as before.
+       With every size gone the product's own word is «нет в наличии» and the
+       card shows no button at all, so the first rung is as good as any. */
+    var best = -1, bestPr = 0;
+    for (var i = 0; i < sizes.length; i++) {
+      if (sizeOut(p, i)) continue;
       var pr = shownPrice(p, i);
-      if (pr < bestPr) { best = i; bestPr = pr; }
+      if (best < 0 || pr < bestPr) { best = i; bestPr = pr; }
+    }
+    if (best >= 0) return best;
+    best = 0; bestPr = shownPrice(p, 0);
+    for (var j = 1; j < sizes.length; j++) {
+      var pr2 = shownPrice(p, j);
+      if (pr2 < bestPr) { best = j; bestPr = pr2; }
     }
     return best;
   }
@@ -11036,6 +11108,21 @@
       return '<span class="cline__parts">' + (who ? esc(who) + "<br>" : "") +
         "<span>Действует год со дня покупки</span></span>";
     }
+    /* per-size stock (r23): a line basketed days ago, whose volume has been
+       counted to zero since. POST /api/orders already refuses it — «Товара не
+       хватает на складе» — but only at the very end, after the address and
+       the delivery method have been filled in, and with nothing to say WHICH
+       of three lines is the problem. Said here instead, on the line itself,
+       where «Убрать» is one tap away.
+       Said, not enforced: the line is left in the basket and the checkout
+       still refuses it. Dropping it silently would be the worse bug of the
+       two — a shopper who put something in a basket is owed the news, not a
+       basket that quietly empties itself — and the server stays the one place
+       that decides what may be bought. */
+    var cp = byIdOrNull(l.id);
+    if (cp && sizeOut(cp, l.size || 0)) {
+      return '<span class="cline__parts cline__gone">' + sizeGoneText(cp) + "</span>";
+    }
     return "";
   }
 
@@ -11801,6 +11888,27 @@
     var sizes = p.sizes && p.sizes.length ? p.sizes : [];
     var pro = proPrice(p, S.size);
     var unitPrice = pro != null ? pro : sizePrice(p, S.size);
+    /* per-size stock (r23): the size the shopper is looking at, counted to
+       zero on a product that is otherwise on sale. The product's own word
+       above (`p.stock`) is a different sentence and MAY DISAGREE with this
+       one — «мало» on the product while the 500 мл is empty is the normal
+       reading of a half-sold ladder, not a bug. `p.stock === "out"` still
+       wins outright: when the whole ladder is counted out the server says so
+       on the product itself and the page keeps the one block it always had,
+       with the «Сообщить о наличии» form. There is deliberately no such form
+       per size — POST /api/stock-alerts is keyed by product and knows nothing
+       about volumes, so a letter promised for «the 500 мл» would never come.
+
+       …and «выберите другой» needs another one to exist. A product with one
+       volume, or none at all, whose single shelf row is at zero is simply not
+       for sale, so it gets the product's own block and the working, product-
+       keyed alert. It is reachable: stockStates() withholds the product word
+       unless it can vouch for the whole ladder, and one of the owner's own
+       products (migration 131) that has never had a ladder saved is exactly
+       the case it cannot vouch for — knownLadder() returns null for it. */
+    var soloGone = sizes.length < 2 && sizeOut(p, S.size);
+    var prodGone = p.stock === "out" || soloGone;
+    var volGone = !prodGone && sizeOut(p, S.size);
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
@@ -11830,7 +11938,7 @@
           variantPicker(p, sizes) +
           // the card hides its add button for stock:"out" — the product page
           // must agree, or a shopper "pays" for an item the shop cannot ship
-          (p.stock === "out"
+          (prodGone
             ? '<div class="pdp__oos"><p>Товара сейчас нет. Оставьте почту — напишем, когда появится.</p>' +
               /* account-flows: the button used to be a toast with nothing
                  behind it (audit top-15 #12). It now opens a one-field form
@@ -11840,6 +11948,12 @@
                 ? '<div class="pdp__oosrow"><input class="input input--box" type="email" inputmode="email" autocomplete="email" data-notifyf aria-label="E-mail для уведомления" placeholder="you@example.com" value="' + esc(S.notifyEmail) + '">' +
                   '<button class="btn btn--ghost" data-notifysend="' + p.id + '"' + (S.notifyBusy ? " disabled" : "") + ">" + (S.notifyBusy ? "Отправляем…" : "Сообщить") + "</button></div></div>"
                 : '<button class="btn btn--ghost" data-notify="' + p.id + '">Сообщить о наличии</button></div>')
+            // per-size stock (r23): two sentences, two text nodes — the
+            // second names what to do about it, and both are whole literals
+            // for translateTree() to swap
+            : volGone
+            ? '<div class="pdp__oos pdp__oos--size"><p>' + sizeGoneText(p) + "</p>" +
+              '<p class="muted">' + sizePickOtherText(p) + "</p></div>"
             : '<div class="pdp__buy">' +
                 '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num" data-qtynum>' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
                 '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
@@ -11886,7 +12000,9 @@
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         complementsFor(p).map(cardHTML).join("") +
       "</div></section></div>" +
-      (p.stock === "out" ? "" :
+      // …and the bar that follows the shopper down the page goes with it: it
+      // carries its own «В корзину» for the size now chosen (r23)
+      (prodGone || volGone ? "" :
         '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(unitPrice * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
   }
   /* `open`/`id` are optional — every call site but Reviews still gets a
@@ -14136,20 +14252,37 @@
       return '<div class="pdp__vol">' + (p.cat === "merch" ? "Размер — " : "Объём — ") + esc(sizes[0]) + "</div>";
     }
     if (sizes.length < 2) return "";
+    /* per-size stock (r23): a size counted down to zero is greyed and marked
+       aria-disabled, but stays PRESSABLE on purpose. Tapping it swaps the buy
+       row for «Этого объёма сейчас нет» (screenProduct) instead of doing
+       nothing at all, which on a phone is indistinguishable from a broken
+       button — and the shopper still gets to see its price. Nothing can be
+       basketed from there: the buy row is gone and addToCart() refuses it
+       anyway. A size nobody counted is left exactly as it was. */
     var sv = splitVariants(sizes);
     if (!sv) {
       return '<div class="field"><span class="field__label">' + (p.cat === "merch" ? "Размер" : "Объём") +
         '</span><div class="sizes">' + sizes.map(function (sz, i) {
-          return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + esc(sz) + "</button>";
+          return '<button class="size' + (sizeOut(p, i) ? " size--out" : "") + '" data-size="' + i +
+            '" aria-current="' + (i === S.size) + '"' + (sizeOut(p, i) ? ' aria-disabled="true"' : "") + ">" + esc(sz) + "</button>";
         }).join("") + "</div></div>";
     }
     var cur = sizes[Math.min(S.size, sizes.length - 1)].split(" / ");
+    /* Merch is a grid of colour × size, so a COLOUR is gone only when every
+       size printed on it is counted to zero — one shirt left in white L keeps
+       white on offer. A SIZE is judged against the colour now chosen. */
+    function colourOut(c) {
+      return sv.sizes.every(function (s2) { return sizeOut(p, variantIndex(sizes, c, s2)); });
+    }
     return '<div class="field"><span class="field__label">Цвет принта — <span data-colourname>' + esc(colourRu(cur[0])) +
       '</span></span><div class="sizes">' + sv.colours.map(function (c) {
-        return '<button class="size" data-vcolour="' + esc(c) + '" aria-current="' + (c === cur[0]) + '">' + esc(colourRu(c)) + "</button>";
+        return '<button class="size' + (colourOut(c) ? " size--out" : "") + '" data-vcolour="' + esc(c) +
+          '" aria-current="' + (c === cur[0]) + '"' + (colourOut(c) ? ' aria-disabled="true"' : "") + ">" + esc(colourRu(c)) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="field"><span class="field__label">Размер</span><div class="sizes">' + sv.sizes.map(function (s2) {
-        return '<button class="size" data-vsize="' + esc(s2) + '" aria-current="' + (s2 === cur[1]) + '">' + esc(s2) + "</button>";
+        var gone = sizeOut(p, variantIndex(sizes, cur[0], s2));
+        return '<button class="size' + (gone ? " size--out" : "") + '" data-vsize="' + esc(s2) +
+          '" aria-current="' + (s2 === cur[1]) + '"' + (gone ? ' aria-disabled="true"' : "") + ">" + esc(s2) + "</button>";
       }).join("") + "</div></div>";
   }
 
@@ -29524,6 +29657,19 @@
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
+    /* per-size stock (r23): the shelf's word for each SIZE, per product id —
+       {«75 мл»: "in", «500 мл»: "out"}, '' for a product with no sizes, keyed
+       by the label exactly as an order line carries it (getOverrides →
+       `stockByVariant` in src/lib/orders.ts). A size NOBODY HAS COUNTED is
+       absent from the map, and absent is not «out»: it means the shelf has no
+       opinion and the owner's own «Наличие» stands, which is the whole of the
+       17.09.2026 decision. The map itself is absent for a product nobody has
+       counted at all.
+       Unlike DEMO.stock beside it this is never restored from localStorage
+       below: the owner's manual word is his own edit and belongs in the
+       offline copy, while this is derived server truth, and a day-old copy of
+       it would grey out sizes that have been back on the shelf since. */
+    stockVar: {},
     // migration 147: the whole size ladder the owner saved, per product id,
     // and the products he switched off «Показывать в магазине»
     sizes: {}, hidden: {},
@@ -29861,6 +30007,8 @@
       // from the global discount", same convention as product_overrides.pro_price
       p.proPrice = (DEMO.proPrice && DEMO.proPrice[p.id] != null) ? DEMO.proPrice[p.id] : null;
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
+      // per-size stock (r23): null where nobody has counted this product
+      p.stockVar = (DEMO.stockVar && DEMO.stockVar[p.id]) || null;
       // p.seo stays the catalogue's own (English) pair; the owner's per-language
       // pairs sit beside it and win in seoFor()
       p.seoOv = DEMO.seo[p.id] || b.seoOv || null;   // product creation: a custom row's own pairs underneath
@@ -29953,6 +30101,7 @@
       return l.type === "bundle" || l.type === "gift" || String(l.id).indexOf("c-") !== 0 || !!byIdOrNull(l.id);
     });
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
+    DEMO.stockVar = {};   // per-size stock (r23)
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
     DEMO.proPrice = {};   // wholesale/loyalty
@@ -29965,6 +30114,11 @@
       if (o.hidden === true) DEMO.hidden[id] = true;
       if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
+      /* per-size stock (r23): already on this feed — publicOverrides() in
+         src/app/api/overrides/route.ts strips the pro price and nothing else
+         — and until now no client read it. Taken as it comes, because only
+         the keys the shelf actually counted are on it. */
+      if (o.stockByVariant && typeof o.stockByVariant === "object") DEMO.stockVar[id] = o.stockByVariant;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
       // per-language Google pairs (`seo`), or the one Russian pair an older
       // server still answers with
@@ -30082,6 +30236,17 @@
       adoptServer(r.body);
       demoSave();
       applyDemoOverrides();
+      /* per-size stock (r23): the shelf's per-size word arrives with THIS
+         answer, and a page opened before it landed chose its size without it
+         — a direct visit to /shop2/p/… restores the screen from the address
+         at boot. Land on a sold-out volume and the page the shopper finally
+         sees says «Этого объёма сейчас нет» about a product with three other
+         volumes on the shelf. Nudged once, here, and only off a size that is
+         really counted out: firstSizeIdx() leaves an uncounted or a stocked
+         one exactly where the shopper put it. */
+      if (S.screen === "product" && sizeOut(byId(S.productId), S.size)) {
+        S.size = firstSizeIdx(byId(S.productId));
+      }
       // On checkout, adoptServer()'s prices/stock/ship-rules only ever move
       // the delivery block and the summary — never the contact block, so
       // never a full render() (same reasoning as loadShipRules() above,
@@ -33521,6 +33686,20 @@
     var p = byId(S.productId);
     var price = document.querySelector("[data-price]");
     if (!price) { render(); return; }
+    /* per-size stock (r23): the buy row is the one thing here that cannot be
+       patched — a size counted to zero replaces it with «Этого объёма сейчас
+       нет», and stepping back to a size that is on the shelf has to bring the
+       stepper, «В корзину» and the sticky bar back. Only that flip costs a
+       full render; every ordinary tap still patches in place and keeps the
+       focused button, which is what this function exists for.
+       The same three-way screenProduct() makes, and made the same way: a lone
+       volume at zero is the PRODUCT being gone, not a volume, and gets the
+       block with the «Сообщить о наличии» form instead. */
+    var pSizes = p.sizes && p.sizes.length ? p.sizes : [];
+    var pGone = p.stock === "out" || (pSizes.length < 2 && sizeOut(p, S.size));
+    if ((!pGone && sizeOut(p, S.size)) !== !!document.querySelector(".pdp__oos--size")) {
+      render(); return;
+    }
     var pro = proPrice(p, S.size);
     var unitPrice = pro != null ? pro : sizePrice(p, S.size);
     price.textContent = eur(unitPrice);
@@ -33544,6 +33723,15 @@
     });
     document.querySelectorAll("[data-vsize]").forEach(function (b) {
       b.setAttribute("aria-current", String(b.dataset.vsize === cur[1]));
+      /* …and these are the only buttons whose availability MOVES: a merch
+         size is judged against the colour now chosen, so «L» can be gone in
+         white and on the shelf in black. The volume and colour rows are fixed
+         per button and need no patching (r23). */
+      if (cur.length === 2) {
+        var gone = sizeOut(p, variantIndex(sizes, cur[0], b.dataset.vsize));
+        b.classList.toggle("size--out", gone);
+        if (gone) b.setAttribute("aria-disabled", "true"); else b.removeAttribute("aria-disabled");
+      }
     });
     var cn = document.querySelector("[data-colourname]");
     if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
@@ -34225,6 +34413,14 @@
     var si = sizeIdx === undefined
       ? (S.productId === id && S.screen === "product" ? S.size : cardSizeIdx(id))
       : sizeIdx;
+    /* per-size stock (r23): the same backstop one size down. The product word
+       above says «в наличии» while any single size is left, so it lets through
+       exactly the line createOrder() then refuses — a 500 мл counted to zero
+       on a product whose 75 мл is on the shelf. Every button in the shop that
+       can basket something comes through here, so this is the one place it
+       has to be said. A size nobody has counted is not refused, here or on
+       the server. */
+    if (sizeOut(byId(id), si)) { toast(sizeGoneText(byId(id))); return; }
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
     S.cart.forEach(function (l) { if (l.id === id && l.size === si) line = l; });
@@ -34454,8 +34650,14 @@
     if (d.goProduct) {
       // features: the video and the review form belong to the product we left
       revLeaveProduct(d.goProduct);
-      S.productId = d.goProduct; S.size = 0; S.qty = 1;
       var np = byId(d.goProduct);
+      /* per-size stock (r23): opening on the first size STILL ON THE SHELF,
+         not blindly on the first rung. Landing on a sold-out 75 мл would show
+         «Этого объёма сейчас нет» over a product whose other volumes are
+         there for the buying — the product would read as gone, which is
+         precisely the loss the 17.09.2026 decision was meant to stop. With
+         nothing counted, or nothing left, this is 0 exactly as before. */
+      S.productId = d.goProduct; S.size = firstSizeIdx(np); S.qty = 1;
       S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
       S.videoOn = false;
       go("product"); return;
@@ -37505,7 +37707,8 @@
       if (found) {
         revLeaveProduct(found.id);   // features
         S.productId = found.id;
-        S.size = 0; S.qty = 1;
+        // per-size stock (r23): as in the click above — the first size left
+        S.size = firstSizeIdx(found); S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
         S.videoOn = false;
         S.screen = "product";
