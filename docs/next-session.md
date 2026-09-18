@@ -95,10 +95,17 @@ Nothing here is urgent; each is written up in
   second numbered invoice). All need design, all are low-probability.
 - **F21** — the label normaliser has no size sanity check. Unverifiable until a
   real label exists, which is Sunday at the earliest.
-- **F26, F29, F40, F53, F55, F56** — noise, coverage gaps and one account screen
-  offering fewer carriers than the checkout.
-- **§ 9.5** — three duplicate keys remain in the ET/EN dictionaries; the later
-  value silently wins, and today the later value is the right one.
+- **F40 — needs your say-so, not a fix.** The account's «Доставка по
+  умолчанию» offers fewer carriers than the checkout does: LV and LT show
+  Omniva alone where the checkout has four, FI shows SmartPosti without DPD,
+  EE lacks Unisend and Nova Post, and none of the 18 DPD countries opened on
+  18.09 has a row at all. So a customer cannot save a Unisend, Nova Post or
+  DPD locker as their default. It is a change to the shop's own screens, which
+  is yours to approve — it was left alone for that reason and for no other.
+- **F26, F29, F53, F55, F56** — noise and coverage gaps.
+- **§ 9.5 — done after this list was written:** the three duplicate keys are
+  gone from the ET and EN dictionaries. Each kept the value that was already
+  winning, so nothing on screen changed.
 
 ## Waiting on Dim, not on us
 
