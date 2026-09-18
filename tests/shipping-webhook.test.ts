@@ -17,7 +17,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { query } from "@/lib/db";
 import { signHs256 } from "@/lib/payments/jwt";
 import { resetRateLimits } from "@/lib/payments/ratelimit";
-import { readStatusBook, statusMeaning } from "@/lib/shipping/webhook";
+import { readStatusBook, statusMeaning, verifyShipmentWebhook } from "@/lib/shipping/webhook";
 import { GET, POST } from "@/app/api/shipping/notify/route";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
@@ -244,6 +244,161 @@ describe("the shipment webhook", () => {
   it("answers 405 on GET, like the payment webhook", async () => {
     const res = GET();
     expect(res.status).toBe(405);
+  });
+});
+
+/**
+ * The envelope Montonio actually sends — the one printed, decoded, in the
+ * webhooks guide. `eventType` and `shipmentId` at the top; the shipment itself,
+ * with its status, its merchantReference and its parcels, inside `data`.
+ *
+ * The fixture above this one is flat, which is what Montonio's envelope is not,
+ * and for months that was the only shape under test: readEvent() had been
+ * written to match the fixture, so every real notification read as «no status»
+ * and was thrown away with a 200. These cases are the documented shape, and
+ * they fail against the code as it stood before 18.09.2026.
+ */
+function guideToken(
+  overrides: { eventType?: string; data?: Record<string, unknown> } = {},
+  secret = SECRET,
+): string {
+  return signHs256(
+    {
+      eventId: "e1be81fb-2355-44b2-9f28-2b1a691151bb",
+      shipmentId: SHIPMENT,
+      created: "2026-09-18T10:51:57.322Z",
+      eventType: overrides.eventType ?? "shipment.statusUpdated",
+      data: {
+        id: SHIPMENT,
+        createdAt: "2026-09-18T10:51:55.288Z",
+        status: "delivered",
+        montonioOrderUuid: null,
+        merchantReference: NUMBER,
+        carrierShipmentId: null,
+        shippingMethod: {
+          type: "pickupPoint",
+          id: "377c3b06-0967-4ff2-b28a-372cab234898",
+          carrierCode: "omniva",
+          countryCode: "EE",
+        },
+        parcels: [
+          {
+            id: "0b10c1e1-beaa-4b09-9bb6-c6dd4002114d",
+            weight: 1,
+            carrierParcelId: "CC548936341EE",
+            trackingLink: "https://minu.omniva.ee/track/CC548936341EE?language=et",
+          },
+        ],
+        store: { id: "088ae409-ae24-4a3c-a640-5c269f732caa" },
+        ...overrides.data,
+      },
+    },
+    secret,
+    { expiresInSeconds: 600 },
+  );
+}
+
+describe("the envelope Montonio documents", () => {
+  const config = { accessKey: ACCESS, secretKey: SECRET, env: "sandbox" } as const;
+
+  it("reads the status, the order and the parcel out of `data`", () => {
+    const event = verifyShipmentWebhook({ payload: guideToken() }, config);
+    expect(event).toEqual({
+      event: "shipment.statusUpdated",
+      shipmentId: SHIPMENT,
+      orderRef: NUMBER,
+      status: "delivered",
+      trackingCode: "CC548936341EE",
+    });
+  });
+
+  it("still reads a flat token, so nothing that worked stopped working", () => {
+    const event = verifyShipmentWebhook({ payload: token() }, config);
+    expect(event).toMatchObject({ shipmentId: SHIPMENT, orderRef: NUMBER, status: "delivered" });
+  });
+
+  it("accepts `orderId`, which Montonio's own example token still encodes", () => {
+    const event = verifyShipmentWebhook(
+      { payload: guideToken({ data: { merchantReference: undefined, orderId: NUMBER } }) },
+      config,
+    );
+    expect(event.orderRef).toBe(NUMBER);
+  });
+});
+
+describe("the shipment webhook, spoken the way Montonio speaks it", () => {
+  beforeAll(async () => {
+    await setupDb();
+    process.env.MONTONIO_ACCESS_KEY = ACCESS;
+    process.env.MONTONIO_SECRET_KEY = SECRET;
+  });
+  afterAll(async () => {
+    delete process.env.MONTONIO_ACCESS_KEY;
+    delete process.env.MONTONIO_SECRET_KEY;
+    await teardownDb();
+  });
+  beforeEach(async () => {
+    await truncateAll();
+    resetRateLimits();
+  });
+
+  it("closes the order from a real `shipment.statusUpdated`", async () => {
+    const id = await shippedOrder();
+
+    const res = await POST(hook({ payload: guideToken() }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      ok: true,
+      status: "delivered",
+      number: NUMBER,
+      applied: "delivered",
+    });
+
+    expect(await statusOf(id)).toBe("delivered");
+    expect(await shipmentStatusOf(id)).toBe("delivered");
+    expect((await readStatusBook()).delivered).toMatchObject({ count: 1, meaning: "delivered" });
+  });
+
+  it("writes down `registrationFailed` — the carrier refused the parcel — and moves nothing", async () => {
+    const id = await shippedOrder();
+
+    const res = await POST(
+      hook({
+        payload: guideToken({
+          eventType: "shipment.registrationFailed",
+          data: { status: "registrationFailed" },
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, status: "registrationFailed", meaning: "unknown" });
+
+    /* Nothing in the white list matches it, so the order stays where it is —
+       but the word is recorded, which is the whole reason this endpoint exists
+       and is exactly what used to be lost. */
+    expect(await statusOf(id)).toBe("shipped");
+    expect((await readStatusBook()).registrationFailed).toMatchObject({
+      count: 1,
+      meaning: "",
+      event: "shipment.registrationFailed",
+    });
+  });
+
+  it("records `awaitingCollection` without calling a waiting parcel delivered", async () => {
+    const id = await shippedOrder();
+    const res = await POST(hook({ payload: guideToken({ data: { status: "awaitingCollection" } }) }));
+    expect(res.status).toBe(200);
+    // it is in the locker, not in the customer's hands
+    expect(await statusOf(id)).toBe("shipped");
+    expect((await readStatusBook()).awaitingCollection).toMatchObject({ meaning: "" });
+  });
+
+  it("finds the order by shipmentId when `data` names no reference", async () => {
+    const id = await shippedOrder();
+    const res = await POST(hook({ payload: guideToken({ data: { merchantReference: "" } }) }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ number: NUMBER });
+    expect(await statusOf(id)).toBe("delivered");
   });
 });
 

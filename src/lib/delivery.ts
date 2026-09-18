@@ -85,9 +85,15 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
  *
  * **This white list is a fallback, and it is meant to be replaced.** The six
  * spellings below are the ones carriers and Montonio use between them, written
- * down before anybody here had seen a real status: the exact vocabulary of
- * Montonio's own `status` field is not in the reference we have. Dim's answer
- * to that, 08.09.2026, was to stop guessing and go and look — so
+ * down before anybody here had seen a real status. It used to say here that
+ * «the exact vocabulary of Montonio's own `status` field is not in the
+ * reference we have» — which is wrong, and was already contradicted twenty
+ * lines further down by looksReturned(), which quotes that vocabulary and cites
+ * the page. It is documented, and the two words this function turns on —
+ * `delivered` and `returned` — are both in it, as is `awaitingCollection`,
+ * which must NOT count as delivered and does not. What the docs do not promise
+ * is that a carrier's own wording is never passed through instead, which is the
+ * real reason to keep looking. Dim's answer, 08.09.2026, was to go and look — so
  * `shipment.statusUpdated` is registered (POST /api/shipping/notify/) and every
  * distinct word it delivers is written into `settings.shipping_statuses` with
  * what this function made of it. When that row says what the real words are,

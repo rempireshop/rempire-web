@@ -611,6 +611,28 @@ describe("creating a shipment", () => {
     });
   });
 
+  /**
+   * «quantity — Product quantity. Max value is 999» (reference § Create
+   * Shipment → products). Over that, Montonio answers 400 and the **whole**
+   * shipment fails to book — the products array is only pick-list and
+   * tracking-page metadata, so a silly count losing its exact value is far
+   * cheaper than the parcel losing its booking.
+   */
+  it("clamps a product quantity to the 999 Montonio documents", async () => {
+    withKeys();
+    const calls = stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+
+    await createMontonioShipment({
+      ...order,
+      items: order.items.map((i) => ({ ...i, qty: 5000 })),
+    });
+
+    const body = JSON.parse(String(calls[0].init?.body));
+    expect(body.products).toEqual([
+      { sku: "free-hold", name: "Free.Hold", quantity: 999, price: 11, currency: "EUR" },
+    ]);
+  });
+
   it("resolves a courier service and sends the street address", async () => {
     withKeys();
     const calls = stubFetch([
@@ -802,6 +824,46 @@ describe("creating a shipment", () => {
     expect(splitPhone("58107505", "EE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
     expect(splitPhone("00358 40 1234567", "FI")).toEqual({ phoneCountryCode: "358", phoneNumber: "401234567" });
     expect(splitPhone("2012345", "LV")).toEqual({ phoneCountryCode: "371", phoneNumber: "2012345" });
+  });
+
+  /**
+   * `receiver.phoneCountryCode` is required on every shipment and the shipments
+   * guide names the price of getting it wrong: «A common issue causing
+   * [registrationFailed] is an incorrect receiver phone number». Until
+   * 18.09.2026 the table held four countries and everything else fell back to
+   * Estonia's "372" — and the sandbox never complained, because it «skips phone
+   * number and address validation» (sandbox guide). Production does not.
+   */
+  it("gives a parcel the destination's own calling code, not Estonia's", () => {
+    expect(splitPhone("15112345678", "DE")).toEqual({ phoneCountryCode: "49", phoneNumber: "15112345678" });
+    expect(splitPhone("512345678", "PL")).toEqual({ phoneCountryCode: "48", phoneNumber: "512345678" });
+    expect(splitPhone("3401234567", "IT")).toEqual({ phoneCountryCode: "39", phoneNumber: "3401234567" });
+    expect(splitPhone("20123456", "DK")).toEqual({ phoneCountryCode: "45", phoneNumber: "20123456" });
+    expect(splitPhone("7700900123", "GB")).toEqual({ phoneCountryCode: "44", phoneNumber: "7700900123" });
+    // a country we do not ship to at all still has to produce something valid
+    expect(splitPhone("5551234", "ZZ")).toEqual({ phoneCountryCode: "372", phoneNumber: "5551234" });
+  });
+
+  it("splits a number the customer wrote in international form, wherever it is from", () => {
+    expect(splitPhone("+49 151 23456789", "DE")).toEqual({ phoneCountryCode: "49", phoneNumber: "15123456789" });
+    expect(splitPhone("0048 512 345 678", "PL")).toEqual({ phoneCountryCode: "48", phoneNumber: "512345678" });
+    // the longest code wins: 372 is a country, 37 is not
+    expect(splitPhone("+37258107505", "DE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
+    // …and a "+" number whose code we do not know keeps the destination's
+    expect(splitPhone("+9715551234", "DE")).toEqual({ phoneCountryCode: "49", phoneNumber: "9715551234" });
+  });
+
+  /**
+   * The mirror image of the case above, and the reason the whole table is not
+   * scanned for a bare number: "45…" is Denmark's calling code AND a complete
+   * Danish number, "39…" is Italy's AND an Italian mobile. Only the four
+   * prefixes this function has always recognised bare are still scanned for.
+   */
+  it("does not eat a local number that merely starts like a country code", () => {
+    expect(splitPhone("45123456", "DK")).toEqual({ phoneCountryCode: "45", phoneNumber: "45123456" });
+    expect(splitPhone("3912345678", "IT")).toEqual({ phoneCountryCode: "39", phoneNumber: "3912345678" });
+    // the Baltic four keep the behaviour they have always had
+    expect(splitPhone("372 5810 7505", "EE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
   });
 });
 
