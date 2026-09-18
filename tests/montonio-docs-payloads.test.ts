@@ -47,6 +47,7 @@ import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit"
 import {
   fetchMontonioCarrierContracts,
   fetchMontonioWebhooks,
+  readWebhookSetup,
   shipmentOnOrder,
 } from "@/lib/shipping/montonio";
 import { verifyShipmentWebhook } from "@/lib/shipping/webhook";
@@ -282,6 +283,10 @@ function withoutKeys() {
   delete process.env.MONTONIO_SECRET_KEY;
   delete process.env.MONTONIO_ENV;
   delete process.env.PAYMENT_PROVIDER;
+  /* The readiness route compares the registered webhook against this shop's
+     own address, so the tests that set it must not leak it into the ones that
+     check what happens without it. */
+  delete process.env.PUBLIC_BASE_URL;
 }
 
 afterEach(() => {
@@ -367,6 +372,12 @@ describe("GET /orders/:orderUuid — the only evidence refunds are switched on",
       grandTotal: 100,
       availableForRefund: 50,
       isRefundableType: false,
+      /* One line apart from `isRefundableType` in the reference's own example,
+         and the reason that flag can be read at all: «will be true if you
+         enabled refunds in montonio (and the user paid with a refundable
+         method)». This example order is a CARD one, so its `false` says
+         nothing about bank-link refunds (F12). */
+      paymentMethodType: "cardPayments",
     });
     expect(snap!.refunds).toEqual([
       { uuid: "92b11684-319a-4cce-92f5-56d348aa986a", amount: 25, status: "SUCCESSFUL" },
@@ -445,29 +456,121 @@ describe("GET /carriers and GET /webhooks — what this store is signed up for",
   it("reads the contracts the reference prints", async () => {
     withKeys();
     stubFetch([[/\/carriers$/, () => json(CARRIERS_BODY)]]);
-    expect(await fetchMontonioCarrierContracts()).toEqual([
-      { code: "smartpost", name: "SmartPosti", montonioContract: true, ownCountries: [] },
-      { code: "omniva", name: "Omniva", montonioContract: true, ownCountries: ["EE"] },
-    ]);
+    expect(await fetchMontonioCarrierContracts()).toEqual({
+      ok: true,
+      data: [
+        { code: "smartpost", name: "SmartPosti", montonioContract: true, ownCountries: [] },
+        { code: "omniva", name: "Omniva", montonioContract: true, ownCountries: ["EE"] },
+      ],
+    });
   });
 
   it("reads the registered webhooks — the one setup step nothing else notices", async () => {
     withKeys();
     stubFetch([[/\/webhooks$/, () => json(WEBHOOKS_BODY)]]);
-    expect(await fetchMontonioWebhooks()).toEqual([
-      {
-        id: "92965086-24a3-4fbd-919a-661142210c48",
-        url: "http://partner.montonio/shipmentEvents",
-        events: ["shipment.registered"],
-      },
-    ]);
+    expect(await fetchMontonioWebhooks()).toEqual({
+      ok: true,
+      data: [
+        {
+          id: "92965086-24a3-4fbd-919a-661142210c48",
+          url: "http://partner.montonio/shipmentEvents",
+          events: ["shipment.registered"],
+        },
+      ],
+    });
   });
 
   it("says «не смогли спросить» rather than «ничего нет» when the call fails", async () => {
     withKeys();
     stubFetch([[/\/(carriers|webhooks)$/, () => json({ message: "boom" }, 500)]]);
-    expect(await fetchMontonioCarrierContracts()).toBeNull();
-    expect(await fetchMontonioWebhooks()).toBeNull();
+    expect(await fetchMontonioCarrierContracts()).toMatchObject({ ok: false, status: 500 });
+    expect(await fetchMontonioWebhooks()).toMatchObject({ ok: false, status: 500 });
+  });
+
+  /**
+   * F14 — the status has to survive the probe.
+   *
+   * Refunds guide § errors: `401 STORE_NOT_FOUND - double check your access
+   * key`, `403 INVALID_TOKEN - double check your secret key`. Both used to
+   * arrive as `null`, indistinguishable from a timeout, and the panel printed
+   * «Проверяем…» to an owner whose keys had just been refused.
+   */
+  it("carries 401 and 403 out of the probe instead of flattening them to null", async () => {
+    withKeys();
+    stubFetch([[/\/webhooks$/, () => json({ message: "STORE_NOT_FOUND - double check your access key" }, 401)]]);
+    expect(await fetchMontonioWebhooks()).toMatchObject({ ok: false, status: 401 });
+
+    stubFetch([[/\/webhooks$/, () => json({ message: "INVALID_TOKEN - double check your secret key" }, 403)]]);
+    expect(await fetchMontonioWebhooks()).toMatchObject({ ok: false, status: 403 });
+  });
+});
+
+/**
+ * F13 — the reference's own example webhook, read properly.
+ *
+ * `GET /webhooks` returns `id, url, enabledEvents`. Until 19.09.2026 the
+ * readiness route kept none of the three and asked only `length > 0`, and this
+ * file's fixture — the reference's example, pointing at
+ * `http://partner.montonio/shipmentEvents` and subscribed to one event this
+ * shop does not act on — was asserted to be a correctly configured webhook.
+ * A fixture shaped like the contract is only worth having if the assertion is
+ * about the contract too.
+ */
+describe("readWebhookSetup — registered is not registered HERE", () => {
+  const OURS = "https://rempireshop.com/api/shipping/notify/";
+  const both = ["shipment.statusUpdated", "shipment.registrationFailed"];
+
+  it("refuses the reference's own example webhook, which used to pass", () => {
+    const setup = readWebhookSetup(
+      WEBHOOKS_BODY.data.map((w) => ({ id: w.id, url: w.url, events: w.enabledEvents })),
+      OURS,
+    );
+    expect(setup.state).toBe("wrong_url");
+    expect(setup.urls).toEqual(["http://partner.montonio/shipmentEvents"]);
+    expect(setup.expectedUrl).toBe(OURS);
+  });
+
+  it("calls the trailing slash what it is — a different address", () => {
+    /* next.config.ts `trailingSlash: true`: a POST to the slashless spelling
+       is answered 308 and the event never reaches the route. */
+    const setup = readWebhookSetup(
+      [{ id: "1", url: "https://rempireshop.com/api/shipping/notify", events: both }],
+      OURS,
+    );
+    expect(setup.state).toBe("wrong_url");
+  });
+
+  it("accepts the right address and names the events that are missing", () => {
+    expect(
+      readWebhookSetup([{ id: "1", url: OURS, events: both }], OURS).state,
+    ).toBe("ok");
+
+    const half = readWebhookSetup(
+      [{ id: "1", url: OURS, events: ["shipment.statusUpdated", "shipment.registered"] }],
+      OURS,
+    );
+    expect(half.state).toBe("missing_events");
+    /* `shipment.registered` is not required — booking is synchronous, so the
+       status comes back in the answer to the button press — and an extra
+       event is never a complaint. */
+    expect(half.missingEvents).toEqual(["shipment.registrationFailed"]);
+  });
+
+  it("ignores the scheme and the case, because the address is still ours", () => {
+    const setup = readWebhookSetup(
+      [{ id: "1", url: "http://RempireShop.com/api/shipping/notify/", events: both }],
+      OURS,
+    );
+    expect(setup.state).toBe("ok");
+  });
+
+  it("says «нет вебхука» for an empty list, and checks events when the base url is unknown", () => {
+    expect(readWebhookSetup([], OURS).state).toBe("none");
+    /* PUBLIC_BASE_URL unset — no address to compare, but a missing event is
+       still a missing event. */
+    const noBase = readWebhookSetup([{ id: "1", url: "https://x/y/", events: ["shipment.statusUpdated"] }], "");
+    expect(noBase.state).toBe("missing_events");
+    expect(noBase.expectedUrl).toBe("");
   });
 });
 
@@ -491,9 +594,19 @@ type RouteBody = {
   configured?: boolean;
   env?: string;
   payments?: { bankPayments?: boolean; cardPayments?: boolean; enabled?: string[] } | null;
-  refunds?: { refundableBankPayments?: boolean | null; availableForRefund?: number | null } | null;
-  shipping?: { webhookRegistered?: boolean | null; carriers?: unknown[] | null } | null;
-  rows?: Array<{ key: string; ok: boolean; sub: Msgs }>;
+  refunds?: {
+    refundableBankPayments?: boolean | null;
+    availableForRefund?: number | null;
+    /** Montonio's own `paymentMethodType` for the sampled order (F12). */
+    checkedMethod?: string | null;
+  } | null;
+  shipping?: {
+    webhookRegistered?: boolean | null;
+    carriers?: unknown[] | null;
+    /** url, trailing slash and events, read rather than counted (F13). */
+    webhook?: { state?: string; expectedUrl?: string; urls?: string[]; missingEvents?: string[] } | null;
+  } | null;
+  rows?: Array<{ key: string; ok: boolean; quiet?: boolean; sub: Msgs }>;
 };
 
 type Min = { id: string; s: string };
@@ -525,7 +638,15 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     await truncateAll();
   });
 
-  async function paidOrder(shipping: Record<string, unknown>, ref?: string) {
+  /* `bank | card | wallet` — our own vocabulary, which is what production
+     writes (src/lib/payments/types.ts `PaymentMethodKind`). This fixture used
+     to store `paymentInitiation`, a value no code path can produce, which hid
+     the fact that the readiness route never looked at the method at all. */
+  async function paidOrder(
+    shipping: Record<string, unknown>,
+    ref?: string,
+    method: "bank" | "card" | "wallet" = "bank",
+  ) {
     const order = await createOrder({
       lang: "RU",
       items: [{ id: PRODUCT.id, qty: 1 }],
@@ -537,7 +658,7 @@ describe("the paths sandbox can never reach, on the real routes", () => {
         provider: "montonio",
         ref,
         status: "paid",
-        method: "paymentInitiation",
+        method,
         amount: Number(order.total),
         currency: "EUR",
         at: new Date().toISOString(),
@@ -720,10 +841,22 @@ describe("the paths sandbox can never reach, on the real routes", () => {
 
   it("GET /api/admin/montonio reports the products, the contracts and the stuck refunds", async () => {
     withKeys();
-    await paidOrder({ method: "pickup", country: "EE" }, ORDER_BODY.uuid);
+    process.env.PUBLIC_BASE_URL = ORIGIN;
+    /* A BANK-link order, because that is the only kind whose
+       `isRefundableType` says anything about «Refundable bank payments». */
+    await paidOrder({ method: "pickup", country: "EE" }, ORDER_BODY.uuid, "bank");
     stubFetch([
       [/payment-methods$/, () => json(PAYMENT_METHODS_BODY)],
-      [/\/orders\//, () => json({ ...ORDER_BODY, isRefundableType: false, availableForRefund: 0 })],
+      [
+        /\/orders\//,
+        () =>
+          json({
+            ...ORDER_BODY,
+            paymentMethodType: "paymentInitiation",
+            isRefundableType: false,
+            availableForRefund: 0,
+          }),
+      ],
       [/\/carriers$/, () => json(CARRIERS_BODY)],
       [/\/webhooks$/, () => json(WEBHOOKS_BODY)],
     ]);
@@ -738,8 +871,8 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     /* The whole point: «Bank payments» on, «Refundable bank payments» off —
        the shop that looks perfect until somebody asks for money back. */
     expect(body.refunds!.refundableBankPayments).toBe(false);
+    expect(body.refunds!.checkedMethod).toBe("paymentInitiation");
     expect(body.refunds!.availableForRefund).toBe(0);
-    expect(body.shipping!.webhookRegistered).toBe(true);
     expect(body.shipping!.carriers).toHaveLength(2);
 
     /* The screen's own rows come from the server in all three languages, so
@@ -751,6 +884,80 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     for (const lang of ["RU", "ET", "EN"] as const) {
       expect(refunds.sub[lang]).toContain("Refundable bank payments");
     }
+
+    /* F13: the reference's example webhook points at partner.montonio and is
+       subscribed to one event this shop never acts on. `length > 0` used to
+       call that «Настроено ✓». */
+    expect(body.shipping!.webhook!.state).toBe("wrong_url");
+    const hook = body.rows!.find((r) => r.key === "ship_webhook")!;
+    expect(hook.ok).toBe(false);
+    expect(hook.sub.RU).toContain(`${ORIGIN}/api/shipping/notify/`);
+
+    /* F14: the keys answered, so the row says so rather than «Проверяем…». */
+    expect(body.rows!.find((r) => r.key === "keys")!.ok).toBe(true);
+  });
+
+  /**
+   * F12, on the reference's own order — which is a CARD one.
+   *
+   * `paymentMethodType: "cardPayments"` and `isRefundableType: false` sit two
+   * lines apart in the published example, and cards are refundable by default
+   * («enabled by default», refunds guide), so that `false` cannot be reported
+   * as «bank refunds are off» — nor, on a `true`, as «refunds are on». The
+   * probe used to take the newest paid order whatever it was.
+   */
+  it("will not read «Refundable bank payments» off a card order", async () => {
+    withKeys();
+    process.env.PUBLIC_BASE_URL = ORIGIN;
+    await paidOrder({ method: "pickup", country: "EE" }, ORDER_BODY.uuid, "card");
+    stubFetch([
+      [/payment-methods$/, () => json(PAYMENT_METHODS_BODY)],
+      // the reference's own body, isRefundableType: true — a card saying yes
+      [/\/orders\//, () => json({ ...ORDER_BODY, isRefundableType: true })],
+      [/\/carriers$/, () => json(CARRIERS_BODY)],
+      [/\/webhooks$/, () => json(WEBHOOKS_BODY)],
+    ]);
+
+    const { GET } = await import("@/app/api/admin/montonio/route");
+    const body = (await (await GET(req("/api/admin/montonio/", {}, admin))).json()) as RouteBody;
+    expect(body.refunds!.checkedMethod).toBe("cardPayments");
+    expect(body.refunds!.refundableBankPayments).toBeNull();
+
+    const refunds = body.rows!.find((r) => r.key === "refunds")!;
+    expect(refunds.quiet).toBe(true);
+    for (const lang of ["RU", "ET", "EN"] as const) {
+      expect(refunds.sub[lang]).toContain("cardPayments");
+    }
+  });
+
+  /**
+   * F14 — Sunday 21.09.2026, live keys pasted in by hand, one half wrong.
+   *
+   * Refunds guide § errors: `401 STORE_NOT_FOUND - double check your access
+   * key`. Every probe used to swallow it, so the screen showed grey rows and
+   * «как только пройдёт первая оплата» — which never comes, because
+   * `POST /orders` answers 401 too.
+   */
+  it("says «Montonio не узнал ключи» when every probe comes back 401", async () => {
+    withKeys();
+    process.env.PUBLIC_BASE_URL = ORIGIN;
+    stubFetch([
+      [/./, () => json({ message: "STORE_NOT_FOUND - double check your access key" }, 401)],
+    ]);
+
+    const { GET } = await import("@/app/api/admin/montonio/route");
+    const res = await GET(req("/api/admin/montonio/", {}, admin));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as RouteBody;
+
+    const keys = body.rows!.find((r) => r.key === "keys")!;
+    expect(keys.ok).toBe(false);
+    for (const lang of ["RU", "ET", "EN"] as const) {
+      expect(keys.sub[lang]).toContain("STORE_NOT_FOUND");
+    }
+    /* …and nothing else on the screen pretends to know anything. */
+    expect(body.rows!.find((r) => r.key === "ship_webhook")!.quiet).toBe(true);
+    expect(body.rows!.find((r) => r.key === "carriers")!.quiet).toBe(true);
   });
 
   it("…and with no keys at all it says so instead of guessing", async () => {

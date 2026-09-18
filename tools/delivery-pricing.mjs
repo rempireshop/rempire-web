@@ -501,9 +501,10 @@ async function main() {
     say("");
     say("Вес НИКТО не мерил: в каталоге 220 товаров и ни у одного нет веса и габаритов.");
     say(`Тут взято: ${bands[typicalBand].units} ${plural(bands[typicalBand].units, ["единица", "единицы", "единиц"])} → ${kgFmt(bands[typicalBand].kg)}.`);
-    say("Это формула estimateWeightKg() из src/lib/shipping/montonio.ts — та самая, которую");
-    say("магазин уже отправляет Montonio на каждой посылке, а не выдуманная здесь. Другое");
-    say("число — --units N; таблица выше говорит, насколько сильно от него зависит ответ.");
+    say("Это формула estimateWeightKg() из src/lib/shipping/montonio.ts — оценка магазина,");
+    say("а не выдуманная здесь. Montonio при этом объявляется коробка (declaredWeightKg),");
+    say("одна и та же на каждой посылке: вес заказа мы не считаем. Другое число — --units N;");
+    say("таблица выше говорит, насколько сильно от него зависит ответ.");
   }
 
   /* ---------- 6. the holes, named ---------- */

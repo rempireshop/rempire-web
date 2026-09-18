@@ -208,6 +208,32 @@ describe("public/shop2/app.js says the same thing", () => {
     expect(literal("LOCKER_SIZES")).toEqual([...LOCKER_SIZES]);
   });
 
+  /**
+   * The panel prints «около N кг» beside the three boxes from its own copy of
+   * the formula (`parcelVolKg`), and since 19.09.2026 that same number is what
+   * `POST /shipments` declares as the parcel's weight. Two copies of an
+   * arithmetic nobody can look up — the reference prints no formula, only the
+   * worked example 20 × 15 × 10 → 0.75 kg — is exactly the pair that drifts
+   * quietly. So they are held equal here rather than in a comment.
+   */
+  it("prints the same volumetric weight in the panel as the shop declares", () => {
+    const at = app.indexOf("function parcelVolKg(");
+    expect(at, "public/shop2/app.js no longer has parcelVolKg()").toBeGreaterThan(-1);
+    const mirror = new Function(
+      `${app.slice(at, app.indexOf("\n", at))} return parcelVolKg;`,
+    )() as (b: { length: number; width: number; height: number }) => number;
+
+    for (const box of [
+      PARCEL_DEFAULTS,
+      { length: 20, width: 15, height: 10 }, // the reference's own worked example
+      { length: 30, width: 30, height: 30 }, // REFERENCE_PARCEL, the expensive one
+      { length: 1, width: 1, height: 1 },
+      { length: 200, width: 200, height: 200 },
+    ]) {
+      expect(mirror(box), `${box.length}×${box.width}×${box.height}`).toBe(volumetricKg(box));
+    }
+  });
+
   it("offers a pickup point in exactly the countries the server prices one for", () => {
     const by = literal("CARRIERS_BY_COUNTRY") as Record<string, string[]>;
     const open = Object.keys(by).filter((c) => c !== "EU" && by[c].length > 0).sort();
@@ -335,20 +361,29 @@ describe("what createMontonioShipment actually posts", () => {
     expect(body.shippingMethod).toEqual({ type: "pickupPoint", id: POINT });
   });
 
-  it("sends no dimensions where Montonio does not require them", async () => {
+  /* 1.13 kg is `volumetricKg(PARCEL_DEFAULTS)` — 25 × 18 × 10 cm / 4000. The
+     weight used to be `estimateWeightKg()`, i.e. 0.6 kg for this one-line
+     order and 3.8 kg for a nine-line one on the very same box; Ренат,
+     18.09.2026: «no weight modelling» (F24). */
+  it("sends no dimensions where Montonio does not require them, and declares the box", async () => {
     const body = await book(false);
-    expect(body.parcels).toEqual([{ weight: 0.6 }]);
+    expect(body.parcels).toEqual([{ weight: 1.13 }]);
   });
 
   it("declares the carton, in METRES, where Montonio does require them", async () => {
     const body = await book(true);
     expect(body.parcels).toEqual([
-      { weight: 0.6, length: 0.25, width: 0.18, height: 0.1 },
+      { weight: 1.13, length: 0.25, width: 0.18, height: 0.1 },
     ]);
   });
 
   it("honours an explicit box even where the flag is false — «эта посылка другая»", async () => {
+    /* …and the weight follows that box rather than the settings one: 40 × 30 ×
+       20 cm is 6 kg volumetric, which is what Montonio would work out from the
+       sides beside it anyway (`chargeableWeight = max(actual, volumetric)`).
+       Declaring 1.13 kg next to those three numbers would be a figure nobody
+       could reconcile with the parcel. */
     const body = await book(false, "smartpost", { length: 0.4, width: 0.3, height: 0.2 });
-    expect(body.parcels).toEqual([{ weight: 0.6, length: 0.4, width: 0.3, height: 0.2 }]);
+    expect(body.parcels).toEqual([{ weight: 6, length: 0.4, width: 0.3, height: 0.2 }]);
   });
 });

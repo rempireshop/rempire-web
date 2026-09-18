@@ -292,21 +292,42 @@ describe("readShipmentRefusal — a parcel the carrier would not take", () => {
 });
 
 describe("montonioReadinessRows — telling him before he needs it", () => {
+  /** The live address this shop's webhook has to carry, slash and all. */
+  const HOOK_URL = "https://rempireshop.com/api/shipping/notify/";
+  const goodHook = {
+    state: "ok" as const,
+    expectedUrl: HOOK_URL,
+    urls: [HOOK_URL],
+    missingEvents: [],
+  };
   const base = {
     configured: true,
     env: "live" as const,
+    keys: "ok" as const,
     bankPayments: true,
     refundableBankPayments: true,
+    /* The sample has to be a BANK order, because that is the only kind whose
+       `isRefundableType` says anything about «Refundable bank payments». */
+    refundSampleMethod: "paymentInitiation",
     carriers: 5,
-    webhookRegistered: true,
+    webhook: goodHook,
     pendingRefunds: 0,
     overdueRefunds: 0,
   };
 
   it("is quiet and green when everything is on", () => {
     const rows = montonioReadinessRows(base);
-    expect(rows.map((r) => r.key)).toEqual(["env", "refunds", "ship_webhook"]);
+    expect(rows.map((r) => r.key)).toEqual([
+      "env",
+      "keys",
+      "bank_payments",
+      "refunds",
+      "carriers",
+      "ship_webhook",
+    ]);
     expect(rows.every((r) => r.ok)).toBe(true);
+    /* Nothing grey either: every one of these is a fact we actually have. */
+    expect(rows.every((r) => !r.quiet)).toBe(true);
     for (const row of rows) {
       /* A row title is a couple of words — «Montonio · режим» — so it only has
          to exist in all three; the sentence under it is the one that has to
@@ -314,6 +335,41 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
       for (const lang of MONTONIO_LANGS) expect(row.name[lang].trim().length, lang).toBeGreaterThan(3);
       speaksAllThree(row.sub);
     }
+  });
+
+  /* ---- the keys, which is what Sunday 21.09.2026 turns on ---------------- */
+
+  it("says «Montonio не узнал ключи» on a 401, instead of «Проверяем…»", () => {
+    const rows = montonioReadinessRows({ ...base, keys: "bad_access_key", keyStatus: 401 });
+    const keys = rows.find((r) => r.key === "keys")!;
+    expect(keys.ok).toBe(false);
+    /* Montonio's own word for it, so the line can be searched for and so the
+       sentence and the Partner System agree. */
+    for (const lang of MONTONIO_LANGS) expect(keys.sub[lang]).toContain("STORE_NOT_FOUND");
+    speaksAllThree(keys.sub);
+    expect(keys.sub.RU).not.toMatch(/Проверяем/);
+  });
+
+  it("tells the two halves of the pair apart — 403 is the secret key", () => {
+    const keys = montonioReadinessRows({ ...base, keys: "bad_secret_key", keyStatus: 403 })
+      .find((r) => r.key === "keys")!;
+    expect(keys.ok).toBe(false);
+    for (const lang of MONTONIO_LANGS) expect(keys.sub[lang]).toContain("INVALID_TOKEN");
+  });
+
+  it("quotes a refusal it has not been taught, rather than renaming it", () => {
+    const keys = montonioReadinessRows({ ...base, keys: "refused", keyStatus: 418 })
+      .find((r) => r.key === "keys")!;
+    expect(keys.ok).toBe(false);
+    for (const lang of MONTONIO_LANGS) expect(keys.sub[lang]).toContain("418");
+  });
+
+  it("is grey, not red, when Montonio simply did not answer", () => {
+    const keys = montonioReadinessRows({ ...base, keys: "unreachable" }).find((r) => r.key === "keys")!;
+    /* A timeout is not a wrong key and must not send him to re-paste one. */
+    expect(keys.ok).toBe(true);
+    expect(keys.quiet).toBe(true);
+    speaksAllThree(keys.sub);
   });
 
   it("goes red on «Bank payments on, Refundable bank payments off» — the whole point", () => {
@@ -326,7 +382,11 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
   });
 
   it("says «пока не знаем» — grey, not red — before the first paid order", () => {
-    const rows = montonioReadinessRows({ ...base, refundableBankPayments: null });
+    const rows = montonioReadinessRows({
+      ...base,
+      refundableBankPayments: null,
+      refundSampleMethod: null,
+    });
     const refunds = rows.find((r) => r.key === "refunds")!;
     /* `null` is not `false`. A shop with no sale yet is not a shop with the
        product switched off, and a red square the owner cannot act on is worse
@@ -334,6 +394,51 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
     expect(refunds.ok).toBe(true);
     expect(refunds.quiet).toBe(true);
     expect(refunds.sub.RU).toMatch(/пока не знаем/i);
+  });
+
+  /**
+   * F12 — the row this screen exists for, answered from the wrong order.
+   *
+   * Reference § Get Order by UUID: `isRefundableType` «will be true if you
+   * enabled refunds in montonio (and the user paid with a refundable method)»,
+   * and the refunds guide lists cards, Apple/Google Pay, MobilePay, BLIK and
+   * BNPL as «enabled by default» while Payment Initiation needs «Bank payment
+   * refunds» switched on. So a card order cannot answer this question either
+   * way, and until 19.09.2026 one card order turned the row green for good.
+   */
+  it("will not answer «возвраты включены» from a card order", () => {
+    const rows = montonioReadinessRows({
+      ...base,
+      /* The route refuses to read the flag off a non-bank order at all, so
+         this is what reaches the row: a sample, and no verdict. */
+      refundableBankPayments: null,
+      refundSampleMethod: "cardPayments",
+    });
+    const refunds = rows.find((r) => r.key === "refunds")!;
+    expect(refunds.ok).toBe(true);
+    expect(refunds.quiet).toBe(true);
+    // it names the method it did see, so «почему не знаем» is answerable
+    for (const lang of MONTONIO_LANGS) expect(refunds.sub[lang]).toContain("cardPayments");
+    speaksAllThree(refunds.sub);
+    // and never the green sentence
+    expect(refunds.sub.RU).not.toMatch(/Возвраты включены/);
+  });
+
+  it("renders the two rows that used to be computed and thrown away", () => {
+    const off = montonioReadinessRows({ ...base, bankPayments: false, carriers: 0 });
+
+    const bank = off.find((r) => r.key === "bank_payments")!;
+    expect(bank.ok).toBe(false);
+    for (const lang of MONTONIO_LANGS) expect(bank.sub[lang]).toContain("Bank payments");
+
+    const carriers = off.find((r) => r.key === "carriers")!;
+    expect(carriers.ok).toBe(false);
+    for (const lang of MONTONIO_LANGS) expect(carriers.sub[lang]).toMatch(/Partner System/);
+
+    // …and the happy row counts them out loud
+    const on = montonioReadinessRows(base).find((r) => r.key === "carriers")!;
+    expect(on.ok).toBe(true);
+    for (const lang of MONTONIO_LANGS) expect(on.sub[lang]).toContain("5");
   });
 
   it("warns that sandbox is not the shop", () => {
@@ -344,10 +449,77 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
   });
 
   it("names the unregistered parcel webhook, which nothing else can notice", () => {
-    const rows = montonioReadinessRows({ ...base, webhookRegistered: false });
+    const rows = montonioReadinessRows({
+      ...base,
+      webhook: { state: "none", expectedUrl: HOOK_URL, urls: [], missingEvents: [] },
+    });
     const hook = rows.find((r) => r.key === "ship_webhook")!;
     expect(hook.ok).toBe(false);
     expect(hook.sub.RU).toMatch(/Partner System/);
+    // the address to paste, printed where he is standing
+    for (const lang of MONTONIO_LANGS) expect(hook.sub[lang]).toContain(HOOK_URL);
+  });
+
+  /**
+   * F13 — «registered» was never the question.
+   *
+   * The day-one state after the domain move is a webhook still pointing at the
+   * host we left, and a POST to the right path without the trailing slash is a
+   * 308 (`trailingSlash: true` in next.config.ts). Both used to be green.
+   */
+  it("goes red on a webhook pointing somewhere else, and prints both addresses", () => {
+    const stale = "https://staging.rempireshop.com/api/shipping/notify/";
+    const hook = montonioReadinessRows({
+      ...base,
+      webhook: { state: "wrong_url", expectedUrl: HOOK_URL, urls: [stale], missingEvents: [] },
+    }).find((r) => r.key === "ship_webhook")!;
+    expect(hook.ok).toBe(false);
+    expect(hook.quiet).toBeFalsy();
+    for (const lang of MONTONIO_LANGS) {
+      expect(hook.sub[lang]).toContain(stale);
+      expect(hook.sub[lang]).toContain(HOOK_URL);
+    }
+    speaksAllThree(hook.sub);
+  });
+
+  it("goes red on the right address with the wrong events, and names them", () => {
+    const hook = montonioReadinessRows({
+      ...base,
+      webhook: {
+        state: "missing_events",
+        expectedUrl: HOOK_URL,
+        urls: [HOOK_URL],
+        missingEvents: ["shipment.statusUpdated", "shipment.registrationFailed"],
+      },
+    }).find((r) => r.key === "ship_webhook")!;
+    expect(hook.ok).toBe(false);
+    for (const lang of MONTONIO_LANGS) {
+      expect(hook.sub[lang]).toContain("shipment.statusUpdated");
+      expect(hook.sub[lang]).toContain("shipment.registrationFailed");
+    }
+  });
+
+  it("will not call it «настроено» when there is no address to compare against", () => {
+    /* PUBLIC_BASE_URL unset: there IS a webhook and the events are right, but
+       claiming the address is ours would be exactly the guess this screen is
+       here to stop. */
+    const hook = montonioReadinessRows({
+      ...base,
+      webhook: { state: "ok", expectedUrl: "", urls: ["https://somewhere/x/"], missingEvents: [] },
+    }).find((r) => r.key === "ship_webhook")!;
+    expect(hook.ok).toBe(true);
+    expect(hook.quiet).toBe(true);
+    speaksAllThree(hook.sub);
+  });
+
+  it("is grey, not green, when the webhook list could not be fetched at all", () => {
+    const hook = montonioReadinessRows({ ...base, webhook: null }).find((r) => r.key === "ship_webhook")!;
+    expect(hook.ok).toBe(true);
+    expect(hook.quiet).toBe(true);
+    /* «Проверяем…» forever was the F14 half of this: it now says what it is
+       waiting for and where to look if it never arrives. */
+    expect(hook.sub.RU).not.toBe("Проверяем…");
+    speaksAllThree(hook.sub);
   });
 
   it("adds a row only when refunds are actually waiting, and reddens it past ten days", () => {
@@ -367,10 +539,12 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
     const rows = montonioReadinessRows({
       configured: false,
       env: null,
+      keys: null,
       bankPayments: null,
       refundableBankPayments: null,
+      refundSampleMethod: null,
       carriers: null,
-      webhookRegistered: null,
+      webhook: null,
       pendingRefunds: 0,
       overdueRefunds: 0,
     });

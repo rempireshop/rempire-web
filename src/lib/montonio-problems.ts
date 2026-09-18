@@ -654,6 +654,31 @@ export function readShipmentRefusal(detail: string | undefined | null): Shipment
 /* ---------- «Подключения»: what the shop believes it can do --------------- */
 
 /**
+ * Montonio's own name for a bank link, everywhere in both APIs: the key in
+ * `GET /stores/payment-methods`, and the value of `paymentMethodType` on
+ * `GET /orders/:orderUuid`. Our own orders store `bank | card | wallet`
+ * instead (`PaymentMethodKind`), which is why the two are never compared
+ * without being translated first.
+ */
+export const MONTONIO_BANK_METHOD = "paymentInitiation";
+
+/**
+ * A machine-readable list inside an owner-facing sentence.
+ *
+ * Addresses and event names are not translated — they are typed into
+ * Montonio's form exactly as printed — so one separator serves all three
+ * languages and `tools/i18n-gaps.mjs` has nothing to find.
+ */
+function listOf(items: readonly string[]): string {
+  return items.filter(Boolean).join(", ") || "—";
+}
+
+/** « — https://…/api/shipping/notify/», or nothing when we do not know it. */
+function urlTail(url: string): string {
+  return url ? " — " + url : "";
+}
+
+/**
  * What the readiness probe found, reduced to the four things worth a row on
  * the owner's «Подключения» screen.
  *
@@ -665,13 +690,59 @@ export function readShipmentRefusal(detail: string | undefined | null): Shipment
 export interface ReadinessState {
   configured: boolean;
   env: "sandbox" | "live" | null;
+  /**
+   * What Montonio said about the keys themselves.
+   *
+   * `ok` — at least one read-only call came back 2xx, so the pair works.
+   * `bad_access_key` — 401 `STORE_NOT_FOUND`. `bad_secret_key` — 403
+   * `INVALID_TOKEN`. `refused` — some other refusal, quoted rather than
+   * guessed at. `unreachable` — no answer at all. `null` — nothing to go on.
+   *
+   * This exists because on Sunday 21.09.2026 the owner pastes the live keys in
+   * by hand, and until 19.09.2026 half a pair got him «Проверяем…» and «как
+   * только пройдёт первая оплата» — which would never come, because
+   * `POST /orders` answers 401 too (audit 18.09.2026, F14).
+   */
+  keys: "ok" | "bad_access_key" | "bad_secret_key" | "refused" | "unreachable" | null;
+  /** The HTTP status behind `keys: "refused"`, so the row can quote it. */
+  keyStatus?: number | null;
+  /** `paymentInitiation` is in `GET /stores/payment-methods`. */
   bankPayments: boolean | null;
-  /** `isRefundableType` from a real paid order — the only signal there is. */
+  /**
+   * `isRefundableType` from a real paid order — the only signal there is.
+   *
+   * Only ever read from an order Montonio says was paid with
+   * `paymentInitiation`; see `refundSampleMethod`.
+   */
   refundableBankPayments: boolean | null;
+  /**
+   * How the sampled order was paid, in Montonio's own spelling, or `null` when
+   * there was no order to sample.
+   *
+   * The reference: `isRefundableType` is true «if you enabled refunds in
+   * montonio **(and the user paid with a refundable method)**». Cards and
+   * wallets are refundable by default, bank links are a separate product — so
+   * a card order answers about cards and says nothing at all about the switch
+   * this screen exists for (audit 18.09.2026, F12).
+   */
+  refundSampleMethod: string | null;
+  /** How many carriers `GET /carriers` names for this store. */
   carriers: number | null;
-  webhookRegistered: boolean | null;
+  /** `GET /webhooks` read properly: url, trailing slash and events. `null` = could not ask. */
+  webhook: ReadinessWebhook | null;
   pendingRefunds: number;
   overdueRefunds: number;
+}
+
+/** The shape `readWebhookSetup()` (src/lib/shipping/montonio.ts) produces. */
+export interface ReadinessWebhook {
+  state: "ok" | "none" | "wrong_url" | "missing_events";
+  /** The address Montonio has to be given — empty when PUBLIC_BASE_URL is unset. */
+  expectedUrl: string;
+  /** The addresses Montonio actually holds. */
+  urls: string[];
+  /** Required events the matching webhook does not carry. */
+  missingEvents: string[];
 }
 
 export interface ReadinessRow {
@@ -693,9 +764,23 @@ export interface ReadinessRow {
  * cannot be kept in step with an API from inside a 1.3 MB file that four agents
  * edit. The panel prints `sub[<its language>]` and adds no literals of its own,
  * so `tools/i18n-gaps.mjs` stays at zero.
+ *
+ * Seven rows, in the order a thing has to be true before the next one can be:
+ * the mode, the keys, bank payments, refunds on those payments, the carriers,
+ * the parcel webhook, and anything stuck. `bankPayments` and `carriers` were
+ * computed and thrown away until 19.09.2026 — the shop knew and did not say
+ * (audit 18.09.2026, F14 and F29).
  */
 export function montonioReadinessRows(state: ReadinessState): ReadinessRow[] {
   const rows: ReadinessRow[] = [];
+  /* «Проверяем…» is only ever honest while an answer is still on its way, and
+     these rows are only ever built from an answer that has arrived — so it
+     survives as one defensive default and nothing more. Every row that used to
+     print it forever because a probe had been refused now says what happened
+     and what to do about it (audit 18.09.2026, F14). The panel shows no
+     Montonio rows at all until the route has replied, which is where the
+     genuine «loading» state lives (public/shop2/app.js, admIntegrationRows). */
+  const CHECKING: Trilingual = { RU: "Проверяем…", ET: "Kontrollime…", EN: "Checking…" };
 
   if (!state.configured) {
     rows.push({
@@ -730,11 +815,96 @@ export function montonioReadinessRows(state: ReadinessState): ReadinessRow[] {
         },
   });
 
+  /* The keys themselves.
+     On Sunday 21.09.2026 the owner pastes the live pair in by hand, and half a
+     pair is worse than neither: `POST /orders` answers 401, so «как только
+     пройдёт первая оплата» never arrives. Montonio names both halves itself —
+     401 STORE_NOT_FOUND is the access key, 403 INVALID_TOKEN is the secret —
+     and until 19.09.2026 five `.catch(() => null)` turned that into silence
+     (audit 18.09.2026, F14). */
+  const keys = state.keys;
+  const keysBad = keys === "bad_access_key" || keys === "bad_secret_key" || keys === "refused";
+  rows.push({
+    key: "keys",
+    ok: !keysBad,
+    quiet: keys !== "ok",
+    name: { RU: "Ключи Montonio", ET: "Montonio võtmed", EN: "Montonio keys" },
+    sub:
+      keys === "ok"
+        ? {
+            RU: "Ключи приняты: Montonio отвечает на запросы магазина. Проверяется каждый раз, когда вы открываете этот экран.",
+            ET: "Võtmed on vastu võetud: Montonio vastab poe päringutele. Kontrollitakse iga kord, kui te selle ekraani avate.",
+            EN: "The keys are accepted: Montonio answers the shop's requests. Checked every time you open this screen.",
+          }
+        : keys === "bad_access_key"
+          ? {
+              RU: "Montonio не узнал магазин (STORE_NOT_FOUND): не тот ключ доступа. Обычно это ключи песочницы на боевом сайте или наоборот — ключ доступа и секретный ключ должны быть из одной среды. Пока так, магазин не примет ни оплату, ни посылку. Это правит Дим на сервере.",
+              ET: "Montonio ei tundnud poodi ära (STORE_NOT_FOUND): vale juurdepääsuvõti. Tavaliselt on liivakasti võtmed päris saidil või vastupidi — juurdepääsuvõti ja salavõti peavad olema samast keskkonnast. Seni ei võta pood vastu ei makset ega pakki. Selle parandab Dim serveris.",
+              EN: "Montonio did not recognise the store (STORE_NOT_FOUND): the access key is wrong. Usually this is sandbox keys on the live site or the other way round — the access key and the secret key must be from the same environment. Until that is fixed the shop takes neither a payment nor a parcel. Dim fixes it on the server.",
+            }
+          : keys === "bad_secret_key"
+            ? {
+                RU: "Montonio отверг подпись запроса (INVALID_TOKEN): не тот секретный ключ. Ключ доступа и секретный ключ должны быть одной парой из одной среды Montonio. Пока так, магазин не примет ни оплату, ни посылку. Это правит Дим на сервере.",
+                ET: "Montonio lükkas päringu allkirja tagasi (INVALID_TOKEN): vale salavõti. Juurdepääsuvõti ja salavõti peavad olema üks paar ühest Montonio keskkonnast. Seni ei võta pood vastu ei makset ega pakki. Selle parandab Dim serveris.",
+                EN: "Montonio rejected the request signature (INVALID_TOKEN): the secret key is wrong. The access key and the secret key must be one pair from one Montonio environment. Until that is fixed the shop takes neither a payment nor a parcel. Dim fixes it on the server.",
+              }
+            : keys === "refused"
+              ? {
+                  /* An answer this file has not been taught is quoted, never
+                     renamed — the rule at the head of this file. */
+                  RU: "Montonio не пустил магазин к своим данным и ответил " + (state.keyStatus ?? "—") + ". Что именно ему не понравилось, он не сказал. Покажите эту строку Диму.",
+                  ET: "Montonio ei lasknud poodi oma andmete juurde ja vastas " + (state.keyStatus ?? "—") + ". Mis talle täpselt ei sobinud, ta ei öelnud. Näidake see rida Dimile.",
+                  EN: "Montonio would not let the shop at its data and answered " + (state.keyStatus ?? "—") + ". It did not say what it disliked. Show this line to Dim.",
+                }
+              : keys === "unreachable"
+                ? {
+                    RU: "Montonio сейчас не отвечает. Это может быть связь или работы на их стороне — ключи при этом могут быть в порядке. Откройте этот экран ещё раз через несколько минут.",
+                    ET: "Montonio ei vasta praegu. See võib olla ühendus või nende poolne hooldus — võtmed võivad olla korras. Avage see ekraan mõne minuti pärast uuesti.",
+                    EN: "Montonio is not answering right now. It may be the connection or work on their side — the keys themselves may be fine. Open this screen again in a few minutes.",
+                  }
+                : CHECKING,
+  });
+
+  /* Bank links are how most of this shop's customers pay, so «включено ли это
+     вообще» is a row and not a field in a JSON blob nobody opens. */
+  rows.push({
+    key: "bank_payments",
+    ok: state.bankPayments !== false,
+    quiet: state.bankPayments === null,
+    name: { RU: "Оплата банковской ссылкой", ET: "Maksmine pangalingiga", EN: "Payment by bank link" },
+    sub:
+      state.bankPayments === true
+        ? {
+            RU: "Включено: покупатель может заплатить из своего банка. Это основной способ оплаты в магазине.",
+            ET: "Sisse lülitatud: klient saab maksta oma pangast. See on poe peamine makseviis.",
+            EN: "On: a customer can pay from their own bank. This is the shop's main way of paying.",
+          }
+        : state.bankPayments === false
+          ? {
+              RU: "Банковские ссылки у Montonio не включены — на оплате покупатель увидит только карту. Включается в Partner System, продукт «Bank payments».",
+              ET: "Pangalingid ei ole Montonios sisse lülitatud — maksmisel näeb klient ainult kaarti. Lülitatakse sisse Partner Systemis, toode «Bank payments».",
+              EN: "Bank links are not switched on at Montonio — at checkout a customer will see only the card. Switch them on in the Partner System, product «Bank payments».",
+            }
+          : {
+              RU: "Пока не знаем: список включённых способов оплаты у Montonio запросить не удалось. Если строка с ключами выше зелёная, откройте этот экран ещё раз через несколько минут.",
+              ET: "Veel ei tea: Montoniolt ei õnnestunud sisse lülitatud makseviiside nimekirja küsida. Kui ülalolev võtmete rida on roheline, avage see ekraan mõne minuti pärast uuesti.",
+              EN: "Not known yet: the list of enabled payment methods could not be fetched from Montonio. If the keys row above is green, open this screen again in a few minutes.",
+            },
+  });
+
   /* The row this screen exists for. «Bank payments» on and «Refundable bank
      payments» off is a shop that looks perfect until somebody asks for money
      back — and it cannot be discovered any other way, because Montonio has no
-     endpoint for it. */
+     endpoint for it.
+     What it may NOT do is answer from the wrong order. The reference: «will be
+     true if you enabled refunds in montonio (and the user paid with a
+     refundable method)» — cards and wallets are refundable by default, so a
+     card order says nothing at all about the bank-link product. The route now
+     samples a bank order where there is one; where there is not, this row says
+     which method it did see and waits (audit 18.09.2026, F12). */
   const refundable = state.refundableBankPayments;
+  const sampleMethod = String(state.refundSampleMethod ?? "").trim();
+  const notBankSample = !!sampleMethod && sampleMethod !== MONTONIO_BANK_METHOD;
   rows.push({
     key: "refunds",
     ok: refundable !== false,
@@ -753,36 +923,107 @@ export function montonioReadinessRows(state: ReadinessState): ReadinessRow[] {
               ET: "Pangalinkide tagasimaksed on Montonios VÄLJA lülitatud. Maksed toimivad, aga raha kliendile tagastada ei saa — ei siit ega Montonio paneelist. Lülitatakse sisse Partner Systemis, toode «Refundable bank payments», ja ainult päris režiimis.",
               EN: "Refunds on bank links are OFF at Montonio. Payments work, but no money can go back to a customer — neither from here nor from Montonio's own panel. Switch it on in the Partner System, product «Refundable bank payments», and only in live mode.",
             }
+          : notBankSample
+            ? {
+                /* F12: the probe used to take the newest paid order whatever
+                   it was. A card order answers about CARDS — they are
+                   refundable by default — so `true` there said nothing about
+                   the one product this row is here for, and the row went green
+                   and stayed green. */
+                RU: "Пока не знаем: последний оплаченный заказ прошёл не банковской ссылкой, а способом «" + sampleMethod + "». Про карты Montonio почти всегда отвечает «вернуть можно», и про банковские ссылки это ничего не говорит. Ответ появится здесь после первой оплаты через банк.",
+                ET: "Veel ei tea: viimane makstud tellimus ei tulnud pangalingiga, vaid viisiga «" + sampleMethod + "». Kaartide kohta vastab Montonio peaaegu alati «tagastada saab», ja pangalinkide kohta ei ütle see midagi. Vastus ilmub siia pärast esimest pangamakset.",
+                EN: "Not known yet: the last paid order did not come through a bank link but by «" + sampleMethod + "». About cards Montonio almost always answers «refundable», and that says nothing about bank links. The answer will appear here after the first bank payment.",
+              }
+            : {
+                RU: "Пока не знаем: у Montonio нет способа спросить об этом напрямую, ответ виден только по оплаченному заказу. Как только пройдёт первая оплата банковской ссылкой, эта строка скажет точно.",
+                ET: "Veel ei tea: Montoniol ei ole võimalust seda otse küsida, vastus on näha ainult makstud tellimuse pealt. Kohe kui esimene pangalingi makse läbi läheb, ütleb see rida täpselt.",
+                EN: "Not known yet: Montonio has no way to ask this directly — the answer only shows on a paid order. As soon as the first bank-link payment goes through, this row will say for certain.",
+              },
+  });
+
+  /* What this store may actually book with. Computed since the screen was
+     written and never shown (audit 18.09.2026, F14/F29): a carrier the
+     checkout offers and this list does not name is a booking that fails on the
+     first live order. */
+  rows.push({
+    key: "carriers",
+    ok: state.carriers === null || state.carriers > 0,
+    quiet: state.carriers === null,
+    name: { RU: "Перевозчики у Montonio", ET: "Vedajad Montonios", EN: "Carriers at Montonio" },
+    sub:
+      state.carriers === null
+        ? {
+            RU: "Пока не знаем: список перевозчиков у Montonio запросить не удалось. Если строка с ключами выше зелёная, откройте этот экран ещё раз через несколько минут.",
+            ET: "Veel ei tea: Montoniolt ei õnnestunud vedajate nimekirja küsida. Kui ülalolev võtmete rida on roheline, avage see ekraan mõne minuti pärast uuesti.",
+            EN: "Not known yet: the list of carriers could not be fetched from Montonio. If the keys row above is green, open this screen again in a few minutes.",
+          }
+        : state.carriers > 0
+          ? {
+              RU: "Montonio назвал перевозчиков: " + state.carriers + ". Наклейка печатается из карточки заказа.",
+              ET: "Montonio nimetas vedajaid: " + state.carriers + ". Silt prinditakse tellimuse kaardilt.",
+              EN: "Montonio named " + state.carriers + " carriers. The label prints from the order card.",
+            }
           : {
-              RU: "Пока не знаем: у Montonio нет способа спросить об этом напрямую, ответ виден только по оплаченному заказу. Как только пройдёт первая оплата, эта строка скажет точно.",
-              ET: "Veel ei tea: Montoniol ei ole võimalust seda otse küsida, vastus on näha ainult makstud tellimuse pealt. Kohe kui esimene makse läbi läheb, ütleb see rida täpselt.",
-              EN: "Not known yet: Montonio has no way to ask this directly — the answer only shows on a paid order. As soon as the first payment goes through, this row will say for certain.",
+              RU: "Montonio не назвал ни одного перевозчика — посылку создать не получится. Перевозчики включаются в Partner System → Shipping, там же берётся договор Montonio или подключается свой.",
+              ET: "Montonio ei nimetanud ühtegi vedajat — pakki ei õnnestu luua. Vedajad lülitatakse sisse Partner System → Shipping, sealsamas võetakse Montonio leping või ühendatakse enda oma.",
+              EN: "Montonio named no carriers at all — a parcel cannot be created. Carriers are switched on in Partner System → Shipping, where you either take Montonio's own contract or connect your own.",
             },
   });
 
+  /* Registered ≠ registered HERE.
+     Until 19.09.2026 this row was green for `webhooks.length > 0`: url,
+     trailing slash and events all discarded (audit 18.09.2026, F13). The
+     likeliest day-one state after the domain move is the one that passed — a
+     webhook still pointing at the old host — and a POST to the right path
+     without the final slash is a 308 that never reaches the route. */
+  const hook = state.webhook;
+  const hookKnown = !!hook && !!hook.expectedUrl;
+  const hookOk = !!hook && hook.state === "ok";
   rows.push({
     key: "ship_webhook",
-    ok: state.webhookRegistered !== false,
-    quiet: state.webhookRegistered === null,
+    /* A webhook we could not check is not a webhook we know is wrong. */
+    ok: !hook || hook.state === "ok",
+    quiet: !hook || !hookKnown,
     name: { RU: "Montonio сообщает о посылках", ET: "Montonio teatab pakkidest", EN: "Montonio reports on parcels" },
-    sub:
-      state.webhookRegistered === true
+    sub: !hook
+      ? {
+          RU: "Пока не знаем: список вебхуков у Montonio запросить не удалось. Если ключи выше в порядке, откройте этот экран ещё раз через несколько минут.",
+          ET: "Veel ei tea: Montoniolt ei õnnestunud veebihaakide nimekirja küsida. Kui ülalolevad võtmed on korras, avage see ekraan mõne minuti pärast uuesti.",
+          EN: "Not known yet: the list of webhooks could not be fetched from Montonio. If the keys above are fine, open this screen again in a few minutes.",
+        }
+      : hookOk && !hookKnown
         ? {
-            RU: "Настроено: заказ сам станет «Доставлен», когда посылку заберут, и сам скажет, если перевозчик её не принял.",
-            ET: "Seadistatud: tellimus muutub ise olekuks «Доставлен», kui pakk kätte saadakse, ja ütleb ise, kui vedaja seda vastu ei võtnud.",
-            EN: "Set up: an order turns «Доставлен» by itself once the parcel is collected, and says so by itself if the carrier refused it.",
+            /* PUBLIC_BASE_URL unset — there is a webhook and the events are
+               right, but nothing to compare the address against, and saying
+               «настроено» about an address we never read is exactly the class
+               of claim this screen exists to stop. */
+            RU: "Вебхук у Montonio есть и события отмечены верно, но проверить адрес не с чем: на сервере не задан адрес магазина. Это настройка на сервере, её делает Дим.",
+            ET: "Montonios on veebihaak olemas ja sündmused on õigesti märgitud, aga aadressi ei ole millegagi võrrelda: serveris ei ole poe aadressi määratud. See on serveri seadistus, seda teeb Dim.",
+            EN: "Montonio has a webhook and the events are ticked correctly, but there is nothing to check the address against: the shop's address is not set on the server. This is a server setting; Dim does it.",
           }
-        : state.webhookRegistered === false
+        : hookOk
           ? {
-              RU: "Montonio не знает, куда сообщать о посылках. Заказы не будут закрываться сами, а отказ перевозчика останется незамеченным. Адрес прописывается один раз в Partner System → Shipping → Webhooks.",
-              ET: "Montonio ei tea, kuhu pakkidest teatada. Tellimused ei sulgu ise ja vedaja keeldumine jääb märkamata. Aadress sisestatakse üks kord: Partner System → Shipping → Webhooks.",
-              EN: "Montonio does not know where to report parcels. Orders will not close by themselves and a carrier's refusal will go unnoticed. The address is entered once, in Partner System → Shipping → Webhooks.",
+              RU: "Настроено: заказ сам станет «Доставлен», когда посылку заберут, и сам скажет, если перевозчик её не принял.",
+              ET: "Seadistatud: tellimus muutub ise olekuks «Доставлен», kui pakk kätte saadakse, ja ütleb ise, kui vedaja seda vastu ei võtnud.",
+              EN: "Set up: an order turns «Доставлен» by itself once the parcel is collected, and says so by itself if the carrier refused it.",
             }
-          : {
-              RU: "Проверяем…",
-              ET: "Kontrollime…",
-              EN: "Checking…",
-            },
+          : hook.state === "none"
+            ? {
+                RU: "Montonio не знает, куда сообщать о посылках. Заказы не будут закрываться сами, а отказ перевозчика останется незамеченным. Адрес прописывается один раз: Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
+                ET: "Montonio ei tea, kuhu pakkidest teatada. Tellimused ei sulgu ise ja vedaja keeldumine jääb märkamata. Aadress sisestatakse üks kord: Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
+                EN: "Montonio does not know where to report parcels. Orders will not close by themselves and a carrier's refusal will go unnoticed. The address is entered once, in Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
+              }
+            : hook.state === "wrong_url"
+              ? {
+                  RU: "Montonio сообщает о посылках не сюда: у него записано «" + listOf(hook.urls) + "», а нужно «" + hook.expectedUrl + "». Адрес должен совпадать до последнего знака, включая слэш в конце. Пока так, заказы не будут закрываться сами. Исправляется в Partner System → Shipping → Webhooks.",
+                  ET: "Montonio ei teata pakkidest siia: tal on kirjas „" + listOf(hook.urls) + "\", aga vaja on „" + hook.expectedUrl + "\". Aadress peab kattuma viimse märgini, kaasa arvatud kaldkriips lõpus. Seni ei sulgu tellimused ise. Parandatakse: Partner System → Shipping → Webhooks.",
+                  EN: "Montonio does not report parcels here: it has \"" + listOf(hook.urls) + "\" written down, and it needs \"" + hook.expectedUrl + "\". The address must match to the last character, the trailing slash included. Until then orders will not close by themselves. Fix it in Partner System → Shipping → Webhooks.",
+                }
+              : {
+                  RU: "Адрес записан верно, но у вебхука не отмечены события: " + listOf(hook.missingEvents) + ". Без них заказ не станет «Доставлен» сам, а отказ перевозчика не попадёт в журнал. Отмечаются там же: Partner System → Shipping → Webhooks.",
+                  ET: "Aadress on õigesti kirjas, aga veebihaagil ei ole märgitud sündmusi: " + listOf(hook.missingEvents) + ". Ilma nendeta ei muutu tellimus ise olekuks «Доставлен» ja vedaja keeldumine ei jõua päevikusse. Märgitakse sealsamas: Partner System → Shipping → Webhooks.",
+                  EN: "The address is right, but the webhook does not have these events ticked: " + listOf(hook.missingEvents) + ". Without them an order will not turn «Доставлен» by itself and a carrier's refusal will not reach the journal. Tick them in the same place: Partner System → Shipping → Webhooks.",
+                },
   });
 
   if (state.pendingRefunds > 0) {

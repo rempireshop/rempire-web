@@ -623,7 +623,11 @@ describe("creating a shipment", () => {
     });
     // a pickup point needs no street address on the receiver
     expect(body.receiver.streetAddress).toBeUndefined();
-    expect(body.parcels).toEqual([{ weight: 1 }]);
+    /* The DECLARED CARTON, not the basket: `volumetricKg(PARCEL_DEFAULTS)`,
+       25 × 18 × 10 cm. This order holds two units, which the old per-unit
+       estimate called 1 kg — and a nine-unit order 3.8 kg, on the same box.
+       Ренат, 18.09.2026: «no weight modelling» (F24, src/lib/shipping/parcel.ts). */
+    expect(body.parcels).toEqual([{ weight: 1.13 }]);
     expect(body.products).toEqual([
       { sku: "free-hold", name: "Free.Hold", quantity: 2, price: 11, currency: "EUR" },
     ]);
@@ -854,9 +858,40 @@ describe("creating a shipment", () => {
     expect(shipment.carrier).toBe("venipak");
   });
 
-  it("estimates a weight and splits a phone number", () => {
+  /**
+   * F24 — the same number on every parcel, whatever is in it.
+   *
+   * The declared weight is the box the owner set, so a nine-line order and a
+   * one-line order declare the same 1.13 kg. `estimateWeightKg()` would have
+   * said 3.8 kg for the first, and since dimensions go out only where
+   * `parcelDimensionsRequired` is true, on most routes that guess IS the bill.
+   */
+  it("declares the box, not the basket — the same weight whatever the line count", async () => {
+    withKeys();
+    const calls = stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+    await createMontonioShipment({
+      ...order,
+      items: [...order.items, ...order.items, ...order.items, ...order.items],
+    });
+    expect(bookingBody(calls).parcels).toEqual([{ weight: 1.13 }]);
+  });
+
+  it("still lets a weighed parcel win over the declared box", async () => {
+    withKeys();
+    const calls = stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+    await createMontonioShipment(order, { weight: 4.2 });
+    expect(bookingBody(calls).parcels).toEqual([{ weight: 4.2 }]);
+  });
+
+  it("keeps the basket estimate for the tariff tool, which is a different question", () => {
+    /* Not declared anywhere any more (F24) — `tools/lib/delivery-pricing.mjs`
+       asks «предположим, в заказе N банок» and compares carrier bands, and
+       tests/delivery-pricing.test.ts holds the two formulas equal. */
     expect(estimateWeightKg({ items: order.items })).toBe(1);
     expect(estimateWeightKg({ items: [] })).toBe(0.3);
+  });
+
+  it("splits a phone number", () => {
     expect(splitPhone("+372 5810 7505", "EE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
     expect(splitPhone("58107505", "EE")).toEqual({ phoneCountryCode: "372", phoneNumber: "58107505" });
     expect(splitPhone("00358 40 1234567", "FI")).toEqual({ phoneCountryCode: "358", phoneNumber: "401234567" });

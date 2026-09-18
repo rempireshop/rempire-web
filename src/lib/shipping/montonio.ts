@@ -33,7 +33,13 @@ import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
 /* A leaf module (it imports the tariff mirror and nothing else), so this adds
    no cycle — see the header of src/lib/shipping/country-prices.ts. */
 import { basisCost } from "@/lib/shipping/country-prices";
-import { getParcelSettings, parcelMetres, takesLockerSize, toLockerSize } from "@/lib/shipping/parcel";
+import {
+  declaredWeightKg,
+  getParcelSettings,
+  parcelMetres,
+  takesLockerSize,
+  toLockerSize,
+} from "@/lib/shipping/parcel";
 import type { ParcelPoint } from "@/lib/parcel-points";
 import type { Order } from "@/lib/orders";
 // SHIPPING_PROVIDER=mock — the e2e suite's carrier; see that file's header.
@@ -129,6 +135,17 @@ export class MontonioShippingError extends Error {
   constructor(
     readonly code: MontonioShippingErrorCode,
     readonly detail?: string,
+    /**
+     * Montonio's own HTTP status, where there was one.
+     *
+     * It used to live only inside `detail` as text, which is fine for a
+     * sentence and useless for a decision — and the decision that needed it is
+     * «did Montonio refuse our keys». 401 `STORE_NOT_FOUND` and 403
+     * `INVALID_TOKEN` are the two answers the owner gets on the Sunday he
+     * pastes the live keys in by hand, and until 19.09.2026 every probe turned
+     * them into `null`, i.e. «проверяем…» forever (audit 18.09.2026, F14).
+     */
+    readonly status?: number,
   ) {
     super(detail ? `${code}: ${detail}` : code);
     this.name = "MontonioShippingError";
@@ -136,7 +153,13 @@ export class MontonioShippingError extends Error {
 }
 
 export interface CreateShipmentOptions {
-  /** Parcel weight in kg. Default: estimated from the line count. */
+  /**
+   * Parcel weight in kg.
+   *
+   * Default: the declared carton's own volumetric weight
+   * (`declaredWeightKg()`), the same number whatever the order holds. It is
+   * **not** derived from the basket — see that function and F24.
+   */
   weight?: number;
   /**
    * Metres, two decimals — `POST /shipments` is metric where
@@ -256,10 +279,10 @@ async function call<T>(
   }
 
   const text = await res.text();
-  if (res.status === 404) throw new MontonioShippingError("not_found", path);
+  if (res.status === 404) throw new MontonioShippingError("not_found", path, 404);
   if (!res.ok) {
     console.error("[montonio shipping]", init?.method ?? "GET", path, res.status, text.slice(0, 400));
-    throw new MontonioShippingError("rejected", `${res.status} ${text.slice(0, 300)}`);
+    throw new MontonioShippingError("rejected", `${res.status} ${text.slice(0, 300)}`, res.status);
   }
   if (!text) return {} as T;
   try {
@@ -267,6 +290,29 @@ async function call<T>(
   } catch {
     throw new MontonioShippingError("bad_response", path);
   }
+}
+
+/* ---------- read-only probes: what a readiness screen may conclude -------- */
+
+/**
+ * The answer to one read-only question asked of Montonio, refusals included.
+ *
+ * Every probe on this screen «fails soft» — a section that could not be asked
+ * must not take the screen down. But *failing* soft and *saying nothing* are
+ * different things: until 19.09.2026 a 401 and a timeout both arrived as
+ * `null`, and the panel printed «Проверяем…» to an owner whose keys Montonio
+ * had just refused. So the failure carries its status, and the row that is
+ * built from it can tell him which of the two happened.
+ */
+export type MontonioProbe<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number | null; code: MontonioShippingErrorCode };
+
+function probeFailure(err: unknown): { ok: false; status: number | null; code: MontonioShippingErrorCode } {
+  if (err instanceof MontonioShippingError) {
+    return { ok: false, status: typeof err.status === "number" ? err.status : null, code: err.code };
+  }
+  return { ok: false, status: null, code: "unreachable" };
 }
 
 /* ---------- pickup points ------------------------------------------------ */
@@ -941,9 +987,20 @@ function round2(n: number): number {
 }
 
 /**
- * A weight, because Montonio requires one and the catalogue has none. Roughly a
- * bottle of shampoo per line plus the box; Renat can correct it in the carrier
- * portal, and the shipment registers either way.
+ * What a basket of this many units would really weigh — roughly a bottle of
+ * shampoo per line plus the box.
+ *
+ * **Not what the shop declares any more.** It was `parcels[].weight` on every
+ * `POST /shipments` until 19.09.2026, which quietly contradicted the owner's
+ * «no weight modelling»: from three units on, the guess was higher than the
+ * carton and therefore the thing Montonio billed (audit 18.09.2026, F24). The
+ * declared figure is now `declaredWeightKg()` — the box, and only the box.
+ *
+ * It stays because a *price* question still needs it: `unitsToKg()` in
+ * `tools/lib/delivery-pricing.mjs` asks «предположим, в заказе N банок» and
+ * compares carrier bands at that weight, and a test holds the two formulas
+ * equal. Estimating what a parcel weighs in order to study tariffs is a
+ * different act from declaring it to a carrier.
  */
 export function estimateWeightKg(order: Pick<Order, "items">): number {
   const units = (order.items ?? []).reduce(
@@ -1168,17 +1225,46 @@ export async function createMontonioShipment(
     receiver.country = country;
   }
 
-  const parcel: Record<string, number> = {
-    weight: round2(opts.weight && opts.weight > 0 ? opts.weight : estimateWeightKg(order)),
-  };
+  /* One read for both halves of the parcel: the weight below always, the
+     dimensions only where Montonio asks for them. */
+  const box = await getParcelSettings();
+
   let measured = false;
+  const given: Record<string, number> = {};
   for (const dim of ["length", "width", "height"] as const) {
     const v = opts[dim];
     if (typeof v === "number" && v > 0) {
-      parcel[dim] = round2(v);
+      given[dim] = round2(v);
       measured = true;
     }
   }
+
+  /* The weight is the DECLARED BOX, not the basket.
+     Ренат, 18.09.2026: «one small default carton, no weight modelling». Until
+     19.09.2026 this line sent `estimateWeightKg(order)` — 0.4 kg a unit plus
+     0.2 — on every booking, so the shop's cost per parcel climbed with the
+     line count while the customer paid one flat price (audit 18.09.2026,
+     F24). And since dimensions go out only where
+     `constraints.parcelDimensionsRequired` is true, on most routes Montonio
+     has nothing of its own to compare against and this number IS the bill —
+     which is exactly why the estimate was expensive.
+     Which box: the one the owner typed for THIS parcel («эта посылка другая»)
+     if he typed all three sides, otherwise the shop's carton. Declaring a
+     weight that disagrees with the dimensions beside it buys nothing —
+     Montonio bills max(actual, volumetric) and would compute the volumetric
+     from those very sides. `opts` is metres, the settings are centimetres
+     (parcel.ts § Units), so the override is converted back before the weight
+     is taken off it.
+     A weight typed into the label form still wins over both: a parcel he has
+     actually put on a scale beats any default. */
+  const declaredBox =
+    given.length && given.width && given.height
+      ? { length: given.length * 100, width: given.width * 100, height: given.height * 100 }
+      : box;
+  const parcel: Record<string, number> = {
+    weight: round2(opts.weight && opts.weight > 0 ? opts.weight : declaredWeightKg(declaredBox)),
+    ...given,
+  };
   /* The declared carton, in **metres**, and only where Montonio says this
      route needs one.
      `constraints.parcelDimensionsRequired` is a per carrier/method/country
@@ -1199,10 +1285,10 @@ export async function createMontonioShipment(
   if (!measured) {
     const needed = await parcelDimensionsRequired(carrier, country, shippingMethod.type);
     if (needed) {
-      const box = parcelMetres(await getParcelSettings());
-      parcel.length = box.length;
-      parcel.width = box.width;
-      parcel.height = box.height;
+      const metres = parcelMetres(box);
+      parcel.length = metres.length;
+      parcel.width = metres.width;
+      parcel.height = metres.height;
     }
   }
 
@@ -1474,15 +1560,15 @@ export interface MontonioCarrierContract {
  * the shop's own per-country deals. A carrier the checkout offers and this
  * list does not name is a booking that will fail on the first live order.
  *
- * Read-only, admin-only, and `null` — never a throw — on anything, like every
- * other probe: a readiness screen that cannot load must say «не смогли
- * спросить», not take the shop down.
+ * Read-only, admin-only, and never a throw, like every other probe: a
+ * readiness screen that cannot load must say «не смогли спросить», not take
+ * the shop down. It says **which** «не смогли», though — see MontonioProbe.
  */
 export async function fetchMontonioCarrierContracts(
   env: NodeJS.ProcessEnv = process.env,
-): Promise<MontonioCarrierContract[] | null> {
+): Promise<MontonioProbe<MontonioCarrierContract[]>> {
   const config = montonioShippingConfig(env);
-  if (!config) return null;
+  if (!config) return { ok: false, status: null, code: "not_configured" };
   try {
     const body = await call<{
       carriers?: Array<{
@@ -1493,19 +1579,22 @@ export async function fetchMontonioCarrierContracts(
       }>;
     }>(config, "/carriers");
     const rows = Array.isArray(body.carriers) ? body.carriers : [];
-    return rows
-      .map((c) => ({
-        code: str(c.code).toLowerCase(),
-        name: str(c.name) || str(c.code),
-        montonioContract: c.hasMontonioContract === true,
-        ownCountries: (Array.isArray(c.contracts) ? c.contracts : [])
-          .map((x) => str(x?.country).toUpperCase())
-          .filter(Boolean),
-      }))
-      .filter((c) => !!c.code);
+    return {
+      ok: true,
+      data: rows
+        .map((c) => ({
+          code: str(c.code).toLowerCase(),
+          name: str(c.name) || str(c.code),
+          montonioContract: c.hasMontonioContract === true,
+          ownCountries: (Array.isArray(c.contracts) ? c.contracts : [])
+            .map((x) => str(x?.country).toUpperCase())
+            .filter(Boolean),
+        }))
+        .filter((c) => !!c.code),
+    };
   } catch (err) {
     console.error("[montonio shipping] GET /carriers —", err);
-    return null;
+    return probeFailure(err);
   }
 }
 
@@ -1524,27 +1613,142 @@ export interface MontonioWebhook {
  * shop can tell that it was forgotten: parcels book, labels print, and the
  * orders simply never close by themselves. So the panel asks.
  *
- * `null` — never a throw — on anything.
+ * `url` and `enabledEvents` are kept, not counted — see readWebhookSetup().
+ * Never a throw.
  */
 export async function fetchMontonioWebhooks(
   env: NodeJS.ProcessEnv = process.env,
-): Promise<MontonioWebhook[] | null> {
+): Promise<MontonioProbe<MontonioWebhook[]>> {
   const config = montonioShippingConfig(env);
-  if (!config) return null;
+  if (!config) return { ok: false, status: null, code: "not_configured" };
   try {
     const body = await call<{
       data?: Array<{ id?: unknown; url?: unknown; enabledEvents?: unknown }>;
     }>(config, "/webhooks");
     const rows = Array.isArray(body.data) ? body.data : [];
-    return rows.map((w) => ({
-      id: str(w.id),
-      url: str(w.url),
-      events: Array.isArray(w.enabledEvents) ? w.enabledEvents.map((e) => str(e)).filter(Boolean) : [],
-    }));
+    return {
+      ok: true,
+      data: rows.map((w) => ({
+        id: str(w.id),
+        url: str(w.url),
+        events: Array.isArray(w.enabledEvents) ? w.enabledEvents.map((e) => str(e)).filter(Boolean) : [],
+      })),
+    };
   } catch (err) {
     console.error("[montonio shipping] GET /webhooks —", err);
-    return null;
+    return probeFailure(err);
   }
+}
+
+/* ---------- is the registered webhook OUR webhook? ------------------------ */
+
+/**
+ * The path Montonio must be given, trailing slash and all.
+ *
+ * `trailingSlash: true` in next.config.ts, so a POST to the same address
+ * without the final slash is answered **308** and the event is never
+ * processed. That one character is the difference between an order closing by
+ * itself and an owner refreshing a screen that never changes.
+ */
+export const SHIPMENT_WEBHOOK_PATH = "/api/shipping/notify/";
+
+/**
+ * The events this shop actually acts on — no more, and no fewer.
+ *
+ * Three documents disagreed about this list (audit 18.09.2026, F13):
+ * `docs/shipping.md:813` says tick one, `:1006` adds a second,
+ * `docs/montonio-untested.md:101` asks for three. The route settles it,
+ * because the route is what runs:
+ *
+ *   · `shipment.statusUpdated` — the only event that moves an order to
+ *     «Доставлен» (src/app/api/shipping/notify/route.ts, `meaning ===
+ *     "delivered"`);
+ *   · `shipment.registrationFailed` — the only event that puts a carrier's
+ *     refusal in the journal. Without it a parcel refused after an
+ *     asynchronous booking is one word in a settings blob and nothing else.
+ *
+ * `shipment.registered` and `shipment.labelsCreated` are *not* needed while
+ * booking is synchronous — the status and the label come back in the answer to
+ * the button press — so they are not required here. Ticking them is harmless
+ * (the route answers 200 and records the word), which is why this checks for
+ * missing events and never complains about extra ones.
+ */
+export const REQUIRED_SHIPMENT_EVENTS: readonly string[] = [
+  "shipment.statusUpdated",
+  "shipment.registrationFailed",
+];
+
+/** Where Montonio has to send parcel events — «» when PUBLIC_BASE_URL is unset. */
+export function shipmentWebhookUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const base = String(env.PUBLIC_BASE_URL ?? "").trim().replace(/\/+$/, "");
+  return base ? base + SHIPMENT_WEBHOOK_PATH : "";
+}
+
+/** Same address? Case and a `?query` do not matter; the trailing slash does. */
+function sameWebhookUrl(a: string, b: string): boolean {
+  const norm = (raw: string) => {
+    try {
+      const u = new URL(raw);
+      /* Host and path only. The scheme is left out on purpose: `http` where we
+         expect `https` is the same *address* wrongly spelt, and telling him to
+         re-paste it is the same instruction either way. */
+      return `${u.host.toLowerCase()}${u.pathname}`;
+    } catch {
+      return raw.trim().toLowerCase();
+    }
+  };
+  return !!a && !!b && norm(a) === norm(b);
+}
+
+/** What `GET /webhooks` amounts to for the owner's screen. */
+export interface WebhookSetup {
+  /** `ok` · `none` · `wrong_url` · `missing_events` — never a bare boolean. */
+  state: "ok" | "none" | "wrong_url" | "missing_events";
+  /** The address he has to paste, so the row can print it. */
+  expectedUrl: string;
+  /** The addresses Montonio really holds, so the row can print those too. */
+  urls: string[];
+  /** Required events the matching webhook does not carry. */
+  missingEvents: string[];
+}
+
+/**
+ * Registered ≠ registered **here**.
+ *
+ * Until 19.09.2026 any webhook at all made this row green: `webhooks.length >
+ * 0`, url and events discarded (audit 18.09.2026, F13). The likely day-one
+ * state after the domain move is precisely the one that passed — a webhook
+ * still pointing at the staging host — and the reference's own example
+ * webhook, pinned as our test fixture, points at `partner.montonio` and
+ * subscribes to one event we do not use. The test asserted it was fine.
+ *
+ * `expectedUrl` empty means PUBLIC_BASE_URL is not set, i.e. we do not know
+ * what to compare against: then the answer is «есть вебхук, проверить не
+ * можем» rather than a verdict — `missing_events` is still worth saying, the
+ * url is not.
+ */
+export function readWebhookSetup(
+  webhooks: readonly MontonioWebhook[],
+  expectedUrl: string,
+): WebhookSetup {
+  const urls = webhooks.map((w) => w.url).filter(Boolean);
+  if (!webhooks.length) return { state: "none", expectedUrl, urls, missingEvents: [] };
+
+  /* With no expected url to match, the honest fallback is «any of them may be
+     ours»: take the union of the events, so a complete set is not called
+     incomplete on a shop whose base url simply is not configured. */
+  const mine = expectedUrl ? webhooks.filter((w) => sameWebhookUrl(w.url, expectedUrl)) : [...webhooks];
+  if (!mine.length) return { state: "wrong_url", expectedUrl, urls, missingEvents: [] };
+
+  const have = new Set<string>();
+  for (const w of mine) for (const e of w.events) have.add(e.trim().toLowerCase());
+  const missingEvents = REQUIRED_SHIPMENT_EVENTS.filter((e) => !have.has(e.toLowerCase()));
+  return {
+    state: missingEvents.length ? "missing_events" : "ok",
+    expectedUrl,
+    urls,
+    missingEvents,
+  };
 }
 
 /** What we stored earlier for this order, if anything. */

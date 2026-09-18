@@ -27,20 +27,27 @@
  * nobody here had seen it.
  *
  * Volumetric weight is the box's volume over a divisor. The reference prints
- * no formula, only a worked example: **20 × 15 × 10 cm → 0.75 kg**. 3000 cm³
- * over the industry-standard 5000 is 0.6 kg, so either the divisor is 4000 or
- * the documented `bufferApplied` is a further 25 % on top of /5000. Both
- * readings give the same number, and both give the same conclusion.
+ * **no formula at all**, only one worked example: **20 × 15 × 10 cm → 0.75 kg**.
+ * 3000 cm³ / 0.75 kg is a divisor of 4000, and that single example is the only
+ * evidence there is — so `volumetricKg()` below divides by 4000 and says out
+ * loud that it is an estimate. It is **not** /5000 plus the documented
+ * `bufferApplied`: the reference describes `bufferApplied` as a buffer
+ * percentage applied to **height**, for stacking, and prints 15 % — a
+ * different quantity applied to a different thing (audit 18.09.2026, F30).
+ * The arithmetic is unchanged either way; only the claim about where it comes
+ * from was wrong, and a comment the documentation contradicts is how the next
+ * reader is misled. `tools/lib/delivery-pricing.mjs` reads the real
+ * `chargeableWeight` off Montonio's own answer and needs no divisor; the open
+ * question is in `docs/montonio-questions.md § 6`.
  *
  * The conclusion is that at this shop's parcel sizes **the declared box, not
  * what is in it, is what gets paid for**. A 30 × 30 × 30 carton — which is
  * what `REFERENCE_PARCEL` is, and what this file declared until the afternoon
- * of 18.09.2026 — is 27 000 cm³, i.e. 5.4–6.75 kg of chargeable weight
- * whatever is inside. An order of three 250 ml bottles weighs 1.4 kg
- * (`estimateWeightKg`). So the shop would have been buying five kilos of
- * cardboard on every single parcel.
+ * of 18.09.2026 — is 27 000 cm³, i.e. 6.75 kg of chargeable weight whatever is
+ * inside, against the 1.4 kg three 250 ml bottles would really weigh. So the
+ * shop would have been buying five kilos of cardboard on every single parcel.
  *
- * 25 × 18 × 10 cm is 4500 cm³ — about 1.1 kg — and that is under or near the
+ * 25 × 18 × 10 cm is 4500 cm³ — 1.13 kg — and that is under or near the
  * real weight of an ordinary order, which is the point: the box stops being
  * the thing that is billed. It is sized from the catalogue rather than
  * guessed: the variants file tops out at 500 ml (a bottle roughly 7 × 7 × 22
@@ -53,11 +60,23 @@
  * as possible and don't over-engineer this feature.»*
  *
  * **So there is no weight modelling here and there must not be one.** No
- * basket-to-weight estimator beyond the one that already exists, no per-country
- * cartons, no size ladder. A rare heavy order costing a little more than it
- * charges is a loss taken on purpose, in exchange for one stable price the
- * customer understands. Weighing the 220 products was an open item since
- * 14.09.2026 and is cancelled; nothing here waits on it.
+ * basket-to-weight estimator, no per-country cartons, no size ladder. A rare
+ * heavy order costing a little more than it charges is a loss taken on
+ * purpose, in exchange for one stable price the customer understands.
+ * Weighing the 220 products was an open item since 14.09.2026 and is
+ * cancelled; nothing here waits on it.
+ *
+ * Until 19.09.2026 that rule was only half kept: the carton was declared
+ * where Montonio asked for dimensions, but `parcels[].weight` on **every**
+ * `POST /shipments` carried `estimateWeightKg()` — 0.4 kg per unit plus 0.2 —
+ * so from three units on it was the guess, not the box, that Montonio billed
+ * (audit 18.09.2026, F24). And on most routes `parcelDimensionsRequired` is
+ * false, so there is no volumetric weight on Montonio's side to compare
+ * against and the declared weight is the whole bill. Ренат, 18.09.2026 23:10:
+ * remove the estimate and declare the box. `declaredWeightKg()` is therefore
+ * `volumetricKg()` of this carton — one number, the same on a one-line order
+ * and a nine-line one, and the same number the panel already prints under
+ * «Коробка магазина». An explicit weight typed into the label form still wins.
  *
  * ## What this box is NOT, and it matters
  *
@@ -161,7 +180,7 @@ export interface ParcelSettings {
   recent: LockerSize[];
 }
 
-/** 25 × 18 × 10 cm — about 1.1 kg of volumetric weight. See the head of this file. */
+/** 25 × 18 × 10 cm — 1.13 kg of volumetric weight. See the head of this file. */
 export const PARCEL_DEFAULTS: ParcelSettings = {
   length: 25,
   width: 18,
@@ -172,18 +191,49 @@ export const PARCEL_DEFAULTS: ParcelSettings = {
 
 /**
  * What Montonio will bill this box as, in kilograms — `volumetricWeight` in
- * its own `calculationDetails`. Not used to price anything: it is what the
- * panel prints beside the three boxes so the owner can see a bigger carton
- * costing more before he saves it, which is the only way «объявите коробку
- * поменьше» is advice rather than a slogan.
+ * its own `calculationDetails`.
  *
- * /5000 is the industry-standard divisor and the one that, with the
- * documented `bufferApplied`, reproduces the reference's worked example
- * (20 × 15 × 10 → 0.75). The number is therefore a good estimate and not a
- * quote, and the panel says «около».
+ * **This is an estimate and it has to be read as one.** The reference prints
+ * no formula, only the single worked example 20 × 15 × 10 cm → 0.75 kg, and
+ * 3000 cm³ / 0.75 kg is the /4000 below. Nothing else about it is documented:
+ * in particular `bufferApplied` is *not* part of it — the reference calls it a
+ * buffer percentage applied to **height** for stacking, and prints 15 %. The
+ * one number that is not a guess is `chargeableWeight`, which comes back on
+ * `POST /shipping-methods/rates` and which `tools/lib/delivery-pricing.mjs`
+ * reads. `docs/montonio-questions.md § 6` asks Montonio for the divisor.
+ *
+ * Two readers, and both want the same number:
+ *   · the panel prints it beside the three boxes («около N кг»), so the owner
+ *     can see a bigger carton costing more before he saves it;
+ *   · `declaredWeightKg()` is this, and it is what goes out as
+ *     `parcels[].weight` on every shipment.
  */
 export function volumetricKg(p: Pick<ParcelSettings, "length" | "width" | "height">): number {
-  return Math.round(((p.length * p.width * p.height) / 5000) * 1.25 * 100) / 100;
+  return Math.round(((p.length * p.width * p.height) / 4000) * 100) / 100;
+}
+
+/**
+ * The weight this shop declares on `POST /shipments` — the box, never the
+ * basket.
+ *
+ * Ренат, 18.09.2026: «one small default carton, no weight modelling». That is
+ * a decision about money, not about tidiness: dimensions go out only where
+ * `constraints.parcelDimensionsRequired` is true, so on most routes Montonio
+ * has no volumetric weight of its own to compare against and **the declared
+ * weight is the entire bill**. A per-unit estimate therefore made the shop's
+ * cost per parcel climb with the line count while the customer paid one flat
+ * price — which is what `estimateWeightKg()` did on every booking until
+ * 19.09.2026 (audit 18.09.2026, F24).
+ *
+ * So: one number, derived from the carton he set, identical on a one-line
+ * order and a nine-line one. The edge case is accepted out loud — a genuinely
+ * heavy parcel is re-weighed by the carrier and surcharged, and that is the
+ * small loss traded for a figure that never surprises him.
+ */
+export function declaredWeightKg(p: Pick<ParcelSettings, "length" | "width" | "height">): number {
+  /* Montonio's own floor: `weight` must be a positive number, and a carton
+     small enough to round to zero would be refused rather than cheap. */
+  return Math.max(0.1, volumetricKg(p));
 }
 
 export const PARCEL_SETTINGS_KEY = "shipping_parcel";
@@ -235,7 +285,8 @@ export function parcelMetres(p: ParcelSettings): { length: number; width: number
  * The commonest of the last twenty labels; a tie goes to the one used most
  * recently, because `recent` is newest-first and the scan keeps the first
  * winner it meets. With no history at all it is `lockerSize`, the owner's own
- * default, seeded at `L`.
+ * default, seeded at `M` — `PARCEL_DEFAULTS.lockerSize`, and the head of this
+ * file says why it is the size that fits all three carriers' doors.
  */
 export function suggestedLockerSize(p: ParcelSettings): LockerSize {
   const counts = new Map<LockerSize, number>();
