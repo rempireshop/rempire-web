@@ -1,0 +1,2407 @@
+{
+  "_comment": "ОБРАЗЕЦ. Это НЕ настоящие цены Montonio и не цены этого магазина. Цифры выдуманы; форма ответа скопирована с документации Montonio Shipping v2, § Calculate shipping rates (docs.montonio.com/api/shipping-v2/reference, прочитано 18.09.2026). Файл существует, чтобы tools/delivery-pricing.mjs --dry-run и tests/delivery-pricing.test.ts можно было прогнать без ключей. С ключами он не читается вообще.",
+  "_bands": [
+    {
+      "units": 1,
+      "box": [
+        20,
+        15,
+        10
+      ]
+    },
+    {
+      "units": 3,
+      "box": [
+        25,
+        20,
+        15
+      ]
+    },
+    {
+      "units": 6,
+      "box": [
+        30,
+        25,
+        20
+      ]
+    },
+    {
+      "units": 12,
+      "box": [
+        35,
+        30,
+        25
+      ]
+    },
+    {
+      "units": 24,
+      "box": [
+        40,
+        35,
+        30
+      ]
+    }
+  ],
+  "responses": {
+    "EE": {
+      "0": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 20,
+              "width": 15,
+              "height": 10,
+              "dimensionUnit": "cm",
+              "actualWeight": 0.6,
+              "volumetricWeight": 0.6,
+              "chargeableWeight": 0.6,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "EE",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.13",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "postOffice",
+                    "rate": "2.33",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.38",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.24",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.79",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.45",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "2.65",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.27",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.03",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "1.82",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "4.02",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "1": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 25,
+              "width": 20,
+              "height": 15,
+              "dimensionUnit": "cm",
+              "actualWeight": 1.4,
+              "volumetricWeight": 1.5,
+              "chargeableWeight": 1.5,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "EE",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.18",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "postOffice",
+                    "rate": "2.38",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.65",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.29",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.08",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.52",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "2.72",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.52",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.08",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "1.86",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "4.20",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "2": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 30,
+              "width": 25,
+              "height": 20,
+              "dimensionUnit": "cm",
+              "actualWeight": 2.6,
+              "volumetricWeight": 3,
+              "chargeableWeight": 3,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "EE",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.25",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "postOffice",
+                    "rate": "2.45",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.10",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.38",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.56",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.64",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "2.84",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.94",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.15",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "1.92",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "4.50",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "3": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 35,
+              "width": 30,
+              "height": 25,
+              "dimensionUnit": "cm",
+              "actualWeight": 5,
+              "volumetricWeight": 5.25,
+              "chargeableWeight": 5.25,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "EE",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.36",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "postOffice",
+                    "rate": "2.56",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.78",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.52",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "7.28",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.82",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "3.02",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.57",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.26",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.01",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "4.95",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "4": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 40,
+              "width": 35,
+              "height": 30,
+              "dimensionUnit": "cm",
+              "actualWeight": 9.8,
+              "volumetricWeight": 8.4,
+              "chargeableWeight": 9.8,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "EE",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.59",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "postOffice",
+                    "rate": "2.79",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "8.14",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.79",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "8.74",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.18",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "3.38",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "7.84",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.49",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.19",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "5.86",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "LV": {
+      "0": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 20,
+              "width": 15,
+              "height": 10,
+              "dimensionUnit": "cm",
+              "actualWeight": 0.6,
+              "volumetricWeight": 0.6,
+              "chargeableWeight": 0.6,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "LV",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.46",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.64",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.67",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.18",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "4.48",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.43",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.25",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "2.94",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "1": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 25,
+              "width": 20,
+              "height": 15,
+              "dimensionUnit": "cm",
+              "actualWeight": 1.4,
+              "volumetricWeight": 1.5,
+              "chargeableWeight": 1.5,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "LV",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.55",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "7.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.77",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.31",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "4.61",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "6.77",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.34",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.01",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "2": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 30,
+              "width": 25,
+              "height": 20,
+              "dimensionUnit": "cm",
+              "actualWeight": 2.6,
+              "volumetricWeight": 3,
+              "chargeableWeight": 3,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "LV",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.70",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "7.60",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.93",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.52",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "4.82",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "7.34",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.47",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.11",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "3": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 35,
+              "width": 30,
+              "height": 25,
+              "dimensionUnit": "cm",
+              "actualWeight": 5,
+              "volumetricWeight": 5.25,
+              "chargeableWeight": 5.25,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "LV",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.93",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "8.50",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.18",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.84",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "5.14",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "8.20",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.67",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.27",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "4": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 40,
+              "width": 35,
+              "height": 30,
+              "dimensionUnit": "cm",
+              "actualWeight": 9.8,
+              "volumetricWeight": 8.4,
+              "chargeableWeight": 9.8,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "LV",
+        "carriers": [
+          {
+            "carrierCode": "omniva",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.38",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "10.32",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.68",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "5.47",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "5.77",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "9.92",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "unisend",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "4.08",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "3.59",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "FI": {
+      "0": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 20,
+              "width": 15,
+              "height": 10,
+              "dimensionUnit": "cm",
+              "actualWeight": 0.6,
+              "volumetricWeight": 0.6,
+              "chargeableWeight": 0.6,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "FI",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "6.48",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "11.68",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "8.67",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "9.37",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "14.17",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "1": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 25,
+              "width": 20,
+              "height": 15,
+              "dimensionUnit": "cm",
+              "actualWeight": 1.4,
+              "volumetricWeight": 1.5,
+              "chargeableWeight": 1.5,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "FI",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "6.75",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "12.40",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "9.08",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "9.78",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "15.02",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "2": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 30,
+              "width": 25,
+              "height": 20,
+              "dimensionUnit": "cm",
+              "actualWeight": 2.6,
+              "volumetricWeight": 3,
+              "chargeableWeight": 3,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "FI",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "7.20",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "13.60",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "9.75",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "10.45",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "16.45",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "3": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 35,
+              "width": 30,
+              "height": 25,
+              "dimensionUnit": "cm",
+              "actualWeight": 5,
+              "volumetricWeight": 5.25,
+              "chargeableWeight": 5.25,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "FI",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "7.88",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "15.40",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "10.76",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "11.46",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "18.59",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "4": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 40,
+              "width": 35,
+              "height": 30,
+              "dimensionUnit": "cm",
+              "actualWeight": 9.8,
+              "volumetricWeight": 8.4,
+              "chargeableWeight": 9.8,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "FI",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "9.24",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "19.04",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "12.81",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "13.51",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "22.91",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "DE": {
+      "0": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 20,
+              "width": 15,
+              "height": 10,
+              "dimensionUnit": "cm",
+              "actualWeight": 0.6,
+              "volumetricWeight": 0.6,
+              "chargeableWeight": 0.6,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "DE",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "16.06",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "12.22",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "13.02",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "17.65",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "8.97",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "1": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 25,
+              "width": 20,
+              "height": 15,
+              "dimensionUnit": "cm",
+              "actualWeight": 1.4,
+              "volumetricWeight": 1.5,
+              "chargeableWeight": 1.5,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "DE",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "17.05",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "12.85",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "13.65",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "18.77",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "9.38",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "2": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 30,
+              "width": 25,
+              "height": 20,
+              "dimensionUnit": "cm",
+              "actualWeight": 2.6,
+              "volumetricWeight": 3,
+              "chargeableWeight": 3,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "DE",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "18.70",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "13.90",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "14.70",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "20.65",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "10.05",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "3": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 35,
+              "width": 30,
+              "height": 25,
+              "dimensionUnit": "cm",
+              "actualWeight": 5,
+              "volumetricWeight": 5.25,
+              "chargeableWeight": 5.25,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "DE",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "21.18",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "15.48",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "16.27",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "23.46",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "11.06",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "4": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 40,
+              "width": 35,
+              "height": 30,
+              "dimensionUnit": "cm",
+              "actualWeight": 9.8,
+              "volumetricWeight": 8.4,
+              "chargeableWeight": 9.8,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "DE",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "26.18",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "pickupPoint",
+                "subtypes": [
+                  {
+                    "code": "parcelMachine",
+                    "rate": "18.66",
+                    "currency": "EUR"
+                  },
+                  {
+                    "code": "parcelShop",
+                    "rate": "19.46",
+                    "currency": "EUR"
+                  }
+                ]
+              },
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "29.15",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "novaPost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "13.11",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GR": {
+      "0": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 20,
+              "width": 15,
+              "height": 10,
+              "dimensionUnit": "cm",
+              "actualWeight": 0.6,
+              "volumetricWeight": 0.6,
+              "chargeableWeight": 0.6,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "GR",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "0.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "32.32",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "1": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 25,
+              "width": 20,
+              "height": 15,
+              "dimensionUnit": "cm",
+              "actualWeight": 1.4,
+              "volumetricWeight": 1.5,
+              "chargeableWeight": 1.5,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "GR",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "0.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "34.30",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "2": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 30,
+              "width": 25,
+              "height": 20,
+              "dimensionUnit": "cm",
+              "actualWeight": 2.6,
+              "volumetricWeight": 3,
+              "chargeableWeight": 3,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "GR",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "0.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "37.60",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "3": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 35,
+              "width": 30,
+              "height": 25,
+              "dimensionUnit": "cm",
+              "actualWeight": 5,
+              "volumetricWeight": 5.25,
+              "chargeableWeight": 5.25,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "GR",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "0.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "42.55",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "4": {
+        "calculationDetails": {
+          "estimatedParcels": [
+            {
+              "length": 40,
+              "width": 35,
+              "height": 30,
+              "dimensionUnit": "cm",
+              "actualWeight": 9.8,
+              "volumetricWeight": 8.4,
+              "chargeableWeight": 9.8,
+              "weightUnit": "kg",
+              "bufferApplied": 0
+            }
+          ]
+        },
+        "destination": "GR",
+        "carriers": [
+          {
+            "carrierCode": "smartpost",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "0.00",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "carrierCode": "dpd",
+            "shippingMethods": [
+              {
+                "type": "courier",
+                "subtypes": [
+                  {
+                    "code": "standard",
+                    "rate": "52.56",
+                    "currency": "EUR"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
