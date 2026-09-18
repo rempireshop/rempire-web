@@ -33,6 +33,7 @@
  * twice. The safety argument for each door, and the story of those two drifts,
  * is in that file's header and above each function.
  */
+import { writeCoverFocus } from "@/lib/blog-cover.mjs";
 import { jsonbParam, query } from "@/lib/db";
 import type { Lang3, Trilingual } from "@/lib/content";
 import {
@@ -55,6 +56,11 @@ export interface Post {
   body: Trilingual;
   coverUrl: string | null;
   coverAlt: Trilingual;
+  /** Which part of the cover each frame keeps — `"<mode> <x> <y>"`, or null
+      for the covers written before there was anything to choose. The one
+      reader is src/lib/blog-cover.mjs, whose header says what the words mean
+      and why it is a point and not a crop. */
+  coverFocus: string | null;
   tags: string[];
   products: string[];
   seoTitle: Trilingual;
@@ -77,6 +83,7 @@ interface PostRow {
   body: Trilingual | null;
   cover_url: string | null;
   cover_alt: Trilingual | null;
+  cover_focus: string | null;
   tags: string[] | null;
   products: string[] | null;
   seo_title: Trilingual | null;
@@ -100,6 +107,10 @@ function toPost(r: PostRow): Post {
     body: { ...EMPTY3, ...(r.body || {}) },
     coverUrl: r.cover_url || null,
     coverAlt: { ...EMPTY3, ...(r.cover_alt || {}) },
+    /* Through the same door on the way out as on the way in: a row written
+       before the column existed, or by hand with a word this vocabulary does
+       not have, reads back as null — which is what every old post is. */
+    coverFocus: writeCoverFocus(r.cover_focus),
     tags: Array.isArray(r.tags) ? r.tags : [],
     products: Array.isArray(r.products) ? r.products : [],
     seoTitle: { ...EMPTY3, ...(r.seo_title || {}) },
@@ -117,7 +128,7 @@ function toSummary(r: PostRow): PostSummary {
 }
 
 const SUMMARY_COLS =
-  "id, slug, status, title, excerpt, cover_url, cover_alt, tags, products, seo_title, seo_desc, author, published_at, created_at, updated_at";
+  "id, slug, status, title, excerpt, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author, published_at, created_at, updated_at";
 const FULL_COLS = SUMMARY_COLS.replace("excerpt,", "excerpt, body,");
 
 /** The language shown, falling back to Russian, then to whatever exists. */
@@ -286,6 +297,7 @@ export interface PostInput {
   body?: unknown;
   coverUrl?: unknown;
   coverAlt?: unknown;
+  coverFocus?: unknown;
   tags?: unknown;
   products?: unknown;
   seoTitle?: unknown;
@@ -369,6 +381,12 @@ export async function upsertPost(input: PostInput): Promise<Post> {
   const tags = cleanList(input.tags, 12, 30);
   const products = cleanList(input.products, 12, 80);
   const coverUrl = cleanUrl(input.coverUrl);
+  /* Deliberately not `undefined`-aware, unlike the title check below: a save
+     that carries no coverFocus is the panel saying «nothing chosen», and the
+     same save carries the cover the point belonged to. The two go together —
+     a photo replaced through the assistant's set_post_cover must not keep a
+     point that was dragged onto the picture before it. */
+  const coverFocus = writeCoverFocus(input.coverFocus);
   const author = (typeof input.author === "string" ? input.author.trim() : "").slice(0, 60) || "Rempire";
 
   /*
@@ -407,6 +425,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
     jsonbParam(body),
     coverUrl,
     jsonbParam(coverAlt),
+    coverFocus,
     tags,
     products,
     jsonbParam(seoTitle),
@@ -418,9 +437,9 @@ export async function upsertPost(input: PostInput): Promise<Post> {
     const rows = await query<PostRow>(
       `update posts set
          slug = $1, title = $2::jsonb, excerpt = $3::jsonb, body = $4::jsonb,
-         cover_url = $5, cover_alt = $6::jsonb, tags = $7, products = $8,
-         seo_title = $9::jsonb, seo_desc = $10::jsonb, author = $11, updated_at = now()
-       where id = $12
+         cover_url = $5, cover_alt = $6::jsonb, cover_focus = $7, tags = $8, products = $9,
+         seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12, updated_at = now()
+       where id = $13
        returning ${FULL_COLS}`,
       [...params, input.id],
     );
@@ -429,8 +448,8 @@ export async function upsertPost(input: PostInput): Promise<Post> {
   }
 
   const rows = await query<PostRow>(
-    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, tags, products, seo_title, seo_desc, author)
-     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9::jsonb, $10::jsonb, $11)
+    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author)
+     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10::jsonb, $11::jsonb, $12)
      returning ${FULL_COLS}`,
     params,
   );

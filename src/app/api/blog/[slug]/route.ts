@@ -1,7 +1,7 @@
 /**
  * GET /api/blog/<slug>/?lang=RU — one published article.
  *
- * `{ ok, post: {slug,title,excerpt,bodyHtml,coverUrl,coverAlt,tags,products,
+ * `{ ok, post: {slug,title,excerpt,bodyHtml,coverUrl,coverAlt,coverFocus,tags,products,
  *    seoTitle,seoDesc,author,publishedAt} }`. `bodyHtml` is the stored body
  * rendered to safe HTML server-side (@/lib/blog renderPostBody — the visual
  * editor's HTML through the allowlist, an older markdown body through
@@ -36,6 +36,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           bodyHtml: renderPostBody(pickLang(post.body, lang)),
           coverUrl: post.coverUrl,
           coverAlt: pickLang(post.coverAlt, lang),
+          coverFocus: post.coverFocus,
           tags: post.tags,
           products: post.products,
           seoTitle: pickLang(post.seoTitle, lang),

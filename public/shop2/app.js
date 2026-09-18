@@ -2397,6 +2397,18 @@
       "В начале статьи": "Artikli alguses",
       "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
         "Nii näeb kaanepilti pood: see mahub aknasse tervikuna, külgedele jääb tühi väli. Kõige ühtlasemalt asetub lai foto 1200×630.",
+      /* …and the size and the point the owner chooses for it (admBlogSeeHTML) */
+      "В соцсетях": "Sotsiaalmeedias",
+      "Вся фотография": "Kogu foto",
+      "Заполнить рамку": "Täida raam",
+      "Как стоит обложка": "Kuidas kaanepilt seisab",
+      "Двигать фотографию": "Liiguta fotot",
+      "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.":
+        "Foto täidab akna, servad lõigatakse ära. Tõmmake seda sõrmega — valige, mis jääb näha.",
+      "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.":
+        "Ruut läheb sotsiaalmeedia lingile: see lõigatakse alati, ükskõik kuidas kaanepilt poes seisab.",
+      "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
+        "Kuni ruutu pole tõmmatud, lõikab pood selle pildi ise — nagu välja tuleb.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Pildi suurus",
       "Куда сдвинуть картинку": "Kuhu pilti nihutada",
@@ -5119,6 +5131,18 @@
       "В начале статьи": "At the top of the article",
       "Так обложку увидят в магазине: она вписывается в окно целиком, по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.":
         "This is how the shop will show the cover: it is fitted into the frame whole, with empty space left at the sides. A wide 1200×630 photo sits best.",
+      /* …and the size and the point the owner chooses for it (admBlogSeeHTML) */
+      "В соцсетях": "On social media",
+      "Вся фотография": "The whole photo",
+      "Заполнить рамку": "Fill the frame",
+      "Как стоит обложка": "How the cover stands",
+      "Двигать фотографию": "Move the photo",
+      "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.":
+        "The photo fills the frame and the edges are cut off. Drag it with a finger to choose what stays visible.",
+      "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.":
+        "The square goes into the link preview on social media: it is always cropped, however the cover stands in the shop.",
+      "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
+        "Until the square is dragged, the shop crops this picture itself — however it turns out.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Picture size",
       "Куда сдвинуть картинку": "Where to move the picture",
@@ -10591,20 +10615,56 @@
      picture whole into a 1200×630 box, so the three pictures never agreed and
      he had to publish to find out. */
   var BLOG_COVER_CLS = { list: "blog__tileimg", post: "blog__cover" };
-  function blogCoverFrameHTML(where, url, alt) {
+  /* ---- and which part of the picture the frame keeps ----------------------
+     One point per post — `coverFocus`, the column 193_blog_cover_focus.sql
+     adds, carried by /api/blog/ and by #blogdata/#blogpost. Two words and two
+     numbers, `"fill 62 28"`: `fill` means the picture fills the frame and is
+     cropped, `fit` (and an absent value, which is every article written
+     before this) means it stands in the frame whole, which is what the two
+     rules in styles.css already do on their own.
+
+     A deliberate twin of readCoverFocus()/coverBgStyle() in
+     src/lib/blog-cover.mjs — the same third copy blogCleanHtml() is of the
+     sanitiser, and for the same reason: this file is loaded by the browser
+     with no build step and cannot import that one. tests/blog-cover.test.ts
+     lifts these two functions out of this file and runs them against the
+     module, so the twin cannot drift the way the sanitiser's did. */
+  var BLOG_FOCUS_RX = /^(fit|fill)(?:\s+(\d{1,3})\s+(\d{1,3}))?$/;
+  function blogCoverFocus(raw) {
+    var m = BLOG_FOCUS_RX.exec(String(raw == null ? "" : raw).trim().toLowerCase());
+    if (!m) return null;
+    var x = m[2] === undefined ? 50 : Number(m[2]);
+    var y = m[3] === undefined ? 50 : Number(m[3]);
+    if (x > 100 || y > 100) return null;
+    return { fill: m[1] === "fill", x: x, y: y };
+  }
+  /** …and back to the one shape that is stored — writeCoverFocus()'s twin. */
+  function blogCoverWrite(fill, x, y) {
+    var cx = Math.max(0, Math.min(100, Math.round(x)));
+    var cy = Math.max(0, Math.min(100, Math.round(y)));
+    return (fill ? "fill" : "fit") + " " + cx + " " + cy;
+  }
+  /** The two properties that crop — nothing at all when the picture stands whole. */
+  function blogCoverBgStyle(focus) {
+    var f = typeof focus === "string" || focus == null ? blogCoverFocus(focus) : focus;
+    return f && f.fill ? "background-size:cover;background-position:" + f.x + "% " + f.y + "%" : "";
+  }
+  function blogCoverFrameHTML(where, url, alt, focus) {
     var cls = BLOG_COVER_CLS[where] || BLOG_COVER_CLS.post;
     if (!url) {
       // the list keeps the box and puts the tower in it; the article shows nothing
       return where === "list" ? '<span class="' + cls + " " + cls + '--none">' + tower("blog__mark") + "</span>" : "";
     }
-    return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + '\')" role="img" aria-label="' + esc(alt || "") + '"></span>';
+    var crop = blogCoverBgStyle(focus);
+    return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + "')" + (crop ? ";" + crop : "") +
+      '" role="img" aria-label="' + esc(alt || "") + '"></span>';
   }
   /* A real link (href), not a bare <a>: the pointer says «clickable», the
      keyboard reaches it, Ctrl/⌘-click opens a tab — a plain click is caught
      by the [data-go-blog] branch of the click handler and stays in the SPA. */
   function blogTileHTML(p) {
     return '<li><a class="card blog__tile" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">' +
-      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title) +
+      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title, p.coverFocus) +
       '<span class="blog__tilebody">' +
         (p.publishedAt ? '<span class="muted blog__date">' + blogDate(p.publishedAt) + "</span>" : "") +
         '<span class="blog__tiletitle">' + esc(p.title) + "</span>" +
@@ -10682,7 +10742,7 @@
      the body is on its way the page already wears the part the list knows,
      and the body's arrival changes nothing above it. */
   function blogHeadHTML(p) {
-    return blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title) +
+    return blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title, p.coverFocus) +
       '<h1 class="display h1">' + esc(p.title) + "</h1>" +
       '<div class="blog__meta">' +
         (p.publishedAt ? '<span class="muted">' + blogDate(p.publishedAt) + "</span>" : "") +
@@ -13482,7 +13542,7 @@
     return {
       id: "", slug: "", slugAuto: true, status: "draft",
       title: { RU: "", ET: "", EN: "" }, excerpt: { RU: "", ET: "", EN: "" }, body: { RU: "", ET: "", EN: "" },
-      coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" },
+      coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" }, coverFocus: "",
       tagsText: "", products: [],
       seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" },
       author: "Rempire", publishedAt: null
@@ -13495,6 +13555,7 @@
       // the editor works in HTML; an older markdown body is converted here, once
       body: blogBody3ToHtml(Object.assign({}, BLOG_EMPTY3, p.body)),
       coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
+      coverFocus: p.coverFocus || "",
       tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
       seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
       author: p.author || "Rempire", publishedAt: p.publishedAt || null
@@ -13543,6 +13604,11 @@
          what is stored is what the shop will show. */
       body: blogBody3ToHtml(d.body),
       coverUrl: d.coverUrl || null, coverAlt: d.coverAlt,
+      /* One point for all four frames — «fill 62 28» or nothing at all.
+         writeCoverFocus() in src/lib/blog-cover.mjs measures it again on the
+         way into the row, so a word this vocabulary does not have is stored
+         as null, which is what a cover nobody has dragged already is. */
+      coverFocus: d.coverFocus || null,
       tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
       products: d.products,
       seoTitle: d.seoTitle, seoDesc: d.seoDesc,
@@ -13628,10 +13694,10 @@
   }
   /** Everything «Сохранить» would send — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
-    return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt,
+    return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt, d.coverFocus,
       d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
   }
-  var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt",
+  var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt", "coverFocus",
     "tagsText", "products", "seoTitle", "seoDesc", "author"];
   /** The same fields, detached from the draft — what a save compares against
       once the draft has moved on under it. See saveBlogFields(). */
@@ -19894,17 +19960,98 @@
    * another, the top of the article a third, and there was no way to know
    * before publishing (Renat, 17.09.2026).
    */
-  function admBlogSeeHTML(url, alt) {
+  /* ---- and how it stands in them ------------------------------------------
+     «возможность редактировать размер или двигать фото для обложки» — Renat,
+     round 20 and again 18.09.2026, written onto a screenshot of this very
+     screen. Two words on a segmented control and a point under a thumb.
+
+     `fit` is what every cover does today: the picture whole in the frame,
+     empty field at the sides. `fill` crops it to the frame. A closed pair,
+     checked here and again on the way into the row (writeCoverFocus,
+     src/lib/blog-cover.mjs) — the discipline the four `data-fig` presets a
+     picture inside the text are held to.
+
+     The point is ONE point for all three frames. A crop rectangle would be
+     right for one shape and wrong for the other two: they are 1200×630 and
+     1:1, and no rectangle is both. */
+  var BLOG_COVER_FITS = [["fit", "Вся фотография"], ["fill", "Заполнить рамку"]];
+  /* One key each, whole sentences: translateTree() rewrites a text node only
+     when the node's whole value is a key, and on one line so a test can lift
+     them out the way it lifts every other `var X = ` table here. */
+  var BLOG_COVER_FILL_NOTE = "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.";
+  var BLOG_COVER_OG_NOTE = "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.";
+  var BLOG_COVER_OG_GUESS = "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.";
+
+  function admBlogSeeHTML(url, alt, focus) {
+    var f = blogCoverFocus(focus);
+    var fill = !!(f && f.fill);
+    /* Only a frame that actually crops is worth a thumb. In «Вся фотография»
+       the two shop frames show the whole picture and there is nothing under
+       the finger to move; the square crops whatever the page does, so it is
+       draggable always — which is the answer to the complaint underneath the
+       complaint, a face that survived the page and came back halved from
+       WhatsApp. */
+    /* Both openings written out whole rather than assembled from pieces:
+       translateTree() reads an aria-label off a finished attribute, and
+       tools/i18n-gaps.mjs can only see one in a literal that is a whole tag. */
+    var pan = function (on, inner) {
+      return (on
+        ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag tabindex="0" aria-label="Двигать фотографию">'
+        : '<span class="adm-see__f">') + inner + "</span>";
+    };
+    /* The two shop frames are drawn by the shop's own blogCoverFrameHTML()
+       under the shop's own classes, against styles.css — so this is not a
+       copy of the cropping rule, it IS the rule (see the note above). The
+       square is not: that card is drawn by sharp on the server, not by any
+       rule this page could borrow, so its frame is the panel's own and its
+       shape — 518×518 in src/lib/og-card.ts — is the one thing here that has
+       to be kept in step with that file by hand. */
     var one = function (where, title) {
       return '<span class="adm-see__one adm-see__one--' + where + '">' +
         '<span class="adm-see__t">' + title + "</span>" +
-        '<span class="adm-see__f">' + blogCoverFrameHTML(where, url, alt) + "</span></span>";
+        pan(fill, blogCoverFrameHTML(where, url, alt, f)) + "</span>";
     };
+    var square = '<span class="adm-see__one adm-see__one--og">' +
+      '<span class="adm-see__t">В соцсетях</span>' +
+      pan(true, '<span class="adm-see__og" style="background-image:url(\'' + esc(url) + "')" +
+        (f ? ";background-position:" + f.x + "% " + f.y + "%" : "") +
+        '" role="img" aria-label="' + esc(alt || "") + '"></span>') + "</span>";
     return '<div class="adm-see">' +
-      one("list", "В списке статей") + one("post", "В начале статьи") +
-      '<span class="adm-hint adm-see__note">Так обложку увидят в магазине: она вписывается в окно целиком, ' +
-        "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.</span>" +
+      one("list", "В списке статей") + one("post", "В начале статьи") + square +
+      '<span class="adm-hint adm-see__note">' +
+        (fill
+          ? BLOG_COVER_FILL_NOTE
+          : "Так обложку увидят в магазине: она вписывается в окно целиком, " +
+            "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.") +
+      "</span>" +
+      '<span class="adm-hint adm-see__note" data-covernote>' + (f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS) + "</span>" +
       "</div>";
+  }
+  /* The frames repaint themselves while a thumb is on one of them. A render()
+     here would rebuild the editor under the finger and take the pointer
+     capture with it — the picture would stop following the thumb halfway
+     through the first drag — which is the same reason paintMailPreview() and
+     blogPaintState() exist. Only the two properties that move are written;
+     the markup, and the note that goes with the mode, are render()'s. */
+  function admBlogPaintCover() {
+    var d = S.adminBlogEdit;
+    if (!d) return;
+    var f = blogCoverFocus(d.coverFocus);
+    var frames = document.querySelectorAll(".adm-see .blog__tileimg, .adm-see .blog__cover, .adm-see .adm-see__og");
+    for (var i = 0; i < frames.length; i++) {
+      var el = frames[i];
+      // the square crops whatever the page does; the shop's two only when asked
+      var crop = el.className.indexOf("adm-see__og") >= 0 || !!(f && f.fill);
+      el.style.backgroundSize = crop ? "cover" : "";
+      el.style.backgroundPosition = crop && f ? f.x + "% " + f.y + "%" : "";
+    }
+    /* …and the one line that stops being true the moment the square is
+       dragged: until then it says the shop is choosing the crop itself. */
+    var note = document.querySelector("[data-covernote]");
+    if (note) {
+      note.textContent = f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS;
+      translateTree(note);
+    }
   }
   /** The cover. With one: the two frames above — the picture as the list and
       as the top of the article will show it — its caption under them when
@@ -19927,9 +20074,15 @@
       // the shop's own fallback for a cover with no caption yet: the title
       var say = alt || String(d.title[L] || d.title.RU || d.title.ET || d.title.EN || "").trim();
       return '<div class="adm-cover" data-galdrop="blog">' +
-        admBlogSeeHTML(d.coverUrl, say) +
+        admBlogSeeHTML(d.coverUrl, say, d.coverFocus) +
         (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
         '<div class="adm-cover__acts">' +
+          /* «размер»: the two ways one photograph can stand in a frame. It
+             sits with «Заменить» and «Удалить» because it is the third thing
+             that can be done to the cover, and above the frames would put a
+             control between the owner and the picture it is about. */
+          admSegHTML("data-coverfit", BLOG_COVER_FITS,
+            (blogCoverFocus(d.coverFocus) || {}).fill ? "fill" : "fit", "Как стоит обложка") +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
             (UP.busy ? upBusyText() : "Заменить обложку") + "</button>" + file +
           '<button class="adm-link adm-link--warn" data-admblogcoverdel aria-label="Удалить обложку">Удалить</button>' +
@@ -25890,7 +26043,10 @@
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
     uploadPhoto(files[0], "blog").then(function (r) {
       UP.busy = 0; UP.total = 0;
-      if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = r.url;
+      /* A new photograph, so the point that was dragged onto the old one
+         goes with it: 62% across one picture is not 62% across another, and
+         a crop nobody chose is worse than the frames' own centring. */
+      if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = r.url; S.adminBlogEdit.coverFocus = ""; }
       render();
       toast("Картинка загружена ✓");
     }).catch(upFail);
@@ -31776,7 +31932,7 @@
       else delete DEMO.gallery[a.id];
     }
     else if (a.type === "set_product_gallery") { customSetGallery(a.id, a.list || []); }
-    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = a.url || ""; }
+    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) { S.adminBlogEdit.coverUrl = a.url || ""; S.adminBlogEdit.coverFocus = ""; } }
     else if (a.type === "set_description") {   // assistant-work
       if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
       else delete DEMO.desc[a.id];
@@ -32116,7 +32272,7 @@
       var post = r.body.post;
       var entry = demoApply({ type: "set_post_cover", slug: a.slug, url: att.url, prevUrl: post.coverUrl || "", title: post.title && (post.title.RU || post.title.ET || post.title.EN) });
       admAttFiled(a.key);
-      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = att.url;
+      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) { S.adminBlogEdit.coverUrl = att.url; S.adminBlogEdit.coverFocus = ""; }
       toast("Обложка поставлена ✓", entry);
       render();
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
@@ -34332,7 +34488,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -36575,7 +36731,18 @@
       }
       render(); return;
     }
-    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = ""; render(); return; }
+    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = ""; S.adminBlogEdit.coverFocus = ""; } render(); return; }
+    if (d.coverfit) {
+      var ced = S.adminBlogEdit;
+      if (ced) {
+        /* The point survives the switch — it is the same spot on the same
+           photograph, and the social card goes on cropping to it whichever
+           way the picture stands on the page. */
+        var cf = blogCoverFocus(ced.coverFocus);
+        ced.coverFocus = blogCoverWrite(d.coverfit === "fill", cf ? cf.x : 50, cf ? cf.y : 50);
+      }
+      render(); return;
+    }
     if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
     if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
     if (d.admblogpublishyes !== undefined) { publishBlogPost(true); return; }
@@ -37231,6 +37398,86 @@
       srvLoadReportSummary(S.reportMonth);
       render();
     }
+  });
+
+  /* ---- the cover under a thumb -------------------------------------------
+     «двигать фото для обложки». What moves is one point on the photograph,
+     stored on the post and read by every frame that draws a cover
+     (src/lib/blog-cover.mjs); the picture following the finger is that point
+     changing.
+
+     POINTER events, not touch ones: one handler then serves the finger on
+     the iPhone the panel is worked from and the mouse on the laptop it is
+     occasionally opened on, and setPointerCapture keeps the picture
+     following a finger that has slid off the small frame it started on —
+     which on a 132 px square is most of the drag. `touch-action: none` on
+     the frame (admin.css) is what stops the editor scrolling underneath
+     instead.
+
+     A drag across the whole width of a frame sweeps the point from one edge
+     of the picture to the other. So the wide article frame is fine and the
+     small square is coarse, which is the right way round: the frame you want
+     to be exact in is the one you are looking at. Dragging any of the three
+     moves all three, because it is one point — that is how the owner finds
+     out, without publishing, that the square does not keep what the page
+     keeps. */
+  var COVERDRAG = null;
+  function coverDragTo(clientX, clientY) {
+    var d = S.adminBlogEdit;
+    if (!COVERDRAG || !d) return;
+    d.coverFocus = blogCoverWrite(
+      COVERDRAG.fill,
+      COVERDRAG.x - (COVERDRAG.w ? ((clientX - COVERDRAG.px) / COVERDRAG.w) * 100 : 0),
+      COVERDRAG.y - (COVERDRAG.h ? ((clientY - COVERDRAG.py) / COVERDRAG.h) * 100 : 0),
+    );
+    admBlogPaintCover();
+  }
+  document.addEventListener("pointerdown", function (e) {
+    var z = e.target && e.target.closest ? e.target.closest("[data-coverdrag]") : null;
+    if (!z || !S.adminBlogEdit) return;
+    var r = z.getBoundingClientRect();
+    /* Nothing chosen yet and the thumb is on the square: the page keeps
+       standing the way it does («fit»), and only the card stops guessing. */
+    var f = blogCoverFocus(S.adminBlogEdit.coverFocus);
+    COVERDRAG = {
+      px: e.clientX, py: e.clientY, w: r.width, h: r.height,
+      fill: !!(f && f.fill), x: f ? f.x : 50, y: f ? f.y : 50,
+    };
+    if (z.setPointerCapture) { try { z.setPointerCapture(e.pointerId); } catch (err) { /* no capture, the document listeners still see the move */ } }
+    /* No preventDefault() here on purpose: it would keep the frame from
+       taking focus, and focus is how the arrow keys below reach it. What
+       preventDefault would have been for — a drag selecting the text around
+       the frame — is `user-select: none` in admin.css instead. */
+  });
+  document.addEventListener("pointermove", function (e) {
+    if (!COVERDRAG) return;
+    coverDragTo(e.clientX, e.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  function coverDragEnd() {
+    if (!COVERDRAG) return;
+    COVERDRAG = null;
+    /* The note under the frames and the state of the two words change with
+       the mode, not with the point, so only the «не сохранено» line has
+       anything to say after a drag. */
+    blogPaintState();
+  }
+  document.addEventListener("pointerup", coverDragEnd);
+  document.addEventListener("pointercancel", coverDragEnd);
+  /* …and without a pointer at all. Two per cent a press: a frame is about 50
+     steps across, which is enough to land on a face and few enough to get
+     there. */
+  var COVER_KEY_STEP = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] };
+  document.addEventListener("keydown", function (e) {
+    var z = e.target && e.target.closest ? e.target.closest("[data-coverdrag]") : null;
+    var step = z && COVER_KEY_STEP[e.key];
+    var d = S.adminBlogEdit;
+    if (!step || !d) return;
+    var f = blogCoverFocus(d.coverFocus);
+    d.coverFocus = blogCoverWrite(!!(f && f.fill), (f ? f.x : 50) + step[0], (f ? f.y : 50) + step[1]);
+    admBlogPaintCover();
+    blogPaintState();
+    e.preventDefault();
   });
 
   /* media: drag-and-drop onto the same zone. Desktop only in practice — a

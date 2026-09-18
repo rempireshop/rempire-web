@@ -1,0 +1,52 @@
+-- 193_blog_cover_focus.sql — which part of the cover a frame keeps (migration range 190–199)
+--
+-- «возможность редактировать размер или двигать фото для обложки» — Renat,
+-- round 20 and again 18.09.2026, written onto a screenshot of the blog
+-- editor. One cover photo is drawn in four frames of three shapes: the list
+-- tile and the top of the article (1200×630), the social card drawn when a
+-- scraper asks (a 518×518 square beside the title, src/lib/og-card.ts) and
+-- the one the build draws (a full-bleed 1200×630, tools/prerender-shop2.mjs).
+-- The two page frames fitted the picture in whole and left white bars at the
+-- sides; the two cards cropped it with sharp's `attention` strategy, which is
+-- a guess at where the detail is. Nobody could say otherwise, and a face came
+-- out halved on a card that the owner had looked at and approved on the page.
+--
+-- ONE POINT, NOT FOUR CROPS. The column holds `"<mode> <x> <y>"`: the mode is
+-- `fit` (the picture whole in the page's frame, as every cover is drawn
+-- today) or `fill` (it fills the frame and is cropped), and x/y are a
+-- percentage across and down the PHOTO — the point every frame lines up with
+-- the same point of itself, which is precisely what CSS `object-position`
+-- takes and what the two sharp crops work out in src/lib/blog-cover.mjs. A
+-- stored crop rectangle would be right for one shape and would have to be
+-- redrawn for the other two, and again for the fifth frame; a point is
+-- dragged once with a thumb and read by all of them.
+--
+-- WHY A COLUMN AND NOT ONE OF THE jsonb FIELDS ALREADY HERE. Every jsonb
+-- column on this table is a {RU, ET, EN} text object that pickLang() reads —
+-- title, excerpt, body, cover_alt, seo_title, seo_desc — and this is not text
+-- and not per-language: one photo has one focal point in all three. tags and
+-- products are text[] with a public meaning of their own. There was no
+-- free-form field to put it in without making one of them mean two things.
+--
+-- NULLABLE, NO DEFAULT, ON PURPOSE. Null is every article written before this
+-- ran and must keep meaning exactly what those articles do today: the page
+-- fits the picture whole and centres it, and the two cards go on choosing
+-- with `attention`. A default of 'fit 50 50' would look identical on the page
+-- and would silently take the cards' own guess away from 40 covers nobody has
+-- looked at — the centre of a photo is not where its subject is. Once the
+-- owner has dragged the point, the cards stop guessing and use it, which is
+-- the whole request.
+--
+-- text, not two smallints and an enum: the value is written and read as one
+-- token by six renderers, three of which are plain JavaScript with no types,
+-- and readCoverFocus() in src/lib/blog-cover.mjs is the one door. Anything it
+-- does not recognise reads back as null, which is the same as absent — so a
+-- hand-written API call cannot put a frame into a state no renderer knows.
+-- The check below is the same closed vocabulary, stated where the row is.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite (the test suite).
+
+alter table posts add column if not exists cover_focus text
+  check (cover_focus is null or cover_focus ~ '^(fit|fill) ([0-9]|[1-9][0-9]|100) ([0-9]|[1-9][0-9]|100)$');
