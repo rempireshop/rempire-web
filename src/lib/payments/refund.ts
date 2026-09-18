@@ -247,11 +247,6 @@ export function giftOwedByCard<T extends GiftPaidOnOrder>(
   return out;
 }
 
-/** The same in one number: what a refund may still put back onto cards. */
-export function giftOwedTotal<T extends GiftPaidOnOrder>(paid: readonly T[], payment: unknown): number {
-  return money(giftOwedByCard(paid, payment).reduce((sum, r) => sum + r.owed, 0));
-}
-
 /**
  * What is still refundable on an order worth `value`. Never below 0.
  *
