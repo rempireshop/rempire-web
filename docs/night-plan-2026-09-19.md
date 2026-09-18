@@ -61,20 +61,26 @@ which of the 73 deferred entries this range already closed.
 - `app.js` is CRLF; `og-card.ts` greps as binary; regenerate the prerender with
   `PUBLIC_BASE_URL` unset.
 
-## For Dim, in the morning
+## Two more decisions, answered by Dim at 22:55 on 18.09
 
-1. **The return window is written as two numbers.** 30 days in `returns.ts`, the
-   legal pages and the returns form; **14 days** on the prerendered delivery page
-   and the product accordion («14 дней на возврат по закону ЕС»), in three
-   languages. Which is the shop's actual policy? EU law gives 14 as the floor, so
-   30 is a promise the shop may be making by accident — or deliberately, and then
-   the delivery page is wrong. This is a promise to customers, so I am not
-   choosing for you.
-2. **The parcel weight.** Your decision was «one small carton, no weight
-   modelling», but the code still computes `0.4 kg × units + 0.2` and sends it on
-   every booking, so from three units on, that guess is what Montonio bills, not
-   the box. Removing it declares the box (~1.1 kg volumetric); the audit notes
-   declaring too little invites a surcharge. Remove the estimate, or keep it and
-   amend the decision?
-3. Still open from before: Google Shopping, the pending-refund letter, hidden
-   products in the low-stock counts, and Renat on the aerosols.
+**7 — The return window is 30 days everywhere.** It was written as two numbers:
+30 in `src/lib/returns.ts`, the legal pages and the returns form; **14** on the
+prerendered delivery page (`app.js:7275`, worded as the shop's own offer) and the
+product accordion (`:12272-12281`), in all three languages, plus the checkout
+trust list (`:16726`). 30 is what the code already enforces and what the legal
+text promises, so the three 14-day places are the ones that are wrong. EU law's
+14 days is a floor, not our offer. Changing them means re-running the prerender,
+and `node tools/i18n-gaps.mjs` must still print `untranslated: 0`.
+
+**8 — The per-unit weight estimate goes; the box is what is declared.**
+`src/lib/shipping/montonio.ts:948-953` computes `min(30, max(0.3, 0.4 × units +
+0.2))` and `:1172` sends it on every `POST /shipments`, so from three units on
+the guess is the chargeable weight rather than the carton (F24). Removing it
+restores the decision as written: one small carton, ~1.1 kg volumetric, one
+stable price. He accepts the edge case — a genuinely heavy order re-weighed and
+surcharged — as the small loss he already said he would take. The panel keeps its
+override, so an explicit `opts.weight` must still win.
+
+Still open from before, and none of it blocks tonight: Google Shopping, the
+pending-refund letter, hidden products in the low-stock counts, and Renat on the
+aerosols.
