@@ -10243,7 +10243,16 @@
       depends on a setting), and a list of prices needs no dictionary at all.
       Its own text node everywhere it is used, for the same reason. */
   function giftAmountsPhrase() {
-    return giftAmountsOn().map(eur).join(", ");
+    /* eur(v), not `.map(eur)`: Array.map hands its callback the INDEX as the
+       second argument, and since 17.09.2026 eur()'s second argument is the
+       language (it was added for the blog editor, which writes a card in the
+       article's language rather than the shopper's). So on the English shop
+       the first amount got `L = 0` — falsy, so S.lang, «€25» — and every one
+       after it got `L = 1`, `L = 2`, which are not "EN": «€25, 50 €, 100 €»,
+       on the home tile and in the /gift/ meta description. RU and ET were
+       unaffected, which is why it read as correct. tools/prerender-shop2.mjs
+       has the same phrase and spells the call out; this is what it says. */
+    return giftAmountsOn().map(function (v) { return eur(v); }).join(", ");
   }
   /* The tile used to name «25, 50 или 100 €» in fixed text while the buttons
      on /gift/ followed «Маркетинг → Подарочные карты» — so switching 25 off
@@ -29858,16 +29867,45 @@
       return res.json().then(function (body) { return { status: res.status, body: body || {} }; });
     });
   }
+  /**
+   * One settings write at a time — everything else goes out as it is asked for.
+   *
+   * PUT /api/admin/settings is a read-modify-write of one row per key and the
+   * panel sends one per change, each carrying the WHOLE map: switch «Скидка ко
+   * дню рождения» on, then pick «за 3 дня» a moment later, and the two PUTs
+   * both carry `flows`. Two of them in the air at once are settled by whichever
+   * COMMITS last, not by whichever was sent last. Measured 18.09.2026 against a
+   * dev server busy compiling a route: the switch's body (`birthdayDays: 0`)
+   * went out 294 ms before the select's (`birthdayDays: 3`) and landed after
+   * it, so the 3 the panel had already said «Сохранено ✓» about was gone — and
+   * nothing said so, the next read of /api/overrides/ simply answered 0.
+   *
+   * So they queue, on the URL rather than at the eleven call sites in srvPush()
+   * plus the two forms that PUT the row of their own accord: this is the one
+   * place every settings write passes through. `JSON.stringify` then runs when
+   * the turn comes rather than when the click happened, which is the right way
+   * round — the bodies that matter here hold a live reference (`DEMO.flows`,
+   * `DEMO.hero`, `DEMO.content`), so a write that waited goes out with the map
+   * as it is THEN. A write that never answers holds the queue; that is a panel
+   * that already cannot save, and the alternative is the silent loss above.
+   */
+  var settingsWrite = Promise.resolve();
   /** `idemKey`: «сделать один раз» — see idemNewKey(). Only the three routes
       that CREATE something read it; everywhere else it is simply absent. */
   function apiSend(url, method, body, idemKey) {
     var head = { "content-type": "application/json" };
     if (idemKey) head["idempotency-key"] = idemKey;
-    return apiJson(url, {
-      method: method,
-      headers: head,
-      body: JSON.stringify(body || {})
-    });
+    var go = function () {
+      return apiJson(url, {
+        method: method,
+        headers: head,
+        body: JSON.stringify(body || {})
+      });
+    };
+    if (method !== "PUT" || url !== "/api/admin/settings/") return go();
+    var queued = settingsWrite.then(go, go);
+    settingsWrite = queued.then(noop, noop);
+    return queued;
   }
 
   function adoptServer(j) {

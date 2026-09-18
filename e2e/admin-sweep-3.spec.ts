@@ -265,7 +265,11 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     // a query of nothing but spaces is no query: the chip's own list comes back
     await expect(page.locator("#orderlist .adm-hint")).toHaveCount(0);
     await q.fill("нет-такого-заказа-🙃");
-    await expect(page.locator(".adm-empty")).toHaveText("Таких заказов нет");
+    /* A search that found nothing says what it looked at (17.09.2026,
+       admOrderEmptyHTML in app.js); «Таких заказов нет» is what an empty chip
+       says, with no search behind it. */
+    await expect(page.locator(".adm-empty")).toContainText("Ничего не нашли.");
+    await expect(page.locator(".adm-empty")).toContainText("номеру заказа, имени, телефону и почте");
     await assertClean(page, w, "orders: a search that finds nothing");
     await q.fill("");
 

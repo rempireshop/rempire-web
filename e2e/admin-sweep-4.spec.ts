@@ -793,8 +793,14 @@ test.describe("admin — «Письма» can be run without waiting for the sch
       await clearToast(page);
       const run = page.locator('[data-admflowrun="birthday"]');
       await expect(run, "switching the letter on did not offer «Запустить сейчас»").toBeVisible();
-      // the count line now says who the letter can reach at all
-      await expect(page.locator('.adm-row__body[data-mailtpl="birthday"]')).toContainText("Ближайшие 7 дней:", { timeout: 15_000 });
+      /* The count line says who the letter can reach at all. It read
+         «Ближайшие 7 дней:» until 17.09.2026, when flowCounters() stopped
+         counting a fixed week and started counting the window the run itself
+         uses — «за сколько дней» in the settings, today only by default —
+         minus the letters already sent this year. The number is now the same
+         thing the other three rows show, «Ждут письма», and says so
+         (FLOW_COUNT_LABEL in app.js). */
+      await expect(page.locator('.adm-row__body[data-mailtpl="birthday"]')).toContainText("Ждут письма:", { timeout: 15_000 });
       await expect(page.locator('.adm-row__body[data-mailtpl="birthday"]')).toContainText("подписчиков с датой");
 
       await run.click();
