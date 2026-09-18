@@ -56,6 +56,8 @@ type Product = {
   sizes?: string[];
   prices?: number[];
   price?: number;
+  /** the owner's own «Наличие» — the product-level word, beside the map */
+  stock?: string;
   stockVar?: Record<string, string> | null;
 };
 
@@ -337,5 +339,78 @@ describe("the wire, and the two screens that read it", () => {
     // patchPdp() keeps the focused button on an ordinary tap; the buy row is
     // the one thing it cannot patch
     expect(slice("patchPdp")).toContain('document.querySelector(".pdp__oos--size")');
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   What the SEARCH ENGINE is told (r25).
+
+   The storefront half above stopped the shop from SELLING a size at zero. It
+   left the head alone, and the head is a second claim about the same fact:
+   setHead() rewrites #ldjson with a `Product` offer on every product render,
+   and Googlebot indexes the rendered DOM rather than the static file. Until
+   this it read `p.stock === "out"` — the owner's product-level word only —
+   so the 153 products with one volume or none said **InStock** while their
+   own page printed «нет в наличии» and offered «Сообщить о наличии» instead
+   of a buy button.
+
+   That is the one structured-data error that costs more than having none:
+   Google drops the item from the merchant surfaces, and a shopper who clicks
+   an «in stock» result onto a page that will not sell bounces.
+--------------------------------------------------------------------------- */
+describe("the offer the head publishes", () => {
+  function sold(p: Product): boolean {
+    return (
+      new Function(
+        "P",
+        `${slice("sizeStockOf")}
+         ${slice("sizeOut")}
+         ${slice("soldOut")}
+         return soldOut(P);`,
+      ) as (p: Product) => boolean
+    )(p);
+  }
+
+  it("a lone volume counted to zero is sold out — the case the page already shows", () => {
+    // the 29 one-size products (migration 194) and the 124 with no size at all
+    expect(sold({ id: "x", sizes: ["250 мл"], stockVar: { "250 мл": "out" } })).toBe(true);
+    expect(sold({ id: "x", stockVar: { "": "out" } })).toBe(true);
+  });
+
+  it("a ladder counted to zero all the way down is sold out", () => {
+    const allOut = { "75 мл": "out", "250 мл": "out", "500 мл": "out" };
+    expect(sold({ id: "x", sizes: SIZES, stockVar: allOut })).toBe(true);
+  });
+
+  it("one rung still on the shelf is NOT sold out — the product is for sale", () => {
+    expect(sold({ id: "x", sizes: SIZES, stockVar: { "75 мл": "out", "250 мл": "out", "500 мл": "in" } })).toBe(false);
+    expect(sold({ id: "x", sizes: SIZES, stockVar: { "75 мл": "out", "250 мл": "out", "500 мл": "low" } })).toBe(false);
+  });
+
+  /* The 17.09.2026 decision, restated where it is easiest to get backwards:
+     an uncounted size is not an empty one. Reading absence as «out» here would
+     publish OutOfStock for most of the catalogue — the opposite failure, and
+     the one nobody would notice until the impressions went. */
+  it("says nothing about a ladder nobody has counted", () => {
+    expect(sold({ id: "x", sizes: SIZES, stockVar: null })).toBe(false);
+    expect(sold({ id: "x", stockVar: null })).toBe(false);
+    expect(sold({ id: "x", sizes: SIZES, stockVar: { "75 мл": "out" } })).toBe(false);
+    expect(sold({ id: "x", stockVar: {} })).toBe(false);
+  });
+
+  it("the owner's own «Наличие» still decides on its own", () => {
+    expect(sold({ id: "x", stock: "out", sizes: SIZES, stockVar: null })).toBe(true);
+    expect(sold({ id: "x", stock: "low", sizes: SIZES, stockVar: null })).toBe(false);
+  });
+
+  it("setHead() publishes that answer, not p.stock, in the offer and the snippet", () => {
+    const head = slice("setHead");
+    expect(head).toContain("var pGoneSeo = soldOut(p);");
+    // the Product offer Googlebot reads off the rendered DOM
+    expect(head).toContain('availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock")');
+    // …and the sentence the result listing prints under it
+    expect(head).toContain('trText(pGoneSeo ? "нет в наличии"');
+    // the old rule must be gone from both, or one of them still lies
+    expect(head).not.toContain('(p.stock === "out" ? "OutOfStock" : "InStock")');
   });
 });
