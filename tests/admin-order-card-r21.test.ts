@@ -150,7 +150,11 @@ async function makeLabel(answer: Reply): Promise<string[]> {
   const shipErr = src.slice(src.indexOf("var SHIP_ERR = {"), src.indexOf("};", src.indexOf("var SHIP_ERR = {")) + 2);
   const run = new Function(
     "SRV", "admOrderById", "render", "apiSend", "demoApply", "toast", "loadSrvOrders", "countryName",
-    [shipErr, slice("shipCourierErr"), slice("srvCreateShipment"), "return srvCreateShipment;"].join("\n"),
+    /* srvMsg is sliced in, not stubbed: since r23-live-ready the server names
+       which refusal this is and sends the sentence, and srvCreateShipment
+       prints it ahead of SHIP_ERR. Stubbing it would test our fallback map
+       instead of what the owner actually reads. */
+    [shipErr, slice("srvMsg"), slice("shipCourierErr"), slice("srvCreateShipment"), "return srvCreateShipment;"].join("\n"),
   )(
     { shipBusy: false },
     () => ({ number: "R-100042" }),
