@@ -66,3 +66,7 @@ public/sitemap-*.xml
 public/robots.txt
 public/robots.production.txt
 public/robots.staging.txt
+
+# Dim's own working files, not the shop
+output/
+tools/generate-use-case-assignment.py
