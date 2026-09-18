@@ -39,6 +39,7 @@ import {
   baseFrom,
   blogCardIds,
   breadcrumbLD,
+  cheapestPrice,
   clip,
   crumbs,
   esc,
@@ -51,6 +52,7 @@ import {
   langNav,
   langPath,
   noindexShell,
+  overriddenPrice,
   patchShell,
   robotsFor,
   stripTags,
@@ -176,11 +178,28 @@ export function renderBlogPostPage(
      and builds its own cards from the live catalogue, so a price written in
      here would be a figure nobody reads and one more thing to keep in step.
      `bodyText` feeds the meta description, which has no business carrying a
-     price either. A body of the old shape comes back byte for byte. */
-  const bodyShown = fillBlogCardPrices(bodyHtml, (id: string) => {
-    const p = (opts.inline ?? []).find((x) => x.id === id);
-    return p ? priceLabel(p, t) : "";
-  });
+     price either. A body of the old shape comes back byte for byte.
+
+     `seg` and the name go with the price because the marker the ASSISTANT
+     writes carries neither an href nor any words — see the three shapes
+     beside fillBlogCardPrices() in seo-head.mjs. The name is this shelf's
+     own «brand + name», so a card inside the text reads exactly like the
+     card under the article. */
+  const inlineOf = (id: string) => (opts.inline ?? []).find((x) => x.id === id);
+  const bodyShown = fillBlogCardPrices(
+    bodyHtml,
+    (id: string) => {
+      const p = inlineOf(id);
+      return p ? priceLabel(p, t) : "";
+    },
+    {
+      seg,
+      nameOf: (id: string) => {
+        const p = inlineOf(id);
+        return p ? p.brand + " " + p.name : "";
+      },
+    },
+  );
   // the Google pair is per language (pickLang: this language, else Russian);
   // the excerpt, then the text, stand in only when neither was written — the
   // same ladder setHead() in app.js runs once the SPA takes the page over
@@ -301,12 +320,10 @@ function html(body: string, status: number, cacheControl: string): Response {
   return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
 }
 
-/** The lowest price of a ladder, and whether the ladder holds more than one. */
-function cheapest(prices: Array<number | null | undefined>, fallback: number): { price: number; from: boolean } {
-  const list = prices.map((p) => Number(p)).filter((p) => Number.isFinite(p) && p > 0);
-  if (!list.length) return { price: fallback, from: false };
-  return { price: Math.min(...list), from: new Set(list).size > 1 };
-}
+/** The lowest price of a ladder, and whether the ladder holds more than one.
+    In seo-head.mjs, because the build prices the same articles from the same
+    table and must reach the same number — see the note above it there. */
+const cheapest = cheapestPrice as (prices: Array<number | null | undefined>, fallback: number) => { price: number; from: boolean };
 
 /**
  * The products under an article: catalogue rows by id, the owner's own rows
@@ -369,17 +386,10 @@ async function shelfProducts(ids: string[], max = 8): Promise<ShelfProduct[]> {
     if (!m) continue;
     const o = overrides[id];
     if (o?.hidden) continue;
-    /* The file's ladder only speaks for the price where it actually spreads.
-       Since 18.09.2026 catalogue.variants.json also carries the 29 products
-       sold in ONE named size, whose single price is catalogue.min.json's own
-       `p` — taking it here would quietly out-vote the owner's «Цена» in
-       «Товары» and put the pre-override number under an article. The owner's
-       own saved ladder still decides outright: every rung of it carries the
-       price he typed (migration 147). */
-    const fileLadder = VARIANTS[id]?.prices ?? [];
-    const ladder = o?.sizes?.length ? o.sizes.map((r) => r.price) : fileLadder.length > 1 ? fileLadder : [];
-    const base = o?.price ?? m.p;
-    const { price, from } = ladder.length ? cheapest(ladder, base) : { price: base, from: false };
+    /* The owner's ladder over the file's, and the file's only where it really
+       spreads — overriddenPrice() in seo-head.mjs owns that rule, so the
+       build reaches the same number for the same article. */
+    const { price, from } = overriddenPrice(m.p, VARIANTS[id]?.prices ?? [], o);
     out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });
   }
   return out;

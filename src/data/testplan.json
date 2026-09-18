@@ -756,30 +756,38 @@
         "Открыть «Блог».",
         "Открыть одну статью.",
         "Пролистать её до конца.",
-        "Нажать на товар внутри статьи, если он там есть."
+        "Нажать на товар внутри статьи, если он там есть.",
+        "Сверить цену под статьёй («Товары из статьи») с ценой этого товара в «Товарах»."
       ],
       "expect": [
         "В списке статьи с картинками.",
         "Статья открывается и читается целиком.",
         "Картинки внутри статьи на месте.",
-        "Ссылка на товар открывает этот товар."
+        "Ссылка на товар открывает этот товар.",
+        "Цена под статьёй — та же, что в «Товарах» сейчас.",
+        "Товара, у которого выключено «Показывать в магазине», под статьёй нет."
       ],
       "why": "Статьи приводят людей из Google бесплатно; сломанная — никого.",
       "risk": "low",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-09-18T18:00:00.000Z",
       "en": {
         "title": "The blog",
         "steps": [
           "Open «Блог».",
           "Open one article.",
           "Scroll it to the end.",
-          "Tap the product inside the article, if there is one."
+          "Tap the product inside the article, if there is one.",
+          "Compare the price under the article («Товары из статьи») with that product's price in «Товары»."
         ],
         "expect": [
           "The list shows articles with pictures.",
           "The article opens and reads to the end.",
           "The pictures inside the article are there.",
-          "The product link opens that product."
+          "The product link opens that product.",
+          "The price under the article is the one «Товары» shows right now.",
+          "A product with «Показывать в магазине» off is not under the article at all."
         ],
         "why": "Articles bring people from Google for free; a broken one brings nobody."
       }
