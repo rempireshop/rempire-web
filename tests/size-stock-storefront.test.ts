@@ -330,9 +330,41 @@ describe("the wire, and the two screens that read it", () => {
   it("a lone volume at zero is the product being gone, not a volume", () => {
     const screen = slice("screenProduct");
     expect(screen).toContain("var soloGone = sizes.length < 2 && sizeOut(p, S.size);");
-    expect(screen).toContain('var prodGone = p.stock === "out" || soloGone;');
+    /* `soldOut(p)` rather than `p.stock === "out"` since 19.09.2026: the two
+       disagreed for a product whose volumes were all counted to zero while the
+       product word stayed «in», and the page then offered «выберите другой
+       объём» over an empty picker (audit F33). soldOut() already covers the
+       owner's word, so nothing this test protected has been given up. */
+    expect(screen).toContain("var prodGone = soldOut(p) || soloGone;");
     // …and the block that takes it is the one with «Сообщить о наличии»
     expect(screen).toMatch(/\(prodGone\s*\n?\s*\? '<div class="pdp__oos">/);
+  });
+
+  it("the restored basket refuses a volume counted to zero, not only a dead product", () => {
+    /* `resumeCart()` reads the «вы оставили корзину» letter's payload, days
+       after it was written. Its own comment claims «the same backstop
+       addToCart() has» — which was true when it was written and stopped being
+       true when addToCart() grew the per-size check, two branches that merged
+       without a conflict (audit F32). Until then the letter brought the sold-out
+       volume back and the checkout refused the whole order at the last tap. */
+    const resume = slice("resumeCart");
+    expect(resume).toContain('if (known.stock === "out") return;');
+    expect(resume).toContain("if (sizeOut(known, size)) return;");
+  });
+
+  it("marks a basket line whose PRODUCT went out, not only one whose size did", () => {
+    /* Same failure r23 fixed for sizes — the checkout refusing a basket with
+       nothing to say which line is the problem — left in place for the product
+       word itself (audit F34). The product is asked first: «Этого объёма сейчас
+       нет» is misleading when there is no other volume to move to. */
+    const note = slice("lineNoteHTML");
+    const product = note.indexOf("soldOut(cp)");
+    const size = note.indexOf("sizeOut(cp, l.size || 0)");
+    expect(product).toBeGreaterThan(-1);
+    expect(size).toBeGreaterThan(-1);
+    expect(product).toBeLessThan(size);
+    // an existing dictionary key, so no new sentence had to be translated
+    expect(note).toContain("Товара нет в наличии");
   });
 
   it("the in-place patch gives up and re-renders when that row has to change", () => {

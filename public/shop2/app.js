@@ -11467,6 +11467,14 @@
        basket that quietly empties itself — and the server stays the one place
        that decides what may be bought. */
     var cp = byIdOrNull(l.id);
+    /* The product word first, because it is the bigger news and because
+       «Этого объёма сейчас нет» is misleading when there is no other volume
+       to move to. The failure r23 fixed for sizes — the checkout refusing a
+       basket with nothing to say WHICH line was the problem — was still
+       there for the product itself (audit F34). */
+    if (cp && soldOut(cp)) {
+      return '<span class="cline__parts cline__gone">Товара нет в наличии</span>';
+    }
     if (cp && sizeOut(cp, l.size || 0)) {
       return '<span class="cline__parts cline__gone">' + sizeGoneText(cp) + "</span>";
     }
@@ -12254,7 +12262,15 @@
        products (migration 131) that has never had a ladder saved is exactly
        the case it cannot vouch for — knownLadder() returns null for it. */
     var soloGone = sizes.length < 2 && sizeOut(p, S.size);
-    var prodGone = p.stock === "out" || soloGone;
+    /* soldOut(), not the owner's word alone. Its own comment says it is «the
+       same three-way screenProduct() makes», and until 19.09.2026 it was not:
+       a product with several volumes, every one of them counted to zero and
+       the product word still «in», had soldOut() true and prodGone false, so
+       the page drew «Выберите другой объём» over a picker with nothing left
+       to pick while the head beside it wrote OutOfStock (audit F33). Now one
+       fact, asked once. `soloGone` stays because it answers a case soldOut()
+       deliberately does not: a single unladdered row nobody has vouched for. */
+    var prodGone = soldOut(p) || soloGone;
     var volGone = !prodGone && sizeOut(p, S.size);
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
@@ -12279,7 +12295,7 @@
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
           '<div class="num pdp__price"><span data-price>' + eur(unitPrice) + "</span>" +
             (pro != null ? ' <span class="chip chip--ok">Цена для салонов</span>' : "") +
-            (p.stock === "out" ? ' <span class="chip chip--out">нет в наличии</span>'
+            (prodGone ? ' <span class="chip chip--out">нет в наличии</span>'
               : p.stock === "low" ? ' <span class="chip chip--low">мало</span>' : "") + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
           variantPicker(p, sizes) +
@@ -15523,6 +15539,14 @@
          order (out_of_stock) at the very last tap of the checkout. */
       if (known.stock === "out") return;
       var size = Number(l.s) || 0;
+      /* …including the per-size half of it. addToCart() grew that check on
+         18.09.2026 («the one place it has to be said») and this line did not,
+         so the «вы оставили корзину» letter went on bringing back a volume
+         counted to zero — the exact case the comment above says was fixed
+         (audit F32). Two branches, merged without a conflict, each right on
+         its own. Silent here, like the line above it: this is a restore, and
+         what did not come back was never in front of the shopper to explain. */
+      if (sizeOut(known, size)) return;
       var qty = Math.max(1, Math.min(CART_MAX_QTY, Math.round(Number(l.q) || 1)));
       var line = null;
       S.cart.forEach(function (x) { if (x.id === id && x.size === size) line = x; });
