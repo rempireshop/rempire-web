@@ -22,7 +22,7 @@
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const CHAT_JS = fileURLToPath(new URL("../public/shop2/chat.js", import.meta.url));
@@ -235,9 +235,30 @@ function inFlight(questions: string[]): Promise<FlightOut> {
   return (new Function("QS", body) as (q: string[]) => Promise<FlightOut>)(questions);
 }
 
+/**
+ * inFlight() on a clock this test controls.
+ *
+ * The rig above resolves its stubbed fetch after 5 ms and reads the result at
+ * 40 ms, on the real clock. Forty milliseconds is plenty on an idle machine and
+ * not plenty on a worker running 186 files: the second turn can land after the
+ * read and `turns` comes back 1 instead of 2 — one of the two named candidates
+ * for the intermittent failure nobody could reproduce (audit F51). Nothing here
+ * is actually about elapsed time, so there is no reason to measure any.
+ */
+async function flight(questions: string[]): Promise<FlightOut> {
+  vi.useFakeTimers();
+  try {
+    const out = inFlight(questions);
+    await vi.advanceTimersByTimeAsync(100);
+    return await out;
+  } finally {
+    vi.useRealTimers();
+  }
+}
+
 describe("one question in the air at a time (askAdminAI)", () => {
   it("ignores the same question sent again while its request is still out", async () => {
-    const out = await inFlight(["сделай скидку 25 % для салонов", "сделай скидку 25 % для салонов"]);
+    const out = await flight(["сделай скидку 25 % для салонов", "сделай скидку 25 % для салонов"]);
     expect(out.sent, "a double-tapped chip raced two proposals into one confirm slot").toEqual([
       "сделай скидку 25 % для салонов",
     ]);
@@ -246,14 +267,14 @@ describe("one question in the air at a time (askAdminAI)", () => {
   });
 
   it("still lets the owner change his mind mid-flight", async () => {
-    const out = await inFlight(["сделай скидку 25 %", "нет, лучше промокод"]);
+    const out = await flight(["сделай скидку 25 %", "нет, лучше промокод"]);
     expect(out.sent).toEqual(["сделай скидку 25 %", "нет, лучше промокод"]);
   });
 
   it("and asks again once the answer has landed", async () => {
-    const first = await inFlight(["сколько продали за неделю?"]);
+    const first = await flight(["сколько продали за неделю?"]);
     expect(first.sent).toHaveLength(1);
-    const again = await inFlight(["сколько продали за неделю?", "сколько продали за неделю?"]);
+    const again = await flight(["сколько продали за неделю?", "сколько продали за неделю?"]);
     expect(again.sent).toHaveLength(1);
   });
 });

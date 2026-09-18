@@ -318,3 +318,81 @@ describe("PUT /api/admin/settings when the read-back fails", () => {
     expect((await res.json()).settings.chatbot).toBe(false);
   });
 });
+
+/* ------------------------------------------------------------------------ *
+ * The settings write queue, and the one thing that could jam it
+ * ------------------------------------------------------------------------ */
+
+describe("apiSend — one settings write at a time, and never for ever", () => {
+  /** apiSend() over a controllable apiJson, on a clock this test drives. */
+  function rig() {
+    const body = `
+      var noop = function () {};
+      var settingsWrite = Promise.resolve();
+      var SETTINGS_WRITE_MS = 30000;
+      var calls = [];
+      function apiJson(url, opts) {
+        return new Promise(function (ok, fail) {
+          var call = { url: url, opts: opts, ok: ok, fail: fail, aborted: false };
+          if (opts && opts.signal) opts.signal.addEventListener("abort", function () {
+            call.aborted = true;
+            fail(new Error("aborted"));
+          });
+          calls.push(call);
+        });
+      }
+      ${slice("apiSend")}
+      return { apiSend: apiSend, calls: calls };
+    `;
+    return new Function(body)() as {
+      apiSend: (url: string, method: string, body?: unknown) => Promise<unknown>;
+      calls: Array<{ url: string; aborted: boolean; ok: (v: unknown) => void }>;
+    };
+  }
+
+  const SETTINGS = "/api/admin/settings/";
+
+  it("holds the second write until the first answers", async () => {
+    const { apiSend, calls } = rig();
+    const first = apiSend(SETTINGS, "PUT", { a: 1 });
+    apiSend(SETTINGS, "PUT", { b: 2 });
+    await Promise.resolve();
+    expect(calls).toHaveLength(1);
+
+    calls[0].ok({ status: 200, body: {} });
+    await first;
+    await Promise.resolve();
+    expect(calls).toHaveLength(2);
+  });
+
+  it("lets a write that never answers go, instead of jamming every later one", async () => {
+    /* The queue frees itself on a REJECTED write, which covers a refusal and a
+       dead connection — but not a request that simply never answers, and the
+       browser gives one of those minutes. Until then every later settings write
+       waited behind it while the panel had already said «Сохранено ✓» for each
+       of them (audit F41). */
+    vi.useFakeTimers();
+    try {
+      const { apiSend, calls } = rig();
+      const first = apiSend(SETTINGS, "PUT", { a: 1 });
+      first.catch(() => {});
+      apiSend(SETTINGS, "PUT", { b: 2 }).catch(() => {});
+      await Promise.resolve();
+      expect(calls).toHaveLength(1);
+
+      await vi.advanceTimersByTimeAsync(31_000);
+      expect(calls[0].aborted, "the stalled write was never abandoned").toBe(true);
+      expect(calls, "the second write is still stuck behind it").toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("leaves every other route alone — only this one is queued", async () => {
+    const { apiSend, calls } = rig();
+    apiSend("/api/admin/orders/1/", "PATCH", {});
+    apiSend("/api/admin/orders/2/", "PATCH", {});
+    await Promise.resolve();
+    expect(calls).toHaveLength(2);
+  });
+});

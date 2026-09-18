@@ -31097,6 +31097,8 @@
    * that already cannot save, and the alternative is the silent loss above.
    */
   var settingsWrite = Promise.resolve();
+  /** How long one settings write may hold the queue. See apiSend(). */
+  var SETTINGS_WRITE_MS = 30000;
   /** `idemKey`: «сделать один раз» — see idemNewKey(). Only the three routes
       that CREATE something read it; everywhere else it is simply absent. */
   function apiSend(url, method, body, idemKey) {
@@ -31110,7 +31112,27 @@
       });
     };
     if (method !== "PUT" || url !== "/api/admin/settings/") return go();
-    var queued = settingsWrite.then(go, go);
+    /* …and never for longer than this. The queue frees itself on a REJECTED
+       write, which covers a refusal and a dead connection — but not a request
+       that simply never answers, and the browser gives one of those minutes
+       before it gives up. Until then every later settings write waited behind
+       it while the panel had already said «Сохранено ✓» for each of them
+       (audit F41). Thirty seconds is far longer than this route has ever
+       taken and far shorter than a phone left on a train: the write is
+       abandoned, the queue moves on, and the caller sees a rejection it
+       already knows how to show. */
+    var timed = function () {
+      var ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctl) ctl.abort(); }, SETTINGS_WRITE_MS);
+      return apiJson(url, {
+        method: method,
+        headers: head,
+        body: JSON.stringify(body || {}),
+        signal: ctl ? ctl.signal : undefined
+      }).then(function (r) { clearTimeout(timer); return r; },
+        function (e) { clearTimeout(timer); throw e; });
+    };
+    var queued = settingsWrite.then(timed, timed);
     settingsWrite = queued.then(noop, noop);
     return queued;
   }
