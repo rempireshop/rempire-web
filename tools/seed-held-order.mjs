@@ -104,6 +104,13 @@ async function main() {
       amount: paid,
       currency,
       at,
+      /* The order card draws TWO lines for a short payment and they come from
+         two different keys: `amountMismatch` is «Пришло X вместо Y — проверьте
+         в Montonio», written whenever the figures differ at all, and `held` is
+         «заказ придержан: товар не списан…». applyPaymentResult() writes both
+         on the way in, so a fixture with only one of them would have the owner
+         testing a screen the shop never shows. */
+      amountMismatch: { expected: total, got: paid },
       held: {
         reason: "underpaid",
         expected: total,
