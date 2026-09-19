@@ -1485,6 +1485,11 @@
       "Карта не загрузилась — список пакоматов работает как обычно":
         "Kaart ei laadinud — pakiautomaatide nimekiri töötab tavapäraselt",
       "На карте пока нет точек этого перевозчика — выберите пакомат из списка.": "Sellel vedajal pole kaardil veel punkte — valige pakiautomaat nimekirjast.",
+      // 19.09.2026: the lockers of every country DPD serves — lists too long to download
+      "Пакоматов в этой стране слишком много для одного списка — введите город или улицу.":
+        "Selles riigis on pakiautomaate ühe nimekirja jaoks liiga palju — sisestage linn või tänav.",
+      "Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.":
+        "Selle riigi pakiautomaat valitakse tellimuse vormistamisel — neid on nimekirja jaoks liiga palju.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
@@ -4323,6 +4328,11 @@
       "Карта не загрузилась — список пакоматов работает как обычно":
         "The map failed to load — the pickup-point list still works as usual",
       "На карте пока нет точек этого перевозчика — выберите пакомат из списка.": "No map pins for this carrier yet — pick a locker from the list.",
+      // 19.09.2026: the lockers of every country DPD serves — lists too long to download
+      "Пакоматов в этой стране слишком много для одного списка — введите город или улицу.":
+        "This country has too many pickup points for one list — type a city or a street.",
+      "Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.":
+        "For this country the pickup point is chosen at checkout — there are too many for a list.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
@@ -6898,6 +6908,12 @@
   }
   /** The country the order is placed to: the real one behind «Другая страна Европы». */
   function orderCountry() { return S.country === "EU" ? (S.countryIso || "EU") : S.country; }
+  /** The zone a real country falls into — the mirror of shippingZone() in
+      src/lib/shipping.ts, and the second step of every price lookup. */
+  function shipZoneOf(cc) {
+    for (var i = 0; i < COUNTRIES.length; i++) if (COUNTRIES[i][0] === cc) return cc;
+    return EUROPE_ISO.indexOf(cc) >= 0 ? "EU" : "default";
+  }
 
   /* ---------- checkout delivery: rules, carriers, parcel points ------------
      The SHIP table above still prices the account screen and the admin's
@@ -7593,7 +7609,7 @@
   function isDigital() { return giftOnlyCart(); }
   function shipMethod() {
     if (giftOnlyCart()) return "digital";
-    var avail = deliveryFor(S.country);
+    var avail = deliveryFor(orderCountry());
     for (var i = 0; i < avail.length; i++) if (avail[i].k === S.ship.method) return S.ship.method;
     return avail.length ? avail[0].k : "courier";
   }
@@ -7607,14 +7623,22 @@
    * tests/shipping-admin-mirror.test.ts fails if the two lists disagree.
    */
   function pickupOpen(country) {
-    var cc = country || S.country;
+    /* orderCountry() and not S.country: S.country is the ZONE — one of five,
+       «EU» standing for a continent — and every carrier list is keyed by the
+       real country. Ренат opened every country DPD serves on 18.09.2026 and
+       nothing changed on the storefront, because a shopper in Italy is
+       S.country = "EU", CARRIERS_BY_COUNTRY.EU is empty, and so eighteen
+       countries were offered the courier alone (Dim, 19.09.2026). The server
+       has allowed those lockers all along — pickupOffered() in
+       src/lib/shipping.ts asks about the real country, as this does now. */
+    var cc = country || orderCountry();
     if (!(CARRIERS_BY_COUNTRY[cc] || []).length) return false;
     var off = SHIP_RULES.pickupOff;
     return !(off && off.indexOf(cc) >= 0);
   }
   /** Carriers worth offering: the country's list, minus any that came back empty. */
   function carriersFor(country) {
-    var cc = country || S.country;
+    var cc = country || orderCountry();
     if (!pickupOpen(cc)) return [];
     return (CARRIERS_BY_COUNTRY[cc] || []).filter(function (c) {
       return !POINTS.empty[c + ":" + cc];
@@ -7651,8 +7675,14 @@
      to. That substitution is now made only where there is no shop behind this
      page at all (loadPointsFor: a 404/405/501, the static prototype); anything
      else marks the feed in `err` and says so. */
-  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
-  function pointsKey() { return shipCarrier() + ":" + S.country; }
+  /* `big` holds how many points a country really has when the answer could
+     not carry them all, `found`/`finding` the server's answers to what the
+     shopper types there. Finland's 1 768 SmartPost points were the longest
+     list the checkout could ever reach until 19.09.2026; Poland's DPD is
+     33 603, Italy's 12 048. Those are not lists to download onto a phone, so
+     the route caps its answer and the typing goes to the server instead. */
+  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {} };  // view: "list" | "map" (UX fix 8)
+  function pointsKey() { return shipCarrier() + ":" + orderCountry(); }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
   /* ---------- what a point actually is ----------
      Montonio's pickup-point rows have always carried a kind of their own —
@@ -7706,16 +7736,18 @@
     // and the chips they belong to are drawn from the same block.
     loadCarrierLogos();
     // a country the owner switched off is not one to download 12 000 points for
-    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [];
-    for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
+    var cc = orderCountry();
+    var all = pickupOpen(cc) ? (CARRIERS_BY_COUNTRY[cc] || []) : [];
+    for (var i = 0; i < all.length; i++) loadPointsFor(all[i], cc);
   }
   /* How many carrier feeds for the selected country are still in flight —
      stamped on [data-co-delivery] as data-points-loading so the e2e sweeps
      (and anyone debugging) can tell "the block will be rewritten again in a
      moment" from "this is the final delivery list". */
   function pointsLoadingCount() {
-    var all = pickupOpen(S.country) ? (CARRIERS_BY_COUNTRY[S.country] || []) : [], n = 0;
-    for (var i = 0; i < all.length; i++) if (POINTS.loading[all[i] + ":" + S.country]) n++;
+    var cc = orderCountry();
+    var all = pickupOpen(cc) ? (CARRIERS_BY_COUNTRY[cc] || []) : [], n = 0;
+    for (var i = 0; i < all.length; i++) if (POINTS.loading[all[i] + ":" + cc]) n++;
     return n;
   }
   function stampPointsLoading() {
@@ -7727,14 +7759,17 @@
      holds, which need not be the one this session's checkout is going to. */
   function loadPointsFor(carrier, country) {
     if (!carrier) return;
-    var cc = country || S.country;
+    var cc = country || orderCountry();
     var key = carrier + ":" + cc;
     if (POINTS.by[key] || POINTS.loading[key] || POINTS.err[key]) return;
     POINTS.loading[key] = true;
     stampPointsLoading();
-    var done = function (list) {
+    var done = function (list, more) {
       POINTS.loading[key] = false;
       POINTS.by[key] = list;
+      /* …and how many there are in total when this is only the first slice of
+         a country (0 when it is the whole of it). */
+      POINTS.big[key] = more || 0;
       // nothing to pick from — drop the chip, whichever source said so
       if (!list.length) POINTS.empty[key] = true;
       pointsArrived();
@@ -7763,7 +7798,7 @@
         if (r.status === 404 || r.status === 405 || r.status === 501) { done(demoPoints(carrier, cc)); return; }
         if (!r.ok) { failed(); return; }
         return r.json().then(function (j) {
-          if (j && j.ok && j.points) { apiSeen(true); done(j.points); }
+          if (j && j.ok && j.points) { apiSeen(true); done(j.points, j.truncated ? j.total : 0); }
           else failed();
         }, failed);
       })
@@ -7804,7 +7839,39 @@
       cap AFTER filtering to the current bounds, which a pre-capped 80 would
       have silently defeated — panning to a city outside the first 80 would
       always have shown nothing. */
+  /**
+   * The server's answer to what the shopper typed, for a country whose list
+   * does not fit in one download.
+   *
+   * Filtering the first 1 500 of Poland's 33 603 machines would never find
+   * Kraków, and the shopper would be told there is no machine there. So the
+   * words go where the whole list is. null while nothing has come back —
+   * pointsMatching() then filters what it holds, which is the right answer for
+   * every country that arrived whole.
+   */
+  function pointsSearch() {
+    var key = pointsKey(), q = POINTS.q.trim().toLowerCase();
+    if (!POINTS.big[key] || q.length < 2) return null;
+    var fk = key + "|" + q;
+    if (POINTS.found[fk]) return POINTS.found[fk];
+    if (!POINTS.finding[fk]) {
+      POINTS.finding[fk] = true;
+      var at = key.indexOf(":");
+      var carrier = key.slice(0, at), cc = key.slice(at + 1);
+      fetch("/api/shipping/points/?country=" + encodeURIComponent(cc) + "&carrier=" + encodeURIComponent(carrier) +
+        "&q=" + encodeURIComponent(q) + "&limit=200")
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          POINTS.finding[fk] = false;
+          if (j && j.ok && j.points) { POINTS.found[fk] = j.points; repaintPicker("[data-pointq]"); }
+        })
+        .catch(function () { POINTS.finding[fk] = false; });
+    }
+    return null;
+  }
   function pointsMatching() {
+    var found = pointsSearch();
+    if (found) return found;
     var all = pointsList() || [];
     var q = POINTS.q.trim().toLowerCase();
     if (!q) return all;
@@ -8885,7 +8952,7 @@
      whether or not the cart that happens to be open has earned free delivery.
      The account screen's «Доставка по умолчанию» is a standing preference,
      not a quote for today's basket, so that is the one that prices it. */
-  function shipRulePrice(m, carrier) {
+  function shipRulePrice(m, carrier, country) {
     if (m === "digital" || m === "pickup") return 0;
     /* The REAL country first, then the zone, then the method's default —
        exactly the three steps quoteFromRules() takes in src/lib/shipping.ts,
@@ -8898,7 +8965,14 @@
        A carrier cell is a parcel-machine price and nothing writes a courier
        one, so it is only consulted for a parcel — same guard, same reason, as
        on the server. */
-    var iso = orderCountry(), zone = S.country;
+    /* `country` names the country the caller is pricing FOR; without it the
+       checkout's own is priced, as it always was. The account needs the
+       argument: its «Доставка по умолчанию» holds a country of its own and
+       S.country belongs to the checkout in progress, so a Latvian preference
+       was labelled with Latvian rows and priced with Estonian numbers — one
+       price in the account, another at the till (Dim, 19.09.2026). */
+    var iso = country || orderCountry();
+    var zone = country ? shipZoneOf(country) : S.country;
     var byCarrier = m === "parcel" && SHIP_RULES.carriers ? SHIP_RULES.carriers[carrier] : null;
     var v = byCarrier
       ? (byCarrier[iso] !== undefined ? byCarrier[iso]
@@ -8935,7 +9009,7 @@
      see it again at the till. */
   function acctShipPrice(x) {
     if (x.pickup) return 0;
-    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "");
+    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "", acctShipCountry());
   }
 
   /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
@@ -8991,6 +9065,14 @@
        checkout's own list does. */
     return live ? live.map(function (pt) { return { name: pt.name, kind: pointKind(pt) }; }) : null;
   }
+  /** True when the draft's country has more machines than one list can carry —
+      Poland's DPD is 33 603 of them. The block then names no machine at all;
+      the checkout's search is where one is picked. */
+  function acctMachinesTooMany() {
+    var x = methods()[acctIdx()];
+    if (!x || !x.pm) return false;
+    return !!POINTS.big[x.pm + ":" + acctShipCountry()];
+  }
   /** The machine the block's select is on: the draft's, while the list still
       has it — else nothing, and the placeholder asks for one. A name and not
       an index, because the list is the carrier's live one: it changes under
@@ -9017,7 +9099,17 @@
     var p = S.cust && S.cust.shipPref;
     if (!p) return;
     var known = { pickup: 1, parcel: 1, courier: 1 };
-    if (p.country && CARRIERS_BY_COUNTRY[p.country]) S.country = p.country;
+    /* The preference holds a REAL country — «IT», not the zone it falls in —
+       so it is split back into the checkout's two selects. Writing it whole
+       into S.country left the first select matching none of its five options,
+       which the browser draws as «Эстония». */
+    if (p.country && CARRIERS_BY_COUNTRY[p.country]) {
+      var zone = shipZoneOf(p.country);
+      if (zone !== "default") {
+        S.country = zone;
+        if (zone === "EU") S.countryIso = p.country === "EU" ? "" : p.country;
+      }
+    }
     if (p.method && known[p.method]) S.ship.method = p.method;
     S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
     /* Nothing picked by hand here (the guard above), so a point in S.ship
@@ -14920,9 +15012,22 @@
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
-      '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-acctcountry>' +
-        COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (acctShipCountry() === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
-      "</select></span></label>" +
+      /* Two selects, exactly as the checkout has them. The block used to have
+         only the first, so «Другая страна Европы» was as far as a customer
+         could get: the preference could never hold Italy, the rows were the
+         empty EU list — courier and nothing else — and the price beside them
+         was another country's (Dim, 19.09.2026). */
+      (function () {
+        var cc = acctShipCountry(), zone = shipZoneOf(cc);
+        if (zone === "default") zone = "EU";
+        return '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-acctcountry>' +
+          COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (zone === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
+        "</select></span></label>" +
+        (zone === "EU"
+          ? '<label class="field"><span class="field__label">Какая страна</span><span class="sel sel--box"><select data-acctcountryiso aria-label="Страна доставки">' +
+            europeOptionsHTML(EUROPE_ISO.indexOf(cc) >= 0 ? cc : "") + "</select></span></label>"
+          : "");
+      })() +
       '<div class="optlist">' + m.map(function (x, i) {
         var xp = acctShipPrice(x);
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
@@ -14937,6 +15042,13 @@
         // find again by name — acctMachines(); null while it is in flight
         var mach = acctMachines();
         if (mach && !mach.length) return "";
+        /* …and a country whose machines do not fit in one list gets no select
+           at all: 33 603 <option> elements is not a choice on a phone. The
+           country and the carrier are remembered, the machine is picked at
+           the checkout, where the search asks the server. */
+        if (acctMachinesTooMany()) {
+          return '<p class="hint" style="margin:8px 0 0">Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.</p>';
+        }
         var sel = acctMachineName();
         /* The label widens the same way the checkout's does, and for the same
            reason: this carrier's list may hold counters as well as machines. */
@@ -15362,7 +15474,11 @@
   function acctShipChanged() {
     var d = S.acctForm.ship;
     if (!d) return;
-    if (d.method === "parcel" && !d.machine) { acctSt("ship", "need"); return; }
+    /* A country whose machines do not fit in one list has no select here to
+       wait for — the checkout's own search picks the machine there. The
+       country and the carrier are still worth remembering, so the row saves
+       without one instead of sitting on «Выберите пакомат» for ever. */
+    if (d.method === "parcel" && !d.machine && !acctMachinesTooMany()) { acctSt("ship", "need"); return; }
     acctQueue("ship");
   }
   /* «Хочу получать новости и скидки» at the checkout starts from the
@@ -15738,7 +15854,7 @@
      (469 Omniva points in Estonia alone), so it lives behind a search rather
      than in a <select> nobody can scroll on a phone. */
   function deliveryPicker() {
-    var avail = deliveryFor(S.country), cur = shipMethod(), chips = carriersFor();
+    var avail = deliveryFor(orderCountry()), cur = shipMethod(), chips = carriersFor();
     return '<div class="optlist">' + avail.map(function (d) {
         var p = shipPriceFor(d.k, d.k === "parcel" ? shipCarrier() : "");
         return '<label class="opt"><input type="radio" name="ship"' + (d.k === cur ? " checked" : "") +
@@ -15858,7 +15974,13 @@
         '<div class="psheet__search"><input class="input input--box" data-pointq value="' + esc(POINTS.q) +
           '" placeholder="Город, улица или название" aria-label="Поиск пакомата" autocomplete="off">' +
           '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>" +
-          (pointsList() ? '<div class="psheet__n muted">' + points(pointsList().length) + "</div>" : "") + "</div>" +
+          /* The count is the country's, not the download's: «1500 пакоматов»
+             under a search box that has all 33 603 behind it would be a lie
+             the shopper can catch. */
+          (pointsList() ? '<div class="psheet__n muted">' + points(POINTS.big[pointsKey()] || pointsList().length) + "</div>" : "") + "</div>" +
+          (POINTS.big[pointsKey()] && POINTS.q.trim().length < 2
+            ? '<p class="psheet__maphint muted">Пакоматов в этой стране слишком много для одного списка — введите город или улицу.</p>'
+            : "") +
         (mapOn
           ? '<div class="psheet__map" id="pointmap"></div>' +
             (ungeo ? '<p class="psheet__maphint muted">Часть пакоматов видна только в списке — у них нет координат для карты.</p>' : "")
@@ -38724,7 +38846,17 @@
 
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.matches("[data-countryiso]")) { S.countryIso = t.value; render(); }
+    /* The country behind «Другая страна Европы» is a country like any other:
+       since the carrier lists are keyed by the real one, picking Italy has to
+       drop the carrier and fetch its machines exactly as picking Latvia does.
+       It used to only re-render, which is why the second select could never
+       produce a locker. */
+    if (t.matches("[data-countryiso]")) {
+      S.countryIso = t.value;
+      S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
+      if (isParcel()) loadPoints();
+      render();
+    }
     else if (t.matches("[data-country]")) {
       S.country = t.value;
       // another country is another carrier and another set of machines
@@ -38746,6 +38878,12 @@
     else if (t.matches("[data-acctcountry]")) {
       var acctCc = CARRIERS_BY_COUNTRY[t.value] ? t.value : "EE";
       S.acctForm.ship = acctShipFromRow(acctCc, acctMethods(acctCc)[0]); render(); acctShipChanged();
+    }
+    /* …and the country behind «Другая страна Европы», which is the one the
+       rows and the price are actually drawn for. */
+    else if (t.matches("[data-acctcountryiso]")) {
+      var acctIso = CARRIERS_BY_COUNTRY[t.value] ? t.value : "EU";
+      S.acctForm.ship = acctShipFromRow(acctIso, acctMethods(acctIso)[0]); render(); acctShipChanged();
     }
     /* returns: the tick on a delivered order goes to the server the moment it
        is ticked. `change` and not the click delegate: the box is inside its

@@ -1474,6 +1474,82 @@ describe("GET /api/shipping/points", () => {
     expect(bad.status).toBe(400);
   });
 
+  /* 19.09.2026: the lockers of every country DPD serves were opened, and the
+     lists stopped being anything a phone should download — Poland is 33 603
+     rows. The answer is capped and the shopper's typing narrows it HERE,
+     because filtering the first 1 500 of Poland on the browser's side would
+     never find Kraków. */
+  describe("a country too long for one answer", () => {
+    /** `n` DPD machines in a country, every fifth of them in Kraków. */
+    function crowd(n: number) {
+      withKeys();
+      stubFetch([
+        [
+          /pickup-points/,
+          () =>
+            json({
+              countryCode: "PL",
+              pickupPoints: Array.from({ length: n }, (_, i) => ({
+                id: `1111aaaa-0000-0000-0000-${String(i).padStart(12, "0")}`,
+                name: `DPD Punkt ${i}`,
+                type: "parcelShop",
+                streetAddress: `Ulica ${i}`,
+                locality: i % 5 === 0 ? "Kraków" : "Warszawa",
+                postalCode: "30-001",
+                carrierCode: "dpd",
+              })),
+            }),
+        ],
+      ]);
+    }
+
+    it("caps the list and says how many there really are", async () => {
+      crowd(2000);
+      const { GET } = await import("@/app/api/shipping/points/route");
+      const body = await (await GET(req("/api/shipping/points/?country=PL&carrier=dpd"))).json();
+      expect(body.points).toHaveLength(1500);
+      expect(body.count).toBe(1500);
+      expect(body.total).toBe(2000);
+      expect(body.truncated).toBe(true);
+    });
+
+    it("finds the town that was past the cap", async () => {
+      crowd(2000);
+      const { GET } = await import("@/app/api/shipping/points/route");
+      const body = await (await GET(req("/api/shipping/points/?country=PL&carrier=dpd&q=krak%C3%B3w&limit=200"))).json();
+      expect(body.q).toBe("kraków");
+      expect(body.total).toBe(400);
+      expect(body.points).toHaveLength(200);
+      expect(body.points.every((p: { city: string }) => p.city === "Kraków")).toBe(true);
+    });
+
+    it("leaves a country that fits exactly as it was", async () => {
+      crowd(12);
+      const { GET } = await import("@/app/api/shipping/points/route");
+      const body = await (await GET(req("/api/shipping/points/?country=PL&carrier=dpd"))).json();
+      expect(body.truncated).toBe(false);
+      expect(body.count).toBe(12);
+      expect(body.total).toBe(12);
+      expect(body.q).toBeUndefined();
+    });
+
+    it("ignores one letter, which narrows nothing and only splits the cache", async () => {
+      crowd(12);
+      const { GET } = await import("@/app/api/shipping/points/route");
+      const body = await (await GET(req("/api/shipping/points/?country=PL&carrier=dpd&q=k"))).json();
+      expect(body.count).toBe(12);
+      expect(body.q).toBeUndefined();
+    });
+
+    it("will not be talked into an unbounded answer", async () => {
+      crowd(4000);
+      const { GET } = await import("@/app/api/shipping/points/route");
+      const body = await (await GET(req("/api/shipping/points/?country=PL&carrier=dpd&limit=999999"))).json();
+      expect(body.points).toHaveLength(3000);
+      expect(body.truncated).toBe(true);
+    });
+  });
+
   it("keeps working exactly as before with no Montonio keys", async () => {
     vi.stubGlobal(
       "fetch",

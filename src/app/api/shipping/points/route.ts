@@ -43,6 +43,36 @@ const RATE_WINDOW_MS = 60_000;
 const COUNTRY_RE = /^[A-Z]{2}$/;
 const CARRIER_RE = /^[a-z][a-z0-9_-]{1,20}$/;
 
+/**
+ * How many rows one answer may carry, and why there is a ceiling at all.
+ *
+ * Until 19.09.2026 the checkout could only ask about four countries, and the
+ * longest list in them is Finland's 1 768 SmartPost points. Then the lockers
+ * of every country DPD serves were opened, and the lists stop being anything
+ * a phone should download: Poland is 33 603 rows, Germany 10 106, Italy
+ * 12 048 — several megabytes of JSON to choose one machine from.
+ *
+ * So the answer is capped, and the shopper's own typing does the narrowing on
+ * this side instead: `?q=` filters by name, address, city and postcode before
+ * the cap applies, over a list this instance already holds for six hours
+ * (fetchMontonioPickupPoints caches it). `truncated` tells the storefront that
+ * what it holds is not the whole country, so it can ask again as the shopper
+ * types rather than pretend its own filter sees everything.
+ */
+const DEFAULT_LIMIT = 1500;
+const MAX_LIMIT = 3000;
+const MIN_QUERY = 2;
+
+/** Every word typed has to appear somewhere in the row — the same rule the
+    storefront's own typeahead uses (pointsMatching() in app.js). */
+function matcher(q: string): (p: MontonioPoint) => boolean {
+  const words = q.split(/\s+/).filter(Boolean);
+  return (p) => {
+    const hay = `${p.name ?? ""} ${p.address ?? ""} ${p.city ?? ""} ${p.zip ?? ""}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  };
+}
+
 /** The wire shape stays small — this list can be 3000 rows long. */
 function slim(p: MontonioPoint) {
   return {
@@ -66,6 +96,9 @@ export async function GET(req: Request) {
   const params = new URL(req.url).searchParams;
   const country = (params.get("country") ?? "EE").trim().toUpperCase();
   const carrierParam = (params.get("carrier") ?? "omniva").trim().toLowerCase();
+  const q = (params.get("q") ?? "").trim().toLowerCase().slice(0, 60);
+  const askedLimit = Number(params.get("limit"));
+  const limit = Number.isFinite(askedLimit) && askedLimit > 0 ? Math.min(MAX_LIMIT, Math.floor(askedLimit)) : DEFAULT_LIMIT;
 
   if (!COUNTRY_RE.test(country)) {
     return NextResponse.json({ ok: false, error: "bad_country" }, { status: 400 });
@@ -135,6 +168,11 @@ export async function GET(req: Request) {
    */
   const answered = montonio !== null || sources.length > 0;
 
+  /* A query shorter than two letters narrows nothing and would only make the
+     edge cache hold a second copy of the same list, so it is ignored. */
+  const matched = q.length >= MIN_QUERY ? points.filter(matcher(q)) : points;
+  const shown = matched.slice(0, limit);
+
   return NextResponse.json(
     {
       ok: true,
@@ -142,8 +180,14 @@ export async function GET(req: Request) {
       carrier: carrierParam,
       source,
       seedAt: sources.includes("seed") ? seedGeneratedAt() : undefined,
-      count: points.length,
-      points: points.map(slim),
+      /** How many rows are in `points` — unchanged, and still `points.length`. */
+      count: shown.length,
+      /** How many matched before the cap: what «показаны первые N из M» says. */
+      total: matched.length,
+      /** There is more of this country than the answer carries: ask again with `q`. */
+      truncated: matched.length > shown.length,
+      q: q.length >= MIN_QUERY ? q : undefined,
+      points: shown.map(slim),
     },
     {
       headers: {
