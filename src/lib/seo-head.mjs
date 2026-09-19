@@ -534,6 +534,15 @@ export const PRE_CSS = `
    page, and the second of them arrived as a jump. The rule the shop means
    wins here too now, which is also the rule the panel previews. */
 #prerender .blog__cover { aspect-ratio: 1200 / 630; }
+/* …and neither is a cover in the LIST. That half was missed: the tile's
+   <img> carries only .pre__img, so every cover on /shop2/{,et/,en/}blog/
+   was framed 1:1 and the inline object-position cropped the picture into a
+   square — a different crop from the one the owner dragged, and from the one
+   the panel previews under «В списке статей». Then app.js removed #prerender
+   and repainted the tile wide: the same jump as above, on the page that has
+   twelve of them. Dim, 19.09.2026: «The image in the list … is not updated».
+   The anchor already carries .blog__tile in both static renderers. */
+#prerender .blog__tile .pre__img { aspect-ratio: 1200 / 630; }
 #prerender .pre__crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
 #prerender .pre__crumbs a:hover { text-decoration: underline; }
 #prerender .pre__brand { font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }

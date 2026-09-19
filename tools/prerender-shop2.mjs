@@ -1561,7 +1561,11 @@ function blogTile(post, seg, code, t, i) {
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
     (post.coverUrl
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="400" height="400"' + coverStyle(post.coverFocus) + ">"
+      /* 1200×630, like the cover on the article itself: the attributes are
+         what reserves the box before the stylesheet arrives, and a square
+         one there reserved the wrong shape on the very page that shows a
+         dozen of them. */
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +

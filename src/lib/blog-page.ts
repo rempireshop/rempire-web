@@ -126,7 +126,9 @@ function tile(post: PostSummary, seg: string, code: string): string {
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
     (post.coverUrl
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="400" height="400"' + coverStyle(post.coverFocus) + ">"
+      /* 1200×630 — the shape the tile is actually drawn in, here and in the
+         prerendered twin (tools/prerender-shop2.mjs blogTile). */
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
