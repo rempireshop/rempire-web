@@ -3208,20 +3208,22 @@
         "Посмотреть «Склад»: товар из этого заказа должен быть на месте.",
         "Проверить, что подарочные карты по этому заказу не выпущены и письмо покупателю не ушло.",
         "Найти платёж в Montonio по номеру из карточки заказа.",
-        "Если всё в порядке — нажать «Оплачен»."
+        "Если всё в порядке — нажать «Оплачен».",
+        "Найти заказ в «Заказах», не открывая его: по значку и по чипу «Придержаны»."
       ],
       "expect": [
         "Заказ не был оплачен сам: ничего не списалось, карты не выпущены, письмо не ушло.",
         "Предупреждение называет обе суммы: сколько пришло и сколько стоит заказ.",
         "После «Оплачен» предупреждение исчезло, товар списался, письмо ушло.",
         "Кнопка «Вернуть деньги» работает — номер платежа Montonio не потерялся.",
-        "Покупатель увидел «Платёж обрабатывается», а не «Заказ оплачен»."
+        "Покупатель увидел «Платёж обрабатывается», а не «Заказ оплачен».",
+        "В списке значок «Заплатили меньше», а не «Ждёт оплаты»."
       ],
       "why": "Montonio разрешает доплатить по старой ссылке меньше, чем стоит заказ. Отправленную посылку не вернуть, а карту — можно выпустить заново.",
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-19T12:05:00.000Z",
+      "markedAt": "2026-09-19T13:21:13.000Z",
       "en": {
         "title": "An order somebody paid short",
         "steps": [
@@ -3230,14 +3232,16 @@
           "Look at «Склад»: the goods from that order must still be there.",
           "Check that no gift cards were issued for it and no letter went to the customer.",
           "Find the payment in Montonio by the number on the order card.",
-          "If it is fine, press «Оплачен»."
+          "If it is fine, press «Оплачен».",
+          "Find the order in «Заказы» without opening it: by its badge and the «Придержаны» chip."
         ],
         "expect": [
           "The order did not pay itself: no stock moved, no cards, no letter.",
           "The warning names both figures: what arrived and what the order costs.",
           "After «Оплачен» the warning is gone, the stock moved and the letter went.",
           "«Вернуть деньги» works — the Montonio payment number was not lost.",
-          "The customer saw the payment being processed, not «Заказ оплачен»."
+          "The customer saw the payment being processed, not «Заказ оплачен».",
+          "The row's badge says «Заплатили меньше», not «Ждёт оплаты»."
         ],
         "why": "Montonio lets a customer pay less than the order is worth on a reused link. A parcel that has gone cannot come back; a gift card can be issued again."
       }
@@ -5536,14 +5540,16 @@
         "Нажать по очереди «Все», «Мало», «Нет», «Не учтено».",
         "Пролистать список до конца, нажимая «Показать ещё».",
         "Нажать у одного товара «−», потом сразу «Отменить» внизу экрана.",
-        "Найти на «Складе» объём, который убрали из карточки товара."
+        "Найти на «Складе» объём, который убрали из карточки товара.",
+        "Посмотреть на кнопки «Все», «Мало», «Нет», «Не учтено», не нажимая их."
       ],
       "expect": [
         "Каждая кнопка сверху оставляет в списке только свои товары.",
         "«Показать ещё» дописывает следующие строки в конец.",
         "Список не прыгает в начало.",
         "«Отменить» возвращает остаток обратно.",
-        "Объём, убранный из карточки товара, остаётся на «Складе» своей строкой."
+        "Объём, убранный из карточки товара, остаётся на «Складе» своей строкой.",
+        "На каждой кнопке число — сколько строк за ней, включая ноль."
       ],
       "why": "Список, который прыгает в начало, не даёт пересчитать склад с телефона.",
       "risk": "low",
@@ -5556,17 +5562,20 @@
           "Press «Все», «Мало», «Нет» and «Не учтено» in turn.",
           "Scroll the list to the end, pressing «Показать ещё» (show more).",
           "On one product press «−», then «Отменить» at the bottom straight away.",
-          "Find on «Склад» a size that was removed from the product card."
+          "Find on «Склад» a size that was removed from the product card.",
+          "Look at the «Все», «Мало», «Нет», «Не учтено» buttons without pressing them."
         ],
         "expect": [
           "Each button at the top leaves only its own products.",
           "«Показать ещё» adds the next rows at the end.",
           "The list does not jump back to the top.",
           "«Отменить» puts the stock back.",
-          "A size removed from the product card stays on «Склад» as its own row."
+          "A size removed from the product card stays on «Склад» as its own row.",
+          "Each button carries a number — how many rows are behind it, zero included."
         ],
         "why": "A list that jumps back to the top makes a phone stock-take impossible."
-      }
+      },
+      "markedAt": "2026-09-19T13:21:13.000Z"
     },
     {
       "id": "stock-edit",

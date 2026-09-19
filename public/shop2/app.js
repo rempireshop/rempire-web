@@ -316,6 +316,9 @@
       /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
       "Счёт просрочен": "Arve on üle tähtaja", "Ждёт оплаты по счёту": "Ootab arve tasumist",
       "счёт просрочен": "arve on üle tähtaja", "счёта просрочены": "arvet on üle tähtaja", "счетов просрочены": "arvet on üle tähtaja",
+      // 19.09.2026: an order somebody paid too little for
+      "заказ придержан": "tellimus on peatatud", "заказа придержаны": "tellimust on peatatud", "заказов придержаны": "tellimust on peatatud",
+      "Заплатили меньше": "Maksti vähem", "Придержаны": "Peatatud",
       /* «По счёту» and «Отметить оплаченным?» already have their entries in the
          order-card and confirm-card blocks below — a second copy of a key here
          only made the i18n report warn about a duplicate that always won with
@@ -2653,6 +2656,8 @@
       "Письмо уйдёт сразу, отозвать его нельзя.": "Kiri läheb kohe välja, seda ei saa tagasi võtta.",
       "Заказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён». Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги».": "Tellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi, kliendile läheb kiri «Tellimus tühistatud». Tühistamine raha ei tagasta — selleks on nupp «Tagasta raha».",
       "Заказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».": "Tellimus ei ole veel makstud — tagastada pole midagi. Kliendile läheb kiri «Tellimus tühistatud».",
+      "По заказу пришли деньги, но меньше, чем нужно. Отмена их не вернёт — верните сумму в панели Montonio. Клиенту уйдёт письмо «Заказ отменён».":
+        "Tellimuse eest tuli raha, aga vähem kui vaja. Tühistamine seda tagasi ei too — tagastage summa Montonio paneelis. Kliendile läheb kiri «Tellimus tühistatud».",
       "Заказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги».": "Tellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi, kliendile läheb kiri «Raha tagastatud». Raha ise siit ei liigu — selleks on nupp «Tagasta raha».",
       "Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.": "Kõigepealt tagastatakse kaardiga makstud osa, ülejäänu läheb Montonio kaudu sama teed, kust raha tuli. Kliendile läheb kiri.",
       "Картой снова можно будет платить. Клиенту уйдёт письмо.": "Kaardiga saab jälle maksta. Kliendile läheb kiri.",
@@ -3178,6 +3183,9 @@
       /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
       "Счёт просрочен": "Invoice overdue", "Ждёт оплаты по счёту": "Awaiting invoice payment",
       "счёт просрочен": "invoice overdue", "счёта просрочены": "invoices overdue", "счетов просрочены": "invoices overdue",
+      // 19.09.2026: an order somebody paid too little for
+      "заказ придержан": "order on hold", "заказа придержаны": "orders on hold", "заказов придержаны": "orders on hold",
+      "Заплатили меньше": "Paid less", "Придержаны": "On hold",
       /* same two duplicates as on the ET side — the entries live below */
       "Отметить оплаченным": "Mark as paid",
       "Скачать счёт": "Download the invoice", "Отправить счёт ещё раз": "Send the invoice again",
@@ -5476,6 +5484,8 @@
       "Письмо уйдёт сразу, отозвать его нельзя.": "The letter goes out at once and cannot be recalled.",
       "Заказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён». Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги».": "The order gets the status “cancelled”, the goods go back to stock and the customer gets the “Order cancelled” letter. Cancelling returns no money — the “Refund” button does that.",
       "Заказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».": "The order has not been paid — there is nothing to return. The customer gets the “Order cancelled” letter.",
+      "По заказу пришли деньги, но меньше, чем нужно. Отмена их не вернёт — верните сумму в панели Montonio. Клиенту уйдёт письмо «Заказ отменён».":
+        "Money did arrive for this order, but less than it needs. Cancelling does not send it back — refund it in Montonio's own panel. The customer gets the “Order cancelled” letter.",
       "Заказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги».": "The order gets the status “refunded”, the goods go back to stock and the customer gets the “Money refunded” letter. No money moves from here — the “Refund” button does that.",
       "Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.": "The part paid with the card goes back first; the rest goes through Montonio the way the money came. The customer gets a letter.",
       "Картой снова можно будет платить. Клиенту уйдёт письмо.": "The card works again. The customer gets a letter.",
@@ -17514,6 +17524,15 @@
          Same rule on the server — src/lib/analytics.ts, `to_ship`. */
       toShip: status === "paid" && !pos && method !== "digital",
       unpaid: status === "new" || status === "failed",
+      /* Money arrived, and not enough of it (payment.held — shortPayment() in
+         src/lib/payments/apply.ts). The order deliberately keeps the status
+         «новый», because nothing has been fulfilled — which left it sitting in
+         «Все» behind the badge «Ждёт оплаты», indistinguishable from a
+         checkout somebody abandoned, and the two warnings about it were inside
+         the card. «There is no warning — it's grouped under all orders»
+         (Dim, 19.09.2026). The list payload already carries the whole payment
+         blob, so this is a reading, not a new field. */
+      held: !!(srv && srv.payment && srv.payment.held),
       refunded: back,
       refundable: rv.refundable,
       refund: rv,
@@ -17591,6 +17610,12 @@
   function admOrderBadge(v, big) {
     var c = "adm-badge" + (big ? " adm-badge--big" : " ");
     if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
+    /* Before every other reading of the order: money arrived and it was not
+       enough, so nothing has been fulfilled and the owner is the only one who
+       can end it. Above «Салон»? No — a till sale is never held. Above the
+       rest, because «Ждёт оплаты» on an order somebody HAS paid is the one
+       badge here that is actively wrong. */
+    if (v.held) return '<span class="' + c + ' adm-badge--warn">Заплатили меньше</span>';
     // an invoice order waits for a transfer; past its due date the badge turns to the warning ink
     if (v.invoice && v.unpaid) {
       return '<span class="' + c + (v.overdue ? " adm-badge--warn" : "") + '">' + (v.overdue ? "Счёт просрочен" : "Ждёт оплаты по счёту") + "</span>";
@@ -17756,7 +17781,13 @@
        first screen of the panel and not only inside «О компании». */
     // the same rule the server keeps an IBAN by (ibanOk), not «is it empty»
     var noIban = waiting.length > 0 && !companyIban();
-    var taskN = shipN + lowN + revN + proN + retN + overN + (noIban ? 1 : 0);
+    /* Money arrived and it was not enough — the queue nothing else leads to. */
+    var heldList = admHeldOrders(), heldN = heldList.length;
+    /* …and the hidden products that are running out, which have had a row of
+       their own since this morning and were missing from the number above it:
+       «Сделать сегодня 4» over five rows is a number nobody can trust. */
+    var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
+    var taskN = shipN + lowN + hidLow + revN + proN + retN + overN + heldN + (noIban ? 1 : 0);
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
     var tasks = "";
@@ -17772,6 +17803,14 @@
       pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
       names(overdue, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="invoice"', true);
+    /* Money arrived and it was not enough. Nothing was fulfilled and nothing
+       will be until he presses «Оплачен», so it belongs among the things only
+       he can end — and it was findable nowhere: the order keeps the status
+       «новый» and sat in «Все» behind «Ждёт оплаты» (Dim, 19.09.2026). */
+    if (heldN) tasks += admTaskRow(heldN,
+      pl(heldN, "заказ придержан", "заказа придержаны", "заказов придержаны"),
+      names(heldList, function (v) { return v.who; }),
+      'data-admtab="orders" data-admfilter="held"', true);
     if (lowN) tasks += admTaskRow(lowN,
       pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
       names(lowItems, function (p) { return p.name; }),
@@ -17780,7 +17819,6 @@
        number above is «закажите ещё», and a product taken off sale is not
        that — but a bottle hidden BECAUSE it ran out must not vanish from the
        only list that would remind him to order it. */
-    var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
     var hidItems = (o && o.lowStock.hiddenItems) || [];
     /* Where the row goes matters as much as the number. «Товары» alone opened
        the whole catalogue, where a hidden product sorts behind everything
@@ -17915,11 +17953,18 @@
      counts the ones still waiting for an answer — the same question «Сделать
      сегодня» asks — while the list itself keeps every order a return was ever
      asked for, so one being dealt with does not vanish mid-way. */
+  /* «Придержаны» sits last and appears only when there is one: an order paid
+     for with too little money is rare, it is the owner's alone to end, and
+     nothing else on this screen leads to it — it keeps the status «новый» and
+     read as an abandoned checkout (Dim, 19.09.2026). A chip that is always
+     there and always zero would be four taps a day for nothing. */
   var ADM_ORDER_FILTERS = [
-    ["all", "Все"], ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["returns", "Возвраты"]
+    ["all", "Все"], ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["returns", "Возвраты"], ["held", "Придержаны"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
+    // money arrived and it was not enough — nothing was fulfilled, and only he can end it
+    if (f === "held") return !!v.held;
     // returns: every order somebody asked to send back, answered or not
     if (f === "returns") return !!v.returnAskedAt;
     // everything paid that has not left yet — a sticker is not a hand-over
@@ -17971,6 +18016,14 @@
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
       .filter(function (v) { return v.delivered && v.returnAskedAt && !v.returnDoneAt; });
   }
+  /** The orders somebody paid too little for. Real orders only — the demo list
+      has none, and a chip promising one that is not there is worse than no
+      chip. Same shape as admReturnsAsked() above, and the chip's number and
+      its rows come from this one reading so they cannot disagree. */
+  function admHeldOrders() {
+    return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
+      .filter(function (v) { return v.held; });
+  }
   /** Which chip is lit. «Все» is where the screen opens (r16); a key from an
       older session that no longer names a chip falls back to it too. */
   function admOrderFilter() {
@@ -17999,7 +18052,13 @@
           var n = x[0] === "new" ? split.fresh + split.labeled
             : x[0] === "shipped" ? admOnTheWay().length
             : x[0] === "invoice" ? admInvoicesWaiting().length
-            : x[0] === "returns" ? admReturnsAsked().length : 0;
+            : x[0] === "returns" ? admReturnsAsked().length
+            : x[0] === "held" ? admHeldOrders().length : 0;
+          /* …and «Придержаны» is the one chip that hides when it is empty:
+             see ADM_ORDER_FILTERS. It stays while it is the chosen filter, so
+             answering the last one does not take the screen out from under
+             him. */
+          if (x[0] === "held" && !n && f !== "held") return "";
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
@@ -18289,7 +18348,11 @@
     // an invoice order's one step is the transfer arriving — the row can record it without opening the card
     else if (v.unpaid && v.invoice) acts =
       '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
-    else if (v.unpaid) acts =
+    /* …but not on a held order. «Написать» here means «ask him to pay», and
+       he has paid — just not enough. The row has no action of its own: the
+       badge says what happened, and what to do about it is two figures and a
+       button inside the card. */
+    else if (v.unpaid && !v.held) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
     /* A wrapper with the button inside it, not a button: the actions are
        buttons of their own. The body is the button (the whole text opens the
@@ -18368,6 +18431,13 @@
      one. Two straight chains, same reason as admShipConfirmText(): the i18n
      check joins each into one text node. */
   function admCancelConfirmText(v) {
+    /* A held order is «не оплачен» to the shop and money to the customer:
+       something arrived, it was too little, and it is sitting in Montonio.
+       «Возвращать нечего» would be false, and false about money. */
+    if (v.held) {
+      return v.number + " · " + v.who +
+        "\nПо заказу пришли деньги, но меньше, чем нужно. Отмена их не вернёт — верните сумму в панели Montonio. Клиенту уйдёт письмо «Заказ отменён».";
+    }
     if (v.unpaid) {
       return v.number + " · " + v.who +
         "\nЗаказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».";
@@ -18764,7 +18834,13 @@
        said «не оплачен» after the order was already paid — both kept on the
        order by src/lib/payments/apply.ts, never acted on automatically. */
     var notes = "";
-    if (p.amountMismatch) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
+    /* …except when the order is held: applyPaymentResult() writes BOTH keys
+       for a shortfall, and the two lines said the same thing in different
+       words, one after the other. The owner read them as a pair and neither
+       of them landed: «⚠ €54 arrived instead of €108 … ⚠ €54 paid instead of
+       €108 — the order is on hold» (Dim, 19.09.2026). The held line below is
+       the one that says what happened and what to do, so it says it alone. */
+    if (p.amountMismatch && !p.held) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
     if (p.rejected) notes += '<br><span class="adm-err">⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio</span>';
     /* …and the third, new on 19.09.2026: the bank paid LESS than the order is
        worth, so nothing was fulfilled at all. This is not a warning beside a
@@ -28597,6 +28673,36 @@
   function admStockToastText(r, qty) {
     return r.name + (r.variant ? " " + r.variant : "") + ": " + qty + " шт";
   }
+  /**
+   * Does this shelf row belong under that chip?
+   *
+   * Its own function because the chip now prints how many rows are behind it,
+   * and a count that is computed anywhere but here is a count that will one
+   * day disagree with the list it opens.
+   *
+   * «Мало» and «Нет» are the reorder list, so a product that is not for sale
+   * is not on it — the same rule the server applies to the same two filters
+   * and to the assistant's low-stock answer (getLevels and lowStockSummary,
+   * src/lib/inventory.ts). It is still findable under «Все» and by search,
+   * badged «Скрыт». «Не учтено» keeps it: «which shelves has nobody counted»
+   * is a fair question about a hidden product too.
+   */
+  function stockInFilter(r, f) {
+    if (f === "low") return !!(r.tracked && !r.offSale && r.state === "low");
+    if (f === "out") return !!(r.tracked && !r.offSale && r.state === "out");
+    if (f === "untracked") return !r.tracked;
+    return true;
+  }
+  /** How many rows that chip would show. The whole warehouse, never the
+      search: the chips are a map of the shelf, and a map that changed under
+      every keystroke would be one nobody could read. */
+  function stockFilterCount(f) {
+    var rows = S.stockLevels || [];
+    if (f === "all") return rows.length;
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) if (stockInFilter(rows[i], f)) n++;
+    return n;
+  }
   /** Everything that is running out comes first — the shelf the owner has to
       act on, not the alphabet. Variants nobody counts yet sort last. */
   function stockFiltered() {
@@ -28617,9 +28723,7 @@
          «Все» and by search, badged «Скрыт». «Не учтено» keeps it: «which
          shelves has nobody counted» is a fair question about a hidden product
          too. */
-      if (f === "low" && !(r.tracked && !r.offSale && r.state === "low")) return false;
-      if (f === "out" && !(r.tracked && !r.offSale && r.state === "out")) return false;
-      if (f === "untracked" && r.tracked) return false;
+      if (!stockInFilter(r, f)) return false;
       if (!words.length) return true;
       var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
       var hayWords = hay.split(" ");
@@ -28771,8 +28875,15 @@
       pwaHintHTML() +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Фильтр">' +
+          /* Each chip says how many rows are behind it. Without the numbers
+             the owner had to press «Мало» to find out whether anything is —
+             and «Не учтено», which is the one he is trying to empty, gave no
+             sign of progress at all (Dim, 19.09.2026: «No counts»). A zero is
+             printed too: «Нет 0» is the answer to the question, and a chip
+             that hides its zero makes him press it to learn the same thing. */
           FILTERS.map(function (f) {
-            return '<button class="adm-chip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' + f[1] + "</button>";
+            return '<button class="adm-chip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' +
+              f[1] + (S.stockLevels ? " " + stockFilterCount(f[0]) : "") + "</button>";
           }).join("") + "</div>" +
         '<input class="adm-input adm-input--row" data-stockq value="' + esc(S.stockQ || "") +
           '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="flex:1;min-width:180px">' +

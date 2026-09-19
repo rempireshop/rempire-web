@@ -134,6 +134,9 @@ const BODY = `
   ${slice("admOnTheWay")}
   ${slice("admInvoicesWaiting")}
   ${slice("admReturnsAsked")}
+  /* …and the queue added on 19.09.2026, because the chip strip counts it now
+     (tests/orders-held-r26.test.ts is the one that checks what it counts). */
+  ${slice("admHeldOrders")}
   ${slice("admOrderFilter")}
   ${slice("admOrderMatches")}
   ${slice("admOrderQClean")}
