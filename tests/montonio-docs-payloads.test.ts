@@ -39,7 +39,8 @@ import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { readRefundStatusDescription } from "@/lib/montonio-problems";
 import { createOrder, getOrder, listAudit, setOrderPayment, setOrderStatus } from "@/lib/orders";
-import { signHs256 } from "@/lib/payments/jwt";
+import { signHs256, verifyHs256 } from "@/lib/payments/jwt";
+import { refundsOf } from "@/lib/payments/refund";
 import { fetchEnabledPaymentMethods } from "@/lib/payments/methods";
 import { MontonioProvider } from "@/lib/payments/montonio";
 import { pendingRefunds } from "@/lib/payments/pending-refunds";
@@ -708,6 +709,62 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     const row = audit.find((a) => a.action === "order.refund_failed");
     expect(row).toBeTruthy();
     expect((row!.payload as { reason?: string }).reason).toBe("nothing_refundable");
+  });
+
+  /* The owner's own test, «Нажать "Вернуть деньги" второй раз», run here
+     because on the stand he cannot run it at all: Montonio's sandbox refuses
+     every refund, so there is never a first one to press again. This is that
+     scenario in the shape he actually meets — the FIRST press refused — and
+     the two things that must hold are the two he would look at: the same
+     sentence both times, and no row appearing from a press that did nothing.
+     (Dim, 19.09.2026: «I need a better explanation to the test - can you test
+     this yourself?») */
+  it("presses «Вернуть деньги» twice into a refusal: same words, no rows, one key", async () => {
+    withKeys();
+    /* The undocumented wording the owner met at 11:07 that morning. */
+    const calls = stubFetch([
+      [
+        /\/refunds$/,
+        () =>
+          json({ message: "Payment intent 71b9ebe6-2d07-4f59-93b7-d5ed305b3b19 cannot be refunded at this time." }, 400),
+      ],
+      [/\/orders\//, () => json({ ...ORDER_BODY, availableForRefund: 0, refunds: [] })],
+    ]);
+
+    const order = await paidOrder({ method: "pickup", country: "EE" }, ORDER_BODY.uuid);
+    const { POST } = await import("@/app/api/admin/orders/[id]/refund/route");
+    const press = async () =>
+      (await POST(
+        req(`/api/admin/orders/${order.id}/refund/`, { method: "POST", body: JSON.stringify({ amount: 5 }) }, admin),
+        { params: Promise.resolve({ id: order.id }) },
+      )).json() as Promise<RouteBody>;
+
+    const first = await press();
+    const second = await press();
+
+    expect(first.reason).toBe("not_refundable_now");
+    expect(second.reason).toBe("not_refundable_now");
+    // the same three sentences, so the second press teaches nothing new and asks for nothing
+    expect(second.messages).toEqual(first.messages);
+    expect(String(first.messages!.RU)).toContain("Ничего не списано");
+    expect(String(first.messages!.RU)).not.toContain("cannot be refunded at this time");
+
+    /* Nothing was taken, so nothing is written down: a refusal that left a row
+       would be a refund the owner can see and the customer never got. */
+    const stored = await getOrder(order.id);
+    expect(refundsOf(stored!.payment)).toEqual([]);
+    expect(stored!.status).toBe("paid");
+
+    /* And both presses carried the SAME idempotency key — which is what makes
+       a retry after a LOST answer ask Montonio about the refund it already
+       made instead of making a second one. The key is derived from the order
+       and the number of refunds on it, and neither moved. */
+    const asked = calls
+      .filter((c) => /\/refunds$/.test(c.url))
+      .map((c) => String((JSON.parse(String(c.init?.body ?? "{}")) as { data?: string }).data ?? ""));
+    expect(asked).toHaveLength(2);
+    const keyOf = (token: string) => verifyHs256<Record<string, unknown>>(token, SECRET).idempotencyKey as string;
+    expect(keyOf(asked[1])).toBe(keyOf(asked[0]));
   });
 
   it("a refund Montonio only accepted says so, and becomes a pending row to look at", async () => {
