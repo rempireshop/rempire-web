@@ -226,30 +226,46 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   /**
-   * The printable gift card (src/lib/giftcard-pdf.ts) reads three TTFs and the
-   * brand's tower path off disk at run time. Everything under public/ is
-   * uploaded to Vercel's static layer, which a serverless function cannot read
-   * — the tracer has to be told, because the paths are built at run time and
-   * nothing in the source names the files literally.
+   * The printable gift card (src/lib/giftcard-pdf.ts) and the link-preview
+   * card (src/lib/og-card.ts) read three TTFs and the brand's tower path off
+   * disk at run time. Everything under public/ is uploaded to Vercel's static
+   * layer, which a serverless function cannot read — the tracer has to be
+   * told, because those paths are built at run time and nothing in the source
+   * names the files literally.
    *
-   * Listed per route family rather than globally: the two routes that make a
-   * PDF (the download and the payment callbacks, whose mail hook attaches one)
-   * plus the admin order screen's data. ~215 KB of fonts, once each.
+   * This used to be a hand-kept list of the route families that make a
+   * document. It was wrong, and the way it was wrong is the reason it is no
+   * longer a list. `drawSlip()` — the A4 shipping label's band, carrying the
+   * order number and the drop-off code in figures big enough to read at the
+   * counter — was added on 13.09.2026 and `/api/admin/shipments/**` was not.
+   * On the stand the band came out reserved and blank, because `readAsset()`
+   * threw `asset_missing` and `drawSlipSafely()` swallowed it exactly as it is
+   * meant to. Six days later the owner wrote: «no drop-off code for the locker
+   * is shown. the address or any other information from order is not printed
+   * on the PDF». Nothing could have caught it: on a developer's disk and in
+   * the suite `process.cwd()` is the repository and public/fonts/ is simply
+   * there.
+   *
+   * And the list could not have been kept right by being more careful, either.
+   * 85 of this shop's 102 routes can reach one of those two modules through
+   * their imports — `src/lib/customers.ts` alone pulls the gift-card PDF in
+   * for the letters it sends — so the honest set was always «nearly all of
+   * them». ~215 KB of fonts per function is the whole price, and a blank label
+   * at the post office is not worth saving it. tests/asset-tracing.test.ts
+   * walks the same graph and fails if a route that can read from public/ ever
+   * falls outside these keys again.
    */
   outputFileTracingIncludes: {
-    "/api/giftcards/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    "/api/payments/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    "/api/admin/orders/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    "/api/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
     /* A custom product's page is the shell patched at request time
        (src/lib/product-page.ts, the /shop2/{,et/,en/}p/[id] routes) — the
        function has to be able to read the file the static layer serves. The
        blog pages a build did not write (src/lib/blog-page.ts) patch the same
-       shell. */
-    "/shop2/**": ["./public/shop2/index.html"],
-    /* The link-preview card drawn at request time (src/lib/og-card.ts):
-       the glyphs come out of the committed fonts and the mark out of the
-       brand SVG, none of which the source names literally. */
-    "/shop2/og/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+       shell, and /shop2/og/** draws the preview card from the fonts. */
+    "/shop2/**": ["./public/shop2/index.html", "./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    /* Both sitemaps list the blog, which is how they reach the card drawer. */
+    "/sitemap-custom.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    "/sitemap-products.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
   },
   /**
    * The shop is one static page that now names its screen in the URL, so the
