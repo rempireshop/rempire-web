@@ -1919,6 +1919,8 @@
       "Этот объём ещё не считали — впишите остаток на «Складе».":
         "Seda mahtu pole veel loetud — märkige jääk «Laos».",
       "На складе уже 0 — списывать нечего.": "Laos on juba 0 — pole midagi maha kanda.",
+      "Это уже записано. Если бутылка новая, отсканируйте ещё раз.":
+        "See on juba kirjas. Kui pudel on uus, skaneerige veel kord.",
       // scanner app: the standalone /shop2/scan/ route
       "Rempire · Сканер": "Rempire · Skanner", "Сканер": "Skanner",
       "В админку": "Paneeli", "Сканер открывается…": "Skanner avaneb…",
@@ -4735,6 +4737,8 @@
       "Этот объём ещё не считали — впишите остаток на «Складе».":
         "This size has never been counted — enter the stock in «Stock».",
       "На складе уже 0 — списывать нечего.": "The shelf is already at 0 — there is nothing to write off.",
+      "Это уже записано. Если бутылка новая, отсканируйте ещё раз.":
+        "This is already recorded. If the bottle is a new one, scan it again.",
       // scanner app: the standalone /shop2/scan/ route
       "Rempire · Сканер": "Rempire · Scanner", "Сканер": "Scanner",
       "В админку": "To the panel", "Сканер открывается…": "The scanner is opening…",
@@ -6207,6 +6211,9 @@
       { ET: "Kaamera pole saadaval ($1). Kontrollige brauseri õigusi või kasutage allolevat otsingut/käsitsi sisestust.",
         EN: "No camera access ($1). Check the browser permissions or use the search/manual entry below." }],
     [/^Приход \+(\d+) ✓$/, { ET: "Sissetulek +$1 ✓", EN: "Goods in +$1 ✓" }],
+    [/^Это уже записано — на складе (\d+)\. Если бутылка новая, отсканируйте ещё раз\.$/,
+      { ET: "See on juba kirjas — laos on $1. Kui pudel on uus, skaneerige veel kord.",
+        EN: "This is already recorded — the shelf has $1. If the bottle is a new one, scan it again." }],
     // scanner app: the write-off half of the same confirm pair
     [/^Списание −(\d+) ✓$/, { ET: "Mahakandmine −$1 ✓", EN: "Written off −$1 ✓" }],
     /* the line under a rate box: «Montonio: 3,19 € · DPD», and the same line
@@ -29277,6 +29284,16 @@
   function scanMoveToast(sign, qty, res) {
     if (res && res.skipped) return "Этот объём ещё не считали — впишите остаток на «Складе».";
     var n = res && typeof res.appliedDelta === "number" ? Math.abs(res.appliedDelta) : qty;
+    /* The answer to a scan whose FIRST answer was lost. The shop cannot tell a
+       retry from the next identical bottle, so it never counts one twice — and
+       this is where it admits that, instead of «Приход +1 ✓» over a shelf that
+       did not move. The remainder is on screen, so a wrong number is visible
+       while the bottle is still in his hand (audit F6, his decision 19.09). */
+    if (res && res.replayed) {
+      return typeof res.qtyAfter === "number"
+        ? "Это уже записано — на складе " + res.qtyAfter + ". Если бутылка новая, отсканируйте ещё раз."
+        : "Это уже записано. Если бутылка новая, отсканируйте ещё раз.";
+    }
     if (!n) return "На складе уже 0 — списывать нечего.";
     return sign > 0 ? "Приход +" + n + " ✓" : "Списание −" + n + " ✓";
   }
@@ -30497,7 +30514,13 @@
           // anything but «ещё идёт» is a definite answer, so this movement is
           // finished with its key — the next identical tap is a NEW bottle
           if (!wait) STOCK_MOVE = { sig: "", key: "" };
-          return !wait && r.status === 200 && r.body.ok ? (r.body.result || true) : null;
+          /* …and whether the shelf actually moved. A REPLAY means the server
+             recognised this exact body under this exact key and handed back
+             the first answer: nothing was written the second time. The caller
+             must be able to say so rather than claim a movement (audit F6). */
+          var out = !wait && r.status === 200 && r.body.ok ? (r.body.result || true) : null;
+          if (out && typeof out === "object" && r.body.replayed) out.replayed = true;
+          return out;
         });
     });
     stockMoveChain = run.then(noop, noop);

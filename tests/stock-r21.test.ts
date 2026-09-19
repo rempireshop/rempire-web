@@ -501,6 +501,30 @@ describe("the key a stock movement carries", () => {
     expect(out.sent[1].key).toBe(out.sent[0].key);
   });
 
+  /* The retry above is the good case: the first attempt never landed, so the
+     second one writes the bottle. This is the other one — the first attempt
+     DID land and only the answer was lost, so the server recognises the key
+     and hands back the first answer without touching the shelf. The panel
+     used to print «Приход +1 ✓» over that, so six identical bottles could be
+     counted as five, cheerfully (audit F6). The shop cannot tell the two
+     apart and keeps under-counting — a shelf that overstates sells what is
+     not there — but it now says so, with the remainder, while the bottle is
+     still in his hand. */
+  it("carries the server's «nothing moved» out to the caller", async () => {
+    const REPLAY = { status: 200, body: { ok: true, result: { appliedDelta: 1, qtyAfter: 5 }, replayed: true } };
+    const out = await moves([
+      { body: PLUS_ONE, answer: "dead" },
+      { body: PLUS_ONE, answer: REPLAY },
+    ]);
+    expect(out.sent[1].key, "the retry must reuse the key or nothing can be recognised").toBe(out.sent[0].key);
+    expect(out.results[1]).toMatchObject({ appliedDelta: 1, qtyAfter: 5, replayed: true });
+  });
+
+  it("does not mark an ordinary movement as a replay", async () => {
+    const out = await moves([{ body: PLUS_ONE, answer: MOVED }]);
+    expect((out.results[0] as Record<string, unknown>).replayed).toBeUndefined();
+  });
+
   /* 409 in_progress is the same movement still being written by the tap
      before. The key is kept, and the panel says so rather than «не
      сохранилось» over a movement that is going through perfectly well. */

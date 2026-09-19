@@ -158,5 +158,18 @@ export async function POST(req: Request) {
   if (done.outcome === "mismatch") {
     return Response.json({ ok: false, error: "key_reused" }, { status: 409, headers: NO_STORE });
   }
-  return Response.json(done.body, { status: done.status, headers: NO_STORE });
+  /* A REPLAY is not a movement, and the till has to be able to tell. The key
+     is minted from the request body, so a second scan of the same bottle sends
+     a byte-identical body under the same key and gets this answer back — the
+     shelf did not move, and the screen used to say «Приход +1 ✓» all the same.
+     Six identical bottles could be counted as five, cheerfully (audit F6). The
+     shop cannot know which of the two it was, so it keeps under-counting — a
+     shelf that overstates sells what is not there — and says so instead of
+     claiming a movement. The stored body is untouched; the flag rides the
+     response only. */
+  const answer =
+    done.outcome === "replayed" && done.status === 200 && done.body && typeof done.body === "object"
+      ? { ...(done.body as Record<string, unknown>), replayed: true }
+      : done.body;
+  return Response.json(answer, { status: done.status, headers: NO_STORE });
 }

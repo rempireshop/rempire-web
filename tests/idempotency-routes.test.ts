@@ -305,7 +305,13 @@ describe("POST /api/admin/inventory/moves: a retry is not a second bottle", () =
 
     expect((await getLevel(product.id, ""))?.qty).toBe(6); // 5 + 1, once
     expect(second.status).toBe(200);
-    expect(two).toEqual(one);
+    /* The stored answer comes back unchanged — that is the whole contract —
+       with one field added on the way out: `replayed`, so the till can say
+       «это уже записано» instead of «Приход +1 ✓» over a shelf that did not
+       move (audit F6, the owner's decision of 19.09.2026). The first answer
+       never carries it. */
+    expect(two).toEqual({ ...one, replayed: true });
+    expect(one.replayed).toBeUndefined();
     // one ledger line, so «История» does not show a movement that never was
     expect(await listMoves({ productId: product.id, reason: "goods_in" })).toHaveLength(2); // the seed + one
   });
@@ -382,7 +388,8 @@ describe("POST /api/admin/inventory/moves: a retry is not a second bottle", () =
     const first = await POST(post("/api/admin/inventory/moves/", count, { key: KEY_A, cookie: admin }));
     const one = await first.json();
     const replay = await POST(post("/api/admin/inventory/moves/", count, { key: KEY_A, cookie: admin }));
-    expect(await replay.json()).toEqual(one);
+    // the stored answer, plus the «nothing moved» marker the till reads
+    expect(await replay.json()).toEqual({ ...one, replayed: true });
 
     await POST(post("/api/admin/inventory/moves/", { ...count, qty: 3 }, { key: KEY_B, cookie: admin }));
     expect((await getLevel(product.id, ""))?.qty).toBe(3);
