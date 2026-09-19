@@ -97,12 +97,18 @@ function bracketNumbers(message: string): number[] {
  * in brackets, and **[0] is a different problem from [10]**. Zero means the
  * money has not settled yet or «Refundable bank payments» is off — nothing
  * about the amount typed in. A non-zero figure means exactly what it says.
+ *
+ * And one refusal the docs do not list at all: «Payment intent [uuid] cannot
+ * be refunded at this time», met on the stand 19.09.2026. An undocumented
+ * wording is still a wording the owner reads, so it is read here rather than
+ * quoted at him in English — see `not_refundable_now` for what bounds it.
  */
 export type RefundRefusal =
   | "duplicate_key"
   | "nothing_refundable"
   | "exceeds_refundable"
   | "below_minimum"
+  | "not_refundable_now"
   | "bad_access_key"
   | "bad_secret_key"
   | "unknown";
@@ -193,6 +199,34 @@ const REFUND_TEXT: Record<Exclude<RefundRefusal, "unknown">, (v: RefundRefusalRe
       "Montonio ei võta vastu tagasimakset, mis on alla 0,05 €. Sisestage vähemalt 0,05 € — või tagastage tellimuse jääk tervikuna.",
     EN:
       "Montonio does not accept a refund below 0.05 €. Enter at least 0.05 € — or send back the whole remainder of the order.",
+  }),
+
+  /* 400 — Payment intent [uuid] cannot be refunded at this time.
+     NOT in Montonio's list of exceptions: the refunds guide prints five and
+     this is not one of them. It is real all the same — the owner met it on
+     19.09.2026 on the stand, and until it was read here the panel could only
+     quote it in English and tell him to show the line to Dim.
+
+     What it can be is bounded by the guide's OWN preconditions, the two that
+     are about the payment rather than the request: «the funds have arrived to
+     the merchant's settlement account … typically 1 business day», and the
+     payment method supporting refunds at all. Both are named, and neither is
+     asserted over the other, because Montonio does not say which. «At this
+     time» is Montonio's own word for it, so the sentence ends where its
+     knowledge does: wait a day and press again. */
+  not_refundable_now: () => ({
+    RU:
+      "Montonio пока не может вернуть деньги по этому платежу: сам платёж ещё не в том состоянии, из которого возврат проходит. " +
+      "Причины две, обе в Montonio. Первая — деньги ещё не дошли на счёт магазина, это занимает один рабочий день. " +
+      "Вторая — для этого способа оплаты возвраты не включены. Подождите день и повторите. Ничего не списано.",
+    ET:
+      "Montonio ei saa selle makse pealt veel raha tagastada: makse ise ei ole seisus, millest tagasimakse läbi läheb. " +
+      "Põhjuseid on kaks, mõlemad Montonio poolel. Esimene — raha ei ole veel poe kontole jõudnud, see võtab ühe tööpäeva. " +
+      "Teine — selle makseviisi jaoks ei ole tagasimaksed sisse lülitatud. Oodake päev ja proovige uuesti. Midagi ei ole maha kantud.",
+    EN:
+      "Montonio cannot send this payment back yet: the payment itself is not in a state a refund can come out of. " +
+      "There are two causes, both on Montonio's side. One — the money has not reached the shop's settlement account, which takes one business day. " +
+      "Two — refunds are not switched on for this payment method. Wait a day and try again. Nothing has been taken.",
   }),
 
   /* 401 — STORE_NOT_FOUND - double check your access key */
@@ -308,6 +342,8 @@ export function readRefundRefusal(
     base.reason = base.refundable && base.refundable > 0 ? "exceeds_refundable" : "nothing_refundable";
   } else if (/under the min allowed amount/i.test(message)) {
     base.reason = "below_minimum";
+  } else if (/cannot be refunded at this time/i.test(message)) {
+    base.reason = "not_refundable_now";
   } else if (/STORE_NOT_FOUND/i.test(message) || status === 401) {
     base.reason = "bad_access_key";
   } else if (/INVALID_TOKEN/i.test(message) || status === 403) {

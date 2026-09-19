@@ -35,16 +35,25 @@ const ORDER_UUID = "4a9115b7-8e55-48f4-bd7e-febc2402e8a0";
 
 /**
  * The five, verbatim from «Some exceptions that can be thrown by the API»,
- * each paired with the reason the owner must act on. The sixth row is ours:
- * the same message with `[0]` instead of a real figure, which is a completely
- * different problem — nothing has settled yet, or refunds are not switched on —
- * and Montonio hands us the number for free.
+ * each paired with the reason the owner must act on. Two rows are ours.
+ *
+ * The `[0]` row: the same documented message with a zero instead of a real
+ * figure, which is a completely different problem — nothing has settled yet,
+ * or refunds are not switched on — and Montonio hands us the number for free.
+ *
+ * The `payment intent` row is verbatim too, but not from the docs: it is what
+ * Montonio answered on the stand on 19.09.2026, and the list of five does not
+ * have it. A wording the owner meets is a wording he has to be able to read,
+ * documented or not.
  */
+const INTENT_UUID = "71b9ebe6-2d07-4f59-93b7-d5ed305b3b19";
+
 const DOCUMENTED: Array<[number, string, RefundRefusal]> = [
   [400, `Order uuid [${ORDER_UUID}] already has a refund with same idempotency key`, "duplicate_key"],
   [400, "Refund amount [1000] exceeds the total amount refundable [10]", "exceeds_refundable"],
   [400, "Refund amount [30] exceeds the total amount refundable [0]", "nothing_refundable"],
   [400, "amount is under the min allowed amount: 0.05EUR", "below_minimum"],
+  [400, `Payment intent ${INTENT_UUID} cannot be refunded at this time.`, "not_refundable_now"],
   [401, "STORE_NOT_FOUND - double check your access key", "bad_access_key"],
   [403, "INVALID_TOKEN - double check your secret key", "bad_secret_key"],
 ];
@@ -84,7 +93,7 @@ describe("readRefundRefusal — each documented refusal gets its own words", () 
     });
   }
 
-  it("gives the six reasons six different Russian sentences", () => {
+  it("gives every reason its own Russian sentence", () => {
     const said = DOCUMENTED.map(([status, message]) =>
       readRefundRefusal(montonioErrorText(status, JSON.stringify({ message }))).messages.RU,
     );
@@ -155,6 +164,27 @@ describe("readRefundRefusal — each documented refusal gets its own words", () 
     expect(missing.messages.RU).not.toMatch(/должна быть в списке/i);
     expect(missing.messages.EN).toMatch(/already accepted/i);
     for (const lang of MONTONIO_LANGS) expect(missing.messages[lang]).toBeTruthy();
+  });
+
+  /* The refusal that was «unknown» until the owner met it. Montonio's list of
+     five does not have this sentence, so until 19.09.2026 the panel quoted it
+     in English and told him to show the line to Dim — which is exactly what he
+     did (test plan `stock-refund-clamped`, 19.09.2026 11:07). It is read now,
+     and read narrowly: the two causes are the refunds guide's own
+     preconditions, and nothing is claimed beyond them. */
+  it("reads «cannot be refunded at this time», which Montonio never documented", () => {
+    const read = readRefundRefusal(
+      montonioErrorText(400, JSON.stringify({ message: `Payment intent ${INTENT_UUID} cannot be refunded at this time.` })),
+    );
+    expect(read.reason).toBe("not_refundable_now");
+    // not the fallback: the owner gets sentences, not a foreign quote
+    for (const lang of MONTONIO_LANGS) expect(read.messages[lang]).not.toContain("cannot be refunded at this time");
+    // both preconditions from the refunds guide, and the reassurance
+    expect(read.messages.RU).toMatch(/рабочий день/);
+    expect(read.messages.RU).toMatch(/возвраты не включены/);
+    expect(read.messages.RU).toMatch(/Ничего не списано/);
+    expect(read.messages.EN).toMatch(/one business day/);
+    expect(read.messages.ET).toMatch(/ühe tööpäeva/);
   });
 
   it("classifies 401 and 403 even when the body says nothing at all", () => {
