@@ -400,6 +400,22 @@ describe("analytics names a custom product", () => {
     const wax = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
     await query("insert into product_overrides (product_id, stock) values ($1, 'out'), ('c-gone-for-good', 'out')", [wax.id]);
     const ov = await getOverviewSummary(NOW);
-    expect(ov.lowStock).toEqual({ total: 1, out: 1, low: 0, items: [{ id: wax.id, name: "Wax", brand: "Acme", stock: "out" }] });
+    expect(ov.lowStock).toEqual({ total: 1, out: 1, low: 0, hidden: 0, items: [{ id: wax.id, name: "Wax", brand: "Acme", stock: "out" }] });
+  });
+
+  /* Dim, 19.09.2026: the number he acts on is «закажите ещё», and a product
+     he has taken off sale is not that — but a bottle hidden BECAUSE it ran
+     out must not disappear from the only list that would remind him. So it is
+     counted apart, never in `total`, and the panel gives it its own line. */
+  it("counts a hidden product that is running out apart from the ones on sale", async () => {
+    const wax = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
+    const gone = await createCustomProduct({ brand: "Acme", name: "Clay", cat: "styling", price: 9 });
+    await query("insert into product_overrides (product_id, stock) values ($1, 'out')", [wax.id]);
+    await query("insert into product_overrides (product_id, stock, hidden) values ($1, 'out', true)", [gone.id]);
+
+    const ov = await getOverviewSummary(NOW);
+    expect(ov.lowStock.total, "a hidden product must not be in the figure he acts on").toBe(1);
+    expect(ov.lowStock.hidden).toBe(1);
+    expect(ov.lowStock.items.map((i) => i.id)).toEqual([wax.id]);
   });
 });

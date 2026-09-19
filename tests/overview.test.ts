@@ -74,7 +74,7 @@ describe("getOverviewSummary", () => {
     const o = await getOverviewSummary(NOW);
     expect(o.orders).toEqual({ today: 0, yesterday: 0 });
     expect(o.revenue7d).toEqual({ total: 0, perDay: 0, orders: 0 });
-    expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, items: [] });
+    expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [] });
     expect(o.attention).toEqual({
       ordersToShip: 0,
       proRequests: 0,

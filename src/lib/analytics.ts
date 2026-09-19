@@ -617,7 +617,14 @@ export type OverviewSummary = {
    * and this one extra (indexed, grouped, seven rows) query instead.
    */
   revenueByDay: Array<{ day: string; revenue: number; orders: number }>;
-  lowStock: { total: number; low: number; out: number; items: OverviewLowStockItem[] };
+  lowStock: {
+    total: number;
+    low: number;
+    out: number;
+    /** Low or out AND off sale — counted, but not in `total`. See qOverviewLowStock(). */
+    hidden: number;
+    items: OverviewLowStockItem[];
+  };
   /** The five queues the owner is the only one who can empty. */
   attention: {
     ordersToShip: number;
@@ -677,10 +684,21 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
   } catch (err) {
     console.error("[analytics] numeric stock unavailable for «Заканчиваются»:", err);
   }
+  /* Hidden products are counted, but separately (Dim, 19.09.2026). The card
+     asks «что заканчивается, закажите ещё», and a product he has taken off
+     sale is not something to re-order today — it does not belong in the
+     number he acts on. Dropping it outright is the other half of the trap
+     though: a bottle hidden BECAUSE it ran out would vanish from the only
+     list that would have reminded him to order it, and stay hidden for ever.
+     So the main figure is clean and one line says how many are waiting
+     behind the switch. */
   const short: Array<[string, "low" | "out"]> = [];
+  let hiddenShort = 0;
   for (const [id, o] of Object.entries(overrides)) {
     const stock = counted[id] ?? o.stock;
-    if (stock === "low" || stock === "out") short.push([id, stock]);
+    if (stock !== "low" && stock !== "out") continue;
+    if (o.hidden) hiddenShort += 1;
+    else short.push([id, stock]);
   }
   const names = await customNames(short.map(([id]) => id));
   const items: OverviewLowStockItem[] = [];
@@ -698,6 +716,7 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
     total: items.length,
     out: items.filter((i) => i.stock === "out").length,
     low: items.filter((i) => i.stock === "low").length,
+    hidden: hiddenShort,
     items: items.slice(0, 20),
   };
 }

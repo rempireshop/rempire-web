@@ -1946,6 +1946,11 @@
       "товар заканчивается": "toode saab otsa",
       "товара заканчиваются": "toodet saab otsa",
       "товаров заканчиваются": "toodet saab otsa",
+      "скрытый товар заканчивается": "peidetud toode saab otsa",
+      "скрытых товара заканчиваются": "peidetud toodet saab otsa",
+      "скрытых товаров заканчиваются": "peidetud toodet saab otsa",
+      "сняты с продажи — закажите, если вернёте в магазин":
+        "müügilt eemaldatud — tellige juurde, kui toote poodi tagasi",
       "отзыв ждёт проверки": "arvustus ootab ülevaatamist",
       "отзыва ждут проверки": "arvustust ootab ülevaatamist",
       "отзывов ждут проверки": "arvustust ootab ülevaatamist",
@@ -4764,6 +4769,11 @@
       "товар заканчивается": "product running out",
       "товара заканчиваются": "products running out",
       "товаров заканчиваются": "products running out",
+      "скрытый товар заканчивается": "hidden product running out",
+      "скрытых товара заканчиваются": "hidden products running out",
+      "скрытых товаров заканчиваются": "hidden products running out",
+      "сняты с продажи — закажите, если вернёте в магазин":
+        "off sale — order more if you put them back in the shop",
       "отзыв ждёт проверки": "review waiting to be checked",
       "отзыва ждут проверки": "reviews waiting to be checked",
       "отзывов ждут проверки": "reviews waiting to be checked",
@@ -6803,53 +6813,6 @@
       "</section>";
   }
 
-  /* Delivery prices are the carriers' own published rates (shipping-data.js:
-     Omniva business list valid 21.02.2025, SmartPosti business-prepaid
-     11.03.2026, DPD business list 2025), converted to VAT-inclusive at 24% and
-     rounded to ten cents. They are list prices for a shop under ~40 parcels a
-     month — Omniva and DPD both discount above that — so read them as a
-     ceiling, not as Rempire's eventual contract rate.
-     `pm` names the carrier whose real parcel-machine list to offer. Only
-     carriers with a verified location list are offered per country: Omniva has
-     no machines in Finland at all, and DPD publishes no open list for LV/LT. */
-  function shipPrice(carrier, service, dest, fallback) {
-    try {
-      var rows = SHIPPING_DATA.prices.parcelRef.rows;
-      for (var i = 0; i < rows.length; i++) {
-        var r = rows[i];
-        if (r.carrier === carrier && r.service === service &&
-            String(r.dest).indexOf(dest) === 0 && typeof r.incVat === "number") {
-          return Math.round(r.incVat * 10) / 10;
-        }
-      }
-    } catch (e) {}
-    return fallback;
-  }
-  var SHIP = {
-    EE: [
-      { l: "Самовывоз — Mardi 1, Таллинн", p: 0, pickup: true },
-      { l: "Пакомат DPD", p: shipPrice("DPD", "Pickup", "EE", 4.5), pm: "dpd" },
-      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "EE", 5.5), pm: "omniva" },
-      { l: "Пакомат SmartPosti", p: shipPrice("SmartPosti", "pakiautomaat", "EE", 5.5), pm: "smartpost" },
-      { l: "Курьер до двери (DPD)", p: shipPrice("DPD", "kuller", "EE", 9) }
-    ],
-    LV: [
-      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "LV", 10.6), pm: "omniva" },
-      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "LV", 13.6) }
-    ],
-    LT: [
-      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "LT", 11.8), pm: "omniva" },
-      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "LT", 15.6) }
-    ],
-    FI: [
-      { l: "Пакомат SmartPosti", p: shipPrice("SmartPosti", "pakiautomaat", "FI", 15.7), pm: "smartpost" },
-      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "FI", 26) }
-    ],
-    /* DPD's rest-of-Europe band is 26–56 € incl. VAT depending on country
-       (shipping-data.js restOfEuropeAt10kg); a flat 33 sits mid-band for the
-       common destinations (DE 37, PL 30, SE 29 incl. VAT). */
-    EU: [{ l: "Курьер DPD по Европе", p: 33 }]
-  };
   /* Free-shipping floors per country, quoted by the announce bar, the footer,
      the product page and the admin.
      These are no longer a constant: whatever the shop *says* here has to be
@@ -8869,11 +8832,31 @@
      rows are the draft's country's (acctShipCountry), not S.country's: the
      checkout owns S.country, and the block has to show what is stored even
      while this session's checkout is going somewhere else. */
-  function methods() { return SHIP[acctShipCountry()] || SHIP.EE; }
+  /* The rows «Доставка по умолчанию» draws, built from the SAME table the
+     checkout offers from (CARRIERS_BY_COUNTRY) rather than a list of its own.
+     The list of its own had fallen behind: Latvia and Lithuania showed Omniva
+     alone where the checkout has four carriers, Finland had no DPD, Estonia
+     had neither Unisend nor Nova Post, and not one of the eighteen countries
+     opened on 18.09.2026 had a row at all — so a customer in Poland could not
+     save a default, and nobody in the Baltics could save a Unisend locker
+     (audit F40, Dim 19.09.2026). Derived, it cannot fall behind again: the
+     mirror is guarded against the server by tests/checkout-parity.test.ts.
+     Labels only. The price beside a row comes from the rules through
+     acctShipPrice() and always did. */
+  function acctMethods(cc) {
+    var rows = [];
+    if (cc === "EE") rows.push({ l: "Самовывоз — Mardi 1, Таллинн", p: 0, pickup: true });
+    (CARRIERS_BY_COUNTRY[cc] || []).forEach(function (c) {
+      rows.push({ l: "Пакомат " + (CARRIER_NAMES[c] || c), pm: c });
+    });
+    rows.push({ l: cc === "EE" ? "Курьер до двери (DPD)" : cc === "EU" ? "Курьер DPD по Европе" : "Курьер DPD" });
+    return rows;
+  }
+  function methods() { return acctMethods(acctShipCountry()); }
   /** The country «Доставка по умолчанию» is drawn for: the draft's, else the shop's. */
   function acctShipCountry() {
     var d = S.acctForm.ship;
-    return d && SHIP[d.country] ? d.country : S.country;
+    return d && CARRIERS_BY_COUNTRY[d.country] ? d.country : S.country;
   }
   /* What a row of SHIP means to the checkout: `pickup` is pickup, `pm` is a
      parcel with that carrier, anything else is the courier. */
@@ -9034,7 +9017,7 @@
     var p = S.cust && S.cust.shipPref;
     if (!p) return;
     var known = { pickup: 1, parcel: 1, courier: 1 };
-    if (p.country && SHIP[p.country]) S.country = p.country;
+    if (p.country && CARRIERS_BY_COUNTRY[p.country]) S.country = p.country;
     if (p.method && known[p.method]) S.ship.method = p.method;
     S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
     /* Nothing picked by hand here (the guard above), so a point in S.ship
@@ -16905,7 +16888,7 @@
         who: ["М. Тамм", "K. Saar", "А. Иванов", "L. Kask", "Д. Петров", "R. Lepik", "J. Mägi"][i % 7],
         items: n + 1,
         sum: sum,
-        ship: SHIP.EE[(i % 4) + 1].l,
+        ship: acctMethods("EE")[(i % 4) + 1].l,
         state: ORDER_STATES[i === 0 ? 0 : i < 3 ? 1 : i < 6 ? 2 : 3]
       });
     }
@@ -17651,6 +17634,15 @@
       pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
       names(lowItems, function (p) { return p.name; }),
       'data-admtab="stock"', true);
+    /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
+       number above is «закажите ещё», and a product taken off sale is not
+       that — but a bottle hidden BECAUSE it ran out must not vanish from the
+       only list that would remind him to order it. */
+    var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
+    if (hidLow) tasks += admTaskRow(hidLow,
+      pl(hidLow, "скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"),
+      "сняты с продажи — закажите, если вернёте в магазин",
+      'data-admtab="goods"', true);
     if (revN) tasks += admTaskRow(revN,
       pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
       "", 'data-admtab="reviews"');
@@ -24647,7 +24639,7 @@
   }
 
   /* ---------- admin: delivery prices (settings.shipping_rules) -------------
-     This block used to print the carriers' 2025–26 list prices (SHIP.EE) while
+     This block used to print the carriers' 2025–26 list prices while
      the checkout billed something else entirely — the owner read one number and
      the shop charged another. It is now an editor bound to the very rules both
      sides price from: what is typed here is what /api/orders charges, what the
@@ -38742,8 +38734,8 @@
        account's own country, not S.country — that one belongs to the
        checkout in progress. */
     else if (t.matches("[data-acctcountry]")) {
-      var acctCc = SHIP[t.value] ? t.value : "EE";
-      S.acctForm.ship = acctShipFromRow(acctCc, SHIP[acctCc][0]); render(); acctShipChanged();
+      var acctCc = CARRIERS_BY_COUNTRY[t.value] ? t.value : "EE";
+      S.acctForm.ship = acctShipFromRow(acctCc, acctMethods(acctCc)[0]); render(); acctShipChanged();
     }
     /* returns: the tick on a delivered order goes to the server the moment it
        is ticked. `change` and not the click delegate: the box is inside its
