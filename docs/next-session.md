@@ -1,10 +1,80 @@
-# Where we stopped — the night of 18→19.09.2026
+# Where we stopped — 18→19.09.2026
 
-`origin/main` is `12a396b`. **186 test files, 4318 tests, 0 failures**, `tsc`
+Two parts: the night's work, and what Dim's own pass over `/test/` on the
+morning of the 19th turned up. The night is the second half of this file and it
+has not changed.
+
+## The morning of 19.09: Dim went through the plan
+
+**38 checks in one sitting, 194 answers stored, nothing left unanswered.** He
+found **8 bad and 3 skip** — everything below comes from that list, and every
+one of them is now closed except the three that need the live Montonio keys.
+
+- **The A4 label came out blank, and had since 13.09.** The band under the
+  sticker — order number, drop-off code in figures you can read at a counter —
+  is drawn with three TTFs read off disk, and `/api/admin/shipments/**` was
+  never added to `outputFileTracingIncludes`. On Vercel nothing under `public/`
+  reaches a function unless the tracer is told, `readAsset()` threw
+  `asset_missing`, and `drawSlipSafely()` swallowed it exactly as designed. The
+  suite and a developer's disk cannot see this: there `process.cwd()` is the
+  repository. The list is gone — 85 of 102 routes can reach a font reader
+  through their imports, so «nearly all of them» was always the honest answer
+  and the keys are now `/api/**`, `/shop2/**` and the two sitemaps. A test walks
+  the same import graph and fails if a route ever falls outside them again.
+- **Lockers outside the Baltics existed in the data and nowhere on screen.**
+  Ренат opened every country DPD serves on 18.09 and the server has allowed
+  them since; the storefront asked about the ZONE (`S.country`, five values,
+  «EU» for a continent) and `CARRIERS_BY_COUNTRY.EU` is empty. Italy really has
+  12 048 DPD points on our own keys. Every reader asks `orderCountry()` now.
+  With it came a real problem: Poland is 33 603 points, Germany 10 106 — not a
+  list to download onto a phone. `/api/shipping/points/` caps its answer at
+  1 500 and takes `?q=`, filtering on the six-hour cache it already holds; the
+  picker sends what the shopper types there and says how many there really are.
+- **The account priced another country with this country's numbers.** Its rows
+  came from the draft's country and its prices from `shipRulePrice()`, which
+  read the checkout's. The function takes the country now, and the account
+  block finally has the second select — until today «Другая страна Европы» was
+  as far as a customer could get.
+- **A refund that Montonio has only accepted now says so everywhere.** Montonio
+  answers `200 PENDING` and confirms days later; voiding the cards an order
+  sold, the points and the «возврат» status all wait for that webhook, and
+  should. What was wrong: the panel promised «карта будет аннулирована» in the
+  present tense, «Выпущенные карты» was a once-per-session cache nothing ever
+  dropped, and the customer's own «Мои заказы» said nothing at all while the
+  letter «Возврат отправлен» sat in their inbox. All three fixed. A hole found
+  beside them: a voided card stayed in the account and its PDF still printed
+  the full face value — 50 € no till will take. Gone from the list, 410 on the
+  link.
+- **«Скрытые заканчиваются» now leads to those products.** It opened the whole
+  catalogue, where a hidden product sorts behind everything on sale and usually
+  past the 40-row cap. It opens «Каталог → Скрытые» and names them.
+- **The blog list framed every cover square.** The 1200/630 rule was written
+  for the article's own cover; the tile carries a different class, so the crop
+  the owner dragged was applied to a square and app.js then repainted it wide.
+- **Montonio refused a refund in words its own documentation does not list** —
+  «Payment intent … cannot be refunded at this time» — so the panel could only
+  quote it in English. It is read now, narrowly: the two causes are the refunds
+  guide's own preconditions and nothing beyond them is claimed.
+- **The two he could not run at all.** «Заказ, за который заплатили не
+  полностью» needs Montonio to underpay and the sandbox will not, so
+  `tools/seed-held-order.mjs` makes one by copying a real paid order (guarded:
+  no `--yes`, no write, and it prints the host). «Вернуть деньги второй раз»
+  needs a first refund that worked, which the sandbox never gives — he asked me
+  to run it instead, so it is a test now, in the shape he actually meets it:
+  the first press refused, the second must say the same words, write no row and
+  carry the same idempotency key.
+
+**The plan is 196 checks**: six marked for re-test, two new (a locker in another
+European country, and what the customer sees while a refund is on its way).
+`order-paid-short` is open again with «Дим создаёт заказ» as its first step.
+
+## The night of 18→19.09
+
+`origin/main` was `12a396b`. **186 test files, 4318 tests, 0 failures**, `tsc`
 clean, 814 prerendered pages with 0 failures, `untranslated: 0` at ET/EN parity.
 29 commits overnight, four agent branches merged, everything pushed.
 
-This replaces the plan written at 22:40; `docs/night-plan-2026-09-19.md` is what
+This replaced the plan written at 22:40; `docs/night-plan-2026-09-19.md` is what
 was intended, this is what happened.
 
 ## The three payment decisions are done
@@ -132,9 +202,13 @@ Nothing here is urgent; each is written up in
   rather than dropped, so a bottle hidden BECAUSE it ran out still shows
   somewhere; and a refund now credits only what the sale actually took — the
   shelf had one, the order wanted two, the sale stopped at zero, the refund
-  puts back one. **Nothing is waiting on him but Montonio.**
+  puts back one.
+- **After his pass of 19.09 midday:** nothing is waiting on him but Montonio and
+  one command — `DATABASE_URL=… node tools/seed-held-order.mjs --yes` against
+  the stand, so «Заказ, за который заплатили не полностью» has an order to be
+  tested on. Everything else on that list is built and back in the plan.
 
-## The test plan: 191 checks
+## The test plan that night: 191 checks
 
 Four new ones — the second press of «Вернуть деньги», an order paid short, the
 nightly reconcile, and cancelling an order with a set and putting it back — plus
