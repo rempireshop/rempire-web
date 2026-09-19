@@ -36,6 +36,8 @@ function slice(name: string): string {
 
 interface View {
   refunded: number;
+  /** Of `refunded`, the part Montonio has accepted and not yet confirmed. */
+  pending: number;
   refundable: number;
   gift: number;
   money: number;
@@ -93,5 +95,41 @@ describe("admRefundView() — when the card offers «Вернуть деньги
 
   it("an unpaid order offers nothing at all", () => {
     expect(view(48, { status: "new", payment: { status: "pending" } }).refundable).toBe(0);
+  });
+
+  /* A refund Montonio has accepted and not confirmed is money that has left,
+     so it counts against what is left to send back and the button goes. That
+     is right, and it was silent: the owner refunded an order that had sold a
+     gift card, came back an hour later, found no «Вернуть деньги» and wrote
+     «I do not have Вернуть деньги for an order for a gift card. Check order -
+     R-100050» (Dim, 19.09.2026). The order's real blob had exactly this
+     shape. So the figure is carried out of here and the card says it. */
+  it("names what is on its way back, so the missing button has a reason", () => {
+    const v = view(50, {
+      status: "paid",
+      payment: { ...paidByBank, refunds: [{ ref: "r1", amount: 50, status: "pending" }] },
+    });
+    expect(v.refundable).toBe(0);
+    expect(v.pending).toBe(50);
+    expect(v.refunded).toBe(50);
+  });
+
+  it("counts nothing as pending once the webhook confirms it", () => {
+    const v = view(50, {
+      status: "paid",
+      payment: { ...paidByBank, refunds: [{ ref: "r1", amount: 50, status: "done" }] },
+    });
+    expect(v.pending).toBe(0);
+    expect(v.refundable).toBe(0);
+  });
+
+  it("does not count a refund Montonio refused", () => {
+    const v = view(50, {
+      status: "paid",
+      payment: { ...paidByBank, refunds: [{ ref: "r1", amount: 50, status: "failed" }] },
+    });
+    expect(v.pending).toBe(0);
+    // …and the money is still there to try again with
+    expect(v.refundable).toBe(50);
   });
 });

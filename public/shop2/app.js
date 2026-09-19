@@ -5969,6 +5969,9 @@
     [/^⚠ Возврат (.+) не прошёл — проверьте в Montonio$/,
       { ET: "⚠ Tagasimakse $1 ei õnnestunud — kontrollige Montonios",
         EN: "⚠ The $1 refund did not go through — check in Montonio" }],
+    [/^Возвращать больше нечего: (.+) уже отправлено, Montonio подтвердит в течение рабочего дня\.$/,
+      { ET: "Rohkem ei ole midagi tagastada: $1 on juba saadetud, Montonio kinnitab ühe tööpäeva jooksul.",
+        EN: "There is nothing left to send back: $1 has gone already, and Montonio confirms within one business day." }],
     [/^Возврат (.+) в обработке у Montonio$/,
       { ET: "Tagasimakse $1 on Montonios töötlemisel", EN: "The $1 refund is being processed by Montonio" }],
     [/^(.+) · возврат (.+) — письмо ушло$/,
@@ -17463,8 +17466,19 @@
     var gift = Math.round(Math.min(left, giftLeft) * 100) / 100;
     var money = Math.round((left - gift) * 100) / 100;
     if (!viaProvider) { left = gift; money = 0; }
+    /* What is on its way back and not confirmed. It is already inside `back`
+       — a pending refund is money that has left — which is why the button
+       disappears the moment one is made. That is right, and it was silent:
+       the owner looked for «Вернуть деньги» on an order he had refunded an
+       hour earlier, did not find it, and concluded the shop cannot refund a
+       gift-card order at all (Dim, 19.09.2026, R-100050). */
+    var pending = 0;
+    admRefunds(pay).forEach(function (r) {
+      if (r && r.status === "pending") pending += Number(r.amount) || 0;
+    });
     return {
       refunded: back,
+      pending: Math.round(pending * 100) / 100,
       refundable: paid ? left : 0,
       gift: paid ? gift : 0,
       money: paid ? money : 0,
@@ -18675,6 +18689,12 @@
     else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
     else if (showSteps && v.paid && v.labeled) hint = "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
     else if (showSteps && v.shipped) hint = "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.";
+    /* …and the one that is not about the steps at all: why «Вернуть деньги»
+       is not here. It is missing because the money is already going back, and
+       nothing said so where he was looking. */
+    if (!(v.refundable > 0.004) && v.refund && v.refund.pending > 0.004) {
+      hint = "Возвращать больше нечего: " + eur(v.refund.pending) + " уже отправлено, Montonio подтвердит в течение рабочего дня.";
+    }
 
     /* Every status the panel could always set stays settable — the actions row
        above is the everyday path, this line is the rest of them. */
