@@ -243,6 +243,29 @@ describe("testplan.json — the shape the checklist page reads", () => {
     }
   });
 
+  /* A mark dated in the FUTURE is a check nobody can answer.
+     `isStale()` on the page asks whether the answer is older than the mark, and
+     an answer given now always is — so the verdict saves, `paintItem()` paints
+     every button back to unpressed, and the tester sees a button that does not
+     respond. It happened on 19.09.2026: nine rows were stamped `15:10Z` from a
+     local clock that was UTC+3, which put them two and a half hours ahead, and
+     the owner reported «I also cannot click on works or broken». His presses
+     were in the database the whole time.
+     Marks are always written for something that has already changed, so there
+     is no honest reason for one to be ahead of the clock. */
+  it("dates no mark in the future — an unanswerable check", () => {
+    const now = Date.now();
+    const ahead = plan.items
+      .filter((i) => typeof i.markedAt === "string" && Date.parse(i.markedAt) > now)
+      .map((i) => `${i.id} (${i.markedAt})`);
+    if (typeof plan.marked === "string" && Date.parse(plan.marked) > now) ahead.push(`plan.marked (${plan.marked})`);
+    expect(
+      ahead,
+      "a mark ahead of the clock makes its check impossible to answer: the page stales every verdict given before it. " +
+        "Write the instant in UTC — new Date().toISOString(), not the wall clock.",
+    ).toEqual([]);
+  });
+
   it("carries no field the renderer does not know about", () => {
     const keys = ["id", "area", "who", "device", "lang", "title", "steps", "expect", "why", "risk", "writes", "en"];
     const optional = ["mark", "markedAt"];
