@@ -624,6 +624,10 @@ export type OverviewSummary = {
     /** Low or out AND off sale — counted, but not in `total`. See qOverviewLowStock(). */
     hidden: number;
     items: OverviewLowStockItem[];
+    /** The same products by name, so the row can say WHICH ones are waiting
+        behind the switch — a bare count sent the owner to a list of every
+        hidden product to go and find them (Dim, 19.09.2026). */
+    hiddenItems: OverviewLowStockItem[];
   };
   /** The five queues the owner is the only one who can empty. */
   attention: {
@@ -693,31 +697,38 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
      So the main figure is clean and one line says how many are waiting
      behind the switch. */
   const short: Array<[string, "low" | "out"]> = [];
-  let hiddenShort = 0;
+  const hidden: Array<[string, "low" | "out"]> = [];
   for (const [id, o] of Object.entries(overrides)) {
     const stock = counted[id] ?? o.stock;
     if (stock !== "low" && stock !== "out") continue;
-    if (o.hidden) hiddenShort += 1;
-    else short.push([id, stock]);
+    (o.hidden ? hidden : short).push([id, stock]);
   }
-  const names = await customNames(short.map(([id]) => id));
-  const items: OverviewLowStockItem[] = [];
-  for (const [id, stock] of short) {
-    if (BY_ID.has(id)) items.push({ ...productInfo(id), stock });
-    else {
-      const n = names.get(id);
-      if (n) items.push({ id, name: n.name, brand: n.brand, stock });
+  /* One round trip for both lists: the hidden ones are named too, because a
+     row that says «2 скрытых товара заканчиваются» and nothing else can only
+     be answered by reading every hidden product in the shop. */
+  const names = await customNames([...short, ...hidden].map(([id]) => id));
+  const resolve = (rows: Array<[string, "low" | "out"]>): OverviewLowStockItem[] => {
+    const out: OverviewLowStockItem[] = [];
+    for (const [id, stock] of rows) {
+      if (BY_ID.has(id)) out.push({ ...productInfo(id), stock });
+      else {
+        const n = names.get(id);
+        if (n) out.push({ id, name: n.name, brand: n.brand, stock });
+      }
     }
-  }
-  items.sort((a, b) =>
-    a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1,
-  );
+    out.sort((a, b) =>
+      a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1,
+    );
+    return out;
+  };
+  const items = resolve(short);
   return {
     total: items.length,
     out: items.filter((i) => i.stock === "out").length,
     low: items.filter((i) => i.stock === "low").length,
-    hidden: hiddenShort,
+    hidden: hidden.length,
     items: items.slice(0, 20),
+    hiddenItems: resolve(hidden).slice(0, 20),
   };
 }
 

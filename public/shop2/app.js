@@ -17639,10 +17639,17 @@
        that — but a bottle hidden BECAUSE it ran out must not vanish from the
        only list that would remind him to order it. */
     var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
+    var hidItems = (o && o.lowStock.hiddenItems) || [];
+    /* Where the row goes matters as much as the number. «Товары» alone opened
+       the whole catalogue, where a hidden product sorts behind everything
+       still on sale and usually past the 40-row cap — so the row counted
+       them and then hid them again (Dim, 19.09.2026: «does not bring to
+       hidden product»). It opens «Каталог → Скрытые» now, and says which
+       ones, so the list is a place to look rather than a place to search. */
     if (hidLow) tasks += admTaskRow(hidLow,
       pl(hidLow, "скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"),
-      "сняты с продажи — закажите, если вернёте в магазин",
-      'data-admtab="goods"', true);
+      hidItems.length ? names(hidItems, function (p) { return p.name; }) : "сняты с продажи — закажите, если вернёте в магазин",
+      'data-admtab="goods" data-admfilter="off"', true);
     if (revN) tasks += admTaskRow(revN,
       pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
       "", 'data-admtab="reviews"');
@@ -36198,6 +36205,9 @@
       // a queue row on «Обзор» carries the filter its section should open on
       if (d.admfilter && d.admtab === "orders") S.admOrderFilter = d.admfilter;
       if (d.admfilter && d.admtab === "people") S.admCustTier = d.admfilter;
+      /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
+         «Скрытые», and the shelf it wants starts at the top of that list. */
+      if (d.admfilter && d.admtab === "goods") { S.goodsFilter = d.admfilter; S.goodsShown = 40; }
       // …and a queue row may name the settings page it wants («Заполните IBAN»)
       if (d.admsetpage && d.admtab === "settings") S.admSetPage = d.admsetpage;
       window.scrollTo({ top: 0 }); render(); return;
