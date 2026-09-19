@@ -917,6 +917,51 @@
       }
     },
     {
+      "id": "shop-locker-europe",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Пакомат в другой стране Европы",
+      "steps": [
+        "Положить товар в корзину и дойти до доставки.",
+        "Выбрать «Другая страна Европы», во втором списке — Италию.",
+        "Выбрать «Пакомат» и открыть выбор пакомата.",
+        "Ввести в поиск «Roma» и выбрать любой пункт.",
+        "Вернуться к стране и выбрать Польшу, потом снова открыть выбор."
+      ],
+      "expect": [
+        "Для Италии предлагается пакомат, а не один курьер.",
+        "Список не грузится весь: сверху написано, что пунктов слишком много.",
+        "Поиск по городу находит пункты, которых в первом списке не было.",
+        "Выбранный пункт встаёт в заказ и виден в сводке.",
+        "Смена страны сбрасывает пункт: чужой пакомат не переезжает в Польшу."
+      ],
+      "why": "Пакоматы DPD открыты во всей Европе, а магазин предлагал только курьера. В Польше 33 603 пункта — телефону их не скачать, поэтому ищет сервер.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-19T15:10:00.000Z",
+      "en": {
+        "title": "A locker in another European country",
+        "steps": [
+          "Put a product in the basket and get to delivery.",
+          "Choose «Другая страна Европы», then Italy in the second list.",
+          "Choose «Пакомат» and open the locker picker.",
+          "Type «Roma» into the search and pick any point.",
+          "Go back to the country, choose Poland, and open the picker again."
+        ],
+        "expect": [
+          "Italy is offered a locker, not the courier alone.",
+          "The list is not downloaded whole: a line says there are too many.",
+          "Searching by city finds points the first list did not hold.",
+          "The chosen point lands on the order and shows in the summary.",
+          "Changing the country clears the point: no locker travels to Poland."
+        ],
+        "why": "DPD lockers are open across Europe and the shop offered the courier alone. Poland has 33 603 points — not a list for a phone, so the server searches."
+      }
+    },
+    {
       "id": "shop-search-names",
       "area": "shop",
       "who": "renat",
@@ -1460,7 +1505,8 @@
       "steps": [
         "Открыть «Обзор».",
         "Прочитать блок «Сделать сегодня».",
-        "Нажать на каждую строку в нём."
+        "Нажать на каждую строку в нём.",
+        "Нажать строку про скрытые товары и посмотреть, какой список открылся."
       ],
       "expect": [
         "Написано, сколько заказов ждут отправки.",
@@ -1468,7 +1514,7 @@
         "Написано, сколько отзывов ждёт проверки.",
         "Числа совпадают с тем, что есть на самом деле.",
         "Каждая строка открывает свой раздел.",
-        "Скрытый товар не попадает в «заканчиваются», а считается отдельной строкой."
+        "Скрытый товар считается отдельной строкой, и она открывает «Каталог → Скрытые»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
       "risk": "med",
@@ -1478,7 +1524,8 @@
         "steps": [
           "Open «Обзор» (overview).",
           "Read the «Сделать сегодня» (to do today) block.",
-          "Tap every line in it."
+          "Tap every line in it.",
+          "Press the row about hidden products and look at the list it opens."
         ],
         "expect": [
           "It says how many orders wait to be sent.",
@@ -1486,12 +1533,12 @@
           "It says how many reviews wait for a check.",
           "The numbers match what is really there.",
           "Each line opens its own section.",
-          "A hidden product is not in «running low» — it gets a line of its own."
+          "A hidden product gets a line of its own, and it opens «Каталог → Скрытые»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T08:45:00.000Z"
+      "markedAt": "2026-09-19T15:10:00.000Z"
     },
     {
       "id": "panel-partners-switch",
@@ -3285,7 +3332,8 @@
         "Нажать «Создать этикетку» и подождать пару секунд.",
         "Нажать «Открыть PDF (A4) ↗».",
         "Вернуться и нажать «A6 для термопринтера ↗».",
-        "Посмотреть вес на этикетке: это коробка магазина, а не число товаров."
+        "Посмотреть вес на этикетке: это коробка магазина, а не число товаров.",
+        "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой."
       ],
       "expect": [
         "Появилось «Отправление»: перевозчик, пакомат, трек-номер и код сдачи.",
@@ -3305,7 +3353,8 @@
           "Press «Создать этикетку» (create label) and wait a couple of seconds.",
           "Press «Открыть PDF (A4) ↗».",
           "Go back and press «A6 для термопринтера ↗».",
-          "Look at the weight on the label: it is the shop's box, not the item count."
+          "Look at the weight on the label: it is the shop's box, not the item count.",
+          "Open the A4 PDF and check the band under the label is not empty."
         ],
         "expect": [
           "«Отправление» appears: carrier, locker, tracking number and drop-off code.",
@@ -3318,7 +3367,7 @@
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-19T15:10:00.000Z"
     },
     {
       "id": "order-shipped",
@@ -3765,37 +3814,39 @@
       "lang": "RU",
       "title": "Нажать «Вернуть деньги» второй раз",
       "steps": [
-        "Открыть заказ, оплаченный подарочной картой и банком вместе.",
-        "Вернуть часть суммы — столько, чтобы хватило одной карты.",
-        "Дождаться ответа и нажать «Вернуть деньги» ещё раз на ту же сумму.",
-        "Открыть «Оплата» и посмотреть список возвратов.",
-        "Открыть эту карту в «Подарочных картах»."
+        "Открыть оплаченный заказ и нажать «Вернуть деньги» на часть суммы.",
+        "Прочитать ответ: он должен быть по-русски и сказать, списано что-нибудь или нет.",
+        "Нажать «Вернуть деньги» ещё раз на ту же сумму.",
+        "Открыть «Оплата» и посчитать строки в списке возвратов.",
+        "Если заказ был оплачен подарочной картой — открыть эту карту."
       ],
       "expect": [
         "Второе нажатие не создало второй возврат — строка одна.",
         "На счёт покупателя не ушло ни цента: всё вернулось на карту.",
         "Баланс карты не вырос второй раз.",
-        "Сумма «Возвращено X из Y» после второго нажатия не изменилась."
+        "Сумма «Возвращено X из Y» после второго нажатия не изменилась.",
+        "Если Montonio отказал оба раза — обе фразы одинаковые, строк нет ни одной."
       ],
       "why": "Кнопка, которая сказала «не удалось», — это кнопка, на которую нажмут ещё раз.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-19T00:00:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-19T15:10:00.000Z",
       "en": {
         "title": "Press «Вернуть деньги» a second time",
         "steps": [
-          "Open an order paid with a gift card and a bank link together.",
-          "Refund part of it — enough that one card covers it.",
-          "Wait for the answer, then press «Вернуть деньги» again for the same amount.",
-          "Open «Оплата» and look at the list of refunds.",
-          "Open that card in «Подарочные карты»."
+          "Open a paid order and press «Вернуть деньги» for part of the amount.",
+          "Read the answer: it must be in plain words and say whether anything was taken.",
+          "Press «Вернуть деньги» again for the same amount.",
+          "Open «Оплата» and count the rows in the refund list.",
+          "If the order was paid with a gift card, open that card."
         ],
         "expect": [
           "The second press made no second refund — there is one line.",
           "Not a cent went to the customer's account: it all went back on the card.",
           "The card's balance did not grow a second time.",
-          "«Возвращено X из Y» did not change after the second press."
+          "«Возвращено X из Y» did not change after the second press.",
+          "If Montonio refused both times, both answers read alike and no row appears."
         ],
         "why": "A button that said «it did not work» is a button somebody presses again."
       }
@@ -3967,7 +4018,8 @@
         "Открыть заказ, оплаченный этой картой, и нажать «Вернуть деньги».",
         "Прочитать окошко и подтвердить.",
         "Снова открыть заказ с картой и вернуть деньги.",
-        "На кассе ввести код карты."
+        "На кассе ввести код карты.",
+        "Прочитать предупреждение перед возвратом: оно должно назвать подтверждение банка."
       ],
       "expect": [
         "Первый возврат отказан: «…уже потрачена на … — вернуть заказ целиком нельзя».",
@@ -3988,7 +4040,8 @@
           "Open the order paid with that card and press «Вернуть деньги».",
           "Read the box and confirm.",
           "Open the card's order again and refund it.",
-          "Enter the card code at the checkout."
+          "Enter the card code at the checkout.",
+          "Read the warning before refunding: it must mention the bank's confirmation."
         ],
         "expect": [
           "The first refund is refused: «…уже потрачена на … — вернуть заказ целиком нельзя».",
@@ -4000,7 +4053,7 @@
         ],
         "why": "A refund onto a card already spent is double money; a card never refunded is money lost."
       },
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-19T15:10:00.000Z"
     },
     {
       "id": "acct-code-login",
@@ -4245,7 +4298,9 @@
         "Войти в кабинет с другого телефона и снова дойти до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз.",
         "Переключить страну на Латвию, потом на Польшу, и посмотреть список способов.",
-        "Сравнить список с тем, что предлагает оформление в ту же страну: он должен совпасть."
+        "Сравнить список с тем, что предлагает оформление в ту же страну: он должен совпасть.",
+        "Выбрать «Другая страна Европы»: появится второй список — взять в нём Италию.",
+        "Проверить, что среди способов есть пакомат, а цена та же, что в оформлении."
       ],
       "expect": [
         "Пока пакомат не выбран, под списком: «Выберите пакомат — тогда сохраним».",
@@ -4267,7 +4322,9 @@
           "Sign in on another phone and get to the delivery step again.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more.",
           "Switch the country to Latvia, then to Poland, and look at the list of methods.",
-          "Compare that list with what the checkout offers for the same country: they must match."
+          "Compare that list with what the checkout offers for the same country: they must match.",
+          "Choose «Другая страна Европы»: a second list appears — pick Italy in it.",
+          "Check that a locker is among the methods, at the same price as the checkout."
         ],
         "expect": [
           "Until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
@@ -4280,7 +4337,52 @@
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T08:45:00.000Z"
+      "markedAt": "2026-09-19T15:10:00.000Z"
+    },
+    {
+      "id": "acct-refund-sent",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Что видит покупатель, пока возврат идёт",
+      "steps": [
+        "Оформить и оплатить заказ на свою почту.",
+        "В панели вернуть деньги по этому заказу.",
+        "Войти в «Мой кабинет» и открыть «Мои заказы».",
+        "Посмотреть строку этого заказа.",
+        "Сравнить её с письмом, которое пришло на почту."
+      ],
+      "expect": [
+        "В строке заказа написано «возврат отправлен» и сумма.",
+        "Когда банк подтвердит, там написано «возврат».",
+        "Строка и письмо говорят одно и то же.",
+        "Аннулированная подарочная карта из кабинета пропала.",
+        "Её PDF больше не скачивается."
+      ],
+      "why": "Montonio подтверждает возврат до десяти дней. Письмо «Возврат отправлен» уже у покупателя, а в кабинете не менялось ничего — и он пишет, что деньги не вернули.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T15:10:00.000Z",
+      "en": {
+        "title": "What the customer sees while a refund is on its way",
+        "steps": [
+          "Place and pay an order to your own e-mail.",
+          "Refund that order from the panel.",
+          "Sign in to the account and open «Мои заказы».",
+          "Look at that order's row.",
+          "Compare it with the letter that arrived."
+        ],
+        "expect": [
+          "The order's row says «возврат отправлен» and the amount.",
+          "Once the bank confirms, it says «возврат».",
+          "The row and the letter say the same thing.",
+          "A cancelled gift card is gone from the account.",
+          "Its PDF no longer downloads."
+        ],
+        "why": "Montonio takes up to ten days to confirm. The «refund sent» letter is already with the customer while the account showed no change at all — so they write that the money never came."
+      }
     },
     {
       "id": "acct-profile",
@@ -5597,18 +5699,20 @@
         "Оформить и оплатить заказ на 2 штуки этого товара.",
         "Посмотреть «Склад»: остаток должен быть 0.",
         "Вернуть деньги по этому заказу.",
-        "Посмотреть «Склад» ещё раз."
+        "Посмотреть «Склад» ещё раз.",
+        "Если Montonio отказал в возврате — отменить заказ: склад считает так же."
       ],
       "expect": [
         "Продажа остановилась на нуле — в минус склад не уходит.",
         "После возврата на складе 1, а не 2.",
-        "В истории один возврат на одну штуку."
+        "В истории один возврат на одну штуку.",
+        "Если Montonio отказал, причина написана по-русски и ничего не списано."
       ],
       "why": "Склад, который завышает, продаёт то, чего нет. Возврат не может положить больше, чем продажа взяла.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-19T08:45:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-19T15:10:00.000Z",
       "en": {
         "title": "Refunding an order the shelf could not fill",
         "steps": [
@@ -5616,12 +5720,14 @@
           "Place and pay an order for 2 of that product.",
           "Look at «Склад»: the count should be 0.",
           "Refund that order.",
-          "Look at «Склад» again."
+          "Look at «Склад» again.",
+          "If Montonio refuses the refund, cancel the order instead: the shelf counts the same."
         ],
         "expect": [
           "The sale stopped at zero — the shelf never goes negative.",
           "After the refund the shelf has 1, not 2.",
-          "The history shows one return of one item."
+          "The history shows one return of one item.",
+          "If Montonio refuses, the reason is in plain words and nothing has been taken."
         ],
         "why": "A shelf that overstates sells what is not there. A refund cannot put back more than the sale took."
       }
@@ -6307,20 +6413,22 @@
         "Под обложкой нажать «Заполнить рамку».",
         "Потянуть пальцем по каждой из трёх рамок.",
         "Сохранить и открыть эту статью в магазине.",
-        "Нажать «Вся фотография» и сохранить снова."
+        "Нажать «Вся фотография» и сохранить снова.",
+        "Открыть список статей в магазине и сравнить обложку с рамкой «В списке статей»."
       ],
       "expect": [
         "Под обложкой есть выбор: «Вся фотография» или «Заполнить рамку».",
         "Рамок три: в списке статей, в начале статьи и в соцсетях.",
         "В «Заполнить рамку» фотография двигается пальцем во всех трёх.",
         "В магазине обложка стоит так же, как в рамке «В начале статьи».",
-        "«Вся фотография» показывает снимок целиком в списке и в статье."
+        "«Вся фотография» показывает снимок целиком в списке и в статье.",
+        "В списке статей обложка стоит так же, как в её рамке в панели."
       ],
       "why": "Обложка обрезается по-разному в трёх местах сразу, и увидеть это можно было только опубликовав статью. Лицо, срезанное посередине, — это статья, которую не открывают.",
       "risk": "low",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-18T12:20:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-19T15:10:00.000Z",
       "en": {
         "title": "How an article's cover sits in its frame",
         "steps": [
@@ -6328,14 +6436,16 @@
           "Under the cover press «Заполнить рамку» (fill the frame).",
           "Drag a finger across each of the three frames.",
           "Save and open that article in the shop.",
-          "Press «Вся фотография» (the whole photo) and save again."
+          "Press «Вся фотография» (the whole photo) and save again.",
+          "Open the blog list in the shop and compare the cover with the «list» frame."
         ],
         "expect": [
           "Under the cover is a choice: «Вся фотография» or «Заполнить рамку».",
           "There are three frames: the blog list, the article top and social.",
           "In «Заполнить рамку» the photo moves under a finger in all three.",
           "In the shop the cover sits as it does in the «В начале статьи» frame.",
-          "«Вся фотография» shows the whole photo in the list and the article."
+          "«Вся фотография» shows the whole photo in the list and the article.",
+          "In the blog list the cover sits exactly as it does in its panel frame."
         ],
         "why": "A cover is cropped three different ways at once, and the only way to see that was to publish the article. A face cut through the middle is an article nobody opens."
       }
