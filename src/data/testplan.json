@@ -1467,7 +1467,8 @@
         "Написано, какие товары заканчиваются.",
         "Написано, сколько отзывов ждёт проверки.",
         "Числа совпадают с тем, что есть на самом деле.",
-        "Каждая строка открывает свой раздел."
+        "Каждая строка открывает свой раздел.",
+        "Скрытый товар не попадает в «заканчиваются», а считается отдельной строкой."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
       "risk": "med",
@@ -1484,10 +1485,13 @@
           "It says which products are running out.",
           "It says how many reviews wait for a check.",
           "The numbers match what is really there.",
-          "Each line opens its own section."
+          "Each line opens its own section.",
+          "A hidden product is not in «running low» — it gets a line of its own."
         ],
         "why": "A wrong number on this screen is a forgotten order."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T08:45:00.000Z"
     },
     {
       "id": "panel-partners-switch",
@@ -4239,7 +4243,9 @@
         "Выбрать страну и строку «Пакомат», потом сам пакомат из списка.",
         "Набрать новую корзину и дойти до шага доставки.",
         "Войти в кабинет с другого телефона и снова дойти до шага доставки.",
-        "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
+        "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз.",
+        "Переключить страну на Латвию, потом на Польшу, и посмотреть список способов.",
+        "Сравнить список с тем, что предлагает оформление в ту же страну: он должен совпасть."
       ],
       "expect": [
         "Пока пакомат не выбран, под списком: «Выберите пакомат — тогда сохраним».",
@@ -4259,7 +4265,9 @@
           "Choose a country and a «Пакомат» row, then the locker itself from the list.",
           "Fill a new cart and get to the delivery step.",
           "Sign in on another phone and get to the delivery step again.",
-          "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
+          "Go back to the account, press «Выйти» (sign out) and go through the checkout once more.",
+          "Switch the country to Latvia, then to Poland, and look at the list of methods.",
+          "Compare that list with what the checkout offers for the same country: they must match."
         ],
         "expect": [
           "Until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
@@ -4270,7 +4278,9 @@
           "On a shared computer the next person sees no stranger's locker."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T08:45:00.000Z"
     },
     {
       "id": "acct-profile",
@@ -5573,6 +5583,47 @@
           "Cancelling the order puts the stock back."
         ],
         "why": "A sale that leaves stock untouched sells the same bottle twice."
+      }
+    },
+    {
+      "id": "stock-refund-clamped",
+      "area": "stock",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Возврат заказа, которого не хватило на складе",
+      "steps": [
+        "Выписать товару остаток 1.",
+        "Оформить и оплатить заказ на 2 штуки этого товара.",
+        "Посмотреть «Склад»: остаток должен быть 0.",
+        "Вернуть деньги по этому заказу.",
+        "Посмотреть «Склад» ещё раз."
+      ],
+      "expect": [
+        "Продажа остановилась на нуле — в минус склад не уходит.",
+        "После возврата на складе 1, а не 2.",
+        "В истории один возврат на одну штуку."
+      ],
+      "why": "Склад, который завышает, продаёт то, чего нет. Возврат не может положить больше, чем продажа взяла.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T08:45:00.000Z",
+      "en": {
+        "title": "Refunding an order the shelf could not fill",
+        "steps": [
+          "Set the product's count to 1.",
+          "Place and pay an order for 2 of that product.",
+          "Look at «Склад»: the count should be 0.",
+          "Refund that order.",
+          "Look at «Склад» again."
+        ],
+        "expect": [
+          "The sale stopped at zero — the shelf never goes negative.",
+          "After the refund the shelf has 1, not 2.",
+          "The history shows one return of one item."
+        ],
+        "why": "A shelf that overstates sells what is not there. A refund cannot put back more than the sale took."
       }
     },
     {

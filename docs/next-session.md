@@ -95,13 +95,13 @@ Nothing here is urgent; each is written up in
   second numbered invoice). All need design, all are low-probability.
 - **F21** — the label normaliser has no size sanity check. Unverifiable until a
   real label exists, which is Sunday at the earliest.
-- **F40 — needs your say-so, not a fix.** The account's «Доставка по
-  умолчанию» offers fewer carriers than the checkout does: LV and LT show
-  Omniva alone where the checkout has four, FI shows SmartPosti without DPD,
-  EE lacks Unisend and Nova Post, and none of the 18 DPD countries opened on
-  18.09 has a row at all. So a customer cannot save a Unisend, Nova Post or
-  DPD locker as their default. It is a change to the shop's own screens, which
-  is yours to approve — it was left alone for that reason and for no other.
+- **F40 — done, 19.09.** He approved it: the account's «Доставка по
+  умолчанию» is now built from CARRIERS_BY_COUNTRY, the same table the
+  checkout offers from and one a mirror test guards, so it cannot fall behind
+  again. It also took 26 lines of hand-written rows and a 23-line price helper
+  with it — those prices had been dead for a while, the screen prices through
+  the rules — and the three places that asked that table whether the shop
+  serves a country, which is why a Polish address could not be picked there.
 - **F26, F29, F53, F55, F56** — noise and coverage gaps.
 - **§ 9.5 — done after this list was written:** the three duplicate keys are
   gone from the ET and EN dictionaries. Each kept the value that was already
@@ -127,10 +127,12 @@ Nothing here is urgent; each is written up in
   not submitted; the refund adoption stays exactly as built; and the scanner
   keeps under-counting but says «это уже записано — на складе N» instead of
   claiming a movement. Two new checks for the last two, 193 in the plan.
-- **Still his, and still open:** F40 above, whether a hidden catalogue product
-  should go back to nagging in the low-stock counts, and whether a refund of a
-  partially-clamped sale should credit the full quantity or only what the sale
-  actually took.
+- **…and the last three, settled the same morning and built:** the account
+  carrier list above; a hidden product is counted apart from «заканчиваются»
+  rather than dropped, so a bottle hidden BECAUSE it ran out still shows
+  somewhere; and a refund now credits only what the sale actually took — the
+  shelf had one, the order wanted two, the sale stopped at zero, the refund
+  puts back one. **Nothing is waiting on him but Montonio.**
 
 ## The test plan: 191 checks
 
