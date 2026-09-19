@@ -4695,7 +4695,9 @@
         "Найти письмо про подарок.",
         "Открыть приложенный PDF.",
         "Ввести код с PDF на кассе, в поле «Промокод или подарочная карта».",
-        "Открыть «Письма» и найти в списке «Подарочная карта»."
+        "Открыть «Письма» и найти в списке «Подарочная карта».",
+        "Открыть «Письма» → «Подарочная карта» и поменять тему.",
+        "Отправить себе тест: в письме должна быть новая тема."
       ],
       "expect": [
         "Письмо лежит у получателя, а не у покупателя.",
@@ -4715,7 +4717,9 @@
           "Find the letter about the gift.",
           "Open the attached PDF.",
           "At the checkout enter the PDF's code in «Промокод или подарочная карта».",
-          "Open «Письма» and find «Подарочная карта» in the list."
+          "Open «Письма» and find «Подарочная карта» in the list.",
+          "Open «Письма» → «Подарочная карта» and change the subject.",
+          "Send yourself a test: the letter must carry the new subject."
         ],
         "expect": [
           "The letter is with the recipient, not with the buyer.",
@@ -4728,7 +4732,7 @@
         "why": "A card sent to the wrong person is a ruined present, already paid for."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-19T15:54:54.000Z"
     },
     {
       "id": "mail-invoice",

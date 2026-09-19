@@ -260,7 +260,11 @@ describe("PUT /api/admin/settings validates mail_texts", () => {
   it("stores only known letters, languages and fields", async () => {
     const stored = await put({
       "order-confirmed": { et: { subject: " Uus teema ", nope: "x" } },
-      "gift-card": { et: { subject: "not editable" } },
+      /* A letter the shop sends but whose text is not the owner's to write.
+         This used to be «gift-card», until the card's letter joined the
+         editable set on 19.09.2026 — the invoice ones are the remaining four
+         in TEMPLATE_IDS that MAIL_TEXT_TEMPLATES leaves out. */
+      invoice: { et: { subject: "not editable" } },
       "order-shipped": { xx: { subject: "no such language" } },
     });
     expect(stored).toEqual({ "order-confirmed": { et: { subject: "Uus teema" } } });

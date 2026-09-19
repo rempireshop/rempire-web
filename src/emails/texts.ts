@@ -43,6 +43,11 @@ export const MAIL_TEXT_TEMPLATES = [
   "pos-receipt",
   "abandoned-cart",
   "back-in-stock",
+  /* 19.09.2026. The card's own design is fixed — src/lib/giftcard-pdf.ts knows
+     one layout — so the letter around it is the only part the owner can shape,
+     and it was the one letter he could not touch. Dim: «if anything it would
+     make sense to be able to edit it in emails». */
+  "gift-card",
   "birthday",
   "login-code",
   "partner-welcome",
@@ -298,6 +303,28 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
         "Availability and price are correct at the time this e-mail was sent. We do not reserve stock — first come, first served.",
     },
   },
+  /* Word for word what the letter said before it became editable, so a shop
+     that never touches these three fields sends exactly the same letter. The
+     one sentence NOT here is «Мария дарит вам...»: whether there is a giver
+     at all is data, not wording, so the renderer keeps that branch and only
+     steps aside once the owner has written an intro of his own. */
+  "gift-card": {
+    ru: {
+      subject: "Вам подарили карту Rempire на {total}",
+      intro: "Вам подарили подарочную карту Rempire на {total}. Ниже её код.",
+      signature: "Храните код как деньги: он не привязан к адресу и работает у любого, кто его введёт.",
+    },
+    et: {
+      subject: "Sulle kingiti Rempire kinkekaart summas {total}",
+      intro: "Sulle kingiti Rempire kinkekaart summas {total}. Kood on allpool.",
+      signature: "Hoia koodi nagu raha: see ei ole aadressiga seotud ja töötab igaühel, kes selle sisestab.",
+    },
+    en: {
+      subject: "You've been given a {total} Rempire gift card",
+      intro: "You've been given a {total} Rempire gift card. The code is below.",
+      signature: "Treat the code like cash: it is not tied to an address and works for anyone who enters it.",
+    },
+  },
   birthday: {
     ru: {
       subject: "С днём рождения! Ваша персональная скидка — Rempire",
@@ -467,6 +494,13 @@ export function mailText(
 }
 
 /** The same string, ready for a letter's HTML body: escaped, newlines kept. */
+/** Has the owner written this field himself? The gift-card letter asks,
+    because its opening sentence changes with the data when he has not. */
+export function hasMailText(template: MailTextTemplate, lang: Lang, field: MailTextField): boolean {
+  const own = OVERRIDE[template]?.[lang]?.[field];
+  return typeof own === "string" && own.trim() !== "";
+}
+
 export function mailTextHtml(
   template: MailTextTemplate,
   lang: Lang,

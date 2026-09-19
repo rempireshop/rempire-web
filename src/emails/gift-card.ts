@@ -20,6 +20,7 @@ import {
   textBody,
   textFooter,
 } from "./layout";
+import { hasMailText, mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, RenderedEmail } from "./types";
 
 export interface GiftCardLike {
@@ -113,7 +114,25 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
   const message = pick(r.message);
   const shopUrl = absUrl("/shop2/", "/shop2/");
 
-  const lead = from ? t.lead(esc(from), amountHtml) : t.leadNoFrom(amountHtml);
+  /* The three fields the owner may write (MAIL_TEXT_TEMPLATES, 19.09.2026).
+     `{total}` is the card's face value, the one number these sentences carry.
+     Two sets of values because the HTML keeps «50 €» unbroken and the plain
+     text keeps the ordinary space. */
+  const values: MailTextValues = { total: amount, shop: "Rempire", code: code };
+  const valuesHtml: MailTextValues = { total: amountHtml, shop: "Rempire", code: code };
+
+  /* Whether there is a giver at all is DATA, not wording: «Мария дарит вам…»
+     against «Вам подарили…». So the branch stays while the owner has written
+     nothing of his own, and steps aside the moment he has — his sentence then
+     opens the letter in both cases, which is the only predictable rule. */
+  const ownIntro = hasMailText("gift-card", L, "intro");
+  const lead = ownIntro
+    ? mailTextHtml("gift-card", L, "intro", valuesHtml)
+    : from ? t.lead(esc(from), amountHtml) : t.leadNoFrom(amountHtml);
+  const leadText = ownIntro
+    ? mailText("gift-card", L, "intro", values)
+    : from ? t.lead(from, amount) : t.leadNoFrom(amount);
+  const signature = mailText("gift-card", L, "signature", values);
 
   const body =
     rowTitle(t.title) +
@@ -122,7 +141,7 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
     rowCode(t.codeLabel, code, t.codeNote, true) +
     rowNote([esc(t.how)]) +
     rowButton(shopUrl, t.cta) +
-    rowNote([esc(t.note)]);
+    rowNote([mailTextHtml("gift-card", L, "signature", values)]);
 
   const html = shell({
     lang: L,
@@ -136,7 +155,7 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
     t.title.toUpperCase(),
     "",
     t.greet(name),
-    from ? t.lead(from, amount) : t.leadNoFrom(amount),
+    leadText,
     "",
     message ? `${t.messageLabel}: ${message}` : "",
     message ? "" : "",
@@ -147,10 +166,10 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
     "",
     `${t.cta}: ${shopUrl}`,
     "",
-    t.note,
+    signature,
     "",
     textFooter(L, t.why),
   ]);
 
-  return { subject: t.subject(amount), html, text: text.replace(/\n{3,}/g, "\n\n") };
+  return { subject: mailText("gift-card", L, "subject", values), html, text: text.replace(/\n{3,}/g, "\n\n") };
 }
