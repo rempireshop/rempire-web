@@ -99,6 +99,24 @@ class; the worst of them was not a count.
   now carries per-line prices, the total, the delivery line and its cost, the
   tracking number and anything refunded, each with its currency.
 
+- **The gift card's letter was the one letter the owner could not write.**
+  `MAIL_TEXT_TEMPLATES` listed twelve and this was not one of them, so the row
+  added to «Письма» that afternoon opened on nothing — and, because
+  `mailTpl()` falls back to the first row for a key it does not know, the
+  button from «Оформление» landed on «Заказ принят». It is editable now, with
+  its defaults lifted word for word from the old text so nothing a customer
+  receives changed. The one sentence that stayed automatic is the opening,
+  because whether there is a giver is data, not wording — it steps aside the
+  moment he writes his own. A test now keeps the panel's list of letters and
+  `MAIL_TEXT_TEMPLATES` the same set; neither side can see the other.
+- **The go-live list had drifted.** Dim went through `/golive/` and six rows
+  were still «todo» for work finished days before: weighing (cancelled 18.09),
+  the aerosols (closed 19.09), the payment decisions (built the night of the
+  19th), the thirteen e2e failures (fixed 18.09, merge `0fbd940`), the
+  «проверьте баланс» copy (removed 18.09) and the hidden-stock question
+  (decided 19.09). Blocking items: **22 → 16**. The second Fable pass moves to
+  after launch week.
+
 **Merchant Center — a go-live dependency nobody had written down.** The account
 (`5819586565`, «Rempire Tower Shop») is live and earning: 175 clicks in 28 days
 on free listings, ad spend €0. Every product in it is fed by **six Shopify App
