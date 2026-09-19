@@ -1584,6 +1584,8 @@
         "Artikkel on liiga pikk — lühenda teksti ja salvesta uuesti.",
       "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
       "Показать ещё": "Näita veel",
+      // 19.09.2026: the one control in an empty search result
+      "Сбросить поиск": "Tühista otsing",
       // analytics agent — «Аналитика» tab
       "Что происходит с магазином — простыми словами.": "Mis toimub poes — lihtsate sõnadega.",
       "Сегодня": "Täna", "7 дней": "7 päeva", "30 дней": "30 päeva", "90 дней": "90 päeva",
@@ -4421,6 +4423,8 @@
         "The article is too long — shorten the text and save again.",
       "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
       "Показать ещё": "Show more",
+      // 19.09.2026: the one control in an empty search result
+      "Сбросить поиск": "Clear the search",
       // analytics agent — «Аналитика» tab
       "Что происходит с магазином — простыми словами.": "What's happening in the shop — in plain terms.",
       "Сегодня": "Today", "7 дней": "7 days", "30 дней": "30 days", "90 дней": "90 days",
@@ -8400,6 +8404,10 @@
     admOrderFilter: "all",
     admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
+    /* «Правки не сохранены — если выйти, они пропадут.» — raised by any way
+       out of the product editor while the save bar says «Не сохранено»,
+       cleared by «Остаться» and by the editor closing for real. */
+    goodsConfirmBack: false,
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
     goodsQ: "",      // admin goods search
     goodsFilter: "all", // «Товары» chips: all | on | off | out (ADM_GOODS_FILTERS)
@@ -19128,6 +19136,12 @@
     }
     return SRV.admin === true ? 0 : lowStock().length;
   }
+  /** What the header counts on each tab: the rows that tab is showing. */
+  function admProductsCount(tab) {
+    if (tab === "stock") return (S.stockLevels || []).length;
+    if (tab === "sets") return (S.admBundles || []).length;
+    return admCatalogList().length;
+  }
   function admProductsHTML() {
     var tab = admProductTab();
     // the badge is drawn on every tab, so the shelf list is asked for on every
@@ -19136,8 +19150,12 @@
     var warn = admLowCount();
     var tabs =
       '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
+      /* The zero is printed too, once the shelf list has actually arrived:
+         «nothing to re-order» and «not loaded yet» looked identical, and the
+         chips one row below print theirs on purpose. Blank only while the
+         list is still coming. */
       '<button class="adm-tab" data-admtab="stock" aria-current="' + (tab === "stock") + '" title="Склад">Склад ' +
-        '<span class="adm-tab__warn">' + (warn || "") + "</span></button>" +
+        '<span class="adm-tab__warn">' + (S.stockLevels ? warn : "") + "</span></button>" +
       '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
     var add = tab === "sets"
       ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
@@ -19154,7 +19172,12 @@
         : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
     if (tab === "catalog") { loadCustomAll(false); loadProOverrides(false); }
     return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", 'Товары <small>' + CATALOGUE.length + "</small>", add) +
+      /* The number follows the tab. It was CATALOGUE.length on all three —
+         the shop's catalogue, which leaves hidden products out — so the
+         header and the line at the foot of «Каталог» printed two different
+         totals on one screen, and on «Склад» and «Наборы» it counted
+         something the tab was not showing at all. */
+      admHead("", 'Товары <small>' + admProductsCount(tab) + "</small>", add) +
       '<div class="adm-tabs" role="group" aria-label="Что показываем">' + tabs + "</div>" +
       (tab === "stock" ? admStockHTML() : tab === "sets" ? admSetsHTML() : admCatalogHTML()) +
       "</div>";
@@ -19177,10 +19200,37 @@
   function goodsOffSale(p) {
     return !!((p.custom && p.active === false) || shopHidden(p.id));
   }
+  /**
+   * «Нет в наличии» here and «Нет» on «Склад» used to count two different
+   * things.
+   *
+   * `p.stock` is the MANUAL in/low/out flag — the «Наличие» select in the
+   * editor. `state` on a warehouse row is the COUNTED quantity against that
+   * row's own threshold. They are two layers by design (src/lib/inventory.ts),
+   * and reading only the first of them meant a bottle «Склад» listed under
+   * «Нет» wore a green «В наличии» badge one tab away, while a custom product
+   * — `customProduct()` hard-codes `stock: "in"` — could never appear under
+   * this chip at all.
+   *
+   * The counted shelf wins wherever there is one, because that is the number
+   * the shop sells against; the manual flag answers for everything nobody has
+   * counted. Same order as the badge beside it (goodsStockWord).
+   */
+  function goodsIsOut(p) {
+    var lv = goodsShelf(p);
+    if (lv && lv.tracked) return lv.state === "out";
+    return p.stock === "out";
+  }
+  /** The warehouse row for a product with no size chosen, or null. */
+  function goodsShelf(p) {
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) if (rows[i].productId === p.id) return rows[i];
+    return null;
+  }
   function goodsMatchesFilter(p, f) {
     if (f === "off") return goodsOffSale(p);
     if (f === "on") return !goodsOffSale(p);
-    if (f === "out") return !goodsOffSale(p) && p.stock === "out";
+    if (f === "out") return !goodsOffSale(p) && goodsIsOut(p);
     return true;
   }
   function admCatalogHTML() {
@@ -19188,10 +19238,15 @@
     var all = admCatalogList();
     return '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
-          // only «Скрытые» carries a number: it is the one he goes looking for
-          var n = x[0] === "off" ? all.filter(goodsOffSale).length : 0;
+          /* Every chip says how many rows are behind it, zeros included — the
+             same rule «Склад» now follows, and for the same reason: three of
+             these four said nothing at all, so the only way to learn whether
+             anything was hidden or out of stock was to press and look. The
+             count comes from goodsMatchesFilter(), the very predicate the
+             list filters by, so the number and the list cannot disagree. */
+          var n = all.filter(function (q) { return goodsMatchesFilter(q, x[0]); }).length;
           return '<button class="adm-chip" data-goodsfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-            x[1] + (n ? " " + n : "") + "</button>";
+            x[1] + " " + n + "</button>";
         }).join("") + "</div>" +
         /* Not «штрихкод»: admCatalogRows() matches the query against
            brand + name + id and nothing else. Barcodes live on the warehouse
@@ -19267,18 +19322,37 @@
     return own.concat(file, hidden, hiddenFileProducts());
   }
   function admCatalogRows() {
-    var q = (S.goodsQ || "").toLowerCase().trim();
+    /* The same folding «Склад» searches with, and for the same reason: a raw
+       substring over «бренд название id» found nothing for «kevin murphy»
+       (the catalogue writes «Kevin.Murphy»), «un tangled» or «300 мл» — which
+       is exactly how the owner types. One tab away the identical typing
+       worked, and this one answered «Таких товаров нет» about a product on
+       the screen below. Sizes are in the haystack too, so «awapuhi 300»
+       narrows to the one bottle. */
+    var q = scanFold(S.goodsQ);
+    var words = q ? q.split(" ") : [];
     var f = S.goodsFilter || "all";
     var all = admCatalogList().filter(function (p) { return goodsMatchesFilter(p, f); });
-    var list = q
-      ? all.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+    var list = words.length
+      ? all.filter(function (p) {
+          var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " + (p.sizes || []).join(" "));
+          var hayWords = hay.split(" ");
+          for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
+          return true;
+        })
       : all;
     // 40 at a time, «Показать ещё» for the rest — a search narrows it faster,
     // but the owner must be able to scroll to any product without one
     var cap = S.goodsShown || 40;
     var shown = list.slice(0, cap);
     return shown.map(admCatalogRow).join("") +
-      (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
+      /* An empty answer with nothing to press is a dead end: the query stays
+         in a box above the fold and the only way out is to find it and clear
+         it by hand, on a phone, with the keyboard over half the screen. */
+      (shown.length ? "" : '<div class="adm-empty"><span>Таких товаров нет</span>' +
+        ((S.goodsQ || "").trim() || f !== "all"
+          ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-goodsclear>Сбросить поиск</button>'
+          : "") + "</div>") +
       '<p class="adm-hint" style="margin:10px 0 0">' +
         (list.length > cap ? "Показаны первые " + cap + " из " + list.length : admItemsLabel(list.length)) + "</p>" +
       (list.length > cap
@@ -28381,6 +28455,7 @@
         DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
       }
       AI_UNDO = null; S.adminEdit = ""; S.goodsSizes = null; GAL.id = ""; UP.err = ""; vidReset();
+      S.goodsConfirmBack = false;   // saved: there is nothing left to warn about
       toast(entry ? "Сохранено ✓" : "Изменений нет", entry);
       render();
       goodsBackToRow(product.id);
@@ -28489,6 +28564,18 @@
     var isNew = !!p.isNew;   // product creation
     return '<div class="adm-screen adm-screen--tight">' +
       '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
+      /* This form keeps no draft in S: every field is read off the DOM when
+         «Сохранить» is pressed. So «← Товары», «Отмена» and the phone's back
+         gesture each threw away a price, three descriptions, six SEO boxes,
+         the size ladder and any reordered photos — silently, on one mis-tap
+         at the top of a five-pane form. The blog editor and the newsletter
+         have asked first since 12.09.2026; this one is the last that did not.
+         Same card, same two buttons, same words. */
+      (S.goodsConfirmBack
+        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admbackyes>Выйти без сохранения</button>' +
+          '<button class="adm-link adm-link--muted" data-admbackno>Остаться</button></div>'
+        : "") +
       '<div class="adm-head"><div>' +
         '<div class="adm-head__kicker">' + (isNew ? "Новый товар"
           : esc(p.brand) + " · <span>" + esc(CAT_NAMES[p.cat] || p.cat) + "</span>" + (p.custom ? " · <span>ваш товар</span>" : "")) + "</div>" +
@@ -28816,6 +28903,18 @@
   /** The list turns its own page: the owner scrolling towards the last row is
       the same intent as pressing «Показать ещё», and on a phone with ~320
       rows it is the only one that does not need six taps. */
+  /** «Каталог» turns its own page, the way «Склад» does. A render() per page
+      is what «Показать ещё» already cost, so nothing here is dearer than the
+      tap it replaces — there is simply no tap. */
+  function goodsScrollMore() {
+    if (S.screen !== "admin" || S.adminTab !== "goods" || S.adminEdit || S.scanOpen) return;
+    if (admProductTab() !== "catalog") return;
+    var more = document.querySelector("[data-admgoodsmore]");
+    if (!more) return;
+    if (more.getBoundingClientRect().top > (window.innerHeight || 0) + 400) return;
+    S.goodsShown = (S.goodsShown || 40) + 40;
+    render();
+  }
   function stockScrollMore() {
     if (!S.stockLevels || S.screen !== "admin" || S.scanOpen) return;
     var list = document.getElementById("stocklist");
@@ -35809,9 +35908,16 @@
       BLOGSEL = null; BLOGCARET = null;
     }
     else if (top === "edit") {
+      /* …and the same question the back LINK asks, because a swipe is how a
+         phone closes a card and it used to be the one exit with no guard at
+         all. The layer stays open, so admSyncHistory() parks a fresh entry
+         and the next Back closes for real — exactly as it works for the blog
+         two branches up. */
+      if (goodsEditDirty() && !S.goodsConfirmBack) { S.goodsConfirmBack = true; return true; }
       var backId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+      S.goodsConfirmBack = false;
       goodsBackToRow(backId);
     } else if (top === "order") {
       S.adminOrder = 0;
@@ -36213,7 +36319,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -36761,6 +36867,7 @@
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
+      S.goodsConfirmBack = false;   // a fresh card never opens mid-question
       S.goodsSizes = null; S.goodsNew = null;   // product creation: the size rows start from what is saved
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       // a fresh product opens on «Основное», in the language and the video
@@ -36768,11 +36875,17 @@
       S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) {
+    /* «Остаться» / «Выйти без сохранения» — the two halves of the question
+       «← Товары» now asks when there is something to lose. */
+    if (d.admbackno !== undefined) { S.goodsConfirmBack = false; render(); return; }
+    if (d.admclose !== undefined || d.admbackyes !== undefined) {
+      if (d.admbackyes === undefined && goodsEditDirty() && !S.goodsConfirmBack) {
+        S.goodsConfirmBack = true; render(); return;
+      }
       var closeId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null;   // product creation
-      S.goodsEditTab = "main"; S.goodsVidKind = ""; render();
+      S.goodsEditTab = "main"; S.goodsVidKind = ""; S.goodsConfirmBack = false; render();
       goodsBackToRow(closeId); return;
     }
     /* ---- Товар: the five tabs -------------------------------------------
@@ -36838,6 +36951,10 @@
     // «Какие товары»: the same chips «Заказы» and «Склад» have, and the same
     // rule — another filter is another list, so it starts at its first page
     if (d.goodsfilter) { S.goodsFilter = d.goodsfilter; S.goodsShown = 40; render(); return; }
+    /* The one control in an empty result: back to every product, query and
+       filter both. The box itself is repainted by render(), so there is
+       nothing to clear by hand afterwards. */
+    if (d.goodsclear !== undefined) { S.goodsQ = ""; S.goodsFilter = "all"; S.goodsShown = 40; render(); return; }
     if (d.admgoodsnew !== undefined) {
       S.adminTab = "goods"; S.adminEdit = "new"; S.goodsNew = { brand: "", name: "", cat: "hair", subcat: "" };
       S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); mediaProbe();
@@ -36979,6 +37096,12 @@
         var moved = GAL.list.splice(mi, 1)[0];
         GAL.list.splice(mj, 0, moved);
         GAL.reset = false;
+        /* «Every button that edits the draft should say so here» — the rule
+           written above admBarTouched() when «×» on a size was fixed. Three of
+           the four buttons in this strip broke it: only «★» said anything, so
+           a reordered or deleted photo could be walked away from with the
+           header still blank. */
+        admBarTouched();
         render();
       }
       return;
@@ -37001,6 +37124,7 @@
         // an older one has to survive so undo can bring it back
         if (gone && GAL.fresh[gone.url]) { galDrop(GAL.fresh[gone.url]); delete GAL.fresh[gone.url]; }
         GAL.reset = false;
+        admBarTouched();
         render();
       }
       return;
@@ -37008,6 +37132,9 @@
     if (d.galreset !== undefined) {
       GAL.list = baseGallery(d.galreset);
       GAL.reset = true;
+      /* Putting the photos back is an edit too: it differs from what is saved
+         the moment anything else in this sitting moved them. */
+      admBarTouched();
       render(); return;
     }
     if (d.vpick !== undefined) {
@@ -39664,6 +39791,9 @@
       tickQueued = false; paintTint();
       // inventory: «Склад» turns its own page when the last row comes up
       stockScrollMore();
+      // …and «Каталог» does the same. It had roughly the same number of rows
+      // and a 40-row page, and needed eight deliberate taps to reach the end.
+      goodsScrollMore();
     });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
@@ -39691,6 +39821,13 @@
     if (!id || S.barTouched === id) return;
     S.barTouched = id;
     admBarPaintNote();
+  }
+  /** Is there anything in the open product editor worth asking about?
+      The same flag the save bar reads, so «Не сохранено» in the header and
+      the question on the way out can never disagree — one of them appearing
+      without the other is how the owner learns not to trust either. */
+  function goodsEditDirty() {
+    return !!(S.adminEdit || S.goodsNew) && S.barTouched === admBarIdent();
   }
   document.addEventListener("input", admBarTouch);
   document.addEventListener("change", admBarTouch);
