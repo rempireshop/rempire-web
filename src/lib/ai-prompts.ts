@@ -349,8 +349,21 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "descrip
 export interface ReplyOrderSummary {
   number: string;
   status?: string;
-  items?: Array<{ title: string; qty?: number }>;
+  /* With their money. A line without its price is why the draft answered
+     "what is the price of the item" with "the price details for this item are
+     not provided here" — a shop that cannot say what it charged (Dim,
+     19.09.2026). The rule above the task is "never invent a fact"; the way to
+     keep it is to hand the facts over. */
+  items?: Array<{ title: string; qty?: number; price?: number; sum?: number }>;
   name?: string;
+  total?: number;
+  currency?: string;
+  /** What the delivery cost, and by whom — both are asked about often. */
+  shipping?: { method?: string; price?: number };
+  /** The carrier's own number, once there is one. */
+  tracking?: string;
+  /** What has gone back, when anything has. */
+  refunded?: number;
 }
 
 export interface ReplyInput {
@@ -375,26 +388,64 @@ function cleanReplyInput(raw: unknown): { customerMessage: string; order: ReplyO
   const o = (src.order && typeof src.order === "object" ? src.order : {}) as Record<string, unknown>;
   const number = line(o.number, 20);
   if (!number) throw new AiInputError("missing_order_number");
+  /** A number the shop really holds, rounded to the cent, or undefined. */
+  const money = (v: unknown): number | undefined => {
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : undefined;
+  };
   const items = Array.isArray(o.items)
     ? (o.items as unknown[]).slice(0, 20).map((it) => {
         const row = (it && typeof it === "object" ? it : {}) as Record<string, unknown>;
-        return { title: line(row.title, 120), qty: Number.isFinite(Number(row.qty)) ? Number(row.qty) : 1 };
+        return {
+          title: line(row.title, 120),
+          qty: Number.isFinite(Number(row.qty)) ? Number(row.qty) : 1,
+          price: money(row.price),
+          sum: money(row.sum),
+        };
       }).filter((it) => it.title)
     : undefined;
+  const ship = (o.shipping && typeof o.shipping === "object" ? o.shipping : {}) as Record<string, unknown>;
   return {
     customerMessage,
-    order: { number, status: line(o.status, 20), items, name: line(o.name, 120) },
+    order: {
+      number, status: line(o.status, 20), items, name: line(o.name, 120),
+      total: money(o.total),
+      currency: line(o.currency, 8) || undefined,
+      shipping: { method: line(ship.method, 60) || undefined, price: money(ship.price) },
+      tracking: line(o.tracking, 60) || undefined,
+      refunded: money(o.refunded),
+    },
   };
 }
 
 export function buildReplyPrompt(lang: Lang3, rawInput: unknown): PromptResult {
   const input = cleanReplyInput(rawInput);
   const o = input.order;
+  /* Money is written with its currency every time: "33.75" on its own is a
+     number the model has to guess a unit for, and a guessed unit in a letter
+     to a customer is exactly the invention this task forbids. */
+  const cur = o.currency || "EUR";
+  const eur = (v?: number) => (typeof v === "number" ? `${v.toFixed(2)} ${cur}` : "");
+  const itemLine = (it: { title: string; qty?: number; price?: number; sum?: number }) => {
+    const qty = it.qty && it.qty > 1 ? ` ×${it.qty}` : "";
+    if (typeof it.price !== "number") return `${it.title}${qty}`;
+    const each = `${eur(it.price)} each`;
+    const sum = typeof it.sum === "number" && it.qty && it.qty > 1 ? `, ${eur(it.sum)} for the line` : "";
+    return `${it.title}${qty} — ${each}${sum}`;
+  };
   const facts = [
     `Order number: ${o.number}`,
     o.status ? `Order status: ${ORDER_STATUS_WORD[o.status] || o.status}` : "",
     o.name ? `Customer name: ${o.name}` : "",
-    o.items && o.items.length ? `Items in the order: ${o.items.map((it) => `${it.title}${it.qty && it.qty > 1 ? ` ×${it.qty}` : ""}`).join(", ")}` : "",
+    o.items && o.items.length
+      ? `Items in the order, with what the shop charged:\n${o.items.map((it) => `- ${itemLine(it)}`).join("\n")}`
+      : "",
+    o.shipping && typeof o.shipping.price === "number"
+      ? `Delivery: ${o.shipping.method ? `${o.shipping.method}, ` : ""}${o.shipping.price > 0 ? eur(o.shipping.price) : "free"}`
+      : o.shipping && o.shipping.method ? `Delivery: ${o.shipping.method}` : "",
+    typeof o.total === "number" ? `Order total: ${eur(o.total)}` : "",
+    typeof o.refunded === "number" && o.refunded > 0 ? `Already refunded: ${eur(o.refunded)}` : "",
+    o.tracking ? `Tracking number: ${o.tracking}` : "",
   ].filter(Boolean).join("\n");
 
   const system = `${HOUSE_VOICE}

@@ -1584,6 +1584,10 @@
         "Artikkel on liiga pikk — lühenda teksti ja salvesta uuesti.",
       "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
       "Показать ещё": "Näita veel",
+      // 19.09.2026: the danger link on a catalogue product, named for what it does
+      "Отметить «нет в наличии»": "Märkida «ei ole laos»",
+      "Отметить «нет в наличии»?": "Märkida «ei ole laos»?",
+      "Отметить": "Märkida",
       // 19.09.2026: the one control in an empty search result
       "Сбросить поиск": "Tühista otsing",
       // analytics agent — «Аналитика» tab
@@ -4423,6 +4427,10 @@
         "The article is too long — shorten the text and save again.",
       "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
       "Показать ещё": "Show more",
+      // 19.09.2026: the danger link on a catalogue product, named for what it does
+      "Отметить «нет в наличии»": "Mark “out of stock”",
+      "Отметить «нет в наличии»?": "Mark “out of stock”?",
+      "Отметить": "Mark",
       // 19.09.2026: the one control in an empty search result
       "Сбросить поиск": "Clear the search",
       // analytics agent — «Аналитика» tab
@@ -5976,6 +5984,13 @@
     [/^Возвращать больше нечего: (.+) уже отправлено, Montonio подтвердит в течение рабочего дня\.$/,
       { ET: "Rohkem ei ole midagi tagastada: $1 on juba saadetud, Montonio kinnitab ühe tööpäeva jooksul.",
         EN: "There is nothing left to send back: $1 has gone already, and Montonio confirms within one business day." }],
+    // 19.09.2026: what the catalogue product's danger link really does
+    [/^Отмечено «нет в наличии» · (.+)$/,
+      { ET: "Märgitud «ei ole laos» · $1", EN: "Marked “out of stock” · $1" }],
+    // 19.09.2026: the picker's cap, said out loud
+    [/^показаны (\d+) из (\d+)$/, { ET: "näidatud $1 / $2", EN: "showing $1 of $2" }],
+    // 19.09.2026: how many sets the shop is not showing
+    [/^скрыто (\d+)$/, { ET: "peidetud $1", EN: "$1 hidden" }],
     [/^Возврат (.+) в обработке у Montonio$/,
       { ET: "Tagasimakse $1 on Montonios töötlemisel", EN: "The $1 refund is being processed by Montonio" }],
     [/^(.+) · возврат (.+) — письмо ушло$/,
@@ -19442,13 +19457,31 @@
               '<span class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-bundleedit="' + esc(b.id) + '">Изменить</button>' +
               '<button class="adm-link adm-link--muted" data-bundletoggle="' + esc(b.id) + '">' +
                 (b.active ? "Скрыть" : "Показать") + "</button>" +
-              '<button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':-1"' +
+              /* A 44x44 box around each glyph (adm-link--move): these were two
+                 14 px characters with no padding, on the screen a phone
+                 reorders sets from. */
+              '<button class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':-1"' +
                 (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
-                '<button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':1"' +
+                '<button class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':1"' +
                 (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
             "</div>";
           }).join("") + "</div>"
-        : (S.admBundles ? '<div class="adm-empty">Наборов пока нет</div>' : '<div class="adm-skel"><i></i><i></i><i></i></div>'));
+        : (S.admBundles
+            ? '<div class="adm-empty"><span>Наборов пока нет</span>' +
+              '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bundlenew>+ Набор</button></div>'
+            : '<div class="adm-skel"><i></i><i></i><i></i></div>')) +
+      /* The line its two siblings both print and this tab never did: how many
+         there are, and how many of them the shop is not showing. «Наборы» was
+         the one tab with no count anywhere — the header's number was about
+         products. */
+      (list.length
+        ? '<p class="adm-hint" style="margin:10px 0 0">' + admItemsLabel(list.length) +
+          /* Its own node: translateTree() rewrites a whole text node, and a
+             tail glued onto the count would leave the pair untranslatable. */
+          (list.filter(function (b) { return !b.active; }).length
+            ? ' · <span>скрыто ' + list.filter(function (b) { return !b.active; }).length + "</span>"
+            : "") + "</p>"
+        : "");
   }
 
   /* ---------- the shell: sidebar, bottom bar, «Ещё», assistant ------------- */
@@ -23930,12 +23963,22 @@
   }
   /* Search shared by both pickers: eight matches, popular products when the
      box is empty, so the owner always has something to tap. */
+  /** Eight tiles, and how many matched — the cap used to be silent, so a
+      search that found forty looked like a search that found eight. The full
+      count rides on the array so the caller can say so. */
   function heroFind(q) {
-    var s = String(q || "").trim().toLowerCase();
-    if (!s) return spread(8, false);
-    return CATALOGUE.filter(function (p) {
-      return (p.brand + " " + p.name).toLowerCase().indexOf(s) >= 0;
-    }).slice(0, 8);
+    var s = scanFold(q);
+    if (!s) { var top = spread(8, false); top.total = top.length; return top; }
+    var words = s.split(" ");
+    var hit = CATALOGUE.filter(function (p) {
+      var hay = scanFold(p.brand + " " + p.name);
+      var hayWords = hay.split(" ");
+      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
+      return true;
+    });
+    var out = hit.slice(0, 8);
+    out.total = hit.length;
+    return out;
   }
   var HERO_NOHIT = '<p class="adm-hint adm-picks__none">Ничего не нашлось — попробуйте другое слово.</p>';
   /** One product tile in a picker grid — the banner's picture and link pickers
@@ -23944,7 +23987,11 @@
     return '<button class="adm-pick-tile" ' + attr + '="' + esc(id) + '" aria-current="' + !!current +
       '" title="' + esc(p.brand + " " + p.name) + '">' +
       '<span class="adm-pick-tile__img">' + media(p, 0, "ph") + "</span>" +
-      '<span class="adm-pick-tile__nm">' + esc(p.name) + "</span></button>";
+      /* The brand belongs on the tile, not in `title=`: a phone has no hover,
+         and three «Shampoo» tiles from three brands were three identical
+         buttons doing three different things. */
+      '<span class="adm-pick-tile__nm"><span class="adm-pick-tile__br">' + esc(p.brand) + "</span>" +
+        esc(p.name) + "</span></button>";
   }
   /* The gift card as a picture, first in the grid and only while the search
      box is empty — it is not a product, so a search for «шампунь» must not
@@ -25981,9 +26028,16 @@
      owner's own products are a server change (custom_products in expand() and
      validateBundle()), not a picker one. */
   function bundlePickRows() {
-    var list = heroFind(S.bundleQ).filter(function (p) { return !p.custom; });
+    var found = heroFind(S.bundleQ);
+    var list = found.filter(function (p) { return !p.custom; });
     if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-bundleadd", p.id, p, false); }).join("");
+    return list.map(function (p) { return admPickTile("data-bundleadd", p.id, p, false); }).join("") +
+      /* «показаны 8 из 41» — the eight are the first eight of the catalogue's
+         own order, and without this line a narrower word looks pointless. */
+      (found.total > list.length
+        ? '<p class="adm-hint adm-picks__more"><span>показаны ' + list.length +
+          " из " + found.total + "</span></p>"
+        : "");
   }
   /** …and why his own product is not in that list — only once he has one. */
   function bundleOwnHint() {
@@ -28596,7 +28650,14 @@
          with an undo like every other money-side change. For the owner's own
          product the same button really takes it off the shelf (active=false),
          undo included; a new product has nothing to take off yet. */
-      (isNew || p.active === false ? "" : '<div class="adm-danger"><button class="adm-link adm-link--warn" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button></div>') +
+      /* Two different words for two different things. For the owner's OWN
+         product this really takes it off the shelf. For a catalogue product
+         there is no DELETE — the catalogue is a file — so it does the
+         strongest thing that exists, «нет в наличии», and now says so: it
+         said «Снять с продажи» while the switch three panes up, which really
+         removes the product from the shop, said nothing of the sort. */
+      (isNew || p.active === false ? "" : '<div class="adm-danger"><button class="adm-link adm-link--warn" data-admgoodspull="' + esc(p.id) + '">' +
+        (p.custom ? "Снять с продажи" : "Отметить «нет в наличии»") + "</button></div>") +
       // goodsFail() fills this in place, so the message appears without a
       // render() taking the caret out of whatever field is being fixed — and
       // it sits in the sticky save bar, outside the panes, so a refusal is on
@@ -36825,9 +36886,27 @@
         task: "reply", lang: ordr.lang || "RU",
         input: {
           customerMessage: custMsg,
+          /* With the money on it. Asked «what is the price of the item», the
+             draft answered «the price details for this item are not provided
+             here» — correctly, because they were not: the order went over as
+             a list of titles and quantities and nothing else. The shop knows
+             what it charged, what delivery cost and what has gone back, so it
+             says so; the prompt's «never invent a fact» rule only works when
+             the facts are handed over (Dim, 19.09.2026). */
           order: {
             number: ordr.number, status: ordr.status, name: ordr.name,
-            items: (ordr.items || []).slice(0, 20).map(function (l) { return { title: l.title, qty: l.qty }; })
+            total: ordr.total, currency: ordr.currency,
+            items: (ordr.items || []).slice(0, 20).map(function (l) {
+              return { title: l.title, qty: l.qty, price: l.price, sum: l.sum };
+            }),
+            /* The same line the panel prints on the row (srvShipLabel), so the
+               draft and the screen describe the delivery with one wording. */
+            shipping: {
+              method: ordRow.ship || "",
+              price: ordr.shipping ? ordr.shipping.price : undefined
+            },
+            tracking: ordRow.tracking || "",
+            refunded: ordRow.refunded || 0
           }
         }
       }).then(function (r) {
@@ -37072,7 +37151,7 @@
         render(); return;
       }
       pendingAction = { type: "goods_pull", id: pullP.id, name: pullP.brand + " — " + pullP.name,
-        title: "Снять с продажи?", ok: "Снять", danger: true, overlay: true,
+        title: "Отметить «нет в наличии»?", ok: "Отметить", danger: true, overlay: true,
         detail: pullP.brand + " — " + pullP.name + "\nВ магазине останется страница товара, но купить его будет нельзя. Вернуть можно здесь же — «Наличие»." };
       render(); return;
     }
@@ -37440,27 +37519,58 @@
         changed = true;
       }
       var eanCells = document.querySelectorAll("[data-edean]");
+      var eanJobs = [];
       for (var ei = 0; ei < eanCells.length; ei++) {
         var eKey = eanCells[ei].getAttribute("data-edean");
         var eRow = stockFindRow(eKey);
         var eVal = eanCells[ei].value.trim();
         if (eVal === ((eRow && eRow.ean) || "")) continue;
         changed = true;
-        stockLevelSaveDetailed({
-          productId: gp.id, variant: eRow ? eRow.variant : eKey.slice(gp.id.length + 1),
-          ean: eVal || null
-        }).then(function (res) {
-          if (!res.ok) toast(stockSaveErrText(res) || "Не удалось привязать штрихкод");
-          reloadStock();
-        });
+        /* Collected, not fired and forgotten. Every other check in this
+           handler runs BEFORE anything is written; the barcode was the
+           exception, so a refusal — «этот код уже привязан к другому товару»
+           — arrived as a toast over the product LIST, after «Сохранено ✓»,
+           with the editor closed and the typed code gone. The key travels
+           with the promise so the answer can point at the box it belongs to
+           (the sizes grid has one per rung). */
+        eanJobs.push((function (key) {
+          return stockLevelSaveDetailed({
+            productId: gp.id, variant: eRow ? eRow.variant : key.slice(gp.id.length + 1),
+            ean: eVal || null
+          }).then(function (res) { return { res: res, key: key }; });
+        })(eKey));
       }
       // product creation: the row itself goes last, and its answer closes the editor
       if (gp.custom) { customUpdate(gp, ownRow); return; }
-      AI_UNDO = null;
-      S.adminEdit = "";
-      toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
-      render();
-      goodsBackToRow(gp.id); return;
+      var doneSaving = function () {
+        AI_UNDO = null;
+        S.adminEdit = "";
+        S.goodsConfirmBack = false;
+        toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
+        render();
+        goodsBackToRow(gp.id);
+      };
+      if (!eanJobs.length) { doneSaving(); return; }
+      /* …and «Сохранено ✓» waits for the barcodes, because a refused one is
+         the owner's to fix and he can only fix it while the box is still on
+         the screen with what he typed in it. */
+      S.goodsBusy = true;
+      Promise.all(eanJobs).then(function (out) {
+        S.goodsBusy = false;
+        reloadStock();
+        var bad = null;
+        for (var bi = 0; bi < out.length; bi++) if (!out[bi].res.ok) { bad = out[bi]; break; }
+        if (bad) {
+          goodsFail(stockSaveErrText(bad.res) || "Не удалось привязать штрихкод",
+            '[data-edean="' + bad.key + '"]');
+          return;
+        }
+        doneSaving();
+      }).catch(function () {
+        S.goodsBusy = false;
+        goodsFail("Сервер не отвечает — попробуйте ещё раз", "");
+      });
+      return;
     }
     if (d.admapply !== undefined) {
       if (pendingAction) {
@@ -37518,7 +37628,7 @@
         else if (pa.type === "goods_pull") {
           var pullEntry = demoApply({ type: "set_stock", id: pa.id, value: "out" });
           S.adminEdit = "";
-          toast("Снято с продажи · " + pa.name, pullEntry);
+          toast("Отмечено «нет в наличии» · " + pa.name, pullEntry);
         }
         /* «Заказы»: the status moves, the letter goes out by itself, and the
            journal keeps the way back — so the toast can offer «Отменить». */

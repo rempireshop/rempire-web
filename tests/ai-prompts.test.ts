@@ -223,6 +223,65 @@ describe("buildReplyPrompt", () => {
     expect(user).toContain("Touchable");
     expect(user).toContain("paid");
   });
+
+  /* Dim, 19.09.2026: he asked the draft «what is the price of the item» on a
+     paid order and got «The price details for this item are not provided
+     here. We will check the price and get back to you shortly.» The model was
+     right — the order went over as titles and quantities and nothing else.
+     The rule above this task is «never invent a fact», and the only way to
+     keep it and still answer is to hand the facts over. */
+  it("carries what the shop charged, so a question about price can be answered", () => {
+    const { user } = buildReplyPrompt("EN", {
+      customerMessage: "what is the price of the item",
+      order: {
+        number: "R-100053", status: "shipped", currency: "EUR", total: 41.5,
+        items: [{ title: "Touchable", qty: 4, price: 8.5, sum: 34 }],
+        shipping: { method: "Пакомат Omniva", price: 7.5 },
+        tracking: "CD123456789EE",
+      },
+    });
+    expect(user).toContain("8.50 EUR each");
+    expect(user).toContain("34.00 EUR for the line");
+    expect(user).toContain("Order total: 41.50 EUR");
+    expect(user).toContain("Delivery: Пакомат Omniva, 7.50 EUR");
+    expect(user).toContain("CD123456789EE");
+  });
+
+  it("says «free» rather than «0.00 EUR» for delivery that cost nothing", () => {
+    const { user } = buildReplyPrompt("EN", {
+      customerMessage: "how much was delivery",
+      order: { number: "R-1", items: [{ title: "Soap", qty: 1, price: 9 }], shipping: { method: "Самовывоз", price: 0 } },
+    });
+    expect(user).toContain("Delivery: Самовывоз, free");
+    // a single unit does not need its line total spelled out twice
+    expect(user).toContain("Soap — 9.00 EUR each");
+    expect(user).not.toContain("for the line");
+  });
+
+  it("says nothing about money it was not given", () => {
+    const { user } = buildReplyPrompt("EN", {
+      customerMessage: "price?",
+      order: { number: "R-2", items: [{ title: "Soap", qty: 1 }] },
+    });
+    expect(user).toContain("Soap");
+    expect(user).not.toContain("EUR");
+    expect(user).not.toContain("Order total");
+    expect(user).not.toContain("Already refunded");
+  });
+
+  it("names a refund only when there is one", () => {
+    const withBack = buildReplyPrompt("EN", {
+      customerMessage: "did you refund me",
+      order: { number: "R-3", total: 50, refunded: 12.5, items: [{ title: "Soap", qty: 1, price: 50 }] },
+    }).user;
+    expect(withBack).toContain("Already refunded: 12.50 EUR");
+
+    const none = buildReplyPrompt("EN", {
+      customerMessage: "did you refund me",
+      order: { number: "R-3", total: 50, refunded: 0, items: [{ title: "Soap", qty: 1, price: 50 }] },
+    }).user;
+    expect(none).not.toContain("Already refunded");
+  });
 });
 
 describe("buildBlogOutlinePrompt", () => {

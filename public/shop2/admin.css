@@ -207,6 +207,14 @@
   text-decoration: underline; text-underline-offset: 3px;
 }
 .adm-link--muted { color: var(--a-muted); font-weight: 400; }
+/* «↑» and «↓» on a set's row are two glyphs 14 px tall with no padding: a
+   10x18 target on the screen the owner actually reorders sets on. The box is
+   44x44 — the platform minimum — while the glyph stays where it was. */
+.adm-link--move {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; text-decoration: none; font-size: 17px; line-height: 1;
+}
+.adm-link--move[disabled] { opacity: .35; }
 .adm-link--warn { color: var(--a-warn); }
 /* «← Заказы», «← Все письма», «← Настройки». `.adm-screen` is a flex column,
    so a bare button stretches the width of the page and centres its own text;
@@ -497,10 +505,15 @@
 
 /* ---------- empty / error / loading --------------------------------------- */
 
+/* An empty answer may carry the one control that ends it — «Сбросить поиск»,
+   «+ Набор». Laid out as a column so the sentence and the way out of it are
+   not on the same line fighting for the width of a phone. */
 .adm-empty {
   border: 1px dashed var(--a-rule); padding: 28px 16px; text-align: center;
   font-size: 14px; color: var(--a-muted); margin-top: 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
+.adm-empty .adm-btn { flex: 0 0 auto; }
 .adm-empty__t { font-family: Oswald, sans-serif; font-size: 24px; color: var(--a-ink); }
 .adm-empty__s { margin-top: 6px; }
 .adm-error {
@@ -2251,10 +2264,18 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    nothing in the grid moves */
 .adm-pick-tile[aria-current="true"] { border: 2px solid var(--a-ink); padding: 5px; }
 .adm-pick-tile__img { position: relative; display: block; width: 100%; height: 64px; background: var(--a-tint); }
+/* Two lines, brand over name: one ellipsised line at 11 px could not tell
+   three «Shampoo» tiles apart, and the brand was only in `title=`, which a
+   phone never shows. */
 .adm-pick-tile__nm {
   font-size: 11px; line-height: 14px; color: var(--a-muted);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: block; overflow: hidden;
 }
+.adm-pick-tile__br {
+  display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--a-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-picks__more { text-align: center; flex-basis: 100%; margin: 6px 0 0; }
 /* The gift card in the banner's picture grid: it has no photo, so the tile
    carries the same tower mark the storefront's gift block does. */
 .adm-pick-tile__img--gift { display: flex; align-items: center; justify-content: center; }
