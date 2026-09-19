@@ -1634,12 +1634,14 @@
         "«Ещё» → «Маркетинг» → «Подарочные карты».",
         "Выключить номинал 25 €.",
         "Открыть страницу подарочной карты в магазине.",
-        "Вернуться и включить 25 € обратно."
+        "Вернуться и включить 25 € обратно.",
+        "Открыть «Оформление» и нажать то, что там есть."
       ],
       "expect": [
         "Выключенная сумма пропадает с кнопок на странице карты.",
         "Она пропадает и из текста под кнопками.",
-        "Включённая обратно — возвращается."
+        "Включённая обратно — возвращается.",
+        "Оформление открывает настоящую карту PDF и письмо к ней."
       ],
       "why": "Сумма, которой нет в продаже, — это заказ, который сорвётся на кассе.",
       "risk": "med",
@@ -1650,15 +1652,19 @@
           "«Ещё» → «Маркетинг» → «Подарочные карты».",
           "Switch the 25 € amount off.",
           "Open the gift-card page in the shop.",
-          "Come back and switch 25 € on again."
+          "Come back and switch 25 € on again.",
+          "Open «Оформление» and press what is there."
         ],
         "expect": [
           "An amount switched off leaves the buttons on the card page.",
           "It leaves the line of text under them too.",
-          "Switched back on, it comes back."
+          "Switched back on, it comes back.",
+          "The design block opens a real card PDF and the letter it arrives with."
         ],
         "why": "An amount not on sale is an order that dies at the checkout."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T13:54:52.000Z"
     },
     {
       "id": "panel-gift-issued",
@@ -3287,6 +3293,49 @@
           "However many times the decision changes, the number does not grow."
         ],
         "why": "A cancel by mistake, undone, used to overstate the stock of everything sold in sets, permanently."
+      }
+    },
+    {
+      "id": "order-reply-price",
+      "area": "orders",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Черновик ответа про цену",
+      "steps": [
+        "Открыть оплаченный заказ и нажать «Написать клиенту».",
+        "В поле сообщения клиента написать: сколько стоил товар?",
+        "Нажать «Черновик помощника» и прочитать ответ.",
+        "Сверить числа с самим заказом.",
+        "Стереть сообщение, написать вопрос про доставку и повторить."
+      ],
+      "expect": [
+        "В ответе названа цена товара, а не «уточним и вернёмся».",
+        "Числа совпадают с заказом, и у каждого написана валюта.",
+        "Про доставку сказано, сколько она стоила и какая.",
+        "О том, чего в заказе нет, помощник по-прежнему не выдумывает."
+      ],
+      "why": "Помощник отвечал «цены здесь не указаны» на вопрос о цене: заказ уезжал к нему без денег вовсе. Письмо клиенту с выдуманной суммой хуже, чем письмо без суммы.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-19T13:54:52.000Z",
+      "en": {
+        "title": "The draft reply about a price",
+        "steps": [
+          "Open a paid order and press «Написать клиенту».",
+          "In the customer's message box write: how much was the item?",
+          "Press «Черновик помощника» and read the answer.",
+          "Compare the figures with the order itself.",
+          "Clear it, ask about delivery instead, and do it again."
+        ],
+        "expect": [
+          "The reply names the price, not «we will check and get back».",
+          "The figures match the order, and each one carries its currency.",
+          "Delivery is answered with what it cost and how it goes.",
+          "It still invents nothing the order does not hold."
+        ],
+        "why": "The assistant answered «the price details are not provided here» to a question about price: the order went over to it with no money on it at all. A letter with an invented sum is worse than one with none."
       }
     },
     {
@@ -5996,12 +6045,14 @@
         "Изменить «Цена, €» у первого объёма на вкладке «Размеры и цены».",
         "Нажать «Сохранить».",
         "Открыть товар в магазине и посмотреть цену.",
-        "Положить его в корзину."
+        "Положить его в корзину.",
+        "Поменять цену и нажать «← Товары», не сохраняя."
       ],
       "expect": [
         "В магазине у товара стоит новая цена.",
         "В корзине та же самая цена.",
-        "В итоге заказа та же самая сумма."
+        "В итоге заказа та же самая сумма.",
+        "Панель спросит, выходить ли без сохранения, а не выйдет молча."
       ],
       "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
       "risk": "high",
@@ -6013,15 +6064,19 @@
           "On the «Размеры и цены» (sizes and prices) tab change «Цена, €» for the first size.",
           "Press «Сохранить».",
           "Open the product in the shop and look at the price.",
-          "Put it in the cart."
+          "Put it in the cart.",
+          "Change the price and press «← Товары» without saving."
         ],
         "expect": [
           "The shop shows the new price on the product.",
           "The cart shows the same price.",
-          "The order total uses the same price."
+          "The order total uses the same price.",
+          "The panel asks whether to leave without saving instead of just leaving."
         ],
         "why": "A price that differs in the cart costs you money or a complaint."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T13:54:52.000Z"
     },
     {
       "id": "goods-sizes",
@@ -6130,14 +6185,16 @@
         "Поставить «Нет в наличии» на вкладке «Основное» и сохранить.",
         "Открыть товар в магазине.",
         "Поставить «Мало», потом «В наличии».",
-        "То же самое проделать с товаром, у которого остаток посчитан."
+        "То же самое проделать с товаром, у которого остаток посчитан.",
+        "Открыть «Каталог» и сверить чип «Нет в наличии» со «Складом»."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
         "При «нет в наличии» кнопка «В корзину» пропадает.",
         "Вместо неё появляется «Сообщить о наличии».",
         "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
-        "А «Мало» и «В наличии» у него перебиваются тем, что посчитано."
+        "А «Мало» и «В наличии» у него перебиваются тем, что посчитано.",
+        "Оба раздела считают одно и то же: посчитанный остаток, если он есть."
       ],
       "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
       "risk": "med",
@@ -6147,20 +6204,23 @@
         "title": "Setting availability by hand",
         "steps": [
           "Take a product nobody has counted on «Склад».",
-          "In the product editor, on the «Основное» tab, set «Нет в наличии» (out of stock) and save.",
+          "In the editor, on «Основное», set «Нет в наличии» and save.",
           "Open the product in the shop.",
           "Set «Мало» (low), then «В наличии» (in stock).",
-          "Do the same on a product whose stock has been counted."
+          "Do the same on a product whose stock has been counted.",
+          "Open the catalogue and compare its out-of-stock chip with the warehouse."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
           "With «нет в наличии» the «В корзину» button goes.",
           "«Сообщить о наличии» appears in its place.",
           "On a counted product «Нет в наличии» stops the sale too.",
-          "But its «Мало» and «В наличии» are overruled by the count."
+          "But its «Мало» and «В наличии» are overruled by the count.",
+          "Both tabs count the same thing: the counted shelf wherever there is one."
         ],
         "why": "Without it you cannot stop sales of stock nobody has counted yet."
-      }
+      },
+      "markedAt": "2026-09-19T13:54:52.000Z"
     },
     {
       "id": "goods-photo",
@@ -6175,7 +6235,9 @@
         "Нажать «Убрать фон» (ножницы) на одной плитке.",
         "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
         "Дождаться конца, сохранить и открыть товар в магазине.",
-        "На новом товаре выбрать фото на шаге «Фото» до сохранения."
+        "На новом товаре выбрать фото на шаге «Фото» до сохранения.",
+        "Переставить фото стрелками: вверху должно появиться «Не сохранено».",
+        "На подписи главного фото должны стоять и размеры, которые его показывают."
       ],
       "expect": [
         "Фотография загрузилась и встала первой; тост просит нажать «Сохранить».",
@@ -6196,7 +6258,9 @@
           "Press «Убрать фон» (the scissors) on one tile.",
           "While it is being cut out, make another photo the main one with the star.",
           "Wait for it to finish, save and open the product in the shop.",
-          "On a new product pick a photo on the «Фото» step before saving."
+          "On a new product pick a photo on the «Фото» step before saving.",
+          "Reorder the photos with the arrows: the top bar must say it is unsaved.",
+          "The main photo's tag must also carry the sizes that show it."
         ],
         "expect": [
           "The photo uploaded and sits first; a toast asks to press «Сохранить».",
@@ -6207,7 +6271,9 @@
           "On a new product picking a photo saves the product itself; the photo lands on it."
         ],
         "why": "A product with no photo is barely bought at all."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T13:54:52.000Z"
     },
     {
       "id": "goods-video",
@@ -6300,36 +6366,41 @@
         "Открыть «Товары» → «Наборы» и нажать «Новый набор».",
         "Дать название и добавить два-три товара из каталога.",
         "Вписать цену набора и посмотреть подсказку с суммой товаров.",
-        "Сохранить и открыть набор в магазине."
+        "Сохранить и открыть набор в магазине.",
+        "Посмотреть на «Наборы» до создания: сколько их и сколько скрыто."
       ],
       "expect": [
         "Под ценой видно, сколько стоят товары по отдельности.",
         "Набор дороже этой суммы сохранить не дают.",
         "Сохранённый набор виден в магазине на главной и в «Наборах».",
         "В корзину он ложится одной строкой.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; «Удалить набор» — в конце формы."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; «Удалить набор» — в конце формы.",
+        "В подборщике товара виден бренд, и написано, сколько найдено всего."
       ],
       "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине. Свои товары в набор пока не добавить — только из каталога.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Building a set",
         "steps": [
           "«Товары» → the «Наборы» tab → «Новый набор» (new set).",
           "Give it a name and add two or three catalogue products.",
           "Type in the set price and look at the hint with the sum of the products.",
-          "Save and open the set in the shop."
+          "Save and open the set in the shop.",
+          "Look at «Наборы» before creating one: how many there are and how many are hidden."
         ],
         "expect": [
           "Under the price you see what the products cost separately.",
           "A set dearer than that sum will not save.",
           "The saved set shows on the home page and under «Наборы».",
           "It goes into the cart as a single line.",
-          "On the phone «Сохранить» and «Отмена» sit in the header; «Удалить набор» ends the form."
+          "On the phone «Сохранить» and «Отмена» sit in the header; «Удалить набор» ends the form.",
+          "The picker shows the brand and says how many were found in all."
         ],
         "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
-      }
+      },
+      "markedAt": "2026-09-19T13:54:52.000Z"
     },
     {
       "id": "bundles-hide",
