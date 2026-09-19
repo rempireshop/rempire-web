@@ -3203,6 +3203,7 @@
       "lang": "RU",
       "title": "Заказ, за который заплатили не полностью",
       "steps": [
+        "Заказ создаёт Дим — командой seed-held-order, сам он не появляется.",
         "Найти заказ с предупреждением «Заплатили меньше».",
         "Посмотреть «Склад»: товар из этого заказа должен быть на месте.",
         "Проверить, что подарочные карты по этому заказу не выпущены и письмо покупателю не ушло.",
@@ -3219,11 +3220,12 @@
       "why": "Montonio разрешает доплатить по старой ссылке меньше, чем стоит заказ. Отправленную посылку не вернуть, а карту — можно выпустить заново.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-19T00:00:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-19T15:20:00.000Z",
       "en": {
         "title": "An order somebody paid short",
         "steps": [
+          "Dim makes the order with the seed-held-order command; it cannot happen by itself.",
           "Find an order warning that less was paid.",
           "Look at «Склад»: the goods from that order must still be there.",
           "Check that no gift cards were issued for it and no letter went to the customer.",
