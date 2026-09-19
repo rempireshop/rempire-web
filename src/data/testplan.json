@@ -4694,14 +4694,16 @@
         "Открыть ящик получателя карты, а если его не указывали — свой.",
         "Найти письмо про подарок.",
         "Открыть приложенный PDF.",
-        "Ввести код с PDF на кассе, в поле «Промокод или подарочная карта»."
+        "Ввести код с PDF на кассе, в поле «Промокод или подарочная карта».",
+        "Открыть «Письма» и найти в списке «Подарочная карта»."
       ],
       "expect": [
         "Письмо лежит у получателя, а не у покупателя.",
         "В самом письме видны код и сумма карты.",
         "В приложении — карта на одну страницу.",
         "На карте тот же код и строка «Действует до».",
-        "Касса этот код принимает."
+        "Касса этот код принимает.",
+        "Письмо есть в списке и открывается — раньше его там не было."
       ],
       "why": "Карта, ушедшая не тому, — испорченный подарок и деньги, которые вы уже взяли.",
       "risk": "high",
@@ -4712,17 +4714,21 @@
           "Open the card recipient's mailbox, or your own if none was given.",
           "Find the letter about the gift.",
           "Open the attached PDF.",
-          "At the checkout enter the PDF's code in «Промокод или подарочная карта»."
+          "At the checkout enter the PDF's code in «Промокод или подарочная карта».",
+          "Open «Письма» and find «Подарочная карта» in the list."
         ],
         "expect": [
           "The letter is with the recipient, not with the buyer.",
           "The letter itself shows the code and the amount.",
           "The attachment is a one-page card.",
           "The card carries the same code and a «Действует до» line.",
-          "The checkout accepts that code."
+          "The checkout accepts that code.",
+          "The letter is in the list and opens — it was not there before."
         ],
         "why": "A card sent to the wrong person is a ruined present, already paid for."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T14:34:03.000Z"
     },
     {
       "id": "mail-invoice",
@@ -6052,7 +6058,8 @@
         "В магазине у товара стоит новая цена.",
         "В корзине та же самая цена.",
         "В итоге заказа та же самая сумма.",
-        "Панель спросит, выходить ли без сохранения, а не выйдет молча."
+        "Панель спросит, выходить ли без сохранения, а не выйдет молча.",
+        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки."
       ],
       "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
       "risk": "high",
@@ -6071,12 +6078,13 @@
           "The shop shows the new price on the product.",
           "The cart shows the same price.",
           "The order total uses the same price.",
-          "The panel asks whether to leave without saving instead of just leaving."
+          "The panel asks whether to leave without saving instead of just leaving.",
+          "The unsaved-work question stands out: colour, a ground and two different buttons."
         ],
         "why": "A price that differs in the cart costs you money or a complaint."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-19T14:34:03.000Z"
     },
     {
       "id": "goods-sizes",
@@ -6367,7 +6375,9 @@
         "Дать название и добавить два-три товара из каталога.",
         "Вписать цену набора и посмотреть подсказку с суммой товаров.",
         "Сохранить и открыть набор в магазине.",
-        "Посмотреть на «Наборы» до создания: сколько их и сколько скрыто."
+        "Посмотреть на «Наборы» до создания: сколько их и сколько скрыто.",
+        "Открыть «Новый набор»: спросить должны название, а не адрес.",
+        "Адрес ниже должен заполниться из названия сам, пока его печатают."
       ],
       "expect": [
         "Под ценой видно, сколько стоят товары по отдельности.",
@@ -6388,7 +6398,9 @@
           "Give it a name and add two or three catalogue products.",
           "Type in the set price and look at the hint with the sum of the products.",
           "Save and open the set in the shop.",
-          "Look at «Наборы» before creating one: how many there are and how many are hidden."
+          "Look at «Наборы» before creating one: how many there are and how many are hidden.",
+          "Open «Новый набор»: it must ask for the name, not the address.",
+          "The address below must fill itself from the name as it is typed."
         ],
         "expect": [
           "Under the price you see what the products cost separately.",
@@ -6400,7 +6412,7 @@
         ],
         "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
       },
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-19T14:34:03.000Z"
     },
     {
       "id": "bundles-hide",

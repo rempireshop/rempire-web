@@ -94,13 +94,13 @@ dependency, not a later job.
 | | | status |
 |---|---|---|
 | C | The eight answered go-live decisions. Four shipping ones are being built now: declare a **small** default carton and read the required-dimensions flag, choose locker size at label time with an automated default, open the rest of Europe as an editable list, and show a refused registration instead of reporting success. No weight modelling — decided against on 18.09, see Stage 2. The per-shipment override is the safety valve and has to be one tap. | in progress |
-| C | The four payment ones: hold an order paid short instead of marking it paid, tighten the two webhook checks and ask Montonio on a mismatch, and sweep for orders stuck unpaid because a notification never arrived. | queued |
+| C | ~~The four payment ones~~ **Done, night of 19.09**: a short-paid order is held rather than marked paid (`payment.held`, `shortPayment` in `src/lib/payments/apply.ts`); both webhook checks tightened and a mismatch re-asks Montonio through `GET /orders/:uuid`; a nightly sweep picks up orders stuck unpaid because their notification never arrived (`src/lib/payments/reconcile.ts`). On 19.09 a held order also became findable from the list — its own badge, a «Придержаны» chip and a row in «Сделать сегодня». | done |
 | C | Harden every path the sandbox cannot exercise, and write `docs/montonio-untested.md` — the honest inventory of what has never run and what must be checked by hand in the first live hour. | in progress |
-| C | Fix the **13 end-to-end failures** that already exist on main. The unit suite has been green throughout at 3834 tests; the browser suite has been quietly red and nobody was looking. | in progress |
+| C | ~~Fix the **13 end-to-end failures**~~ **Done 18.09**, merge `0fbd940` — «thirteen red browser probes, two real bugs»; the other eleven were probes that had fallen behind the shop. The unit suite is 4400+ and green. The browser suite has not been run since: one more run belongs in «Final pass» below. | done |
 | C | The go-live reset tool and `docs/go-live-reset.md`. Dry run by default, explicit confirmation to clear, asserts the keep-list survived. | in progress |
 | D C | **The Google Shopping feed is a Merchant Center risk and must not be submitted as it stands.** `tools/build-merchant-feed.mjs` hardcodes the **staging** host, reads stock from the generated catalogue alone, and is **not in `prebuild`** — so it is only as fresh as the last manual run. Submitted today every `g:link` would point at a `noindex` host, and `g:availability` is the field that gets Merchant Center accounts suspended. Found 18.09 by the SEO audit. **Decided by Dim, 19.09.2026: not now.** The feed stays out of the build and nothing is submitted; the question is re-opened once the shop is live and the stock numbers have settled. Nothing to do before launch. | decided: not now |
 | C | Replace `public/shop/legal.js` — the fallback privacy policy still names **Shopify** as the data processor. Unreachable today, embarrassing on a live shop. | to do |
-| C | Correct the panel's «проверьте баланс в его панели» — it names the one cause of a refused refund that is impossible. Exact replacement already written. | to do |
+| C | ~~Correct the panel's «проверьте баланс в его панели»~~ **Done 18.09.** By Montonio's own documentation a refund with no money behind it is answered `200 PENDING`, never an HTTP error — so the panel was sending the owner to look at the one thing it could never be. Each documented refusal now carries three sentences of its own (`src/lib/montonio-problems.ts`), and a test stops any of them mentioning the balance again. | done |
 | C | Final pass: regenerate the bundle and the prerender, full suite, push, and confirm `index.html` carries no `localhost:` and exactly two `boot.js` references. | at the end |
 
 ---
@@ -139,11 +139,11 @@ In order. Several of these are only correct **together**.
 - A hidden **catalogue** product now drops out of «Мало»/«Нет», the «Склад» tab
   count and the assistant's low-stock answer, where before it nagged. Deliberate,
   and reversible in about five lines if Renat disagrees.
-- The two Fable 5.1 passes agreed on 17.09 — a regression review of the diff, and
-  a go-live readiness pass. Waiting on the owner's re-test of the marked checks.
-  This document overlaps the second one heavily; the review is still worth running
-  because it reads what was written, not what was intended.
-
+- **The second Fable 5.1 pass.** The first was done on 18.09: a regression
+  review of the diff, 56 findings in `docs/audit-2026-09-18-findings.md`, more
+  than forty of them closed — including the only serious one, a double refund on
+  a mixed tender. The second, the go-live readiness pass, **moves to after
+  launch week** (Dim, 19.09). It does not block the launch.
 ---
 
 ## What is already done, so nobody redoes it

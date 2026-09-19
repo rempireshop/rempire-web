@@ -234,10 +234,10 @@
         "tariff-mirror"
       ],
       "title": "Собрать таблицу цен: страна × вес × размер ячейки — и точку безубыточности по зонам",
-      "detail": "Инструмент и docs/delivery-pricing.md пишутся сейчас. Без ключей таблица соберётся по вчерашним числам, поэтому она ждёт зеркало.",
+      "detail": "Инструмент и docs/delivery-pricing.md готовы (npm run delivery:pricing). Без живых ключей таблица собирается по вчерашнему зеркалу тарифов, поэтому настоящая ждёт ключей. Взвешивание товара для неё НЕ нужно: объёмный вес коробки 30×30×30 — 5,4 кг, и на здешних посылках платят за коробку (решение 18.09).",
       "en": {
         "title": "Produce the pricing grid — country × weight band × locker size — and the break-even flat price per zone",
-        "detail": "The tool and `docs/delivery-pricing.md` are being built now. Without keys the grid is built on yesterday's numbers, so it waits for the mirror."
+        "detail": "The tool and docs/delivery-pricing.md are ready (npm run delivery:pricing). Without live keys the grid is built from yesterday's tariff mirror, so the real one waits for the keys. It does NOT need the products weighed: a 30×30×30 carton is 5.4 kg volumetric, and at this shop's parcel sizes the box is what gets paid for (decision of 18.09)."
       }
     },
     {
@@ -266,13 +266,13 @@
       "who": [
         "renat"
       ],
-      "status": "todo",
-      "blocking": true,
-      "title": "Взвесить товар",
-      "detail": "В каталоге нет веса ни у одного из 220 товаров; у 113 есть только объём. Международная цена зависит от веса, и пока веса нет, единая цена на зону — ставка на каждый тяжёлый заказ. У 14 своих товаров публичных данных нет по определению. Открыто с 14.09.",
+      "status": "done",
+      "blocking": false,
+      "title": "Взвесить товар — отменено 18.09",
+      "detail": "Решение владельца, и рассуждение стоит сохранить. Montonio берёт max(вес, объёмный), объёмный — это габариты ÷ 5000, поэтому коробка 30×30×30 весит 5,4 кг чем её ни набей. На здешних размерах посылки платят за заявленную коробку, а не за содержимое. Маленькая коробка по умолчанию забирает почти всю экономию без всякой работы, а редкий тяжёлый заказ — принятый убыток в обмен на одну устойчивую цену.",
       "en": {
-        "title": "Weigh the products",
-        "detail": "The catalogue holds no weight for any of 220 items; 113 carry a volume and nothing else. International prices move with weight, so until this exists a flat price per zone is a bet on every heavy order. The 14 own-brand products have no public data by definition. Open since 14.09."
+        "title": "Weigh the products — cancelled 18.09",
+        "detail": "The owner's decision, and the reasoning is worth keeping. Montonio bills max(actual, volumetric) and volumetric is dimensions ÷ 5000, so a 30×30×30 carton is 5.4 kg whatever is inside it. At this shop's parcel sizes the declared box is what gets paid for, not the contents. A small default carton captures nearly all of the saving with none of the work, and the rare heavy order is an accepted loss taken deliberately in exchange for one stable price."
       }
     },
     {
@@ -281,13 +281,13 @@
       "who": [
         "renat"
       ],
-      "status": "todo",
-      "blocking": true,
-      "title": "Сказать, какие спреи Kevin.Murphy — аэрозоли под давлением",
-      "detail": "Перевозчики их ограничивают. От этого зависит, можно ли их вообще отправлять за границу, — отдельно от цены. Открыто с 14.09.",
+      "status": "done",
+      "blocking": false,
+      "title": "Какие спреи Kevin.Murphy — аэрозоли — закрыто 19.09",
+      "detail": "«Forget about it, it's fine» (Дима, 19.09.2026). Магазин этот вопрос больше нигде не задаёт.",
       "en": {
-        "title": "Which Kevin.Murphy sprays are pressurised aerosols",
-        "detail": "Carriers restrict them — this decides whether they may be shipped abroad at all, separately from price. Open since 14.09."
+        "title": "Which Kevin.Murphy sprays are pressurised aerosols — closed 19.09",
+        "detail": "«Forget about it, it's fine» (Dim, 19.09.2026). Nothing in the shop asks the question any more."
       }
     },
     {
@@ -403,13 +403,13 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
-      "title": "Четыре решения по платежам",
-      "detail": "Держать недоплаченный заказ недоплаченным, а не помечать оплаченным; ужесточить две проверки уведомлений и переспрашивать Montonio при расхождении; подбирать заказы, застрявшие неоплаченными из-за непришедшего уведомления. Стоит в очереди за доставкой.",
+      "title": "Четыре решения по платежам — сделаны в ночь на 19.09",
+      "detail": "Все три, что были в очереди: недоплаченный заказ держится придержанным, а не помечается оплаченным (payment.held, shortPayment в src/lib/payments/apply.ts); обе проверки уведомления ужесточены и при расхождении шоп переспрашивает Montonio через GET /orders/:uuid; ночная сверка подбирает заказы, застрявшие неоплаченными из-за непришедшего уведомления (src/lib/payments/reconcile.ts). 19.09 к ним добавилось то, что придержанный заказ теперь видно из списка — значок, чип «Придержаны» и строка в «Сделать сегодня».",
       "en": {
-        "title": "The four payment decisions",
-        "detail": "Hold an order paid short instead of marking it paid; tighten the two webhook checks and ask Montonio on a mismatch; sweep for orders stuck unpaid because a notification never arrived. Queued behind the shipping four."
+        "title": "The four payment decisions — built on the night of 19.09",
+        "detail": "All three that were queued: a short-paid order is held rather than marked paid (payment.held, shortPayment in src/lib/payments/apply.ts); both notification checks are tightened and a mismatch re-asks Montonio through GET /orders/:uuid; a nightly sweep picks up orders stuck unpaid because their notification never arrived (src/lib/payments/reconcile.ts). On 19.09 a held order also became findable from the list — its own badge, a «Придержаны» chip and a row in «Сделать сегодня»."
       }
     },
     {
@@ -433,13 +433,13 @@
       "who": [
         "claude"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
-      "title": "Починить 13 падающих браузерных тестов, которые уже есть на main",
-      "detail": "Модульные тесты всё это время зелёные — 3834 штуки. Браузерные тихо красные, и никто не смотрел.",
+      "title": "13 падающих браузерных тестов — починены 18.09",
+      "detail": "Слияние 0fbd940, «тринадцать красных браузерных проб, две настоящие ошибки»: остальные одиннадцать оказались пробами, отставшими от магазина. Модульных тестов сейчас 4400+, и они зелёные; браузерные с тех пор не прогонялись — перед самым запуском их стоит прогнать ещё раз (это пункт «Последний проход»).",
       "en": {
-        "title": "Fix the 13 end-to-end failures that already exist on main",
-        "detail": "The unit suite has been green throughout at 3834 tests; the browser suite has been quietly red and nobody was looking."
+        "title": "The 13 end-to-end failures — fixed 18.09",
+        "detail": "Merge 0fbd940, «thirteen red browser probes, two real bugs»: the other eleven were probes that had fallen behind the shop. The unit suite is 4400+ and green; the browser suite has not been run since, and is worth one more run right before launch (that is the «Final pass» item)."
       }
     },
     {
@@ -478,13 +478,13 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
-      "title": "Исправить в кабинете «проверьте баланс в его панели»",
-      "detail": "Эта фраза называет единственную причину отказа в возврате, которая невозможна. Точная замена уже написана.",
+      "title": "«Проверьте баланс в его панели» — убрано 18.09",
+      "detail": "Эта фраза называла единственную причину отказа в возврате, которая невозможна: по документации Montonio возврат, за которым нет денег, получает 200 PENDING, а не ошибку. То есть панель отправляла смотреть ровно туда, где никогда не было дела. Теперь каждый документированный отказ получает собственные три фразы (src/lib/montonio-problems.ts), а тест не даёт ни одной из них снова заговорить о балансе. В коде фраза осталась только в комментариях, объясняющих, как это было.",
       "en": {
-        "title": "Correct the panel's «проверьте баланс в его панели»",
-        "detail": "It names the one cause of a refused refund that is impossible. The exact replacement is already written."
+        "title": "The panel's «проверьте баланс в его панели» — removed 18.09",
+        "detail": "The sentence named the one cause of a refused refund that cannot happen: by Montonio's own documentation a refund with no money behind it is answered 200 PENDING, never an HTTP error. So the panel sent the owner to look at the one thing it was never about. Each documented refusal now gets three sentences of its own (src/lib/montonio-problems.ts), and a test stops any of them mentioning the balance again. The phrase survives in the code only in comments explaining the history."
       }
     },
     {
@@ -517,14 +517,14 @@
       "who": [
         "renat"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": false,
       "optional": true,
-      "title": "Скрытый товар больше не напоминает о себе в «Складе» — оставляем так?",
-      "detail": "Скрытый из каталога товар теперь выпадает из «Мало» и «Нет», из счётчика вкладки «Склад» и из ответа помощника про остатки. Сделано намеренно и откатывается строк в пять, если Ренат не согласен.",
+      "title": "Скрытый товар в «Складе» — решено 19.09",
+      "detail": "Считается отдельно, а не выбрасывается: скрытый товар не попадает в «заканчиваются», но получает собственную строку на «Обзоре» — чтобы бутылка, спрятанная ИМЕННО потому, что кончилась, не исчезла из единственного списка, который о ней напомнит. В тот же день строка научилась называть товары и вести в «Каталог → Скрытые».",
       "en": {
-        "title": "A hidden product no longer nags from «Склад» — leave it that way?",
-        "detail": "A hidden catalogue product now drops out of «Мало»/«Нет», the «Склад» tab count and the assistant's low-stock answer, where before it nagged. Deliberate, and reversible in about five lines if Renat disagrees."
+        "title": "A hidden product in «Склад» — decided 19.09",
+        "detail": "Counted apart rather than dropped: a hidden product stays out of «running low» but gets a line of its own on the overview — so a bottle hidden BECAUSE it ran out does not vanish from the only list that would remind him. The same day that line learned to name the products and to lead to «Каталог → Скрытые»."
       }
     },
     {
@@ -536,11 +536,11 @@
       "status": "todo",
       "blocking": false,
       "optional": true,
-      "title": "Два прохода Fable 5.1, о которых договорились 17.09",
-      "detail": "Разбор диффа на регрессии и проверка готовности к запуску. Ждут повторной проверки отмеченных пунктов владельцем. Этот список сильно пересекается со вторым проходом, но прогнать его всё равно стоит: он читает написанное, а не задуманное.",
+      "title": "Второй проход Fable 5.1 — после недели запуска",
+      "detail": "Первый сделан 18.09: разбор диффа на регрессии, 56 находок, docs/audit-2026-09-18-findings.md — из них закрыто больше сорока, включая единственную серьёзную (двойной возврат на смешанной оплате). Второй — проверка готовности к запуску — переносится на после недели запуска (Дима, 19.09). Запуску не мешает.",
       "en": {
-        "title": "The two Fable 5.1 passes agreed on 17.09",
-        "detail": "A regression review of the diff, and a go-live readiness pass. Waiting on the owner's re-test of the marked checks. This list overlaps the second one heavily; the review is still worth running because it reads what was written, not what was intended."
+        "title": "The second Fable 5.1 pass — after launch week",
+        "detail": "The first was done on 18.09: a regression review of the diff, 56 findings, docs/audit-2026-09-18-findings.md — more than forty of them closed, including the only serious one (a double refund on a mixed tender). The second, the go-live readiness pass, moves to after launch week (Dim, 19.09). It does not block the launch."
       }
     },
     {
