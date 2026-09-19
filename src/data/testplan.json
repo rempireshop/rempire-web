@@ -4633,6 +4633,51 @@
           "After a partial refund that is not the order's total."
         ],
         "why": "A letter promising the whole sum instead of part is an argument you lose."
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-19T06:45:00.000Z"
+    },
+    {
+      "id": "mail-refund-sent",
+      "area": "mail",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Два письма про один возврат",
+      "steps": [
+        "Открыть «Письма» и найти «Возврат отправлен» рядом с «Деньги возвращены».",
+        "Посмотреть его в предпросмотре на всех трёх языках.",
+        "Сделать настоящий возврат и прочитать письмо, которое пришло покупателю.",
+        "Дождаться подтверждения от Montonio и прочитать второе письмо."
+      ],
+      "expect": [
+        "В «Письмах» оба шаблона на месте и оба можно отредактировать.",
+        "Первое письмо говорит, что возврат отправлен, а не что деньги уже вернулись.",
+        "В нём названа сумма и сказано, когда начинать беспокоиться.",
+        "Второе письмо приходит отдельно и говорит, что деньги у покупателя.",
+        "Возврат на подарочную карту шлёт только одно письмо — деньги на карте сразу."
+      ],
+      "why": "Montonio отвечает «принято» на возврат, которого ещё не произошло. Письмо «деньги возвращены» в этот момент — письменное обещание того, что может не случиться.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T06:45:00.000Z",
+      "en": {
+        "title": "Two letters for one refund",
+        "steps": [
+          "Open «Письма» and find «Возврат отправлен» next to «Деньги возвращены».",
+          "Preview it in all three languages.",
+          "Make a real refund and read the letter the customer got.",
+          "Wait for Montonio to confirm and read the second letter."
+        ],
+        "expect": [
+          "Both templates are in «Письма» and both can be edited.",
+          "The first says the refund was sent, not that the money is back.",
+          "It names the amount and says when to start worrying.",
+          "The second letter arrives separately and says the money has arrived.",
+          "A gift-card refund sends one letter only — that money is back at once."
+        ],
+        "why": "Montonio says «accepted» for a refund that has not happened yet. «Money returned» at that moment is a promise in writing that may not come true."
       }
     },
     {
@@ -5125,7 +5170,8 @@
           "The number next to «+» is back to 1."
         ],
         "why": "Taking goods in by hand, one bottle at a time, eats an evening."
-      }
+      },
+      "markedAt": "2026-09-19T06:45:00.000Z"
     },
     {
       "id": "stock-scan-bind",
@@ -5317,6 +5363,51 @@
           "Its own stock did not move at all."
         ],
         "why": "A write-off is breakage or loss; a sale run this way vanishes from reports."
+      }
+    },
+    {
+      "id": "stock-scan-repeat",
+      "area": "stock",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Сканер: приход, который не записался",
+      "steps": [
+        "Открыть сканер и отсканировать товар со штрих-кодом.",
+        "Выключить интернет на телефоне и нажать «Приход».",
+        "Включить интернет обратно.",
+        "Отсканировать тот же товар ещё раз и снова нажать «Приход».",
+        "Посмотреть остаток на «Складе»."
+      ],
+      "expect": [
+        "После потери связи сказано, что не удалось сохранить.",
+        "Второе нажатие не пишет «Приход +1 ✓», а говорит, что это уже записано.",
+        "В той же строке назван остаток, который сейчас на складе.",
+        "Сказано, что делать, если бутылка была новая.",
+        "Остаток вырос на одну, а не на две."
+      ],
+      "why": "Магазин не может отличить повтор от следующей такой же бутылки. Он выбирает недосчитать, и об этом надо сказать вслух, пока бутылка в руках.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-19T06:45:00.000Z",
+      "en": {
+        "title": "The scanner: an arrival that did not save",
+        "steps": [
+          "Open the scanner and scan a product with a barcode.",
+          "Turn the phone's internet off and press «Приход».",
+          "Turn the internet back on.",
+          "Scan the same product again and press «Приход» again.",
+          "Look at the count in «Склад»."
+        ],
+        "expect": [
+          "After the connection is lost it says it could not save.",
+          "The second press does not say «Приход +1 ✓» — it says this is already recorded.",
+          "The same line names the count that is on the shelf now.",
+          "It says what to do if the bottle really was a new one.",
+          "The count grew by one, not by two."
+        ],
+        "why": "The shop cannot tell a retry from the next identical bottle. It chooses to under-count, and must say so while the bottle is still in hand."
       }
     },
     {

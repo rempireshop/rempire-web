@@ -121,10 +121,16 @@ Nothing here is urgent; each is written up in
   ever carry a registration failure, and whether `paymentMethodType` is stable.
   **And the one that decides the parcel weight:** whether `actualWeight` means
   what we declared or what the carrier's scale reads.
-- **Renat, open since 14.09:** which Kevin.Murphy sprays are pressurised
-  aerosols.
-- **Three decisions:** Google Shopping, the pending-refund letter, hidden
-  products in the low-stock counts.
+- **Decisions he settled on the morning of 19.09, all four built:** the
+  pending-refund letter is now two letters (`order-refund-sent`, its own
+  template in «Письма»); the Google Shopping feed stays out of the build and is
+  not submitted; the refund adoption stays exactly as built; and the scanner
+  keeps under-counting but says «это уже записано — на складе N» instead of
+  claiming a movement. Two new checks for the last two, 193 in the plan.
+- **Still his, and still open:** F40 above, whether a hidden catalogue product
+  should go back to nagging in the low-stock counts, and whether a refund of a
+  partially-clamped sale should credit the full quantity or only what the sale
+  actually took.
 
 ## The test plan: 191 checks
 
