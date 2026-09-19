@@ -85,8 +85,18 @@ export const dynamic = "force-dynamic";
 
 const NO_STORE = { "cache-control": "no-store" } as const;
 
-/** The settings row that keeps the last answer, dated. */
-export const MONTONIO_READINESS_SETTING = "montonio_readiness";
+/* The settings row that keeps the last answer, dated.
+
+   NOT exported, and it must not be. A Next.js App Router route file may export
+   only the HTTP handlers and a fixed list of config names; anything else fails
+   the build — «Property 'MONTONIO_READINESS_SETTING' is incompatible with index
+   signature… not assignable to type 'never'». `tsc --noEmit` does not see this,
+   because the check lives in the route types Next GENERATES during `next build`,
+   so the whole suite stayed green while every deploy since 18.09 14:57 failed
+   and the stand went on serving the build from lunchtime that day. Nothing
+   imports this name; if something ever needs to, it goes in a module of its own
+   rather than back onto the route. */
+const MONTONIO_READINESS_SETTING = "montonio_readiness";
 
 type Refundable = true | false | null;
 
