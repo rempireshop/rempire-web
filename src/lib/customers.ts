@@ -549,6 +549,16 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       })),
       tracking: code || null,
       trackingUrl: url || null,
+      /* What has gone back, and what has been sent and not yet confirmed.
+         Montonio answers `200 PENDING` for a refund it has merely accepted and
+         the real answer arrives on a webhook up to ten days later, so between
+         the shop's «Вернуть деньги» and that webhook the order is still `paid`
+         and the customer's screen said nothing at all had happened — while the
+         letter in their inbox said the money was on its way (Dim, 19.09.2026:
+         «I can still see it in "my orders"»). Two numbers, so the screen can
+         tell «отправлен» from «возвращено» instead of guessing from status. */
+      refunded: refundedMoney(payment, "done"),
+      refundPending: refundedMoney(payment, "pending"),
       giftCards: cardsByOrder.get(r.id) ?? [],
       invoice: inv ? { number: inv.number, pdfUrl: accountInvoicePath(r.number) } : null,
       returnable: canRequestReturn(ret),
@@ -574,6 +584,30 @@ export function accountInvoicePath(orderNumber: string): string {
  * Empty for every order when anything at all goes wrong: a customer's order
  * list must not fail because a card could not be looked up.
  */
+/**
+ * The refunds on one order's payment blob, in one status, as a sum.
+ *
+ * Its own tiny reader rather than refundsOf() from src/lib/payments/refund.ts:
+ * this module is imported by every signed-in route, and the payments graph is
+ * not something the account list should drag in for two numbers. The shape it
+ * reads is the same one settleRefund() writes — `payment.refunds[]` with
+ * `amount` and `status` — and `payments-refund-account.test.ts` compares the
+ * two answers so they cannot drift apart.
+ */
+function refundedMoney(payment: unknown, status: "done" | "pending"): number {
+  const raw = (payment as { refunds?: unknown } | null | undefined)?.refunds;
+  if (!Array.isArray(raw)) return 0;
+  let sum = 0;
+  for (const r of raw) {
+    if (!r || typeof r !== "object" || Array.isArray(r)) continue;
+    const row = r as Record<string, unknown>;
+    if (String(row.status ?? "") !== status) continue;
+    const amount = Number(row.amount);
+    if (Number.isFinite(amount)) sum += amount;
+  }
+  return Math.round(sum * 100) / 100 || 0;
+}
+
 async function giftCardsForEmail(
   addr: string,
   limit: number,
@@ -583,9 +617,16 @@ async function giftCardsForEmail(
     /* The query first, the module after it: `giftPdfPath` is behind a dynamic
        import (see the caller's note for why) and on a cold instance that import
        is disk work this query has no reason to wait for. */
+    /* `voided_at is null` — a card the shop has bought back is not a card the
+       account may keep offering. Voiding zeroes the balance and stamps the
+       row (151_gift_card_refunds), redeemGiftCard() refuses it, and yet «Мои
+       заказы» went on showing it and «Скачать подарочную карту (PDF)» went on
+       printing its full face value: a PDF of 50 € that buys nothing, handed
+       to whoever was given the card. */
     const pending = query<{ code: string; amount: string | number; order_id: string }>(
       `select code, amount, order_id from gift_cards
-        where order_id in (select id from orders where lower(email) = $1
+        where voided_at is null
+          and order_id in (select id from orders where lower(email) = $1
                             order by created_at desc limit $2)
         order by created_at asc`,
       [addr, limit],

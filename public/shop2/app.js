@@ -805,6 +805,8 @@
       "Заявка на возврат отправлена ✓": "Tagastustaotlus on saadetud ✓",
       "принят": "vastu võetud", "оплачен": "makstud", "отправлен": "teele saadetud",
       "отменён": "tühistatud", "возврат": "tagastatud",
+      // 19.09.2026: a refund the bank has not confirmed yet is its own word
+      "возврат отправлен": "tagasimakse saadetud", "возвращено": "tagastatud summa",
       "Телефон": "Telefon",
       "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
       "Сообщить о наличии": "Anna teada, kui on laos",
@@ -3661,6 +3663,8 @@
       "Заявка на возврат отправлена ✓": "Return request sent ✓",
       "принят": "received", "оплачен": "paid", "отправлен": "shipped",
       "отменён": "cancelled", "возврат": "refunded",
+      // 19.09.2026: a refund the bank has not confirmed yet is its own word
+      "возврат отправлен": "refund sent", "возвращено": "refunded",
       "Телефон": "Phone",
       "День рождения — пришлём скидку": "Birthday — we'll send a discount",
       "Сообщить о наличии": "Tell me when it's back",
@@ -5966,8 +5970,9 @@
     [/^Подарочная карта (.+) из этого заказа уже потрачена на (.+) — вернуть заказ целиком нельзя\.$/,
       { ET: "Selle tellimuse kinkekaart $1 on juba kulutatud $2 ulatuses — tervet tellimust tagastada ei saa.",
         EN: "Gift card $1 from this order has already been spent — $2 of it — so the whole order cannot be refunded." }],
-    [/^Подарочная карта из этого заказа будет аннулирована: (.+)\.$/,
-      { ET: "Selle tellimuse kinkekaart tühistatakse: $1.", EN: "The gift card from this order will be cancelled: $1." }],
+    [/^Подарочная карта из этого заказа будет аннулирована, когда банк подтвердит возврат: (.+)\.$/,
+      { ET: "Selle tellimuse kinkekaart tühistatakse, kui pank tagasimakse kinnitab: $1.",
+        EN: "The gift card from this order will be cancelled once the bank confirms the refund: $1." }],
     [/^(.+) · возврат (.+) · на карту (.+) — письмо ушло$/,
       { ET: "$1 · tagasimakse $2 · kaardile $3 — kiri läks välja", EN: "$1 · refunded $2 · $3 onto the card — the letter is out" }],
     [/^(.+) · вернули часть, (.+) · на карту (.+)$/,
@@ -14869,6 +14874,20 @@
   }
   function acctOrderRow(o) {
     var st = ACCT_ORDER_STATE[o.status] || ["принят", "chip--low"];
+    /* A refund the shop has SENT and the bank has not confirmed. Montonio
+       answers «принято» at once and the real answer comes days later, so until
+       it does the order is still «оплачен» and this screen said nothing had
+       happened — while the letter «Возврат отправлен» was already in the
+       customer's inbox (Dim, 19.09.2026). The word and the sum are separate
+       nodes, because translateTree() rewrites a whole text node and a sentence
+       glued together here would never be translated. */
+    var sent = Number(o.refundPending) || 0;
+    var back = Number(o.refunded) || 0;
+    var refundChip = sent > 0.004
+      ? '<span class="chip chip--low">возврат отправлен</span><span class="muted num"> ' + eur(sent) + "</span>"
+      : back > 0.004 && o.status !== "refunded"
+        ? '<span class="chip chip--low">возвращено</span><span class="muted num"> ' + eur(back) + "</span>"
+        : "";
     var track = o.trackingUrl
       ? ' <a class="link rowcard__act" href="' + esc(o.trackingUrl) + '" target="_blank" rel="noopener">Отследить</a>'
       : o.tracking ? ' <span class="muted num">' + esc(o.tracking) + "</span>" : "";
@@ -14918,7 +14937,8 @@
     }
     return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
-      '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + track +
+      '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + refundChip +
+      track +
       (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + ret + "</div>";
   }
   function screenAccount() {
@@ -32020,6 +32040,13 @@
        over a «Склад» screen still showing the old number is exactly what the
        owner reported. Same door the scanner already uses. */
     scanStockChanged();
+    /* …and «Выпущенные карты», for the same reason. That list is fetched once
+       per session (loadAdminGiftCards keeps it until something drops it) and
+       nothing ever did: a refund voids the cards the order sold, and the tab —
+       if it had been opened earlier in the same visit — went on showing them
+       alive, with their balance and their PDF button. Dropped, not fetched:
+       the next render of that tab asks. */
+    S.admGiftCards = null;
   }
   /**
    * returns: «Обработано» on the order card, and the undo of it.
@@ -32191,8 +32218,15 @@
       var used = Math.round((Number(live[i].amount) - Number(live[i].balance)) * 100) / 100;
       if (used > 0.004) return "Подарочная карта " + live[i].code + " из этого заказа уже потрачена на " + eur(used) + " — вернуть заказ целиком нельзя.";
     }
+    /* «когда банк подтвердит возврат» and not «будет аннулирована»: Montonio
+       answers «принято» to a refund it has only accepted, and the card is
+       voided by the webhook that confirms it — up to ten days later. The
+       sentence promised it in the present tense, so the owner refunded a card
+       order, opened «Подарочные карты», found the card alive and reported the
+       shop broken (Dim, 19.09.2026). Voiding earlier is not the fix: a void
+       cannot be undone, and Montonio may still cancel the refund. */
     var codes = live.map(function (c) { return c.code; }).join(", ");
-    return "Подарочная карта из этого заказа будет аннулирована: " + codes + ".";
+    return "Подарочная карта из этого заказа будет аннулирована, когда банк подтвердит возврат: " + codes + ".";
   }
   /** The confirm card's text. `typed` is the amount in the box while the
       owner edits it; the split under it follows (the input handler repaints

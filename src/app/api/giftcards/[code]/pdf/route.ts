@@ -51,6 +51,15 @@ export async function GET(req: Request, ctx: Ctx) {
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
   }
   if (!card) return notFound();
+  /* A card the shop has bought back is not a card it will print again. Voiding
+     happens when the order that SOLD it is refunded in full (voidGiftCards,
+     151_gift_card_refunds): the balance is zeroed and the code buys nothing
+     from that moment. The link, though, lives in an old letter and in the
+     account, and it went on rendering the full face value — a 50 € card, in
+     the customer's hands, that no till will take. 410 and not 404: the card
+     existed, and saying so is the difference between «wrong link» and «this
+     one has been cancelled». */
+  if (card.voidedAt) return Response.json({ ok: false, error: "voided" }, { status: 410 });
 
   let bytes = await fetchStoredGiftCardPdf(code);
   if (!bytes) {
