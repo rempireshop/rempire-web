@@ -2048,6 +2048,10 @@ export async function setOrderStatus(
          again inside a set), and every question below is about the order as it
          stood before this refund. */
       const ledger = await orderLedgerReader(refLedger, after.number);
+      /* What this cancel/refund has already put back on each shelf row, so
+         two lines naming one row (a bottle bought loose and again inside a
+         set) share the same ceiling instead of each taking the whole of it. */
+      const givenBack = new Map<string, number>();
       for (const item of before.items) {
         const storedSizes = storedSizesOf(item);
         for (const unit of stockUnitsOf(item)) {
@@ -2070,10 +2074,28 @@ export async function setOrderStatus(
              name. Every other line is unchanged: its size is its own. */
           const stored = storedSizes.get(unit.productId) ?? "";
           if (!stored && unit.variant && (await ledger(unit.productId, unit.variant)).net >= 0) continue;
+          /* NEVER more than the sale actually took. move() clamps a sale at
+             zero — the shelf held 1, the order wanted 2, so one bottle left
+             and the ledger says −1 — and the return used to credit the two
+             the LINE names. The shelf then claimed a bottle that never
+             existed, which is the expensive direction: a count that overstates
+             sells what is not there (Dim, 19.09.2026). The ledger is read
+             through the same memo the loop already uses, so it is this order
+             as it stood BEFORE any of these returns were written.
+             It generalises F8: an order whose sale never landed at all —
+             untracked then, or paid before this row existed — reads 0 and
+             gets nothing back, which is what the guard above says for the
+             one-volume twenty-nine and is just as true everywhere else. */
+          const row = unit.productId + "\u0000" + unit.variant;
+          const took = Math.max(0, -(await ledger(unit.productId, unit.variant)).net);
+          const already = givenBack.get(row) ?? 0;
+          const give = Math.min(unit.qty, Math.max(0, took - already));
+          if (!give) continue;
+          givenBack.set(row, already + give);
           await move({
             productId: unit.productId,
             variant: unit.variant,
-            delta: unit.qty,
+            delta: give,
             reason: "return",
             ref: after.number,
             actor,

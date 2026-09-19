@@ -607,6 +607,23 @@ describe("inventory", () => {
     });
   });
 
+  /* Pays an order the way the shop pays it. setOrderStatus("paid") moves no
+     stock on purpose — applyPaymentResult() is what writes the decrement —
+     and since 19.09.2026 a return is capped at what the sale actually took
+     (Dim: «give back only what the sale took»). So a test that wants goods
+     to come BACK has to let them leave first, through the real door, which
+     also gets a set's parts and a one-volume line right without the test
+     having to know how. */
+  async function payThrough(order: { id: string; number: string; total: number | string; status?: string }) {
+    const { setOrderPayment, setOrderStatus: realSetStatus } = await import("@/lib/orders");
+    await applyPaymentResult(
+      { ...order, status: order.status ?? "new" } as unknown as OrderLike,
+      { orderRef: order.number, status: "paid", providerRef: "manual", amount: Number(order.total), currency: "EUR" },
+      "manual",
+      { setOrderPayment, setOrderStatus: realSetStatus },
+    );
+  }
+
   describe("setOrderStatus — a refund/cancel after paid returns stock", () => {
     async function payOrder() {
       const order = await createOrder({
@@ -614,7 +631,7 @@ describe("inventory", () => {
         customer: { name: "Т", email: "t@example.com", phone: "+372 5555 5555" },
         shipping: { method: "pickup", country: "EE" },
       });
-      await setOrderStatus(order.id, "paid", "test");
+      await payThrough(order);
       return order;
     }
 
@@ -623,17 +640,39 @@ describe("inventory", () => {
       const order = await payOrder();
       await setOrderStatus(order.id, "refunded", "test");
       const level = await getLevel(plain.id, "");
-      expect(level?.qty).toBe(13);
+      expect(level?.qty).toBe(10); // 10 on the shelf, 3 sold, 3 back
       const moves = await listMoves({ productId: plain.id, reason: "return" });
       expect(moves).toHaveLength(1);
       expect(moves[0].ref).toBe(order.number);
+    });
+
+    /* THE ONE DIM DECIDED ON, 19.09.2026. move() clamps a sale at zero: the
+       shelf held one bottle, the order asked for two, one left and the ledger
+       says −1. The return used to credit the TWO the line names, so the shelf
+       came back with a bottle that never existed — and a count that overstates
+       sells what is not there. «Give back only what the sale took.» */
+    it("returns only what a clamped sale actually took", async () => {
+      await move({ productId: plain.id, delta: 1, reason: "goods_in", actor: "test" });
+      const order = await createOrder({
+        items: [{ id: plain.id, qty: 2 }],
+        customer: { name: "Т", email: "clamped@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "pickup", country: "EE" },
+      });
+      await payThrough(order);
+      expect((await getLevel(plain.id, ""))?.qty, "the sale should have stopped at zero").toBe(0);
+
+      await setOrderStatus(order.id, "refunded", "test");
+      expect((await getLevel(plain.id, ""))?.qty, "the shelf gained a bottle that never existed").toBe(1);
+      const back = await listMoves({ productId: plain.id, reason: "return" });
+      expect(back).toHaveLength(1);
+      expect(back[0].delta).toBe(1);
     });
 
     it("cancelled after paid also returns stock", async () => {
       await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
       const order = await payOrder();
       await setOrderStatus(order.id, "cancelled", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
     });
 
     /* …and the way back. «Отменён» pressed by mistake and put right again
@@ -646,15 +685,15 @@ describe("inventory", () => {
       await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
       const order = await payOrder();
       await setOrderStatus(order.id, "cancelled", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
 
       await setOrderStatus(order.id, "paid", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7); // off the shelf again
 
       // …however many times the owner changes his mind
       await setOrderStatus(order.id, "cancelled", "test");
       await setOrderStatus(order.id, "shipped", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7);
     });
 
     /* The guard on that mirror: an order cancelled BEFORE it was ever paid
@@ -701,24 +740,24 @@ describe("inventory", () => {
       await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
       const order = await payOrder();
       await setOrderStatus(order.id, "cancelled", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
 
       await setOrderStatus(order.id, "paid", "admin");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7); // off the shelf again
 
       // …and a second cycle is not a second gift either
       await setOrderStatus(order.id, "cancelled", "test");
       await setOrderStatus(order.id, "paid", "admin");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7); // off the shelf again
     });
 
     it("the undo of a refund takes it back too", async () => {
       await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
       const order = await payOrder();
       await setOrderStatus(order.id, "refunded", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
-      await setOrderStatus(order.id, "paid", "admin");
       expect((await getLevel(plain.id, ""))?.qty).toBe(10);
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(plain.id, ""))?.qty).toBe(7); // off the shelf again
     });
 
     /* The other half of the same rule: an order that never took stock has
@@ -757,10 +796,12 @@ describe("inventory", () => {
         customer: { name: "Т", email: "set@example.com", phone: "+372 5555 5555" },
         shipping: { method: "pickup", country: "EE" },
       });
-      await setOrderStatus(order.id, "paid", "test");
+      await payThrough(order);
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(8);  // the sale took 1×2
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(6); // …and 2×2
       await setOrderStatus(order.id, "refunded", "test");
-      expect((await getLevel(setPartA.id, ""))?.qty).toBe(12); // 10 + 1×2
-      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(14); // 10 + 2×2
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(10);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(10);
     });
 
     /* …and the way back from THAT. The cancellation gave the parts back
@@ -780,20 +821,20 @@ describe("inventory", () => {
         customer: { name: "Т", email: "set-undo@example.com", phone: "+372 5555 5555" },
         shipping: { method: "pickup", country: "EE" },
       });
-      await setOrderStatus(order.id, "paid", "test");
+      await payThrough(order);
       await setOrderStatus(order.id, "cancelled", "test");
-      expect((await getLevel(setPartA.id, ""))?.qty).toBe(12);
-      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(14);
-
-      await setOrderStatus(order.id, "paid", "admin");
       expect((await getLevel(setPartA.id, ""))?.qty).toBe(10);
       expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(10);
+
+      await setOrderStatus(order.id, "paid", "admin");
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(8);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(6);
 
       // …and however many times the owner changes his mind, as for a plain line
       await setOrderStatus(order.id, "cancelled", "test");
       await setOrderStatus(order.id, "paid", "admin");
-      expect((await getLevel(setPartA.id, ""))?.qty).toBe(10);
-      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(10);
+      expect((await getLevel(setPartA.id, ""))?.qty).toBe(8);
+      expect((await getLevel(setPartB.id, setPartBSize))?.qty).toBe(6);
     });
 
     it("cancelling a NEW order (never paid) returns nothing — it never took stock", async () => {
@@ -938,10 +979,10 @@ describe("inventory", () => {
         customer: { name: "Т", email: "onesize-refund@example.com", phone: "+372 5555 5555" },
         shipping: { method: "pickup", country: "EE" },
       });
-      await setOrderStatus(order.id, "paid", "test");
+      await payThrough(order);
       await setOrderStatus(order.id, "refunded", "test");
 
-      expect((await getLevel(oneRung.id, rung))?.qty).toBe(12);
+      expect((await getLevel(oneRung.id, rung))?.qty).toBe(10);
       expect(await getLevel(oneRung.id, "")).toBeNull();
       const back = await listMoves({ productId: oneRung.id, reason: "return" });
       expect(back).toHaveLength(1);
