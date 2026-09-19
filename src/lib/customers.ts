@@ -446,6 +446,14 @@ export interface CustomerOrder {
   items: Array<{ title: string; variant: string | null; qty: number }>;
   tracking: string | null;
   trackingUrl: string | null;
+  /* A refund's two halves, because the shop's own screen has to tell them
+     apart. Montonio answers `200 PENDING` to a refund it has merely accepted
+     and confirms on a webhook up to ten days later, so between the two the
+     order is still `paid` and its status says nothing has happened — while
+     the «Возврат отправлен» letter is already with the customer. `refunded`
+     is what the bank has confirmed, `refundPending` what is on its way. */
+  refunded: number;
+  refundPending: number;
   /* The printable gift cards this order bought, if any — code plus the signed
      link to /api/giftcards/<code>/pdf/. Until 07.09.2026 that link existed
      only on the receipt screen, so closing the tab left the buyer with the
