@@ -68,6 +68,51 @@ one of them is now closed except the three that need the live Montonio keys.
 European country, and what the customer sees while a refund is on its way).
 `order-paid-short` is open again with «Дим создаёт заказ» as its first step.
 
+## The afternoon of 19.09: «Товары», and one thing found in Merchant Center
+
+He asked for the products section to be brought up to the standard of an
+ordinary back office, and sent a screenshot of the «Склад» filter chips
+circled with the words «No counts». A survey found fourteen defects of that
+class; the worst of them was not a count.
+
+- **The product editor threw away unsaved work without asking.** It keeps no
+  draft in `S` — every field is read off the DOM at «Сохранить» — so «← Товары»,
+  «Отмена» and the phone's back gesture each cleared a price, three
+  descriptions, six SEO boxes, the size ladder and any reordered photos, on one
+  mis-tap at the top of a five-pane form. It asks now, with the card the blog
+  editor has used since 12.09, on all three exits. And three of the four
+  buttons in the photo strip edited that draft while the save bar stayed blank.
+- **Counts everywhere they were missing**: «Каталог» chips (zeros included),
+  the «Склад» tab badge's zero, and a header number that follows the tab
+  instead of always counting the shop's catalogue.
+- **«Нет в наличии» and «Нет» counted different things** — the manual flag
+  against the counted shelf — so one bottle could be both, and a custom product
+  (hard-coded `stock: "in"`) could never appear under the chip at all.
+- «Каталог» search folds now (`kevin murphy`, `un tangled`, `300 мл` all found
+  nothing before); an empty result has a way out of itself; the list turns its
+  own page. «Наборы» has a count, an actionable empty state and 44×44 reorder
+  buttons. A refused barcode keeps the editor open instead of arriving as a
+  toast over the product list after «Сохранено ✓».
+- **The assistant's draft to a customer had no money on it.** Asked «what is
+  the price of the item» it answered «the price details for this item are not
+  provided here» — correctly: the order went over as titles and quantities. It
+  now carries per-line prices, the total, the delivery line and its cost, the
+  tracking number and anything refunded, each with its currency.
+
+**Merchant Center — a go-live dependency nobody had written down.** The account
+(`5819586565`, «Rempire Tower Shop») is live and earning: 175 clicks in 28 days
+on free listings, ad spend €0. Every product in it is fed by **six Shopify App
+API sources**, 328 products each, one per market (EE/LV/LT/FI in English, a
+Russian one for BY/GE/KZ+3, and one covering 82 more countries) — 1.97K
+"products" is the same 328 items counted per market. "Found by Google" crawling
+`rempireshop.com` has found **2**. So the day Shopify is switched off, those
+feeds stop updating and the free traffic goes with them. Its shipping policies
+are Shopify's flat €15.00 / 4–12 days per country, nothing like the real
+Montonio prices, and that mismatch is what suspends accounts. Our own
+`public/feed/google-shopping.xml` is committed, served publicly, built on
+03.09 from the OLD `public/shop/catalogue2.js` with the staging domain, and
+connected to nothing.
+
 ## The night of 18→19.09
 
 `origin/main` was `12a396b`. **186 test files, 4318 tests, 0 failures**, `tsc`
