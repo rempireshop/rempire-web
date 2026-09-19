@@ -267,6 +267,14 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
           kind: "refunded",
           amount: 42,
         });
+      /* Its twin: the refund Montonio has accepted and not yet paid. Same
+         order, same amount, and the order is still «оплачен» — nothing has
+         moved yet, which is the whole point of the letter. */
+      case "order-refund-sent":
+        return renderOrderCancelled({ ...sampleOrder(lang), status: "paid" }, lang, {
+          kind: "refund_sent",
+          amount: 42,
+        });
       /* «Чек о продаже в салоне»: the sale is over and nothing ships, so the
          sample carries a discount the cashier typed and no delivery at all. */
       case "pos-receipt":

@@ -568,10 +568,18 @@ export async function POST(req: Request, ctx: Ctx) {
 
     const refundedNow = money((moneyResult ? money(moneyResult.amount || split.money) : 0) + giftBack);
     if (!moneyResult || moneyResult.status !== "failed") {
+      /* «Отправлен», not «возвращён», while Montonio has only ACCEPTED the
+         money half — the owner's decision of 19.09.2026, and the same rule
+         settleRefund() applies. A gift card is money already on the card, so
+         a card-only refund is never pending; a MIXED one takes the pending
+         wording, because the half that has not moved is the half the customer
+         will be looking for on a statement. The gift lines still name the
+         card and its amount inside that letter. */
+      const letterKind = moneyResult && moneyResult.status === "pending" ? "refund_sent" : "refunded";
       await notifyOrderClosed(
         { ...order, status: out.status },
         {
-          kind: "refunded",
+          kind: letterKind,
           amount: refundedNow,
           giftAmount: giftBack > 0 ? giftBack : undefined,
           giftCode: giftBack > 0 && giftCard ? giftCard.code : undefined,

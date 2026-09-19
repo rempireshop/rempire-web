@@ -34,7 +34,18 @@ import {
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, OrderLike, RenderedEmail } from "./types";
 
-export type ClosedKind = "cancelled" | "refunded";
+/**
+ * `refund_sent` is the third one, added 19.09.2026 on the owner's decision.
+ *
+ * Montonio answers 200 PENDING for a refund it has merely ACCEPTED — it may
+ * still fail for want of balance, and it cancels itself after ten days. Until
+ * now that state sent «Деньги возвращены», so a customer could have it in
+ * writing that the money was back when it was not. Saying nothing instead would
+ * leave somebody who asked for a refund with no news for days, which is the
+ * e-mail Renat then has to answer by hand. So: one letter on acceptance that
+ * promises nothing, and the real one when Montonio confirms.
+ */
+export type ClosedKind = "cancelled" | "refunded" | "refund_sent";
 
 export interface ClosedOptions {
   kind: ClosedKind;
@@ -117,6 +128,29 @@ const T: Record<ClosedKind, Record<Lang, Strings>> = {
       wait: "Still want these items? Place the order again — they are back in the shop.",
     },
   },
+  refund_sent: {
+    ru: {
+      preheader: "Возврат отправлен в банк.",
+      title: "Возврат отправлен",
+      label: "Сумма возврата",
+      detail: ["Мы отправили возврат на ", "."],
+      wait: "Банк переводит деньги не сразу: обычно они приходят в течение нескольких дней. Когда деньги будут у вас, мы напишем ещё раз. Если через десять дней их всё ещё нет — ответьте на это письмо.",
+    },
+    et: {
+      preheader: "Tagastus on panka saadetud.",
+      title: "Tagastus saadetud",
+      label: "Tagastatav summa",
+      detail: ["Saatsime tagastuse summas ", "."],
+      wait: "Pank ei kanna raha kohe: tavaliselt jõuab see kohale mõne päevaga. Kui raha on teie kontol, kirjutame uuesti. Kui kümne päeva pärast seda ikka ei ole — vastake sellele kirjale.",
+    },
+    en: {
+      preheader: "The refund has been sent to the bank.",
+      title: "Refund sent",
+      label: "Refund amount",
+      detail: ["We have sent a refund of ", "."],
+      wait: "A bank does not move money instantly: it usually arrives within a few days. We will write again once it is with you. If it still has not arrived after ten days, reply to this letter.",
+    },
+  },
   refunded: {
     ru: {
       preheader: "Деньги за заказ отправлены обратно.",
@@ -148,10 +182,14 @@ export function renderOrderCancelled(
   options: ClosedOptions = { kind: "cancelled" },
 ): RenderedEmail {
   const L = normalizeLang(lang);
-  const kind: ClosedKind = options.kind === "refunded" ? "refunded" : "cancelled";
+  const kind: ClosedKind = options.kind === "refunded" || options.kind === "refund_sent" ? options.kind : "cancelled";
   const t = T[kind][L];
   const c = COMMON[L];
-  const template = kind === "refunded" ? "order-refunded" : "order-cancelled";
+  /* `refund_sent` borrows the refund template's own intro and signature — the
+     owner writes one set of words for «возврат» in «Письма» and both letters
+     are that event, one before the money lands and one after. */
+  const template =
+    kind === "cancelled" ? "order-cancelled" : kind === "refund_sent" ? "order-refund-sent" : "order-refunded";
 
   const number = orderNumber(order);
   const name = customerName(order);
@@ -159,13 +197,13 @@ export function renderOrderCancelled(
   /* On a refund `{total}` is what went back, not the order's total: the two
      differ on a partial refund, and the number in the letter must be the one
      the customer will see on their statement. docs/mail.md says so too. */
-  const amount = kind === "refunded" ? num(options.amount, num(order.total, 0)) : num(order.total, 0);
+  const amount = kind === "cancelled" ? num(order.total, 0) : num(options.amount, num(order.total, 0));
   const sum = money(amount);
 
   const values: MailTextValues = { name, order: number, total: sum, shop: BRAND.name };
   const intro = mailText(template, L, "intro", values);
   const signature = mailText(template, L, "signature", values);
-  const withSum = kind === "refunded";
+  const withSum = kind !== "cancelled";
   const gift = withSum ? giftLines(L, amount, options) : null;
   const detail = gift ? gift.detail : withSum ? t.detail[0] + sum + t.detail[1] : t.detail[0];
   const detailHtml = gift

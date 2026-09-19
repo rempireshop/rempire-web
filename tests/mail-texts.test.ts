@@ -193,9 +193,16 @@ describe("cleanMailTexts", () => {
     });
   });
 
+  /* The control characters below are written as ESCAPES, not typed into the
+     file. Until 19.09.2026 a real NUL and a real BELL sat in that literal, so
+     git and grep called this file binary: a search over `tests/` printed
+     «Binary file … matches» and not one line, and every grep-based check of
+     this suite skipped it in silence. Same trap as src/lib/og-card.ts, and the
+     same fix already applied to src/lib/golive.ts in 720db54 — the behaviour is
+     identical and the file is text again. */
   it("strips control characters and collapses a subject onto one line", () => {
     const out = cleanMailTexts({
-      birthday: { ru: { subject: "A B\nC", intro: "one\n\n\n\ntwo", signature: "x\ty" } },
+      birthday: { ru: { subject: "A\u0000B\u0007\nC", intro: "one\n\n\n\ntwo", signature: "x\ty" } },
     });
     expect(out.birthday!.ru!.subject).toBe("A B C");
     expect(out.birthday!.ru!.intro).toBe("one\n\ntwo");
@@ -261,7 +268,7 @@ describe("PUT /api/admin/settings validates mail_texts", () => {
 
   it("clamps and de-controls before anything is written", async () => {
     const stored = await put({
-      birthday: { ru: { subject: "x".repeat(1000), signature: "ab" } },
+      birthday: { ru: { subject: "x".repeat(1000), signature: "a\u0001b" } },
     });
     expect(stored.birthday.ru.subject.length).toBe(MAIL_TEXT_LIMITS.subject);
     expect(stored.birthday.ru.signature).toBe("a b");

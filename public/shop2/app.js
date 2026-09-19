@@ -2046,6 +2046,10 @@
       /* «Письма»: the three new rows and the two intervals behind them */
       "Заказ ждёт оплаты": "Tellimus ootab tasumist",
       "через несколько дней без оплаты": "mõne päeva pärast ilma makseta",
+      "Возврат отправлен":
+        "Tagastus saadetud",
+      "сразу после возврата, пока деньги идут":
+        "kohe pärast tagastust, kuni raha liigub",
       "Деньги возвращены": "Raha tagastatud",
       "когда заказ отменён — вами или по сроку": "kui tellimus tühistatakse — teie poolt või tähtaja tõttu",
       "когда вы вернули деньги": "kui olete raha tagastanud",
@@ -4856,6 +4860,10 @@
         "The money left, but the record did not save — open the order again and check.",
       "Заказ ждёт оплаты": "Order awaiting payment",
       "через несколько дней без оплаты": "a few days after an order goes unpaid",
+      "Возврат отправлен":
+        "Refund sent",
+      "сразу после возврата, пока деньги идут":
+        "right after the refund, while the money travels",
       "Деньги возвращены": "Money refunded",
       "когда заказ отменён — вами или по сроку": "when an order is cancelled — by you or by the clock",
       "когда вы вернули деньги": "when you have refunded the money",
@@ -19972,6 +19980,12 @@
        cancels people's orders in silence. */
     ["order-unpaid", "Заказ ждёт оплаты", "через несколько дней без оплаты", "unpaid"],
     ["order-cancelled", "Заказ отменён", "когда заказ отменён — вами или по сроку", ""],
+    /* Two letters, one refund (19.09.2026). Montonio answers PENDING for a
+       refund it has accepted and not yet paid, which can take days and can
+       still fail — so the first letter promises nothing and the second says
+       the money is there. Both always on: a customer who asked for money back
+       is owed both halves of the news. */
+    ["order-refund-sent", "Возврат отправлен", "сразу после возврата, пока деньги идут", ""],
     ["order-refunded", "Деньги возвращены", "когда вы вернули деньги", ""],
     /* «Продажа в салоне» sends the printable slip as a letter now, instead of
        «Заказ принят» — which promised to write again about goods the customer

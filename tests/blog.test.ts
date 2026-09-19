@@ -566,7 +566,7 @@ describe("blog storage", () => {
   });
 
   it("strips control characters from a body without touching its newlines", async () => {
-    const post = await upsertPost({ title: { RU: "З" }, body: { RU: "а б​в\nг" } });
+    const post = await upsertPost({ title: { RU: "З" }, body: { RU: "а\u0000б​в\nг" } });
     expect(post.body.RU).toBe("а б в\nг");
   });
 

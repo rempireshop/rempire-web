@@ -174,6 +174,46 @@ describe("onOrderPaid", () => {
     }
   });
 
+  /* Montonio answers 200 PENDING for a refund it has merely ACCEPTED: it can
+     still fail for want of balance, and it cancels itself after ten days. Until
+     19.09.2026 that state sent «Деньги возвращены», so a customer could have it
+     in writing that the money was back when it was not (D9). The owner's
+     decision: one letter that promises nothing when the refund goes out, and
+     the real one when Montonio confirms. */
+  it("tells a customer the refund was SENT, not returned, while it is only accepted", async () => {
+    const { fn, calls } = makeFetch();
+    vi.stubGlobal("fetch", fn);
+    await onOrderClosed({ ...ORDER, lang: "RU", status: "paid" }, { kind: "refund_sent", amount: 42 });
+
+    const sent = payloadOf(calls.resend[0]);
+    expect(String(sent.subject)).toContain("Возврат отправлен");
+    expect(String(sent.subject)).not.toContain("вернули");
+    const text = String(sent.text ?? "") + String(sent.html ?? "");
+    expect(text).toContain("42");
+    expect(text).toContain("Мы отправили возврат");
+    // …and it never claims the money is already back
+    expect(text).not.toContain("Мы вернули деньги");
+    // …and it says when to start worrying, because ten days is Montonio's own limit
+    expect(text).toContain("десять дней");
+    vi.unstubAllGlobals();
+  });
+
+  it("sends both letters for one refund — «отправлен», then «возвращены»", async () => {
+    /* Different templates, so different idempotency keys: the confirming
+       webhook must not be swallowed as a repeat of the first letter. */
+    const { fn, calls } = makeFetch();
+    vi.stubGlobal("fetch", fn);
+    await onOrderClosed({ ...ORDER, lang: "RU", status: "paid" }, { kind: "refund_sent", amount: 42 });
+    await onOrderClosed({ ...ORDER, lang: "RU", status: "refunded" }, { kind: "refunded", amount: 42 });
+
+    expect(calls.resend, "the second letter was swallowed as a repeat of the first").toHaveLength(2);
+    expect(String(payloadOf(calls.resend[0]).subject)).toContain("Возврат отправлен");
+    expect(String(payloadOf(calls.resend[1]).subject)).toContain("Возврат по заказу");
+    const second = String(payloadOf(calls.resend[1]).text ?? "");
+    expect(second).toContain("Мы вернули деньги");
+    vi.unstubAllGlobals();
+  });
+
   it("still pings the shop when the order has no customer address", async () => {
     process.env.RESEND_TO = "shop@rempireshop.com";
     const { fn, calls } = makeFetch();

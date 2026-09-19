@@ -14,12 +14,12 @@
  * So this tool reproduces that test statically:
  *   1. tokenise app.js and chat.js into string literals and code;
  *   2. re-join literals that are glued together with `+` into one chunk, with
- *       standing in for the interpolated expression — that is what the
+ *      \u0001 standing in for the interpolated expression — that is what the
  *      browser actually ends up with;
  *   3. cut each chunk into text nodes on tag boundaries, and pull out the four
  *      translatable attributes;
  *   4. test every fragment against the dictionary and the regex rules
- *      (a fragment with  is probed with sample values, so "от " + n + " €"
+ *      (a fragment with \u0001 is probed with sample values, so "от " + n + " €"
  *      is recognised as covered by /^от (\d.*)$/);
  *   5. group what is left by the function it lives in.
  *
@@ -34,7 +34,7 @@ const APP = join(ROOT, "public/shop2/app.js");
 const CHAT = join(ROOT, "public/shop2/chat.js");
 
 const CYR = /[А-Яа-яЁё]/;
-const HOLE = "";
+const HOLE = "\u0001";
 
 /* ---------- tokeniser ---------------------------------------------------- */
 /* Strings, comments and regex literals only — enough to tell a quote that
@@ -221,7 +221,7 @@ function fragments(html) {
   return out;
 }
 
-/* A fragment carrying  is a runtime string; probe a few shapes so the
+/* A fragment carrying \u0001 is a runtime string; probe a few shapes so the
    regex rules get a fair test. */
 /* Sample values a hole can take at runtime. The first four are also the set
    used for fragments with three or four holes, so keep the common shapes —

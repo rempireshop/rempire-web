@@ -212,11 +212,19 @@ export async function settleRefund(
      customer. `notify: false` is for the caller that sends its own (the admin
      route, which knows the language and the amount before this returns). */
   if (opts.notify !== false && folded.applied && entry.status !== "failed") {
+    /* PENDING is «отправлено», not «возвращено» (the owner's decision of
+       19.09.2026). Montonio answers 200 PENDING for a refund it has merely
+       accepted; it can still fail for want of balance and it cancels itself
+       after ten days, so this letter promises nothing and says when to worry.
+       The confirming webhook comes back through this same door with `done` and
+       sends the real one — a different idempotency key, so both go out.
+       A gift card is money already back on the card, never pending. */
+    const kind = entry.to !== "giftcard" && entry.status === "pending" ? "refund_sent" : "refunded";
     await notifyOrderClosed(
       { ...order, status },
       entry.to === "giftcard"
         ? { kind: "refunded", amount: entry.amount, giftAmount: entry.amount, giftCode: entry.code }
-        : { kind: "refunded", amount: entry.amount },
+        : { kind, amount: entry.amount },
     );
   }
 

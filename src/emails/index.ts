@@ -85,6 +85,7 @@ export const TEMPLATE_IDS = [
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
+  "order-refund-sent",
   "pos-receipt",
   "abandoned-cart",
   "back-in-stock",
@@ -110,6 +111,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "order-unpaid": "Заказ ждёт оплаты",
   "order-cancelled": "Заказ отменён",
   "order-refunded": "Деньги возвращены",
+  "order-refund-sent": "Возврат отправлен",
   "pos-receipt": "Чек о продаже в салоне",
   "abandoned-cart": "Брошенная корзина",
   "back-in-stock": "Товар снова в наличии",
@@ -349,6 +351,7 @@ export function demoValues(
     case "order-shipped":
       return { ...withOrder, total: "", track: "CE123456789EE" };
     case "order-refunded":
+    case "order-refund-sent":
     case "order-cancelled":
     case "order-unpaid":
     case "pos-receipt":
@@ -410,6 +413,14 @@ export function renderDemo(
     case "order-refunded":
       return renderOrderCancelled({ ...demoOrder(L), status: "refunded" }, L, {
         kind: "refunded",
+        amount: 95,
+      });
+    /* The first of the two: Montonio has accepted the refund and not yet moved
+       the money. «Письма» previews it beside the other one, because the owner
+       edits both and they are one event to him. */
+    case "order-refund-sent":
+      return renderOrderCancelled({ ...demoOrder(L), status: "paid" }, L, {
+        kind: "refund_sent",
         amount: 95,
       });
     case "abandoned-cart":

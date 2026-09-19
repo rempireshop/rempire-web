@@ -39,6 +39,7 @@ export const MAIL_TEXT_TEMPLATES = [
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
+  "order-refund-sent",
   "pos-receipt",
   "abandoned-cart",
   "back-in-stock",
@@ -195,6 +196,28 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       subject: "Order {order} has been cancelled — Rempire",
       intro: "Order no. {order} has been cancelled. Nothing was charged — there is nothing to pay.",
       signature: "If this is a mistake, or you would like to order again, just reply to this e-mail.",
+    },
+  },
+  /* Two letters, one refund. This is the first: Montonio has ACCEPTED the
+     money and has not yet moved it, which can take days and can still fail.
+     Its own words rather than «order-refunded»'s, because «мы вернули деньги»
+     is exactly what must not be said yet (the owner's decision of 19.09.2026,
+     D9 in docs/montonio-untested.md). */
+  "order-refund-sent": {
+    ru: {
+      subject: "Возврат отправлен по заказу {order} — Rempire",
+      intro: "Мы отправили возврат по заказу № {order} — сумма указана ниже. Деньги идут через банк, обычно это несколько дней.",
+      signature: "Как только деньги будут у вас, мы напишем ещё раз. Если через десять дней их нет — ответьте на это письмо.",
+    },
+    et: {
+      subject: "Tagastus tellimuse {order} eest saadetud — Rempire",
+      intro: "Saatsime tellimuse nr {order} tagastuse teele — summa on allpool. Raha liigub panga kaudu, tavaliselt mõni päev.",
+      signature: "Kui raha on kohal, kirjutame uuesti. Kui kümne päeva pärast seda ei ole — vastake sellele kirjale.",
+    },
+    en: {
+      subject: "Refund sent for order {order} — Rempire",
+      intro: "We have sent the refund for order no. {order} — the amount is below. It travels through the bank, usually a few days.",
+      signature: "We will write again once the money is with you. If it has not arrived after ten days, reply to this e-mail.",
     },
   },
   "order-refunded": {

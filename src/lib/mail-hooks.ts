@@ -382,16 +382,17 @@ export async function onOrderClosed(
 
     await loadBrand();
     const lang = langOf(order);
-    const kind: ClosedKind = options.kind === "refunded" ? "refunded" : "cancelled";
-    const amount = kind === "refunded" ? num(options.amount, num(order.total, 0)) : 0;
+    const kind: ClosedKind =
+      options.kind === "refunded" || options.kind === "refund_sent" ? options.kind : "cancelled";
+    const amount = kind === "cancelled" ? 0 : num(options.amount, num(order.total, 0));
     /* The part that went back onto a gift card rather than to the bank — the
        letter names the card, because «деньги идут тем же путём» would send
        the customer to look at a bank statement for money that is on a card. */
-    const giftAmount = kind === "refunded" ? Math.min(amount, Math.max(0, num(options.giftAmount, 0))) : 0;
+    const giftAmount = kind === "cancelled" ? 0 : Math.min(amount, Math.max(0, num(options.giftAmount, 0)));
     const giftCode = giftAmount > 0 && typeof options.giftCode === "string" ? options.giftCode.trim() : "";
     const mail = renderOrderCancelled(order, lang, { kind, amount, giftAmount, giftCode });
     const res = await sendRendered(to, mail, {
-      tags: { template: kind === "refunded" ? "order-refunded" : "order-cancelled" },
+      tags: { template: kind === "cancelled" ? "order-cancelled" : kind === "refund_sent" ? "order-refund-sent" : "order-refunded" },
       idempotencyKey: `${kind}:${orderNumber(order)}:${amount.toFixed(2)}${giftAmount > 0 ? `:gc${giftAmount.toFixed(2)}` : ""}`,
     });
     return { ok: res.ok, skipped: res.skipped, reason: res.error, id: res.id };
