@@ -1688,11 +1688,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   background: var(--a-ink); color: #fff; border: 1px solid var(--a-ink);
 }
 .adm-amt[aria-pressed="false"] { background: var(--a-paper); color: var(--a-muted); border-color: var(--a-rule); }
-.adm-gift {
-  width: 100%; max-width: 260px; aspect-ratio: 1.6; border: 2px solid var(--a-ink); background: var(--a-ink);
-  color: #fff; display: flex; align-items: flex-end; padding: 8px;
-  font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .15em;
-}
+/* .adm-gift was a drawing of the gift card — a dark rectangle with the word
+   REMPIRE in it, next to a caption saying it was the card. It was not the
+   card: the real one is a PDF (src/lib/giftcard-pdf.ts), and the block now
+   links to a real issued one instead. Removed rather than left behind, so
+   nothing reaches for it again. */
 /* The cards an order bought. Dim, 07.09.2026: the code and «Карта PDF ↗» were
    one line and one link — so the code, which is money and gets read aloud or
    copied, could not be looked at without looking at a button. One card per

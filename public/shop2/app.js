@@ -2360,8 +2360,13 @@
       "Нажмите, чтобы включить или скрыть номинал. Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».":
         "Vajuta, et nimiväärtus sisse lülitada või peita. Kaarti müüakse poe menüüs eraldi punktina, mitte «Komplektide» all.",
       "Оформление": "Kujundus",
-      "Одно оформление на все номиналы — тёмная карта с логотипом, её же покупатель получает в PDF.":
-        "Üks kujundus kõigile nimiväärtustele — tume logoga kaart, sama saab ostja PDF-ina.",
+      // 19.09.2026: the block shows the real card now, and points at the letter
+      "Одно оформление на все номиналы — тёмная карта с логотипом. Меняется только письмо, с которым она приходит.":
+        "Üks kujundus kõigile nimiväärtustele — tume logoga kaart. Muuta saab ainult kirja, millega see tuleb.",
+      "Посмотреть карту PDF ↗": "Vaata kaarti PDF-ina ↗",
+      "Карту видно, когда куплена хотя бы одна — PDF открывается из списка справа.":
+        "Kaarti näeb siis, kui vähemalt üks on ostetud — PDF avaneb paremal olevast loendist.",
+      "Письмо к карте": "Kaardi kiri",
       "Пока не куплено ни одной карты": "Ühtegi kaarti pole veel ostetud",
       "Выпущенные карты": "Väljastatud kaardid",
       "покупателю": "ostjale",
@@ -5199,8 +5204,13 @@
       "Нажмите, чтобы включить или скрыть номинал. Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».":
         "Tap to switch an amount on or hide it. The card is sold as its own entry in the shop menu, not under “Sets”.",
       "Оформление": "Design",
-      "Одно оформление на все номиналы — тёмная карта с логотипом, её же покупатель получает в PDF.":
-        "One design for every amount — the dark card with the logo, the same one the buyer gets as a PDF.",
+      // 19.09.2026: the block shows the real card now, and points at the letter
+      "Одно оформление на все номиналы — тёмная карта с логотипом. Меняется только письмо, с которым она приходит.":
+        "One design for every amount — the dark card with the logo. Only the letter it arrives with can be changed.",
+      "Посмотреть карту PDF ↗": "See the card as a PDF ↗",
+      "Карту видно, когда куплена хотя бы одна — PDF открывается из списка справа.":
+        "The card is visible once at least one has been bought — its PDF opens from the list on the right.",
+      "Письмо к карте": "The card's letter",
       "Пока не куплено ни одной карты": "No card has been bought yet",
       "Выпущенные карты": "Issued cards",
       "покупателю": "to the buyer",
@@ -20217,6 +20227,15 @@
      One design, not three: the printable card (src/lib/giftcard-pdf.ts) knows
      a single layout, and a thumbnail offering «светлое» or «своё» would be a
      button that changes nothing. */
+  /** The real card to look at: the newest issued one that is still alive.
+      "" before the list has arrived and in a shop that has sold none — there
+      is no sample PDF to invent, and a drawing of a card is not a card. */
+  function giftSamplePdf() {
+    var g = S.admGiftCards;
+    var cards = (g && g.cards) || [];
+    for (var i = 0; i < cards.length; i++) if (cards[i].pdfUrl && !cards[i].voidedAt) return cards[i].pdfUrl;
+    return "";
+  }
   function admGiftScreenHTML() {
     loadAdminGiftCards(false);
     var on = giftAmountsOn();
@@ -20230,10 +20249,27 @@
           }).join("") + "</div>" +
         '<p class="adm-hint" style="margin:8px 0 0">Нажмите, чтобы включить или скрыть номинал. ' +
           "Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».</p></div>" +
+      /* This block used to be a dark rectangle with the word REMPIRE in it —
+         a drawing of the card, not the card, and nothing to press. «The
+         "showing the design" does not give absolutely anything, if anything
+         it would make sense to be able to edit it in emails» (Dim,
+         19.09.2026). The design really is fixed — src/lib/giftcard-pdf.ts
+         knows one layout — so the honest block says so, shows the real thing
+         when there is one to show, and points at the letter around it, which
+         IS his to write. */
       '<div><div class="adm-sec__t">Оформление</div>' +
-        '<div class="adm-gift" style="margin-top:10px" aria-hidden="true">REMPIRE</div>' +
-        '<p class="adm-hint" style="margin:8px 0 0">Одно оформление на все номиналы — ' +
-          "тёмная карта с логотипом, её же покупатель получает в PDF.</p></div>";
+        '<p class="adm-hint" style="margin:10px 0 0">Одно оформление на все номиналы — ' +
+          "тёмная карта с логотипом. Меняется только письмо, с которым она приходит.</p>" +
+        '<div class="adm-acts" style="margin-top:10px">' +
+          (giftSamplePdf()
+            ? '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(giftSamplePdf()) +
+              '" target="_blank" rel="noopener">Посмотреть карту PDF ↗</a>'
+            : '<span class="adm-hint">Карту видно, когда куплена хотя бы одна — PDF открывается из списка справа.</span>') +
+          /* `data-mailtpl` alone: it opens «Письма» on that letter by itself,
+             and adding `data-admtab` would be caught by the earlier branch of
+             the click delegate, which returns before this one is read. */
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="gift-card">Письмо к карте</button>' +
+        "</div></div>";
     var rows = g && g.cards.length
       ? '<div class="adm-list">' + g.cards.map(admGiftRowHTML).join("") + "</div>"
       : g
@@ -27612,8 +27648,12 @@
   }
   /** Which size (if any) shows this photo — the tag the design puts on every
       picture after the first. Reads the draft list, like the picker below. */
-  function edPhotoTag(p, i) {
-    if (i === 0) return "главное";
+  /** Which sizes show THIS photo — for every photo, the first one included.
+      It used to stop at «главное» and say nothing else, so the one picture
+      most sizes usually point at was the one tile that would not admit it:
+      «it seems that main images does not show sizes but the other ones do»
+      (Dim, 19.09.2026). */
+  function edPhotoSizes(p, i) {
     var names = [];
     if (p.sizes && p.sizes.length) {
       for (var s = 0; s < p.sizes.length; s++) if (galSizePick(p, s) === i) names.push(p.sizes[s]);
@@ -28167,11 +28207,17 @@
          as it takes, and watching a picture change under you with nothing
          marked is what made it look like a photo had been swapped. */
       var busy = galCutBusy(ph);
-      var tag = busy ? "Убираем фон…" : edPhotoTag(p, i);
+      /* «главное» is a word and its own node, so translateTree() carries it;
+         the sizes beside it are names and travel as they are. One tag, two
+         pieces — the main photo says both what it is and which sizes use it. */
+      var sizes = busy ? "" : edPhotoSizes(p, i);
+      var tagInner = busy
+        ? esc("Убираем фон…")
+        : (i === 0 ? "<span>главное</span>" : "") + (sizes ? (i === 0 ? " · " : "") + esc(sizes) : "");
       return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + (busy ? " adm-photo--busy" : "") + '"' +
         (busy ? ' aria-busy="true"' : "") + ">" +
         '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
-        (tag ? '<span class="adm-photo__tag' + (busy || i === 0 ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
+        (tagInner ? '<span class="adm-photo__tag' + (busy || i === 0 ? " adm-photo__tag--ink" : "") + '">' + tagInner + "</span>" : "") +
         '<span class="adm-photo__ops">' +
           '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее" title="Левее">←</button>' +
           '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее" title="Правее">→</button>' +
