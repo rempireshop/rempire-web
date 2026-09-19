@@ -64,6 +64,31 @@ finished, and two cannot even be tested.
 
 ---
 
+## Stage 2b — Google Shopping, which carries free traffic
+
+Found on 19.09.2026 and written down nowhere until then. Merchant Center
+account `5819586565` («Rempire Tower Shop») is **live and earning**: 175 clicks
+in 28 days from free listings, ad spend €0.00, 1.63K approved / 325 limited /
+17 not approved. Every product in it is fed by **six `Shopify App API`
+sources** of 328 products each — Estonia, Latvia, Lithuania and Finland in
+English, a Russian one for Belarus/Georgia/Kazakhstan+3, and one covering 82
+more countries. The overview's "1.97K products" is the same 328 items counted
+once per market. "Found by Google", crawling `rempireshop.com`, has found **2**.
+
+So the day Shopify is switched off, those six feeds stop updating, the listings
+go stale and drop, and the free traffic goes with them. This is a go-live
+dependency, not a later job.
+
+| | | status |
+|---|---|---|
+| D R | **Where `rempireshop.com` points today, and which domain the account has claimed.** Decides whether the cutover is a feed swap or also a re-verification. Nothing else here can be planned until it is answered. | blocking |
+| D | **Build a feed from the shop's own catalogue and add it beside the Shopify ones.** `tools/build-merchant-feed.mjs` exists but writes from the old `public/shop/catalogue2.js` with the staging domain, and nothing in the build runs it — `public/feed/google-shopping.xml` is dated 03.09 and was submitted nowhere. Repoint it at shop2, give it the live domain, run it in `prebuild`. Beside, not instead: while both are there they can be compared. | blocking |
+| D | **Rewrite the shipping policies from the real Montonio prices.** They are Shopify's today — a flat €15.00, 4–12 days, one per country — against real prices of roughly €5–60 by country and carrier. A feed that disagrees with the product page is the commonest cause of suspension, and it would surface on the day of the switch. | blocking |
+| D | Remove the Shopify feeds, **only after ours has run for a day**. The shop has ~224 products against Shopify's 328; worth seeing in advance which listings would vanish. | after |
+| D | A week after the switch, compare the clicks with the 175 they were. A fall is nearly always products failing review, or feed shipping disagreeing with the page. | after |
+
+---
+
 ## Stage 3 — the code, all of it Claude's
 
 | | | status |

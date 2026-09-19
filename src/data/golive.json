@@ -28,7 +28,10 @@
       "phase": "a",
       "name": "Перед всем остальным",
       "note": "Два пункта, без которых остальное необратимо.",
-      "en": { "name": "Before anything else", "note": "Two items, without which the rest is irreversible." }
+      "en": {
+        "name": "Before anything else",
+        "note": "Two items, without which the rest is irreversible."
+      }
     },
     {
       "id": "montonio",
@@ -45,7 +48,20 @@
       "phase": "a",
       "name": "Что знает только Ренат",
       "note": "Ни ключами, ни кодом это не добывается.",
-      "en": { "name": "What only Renat knows", "note": "No key and no code gets at this." }
+      "en": {
+        "name": "What only Renat knows",
+        "note": "No key and no code gets at this."
+      }
+    },
+    {
+      "id": "google",
+      "phase": "a",
+      "name": "Google Shopping — на нём висит бесплатный трафик",
+      "note": "Merchant Center живой и приносит переходы, но все товары в нём приходят из Shopify. Выключить Shopify, не подготовив это, значит выключить и их.",
+      "en": {
+        "name": "Google Shopping, which carries free traffic",
+        "note": "Merchant Center is live and earning, but every product in it is fed by Shopify. Switching Shopify off without preparing this switches the traffic off too."
+      }
     },
     {
       "id": "code",
@@ -82,14 +98,19 @@
       "phase": "b",
       "name": "Первый живой час",
       "note": "То, что нельзя доказать нигде, кроме живого магазина.",
-      "en": { "name": "The first hour live", "note": "What cannot be proved anywhere but on the live shop." }
+      "en": {
+        "name": "The first hour live",
+        "note": "What cannot be proved anywhere but on the live shop."
+      }
     }
   ],
   "items": [
     {
       "id": "snapshot",
       "area": "start",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "blocking": true,
       "outside": "Railway",
@@ -103,7 +124,9 @@
     {
       "id": "same-db",
       "area": "start",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "done",
       "blocking": true,
       "title": "Проверить, что боевая база — тот же Railway, что у стенда",
@@ -113,11 +136,13 @@
         "detail": "It is, as of 18.09 — worth re-confirming on the day itself."
       }
     },
-
     {
       "id": "montonio-keys",
       "area": "montonio",
-      "who": ["dim", "renat"],
+      "who": [
+        "dim",
+        "renat"
+      ],
       "status": "todo",
       "blocking": true,
       "outside": "Montonio",
@@ -131,11 +156,15 @@
     {
       "id": "refunds-live",
       "area": "montonio",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "blocked",
       "blocking": true,
       "outside": "Montonio",
-      "needs": ["montonio-keys"],
+      "needs": [
+        "montonio-keys"
+      ],
       "title": "Включить «Refundable bank payments» в боевом режиме",
       "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе.",
       "en": {
@@ -146,7 +175,9 @@
     {
       "id": "dpd-pin",
       "area": "montonio",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "blocking": true,
       "outside": "DPD",
@@ -160,7 +191,9 @@
     {
       "id": "smartposti-size",
       "area": "montonio",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "blocking": true,
       "outside": "SmartPosti",
@@ -174,10 +207,14 @@
     {
       "id": "tariff-mirror",
       "area": "montonio",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "blocked",
       "blocking": true,
-      "needs": ["montonio-keys"],
+      "needs": [
+        "montonio-keys"
+      ],
       "title": "Пересобрать зеркало тарифов — уже с ключами",
       "detail": "Чтобы цены посылочных автоматов брались из подтипа parcelMachine, а не из строки без подтипа с недокументированного адреса. tools/fetch-montonio-tariffs.mjs уже предпочитает нужный тариф — он просто ни разу не запускался с доступами.",
       "en": {
@@ -188,10 +225,14 @@
     {
       "id": "pricing-grid",
       "area": "montonio",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "doing",
       "blocking": true,
-      "needs": ["tariff-mirror"],
+      "needs": [
+        "tariff-mirror"
+      ],
       "title": "Собрать таблицу цен: страна × вес × размер ячейки — и точку безубыточности по зонам",
       "detail": "Инструмент и docs/delivery-pricing.md пишутся сейчас. Без ключей таблица соберётся по вчерашним числам, поэтому она ждёт зеркало.",
       "en": {
@@ -202,10 +243,16 @@
     {
       "id": "flat-price",
       "area": "montonio",
-      "who": ["renat", "dim"],
+      "who": [
+        "renat",
+        "dim"
+      ],
       "status": "blocked",
       "blocking": true,
-      "needs": ["pricing-grid", "weigh-products"],
+      "needs": [
+        "pricing-grid",
+        "weigh-products"
+      ],
       "title": "Выбрать единую цену на зону по этой таблице",
       "detail": "Ренат берёт одну цену за страну и разницу гасит сам — это решение про его маржу, и принимать его надо по настоящим числам, а не на глаз.",
       "en": {
@@ -213,11 +260,12 @@
         "detail": "Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses."
       }
     },
-
     {
       "id": "weigh-products",
       "area": "renat",
-      "who": ["renat"],
+      "who": [
+        "renat"
+      ],
       "status": "todo",
       "blocking": true,
       "title": "Взвесить товар",
@@ -230,7 +278,9 @@
     {
       "id": "aerosols",
       "area": "renat",
-      "who": ["renat"],
+      "who": [
+        "renat"
+      ],
       "status": "todo",
       "blocking": true,
       "title": "Сказать, какие спреи Kevin.Murphy — аэрозоли под давлением",
@@ -243,7 +293,9 @@
     {
       "id": "shopify-import",
       "area": "renat",
-      "who": ["renat"],
+      "who": [
+        "renat"
+      ],
       "status": "todo",
       "blocking": false,
       "optional": true,
@@ -254,11 +306,88 @@
         "detail": "Optional; the launch does not wait for it. If it happens: imported customers arrive with no marketing consent (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in."
       }
     },
-
+    {
+      "id": "google-domain",
+      "area": "google",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Выяснить, на что сейчас указывает rempireshop.com и какой домен подтверждён в Merchant Center",
+      "detail": "От этого зависит, будет переключение подменой фида или ещё и повторным подтверждением домена. Аккаунт 5819586565, «Rempire Tower Shop». Пока ответа нет, остальные пункты этого раздела нельзя спланировать.",
+      "en": {
+        "title": "Find out where rempireshop.com points today and which domain the Merchant Center account has claimed",
+        "detail": "This decides whether the cutover is a feed swap or also a re-verification. Account 5819586565, «Rempire Tower Shop». Until it is answered the rest of this area cannot be planned."
+      }
+    },
+    {
+      "id": "google-feed",
+      "area": "google",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Собрать фид из каталога магазина и добавить его рядом с фидами Shopify",
+      "detail": "tools/build-merchant-feed.mjs существует, но пишет из старого public/shop/catalogue2.js, со стендовым доменом, и в сборке не запускается — public/feed/google-shopping.xml лежит от 03.09 и никуда не отправлен. Перенацелить на shop2, поставить живой домен, запускать в prebuild. Добавлять рядом с шестью фидами Shopify, а не вместо: пока оба на месте, их видно и можно сравнить.",
+      "en": {
+        "title": "Build a feed from the shop's own catalogue and add it alongside the Shopify ones",
+        "detail": "tools/build-merchant-feed.mjs exists but writes from the old public/shop/catalogue2.js with the staging domain, and nothing in the build runs it — public/feed/google-shopping.xml is dated 03.09 and was never submitted. Repoint it at shop2, give it the live domain, run it in prebuild. Add it beside the six Shopify feeds rather than in place of them: while both are there they can be compared."
+      }
+    },
+    {
+      "id": "google-shipping",
+      "area": "google",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Переписать доставку в Merchant Center по настоящим ценам Montonio",
+      "detail": "Сейчас там политика Shopify: плоские 15,00 € и 4–12 дней на каждую страну. Настоящие цены идут примерно от 5 до 60 € по стране и перевозчику. Расхождение фида со страницей товара — самая частая причина блокировки аккаунта, и вскроется оно ровно в день переключения.",
+      "en": {
+        "title": "Rewrite the Merchant Center shipping policies from the real Montonio prices",
+        "detail": "They are Shopify's today: a flat €15.00, 4–12 days, one per country. The real prices run from about €5 to €60 by country and carrier. A feed that disagrees with the product page is the commonest cause of account suspension, and it would surface on the day of the switch."
+      }
+    },
+    {
+      "id": "google-cutover",
+      "area": "google",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Убрать фиды Shopify — только после того, как свой отработал сутки",
+      "detail": "Шесть источников Shopify App API по 328 товаров: Эстония, Латвия, Литва и Финляндия по-английски, русский на Беларусь, Грузию и Казахстан и один на 82 страны. В магазине около 224 товаров против 328 — стоит заранее посмотреть, какие карточки исчезнут. «Found by Google» с сайта нашёл всего 2, так что сам себя каталог Google не соберёт.",
+      "en": {
+        "title": "Remove the Shopify feeds — only after ours has run for a day",
+        "detail": "Six Shopify App API sources of 328 products each: Estonia, Latvia, Lithuania and Finland in English, a Russian one for Belarus, Georgia and Kazakhstan, and one covering 82 countries. The shop has about 224 products against 328 — worth seeing in advance which listings would vanish. «Found by Google», crawling the site, has found 2, so Google will not assemble the catalogue by itself."
+      }
+    },
+    {
+      "id": "google-clicks",
+      "area": "google",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Через неделю после переключения сверить переходы с тем, что было",
+      "detail": "На 19.09 было 175 переходов за 28 дней бесплатными карточками, реклама не тратилась. Если после переключения число ушло вниз, причина почти всегда одна из двух: товары не прошли модерацию или доставка в фиде не сходится со страницей.",
+      "en": {
+        "title": "A week after the switch, compare the clicks with what they were",
+        "detail": "On 19.09 it was 175 clicks in 28 days from free listings, with no ad spend. If the number falls after the switch the cause is nearly always one of two: products failing review, or feed shipping that disagrees with the page."
+      }
+    },
     {
       "id": "code-shipping",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "doing",
       "blocking": true,
       "title": "Четыре решения по доставке из восьми отвеченных",
@@ -271,7 +400,9 @@
     {
       "id": "code-payments",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
       "blocking": true,
       "title": "Четыре решения по платежам",
@@ -284,7 +415,9 @@
     {
       "id": "code-untested",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "doing",
       "blocking": true,
       "title": "Укрепить всё, что песочница не проверяет, и написать docs/montonio-untested.md",
@@ -297,7 +430,9 @@
     {
       "id": "code-e2e",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "doing",
       "blocking": true,
       "title": "Починить 13 падающих браузерных тестов, которые уже есть на main",
@@ -310,7 +445,9 @@
     {
       "id": "code-reset",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "doing",
       "blocking": true,
       "title": "Инструмент обнуления перед запуском и docs/go-live-reset.md",
@@ -323,7 +460,9 @@
     {
       "id": "code-legal",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
       "blocking": true,
       "title": "Заменить public/shop/legal.js",
@@ -336,7 +475,9 @@
     {
       "id": "code-balance-copy",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
       "blocking": true,
       "title": "Исправить в кабинете «проверьте баланс в его панели»",
@@ -349,7 +490,9 @@
     {
       "id": "code-final",
       "area": "code",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
       "blocking": true,
       "needs": [
@@ -368,11 +511,12 @@
         "detail": "And confirm `index.html` carries no `localhost:` and exactly two `boot.js` references."
       }
     },
-
     {
       "id": "hidden-stock",
       "area": "open",
-      "who": ["renat"],
+      "who": [
+        "renat"
+      ],
       "status": "todo",
       "blocking": false,
       "optional": true,
@@ -386,7 +530,9 @@
     {
       "id": "fable-passes",
       "area": "open",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
       "blocking": false,
       "optional": true,
@@ -397,13 +543,16 @@
         "detail": "A regression review of the diff, and a go-live readiness pass. Waiting on the owner's re-test of the marked checks. This list overlaps the second one heavily; the review is still worth running because it reads what was written, not what was intended."
       }
     },
-
     {
       "id": "live-keys-env",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
-      "needs": ["montonio-keys"],
+      "needs": [
+        "montonio-keys"
+      ],
       "title": "Поставить боевые ключи Montonio и флаг окружения — вместе",
       "detail": "Половина этой пары хуже, чем ни одной.",
       "en": {
@@ -414,7 +563,9 @@
     {
       "id": "public-base-url",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "title": "Поставить PUBLIC_BASE_URL",
       "detail": "Без него страницы пересобираются с боевыми адресами, но с «noindex, nofollow» — сегодня они именно такие, а robots.txt стендовый.",
@@ -426,7 +577,9 @@
     {
       "id": "session-secret",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "title": "Поставить SESSION_SECRET",
       "detail": "Он теперь держит токен статуса заказа, по которому возвращается брошенная корзина. Без него всё закрывается молча: возврат корзины просто не работает, и никто об этом не скажет.",
@@ -438,9 +591,13 @@
     {
       "id": "regenerate",
       "area": "switches",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
-      "needs": ["public-base-url"],
+      "needs": [
+        "public-base-url"
+      ],
       "title": "Пересобрать страницы и выложить, чтобы они несли боевую политику для поисковиков",
       "detail": "Строго после того, как выставлен PUBLIC_BASE_URL, не раньше. Иначе в боевые адреса снова уедет «noindex».",
       "en": {
@@ -451,9 +608,14 @@
     {
       "id": "run-reset",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
-      "needs": ["snapshot", "code-reset"],
+      "needs": [
+        "snapshot",
+        "code-reset"
+      ],
       "title": "Запустить инструмент обнуления",
       "detail": "Сначала сухой прогон, прочитать его, и только потом подтвердить.",
       "en": {
@@ -464,7 +626,9 @@
     {
       "id": "unpaid-flow",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "optional": true,
       "title": "Включить, если нужно, обработку неоплаченных заказов",
@@ -477,16 +641,23 @@
     {
       "id": "domain-dns",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "title": "Направить домен на Vercel",
       "detail": "DNS лежит в ASCIO.",
-      "en": { "title": "Point the domain at Vercel", "detail": "DNS is at ASCIO." }
+      "en": {
+        "title": "Point the domain at Vercel",
+        "detail": "DNS is at ASCIO."
+      }
     },
     {
       "id": "region-fra1",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "done",
       "title": "Проверить, что регион функций всё ещё fra1",
       "detail": "Задан в vercel.json и в панели; они совпадают. Проверено 14.09.",
@@ -498,7 +669,9 @@
     {
       "id": "crons",
       "area": "switches",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "title": "Проверить два расписания в vercel.json",
       "detail": "Это то, что должно работать на живых покупателях?",
@@ -507,13 +680,17 @@
         "detail": "Are they what you want running against real customers?"
       }
     },
-
     {
       "id": "untested-by-hand",
       "area": "firsthour",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
-      "needs": ["code-untested", "domain-dns"],
+      "needs": [
+        "code-untested",
+        "domain-dns"
+      ],
       "title": "Пройти docs/montonio-untested.md руками",
       "detail": "Он существует потому, что эти пути нельзя доказать в песочнице: настоящий возврат, настоящий отказ перевозчика в регистрации, настоящий PDF наклейки, проверка телефона и адреса, которую песочница пропускает целиком.",
       "en": {
@@ -524,9 +701,13 @@
     {
       "id": "real-order",
       "area": "firsthour",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
-      "needs": ["domain-dns"],
+      "needs": [
+        "domain-dns"
+      ],
       "title": "Сделать один настоящий заказ от начала до конца и вернуть за него деньги",
       "detail": "Возвраты в этот момент отработают впервые в жизни.",
       "en": {
@@ -537,9 +718,13 @@
     {
       "id": "smoke-live",
       "area": "firsthour",
-      "who": ["claude"],
+      "who": [
+        "claude"
+      ],
       "status": "todo",
-      "needs": ["domain-dns"],
+      "needs": [
+        "domain-dns"
+      ],
       "title": "Прогнать смоук по живому сайту и сравнить со стендом",
       "detail": "Тот же набор проверок, что по стенду, — разница и есть отчёт.",
       "en": {
@@ -550,7 +735,9 @@
     {
       "id": "webhook-alarm",
       "area": "firsthour",
-      "who": ["dim"],
+      "who": [
+        "dim"
+      ],
       "status": "todo",
       "title": "Убедиться, что что-то сообщает, когда уведомление об оплате не дошло",
       "detail": "Молчание в этом месте выглядит ровно как «заказов нет».",

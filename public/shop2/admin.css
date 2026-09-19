@@ -617,6 +617,24 @@
   border: 1px solid var(--a-rule); padding: 14px 16px; font-size: 14px; color: var(--a-muted);
   display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
 }
+/* «Правки не сохранены — если выйти, они пропадут.» and its two answers. The
+   card carried no styling of its own at all, so a question about losing work
+   looked exactly like every other grey box on the page: «Currently a bit hard
+   to notice» (Dim, 19.09.2026). It reads as a warning now — warn ink, a tinted
+   ground, and a left edge you cannot scroll past — and its two buttons are
+   told apart: staying is the safe answer and looks like the one to press,
+   leaving without saving is the destructive one and wears the warning colour.
+   Colour is never the only signal: the words already say which is which. */
+.adm-note--warn {
+  border-color: var(--a-warn); border-left-width: 4px;
+  background: color-mix(in srgb, var(--a-warn) 7%, var(--a-paper));
+  color: var(--a-ink);
+}
+.adm-note--warn > span:first-child { font-weight: 600; }
+.adm-note--warn .adm-btn--ghost {
+  border-color: var(--a-warn); color: var(--a-warn);
+}
+.adm-note--warn .adm-link--muted { color: var(--a-ink); font-weight: 600; text-underline-offset: 4px; }
 .adm-total { display: flex; justify-content: space-between; padding: 12px 0; font-weight: 600; }
 .adm-total__v { font-family: Oswald, sans-serif; font-size: 20px; }
 .adm-kv { border-top: 1px solid var(--a-ink); margin-top: 10px; padding-top: 12px; line-height: 22px; }
@@ -2275,7 +2293,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
   color: var(--a-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.adm-picks__more { text-align: center; flex-basis: 100%; margin: 6px 0 0; }
+/* The grid is `repeat(auto-fill, minmax(96px, 1fr))`, so `flex-basis` meant
+   nothing here and the line sat in one 96 px cell, wrapping onto two rows.
+   Same full-width rule its sibling `__none` has used all along. */
+.adm-picks__more { grid-column: 1 / -1; text-align: center; margin: 6px 0 0; }
 /* The gift card in the banner's picture grid: it has no photo, so the tile
    carries the same tower mark the storefront's gift block does. */
 .adm-pick-tile__img--gift { display: flex; align-items: center; justify-content: center; }

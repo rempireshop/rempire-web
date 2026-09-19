@@ -140,6 +140,8 @@
       "Сначала добавьте в набор хотя бы два товара": "Lisa komplekti esmalt vähemalt kaks toodet",
       "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
         "Mustand kirjutatakse komplekti toodete järgi. Kirjelduse esimesi ridu näitab pood Google'is.",
+      // 19.09.2026: the address moved below the name it is derived from
+      "Адрес подставляется из названия сам — менять его не обязательно.": "Aadress täidetakse nimest ise — seda ei pea muutma.",
       "Список наборов не загрузился — откройте «Товары → Наборы»": "Komplektide nimekiri ei laadinud — ava «Tooted → Komplektid»",
       "Такого набора нет — соберите новый в «Товары → Наборы»": "Sellist komplekti ei ole — koosta uus «Tooted → Komplektid» all",
       "Такого набора нет — откройте «Товары → Наборы»": "Sellist komplekti ei ole — ava «Tooted → Komplektid»",
@@ -2078,6 +2080,8 @@
       "когда вы вернули деньги": "kui olete raha tagastanud",
       "Чек о продаже в салоне": "Salongimüügi kviitung",
       "сразу после продажи в салоне, если указали почту клиента": "kohe pärast salongimüüki, kui kliendi e-post on sisestatud",
+      // 19.09.2026: the gift card's own letter joined the list the owner edits
+      "сразу после оплаты, если в заказе есть карта": "kohe pärast tasumist, kui tellimuses on kinkekaart",
       "Ждут оплаты:": "Ootavad tasumist:",
       "Неоплаченные заказы": "Maksmata tellimused",
       "Неоплаченные заказы: сохранено ✓": "Maksmata tellimused: salvestatud ✓",
@@ -3032,6 +3036,8 @@
       "Сначала добавьте в набор хотя бы два товара": "Add at least two products to the set first",
       "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
         "The draft is written from the products in the set. The first lines of the description are what the shop shows in Google.",
+      // 19.09.2026: the address moved below the name it is derived from
+      "Адрес подставляется из названия сам — менять его не обязательно.": "The address fills itself from the name — you need not change it.",
       "Список наборов не загрузился — откройте «Товары → Наборы»": "The list of sets did not load — open «Goods → Sets»",
       "Такого набора нет — соберите новый в «Товары → Наборы»": "There is no such set — build a new one in «Goods → Sets»",
       "Такого набора нет — откройте «Товары → Наборы»": "There is no such set — open «Goods → Sets»",
@@ -4922,6 +4928,8 @@
       "когда вы вернули деньги": "when you have refunded the money",
       "Чек о продаже в салоне": "Salon sale receipt",
       "сразу после продажи в салоне, если указали почту клиента": "right after a salon sale, when the customer's e-mail was typed in",
+      // 19.09.2026: the gift card's own letter joined the list the owner edits
+      "сразу после оплаты, если в заказе есть карта": "right after payment, when the order holds a gift card",
       "Ждут оплаты:": "Awaiting payment:",
       "Неоплаченные заказы": "Unpaid orders",
       "Неоплаченные заказы: сохранено ✓": "Unpaid orders: saved ✓",
@@ -20379,6 +20387,15 @@
        had already taken home (Renat, 13.09.2026). Always: a sale with an
        address typed at the till is a customer waiting for their receipt. */
     ["pos-receipt", "Чек о продаже в салоне", "сразу после продажи в салоне, если указали почту клиента", ""],
+    /* The gift card's own letter. The server has had it all along
+       (src/emails/index.ts), this list did not — so the one letter whose
+       design the owner cannot change was also the one letter he could not
+       edit. «Маркетинг → Подарочные карты → Оформление» now points straight
+       at it, and until 19.09.2026 that pointer landed on «Заказ принят»,
+       because mailTpl() falls back to the first row for a key it does not
+       know (Dim: «Brings me to "Заказ принят" e-mail»). Always on: a bought
+       card that never arrives is money taken for nothing. */
+    ["gift-card", "Подарочная карта", "сразу после оплаты, если в заказе есть карта", ""],
     ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше 3 часов, если заказа так и не было", "abandoned"],
     ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
@@ -26119,13 +26136,12 @@
     var lang = f.lang || "RU";
     return '<div class="adm-card adm-card--pad">' +
       '<div class="adm-confirm__t">' + (f.editing ? "Изменить набор" : "Новый набор") + "</div>" +
-      '<label class="adm-field">Адрес набора — латиницей, менять нельзя после первой продажи' +
-        '<input class="adm-input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
-        (f.editing ? " readonly" : "") + "></label>" +
-      '<label class="adm-field">Раздел магазина' +
-        '<select class="adm-input" data-bundlecat>' + BUNDLE_CATS.map(function (c) {
-          return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
-        }).join("") + "</select></label>" +
+      /* The name comes first. The address used to — a latin slug nobody
+         thinks of before they have thought of the set, and a form that opens
+         with «менять нельзя после первой продажи» asks for a decision before
+         it has asked for anything at all (Dim, 19.09.2026). It writes itself
+         from the Russian name as that is typed (paintBundleId) and now sits
+         where a derived value belongs: below the text it is derived from. */
       '<div class="adm-chips" role="group" aria-label="Язык текста">' + LANGS.map(function (l) {
         return '<button class="adm-chip" data-bundlelang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
       }).join("") + "</div>" +
@@ -26150,6 +26166,14 @@
           (BUNDLE_AI_UNDO ? '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>' : "") +
         "</span></div>" +
       '<p class="hint adm-hint" style="margin:0">Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.</p>' +
+      '<label class="adm-field">Раздел магазина' +
+        '<select class="adm-input" data-bundlecat>' + BUNDLE_CATS.map(function (c) {
+          return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
+        }).join("") + "</select></label>" +
+      '<label class="adm-field">Адрес набора — латиницей, менять нельзя после первой продажи' +
+        '<input class="adm-input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
+        (f.editing ? " readonly" : "") + "></label>" +
+      (f.editing ? "" : '<p class="hint adm-hint" style="margin:0">Адрес подставляется из названия сам — менять его не обязательно.</p>') +
       '<div class="adm-sec__t">Что внутри — минимум два товара</div>' +
       bundleItemRowsHTML() +
       '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
