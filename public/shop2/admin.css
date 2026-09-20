@@ -252,6 +252,19 @@
    the owner asked what «Салон» does; nothing else on the page could tell him */
 .adm-lead { font-size: 14px; color: var(--a-muted); line-height: 20px; max-width: 640px; margin: -8px 0 0; }
 .adm-err { font-size: 13px; color: var(--a-warn); line-height: 18px; }
+/* The one warning an owner must not read past. «Заплатили 54 € вместо 108 € —
+   заказ придержан» sat in the payment block as another 13 px line in the same
+   muted weight as the method and the provider above it, and was read as more
+   grey detail. A block of its own: the warning ink on a tinted ground, a left
+   edge, and room around it. Not colour alone — it keeps its ⚠ and its words. */
+.adm-err--block {
+  display: block; margin-top: 10px; padding: 12px 14px; font-size: 14px; line-height: 21px;
+  border: 1px solid var(--a-warn); border-left-width: 4px;
+  background: color-mix(in srgb, var(--a-warn) 8%, var(--a-paper));
+  font-weight: 500;
+}
+/* …and the <br> before it would otherwise leave a blank line above the box. */
+.adm-kv br + .adm-err--block { margin-top: 12px; }
 
 /* ---------- chips and tabs ------------------------------------------------ */
 

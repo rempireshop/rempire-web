@@ -5959,6 +5959,21 @@
        node and nothing matched it. i18n-gaps cannot see either of them: the
        label comes out of ADM_ORDER_FILTERS, so the tool reads the chip as two
        holes glued together and has nothing to test. */
+    /* Every chip that carries a number needs one of these, and on 19.09.2026
+       three screens grew numbers without them: «Заказы» gained «Придержаны»,
+       and «Склад» and «Каталог» started printing a count on all four of their
+       chips. The word alone is in the dictionary, but the chip is one text
+       node — «Все 334» — so translateTree() matched nothing and the English
+       panel showed Russian (Dim, 20.09.2026). tools/i18n-gaps.mjs cannot see
+       this: the string is assembled at run time, not written in the source. */
+    [/^Придержаны (\d+)$/, { ET: "Peatatud $1", EN: "On hold $1" }],
+    [/^Все (\d+)$/, { ET: "Kõik $1", EN: "All $1" }],
+    [/^Мало (\d+)$/, { ET: "Vähe $1", EN: "Low $1" }],
+    [/^Нет в наличии (\d+)$/, { ET: "Pole laos $1", EN: "Out of stock $1" }],
+    [/^Нет (\d+)$/, { ET: "Pole $1", EN: "None $1" }],
+    [/^Не учтено (\d+)$/, { ET: "Loendamata $1", EN: "Not counted $1" }],
+    [/^В продаже (\d+)$/, { ET: "Müügil $1", EN: "On sale $1" }],
+    [/^Скрытые (\d+)$/, { ET: "Peidetud $1", EN: "Hidden $1" }],
     [/^В пути (\d+)$/, { ET: "Teel $1", EN: "On the way $1" }],
     [/^Возвраты (\d+)$/, { ET: "Tagastused $1", EN: "Returns $1" }],
     // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
@@ -18907,8 +18922,12 @@
        worth, so nothing was fulfilled at all. This is not a warning beside a
        paid order — it is the reason the order is not paid, and it names the
        two figures and the one button that ends it. */
-    if (p.held && p.held.reason === "currency") notes += '<br><span class="adm-err">⚠ Заплатили в другой валюте — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>';
-    else if (p.held) notes += '<br><span class="adm-err">⚠ Заплатили ' + eur(p.held.got) + " вместо " + eur(p.held.expected) + " — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>";
+    /* A block, not another line of the grey list. «€54 paid instead of €108 —
+       the order is on hold» is the most consequential sentence the panel ever
+       shows an owner, and it was 13 px of muted rust among 13 px of muted
+       olive: «The paid less should be better visible» (Dim, 20.09.2026). */
+    if (p.held && p.held.reason === "currency") notes += '<br><span class="adm-err adm-err--block">⚠ Заплатили в другой валюте — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>';
+    else if (p.held) notes += '<br><span class="adm-err adm-err--block">⚠ Заплатили ' + eur(p.held.got) + " вместо " + eur(p.held.expected) + " — заказ придержан: товар не списан, карты не выпущены, письмо не ушло. Проверьте в Montonio и нажмите «Оплачен», если всё в порядке</span>";
     /* A third: a second payment arrived for an order the first one had
        already paid for — the shopper paid twice (src/lib/payments/apply.ts
        keeps it beside the first one, never on top of it, so the reference the
