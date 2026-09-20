@@ -244,12 +244,20 @@ img { max-width: 100%; display: block; }
 /* the mark draws itself once, then answers taps */
 .hdr__tower { transform-origin: 50% 100%; transition: transform .25s var(--ease); }
 .hdr__logo:hover .hdr__tower { transform: translateY(-2px); }
+/* The mark's RESTING state is the finished one, and the animation takes it
+   away for a moment rather than bringing it in. Written the other way round
+   — dashoffset 1 and opacity 0 at rest, animated to the visible state — an
+   animation that does not run leaves the tower invisible for good, while the
+   34px box it sits in keeps its width: no tower, and «REMPIRE» standing a
+   tower's width to the right of where it belongs. That is what Ренат opened
+   his iPad to on 20.09.2026, and with `backwards` / a keyframe that starts
+   hidden the worst case is now a mark that simply appears without its intro. */
 .hdr__tower .tw-draw {
   fill: none; stroke: var(--ink); stroke-width: 2.4;
-  stroke-dasharray: 1; stroke-dashoffset: 1;
-  animation: draw 1.1s var(--ease-inout) .2s forwards;
+  stroke-dasharray: 1; stroke-dashoffset: 0;
+  animation: draw 1.1s var(--ease-inout) .2s backwards;
 }
-.hdr__tower .tw-fill { opacity: 0; animation: fillIn .5s ease 1s forwards; }
+.hdr__tower .tw-fill { opacity: 1; animation: fillIn 1.5s ease backwards; }
 .hdr__tower.is-ident { animation: ident .55s var(--ease); }
 @keyframes ident {
   30% { transform: translateY(-4px) scaleY(1.05); }
@@ -669,18 +677,41 @@ body:has(.stickybar) .ftr {
    page its button opens. */
 .hero__art--gift { display: flex; align-items: center; justify-content: center; background: var(--shell); }
 .hero__giftmark { width: 42px; height: 66px; color: var(--ink); }
+/* Ренат, 20.09.2026: «убрать квадратное оформление и оставить просто стрелки
+   и чуть их увеличить», with a drawing — a red cross over a boxed chevron, a
+   green tick beside a bare one. So the plate is gone and the chevron is the
+   whole control. The BUTTON keeps its size: 48 × 48 is the touch target, and
+   taking the plate away must not take the target with it.
+
+   The plate was also what made the glyph legible over a photograph, so the
+   stroke carries a shadow of its own instead — a banner image is the owner's
+   to upload and can be light or dark under either arrow. */
 .hero__arrow {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
-  width: 42px; height: 42px; border: none; cursor: pointer;
-  background: rgba(255, 255, 255, .6); color: var(--ink);
-  font-size: 19px; line-height: 1; backdrop-filter: blur(3px);
+  width: 48px; height: 48px; border: none; padding: 0; cursor: pointer;
+  background: none; color: var(--ink);
   display: flex; align-items: center; justify-content: center;
-  transition: background .18s var(--ease);
+  transition: transform .18s var(--ease), opacity .18s var(--ease);
 }
-.hero__arrow:hover { background: rgba(255, 255, 255, .92); }
-.hero__arrow--prev { left: 8px; }
-.hero__arrow--next { right: 8px; }
-@media (max-width: 767px) { .hero__arrow { display: none; } }
+.hero__arrow svg {
+  width: 15px; height: 34px;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, .95)) drop-shadow(0 1px 2px rgba(255, 255, 255, .8));
+}
+.hero__arrow:hover { opacity: .7; }
+.hero__arrow--prev { left: 4px; }
+.hero__arrow--next { right: 4px; }
+.hero__arrow--prev:hover { transform: translate(-2px, -50%); }
+.hero__arrow--next:hover { transform: translate(2px, -50%); }
+/* The phone used to have no arrows at all — swipe and autoplay only — and
+   Ренат read that as the same fault («на телефоне они вообще отсутствуют»).
+   A swipe nobody can see is not a control, so they are drawn there too, just
+   tucked closer to the edge where the slide has less room to give. */
+@media (max-width: 767px) {
+  .hero__arrow { width: 44px; height: 44px; }
+  .hero__arrow svg { width: 13px; height: 29px; }
+  .hero__arrow--prev { left: 0; }
+  .hero__arrow--next { right: 0; }
+}
 
 /* UX fix 1: dot indicators removed (staging review) — arrows, swipe and
    autoplay carry the carousel on their own; the .hero__dots rules they used
@@ -1433,8 +1464,9 @@ body.is-locked .sbot { display: none; }
 .tw-draw { fill: none; stroke: var(--ink); stroke-width: 2; }
 .intro .tw-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.3s var(--ease-inout) .1s forwards; }
 .intro .tw-fill { opacity: 0; animation: fillIn .6s ease 1.15s forwards; }
-@keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes fillIn { to { opacity: 1; } }
+/* Both start hidden INSIDE the keyframe, so the rule above can rest visible. */
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes fillIn { 0%, 66% { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- feedback widget ----------
    Must clear the fixed bottom nav and never sit above the sticky action bars

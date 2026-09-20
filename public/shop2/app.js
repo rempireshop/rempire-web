@@ -64,6 +64,14 @@
   function icon(name) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
   }
+  /** A bare chevron for the banner arrows — tall, thin and open, the shape
+      Ренат drew a green tick beside. Its own viewBox rather than ICON's 24×24
+      square so the stroke can be set in one place and scale with the button. */
+  function chevron(dir) {
+    return '<svg viewBox="0 0 12 28" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="' + (dir === "left" ? "M9 3L3 14l6 11" : "M3 3l6 11-6 11") + '"/></svg>';
+  }
 
   /* Inline SVG rather than flagcdn.com — a decorative flag is not worth a
      third-party request, and the prototype otherwise talks to nobody. */
@@ -6891,8 +6899,14 @@
       // UX fix 1: dot indicators removed (staging review) — arrows, swipe and
       // autoplay still work off S.slide alone, no dots required
       (list.length > 1
-        ? '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">‹</button>' +
-          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">›</button>'
+        /* A drawn chevron, not the ‹ › glyphs: Ренат, 20.09.2026 — «убрать
+           квадратное оформление и оставить просто стрелки и чуть их
+           увеличить», with a sketch of a bare chevron against a boxed one.
+           A glyph's weight and height are the font's to decide and a plate
+           behind it was the only thing making it legible; a stroked path is
+           sized here and carries its own shadow instead. */
+        ? '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">' + chevron("left") + "</button>" +
+          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">' + chevron("right") + "</button>"
         : "") +
       "</section>";
   }

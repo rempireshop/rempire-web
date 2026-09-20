@@ -88,6 +88,10 @@ function ask(q: string, levels: CatalogueLevelRow[], cat: Shelf[]): Asked {
     ${slice("posVariantPrice")}
     ${slice("posSearchResultsHTML")}
     ${slice("posAddProduct")}
+    /* stockFiltered() hands the chip rule — «Мало», «Нет», «Не учтено» — to
+       its own function now. Sliced in rather than stubbed, so the «Склад»
+       side of this comparison stays the shop's own filtering. */
+    ${slice("stockInFilter")}
     ${slice("stockFiltered")}
     var html = posSearchResultsHTML();
     var chips = (html.match(/data-posadd="[^"]+"/g) || []).map(function (m) { return m.slice(13, -1); });

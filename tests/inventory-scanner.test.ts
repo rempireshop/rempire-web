@@ -243,6 +243,10 @@ function stockList(rows: Row[], state: Record<string, unknown> = {}) {
     function stockRowHTML(r) { return "<i data-row=\\"" + r.productId + "\\"></i>"; }
     ${slice("scanFold")}
     ${slice("scanWordHas")}
+    /* The chip rule moved out of stockFiltered into its own function so the
+       count printed on a chip and the list it opens cannot disagree. Sliced
+       in, not stubbed: «Все» has to keep meaning what the shop means by it. */
+    ${slice("stockInFilter")}
     ${slice("stockFiltered")}
     ${slice("stockCountText")}
     ${slice("stockRows")}

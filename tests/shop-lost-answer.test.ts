@@ -263,9 +263,16 @@ interface PointsRun {
 /** Run the real loadPointsFor() against one stubbed answer. */
 function loadPointsFor(fetchStub: () => Promise<unknown>): Promise<PointsRun> {
   const body = `
-    var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list" };
+    /* POINTS.big stands in for the bucket that holds how many machines the
+       country has in total when the feed sent only a first slice: without it
+       the arrival path throws, and loadPointsFor's own .catch swallows it. */
+    var POINTS = { by: {}, empty: {}, loading: {}, err: {}, big: {}, q: "", view: "list" };
     var S = { country: "EE" };
     var fetch = FETCH;
+    /* Stands in for the checkout's own country: every case below is an
+       Estonian order, which is the «EE» in the POINTS keys read back at the
+       end of this body. */
+    function orderCountry() { return "EE"; }
     function stampPointsLoading() {}
     function pointsArrived() {}
     function apiSeen() {}

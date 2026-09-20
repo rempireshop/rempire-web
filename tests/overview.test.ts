@@ -74,7 +74,15 @@ describe("getOverviewSummary", () => {
     const o = await getOverviewSummary(NOW);
     expect(o.orders).toEqual({ today: 0, yesterday: 0 });
     expect(o.revenue7d).toEqual({ total: 0, perDay: 0, orders: 0 });
-    expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [] });
+    expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [], hiddenItems: [] });
+    // `hidden` and `hiddenItems` are one statement in two halves (Dim, 19.09.2026):
+    // how many are waiting behind the switch, and which ones. A fresh shop has to
+    // pin both, or the card can go back to saying «2 скрытых товара заканчиваются»
+    // with nothing behind the number — the same invented figure as «вчера — 5»,
+    // one row further down. The list has to BE there and be empty: the panel reads
+    // it to decide whether to draw the row at all.
+    expect(o.lowStock.hiddenItems).toEqual([]);
+    expect(o.lowStock.hiddenItems).toHaveLength(o.lowStock.hidden);
     expect(o.attention).toEqual({
       ordersToShip: 0,
       proRequests: 0,
