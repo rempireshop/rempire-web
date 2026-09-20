@@ -161,19 +161,21 @@
       "id": "shop-menu",
       "area": "shop",
       "who": "renat",
-      "device": "phone",
+      "device": "any",
       "lang": "RU",
       "title": "Ссылки вверху и внизу",
       "steps": [
         "Пролистать вбок ряд ссылок вверху страницы.",
         "Зайти по очереди в «Наборы», «Подарочная карта», «Блог».",
-        "Пролистать до низа страницы и открыть там каждую ссылку."
+        "Пролистать до низа страницы и открыть там каждую ссылку.",
+        "На планшете долистать до самого низа и посмотреть на «Админку»."
       ],
       "expect": [
         "«Подарочная карта» стоит сразу за «Наборами».",
         "Каждая ссылка вверху открывает свою страницу.",
         "Внизу открываются «Доставка и оплата» и «Контакты».",
         "Внизу открываются «Возврат товара», «Правовая информация», «Данные и cookie».",
+        "Круглая кнопка помощника не закрывает «Админку» и строку ©.",
         "Ни одна ссылка не открывает пустую страницу."
       ],
       "why": "Ссылка в никуда — это покупатель, ушедший искать ответ в другом месте.",
@@ -184,17 +186,21 @@
         "steps": [
           "Scroll the row of links at the top sideways.",
           "Go into «Наборы» (sets), «Подарочная карта» (gift card) and «Блог» in turn.",
-          "Scroll to the bottom of the page and open every link there."
+          "Scroll to the bottom of the page and open every link there.",
+          "On a tablet scroll right to the bottom and look at «Админка»."
         ],
         "expect": [
           "«Подарочная карта» sits right after «Наборы».",
           "Every link at the top opens its page.",
           "At the bottom, «Доставка и оплата» and «Контакты» open.",
           "At the bottom, «Возврат товара», «Правовая информация» and «Данные и cookie» open.",
+          "The round assistant button covers neither «Админка» nor the © line.",
           "No link opens an empty page."
         ],
         "why": "A link that goes nowhere is a buyer who left to ask elsewhere."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-20T09:56:00.000Z"
     },
     {
       "id": "shop-langs",
