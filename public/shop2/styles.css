@@ -702,6 +702,19 @@ body:has(.stickybar) .ftr {
 .hero__arrow--next { right: 4px; }
 .hero__arrow--prev:hover { transform: translate(-2px, -50%); }
 .hero__arrow--next:hover { transform: translate(2px, -50%); }
+/* …and the slide has to give them room. The box's own gutter is 32px and
+   the left arrow ends at 52, so on a tablet the chevron stood on the first
+   letters of «TALLINN · MARDI 1 · EST 2018» and the headline under it
+   (Ренат, 20.09.2026). It only happens while the box reaches the window's
+   edges: from --maxw + 2 × 32 up, the box is centred and its gutter already
+   clears the arrow, so the wide desktop keeps the measure it has.
+
+   `:has(.hero__arrow)` because a single banner is a picture, not a carousel,
+   and draws no arrows at all — it must not be indented for controls that
+   are not there. */
+@media (min-width: 768px) and (max-width: 1303px) {
+  .hero:has(.hero__arrow) .hero__box { padding-inline: max(var(--gutter), 64px); }
+}
 /* The phone used to have no arrows at all — swipe and autoplay only — and
    Ренат read that as the same fault («на телефоне они вообще отсутствуют»).
    A swipe nobody can see is not a control, so they are drawn there too.
