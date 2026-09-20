@@ -123,6 +123,7 @@
         "Открыть магазин на телефоне.",
         "Пролистать главную сверху донизу.",
         "Нажать стрелку на большой картинке и пролистать баннеры.",
+        "Открыть ту же главную на планшете и посмотреть на левую стрелку.",
         "Нажать кнопку на большой картинке сверху, потом вернуться назад."
       ],
       "expect": [
@@ -142,6 +143,7 @@
           "Open the shop on a phone.",
           "Scroll the home page from top to bottom.",
           "Tap an arrow on the big picture and page through the banners.",
+          "Open the same home page on a tablet and look at the left arrow.",
           "Tap the button on the big picture at the top, then go back."
         ],
         "expect": [
@@ -155,7 +157,7 @@
         "why": "A broken home page loses the buyer the ad just paid for."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T09:40:00.000Z"
+      "markedAt": "2026-09-20T10:06:00.000Z"
     },
     {
       "id": "shop-menu",
