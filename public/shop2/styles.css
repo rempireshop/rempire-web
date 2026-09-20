@@ -704,13 +704,25 @@ body:has(.stickybar) .ftr {
 .hero__arrow--next:hover { transform: translate(2px, -50%); }
 /* The phone used to have no arrows at all — swipe and autoplay only — and
    Ренат read that as the same fault («на телефоне они вообще отсутствуют»).
-   A swipe nobody can see is not a control, so they are drawn there too, just
-   tucked closer to the edge where the slide has less room to give. */
+   A swipe nobody can see is not a control, so they are drawn there too.
+
+   They sit over the PHOTO, not over the middle of the slide. The phone's
+   hero is a column — picture on top, words underneath (.hero__art has
+   order: -1 below) — so «the vertical centre» lands in the eyebrow line and
+   the arrow clipped the first letter of «TALLINN · MARDI 1 · EST 2018». The
+   band below is the picture's own height, written the same way .hero__art
+   writes it, with .hero__box's top padding above it. */
 @media (max-width: 767px) {
-  .hero__arrow { width: 44px; height: 44px; }
+  .hero__arrow {
+    width: 44px; top: var(--s5); transform: none;
+    height: 44vw; max-height: 230px; min-height: 150px;
+  }
   .hero__arrow svg { width: 13px; height: 29px; }
   .hero__arrow--prev { left: 0; }
   .hero__arrow--next { right: 0; }
+  /* …so the hover nudge cannot put the -50% back */
+  .hero__arrow--prev:hover { transform: translateX(-2px); }
+  .hero__arrow--next:hover { transform: translateX(2px); }
 }
 
 /* UX fix 1: dot indicators removed (staging review) — arrows, swipe and
