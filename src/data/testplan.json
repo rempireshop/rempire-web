@@ -2276,14 +2276,14 @@
       "steps": [
         "На шаге доставки выбрать «Другая страна Европы».",
         "Выбрать в списке стран Германию и посмотреть цену.",
-        "Выбрать Польшу.",
+        "Выбрать Польшу и открыть список пакоматов.",
         "Выбрать Грецию."
       ],
       "expect": [
         "Германия — 22,29 €.",
-        "Польша — 20,69 €.",
+        "Польша — 20,69 € курьером и 17,89 € в пакомат.",
         "Греция — 43,19 €.",
-        "По Европе предлагают только курьера, пакоматов там нет.",
+        "У польских пакоматов кнопки «Карта» нет — только список и поиск.",
         "Под ценой написано, что у каждой страны она своя."
       ],
       "why": "Одна цена 9,90 € на всю Европу — 33 € убытка на греческой посылке.",
@@ -2294,18 +2294,20 @@
         "steps": [
           "At the delivery step choose «Другая страна Европы» (another European country).",
           "Choose Germany in the country list and look at the price.",
-          "Choose Poland.",
+          "Choose Poland and open the list of lockers.",
           "Choose Greece."
         ],
         "expect": [
           "Germany — 22.29 €.",
-          "Poland — 20.69 €.",
+          "Poland — 20.69 € by courier, 17.89 € to a locker.",
           "Greece — 43.19 €.",
-          "Across Europe only a courier is offered, no lockers.",
+          "Polish lockers have no «Карта» button — the list and its search only.",
           "The note under the price says each country has its own."
         ],
         "why": "One 9.90 € price for all Europe loses 33 € on a Greek parcel."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-20T09:10:00.000Z"
     },
     {
       "id": "checkout-eu-free200",
@@ -3388,7 +3390,8 @@
         "Нажать «Открыть PDF (A4) ↗».",
         "Вернуться и нажать «A6 для термопринтера ↗».",
         "Посмотреть вес на этикетке: это коробка магазина, а не число товаров.",
-        "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой."
+        "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой.",
+        "Открыть оплаченный заказ в польский пакомат и посмотреть блок над кнопкой."
       ],
       "expect": [
         "Появилось «Отправление»: перевозчик, пакомат, трек-номер и код сдачи.",
@@ -3396,7 +3399,7 @@
         "На листе A4 под этикеткой — номер заказа и код сдачи крупными цифрами.",
         "Там же написано, куда и кому едет посылка и что внутри.",
         "Наклейка A6 — голая этикетка перевозчика, этих строк на ней нет.",
-        "Заказ остался на прежнем шаге."
+        "У польского заказа размера ячейки нет, и написано почему."
       ],
       "why": "Этикетка, которая не печатается, — это посылка, которую вы не сдадите сегодня.",
       "risk": "med",
@@ -3409,7 +3412,8 @@
           "Press «Открыть PDF (A4) ↗».",
           "Go back and press «A6 для термопринтера ↗».",
           "Look at the weight on the label: it is the shop's box, not the item count.",
-          "Open the A4 PDF and check the band under the label is not empty."
+          "Open the A4 PDF and check the band under the label is not empty.",
+          "Open a paid order going to a Polish locker and look above the button."
         ],
         "expect": [
           "«Отправление» appears: carrier, locker, tracking number and drop-off code.",
@@ -3417,12 +3421,12 @@
           "Under the label on A4: the order number and the drop-off code in big figures.",
           "The same band says where and to whom it goes and what is inside.",
           "The A6 sticker is the bare carrier label; those lines are not on it.",
-          "The order stays at the same step."
+          "A Polish order has no locker size, and says why."
         ],
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T12:00:00.000Z"
+      "markedAt": "2026-09-20T09:10:00.000Z"
     },
     {
       "id": "order-shipped",
@@ -4360,10 +4364,10 @@
       "expect": [
         "Пока пакомат не выбран, под списком: «Выберите пакомат — тогда сохраним».",
         "После выбора пакомата под списком «Доставка по умолчанию сохранена ✓»; кнопки нет.",
+        "У Польши списка пакоматов нет, и строка сохраняется без него.",
         "Сохранённая доставка подставляется в кассу сама.",
         "На другом телефоне после входа она подставляется тоже.",
-        "После «Выйти» она больше не подставляется.",
-        "На общем компьютере следующий человек чужого пакомата не видит."
+        "После «Выйти» она больше не подставляется."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4384,15 +4388,15 @@
         "expect": [
           "Until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
           "Once the locker is picked, «Доставка по умолчанию сохранена ✓» shows under the list; no button.",
+          "Poland has no list of lockers, and the row saves without one.",
           "The saved delivery fills itself in at the checkout.",
           "On the other phone, once signed in, it fills in too.",
-          "After «Выйти» it stops filling in.",
-          "On a shared computer the next person sees no stranger's locker."
+          "After «Выйти» it stops filling in."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T12:00:00.000Z"
+      "markedAt": "2026-09-20T09:10:00.000Z"
     },
     {
       "id": "acct-refund-sent",

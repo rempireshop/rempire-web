@@ -2981,6 +2981,8 @@
       "Другая коробка": "Teine karp",
       "Это только для этой посылки — коробка магазина не меняется.":
         "See kehtib ainult sellele pakile — poe karp ei muutu.",
+      "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
+        "Selle vedaja puhul luugi suurust ei valita — ta valib selle ise.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
         "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Montonio arvestab kahest suurema järgi: tegelik kaal ja karbi mahu järgi arvutatud kaal. Seepärast on väiksem karp otsene kokkuhoid igalt pakilt.",
       "по умолчанию": "vaikimisi",
@@ -5824,6 +5826,8 @@
       "Другая коробка": "A different box",
       "Это только для этой посылки — коробка магазина не меняется.":
         "This is for this parcel only — the shop's box does not change.",
+      "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
+        "This carrier does not take a locker size — it picks the door itself.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
         "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Montonio charges the greater of two: the real weight and the weight worked out from the box's volume. So a smaller box is a direct saving on every parcel.",
       "по умолчанию": "by default",
@@ -16034,7 +16038,18 @@
        asks for it from inside a render — so the answer has to bring a repaint
        with it or the select stays on «Загружаем список…» until something
        else redraws the screen. */
-    if (S.screen === "account") { render(); return; }
+    if (S.screen === "account") {
+      /* …and the list that lands can settle a row that was waiting for it.
+         «Доставка по умолчанию» asks for a machine BEFORE the country's feed
+         has answered, so a country whose machines do not fit in one list —
+         Poland, 33 603 of them — got «Выберите пакомат — тогда сохраним» over
+         a hint saying the machine is picked at the checkout, and nothing ever
+         came back to re-read the question (Dim, 20.09.2026). It is re-read
+         here: the same rule, now with the answer in hand, and the row saves. */
+      if (S.acctSt.ship === "need") acctShipChanged();
+      render();
+      return;
+    }
     if (S.screen !== "checkout") return;
     /* The account's saved parcel machine is a NAME off this same list; the
        real one only exists once this carrier's feed has answered. Matched
@@ -16053,8 +16068,19 @@
      §3: "Координат в ответе Montonio нет вообще") cannot go on the map. */
   function pointGeo(p) { return typeof p.lat === "number" && typeof p.lng === "number" ? p : null; }
   /** A bottom sheet on a phone, a centred panel on a desktop. */
+  /** Can a map be drawn at all for what is loaded? Montonio returns DPD's
+      points outside the Baltics with `lat: null, lng: null` — every one of
+      them — so the map opened on nothing and Leaflet fell back to its default
+      view: a shopper who picked Poland was shown Tallinn (Dim, 20.09.2026).
+      No coordinates, no map button; the list is the whole picker there. */
+  function pointsHaveMap() {
+    var all = pointsMatching();
+    for (var i = 0; i < all.length; i++) if (pointGeo(all[i])) return true;
+    return false;
+  }
   function pointSheet() {
-    var mapOn = POINTS.view === "map";
+    var canMap = pointsHaveMap();
+    var mapOn = canMap && POINTS.view === "map";
     var ungeo = mapOn ? pointsMatching().filter(function (p) { return !pointGeo(p); }).length : 0;
     return '<div class="scrim" data-pointclose></div>' +
       '<div class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
@@ -16062,7 +16088,9 @@
           '<button class="iconbtn" data-pointclose aria-label="Закрыть">✕</button></div>' +
         '<div class="psheet__search"><input class="input input--box" data-pointq value="' + esc(POINTS.q) +
           '" placeholder="Город, улица или название" aria-label="Поиск пакомата" autocomplete="off">' +
-          '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>" +
+          (canMap
+            ? '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>"
+            : "") +
           /* The count is the country's, not the download's: «1500 пакоматов»
              under a search box that has all 33 603 behind it would be a lie
              the shopper can catch. */
@@ -18340,6 +18368,20 @@
     if (m !== "parcel" && !sh.pointId) return false;
     return LOCKER_CARRIERS.indexOf(String(sh.carrier || "").toLowerCase()) >= 0;
   }
+  /** …and a locker order whose carrier does NOT take one. Montonio's
+      `lockerSize` is a field on Unisend, SmartPosti and Latvian Post only
+      (LOCKER_SIZE_CARRIERS, src/lib/shipping/parcel.ts); a field a carrier
+      does not know is a 400, so DPD — every Polish locker — is sent without
+      it and the carrier picks the door itself. The chips are missing for a
+      reason, and Dim asked whether it was one (20.09.2026), so the reason is
+      on the card: the box beside it is still his to set, and on a carrier
+      that bills by volume it is the only thing on this card that costs. */
+  function admLockerSilent(v) {
+    if (admLockerOrder(v)) return false;
+    if (!v || !v.paid || v.labeled || v.pickup || v.digital) return false;
+    var sh = v.srv && v.srv.shipping;
+    return !!sh && String(sh.method || "").toLowerCase() === "parcel";
+  }
   /**
    * Is this order still waiting for a label at all? Then the two things
    * decided at label time belong on its card: the box and the locker door.
@@ -18392,7 +18434,9 @@
           "</div>" +
           '<div class="adm-hint">Нажмите «Создать этикетку» — поедет ячейка ' + esc(pick) +
             ". Другой размер — нажмите на него.</div>"
-        : "") +
+        : admLockerSilent(v)
+          ? '<div class="adm-hint" style="margin-top:8px">Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.</div>'
+          : "") +
       "</div>";
   }
   /** «25 × 18 × 10 см · около 1,13 кг» — one text node, so it stays translatable. */
