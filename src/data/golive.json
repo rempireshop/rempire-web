@@ -307,6 +307,38 @@
       }
     },
     {
+      "id": "cart-reminder-tiers",
+      "area": "renat",
+      "who": [
+        "renat",
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Решить, делать ли вторую ступень напоминания о брошенной корзине",
+      "detail": "Одно письмо есть уже: через 3 часа после того, как корзина затихла, и только если заказа с этого адреса так и не пришло. Переключатель «Брошенная корзина» по умолчанию выключен — его надо включить, иначе не уходит ничего. Ренат 20.09 предложил делить по сумме: до 100 € — просто напоминание в первые сутки, свыше 100 € — через три дня скидка 5 %. Первая половина уже работает (3 часа — это «в течение суток»). Вторая — новое письмо: порог суммы, свой штамп в carts, свой промокод на каждую корзину и срок его жизни. Скидка уходит тем, кто, возможно, купил бы и так, поэтому это решение о деньгах, а не о коде.",
+      "en": {
+        "title": "Decide whether the abandoned cart gets a second, discounted reminder",
+        "detail": "One letter already exists: three hours after the cart went quiet, and only while no order has come from that address. The «Брошенная корзина» switch is off by default — nothing is sent until it is on. Renat proposed splitting by value on 20.09: under 100 € a plain reminder within a day, over 100 € a 5 % discount after three days. The first half already works. The second is a new letter: a value threshold, its own stamp on carts, a promo code per cart and an expiry. The discount goes to people who might have bought anyway, so this is a decision about money, not about code."
+      }
+    },
+    {
+      "id": "news-banner-image",
+      "area": "renat",
+      "who": [
+        "renat",
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Решить, каким должен быть баннер в рассылке",
+      "detail": "Ренат 20.09 попросил «+ фото» в «Маркетинг → Рассылка» и прислал образец — письмо Aromatic 89, где всё письмо собрано из картинок, и каждая ведёт на свою страницу. Кнопка «Картинка» в редакторе уже есть, и картинка уходит во всю ширину письма (504 px). Чего нет — ссылки на картинке: <a> вокруг <img> письмо роняет, остаются одни слова. Это и надо решить: достаточно ли «картинка + кнопка под ней» или нужен кликающий баннер.",
+      "en": {
+        "title": "Decide what a newsletter banner has to be",
+        "detail": "Renat asked for «+ photo» in «Маркетинг → Рассылка» on 20.09 and sent an example — an Aromatic 89 letter built entirely out of pictures, each linking somewhere of its own. The editor already has a «Картинка» button and the picture goes out at the letter's full width (504 px). What is missing is a link ON the picture: an <a> around an <img> is dropped by the letter and only the words survive. That is the decision: is «a picture with a button under it» enough, or is a clickable banner the thing."
+      }
+    },
+    {
       "id": "google-domain",
       "area": "google",
       "who": [
