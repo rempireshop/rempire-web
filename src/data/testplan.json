@@ -122,13 +122,14 @@
       "steps": [
         "Открыть магазин на телефоне.",
         "Пролистать главную сверху донизу.",
+        "Нажать стрелку на большой картинке и пролистать баннеры.",
         "Нажать кнопку на большой картинке сверху, потом вернуться назад."
       ],
       "expect": [
         "Сверху большая картинка, на ней кнопка.",
+        "Стрелки по краям картинки — голые, без рамки, и не налезают на текст.",
         "Под ней ряд названий марок.",
         "Ниже ряды товаров с ценами.",
-        "Есть квадратик «Подарочная карта».",
         "В самом низу квадраты разделов.",
         "Ничего не вылезает за край экрана."
       ],
@@ -140,18 +141,21 @@
         "steps": [
           "Open the shop on a phone.",
           "Scroll the home page from top to bottom.",
+          "Tap an arrow on the big picture and page through the banners.",
           "Tap the button on the big picture at the top, then go back."
         ],
         "expect": [
           "A big picture at the top, with a button on it.",
+          "Bare arrows at its edges, no frame, and clear of the words.",
           "Under it, a row of brand names.",
           "Below that, rows of products with prices.",
-          "A «Подарочная карта» (gift card) square.",
           "Squares for the sections at the very bottom.",
           "Nothing runs off the edge of the screen."
         ],
         "why": "A broken home page loses the buyer the ad just paid for."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-20T09:40:00.000Z"
     },
     {
       "id": "shop-menu",
