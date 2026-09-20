@@ -1394,7 +1394,14 @@ body.is-locked .sbot { display: none; }
   border-top: 2px solid var(--ink); margin-top: var(--s6);
   padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom) + 16px);
 }
-@media (min-width: 768px) { .ftr { padding-bottom: 0; } }
+/* Not zero: two round buttons are parked in the bottom corners of every
+   screen — the assistant on the right (.sbot__fab, bottom 20px, 52px tall)
+   and «Оставить комментарий» on the left — and the footer's last row puts
+   «Админка» in the right corner and the © line in the left one. With no
+   padding the page simply ends there, so scrolled to the bottom the bubble
+   sat on the link. Ренат, 20.09.2026, on the iPad: «админка поправить».
+   80px is the fab's own 20 + 52 and room to see the link is not under it. */
+@media (min-width: 768px) { .ftr { padding-bottom: 80px; } }
 .ftr__cols {
   display: grid; gap: 22px 28px; padding: var(--s5) 0;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
