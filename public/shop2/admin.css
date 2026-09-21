@@ -2283,6 +2283,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* the blog toolbar's own line: a box and a button or two under the tools */
 .adm-toolrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .adm-toolrow__in { flex: 1 1 200px; width: auto; }
+/* «Куда ведёт картинка» — a full-width row under the two that insert the
+   picture, not a third thing crammed into their flex line. It is optional and
+   it is the only field here with a visible label, which is what says «this one
+   you may skip» without a word about it. */
+.adm-field--tool { margin-top: 10px; }
 
 .adm-picks { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
 .adm-picks__none { grid-column: 1 / -1; margin: 0; }

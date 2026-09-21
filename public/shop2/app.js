@@ -2989,6 +2989,10 @@
       "Другая коробка": "Teine karp",
       "Это только для этой посылки — коробка магазина не меняется.":
         "See kehtib ainult sellele pakile — poe karp ei muutu.",
+      "Куда ведёт картинка": "Kuhu pilt viib",
+      "Необязательно. Пусто — картинка просто картинка.": "Pole kohustuslik. Tühi — pilt on lihtsalt pilt.",
+      "Ссылка должна начинаться с https:// — картинка вставлена без неё":
+        "Link peab algama https:// — pilt lisati ilma selleta",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "Selle vedaja puhul luugi suurust ei valita — ta valib selle ise.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
@@ -5834,6 +5838,10 @@
       "Другая коробка": "A different box",
       "Это только для этой посылки — коробка магазина не меняется.":
         "This is for this parcel only — the shop's box does not change.",
+      "Куда ведёт картинка": "Where the picture leads",
+      "Необязательно. Пусто — картинка просто картинка.": "Optional. Leave it empty and the picture is just a picture.",
+      "Ссылка должна начинаться с https:// — картинка вставлена без неё":
+        "A link has to start with https:// — the picture went in without one",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "This carrier does not take a locker size — it picks the door itself.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
@@ -8585,6 +8593,7 @@
        rebuilds the sheet, and a half-typed link that vanished when the media
        probe answered would look like the «Вставить» button doing nothing. */
     adminBlogToolUrl: "",
+    adminBlogToolHref: "",   // «куда ведёт картинка», letters only — see blogToolSheet()
     // ---- wholesale (salon/pro) pricing & loyalty points ----
     pro: null,          // {tier, proDiscountPct, proMinOrder, proPrices} — loadProPricing(), only once S.cust.tier === "pro"
     loyalty: null,      // {balance, history, settings:{enabled,earnPct,redeemMaxPct,minRedeem}} — from acctLoad()/acctVerify()
@@ -13695,7 +13704,17 @@
             '" placeholder="https://адрес-картинки" aria-label="Ссылка на картинку">' +
           '<button class="adm-btn adm-btn--row" data-blogtoolok="image">Вставить</button>' +
           (MEDIA.on === true ? "" : '<button class="adm-link adm-link--muted" data-blogtoolcancel>Отмена</button>') +
-        "</div>";
+        "</div>" +
+        /* Letters only. Ренат прислал образец — письмо Aromatic 89, целиком
+           собранное из баннеров, и у каждого своя ссылка (20.09.2026). В
+           статье картинка уже кликается на саму себя, и вторая ссылка там
+           была бы спором двух поведений; в письме кликать больше не на что. */
+        (blogToolForNews()
+          ? '<label class="adm-field adm-field--tool"><span>Куда ведёт картинка</span>' +
+              '<input class="adm-input" data-blogtoolhref value="' + esc(S.adminBlogToolHref || "") +
+              '" placeholder="https://rempireshop.com/…" inputmode="url"></label>' +
+            '<p class="adm-hint">Необязательно. Пусто — картинка просто картинка.</p>'
+          : "");
     }
     if (t === "product") {
       return '<div class="adm-toolrow">' +
@@ -13733,21 +13752,35 @@
   function blogToolOpen(which) {
     blogSelSave();
     S.adminBlogTool = which;
-    S.adminBlogToolQ = ""; S.adminBlogToolUrl = "";
+    S.adminBlogToolQ = ""; S.adminBlogToolUrl = ""; S.adminBlogToolHref = "";
     blogToolDraw(true);
   }
   function blogToolClose() {
-    S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = "";
+    S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = ""; S.adminBlogToolHref = "";
     blogToolDraw(false);
   }
   /** <figure><img></figure> — a picture is a block, never inline in a sentence.
       It arrives at «во всю ширину», which is both the sensible default and the
       one preset that has a button already lit when the owner taps the picture. */
-  function blogInsertImage(url) {
+  /** Is the box on screen a letter? «Рассылка» is the one place a picture
+      may carry a link of its own — see the sheet above. */
+  function blogToolForNews() {
+    var rd = richDraft();
+    return !!rd && rd.kind === "news";
+  }
+  function blogInsertImage(url, href) {
     var u = blogImgUrl(url);
     if (!u) { toast("Ссылка на картинку должна начинаться с https://"); return; }
+    /* A link that is not a link is not an error to stop on — the picture is
+       what the owner asked for, and a half-typed address is the likeliest
+       reason this is blank. It goes in unlinked and says so. */
+    var to = href ? blogSafeUrl(href) : "";
+    if (href && !to) toast("Ссылка должна начинаться с https:// — картинка вставлена без неё");
     blogToolClose();
-    blogInsertHtml('<figure data-fig="full"><img src="' + esc(u) + '" alt="" loading="lazy"></figure><p><br></p>');
+    var img = '<img src="' + esc(u) + '" alt="" loading="lazy">';
+    blogInsertHtml('<figure data-fig="full">' +
+      (to ? '<a href="' + esc(to) + '">' + img + "</a>" : img) +
+      "</figure><p><br></p>");
   }
 
   /* ---- a picture in the text: how wide, on which side, and how far up ------
@@ -38738,7 +38771,11 @@
       // the field, or the draft behind it if a render() has just rebuilt it
       var urlVal = String((urlEl && urlEl.value) || S.adminBlogToolUrl || "").trim();
       if (!urlVal) { if (urlEl) urlEl.focus(); return; }
-      if (d.blogtoolok === "image") { blogInsertImage(urlVal); return; }
+      if (d.blogtoolok === "image") {
+        var hrefEl = document.querySelector("[data-blogtoolhref]");
+        blogInsertImage(urlVal, String((hrefEl && hrefEl.value) || S.adminBlogToolHref || "").trim());
+        return;
+      }
       var linkUrl = blogSafeUrl(urlVal);
       if (!linkUrl) { toast("Ссылка должна начинаться с https://"); if (urlEl) urlEl.focus(); return; }
       blogToolClose();

@@ -230,9 +230,14 @@ function quoteRow(html: string): string {
   );
 }
 
-function imageRow(src: string, alt: string): string {
+function imageRow(src: string, alt: string, href = ""): string {
+  const img =
+    `<img src="${esc(src)}" width="504" alt="${esc(alt)}" style="display:block; width:100%; max-width:504px; height:auto; border:0; outline:none;">`;
+  /* `display:block` on the anchor too: an inline <a> round a block image
+     leaves a few pixels of line-height under it, which in Outlook draws as a
+     stripe of link-coloured underline along the bottom of the banner. */
   return cell(
-    `            <img src="${esc(src)}" width="504" alt="${esc(alt)}" style="display:block; width:100%; max-width:504px; height:auto; border:0; outline:none;">`,
+    `            ${href ? `<a href="${esc(href)}" style="display:block; text-decoration:none;">${img}</a>` : img}`,
     "4px 48px 20px 48px",
   );
 }
@@ -340,6 +345,8 @@ function build(html: string, lang: Lang, cards: Map<string, NewsletterCard>): Bu
     if (!pending.length) return;
     const nodes = pending;
     pending = [];
+    const pic = lonePicture(nodes);
+    if (pic) { image(pic.attrs, pic.href); return; }
     const words = textOf(nodes).trim();
     if (!words && !nodes.some((n) => typeof n !== "string" && n.tag === "a")) return;
     const marker = markerOf(nodes);
@@ -356,13 +363,37 @@ function build(html: string, lang: Lang, cards: Map<string, NewsletterCard>): Bu
     out.rows.push(productRow(card, lang));
     out.text.push(`${cardName(card, lang)} — ${cardPrice(card, lang, false)}: ${newsletterProductUrl(card.id, lang)}`, "");
   };
-  const image = (attrs: Record<string, string>) => {
+  const image = (attrs: Record<string, string>, href = "") => {
     const src = pick(attrs.src);
     if (!src) return;
     const abs = absUrl(src, "/shop2/");
     const alt = stripHtml(pick(attrs.alt)) || t.picture;
-    out.rows.push(imageRow(abs, alt));
-    out.text.push(`${alt}: ${abs}`, "");
+    const link = href ? absUrl(href, "/shop2/") : "";
+    out.rows.push(imageRow(abs, alt, link));
+    /* The plain-text part quotes where the banner GOES, not the .jpg it is
+       made of: a reader on a text-only client wants the shop, not the file. */
+    out.text.push(`${alt}: ${link || abs}`, "");
+  };
+  /* An `<img>`, or an `<a>` wrapped round one — the shape a clickable banner
+     arrives in. Renat's own example (Aromatic 89, 20.09.2026) is a letter made
+     entirely of them. Until this existed, `<a>` was inline and inlineHtml()
+     kept only its WORDS, so a linked banner reached the letter as a blank
+     line; a bare `<p><img></p>` was dropped by the empty-paragraph guard the
+     same way. Anything else here is null and stays an ordinary paragraph. */
+  const pictureOf = (n: Node): { attrs: Record<string, string>; href: string } | null => {
+    if (typeof n === "string") return null;
+    if (n.tag === "img") return { attrs: n.attrs, href: "" };
+    if (n.tag !== "a") return null;
+    const kids = n.kids.filter((k) => typeof k !== "string" || k.trim());
+    const only = kids.length === 1 ? kids[0] : null;
+    return only && typeof only !== "string" && only.tag === "img"
+      ? { attrs: only.attrs, href: pick(n.attrs.href) }
+      : null;
+  };
+  /** The one picture this line is, if that is all it is. */
+  const lonePicture = (nodes: Node[]) => {
+    const solid = nodes.filter((n) => typeof n !== "string" || n.trim());
+    return solid.length === 1 ? pictureOf(solid[0]) : null;
   };
   const block = (n: Exclude<Node, string>) => {
     if (n.tag === "p") {
@@ -394,7 +425,7 @@ function build(html: string, lang: Lang, cards: Map<string, NewsletterCard>): Bu
       return;
     }
     if (n.tag === "figure") {
-      for (const k of n.kids) if (typeof k !== "string" && k.tag === "img") image(k.attrs);
+      for (const k of n.kids) { const p = pictureOf(k); if (p) image(p.attrs, p.href); }
       return;
     }
     if (n.tag === "img") {
