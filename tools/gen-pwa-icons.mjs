@@ -19,6 +19,7 @@
  *                                          circle a launcher may mask the icon to
  *   apple-touch-icon-180.png               iOS home screen (Safari rounds the corners)
  *   favicon-32.png                         tab icon for browsers that skip SVG favicons
+ *   badge-96.png                           the status-bar mark on an Android push
  *   favicon.svg                            tab icon: transparent, ink; white in a dark UI
  *
  * Not part of `prebuild`: the icons only need regenerating if the mark itself
@@ -46,6 +47,16 @@ const PNGS = [
   { name: "icon-maskable-512.png", size: 512, tower: 0.58 },
   { name: "apple-touch-icon-180.png", size: 180, tower: 0.62 },
   { name: "favicon-32.png", size: 32, tower: 0.84 },
+  /* The push notification's `badge` — the little mark in the status bar,
+     NOT the icon inside the notification. Android draws it from the ALPHA
+     CHANNEL alone: it silhouettes whatever it is given and tints the result.
+     An ordinary app icon is opaque across the whole square, so its silhouette
+     IS the square — which is why the first push Renat got showed a white
+     block and only turned into a tower when he opened it (21.09.2026).
+     Transparent ground, therefore, and a shape that reads at 24dp: bigger
+     than the app icon's 62 %, because there is no white square around it to
+     give it room. 96px covers xxhdpi. */
+  { name: "badge-96.png", size: 96, tower: 0.86, clear: true },
 ];
 
 function readTower() {
@@ -62,13 +73,17 @@ function readTower() {
 /* The square: white page, the tower centred, `tower` of the square tall.
    Width follows from the viewBox ratio rather than `auto`, so the box is
    the same in every engine. */
-function iconHTML({ d, vb, ratio }, size, tower) {
+function iconHTML({ d, vb, ratio }, size, tower, clear) {
   const h = Math.round(size * tower);
   const w = Math.round(h * ratio);
-  return '<!doctype html><html style="background:#fff"><head><meta charset="utf-8"></head>' +
-    '<body style="margin:0;width:' + size + 'px;height:' + size + 'px;display:grid;place-items:center;background:#fff">' +
+  /* White on nothing for a badge: Android replaces the colour anyway, and the
+     one consumer that does NOT tint draws it on a dark system bar. */
+  const bg = clear ? "transparent" : "#fff";
+  const fill = clear ? "#ffffff" : INK;
+  return '<!doctype html><html style="background:' + bg + '"><head><meta charset="utf-8"></head>' +
+    '<body style="margin:0;width:' + size + 'px;height:' + size + 'px;display:grid;place-items:center;background:' + bg + '">' +
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + vb + '" width="' + w + '" height="' + h + '" style="display:block">' +
-    '<path d="' + d + '" fill="' + INK + '"/></svg></body></html>';
+    '<path d="' + d + '" fill="' + fill + '"/></svg></body></html>';
 }
 
 /* The SVG favicon: the same mark on a transparent square, so it sits on
@@ -96,11 +111,14 @@ async function main() {
   try {
     const context = await browser.newContext({ deviceScaleFactor: 1, colorScheme: "light" });
     const page = await context.newPage();
-    for (const { name, size, tower: frac } of PNGS) {
+    for (const { name, size, tower: frac, clear } of PNGS) {
       await page.setViewportSize({ width: size, height: size });
-      await page.setContent(iconHTML(tower, size, frac));
+      await page.setContent(iconHTML(tower, size, frac, clear));
       const out = path.join(OUT_DIR, name);
-      await page.screenshot({ path: out, type: "png", clip: { x: 0, y: 0, width: size, height: size } });
+      await page.screenshot({
+        path: out, type: "png", omitBackground: !!clear,
+        clip: { x: 0, y: 0, width: size, height: size },
+      });
       console.log(`gen-pwa-icons: wrote ${path.relative(ROOT, out)} (${size}x${size})`);
     }
   } finally {

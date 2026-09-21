@@ -57,6 +57,13 @@ self.addEventListener("activate", function (event) {
 
 var PANEL = "/shop2/admin/";
 var ICON = "/shop2/icons/icon-192.png";
+/* NOT the same file as ICON. Android draws the badge — the little mark in the
+   status bar — from the ALPHA CHANNEL alone: it silhouettes what it is given
+   and tints the result. An app icon is opaque across the whole square, so its
+   silhouette is the square, and Renat's first push showed a white block that
+   only became a tower when he opened it (21.09.2026). badge-96.png is the
+   tower on nothing, which is the only shape that survives that treatment. */
+var BADGE = "/shop2/icons/badge-96.png";
 
 /**
  * A push arrived.
@@ -79,7 +86,7 @@ self.addEventListener("push", function (event) {
   var options = {
     body: msg.body || "Новое событие в магазине",
     icon: ICON,
-    badge: ICON,
+    badge: BADGE,
     /* One line per order, not per delivery attempt: a second push carrying the
        same tag replaces the first in the shade instead of stacking beside it.
        src/lib/push.ts gives every order its own tag. */
