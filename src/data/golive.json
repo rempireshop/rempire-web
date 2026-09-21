@@ -576,6 +576,21 @@
       }
     },
     {
+      "id": "subcat-words",
+      "area": "open",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "После запуска: вписать подразделы в заголовки разделов — по-эстонски",
+      "detail": "Выгрузка Search Console за три месяца (21.09.2026): единственный язык, где ищут не марку, а категорию, — эстонский, и всё это лежит на четвёртой—восьмой странице. habemehooldus 21 показ, позиция 45,9 · habemehooldusvahendid 18 / 44,3 · palsamid 11 / 73,5 · habemeõli 9 / 44,2 · juuksevaha 5 / 39,2. Слова «juuksevaha» на странице стайлинга нет вовсе — есть только «vaha», а по-эстонски это разные слова. Подразделы у нас есть (SUBCATS в app.js, 16 штук), но это фильтры в браузере: URL у них нет, индексировать нечего. Поиск по сайту — не ответ: /shop2/search/ стоит noindex, и внутренние результаты поиска Google не индексирует по своему же правилу. Дим, 21.09.2026: пока не отдельные страницы, а словарь подразделов в заголовок, описание и подзаголовки раздела — час работы. Отдельные страницы (~48 URL) — если после запуска цифры покажут, что спрос есть.",
+      "en": {
+        "title": "After launch: put the subsection words into the section titles — in Estonian",
+        "detail": "Three months of Search Console (21.09.2026): the only language where people search a category rather than a brand is Estonian, and all of it sits on pages four to eight. habemehooldus 21 impressions at position 45.9 · habemehooldusvahendid 18 / 44.3 · palsamid 11 / 73.5 · habemeõli 9 / 44.2 · juuksevaha 5 / 39.2. The word «juuksevaha» is not on the styling page at all — only «vaha», which in Estonian is a different word. The subsections exist (SUBCATS in app.js, sixteen of them) but they are browser-side filters with no URL, so there is nothing to index. The site's own search is not the answer: /shop2/search/ is noindex, and Google does not index internal search results by its own rule. Dim, 21.09.2026: the subsection vocabulary in the section's title, description and headings first — an hour. Separate pages (~48 URLs) only if the numbers after launch show the demand is real."
+      }
+    },
+    {
       "id": "live-keys-env",
       "area": "switches",
       "who": [
