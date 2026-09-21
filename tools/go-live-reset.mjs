@@ -156,6 +156,21 @@ export const PLAN = [
       "sentence, not one line of a generic «a keep table changed».",
   },
   {
+    table: "push_subscriptions",
+    verdict: "keep",
+    why:
+      "The phones «новый заказ» goes to — the iPhone, the Android and the Mac on the counter, one row each " +
+      "(200_push_subscriptions.sql, src/lib/push.ts). Not test data by any reading: a row is a permission the " +
+      "owner granted from his own device, and nothing a test does can create one. The asymmetry settles it. A " +
+      "stale row costs one request that comes back 410 and retires itself; a cleared LIVE row turns his " +
+      "notifications off on the exact morning the orders stop being test orders, and says nothing — the panel's " +
+      "switch reads this table, so it would go back to «выключено» with no explanation beside it. " +
+      "One honest caveat, because it is the case that will actually happen: a subscription belongs to the ORIGIN " +
+      "it was made on. If «Админка» went onto the Home Screen from the staging address and the domain then " +
+      "moves (docs/accounts.md), these rows are already dead and he subscribes again once from rempireshop.com. " +
+      "That costs a 410 apiece, once — still cheaper than this tool guessing which of the two it is.",
+  },
+  {
     table: "admin_audit",
     verdict: "keep",
     never: true,

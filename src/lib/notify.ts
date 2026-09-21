@@ -9,6 +9,13 @@
  *  - Telegram: TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
  *  - E-mail:   RESEND_API_KEY **and RESEND_TO** (+ optional RESEND_FROM)
  *
+ * Since 20.09.2026 there is a third, and it is NOT in this file: Web Push to
+ * the «Админка» on Renat's Home Screen (src/lib/push.ts, VAPID_PUBLIC_KEY +
+ * VAPID_PRIVATE_KEY). It keeps its own module because it has a table behind it
+ * and these two have nothing but an environment variable. pingOwner() fires
+ * all three side by side, and these two remain the fallback: a push permission
+ * is a thing a phone can take away without telling anybody.
+ *
  * RESEND_TO has no default and must not get one. Until 07.09.2026 it fell
  * back to `info@diipsolutions.eu` — the developer's own address — with
  * Resend's `onboarding@resend.dev` as the sender, so an unconfigured

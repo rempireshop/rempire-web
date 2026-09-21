@@ -29,6 +29,10 @@ import {
 import type { OrderLike, Tracking } from "@/emails/types";
 import { sendRendered } from "@/lib/mail";
 import { forwardEmail, forwardTelegram } from "@/lib/notify";
+/* Type only — erased at compile time. The module itself comes in by dynamic
+   import inside pushOwner(), so rendering a letter in a test or in the preview
+   route never drags `pg` and `web-push` in behind it. */
+import type { PushMessage } from "@/lib/push";
 
 export interface MailHookResult {
   ok: boolean;
@@ -37,7 +41,7 @@ export interface MailHookResult {
   reason?: string;
   /** Resend message id when a customer letter went out. */
   id?: string;
-  /** Whether Renat/Dim were pinged. */
+  /** Whether Renat/Dim were pinged — Telegram, the owner's e-mail or a push. */
   notified?: boolean;
   /**
    * The CUSTOMER's letter really left — not `ok`, which onOrderPaid() widens
@@ -153,12 +157,75 @@ function ownerSummary(order: OrderLike, headline: string): string {
     .join("\n");
 }
 
-async function pingOwner(subject: string, body: string): Promise<boolean> {
-  const [tg, mail] = await Promise.all([
+/**
+ * The same event, sized for a lock screen.
+ *
+ * Renat, 20.09.2026, through Dim: «Notifications about order on the phone,
+ * through app would be nice — apple and android.» A push has room for a line,
+ * not for the summary above — the sum, who it is from, and what it is, in the
+ * order he needs them. The rest is already in his inbox and in the panel the
+ * tap opens.
+ *
+ * `url` is a path, not an absolute address: the worker resolves it against its
+ * own origin, so the stand's notification opens the stand's panel. The panel
+ * has no `?order=` handler yet (Dim draws that side); until it does, the tap
+ * lands on «Админка», which is where he was going anyway.
+ */
+function ownerPush(order: OrderLike): PushMessage {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const first = items.length ? itemTitle(items[0], "ru") : "";
+  const who = pick(customerName(order), customerEmail(order), "гость");
+  const number = orderNumber(order);
+  return {
+    title: `💶 Оплачен заказ ${number}`,
+    body: [money(order.total ?? 0), who, first + (items.length > 1 ? ` +${items.length - 1}` : "")]
+      .filter(Boolean)
+      .join(" · "),
+    url: `/shop2/admin/?order=${encodeURIComponent(number)}`,
+    /* One line per ORDER. A retried webhook that reaches this hook twice
+       replaces the notification instead of adding a second one that says the
+       same thing; two different orders never collide. */
+    tag: `order:${pick(order.id, number)}`,
+  };
+}
+
+/**
+ * The owner's own three channels, all at once. Telegram and e-mail are
+ * src/lib/notify.ts and have not changed; the push is the third and is
+ * optional, because it is worth waking a phone for a paid order and not for
+ * everything a ping might one day be about.
+ *
+ * Nothing here can fail the order: all three swallow their own failures and
+ * answer false. Promise.all is safe only because of that — one rejection would
+ * take the other two down with it.
+ */
+async function pingOwner(subject: string, body: string, push?: PushMessage): Promise<boolean> {
+  const [tg, mail, pushed] = await Promise.all([
     forwardTelegram(body),
     forwardEmail(subject, body),
+    push ? pushOwner(push) : Promise.resolve(false),
   ]);
-  return tg || mail;
+  return tg || mail || pushed;
+}
+
+/**
+ * Web Push to every device Renat has registered — src/lib/push.ts, which is
+ * loaded here and only here so the e-mail renderers stay free of `pg`.
+ *
+ * True when at least one device took it. A shop with no VAPID keys answers
+ * false without touching the database, exactly the way forwardTelegram()
+ * answers false without a bot token.
+ */
+async function pushOwner(message: PushMessage): Promise<boolean> {
+  try {
+    const { sendPush } = await import("@/lib/push");
+    return (await sendPush(message)).ok;
+  } catch (err) {
+    /* sendPush() does not throw; this catches the import itself failing on a
+       deployment where `web-push` never installed. */
+    console.error("[mail-hooks] the owner's push could not be sent", err);
+    return false;
+  }
 }
 
 /* ---------- hooks -------------------------------------------------------- */
@@ -255,6 +322,7 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
     const notified = await pingOwner(
       `REMPIRE — оплачен заказ ${orderNumber(order)}`,
       ownerSummary(order, "💶 Заказ оплачен"),
+      ownerPush(order),
     );
 
     // Gift cards bought in this order — the same path the payment routes run
