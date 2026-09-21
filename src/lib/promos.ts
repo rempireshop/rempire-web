@@ -3,9 +3,11 @@ import { query, withTx } from "@/lib/db";
 /**
  * Promo codes — quote, consume, and the admin's CRUD.
  *
- * Storage: db/migrations/060_promo_codes.sql (promo_codes + promo_code_uses)
- * and db/migrations/170_promo_scope.sql (scope + scope_value — a code that
- * applies to one brand or one product rather than to the whole basket).
+ * Storage: db/migrations/060_promo_codes.sql (promo_codes + promo_code_uses),
+ * db/migrations/170_promo_scope.sql (scope + scope_value — a code that
+ * applies to one brand or one product rather than to the whole basket) and
+ * db/migrations/197_abandoned_cart_discount.sql (scope 'cart' + scope_lines —
+ * a code that applies to the lines ONE abandoned basket held).
  *
  * Who calls what
  *   · quotePromo(code, subtotal, shipping, lines) — from createOrder and from
@@ -31,27 +33,37 @@ export type PromoKind = "percent" | "fixed" | "free_shipping";
 export const PROMO_KINDS: readonly PromoKind[] = ["percent", "fixed", "free_shipping"];
 
 /**
- * What a code is allowed to touch — db/migrations/170_promo_scope.sql.
+ * What a code is allowed to touch — db/migrations/170_promo_scope.sql, and
+ * 197_abandoned_cart_discount.sql for the fourth.
  *
  *   order    the whole basket, which is every code that existed before 170
  *   brand    only the lines of one brand, as the catalogue spells it
  *   product  only the lines of one product id
+ *   cart     only the lines ONE abandoned basket held — `scopeLines`
  *
  * A scoped code discounts the MATCHING LINES ONLY. Renat chose that over the
  * whole-basket readings himself: ten per cent off a 200 € order for adding one
  * 9 € bottle is not a promotion, it is a hole.
+ *
+ * 'cart' is the same rule applied to the second abandoned-cart letter (Renat,
+ * 20.09.2026: «the discount … preferably ONLY for the cart»). It is the one
+ * scope nobody types: the letter mints it per basket, single-use, and nothing
+ * in the panel can invent one — see validatePromo, which needs the id list
+ * before it will accept the word.
  */
-export type PromoScope = "order" | "brand" | "product";
+export type PromoScope = "order" | "brand" | "product" | "cart";
 
-export const PROMO_SCOPES: readonly PromoScope[] = ["order", "brand", "product"];
+export const PROMO_SCOPES: readonly PromoScope[] = ["order", "brand", "product", "cart"];
 
 /** Ceilings the admin and the assistant are both held to. */
 export const PROMO_MAX_CODE = 24;
 export const PROMO_MAX_PERCENT = 90;
 export const PROMO_MIN_PERCENT = 1;
 export const PROMO_MAX_FIXED = 200;
-/** A brand name or a product id — both comfortably shorter than this. */
+/** A brand name, a product id or a cart id — all comfortably shorter than this. */
 export const PROMO_MAX_SCOPE_VALUE = 80;
+/** The most lines a 'cart' code carries — the cap the resume link already has. */
+export const PROMO_MAX_CART_LINES = 50;
 
 export interface Promo {
   code: string;
@@ -72,8 +84,15 @@ export interface Promo {
    * a missing value as anything narrower would silently stop one working.
    */
   scope?: PromoScope;
-  /** The brand name or the product id, null for a whole-basket code. */
+  /** The brand name, the product id or the cart id; null for a whole-basket code. */
   scopeValue?: string | null;
+  /**
+   * The product ids a 'cart' code may touch, and nothing else's business:
+   * a brand and a product code each name ONE thing in `scopeValue`, while a
+   * basket is a set (db/migrations/197_abandoned_cart_discount.sql). Null for
+   * every other scope and for every code written before 197.
+   */
+  scopeLines?: string[] | null;
 }
 
 interface PromoRow {
@@ -90,12 +109,40 @@ interface PromoRow {
   created_at: Date | string;
   scope?: string | null;
   scope_value?: string | null;
+  scope_lines?: unknown;
 }
 
 const cents = (n: number) => Math.round(n * 100) / 100;
 const num = (v: string | number) => (typeof v === "number" ? v : parseFloat(v));
 const iso = (v: Date | string | null) =>
   v == null ? null : v instanceof Date ? v.toISOString() : String(v);
+
+/**
+ * `promo_codes.scope_lines` → the ids a 'cart' code may touch.
+ *
+ * Null means «this row carries no list», which for a cart code is a row
+ * somebody edited by hand: it is answered with no_match, never with the whole
+ * basket. jsonb comes back parsed, but a row written by an older driver can
+ * be the JSON string — the same defensiveness getFlows() has.
+ */
+function cartLines(raw: unknown): string[] | null {
+  let v: unknown = raw;
+  if (typeof v === "string") {
+    try {
+      v = JSON.parse(v);
+    } catch {
+      return null;
+    }
+  }
+  if (!Array.isArray(v)) return null;
+  const out: string[] = [];
+  for (const x of v) {
+    const id = typeof x === "string" ? x.trim() : "";
+    if (id && out.indexOf(id) < 0) out.push(id);
+    if (out.length >= PROMO_MAX_CART_LINES) break;
+  }
+  return out;
+}
 
 function toPromo(r: PromoRow): Promo {
   /* A row read back from a database that has not run migration 170 yet (or a
@@ -104,6 +151,7 @@ function toPromo(r: PromoRow): Promo {
      asked for. */
   const scope = PROMO_SCOPES.includes(r.scope as PromoScope) ? (r.scope as PromoScope) : "order";
   const scopeValue = scope === "order" ? null : (r.scope_value ?? null) || null;
+  const scopeLines = scope === "cart" ? cartLines(r.scope_lines) : null;
   return {
     code: r.code,
     kind: r.kind,
@@ -118,13 +166,18 @@ function toPromo(r: PromoRow): Promo {
     createdAt: iso(r.created_at) as string,
     /* …and a scope that lost its value is not a code that discounts nothing,
        it is a whole-basket code — the constraint in 170 makes the pair
-       impossible, so this only ever fires for a hand-edited row. */
-    scope: scopeValue ? scope : "order",
+       impossible, so this only ever fires for a hand-edited row.
+       'cart' is the other way round on purpose: it keeps its scope and loses
+       its arithmetic, so a row somebody emptied by hand discounts NOTHING
+       rather than everything. A code minted for one basket must never be able
+       to widen into a code for the shop. */
+    scope: scope === "cart" || scopeValue ? scope : "order",
     scopeValue,
+    scopeLines,
   };
 }
 
-const COLS = `code, kind, value, min_subtotal, starts_at, ends_at, max_uses, used, active, note, created_at, scope, scope_value`;
+const COLS = `code, kind, value, min_subtotal, starts_at, ends_at, max_uses, used, active, note, created_at, scope, scope_value, scope_lines`;
 
 /* ---------- codes ------------------------------------------------------- */
 
@@ -197,9 +250,9 @@ export interface PromoQuote {
   /** What the basket has to reach — surfaced so the shop can say «ещё 12 €». */
   minSubtotal?: number;
   value?: number;
-  /** 'order' | 'brand' | 'product' — what the code is allowed to touch. */
+  /** 'order' | 'brand' | 'product' | 'cart' — what the code is allowed to touch. */
   scope?: PromoScope;
-  /** The brand name or product id behind a narrowed code, null otherwise. */
+  /** The brand name, product id or cart id behind a narrowed code, null otherwise. */
   scopeValue?: string | null;
   /** What the discount was computed on — the whole goods for 'order', the matching lines otherwise. */
   base?: number;
@@ -236,16 +289,26 @@ function brandKey(v: unknown): string {
  * own, it is sold at one price the owner typed for the set as a whole, and
  * «−10 % на Davines» off a set that happens to contain one Davines bottle is
  * arithmetic neither the shopper nor the owner could check. It matches a
- * product code only if the code names the set itself.
+ * product code only if the code names the set itself — and a CART code if the
+ * basket that earned the code held it, which is the same statement about ids.
+ *
+ * `scopeLines` is read only by scope 'cart', and a cart code without one
+ * matches nothing at all: the list IS the offer the letter made, and a
+ * missing list is a code that has lost it, never one that covers the shop.
  */
 export function promoLineMatches(
   scope: PromoScope,
   scopeValue: string | null | undefined,
   line: PromoBasketLine | null | undefined,
+  scopeLines: readonly string[] | null | undefined = null,
 ): boolean {
   if (!line) return false;
   if (line.kind === "gift") return false;
   if (scope === "order") return true;
+  if (scope === "cart") {
+    const id = String(line.id ?? "");
+    return !!id && !!scopeLines && scopeLines.indexOf(id) >= 0;
+  }
   const want = String(scopeValue ?? "").trim();
   if (!want) return false;
   if (scope === "brand") return !!line.brand && brandKey(line.brand) === brandKey(want);
@@ -254,14 +317,14 @@ export function promoLineMatches(
 
 /** The matching lines' total, and which they were. Pure; no I/O. */
 export function promoBaseFor(
-  promo: Pick<Promo, "scope" | "scopeValue">,
+  promo: Pick<Promo, "scope" | "scopeValue" | "scopeLines">,
   lines: readonly PromoBasketLine[],
 ): PromoMatch {
   let base = 0;
   const ids: string[] = [];
   const scope = promo.scope ?? "order";
   for (const line of lines) {
-    if (!promoLineMatches(scope, promo.scopeValue, line)) continue;
+    if (!promoLineMatches(scope, promo.scopeValue, line, promo.scopeLines)) continue;
     const sum = typeof line.sum === "number" ? line.sum : parseFloat(String(line.sum ?? ""));
     if (Number.isFinite(sum) && sum > 0) base += sum;
     const id = String(line.id ?? "");
@@ -291,6 +354,7 @@ export function quoteFromPromo(
   const scope = promo.scope ?? "order";
   const scopeValue = scope === "order" ? null : (promo.scopeValue ?? null);
   const where = { scope, scopeValue };
+  const scopeLines = scope === "cart" ? (promo.scopeLines ?? null) : null;
   if (!promo.active) return NO("inactive", { code: promo.code, ...where });
   if (promo.startsAt && new Date(promo.startsAt).getTime() > now.getTime()) {
     return NO("not_started", { code: promo.code, ...where });
@@ -335,7 +399,7 @@ export function quoteFromPromo(
   let matched: string[] = [];
   if (scope !== "order") {
     if (!lines) return NO("no_match", { code: promo.code, ...where, base: 0 });
-    const found = promoBaseFor(where, lines);
+    const found = promoBaseFor({ ...where, scopeLines }, lines);
     base = Math.min(goods, found.base);
     matched = found.lines;
     if (!(base > 0)) return NO("no_match", { code: promo.code, ...where, base: 0 });
@@ -474,6 +538,8 @@ export interface PromoInput {
   /** Absent = 'order', the whole basket — see Promo.scope. */
   scope?: PromoScope;
   scopeValue?: string | null;
+  /** The product ids a 'cart' code may touch; null for every other scope. */
+  scopeLines?: string[] | null;
 }
 
 export type PromoValidation =
@@ -580,6 +646,7 @@ export function validatePromo(raw: unknown): PromoValidation {
   if (said && !PROMO_SCOPES.includes(rawScope as PromoScope)) return { ok: false, error: "bad_scope" };
   let scope: PromoScope | undefined = said ? (rawScope as PromoScope) : undefined;
   let scopeValue: string | null | undefined = said ? null : undefined;
+  let scopeLines: string[] | null | undefined = said ? null : undefined;
 
   /* …with one answer that is never «не трогать»: a free-delivery code has no
      line to apply to, because the parcel is one line for the whole basket. A
@@ -593,11 +660,31 @@ export function validatePromo(raw: unknown): PromoValidation {
     if (said && scope !== "order") return { ok: false, error: "scope_free_shipping" };
     scope = "order";
     scopeValue = null;
+    scopeLines = null;
   } else if (scope && scope !== "order") {
     const raw = x.scopeValue ?? x.scope_value;
     const v = typeof raw === "string" ? raw.replace(/\s+/g, " ").trim() : "";
     if (!v || v.length > PROMO_MAX_SCOPE_VALUE) return { ok: false, error: "bad_scope_value" };
     scopeValue = v;
+    /* …and a 'cart' code must also say WHICH lines. The word alone is not a
+       code: without the list it matches nothing (promoLineMatches), so a body
+       that names the scope and forgets the ids would be saved as a live code
+       that silently discounts zero. Refused here instead, at the one door the
+       panel and the assistant both go through — and it is also what keeps
+       'cart' from being typed into the panel's scope box by accident, since
+       nothing there can produce the list. */
+    if (scope === "cart") {
+      const rawLines = x.scopeLines ?? x.scope_lines;
+      if (!Array.isArray(rawLines)) return { ok: false, error: "bad_scope_lines" };
+      const ids: string[] = [];
+      for (const item of rawLines) {
+        const id = typeof item === "string" ? item.trim() : "";
+        if (!id || id.length > 120) return { ok: false, error: "bad_scope_lines" };
+        if (ids.indexOf(id) < 0) ids.push(id);
+      }
+      if (!ids.length || ids.length > PROMO_MAX_CART_LINES) return { ok: false, error: "bad_scope_lines" };
+      scopeLines = ids;
+    }
   }
 
   return {
@@ -614,6 +701,7 @@ export function validatePromo(raw: unknown): PromoValidation {
       note,
       scope,
       scopeValue,
+      scopeLines,
     },
   };
 }
@@ -639,9 +727,10 @@ export async function listPromos(limit = 200): Promise<Promo[]> {
  */
 export async function upsertPromo(input: PromoInput): Promise<Promo> {
   const scope = input.scope ?? null;
+  const lines = scope === "cart" ? (input.scopeLines ?? []).slice(0, PROMO_MAX_CART_LINES) : null;
   const rows = await query<PromoRow>(
-    `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note, scope, scope_value)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, coalesce($10::text, 'order'), $11::text)
+    `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note, scope, scope_value, scope_lines)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, coalesce($10::text, 'order'), $11::text, $12::jsonb)
      on conflict (code) do update set
        kind = excluded.kind,
        value = excluded.value,
@@ -652,7 +741,8 @@ export async function upsertPromo(input: PromoInput): Promise<Promo> {
        active = excluded.active,
        note = excluded.note,
        scope = coalesce($10::text, promo_codes.scope),
-       scope_value = case when $10::text is null then promo_codes.scope_value else $11::text end
+       scope_value = case when $10::text is null then promo_codes.scope_value else $11::text end,
+       scope_lines = case when $10::text is null then promo_codes.scope_lines else $12::jsonb end
      returning ${COLS}`,
     [
       input.code,
@@ -666,6 +756,7 @@ export async function upsertPromo(input: PromoInput): Promise<Promo> {
       input.note,
       scope,
       scope && scope !== "order" ? input.scopeValue ?? null : null,
+      lines && lines.length ? JSON.stringify(lines) : null,
     ],
   );
   return toPromo(rows[0]);

@@ -8,6 +8,7 @@
 
 import { BRAND, baseUrl, money, normalizeLang } from "./layout";
 import { renderAbandonedCart } from "./abandoned-cart";
+import { renderAbandonedCartDiscount } from "./abandoned-cart-discount";
 import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
 import { renderGiftCard, type GiftCardLike } from "./gift-card";
@@ -40,6 +41,7 @@ export type { UnpaidOptions } from "./order-unpaid";
 export { renderPosReceipt } from "./pos-receipt";
 export type { PosReceiptOptions } from "./pos-receipt";
 export { renderAbandonedCart } from "./abandoned-cart";
+export { renderAbandonedCartDiscount } from "./abandoned-cart-discount";
 export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
 export { renderGiftCard } from "./gift-card";
@@ -88,6 +90,7 @@ export const TEMPLATE_IDS = [
   "order-refund-sent",
   "pos-receipt",
   "abandoned-cart",
+  "abandoned-cart-discount",
   "back-in-stock",
   "gift-card",
   "birthday",
@@ -114,6 +117,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "order-refund-sent": "Возврат отправлен",
   "pos-receipt": "Чек о продаже в салоне",
   "abandoned-cart": "Брошенная корзина",
+  "abandoned-cart-discount": "Брошенная корзина — письмо со скидкой",
   "back-in-stock": "Товар снова в наличии",
   "gift-card": "Подарочная карта",
   birthday: "Скидка ко дню рождения",
@@ -312,12 +316,24 @@ export function demoInvoiceCancelled(total = 95): InvoiceCancelledData {
 export interface DemoOptions {
   /** `settings.flows.birthdayPercent` — what the real birthday letter offers. */
   birthdayPercent?: number;
+  /** `settings.flows.abandonedDiscountPercent` — what the second cart letter offers. */
+  cartDiscountPercent?: number;
 }
 
 function demoPercent(opts: DemoOptions | undefined): number {
   const n = Number(opts?.birthdayPercent);
   return Number.isFinite(n) && n > 0 ? Math.round(n) : 15;
 }
+
+/* The same trap the birthday preview fell into: a hard-coded number here and
+   the owner's own in the letter means he reads a discount he is not giving. */
+function demoCartPercent(opts: DemoOptions | undefined): number {
+  const n = Number(opts?.cartDiscountPercent);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 5;
+}
+
+/** The demo code the second cart letter shows — never a code the shop issued. */
+const DEMO_CART_CODE = "REM-CART-2417";
 
 /**
  * What `{name}`, `{order}`, `{total}` … become in the demo letter — the very
@@ -362,6 +378,14 @@ export function demoValues(
       return withOrder;
     case "abandoned-cart":
       return { ...shop, name: "Renat", total: money(demoCart(L).total) };
+    case "abandoned-cart-discount":
+      return {
+        ...shop,
+        name: "Renat",
+        total: money(demoCart(L).total),
+        code: DEMO_CART_CODE,
+        percent: String(demoCartPercent(opts)),
+      };
     case "back-in-stock": {
       const p = demoProduct(L);
       return { ...shop, product: `${p.brand ?? ""} ${p.title ?? ""}`.trim(), total: money(p.price) };
@@ -425,6 +449,14 @@ export function renderDemo(
       });
     case "abandoned-cart":
       return renderAbandonedCart(demoCart(L), L, "/shop2/checkout/");
+    case "abandoned-cart-discount":
+      return renderAbandonedCartDiscount(demoCart(L), L, "/shop2/checkout/", {
+        code: DEMO_CART_CODE,
+        percent: demoCartPercent(opts),
+        /* A fixed date, not «30 days from now»: the preview is the one letter
+           the owner reads twice and compares. */
+        expires: "2026-10-19T12:00:00",
+      });
     case "gift-card":
       return renderGiftCard(demoGiftCard(L), L);
     case "back-in-stock":

@@ -9,9 +9,10 @@ import {
   mailTextsOverride,
 } from "@/emails/texts";
 import { loadMailTexts } from "@/lib/mail-texts";
-/* «Скидка ко дню рождения» — the percent the shop really sends. The preview
-   used to print a hard-coded 15 while the letter offered whatever this box
-   said (10 out of the box), so the owner read a discount he was not giving. */
+/* «Скидка ко дню рождения» and «Письмо со скидкой» — the percents the shop
+   really sends. The preview used to print a hard-coded 15 while the letter
+   offered whatever this box said (10 out of the box), so the owner read a
+   discount he was not giving. */
 import { getFlows } from "@/lib/flows";
 
 /**
@@ -65,7 +66,13 @@ export async function GET(req: Request): Promise<Response> {
   // The owner's own subject / intro / signature — before anything is rendered
   // and before the texts feed is answered, so both show the same thing.
   await loadMailTexts();
-  const demo = { birthdayPercent: (await getFlows()).birthdayPercent };
+  /* Both live percents, for the same reason: a preview that prints a number
+     the shop is not giving is worse than no preview. */
+  const flows = await getFlows();
+  const demo = {
+    birthdayPercent: flows.birthdayPercent,
+    cartDiscountPercent: flows.abandonedDiscountPercent,
+  };
 
   if (format === "texts") {
     return Response.json(

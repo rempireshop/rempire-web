@@ -1,8 +1,9 @@
 /**
- * POST /api/admin/flows/run/  { flow: "abandoned" | "birthday" }
+ * POST /api/admin/flows/run/  { flow: "abandoned" | "abandonedDiscount" | "birthday" }
  *   → { ok: true, flow, sent, skipped, reason?, at, runs }
  *
- * «Запустить сейчас» under «Брошенная корзина» and «Скидка ко дню рождения»
+ * «Запустить сейчас» under «Брошенная корзина», its discounted follow-up
+ * («Письмо со скидкой», 20.09.2026) and «Скидка ко дню рождения»
  * in «Маркетинг → Письма». Until 10.09.2026 the only way to make either
  * letter go out before the daily cron was to call the cron by hand with the
  * server's secret — the test plan literally said «Попросить Дима запустить
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400, headers: NO_STORE });
   }
   const flow = body.flow;
-  if (flow !== "abandoned" && flow !== "birthday") {
+  if (flow !== "abandoned" && flow !== "abandonedDiscount" && flow !== "birthday") {
     return Response.json({ ok: false, error: "bad_flow" }, { status: 400, headers: NO_STORE });
   }
 

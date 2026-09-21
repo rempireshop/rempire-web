@@ -930,9 +930,19 @@ export async function pruneCartWrites(now: number = Date.now()): Promise<number>
 export async function markCartRecovered(email: string): Promise<void> {
   const addr = normalizeEmail(email);
   if (!isEmail(addr)) return;
-  // reminded_at is cleared too: the next cart this person abandons is a new
-  // story and deserves its own single reminder.
-  await query("update carts set recovered_at = now(), reminded_at = null where email = $1", [addr]);
+  /* reminded_at is cleared too: the next cart this person abandons is a new
+     story and deserves its own single reminder — and, since 20.09.2026, its
+     own single discounted follow-up. The stamp and the code it issued go
+     together: a row that kept `discount_at` would let the first letter fire
+     again on the next basket and silently withhold the second one for ever,
+     and a `discount_code` left behind would name a code written for a basket
+     this person has already bought. */
+  await query(
+    `update carts set recovered_at = now(), reminded_at = null,
+            discount_at = null, discount_code = null
+      where email = $1`,
+    [addr],
+  );
 }
 
 export async function getCart(email: string): Promise<CartRow | null> {

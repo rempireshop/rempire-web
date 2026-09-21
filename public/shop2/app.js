@@ -2990,6 +2990,51 @@
       "Это только для этой посылки — коробка магазина не меняется.":
         "See kehtib ainult sellele pakile — poe karp ei muutu.",
       "Куда ведёт картинка": "Kuhu pilt viib",
+      "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "kord ööpäevas: korvidele, mis on seadetes märgitud ajast vanemad, kui tellimust ikka ei tulnud",
+      "Брошенная корзина — письмо со скидкой": "Hüljatud korv — kiri sooduskoodiga",
+      "через несколько дней после первого письма, если заказа так и нет": "mõni päev pärast esimest kirja, kui tellimust ikka ei ole",
+      "Напоминание — от 1 до 168 часов": "Meeldetuletus — 1 kuni 168 tundi",
+      "Скидка — от 1 до 60 дней": "Soodustus — 1 kuni 60 päeva",
+      "Скидка — от 1 до 90 %": "Soodustus — 1 kuni 90 %",
+      "Сумма — от 0 до 10 000 €": "Summa — 0 kuni 10 000 €",
+      "Брошенные корзины: сохранено ✓": "Hüljatud korvid: salvestatud ✓",
+      "Не сохранилось — попробуйте ещё раз": "Ei salvestunud — proovi uuesti",
+      "Нет связи с магазином": "Poega ei ole ühendust",
+      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.": "Ostja pani korvi kokku ja lahkus. Kõigepealt pood tuletab korvi meelde ja kui tellimust ikka ei ole, saadab sellele samale korvile soodustuse. Mõlemad kirjad on ülal. Kontroll kord ööpäevas.",
+      "Напомнить через, часов": "Tuleta meelde pärast, tundi",
+      "Столько корзина должна простоять, чтобы уйти первому письму.": "Nii kaua peab korv seisma, et esimene kiri välja läheks.",
+      "Скидку через, дней": "Soodustus pärast, päeva",
+      "Считается от первого письма, а не от корзины.": "Loetakse esimesest kirjast, mitte korvist.",
+      "Размер скидки, %": "Soodustuse suurus, %",
+      "Скидку от суммы, €": "Soodustus alates summast, €",
+      "Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.": "Odavamad korvid saavad ainult meeldetuletuse. Suurem kui iga korv — teist kirja ei tule.",
+      "Этот браузер не умеет оповещения.": "See brauser teavitusi ei oska.",
+      "Откройте «Админку» на телефоне — там они работают.": "Ava telefonis «Админка» ikoon — seal need töötavad.",
+      "Оповещения ещё не подключены к магазину. Это делает Дим — один раз, ключами на сервере.": "Teavitused ei ole poega veel ühendatud. Seda teeb Dim — üks kord, serveri võtmetega.",
+      "iPhone присылает оповещения только из «Админки» на домашнем экране.": "iPhone saadab teavitusi ainult avaekraanile lisatud «Админка» ikooni kaudu.",
+      "Внизу Safari нажмите «Поделиться» → «На экран «Домой»», откройте «Админку» с иконки и вернитесь сюда.": "Safari all vajuta «Jaga» → «Lisa avaekraanile», ava «Админка» ikoonilt ja tule siia tagasi.",
+      "Этот телефон подключён ✓": "See telefon on ühendatud ✓",
+      "Этот телефон не подключён": "See telefon ei ole ühendatud",
+      "Выключить на этом телефоне": "Lülita selles telefonis välja",
+      "Включить на этом телефоне": "Lülita selles telefonis sisse",
+      "Приходит, когда заказ оплачен: номер, сумма и покупатель. Нажатие открывает этот заказ.": "Tuleb siis, kui tellimus on makstud: number, summa ja ostja. Vajutus avab selle tellimuse.",
+      "Подключённые устройства": "Ühendatud seadmed",
+      "Пока ни одного. Включите на телефоне, который всегда с вами.": "Praegu ühtegi. Lülita sisse telefonis, mis on alati kaasas.",
+      "этот": "see",
+      "Отправить проверочное": "Saada proovisõnum",
+      "Эти устройства уже получают оповещения — кнопка выше включает их на том, с которого вы смотрите сейчас.": "Need seadmed saavad teavitusi juba — ülemine nupp lülitab need sisse selles, millest praegu vaatad.",
+      "Оповещения на телефон": "Teavitused telefoni",
+      "звонок, когда заказ оплачен": "teade, kui tellimus on makstud",
+      "Устройство": "Seade",
+      "ещё не приходило": "veel ei ole tulnud",
+      "вчера": "eile",
+      "Телефон запретил оповещения. Разрешите их для этого сайта в настройках браузера и нажмите ещё раз.": "Telefon keelas teavitused. Luba need brauseri seadetes sellele saidile ja vajuta uuesti.",
+      "Не получилось включить. Попробуйте ещё раз.": "Sisselülitamine ei õnnestunud. Proovi uuesti.",
+      "Нет связи с магазином.": "Poega ei saa ühendust.",
+      "Сервер не ответил. Список устройств мог устареть.": "Server ei vastanud. Seadmete nimekiri võib olla vana.",
+      "Пока ни одно устройство не подключено.": "Ühtegi seadet ei ole veel ühendatud.",
+      "Слишком часто. Подождите немного.": "Liiga tihti. Oota veidi.",
+      "Проверочное не ушло.": "Proovisõnum ei läinud välja.",
       "Необязательно. Пусто — картинка просто картинка.": "Pole kohustuslik. Tühi — pilt on lihtsalt pilt.",
       "Ссылка должна начинаться с https:// — картинка вставлена без неё":
         "Link peab algama https:// — pilt lisati ilma selleta",
@@ -5839,6 +5884,51 @@
       "Это только для этой посылки — коробка магазина не меняется.":
         "This is for this parcel only — the shop's box does not change.",
       "Куда ведёт картинка": "Where the picture leads",
+      "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "once a day: to baskets older than the time set in Settings, if no order ever came",
+      "Брошенная корзина — письмо со скидкой": "Abandoned cart — the letter with the discount",
+      "через несколько дней после первого письма, если заказа так и нет": "some days after the first letter, if there is still no order",
+      "Напоминание — от 1 до 168 часов": "The reminder — from 1 to 168 hours",
+      "Скидка — от 1 до 60 дней": "The discount — from 1 to 60 days",
+      "Скидка — от 1 до 90 %": "The discount — from 1 to 90 %",
+      "Сумма — от 0 до 10 000 €": "The sum — from 0 to 10 000 €",
+      "Брошенные корзины: сохранено ✓": "Abandoned carts: saved ✓",
+      "Не сохранилось — попробуйте ещё раз": "It did not save — try again",
+      "Нет связи с магазином": "No connection to the shop",
+      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.": "The buyer filled a basket and left. First the shop reminds them of it, and if there is still no order it sends a discount on that same basket. Both letters are above. Checked once a day.",
+      "Напомнить через, часов": "Remind after, hours",
+      "Столько корзина должна простоять, чтобы уйти первому письму.": "This is how long a basket must sit before the first letter goes.",
+      "Скидку через, дней": "The discount after, days",
+      "Считается от первого письма, а не от корзины.": "Counted from the first letter, not from the basket.",
+      "Размер скидки, %": "How big the discount is, %",
+      "Скидку от суммы, €": "The discount from a sum of, €",
+      "Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.": "Cheaper baskets get the reminder only. Above every basket — no second letter at all.",
+      "Этот браузер не умеет оповещения.": "This browser cannot do notifications.",
+      "Откройте «Админку» на телефоне — там они работают.": "Open the «Админка» icon on a phone — they work there.",
+      "Оповещения ещё не подключены к магазину. Это делает Дим — один раз, ключами на сервере.": "Notifications are not connected to the shop yet. Dim does that — once, with keys on the server.",
+      "iPhone присылает оповещения только из «Админки» на домашнем экране.": "An iPhone only sends notifications from the «Админка» icon on the Home Screen.",
+      "Внизу Safari нажмите «Поделиться» → «На экран «Домой»», откройте «Админку» с иконки и вернитесь сюда.": "At the bottom of Safari press Share → Add to Home Screen, open «Админка» from the icon and come back here.",
+      "Этот телефон подключён ✓": "This phone is connected ✓",
+      "Этот телефон не подключён": "This phone is not connected",
+      "Выключить на этом телефоне": "Turn off on this phone",
+      "Включить на этом телефоне": "Turn on on this phone",
+      "Приходит, когда заказ оплачен: номер, сумма и покупатель. Нажатие открывает этот заказ.": "It arrives when an order is paid: the number, the total and the buyer. Tapping it opens that order.",
+      "Подключённые устройства": "Connected devices",
+      "Пока ни одного. Включите на телефоне, который всегда с вами.": "None yet. Turn it on on the phone that is always with you.",
+      "этот": "this one",
+      "Отправить проверочное": "Send a test",
+      "Эти устройства уже получают оповещения — кнопка выше включает их на том, с которого вы смотрите сейчас.": "These devices already get notifications — the button above turns them on for the one you are looking at now.",
+      "Оповещения на телефон": "Notifications on your phone",
+      "звонок, когда заказ оплачен": "a ping when an order is paid",
+      "Устройство": "Device",
+      "ещё не приходило": "nothing has arrived yet",
+      "вчера": "yesterday",
+      "Телефон запретил оповещения. Разрешите их для этого сайта в настройках браузера и нажмите ещё раз.": "The phone refused notifications. Allow them for this site in the browser's settings and press again.",
+      "Не получилось включить. Попробуйте ещё раз.": "It could not be turned on. Try again.",
+      "Нет связи с магазином.": "No connection to the shop.",
+      "Сервер не ответил. Список устройств мог устареть.": "The server did not answer. The device list may be out of date.",
+      "Пока ни одно устройство не подключено.": "No device is connected yet.",
+      "Слишком часто. Подождите немного.": "Too often. Wait a moment.",
+      "Проверочное не ушло.": "The test did not go out.",
       "Необязательно. Пусто — картинка просто картинка.": "Optional. Leave it empty and the picture is just a picture.",
       "Ссылка должна начинаться с https:// — картинка вставлена без неё":
         "A link has to start with https:// — the picture went in without one",
@@ -5969,6 +6059,12 @@
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
+    /* «Брошенные корзины»: три числа в одной строке журнала — собирается в
+       srvCartFlowSave(), поэтому ключа у неё быть не может. */
+    [/^Брошенные корзины: напоминание через (\d+) ч, скидка (\d+) % через (\d+) дн\.$/, {
+      ET: "Hüljatud korvid: meeldetuletus $1 h pärast, soodustus $2 % $3 päeva pärast.",
+      EN: "Abandoned carts: a reminder after $1 h, a $2 % discount after $3 days.",
+    }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
     [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
@@ -5987,6 +6083,11 @@
        panel showed Russian (Dim, 20.09.2026). tools/i18n-gaps.mjs cannot see
        this: the string is assembled at run time, not written in the source. */
     [/^Придержаны (\d+)$/, { ET: "Peatatud $1", EN: "On hold $1" }],
+    /* «Оповещения»: обе строки собираются на лету — время у устройства и
+       число устройств, которым ушло проверочное. */
+    [/^сегодня, (.+)$/, { ET: "täna, $1", EN: "today, $1" }],
+    [/^Проверочное ушло на устройств: (\d+)$/,
+      { ET: "Proovisõnum läks seadmetele: $1", EN: "The test went to this many devices: $1" }],
     [/^Все (\d+)$/, { ET: "Kõik $1", EN: "All $1" }],
     [/^Мало (\d+)$/, { ET: "Vähe $1", EN: "Low $1" }],
     [/^Нет в наличии (\d+)$/, { ET: "Pole laos $1", EN: "Out of stock $1" }],
@@ -8457,6 +8558,7 @@
     invTouched: false,
     // «Письма → Неоплаченные заказы»: the two day counts being typed
     unpaidDraft: null,
+    cartFlowDraft: null, cartFlowSaved: false,
     acctName: "",
     pay: 0,
     bank: 0,
@@ -20507,7 +20609,8 @@
        card that never arrives is money taken for nothing. */
     ["gift-card", "Подарочная карта", "сразу после оплаты, если в заказе есть карта", ""],
     ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
-    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше 3 часов, если заказа так и не было", "abandoned"],
+    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было", "abandoned"],
+    ["abandoned-cart-discount", "Брошенная корзина — письмо со скидкой", "через несколько дней после первого письма, если заказа так и нет", "abandonedDiscount"],
     ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
@@ -20702,6 +20805,7 @@
         "один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>" +
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
+      cartFlowSettingsCard() +
       unpaidSettingsCard();
   }
   /* ---------- «Заказ ждёт оплаты»: the two numbers behind it -----------------
@@ -20711,6 +20815,97 @@
      rather than constants, and they live here, next to the letter they send.
      The cron runs once a day on Vercel's free plan, so whole days are the
      only unit that means anything. */
+  /* ---- «Брошенные корзины»: когда напомнить и когда дать скидку ----------
+     Ренат, 20.09.2026: «до 100 € — просто напоминание в течение суток, свыше
+     100 € — через три дня скидка 5 %», и отдельно: «add possibility to choose
+     time when the abandoned cart letter goes out».
+
+     Четыре числа, а не четыре переключателя. Второе письмо не включается
+     само по себе: порог суммы и есть его выключатель — поставьте сумму выше
+     любой корзины, и уходит только первое. Иначе пришлось бы объяснять, чем
+     «скидка выключена» отличается от «скидка от 100 000 €».
+
+     Дни второго письма считаются от ПЕРВОГО письма, не от корзины: пока
+     первое не ушло, второго не бывает вовсе (skip `no_reminder`). */
+  function cartFlowDraft() {
+    if (!S.cartFlowDraft) {
+      S.cartFlowDraft = {
+        hours: Number(DEMO.flows.abandonedHours) || 3,
+        days: Number(DEMO.flows.abandonedDiscountDays) || 3,
+        percent: Number(DEMO.flows.abandonedDiscountPercent) || 5,
+        min: DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal),
+      };
+    }
+    return S.cartFlowDraft;
+  }
+  function cartFlowSettingsCard() {
+    var d = cartFlowDraft();
+    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Брошенные корзины</div></div>' +
+      '<div class="adm-form" style="margin-top:8px" data-admcartsettings>' +
+        '<p class="adm-hint" style="margin:0">Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, ' +
+          "а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.</p>" +
+        '<div class="adm-edpair" style="margin-top:12px">' +
+          '<label class="adm-field">Напомнить через, часов' +
+            '<input class="adm-input" type="number" min="1" max="168" inputmode="numeric" data-cartf="hours" value="' + esc(d.hours) + '">' +
+            '<span class="adm-hint">Столько корзина должна простоять, чтобы уйти первому письму.</span></label>' +
+          '<label class="adm-field">Скидку через, дней' +
+            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-cartf="days" value="' + esc(d.days) + '">' +
+            '<span class="adm-hint">Считается от первого письма, а не от корзины.</span></label>' +
+          '<label class="adm-field">Размер скидки, %' +
+            '<input class="adm-input" type="number" min="1" max="90" inputmode="numeric" data-cartf="percent" value="' + esc(d.percent) + '">' +
+            '<span class="adm-hint">Промокод на один раз и только на товары из этой корзины.</span></label>' +
+          '<label class="adm-field">Скидку от суммы, €' +
+            '<input class="adm-input" type="number" min="0" max="10000" step="0.01" inputmode="decimal" data-cartf="min" value="' + esc(d.min) + '">' +
+            '<span class="adm-hint">Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.</span></label>' +
+        "</div>" +
+        '<div class="adm-acts" data-admcartacts>' + cartFlowActsHTML() + "</div>" +
+      "</div>";
+  }
+  function cartFlowDirty() {
+    if (!S.cartFlowDraft) return false;
+    var d = S.cartFlowDraft;
+    return String(d.hours) !== String(Number(DEMO.flows.abandonedHours) || 3) ||
+      String(d.days) !== String(Number(DEMO.flows.abandonedDiscountDays) || 3) ||
+      String(d.percent) !== String(Number(DEMO.flows.abandonedDiscountPercent) || 5) ||
+      String(d.min) !== String(DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal));
+  }
+  function cartFlowActsHTML() {
+    var dirty = cartFlowDirty(), saved = S.cartFlowSaved && !dirty;
+    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admcartsave' + (dirty ? "" : " disabled") + ">" +
+      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
+      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
+  }
+  function paintCartFlowState() {
+    var acts = document.querySelector("[data-admcartacts]");
+    if (acts) { acts.innerHTML = cartFlowActsHTML(); translateTree(acts); }
+  }
+  function srvCartFlowSave() {
+    var d = cartFlowDraft();
+    var hours = Math.round(Number(d.hours));
+    var days = Math.round(Number(d.days));
+    var percent = Math.round(Number(d.percent));
+    var min = Math.round(Number(String(d.min).replace(",", ".")) * 100) / 100;
+    if (!isFinite(hours) || hours < 1 || hours > 168) { toast("Напоминание — от 1 до 168 часов"); return; }
+    if (!isFinite(days) || days < 1 || days > 60) { toast("Скидка — от 1 до 60 дней"); return; }
+    if (!isFinite(percent) || percent < 1 || percent > 90) { toast("Скидка — от 1 до 90 %"); return; }
+    if (!isFinite(min) || min < 0 || min > 10000) { toast("Сумма — от 0 до 10 000 €"); return; }
+    var flows = {};
+    for (var k in DEMO.flows) flows[k] = DEMO.flows[k];
+    flows.abandonedHours = hours;
+    flows.abandonedDiscountDays = days;
+    flows.abandonedDiscountPercent = percent;
+    flows.abandonedDiscountMinTotal = min;
+    apiSend("/api/admin/settings/", "PUT", { flows: flows }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        DEMO.flows = flows; demoSave(); S.cartFlowDraft = null; S.cartFlowSaved = true;
+        journalNote("Брошенные корзины: напоминание через " + hours + " ч, скидка " + percent + " % через " + days + " дн.");
+        toast("Брошенные корзины: сохранено ✓"); render();
+        return;
+      }
+      toast("Не сохранилось — попробуйте ещё раз");
+    }).catch(function () { toast("Нет связи с магазином"); });
+  }
   function unpaidDraft() {
     if (!S.unpaidDraft) {
       S.unpaidDraft = {
@@ -22545,12 +22740,282 @@
      the content document, the delivery table, the loyalty form, the
      accountant's report — each on the page it belongs to and each still saving
      through the confirm card into the journal. */
+  /* ---------- «Оповещения на телефон» ------------------------------------
+     Ренат, 20.09.2026: «Notifications about order on the phone, through app
+     would be nice — apple and android.» Приложения нет и не нужно: «Админка»
+     и так живёт на домашнем экране (panel-install в /test), а оттуда iPhone
+     разрешает веб-оповещения. Телеграм (src/lib/notify.ts) остаётся запасным
+     каналом и включается двумя переменными окружения.
+
+     Разрешение даёт не магазин, а телефон, и каждому телефону своё. Поэтому
+     на экране два разных списка: «этот телефон» — одна кнопка, которую можно
+     нажать, и «остальные» — те, что уже подключены и которые отсюда можно
+     только выключить. Пока их не разделили, человек с макбука жал «включить»
+     и не понимал, почему звонит айфон. */
+  var PUSH = {
+    loaded: false, busy: false, configured: false, publicKey: "",
+    devices: [], here: "",          // endpoint этого устройства, если подписан
+    want: null,                     // номер заказа из ?order=, см. pushOpenWanted()
+    err: "", sent: "",
+  };
+
+  /** Умеет ли этот браузер вообще. */
+  function pushCan() {
+    return typeof navigator !== "undefined" && "serviceWorker" in navigator &&
+      typeof window !== "undefined" && "PushManager" in window && "Notification" in window;
+  }
+  /** iPhone присылает оповещения только из приложения с домашнего экрана. */
+  function pushIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent || ""); }
+  function pushStandalone() {
+    return navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  }
+  /** Имя устройства подставляем сами — это не то, что владелец должен печатать. */
+  function pushLabel() {
+    var u = navigator.userAgent || "";
+    if (/iPhone/.test(u)) return "iPhone";
+    if (/iPad/.test(u)) return "iPad";
+    if (/Android/.test(u)) return "Android";
+    if (/Macintosh/.test(u)) return "Mac";
+    if (/Windows/.test(u)) return "Windows";
+    return "Устройство";
+  }
+  /* base64url → Uint8Array: applicationServerKey не принимает строку. */
+  function pushKeyBytes(b64) {
+    var pad = "=".repeat((4 - (b64.length % 4)) % 4);
+    var raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
+    var out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+  function pushLoad(force) {
+    if (SRV.admin !== true || !pushCan()) return;
+    if (PUSH.loaded && !force) return;
+    PUSH.loaded = true;
+    apiJson("/api/admin/push/").then(function (r) {
+      PUSH.configured = !!(r.body && r.body.configured);
+      PUSH.publicKey = (r.body && r.body.publicKey) || "";
+      PUSH.devices = (r.body && r.body.devices) || [];
+      PUSH.err = r.status === 503 ? "db" : "";
+      render();
+      pushSyncHere();
+    }).catch(function () { PUSH.err = "net"; render(); });
+  }
+  /** Какой из подключённых — этот самый телефон. */
+  function pushSyncHere() {
+    if (!pushCan() || Notification.permission !== "granted") { PUSH.here = ""; return; }
+    navigator.serviceWorker.getRegistration("/shop2/admin/").then(function (reg) {
+      return reg && reg.pushManager.getSubscription();
+    }).then(function (sub) {
+      PUSH.here = sub ? sub.endpoint : "";
+      render();
+    }).catch(function () {});
+  }
+  function pushOn() {
+    if (PUSH.busy || !pushCan()) return;
+    PUSH.busy = true; PUSH.err = ""; PUSH.sent = ""; render();
+    var reg;
+    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: "/shop2/admin/" })
+      .then(function () { return navigator.serviceWorker.ready; })
+      .then(function (r) { reg = r; return Notification.requestPermission(); })
+      .then(function (p) {
+        if (p !== "granted") throw new Error("denied");
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: pushKeyBytes(PUSH.publicKey),
+        });
+      })
+      .then(function (sub) {
+        var body = sub.toJSON();
+        body.label = pushLabel();
+        return apiSend("/api/admin/push/subscribe/", "POST", body).then(function (r) {
+          if (!r.body || r.body.ok !== true) throw new Error((r.body && r.body.error) || "save");
+          PUSH.here = sub.endpoint;
+          return pushLoad(true);
+        });
+      })
+      .catch(function (e) { PUSH.err = String(e && e.message) === "denied" ? "denied" : "on"; })
+      .then(function () { PUSH.busy = false; render(); });
+  }
+  function pushOff() {
+    if (PUSH.busy || !PUSH.here) return;
+    var endpoint = PUSH.here;
+    PUSH.busy = true; PUSH.err = ""; PUSH.sent = ""; render();
+    navigator.serviceWorker.getRegistration("/shop2/admin/")
+      .then(function (reg) { return reg && reg.pushManager.getSubscription(); })
+      .then(function (sub) { return sub && sub.unsubscribe(); })
+      .catch(function () {})
+      .then(function () { return pushDropCall(endpoint); })
+      .then(function () { PUSH.here = ""; PUSH.busy = false; pushLoad(true); });
+  }
+  function pushDropCall(endpoint) {
+    return apiSend("/api/admin/push/unsubscribe/", "POST", { endpoint: endpoint })
+      .catch(function () { PUSH.err = "net"; });
+  }
+  function pushDrop(endpoint) {
+    if (PUSH.busy) return;
+    PUSH.busy = true; PUSH.sent = ""; render();
+    pushDropCall(endpoint).then(function () { PUSH.busy = false; pushLoad(true); });
+  }
+  function pushTest() {
+    if (PUSH.busy) return;
+    PUSH.busy = true; PUSH.err = ""; PUSH.sent = ""; render();
+    apiSend("/api/admin/push/test/", "POST", {}).then(function (r) {
+      var b = r.body || {};
+      if (b.ok === true) PUSH.sent = String(b.sent || 0);
+      else PUSH.err = b.error === "no_devices" ? "none" : b.error === "rate_limited" ? "slow" : "test";
+    }).catch(function () { PUSH.err = "net"; })
+      .then(function () { PUSH.busy = false; render(); });
+  }
+  /* На каждом запуске панели: браузер иногда меняет подписку сам, и тогда
+     сервер шлёт на адрес, которого больше нет. Без метки — метку, которую
+     владелец уже видит в списке, перезаписывать нечем (см. маршрут). */
+  /* Нажатие на оповещение открывает /shop2/admin/?order=R-100042 — номер, а
+     не внутренний id, потому что номер и напечатан в самом оповещении. Пока
+     заказы не приехали, открывать нечего, поэтому номер запоминается и
+     срабатывает один раз, когда список пришёл. Не нашли — просто «Заказы»:
+     заказ мог быть удалён, а пустой экран в ответ на нажатие — это тупик. */
+  function pushOpenWanted() {
+    /* Читается один раз и лениво: на момент загрузки файла адреса ещё может
+       не быть тем, каким он станет, а тесты режут этот файл на куски и гоняют
+       функции отдельно — чтение location в литерале сломало бы их все. */
+    if (PUSH.want === null) {
+      var m = String(location.search || "").match(/[?&]order=([^&]+)/);
+      PUSH.want = m ? decodeURIComponent(m[1]).toUpperCase() : "";
+    }
+    if (!PUSH.want || !SRV.orders) return;
+    var want = PUSH.want;
+    PUSH.want = "";
+    var list = SRV.orders || [];
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].number || "").toUpperCase() === want) {
+        S.adminOrder = String(list[i].id);
+        S.adminTab = "orders";
+        render();
+        return;
+      }
+    }
+    S.adminTab = "orders";
+    render();
+  }
+  function pushBoot() {
+    if (pushBoot._done) return;
+    if (SRV.admin !== true || !pushCan() || Notification.permission !== "granted") return;
+    pushBoot._done = true;
+    /* Ключ нужен и здесь: подписка без него не создаётся, а экран «Оповещения»
+       в этот момент, скорее всего, не открыт. Один маленький GET за запуск. */
+    apiJson("/api/admin/push/").then(function (r) {
+      PUSH.configured = !!(r.body && r.body.configured);
+      PUSH.publicKey = (r.body && r.body.publicKey) || "";
+      PUSH.devices = (r.body && r.body.devices) || [];
+      PUSH.loaded = true;
+      if (PUSH.configured && PUSH.publicKey) pushResub();
+    }).catch(function () {});
+  }
+  function pushResub() {
+    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: "/shop2/admin/" })
+      .then(function () { return navigator.serviceWorker.ready; })
+      .then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (sub) {
+          return sub || reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: pushKeyBytes(PUSH.publicKey),
+          });
+        });
+      })
+      .then(function (sub) {
+        if (!sub) return;
+        PUSH.here = sub.endpoint;
+        return apiSend("/api/admin/push/subscribe/", "POST", sub.toJSON());
+      })
+      .catch(function () {});
+  }
+  /** «сегодня, 12:40» / «вчера» / «14.09» — когда до него в последний раз дошло. */
+  function pushWhen(iso) {
+    if (!iso) return "ещё не приходило";
+    var d = new Date(iso), now = new Date();
+    if (isNaN(d.getTime())) return "";
+    var day = 86400000, a = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var b = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    if (b === a) return "сегодня, " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    if (a - b === day) return "вчера";
+    return String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  var PUSH_ERR = {
+    denied: "Телефон запретил оповещения. Разрешите их для этого сайта в настройках браузера и нажмите ещё раз.",
+    on: "Не получилось включить. Попробуйте ещё раз.",
+    net: "Нет связи с магазином.",
+    db: "Сервер не ответил. Список устройств мог устареть.",
+    none: "Пока ни одно устройство не подключено.",
+    slow: "Слишком часто. Подождите немного.",
+    test: "Проверочное не ушло.",
+  };
+  function admSetPushHTML() {
+    pushLoad(false);
+    var out = "";
+    if (!pushCan()) {
+      return '<div class="adm-empty"><p>Этот браузер не умеет оповещения.</p>' +
+        '<p class="adm-hint">Откройте «Админку» на телефоне — там они работают.</p></div>';
+    }
+    if (!PUSH.configured) {
+      return '<p class="adm-err adm-err--block">Оповещения ещё не подключены к магазину. ' +
+        'Это делает Дим — один раз, ключами на сервере.</p>';
+    }
+    /* iPhone отдаёт оповещения только приложению с домашнего экрана, и
+       Notification.requestPermission() из вкладки Safari просто не спросит —
+       кнопка, которая молча ничего не делает, хуже отсутствующей. */
+    if (pushIOS() && !pushStandalone()) {
+      return '<p class="adm-note adm-note--warn">iPhone присылает оповещения только из «Админки» ' +
+        'на домашнем экране.</p>' +
+        '<p class="adm-hint">Внизу Safari нажмите «Поделиться» → «На экран «Домой»», ' +
+        'откройте «Админку» с иконки и вернитесь сюда.</p>';
+    }
+    var on = !!PUSH.here;
+    out += '<div class="adm-push__here">' +
+      '<p class="adm-push__state">' + (on ? "Этот телефон подключён ✓" : "Этот телефон не подключён") + "</p>" +
+      (on
+        ? '<button class="adm-btn adm-btn--ghost" type="button" data-pushoff' + (PUSH.busy ? " disabled" : "") +
+            ">Выключить на этом телефоне</button>"
+        : '<button class="adm-btn" type="button" data-pushon' + (PUSH.busy ? " disabled" : "") +
+            ">Включить на этом телефоне</button>") +
+      "</div>" +
+      '<p class="adm-hint">Приходит, когда заказ оплачен: номер, сумма и покупатель. ' +
+      "Нажатие открывает этот заказ.</p>";
+    if (PUSH.err) out += '<p class="adm-err adm-err--block">' + esc(PUSH_ERR[PUSH.err] || PUSH_ERR.on) + "</p>";
+    if (PUSH.sent) out += '<p class="adm-note">Проверочное ушло на устройств: ' + esc(PUSH.sent) + "</p>";
+
+    var others = PUSH.devices.filter(function (d) { return d.endpoint !== PUSH.here; });
+    out += '<h3 class="adm-sec__t" style="margin-top:18px">Подключённые устройства</h3>';
+    if (!PUSH.devices.length) {
+      out += '<p class="adm-hint">Пока ни одного. Включите на телефоне, который всегда с вами.</p>';
+    } else {
+      out += '<div class="adm-push__list">' + PUSH.devices.map(function (d) {
+        var here = d.endpoint === PUSH.here;
+        return '<div class="adm-push__row">' +
+          '<span class="adm-push__nm">' + esc(d.label || "Устройство") +
+            (here ? ' <span class="adm-push__this">этот</span>' : "") + "</span>" +
+          '<span class="adm-hint">' + esc(pushWhen(d.lastOkAt)) + "</span>" +
+          '<button class="adm-link adm-link--muted" type="button" data-pushdrop="' + esc(d.endpoint) + '"' +
+            (PUSH.busy ? " disabled" : "") + ">Убрать</button>" +
+        "</div>";
+      }).join("") + "</div>";
+      out += '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" type="button" data-pushtest' +
+        (PUSH.busy ? " disabled" : "") + ">Отправить проверочное</button></div>";
+      if (others.length && !PUSH.here) {
+        out += '<p class="adm-hint">Эти устройства уже получают оповещения — ' +
+          "кнопка выше включает их на том, с которого вы смотрите сейчас.</p>";
+      }
+    }
+    return out;
+  }
+
   var ADM_SET_PAGES = [
     ["delivery", "Доставка и оплата", "тарифы по странам · Montonio · способы оплаты"],
     ["home", "Главная страница", "баннер, полоска вверху, наборы и чат"],
     ["company", "О компании", "реквизиты, часы, контакты, соцсети, отчёты"],
     ["prices", "Цены и баллы", "скидка салона, баллы лояльности, Pro-цены"],
     ["langs", "Языки", "RU основной · ET · EN"],
+    ["push", "Оповещения на телефон", "звонок, когда заказ оплачен"],
     /* «в этом браузере», because that is where it lives: DEMO.log is a
        localStorage list (ADM_LS), not the server's admin_audit. What was
        changed from the phone is not in the laptop's journal — the row used to
@@ -22754,6 +23219,7 @@
         : page === "company" ? admSetCompanyHTML()
         : page === "prices" ? admSetPricesHTML()
         : page === "langs" ? admSetLangsHTML()
+        : page === "push" ? admSetPushHTML()
         : admSetJournalHTML()) +
       // the page's one «Сохранить», sticky at the bottom (ADM_SET_CARDS above)
       admSetBarHTML(page) +
@@ -31330,7 +31796,8 @@
     /* «Заказ ждёт оплаты» and «за N дней» before a birthday: the panel
        must show the same numbers the cron would use before the server
        has answered — FLOW_DEFAULTS in src/lib/flows.ts. */
-    flows: { abandoned: false, birthday: false, backstock: false, unpaid: false, unpaidRemindDays: 3, unpaidCancelDays: 7, birthdayDays: 0 }, log: [] };
+    flows: { abandoned: false, birthday: false, backstock: false, unpaid: false, unpaidRemindDays: 3, unpaidCancelDays: 7, birthdayDays: 0,
+      abandonedHours: 3, abandonedDiscountDays: 3, abandonedDiscountPercent: 5, abandonedDiscountMinTotal: 100 }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
@@ -32394,6 +32861,7 @@
     apiJson("/api/admin/orders/?limit=100").then(function (r) {
       loadSrvOrders._busy = false;
       if (r.status === 401) { SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
+      if (r.status === 200) { pushBoot(); pushOpenWanted(); }
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       /* A refresh that failed keeps the list that is on screen, for the same
          reason loadOverview() keeps its figures — «Заказы» going blank after a
@@ -36560,7 +37028,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -38295,6 +38763,11 @@
     // «Настройки»: the index of six and the way back out of a sub-page
     // …the bar's «Сохранено ✓» belongs to the page it was earned on, and so
     // does the delivery page's refusal (S.shipErr) — a page opens quiet
+    if (d.admcartsave !== undefined) { srvCartFlowSave(); return; }
+    if (d.pushon !== undefined) { pushOn(); return; }
+    if (d.pushoff !== undefined) { pushOff(); return; }
+    if (d.pushtest !== undefined) { pushTest(); return; }
+    if (d.pushdrop) { pushDrop(d.pushdrop); return; }
     if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admsetback !== undefined) { S.admSetPage = ""; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
     /* A denomination is a quick, reversible edit: it applies at once and the
@@ -39249,6 +39722,7 @@
     else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); paintSetBar(); }
     else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; paintSetBar(); }
     else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
+    else if (t.matches("[data-cartf]")) { cartFlowDraft()[t.dataset.cartf] = t.value; S.cartFlowSaved = false; paintCartFlowState(); }
     else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; paintSetBar(); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
@@ -40287,6 +40761,7 @@
        its own. Not the banner's search boxes ([data-heroq], [data-heroimgq])
        and not its URL box: Enter there must never mean «save the banner». */
     ["[data-unpaidf]", "[data-admunpaidsave]"],
+    ["[data-cartf]", "[data-admcartsave]"],
     ["[data-invsetf]", "[data-adminvsave]"],
     ["[data-shiprule]", "[data-admshipsave]"],
     ["[data-pricingf]", "[data-admpricingsave]"],

@@ -182,3 +182,16 @@ export interface BirthdayOptions {
   /** Code expiry. Default: 14 days from render time. */
   expires?: Date | string | null;
 }
+
+/** The second abandoned-cart letter — the one that carries a code. */
+export interface CartDiscountOptions {
+  /** The single-use code minted for this basket. */
+  code?: string | null;
+  /** Discount percent shown in the letter. Default 5. */
+  percent?: number;
+  /**
+   * When the code stops working. Unlike the birthday letter there is no
+   * default: a promise about a date is only made when the sender said one.
+   */
+  expires?: Date | string | null;
+}

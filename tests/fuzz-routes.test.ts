@@ -76,6 +76,13 @@ const PAGINATION = ["?limit=0", "?limit=-1", "?limit=1e9", "?limit=abc", "?limit
 const TESTPLAN_ITEM = TEST_PLAN.items[0].id;
 /** An id the go-live list really has — see the /api/golive/ rows below. */
 const GOLIVE_ITEM = GOLIVE_PLAN.items[0].id;
+/* A Web Push subscription of the right SHAPE — the endpoint is a real push
+   service's URL form and the two keys are the right lengths, so the subscribe
+   route's validator is exercised rather than short-circuited. Nothing is ever
+   sent to it: this deployment has no VAPID keys. */
+const PUSH_ENDPOINT = "https://fcm.googleapis.com/fcm/send/";
+const PUSH_P256DH = "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM";
+const PUSH_AUTH = "tBHItJI5svbpez7KI4CCXg";
 
 function routes(): RouteCase[] {
   const admin = { cookie: adminCookieHeader() };
@@ -102,6 +109,13 @@ function routes(): RouteCase[] {
        tests/held-cart-r22.test.ts. */
     { deep: true, name: "POST /api/orders/status/", path: "/api/orders/status/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/orders/status/route"), body: { orderId: "11111111-1111-4111-8111-111111111111", token: "0123456789abcdef0123456789abcdef" } },
     { name: "POST /api/carts/", path: "/api/carts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/carts/route"), body: { email: "fuzz@example.com", lang: "RU", items: [{ id: PRODUCT.id, qty: 2, size: 0 }] } },
+    /* The verified read of the link the abandoned-cart letters carry
+       (src/lib/flows.ts makeResumeToken). The signature in the token is the
+       whole credential — it is what tells a code the shop wrote from a string
+       somebody typed into a URL — so every case here is a refusal, and none of
+       them may be anything but «bad_token». The 200 lives in
+       tests/flows-cart-discount.test.ts. */
+    { name: "GET /api/carts/resume/", path: "/api/carts/resume/", method: "GET", exports: ["GET"], load: () => import("@/app/api/carts/resume/route"), queries: ["", "?t=", "?t=junk", "?t=junk.junk", "?t=" + "9".repeat(3000), "?t=%00", "?t=../../etc/passwd"] },
     { deep: true, name: "POST /api/promos/check/", path: "/api/promos/check/", method: "POST", exports: ["POST"], load: () => import("@/app/api/promos/check/route"), body: { code: "FUZZ10", subtotal: 100, shipping: 5 } },
     { deep: true, name: "POST /api/giftcards/check/", path: "/api/giftcards/check/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/giftcards/check/route"), body: { code: "RMP-ACDE-FGHJ" } },
     /* The printable card. Answers `application/pdf`, so no {ok,error} shape to
@@ -248,6 +262,16 @@ function routes(): RouteCase[] {
     { name: "POST /api/admin/mail/send/", path: "/api/admin/mail/send/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/mail/send/route"), auth: "admin", req: admin, body: { orderId: "", customerMessage: "вопрос", reply: "ответ" } },
     { name: "POST /api/admin/mail/test/", path: "/api/admin/mail/test/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/mail/test/route"), auth: "admin", req: admin, body: { template: "order-confirmed", to: "fuzz@example.com", lang: "RU" } },
     { name: "POST /api/admin/ai/text/", path: "/api/admin/ai/text/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/ai/text/route"), auth: "admin", req: { ...admin, next: true }, body: { task: "seo", lang: "RU", input: { name: "X", brand: "Y", category: "hair" } } },
+    /* «Уведомления на телефон» — Web Push to the «Админка» on the owner's Home
+       Screen (Renat, 20.09.2026). There are no VAPID keys in this environment,
+       which is the state worth fuzzing: subscribing refuses with 503
+       not_configured before it writes a row, the test send answers the same
+       without opening a socket, and turning a device OFF still works — that
+       one must not be gated on the keys being healthy. */
+    { name: "GET /api/admin/push/", path: "/api/admin/push/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/push/route"), auth: "admin", req: admin },
+    { name: "POST /api/admin/push/subscribe/", path: "/api/admin/push/subscribe/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/subscribe/route"), auth: "admin", req: admin, body: { endpoint: `${PUSH_ENDPOINT}fuzz`, keys: { p256dh: PUSH_P256DH, auth: PUSH_AUTH }, label: "iPhone" } },
+    { name: "POST /api/admin/push/unsubscribe/", path: "/api/admin/push/unsubscribe/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/unsubscribe/route"), auth: "admin", req: admin, body: { endpoint: `${PUSH_ENDPOINT}fuzz` } },
+    { name: "POST /api/admin/push/test/", path: "/api/admin/push/test/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/test/route"), auth: "admin", req: admin, body: {} },
     { name: "GET /api/admin/upload/", path: "/api/admin/upload/", method: "GET", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin },
     { name: "DELETE /api/admin/upload/", path: "/api/admin/upload/", method: "DELETE", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin, queries: ["?key=products/a.webp", "?key=../../etc/passwd", "?key=", "?key=%00"] },
     /* product creation: «Убрать фон» is off in this suite (no PHOTO_CUTOUT), so
@@ -562,6 +586,9 @@ describe("API fuzzing", () => {
       ["/api/admin/mail/send/", () => import("@/app/api/admin/mail/send/route"), "GET"],
       ["/api/admin/mail/test/", () => import("@/app/api/admin/mail/test/route"), "GET"],
       ["/api/admin/ai/text/", () => import("@/app/api/admin/ai/text/route"), "GET"],
+      ["/api/admin/push/subscribe/", () => import("@/app/api/admin/push/subscribe/route"), "GET"],
+      ["/api/admin/push/unsubscribe/", () => import("@/app/api/admin/push/unsubscribe/route"), "GET"],
+      ["/api/admin/push/test/", () => import("@/app/api/admin/push/test/route"), "GET"],
       ["/api/admin/newsletters/x/test/", () => import("@/app/api/admin/newsletters/[id]/test/route"), "GET"],
       ["/api/admin/newsletters/x/send/", () => import("@/app/api/admin/newsletters/[id]/send/route"), "GET"],
     ];

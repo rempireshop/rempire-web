@@ -42,6 +42,10 @@ export const MAIL_TEXT_TEMPLATES = [
   "order-refund-sent",
   "pos-receipt",
   "abandoned-cart",
+  /* 20.09.2026. The second cart letter, the one with the code — Renat asked
+     for it and for the owner to be able to say when it goes and what it takes
+     off, so the three sentences around the code are his to write too. */
+  "abandoned-cart-discount",
   "back-in-stock",
   /* 19.09.2026. The card's own design is fixed — src/lib/giftcard-pdf.ts knows
      one layout — so the letter around it is the only part the owner can shape,
@@ -280,6 +284,35 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       intro: "You filled a cart but did not finish the order. We kept everything — here is what is inside:",
       signature:
         "Items in a cart are not reserved — popular ones sell out quickly. Changed your mind? Just ignore this e-mail.",
+    },
+  },
+  /* `{percent}` is live, exactly as it is in the birthday letter: the number
+     is a shop setting (`settings.flows.abandonedDiscountPercent`) and an owner
+     who keeps the token gets whatever the box says, while one who types «10»
+     owns that ten for as long as the box says five. `{code}` is the basket's
+     own single-use code — the letter prints it under the button as well, so
+     an intro that drops the token still leaves a usable letter. */
+  "abandoned-cart-discount": {
+    ru: {
+      subject: "Скидка {percent} % на вашу корзину — Rempire",
+      intro:
+        "Корзина всё ещё ждёт, поэтому дарим {percent} % на неё. Промокод ниже — он одноразовый и действует на эти товары:",
+      signature:
+        "Скидка действует только на товары из этого письма. Если передумали — просто проигнорируйте его.",
+    },
+    et: {
+      subject: "{percent} % soodustust teie ostukorvile — Rempire",
+      intro:
+        "Ostukorv ootab endiselt, seepärast kingime sellele {percent} %. Sooduskood on allpool — see kehtib ühe korra ja nendele toodetele:",
+      signature:
+        "Soodustus kehtib ainult selle kirja toodetele. Kui mõtlesite ümber, jätke kiri lihtsalt tähelepanuta.",
+    },
+    en: {
+      subject: "{percent}% off your cart — Rempire",
+      intro:
+        "Your cart is still waiting, so here is {percent}% off it. The code is below — one use, and only for these items:",
+      signature:
+        "The discount applies to the items in this e-mail only. Changed your mind? Just ignore it.",
     },
   },
   "back-in-stock": {

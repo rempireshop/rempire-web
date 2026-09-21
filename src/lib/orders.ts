@@ -565,7 +565,13 @@ async function codeDiscount(
       if (!out?.ok) return NO_DISCOUNT;
       const discount = num(out.discount, 0);
       if (!Number.isFinite(discount) || discount <= 0) return NO_DISCOUNT;
-      const kind = out.scope === "brand" || out.scope === "product" ? out.scope : null;
+      /* …including 'cart' (db/migrations/197_abandoned_cart_discount.sql): the
+         second abandoned-cart letter's code is narrowed to the lines that one
+         basket held, so what it took off has to be recorded the same way a
+         brand or a product code's is — otherwise the order card would call the
+         cheapest kind of code there is «весь заказ». */
+      const kind =
+        out.scope === "brand" || out.scope === "product" || out.scope === "cart" ? out.scope : null;
       return {
         discount: money(Math.min(discount, goods + shipping)),
         scope: kind

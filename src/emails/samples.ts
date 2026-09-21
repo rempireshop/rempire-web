@@ -17,6 +17,7 @@
 import {
   demoInvoice,
   renderAbandonedCart,
+  renderAbandonedCartDiscount,
   renderBackInStock,
   renderBirthday,
   renderGiftCard,
@@ -285,6 +286,15 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
         );
       case "abandoned-cart":
         return renderAbandonedCart(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7");
+      /* Its follow-up: the same basket a few days later, with the single-use
+         code the letter is for. Five per cent is the shop's own default, and
+         the date is fixed so the screenshots do not move every day. */
+      case "abandoned-cart-discount":
+        return renderAbandonedCartDiscount(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7", {
+          code: "REM-CART-2417",
+          percent: 5,
+          expires: "2026-10-19T12:00:00",
+        });
       case "back-in-stock":
         return renderBackInStock(sampleProduct(lang), lang);
       case "gift-card":

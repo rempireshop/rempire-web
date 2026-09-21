@@ -2289,6 +2289,32 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    you may skip» without a word about it. */
 .adm-field--tool { margin-top: 10px; }
 
+/* «Оповещения на телефон». Разрешение даёт телефон, а не магазин, поэтому
+   на экране сначала ЭТОТ телефон — одна кнопка во всю ширину, которую видно
+   с порога, — и только потом список остальных. */
+.adm-push__here {
+  border: 1px solid var(--a-rule); background: var(--a-shell);
+  padding: 14px; margin-bottom: 10px;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
+}
+.adm-push__state { margin: 0; font-weight: 600; font-size: 15px; }
+.adm-push__here .adm-btn { width: 100%; }
+.adm-push__list { display: flex; flex-direction: column; margin: 6px 0 12px; }
+/* label · when · remove — the middle column takes the slack, so «Убрать»
+   stays on the right edge whatever the device is called */
+.adm-push__row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline;
+  padding: 11px 0; border-bottom: 1px solid var(--a-rule);
+}
+.adm-push__row:last-child { border-bottom: 0; }
+.adm-push__nm { font-weight: 500; }
+.adm-push__this {
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--a-muted); border: 1px solid var(--a-rule); padding: 1px 5px;
+}
+/* the remove link is a 44px target even though it reads as text */
+.adm-push__row .adm-link { min-height: 44px; display: inline-flex; align-items: center; }
+
 .adm-picks { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
 .adm-picks__none { grid-column: 1 / -1; margin: 0; }
 .adm-pick-tile {

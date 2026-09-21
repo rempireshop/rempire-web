@@ -1977,6 +1977,55 @@
       }
     },
     {
+      "id": "panel-push",
+      "area": "panel",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Оповещения о заказе на телефон",
+      "steps": [
+        "Открыть «Админку» с иконки на домашнем экране, а не из браузера.",
+        "«Ещё» → «Настройки» → «Оповещения на телефон».",
+        "Нажать «Включить на этом телефоне» и разрешить, когда телефон спросит.",
+        "Нажать «Отправить проверочное» и свернуть панель.",
+        "Нажать на пришедшее оповещение.",
+        "Открыть тот же экран на втором устройстве и включить там тоже."
+      ],
+      "expect": [
+        "Телефон спрашивает разрешение один раз; после него написано «Этот телефон подключён ✓».",
+        "Проверочное приходит, даже когда панель свёрнута.",
+        "Нажатие на оповещение открывает карточку того самого заказа.",
+        "В списке оба устройства; у того, с которого смотрите, стоит «этот».",
+        "«Убрать» снимает устройство из списка, и оповещения на него больше не идут.",
+        "В Safari не с домашнего экрана кнопки нет — написано, как добавить иконку."
+      ],
+      "why": "Оповещение — это единственный способ узнать о заказе, не открывая панель. iPhone отдаёт их только приложению с домашнего экрана, поэтому проверять надо именно оттуда.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-21T06:53:00.000Z",
+      "en": {
+        "title": "Order notifications on your phone",
+        "steps": [
+          "Open «Админка» from the Home Screen icon, not from the browser.",
+          "«Ещё» → «Настройки» → «Оповещения на телефон».",
+          "Press «Включить на этом телефоне» and allow it when the phone asks.",
+          "Press «Отправить проверочное» and put the panel in the background.",
+          "Tap the notification when it arrives.",
+          "Open the same screen on a second device and turn it on there too."
+        ],
+        "expect": [
+          "The phone asks once; after that it says «Этот телефон подключён ✓».",
+          "The test arrives even with the panel in the background.",
+          "Tapping the notification opens that exact order's card.",
+          "Both devices are listed; the one you are on is marked «этот».",
+          "«Убрать» takes a device off the list and notifications stop going to it.",
+          "Outside the Home Screen there is no button, but instructions for adding the icon."
+        ],
+        "why": "A notification is the only way to hear about an order without opening the panel. iOS delivers them only to a Home Screen app, so that is where this must be tested."
+      }
+    },
+    {
       "id": "cart-basics",
       "area": "checkout",
       "who": "renat",
@@ -4996,16 +5045,16 @@
       "lang": "RU",
       "title": "Письмо про брошенную корзину",
       "steps": [
-        "В «Письмах» включить «Брошенная корзина».",
+        "В «Письмах» включить «Брошенная корзина» и посмотреть блок «Брошенные корзины» внизу.",
         "Набрать корзину, ввести почту на кассе и не оплачивать.",
         "Сразу нажать «Запустить сейчас» под письмом.",
-        "Выждать три часа и нажать «Запустить сейчас» ещё два раза.",
+        "Выждать срок из настройки и нажать «Запустить сейчас» ещё два раза.",
         "Проверить почту и нажать кнопку возврата к корзине.",
         "Нажать «Отписаться» внизу письма."
       ],
       "expect": [
-        "Сразу после корзины тост говорит: корзине ещё нет трёх часов.",
-        "Через три часа — «Отправлено 1 · пропущено 0», под письмом «Последний запуск».",
+        "Сразу после корзины тост говорит: корзина ещё моложе срока из настроек.",
+        "Позже — «Отправлено 1 · пропущено 0», под письмом «Последний запуск».",
         "Следующее нажатие говорит, что письмо уже уходило.",
         "Письмо пришло со списком товаров, кнопка открывает магазин с той же корзиной.",
         "После «Отписаться» страница подтверждает отписку сама; если нет — нажмите кнопку на ней.",
@@ -5015,26 +5064,75 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-17T12:38:35.000Z",
+      "markedAt": "2026-09-21T07:04:00.000Z",
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
-          "In «Письма» switch on «Брошенная корзина».",
+          "In «Письма» switch on «Брошенная корзина» and look at the «Брошенные корзины» block below.",
           "Fill a cart, enter an e-mail at the checkout and do not pay.",
           "Press «Запустить сейчас» under the letter straight away.",
-          "Wait three hours and press «Запустить сейчас» twice more.",
+          "Wait out the time from the setting and press «Запустить сейчас» twice more.",
           "Check your mail and press the button back to the cart.",
           "Press «Отписаться» at the bottom of the letter."
         ],
         "expect": [
-          "Straight after the cart the toast says: the basket is under three hours old.",
-          "Three hours later — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
+          "Straight after the cart the toast says the basket is younger than the setting.",
+          "Later — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
           "The next press says the letter has already gone.",
           "The letter lists the cart, and its button opens the shop with that cart.",
           "After «Отписаться» the page confirms it by itself; if not, press the button on it.",
           "The next abandoned cart from that address gets no letter."
         ],
         "why": "A second letter about the same cart annoys people into unsubscribing."
+      }
+    },
+    {
+      "id": "mail-abandoned-discount",
+      "area": "mail",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Второе письмо про корзину — со скидкой",
+      "steps": [
+        "В «Настройках» → «Письма» открыть блок «Брошенные корзины».",
+        "Поставить: напомнить через 1 ч, скидку через 1 день, 5 %, от 100 €.",
+        "Набрать корзину дороже 100 €, ввести почту на кассе и не оплачивать.",
+        "Дождаться первого письма, потом второго, запуская «Запустить сейчас».",
+        "Открыть скидку из письма и дойти до оплаты.",
+        "Повторить всё с корзиной дешевле 100 €."
+      ],
+      "expect": [
+        "Второе письмо уходит только после первого, не раньше.",
+        "В нём промокод и обещанные 5 %.",
+        "Кнопка письма возвращает ту же корзину, и скидка уже применена.",
+        "Скидка считается только с товаров этой корзины.",
+        "Второй раз тот же код не принимается.",
+        "Корзина дешевле 100 € получает только первое письмо."
+      ],
+      "why": "Скидка уходит тем, кто, возможно, купил бы и так. Неверный порог или код на весь заказ — это подаренные деньги.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-21T07:04:00.000Z",
+      "en": {
+        "title": "The second cart letter — the one with the discount",
+        "steps": [
+          "In «Настройки» → «Письма» open the «Брошенные корзины» block.",
+          "Set: remind after 1 h, discount after 1 day, 5 %, from 100 €.",
+          "Fill a basket over 100 €, enter an e-mail at the checkout and do not pay.",
+          "Wait for the first letter, then the second, using «Запустить сейчас».",
+          "Open the discount from the letter and go through to payment.",
+          "Do it all again with a basket under 100 €."
+        ],
+        "expect": [
+          "The second letter goes only after the first, never before.",
+          "It carries a promo code and the 5 % promised.",
+          "Its button brings back that basket with the discount already applied.",
+          "The discount counts only the products from that basket.",
+          "The same code is refused the second time.",
+          "A basket under 100 € gets the first letter only."
+        ],
+        "why": "The discount goes to people who might have bought anyway. A wrong threshold, or a code that pays for the whole order, is money given away."
       }
     },
     {
@@ -5095,6 +5193,7 @@
       "title": "Рассылка уходит подписчикам на их языке",
       "steps": [
         "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
+        "В тексте письма нажать «Картинка», вставить адрес и заполнить «Куда ведёт картинка».",
         "Написать название, тему и текст по-русски, добавить товар, «Сохранить».",
         "Переключить на Eesti, написать тему и текст, «Сохранить».",
         "Ввести свой адрес, «Отправить мне тест».",
@@ -5115,6 +5214,7 @@
         "title": "The newsletter reaches subscribers in their language",
         "steps": [
           "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
+          "In the letter press «Картинка», paste an address and fill in «Куда ведёт картинка».",
           "Write a name, subject and text in Russian, add a product, «Сохранить».",
           "Switch to Eesti, write the subject and text, «Сохранить».",
           "Enter your address, «Отправить мне тест».",
@@ -5129,7 +5229,9 @@
           "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
         ],
         "why": "One letter to every subscriber is the first time the checkout tick means something; a mistake goes to hundreds."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-21T06:53:00.000Z"
     },
     {
       "id": "mail-newsletter-resume",
@@ -5221,12 +5323,14 @@
       "title": "Уведомление магазину о новом заказе",
       "steps": [
         "Оформить и оплатить любой заказ.",
-        "Открыть почту магазина shop@rempireshop.com."
+        "Открыть почту магазина shop@rempireshop.com.",
+        "Посмотреть, пришло ли оповещение на телефон (если оно включено)."
       ],
       "expect": [
         "В ящике магазина лежит короткое письмо о заказе.",
         "В нём номер заказа и имя покупателя.",
-        "Там же способ доставки, список товаров и сумма."
+        "Там же способ доставки, список товаров и сумма.",
+        "Если оповещения включены, на телефон пришло то же самое."
       ],
       "why": "Без этого письма вы узнаёте о заказе, только когда сами откроете панель.",
       "risk": "med",
@@ -5235,15 +5339,19 @@
         "title": "The shop's own notice of a new order",
         "steps": [
           "Place and pay for any order.",
-          "Open the shop mailbox shop@rempireshop.com."
+          "Open the shop mailbox shop@rempireshop.com.",
+          "Check whether the phone notification arrived too, if it is switched on."
         ],
         "expect": [
           "A short letter about the order is in the shop mailbox.",
           "It gives the order number and the buyer's name.",
-          "It also gives the delivery, the products and the total."
+          "It also gives the delivery, the products and the total.",
+          "With notifications on, the same thing arrived on the phone."
         ],
         "why": "Without this letter you learn about an order only by opening the panel."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-21T06:53:00.000Z"
     },
     {
       "id": "mail-not-spam",

@@ -25,6 +25,7 @@
  * cycle between the two would be a live hazard for a rarely-exercised path.
  */
 import { renderAbandonedCart } from "@/emails/abandoned-cart";
+import { renderAbandonedCartDiscount } from "@/emails/abandoned-cart-discount";
 import { renderBackInStock } from "@/emails/back-in-stock";
 import { renderBirthday } from "@/emails/birthday";
 import { baseUrl, normalizeLang } from "@/emails/layout";
@@ -53,8 +54,39 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 /* ---------- settings.flows ------------------------------------------------ */
 
 export interface Flows {
-  /** «Брошенная корзина» — a reminder 3 h after the cart went quiet. */
+  /**
+   * «Брошенная корзина» — the reminder, and the discounted letter that
+   * follows it when it did not work. One switch for the pair, the same way
+   * `unpaid` carries the reminder and the cancellation: a shop that nudges
+   * but never offers anything, or offers a discount to somebody who was
+   * never reminded, is neither of the two things Renat asked for.
+   */
   abandoned: boolean;
+  /**
+   * How long a basket has to be quiet before the FIRST letter — Renat,
+   * 20.09.2026, via Dim: «add possibility to choose time when the abandoned
+   * cart letter (currently 3h) goes out». Three hours is what the constant
+   * said and what the shop still does out of the box.
+   */
+  abandonedHours: number;
+  /**
+   * …and how many days after that letter the DISCOUNTED one goes out. Counted
+   * from `carts.reminded_at`, the day the first letter really left, not from
+   * the day the basket went quiet: the cron runs once a day and can miss one,
+   * and «after the first one did not work» has to mean a full wait after the
+   * first one, whenever it happened to go.
+   */
+  abandonedDiscountDays: number;
+  /** Percent off in that second letter. */
+  abandonedDiscountPercent: number;
+  /**
+   * The basket total below which the second letter is not sent at all — the
+   * gate Renat drew himself: under 100 € a plain reminder, over it five per
+   * cent after three days. 0 sends it to everybody; it is also the only way
+   * to switch the second letter off without switching the first one off with
+   * it, so a number above every basket the shop sees is «не отправлять».
+   */
+  abandonedDiscountMinTotal: number;
   /** «Скидка ко дню рождения» — a personal promo on the day. */
   birthday: boolean;
   /** «Товар снова в наличии» — to everybody waiting for that product. */
@@ -111,8 +143,24 @@ export interface Flows {
 /** The most warning that still reads as a birthday letter rather than a random promo. */
 export const BIRTHDAY_MAX_DAYS = 30;
 
+/**
+ * The longest wait that still makes the first cart letter a REMINDER. A week
+ * is already generous — after that the basket is not something the shopper
+ * has half-forgotten, it is something they decided against — and the ceiling
+ * is what keeps a mistyped «72» in a box labelled «часов» from becoming a
+ * letter nobody will connect to anything they did.
+ */
+export const ABANDONED_MAX_HOURS = 168;
+
+/** The most a basket may have to be worth before the discounted letter goes. */
+export const ABANDONED_MAX_MIN_TOTAL = 10_000;
+
 export const FLOW_DEFAULTS: Flows = {
   abandoned: false,
+  abandonedHours: 3,
+  abandonedDiscountDays: 3,
+  abandonedDiscountPercent: 5,
+  abandonedDiscountMinTotal: 100,
   birthday: false,
   backstock: false,
   pending: false,
@@ -129,6 +177,29 @@ export const FLOW_DEFAULTS: Flows = {
 function days(v: unknown, fallback: number): number {
   const n = Number(v);
   return Number.isFinite(n) && n >= 1 && n <= 60 ? Math.round(n) : fallback;
+}
+
+/** 1–168 whole hours, or the default. Same door, same posture as days(). */
+function hours(v: unknown, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 1 && n <= ABANDONED_MAX_HOURS ? Math.round(n) : fallback;
+}
+
+/**
+ * A euro floor: 0 («всем») up to the ceiling, two decimals.
+ *
+ * Deliberately NOT `Number(v)`. Zero is a real answer here — «write to
+ * everybody the reminder reached» — and `Number(null)`, `Number([])` and
+ * `Number("")` are all 0, so a blob with the field missing, blanked or
+ * mangled would silently switch the floor OFF rather than fall back to the
+ * hundred euro the owner last saw. A comma is read as a decimal point for the
+ * same reason validatePromo does it: the box is typed on a phone.
+ */
+function euro(v: unknown, fallback: number, max: number): number {
+  const n =
+    typeof v === "number" ? v : typeof v === "string" && v.trim() ? Number(v.replace(",", ".")) : Number.NaN;
+  if (!Number.isFinite(n) || n < 0 || n > max) return fallback;
+  return Math.round(n * 100) / 100;
 }
 
 function bool(v: unknown, fallback: boolean): boolean {
@@ -176,9 +247,25 @@ export async function getFlows(): Promise<Flows> {
      is the door that cannot be walked round. */
   const remindDays = Math.min(days(f.unpaidRemindDays, FLOW_DEFAULTS.unpaidRemindDays), Math.max(1, cancelDays - 1));
   const birthdayN = Math.trunc(Number(f.birthdayDays));
+  const cartPercent = Number(f.abandonedDiscountPercent);
   return {
     birthdayDays: Number.isFinite(birthdayN) && birthdayN > 0 ? Math.min(birthdayN, BIRTHDAY_MAX_DAYS) : 0,
     abandoned: bool(f.abandoned, FLOW_DEFAULTS.abandoned),
+    abandonedHours: hours(f.abandonedHours, FLOW_DEFAULTS.abandonedHours),
+    abandonedDiscountDays: days(f.abandonedDiscountDays, FLOW_DEFAULTS.abandonedDiscountDays),
+    /* The same bounds the promo table itself is held to (validatePromo,
+       src/lib/promos.ts): this number is written onto a real code, and a
+       setting that could ask for 120 % would be a code the checkout refuses
+       in front of a customer the letter has already promised a discount. */
+    abandonedDiscountPercent:
+      Number.isFinite(cartPercent) && cartPercent > 0 && cartPercent <= 90
+        ? Math.round(cartPercent)
+        : FLOW_DEFAULTS.abandonedDiscountPercent,
+    abandonedDiscountMinTotal: euro(
+      f.abandonedDiscountMinTotal,
+      FLOW_DEFAULTS.abandonedDiscountMinTotal,
+      ABANDONED_MAX_MIN_TOTAL,
+    ),
     birthday: bool(f.birthday, FLOW_DEFAULTS.birthday),
     backstock: bool(f.backstock, FLOW_DEFAULTS.backstock),
     pending: bool(f.pending, FLOW_DEFAULTS.pending),
@@ -278,12 +365,22 @@ function sign(payload: string): string {
  * the server checks; the storefront treats the payload as untrusted anyway and
  * only accepts catalogue ids at a capped quantity, which is exactly what a
  * shopper could type into their own basket by hand.
+ *
+ * `code` is the second letter's promo (`p` in the payload), and it rides
+ * INSIDE the token rather than beside it in the query string for one reason:
+ * the storefront strips the whole query the moment it has restored the basket
+ * (`history.replaceState` in resumeCart(), public/shop2/app.js), so anything
+ * parked next to `resume=` is gone before it could be applied. Omitted
+ * entirely for the first letter, which has no code — an older reader that
+ * knows nothing about `p` simply restores the basket, exactly as it does now.
  */
-export function makeResumeToken(items: CartLine[], now: number = Date.now()): string {
+export function makeResumeToken(items: CartLine[], now: number = Date.now(), code?: string | null): string {
+  const promo = String(code ?? "").trim().toUpperCase();
   const payload = JSON.stringify({
     v: 1,
     exp: now + RESUME_TTL_MS,
     i: items.slice(0, 50).map((l) => ({ id: l.id, s: l.size, q: l.qty })),
+    ...(promo ? { p: promo } : {}),
   });
   const b64 = Buffer.from(payload, "utf8").toString("base64url");
   return `${b64}.${sign(b64)}`;
@@ -291,6 +388,8 @@ export function makeResumeToken(items: CartLine[], now: number = Date.now()): st
 
 export interface ResumePayload {
   items: Array<{ id: string; size: number | null; qty: number }>;
+  /** The promo code the letter offered, "" when it offered none. */
+  code: string;
 }
 
 /** Verifies a resume token. Null for anything forged, stale or malformed. */
@@ -305,7 +404,14 @@ export function readResumeToken(token: string | null | undefined, now: number = 
     const raw = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8")) as Record<string, unknown>;
     if (Number(raw.exp) <= now) return null;
     const list = Array.isArray(raw.i) ? raw.i : [];
+    /* The same normalisation normalisePromoCode() applies (src/lib/promos.ts),
+       said here rather than imported: this module is loaded by the cron and by
+       the storefront's own route, and the promo table is not a dependency of
+       reading a signed link. A code that survives this is still only a
+       CANDIDATE — the checkout looks it up and prices it like any other. */
+    const promo = String(raw.p ?? "").toUpperCase().replace(/\s+/g, "").slice(0, 24);
     return {
+      code: /^[A-Z0-9-]+$/.test(promo) && /[A-Z0-9]/.test(promo) ? promo : "",
       items: list.slice(0, 50).map((l) => {
         const it = l as Record<string, unknown>;
         // `null` means "the product has no sizes"; Number(null) is 0, which
@@ -323,10 +429,11 @@ export function readResumeToken(token: string | null | undefined, now: number = 
   }
 }
 
-/** `/shop2/et/checkout/?resume=…`, absolute. */
-function resumeUrl(lang: LangCode, items: CartLine[]): string {
+/** `/shop2/et/checkout/?resume=…`, absolute. `code` rides inside the token. */
+function resumeUrl(lang: LangCode, items: CartLine[], code?: string | null): string {
   const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
-  return `${baseUrl()}/shop2${seg}/checkout/?resume=${encodeURIComponent(makeResumeToken(items))}`;
+  const token = makeResumeToken(items, Date.now(), code);
+  return `${baseUrl()}/shop2${seg}/checkout/?resume=${encodeURIComponent(token)}`;
 }
 
 function productUrl(lang: LangCode, id: string): string {
@@ -378,6 +485,10 @@ export const SKIP_REASONS = [
   "no_birthday",
   "no_marketing",
   "not_in_window",
+  /* the second cart letter's own two: the first letter has not gone yet, and
+     the basket is worth less than «Скидка от … €» asks for */
+  "no_reminder",
+  "below_min",
   /* …and when not one of the counts above is anything but zero: there is
      nobody this letter could go to at all. Said out loud, because «отправлено
      0» with nothing beside it is what «the sender is broken» looks like. */
@@ -429,13 +540,29 @@ function sendSkip(res: { ok: boolean; skipped?: boolean; error?: string }): Skip
 }
 
 /** Exported so «Брошенные корзины» on «Аналитика» can count the same carts this
-    letter writes to — src/lib/analytics.ts holds a copy and a test ties them. */
+    letter writes to — src/lib/analytics.ts holds a copy and a test ties them.
+
+    Since 20.09.2026 this is the DEFAULT rather than the rule: the wait is
+    `settings.flows.abandonedHours` and the owner picks it (Renat: «add
+    possibility to choose time when the abandoned cart letter (currently 3h)
+    goes out»). Analytics still counts on three hours, because «Брошенные
+    корзины» is a figure about baskets and not about letters, and a shop that
+    moves the letter to twelve hours has not changed what an abandoned basket
+    is. The two only have to agree out of the box, which is what the tie-test
+    checks. */
 export const ABANDONED_AFTER_MS = 3 * 60 * 60 * 1000;
+
+/** The owner's wait in milliseconds. */
+function abandonedAfterMs(flows: Flows): number {
+  return flows.abandonedHours * 60 * 60 * 1000;
+}
+
 const BATCH = 100;
 
 /**
- * One reminder per abandoned cart, three hours after the last change, and only
- * when no order has arrived from that address since.
+ * One reminder per abandoned cart, `flows.abandonedHours` after the last
+ * change (three by default, which is what it always was), and only when no
+ * order has arrived from that address since.
  *
  * `reminded_at` is stamped **before** the send, not after: a crash between the
  * two costs one letter, while the other order costs the customer a second copy
@@ -463,7 +590,7 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
   if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
 
-  const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
+  const cutoff = new Date(now - abandonedAfterMs(flows)).toISOString();
   const rows = await query<{
     id: string;
     email: string;
@@ -591,6 +718,279 @@ function safeJson(s: string): unknown {
     return JSON.parse(s);
   } catch {
     return null;
+  }
+}
+
+/* ---------- «Брошенная корзина» — письмо со скидкой ----------------------- */
+
+/** `REM-CART-7QK4X9` — the same readable alphabet the birthday code uses, and
+ *  a prefix that says at a glance which letter wrote it. */
+export function cartPromoCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = randomBytes(6);
+  let out = "";
+  for (const b of bytes) out += alphabet[b % alphabet.length];
+  return `REM-CART-${out}`;
+}
+
+/** What the second letter has to carry. */
+interface CartPromo {
+  code: string;
+  expires: Date;
+}
+
+/**
+ * A single-use code for ONE basket, on the `cart` scope
+ * (db/migrations/197_abandoned_cart_discount.sql). Null means «there is no
+ * code to send», and then no letter goes out at all: a discount letter whose
+ * code does nothing is worse than silence, exactly as it is for a birthday.
+ *
+ * Unlike promoForBirthday() there is **no static fallback and no `createPromo`
+ * spelling**. Both of those would produce a code the shop could not narrow,
+ * and an unnarrowed five per cent is a five per cent off the whole shop handed
+ * to everybody who ever abandoned a basket — the opposite of what Renat asked
+ * for («preferably ONLY for the cart»). A database that has not run migration
+ * 197 refuses the row for the same reason, and that refusal must stay a
+ * refusal, so what comes back is checked rather than assumed.
+ *
+ * The code dies with the link that carries it (RESUME_TTL_MS), at the end of
+ * that Tallinn day. Longer would be a code nobody can reach by the route the
+ * letter offers; shorter would be a button that restores a basket whose
+ * promise has already run out.
+ */
+async function promoForCart(
+  flows: Flows,
+  cartId: string,
+  lines: CartLine[],
+  now: number,
+): Promise<CartPromo | null> {
+  const ids = [...new Set(lines.map((l) => l.id).filter(Boolean))].slice(0, 50);
+  if (!ids.length) return null;
+  const expires = endOfShopDay(new Date(now + RESUME_TTL_MS));
+  try {
+    const mod = (await import("@/lib/promos")) as unknown as {
+      upsertPromo?: (input: Record<string, unknown>) => Promise<{ scope?: string; scopeLines?: string[] | null }>;
+    };
+    if (!mod.upsertPromo) return null;
+    const code = cartPromoCode();
+    const saved = await mod.upsertPromo({
+      code,
+      kind: "percent",
+      value: flows.abandonedDiscountPercent,
+      minSubtotal: 0,
+      startsAt: null,
+      endsAt: expires.toISOString(),
+      maxUses: 1,
+      active: true,
+      note: "Брошенная корзина — код выписан автоматически",
+      scope: "cart",
+      scopeValue: cartId,
+      scopeLines: ids,
+    });
+    if (saved?.scope !== "cart" || !saved.scopeLines?.length) return null;
+    return { code, expires };
+  } catch (err) {
+    console.warn("[flows] cart promo not written:", (err as Error)?.message);
+    return null;
+  }
+}
+
+/**
+ * Take back the code this run minted for a letter that never went — the same
+ * tidying dropBirthdayPromo() does, and for the same reason: a skipped send
+ * (no Resend key, no address) puts the stamp back so the letter goes as soon
+ * as mail works, and the next run mints another code. Best effort; deletePromo
+ * refuses a code that has been used, which is exactly the one that must stay.
+ */
+async function dropCartPromo(code: string): Promise<void> {
+  try {
+    const mod = (await import("@/lib/promos")) as unknown as {
+      deletePromo?: (code: string) => Promise<unknown>;
+    };
+    await mod.deletePromo?.(code);
+  } catch (err) {
+    console.warn("[flows] cart code left behind:", (err as Error)?.message);
+  }
+}
+
+/**
+ * The second letter: the one with the discount, for the baskets the first
+ * letter did not bring back.
+ *
+ * Renat, 20.09.2026, via Dim: «after first one did not work we send out
+ * another mail with discount.» Three questions, and the shop can answer all
+ * three from its own rows:
+ *
+ *   · did the first letter go?      `reminded_at is not null`
+ *   · was that long enough ago?     `reminded_at <= now − abandonedDiscountDays`
+ *   · did it work?                  no order from that address since the basket
+ *                                   went quiet, and `recovered_at` still null
+ *
+ * «Did it work» is deliberately NOT «did they open it» or «did they click».
+ * Apple Mail Privacy Protection fetches every image in every letter from its
+ * own proxy and prefetches links, so both of those columns would be full of
+ * confident nonsense — and the customer this flow exists for, the one who
+ * really did ignore the letter, would be the one the shop decided had read it.
+ * An order is a fact.
+ *
+ * `discount_at` is stamped **before** the send, the rule runAbandonedCarts()
+ * already follows: a crash between the two costs one letter; the other order
+ * costs the customer a second five-per-cent code every day the cron runs.
+ *
+ * The basket floor is the owner's (`abandonedDiscountMinTotal`, 100 € out of
+ * the box — Renat's own line). A basket under it is stamped and walked past:
+ * it had its reminder, and the shop does not buy back a 12 € order.
+ *
+ * An address on the stop list, or one whose customer row says the tick was
+ * switched off by hand, gets nothing — the same two sets the first letter
+ * subtracts, read before any stamp goes down.
+ */
+export async function runAbandonedCartsDiscount(now: number = Date.now()): Promise<FlowRun> {
+  const flows = await getFlows();
+  if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
+  await loadTexts();
+
+  const cutoff = new Date(now - flows.abandonedDiscountDays * 24 * 60 * 60 * 1000).toISOString();
+  const minTotal = flows.abandonedDiscountMinTotal;
+  const rows = await query<{
+    id: string;
+    email: string;
+    lang: string;
+    items: unknown;
+    total: string | number;
+  }>(
+    `select c.id, c.email, c.lang, c.items, c.total
+       from carts c
+      where c.reminded_at is not null
+        and c.discount_at is null
+        and c.recovered_at is null
+        and c.reminded_at <= $1
+        and c.total >= $2
+        and not exists (
+          select 1 from orders o
+           where lower(o.email) = c.email and o.created_at >= c.updated_at
+        )
+      order by c.reminded_at
+      limit ${BATCH}`,
+    [cutoff, minTotal],
+  );
+
+  /* Read before any stamp goes down, exactly as the first letter does: a stop
+     list that cannot be read means this run sends nothing (the throw is caught
+     in runFlows), never «send to everybody and hope». */
+  const blocked = await optedOutSet(rows.map((r) => r.email));
+  for (const email of await withdrawnSet(rows.map((r) => r.email))) blocked.add(email);
+
+  let sent = 0;
+  const skips = counter();
+  for (const row of rows) {
+    const items = parseItems(row.items);
+    if (!items.length) {
+      await query("update carts set discount_at = now() where id = $1", [row.id]);
+      skips.add("empty_cart");
+      continue;
+    }
+    if (blocked.has(row.email)) {
+      /* Stamped, like the first letter stamps them: the row must not be
+         re-selected and re-counted on every run, and no letter is exactly
+         what the person asked for. */
+      await query("update carts set discount_at = now() where id = $1", [row.id]);
+      skips.add("opted_out");
+      continue;
+    }
+    const promo = await promoForCart(flows, row.id, items, now);
+    if (!promo) {
+      /* No code, no letter, and no stamp: this basket is still owed the offer
+         the moment codes can be written again. */
+      skips.add("no_promo_code");
+      continue;
+    }
+    // Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
+    await query("update carts set discount_at = now(), discount_code = $2 where id = $1", [row.id, promo.code]);
+    const lang = normalizeLangCode(row.lang);
+    const mail = renderAbandonedCartDiscount(
+      {
+        email: row.email,
+        lang,
+        items,
+        total: Number(row.total) || undefined,
+        unsubscribeUrl: unsubscribeUrl(row.email, lang, "marketing"),
+      },
+      normalizeLang(lang),
+      resumeUrl(lang, items, promo.code),
+      { code: promo.code, percent: flows.abandonedDiscountPercent, expires: promo.expires },
+    );
+    const res = await sendRendered(row.email, mail, {
+      tags: { template: "abandoned-cart-discount", lang: lang.toLowerCase() },
+      idempotencyKey: `cart-discount:${row.id}`,
+      headers: unsubscribeHeaders(row.email, lang, "marketing"),
+    });
+    if (res.ok && !res.skipped) {
+      sent += 1;
+    } else {
+      skips.add(sendSkip(res));
+      /* Skipped, not failed: the mail layer did not even try (no key, no
+         address). Nothing reached anybody, so the stamp and the code both come
+         off — the basket is owed this letter as soon as mail works, and the
+         next run writes a fresh code. A real failure keeps both: Resend was
+         asked, and a retry from here would be the second code the stamp exists
+         to stop. */
+      if (res.skipped) {
+        await query(
+          "update carts set discount_at = null, discount_code = null where id = $1 and discount_code = $2",
+          [row.id, promo.code],
+        );
+        await dropCartPromo(promo.code);
+      }
+    }
+  }
+  /* The queue was empty: say what it was full of, the way the first letter
+     does. Only when nothing was walked at all — a run that already has real
+     reasons must not count the same cart twice. */
+  if (!sent && !skips.skipped) await explainEmptyDiscountQueue(skips, cutoff, minTotal);
+  return { sent, skipped: skips.skipped, reason: skips.top, skips: skips.map };
+}
+
+/**
+ * Why nobody was due the discounted letter — the five conditions the query
+ * above applies, counted rather than silently subtracted. Best effort, like
+ * every other diagnostic here.
+ */
+async function explainEmptyDiscountQueue(
+  skips: ReturnType<typeof counter>,
+  cutoff: string,
+  minTotal: number,
+): Promise<void> {
+  try {
+    const [row] = await query<Record<string, string | number>>(
+      `select
+         count(*) filter (where c.reminded_at is null and c.recovered_at is null)::int as no_reminder,
+         count(*) filter (where c.discount_at is not null)::int as already_sent,
+         count(*) filter (where c.discount_at is null and c.recovered_at is not null)::int as recovered,
+         count(*) filter (where c.reminded_at is not null and c.discount_at is null
+                            and c.recovered_at is null and c.reminded_at > $1)::int as too_fresh,
+         count(*) filter (where c.reminded_at is not null and c.discount_at is null
+                            and c.recovered_at is null and c.reminded_at <= $1
+                            and c.total < $2)::int as below_min,
+         count(*) filter (where c.reminded_at is not null and c.discount_at is null
+                            and c.recovered_at is null and c.reminded_at <= $1
+                            and c.total >= $2
+                            and exists (select 1 from orders o
+                                         where lower(o.email) = c.email
+                                           and o.created_at >= c.updated_at))::int as ordered_since
+       from carts c`,
+      [cutoff, minTotal],
+    );
+    if (!row) return;
+    skips.note("no_reminder", Number(row.no_reminder) || 0);
+    skips.note("already_sent", Number(row.already_sent) || 0);
+    skips.note("recovered", Number(row.recovered) || 0);
+    skips.note("too_fresh", Number(row.too_fresh) || 0);
+    skips.note("below_min", Number(row.below_min) || 0);
+    skips.note("ordered_since", Number(row.ordered_since) || 0);
+    if (!skips.map) skips.note("nobody", 1); // not one cart in the table
+  } catch (err) {
+    console.warn("[flows] discount queue could not be explained:", (err as Error)?.message);
   }
 }
 
@@ -1362,6 +1762,8 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
 
 export interface FlowsReport {
   abandoned: FlowRun;
+  /** The discounted second letter — the same switch, its own clock. */
+  abandonedDiscount: FlowRun;
   backstock: FlowRun;
   birthday: FlowRun;
   /** «По счёту»: the reminder and the automatic cancellation — src/lib/invoice-dunning.ts. */
@@ -1374,8 +1776,8 @@ export interface FlowsReport {
 
 /* ---------- «Последний запуск» ------------------------------------------- */
 
-/** The flows a run is recorded for — the two the panel can start by hand and the two beside them. */
-export const RUNNABLE_FLOWS = ["abandoned", "birthday", "backstock", "unpaid"] as const;
+/** The flows a run is recorded for — the ones the panel can start by hand and the ones beside them. */
+export const RUNNABLE_FLOWS = ["abandoned", "abandonedDiscount", "birthday", "backstock", "unpaid"] as const;
 export type RunnableFlow = (typeof RUNNABLE_FLOWS)[number];
 
 /** One line of `settings.flow_runs`: what the last run of a flow did and when. */
@@ -1480,8 +1882,15 @@ export async function getFlowRuns(): Promise<Partial<Record<RunnableFlow, FlowRu
  * keep the cron from sending twice keep the button from it too. The run is
  * recorded as the panel's, so the line under the row says who ran it.
  */
-export async function runFlowByHand(flow: "abandoned" | "birthday", now: number = Date.now()): Promise<FlowRun & { at: string }> {
-  const run = flow === "abandoned" ? await runAbandonedCarts(now) : await runBirthdays(now);
+export type HandRunFlow = "abandoned" | "abandonedDiscount" | "birthday";
+
+export async function runFlowByHand(flow: HandRunFlow, now: number = Date.now()): Promise<FlowRun & { at: string }> {
+  const run =
+    flow === "abandoned"
+      ? await runAbandonedCarts(now)
+      : flow === "abandonedDiscount"
+        ? await runAbandonedCartsDiscount(now)
+        : await runBirthdays(now);
   const record = await recordFlowRun(flow, run, "admin", now);
   return { ...run, at: record.at };
 }
@@ -1491,6 +1900,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
   const started = Date.now();
   const out: FlowsReport = {
     abandoned: { sent: 0, skipped: 0, reason: "error" },
+    abandonedDiscount: { sent: 0, skipped: 0, reason: "error" },
     backstock: { sent: 0, skipped: 0, reason: "error" },
     birthday: { sent: 0, skipped: 0, reason: "error" },
     invoices: { reminded: 0, cancelled: 0, skipped: 0, reason: "error" },
@@ -1498,8 +1908,14 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     delivered: { closed: 0, checked: 0, reason: "error" },
     ms: 0,
   };
+  /* «Брошенная корзина» first, then its discounted follow-up: the second
+     letter's queue is built out of `reminded_at`, so running them in this
+     order on the one pass a day the free plan allows means a basket that
+     became due for both on the same day still gets them a full
+     `abandonedDiscountDays` apart rather than minutes apart. */
   for (const [key, fn] of [
     ["abandoned", runAbandonedCarts],
+    ["abandonedDiscount", runAbandonedCartsDiscount],
     ["backstock", sweepBackInStock],
     ["birthday", runBirthdays],
   ] as const) {
@@ -1581,7 +1997,10 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
      with the defaults rather than throwing, so it needs no try of its own. */
   const flows = await getFlows();
   try {
-    const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
+    /* The wait the RUN is going to make, not the built-in three hours: the
+       panel's «в очереди N» must not promise a letter the run will not send,
+       which is the same rule NOT_OPTED_OUT above exists for. */
+    const cutoff = new Date(now - abandonedAfterMs(flows)).toISOString();
     const [carts] = await query<{ n: string | number }>(
       `select count(*)::int as n from carts c
         where c.reminded_at is null and c.recovered_at is null and c.updated_at <= $1
