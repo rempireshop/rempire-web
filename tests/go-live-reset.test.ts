@@ -254,7 +254,7 @@ describe("the plan", () => {
   });
 
   it("gives every table a verdict and an argument", () => {
-    expect(plan.length).toBe(28 + 1); // 28 tables from db/migrations, plus _migrations
+    expect(plan.length).toBe(29 + 1); // 29 tables from db/migrations, plus _migrations
     for (const p of plan) {
       expect(["clear", "keep", "ask"]).toContain(p.verdict);
       expect(p.why.length).toBeGreaterThan(60);

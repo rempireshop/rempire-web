@@ -171,6 +171,18 @@ export const PLAN = [
       "That costs a 410 apiece, once — still cheaper than this tool guessing which of the two it is.",
   },
   {
+    table: "mail_sends_daily",
+    verdict: "keep",
+    why:
+      "How many letters went out today, per class, against the free plan's hundred (201_mail_budget.sql, " +
+      "src/lib/mail-budget.ts). It looks like test data and it is not: the rows are a record of what RESEND " +
+      "has already accepted, and the one thing this tool cannot reset is the provider's own counter. Clearing " +
+      "it on the morning of go-live would tell the shop it has a full day's allowance it does not have, and " +
+      "the letter that then gets refused is «Заказ принят» for the first real order — the exact failure the " +
+      "table exists to prevent. Keeping it costs nothing and lasts hours: the key is the UTC day, so the rows " +
+      "stop mattering at midnight without anybody deleting them.",
+  },
+  {
     table: "admin_audit",
     verdict: "keep",
     never: true,

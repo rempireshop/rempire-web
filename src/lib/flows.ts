@@ -38,6 +38,7 @@ import { query } from "@/lib/db";
    midnight would otherwise still be looking at yesterday's date. */
 import { addShopDays, endOfShopDay, shopDay, shopDayStart, ymdParts } from "@/lib/day";
 import { sendRendered } from "@/lib/mail";
+import { roomFor, warnOwnerOnce } from "@/lib/mail-budget";
 import {
   markStockAlertSent,
   normalizeLangCode,
@@ -489,6 +490,11 @@ export const SKIP_REASONS = [
      the basket is worth less than «Скидка от … €» asks for */
   "no_reminder",
   "below_min",
+  /* the day's marketing allowance is spent — cap minus the reserve held for
+     order letters, or Resend's own quota (src/lib/mail-budget.ts). Nothing is
+     wrong and nothing is lost: the rows are not stamped, so tomorrow's run
+     picks up exactly where this one stopped. */
+  "no_budget",
   /* …and when not one of the counts above is anything but zero: there is
      nobody this letter could go to at all. Said out loud, because «отправлено
      0» with nothing beside it is what «the sender is broken» looks like. */
@@ -537,6 +543,26 @@ function sendSkip(res: { ok: boolean; skipped?: boolean; error?: string }): Skip
   if (res.error === "no_api_key") return "no_api_key";
   if (res.error === "no_recipient" || res.error === "bad_email") return "no_email";
   return "send_failed";
+}
+
+/**
+ * How many letters this run may send today — src/lib/mail-budget.ts.
+ *
+ * Three of the flows below are marketing (the cart reminder, its discounted
+ * follow-up, the birthday greeting): nobody asked for them, so they are the
+ * ones that stop when the day's allowance is down to the reserve held for
+ * order letters. «Снова в наличии» is not one of them — a shopper left their
+ * address against a named product and is owed the answer — and neither is the
+ * unpaid reminder, which is about an order that already exists.
+ *
+ * The run never sends more than this many, and it never STAMPS a row it did
+ * not send to: a cart with no `reminded_at` is a cart tomorrow's run still
+ * owes a letter. The owner hears about it once a day, on his phone.
+ */
+async function marketingRoom(): Promise<number> {
+  const room = await roomFor("marketing");
+  if (room <= 0) await warnOwnerOnce();
+  return room;
 }
 
 /** Exported so «Брошенные корзины» on «Аналитика» can count the same carts this
@@ -589,6 +615,8 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
   const flows = await getFlows();
   if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
+  let roomLeft = await marketingRoom();
+  if (roomLeft <= 0) return { sent: 0, skipped: 0, reason: "no_budget", skips: { no_budget: 1 } };
 
   const cutoff = new Date(now - abandonedAfterMs(flows)).toISOString();
   const rows = await query<{
@@ -621,6 +649,13 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
   let sent = 0;
   const skips = counter();
   for (const row of rows) {
+    /* Before the stamp, always: a row this run will not write to must stay
+       exactly as it was, or tomorrow's run would skip a cart that never got
+       its letter. */
+    if (roomLeft <= 0) {
+      skips.add("no_budget");
+      continue;
+    }
     const items = parseItems(row.items);
     if (!items.length) {
       await query("update carts set reminded_at = now() where id = $1", [row.id]);
@@ -648,9 +683,17 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
       tags: { template: "abandoned-cart", lang: lang.toLowerCase() },
       idempotencyKey: `cart:${row.id}`,
       headers: unsubscribeHeaders(row.email, lang, "marketing"),
+      kind: "marketing",
     });
-    if (res.ok && !res.skipped) sent += 1;
-    else skips.add(sendSkip(res));
+    if (res.ok && !res.skipped) {
+      sent += 1;
+      roomLeft -= 1;
+    } else {
+      skips.add(sendSkip(res));
+      // Resend's own daily quota: nothing else is going out today, whatever
+      // our counter says. The rest of the queue is left for tomorrow.
+      if (res.quota) roomLeft = 0;
+    }
   }
   /* The queue was empty: say what it was full of instead of reporting a bare
      zero. This is the one question «Запустить сейчас» exists to answer — Renat
@@ -849,6 +892,8 @@ export async function runAbandonedCartsDiscount(now: number = Date.now()): Promi
   const flows = await getFlows();
   if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
+  let roomLeft = await marketingRoom();
+  if (roomLeft <= 0) return { sent: 0, skipped: 0, reason: "no_budget", skips: { no_budget: 1 } };
 
   const cutoff = new Date(now - flows.abandonedDiscountDays * 24 * 60 * 60 * 1000).toISOString();
   const minTotal = flows.abandonedDiscountMinTotal;
@@ -884,6 +929,12 @@ export async function runAbandonedCartsDiscount(now: number = Date.now()): Promi
   let sent = 0;
   const skips = counter();
   for (const row of rows) {
+    /* Before the stamp and before a code is written: a basket this run cannot
+       write to keeps both, and tomorrow's run makes it the same offer. */
+    if (roomLeft <= 0) {
+      skips.add("no_budget");
+      continue;
+    }
     const items = parseItems(row.items);
     if (!items.length) {
       await query("update carts set discount_at = now() where id = $1", [row.id]);
@@ -924,11 +975,15 @@ export async function runAbandonedCartsDiscount(now: number = Date.now()): Promi
       tags: { template: "abandoned-cart-discount", lang: lang.toLowerCase() },
       idempotencyKey: `cart-discount:${row.id}`,
       headers: unsubscribeHeaders(row.email, lang, "marketing"),
+      kind: "marketing",
     });
     if (res.ok && !res.skipped) {
       sent += 1;
+      roomLeft -= 1;
     } else {
       skips.add(sendSkip(res));
+      // Resend's own daily quota — the rest of this queue is tomorrow's.
+      if (res.quota) roomLeft = 0;
       /* Skipped, not failed: the mail layer did not even try (no key, no
          address). Nothing reached anybody, so the stamp and the code both come
          off — the basket is owed this letter as soon as mail works, and the
@@ -1374,6 +1429,8 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
   await loadTexts();
+  let roomLeft = await marketingRoom();
+  if (roomLeft <= 0) return { sent: 0, skipped: 0, reason: "no_budget", skips: { no_budget: 1 } };
 
   const window = birthdayWindow(now, flows.birthdayDays);
   const byDay = new Map<number, WindowDay>();
@@ -1425,6 +1482,12 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   let sent = 0;
   const skips = counter();
   for (const row of rows) {
+    /* Before the stamp: an unstamped row is one tomorrow's run still sees,
+       and a birthday is worth being a day late about rather than missing. */
+    if (roomLeft <= 0) {
+      skips.add("no_budget");
+      continue;
+    }
     const day = byDay.get(Number(row.mmdd));
     if (!day) continue;
     const year = day.year;
@@ -1458,11 +1521,15 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
       tags: { template: "birthday", lang: lang.toLowerCase() },
       idempotencyKey: `bday:${row.id}:${year}`,
       headers: unsubscribeHeaders(row.email, lang, "marketing"),
+      kind: "marketing",
     });
     if (res.ok && !res.skipped) {
       sent += 1;
+      roomLeft -= 1;
     } else {
       skips.add(sendSkip(res));
+      // Resend's own daily quota — the rest of this queue is tomorrow's.
+      if (res.quota) roomLeft = 0;
       /* Skipped, not failed: the mail layer did not even try (no key, no
          address). Nothing reached anybody, so the stamp comes off — a shop
          that gets its Resend key next week must still greet this customer

@@ -27,6 +27,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { runFlows } from "@/lib/flows";
+import { resumeParkedNewsletters } from "@/lib/newsletters";
 import { reconcileUnpaidOrders } from "@/lib/payments/reconcile";
 
 export const runtime = "nodejs";
@@ -75,7 +76,25 @@ export async function GET(req: Request) {
       console.error("[api/cron/flows] the payment sweep failed:", err);
       reconciled = { error: "failed" };
     }
-    return Response.json({ ok: true, ...report, payments: reconciled }, { headers: NO_STORE });
+    /* …and the campaigns that ran out of day. A «Рассылка» bigger than the
+       free plan's hundred letters stops at the cap and parks itself
+       (src/lib/mail-budget.ts, src/lib/newsletters.ts): nothing in a
+       serverless shop would ever call it back, because the panel only loops
+       while the tab is open. This is the call-back. It runs LAST of the three
+       — the automatic letters and the payment sweep are about orders and
+       people waiting for them, and this one is content to take another day.
+       Its own failure is caught here for the same reason the sweep's is. */
+    let newsletters;
+    try {
+      newsletters = await resumeParkedNewsletters();
+    } catch (err) {
+      console.error("[api/cron/flows] the parked campaigns failed:", err);
+      newsletters = { error: "failed" };
+    }
+    return Response.json(
+      { ok: true, ...report, payments: reconciled, newsletters },
+      { headers: NO_STORE },
+    );
   } catch (err) {
     console.error("[api/cron/flows] failed:", err);
     return Response.json({ ok: false, error: "server_error" }, { status: 500, headers: NO_STORE });

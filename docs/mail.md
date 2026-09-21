@@ -55,6 +55,50 @@ Railway, into the project's environment settings.
 | `MAIL_RETRY_DELAY_MS` | the 5xx retry pause | default `400`. Tests set `0`. |
 | `RESEND_TO`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | the *shop's own* ping on a paid order | owned by `src/lib/notify.ts`, documented here because `onOrderPaid` uses it. |
 
+## The day's allowance — `settings.mail_budget` (21.09.2026)
+
+The free plan gives 100 letters a day and 3 000 a month, and enforces it
+softly: Dim has watched a run pass 100 and stop nearer 200. So the cap the shop
+obeys is **ours**, and it is counted: `src/lib/mail-budget.ts` over
+`db/migrations/201_mail_budget.sql` (`mail_sends_daily`, one row per UTC day
+per class).
+
+The danger is not a slow newsletter. It is a campaign eating the day's
+allowance in the morning and an **order confirmation failing in the
+afternoon** — a customer who has paid and gets nothing. Hence two rules, and
+they are not symmetrical:
+
+| | asks first? | counted? | when the counter cannot be read |
+|---|---|---|---|
+| **transactional** — order letters, gift cards, invoices, «снова в наличии», the owner's ping | never | yes | **sends anyway** (fail open) |
+| **marketing** — «Рассылка», abandoned cart, its discounted follow-up, birthday | yes, stops at `cap − reserve` | yes | **holds back** (fail closed) |
+
+- The two numbers are `settings.mail_budget` — `{ "cap": 100, "reserve": 30 }`
+  out of the box, validated on the way in by `cleanMailBudget()`
+  (`PUT /api/admin/settings`). The reserve is the part of the cap marketing may
+  not touch.
+- `kind: "marketing"` on the send is what puts a letter in the second row of
+  that table. **The default is `transactional`**: a letter nobody classified is
+  counted but can never be stopped.
+- **UTC**, not Tallinn (which `src/lib/day.ts` cuts the shop's own days on),
+  because that is when Resend's allowance turns over.
+- A campaign that does not fit **parks**: the rows stay queued, the letter
+  stays `sending`, `POST …/send/` answers `parked:true`, and
+  `GET /api/cron/flows` (07:00) calls it back until it is done — «отправлено 70
+  из 180, продолжится завтра».
+- A 429 that names the daily quota is **not** the 429 that names two requests
+  a second (`quotaRefusal()` in `src/lib/mail.ts`). The first stamps the day
+  blocked and the run stops at once; the second still just pauses.
+- When the wall is hit the owner is told **once a day, by Web Push and
+  Telegram** — never by e-mail, which is the thing that has run out. The
+  same run also moved his «новый заказ» ping off Resend: push first, the
+  letter only if no phone took it (`pingOwner` in `src/lib/mail-hooks.ts`).
+- For the panel: `GET /api/admin/newsletters/audience/` and
+  `GET|POST /api/admin/newsletters/<id>/send/` all carry `budget` (`cap`,
+  `reserve`, `sent.{transactional,marketing,total}`, `marketingRoom`,
+  `blocked`, `known`) and `plan` (`left`, `today`, `days`, `until`).
+- Tests: `tests/mail-budget.test.ts`.
+
 ## Creating the Resend API key (Dim)
 
 The Resend account is the shop's (`rempireshopinfo@`, see `docs/accounts.md`),
@@ -436,7 +480,9 @@ including "does not throw on a garbage order".
 ## Notes and limits
 
 - The free Resend tier is 3 000 mails a month, 100 a day. Five order letters
-  per order plus the three flows is nowhere near that at 3–5 orders a month.
+  per order plus the three flows is nowhere near that at 3–5 orders a month —
+  «Рассылка» is, which is why the day is counted and the campaigns are the
+  only thing that stops (see «The day's allowance» above).
 - Tags (`template`, `lang`, `stage`, `mode`) are attached to every send, so
   Resend's dashboard can be filtered by letter type.
 - **Attachments.** `sendMail({ attachments: [{ filename, content, contentType }] })`

@@ -125,7 +125,10 @@ beforeEach(async () => {
   answers.clear();
   process.env.RESEND_API_KEY = "re_test_key";
   delete process.env.E2E_BOOTSTRAP;
-  await exec("truncate newsletters, newsletter_sends, customers, mail_optouts, admin_audit restart identity cascade");
+  /* mail_sends_daily too: every accepted send now comes off the day's
+     allowance (src/lib/mail-budget.ts), and a suite that left yesterday's
+     count standing would eventually stop its own campaigns. */
+  await exec("truncate newsletters, newsletter_sends, customers, mail_optouts, admin_audit, mail_sends_daily restart identity cascade");
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
@@ -270,6 +273,10 @@ describe("routes without the admin cookie", () => {
       audience.GET(req("/api/admin/newsletters/audience/")),
       test.POST(req(`/api/admin/newsletters/${ZERO}/test/`, { method: "POST", body: JSON.stringify({ to: "a@b.ee" }) }), ctx(ZERO)),
       send.POST(req(`/api/admin/newsletters/${ZERO}/send/`, { method: "POST" }), ctx(ZERO)),
+      /* The status read is behind the same door as the send: it prints how
+         many letters the shop has spent today, which is nobody else's
+         business (21.09.2026, the budget). */
+      send.GET(req(`/api/admin/newsletters/${ZERO}/send/`), ctx(ZERO)),
       preview.GET(req(`/api/admin/newsletters/${ZERO}/preview/`), ctx(ZERO)),
     ];
     for (const res of await Promise.all(cases)) expect(res.status).toBe(401);
@@ -532,7 +539,7 @@ describe("sendNewsletterBatch", () => {
     expect(ids.map((r) => r.message_id)).toEqual(["e2e-sink"]);
   });
 
-  it("the send route loops to done and then answers 409; GET is 405", async () => {
+  it("the send route loops to done and then answers 409; GET reads the same figures without sending", async () => {
     await seedAudience();
     mockResend();
     const n = await createNewsletter(draftInput());
@@ -546,7 +553,20 @@ describe("sendNewsletterBatch", () => {
     expect(again.status).toBe(409);
     expect((await again.json()).error).toBe("already_sent");
     expect((await POST(req(`/api/admin/newsletters/${ZERO}/send/`, { method: "POST", cookie: admin }), ctx(ZERO))).status).toBe(404);
-    expect(GET().status).toBe(405);
+
+    /* GET was a 405 until 21.09.2026 and is now the status read the panel
+       polls: the same numbers, nothing sent, plus where the day's letter
+       budget stands (src/lib/mail-budget.ts). */
+    const before = sent.length;
+    const status = await GET(req(`/api/admin/newsletters/${n.id}/send/`, { cookie: admin }), ctx(n.id));
+    expect(status.status).toBe(200);
+    const read = await status.json();
+    expect(read).toMatchObject({ ok: true, done: true, sent: 4, left: 0, total: 4, status: "sent" });
+    expect(read.budget).toMatchObject({ cap: 100, reserve: 30 });
+    expect(read.budget.sent.marketing).toBe(4);
+    expect(read.plan).toMatchObject({ left: 0, today: 0, days: 0 });
+    expect(sent).toHaveLength(before); // reading the figures sends nothing
+    expect((await GET(req(`/api/admin/newsletters/${ZERO}/send/`, { cookie: admin }), ctx(ZERO))).status).toBe(404);
   });
 
   it("the test route sends one [test] letter to the address typed, in the language asked for", async () => {

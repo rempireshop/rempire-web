@@ -5234,6 +5234,55 @@
       "markedAt": "2026-09-21T06:53:00.000Z"
     },
     {
+      "id": "mail-daily-limit",
+      "area": "mail",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Дневной лимит писем",
+      "steps": [
+        "«Настройки» → «Письма» → блок «Сколько писем в сутки».",
+        "Поставить всего 4, придержать 2, сохранить.",
+        "Проверить, что подписчиков больше двух; если нет — добавить.",
+        "Открыть рассылку и нажать отправку.",
+        "Оформить и оплатить заказ, пока лимит занят.",
+        "На следующий день открыть рассылку снова."
+      ],
+      "expect": [
+        "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
+        "Рассылка останавливается на двух и говорит, что продолжится завтра.",
+        "Письмо «Заказ принят» приходит покупателю всё равно.",
+        "На телефон приходит одно оповещение о лимите, а не по одному на письмо.",
+        "Назавтра рассылка доходит до конца сама, без повторов.",
+        "Никто не получил письмо дважды."
+      ],
+      "why": "Рассылка может тихо съесть сутки, и тогда не уйдёт «Заказ принят». Это оплаченный заказ, о котором покупатель не получил ни слова.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-21T09:19:00.000Z",
+      "en": {
+        "title": "The daily letter limit",
+        "steps": [
+          "«Настройки» → «Письма» → the «Сколько писем в сутки» block.",
+          "Set the total to 4, hold back 2, save.",
+          "Check there are more than two subscribers; add some if not.",
+          "Open a campaign and press send.",
+          "Place and pay for an order while the allowance is spent.",
+          "Open the campaign again the next day."
+        ],
+        "expect": [
+          "Under the button: how many went today and how many the campaign may use.",
+          "The campaign stops at two and says it continues tomorrow.",
+          "The «Заказ принят» letter still reaches the buyer.",
+          "One phone notification about the limit, not one per letter.",
+          "Next day the campaign finishes by itself, with no repeats.",
+          "Nobody received the letter twice."
+        ],
+        "why": "A campaign can quietly eat the day and then «Заказ принят» cannot send. That is a paid order whose buyer heard nothing."
+      }
+    },
+    {
       "id": "mail-newsletter-resume",
       "area": "mail",
       "who": "dim",

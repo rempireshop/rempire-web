@@ -190,22 +190,50 @@ function ownerPush(order: OrderLike): PushMessage {
 }
 
 /**
- * The owner's own three channels, all at once. Telegram and e-mail are
- * src/lib/notify.ts and have not changed; the push is the third and is
- * optional, because it is worth waking a phone for a paid order and not for
- * everything a ping might one day be about.
+ * The owner's own three channels — push and Telegram together, the e-mail
+ * only if the push reached nobody.
  *
- * Nothing here can fail the order: all three swallow their own failures and
- * answer false. Promise.all is safe only because of that — one rejection would
- * take the other two down with it.
+ * Dim, 21.09.2026: the ping used to go out on all three at once, and one of
+ * the three is Resend. Renat's own «новый заказ» letter was therefore spending
+ * the same hundred a day the CUSTOMERS' letters come out of — an order that
+ * pings him costs two of the allowance, not one, and he is the one person in
+ * this shop who does not need to be told by e-mail. So: the push is tried
+ * first (src/lib/push.ts — it is already on his Home Screen), Telegram runs
+ * beside it exactly as it always has, and the letter is the fallback for the
+ * day the push permission is gone. He never loses the notice; it stops costing
+ * a customer's letter to deliver.
+ *
+ * Nothing here can fail the order: every channel swallows its own failure and
+ * answers false. Promise.all is safe only because of that — one rejection
+ * would take the other down with it.
  */
 async function pingOwner(subject: string, body: string, push?: PushMessage): Promise<boolean> {
-  const [tg, mail, pushed] = await Promise.all([
+  const [tg, pushed] = await Promise.all([
     forwardTelegram(body),
-    forwardEmail(subject, body),
     push ? pushOwner(push) : Promise.resolve(false),
   ]);
-  return tg || mail || pushed;
+  /* A ping with no push message at all (a future caller that has nothing to
+     put on a lock screen) falls through to the letter, which is what every
+     caller used to do. */
+  if (pushed) return true;
+
+  const mail = await forwardEmail(subject, body);
+  /* forwardEmail() posts to Resend itself rather than through sendMail(), so
+     it is the one send in the shop the counter cannot see from the inside —
+     counted here, against the class that is never stopped (it is the owner's,
+     and it only happens when the phone did not answer). */
+  if (mail) await noteOwnerMail();
+  return tg || mail;
+}
+
+/** One line, lazily, so the renderers never drag `pg` in behind them. */
+async function noteOwnerMail(): Promise<void> {
+  try {
+    const { noteSent } = await import("@/lib/mail-budget");
+    await noteSent("transactional");
+  } catch (err) {
+    console.error("[mail-hooks] the owner's ping was not counted:", err);
+  }
 }
 
 /**

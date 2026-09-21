@@ -6,6 +6,15 @@
  * An order that was paid for must not fail because a mail provider had a bad
  * minute — the caller gets `{ ok: false }` and the order flow carries on.
  *
+ * Since 21.09.2026 every accepted send is also COUNTED — the free plan allows
+ * a hundred letters a day and nothing was keeping score, so a campaign could
+ * eat the day's allowance and leave an order confirmation to fail
+ * (src/lib/mail-budget.ts). Nothing in here decides whether a letter may go:
+ * the counter is written after the fact, `kind` says which allowance it came
+ * out of, and only the MARKETING senders ask permission first. A letter
+ * nobody classified is counted as transactional, spends the allowance and can
+ * never be stopped by it.
+ *
  * Env:
  *   RESEND_API_KEY   — required to actually send; missing ⇒ skipped
  *   RESEND_FROM      — "Rempire <shop@rempireshop.com>" by default
@@ -23,6 +32,17 @@ export interface MailTag {
   name: string;
   value: string;
 }
+
+/**
+ * Which of the day's two allowances a letter comes out of — the whole of what
+ * src/lib/mail-budget.ts needs to know about it.
+ *
+ * "transactional" is everything the shop OWES somebody: the order letters,
+ * the gift card, an invoice, the «снова в наличии» alert a shopper asked for
+ * by name, the owner's own ping. "marketing" is what nobody asked for —
+ * «Рассылка» and the three automatic letters in src/lib/flows.ts.
+ */
+export type MailKind = "transactional" | "marketing";
 
 /**
  * One file riding along with the letter. Resend takes attachments inline as
@@ -63,6 +83,12 @@ export interface SendMailInput {
    * the request itself is sent with.
    */
   headers?: Record<string, string>;
+  /**
+   * Whose allowance this letter spends. Default "transactional", and that
+   * default is the safe one: an untagged letter is counted (so the day's
+   * figure stays true) but is never the letter that gets stopped.
+   */
+  kind?: MailKind;
 }
 
 export interface SendMailResult {
@@ -75,6 +101,12 @@ export interface SendMailResult {
   error?: string;
   /** True when the first attempt got a 5xx and the retry was used. */
   retried?: boolean;
+  /**
+   * Resend refused because the DAY's quota is gone — see quotaRefusal().
+   * A caller sending a queue reads this and stops; an ordinary failure is
+   * about one address and says nothing about the next one.
+   */
+  quota?: boolean;
 }
 
 /* ---------- helpers ----------------------------------------------------- */
@@ -161,6 +193,69 @@ function sleep(ms: number): Promise<void> {
   return ms > 0
     ? new Promise((r) => setTimeout(r, ms))
     : Promise.resolve();
+}
+
+/* ---------- the day's quota ---------------------------------------------- */
+
+/**
+ * Resend answers 429 for two entirely different things, and telling them
+ * apart is the difference between «wait a second» and «come back tomorrow»:
+ *
+ *   rate_limit_exceeded   "Too many requests. You can only make 2 requests
+ *                          per second." — the batch pauses and carries on,
+ *                          which src/lib/newsletters.ts has always done.
+ *   daily_quota_exceeded  "You have reached your daily email sending quota."
+ *                          — nothing else will be accepted today, and a queue
+ *                          that keeps walking simply collects this refusal
+ *                          once per address.
+ *
+ * Matched on the words rather than the code because the code is the same one,
+ * and on what attempt() already puts in `error` — `message` if there is one,
+ * else Resend's `name`, so both spellings above land here. 403 is included
+ * for the plan-level refusal that is not a rate limit at all; a 403 that says
+ * nothing about a quota (a restricted key) is not one of these.
+ */
+const QUOTA_WORDS = /quota|daily limit|daily sending|sending limit|limit reached/i;
+const RATE_WORDS = /per second|rate[ _-]?limit|too many requests/i;
+
+export function quotaRefusal(status: number | undefined, error: string | undefined): boolean {
+  if (status !== 429 && status !== 403) return false;
+  const text = String(error ?? "");
+  if (RATE_WORDS.test(text)) return false;
+  return QUOTA_WORDS.test(text);
+}
+
+/* The counter lives behind `pg` (src/lib/mail-budget.ts → src/lib/db.ts), and
+   this file is imported by every renderer and by the preview route, so it
+   comes in lazily and its failures stay its own — the same shape as the push
+   import in src/lib/mail-hooks.ts.
+
+   The env check first: a run with no database configured (the mail unit
+   tests, a script rendering letters) must not spend a failed query per
+   letter proving it, exactly as src/lib/push.ts checks its keys before
+   touching the table. */
+function countingOn(): boolean {
+  return process.env.DB_DRIVER === "pglite" || Boolean((process.env.DATABASE_URL ?? "").trim());
+}
+
+async function countSend(kind: MailKind | undefined): Promise<void> {
+  if (!countingOn()) return;
+  try {
+    const { noteSent } = await import("@/lib/mail-budget");
+    await noteSent(kind === "marketing" ? "marketing" : "transactional");
+  } catch (err) {
+    console.error("[mail] the send was not counted:", err);
+  }
+}
+
+async function countQuotaRefusal(kind: MailKind | undefined): Promise<void> {
+  if (!countingOn()) return;
+  try {
+    const { noteQuotaRefusal } = await import("@/lib/mail-budget");
+    await noteQuotaRefusal(kind === "marketing" ? "marketing" : "transactional");
+  } catch (err) {
+    console.error("[mail] the quota refusal was not recorded:", err);
+  }
 }
 
 /** The reply-to policy lives in one place: env, unless the caller overrode it. */
@@ -391,6 +486,10 @@ export async function sendMail(
   }
 
   if (res.id || (res.status >= 200 && res.status < 300)) {
+    /* Accepted: it comes off the day's allowance. Awaited rather than left
+       running — the very next send may be the one that has to be stopped,
+       and a counter written after that decision is a counter that lies. */
+    await countSend(input.kind);
     return { ok: true, id: res.id, status: res.status, retried };
   }
 
@@ -401,11 +500,16 @@ export async function sendMail(
     "→",
     to.join(", "),
   );
+  const quota = quotaRefusal(res.status, res.error);
+  // The day is over at Resend's end: written down here so the queue this
+  // letter came from stops at once rather than address by address.
+  if (quota) await countQuotaRefusal(input.kind);
   return {
     ok: false,
     status: res.status,
     error: res.error || `http_${res.status}`,
     retried,
+    ...(quota ? { quota: true } : {}),
   };
 }
 

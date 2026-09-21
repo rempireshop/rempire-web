@@ -2990,6 +2990,21 @@
       "Это только для этой посылки — коробка магазина не меняется.":
         "See kehtib ainult sellele pakile — poe karp ei muutu.",
       "Куда ведёт картинка": "Kuhu pilt viib",
+      "лимит писем на сегодня исчерпан": "tänane kirjade limiit on täis",
+      "Сколько писем ушло сегодня — неизвестно. Рассылка подождёт, письма о заказах уходят как обычно.": "Kui palju kirju täna läks, ei ole teada. Uudiskiri ootab, tellimuste kirjad lähevad tavapäraselt.",
+      "Сегодня отправлено": "Täna saadetud",
+      "из": "kokku",
+      "рассылке доступно": "uudiskirjale jääb",
+      "На сегодня лимит исчерпан. Рассылка продолжится завтра сама, письма о заказах уходят как обычно.": "Tänane limiit on täis. Uudiskiri jätkub homme ise, tellimuste kirjad lähevad tavapäraselt.",
+      "Сегодняшняя доля рассылки уже занята — продолжится завтра сама.": "Uudiskirja tänane osa on juba kasutatud — jätkub homme ise.",
+      "Сколько писем в сутки": "Mitu kirja ööpäevas",
+      "У почтового сервиса есть суточный предел. Магазин считает письма сам и придерживает часть для писем о заказах.": "Postiteenusel on ööpäevane piir. Pood loeb kirju ise ja hoiab osa tellimuste kirjade jaoks.",
+      "Писем в сутки, всего": "Kirju ööpäevas kokku",
+      "Столько магазин отправит за сутки и больше не будет.": "Nii palju saadab pood ööpäevas ja rohkem mitte.",
+      "Из них придержать": "Neist hoida tagasi",
+      "Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.": "See on tellimuste kirjade osa. Null — ja uudiskiri võtab ühel päeval kogu ööpäeva.",
+      "Писем в сутки — от 1 до 5000": "Kirju ööpäevas — 1 kuni 5000",
+      "Придержать можно меньше, чем всего": "Tagasi hoida saab vähem kui kokku",
       "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "kord ööpäevas: korvidele, mis on seadetes märgitud ajast vanemad, kui tellimust ikka ei tulnud",
       "Брошенная корзина — письмо со скидкой": "Hüljatud korv — kiri sooduskoodiga",
       "через несколько дней после первого письма, если заказа так и нет": "mõni päev pärast esimest kirja, kui tellimust ikka ei ole",
@@ -5884,6 +5899,21 @@
       "Это только для этой посылки — коробка магазина не меняется.":
         "This is for this parcel only — the shop's box does not change.",
       "Куда ведёт картинка": "Where the picture leads",
+      "лимит писем на сегодня исчерпан": "today's letter limit is used up",
+      "Сколько писем ушло сегодня — неизвестно. Рассылка подождёт, письма о заказах уходят как обычно.": "How many letters went out today is unknown. The campaign waits; order letters go as usual.",
+      "Сегодня отправлено": "Sent today",
+      "из": "of",
+      "рассылке доступно": "the campaign may use",
+      "На сегодня лимит исчерпан. Рассылка продолжится завтра сама, письма о заказах уходят как обычно.": "Today's limit is used up. The campaign continues tomorrow by itself; order letters go as usual.",
+      "Сегодняшняя доля рассылки уже занята — продолжится завтра сама.": "The campaign's share for today is used up — it continues tomorrow by itself.",
+      "Сколько писем в сутки": "How many letters a day",
+      "У почтового сервиса есть суточный предел. Магазин считает письма сам и придерживает часть для писем о заказах.": "The mail service has a daily limit. The shop counts the letters itself and holds some back for order letters.",
+      "Писем в сутки, всего": "Letters a day, in total",
+      "Столько магазин отправит за сутки и больше не будет.": "That is how many the shop sends in a day and no more.",
+      "Из них придержать": "Of those, hold back",
+      "Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.": "That is the order letters' share. Zero, and a campaign will one day take the whole allowance.",
+      "Писем в сутки — от 1 до 5000": "Letters a day — from 1 to 5000",
+      "Придержать можно меньше, чем всего": "You can hold back less than the total",
       "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "once a day: to baskets older than the time set in Settings, if no order ever came",
       "Брошенная корзина — письмо со скидкой": "Abandoned cart — the letter with the discount",
       "через несколько дней после первого письма, если заказа так и нет": "some days after the first letter, if there is still no order",
@@ -6065,6 +6095,17 @@
       ET: "Hüljatud korvid: meeldetuletus $1 h pärast, soodustus $2 % $3 päeva pärast.",
       EN: "Abandoned carts: a reminder after $1 h, a $2 % discount after $3 days.",
     }],
+    /* «Письма за сегодня» и «займёт 3 дня» — числа в этих строках
+       собираются на лету, ключа у них быть не может. */
+    [/^· (\d+) день$/, { ET: "· $1 päev", EN: "· $1 day" }],
+    [/^· (\d+) дня$/, { ET: "· $1 päeva", EN: "· $1 days" }],
+    [/^· (\d+) дней$/, { ET: "· $1 päeva", EN: "· $1 days" }],
+    [/^(\d+) дня$/, { ET: "$1 päeva", EN: "$1 days" }],
+    [/^(\d+) дней$/, { ET: "$1 päeva", EN: "$1 days" }],
+    [/^Рассылка: отправлено (\d+) из (\d+), продолжится завтра$/,
+      { ET: "Uudiskiri: saadetud $1 / $2, jätkub homme", EN: "Campaign: $1 of $2 sent, continues tomorrow" }],
+    [/^Писем в сутки: (\d+), придержано (\d+)$/,
+      { ET: "Kirju ööpäevas: $1, tagasi hoitud $2", EN: "Letters a day: $1, held back $2" }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
     [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
@@ -8559,6 +8600,7 @@
     // «Письма → Неоплаченные заказы»: the two day counts being typed
     unpaidDraft: null,
     cartFlowDraft: null, cartFlowSaved: false,
+    mailBudgetDraft: null, mailBudgetSaved: false,
     acctName: "",
     pay: 0,
     bank: 0,
@@ -20704,7 +20746,8 @@
     no_birthday: "дата рождения не указана",
     no_marketing: "нет согласия на письма",
     not_in_window: "дата не попадает в это окно",
-    nobody: "в списке никого нет"
+    nobody: "в списке никого нет",
+    no_budget: "лимит писем на сегодня исчерпан"
   };
   /** « · корзине ещё нет трёх часов 2» — every reason the run counted. */
   function flowSkipsHTML(skips) {
@@ -20805,6 +20848,7 @@
         "один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>" +
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
+      mailBudgetCard() +
       cartFlowSettingsCard() +
       unpaidSettingsCard();
   }
@@ -20827,6 +20871,80 @@
 
      Дни второго письма считаются от ПЕРВОГО письма, не от корзины: пока
      первое не ушло, второго не бывает вовсе (skip `no_reminder`). */
+  /* ---- «Сколько писем в сутки» -------------------------------------------
+     У бесплатного Resend сто в сутки. Предел здесь НАШ, а не вычитанный у
+     провайдера: Дим, 21.09.2026, видел, как тот пропускает и полторы сотни,
+     а строить расчёт на чужой мягкости нельзя.
+
+     Резерв — это единственное, что стоит между рассылкой и письмом «Заказ
+     принят». Рассылка останавливается, не дойдя до предела; письма о заказах
+     разрешения не спрашивают вообще и уходят всегда. Поставить резерв в ноль
+     можно, и тогда кампания однажды съест сутки, а покупатель не получит ни
+     слова об оплаченном заказе — поэтому под полем это написано словами. */
+  function mailBudgetDraft() {
+    if (!S.mailBudgetDraft) {
+      var b = S.newsBudget || {};
+      S.mailBudgetDraft = {
+        cap: Number(b.cap) || 100,
+        reserve: b.reserve == null ? 30 : Number(b.reserve),
+      };
+    }
+    return S.mailBudgetDraft;
+  }
+  function mailBudgetCard() {
+    loadNewsAudience(false);   // тем же запросом приходят cap и reserve
+    var d = mailBudgetDraft();
+    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Сколько писем в сутки</div></div>' +
+      '<div class="adm-form" style="margin-top:8px" data-admmailbudget>' +
+        '<p class="adm-hint" style="margin:0">У почтового сервиса есть суточный предел. ' +
+          "Магазин считает письма сам и придерживает часть для писем о заказах.</p>" +
+        newsBudgetLineHTML() +
+        '<div class="adm-edpair" style="margin-top:12px">' +
+          '<label class="adm-field">Писем в сутки, всего' +
+            '<input class="adm-input" type="number" min="1" max="5000" inputmode="numeric" data-mbf="cap" value="' + esc(d.cap) + '">' +
+            '<span class="adm-hint">Столько магазин отправит за сутки и больше не будет.</span></label>' +
+          '<label class="adm-field">Из них придержать' +
+            '<input class="adm-input" type="number" min="0" max="5000" inputmode="numeric" data-mbf="reserve" value="' + esc(d.reserve) + '">' +
+            '<span class="adm-hint">Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.</span></label>' +
+        "</div>" +
+        '<div class="adm-acts" data-admmbacts>' + mailBudgetActsHTML() + "</div>" +
+      "</div>";
+  }
+  function mailBudgetDirty() {
+    if (!S.mailBudgetDraft) return false;
+    var b = S.newsBudget || {}, d = S.mailBudgetDraft;
+    return String(d.cap) !== String(Number(b.cap) || 100) ||
+      String(d.reserve) !== String(b.reserve == null ? 30 : Number(b.reserve));
+  }
+  function mailBudgetActsHTML() {
+    var dirty = mailBudgetDirty(), saved = S.mailBudgetSaved && !dirty;
+    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admmbsave' + (dirty ? "" : " disabled") + ">" +
+      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
+      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
+  }
+  function paintMailBudgetState() {
+    var acts = document.querySelector("[data-admmbacts]");
+    if (acts) { acts.innerHTML = mailBudgetActsHTML(); translateTree(acts); }
+  }
+  function srvMailBudgetSave() {
+    var d = mailBudgetDraft();
+    var cap = Math.round(Number(d.cap));
+    var reserve = Math.round(Number(d.reserve));
+    if (!isFinite(cap) || cap < 1 || cap > 5000) { toast("Писем в сутки — от 1 до 5000"); return; }
+    if (!isFinite(reserve) || reserve < 0 || reserve >= cap) { toast("Придержать можно меньше, чем всего"); return; }
+    apiSend("/api/admin/settings/", "PUT", { mail_budget: { cap: cap, reserve: reserve } }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.mailBudgetDraft = null; S.mailBudgetSaved = true;
+        journalNote("Писем в сутки: " + cap + ", придержано " + reserve);
+        toast("Сохранено ✓");
+        loadNewsAudience(true);   // строка выше пересчитается по новым числам
+        render();
+        return;
+      }
+      toast("Не сохранилось — попробуйте ещё раз");
+    }).catch(function () { toast("Нет связи с магазином"); });
+  }
   function cartFlowDraft() {
     if (!S.cartFlowDraft) {
       S.cartFlowDraft = {
@@ -21567,7 +21685,13 @@
     loadNewsAudience._busy = true;
     apiJson("/api/admin/newsletters/audience/").then(function (r) {
       loadNewsAudience._busy = false;
-      if (r.status === 200 && r.body.ok && r.body.audience) { S.newsAudience = r.body.audience; render(); if (then) then(); }
+      if (r.status === 200 && r.body.ok && r.body.audience) {
+        S.newsAudience = r.body.audience;
+        // «сегодня отправлено N из 100» и «займёт N дня» — см. newsBudgetLineHTML()
+        S.newsBudget = r.body.budget || null;
+        S.newsPlan = r.body.plan || null;
+        render(); if (then) then();
+      }
     }).catch(function () { loadNewsAudience._busy = false; });
   }
   function admNewsHTML() {
@@ -21652,6 +21776,53 @@
     if (acts) { acts.innerHTML = admNewsActsHTML(); translateTree(acts); }
   }
   /* ---- the editor ---------------------------------------------------------- */
+  /* ---- «Письма за сегодня»: сколько ещё можно отправить ------------------
+     У бесплатного Resend сто писем в сутки, и считать их приходится самим —
+     Дим, 21.09.2026, видел, как провайдер пропускает и полторы сотни, так что
+     предел должен быть НАШ, а не догадка о чужом.
+
+     Опасность не в медленной рассылке. Опасность в том, что рассылка тихо
+     съест сутки, а потом не уйдёт «Заказ принят»: это оплаченный заказ, о
+     котором покупатель не получил ни слова. Поэтому резерв: рассылка
+     останавливается, не доходя до предела, а письма о заказах не спрашивают
+     разрешения вовсе.
+
+     Цифры показываются одной строкой рядом с кнопкой отправки — там, где
+     решение и принимается, а не на отдельном экране, куда никто не ходит. */
+  function newsBudgetLineHTML() {
+    var b = S.newsBudget;
+    if (!b) return "";
+    if (b.known === false) {
+      return '<p class="adm-hint adm-hint--warn">Сколько писем ушло сегодня — неизвестно. ' +
+        "Рассылка подождёт, письма о заказах уходят как обычно.</p>";
+    }
+    var sent = (b.sent && b.sent.total) || 0;
+    var room = Number(b.marketingRoom) || 0;
+    var line = '<p class="adm-hint"><span>Сегодня отправлено</span> ' + sent + " <span>из</span> " + (Number(b.cap) || 0) +
+      " · <span>рассылке доступно</span> " + room + "</p>";
+    if (b.blocked) {
+      line += '<p class="adm-hint adm-hint--warn">На сегодня лимит исчерпан. ' +
+        "Рассылка продолжится завтра сама, письма о заказах уходят как обычно.</p>";
+    } else if (!room) {
+      line += '<p class="adm-hint adm-hint--warn">Сегодняшняя доля рассылки уже занята — ' +
+        "продолжится завтра сама.</p>";
+    }
+    return line;
+  }
+  /** «займёт 3 дня» — только когда за сегодня действительно не успеть. */
+  function newsPlanWord() {
+    var p = S.newsPlan;
+    if (!p || !(Number(p.days) > 1)) return "";
+    return " · " + plainDays(Number(p.days));
+  }
+  /* «2 дня» / «5 дней» — одним словом, потому что строку целиком переводит
+     словарь, а число в ней собирается на лету (UI_RX). */
+  function plainDays(n) {
+    var t = n % 10, h = n % 100;
+    if (t === 1 && h !== 11) return n + " день";
+    if (t >= 2 && t <= 4 && (h < 12 || h > 14)) return n + " дня";
+    return n + " дней";
+  }
   function newsSendLabel(aud) {
     if (!aud) return "Отправить подписчикам";
     var n = Number(aud.total) || 0;
@@ -21721,7 +21892,8 @@
         /* the send itself — this card's own verb since the save bar became
            the phone's header (11.09.2026): the count above it, the confirm
            card behind it as before (newsSendAsk) */
-        '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" + newsSendLabel(aud) + "</button>";
+        '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" +
+          newsSendLabel(aud) + newsPlanWord() + "</button>" + newsBudgetLineHTML();
     }
     return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
   }
@@ -22010,10 +22182,22 @@
       }
       st.sent = r.body.sent || 0; st.failed = r.body.failed || 0; st.left = r.body.left || 0; st.total = r.body.total || 0;
       newsSyncSent(r.body.newsletter);
+      S.newsBudget = r.body.budget || S.newsBudget;
+      S.newsPlan = r.body.plan || S.newsPlan;
       if (r.body.done) {
         st.busy = false; S.news = null;
         var line = newsDoneLine(st.sent, st.failed);
         journalNote(line); toast(line);
+        render(); return;
+      }
+      /* Единственное «не готово», после которого звать снова НЕ нужно: сутки
+         исчерпаны, и остаток заберёт ночное расписание. Старая панель здесь
+         звонила бы дальше — сервер отвечает ей паузой в четверть часа, но
+         правильный ответ тот, что ниже: остановиться и сказать словами. */
+      if (r.body.parked) {
+        st.busy = false; st.parked = true;
+        var pline = "Рассылка: отправлено " + st.sent + " из " + st.total + ", продолжится завтра";
+        journalNote(pline); toast(pline);
         render(); return;
       }
       render();
@@ -37028,7 +37212,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -38763,6 +38947,7 @@
     // «Настройки»: the index of six and the way back out of a sub-page
     // …the bar's «Сохранено ✓» belongs to the page it was earned on, and so
     // does the delivery page's refusal (S.shipErr) — a page opens quiet
+    if (d.admmbsave !== undefined) { srvMailBudgetSave(); return; }
     if (d.admcartsave !== undefined) { srvCartFlowSave(); return; }
     if (d.pushon !== undefined) { pushOn(); return; }
     if (d.pushoff !== undefined) { pushOff(); return; }
@@ -39723,6 +39908,7 @@
     else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; paintSetBar(); }
     else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
     else if (t.matches("[data-cartf]")) { cartFlowDraft()[t.dataset.cartf] = t.value; S.cartFlowSaved = false; paintCartFlowState(); }
+    else if (t.matches("[data-mbf]")) { mailBudgetDraft()[t.dataset.mbf] = t.value; S.mailBudgetSaved = false; paintMailBudgetState(); }
     else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; paintSetBar(); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
@@ -40762,6 +40948,7 @@
        and not its URL box: Enter there must never mean «save the banner». */
     ["[data-unpaidf]", "[data-admunpaidsave]"],
     ["[data-cartf]", "[data-admcartsave]"],
+    ["[data-mbf]", "[data-admmbsave]"],
     ["[data-invsetf]", "[data-adminvsave]"],
     ["[data-shiprule]", "[data-admshipsave]"],
     ["[data-pricingf]", "[data-admpricingsave]"],

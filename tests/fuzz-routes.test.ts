@@ -590,7 +590,10 @@ describe("API fuzzing", () => {
       ["/api/admin/push/unsubscribe/", () => import("@/app/api/admin/push/unsubscribe/route"), "GET"],
       ["/api/admin/push/test/", () => import("@/app/api/admin/push/test/route"), "GET"],
       ["/api/admin/newsletters/x/test/", () => import("@/app/api/admin/newsletters/[id]/test/route"), "GET"],
-      ["/api/admin/newsletters/x/send/", () => import("@/app/api/admin/newsletters/[id]/send/route"), "GET"],
+      /* …/send/ used to be here. Its GET stopped being a refusal on
+         21.09.2026 and became the status read the panel polls — «отправлено N
+         из M» and where the day's letter budget stands. It is admin-only like
+         everything else on this path, which the 401 sweep above covers. */
     ];
     for (const [path, load, method] of refusers) {
       const mod = await load();

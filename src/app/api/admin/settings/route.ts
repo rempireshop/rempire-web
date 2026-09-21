@@ -14,6 +14,7 @@ import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
 import { belowCostCells, belowCostMessage, cleanShippingRules, type ShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
+import { cleanMailBudget } from "@/lib/mail-budget";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
 import { cleanDelivery } from "@/lib/delivery";
@@ -117,6 +118,13 @@ export async function PUT(req: Request) {
          anything is stored — src/emails/texts.ts cleanMailTexts(). The
          letters escape it again at render time; this is the first door. */
       if (key === "mail_texts") value = cleanMailTexts(value);
+      /* «Лимит писем»: how many letters a day the shop allows itself and how
+         many of them are held back for order letters — the numbers
+         src/lib/mail-budget.ts stops the campaigns with. Whole, non-negative,
+         and a reserve that can never exceed the cap it lives inside, because
+         the arithmetic behind «рассылке доступно M» must not be able to go
+         negative. Same first door as pricing and gift_amounts. */
+      if (key === "mail_budget") value = cleanMailBudget(value);
       /* «Подарочные карты»: which denominations the /gift/ page offers. Kept to
          a subset of the amounts the checkout will actually accept
          (GIFT_AMOUNTS), sorted and de-duplicated, and never empty — a gift page

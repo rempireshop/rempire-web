@@ -32,6 +32,17 @@
  * second one is told `busy`; a lease older than the function budget belongs
  * to a call that is dead and is taken over.
  *
+ * How much may go out today (since 21.09.2026): the day's allowance, minus
+ * the reserve held back for order letters — src/lib/mail-budget.ts. A
+ * campaign is the one thing in this shop big enough to eat a hundred letters
+ * before lunch, so it is the one thing that asks permission: the batch sends
+ * at most `roomFor("marketing")` letters and then PARKS, which is not a
+ * failure and not a finished send. The rows stay queued, the letter stays
+ * 'sending', the daily cron (/api/cron/flows, 07:00) calls back until it is
+ * done, and the panel can say «отправлено 70 из 180, продолжится завтра».
+ * Nobody is written to twice, for the same reason a resumed batch never was:
+ * the queue is the table and a row leaves it only when Resend has answered.
+ *
  * In the e2e suite there is no RESEND_API_KEY on purpose, and sendMail()
  * records what it was asked to send instead (the sink in src/lib/mail.ts).
  * Under that suite's own double gate — `NODE_ENV` not production AND
@@ -50,6 +61,7 @@ import { customMinByIds, isCustomId, type MinWithVariants } from "@/lib/custom-p
 import { isEmail, normalizeEmail, normalizeLangCode, type LangCode } from "@/lib/customers";
 import { jsonbParam, query, withTx, type Querier } from "@/lib/db";
 import { mailConfigured, sendMail, type SendMailResult } from "@/lib/mail";
+import { roomFor, warnOwnerOnce } from "@/lib/mail-budget";
 import { getOverrides, writeAuditSafe } from "@/lib/orders";
 
 /* ---------- shapes -------------------------------------------------------- */
@@ -510,6 +522,12 @@ export async function sendNewsletterTest(
     text: mail.text,
     tags: { template: "newsletter", lang: L.toLowerCase(), mode: "test" },
     headers: unsubscribeHeaders(addr, L, "marketing"),
+    /* Counted against the campaign's share, because that is whose letter it
+       is — but never refused for it. One letter the owner asked for by hand
+       is not what empties a hundred a day, and telling him «нельзя даже
+       посмотреть» while thirty are being held for orders would read as a
+       broken button. */
+    kind: "marketing",
   });
   if (!result.ok && result.skipped && result.error === "no_api_key" && e2eSinkTransport()) {
     return { result: { ok: true, id: "e2e-sink" }, lang: L };
@@ -541,6 +559,13 @@ export interface BatchProgress {
   status: NewsletterStatus;
   /** Resend asked for a pause — the panel waits this long before calling again. */
   retryAfterMs?: number;
+  /**
+   * Stopped for today, not stopped for good: the day's marketing allowance is
+   * spent (or Resend refused for quota) and letters are still queued. The
+   * panel stops calling and says «продолжится завтра»; the daily cron picks it
+   * up. Never true on a finished send.
+   */
+  parked?: boolean;
 }
 
 const DEFAULTS: Required<BatchOptions> = {
@@ -550,6 +575,9 @@ const DEFAULTS: Required<BatchOptions> = {
   leaseMs: 90_000,
   batchSize: 20,
 };
+
+/** How long a parked campaign asks the panel to wait — see the end of sendNewsletterBatch(). */
+const PARKED_RETRY_MS = 15 * 60 * 1000;
 
 function sleep(ms: number): Promise<void> {
   return ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve();
@@ -684,18 +712,32 @@ export async function sendNewsletterBatch(
 
   const n = await claim(id, o.leaseMs);
   let retryAfterMs: number | undefined;
+  /* Why this run stopped early, if it did: the day's marketing allowance ran
+     out, or Resend refused for its own quota. Both mean «tomorrow», never
+     «failed» — see `parked` below. */
+  let budgetStop = false;
   try {
     await dropWithdrawn(id);
     await loadNewsletterBrand();
     const cards = await newsletterCards(n.products);
+    /* Read once, at the top, and counted down as letters are accepted: one
+       question to the counter per call rather than one per address. It can
+       only shrink underneath us — an order letter going out in the middle of
+       this run spends the reserve, not the campaign's share — and the next
+       call reads it again anyway. */
+    let roomLeft = await roomFor("marketing");
     // the languages are few and the letters differ only in the footer's
     // link, so the body rows are built once per language and the shell
     // per reader — rendering is string work, not the slow part
     let stop = false;
     while (!stop && Date.now() - started < o.budgetMs) {
+      if (roomLeft <= 0) {
+        budgetStop = true;
+        break;
+      }
       const queued = await query<{ email: string; lang: string }>(
         "select email, lang from newsletter_sends where newsletter_id = $1 and status = 'queued' order by email limit $2",
-        [id, o.batchSize],
+        [id, Math.min(o.batchSize, roomLeft)],
       );
       if (!queued.length) break;
       for (let i = 0; i < queued.length && !stop; i += concurrency) {
@@ -703,7 +745,15 @@ export async function sendNewsletterBatch(
           stop = true;
           break;
         }
-        const wave = queued.slice(i, i + concurrency);
+        if (roomLeft <= 0) {
+          // the page was sized to the allowance, so this is the belt to that
+          // pair of braces — never a wave of zero letters spinning to the end
+          budgetStop = true;
+          stop = true;
+          break;
+        }
+        // never more letters in flight than the day still has room for
+        const wave = queued.slice(i, i + Math.min(concurrency, roomLeft));
         const waveStart = Date.now();
         const results = await Promise.all(
           wave.map(async (r) => {
@@ -717,16 +767,29 @@ export async function sendNewsletterBatch(
               tags: { template: "newsletter", lang: L.toLowerCase(), newsletter: id.slice(0, 8) },
               idempotencyKey: `news:${id}:${r.email}`,
               headers: unsubscribeHeaders(r.email, L, "marketing"),
+              kind: "marketing",
             });
             return { email: r.email, res };
           }),
         );
         for (const { email, res } of results) {
           if (res.ok) {
+            roomLeft -= 1;
             await query(
               "update newsletter_sends set status = 'sent', message_id = $3, error = null, sent_at = now() where newsletter_id = $1 and email = $2",
               [id, email, res.id ?? null],
             );
+            continue;
+          }
+          if (res.quota) {
+            /* Resend's own daily quota, not our cap and not the per-second
+               rate: nothing else is going out today whatever the counter
+               says. The row stays queued — it was refused, not delivered —
+               and the run ends here rather than collecting the same answer
+               once per address. sendMail() has already stamped the day
+               (src/lib/mail-budget.ts noteQuotaRefusal). */
+            budgetStop = true;
+            stop = true;
             continue;
           }
           if (res.skipped && res.error === "no_api_key") {
@@ -802,7 +865,118 @@ export async function sendNewsletterBatch(
   const fresh = (await getNewsletter(id)) ?? n;
   const progress: BatchProgress = { done, sent: c.sent, failed: c.failed, left: c.left, total: c.total, status: fresh.status };
   if (retryAfterMs && !done) progress.retryAfterMs = retryAfterMs;
+  /* Parked, not stalled: the allowance is spent and there are still addresses
+     waiting. A run that emptied the queue on its last letter is simply done,
+     which is why this is decided here and not where the loop stopped. The
+     owner is told once a day, on his phone, by whichever of the four marketing
+     senders reaches the wall first (warnOwnerOnce claims the day). */
+  if (budgetStop && !done) {
+    progress.parked = true;
+    /* A pause long enough that the panel stops asking, in the field it
+       already obeys. The loop in public/shop2/app.js calls again after
+       `retryAfterMs` for as long as `done` is false, and it knew nothing
+       about parking on the day this shipped — without this it would call the
+       route as fast as the network allows for the rest of the afternoon, each
+       call taking the lease to discover the same «tomorrow». A quarter of an
+       hour also means a tab left open overnight picks the campaign up by
+       itself once the counter rolls. The panel that understands `parked`
+       should stop calling altogether and say «продолжится завтра». */
+    progress.retryAfterMs = PARKED_RETRY_MS;
+    await warnOwnerOnce();
+  }
   return { progress, newsletter: fresh };
+}
+
+/* ---------- the parked campaigns ------------------------------------------ */
+
+export interface NewsletterResumeReport {
+  /** Letters that were still owed addresses when the run started. */
+  picked: number;
+  /** Addresses answered in this run, across all of them. */
+  sent: number;
+  failed: number;
+  /** Still queued when the run ended — tomorrow's work. */
+  left: number;
+  /** Letters that finished in this run. */
+  finished: number;
+  /** Why nothing happened, when nothing did: `nobody`, `no_budget`, `no_api_key`, `error`. */
+  reason?: string;
+}
+
+/** A parked campaign may hold the daily job for this long before it gives the rest of the run its turn. */
+const RESUME_BUDGET_MS = 20_000;
+
+/**
+ * «Продолжить» without anybody pressing it — the daily cron's half of the
+ * parking decision (Dim, 21.09.2026).
+ *
+ * A campaign bigger than the day's allowance stops at cap − reserve and waits
+ * (sendNewsletterBatch). Nothing in a serverless shop would ever call it back:
+ * the panel only loops while the tab is open, and the tab is closed by the
+ * time the allowance matters. So /api/cron/flows, the one scheduled job this
+ * shop has, carries it — 07:00 Tallinn, which is well after the counter rolls
+ * at UTC midnight, so the first thing it meets is a full day.
+ *
+ * Every letter still 'sending' with queued rows, oldest first, until the
+ * allowance or the time budget runs out. Each one goes through the ordinary
+ * batch, so the lease, the consent re-check and the «never twice» guarantee
+ * are the same ones the panel gets; a letter that refuses (busy — the owner
+ * is sending it by hand right now) is skipped rather than fought over.
+ */
+export async function resumeParkedNewsletters(opts: BatchOptions & { budgetMs?: number } = {}): Promise<NewsletterResumeReport> {
+  const out: NewsletterResumeReport = { picked: 0, sent: 0, failed: 0, left: 0, finished: 0 };
+  const until = Date.now() + Math.max(1_000, opts.budgetMs ?? RESUME_BUDGET_MS);
+  if (!newsletterMailReady()) return { ...out, reason: "no_api_key" };
+
+  let rows: Array<{ id: string }>;
+  try {
+    rows = await query<{ id: string }>(
+      `select n.id
+         from newsletters n
+        where n.status = 'sending'
+          and exists (select 1 from newsletter_sends s where s.newsletter_id = n.id and s.status = 'queued')
+        order by n.created_at
+        limit 20`,
+    );
+  } catch (err) {
+    console.error("[newsletters] the parked campaigns could not be read:", err);
+    return { ...out, reason: "error" };
+  }
+  out.picked = rows.length;
+  if (!rows.length) return { ...out, reason: "nobody" };
+
+  /* Asked once for the whole sweep: if there is no room at all there is
+     nothing to try, and the batch would only claim leases to discover it. */
+  if ((await roomFor("marketing")) <= 0) return { ...out, reason: "no_budget" };
+
+  for (const row of rows) {
+    if (Date.now() >= until) break;
+    try {
+      /* The batch answers with the LETTER's totals — 70 of 180, counted since
+         the day it started. What a run reports is what IT did, so the
+         difference is taken here rather than printing yesterday's work again
+         in this morning's line. */
+      const before = await newsletterProgress(row.id);
+      const { progress } = await sendNewsletterBatch(row.id, {
+        ...opts,
+        budgetMs: Math.min(opts.budgetMs ?? DEFAULTS.budgetMs, Math.max(0, until - Date.now())),
+      });
+      out.sent += Math.max(0, progress.sent - (before?.sent ?? 0));
+      out.failed += Math.max(0, progress.failed - (before?.failed ?? 0));
+      out.left += progress.left;
+      if (progress.done) out.finished += 1;
+      // parked again: the allowance is gone, and so is the point of the rest
+      if (progress.parked) break;
+    } catch (err) {
+      if (err instanceof NewsletterError) {
+        console.warn(`[newsletters] parked letter ${row.id} skipped: ${err.code}`);
+        continue;
+      }
+      console.error(`[newsletters] parked letter ${row.id} failed:`, err);
+      out.reason = "error";
+    }
+  }
+  return out;
 }
 
 /** Where a letter that is neither draft nor sent stands — what «Продолжить» shows. */
