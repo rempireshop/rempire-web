@@ -713,6 +713,21 @@
       }
     },
     {
+      "id": "admin-link-off",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Убрать ссылку «Админка» из подвала магазина",
+      "detail": "Ссылка внизу каждой страницы говорит любому, кто её увидит, где панель. Дим, 21.09.2026: на запуске она уходит, и Ренат открывает панель по адресу /admin — короткий адрес, который можно набрать, и он уже работает (редирект на /shop2/admin/, next.config.ts). Убрать `.ftr__admin` в public/shop2/app.js, пересобрать и выложить. Ссылка, которой нет, — это не защита: пароль остаётся единственной. Но и подсказывать адрес незачем. Сказать Ренату ДО того, как убрали: он ходит туда этой кнопкой каждый день.",
+      "en": {
+        "title": "Take the «Админка» link out of the shop's footer",
+        "detail": "A link at the bottom of every page tells anyone who sees it where the panel is. Dim, 21.09.2026: at the switch it comes off and Renat opens the panel at /admin — a short address he can type, already working (a redirect to /shop2/admin/ in next.config.ts). Remove `.ftr__admin` in public/shop2/app.js, rebuild, deploy. A missing link is not a security measure — the password stays the only one — but there is no reason to advertise the address either. Tell Renat BEFORE it goes: that button is how he gets there every day."
+      }
+    },
+    {
       "id": "untested-by-hand",
       "area": "firsthour",
       "who": [

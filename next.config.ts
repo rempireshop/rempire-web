@@ -379,6 +379,16 @@ const nextConfig: NextConfig = {
          (docs/seo.md), and a permanent redirect cached in every visitor's
          browser is the one thing that would make that move painful. */
       { source: "/", destination: "/shop2/", permanent: false },
+      /* The owner's own door. The panel has always lived at /shop2/admin/ and
+         been reached by a link in the shop's footer; Dim, 21.09.2026: at the
+         switch that link comes off the storefront and Renat opens /admin
+         instead. A short address he can type is what makes taking the link
+         away reasonable rather than annoying — and a link nobody but him has
+         is not a security measure, so the password remains the only one.
+
+         307: the panel's real path may yet move, and a permanent redirect
+         cached in his phone is exactly what would make moving it painful. */
+      { source: "/admin", destination: "/shop2/admin/", permanent: false },
       { source: "/shop", destination: "/shop2/", permanent: false },
       { source: "/shop/c/:cat", destination: "/shop2/c/:cat/", permanent: false },
       { source: "/shop/b/:brand", destination: "/shop2/b/:brand/", permanent: false },
