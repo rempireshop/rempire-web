@@ -451,6 +451,26 @@ body:has(.stickybar) .ftr {
   position: relative; aspect-ratio: 1; background: var(--page);
   margin-bottom: 9px; overflow: hidden;
 }
+/* …and a real in-flow height under it, not only the ratio.
+ *
+ * Renat's MacBook, 21.09.2026: Safari 17.3 showed every product card as text
+ * with no photograph and no room for one. Chrome on the same machine was
+ * fine, the image opened on its own URL, and there was no content blocker —
+ * the box itself had collapsed. These three boxes hold nothing but
+ * absolutely-positioned children, so their content height is zero and the
+ * height comes entirely from `aspect-ratio`; that resolution is what 17.3
+ * gets wrong inside a grid item, and 17.4 fixed. iPadOS and every other
+ * engine were already past it, which is why only his laptop saw it.
+ *
+ * The pseudo-element is in flow and gives the box its height without asking
+ * the ratio to resolve. Where `aspect-ratio` works it computes the same
+ * number, so this changes nothing anywhere else — it only removes the
+ * dependency. */
+.card__media::before,
+.cattile__shot::before,
+.pdp__stage::before { content: ""; display: block; padding-top: 100%; }
+.cattile__shot::before { padding-top: 75%; }   /* 4 / 3 */
+
 .card__img, .card__img2 { transition: opacity .3s var(--ease), transform .5s var(--ease); }
 .card__img2 { opacity: 0; }
 @media (hover: hover) {
