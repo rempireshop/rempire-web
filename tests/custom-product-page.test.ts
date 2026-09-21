@@ -197,11 +197,17 @@ describe("a custom product's page at request time", () => {
        07.09.2026 (src/lib/seo-head.mjs fitTitle()/descFrom(),
        docs/audit/2026-09-07-seo.md): the full sentence «… — купить в Rempire ·
        от 14,90 €» is 62 characters, so the price rides on the short form
-       instead of «— REMPIRE», and a description cut from the product's own
-       text ends on what a shopper is deciding about. */
+       instead of «— REMPIRE».
+
+       The tail lost the price and the stock on 21.09.2026: the price is
+       already in the title above, and «нет в наличии» in a result listing is
+       a line nobody clicks about a page that keeps its ranking anyway. Google
+       reads the real availability from the Offer in the structured data,
+       which cannot go stale between crawls. What is left is the half that
+       answers «why here» and stays true. */
     expect(title(html)).toBe("Proraso Beard Balm — бальзам для бороды · от 14,90 €");
     expect(meta(html, "description")).toBe(
-      "Бальзам для бороды. Смягчает и укладывает · от 14,90 € · в наличии · доставка по Эстонии и Балтии",
+      "Бальзам для бороды. Смягчает и укладывает · доставка по Эстонии и Балтии · самовывоз в Таллинне",
     );
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/p/${p.id}/`);
     expect(html).toContain('<span class="chip chip--ok">В наличии</span>');

@@ -78,6 +78,39 @@ export const stripTags = h => unentity(String(h || "")
   .trim();
 export const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+/* The same plain text as stripTags(), but with the block boundaries kept as
+   sentence breaks.
+
+   A product description usually opens with a heading line above the copy —
+   «Шампунь для редеющих волос», «Бальзам после бритья Proraso Single Blade» —
+   and stripTags() turns a block tag into a space, so the snippet came out as
+   «Шампунь для редеющих волос Шампунь поддерживает…»: two sentences run
+   together, which reads as a typo in a result listing (Dim, 21.09.2026).
+
+   The heading is a GOOD first line — it is the thing the searcher asked for —
+   so it stays and merely gets its full stop. A block that already ends in
+   punctuation is joined with a space, because a second stop after one would
+   be the same fault the other way round.
+
+   stripTags() itself is left exactly as it is: it is the twin of the copy in
+   public/shop2/app.js, and the two must keep answering identically. */
+export const textForSnippet = h => {
+  /* A sentinel rather than a space, because a space is what the text is
+     already full of. `\u0000` is written as an escape and never as the
+     character: a raw NUL in a source file makes grep call it binary and
+     report no matches at all, which is a trap this repository has already
+     walked into once (src/lib/og-card.ts). */
+  const MARK = "\u0000";
+  return unentity(String(h || "")
+    .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : MARK))
+    .replace(/<[^>]+>/g, MARK))
+    .split(MARK)
+    .map(x => x.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .reduce((out, part) => (out ? out + (/[.!?…:;,)»—–-]$/.test(out) ? " " : ". ") + part : part), "")
+    .trim();
+};
+
 /* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
    SYSTEM 4 Сыворотка, стимулирующая…», «НЕВЕСОМЫЙ ЛАК ДЛЯ ВОЛОС — ОБЪЁМ И
    БЛЕСК БЕЗ МАСЕЛ ОТ KEVIN MURPHY Бросьте вызов…». On the page it is a
@@ -389,7 +422,7 @@ export const T = {
       `${price} · ${cat} · ${stock}. Магазин Rempire, Таллинн — доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
     /* What a product's own copy gets after it, when the description is cut
        from the product text rather than written by the owner. See descFrom(). */
-    descTail: (price, stock) => `${price} · ${stock} · доставка по Эстонии и Балтии`,
+    descTail: () => "доставка по Эстонии и Балтии · самовывоз в Таллинне",
     /* the four screens added 03.09 — sets, one set, the gift card, the policy pages */
     save: "выгода", pieces: "товара в наборе",
     setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
@@ -432,7 +465,7 @@ export const T = {
     brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    descTail: (price, stock) => `${price} · ${stock} · tarne Eestis ja Baltikumis`,
+    descTail: () => "tarne Eestis ja Baltikumis · järeletulek Tallinnas",
     save: "sääst", pieces: "toodet komplektis",
     setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
@@ -448,7 +481,7 @@ export const T = {
     notFoundText: "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga."
   },
   EN: {
-    base: "REMPIRE — grooming shop in Tallinn",
+    base: "REMPIRE — professional hair care & cosmetics in Tallinn",
     buy: "buy at Rempire",
     home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
     homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +
@@ -465,7 +498,7 @@ export const T = {
     brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    descTail: (price, stock) => `${price} · ${stock} · delivery across Estonia and the Baltics`,
+    descTail: () => "delivery across Estonia and the Baltics · pickup in Tallinn",
     save: "you save", pieces: "products in the set",
     setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
@@ -662,8 +695,8 @@ export function breadcrumbLD(base, items) {
    whole. The tail is budgeted first and the copy takes what is left, so the
    price is never the half that gets cut off. */
 export const DESC_MAX = 158;
-export function descFrom(text, t, priceText, stockText) {
-  const tail = t.descTail(priceText, String(stockText).toLowerCase());
+export function descFrom(text, t) {
+  const tail = t.descTail();
   const lead = dropShout(text) || text;
   if (!lead) return clip(tail, DESC_MAX);
   const room = DESC_MAX - tail.length - 3;   // " · "
@@ -685,14 +718,14 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
   let title = fitTitle(core, full, core + " · " + priceText);
   if (seoTitle) title = fitTitle(seoTitle, "");
 
-  const text = stripTags(body);
+  const text = textForSnippet(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
   /* An owner's or the assistant's own pair is deliberate and is left alone —
      no price is appended to a sentence somebody wrote on purpose. */
   const desc = seoDesc
     ? clip(seoDesc, DESC_MAX)
     : text
-      ? descFrom(text, t, priceText, stockText)
+      ? descFrom(text, t)
       : clip(t.prodDesc(priceText, section, stockText), DESC_MAX);
 
   const crumbItems = [

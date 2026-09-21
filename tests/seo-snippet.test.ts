@@ -15,7 +15,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { clip, descFrom, DESC_MAX, dropShout, fitTitle, LANGS, productSpec, stripTags, T, unentity } from "@/lib/seo-head.mjs";
+import {
+  clip, descFrom, DESC_MAX, dropShout, fitTitle, LANGS, productSpec, stripTags, T, textForSnippet, unentity,
+} from "@/lib/seo-head.mjs";
 
 const RU = T.RU;
 const BASE = "https://rempireshop.com";
@@ -54,32 +56,73 @@ describe("a SHOUTED heading is not the first thing a reader sees", () => {
 });
 
 describe("the meta description says what it is and why to buy it", () => {
-  it("puts the price, the stock and the delivery after the product's own words", () => {
-    const d = descFrom("Успокаивающий шампунь для чувствительной кожи головы", RU, "от 9 €", "В наличии");
-    expect(d).toBe("Успокаивающий шампунь для чувствительной кожи головы · от 9 € · в наличии · доставка по Эстонии и Балтии");
+  /* The tail lost the price and the stock on 21.09.2026. The price is already
+     in the title, where Google prints it more reliably, and repeating it here
+     only spent the 158 characters the copy needs — while «нет в наличии» in a
+     result listing is a line nobody clicks, about a page that keeps its
+     ranking either way. Google reads the real availability from the Offer in
+     the structured data, which does not go stale between crawls. What is left
+     is the half that answers «why here» and cannot become untrue. */
+  it("puts the delivery and the pickup after the product's own words", () => {
+    const d = descFrom("Успокаивающий шампунь для чувствительной кожи головы", RU);
+    expect(d).toBe("Успокаивающий шампунь для чувствительной кожи головы · доставка по Эстонии и Балтии · самовывоз в Таллинне");
     expect(d.length).toBeLessThanOrEqual(DESC_MAX);
+  });
+
+  it("says nothing about the price or the stock — those go stale", () => {
+    const d = descFrom("Воск для укладки", RU);
+    expect(d).not.toMatch(/€/);
+    expect(d).not.toContain("наличии");
   });
 
   it("never lets the tail be the half that gets cut off", () => {
     const long = "Слово ".repeat(60);
-    const d = descFrom(long, RU, "от 123,45 €", "нет в наличии");
+    const d = descFrom(long, RU);
     expect(d.length).toBeLessThanOrEqual(DESC_MAX);
-    expect(d.endsWith("· от 123,45 € · нет в наличии · доставка по Эстонии и Балтии")).toBe(true);
+    expect(d.endsWith("· доставка по Эстонии и Балтии · самовывоз в Таллинне")).toBe(true);
     expect(d).toContain("…");
   });
 
-  it("says «нет в наличии» when there is none, in every language", () => {
-    expect(descFrom("Воск для укладки", T.RU, "15 €", T.RU.out)).toContain("· нет в наличии ·");
-    /* «otsas», not «pole saadaval»: this table had drifted from the shop's own
-       dictionary, so the static Estonian page said one word and the DOM said
-       the other a moment later about the same bottle (audit § 9.3). */
-    expect(descFrom("Viimistlusvaha", T.ET, "15 €", T.ET.out)).toContain("· otsas · tarne Eestis ja Baltikumis");
-    expect(descFrom("Styling wax", T.EN, "15 €", T.EN.out)).toContain("· out of stock · delivery across Estonia and the Baltics");
+  it("writes the tail in the page's own language", () => {
+    expect(descFrom("Viimistlusvaha", T.ET)).toContain("· tarne Eestis ja Baltikumis · järeletulek Tallinnas");
+    expect(descFrom("Styling wax", T.EN)).toContain("· delivery across Estonia and the Baltics · pickup in Tallinn");
+  });
+
+  /* The stock WORDS still exist and still have to match the shop's own
+     dictionary — they are what the fallback description and the page itself
+     print. «otsas», not «pole saadaval»: this table had drifted, so the static
+     Estonian page said one word and the DOM said the other a moment later
+     about the same bottle (audit § 9.3). */
+  it("keeps the stock words in step with the shop's dictionary", () => {
+    expect(T.RU.out).toBe("нет в наличии");
+    expect(T.ET.out).toBe("otsas");
+    expect(T.EN.out).toBe("out of stock");
   });
 
   it("does not put a full stop directly before the separator", () => {
-    expect(descFrom("Бальзам для бороды. Смягчает и укладывает.", RU, "от 14,90 €", "В наличии"))
-      .toBe("Бальзам для бороды. Смягчает и укладывает · от 14,90 € · в наличии · доставка по Эстонии и Балтии");
+    expect(descFrom("Бальзам для бороды. Смягчает и укладывает.", RU))
+      .toBe("Бальзам для бороды. Смягчает и укладывает · доставка по Эстонии и Балтии · самовывоз в Таллинне");
+  });
+
+  /* A description usually opens with a heading line above the copy. Stripping
+     the tags used to join the two with a space, so the snippet read «Шампунь
+     для редеющих волос Шампунь поддерживает…» — two sentences run together,
+     which reads as a typo (Dim, 21.09.2026). The heading is a good first line
+     and stays; it only gets its full stop. */
+  it("gives a heading line its full stop before the copy", () => {
+    expect(textForSnippet("<p>Шампунь для редеющих волос</p><p>Шампунь поддерживает баланс.</p>"))
+      .toBe("Шампунь для редеющих волос. Шампунь поддерживает баланс.");
+  });
+
+  it("…and does not add a second one where there already is punctuation", () => {
+    expect(textForSnippet("<p>Бальзам после бритья.</p><p>Смягчает.</p>"))
+      .toBe("Бальзам после бритья. Смягчает.");
+    expect(textForSnippet("<p>Уход за волосами:</p><p>мягко очищает.</p>"))
+      .toBe("Уход за волосами: мягко очищает.");
+  });
+
+  it("still keeps a word that carries markup inside it in one piece", () => {
+    expect(textForSnippet("s<b>trong</b> hold")).toBe("strong hold");
   });
 });
 
@@ -132,7 +175,7 @@ describe("a pair somebody wrote by hand is left alone", () => {
   });
 
   it("builds the tail only when the description comes from the product text", () => {
-    expect(spec({}).desc).toBe("Шампунь для редеющих волос · от 9 € · в наличии · доставка по Эстонии и Балтии");
+    expect(spec({}).desc).toBe("Шампунь для редеющих волос · доставка по Эстонии и Балтии · самовывоз в Таллинне");
   });
 });
 
@@ -148,11 +191,11 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
     expect(DESC_MAX).toBe(158);
     expect(app).toContain("[^a-zà-öø-ÿšžа-яё]{10,160}?(?=[A-ZÀ-ÖØ-ÞŠŽА-ЯЁ][a-zà-öø-ÿšžа-яё])");
     expect(app).toContain('trText("доставка по Эстонии и Балтии", lang, false)');
-    expect(T.RU.descTail("P", "s")).toContain("доставка по Эстонии и Балтии");
+    expect(T.RU.descTail()).toContain("доставка по Эстонии и Балтии");
     expect(app).toContain('"доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis"');
-    expect(T.ET.descTail("P", "s")).toContain("tarne Eestis ja Baltikumis");
+    expect(T.ET.descTail()).toContain("tarne Eestis ja Baltikumis");
     expect(app).toContain('"доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics"');
-    expect(T.EN.descTail("P", "s")).toContain("delivery across Estonia and the Baltics");
+    expect(T.EN.descTail()).toContain("delivery across Estonia and the Baltics");
     /* The entity decode the SEO path used to skip. */
     expect(app).toContain("descFromText(unentity(stripTags(descFor(p)))");
     expect(app).toContain("unentity(stripTags(descFor(p))).slice(0, 500)");

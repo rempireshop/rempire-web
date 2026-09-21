@@ -210,6 +210,7 @@
       // the tail of a product page's meta description — the same words
       // src/lib/seo-head.mjs's descTail() writes into the static page
       "доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis",
+      "самовывоз в Таллинне": "järeletulek Tallinnas",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
       "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓",
@@ -3167,6 +3168,7 @@
       "Сбросить всё": "Reset all", "Сбросить фильтры": "Reset filters",
       "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
       "доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics",
+      "самовывоз в Таллинне": "pickup in Tallinn",
       "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
       "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓",
@@ -35662,8 +35664,13 @@
      and the head it reads after this script runs are one text. */
   var DESC_MAX = 158;
   function descFromText(text, priceText, stockText, lang) {
-    var tail = priceText + " · " + String(stockText).toLowerCase() + " · " +
-      trText("доставка по Эстонии и Балтии", lang, false);
+    /* Ни цены, ни наличия — 21.09.2026. Цена уже стоит в заголовке, и в
+       сниппете она только повторяется, съедая место у самого текста; а
+       «нет в наличии» в выдаче — это строчка, после которой не нажимают,
+       при том что Google и так знает наличие из Offer в разметке. Место
+       занимает то, что не устаревает и отвечает на «почему здесь». */
+    var tail = trText("доставка по Эстонии и Балтии", lang, false) + " · " +
+      trText("самовывоз в Таллинне", lang, false);
     var lead = dropShout(text) || text;
     if (!lead) return clipDesc(tail, DESC_MAX);
     var room = DESC_MAX - tail.length - 3;
@@ -35768,9 +35775,9 @@
       if (so && so.t) t = fitTitle(so.t, "");
       else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
       /* A pair somebody wrote is left exactly as written; a description cut
-         from the product text gets the shouted heading dropped and the price,
-         the stock and the delivery line added — descFrom() in
-         src/lib/seo-head.mjs, the same sentence the static page carries. */
+         from the product text gets the shouted heading dropped and the
+         delivery line added — descFrom() in src/lib/seo-head.mjs, the same
+         sentence the static page carries. */
       d = so && so.d ? so.d
         : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d
           : descFromText(unentity(stripTags(descFor(p))), priceText, stockText, S.lang);
