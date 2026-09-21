@@ -52,10 +52,33 @@ export type StorageConfig = {
   secretAccessKey: string;
   bucket: string;
   publicBase: string;
+  /** Bases this bucket HAS been served from, newest first. See `pastBases()`. */
+  bases: string[];
 };
 
 function env(name: string): string {
   return (process.env[name] || "").trim();
+}
+
+/**
+ * Addresses this bucket used to be served from, so a URL stored under an old
+ * one is still recognised as ours.
+ *
+ * On 21.09.2026 the public base moved off Cloudflare's `pub-….r2.dev`, which
+ * Cloudflare's own console calls rate-limited and not for production, onto
+ * `img.rempireshop.com`. Every photo the owner had already uploaded carries
+ * the old address in the database, and `keyFromUrl()` is what «Убрать фон» и
+ * «Удалить фото» use to turn a URL back into an object key — matched against
+ * the CURRENT base alone, those photos would have stopped being editable the
+ * moment the variable changed. The old base is a comma-separated
+ * `R2_PUBLIC_BASE_OLD`; the default carries this shop's own dev URL so the
+ * switch needs one variable changed, not two.
+ */
+const LEGACY_BASE = "https://pub-cb5b2acfd95a42a89fe5b418936afeea.r2.dev";
+
+function pastBases(): string[] {
+  const raw = env("R2_PUBLIC_BASE_OLD") || LEGACY_BASE;
+  return raw.split(",").map((b) => b.trim().replace(/\/+$/, "")).filter(Boolean);
 }
 
 /** The five variables, or null when even one of them is missing. */
@@ -66,7 +89,23 @@ export function storageConfig(): StorageConfig | null {
   const bucket = env("R2_BUCKET");
   const publicBase = env("R2_PUBLIC_BASE").replace(/\/+$/, "");
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicBase) return null;
-  return { accountId, accessKeyId, secretAccessKey, bucket, publicBase };
+  const bases = [publicBase, ...pastBases().filter((b) => b !== publicBase)];
+  return { accountId, accessKeyId, secretAccessKey, bucket, publicBase, bases };
+}
+
+/**
+ * A stored URL moved onto the base this deployment serves from. Anything that
+ * is not one of ours comes back untouched — the owner may paste a picture from
+ * anywhere, and rewriting a stranger's address would be a bug with teeth.
+ */
+export function rehost(url: string): string {
+  const cfg = storageConfig();
+  if (!cfg) return String(url || "");
+  const u = String(url || "");
+  for (const base of cfg.bases) {
+    if (base !== cfg.publicBase && u.startsWith(`${base}/`)) return cfg.publicBase + u.slice(base.length);
+  }
+  return u;
 }
 
 export function storageConfigured(): boolean {
@@ -165,10 +204,13 @@ export function isAllowedKey(key: unknown): key is string {
 export function keyFromUrl(url: string): string | null {
   const cfg = storageConfig();
   if (!cfg) return null;
-  const base = `${cfg.publicBase}/`;
-  if (!String(url || "").startsWith(base)) return null;
-  const key = String(url).slice(base.length).split("?")[0];
-  return isAllowedKey(key) ? key : null;
+  /* Every base this bucket has worn, not just today's — see pastBases(). */
+  for (const base of cfg.bases) {
+    if (!String(url || "").startsWith(`${base}/`)) continue;
+    const key = String(url).slice(base.length + 1).split("?")[0];
+    return isAllowedKey(key) ? key : null;
+  }
+  return null;
 }
 
 /* ---------- signature version 4 ------------------------------------------ */
