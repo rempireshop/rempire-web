@@ -350,6 +350,21 @@ test.describe("sweep checkout — promo codes", () => {
       await apply.click();
     };
 
+    /* Since 22.09.2026 Estonia's carrier cards follow Montonio's order, DPD
+       first — and an e2e run has no DPD points, so its card is struck off
+       when its feed answers empty and the total moves under the test. Read
+       the baseline only once every feed has landed. */
+    await page.waitForLoadState("networkidle");
+    await expect
+      .poll(async () => page.locator("[data-co-delivery]").getAttribute("data-points-loading").catch(() => null),
+        { timeout: 25_000, message: "parcel-point feeds never settled" })
+      .toBe("0");
+    /* …and the total itself has stopped moving: read it twice, 400 ms apart */
+    await expect.poll(async () => {
+      const a = ((await totalRow.textContent()) || "").trim();
+      await page.waitForTimeout(400);
+      return a === ((await totalRow.textContent()) || "").trim();
+    }, { timeout: 15_000, message: "the total never settled" }).toBe(true);
     const beforeText = ((await totalRow.textContent()) || "").trim();
     const before = parseEur(beforeText, "RU");
 
@@ -469,7 +484,8 @@ const COUNTRIES = ["EE", "LV", "LT", "FI", "EU"] as const;
 for (let scenario = 0; scenario < 10; scenario++) {
   test.describe(`sweep checkout — randomised order ${scenario + 1}`, () => {
     /* An address of its own per scenario. Choosing a country makes the shop
-       ask every carrier it has for that country (five for Estonia), and
+       ask every carrier it has for that country (four for Estonia since Nova
+       Post left it on 22.09.2026), and
        `GET /api/shipping/points/` allows 60/min per IP — a budget ten orders
        back to back share out in about four scenarios. Ten shoppers is what
        this actually is, so ten addresses is the honest shape; the limiter

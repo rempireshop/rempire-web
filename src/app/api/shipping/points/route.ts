@@ -7,6 +7,7 @@ import {
   mergePoints,
   type MontonioPoint,
 } from "@/lib/shipping/montonio";
+import { searchPoints } from "@/lib/shipping/point-search";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
@@ -63,15 +64,9 @@ const DEFAULT_LIMIT = 1500;
 const MAX_LIMIT = 3000;
 const MIN_QUERY = 2;
 
-/** Every word typed has to appear somewhere in the row — the same rule the
-    storefront's own typeahead uses (pointsMatching() in app.js). */
-function matcher(q: string): (p: MontonioPoint) => boolean {
-  const words = q.split(/\s+/).filter(Boolean);
-  return (p) => {
-    const hay = `${p.name ?? ""} ${p.address ?? ""} ${p.city ?? ""} ${p.zip ?? ""}`.toLowerCase();
-    return words.every((w) => hay.includes(w));
-  };
-}
+/* The search itself lives in src/lib/shipping/point-search.ts: a postcode
+   ORDERS the list nearest-first (there are no coordinates to measure with),
+   anything else filters it by words. The storefront runs the same rules. */
 
 /** The wire shape stays small — this list can be 3000 rows long. */
 function slim(p: MontonioPoint) {
@@ -170,7 +165,7 @@ export async function GET(req: Request) {
 
   /* A query shorter than two letters narrows nothing and would only make the
      edge cache hold a second copy of the same list, so it is ignored. */
-  const matched = q.length >= MIN_QUERY ? points.filter(matcher(q)) : points;
+  const matched = q.length >= MIN_QUERY ? searchPoints(points, q) : points;
   const shown = matched.slice(0, limit);
 
   return NextResponse.json(

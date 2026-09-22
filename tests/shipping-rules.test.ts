@@ -44,7 +44,7 @@ describe("what the assistant may do to the delivery prices", () => {
     expect(out).toEqual({
       carriers: {
         omniva: { LV: 6.9 }, smartpost: { LV: 6.9 }, dpd: { LV: 6.9 },
-        unisend: { LV: 6.9 }, novapost: { LV: 6.9 },
+        unisend: { LV: 6.9 },
       },
     });
     // «сделай доставку в Латвию 6,90» must not carry the other eleven prices
@@ -64,14 +64,14 @@ describe("what the assistant may do to the delivery prices", () => {
     expect(sanitizeShippingRules({ methods: { parcel: { EE: 99 } } })).toEqual({
       carriers: {
         omniva: { EE: 99 }, smartpost: { EE: 99 }, dpd: { EE: 99 },
-        unisend: { EE: 99 }, novapost: { EE: 99 },
+        unisend: { EE: 99 },
       },
     });
     // two decimals, never a float tail
     expect(sanitizeShippingRules({ methods: { parcel: { EE: 3.4567 } } })).toEqual({
       carriers: {
         omniva: { EE: 3.46 }, smartpost: { EE: 3.46 }, dpd: { EE: 3.46 },
-        unisend: { EE: 3.46 }, novapost: { EE: 3.46 },
+        unisend: { EE: 3.46 },
       },
     });
   });
@@ -123,21 +123,23 @@ describe("what the assistant may do to the delivery prices", () => {
     expect(sanitizeShippingRules({ methods: { parcel: { EE: 6.9 } } })).toEqual({
       carriers: {
         omniva: { EE: 6.9 }, smartpost: { EE: 6.9 }, dpd: { EE: 6.9 },
-        unisend: { EE: 6.9 }, novapost: { EE: 6.9 },
+        unisend: { EE: 6.9 },
       },
     });
   });
 
-  /* Nova Post is chip-only (CHIP_ONLY_CARRIERS), and it still takes the price:
-     that flag keeps it from pricing a *country*, while this is its own chip's
-     cell — the one thing it is allowed to price. Leaving it out would be the
-     original defect again, one carrier wide: the owner sets a locker price for
-     Estonia and the Nova Post shopper pays something else. */
-  it("includes Nova Post, whose chip bills like any other", () => {
+  /* Nova Post used to take the price too: its Baltic chip had a cell of its
+     own, and leaving it out would have let the Nova Post shopper pay
+     something else. Since 22.09.2026 (owner's decision, Montonio-calculator
+     carrier choice) Nova Post is never offered in EE, LV or LT, so the row
+     has no Nova Post box and the fan-out writes no cell for it — there is no
+     Nova Post shopper in Lithuania to pay anything. */
+  it("leaves Nova Post out — it is never offered in the Baltics", () => {
     const out = sanitizeShippingRules({ methods: { parcel: { LT: 5.5 } } }) as {
       carriers: Record<string, Record<string, number>>;
     };
-    expect(out.carriers.novapost).toEqual({ LT: 5.5 });
+    expect(out.carriers.novapost).toBeUndefined();
+    expect(Object.keys(out.carriers).sort()).toEqual(["dpd", "omniva", "smartpost", "unisend"]);
   });
 
   it("fans out only to the boxes that row actually has", () => {
@@ -156,7 +158,7 @@ describe("what the assistant may do to the delivery prices", () => {
     })).toEqual({
       carriers: {
         omniva: { EE: 5.9 }, smartpost: { EE: 6.9 }, dpd: { EE: 6.9 },
-        unisend: { EE: 6.9 }, novapost: { EE: 6.9 },
+        unisend: { EE: 6.9 },
       },
     });
   });
@@ -166,7 +168,9 @@ describe("what the assistant may do to the delivery prices", () => {
     // the only thing that could price a parcel there
     expect(sanitizeShippingRules({ methods: { parcel: { EU: 24.9 } } }))
       .toEqual({ methods: { parcel: { EU: 24.9 } } });
-    // …and a courier price is never fanned out: nobody picks a courier's carrier
+    // …and a courier price is never fanned out. Since 22.09.2026 the shopper
+    // does pick a courier's carrier, but a courier cell the owner typed holds
+    // for every one of them (quoteFromRules()), so the one cell is enough
     expect(sanitizeShippingRules({ methods: { courier: { EE: 12.9 } } }))
       .toEqual({ methods: { courier: { EE: 12.9 } } });
   });
@@ -176,7 +180,8 @@ describe("what the assistant may do to the delivery prices", () => {
   it("moves every Estonian chip's price, which is what «Применено ✓» promised", () => {
     const patch = sanitizeShippingRules({ methods: { parcel: { EE: 6.9 } } })!;
     const rules = parseShippingRules(patch);
-    for (const carrier of ["omniva", "smartpost", "dpd", "unisend", "novapost"]) {
+    // Estonia's four cards since 22.09.2026 — Nova Post is not one of them
+    for (const carrier of ["dpd", "omniva", "unisend", "smartpost"]) {
       expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier, subtotal: 10 }).price, carrier)
         .toBe(6.9);
     }
@@ -309,14 +314,19 @@ describe("the rules the shop actually bills on", () => {
   /* …and the carrier that came the other way on the same day. Nova Post is in
      SHOP_CARRIERS now, so a stored cell for it is the owner's number and is
      kept — the read is a whitelist, not a blanket refusal, and the two halves
-     have to be asserted separately or one list could quietly swallow both. */
-  it("keeps a stored Nova Post cell, which the shop does ship with again", () => {
+     have to be asserted separately or one list could quietly swallow both.
+
+     22.09.2026 (owner's decision, Montonio-calculator carrier choice): kept,
+     but it no longer bills. Nova Post is never offered in EE, LV or LT, so a
+     request that still names it there — a stale tab — is priced as if it
+     named no carrier: the country's own «Пакомат» price. */
+  it("keeps a stored Nova Post cell, which bills nothing in the Baltics any more", () => {
     const rules = parseShippingRules({ carriers: { novapost: { EE: 2.9 } } });
     expect(rules.carriers?.novapost?.EE).toBe(2.9);
-    // the cells he did not type stay on Montonio's own prices
-    expect(rules.carriers?.novapost?.LV).toBe(DEFAULT_SHIPPING_RULES.carriers?.novapost?.LV);
+    // the defaults have no Nova Post row at all now
+    expect(DEFAULT_SHIPPING_RULES.carriers?.novapost).toBeUndefined();
     expect(quoteFromRules(rules, { country: "EE", method: "parcel", carrier: "novapost", subtotal: 10 }).price)
-      .toBe(2.9);
+      .toBe(quoteFromRules(rules, { country: "EE", method: "parcel", subtotal: 10 }).price);
   });
 
   /* Ренат, 13.09.2026: «we get prices from Montonio and we should use those,

@@ -88,31 +88,24 @@ describe("what Montonio serves and the shop does not", () => {
    * Every pair below is a deliberate omission, and the reason is here so the
    * next reader does not have to guess:
    *
-   * · **novapost, outside EE/LV/LT** — Montonio International Shipping. It is
-   *   the cheapest locker on every one of these routes, often half of DPD, and
-   *   it has no returns at all. Montonio, 22.09.2026, advises against it in
-   *   the Baltics specifically, where the locker networks are already dense.
-   *   Дим, 22.09.2026: offer it outside the Baltics and tell the customer in
-   *   the terms that the return is on them. **Not yet built** — when it is,
-   *   these nine lines go.
+   * · **novapost in EE, LV and LT** — Montonio International Shipping has no
+   *   returns at all, and Montonio, 22.09.2026, advises against it in the
+   *   Baltics specifically, where the locker networks are already dense.
+   *   NO_NOVAPOST_COUNTRIES in src/lib/shipping/country-prices.ts.
    *
-   * · **smartpost in LV and LT** — SmartPosti has lockers in both (3.95 € ex
-   *   VAT against DPD's 4.50), and the shop has never shown them. No decision
-   *   was ever recorded against it; it looks like an oversight rather than a
-   *   choice.
-   *
-   * · **novapost is present in EE/LV/LT today** and, by the same 22.09.2026
-   *   decision, is due to come OFF that list. Until it does it stays here as
-   *   an offered chip, not an omission.
+   * 22.09.2026 (owner's decision, Montonio-calculator carrier choice): the
+   * list used to be the other way round — Nova Post offered in the Baltics
+   * and omitted in AT CZ DE ES IT PL SK, SmartPosti omitted in LV and LT. The
+   * delivery step was rebuilt that day to offer every carrier Montonio serves,
+   * in Montonio's order, so Nova Post went on outside the Baltics (its card
+   * says «без возврата», the terms say the return is the buyer's), came off
+   * inside them, and SmartPosti's Latvian and Lithuanian lockers are shown.
    */
   const KNOWN_OMISSIONS = [
-    "AT/novaPost", "CZ/novaPost", "DE/novaPost", "ES/novaPost",
-    "IT/novaPost", "PL/novaPost", "SK/novaPost",
-    "LT/smartpost", "LV/smartpost",
+    "EE/novaPost", "LT/novaPost", "LV/novaPost",
   ].sort();
-  /* Hungary and Romania are not here: they have no chip row at all, which the
-     next test covers. Omitting a carrier from a country the shop does not draw
-     is not an omission, it is the same decision counted twice. */
+  /* Hungary and Romania are not here: since 22.09.2026 they have a chip row,
+     Nova Post alone, which the next test covers. */
 
   it("omits exactly what we decided to omit", () => {
     const missing: string[] = [];
@@ -126,14 +119,15 @@ describe("what Montonio serves and the shop does not", () => {
     expect(missing.sort(), "a locker Montonio serves stopped being offered, or started").toEqual(KNOWN_OMISSIONS);
   });
 
-  it("lists HU and RO as countries with no chips at all", () => {
+  it("lists HU and RO with Nova Post as their only chip", () => {
     /* Nova Post is the only carrier Montonio prices a locker with in either —
        DPD's Hungarian lockers are not in its list, and its Romanian ones are
-       listed but quote nothing. Excluding Nova Post therefore leaves nothing
-       to show, which is why neither country has a row in CARRIERS_BY_COUNTRY.
-       Both gain a locker the day Nova Post goes on outside the Baltics. */
-    expect(chips.HU).toBeUndefined();
-    expect(chips.RO).toBeUndefined();
+       listed but quote nothing. Until 22.09.2026 Nova Post was not offered
+       outside the Baltics, so neither country had a row in
+       CARRIERS_BY_COUNTRY; that day it went on (owner's decision,
+       Montonio-calculator carrier choice) and both gained a locker. */
+    expect(chips.HU).toEqual(["novapost"]);
+    expect(chips.RO).toEqual(["novapost"]);
     expect(carriersFor("pickupPoint", "HU")).toEqual(["novaPost"]);
     expect(carriersFor("pickupPoint", "RO")).toEqual(["novaPost"]);
   });

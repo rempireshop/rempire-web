@@ -944,20 +944,22 @@
         "Выбрать «Другая страна Европы», во втором списке — Италию.",
         "Выбрать «Пакомат» и открыть выбор пакомата.",
         "Ввести в поиск «Roma» и выбрать любой пункт.",
-        "Вернуться к стране и выбрать Польшу, потом снова открыть выбор."
+        "Вернуться к стране и выбрать Польшу, потом снова открыть выбор.",
+        "В поиске набрать польский индекс 91-433."
       ],
       "expect": [
         "Для Италии предлагается пакомат, а не один курьер.",
         "Список не грузится весь: сверху написано, что пунктов слишком много.",
         "Поиск по городу находит пункты, которых в первом списке не было.",
         "Выбранный пункт встаёт в заказ и виден в сводке.",
-        "Смена страны сбрасывает пункт: чужой пакомат не переезжает в Польшу."
+        "Смена страны сбрасывает пункт: чужой пакомат не переезжает в Польшу.",
+        "Первыми идут пункты с индексом 91-433, дальше ближайшие к нему."
       ],
       "why": "Пакоматы DPD открыты во всей Европе, а магазин предлагал только курьера. В Польше 33 603 пункта — телефону их не скачать, поэтому ищет сервер.",
       "risk": "med",
       "writes": false,
-      "mark": "new",
-      "markedAt": "2026-09-19T12:00:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-22T19:03:00.000Z",
       "en": {
         "title": "A locker in another European country",
         "steps": [
@@ -965,14 +967,16 @@
           "Choose «Другая страна Европы», then Italy in the second list.",
           "Choose «Пакомат» and open the locker picker.",
           "Type «Roma» into the search and pick any point.",
-          "Go back to the country, choose Poland, and open the picker again."
+          "Go back to the country, choose Poland, and open the picker again.",
+          "In the search type the Polish postcode 91-433."
         ],
         "expect": [
           "Italy is offered a locker, not the courier alone.",
           "The list is not downloaded whole: a line says there are too many.",
           "Searching by city finds points the first list did not hold.",
           "The chosen point lands on the order and shows in the summary.",
-          "Changing the country clears the point: no locker travels to Poland."
+          "Changing the country clears the point: no locker travels to Poland.",
+          "Points with postcode 91-433 come first, then the nearest to it."
         ],
         "why": "DPD lockers are open across Europe and the shop offered the courier alone. Poland has 33 603 points — not a list for a phone, so the server searches."
       }
@@ -1740,7 +1744,7 @@
         "Финляндия 7,89 / 16,29 €.",
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
         "Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
-        "На кассе перевозчики дешевле: 2,59 € в Эстонии, 4,09 € в Латвии и Литве.",
+        "На кассе у каждого перевозчика своя цена: в Эстонии от 2,49 €.",
         "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
@@ -1759,13 +1763,13 @@
           "Finland 7.89 / 16.29 €.",
           "«Бесплатно от»: 59 € in the four home countries, 200 € in the rest of Europe.",
           "Germany 17.59 €, Poland 15.99 €, Greece 28.89 €.",
-          "At the checkout carriers are cheaper: 2.59 € in Estonia, 4.09 € in Latvia and Lithuania.",
+          "At the checkout each carrier has its own price: in Estonia from €2.49.",
           "Not shipped to: Norway, Switzerland, the United Kingdom, Iceland, Cyprus, Malta, Liechtenstein."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T17:36:00.000Z"
+      "markedAt": "2026-09-22T18:58:00.000Z"
     },
     {
       "id": "panel-carton",
@@ -2284,7 +2288,8 @@
       "expect": [
         "Доставка 5,59 €.",
         "Хотя бы у одного перевозчика список пакоматов не пустой.",
-        "Перевозчик без пакоматов вообще не показан в выборе."
+        "Перевозчик без пакоматов вообще не показан в выборе.",
+        "Среди перевозчиков пакомата есть SmartPosti."
       ],
       "why": "Пустой список пакоматов на шаге доставки — это заказ, который невозможно оформить.",
       "risk": "med",
@@ -2299,10 +2304,13 @@
         "expect": [
           "Delivery is 5.59 €.",
           "At least one carrier has a locker list that is filled.",
-          "A carrier with no lockers is not shown at all."
+          "A carrier with no lockers is not shown at all.",
+          "SmartPosti is one of the locker carriers."
         ],
         "why": "An empty locker list is an order nobody can place."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-22T18:58:00.000Z"
     },
     {
       "id": "checkout-lt-parcel",
@@ -2383,14 +2391,15 @@
       "title": "Другая страна Европы",
       "steps": [
         "На шаге доставки выбрать «Другая страна Европы».",
-        "Выбрать в списке стран Германию и посмотреть цену.",
+        "Выбрать Германию и посмотреть цены у «Пакомата» и «Курьера».",
         "Выбрать Польшу и открыть список пакоматов.",
-        "Выбрать Грецию."
+        "Выбрать Грецию, потом Венгрию."
       ],
       "expect": [
-        "Германия — 17,59 €.",
-        "Польша — 15,99 € курьером и 7,49 € в пакомат.",
-        "Греция — 28,89 €.",
+        "Германия: пакомат от 8,89 €, курьер от 9,29 €.",
+        "Польша: пакомат от 5,49 €, курьер от 7,09 €.",
+        "Греция: только курьер, от 28,89 €.",
+        "Венгрия: пакомат есть, перевозчик только Nova Post.",
         "У польских пакоматов кнопки «Карта» нет — только список и поиск.",
         "Под ценой написано, что у каждой страны она своя."
       ],
@@ -2401,21 +2410,69 @@
         "title": "Another European country",
         "steps": [
           "At the delivery step choose «Другая страна Европы» (another European country).",
-          "Choose Germany in the country list and look at the price.",
+          "Choose Germany and look at the prices for the locker and the courier.",
           "Choose Poland and open the list of lockers.",
-          "Choose Greece."
+          "Choose Greece, then Hungary."
         ],
         "expect": [
-          "Germany — 17.59 €.",
-          "Poland — 15.99 € by courier, 7.49 € to a locker.",
-          "Greece — 28.89 €.",
-          "Polish lockers have no «Карта» button — the list and its search only.",
-          "The note under the price says each country has its own."
+          "Germany: locker from €8.89, courier from €9.29.",
+          "Poland: locker from €5.49, courier from €7.09.",
+          "Greece: courier only, from €28.89.",
+          "Hungary: has a locker, with Nova Post as the only carrier.",
+          "Polish lockers have no «Карта» button — only the list and search.",
+          "Under the price it says every country has its own."
         ],
         "why": "One 9.90 € price for all Europe loses 33 € on a Greek parcel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T17:36:00.000Z"
+      "markedAt": "2026-09-22T18:58:00.000Z"
+    },
+    {
+      "id": "checkout-carrier-cards",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Перевозчик: карточки с ценой, как у Montonio",
+      "steps": [
+        "Выбрать «Другая страна Европы» и Польшу.",
+        "Посмотреть карточки под «Пакоматом».",
+        "Выбрать «Курьер до двери» и посмотреть карточки.",
+        "Нажать DPD и посмотреть сумму заказа.",
+        "Вернуться к Эстонии и открыть «Курьер до двери»."
+      ],
+      "expect": [
+        "Под «Пакоматом»: Nova Post 5,49 € и DPD 7,49 €, выбран Nova Post.",
+        "У Nova Post пометка «без возврата» и строчка про возврат под списком.",
+        "У курьера: Nova Post 7,09 €, DPD 23,89 €, SmartPosti 15,99 €.",
+        "После DPD сумма заказа выросла, строчка про возврат пропала.",
+        "В Эстонии Nova Post нет ни у пакомата, ни у курьера.",
+        "У курьера в Эстонии каждая карточка стоит 10,84 €."
+      ],
+      "why": "Перевозчик и его цена видны до оплаты — так же, как в калькуляторе Montonio.",
+      "risk": "high",
+      "writes": false,
+      "en": {
+        "title": "Carrier: priced cards, the way Montonio shows them",
+        "steps": [
+          "Choose «Другая страна Европы» and Poland.",
+          "Look at the cards under the locker.",
+          "Choose «Курьер до двери» (courier) and look at the cards.",
+          "Tap DPD and look at the order total.",
+          "Go back to Estonia and open the courier."
+        ],
+        "expect": [
+          "Under the locker: Nova Post €5.49 and DPD €7.49, Nova Post picked.",
+          "Nova Post carries «без возврата» and a line about returns under the list.",
+          "Courier: Nova Post €7.09, DPD €23.89, SmartPosti €15.99.",
+          "After DPD the total went up and the returns line is gone.",
+          "In Estonia there is no Nova Post, for a locker or a courier.",
+          "Every courier card in Estonia costs €10.84."
+        ],
+        "why": "The carrier and its price are visible before paying — as in Montonio's calculator."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-22T18:58:00.000Z"
     },
     {
       "id": "checkout-eu-free200",
@@ -4510,7 +4567,7 @@
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T09:10:00.000Z"
+      "markedAt": "2026-09-22T18:58:00.000Z"
     },
     {
       "id": "acct-refund-sent",

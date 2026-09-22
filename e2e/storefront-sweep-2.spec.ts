@@ -470,13 +470,26 @@ test.describe("account — «Доставка по умолчанию»", () => 
     await page.locator('button.btn--wide[data-step="2"]').click();
     await expect(page.locator('input[data-dm="parcel"]')).toBeVisible();
 
+    /* Since 22.09.2026 the checkout's «Пакомат» row is priced «от» the
+       cheapest of its carriers, and every carrier has a card of its own with
+       its own price (Montonio-calculator carrier choice, owner's decision) —
+       so the account's «Пакомат Omniva» is held to the Omniva card, not to
+       the row. */
+    const omnivaCard = page.locator('[data-carrier="omniva"] .carrier__price');
+    await expect(omnivaCard, "no Omniva card at the till").toBeVisible();
     expect(acctParcel, "the account quotes another parcel price than the checkout").toBe(
-      await priceOf(page, "Пакомат"),
-    );
-    expect(acctCourier, "the account quotes another courier price than the checkout").toBe(
-      await priceOf(page, "Курьер до двери"),
+      (await omnivaCard.innerText()).trim(),
     );
     expect(acctPickup).toBe(await priceOf(page, "Самовывоз"));
+    /* …and the account's «Курьер до двери» names no carrier since the same
+       day: it is priced by the country's FIRST courier carrier, the one the
+       checkout pre-selects under «Курьер до двери». */
+    await page.locator('input[data-dm="courier"]').check();
+    const pickedCourier = page.locator('.carrier[aria-current="true"] .carrier__price');
+    await expect(pickedCourier, "no courier carrier is pre-selected").toBeVisible();
+    expect(acctCourier, "the account quotes another courier price than the checkout").toBe(
+      (await pickedCourier.innerText()).trim(),
+    );
     expect(acctCourier).not.toBe(acctParcel);   // both really read, neither a stray «Бесплатно»
   });
 });
@@ -668,8 +681,9 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await page.locator("[data-logincode]").click();
     await expect(page.locator("[data-logout]")).toBeVisible();
 
-    /* «Пакомат SmartPosti» is not the checkout's first carrier chip (that is
-       Omniva) — and the account checks no row at all until a preference
+    /* «Пакомат SmartPosti» is not the checkout's first carrier card (since
+       22.09.2026 that is DPD, in Montonio's order, or Omniva where DPD has no
+       points, as in an e2e run) — and the account checks no row at all until a preference
        exists — so finding it selected at the till can only mean the
        preference travelled. The block promised «Подставим это при следующем
        заказе» and did nothing at all until 07.09.2026. */

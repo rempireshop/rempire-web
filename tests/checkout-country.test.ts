@@ -61,6 +61,10 @@ function literal<T>(name: string): T {
 }
 
 const CARRIERS_BY_COUNTRY = literal<Record<string, string[]>>("CARRIERS_BY_COUNTRY");
+/* …and the courier's own carrier list, which shipRulePrice() reads since
+   22.09.2026, when a courier got a carrier the shopper picks (owner's
+   decision, Montonio-calculator carrier choice). */
+const COURIER_CARRIERS = literal<Record<string, string[]>>("COURIER_CARRIERS");
 
 type Shop = {
   iso: string;
@@ -97,7 +101,8 @@ function shop(country: string, countryIso = "", rules: ShippingRules = DEFAULT_S
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
   const run = new Function(
-    "S", "COUNTRIES", "EUROPE_ISO", "CARRIERS_BY_COUNTRY", "DELIVERY", "SHIP_RULES", "POINTS", "MONTONIO_PRICE", "CARRIER",
+    "S", "COUNTRIES", "EUROPE_ISO", "CARRIERS_BY_COUNTRY", "COURIER_CARRIERS", "DELIVERY", "SHIP_RULES", "POINTS",
+    "MONTONIO_PRICE", "CARRIER",
     body,
   ) as (...args: unknown[]) => Shop;
   return run(
@@ -105,6 +110,7 @@ function shop(country: string, countryIso = "", rules: ShippingRules = DEFAULT_S
     literal<Array<[string, string]>>("COUNTRIES"),
     literal<string[]>("EUROPE_ISO"),
     CARRIERS_BY_COUNTRY,
+    COURIER_CARRIERS,
     literal<Array<{ k: string; l: string }>>("DELIVERY"),
     rules,
     { empty: {} },
@@ -118,7 +124,9 @@ describe("the country the storefront asks about is the real one, not the zone", 
     const it = shop("EU", "IT");
     expect(it.iso).toBe("IT");
     expect(it.methods).toContain("parcel");
-    expect(it.carriers).toEqual(["dpd"]);
+    // Nova Post first, in Montonio's order, since 22.09.2026 (owner's
+    // decision, Montonio-calculator carrier choice); DPD alone before that
+    expect(it.carriers).toEqual(["novapost", "dpd"]);
     // …and the server agrees, which is the point of importing it
     expect(pickupOffered(DEFAULT_SHIPPING_RULES, "IT")).toBe(true);
   });
@@ -205,7 +213,9 @@ describe("the price beside a method is the price the server bills", () => {
        bug — so the two are compared here rather than one of them asserted. */
     const body = `${slice("orderCountry")}${slice("shipZoneOf")}${slice("shipRulePrice")}
       return { asked: shipRulePrice("courier", "", "LV"), ambient: shipRulePrice("courier", "") };`;
-    const run = new Function("S", "COUNTRIES", "EUROPE_ISO", "SHIP_RULES", "MONTONIO_PRICE", body) as (
+    const run = new Function(
+      "S", "COUNTRIES", "EUROPE_ISO", "SHIP_RULES", "MONTONIO_PRICE", "CARRIERS_BY_COUNTRY", "COURIER_CARRIERS", body,
+    ) as (
       ...args: unknown[]
     ) => { asked: number; ambient: number };
     const out = run(
@@ -214,6 +224,8 @@ describe("the price beside a method is the price the server bills", () => {
       literal<string[]>("EUROPE_ISO"),
       DEFAULT_SHIPPING_RULES,
       literal<unknown>("MONTONIO_PRICE"),
+      CARRIERS_BY_COUNTRY,
+      COURIER_CARRIERS,
     );
     expect(out.asked).toBe(quoteFromRules(DEFAULT_SHIPPING_RULES, { country: "LV", method: "courier", subtotal: 0 }).price);
     expect(out.ambient).toBe(quoteFromRules(DEFAULT_SHIPPING_RULES, { country: "EE", method: "courier", subtotal: 0 }).price);

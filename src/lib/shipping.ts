@@ -6,6 +6,7 @@ import {
   countryPriceTable,
   methodPrice,
   MONTONIO_NOT_SERVED,
+  offeredCarriers,
   PICKUP_POINT_COUNTRIES,
   SHOP_CARRIERS,
 } from "@/lib/shipping/country-prices";
@@ -817,7 +818,14 @@ export function quoteFromRules(
    * carrier for every method, so both halves had the same hole; both now
    * ignore the carrier unless the method is one a carrier was picked for.
    */
-  const carrierTable = carrier && method === "parcel" ? rules.carriers?.[carrier] : undefined;
+  /* Only a carrier this country actually offers for this delivery type prices
+     anything — Nova Post in the Baltics, a Venipak left in an old tab, a word
+     the client made up: all fall through to the country's own price. */
+  const pricedCarrier =
+    carrier && (method === "parcel" || method === "courier") && offeredCarriers(country, method).includes(carrier)
+      ? carrier
+      : undefined;
+  const carrierTable = pricedCarrier && method === "parcel" ? rules.carriers?.[pricedCarrier] : undefined;
   /*
    * …and an EMPTY carrier cell means «charge what Montonio charges for this
    * carrier», not «take the country's own «Пакомат» number».
@@ -835,7 +843,7 @@ export function quoteFromRules(
    * A typed number still wins — the three lookups above come first — so the
    * owner keeps control; this is the floor under him, not a ceiling over him.
    */
-  const fromMontonio = carrier && method === "parcel" ? carrierPrice(carrier, country, "parcel") : null;
+  const fromMontonio = pricedCarrier && method === "parcel" ? carrierPrice(pricedCarrier, country, "parcel") : null;
   /*
    * …and the same rule in the courier column, which until 14.09.2026 was the
    * one box on the rate screen where empty meant something else.
@@ -855,14 +863,48 @@ export function quoteFromRules(
    * whole point of putting it there.
    */
   const courierFromMontonio = method === "courier" ? methodPrice(country, "courier") : null;
+  /*
+   * …and since 22.09.2026 a COURIER can carry the shopper's carrier too, the
+   * way Montonio's own calculator offers one: «Курьер» first, then DPD,
+   * SmartPosti or Nova Post, each at its own price.
+   *
+   * The one question is what the country's courier cell means now. It means
+   * what it always meant: if it is Montonio's own number for the country (the
+   * cheapest carrier the shop can take — methodPrice), nobody typed it, and
+   * each carrier charges its own Montonio price. If it is anything else, the
+   * owner typed it — Estonia's 10.84, Latvia's and Lithuania's 9.90 — and it
+   * stays the price for every courier in that country, whichever carrier the
+   * shopper picks. A carrier the country does not offer (Nova Post in the
+   * Baltics, a stale one from an old tab) prices nothing and falls through.
+   */
+  const courierCell = method === "courier" ? table[country] : undefined;
+  const courierIsMontonios =
+    courierCell === undefined ||
+    (courierFromMontonio !== null && Math.abs(courierCell - courierFromMontonio) < 0.005);
+  const courierChip =
+    pricedCarrier && method === "courier" && courierIsMontonios
+      ? carrierPrice(pricedCarrier, country, "courier")
+      : null;
+  /*
+   * A locker in a country whose only carriers are chips — Hungary and
+   * Romania, Nova Post only — has no country «Пакомат» cell at all, so a
+   * request that names no carrier is priced by the first carrier the shopper
+   * would have been offered rather than by the zone's default.
+   */
+  const firstOffered = method === "parcel" && !pricedCarrier ? offeredCarriers(country, "parcel")[0] : undefined;
+  const parcelFallback = firstOffered ? carrierPrice(firstOffered, country, "parcel") : null;
   const base =
     carrierTable?.[country] ??
     carrierTable?.[zone] ??
     carrierTable?.default ??
     fromMontonio ??
+    courierChip ??
     table[country] ??
     courierFromMontonio ??
     table[zone] ??
+    /* after the zone, not before it: a table that prices «EU» as a whole
+       still does — this only fills the gap where nothing else can */
+    parcelFallback ??
     table.default ??
     0;
 

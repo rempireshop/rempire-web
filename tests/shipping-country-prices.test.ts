@@ -89,15 +89,24 @@ describe("which carriers count", () => {
      Hungary and Romania have no other carrier at all — so letting it into the
      basis would put a parcel price on two countries that have never had one.
      Offering a locker somewhere new is a decision about what the customer
-     sees; this is the assertion that it has not been taken by accident. */
-  it("opens no parcel machine in a country that had none", () => {
+     sees; this is the assertion that it has not been taken by accident.
+
+     22.09.2026 (owner's decision, Montonio-calculator carrier choice): that
+     decision WAS taken — Nova Post is offered wherever Montonio carries it
+     outside EE/LV/LT, which opened lockers in Hungary and Romania. It was
+     taken through the carrier cards (offeredCarriers(), chipPriceTable()),
+     not through the basis: the two countries still have no «Пакомат» cell
+     of their own, and Nova Post still prices no country's basis. And since
+     it is never offered in the Baltics, the home carrier table has no Nova
+     Post row at all any more (it had EE, LV and LT). */
+  it("puts no «Пакомат» cell on a country that had none — Nova Post's own card prices HU and RO", () => {
     expect(CARRIER_CHOICE_COUNTRIES).toEqual(["EE", "LV", "LT", "FI"]);
     const parcel = countryPriceTable().parcel;
     expect(parcel.HU).toBeUndefined();
     expect(parcel.RO).toBeUndefined();
     expect(cheapestCostAnyCarrier("HU", "parcel")).toEqual({ price: 7.06, carrier: "novapost" });
-    // …and a Nova Post cell exists in exactly the three Baltic countries
-    expect(Object.keys(carrierPriceTable().novapost).sort()).toEqual(["EE", "LT", "LV"]);
+    // …and no Nova Post cell in the home carrier table: it is never offered there
+    expect(carrierPriceTable().novapost).toBeUndefined();
   });
 });
 

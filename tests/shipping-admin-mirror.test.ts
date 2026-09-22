@@ -79,17 +79,24 @@ describe("the admin's copy of what an empty box charges", () => {
   it("takes the dearest carrier only for a parcel machine, where the shopper picks one", () => {
     // dearest — the chips under «Пакомат»: Omniva at 3.10 is the one to cover
     expect(price.carriers.omniva.EE).toBe(3.19);
-    expect(price.courier.EE).toEqual([6.89, "dpd"]); // cheapest — no chips for a courier
+    // cheapest — the country's basis. (Since 22.09.2026 a courier has carrier
+    // cards too, each at its own price in MONTONIO_PRICE.chips.courier; this
+    // line is still what an empty «Курьер» box charges.)
+    expect(price.courier.EE).toEqual([6.89, "dpd"]);
     expect(price.courier.DE).toEqual([17.59, "smartpost"]); // cheapest the shop can use — 22.29 until
     // 22.09.2026, when the table was still quoted for a 30 cm cube instead of the 25 × 18 × 8 carton
   });
 
   /* Nova Post is a chip, not a basis (CHIP_ONLY_CARRIERS in
-     src/lib/shipping/country-prices.ts), so it has a carrier row of its own
-     here and never a courier line — the courier is the carrier Renat picks at
-     the label, and it is not that one. */
-  it("quotes Nova Post as a carrier and never as a courier", () => {
-    expect(price.carriers.novapost).toEqual({ EE: 2.39, LV: 4.79, LT: 4.09 });
+     src/lib/shipping/country-prices.ts), so it is never a courier line.
+     Until 22.09.2026 it had a carrier row of its own here (EE 2,39, LV 4,79,
+     LT 4,09); that day it stopped being offered in the Baltics at all (owner's
+     decision, Montonio-calculator carrier choice), and it has no Finnish
+     locker, so the home carrier table has no row for it. Its cards abroad —
+     locker and courier — are priced from MONTONIO_PRICE.chips, which
+     tests/shipping-carrier-choice.test.ts holds to the server. */
+  it("has no home carrier row for Nova Post, and never quotes it as a courier", () => {
+    expect(price.carriers.novapost).toBeUndefined();
     for (const [country, cell] of Object.entries(price.courier)) {
       expect(cell[1], country).not.toBe("novapost");
     }
@@ -172,8 +179,10 @@ describe("the storefront's copy of the default carrier prices", () => {
     }
   });
 
-  it("has a Nova Post row and no Venipak one", () => {
-    expect(rules.carriers.novapost).toEqual({ EE: 2.39, LV: 4.79, LT: 4.09 });
+  /* Nova Post left this table on 22.09.2026 — never offered in EE, LV or LT
+     since then (owner's decision, Montonio-calculator carrier choice). */
+  it("has no Nova Post row and no Venipak one", () => {
+    expect(rules.carriers.novapost).toBeUndefined();
     expect(Object.keys(rules.carriers)).not.toContain("venipak");
   });
 });

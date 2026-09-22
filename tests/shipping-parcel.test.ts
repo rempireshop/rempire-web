@@ -157,11 +157,14 @@ describe("the countries a pickup point is offered in", () => {
     expect(PICKUP_POINT_COUNTRIES.length).toBeGreaterThanOrEqual(22);
   });
 
-  it("leaves out the three that have no locker the shop can bill from", () => {
-    /* Greece has no pickup point at any carrier; Hungary and Romania have one
-       at Nova Post only, and Nova Post outside the Baltics is a separate
-       decision — Montonio International Shipping, no returns at all. */
-    for (const c of ["GR", "HU", "RO"]) expect(PICKUP_POINT_COUNTRIES).not.toContain(c);
+  it("leaves out Greece, the one country with no locker at all", () => {
+    /* Greece has no pickup point at any carrier. Hungary and Romania have one
+       at Nova Post only, and until 22.09.2026 they were left out with it: Nova
+       Post outside the Baltics was a separate decision — Montonio
+       International Shipping, no returns at all. That day it was taken (owner's
+       decision, Montonio-calculator carrier choice), and both have lockers. */
+    expect(PICKUP_POINT_COUNTRIES).not.toContain("GR");
+    for (const c of ["HU", "RO"]) expect(PICKUP_POINT_COUNTRIES).toContain(c);
   });
 
   it("is open by default and narrowed by a setting, not by a deploy", () => {
@@ -174,7 +177,8 @@ describe("the countries a pickup point is offered in", () => {
 
   it("can never be turned on for a country with no locker at all", () => {
     expect(pickupOffered(parseShippingRules({ pickupOff: [] }), "GR")).toBe(false);
-    expect(pickupOffered(parseShippingRules({ pickupOff: [] }), "HU")).toBe(false);
+    // Hungary has one since 22.09.2026 — Nova Post's (Montonio-calculator carrier choice)
+    expect(pickupOffered(parseShippingRules({ pickupOff: [] }), "HU")).toBe(true);
   });
 
   it("stores only real codes, sorted, and an empty list survives a save", () => {
@@ -241,12 +245,19 @@ describe("public/shop2/app.js says the same thing", () => {
     expect(open).toEqual([...PICKUP_POINT_COUNTRIES].sort());
   });
 
-  it("asks only DPD outside the Baltics — Nova Post there is its own decision", () => {
+  /* Until 22.09.2026 this was «asks only DPD outside the Baltics — Nova Post
+     there is its own decision». It was taken that day (owner's decision,
+     Montonio-calculator carrier choice): outside EE, LV, LT and FI a locker is
+     Nova Post's, DPD's, or both — in Montonio's order, Nova Post first. */
+  it("asks Nova Post and DPD outside the Baltics, in Montonio's order", () => {
     const by = literal("CARRIERS_BY_COUNTRY") as Record<string, string[]>;
     for (const [country, carriers] of Object.entries(by)) {
       if (["EE", "LV", "LT", "FI", "EU"].includes(country)) continue;
-      expect(carriers, country).toEqual(["dpd"]);
+      expect(carriers.length, country).toBeGreaterThan(0);
+      expect(carriers, country).toEqual(["novapost", "dpd"].filter((c) => carriers.includes(c)));
     }
+    expect(by.HU).toEqual(["novapost"]);
+    expect(by.PL).toEqual(["novapost", "dpd"]);
   });
 
   it("only ever asks for a locker door where the server would send one", () => {

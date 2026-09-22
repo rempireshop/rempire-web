@@ -158,10 +158,49 @@ export const SHOP_CARRIERS: readonly string[] = ["omniva", "smartpost", "dpd", "
 export const CHIP_ONLY_CARRIERS: readonly string[] = ["novapost"];
 
 /**
- * The four countries whose checkout lets the shopper choose the carrier, and
- * so the four that must be priced at the dearest of them.
+ * The four home countries whose per-carrier «Пакомат» prices the owner can
+ * type in the panel, and so the four whose country price is the dearest of
+ * them. Since 22.09.2026 the shopper picks a carrier in EVERY country, for a
+ * locker and for a courier alike (`offeredCarriers()` below) — this list no
+ * longer says where the choice exists, only where the owner can override it.
  */
 export const CARRIER_CHOICE_COUNTRIES: readonly string[] = ["EE", "LV", "LT", "FI"];
+
+/**
+ * The order the carriers are shown in, and the first one is pre-selected —
+ * exactly Montonio's own shipping calculator (shipping-calculator.montonio.com,
+ * read out of its bundle on 22.09.2026): Montonio International Shipping,
+ * which is Nova Post, then DPD, Omniva, Unisend and SmartPosti. Not sorted by
+ * price. Дим, 22.09.2026: «We use same logic as Montonio».
+ */
+export const CARRIER_ORDER: readonly string[] = ["novapost", "dpd", "omniva", "unisend", "smartpost"];
+
+/**
+ * Where Nova Post is never offered. Montonio, 22.09.2026: Nova Post has no
+ * returns at all, and inside the Baltics — where the locker networks are
+ * dense — they advise against it. Outside them it is offered, marked
+ * «без возврата» in the checkout, and the terms say the return is the buyer's
+ * to arrange.
+ */
+export const NO_NOVAPOST_COUNTRIES: readonly string[] = ["EE", "LV", "LT"];
+
+/**
+ * The carriers a shopper may pick for this country and delivery type, in
+ * `CARRIER_ORDER`. A carrier is offered where the tariff mirror holds a row
+ * for it — i.e. where Montonio will quote the route from Estonia — minus Nova
+ * Post in the Baltics. The storefront carries the same lists as literals
+ * (CARRIERS_BY_COUNTRY / COURIER_CARRIERS in public/shop2/app.js), and
+ * tests/shipping-carrier-choice.test.ts holds the two together.
+ */
+export function offeredCarriers(country: string, method: CostMethod): string[] {
+  const cc = String(country || "").toUpperCase();
+  return CARRIER_ORDER.filter(
+    (c) =>
+      SHOP_CARRIERS.includes(c) &&
+      !(c === "novapost" && NO_NOVAPOST_COUNTRIES.includes(cc)) &&
+      RATES.some((r) => r.carrier === c && r.method === method && r.country.toUpperCase() === cc),
+  );
+}
 
 /**
  * Every country the shop can put a parcel into a pickup point in — «открыть
@@ -202,15 +241,14 @@ export const CARRIER_CHOICE_COUNTRIES: readonly string[] = ["EE", "LV", "LT", "F
  * price per country either way. See docs/montonio-shipping-audit.md § 3.1.
  */
 export const PICKUP_POINT_COUNTRIES: readonly string[] = [
-  ...new Set(
-    RATES.filter(
-      (r) =>
-        r.method === "parcel" &&
-        SHOP_CARRIERS.includes(r.carrier) &&
-        !CHIP_ONLY_CARRIERS.includes(r.carrier),
-    ).map((r) => r.country.toUpperCase()),
-  ),
-].sort();
+  ...new Set(RATES.filter((r) => r.method === "parcel").map((r) => r.country.toUpperCase())),
+]
+  /* Since 22.09.2026 a country has lockers wherever ANY carrier the shopper can
+     pick has one — Nova Post included, which is what opens Hungary and
+     Romania. Before that only a carrier that could be a price basis counted,
+     and those two had none. */
+  .filter((cc) => offeredCarriers(cc, "parcel").length > 0)
+  .sort();
 
 /** Destinations Montonio will not quote at all — HTTP 400 no_applicable_tier. */
 export const MONTONIO_NOT_SERVED: readonly string[] =
@@ -449,22 +487,20 @@ export function methodPrice(country: string, method: CostMethod): number | null 
 
 /**
  * What Montonio charges for one carrier on one route, or null if it has no
- * price — and null, too, wherever a carrier is not the *shopper's* to choose.
+ * price — and null, too, wherever the shopper cannot pick that carrier.
  *
- * A carrier price only means anything under «Пакомат» in EE, LV, LT and FI:
- * those are the only chips the checkout draws (CARRIERS_BY_COUNTRY in
- * public/shop2/app.js). Everywhere else — and for every courier — Renat picks
- * the carrier when he makes the label, so the country's own cell is the price
- * and a per-carrier one would be a number nobody can reach. Narrowing it here
- * is also what keeps the storefront's mirror of this table small enough to
- * state literally, and therefore checkable against this one.
+ * Until 22.09.2026 this answered only for «Пакомат» in EE, LV, LT and FI,
+ * because those were the only chips the checkout drew; a courier's carrier
+ * was Renat's to pick at the label. Since then the shopper picks a carrier in
+ * every country for both delivery types, like Montonio's own calculator, so
+ * the answer follows `offeredCarriers()` — which is also what keeps Nova Post
+ * out of the Baltics here.
  */
 export function carrierCost(carrier: string, country: string, method: CostMethod): number | null {
   const c = String(carrier || "").toLowerCase();
   if (!c || !SHOP_CARRIERS.includes(c)) return null;
-  if (method !== "parcel") return null;
   const cc = String(country || "").toUpperCase();
-  if (!CARRIER_CHOICE_COUNTRIES.includes(cc)) return null;
+  if (!offeredCarriers(cc, method).includes(c)) return null;
   let best: number | null = null;
   for (const r of RATES) {
     if (r.carrier !== c || r.method !== method || r.country.toUpperCase() !== cc) continue;
@@ -490,6 +526,26 @@ export function carrierPrice(carrier: string, country: string, method: CostMetho
  * a courier never carries a carrier the shopper chose — Renat picks that one
  * when he makes the label, and the country's own courier cell prices it.
  */
+/**
+ * `{ novapost: { PL: 5.49, … }, dpd: { … } }` — the shelf price of every
+ * carrier the shopper can pick, for one delivery type, in every country.
+ * The storefront states it literally (MONTONIO_PRICE.chips in
+ * public/shop2/app.js) and tests/shipping-carrier-choice.test.ts compares the
+ * two. Unlike carrierPriceTable() below it is not owner-editable: an empty
+ * cell here is Montonio's price and nothing else.
+ */
+export function chipPriceTable(method: CostMethod): Record<string, Record<string, number>> {
+  const out: Record<string, Record<string, number>> = {};
+  for (const country of MONTONIO_COUNTRIES) {
+    for (const carrier of offeredCarriers(country, method)) {
+      const price = carrierPrice(carrier, country, method);
+      if (price === null) continue;
+      (out[carrier] ??= {})[country] = price;
+    }
+  }
+  return out;
+}
+
 export function carrierPriceTable(): Record<string, Record<string, number>> {
   const out: Record<string, Record<string, number>> = {};
   for (const carrier of SHOP_CARRIERS) {

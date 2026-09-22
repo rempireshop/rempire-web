@@ -56,6 +56,14 @@ for (const [i, lang] of LANGS.entries()) {
       await expect(page.locator('[data-shipf="addr"]')).toHaveCount(0);
 
       await page.locator('input[data-dm="parcel"]').check();
+      /* Since 22.09.2026 the cards follow Montonio's order, and in Estonia that
+         puts DPD first — a carrier an e2e run has no points for, so its card is
+         struck off the moment its feed answers empty. Wait for every feed to
+         land ("0" in flight) so the first card is one that stays. */
+      await expect
+        .poll(async () => page.locator("[data-co-delivery]").getAttribute("data-points-loading").catch(() => null),
+          { timeout: 25_000, message: "parcel-point feeds never settled" })
+        .not.toMatch(/^[1-9]/);
       const carrierChip = page.locator("[data-carrier]").first();
       await expect(carrierChip).toBeVisible();
       await carrierChip.click();
@@ -217,7 +225,8 @@ test.describe("checkout — pickup", () => {
 });
 
 /** Regression: the checkout screen's own background probes (shipping rules,
- *  one loadPointsFor() per carrier — 5 for EE, the signed-in account check,
+ *  one loadPointsFor() per carrier — 4 for EE since Nova Post left it on
+ *  22.09.2026, the signed-in account check,
  *  payment methods) used to call the full render() the instant each landed,
  *  tearing out and recreating the e-mail input on step 1 mid-keystroke — a
  *  visible flicker, and on a phone it also dropped the keyboard. app.js now
@@ -451,7 +460,12 @@ test.describe("checkout — the carrier's own mark", () => {
        Measured rather than matched against a colour name, so any treatment a
        black mark survives passes — and composited down the ancestors, because
        --hover is 5% ink and an alpha channel read on its own would read as
-       black as the fill it replaced. */
+       black as the fill it replaced.
+
+       Omniva is the first card here only because the feeds have settled:
+       since 22.09.2026 Estonia's cards are in Montonio's order — DPD, Omniva,
+       Unisend, SmartPosti — and an e2e run has no DPD or Unisend points, so
+       both are struck off and Omniva is what is left at the top. */
     await expect(omniva, "the first carrier is no longer picked on arrival").toHaveAttribute("aria-current", "true");
     const lum = await omniva.evaluate((el: Element) => {
       const parse = (css: string) => {

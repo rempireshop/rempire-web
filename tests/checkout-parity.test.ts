@@ -117,14 +117,24 @@ function client(
      what shipRulePrice() falls back to when a carrier or a courier has no cell
      of its own, the same step quoteFromRules() takes on the server. Read out
      of app.js rather than restated, so the two cannot drift. */
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", "GIFT_FACE", "BRAND", body) as (
+  /* CARRIERS_BY_COUNTRY and COURIER_CARRIERS likewise: since 22.09.2026 a
+     carrier prices a delivery only where the country offers it for that
+     delivery type — a locker AND, since that day, a courier (owner's decision,
+     Montonio-calculator carrier choice) — and shipRulePrice() reads the two
+     lists to know. */
+  const run = new Function(
+    "S", "CART_SUM", "SHIP_RULES", "METHOD", "MONTONIO_PRICE", "GIFT_FACE", "BRAND",
+    "CARRIERS_BY_COUNTRY", "COURIER_CARRIERS", body,
+  ) as (
     s: unknown, n: number, r: ShippingRules, m: string, d: unknown, g: number, b: string,
+    p: unknown, c: unknown,
   ) => ClientOut;
   const cart: Array<Record<string, unknown>> = [{ id: "p", qty: 1 }];
   if (giftFace > 0) cart.push({ type: "gift", id: "gift:50", qty: 1 });
   return run(
     { promoInfo, country, countryIso, ship: { carrier }, cart },
     cartSum, rules, method, literal<unknown>("MONTONIO_PRICE"), giftFace, brand,
+    literal<unknown>("CARRIERS_BY_COUNTRY"), literal<unknown>("COURIER_CARRIERS"),
   );
 }
 

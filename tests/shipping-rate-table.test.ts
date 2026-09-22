@@ -1,4 +1,23 @@
 /*
+ * 22.09.2026, later the same day — HU, RO AND NOVAPOST MOVED AGAIN, ON PURPOSE.
+ *
+ * The owner's decision: the delivery step offers carriers the way Montonio's
+ * own shipping calculator does (offeredCarriers() in
+ * src/lib/shipping/country-prices.ts; tests/shipping-carrier-choice.test.ts is
+ * the specification). Three things follow for this table, and nothing else:
+ *
+ *   · Nova Post is never offered in EE, LV or LT. A delivery still tagged
+ *     with it there bills as if it named no carrier — the country's own
+ *     «Пакомат» price: EE 2.39 → 5.47, LV 4.79 → 5.59, LT 4.09 → 5.59;
+ *   · Nova Post is offered everywhere else Montonio carries it, at its own
+ *     Montonio price, like any other card: AT 9.59, CZ 6.99, DE 8.89,
+ *     ES 11.39, IT 10.99, PL 5.49, SK 7.29 (each was the country's cell);
+ *   · Hungary and Romania have lockers now, Nova Post's only, and have no
+ *     «Пакомат» cell of their own — so every HU and RO parcel price, whatever
+ *     carrier tag it carries, is Nova Post's: HU 4.99 → 7.09, RO 4.99 → 10.99.
+ *
+ * Nothing moved in EE, LV, LT or FI but Nova Post; no courier moved at all.
+ *
  * 22.09.2026 — THE PRICES IN FROZEN AND NOVAPOST MOVED, ON PURPOSE.
  *
  * Renat measured his carton: 25 × 18 × 8 cm, declared at 0.9 kg. The tariff
@@ -101,9 +120,9 @@ const FROZEN: Record<string, number> = {
   "GR|courier|": 28.89, "GR|pickup|": 0.00, "HR|parcel|": 29.79,
   "HR|parcel|omniva": 29.79, "HR|parcel|smartpost": 29.79, "HR|parcel|dpd": 29.79,
   "HR|parcel|venipak": 29.79, "HR|parcel|unisend": 29.79, "HR|courier|": 23.59,
-  "HR|pickup|": 0.00, "HU|parcel|": 4.99, "HU|parcel|omniva": 4.99,
-  "HU|parcel|smartpost": 4.99, "HU|parcel|dpd": 4.99, "HU|parcel|venipak": 4.99,
-  "HU|parcel|unisend": 4.99, "HU|courier|": 22.69, "HU|pickup|": 0.00,
+  "HR|pickup|": 0.00, "HU|parcel|": 7.09, "HU|parcel|omniva": 7.09,
+  "HU|parcel|smartpost": 7.09, "HU|parcel|dpd": 7.09, "HU|parcel|venipak": 7.09,
+  "HU|parcel|unisend": 7.09, "HU|courier|": 22.69, "HU|pickup|": 0.00,
   "IE|parcel|": 22.39, "IE|parcel|omniva": 22.39, "IE|parcel|smartpost": 22.39,
   "IE|parcel|dpd": 22.39, "IE|parcel|venipak": 22.39, "IE|parcel|unisend": 22.39,
   "IE|courier|": 31.29, "IE|pickup|": 0.00, "IT|parcel|": 20.89,
@@ -120,8 +139,8 @@ const FROZEN: Record<string, number> = {
   "PL|pickup|": 0.00, "PT|parcel|": 29.79, "PT|parcel|omniva": 29.79,
   "PT|parcel|smartpost": 29.79, "PT|parcel|dpd": 29.79, "PT|parcel|venipak": 29.79,
   "PT|parcel|unisend": 29.79, "PT|courier|": 33.69, "PT|pickup|": 0.00,
-  "RO|parcel|": 4.99, "RO|parcel|omniva": 4.99, "RO|parcel|smartpost": 4.99,
-  "RO|parcel|dpd": 4.99, "RO|parcel|venipak": 4.99, "RO|parcel|unisend": 4.99,
+  "RO|parcel|": 10.99, "RO|parcel|omniva": 10.99, "RO|parcel|smartpost": 10.99,
+  "RO|parcel|dpd": 10.99, "RO|parcel|venipak": 10.99, "RO|parcel|unisend": 10.99,
   "RO|courier|": 31.99, "RO|pickup|": 0.00, "SE|parcel|": 13.69,
   "SE|parcel|omniva": 13.69, "SE|parcel|smartpost": 13.69, "SE|parcel|dpd": 13.69,
   "SE|parcel|venipak": 13.69, "SE|parcel|unisend": 13.69, "SE|courier|": 21.59,
@@ -145,23 +164,27 @@ const FROZEN: Record<string, number> = {
  * merging a new carrier's twenty-seven prices into it would make every future
  * reader wonder which literals are the freeze and which are the new thing.
  *
- * Three of these are the carrier's own Montonio rate — EE 2,39, LV 4,79,
- * LT 4,09, the only countries the checkout draws a Nova Post chip in. Finland
- * is 12,39 because Montonio runs no Nova Post locker there, so the chip is not
- * drawn and the tag falls through to `methods.parcel` — the same number every
- * other carrier without a Finnish cell gets. Every remaining country falls
- * through the same way, which is why each one equals its Venipak twin above.
+ * Until 22.09.2026 three of these were the carrier's own Montonio rate — EE
+ * 2,39, LV 4,79, LT 4,09, the only countries the checkout drew a Nova Post chip
+ * in — and every other country fell through to its own cell. Since that day
+ * (owner's decision, Montonio-calculator carrier choice) it is the other way
+ * round: Nova Post is never offered in EE, LV or LT, so there the tag falls
+ * through to the country's «Пакомат» cell and equals its Venipak twin; and it
+ * IS offered in AT CZ DE ES HU IT PL RO SK, so there it bills its own Montonio
+ * price (MONTONIO_PRICE.chips.parcel.novapost in public/shop2/app.js). Finland
+ * is still 12,39 — Montonio runs no Nova Post locker there — and every
+ * remaining country still falls through the same way.
  */
 const NOVAPOST: Record<string, number> = {
-  "EE|parcel|novapost": 2.39, "LV|parcel|novapost": 4.79, "LT|parcel|novapost": 4.09,
-  "FI|parcel|novapost": 12.39, "AT|parcel|novapost": 20.89, "BE|parcel|novapost": 17.89,
-  "BG|parcel|novapost": 37.29, "CZ|parcel|novapost": 16.39, "DE|parcel|novapost": 16.39,
-  "DK|parcel|novapost": 14.89, "ES|parcel|novapost": 23.89, "FR|parcel|novapost": 28.29,
-  "GR|parcel|novapost": 4.99, "HR|parcel|novapost": 29.79, "HU|parcel|novapost": 4.99,
-  "IE|parcel|novapost": 22.39, "IT|parcel|novapost": 20.89, "LU|parcel|novapost": 20.89,
-  "NL|parcel|novapost": 14.89, "PL|parcel|novapost": 7.49, "PT|parcel|novapost": 29.79,
-  "RO|parcel|novapost": 4.99, "SE|parcel|novapost": 13.69, "SI|parcel|novapost": 22.39,
-  "SK|parcel|novapost": 16.39, "EU|parcel|novapost": 4.99, "US|parcel|novapost": 4.99,
+  "EE|parcel|novapost": 5.47, "LV|parcel|novapost": 5.59, "LT|parcel|novapost": 5.59,
+  "FI|parcel|novapost": 12.39, "AT|parcel|novapost": 9.59, "BE|parcel|novapost": 17.89,
+  "BG|parcel|novapost": 37.29, "CZ|parcel|novapost": 6.99, "DE|parcel|novapost": 8.89,
+  "DK|parcel|novapost": 14.89, "ES|parcel|novapost": 11.39, "FR|parcel|novapost": 28.29,
+  "GR|parcel|novapost": 4.99, "HR|parcel|novapost": 29.79, "HU|parcel|novapost": 7.09,
+  "IE|parcel|novapost": 22.39, "IT|parcel|novapost": 10.99, "LU|parcel|novapost": 20.89,
+  "NL|parcel|novapost": 14.89, "PL|parcel|novapost": 5.49, "PT|parcel|novapost": 29.79,
+  "RO|parcel|novapost": 10.99, "SE|parcel|novapost": 13.69, "SI|parcel|novapost": 22.39,
+  "SK|parcel|novapost": 7.29, "EU|parcel|novapost": 4.99, "US|parcel|novapost": 4.99,
 };
 
 const ALL = { ...FROZEN, ...NOVAPOST };
@@ -275,14 +298,20 @@ describe("the rate table lost two columns and no price moved", () => {
   });
 
   /* The other half of the same day: a carrier arriving must not move anything
-     either. Nova Post prices its own three cells and touches nothing else —
-     no country's «Курьер», no country's «Пакомат», no other carrier's chip. */
+     either. Nova Post prices its own column and touches nothing else — no
+     country's «Курьер», no country's «Пакомат», no other carrier's chip.
+     (Hungary and Romania, whose every parcel price IS Nova Post's since
+     22.09.2026, are in FROZEN at that price — they have no other carrier.) */
   it("Nova Post prices its own column and moves nothing else", () => {
     const priced = priceEveryDelivery(DEFAULT_SHIPPING_RULES);
     for (const [k, v] of Object.entries(FROZEN)) expect([k, priced[k]]).toEqual([k, v]);
-    expect(priced["EE|parcel|novapost"]).toBe(2.39);   // cheapest chip in Estonia
-    expect(priced["LV|parcel|novapost"]).toBe(4.79);   // Unisend's 3,79 is still cheaper
-    expect(priced["LT|parcel|novapost"]).toBe(4.09);   // …and here too
+    /* 22.09.2026 (owner's decision, Montonio-calculator carrier choice): never
+       offered in the Baltics — a stale tag bills the country's «Пакомат»… */
+    expect(priced["EE|parcel|novapost"]).toBe(priced["EE|parcel|"]);
+    expect(priced["LV|parcel|novapost"]).toBe(priced["LV|parcel|"]);
+    expect(priced["LT|parcel|novapost"]).toBe(priced["LT|parcel|"]);
+    // …and abroad it bills its own card, which is why it is so often the cheapest
+    expect(priced["PL|parcel|novapost"]).toBe(5.49);   // DPD's is 7,49
   });
 });
 
@@ -430,12 +459,14 @@ describe("the parcel column is not stored", () => {
 
   it("prices every delivery exactly the same after the drop", () => {
     /* The cells a save sends back are the ones the read seeded — today's
-       table, so DE 16.39 and PL 7.49 since the 22.09.2026 carton re-quote. */
+       table, so DE 16.39 and PL 7.49 since the 22.09.2026 carton re-quote,
+       and HU 7.09 since the carrier choice of the same day: Hungary's only
+       locker is Nova Post's, at Nova Post's price (it was the 4.99 fallback). */
     const withCells = parseShippingRules({
-      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 4.99 } },
+      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 7.09 } },
     });
     const dropped = parseShippingRules(cleanShippingRules({
-      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 4.99 } },
+      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 7.09 } },
     }));
     for (const c of ["DE", "PL", "AT", "SK", "GR", "HU", "RO", "ES", "IT"]) {
       const q = { country: c, method: "parcel" as const, subtotal: 10 };

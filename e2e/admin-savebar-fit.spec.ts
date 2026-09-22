@@ -20,7 +20,8 @@ import { adminLang, adminSection, loginAsAdmin } from "./fixtures";
  *
  * The subject is «Настройки → Доставка и оплата», which is the widest thing
  * the panel asks a phone to hold — one row per country, a column per carrier
- * (five since Nova Post came back on 14.09.2026), plus the courier and the
+ * (five from 14.09.2026, four since Nova Post left the home columns on
+ * 22.09.2026), plus the courier and the
  * free-from threshold. The BAR, though, is every admin screen's: .adm-savebar
  * in admin.css is the phone's top header on the product editor, the mail
  * texts, a newsletter and all four settings pages. A fix for one is a fix for

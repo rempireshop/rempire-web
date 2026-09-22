@@ -40,6 +40,7 @@ import {
 // cannot drift from it; the live computeShipping() call itself still goes
 // through the optional-neighbour door a few lines down.
 import { DEFAULT_SHIPPING_RULES, shippingZone } from "@/lib/shipping";
+import { NO_NOVAPOST_COUNTRIES } from "@/lib/shipping/country-prices";
 // media: what product_overrides.video_url is allowed to hold — a pure module
 // of this build, no side effects, see src/lib/video.ts.
 import { cleanVideoUrl } from "@/lib/video";
@@ -1486,6 +1487,13 @@ export function shipCarrierOf(v: unknown): string | null {
   return (SHIP_CARRIERS as readonly string[]).includes(s) ? s : null;
 }
 
+/** shipCarrierOf(), minus a carrier this country never offers. */
+function shipCarrierForCountry(v: unknown, country: unknown): string | null {
+  const c = shipCarrierOf(v);
+  const cc = String(country ?? "").toUpperCase();
+  return c === "novapost" && NO_NOVAPOST_COUNTRIES.includes(cc) ? null : c;
+}
+
 /** The three kinds a pickup point can be — MontonioPointType, in our spelling. */
 export const SHIP_POINT_TYPES = ["parcel_machine", "pickup_point", "post_office"] as const;
 
@@ -1524,7 +1532,10 @@ function cleanShipping(ship: CreateOrderInput["shipping"], price: number): Order
     country: /^[A-Za-z]{2}$/.test(String(ship?.country ?? ""))
       ? String(ship.country).toUpperCase()
       : "EE",
-    carrier: parcel ? shipCarrierOf(ship?.carrier) : null,
+    /* Nova Post is never offered in the Baltics (Montonio, 22.09.2026 — no
+       returns, and the local locker networks are better). A stale tab that
+       still sends it would otherwise book it at the label. */
+    carrier: parcel ? shipCarrierForCountry(ship?.carrier, ship?.country) : null,
     pointId: parcel ? shipText(ship?.pointId, 80) : null,
     pointName: parcel ? shipText(ship?.pointName, 160) : null,
     /* One of three words or nothing at all — the browser does not get to
