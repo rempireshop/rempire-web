@@ -23,6 +23,7 @@
     "i18n:gaps": "node tools/i18n-gaps.mjs",
     "pack:migrations": "node tools/pack-migrations.mjs",
     "pack:content": "node tools/pack-content.mjs",
+    "montonio:routes": "node tools/montonio-route-grid.mjs",
     "pack:legal": "node tools/pack-legal.mjs",
     "e2e": "node tools/e2e-build.mjs && playwright test",
     "e2e:ui": "node tools/e2e-build.mjs && playwright test --ui",
