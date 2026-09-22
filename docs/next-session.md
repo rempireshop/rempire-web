@@ -11,7 +11,10 @@ found **8 bad and 3 skip** — everything below comes from that list, and every
 one of them is now closed except the three that need the live Montonio keys.
 
 - **The A4 label came out blank, and had since 13.09.** The band under the
-  sticker — order number, drop-off code in figures you can read at a counter —
+  sticker — order number, recipient, tracking number, and a drop-off code only
+  on the rare occasion one arrives (Montonio, in writing, 22.09.2026: a door
+  code needs the merchant's own direct contract with the carrier and Omniva has
+  none, so a blank code line is normal) —
   is drawn with three TTFs read off disk, and `/api/admin/shipments/**` was
   never added to `outputFileTracingIncludes`. On Vercel nothing under `public/`
   reaches a function unless the tracer is told, `readAsset()` threw

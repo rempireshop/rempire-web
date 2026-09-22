@@ -3459,9 +3459,9 @@
         "Открыть оплаченный заказ в польский пакомат и посмотреть блок над кнопкой."
       ],
       "expect": [
-        "Появилось «Отправление»: перевозчик, пакомат, трек-номер и код сдачи.",
+        "Появилось «Отправление»: перевозчик, пакомат и трек-номер.",
         "Рядом с трек-номером есть кнопка «Скопировать».",
-        "На листе A4 под этикеткой — номер заказа и код сдачи крупными цифрами.",
+        "На листе A4 под этикеткой — номер заказа крупными цифрами.",
         "Там же написано, куда и кому едет посылка и что внутри.",
         "Наклейка A6 — голая этикетка перевозчика, этих строк на ней нет.",
         "У польского заказа размера ячейки нет, и написано почему."
@@ -3481,9 +3481,9 @@
           "Open a paid order going to a Polish locker and look above the button."
         ],
         "expect": [
-          "«Отправление» appears: carrier, locker, tracking number and drop-off code.",
+          "«Отправление» appears: carrier, locker and tracking number.",
           "Next to the tracking number is a «Скопировать» button.",
-          "Under the label on A4: the order number and the drop-off code in big figures.",
+          "Under the label on A4: the order number in big figures.",
           "The same band says where and to whom it goes and what is inside.",
           "The A6 sticker is the bare carrier label; those lines are not on it.",
           "A Polish order has no locker size, and says why."
@@ -3491,7 +3491,7 @@
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T09:10:00.000Z"
+      "markedAt": "2026-09-22T15:49:00.000Z"
     },
     {
       "id": "order-shipped",
@@ -8095,7 +8095,7 @@
       "lang": "RU",
       "title": "Первый возврат настоящих денег",
       "steps": [
-        "Проверить, что в кабинете Montonio включены возвраты для банковских ссылок.",
+        "В кабинете Montonio, роль «Juhataja», проверить включённые возвраты для банковских ссылок.",
         "Открыть заказ из предыдущей проверки.",
         "Нажать «Вернуть деньги», вернуть всю сумму, подтвердить.",
         "Следить за кабинетом Montonio и выпиской пару дней.",
@@ -8116,7 +8116,7 @@
       "en": {
         "title": "The first refund of real money",
         "steps": [
-          "Check that refunds for bank payments are switched on in the Montonio account.",
+          "Check in the Montonio account, Juhataja role, that refunds for bank payments are on.",
           "Open the order from the previous check.",
           "Press «Вернуть деньги», refund the whole sum, confirm.",
           "Watch the Montonio account and the bank statement for two days.",
@@ -8132,7 +8132,7 @@
         ],
         "why": "Without a working refund it is easy to pay someone twice."
       },
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-22T15:49:00.000Z"
     },
     {
       "id": "live-apple-pay",

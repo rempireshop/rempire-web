@@ -157,7 +157,7 @@
       "id": "refunds-live",
       "area": "montonio",
       "who": [
-        "dim"
+        "renat"
       ],
       "status": "blocked",
       "blocking": true,
@@ -166,42 +166,25 @@
         "montonio-keys"
       ],
       "title": "Включить «Refundable bank payments» в боевом режиме",
-      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе.",
+      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). И плата за это есть: с включёнными возвратами выплаты приходят на один рабочий день позже и от имени самой фирмы магазина.",
       "en": {
         "title": "Activate «Refundable bank payments» in live mode",
-        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance."
+        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). It has a price: with refunds on, payouts arrive one business day later and in the merchant's own company name."
       }
     },
     {
-      "id": "dpd-pin",
+      "id": "dropoff-code",
       "area": "montonio",
       "who": [
         "dim"
       ],
-      "status": "todo",
-      "blocking": true,
-      "outside": "DPD",
-      "title": "Включить услугу PIN на аккаунте DPD",
-      "detail": "Без неё код для сдачи посылки не выдаётся.",
+      "status": "done",
+      "blocking": false,
+      "title": "Код для сдачи посылки — отменено 22.09",
+      "detail": "Здесь стояло два пункта: включить услугу PIN на аккаунте DPD и задать defaultLockerSize в договоре SmartPosti. Оба отпали. Montonio ответила письменно 22.09.2026: код на дверцу работает только по собственному прямому договору магазина с перевозчиком, оформляется при участии самого перевозчика и сделан для маркетплейсов, а у Omniva такой возможности нет вообще. Обычный магазин — а это ровно наш случай — сканирует в автомате напечатанную наклейку, и посылка уходит. Включать нечего и не нужно, а пустая строка кода на листе A4 — норма, а не поломка. Поле dropOffPin в коде остаётся: если оно когда-нибудь придёт, его покажут.",
       "en": {
-        "title": "Enable the PIN service on the DPD carrier account",
-        "detail": "Without it the drop-off code does not issue."
-      }
-    },
-    {
-      "id": "smartposti-size",
-      "area": "montonio",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "blocking": true,
-      "outside": "SmartPosti",
-      "title": "Задать defaultLockerSize в договоре SmartPosti",
-      "detail": "Без него и без размера в самой отправке код на посылку не выдаётся вообще — на это Ренат жаловался 13.09. Выбор размера для каждой отправки сейчас делается в коде; это страховка под ним.",
-      "en": {
-        "title": "Set `defaultLockerSize` on the SmartPosti contract",
-        "detail": "Without it, and without a per-shipment size, no drop-off code is issued at all — Renat's complaint of 13.09. The per-shipment choice is being built; this is the safety net under it."
+        "title": "The parcel drop-off code — cancelled 22.09",
+        "detail": "Two items stood here: enable the PIN service on the DPD account, and set `defaultLockerSize` on the SmartPosti contract. Both are gone. Montonio's written answer of 22.09.2026: a drop-off / door code works only on a merchant's own direct contract with the carrier, is arranged with that carrier's help, and is aimed at marketplace platforms — and Omniva has no such option at all. A normal merchant, which is exactly what this shop is, scans the printed label at the parcel machine and the parcel goes. There is nothing to switch on and nothing missing, and a blank code line on the A4 slip is the normal outcome, not a fault. The `dropOffPin` plumbing stays: if one ever does arrive, it is shown."
       }
     },
     {

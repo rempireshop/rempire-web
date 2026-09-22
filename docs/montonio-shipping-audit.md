@@ -264,14 +264,27 @@ same script already uses as source 1 (`tools/fetch-montonio-tariffs.mjs:234-262`
 — but that one needs keys and, per the reference Note, *"only returns rates for
 carriers with Montonio contracts."*
 
-One consequence worth naming, because it touches question 1 below:
-`contract-prices` takes a single `shippingMethod=pickupPoint` and returns one
-price. The documented `/shipping-methods/rates` splits that into **per-subtype**
-rates — `parcelMachine`, `parcelShop`, `postOffice` each with their own `rate`.
-So when the mirror is built without keys, a country's "parcel" cost is
-subtype-blind: it may be the parcel-shop price where the shop actually sells a
-locker. With keys, `flatten()` prefers `parcelMachine`
-(`tools/fetch-montonio-tariffs.mjs:272-274`) and the number is right.
+One consequence used to be named here, and **Montonio has since answered
+it** (Harri Holm, 22.09.2026): *«Pakiautomaat ja pickupPoint on sama hinnaga aga
+erinevad väljastuspunktid»* — a parcel machine and a pickup point are the same
+price, only different places to collect from. So the subtype-blindness costs
+nothing. `contract-prices` takes one `shippingMethod=pickupPoint` and returns
+one price; `/shipping-methods/rates` splits it per subtype; the numbers agree.
+`flatten()` still prefers `parcelMachine` (`tools/fetch-montonio-tariffs.mjs`)
+and that stays the tidier choice, not a correction.
+
+What the answer does **not** close is the paragraph above: the endpoint is still
+undocumented, and it is still the only source of prices without keys. That half
+stands.
+
+A separate consequence, found on 22.09.2026 and **still open**, is the box
+rather than the subtype. `REFERENCE_PARCEL` is a 30 × 30 × 30 cm cube, which
+fits nothing smaller than DPD's largest international drawer, so every non-Baltic
+row in the mirror is the **L** tier. The shop declares a 25 × 18 × 10 cm carton
+on every shipment (`src/lib/shipping/parcel.ts`), which is an **M**. Poland's
+locker is 17.86 € in the table and 13.39 € for the box we actually post.
+`docs/montonio-routes.md` has the grid. Closing it moves every international
+shelf price down, so it is a pricing decision and not an audit finding.
 
 ### 3.2 Dropping a rate of exactly `0`
 
@@ -304,20 +317,32 @@ instead of one per carrier+country+type.
 | `parcelHandoverMethod` for Unisend | reference § Create Shipment → shippingMethod | never sent |
 | Check `additionalServices` before requesting one | reference § Get pickup points, Note | we request none, so nothing to check |
 
-`lockerSize` is worth a line of its own. It is optional, and omitting it falls
-back to the contract's `defaultLockerSize` — but the shipments guide
-§ Marketplaces and drop-off codes says that for **SmartPosti**, with neither a
-request value nor a contract default, *"no code is issued at all"*. The A4 label
-slip prints that code (`src/lib/shipping/label-pdf.ts:39`, `:225`) and Renat
-asked for it specifically (13.09.2026, «no drop-off code for the locker is
-shown»). So: either set `defaultLockerSize` on the SmartPosti contract in the
-Partner System, or start sending `lockerSize`. This is a purchasing decision —
-locker size is a price tier — so it is a recommendation, not a fix.
+`lockerSize` had a line of its own here, and the reasoning under it was
+**wrong** — corrected 22.09.2026 on Montonio's written answer.
 
-Two smaller notes from the same section, both in our favour: **Omniva** needs
-nothing enabled — for an EE→EE parcel-machine shipment, `dropOffPin` is a copy of
-`carrierParcelId`. And **DPD** needs the PIN service enabled on the carrier
-account.
+What this section used to say: the shipments guide § Marketplaces and drop-off
+codes states that for SmartPosti, with neither a request value nor a contract
+default, *"no code is issued at all"*; the A4 slip prints that code
+(`src/lib/shipping/label-pdf.ts`); Renat asked for it on 13.09.2026; therefore
+set `defaultLockerSize` in the Partner System or send `lockerSize`.
+
+What Montonio actually says (Harri Holm, 22.09.2026): a drop-off / handover code
+works **only on the merchant's own direct contract with the carrier**, arranged
+with that carrier's help, and the whole feature is aimed at marketplace
+platforms. A normal merchant scans the printed label at the machine and the
+parcel goes. **Omniva has no such option at all** — the note below this one, that
+an Estonian `dropOffPin` is a copy of `carrierParcelId`, was wrong and is
+removed. DPD's PIN is the same story: direct contract only.
+
+So the blank line on the A4 slip is the normal outcome, not a fault, and the two
+Partner-System switches this audit recommended were never Renat's to throw. Both
+have been struck from `src/data/golive.json` and `docs/go-live.md`, where they
+had been **blocking** go-live.
+
+`lockerSize` itself stays and is still sent: it picks the door the box has to
+fit, which is a real thing for Unisend, SmartPosti and Latvian Post. It simply
+does not buy a code. `admShipmentHTML()` prints the code only
+`if (mont.dropOffPin)`, which was right all along.
 
 ---
 
@@ -515,17 +540,22 @@ Recommended, not implemented — each needs a decision, or moves money:
    (`src/lib/shipping/parcel.ts`), 25 × 18 × 10 cm by default and editable in
    the panel, with a one-tap per-parcel override on the order card.
 3. ~~Set `defaultLockerSize` on the SmartPosti contract, or send `lockerSize`~~
-   **Half done on `r24-shipping`.** `lockerSize` is now sent, chosen at label
-   time from a default derived from the last twenty labels. The contract's own
-   `defaultLockerSize` is still worth setting as the safety net and the panel
-   says so — that half is in Montonio's Partner System and is the owner's.
-4. Rebuild the tariff mirror **with keys**, so locker prices come from the
-   `parcelMachine` subtype rather than a subtype-blind `contract-prices` row
-   (3.1). ~~Do this before offering lockers outside the Baltics.~~ The lockers
-   were opened first, on the owner's decision of 18.09.2026 knowing the prices
-   are approximate — a wrong tier lands on the margin and never on the
-   customer, because the shop charges one fixed price per country. It is still
-   the first thing to re-check once the keys land.
+   **Done, and the other half cancelled 22.09.2026.** `lockerSize` is sent,
+   chosen at label time from a default derived from the last twenty labels.
+   Setting `defaultLockerSize` on the contract was recommended here to make a
+   drop-off code appear; Montonio's answer of 22.09.2026 says no code appears
+   for a normal merchant however that field is set, so there is nothing left in
+   the Partner System to do. The panel no longer asks for it either.
+4. ~~Rebuild the tariff mirror **with keys**, so locker prices come from the
+   `parcelMachine` subtype rather than a subtype-blind `contract-prices` row~~
+   **The subtype half is closed** — Montonio, 22.09.2026: a parcel machine and
+   a pickup point cost the same (3.1). The lockers were opened before the
+   rebuild, on the owner's decision of 18.09.2026, and that turns out to have
+   cost nothing.
+   What the rebuild is still owed is the **box**, not the subtype: the mirror is
+   quoted for a 30 cm cube and the shop posts a 25 × 18 × 10 cm carton, so every
+   international row is one tier too dear (3.1). That is a pricing decision and
+   it is with the owner.
 5. **New, found while doing 2.** `fetchMontonioRates()` discards
    `calculationDetails.estimatedParcels[]`, and that block is where Montonio
    states `chargeableWeight` as *«max of actual and volumetricWeight»*. The
@@ -533,4 +563,7 @@ Recommended, not implemented — each needs a decision, or moves money:
    kg, which is 3000 cm³ over 4000 — or over 5000 with the documented
    `bufferApplied` on top. Either way the divisor is **not** documented, only
    the example. Reading that block would let the shop see what it is actually
-   billed for instead of inferring it.
+   billed for instead of inferring it. **Asked of Montonio directly on
+   22.09.2026** — the shop declares volumetric weight off its own carton and
+   uses /4000, so a wrong divisor is a surcharge on every international parcel
+   that nothing in the panel would show.

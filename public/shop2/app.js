@@ -2974,8 +2974,8 @@
       "Размер ячейки по умолчанию": "Kapi vaikesuurus",
       "Пока этикеток не было — при первой будет предложен этот размер.":
         "Silte pole veel olnud — esimese juures pakutakse seda suurust.",
-      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
-        "Kontrolli Montonio kabinetis kahte lülitit: SmartPostil kapi vaikesuurus, DPD-l PIN-teenus. Ilma nendeta võib pakil üleandmiskoodi mitte olla ja A4-lehel jääb see rida tühjaks.",
+      "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
+        "Üleandmiskoodi pakil tavaliselt ei ole: seda antakse ainult vedajaga sõlmitud otselepingu korral ja Omniva ei anna üldse. See on normaalne — pakk antakse üle pakisildi järgi, skaneerides selle pakiautomaadis. Tühi rida A4-lehel ei ole viga.",
       "Сторона коробки — от 1 до 200 см.": "Karbi külg on 1 kuni 200 cm.",
       "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
         "Pakiautomaadi hind nendes riikides tuleb selle riigi «Pakiautomaadi» veerust, eraldi vedajahinda siin ei ole. Hinna all on see, mis pood võtab, kui väli tühjendada, ja millise vedajaga pakk läheb.",
@@ -3056,8 +3056,8 @@
         "Link peab algama https:// — pilt lisati ilma selleta",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "Selle vedaja puhul luugi suurust ei valita — ta valib selle ise.",
-      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
-        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Montonio arvestab kahest suurema järgi: tegelik kaal ja karbi mahu järgi arvutatud kaal. Seepärast on väiksem karp otsene kokkuhoid igalt pakilt.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
+        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Välismaale arvestab Montonio karbi mõõtude järgi, nii et väiksem karp on otsene kokkuhoid igalt välismaa pakilt. Eestis, Lätis, Leedus, Soomes ja Rootsis hind karbi suurusest ei sõltu.",
       "по умолчанию": "vaikimisi",
       "как в прошлый раз": "nagu eelmisel korral",
       "чаще всего": "kõige sagedamini",
@@ -5884,8 +5884,8 @@
       "Размер ячейки по умолчанию": "Default locker size",
       "Пока этикеток не было — при первой будет предложен этот размер.":
         "No labels yet — this size will be offered on the first one.",
-      "В кабинете Montonio проверьте два переключателя: у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.":
-        "Check two switches in your Montonio account: a default locker size for SmartPosti, and the PIN service for DPD. Without them a parcel may get no drop-off code, and that line on the A4 sheet stays blank.",
+      "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
+        "A parcel usually has no drop-off code: it is issued only on a direct contract with the carrier, and Omniva issues none at all. That is normal — the parcel is handed over by its label, scanned at the machine. A blank line on the A4 sheet is not a fault.",
       "Сторона коробки — от 1 до 200 см.": "A side of the box is 1 to 200 cm.",
       "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
         "The pickup-point price in these countries comes from that country's «Pickup point» column; there is no separate per-carrier price here. Under the price is what the shop charges if the box is cleared, and which carrier the parcel goes with.",
@@ -5966,8 +5966,8 @@
         "A link has to start with https:// — the picture went in without one",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "This carrier does not take a locker size — it picks the door itself.",
-      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. Поэтому коробка поменьше — это прямая экономия на каждой посылке.":
-        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Montonio charges the greater of two: the real weight and the weight worked out from the box's volume. So a smaller box is a direct saving on every parcel.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
+        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Abroad Montonio charges by the size of the box, so a smaller box is a direct saving on every parcel that leaves the country. Inside Estonia, Latvia, Lithuania, Finland and Sweden the price does not depend on the size.",
       "по умолчанию": "by default",
       "как в прошлый раз": "as last time",
       "чаще всего": "most often",
@@ -18537,15 +18537,19 @@
    * Drawn only where the field means something: a parcel going to a pickup
    * point, on a carrier that takes the field at all (Unisend, SmartPosti —
    * `LOCKER_CARRIERS`), and only while the label is still to be made. A
-   * courier parcel and an Omniva locker never see it, because Montonio would
-   * refuse the field and because an Estonian Omniva drop-off pin is a copy of
-   * the parcel id anyway.
+   * courier parcel and an Omniva locker never see it, because Montonio refuses
+   * the field on both.
    *
-   * What the shop cannot do from here, and the hint says so: SmartPosti's
-   * contract default and DPD's PIN service are switches in Montonio's own
-   * Partner System. With neither a request value nor a contract default,
-   * SmartPosti issues no drop-off code at all — the blank line on the A4 slip
-   * Renat reported on 13.09.2026 — which is exactly why this strip sends one.
+   * This strip used to be justified by the drop-off code: SmartPosti was said
+   * to issue none without a size, so sending one was how the blank line on the
+   * A4 slip got filled. **That reasoning was wrong**, and Montonio said so in
+   * writing on 22.09.2026: a handover code needs the merchant's OWN direct
+   * contract with the carrier and is meant for marketplaces, and Omniva has no
+   * such thing at all. A normal shop scans the printed label at the machine.
+   *
+   * So the strip stays for the only reason that was ever real — the door has
+   * to be big enough for the box — and the blank code line is normal rather
+   * than a fault the panel should be trying to fix.
    */
   var LOCKER_CARRIERS = ["unisend", "smartpost"];
   /** The door this order will be booked with: what he tapped, else the suggestion. */
@@ -23526,8 +23530,9 @@
     return '<div class="adm-sec__t" style="margin-top:24px">Коробка магазина</div>' +
       '<p class="adm-hint" style="margin:0 0 10px">Некоторые перевозчики не примут посылку без размеров. ' +
         "Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. " +
-        "Montonio считает по большему из двух: настоящий вес и вес по объёму коробки. " +
-        "Поэтому коробка поменьше — это прямая экономия на каждой посылке.</p>" +
+        "За границу Montonio считает по размеру коробки, поэтому коробка поменьше — " +
+        "прямая экономия на каждой заграничной посылке. " +
+        "По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.</p>" +
       '<div class="adm-parcel">' +
         '<label class="adm-field"><span>Длина, см</span>' +
           '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
@@ -23550,13 +23555,18 @@
           ? admParcelLearnedLine(suggestLocker(p))
           : "Пока этикеток не было — при первой будет предложен этот размер.") +
         "</p>" +
-      /* The two switches that are not ours to throw, named rather than
-         quietly worked around. Montonio's Partner System is the owner's
-         account; a panel that pretended otherwise would be a panel that lies
-         about why a drop-off code is blank. */
-      '<p class="adm-hint" style="margin-top:8px">В кабинете Montonio проверьте два переключателя: ' +
-        "у SmartPosti — размер ячейки по умолчанию, у DPD — услугу PIN. " +
-        "Без них у посылки может не быть кода сдачи, и на листе A4 эта строка будет пустой.</p>";
+      /* Until 22.09.2026 this told the owner to go and throw two switches in
+         Montonio's Partner System. He cannot: Montonio answered in writing
+         that a drop-off code needs the merchant's OWN direct contract with
+         the carrier, is aimed at marketplaces, and does not exist at Omniva
+         at all. A blank line on the A4 slip is therefore the normal outcome,
+         and the panel says so rather than sending him looking for a setting
+         that is not his to find. The code is still printed when one does
+         arrive — admShipmentHTML() draws it only `if (mont.dropOffPin)`. */
+      '<p class="adm-hint" style="margin-top:8px">Кода сдачи у посылки обычно не будет: ' +
+        "его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. " +
+        "Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. " +
+        "Пустая строка на листе A4 не ошибка.</p>";
   }
   /** «Чаще всего вы отправляете L — этот размер и будет предложен.»
       One text node, and no declining noun in it: translateTree() rewrites a
