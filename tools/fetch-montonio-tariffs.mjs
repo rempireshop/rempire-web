@@ -15,6 +15,8 @@
  *      authenticated with MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY. This is
  *      the only source that knows what *this* store pays: its plan, its
  *      activated carriers, any negotiated override. Used when keys are set.
+ *      Its `rate` is **excluding VAT** as well (Montonio, 22.09.2026), so the
+ *      overlay stores it gross like source 2 — both write paths add VAT.
  *
  *   2. **Montonio's own published contract prices** —
  *      `GET https://shipping.montonio.com/api/v2/contract-prices
@@ -261,7 +263,16 @@ async function fetchRatesFor(config, country) {
   return text ? JSON.parse(text) : {};
 }
 
-/** carriers[].shippingMethods[].subtypes[] -> one row per carrier+method, preferring parcelMachine/standard. */
+/**
+ * carriers[].shippingMethods[].subtypes[] -> one row per carrier+method, preferring parcelMachine/standard.
+ *
+ * `rate` comes back **excluding VAT** — Montonio confirmed that on 22.09.2026;
+ * the endpoint's own reference names `code`, `rate`, `currency` and no tax
+ * field, so the file used to store the raw number here while contractPrice()
+ * stored a gross one. A row is now written exactly the way contractPrice()
+ * writes its own: `price` with Estonian VAT added, the untouched figure kept
+ * in `priceExVat`.
+ */
 function flatten(body, country) {
   const out = [];
   for (const carrierRow of body.carriers ?? []) {
@@ -272,9 +283,17 @@ function flatten(body, country) {
       const preferred = method === "parcel" ? "parcelMachine" : "standard";
       const subtypes = sm.subtypes ?? [];
       const pick = subtypes.find((s) => s.code === preferred) ?? subtypes[0];
-      const price = Number(pick?.rate);
-      if (!pick || !Number.isFinite(price)) continue;
-      out.push({ carrier, country, method, price: round2(price), currency: pick.currency || "EUR" });
+      const ex = Number(pick?.rate);
+      if (!pick || !Number.isFinite(ex)) continue;
+      out.push({
+        carrier,
+        country,
+        method,
+        price: withVat(ex),
+        priceExVat: round2(ex),
+        currency: pick.currency || "EUR",
+        vatIncluded: true,
+      });
     }
   }
   return out;
@@ -334,17 +353,23 @@ async function main() {
         const i = data.rates.findIndex(
           (r) => r.carrier === row.carrier && r.country === row.country && r.method === row.method,
         );
+        // The overlay replaces a contract-price row, so it has to mean the same
+        // thing by `price`: gross. flatten() has already added Estonian VAT to
+        // the quoted `rate`, which Montonio confirmed is ex-VAT on 22.09.2026;
+        // `vatIncluded` is restated here so the two paths cannot drift apart.
         const entry = {
           ...(i >= 0 ? data.rates[i] : {}),
           ...row,
           effectiveDate: today,
-          vatIncluded: false,
-          source: `live quote, POST /shipping-methods/rates (${config.env}), fetched ${today}`,
+          vatIncluded: true,
+          source:
+            `live quote, POST /shipping-methods/rates (${config.env}), ` +
+            `rate ex-VAT + ${round2(VAT_EE * 100)}% EE VAT, fetched ${today}`,
         };
         if (i >= 0) data.rates[i] = entry;
         else data.rates.push(entry);
         overlaid++;
-        log(`  ${row.carrier} ${row.country} ${row.method}: ${row.price} ${row.currency} (this store)`);
+        log(`  ${row.carrier} ${row.country} ${row.method}: ${row.price} ${row.currency} incl. VAT (this store)`);
       }
     }
     if (!overlaid) {
