@@ -74,6 +74,8 @@
  *
  * Every price here includes Estonian VAT, like the shelf prices they are
  * compared against; `src/data/montonio-tariffs.json` keeps the ex-VAT original.
+ * A live quote has to mean the same thing, which is what `withEstonianVat()`
+ * below is for — Montonio answers ex-VAT on both endpoints.
  */
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 
@@ -92,6 +94,34 @@ interface StaticRateRow {
 }
 
 const RATES: StaticRateRow[] = (montonioTariffsData as { rates: StaticRateRow[] }).rates;
+
+/**
+ * Estonian VAT, read from the mirror's own `vatRateEE` rather than restated:
+ * the rate is written down once, in the file whose prices it was applied to,
+ * so the day it moves nothing here can be left on the old one.
+ */
+export const VAT_RATE_EE: number = (montonioTariffsData as { vatRateEE: number }).vatRateEE;
+
+/**
+ * An ex-VAT figure from Montonio, as a price this module can compare against a
+ * shelf price.
+ *
+ * Both endpoints answer net. `pricePerParcel` on the public contract-prices
+ * endpoint is ex-VAT — Montonio's own calculator prints «+VAT» under every
+ * figure — and `tools/fetch-montonio-tariffs.mjs` therefore grosses it up
+ * before writing a row, which is why every `price` in the mirror includes VAT.
+ * `rate` on the per-store `POST /shipping-methods/rates` is ex-VAT too:
+ * Montonio confirmed that on 22.09.2026, after a reference that named `code`,
+ * `rate`, `currency` and no tax field at all.
+ *
+ * So this is what the live leg owes the static table. `fetchMontonioRates()`
+ * in ./montonio.ts is the single place that calls it — a live quote and a
+ * static row are then the same kind of number, and `getMontonioTariff()` can
+ * go on preferring one over the other and mixing both into one list.
+ */
+export function withEstonianVat(net: number): number {
+  return Math.round(Number(net) * (1 + VAT_RATE_EE) * 100) / 100;
+}
 
 /**
  * The carriers the shop can actually put a parcel on: the ones the admin has a

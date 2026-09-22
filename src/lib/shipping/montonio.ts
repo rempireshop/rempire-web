@@ -32,7 +32,7 @@ import { montonioConfigFromEnv, type MontonioConfig } from "@/lib/payments/monto
 import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
 /* A leaf module (it imports the tariff mirror and nothing else), so this adds
    no cycle — see the header of src/lib/shipping/country-prices.ts. */
-import { basisCost } from "@/lib/shipping/country-prices";
+import { basisCost, withEstonianVat } from "@/lib/shipping/country-prices";
 import {
   declaredWeightKg,
   getParcelSettings,
@@ -584,6 +584,14 @@ export interface MontonioRate {
   methodType: "pickupPoint" | "courier";
   /** Montonio's own subtype code — parcelMachine/postOffice/parcelShop, or standard/standardB2B for a courier. */
   subtype: string;
+  /**
+   * EUR **incl. Estonian VAT** — the quoted `rate` grossed up, not the raw
+   * field. Montonio answers `rate` ex-VAT (confirmed 22.09.2026) and
+   * everything downstream — the static mirror it is preferred over, the shelf
+   * prices it is compared against — is gross, so the conversion happens here,
+   * once, rather than in each of the callers. See `withEstonianVat()` in
+   * ./country-prices.ts.
+   */
   price: number;
   currency: string;
 }
@@ -593,8 +601,11 @@ export interface MontonioRate {
  * confirmed to exist 03.09.2026 (see docs/shipping.md § «Тарифы Montonio»).
  * One call prices every carrier and method this store has active for a single
  * destination country against one parcel shape; there is no per-carrier or
- * per-method request. `null` — never a throw — when there are no keys or
- * Montonio would not answer, exactly like the pickup-point reader, so a caller
+ * per-method request. Every `price` it returns is gross: Montonio quotes
+ * `rate` ex-VAT, and this is where that becomes a number the rest of the
+ * shipping layer can compare with anything else. `null` — never a throw —
+ * when there are no keys or Montonio would not answer, exactly like the
+ * pickup-point reader, so a caller
  * (src/lib/shipping/tariffs.ts) can fall back to the static table without a
  * try/catch of its own.
  */
@@ -644,7 +655,7 @@ export async function fetchMontonioRates(
         const methodType: "pickupPoint" | "courier" =
           str(method.type) === "courier" ? "courier" : "pickupPoint";
         for (const sub of method.subtypes ?? []) {
-          const price = Number(sub.rate);
+          const net = Number(sub.rate);
           /* A rate of exactly 0 is not a free delivery, it is **no rate**.
              Montonio answers `"rate": "0"` for a carrier/method pair this
              store has no priced tier for — DPD's Estonian courier is one, and
@@ -656,12 +667,19 @@ export async function fetchMontonioRates(
              costs nothing does not exist; the row is dropped like a negative
              one and the caller falls back to the static mirror, which knows
              the route's real price (src/lib/shipping/tariffs.ts). */
-          if (!Number.isFinite(price) || price <= 0) continue;
+          if (!Number.isFinite(net) || net <= 0) continue;
           out.push({
             carrier,
             methodType,
             subtype: str(sub.code) || "standard",
-            price: Math.round(price * 100) / 100,
+            /* `rate` is ex-VAT — Montonio confirmed it on 22.09.2026, and its
+               reference still names no tax field either way. Stored raw, it
+               was a live cost 24 % under the static row it replaces in
+               src/lib/shipping/tariffs.ts, which is the number the admin's
+               cost hints and every shelf price derived from a cost are built
+               on. The gross-up belongs here, on the one line that turns
+               Montonio's field into our `price`. */
+            price: withEstonianVat(net),
             currency: str(sub.currency) || "EUR",
           });
         }

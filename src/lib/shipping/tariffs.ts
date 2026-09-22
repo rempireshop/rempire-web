@@ -7,7 +7,10 @@
  *      fetchMontonioRates), cached 24 hours per country. Needs
  *      MONTONIO_ACCESS_KEY/SECRET_KEY and carriers activated in the Montonio
  *      partner portal; without either it answers null rather than throwing.
- *      This is the only source that knows what *this* store pays.
+ *      This is the only source that knows what *this* store pays. Its `rate`
+ *      is ex-VAT (Montonio, 22.09.2026) and `fetchMontonioRates()` grosses it
+ *      up, so a live quote is comparable with a static row rather than 24 %
+ *      under one.
  *   2. static — src/data/montonio-tariffs.json: Montonio's own published
  *      standard contract prices, every route it will quote out of Estonia,
  *      rebuilt by tools/fetch-montonio-tariffs.mjs from the public endpoint
@@ -67,7 +70,14 @@ export interface TariffQuote {
   carrier: string;
   country: string;
   method: ShipMethod;
-  /** The raw carrier cost — not yet marked up, not yet rounded. */
+  /**
+   * The carrier cost — not yet marked up, not yet rounded, and **incl.
+   * Estonian VAT** whichever source it came from. Montonio quotes both of its
+   * endpoints ex-VAT; the static rows were grossed up when the mirror was
+   * written and a live one is grossed up in `fetchMontonioRates()`, so a
+   * `"live"` row and a `"static"` row in the same list mean the same thing —
+   * which is the only reason one can be preferred over the other.
+   */
   price: number;
   currency: string;
   source: "live" | "static";

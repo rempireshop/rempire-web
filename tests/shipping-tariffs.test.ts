@@ -22,6 +22,7 @@ import {
   cheapestCost,
   customerPrice,
   getMontonioTariff,
+  getMontonioTariffsForCountry,
   MONTONIO_COUNTRIES,
   MONTONIO_NOT_SERVED,
   montonioServes,
@@ -191,7 +192,15 @@ describe("getMontonioTariff — live preferred, static as the fallback", () => {
     });
     const q = await getMontonioTariff("omniva", "EE", "parcel");
     expect(q?.source).toBe("live");
-    expect(q?.price).toBe(2.5);
+    /* Gross, like the static row it just displaced. Montonio quotes `rate`
+       ex-VAT (confirmed 22.09.2026) and `fetchMontonioRates()` adds Estonian
+       VAT, so 2.50 € on the wire is 3.10 € here — and a store quoted
+       Montonio's own published contract price sees the live and the static
+       number agree, instead of a "live" cost a quarter below the mirror's.
+       Until this was fixed, preferring live meant quietly understating cost
+       by 24 % wherever MONTONIO_ACCESS_KEY/SECRET_KEY are set. */
+    expect(q?.price).toBe(3.1);
+    expect(q?.price).toBe(staticTariff("omniva", "EE", "parcel")!.price);
   });
 
   it("falls back to the static row for a carrier the live answer said nothing about", async () => {
@@ -233,6 +242,46 @@ describe("getMontonioTariff — live preferred, static as the fallback", () => {
     vi.advanceTimersByTime(2 * 60 * 60 * 1000); // total 25h
     await getMontonioTariff("omniva", "EE", "parcel");
     expect(calls).toHaveLength(3); // stale — refetched
+  });
+});
+
+describe("getMontonioTariffsForCountry — live and static rows in one list", () => {
+  /* The list the admin's rate screen is built from puts a live row and a
+     static row side by side and labels them only by `source`. So the two have
+     to be the same kind of number, or the table compares a net price with a
+     gross one and the cheaper-looking carrier wins on VAT alone. */
+  it("prices a live row exactly like the static row it replaces", async () => {
+    withKeys();
+    stubFetch(() =>
+      json({
+        destination: "EE",
+        carriers: [
+          {
+            // Montonio's own published contract prices for these two routes,
+            // ex-VAT, as src/data/montonio-tariffs.json's `priceExVat` holds them
+            carrierCode: "omniva",
+            shippingMethods: [
+              { type: "pickupPoint", subtypes: [{ code: "parcelMachine", rate: "2.50", currency: "EUR" }] },
+              { type: "courier", subtypes: [{ code: "standard", rate: "5.50", currency: "EUR" }] },
+            ],
+          },
+        ],
+      }),
+    );
+    const rows = await getMontonioTariffsForCountry("EE");
+    const live = rows.filter((r) => r.source === "live");
+    expect(live.map((r) => `${r.carrier}:${r.method}`).sort()).toEqual(["omniva:courier", "omniva:parcel"]);
+    for (const row of live) {
+      // the same number the mirror holds for that route — to the cent, not to 24 %
+      expect(row.price).toBe(staticTariff(row.carrier, "EE", row.method)!.price);
+    }
+    expect(live.find((r) => r.method === "parcel")!.price).toBe(3.1);
+    expect(live.find((r) => r.method === "courier")!.price).toBe(6.82);
+
+    // …and everything Montonio said nothing about still comes from the mirror
+    const dpd = rows.find((r) => r.carrier === "dpd" && r.method === "courier")!;
+    expect(dpd.source).toBe("static");
+    expect(dpd.price).toBe(6.82);
   });
 });
 

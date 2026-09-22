@@ -46,7 +46,9 @@
  *    records that Montonio answers `"0"` for a pair the store has no priced
  *    tier for, and a zero that reached this arithmetic would read as infinite
  *    margin.
- * 3. **VAT is an assumption here, not a fact.** See `VAT_NOTE`.
+ * 3. **Every `rate` is net and gets 24 % added.** Montonio confirmed that on
+ *    22.09.2026, after the reference had said nothing either way. See
+ *    `VAT_NOTE`.
  */
 
 /* ---------- restated from the app, asserted equal in the test --------------
@@ -112,35 +114,34 @@ export function unitsToKg(units) {
 export const VAT_EE = 0.24;
 
 /**
- * **The documentation says nothing about VAT on `rate`.** Checked against the
- * reference § Calculate shipping rates on 18.09.2026: the response carries
- * `code`, `rate`, `currency` and no tax field, and no Note anywhere on the
- * endpoint mentions tax.
+ * **`rate` comes back ex-VAT, and since 22.09.2026 that is an answer rather
+ * than an assumption.** Montonio was asked and confirmed it: the per-store
+ * `POST /shipping-methods/rates` quotes net, exactly like `pricePerParcel` on
+ * the public contract-prices endpoint, whose calculator prints «+VAT» under
+ * every figure. The reference itself still says neither way — it names `code`,
+ * `rate`, `currency` and no tax field — so the confirmation is written down
+ * here, where the arithmetic depends on it.
  *
- * What is documented is the *other* endpoint. `contract-prices`'
- * `pricePerParcel` is **ex-VAT** — Montonio's calculator prints «+VAT» under
- * every figure — and `tools/fetch-montonio-tariffs.mjs:111,181` therefore adds
- * 24 % before storing, so `src/data/montonio-tariffs.json` is gross and
- * `src/lib/shipping/country-prices.ts` can say «Every price here includes
- * Estonian VAT, like the shelf prices they are compared against».
+ * Everything that stores or compares one of those numbers now adds the 24 %.
+ * `tools/fetch-montonio-tariffs.mjs` does it on **both** write paths, the
+ * contract price and this store's live quote (pinned by
+ * tests/tariff-vat.test.ts), so `src/data/montonio-tariffs.json` is gross
+ * throughout; `fetchMontonioRates()` in `src/lib/shipping/montonio.ts` does it
+ * to a live quote before `src/lib/shipping/tariffs.ts` can prefer one over a
+ * static row. That is what lets `src/lib/shipping/country-prices.ts` say
+ * «Every price here includes Estonian VAT, like the shelf prices they are
+ * compared against».
  *
- * The live overlay in that same script does **not** add VAT
- * (`tools/fetch-montonio-tariffs.mjs:333-344` writes the raw rate with
- * `vatIncluded: false`), and `src/lib/shipping/tariffs.ts` then compares that
- * raw number against static rows that are gross. So the two halves of the
- * existing tooling disagree about what `price` means, and neither of them is
- * wrong on the evidence, because the evidence does not exist.
- *
- * This tool therefore does what the mirror does — treats `rate` as ex-VAT and
- * prints the gross figure beside it, so cost and shelf price are compared
- * like for like — and says so on every screen and in every file it writes.
- * `--rates-include-vat` flips it in one place the moment an invoice settles
- * the question. Do not let this become a silent default.
+ * This tool does the same, for the same reason: a cost and a shelf price have
+ * to be the same kind of number. It says so on every screen and in every file
+ * it writes. `--rates-include-vat` stays behind as a manual override for the
+ * day Montonio changes what it quotes; it is no longer an open question
+ * waiting on the first invoice.
  */
 export const VAT_NOTE =
-  "НДС: документация Montonio про `rate` НЕ ГОВОРИТ НИЧЕГО. Здесь принято, что rate — БЕЗ НДС " +
-  "(как pricePerParcel в контрактных ценах), и рядом показана цена с эстонским НДС 24 %. " +
-  "Первый настоящий счёт Montonio закрывает вопрос — если там НДС уже внутри, перезапустить с --rates-include-vat.";
+  "НДС: Montonio подтвердила 22.09.2026, что `rate` приходит БЕЗ НДС — так же, как pricePerParcel " +
+  "в контрактных ценах. Поэтому здесь к цифрам Montonio добавлен эстонский НДС 24 %: на витрине он " +
+  "уже внутри, и сравнивать надо одно с одним.";
 
 export function round2(n) {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;

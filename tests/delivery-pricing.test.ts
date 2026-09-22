@@ -548,13 +548,13 @@ describe("the arithmetic a person reads before typing a number", () => {
   });
 });
 
-describe("VAT is an assumption, and it is the same one the mirror makes", () => {
+describe("VAT is confirmed, and it is the same 24 % the mirror adds", () => {
   it("adds Estonian VAT by default, because that is what the tariff mirror does", () => {
-    /* tools/fetch-montonio-tariffs.mjs stores contract prices WITH 24 % VAT
-       (withVat(), line 111) so they compare like for like against shelf
-       prices, which include VAT — src/lib/shipping/country-prices.ts says so
-       in its header. This tool matches that, so a cost here and a cost there
-       mean the same thing. */
+    /* tools/fetch-montonio-tariffs.mjs stores every price WITH 24 % VAT —
+       `withVat()`, on the contract-price path and the live-quote path alike —
+       so they compare like for like against shelf prices, which include VAT;
+       src/lib/shipping/country-prices.ts says so in its header. This tool
+       matches that, so a cost here and a cost there mean the same thing. */
     expect(grossCost(10)).toBe(12.4);
     expect(VAT_EE).toBe(0.24);
     const tariffs = JSON.parse(
@@ -563,19 +563,27 @@ describe("VAT is an assumption, and it is the same one the mirror makes", () => 
     expect(tariffs.vatRateEE).toBe(VAT_EE);
   });
 
-  it("can be flipped in one place when a real invoice settles it", () => {
+  it("keeps one manual override, for the day Montonio quotes something else", () => {
+    /* Not an escape hatch waiting on an invoice any more — Montonio answered
+       on 22.09.2026 — but still one flag rather than an edit, and still off
+       unless it is typed. */
     expect(grossCost(10, { ratesIncludeVat: true })).toBe(10);
     expect(CLI_SRC).toContain("--rates-include-vat");
   });
 
-  it("says out loud that the documentation is silent about it", () => {
-    /* The reference prints `code`, `rate`, `currency` and no tax field, and no
-       Note on the endpoint mentions VAT. The live overlay in
-       tools/fetch-montonio-tariffs.mjs writes the raw rate with
-       `vatIncluded: false` while the static rows beside it are gross, so the
-       existing tooling disagrees with itself. An assumption that big has to be
-       on the screen, not in a comment. */
-    expect(LIB_SRC).toMatch(/документация Montonio про `rate` НЕ ГОВОРИТ НИЧЕГО/);
+  it("says out loud where the 24 % comes from", () => {
+    /* The reference prints `code`, `rate`, `currency` and no tax field, so the
+       answer came from Montonio directly and lives in this string: it is on
+       every screen the tool prints and in every file it writes, because a
+       reader comparing these costs with shelf prices has to know which of the
+       two numbers moved. Both halves of the tooling now add the VAT — the
+       mirror on both its write paths (tests/tariff-vat.test.ts) and the live
+       leg in src/lib/shipping/montonio.ts — so nothing here disagrees with
+       what the shop bills from. */
+    expect(LIB_SRC).toMatch(/Montonio подтвердила 22\.09\.2026, что `rate` приходит БЕЗ НДС/);
+    expect(LIB_SRC, "an assumption that big must not go back into a comment").not.toMatch(
+      /НЕ ГОВОРИТ НИЧЕГО/,
+    );
   });
 });
 

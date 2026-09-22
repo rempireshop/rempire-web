@@ -8,6 +8,7 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
+import montonioTariffsData from "@/data/montonio-tariffs.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createOrder, getOrder, listAudit, setOrderStatus, type Order } from "@/lib/orders";
 import { verifyHs256 } from "@/lib/payments/jwt";
@@ -1632,11 +1633,51 @@ describe("fetchMontonioRates", () => {
       ],
     ]);
     const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
+    /* `rate` is ex-VAT — Montonio confirmed it on 22.09.2026 — and `price` is
+       gross, because that is what the static mirror this is preferred over
+       holds and what a shelf price is compared against
+       (src/lib/shipping/country-prices.ts). 2.50 + 24 % = 3.10, 9.90 = 12.28.
+       Until 22.09.2026 the raw number flowed straight through and every live
+       cost was a quarter under the static one beside it. */
     expect(rates).toEqual([
-      { carrier: "omniva", methodType: "pickupPoint", subtype: "parcelMachine", price: 2.5, currency: "EUR" },
-      { carrier: "omniva", methodType: "pickupPoint", subtype: "postOffice", price: 2.5, currency: "EUR" },
-      { carrier: "dpd", methodType: "courier", subtype: "standard", price: 9.9, currency: "EUR" },
+      { carrier: "omniva", methodType: "pickupPoint", subtype: "parcelMachine", price: 3.1, currency: "EUR" },
+      { carrier: "omniva", methodType: "pickupPoint", subtype: "postOffice", price: 3.1, currency: "EUR" },
+      { carrier: "dpd", methodType: "courier", subtype: "standard", price: 12.28, currency: "EUR" },
     ]);
+  });
+
+  it("grosses up with the mirror's own VAT rate, not a second copy of 24 %", async () => {
+    /* One rate, written down in src/data/montonio-tariffs.json, applied by
+       both the tool that writes that file and the live leg here. A live quote
+       of Montonio's own published contract price must land exactly on the
+       static row it replaces — that is the whole of «the two sources mean the
+       same thing», and it is checked against the file rather than against a
+       literal so the day the rate moves this moves with it. */
+    withKeys();
+    stubFetch([
+      [
+        /rates/,
+        () =>
+          json({
+            destination: "EE",
+            carriers: [
+              {
+                carrierCode: "omniva",
+                shippingMethods: [
+                  { type: "pickupPoint", subtypes: [{ code: "parcelMachine", rate: "2.50", currency: "EUR" }] },
+                ],
+              },
+            ],
+          }),
+      ],
+    ]);
+    const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
+    const omniva = montonioTariffsData.rates.find(
+      (r) => r.carrier === "omniva" && r.country === "EE" && r.method === "parcel",
+    )!;
+    expect(omniva.priceExVat).toBe(2.5); // the same ex-VAT figure Montonio just quoted
+    expect(rates![0].price).toBe(omniva.price); // …so the same gross price, to the cent
+    expect(rates![0].price).toBe(Math.round(2.5 * (1 + montonioTariffsData.vatRateEE) * 100) / 100);
   });
 
   /**
@@ -1679,7 +1720,8 @@ describe("fetchMontonioRates", () => {
     ]);
     const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
     expect(rates).toEqual([
-      { carrier: "dpd", methodType: "pickupPoint", subtype: "parcelMachine", price: 2.59, currency: "EUR" },
+      // 2.59 ex-VAT + 24 % — the surviving row is grossed up like any other
+      { carrier: "dpd", methodType: "pickupPoint", subtype: "parcelMachine", price: 3.21, currency: "EUR" },
     ]);
   });
 
