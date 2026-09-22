@@ -2112,7 +2112,7 @@
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
         "⚠ Tellimusele tuli teine makse — võimalik, et klient maksis kaks korda, kontrolli Montonios",
       "Баллы за заказ возвращены": "Punktid tellimuse eest tagastatud",
-      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Kleepige silt pakile ja viige pakk pakiautomaati — kullerit tellitakse Montonio paneelist. Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
       "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
       "Не удалось создать этикетку": "Silti ei õnnestunud luua", "Не удалось вернуть шаг": "Sammu ei õnnestunud tagasi võtta",
@@ -5027,7 +5027,7 @@
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
         "⚠ A second payment arrived for this order — the customer may have paid twice, check in Montonio",
       "Баллы за заказ возвращены": "The order's points were given back",
-      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
+      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Stick the label on and take the parcel to a parcel machine — a courier is booked in the Montonio panel. Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
       "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
       "Не удалось создать этикетку": "Could not create the label", "Не удалось вернуть шаг": "Could not take the step back",
@@ -18980,7 +18980,7 @@
     else if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
     else if (showSteps && v.paid && v.pickup) hint = "Клиент забирает заказ в салоне. Письмо не отправляется.";
     else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
-    else if (showSteps && v.paid && v.labeled) hint = "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+    else if (showSteps && v.paid && v.labeled) hint = "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
     else if (showSteps && v.shipped) hint = "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.";
     /* …and the one that is not about the steps at all: why «Вернуть деньги»
        is not here. It is missing because the money is already going back, and

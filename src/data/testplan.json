@@ -866,7 +866,8 @@
         "Текст нигде не обрывается.",
         "Название фирмы везде одно и то же.",
         "Адрес и регистрационный номер везде совпадают.",
-        "Ссылка «Правовая информация» ведёт на «Условия продажи»."
+        "Ссылка «Правовая информация» ведёт на «Условия продажи».",
+        "На «Возврат товара» этикетку возврата не обещают — только инструкции и адрес."
       ],
       "why": "Два разных названия фирмы на одном сайте — это вопрос от инспекции.",
       "risk": "high",
@@ -882,10 +883,13 @@
           "No text is cut off anywhere.",
           "The company name is the same on every page.",
           "The address and registration number match everywhere.",
-          "The «Правовая информация» link leads to «Условия продажи»."
+          "The «Правовая информация» link leads to «Условия продажи».",
+          "The returns page promises no return label, only instructions and an address."
         ],
         "why": "Two different company names on one site is a question from the inspectorate."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-22T14:41:00.000Z"
     },
     {
       "id": "shop-delivery-prices",
@@ -3498,10 +3502,12 @@
       "title": "Отметить заказ отправленным",
       "steps": [
         "В карточке того же заказа нажать «Отправлен».",
+        "Прочитать подсказку под кнопками, до нажатия.",
         "Прочитать полоску, которая всплыла внизу.",
         "Открыть «Заказы» и найти заказ в «В пути»."
       ],
       "expect": [
+        "В подсказке сказано отнести посылку в пакомат, курьер — из панели Montonio.",
         "Внизу появилась полоска с номером заказа.",
         "В ней написано, что письмо покупателю ушло.",
         "Рядом кнопка «Отменить», она живёт шесть секунд.",
@@ -3514,17 +3520,21 @@
         "title": "Marking an order dispatched",
         "steps": [
           "In the same order press «Отправлен» (dispatched).",
+          "Read the hint under the buttons before pressing anything.",
           "Read the bar that pops up at the bottom.",
           "Open «Заказы» and find the order under «В пути»."
         ],
         "expect": [
+          "The hint says to take the parcel to a machine; couriers come from Montonio.",
           "A bar appears at the bottom with the order number.",
           "It says the letter to the buyer has gone.",
           "An «Отменить» button sits there for six seconds.",
           "The order has moved to the «В пути» list."
         ],
         "why": "Silence after dispatch is the commonest reason buyers ask where their order is."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-22T14:41:00.000Z"
     },
     {
       "id": "order-shipped-nolabel",

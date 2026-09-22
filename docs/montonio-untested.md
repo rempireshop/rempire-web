@@ -4,6 +4,12 @@
 engineer-to-engineer inventory. The owner-facing Russian version of the same
 facts lives in `docs/payments.md` § 5a and `docs/shipping.md`.
 
+**Updated 22.09.2026** against the written answers of Montonio's Customer
+Success Manager (e-mail of 22.09.2026) and the published price list at
+`montonio.com/et/hinnapaketid`, read the same day. Every item those answers
+closed, changed or opened says so on its own line — nothing here is inferred
+from them.
+
 ---
 
 ## Why this document exists
@@ -44,10 +50,10 @@ not from our own output.
 
 | # | Never run | Why it cannot run | Stands in for it |
 |---|---|---|---|
-| P1 | **A refund reaching a customer** | «Refundable bank payments» cannot be activated in test mode at all. Without it `isRefundableType` is `false` on every bank-link order. | `tests/montonio-docs-payloads.test.ts` → the guide's own `POST /refunds` 200 body, mapped to `pending`; `tests/payments-refund.test.ts` for the ledger |
-| P2 | **A bank link, at all** | Dim, 08.09.2026: the sandbox Partner System says «Bank payments» is unavailable for test mode. The whole `paymentInitiation` method is a request shape we have never seen answered. | `tests/payments-montonio.test.ts` — that `payment.method: "paymentInitiation"` and the chosen `preferredProvider` go out correctly |
+| P1 | **A refund reaching a customer** | «Refundable bank payments» cannot be activated in test mode at all. Without it `isRefundableType` is `false` on every bank-link order. **Montonio's written answer of 22.09.2026 confirms it: a refund can only be exercised in live.** What switching the product on costs is now known — Part 2 | `tests/montonio-docs-payloads.test.ts` → the guide's own `POST /refunds` 200 body, mapped to `pending`; `tests/payments-refund.test.ts` for the ledger |
+| ~~P2~~ | ~~**A bank link, at all**~~ · **closed 22.09.2026** | Montonio's written answer of 22.09.2026: they can see **several successful sandbox bank payments from this store**, so `paymentInitiation` does work in the sandbox now and has been answered for real. The 08.09.2026 note that «Bank payments» was unavailable for test mode is out of date | `tests/payments-montonio.test.ts` still holds the shape — that `payment.method: "paymentInitiation"` and the chosen `preferredProvider` go out correctly |
 | P3 | **`availableForRefund` above 0** | Needs settled funds. «The funds have arrived to the merchant's settlement account in Montonio. This typically takes 1 business day.» Sandbox settles nothing. | The reference's own `GET /orders/:orderUuid` body, read by `fetchOrder()` — `tests/montonio-docs-payloads.test.ts` |
-| P4 | **`isRefundableType: true`** | Same product switch as P1. | Same test; and `GET /api/admin/montonio/` surfaces the live value (Part 4) |
+| P4 | **`isRefundableType: true`** | Same product switch as P1, and the same written confirmation of 22.09.2026 that it can only be seen live. What the switch costs is in Part 2 | Same test; and `GET /api/admin/montonio/` surfaces the live value (Part 4) |
 | P5 | **A refund refused by Montonio** — all five documented HTTP refusals | The account never gets far enough to produce four of the five; the fifth (bad keys) is not worth breaking a working sandbox for | `tests/payments-montonio-refusal.test.ts` (Montonio's five verbatim messages) + `tests/montonio-problems.test.ts` (one distinct action per refusal, RU/ET/EN) |
 | P6 | **A refund webhook carrying `refundStatusDescription`** | It only arrives after a real refund. `INSUFFICIENT_FUNDS` in particular can never be produced in sandbox. | The refunds guide's own decoded `refundToken`, signed fresh — `tests/montonio-docs-payloads.test.ts`, including the `PENDING / INSUFFICIENT_FUNDS` variant |
 | P7 | **A refund cancelled after ten days of PENDING** | Nothing pends in sandbox | `refundPendingText()` counts the clock down; `pendingRefunds()` lists them; `tests/montonio-problems.test.ts` |
@@ -61,17 +67,47 @@ not from our own output.
 
 | # | Never run | Why it cannot run | Stands in for it |
 |---|---|---|---|
-| S1 | **A carrier refusing a parcel** (`registrationFailed`) | Sandbox guide: «It doesn't make actual calls to carrier APIs and provides mocked responses instead.» The state is unreachable, not merely untested. | `tests/montonio-docs-payloads.test.ts` → a `POST /shipments` reply with `status: "registrationFailed"` through the real route, plus the webhook event; `tests/montonio-problems.test.ts` for the words |
+| S1 | **A carrier refusing a parcel** (`registrationFailed`) | Sandbox guide: «It doesn't make actual calls to carrier APIs and provides mocked responses instead.» The state is unreachable, not merely untested. **Montonio's written answer of 22.09.2026 confirms it: this can only be exercised in live.** | `tests/montonio-docs-payloads.test.ts` → a `POST /shipments` reply with `status: "registrationFailed"` through the real route, plus the webhook event; `tests/montonio-problems.test.ts` for the words |
 | S2 | **Phone-number validation** | Sandbox guide: «The POST /shipments endpoint skips phone number and address validation.» Every wrong `phoneCountryCode` we ever sent passed. | `tests/shipping-montonio.test.ts` (`splitPhone` across all 32 destinations, fixed 18.09.2026) + S1's refusal path |
 | S3 | **Address validation** | Same sentence | Same |
 | S4 | **A real label PDF** | Sandbox guide: «The system generates dummy labels.» `normaliseLabelPdf()` has never seen a real Montonio label. | `tests/shipping-label-pdf.test.ts` rebuilds the same nesting with pdf-lib. An unrecognised file is served unchanged, so the failure is soft |
 | S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one |
 | S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | Nothing. We never read the flag and never send dimensions — see Part 5, D6 |
-| S7 | **A SmartPosti drop-off code** (`dropOffPin`) | Needs `lockerSize` or a contract `defaultLockerSize`, neither of which exists in sandbox | Nothing. See Part 5, D7 |
+| ~~S7~~ | ~~**A SmartPosti drop-off code** (`dropOffPin`)~~ · **not applicable, 22.09.2026** | Montonio's written answer of 22.09.2026: a drop-off / door code works **only on the merchant's own direct contract with the carrier**, and only with that carrier's help; it is aimed at marketplaces. A normal merchant simply **scans the label at the parcel machine**. **Omniva has no such option at all.** So this is not «untested» — there is nothing here for a shop like ours to test | Nothing, and nothing wanted. See Part 5, D7 |
 | S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | Not implemented at all | Nothing. The refusal message tells the owner to pass the correction to Dim rather than to press again — see Part 5, D8 |
 | S9 | **The parcel-events webhook being registered** | It is a manual step in the Partner System; nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it |
 | S10 | **Which carriers this store is actually contracted for** | Sandbox contracts are not live contracts | `GET /api/admin/montonio/` reads `GET /carriers` (`hasMontonioContract`, `contracts[]`) |
-| S11 | **A locker outside the Baltics being priced correctly** | The tariff mirror built without keys is subtype-blind | `docs/montonio-shipping-audit.md` § 3.1. Rebuild the mirror **with keys** before offering lockers outside EE/LV/LT |
+| ~~S11~~ | ~~**A locker outside the Baltics being priced correctly**~~ · **money risk closed 22.09.2026** | The worry was that our tariff mirror asks one subtype-blind `pickupPoint` price where Montonio has separate `parcelMachine` / `parcelShop` / `postOffice` rates, so a locker could be sold under its cost. Montonio's written answer of 22.09.2026: «Pakiautomaat ja pickupPoint on sama hinnaga aga erinevad väljastuspunktid» — **the same price, different delivery points.** A subtype-blind row therefore cannot underprice a locker, and the margin risk in `docs/montonio-shipping-audit.md` § 3.1 is gone | Nothing more needed for the money. **The other half of § 3.1 still stands**: `contract-prices` is an undocumented, unauthenticated endpoint that can change or vanish without notice, and rebuilding the mirror with keys remains the documented route |
+| S12 | **Ordering a courier pickup** | Montonio's written answer of 22.09.2026: **a pickup cannot be ordered through the API at all.** Their advice is to configure a **recurring pickup** in the Montonio system | Nothing in code, and nothing wanted in code: it is an owner/ops step — Part 2 |
+| S13 | **An uncollected parcel coming back** | Nothing ships in sandbox, so the return leg has never happened | Nothing. Montonio, 22.09.2026: an uncollected parcel goes back **to the sender's address at the same price it was sent at**, and the return address is **always the sender's and cannot be changed**. So a parcel nobody collects costs the shop the delivery **twice** — that is a real money line, not a nuisance |
+| S14 | **A customer return** | No parcel has ever moved in either direction | Nothing. Montonio's per-carrier answer of 22.09.2026 is under this table; whether a **return label** is reachable through the API is one of the four questions they did not answer |
+
+**Returns, per carrier — Montonio's written answer of 22.09.2026 (S14).** None
+of this has ever run here; it is written down so the first customer who wants
+to send something back does not find it out for us.
+
+- **DPD, international** — the only carrier a **return label** can be created
+  for. Montonio is **not sure it is available through the API**; that half is
+  still open, below.
+- **Omniva, DPD, Unisend** — **SMS returns** can be activated. That is a switch
+  in the Partner System, not code.
+- **SmartPosti** — returns are **automatic**, but the customer has to start
+  them on **SmartPosti's own page**, not in our shop. So the shop's return text
+  has to send them there.
+- **Nova Post** — **no returns at all**, and Montonio **advises against using
+  Nova Post in the Baltics**.
+
+**Asked on 22.09.2026 and still unanswered.** Montonio's reply left four
+questions open. They stay visible here until there is an answer to strike them
+with:
+
+1. **Dimension and weight limits per country and per method** — and whether
+   `POST /v2/shipping-methods/filter-by-parcels` is the right way to ask for
+   them (S6, and Part 5 D6).
+2. **Which webhooks actually fire, and who registers them** (S9).
+3. Whether **`PATCH /v2/shipments/{id}`** is the documented repair for a
+   `registrationFailed` shipment (S8, and Part 5 D8).
+4. Whether a **return label** is reachable through the API at all (S14).
 
 ### Products that cannot be activated in test mode at all
 
@@ -83,6 +119,14 @@ Owner-verified in the Partner System, 18.09.2026:
   rule is the same: a product that cannot be switched on in test cannot be
   tested, and the first evidence will be a live customer.
 
+> **Montonio now says the same thing in writing, 22.09.2026.** Their Customer
+> Success Manager confirms that **a carrier refusing a parcel (S1) and a refund
+> (P1) can only be exercised in live**, and that live testing presumes **an
+> activated company and a finished shop** — cart, checkout, terms, contact
+> details, products. Ours is finished; the activation is Part 2. So the two
+> paths this branch could never run are not a gap in our testing, they are the
+> supplier's own answer to how they are tested.
+
 ---
 
 ## Part 2 — Before go-live: what only the owner can do
@@ -92,6 +136,18 @@ Nothing in the code can do any of these. In the order they bite.
 - [ ] **Switch on «Refundable bank payments»** in the Partner System, in
       **live** mode. Without it no refund on a bank-link order will ever work.
       This is the single most important line in this document.
+
+  > **What it costs, from Montonio's written answer of 22.09.2026 and their
+  > published price list at `montonio.com/et/hinnapaketid`, read the same day.**
+  > Only an account holding at least the **«Juhataja»** (manager) role can
+  > activate refunds, so whoever does it has to be that account. On our plan —
+  > **Starter, 11.99 €/month** — the price list shows «Pangamaksed 0,20 €» and
+  > «Tagastusega pangamaksed 0,20 €»: refundable bank payments cost **exactly
+  > the same per transaction**, so on Starter there is **no per-transaction
+  > penalty** for switching. (On Core the same switch would be 0,05 € →
+  > 0,15 €.) **Refunds themselves are listed as free.** What does change:
+  > **payouts arrive with one business day's delay, and in our own company's
+  > name.** All figures are ex-VAT.
 - [ ] **Switch on Shipping** in live mode, and the carriers used: Omniva, DPD,
       SmartPosti, Unisend, Nova Post.
 - [ ] **Register the parcel-events webhook**: Partner System → Shipping →
@@ -102,8 +158,11 @@ Nothing in the code can do any of these. In the order they bite.
       `shipment.statusUpdated`.
       (The *payment* webhook needs nothing: `notificationUrl` rides on every
       order.)
-- [ ] **Set a `defaultLockerSize` on the SmartPosti contract**, or accept that
-      the A4 slip's drop-off code will be blank (S7).
+- [ ] **Configure a recurring courier pickup** in the Montonio system.
+      Montonio's written answer of 22.09.2026: **a pickup cannot be ordered
+      through the API at all** (S12), and a standing pickup is what they advise
+      instead. Nothing in the code can do it and nothing in the code will
+      notice it was skipped — the parcels simply sit here.
 - [ ] **Business verification** for production API keys.
 - [ ] Confirm the **live** `GET /stores/payment-methods` list is not empty. The
       guide: «if empty that means the paymentMethods have not been enabled for
@@ -172,8 +231,11 @@ sandbox could not tell us.
     order journal has a `shipment.registration_failed` row. The parcel exists
     at Montonio but is not registered — **do not press the button again**, it
     will repeat the same refusal by design.
-- [ ] Check the **drop-off code** on the A4 slip. Blank means S7: set
-      `defaultLockerSize` on the contract.
+- [ ] **Do not look for a drop-off code on the A4 slip.** Blank is correct.
+      Montonio, in writing on 22.09.2026: a door code needs the merchant's own
+      direct contract with the carrier and is aimed at marketplaces, and Omniva
+      has no such option at all (S7). **Scan the label at the parcel machine**
+      like any other merchant.
 - [ ] Hand the parcel over and watch the order: within a day or two the
       `shipment.statusUpdated` webhook should move it to «Доставлен» by itself.
       If it never does, S9 (the webhook) or S5 (an unknown status word) is why;
@@ -208,6 +270,13 @@ sandbox could not tell us.
       carrier vocabulary, which nobody has ever seen.
 - [ ] `settings.montonio_readiness` — the dated snapshot of what the shop
       believed it could do, written on every «Подключения» load.
+- [ ] And from that day on, not only the first one: Montonio's written answer
+      of 22.09.2026 says they **notify merchants of major API changes by
+      e-mail**, and that they run a **status page at
+      <https://status.montonio.com/>**. So the mail address on the Montonio
+      account has to be one somebody reads, and when something that worked
+      stops working, that page is the first thing to open — before our own
+      logs.
 
 ---
 
@@ -266,7 +335,7 @@ from a webhook, or what the shop charges.
 | D4 | Send `expiresIn`, matched to the unpaid-order cron (P11) | payments audit § B2 |
 | D5 | Enforce Montonio's own 0.05 € refund floor in the panel | payments audit § C3 |
 | D6 | Read `constraints.parcelDimensionsRequired` and declare a carton (S6) | shipping audit § 1.6 |
-| D7 | `lockerSize`, or `defaultLockerSize` on the contract (S7) | shipping audit § 4 |
+| ~~D7~~ | ~~`lockerSize`, or `defaultLockerSize` on the contract (S7)~~ · **closed 22.09.2026, not applicable.** Montonio's written answer: a drop-off code works only on the merchant's own direct contract with the carrier, with that carrier's help, and is aimed at marketplaces; Omniva has no such option at all. A normal merchant scans the label at the parcel machine. There is nothing left to decide | shipping audit § 4 |
 | D8 | Implement `PATCH /shipments/{id}` so a refused parcel can be repaired from the panel (S8) | shipping audit § 1.5 |
 | D9 | **A pending refund still sends the customer «Деньги возвращены».** `notifyOrderClosed()` fires for anything that is not `failed`, so a refund Montonio has only accepted — and may cancel in ten days — is announced to the customer as done. Changing it changes what a customer is told about money, so it is a decision, not a fix | this branch, `src/app/api/admin/orders/[id]/refund/route.ts` |
 | D10 | Drop non-EUR banks from the checkout list | payments audit § C2 |
