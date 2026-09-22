@@ -36,12 +36,13 @@ describe("zones: an order carries a real country, the rules price it by row", ()
     /* Germany has no cell of its own here, and since 14.09.2026 an empty
        courier box means «цена Montonio» before it means «возьмите зону»: the
        one rule the whole rate screen now runs on. So Germany is priced at
-       Montonio's own 22.29 and not at the owner's 16.29 for all of Europe.
+       Montonio's own 17.59 (22.29 until the 22.09.2026 re-quote for the
+       25 × 18 × 8 cm carton) and not at the owner's 16.29 for all of Europe.
        The zone still answers for a country Montonio has no route to — CH
-       below — which is the only kind of destination the row can reach once
-       every served country has a cell (db/migrations/148 gives them all one). */
+       below — which is the only kind of destination it can reach: every
+       served country has a price of its own, the owner's cell or Montonio's. */
     const de = quoteFromRules(rules, { country: "DE", method: "courier", subtotal: 40 });
-    expect(de.price).toBe(22.29);
+    expect(de.price).toBe(17.59);
     expect(de.freeFrom).toBe(120);
     expect(de.country, "the quote keeps the real country").toBe("DE");
     expect(quoteFromRules(rules, { country: "CH", method: "courier", subtotal: 40 }).price).toBe(16.29);
@@ -53,9 +54,10 @@ describe("zones: an order carries a real country, the rules price it by row", ()
   });
 
   it("prefers a country's own cell over its zone, so Europe need not be one price", () => {
-    // Montonio's own contract rates run from 17.86 € (Poland) to 52.08 €
-    // (Croatia) for the same box; the «EU» cell cannot be right for both.
-    // «Заполнить по тарифам Montonio» writes country cells like these.
+    // Montonio's own parcel-machine rates for the same 25 × 18 × 8 cm carton
+    // run from 7.44 € (Poland) to 37.20 € (Bulgaria) — Croatia is 29.76 € —
+    // so the «EU» cell cannot be right for all of them. The cells below are an
+    // owner's own numbers: a country's cell wins whatever it says.
     const rules: ShippingRules = {
       ...DEFAULT_SHIPPING_RULES,
       methods: {
@@ -72,9 +74,9 @@ describe("zones: an order carries a real country, the rules price it by row", ()
     /* …but a courier with no country cell takes Montonio's price for that
        country before the EU row, since 14.09.2026 — an empty box means «цена
        Montonio» in every column of the rate screen, and Poland's courier is
-       20.69 there. The zone row is what a country Montonio cannot reach still
-       falls to (Switzerland). */
-    expect(quoteFromRules(rules, { country: "PL", method: "courier", subtotal: 40 }).price).toBe(20.69);
+       15.99 there (20.69 until the 22.09.2026 carton re-quote). The zone row
+       is what a country Montonio cannot reach still falls to (Switzerland). */
+    expect(quoteFromRules(rules, { country: "PL", method: "courier", subtotal: 40 }).price).toBe(15.99);
     expect(quoteFromRules(rules, { country: "CH", method: "courier", subtotal: 40 }).price).toBe(39.99);
     // the free-from threshold resolves the same way: country, then zone
     expect(quoteFromRules(rules, { country: "PL", method: "parcel", subtotal: 40 }).freeFrom).toBe(90);
@@ -111,16 +113,19 @@ describe("the default price list", () => {
     expect(quote("LT", "parcel", 10).price).toBe(5.59);
     // Since 07.09.2026 every country Montonio serves has its own cell rather
     // than falling to the method's default: a German parcel machine costs
-    // 29.76 € on the cheapest carrier the shop can actually put it on.
-    expect(quote("DE", "parcel", 10).price).toBe(29.79);
+    // 16.37 € on the cheapest carrier the shop can actually put it on (DPD's XS
+    // drawer for the 25 × 18 × 8 cm carton; 29.76 € for the old 30 cm cube).
+    expect(quote("DE", "parcel", 10).price).toBe(16.39);
   });
 
   it("prices a courier per country", () => {
     expect(quote("EE", "courier", 10).price).toBe(10.84);
-    expect(quote("DE", "courier", 10).price).toBe(22.29);
+    expect(quote("DE", "courier", 10).price).toBe(17.59);
     expect(quote("FI", "courier", 10).price).toBe(15.69);
-    expect(quote("GR", "courier", 10).price).toBe(43.19);
-    expect(quote("PL", "courier", 10).price).toBe(20.69);
+    // SmartPosti's 28.82 € since the 22.09.2026 carton re-quote; for the old
+    // 30 cm cube DPD was the cheaper of the two and Greece cost 43.19 €
+    expect(quote("GR", "courier", 10).price).toBe(28.89);
+    expect(quote("PL", "courier", 10).price).toBe(15.99);
   });
 
   /* The zone cell is still there, and still 9.90 — it is what a destination
@@ -219,8 +224,8 @@ describe("free delivery", () => {
     expect(quote("DE", "courier", 100, undefined, custom).free).toBe(false);
     expect(quote("DE", "courier", 100, undefined, custom).freeFrom).toBe(150);
     expect(quote("DE", "courier", 150, undefined, custom).price).toBe(0);
-    // Greece costs 43.15 € to reach — never free, whatever the basket
-    expect(quote("GR", "courier", 10_000, undefined, custom).price).toBe(43.19);
+    // Greece costs 28.82 € to reach (SmartPosti) — never free, whatever the basket
+    expect(quote("GR", "courier", 10_000, undefined, custom).price).toBe(28.89);
     expect(quote("GR", "courier", 10_000, undefined, custom).freeFrom).toBe(null);
     // home is untouched by a European rule
     expect(quote("EE", "parcel", 59, undefined, custom).price).toBe(0);
@@ -236,8 +241,8 @@ describe("free delivery", () => {
     for (const c of ["EE", "LV", "LT", "FI"]) {
       expect([c, quote(c, "courier", 59).price]).toEqual([c, 0]);
     }
-    expect(quote("HR", "courier", 59).price).toBe(28.29);
-    expect(quote("GR", "courier", 59).price).toBe(43.19);
+    expect(quote("HR", "courier", 59).price).toBe(23.59);
+    expect(quote("GR", "courier", 59).price).toBe(28.89);
     expect(quote("GR", "courier", 200).price).toBe(0);
     expect(quote("GR", "courier", 59).freeFrom).toBe(200);
   });
@@ -348,16 +353,21 @@ describe("against the database", () => {
     resetShippingRulesCache();
   });
 
-  it("migrations 030 + 031 seed a rules row the admin can edit, at the sourced EE tariffs", async () => {
-    // The raw row, not loadShippingRules(): that one merges over the code
-    // defaults, so a missing EE cell would read as 5.47 and hide a stale seed.
+  it("the migrations seed a rules row the admin can edit, at the sourced EE tariffs", async () => {
+    // The raw row first, not loadShippingRules(): that one merges over the
+    // code defaults, so a stale seed could hide behind it. The courier cell is
+    // the shop's own 10.84 and stays in the row; the parcel cell is ABSENT
+    // since db/migrations/202 — an empty cell is Montonio's price — so the
+    // brief's 3.49 cannot be there, and the read fills in the sourced 5.47.
     const rows = await query<{ value: { methods: Record<string, Record<string, number>> } }>(
       "select value from settings where key = 'shipping_rules'",
     );
     expect(rows).toHaveLength(1);
-    expect(rows[0].value.methods.parcel.EE).toBe(5.47);
+    expect(rows[0].value.methods.parcel.EE).toBeUndefined();
     expect(rows[0].value.methods.courier.EE).toBe(10.84);
     const loaded = await loadShippingRules();
+    expect(loaded?.methods.parcel.EE).toBe(5.47);
+    expect(loaded?.methods.courier.EE).toBe(10.84);
     expect(loaded?.freeFrom).toBe(59);
   });
 

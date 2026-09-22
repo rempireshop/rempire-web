@@ -95,7 +95,7 @@ describe("which carriers count", () => {
     const parcel = countryPriceTable().parcel;
     expect(parcel.HU).toBeUndefined();
     expect(parcel.RO).toBeUndefined();
-    expect(cheapestCostAnyCarrier("HU", "parcel")).toEqual({ price: 10.24, carrier: "novapost" });
+    expect(cheapestCostAnyCarrier("HU", "parcel")).toEqual({ price: 7.06, carrier: "novapost" });
     // …and a Nova Post cell exists in exactly the three Baltic countries
     expect(Object.keys(carrierPriceTable().novapost).sort()).toEqual(["EE", "LT", "LV"]);
   });
@@ -103,13 +103,13 @@ describe("which carriers count", () => {
 
 describe("cost: cheapest, dearest, and the one the audit quoted", () => {
   it("reads the cheapest carrier the shop can use, and names it", () => {
-    expect(cheapestCost("DE", "courier")).toEqual({ price: 22.23, carrier: "smartpost" });
-    expect(cheapestCost("PL", "parcel")).toEqual({ price: 17.86, carrier: "dpd" });
+    expect(cheapestCost("DE", "courier")).toEqual({ price: 17.55, carrier: "smartpost" });
+    expect(cheapestCost("PL", "parcel")).toEqual({ price: 7.44, carrier: "dpd" });
     expect(cheapestCost("GR", "parcel")).toBeNull(); // no parcel machine from Estonia at all
   });
 
   it("reads the dearest carrier the shop can use", () => {
-    expect(ceilingCost("DE", "courier")).toEqual({ price: 32.74, carrier: "dpd" });
+    expect(ceilingCost("DE", "courier")).toEqual({ price: 23.81, carrier: "dpd" });
     expect(ceilingCost("EE", "parcel")).toEqual({ price: 3.1, carrier: "omniva" });
   });
 
@@ -118,18 +118,20 @@ describe("cost: cheapest, dearest, and the one the audit quoted", () => {
      them. They are in the mirror again since 14.09.2026 and they still price
      nothing: the basis is what the shop can put a parcel on knowing it can
      take a return, and that is not Montonio International Shipping. Both
-     halves asserted, because the whole point is that the two answers differ. */
+     halves asserted, because the whole point is that the two answers differ.
+     Since 22.09.2026 the table is quoted for the 25 × 18 × 8 cm carton, not a
+     30 cm cube, so the same two Nova Post rows now read 9.23 and 7.03. */
   it("the audit's cheap numbers are visible and still price nothing", () => {
-    expect(cheapestCostAnyCarrier("DE", "courier")).toEqual({ price: 12.91, carrier: "novapost" });
-    expect(cheapestCostAnyCarrier("PL", "courier")).toEqual({ price: 8.51, carrier: "novapost" });
-    expect(cheapestCost("DE", "courier")!.price).toBeGreaterThan(12.91);
-    expect(cheapestCost("PL", "courier")!.price).toBeGreaterThan(8.51);
-    expect(countryPriceTable().courier.DE).toBe(22.29);
-    expect(countryPriceTable().courier.PL).toBe(20.69);
+    expect(cheapestCostAnyCarrier("DE", "courier")).toEqual({ price: 9.23, carrier: "novapost" });
+    expect(cheapestCostAnyCarrier("PL", "courier")).toEqual({ price: 7.03, carrier: "novapost" });
+    expect(cheapestCost("DE", "courier")!.price).toBeGreaterThan(9.23);
+    expect(cheapestCost("PL", "courier")!.price).toBeGreaterThan(7.03);
+    expect(countryPriceTable().courier.DE).toBe(17.59);
+    expect(countryPriceTable().courier.PL).toBe(15.99);
   });
 
   it("knows what a return costs where Montonio prices one", () => {
-    expect(returnCost("DE", "courier")).toBe(32.74); // DPD, the only reachable carrier that prices a return
+    expect(returnCost("DE", "courier")).toBe(23.81); // DPD, the only reachable carrier that prices a return
     expect(returnCost("GR", "parcel")).toBeNull();
   });
 });
@@ -199,8 +201,9 @@ describe("the shelf table", () => {
      boxes changed no bill, and a hidden multiplier under a screen that says
      «цена Montonio» would have made that sentence untrue. */
   it("is the tariff rounded up, and nothing else", () => {
-    expect(table.courier.DE).toBe(customerPrice(22.23));
-    expect(customerPrice(22.23)).toBe(22.29);
+    // SmartPosti's German courier, 22.23 → 22.29 until the 22.09.2026 carton re-quote
+    expect(table.courier.DE).toBe(customerPrice(17.55));
+    expect(customerPrice(17.55)).toBe(17.59);
   });
 
   it("leaves out a country/method with no reachable carrier rather than inventing one", () => {

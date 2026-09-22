@@ -3058,6 +3058,8 @@
         "Selle vedaja puhul luugi suurust ei valita — ta valib selle ise.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
         "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Välismaale arvestab Montonio karbi mõõtude järgi, nii et väiksem karp on otsene kokkuhoid igalt välismaa pakilt. Eestis, Lätis, Leedus, Soomes ja Rootsis hind karbi suurusest ei sõltu.",
+      "Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
+        "Välismaa tarnehinnad on arvutatud karbile 25 × 18 × 8 cm. Suurema karbiga võtab Montonio paki eest rohkem, kui ostja maksab — harva ette tuleva suure paki puhul muutke mõõte otse tellimuses.",
       "по умолчанию": "vaikimisi",
       "как в прошлый раз": "nagu eelmisel korral",
       "чаще всего": "kõige sagedamini",
@@ -5968,6 +5970,8 @@
         "This carrier does not take a locker size — it picks the door itself.",
       "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
         "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Abroad Montonio charges by the size of the box, so a smaller box is a direct saving on every parcel that leaves the country. Inside Estonia, Latvia, Lithuania, Finland and Sweden the price does not depend on the size.",
+      "Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
+        "Delivery prices abroad are worked out for a 25 × 18 × 8 cm box. With a bigger box Montonio charges more for the parcel than the buyer pays — for the rare large parcel, change the size in the order itself.",
       "по умолчанию": "by default",
       "как в прошлый раз": "as last time",
       "чаще всего": "most often",
@@ -7186,17 +7190,17 @@
     methods: {
       parcel: {
         "default": 4.99,
-        AT: 37.29, BE: 29.79, BG: 52.09, CZ: 28.29, DE: 29.79, DK: 23.89, EE: 5.47,
-        ES: 38.69, FI: 12.39, FR: 44.69, HR: 59.59, IE: 52.09, IT: 34.29, LT: 5.59,
-        LU: 35.79, LV: 5.59, NL: 29.79, PL: 17.89, PT: 41.69, SE: 13.69, SI: 40.19,
-        SK: 26.79
+        AT: 20.89, BE: 17.89, BG: 37.29, CZ: 16.39, DE: 16.39, DK: 14.89, EE: 5.47,
+        ES: 23.89, FI: 12.39, FR: 28.29, HR: 29.79, IE: 22.39, IT: 20.89, LT: 5.59,
+        LU: 20.89, LV: 5.59, NL: 14.89, PL: 7.49, PT: 29.79, SE: 13.69, SI: 22.39,
+        SK: 16.39
       },
       courier: {
         "default": 9.90,
-        AT: 28.49, BE: 24.39, BG: 32.59, CZ: 23.99, DE: 22.29, DK: 24.19, EE: 10.84,
-        ES: 34.29, FI: 15.69, FR: 24.19, GR: 43.19, HR: 28.29, HU: 27.39, IE: 38.69,
-        IT: 30.09, LT: 9.90, LU: 26.09, LV: 9.90, NL: 25.59, PL: 20.69, PT: 38.39,
-        RO: 36.69, SE: 21.59, SI: 32.59, SK: 27.69
+        AT: 23.79, BE: 19.69, BG: 27.89, CZ: 19.29, DE: 17.59, DK: 19.59, EE: 10.84,
+        ES: 29.69, FI: 15.69, FR: 19.59, GR: 28.89, HR: 23.59, HU: 22.69, IE: 31.29,
+        IT: 25.49, LT: 9.90, LU: 21.39, LV: 9.90, NL: 20.89, PL: 15.99, PT: 33.69,
+        RO: 31.99, SE: 21.59, SI: 27.89, SK: 22.99
       },
       pickup: { "default": 0 }
     },
@@ -7268,15 +7272,15 @@
       novapost: { EE: 2.39, LV: 4.79, LT: 4.09 }
     },
     courier: {
-      AT: [28.49, "smartpost"], BE: [24.39, "smartpost"], BG: [32.59, "smartpost"],
-      CZ: [23.99, "smartpost"], DE: [22.29, "smartpost"], DK: [24.19, "smartpost"],
-      EE: [6.89, "dpd"], ES: [34.29, "smartpost"], FI: [15.69, "smartpost"],
-      FR: [24.19, "smartpost"], GR: [43.19, "dpd"], HR: [28.29, "smartpost"],
-      HU: [27.39, "smartpost"], IE: [38.69, "dpd"], IT: [30.09, "smartpost"],
-      LT: [8.09, "smartpost"], LU: [26.09, "smartpost"], LV: [8.09, "smartpost"],
-      NL: [25.59, "smartpost"], PL: [20.69, "smartpost"], PT: [38.39, "smartpost"],
-      RO: [36.69, "smartpost"], SE: [21.59, "dpd"], SI: [32.59, "smartpost"],
-      SK: [27.69, "smartpost"]
+      AT: [23.79, "smartpost"], BE: [19.69, "smartpost"], BG: [27.89, "smartpost"],
+      CZ: [19.29, "smartpost"], DE: [17.59, "smartpost"], DK: [19.59, "smartpost"],
+      EE: [6.89, "dpd"], ES: [29.69, "smartpost"], FI: [15.69, "smartpost"],
+      FR: [19.59, "smartpost"], GR: [28.89, "smartpost"], HR: [23.59, "smartpost"],
+      HU: [22.69, "smartpost"], IE: [31.29, "dpd"], IT: [25.49, "smartpost"],
+      LT: [8.09, "smartpost"], LU: [21.39, "smartpost"], LV: [8.09, "smartpost"],
+      NL: [20.89, "smartpost"], PL: [15.99, "smartpost"], PT: [33.69, "smartpost"],
+      RO: [31.99, "smartpost"], SE: [21.59, "dpd"], SI: [27.89, "smartpost"],
+      SK: [22.99, "smartpost"]
     }
   };
   /* The seeded values, kept whole: «Вернуть значения по умолчанию» in the
@@ -18636,7 +18640,7 @@
           : "") +
       "</div>";
   }
-  /** «25 × 18 × 10 см · около 1,13 кг» — one text node, so it stays translatable. */
+  /** «25 × 18 × 8 см · около 0,9 кг» — one text node, so it stays translatable. */
   function admBoxLine(l, w, h, kg) {
     return l + " × " + w + " × " + h + " см · около " + kgNum(kg) + " кг";
   }
@@ -23508,7 +23512,8 @@
    * products, so there is nothing to measure — Ренат, 18.09.2026: «one default
    * parcel size, overridable». This is that box.
    *
-   * 25 × 18 × 10 cm to start with, and small on purpose: Montonio bills
+   * 25 × 18 × 8 cm — Renat's own carton, measured 22.09.2026 — and small on
+   * purpose: Montonio bills
    * `max(actualWeight, volumetricWeight)` and the volumetric half is the box's
    * own volume, so at this shop's parcel sizes the carton — not what is in it
    * — is what gets paid for. The line under the boxes prints what Montonio
@@ -23545,6 +23550,11 @@
             'data-parcelbox="height" value="' + esc(String(p.height)) + '"></label>' +
       "</div>" +
       '<p class="adm-hint" style="margin-top:8px">' + admParcelVolLine(parcelVolKg(p)) + "</p>" +
+      (parcelBeyondPriced(p)
+        ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. ' +
+          "С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — " +
+          "для редкой большой посылки поменяйте размер прямо в заказе.</p>"
+        : "") +
       '<label class="adm-field" style="margin-top:12px"><span>Размер ячейки по умолчанию</span>' +
         '<select class="adm-input" data-parcelsize>' +
         LOCKER_SIZES.map(function (k) {
@@ -23572,7 +23582,22 @@
       One text node, and no declining noun in it: translateTree() rewrites a
       whole node, and a plural that changes with the count would need three
       dictionary keys to say one thing. */
-  /** «Montonio посчитает эту коробку примерно как 1,13 кг.» One text node. */
+  /* The price table (src/data/montonio-tariffs.json) is quoted for ONE box —
+     PARCEL_DEFAULT, which is src/lib/shipping/parcel.ts PARCEL_DEFAULTS, which
+     is Renat's own carton as he measured it on 22.09.2026. The carton saved
+     here is what every label DECLARES. If he ever saves a bigger one, abroad
+     Montonio bills a bigger tier than the shelf price was worked out for, on
+     every parcel, and nothing else in the panel would show it. So this says
+     so the moment it is saved. Sorted, because a box goes in whichever way
+     round fits. Inside the Baltics size does not move the price at all.
+     tests/reference-parcel.test.ts holds the sentence's numbers to the box. */
+  function parcelBeyondPriced(p) {
+    var up = function (x, y) { return x - y; };
+    var a = [Number(p.length), Number(p.width), Number(p.height)].sort(up);
+    var b = [PARCEL_DEFAULT.length, PARCEL_DEFAULT.width, PARCEL_DEFAULT.height].sort(up);
+    return a[0] > b[0] || a[1] > b[1] || a[2] > b[2];
+  }
+  /** «Montonio посчитает эту коробку примерно как 0,9 кг.» One text node. */
   function admParcelVolLine(kg) { return "Montonio посчитает эту коробку примерно как " + kgNum(kg) + " кг."; }
   function admParcelLearnedLine(size) {
     return "Чаще всего вы отправляете " + size + " — этот размер и будет предложен.";
@@ -25404,12 +25429,13 @@
      The default is SMALL on purpose. Montonio bills
      `max(actualWeight, volumetricWeight)` and volumetric weight is the box's
      own volume, so at this shop's parcel sizes the carton — not what is in it
-     — is what gets paid for. 25 × 18 × 10 cm is about 1,1 kg; the 30 × 30 × 30
-     of REFERENCE_PARCEL would be five to seven. Ренат, 18.09.2026: «use a
-     smaller default box then and we don't bother with weights». */
+     — is what gets paid for. 25 × 18 × 8 cm is 0,9 kg; the 30 × 30 × 30 that
+     REFERENCE_PARCEL used to be would be five to seven. Ренат, 18.09.2026: «use
+     a smaller default box then and we don't bother with weights»; and on
+     22.09.2026 he measured the real one — 25 × 18 × 8, which is DPD's XS. */
   var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
-  var PARCEL_DEFAULT = { length: 25, width: 18, height: 10, lockerSize: "M", recent: [] };
-  /** «около 1,13 кг» — volumetricKg() in src/lib/shipping/parcel.ts, and the
+  var PARCEL_DEFAULT = { length: 25, width: 18, height: 8, lockerSize: "M", recent: [] };
+  /** «около 0,9 кг» — volumetricKg() in src/lib/shipping/parcel.ts, and the
       figure this shop DECLARES to Montonio on every label since 19.09.2026. */
   function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }
   /* 1.1 → «1,1». A REGEX and not a string literal on purpose: tools/i18n-gaps.mjs

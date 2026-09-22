@@ -11,12 +11,12 @@
  * The runner skips files recorded in _migrations, so to replay 031 against a
  * hand-shaped row these tests forget that one record and run setupDb() again —
  * which is exactly what a production database that ran 030 on 2026-09-03 goes
- * through on its next deploy.
+ * through on its next deploy. 148, 149 and 202 are replayed the same way.
  */
 import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { exec, query } from "@/lib/db";
-import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
+import { DEFAULT_SHIPPING_RULES, parseShippingRules, quoteFromRules, type ShippingRules } from "@/lib/shipping";
 import { setupDb, teardownDb } from "./helpers";
 
 const MIGRATION = "031_shipping_rules_ee_tariffs.sql";
@@ -24,6 +24,8 @@ const MIGRATION = "031_shipping_rules_ee_tariffs.sql";
 const MIGRATION_148 = "148_shipping_country_prices.sql";
 /** 149 carries Dim's two answers of 08.09.2026 into the same row. */
 const MIGRATION_149 = "149_shipping_free_from_eu_lv_lt_parcel.sql";
+/** 202 takes 148's frozen country prices back out, so they follow Montonio again. */
+const MIGRATION_202 = "202_shipping_prices_follow_montonio.sql";
 
 type Rules = {
   freeFrom?: number | null;
@@ -45,6 +47,31 @@ const SEED_030: Rules = {
   },
 };
 
+/** …and what 031 leaves of it: the brief's EE numbers raised to the sourced ones. */
+const SEED_031: Rules = {
+  ...SEED_030,
+  methods: {
+    ...SEED_030.methods,
+    parcel: { ...SEED_030.methods.parcel, EE: 5.47 },
+    courier: { ...SEED_030.methods.courier, EE: 10.84 },
+  },
+};
+
+/**
+ * The only numbers a migrated row may still hold under `methods` after 202:
+ * the fallback cells and the shop's own three home courier prices.
+ */
+const METHODS_AFTER_202 = {
+  parcel: { default: 4.99 },
+  courier: { default: 9.9, EE: 10.84, LV: 9.9, LT: 9.9 },
+  pickup: { default: 0 },
+};
+
+/** countriesOff compared as a set — parseShippingRules() sorts it, the defaults need not. */
+function withSortedOff(rules: ShippingRules): ShippingRules {
+  return { ...rules, countriesOff: [...(rules.countriesOff ?? [])].sort() };
+}
+
 async function rulesRows(): Promise<Row[]> {
   return query<Row>("select value, updated_at from settings where key = 'shipping_rules'");
 }
@@ -55,8 +82,11 @@ async function rulesRow(): Promise<Row> {
   return rows[0];
 }
 
-/** Put `value` in the row (or drop it), forget `which` ran, run the migrations again. */
-async function replay(value: Rules | null, which: string = MIGRATION): Promise<string[]> {
+/**
+ * Put `value` in the row (or drop it), forget `which` ran — one migration or
+ * several — and run the migrations again. The runner applies them in file order.
+ */
+async function replay(value: Rules | null, which: string | string[] = MIGRATION): Promise<string[]> {
   if (value === null) {
     await query("delete from settings where key = 'shipping_rules'");
   } else {
@@ -66,7 +96,9 @@ async function replay(value: Rules | null, which: string = MIGRATION): Promise<s
       [JSON.stringify(value)],
     );
   }
-  await query("delete from _migrations where name = $1", [which]);
+  for (const name of Array.isArray(which) ? which : [which]) {
+    await query("delete from _migrations where name = $1", [name]);
+  }
   return setupDb();
 }
 
@@ -74,19 +106,36 @@ describe("a fresh database", () => {
   beforeAll(setupDb);
   afterAll(teardownDb);
 
-  it("carries the sourced EE tariffs, not the brief's", async () => {
+  it("bills the sourced EE tariffs, not the brief's", async () => {
     const { value } = await rulesRow();
-    expect(value.methods.parcel.EE).toBe(5.47);
+    // the courier cell is the shop's own price and stays in the row…
     expect(value.methods.courier.EE).toBe(10.84);
+    // …the parcel cell follows the code default since 202, and that says 5.47
+    expect(value.methods.parcel.EE).toBeUndefined();
+    const rules = parseShippingRules(value);
+    expect(quoteFromRules(rules, { country: "EE", method: "parcel", subtotal: 10 }).price).toBe(5.47);
+    expect(quoteFromRules(rules, { country: "EE", method: "courier", subtotal: 10 }).price).toBe(10.84);
   });
 
   it("says the same numbers the code falls back to", async () => {
     // What docs/shipping.md promises: a missing row and a freshly migrated one
     // price a basket identically, so a new Railway database and CI's PGlite
-    // both bill what DEFAULT_SHIPPING_RULES says.
+    // both bill what DEFAULT_SHIPPING_RULES says. Since 202 the row no longer
+    // spells those numbers out — an absent cell IS the default, «пустое поле —
+    // цена Montonio» — so what is compared is what the row bills: the row as
+    // computeShipping() reads it, against the rules a shop with no row runs on.
     const { value } = await rulesRow();
     expect(value.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
-    expect(value.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
+    expect(withSortedOff(parseShippingRules(value))).toEqual(withSortedOff(DEFAULT_SHIPPING_RULES));
+  });
+
+  it("holds no country price but the shop's three home couriers", async () => {
+    // A number in the row is an override, and an override does not move when
+    // Montonio's tariff moves — which is how 148's cells kept the 30 cm cube's
+    // prices on the bill after the 22.09.2026 re-quote. EE 10.84 and LV/LT 9.90
+    // are the shop's own, not Montonio's, so they are the only ones left.
+    const { value } = await rulesRow();
+    expect(value.methods).toEqual(METHODS_AFTER_202);
   });
 
   it("switches off the seven countries Montonio cannot reach", async () => {
@@ -110,6 +159,9 @@ describe("a fresh database", () => {
  * row 030 seeded wins over DEFAULT_SHIPPING_RULES in computeShipping(), so a
  * database that ran 030 keeps billing 9.90 € to Greece however the code
  * defaults move. It fills only the cells that are missing.
+ *
+ * Which was also its flaw: the numbers it fills in are one day's tariff, and
+ * they stay that day's tariff. 202 takes them back out — see further down.
  */
 describe("replaying 148 over a row 030 already seeded", () => {
   beforeAll(setupDb);
@@ -255,6 +307,156 @@ describe("replaying 149 over a row 030 already seeded", () => {
   it("does not invent a row where there is none", async () => {
     const applied = await replay(null, MIGRATION_149);
     expect(applied).toEqual([MIGRATION_149]);
+    expect(await rulesRows()).toHaveLength(0);
+  });
+});
+
+/*
+ * 202, 22.09.2026. Renat measured his carton — 25 × 18 × 8 cm — and the tariff
+ * table, quoted until then for a 30 cm cube that only fits DPD's biggest
+ * drawer, was re-quoted for it: every international price fell one or more
+ * size tiers. None of it reached a customer, because the cells 148 wrote win
+ * over DEFAULT_SHIPPING_RULES. «Пустое поле — цена Montonio»: 202 deletes every
+ * per-country cell that still says exactly what 148 wrote (for the LV/LT parcel
+ * machine, what 149 wrote), so an untouched cell follows Montonio again and a
+ * typed one stays. The three home couriers stay too — EE 10.84, LV/LT 9.90 are
+ * the shop's own price, and without them the read would charge Montonio's
+ * 6.89 / 8.09.
+ */
+describe("replaying 202 over a row carrying 148's numbers", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  /** What 030 → 031 → 148 → 149 leave: the live shop's row before 202. */
+  async function rowBefore202(): Promise<Rules> {
+    await replay(SEED_031, [MIGRATION_148, MIGRATION_149]);
+    return (await rulesRow()).value;
+  }
+
+  it("takes out every cell that still says what 148 or 149 wrote", async () => {
+    const before = await rowBefore202();
+    // the 30 cm cube's prices, frozen into the row — a cell for every country
+    expect(before.methods.courier.DE).toBe(22.29);
+    expect(before.methods.parcel.PL).toBe(17.89);
+    expect(before.methods.parcel.LV).toBe(5.59); // 149's literal
+    expect(Object.keys(before.methods.parcel)).toHaveLength(1 + 22);
+    expect(Object.keys(before.methods.courier)).toHaveLength(1 + 25);
+
+    const applied = await replay(before, MIGRATION_202);
+    expect(applied).toEqual([MIGRATION_202]);
+
+    const { value } = await rulesRow();
+    expect(value.methods).toEqual(METHODS_AFTER_202);
+    // what 148 and 149 decided that is not a price is not 202's business
+    expect(value.countriesOff).toEqual(before.countriesOff);
+    expect(value.freeFromByCountry).toEqual({ EU: 200 });
+    expect(value.freeFrom).toBe(59);
+  });
+
+  it("bills the carton, not the cube, once the cells are gone", async () => {
+    const before = await rowBefore202();
+    const price = (rules: ShippingRules, country: string, method: string) =>
+      quoteFromRules(rules, { country, method, subtotal: 10 }).price;
+    const stale = parseShippingRules(before);
+    expect(price(stale, "DE", "courier")).toBe(22.29);
+    expect(price(stale, "PL", "parcel")).toBe(17.89);
+
+    await replay(before, MIGRATION_202);
+    const now = parseShippingRules((await rulesRow()).value);
+    expect(price(now, "DE", "courier")).toBe(DEFAULT_SHIPPING_RULES.methods.courier.DE);
+    expect(price(now, "PL", "parcel")).toBe(DEFAULT_SHIPPING_RULES.methods.parcel.PL);
+    expect(now.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
+    // …and the home prices did not move a cent
+    expect(price(now, "EE", "courier")).toBe(10.84);
+    expect(price(now, "LV", "courier")).toBe(9.9);
+    expect(price(now, "EE", "parcel")).toBe(5.47);
+    expect(price(now, "LT", "parcel")).toBe(5.59);
+  });
+
+  it("keeps a cell the owner changed, one cell at a time", async () => {
+    const before = await rowBefore202();
+    await replay(
+      {
+        ...before,
+        methods: {
+          ...before.methods,
+          courier: { ...before.methods.courier, DE: 25, FR: 24.2 },
+          parcel: { ...before.methods.parcel, PL: 9.99, LV: 4.99 },
+        },
+      },
+      MIGRATION_202,
+    );
+    const { value } = await rulesRow();
+    expect(value.methods.courier.DE).toBe(25);
+    // a cent off 148's 24.19 is still a number somebody typed
+    expect(value.methods.courier.FR).toBe(24.2);
+    expect(value.methods.parcel.PL).toBe(9.99);
+    // 4.99 IS 148's literal for LV — but 149 replaced every 4.99 it found
+    // there, so one that is back was typed, and it stays
+    expect(value.methods.parcel.LV).toBe(4.99);
+    // …while the cells beside them that nobody touched go
+    expect(value.methods.courier.PL).toBeUndefined();
+    expect(value.methods.courier.GR).toBeUndefined();
+    expect(value.methods.parcel.LT).toBeUndefined();
+    expect(value.methods.parcel.DE).toBeUndefined();
+    expect(value.methods.courier.EE).toBe(10.84);
+  });
+
+  it("compares numbers by value — 29.790 is the 29.79 148 wrote", async () => {
+    await rowBefore202();
+    await query(
+      `update settings set value = jsonb_set(value, '{methods,parcel,DE}', '29.790'::jsonb)
+        where key = 'shipping_rules'`,
+    );
+    await query("delete from _migrations where name = $1", [MIGRATION_202]);
+    await setupDb();
+    expect((await rulesRow()).value.methods.parcel.DE).toBeUndefined();
+  });
+
+  it("leaves the rest of the owner's table alone", async () => {
+    const before = await rowBefore202();
+    const owners: Rules = {
+      ...before,
+      freeFrom: 79,
+      freeFromByCountry: { EU: 150, GR: null },
+      countriesOff: ["GB"],
+      // 12.39 is 148's FI parcel literal — under `carriers` it is not 202's
+      carriers: { omniva: { EE: 3.29 }, dpd: { FI: 12.39 } },
+      markup: { percent: 10, fixed: 0.5 },
+      methods: {
+        parcel: { ...before.methods.parcel, default: 5.99 },
+        courier: { ...before.methods.courier, default: 12.9 },
+        pickup: { default: 1.5 },
+      },
+    };
+    await replay(owners, MIGRATION_202);
+    const { value } = await rulesRow();
+    expect(value).toEqual({
+      ...owners,
+      methods: {
+        parcel: { default: 5.99 },
+        courier: { default: 12.9, EE: 10.84, LV: 9.9, LT: 9.9 },
+        pickup: { default: 1.5 },
+      },
+    });
+  });
+
+  it("is idempotent — running its SQL twice changes nothing, not even updated_at", async () => {
+    const before = await rowBefore202();
+    await replay(before, MIGRATION_202);
+    const once = await rulesRow();
+
+    const sql = readFileSync(new URL(`../db/migrations/${MIGRATION_202}`, import.meta.url), "utf8");
+    await exec(sql);
+
+    const twice = await rulesRow();
+    expect(twice.value).toEqual(once.value);
+    expect(new Date(twice.updated_at).getTime()).toBe(new Date(once.updated_at).getTime());
+  });
+
+  it("does not invent a row where there is none", async () => {
+    const applied = await replay(null, MIGRATION_202);
+    expect(applied).toEqual([MIGRATION_202]);
     expect(await rulesRows()).toHaveLength(0);
   });
 });

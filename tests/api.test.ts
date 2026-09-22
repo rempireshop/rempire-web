@@ -235,7 +235,7 @@ describe("api routes", () => {
     const { parseShippingRules, quoteFromRules } = await import("@/lib/shipping");
     const priced = parseShippingRules(back.settings.shipping_rules);
     expect(quoteFromRules(priced, { country: "FI", method: "parcel", carrier: "smartpost", subtotal: 20 }).price).toBe(9.39);
-    expect(quoteFromRules(priced, { country: "DE", method: "courier", subtotal: 20 }).price).toBe(22.29);
+    expect(quoteFromRules(priced, { country: "DE", method: "courier", subtotal: 20 }).price).toBe(17.59);
   });
 
   it("PUT /api/admin/settings still refuses a body that is not a JSON object", async () => {

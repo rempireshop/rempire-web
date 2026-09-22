@@ -80,7 +80,8 @@ describe("the admin's copy of what an empty box charges", () => {
     // dearest — the chips under «Пакомат»: Omniva at 3.10 is the one to cover
     expect(price.carriers.omniva.EE).toBe(3.19);
     expect(price.courier.EE).toEqual([6.89, "dpd"]); // cheapest — no chips for a courier
-    expect(price.courier.DE).toEqual([22.29, "smartpost"]); // cheapest the shop can use
+    expect(price.courier.DE).toEqual([17.59, "smartpost"]); // cheapest the shop can use — 22.29 until
+    // 22.09.2026, when the table was still quoted for a 30 cm cube instead of the 25 × 18 × 8 carton
   });
 
   /* Nova Post is a chip, not a basis (CHIP_ONLY_CARRIERS in

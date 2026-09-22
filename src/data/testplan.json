@@ -1739,7 +1739,7 @@
         "Эстония 5,47 / 10,84 €, Латвия 5,59 / 16,29 €, Литва 5,59 / 17,79 €.",
         "Финляндия 7,89 / 16,29 €.",
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
-        "Германия 22,29 €, Польша 20,69 €, Греция 43,19 €.",
+        "Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
         "На кассе перевозчики дешевле: 2,59 € в Эстонии, 4,09 € в Латвии и Литве.",
         "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
       ],
@@ -1758,12 +1758,55 @@
           "Estonia 5.47 / 10.84 €, Latvia 5.59 / 16.29 €, Lithuania 5.59 / 17.79 €.",
           "Finland 7.89 / 16.29 €.",
           "«Бесплатно от»: 59 € in the four home countries, 200 € in the rest of Europe.",
-          "Germany 22.29 €, Poland 20.69 €, Greece 43.19 €.",
+          "Germany 17.59 €, Poland 15.99 €, Greece 28.89 €.",
           "At the checkout carriers are cheaper: 2.59 € in Estonia, 4.09 € in Latvia and Lithuania.",
           "Not shipped to: Norway, Switzerland, the United Kingdom, Iceland, Cyprus, Malta, Liechtenstein."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-22T17:36:00.000Z"
+    },
+    {
+      "id": "panel-carton",
+      "area": "panel",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Коробка магазина: 25 × 18 × 8",
+      "steps": [
+        "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
+        "Проверить три размера и строку с весом под ними.",
+        "Поставить высоту 10 и выйти из поля.",
+        "Вернуть высоту 8 и выйти из поля."
+      ],
+      "expect": [
+        "Размеры 25, 18 и 8 см, вес около 0,9 кг.",
+        "С высотой 10 под весом появилось предупреждение про цены за границу.",
+        "С высотой 8 предупреждение исчезло.",
+        "Каждое изменение подтверждено «Сохранено ✓»."
+      ],
+      "why": "Коробка больше той, для которой посчитаны цены, — убыток на каждой посылке за границу.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "The shop's box: 25 × 18 × 8",
+        "steps": [
+          "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
+          "Check the three sides and the weight line under them.",
+          "Set the height to 10 and leave the field.",
+          "Set it back to 8 and leave the field."
+        ],
+        "expect": [
+          "Sides 25, 18 and 8 cm, weight about 0.9 kg.",
+          "With a height of 10 a warning about prices abroad appears.",
+          "With a height of 8 the warning is gone.",
+          "Each change is confirmed with «Сохранено ✓»."
+        ],
+        "why": "A box bigger than the one prices are worked out for loses money on every parcel abroad."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-22T17:36:00.000Z"
     },
     {
       "id": "panel-delivery-folds",
@@ -2345,9 +2388,9 @@
         "Выбрать Грецию."
       ],
       "expect": [
-        "Германия — 22,29 €.",
-        "Польша — 20,69 € курьером и 17,89 € в пакомат.",
-        "Греция — 43,19 €.",
+        "Германия — 17,59 €.",
+        "Польша — 15,99 € курьером и 7,49 € в пакомат.",
+        "Греция — 28,89 €.",
         "У польских пакоматов кнопки «Карта» нет — только список и поиск.",
         "Под ценой написано, что у каждой страны она своя."
       ],
@@ -2363,16 +2406,16 @@
           "Choose Greece."
         ],
         "expect": [
-          "Germany — 22.29 €.",
-          "Poland — 20.69 € by courier, 17.89 € to a locker.",
-          "Greece — 43.19 €.",
+          "Germany — 17.59 €.",
+          "Poland — 15.99 € by courier, 7.49 € to a locker.",
+          "Greece — 28.89 €.",
           "Polish lockers have no «Карта» button — the list and its search only.",
           "The note under the price says each country has its own."
         ],
         "why": "One 9.90 € price for all Europe loses 33 € on a Greek parcel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T09:10:00.000Z"
+      "markedAt": "2026-09-22T17:36:00.000Z"
     },
     {
       "id": "checkout-eu-free200",

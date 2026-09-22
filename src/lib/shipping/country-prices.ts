@@ -11,7 +11,7 @@
  * ## The one number that matters: which carrier the price has to cover
  *
  * Montonio quotes several carriers per route and they are not close together —
- * a courier to France is 24.19 € with SmartPosti and 44.64 € with DPD. So
+ * a courier to France is 19.51 € with SmartPosti and 35.71 € with DPD. So
  * "the cost" is not a number, it is a number *plus which carrier*, and the
  * right one depends on **who does the choosing**:
  *
@@ -45,19 +45,21 @@
  *     and the carrier is picked later by Renat at the label. Nova Post is the
  *     cheapest courier on fourteen routes and the cheapest locker on nine, so
  *     letting it into `rowsFor()` would silently reprice most of Europe
- *     downwards — EE courier 6.82 → 4.76, DE courier 22.23 → 12.91 — and
+ *     downwards — EE courier 6.82 → 3.74, DE courier 17.55 → 9.23 — and
  *     commit the shop to actually putting those parcels on Montonio
  *     International Shipping, which has **no returns at all**
  *     (help.montonio.com/en/articles/431075). Nobody asked for that.
  *
  * docs/audit/2026-09-07-shipping-returns.md's headline numbers («Германия
- * 12,91 €, Италия 18,43 €, Польша 8,51 €») are exactly those Nova Post rows.
+ * 12,91 €, Италия 18,43 €, Польша 8,51 €») were exactly those Nova Post rows,
+ * as quoted for the old 30 × 30 × 30 cm reference box (for Renat's 25 × 18 ×
+ * 8 cm carton, re-quoted 22.09.2026, they are 9.23 €, 13.80 € and 7.03 €).
  * `cheapestCostAnyCarrier()` is the view that shows them, so the admin and the
  * docs can say what switching Nova Post on as a basis would be worth without
  * any price actually moving.
  *
  * Against the carriers that *are* the basis, the cheapest courier to Germany
- * is 22.23 € (SmartPosti) and to Poland 20.66 € — so 9.90 € covers the courier
+ * is 17.55 € (SmartPosti) and to Poland 15.97 € — so 9.90 € covers the courier
  * in **no** European country, not even the one the audit found it covered.
  *
  * ## Venipak is gone (Ренат, 14.09.2026)
@@ -285,8 +287,9 @@ export function ceilingCost(country: string, method: CostMethod): CountryCost | 
  * `resolveCourierService()` in ./montonio walks Montonio's `/shipping-methods`
  * candidates, and until 17.09.2026 it took whichever one Montonio happened to
  * list first — while `costBasis()` had priced the order off the CHEAPEST. Any
- * dearer carrier in that list ate the margin (Germany: 22.23 € priced,
- * 32.74 € booked). Ordering that walk by this number makes the two agree.
+ * dearer carrier in that list ate the margin (Germany, on the 30 cm cube's
+ * table of the day: 22.23 € priced, 32.74 € booked). Ordering that walk by
+ * this number makes the two agree.
  *
  * Nova Post returning `null` here is the point, not an omission: it is the
  * cheapest courier on most routes and it was deliberately kept out of every
@@ -311,7 +314,7 @@ export function basisCost(carrier: string, country: string, method: CostMethod):
  * «what would switching Montonio International Shipping on be worth» number,
  * and it exists so the admin, the docs and a report can put a figure on that
  * question without any code having to move a price to find out. Germany's
- * courier is 22.23 € the way the shop prices it and 12.91 € this way; the
+ * courier is 17.55 € the way the shop prices it and 9.23 € this way; the
  * difference is what the decision is about.
  */
 export function cheapestCostAnyCarrier(country: string, method: CostMethod): CountryCost | null {

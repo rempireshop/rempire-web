@@ -47,7 +47,7 @@
  * inside, against the 1.4 kg three 250 ml bottles would really weigh. So the
  * shop would have been buying five kilos of cardboard on every single parcel.
  *
- * 25 × 18 × 10 cm is 4500 cm³ — 1.13 kg — and that is under or near the
+ * 25 × 18 × 8 cm is 3600 cm³ — 0.9 kg — and that is under or near the
  * real weight of an ordinary order, which is the point: the box stops being
  * the thing that is billed. It is sized from the catalogue rather than
  * guessed: the variants file tops out at 500 ml (a bottle roughly 7 × 7 × 22
@@ -122,12 +122,14 @@
  *
  * The seed, before he has ever pressed the button, is `M`, and it is the
  * declared box's own tier read off the carriers' door lists
- * (public/shop/shipping-data.js): 25 × 18 × 10 cm goes through Omniva's M
- * (19 × 38 × 64), DPD's M (17 × 43 × 61) and SmartPosti's **S** (12 × 34 × 42).
- * S would be cheaper and would fit the one carrier of the three that the shop
- * actually offers — but a door too small is a failed drop-off in a car park
- * and a door one size too big is about a euro, so the seed is the size that
- * fits everywhere and the first label he sends teaches it the rest.
+ * (public/shop/shipping-data.js). Written for a 25 × 18 × 10 cm box, when
+ * that was an M at Omniva and DPD. The real carton (22.09.2026) is 8 cm tall
+ * and goes through Omniva's S (9 × 38 × 64), DPD's XS (8 × 18 × 61) and
+ * SmartPosti's S (12 × 34 × 42) — so M is now one size generous everywhere.
+ * It stays the seed on purpose: a door too small is a failed drop-off in a
+ * car park and a door one size too big costs nothing inside the Baltics,
+ * where Montonio's price does not move with size. And he has long since sent
+ * enough labels for his last twenty to decide it anyway.
  *
  * **The contract default stays underneath as the safety net.** For SmartPosti
  * with neither a request value nor a contract default the parcel registers
@@ -180,11 +182,22 @@ export interface ParcelSettings {
   recent: LockerSize[];
 }
 
-/** 25 × 18 × 10 cm — 1.13 kg of volumetric weight. See the head of this file. */
+/**
+ * 25 × 18 × 8 cm — 0.9 kg of volumetric weight. Renat's own black carton,
+ * measured by him on 22.09.2026 («18х25х8, высота 8 см»; smaller boxes now
+ * and then, a bigger one very rarely). Until that day this said 10 cm, a guess
+ * from the catalogue, and those two centimetres were a whole DPD tier abroad:
+ * DPD's XS and S drawers are both 8 cm tall, so 10 cm is an M and 8 cm is an
+ * XS. See the head of this file.
+ *
+ * **This is also the box the price table is quoted for** — `REFERENCE_PARCEL`
+ * in ./tariffs is derived from it and `tools/fetch-montonio-tariffs.mjs`
+ * restates it; `tests/reference-parcel.test.ts` fails the day they differ.
+ */
 export const PARCEL_DEFAULTS: ParcelSettings = {
   length: 25,
   width: 18,
-  height: 10,
+  height: 8,
   lockerSize: "M",
   recent: [],
 };

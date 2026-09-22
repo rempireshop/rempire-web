@@ -1339,8 +1339,9 @@ export async function createMontonioShipment(
      booking without them, or a network blip could quietly reprice it.
      Sending nothing is also the CHEAPER default, which is worth knowing:
      Montonio bills `max(actualWeight, volumetricWeight)`, so a declared box is
-     a floor under the bill. The default carton is 25 × 18 × 10 cm — about 1.1
-     kg — for exactly that reason; see src/lib/shipping/parcel.ts. */
+     a floor under the bill. The default carton is 25 × 18 × 8 cm — 0.9 kg,
+     Renat's own box as he measured it on 22.09.2026 — for exactly that reason;
+     see src/lib/shipping/parcel.ts. */
   if (!measured) {
     const needed = await parcelDimensionsRequired(carrier, country, shippingMethod.type);
     if (needed) {

@@ -58,13 +58,32 @@ export {
   SHOP_CARRIERS,
   type CountryCost,
 } from "./country-prices";
+/* montonio.ts already imports parcel.ts, so this adds no module and no cycle —
+   parcel.ts imports nothing from the shipping layer. */
+import { declaredWeightKg, PARCEL_DEFAULTS } from "./parcel";
 
 /**
- * The parcel every quote — live or static — is priced for: ~5 kg, 30×30×30 cm,
- * the same "L" locker size public/shop/shipping-data.js already standardised
- * on, so the two sources are always comparing the same nominal box.
+ * The parcel every quote — live or static — is priced for: **the carton the
+ * shop actually declares**, read from `PARCEL_DEFAULTS` rather than restated.
+ *
+ * Until 22.09.2026 this was a 30 × 30 × 30 cm cube at 5 kg — «the same L
+ * locker size public/shop/shipping-data.js standardised on». A 30 cm cube fits
+ * nothing smaller than DPD's largest international drawer, so every row of the
+ * mirror outside the Baltics was the L tier while the shop posted a box that
+ * fits XS: Poland's locker was quoted 14.40 € ex VAT for a parcel Montonio
+ * prices at 6.00. Inside EE/LV/LT/FI/SE it made no difference, because there
+ * the price does not move with size (Montonio, 22.09.2026, answer 2.3).
+ *
+ * The weight is `declaredWeightKg()` of the same carton, because that is the
+ * number `POST /shipments` sends — pricing one box and declaring another is
+ * the exact mistake this replaces.
  */
-export const REFERENCE_PARCEL = { weightKg: 5, lengthCm: 30, widthCm: 30, heightCm: 30 };
+export const REFERENCE_PARCEL = {
+  weightKg: declaredWeightKg(PARCEL_DEFAULTS),
+  lengthCm: PARCEL_DEFAULTS.length,
+  widthCm: PARCEL_DEFAULTS.width,
+  heightCm: PARCEL_DEFAULTS.height,
+};
 
 export interface TariffQuote {
   carrier: string;

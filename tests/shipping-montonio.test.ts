@@ -625,10 +625,11 @@ describe("creating a shipment", () => {
     // a pickup point needs no street address on the receiver
     expect(body.receiver.streetAddress).toBeUndefined();
     /* The DECLARED CARTON, not the basket: `volumetricKg(PARCEL_DEFAULTS)`,
-       25 × 18 × 10 cm. This order holds two units, which the old per-unit
+       25 × 18 × 8 cm — Renat's carton, measured 22.09.2026 (25 × 18 × 10 and
+       1.13 kg before). This order holds two units, which the old per-unit
        estimate called 1 kg — and a nine-unit order 3.8 kg, on the same box.
        Ренат, 18.09.2026: «no weight modelling» (F24, src/lib/shipping/parcel.ts). */
-    expect(body.parcels).toEqual([{ weight: 1.13 }]);
+    expect(body.parcels).toEqual([{ weight: 0.9 }]);
     expect(body.products).toEqual([
       { sku: "free-hold", name: "Free.Hold", quantity: 2, price: 11, currency: "EUR" },
     ]);
@@ -863,7 +864,8 @@ describe("creating a shipment", () => {
    * F24 — the same number on every parcel, whatever is in it.
    *
    * The declared weight is the box the owner set, so a nine-line order and a
-   * one-line order declare the same 1.13 kg. `estimateWeightKg()` would have
+   * one-line order declare the same 0.9 kg (25 × 18 × 8 cm since 22.09.2026).
+   * `estimateWeightKg()` would have
    * said 3.8 kg for the first, and since dimensions go out only where
    * `parcelDimensionsRequired` is true, on most routes that guess IS the bill.
    */
@@ -874,7 +876,7 @@ describe("creating a shipment", () => {
       ...order,
       items: [...order.items, ...order.items, ...order.items, ...order.items],
     });
-    expect(bookingBody(calls).parcels).toEqual([{ weight: 1.13 }]);
+    expect(bookingBody(calls).parcels).toEqual([{ weight: 0.9 }]);
   });
 
   it("still lets a weighed parcel win over the declared box", async () => {

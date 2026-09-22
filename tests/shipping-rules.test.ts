@@ -373,13 +373,15 @@ describe("the rules the shop actually bills on", () => {
     });
 
     it("catches the courier column too", () => {
-      /* SmartPosti is the cheapest courier to Germany at 22.23 — Renat picks
-         it — and 22.29 is what an empty box would charge for it. The floor is
-         that, not the raw 22.23: since 14.09.2026 the guard refuses exactly
+      /* SmartPosti is the cheapest courier to Germany at 17.55 — Renat picks
+         it — and 17.59 is what an empty box would charge for it (22.23/22.29
+         until 22.09.2026, when the table was re-quoted for the 25 × 18 × 8 cm
+         carton). The floor is that, not the raw 17.55: since 14.09.2026 the
+         guard refuses exactly
          what the screen says an empty box gives, so its own advice («очистите
          поле») can never lead to a higher price than the one it allowed. */
       const bad = belowCostCells(parseShippingRules({ methods: { courier: { DE: 9.9 } } }));
-      expect(bad).toEqual([{ carrier: "", country: "DE", method: "courier", charged: 9.9, cost: 22.29 }]);
+      expect(bad).toEqual([{ carrier: "", country: "DE", method: "courier", charged: 9.9, cost: 17.59 }]);
       expect(belowCostMessage(bad)).toContain("Курьер, Германия");
     });
 

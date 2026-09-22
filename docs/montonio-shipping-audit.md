@@ -277,14 +277,16 @@ What the answer does **not** close is the paragraph above: the endpoint is still
 undocumented, and it is still the only source of prices without keys. That half
 stands.
 
-A separate consequence, found on 22.09.2026 and **still open**, is the box
-rather than the subtype. `REFERENCE_PARCEL` is a 30 × 30 × 30 cm cube, which
-fits nothing smaller than DPD's largest international drawer, so every non-Baltic
-row in the mirror is the **L** tier. The shop declares a 25 × 18 × 10 cm carton
-on every shipment (`src/lib/shipping/parcel.ts`), which is an **M**. Poland's
-locker is 17.86 € in the table and 13.39 € for the box we actually post.
-`docs/montonio-routes.md` has the grid. Closing it moves every international
-shelf price down, so it is a pricing decision and not an audit finding.
+A separate consequence, found and **closed on 22.09.2026**, was the box
+rather than the subtype. `REFERENCE_PARCEL` was a 30 × 30 × 30 cm cube, which
+fits nothing smaller than DPD's largest international drawer, so every
+non-Baltic row in the mirror was the **L** tier — Poland's locker quoted at
+14.40 € ex VAT for a parcel Montonio prices at 6.00. Renat measured his carton
+the same day, 25 × 18 × 8 cm, which is DPD's XS. `REFERENCE_PARCEL` is now
+derived from that carton, the mirror was rebuilt, and every international shelf
+price moved down a tier or more (Poland's locker 17.89 → 7.49 €).
+`tests/reference-parcel.test.ts` keeps the declared box and the quoted box the
+same box; `docs/montonio-routes.md` has the grid.
 
 ### 3.2 Dropping a rate of exactly `0`
 
@@ -537,7 +539,7 @@ Recommended, not implemented — each needs a decision, or moves money:
    carrier/method/country (`parcelDimensionsRequired()` in
    `src/lib/shipping/montonio.ts`) and, where it is true, the shop's declared
    carton goes out in metres. The carton is `settings.shipping_parcel`
-   (`src/lib/shipping/parcel.ts`), 25 × 18 × 10 cm by default and editable in
+   (`src/lib/shipping/parcel.ts`), 25 × 18 × 8 cm by default and editable in
    the panel, with a one-tap per-parcel override on the order card.
 3. ~~Set `defaultLockerSize` on the SmartPosti contract, or send `lockerSize`~~
    **Done, and the other half cancelled 22.09.2026.** `lockerSize` is sent,
@@ -552,10 +554,10 @@ Recommended, not implemented — each needs a decision, or moves money:
    a pickup point cost the same (3.1). The lockers were opened before the
    rebuild, on the owner's decision of 18.09.2026, and that turns out to have
    cost nothing.
-   What the rebuild is still owed is the **box**, not the subtype: the mirror is
-   quoted for a 30 cm cube and the shop posts a 25 × 18 × 10 cm carton, so every
-   international row is one tier too dear (3.1). That is a pricing decision and
-   it is with the owner.
+   The **box** half is closed too, on 22.09.2026: the mirror is now quoted for
+   the carton the shop posts, 25 × 18 × 8 cm as Renat measured it (3.1). What
+   remains for the keys is only the overlay of this store's own negotiated
+   prices over Montonio's list.
 5. **New, found while doing 2.** `fetchMontonioRates()` discards
    `calculationDetails.estimatedParcels[]`, and that block is where Montonio
    states `chargeableWeight` as *«max of actual and volumetricWeight»*. The

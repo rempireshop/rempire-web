@@ -1,3 +1,28 @@
+/*
+ * 22.09.2026 — THE PRICES IN FROZEN AND NOVAPOST MOVED, ON PURPOSE.
+ *
+ * Renat measured his carton: 25 × 18 × 8 cm, declared at 0.9 kg. The tariff
+ * table (src/data/montonio-tariffs.json) had been quoted for a 30 × 30 × 30 cm
+ * cube at 5 kg, which fits only DPD's biggest (L) drawer, and it was re-quoted
+ * for the real box. Outside the Baltics Montonio prices a parcel machine by
+ * size — the carton goes through DPD's XS door — and a courier by weight, so:
+ *
+ *   · «Пакомат» moved in 17 countries: AT BE BG CZ DE DK ES FR HR IE IT LU NL
+ *     PL PT SI SK (Poland 17.89 → 7.49, Croatia 59.59 → 29.79), and with it
+ *     every carrier tag there that falls through to that cell — Venipak and
+ *     Nova Post outside the Baltics included;
+ *   · «Курьер» moved in 20: the same 17 plus GR, HU and RO (Germany 22.29 →
+ *     17.59; Greece 43.19 → 28.89, priced off SmartPosti now, which became the
+ *     cheaper of the two);
+ *   · nothing moved in EE, LV, LT, FI or SE, where Montonio's price does not
+ *     depend on size — Nova Post's own EE/LV/LT chips included — nor in the
+ *     fallback cells (the GR, HU and RO parcel machine, EU, US) or pickup.
+ *
+ * Every literal below was re-read from the code after the re-quote and pasted
+ * in. It is the baseline again: a refactor must not move one of them, exactly
+ * as the 14.09.2026 note below says, and a deliberate re-quote that does gets
+ * a dated note like this one. STORED_ROW changed the same day — see there.
+ */
 import { describe, expect, it } from "vitest";
 import {
   belowCostCells,
@@ -49,63 +74,63 @@ const FROZEN: Record<string, number> = {
   "LT|parcel|unisend": 3.79, "LT|courier|": 9.90, "LT|pickup|": 0.00,
   "FI|parcel|": 12.39, "FI|parcel|omniva": 12.39, "FI|parcel|smartpost": 9.39,
   "FI|parcel|dpd": 12.39, "FI|parcel|venipak": 12.39, "FI|parcel|unisend": 12.39,
-  "FI|courier|": 15.69, "FI|pickup|": 0.00, "AT|parcel|": 37.29,
-  "AT|parcel|omniva": 37.29, "AT|parcel|smartpost": 37.29, "AT|parcel|dpd": 37.29,
-  "AT|parcel|venipak": 37.29, "AT|parcel|unisend": 37.29, "AT|courier|": 28.49,
-  "AT|pickup|": 0.00, "BE|parcel|": 29.79, "BE|parcel|omniva": 29.79,
-  "BE|parcel|smartpost": 29.79, "BE|parcel|dpd": 29.79, "BE|parcel|venipak": 29.79,
-  "BE|parcel|unisend": 29.79, "BE|courier|": 24.39, "BE|pickup|": 0.00,
-  "BG|parcel|": 52.09, "BG|parcel|omniva": 52.09, "BG|parcel|smartpost": 52.09,
-  "BG|parcel|dpd": 52.09, "BG|parcel|venipak": 52.09, "BG|parcel|unisend": 52.09,
-  "BG|courier|": 32.59, "BG|pickup|": 0.00, "CZ|parcel|": 28.29,
-  "CZ|parcel|omniva": 28.29, "CZ|parcel|smartpost": 28.29, "CZ|parcel|dpd": 28.29,
-  "CZ|parcel|venipak": 28.29, "CZ|parcel|unisend": 28.29, "CZ|courier|": 23.99,
-  "CZ|pickup|": 0.00, "DE|parcel|": 29.79, "DE|parcel|omniva": 29.79,
-  "DE|parcel|smartpost": 29.79, "DE|parcel|dpd": 29.79, "DE|parcel|venipak": 29.79,
-  "DE|parcel|unisend": 29.79, "DE|courier|": 22.29, "DE|pickup|": 0.00,
-  "DK|parcel|": 23.89, "DK|parcel|omniva": 23.89, "DK|parcel|smartpost": 23.89,
-  "DK|parcel|dpd": 23.89, "DK|parcel|venipak": 23.89, "DK|parcel|unisend": 23.89,
-  "DK|courier|": 24.19, "DK|pickup|": 0.00, "ES|parcel|": 38.69,
-  "ES|parcel|omniva": 38.69, "ES|parcel|smartpost": 38.69, "ES|parcel|dpd": 38.69,
-  "ES|parcel|venipak": 38.69, "ES|parcel|unisend": 38.69, "ES|courier|": 34.29,
-  "ES|pickup|": 0.00, "FR|parcel|": 44.69, "FR|parcel|omniva": 44.69,
-  "FR|parcel|smartpost": 44.69, "FR|parcel|dpd": 44.69, "FR|parcel|venipak": 44.69,
-  "FR|parcel|unisend": 44.69, "FR|courier|": 24.19, "FR|pickup|": 0.00,
+  "FI|courier|": 15.69, "FI|pickup|": 0.00, "AT|parcel|": 20.89,
+  "AT|parcel|omniva": 20.89, "AT|parcel|smartpost": 20.89, "AT|parcel|dpd": 20.89,
+  "AT|parcel|venipak": 20.89, "AT|parcel|unisend": 20.89, "AT|courier|": 23.79,
+  "AT|pickup|": 0.00, "BE|parcel|": 17.89, "BE|parcel|omniva": 17.89,
+  "BE|parcel|smartpost": 17.89, "BE|parcel|dpd": 17.89, "BE|parcel|venipak": 17.89,
+  "BE|parcel|unisend": 17.89, "BE|courier|": 19.69, "BE|pickup|": 0.00,
+  "BG|parcel|": 37.29, "BG|parcel|omniva": 37.29, "BG|parcel|smartpost": 37.29,
+  "BG|parcel|dpd": 37.29, "BG|parcel|venipak": 37.29, "BG|parcel|unisend": 37.29,
+  "BG|courier|": 27.89, "BG|pickup|": 0.00, "CZ|parcel|": 16.39,
+  "CZ|parcel|omniva": 16.39, "CZ|parcel|smartpost": 16.39, "CZ|parcel|dpd": 16.39,
+  "CZ|parcel|venipak": 16.39, "CZ|parcel|unisend": 16.39, "CZ|courier|": 19.29,
+  "CZ|pickup|": 0.00, "DE|parcel|": 16.39, "DE|parcel|omniva": 16.39,
+  "DE|parcel|smartpost": 16.39, "DE|parcel|dpd": 16.39, "DE|parcel|venipak": 16.39,
+  "DE|parcel|unisend": 16.39, "DE|courier|": 17.59, "DE|pickup|": 0.00,
+  "DK|parcel|": 14.89, "DK|parcel|omniva": 14.89, "DK|parcel|smartpost": 14.89,
+  "DK|parcel|dpd": 14.89, "DK|parcel|venipak": 14.89, "DK|parcel|unisend": 14.89,
+  "DK|courier|": 19.59, "DK|pickup|": 0.00, "ES|parcel|": 23.89,
+  "ES|parcel|omniva": 23.89, "ES|parcel|smartpost": 23.89, "ES|parcel|dpd": 23.89,
+  "ES|parcel|venipak": 23.89, "ES|parcel|unisend": 23.89, "ES|courier|": 29.69,
+  "ES|pickup|": 0.00, "FR|parcel|": 28.29, "FR|parcel|omniva": 28.29,
+  "FR|parcel|smartpost": 28.29, "FR|parcel|dpd": 28.29, "FR|parcel|venipak": 28.29,
+  "FR|parcel|unisend": 28.29, "FR|courier|": 19.59, "FR|pickup|": 0.00,
   "GR|parcel|": 4.99, "GR|parcel|omniva": 4.99, "GR|parcel|smartpost": 4.99,
   "GR|parcel|dpd": 4.99, "GR|parcel|venipak": 4.99, "GR|parcel|unisend": 4.99,
-  "GR|courier|": 43.19, "GR|pickup|": 0.00, "HR|parcel|": 59.59,
-  "HR|parcel|omniva": 59.59, "HR|parcel|smartpost": 59.59, "HR|parcel|dpd": 59.59,
-  "HR|parcel|venipak": 59.59, "HR|parcel|unisend": 59.59, "HR|courier|": 28.29,
+  "GR|courier|": 28.89, "GR|pickup|": 0.00, "HR|parcel|": 29.79,
+  "HR|parcel|omniva": 29.79, "HR|parcel|smartpost": 29.79, "HR|parcel|dpd": 29.79,
+  "HR|parcel|venipak": 29.79, "HR|parcel|unisend": 29.79, "HR|courier|": 23.59,
   "HR|pickup|": 0.00, "HU|parcel|": 4.99, "HU|parcel|omniva": 4.99,
   "HU|parcel|smartpost": 4.99, "HU|parcel|dpd": 4.99, "HU|parcel|venipak": 4.99,
-  "HU|parcel|unisend": 4.99, "HU|courier|": 27.39, "HU|pickup|": 0.00,
-  "IE|parcel|": 52.09, "IE|parcel|omniva": 52.09, "IE|parcel|smartpost": 52.09,
-  "IE|parcel|dpd": 52.09, "IE|parcel|venipak": 52.09, "IE|parcel|unisend": 52.09,
-  "IE|courier|": 38.69, "IE|pickup|": 0.00, "IT|parcel|": 34.29,
-  "IT|parcel|omniva": 34.29, "IT|parcel|smartpost": 34.29, "IT|parcel|dpd": 34.29,
-  "IT|parcel|venipak": 34.29, "IT|parcel|unisend": 34.29, "IT|courier|": 30.09,
-  "IT|pickup|": 0.00, "LU|parcel|": 35.79, "LU|parcel|omniva": 35.79,
-  "LU|parcel|smartpost": 35.79, "LU|parcel|dpd": 35.79, "LU|parcel|venipak": 35.79,
-  "LU|parcel|unisend": 35.79, "LU|courier|": 26.09, "LU|pickup|": 0.00,
-  "NL|parcel|": 29.79, "NL|parcel|omniva": 29.79, "NL|parcel|smartpost": 29.79,
-  "NL|parcel|dpd": 29.79, "NL|parcel|venipak": 29.79, "NL|parcel|unisend": 29.79,
-  "NL|courier|": 25.59, "NL|pickup|": 0.00, "PL|parcel|": 17.89,
-  "PL|parcel|omniva": 17.89, "PL|parcel|smartpost": 17.89, "PL|parcel|dpd": 17.89,
-  "PL|parcel|venipak": 17.89, "PL|parcel|unisend": 17.89, "PL|courier|": 20.69,
-  "PL|pickup|": 0.00, "PT|parcel|": 41.69, "PT|parcel|omniva": 41.69,
-  "PT|parcel|smartpost": 41.69, "PT|parcel|dpd": 41.69, "PT|parcel|venipak": 41.69,
-  "PT|parcel|unisend": 41.69, "PT|courier|": 38.39, "PT|pickup|": 0.00,
+  "HU|parcel|unisend": 4.99, "HU|courier|": 22.69, "HU|pickup|": 0.00,
+  "IE|parcel|": 22.39, "IE|parcel|omniva": 22.39, "IE|parcel|smartpost": 22.39,
+  "IE|parcel|dpd": 22.39, "IE|parcel|venipak": 22.39, "IE|parcel|unisend": 22.39,
+  "IE|courier|": 31.29, "IE|pickup|": 0.00, "IT|parcel|": 20.89,
+  "IT|parcel|omniva": 20.89, "IT|parcel|smartpost": 20.89, "IT|parcel|dpd": 20.89,
+  "IT|parcel|venipak": 20.89, "IT|parcel|unisend": 20.89, "IT|courier|": 25.49,
+  "IT|pickup|": 0.00, "LU|parcel|": 20.89, "LU|parcel|omniva": 20.89,
+  "LU|parcel|smartpost": 20.89, "LU|parcel|dpd": 20.89, "LU|parcel|venipak": 20.89,
+  "LU|parcel|unisend": 20.89, "LU|courier|": 21.39, "LU|pickup|": 0.00,
+  "NL|parcel|": 14.89, "NL|parcel|omniva": 14.89, "NL|parcel|smartpost": 14.89,
+  "NL|parcel|dpd": 14.89, "NL|parcel|venipak": 14.89, "NL|parcel|unisend": 14.89,
+  "NL|courier|": 20.89, "NL|pickup|": 0.00, "PL|parcel|": 7.49,
+  "PL|parcel|omniva": 7.49, "PL|parcel|smartpost": 7.49, "PL|parcel|dpd": 7.49,
+  "PL|parcel|venipak": 7.49, "PL|parcel|unisend": 7.49, "PL|courier|": 15.99,
+  "PL|pickup|": 0.00, "PT|parcel|": 29.79, "PT|parcel|omniva": 29.79,
+  "PT|parcel|smartpost": 29.79, "PT|parcel|dpd": 29.79, "PT|parcel|venipak": 29.79,
+  "PT|parcel|unisend": 29.79, "PT|courier|": 33.69, "PT|pickup|": 0.00,
   "RO|parcel|": 4.99, "RO|parcel|omniva": 4.99, "RO|parcel|smartpost": 4.99,
   "RO|parcel|dpd": 4.99, "RO|parcel|venipak": 4.99, "RO|parcel|unisend": 4.99,
-  "RO|courier|": 36.69, "RO|pickup|": 0.00, "SE|parcel|": 13.69,
+  "RO|courier|": 31.99, "RO|pickup|": 0.00, "SE|parcel|": 13.69,
   "SE|parcel|omniva": 13.69, "SE|parcel|smartpost": 13.69, "SE|parcel|dpd": 13.69,
   "SE|parcel|venipak": 13.69, "SE|parcel|unisend": 13.69, "SE|courier|": 21.59,
-  "SE|pickup|": 0.00, "SI|parcel|": 40.19, "SI|parcel|omniva": 40.19,
-  "SI|parcel|smartpost": 40.19, "SI|parcel|dpd": 40.19, "SI|parcel|venipak": 40.19,
-  "SI|parcel|unisend": 40.19, "SI|courier|": 32.59, "SI|pickup|": 0.00,
-  "SK|parcel|": 26.79, "SK|parcel|omniva": 26.79, "SK|parcel|smartpost": 26.79,
-  "SK|parcel|dpd": 26.79, "SK|parcel|venipak": 26.79, "SK|parcel|unisend": 26.79,
-  "SK|courier|": 27.69, "SK|pickup|": 0.00, "EU|parcel|": 4.99,
+  "SE|pickup|": 0.00, "SI|parcel|": 22.39, "SI|parcel|omniva": 22.39,
+  "SI|parcel|smartpost": 22.39, "SI|parcel|dpd": 22.39, "SI|parcel|venipak": 22.39,
+  "SI|parcel|unisend": 22.39, "SI|courier|": 27.89, "SI|pickup|": 0.00,
+  "SK|parcel|": 16.39, "SK|parcel|omniva": 16.39, "SK|parcel|smartpost": 16.39,
+  "SK|parcel|dpd": 16.39, "SK|parcel|venipak": 16.39, "SK|parcel|unisend": 16.39,
+  "SK|courier|": 22.99, "SK|pickup|": 0.00, "EU|parcel|": 4.99,
   "EU|parcel|omniva": 4.99, "EU|parcel|smartpost": 4.99, "EU|parcel|dpd": 4.99,
   "EU|parcel|venipak": 4.99, "EU|parcel|unisend": 4.99, "EU|courier|": 9.90,
   "EU|pickup|": 0.00, "US|parcel|": 4.99, "US|parcel|omniva": 4.99,
@@ -129,14 +154,14 @@ const FROZEN: Record<string, number> = {
  */
 const NOVAPOST: Record<string, number> = {
   "EE|parcel|novapost": 2.39, "LV|parcel|novapost": 4.79, "LT|parcel|novapost": 4.09,
-  "FI|parcel|novapost": 12.39, "AT|parcel|novapost": 37.29, "BE|parcel|novapost": 29.79,
-  "BG|parcel|novapost": 52.09, "CZ|parcel|novapost": 28.29, "DE|parcel|novapost": 29.79,
-  "DK|parcel|novapost": 23.89, "ES|parcel|novapost": 38.69, "FR|parcel|novapost": 44.69,
-  "GR|parcel|novapost": 4.99, "HR|parcel|novapost": 59.59, "HU|parcel|novapost": 4.99,
-  "IE|parcel|novapost": 52.09, "IT|parcel|novapost": 34.29, "LU|parcel|novapost": 35.79,
-  "NL|parcel|novapost": 29.79, "PL|parcel|novapost": 17.89, "PT|parcel|novapost": 41.69,
-  "RO|parcel|novapost": 4.99, "SE|parcel|novapost": 13.69, "SI|parcel|novapost": 40.19,
-  "SK|parcel|novapost": 26.79, "EU|parcel|novapost": 4.99, "US|parcel|novapost": 4.99,
+  "FI|parcel|novapost": 12.39, "AT|parcel|novapost": 20.89, "BE|parcel|novapost": 17.89,
+  "BG|parcel|novapost": 37.29, "CZ|parcel|novapost": 16.39, "DE|parcel|novapost": 16.39,
+  "DK|parcel|novapost": 14.89, "ES|parcel|novapost": 23.89, "FR|parcel|novapost": 28.29,
+  "GR|parcel|novapost": 4.99, "HR|parcel|novapost": 29.79, "HU|parcel|novapost": 4.99,
+  "IE|parcel|novapost": 22.39, "IT|parcel|novapost": 20.89, "LU|parcel|novapost": 20.89,
+  "NL|parcel|novapost": 14.89, "PL|parcel|novapost": 7.49, "PT|parcel|novapost": 29.79,
+  "RO|parcel|novapost": 4.99, "SE|parcel|novapost": 13.69, "SI|parcel|novapost": 22.39,
+  "SK|parcel|novapost": 16.39, "EU|parcel|novapost": 4.99, "US|parcel|novapost": 4.99,
 };
 
 const ALL = { ...FROZEN, ...NOVAPOST };
@@ -166,30 +191,33 @@ function priceEveryDelivery(rules: ShippingRules): Record<string, number> {
 }
 
 /**
- * The row the live shop actually has: what db/migrations 030 → 031 → 148 → 149
- * leave in `settings.shipping_rules`. Note what is NOT in it — no `carriers`
- * key at all, because nothing but those migrations ever wrote the row and none
- * of them writes one. That is precisely why the markup could never reach a
- * bill: parseShippingRules() merges carrierPriceTable() in underneath, so
- * every carrier cell the checkout can read is filled, and the empty-cell
- * fallback the markup rode on is unreachable.
+ * The row a migrated shop has before anyone types a price into it: what
+ * db/migrations 030 → 031 → 148 → 149 → 202 leave in `settings.shipping_rules`
+ * (tests/shipping-migration.test.ts builds it for real and compares).
+ *
+ * Until 22.09.2026 this held a cell for every country — 148 wrote them all as
+ * fixed numbers, and a stored cell wins over the code defaults, so the row kept
+ * billing the 30 cm cube after the table was re-quoted for the carton. 202
+ * took out every cell that still said 148's (or 149's) number: an absent cell
+ * is Montonio's price. What is left are the fallback cells and the three home
+ * couriers, EE 10.84 and LV/LT 9.90 — the shop's own prices, which the read
+ * does NOT seed (parseShippingRules() fills the courier column from Montonio's
+ * table without them), so they have to stay in the row to keep billing.
+ *
+ * Note what is NOT in it — no `carriers` key at all, because nothing but those
+ * migrations ever wrote the row and none of them writes one. That is precisely
+ * why the markup could never reach a bill: parseShippingRules() merges
+ * carrierPriceTable() in underneath, so every carrier cell the checkout can
+ * read is filled, and the empty-cell fallback the markup rode on is
+ * unreachable.
  */
 const STORED_ROW = {
   freeFrom: 59,
   freeFromByCountry: { EU: 200 },
+  countriesOff: ["CH", "CY", "GB", "IS", "LI", "MT", "NO"],
   methods: {
-    parcel: {
-      default: 4.99, AT: 37.29, BE: 29.79, BG: 52.09, CZ: 28.29, DE: 29.79, DK: 23.89,
-      EE: 5.47, ES: 38.69, FI: 12.39, FR: 44.69, HR: 59.59, IE: 52.09, IT: 34.29,
-      LT: 5.59, LU: 35.79, LV: 5.59, NL: 29.79, PL: 17.89, PT: 41.69, SE: 13.69,
-      SI: 40.19, SK: 26.79,
-    },
-    courier: {
-      default: 9.9, AT: 28.49, BE: 24.39, BG: 32.59, CZ: 23.99, DE: 22.29, DK: 24.19,
-      EE: 10.84, ES: 34.29, FI: 15.69, FR: 24.19, GR: 43.19, HR: 28.29, HU: 27.39,
-      IE: 38.69, IT: 30.09, LT: 9.9, LU: 26.09, LV: 9.9, NL: 25.59, PL: 20.69,
-      PT: 38.39, RO: 36.69, SE: 21.59, SI: 32.59, SK: 27.69,
-    },
+    parcel: { default: 4.99 },
+    courier: { default: 9.9, EE: 10.84, LV: 9.9, LT: 9.9 },
     pickup: { default: 0 },
   },
 };
@@ -260,9 +288,10 @@ describe("the rate table lost two columns and no price moved", () => {
 
 describe("an empty box means Montonio's price — in every column now", () => {
   /* The rule quoteFromRules() has had for carrier cells since 13.09.2026, now
-     true of the courier column too. Nothing on this shop has an empty box, so
-     none of this moves a price today; it is what the owner gets when he clears
-     one, and it is the number the screen prints under every box. */
+     true of the courier column too. Since db/migrations/202 (22.09.2026) it is
+     what prices every country cell nobody typed — 148 used to fill them all
+     with fixed numbers; it is also what the owner gets when he clears one, and
+     the number the screen prints under every box. */
   it("a cleared carrier cell charges that carrier's Montonio price", () => {
     const rules = parseShippingRules(STORED_ROW);
     delete carriersOf(rules).omniva.EE;
@@ -400,11 +429,13 @@ describe("the parcel column is not stored", () => {
   });
 
   it("prices every delivery exactly the same after the drop", () => {
+    /* The cells a save sends back are the ones the read seeded — today's
+       table, so DE 16.39 and PL 7.49 since the 22.09.2026 carton re-quote. */
     const withCells = parseShippingRules({
-      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 4.99 } },
     });
     const dropped = parseShippingRules(cleanShippingRules({
-      methods: { parcel: { default: 4.99, DE: 29.79, PL: 17.89, GR: 4.99, HU: 4.99 } },
+      methods: { parcel: { default: 4.99, DE: 16.39, PL: 7.49, GR: 4.99, HU: 4.99 } },
     }));
     for (const c of ["DE", "PL", "AT", "SK", "GR", "HU", "RO", "ES", "IT"]) {
       const q = { country: c, method: "parcel" as const, subtotal: 10 };

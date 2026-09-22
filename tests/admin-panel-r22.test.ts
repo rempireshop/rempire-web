@@ -647,8 +647,9 @@ describe("«Настройки → Доставка»: an empty box stays empty"
     const rig = rateRig({ methods: { courier: { DE: 25 } } });
     expect(rig.live().methods.courier.DE).toBe(25);
     rig.set("m:courier:DE", "");
-    // 22.29 is MONTONIO_PRICE.courier.DE — the number printed under the box
-    expect(rig.live().methods.courier.DE).toBe(22.29);
+    // 17.59 is MONTONIO_PRICE.courier.DE — the number printed under the box
+    // (22.29 until the 22.09.2026 re-quote for the 25 × 18 × 8 cm carton)
+    expect(rig.live().methods.courier.DE).toBe(17.59);
   });
 
   it("«Везде взять цены Montonio» empties the table instead of freezing it", () => {

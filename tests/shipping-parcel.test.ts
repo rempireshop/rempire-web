@@ -50,8 +50,9 @@ const app = readFileSync(APP_JS, "utf8").replace(/\r\n/g, "\n");
 
 describe("the box the shop declares", () => {
   it("is small, because Montonio bills the greater of the real and the volumetric weight", () => {
-    /* 25 × 18 × 10 is about 1.1 kg of volumetric weight; the 30 × 30 × 30 of
-       REFERENCE_PARCEL is five to seven, whatever is inside it. At this shop's
+    /* 25 × 18 × 8 (Renat's carton, measured 22.09.2026) is 0.9 kg of volumetric
+       weight; the 30 × 30 × 30 cube REFERENCE_PARCEL was until that day is five
+       to seven, whatever is inside it. At this shop's
        parcel sizes that difference is paid on every single label, which is why
        the default is a small carton and not a comfortable one. */
     expect(volumetricKg(PARCEL_DEFAULTS)).toBeLessThan(1.5);
@@ -361,19 +362,20 @@ describe("what createMontonioShipment actually posts", () => {
     expect(body.shippingMethod).toEqual({ type: "pickupPoint", id: POINT });
   });
 
-  /* 1.13 kg is `volumetricKg(PARCEL_DEFAULTS)` — 25 × 18 × 10 cm / 4000. The
-     weight used to be `estimateWeightKg()`, i.e. 0.6 kg for this one-line
-     order and 3.8 kg for a nine-line one on the very same box; Ренат,
+  /* 0.9 kg is `volumetricKg(PARCEL_DEFAULTS)` — 25 × 18 × 8 cm / 4000, Renat's
+     carton as he measured it on 22.09.2026 (it was 25 × 18 × 10, 1.13 kg,
+     before). The weight used to be `estimateWeightKg()`, i.e. 0.6 kg for this
+     one-line order and 3.8 kg for a nine-line one on the very same box; Ренат,
      18.09.2026: «no weight modelling» (F24). */
   it("sends no dimensions where Montonio does not require them, and declares the box", async () => {
     const body = await book(false);
-    expect(body.parcels).toEqual([{ weight: 1.13 }]);
+    expect(body.parcels).toEqual([{ weight: 0.9 }]);
   });
 
   it("declares the carton, in METRES, where Montonio does require them", async () => {
     const body = await book(true);
     expect(body.parcels).toEqual([
-      { weight: 1.13, length: 0.25, width: 0.18, height: 0.1 },
+      { weight: 0.9, length: 0.25, width: 0.18, height: 0.08 },
     ]);
   });
 
@@ -381,7 +383,7 @@ describe("what createMontonioShipment actually posts", () => {
     /* …and the weight follows that box rather than the settings one: 40 × 30 ×
        20 cm is 6 kg volumetric, which is what Montonio would work out from the
        sides beside it anyway (`chargeableWeight = max(actual, volumetric)`).
-       Declaring 1.13 kg next to those three numbers would be a figure nobody
+       Declaring 0.9 kg next to those three numbers would be a figure nobody
        could reconcile with the parcel. */
     const body = await book(false, "smartpost", { length: 0.4, width: 0.3, height: 0.2 });
     expect(body.parcels).toEqual([{ weight: 6, length: 0.4, width: 0.3, height: 0.2 }]);

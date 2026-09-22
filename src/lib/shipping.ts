@@ -364,8 +364,9 @@ export function cleanShippingRules(value: unknown): ShippingRules {
         /* The parcel column's country cells are STORED BY NOBODY, deliberately.
            admShipRowHTML() emits `c:<carrier>:`, `m:courier:` and `free:` keys
            and no `m:parcel:` one, so eighteen of its twenty-two countries have
-           no box on any screen — and the row the shop runs on today carries all
-           twenty-two as literals from 148_shipping_country_prices.sql. Left
+           no box on any screen — and the row the shop ran on until 22.09.2026
+           carried all twenty-two as literals from 148_shipping_country_prices.sql
+           (202_shipping_prices_follow_montonio.sql removes the untouched ones). Left
            alone they round-trip through every ordinary save, frozen on the day
            they were written, while the tariff they were copied from moves.
 
@@ -453,8 +454,10 @@ export function parseShippingRules(value: unknown): ShippingRules {
          взять цены Montonio» clears the boxes, and a seed of 10.84 underneath
          would put Estonia's own number back the moment the row was read again
          — the button lying about what it did.
-         No price moves. Every row a shop can actually have carries an explicit
-         cell for all twenty-five countries (db/migrations/148), and a shop with
+         No price moves. 148 wrote an explicit cell for all twenty-five
+         countries; since 22.09.2026, 202 removes every one still holding 148's
+         seed EXCEPT the three home couriers above, which is exactly why they are
+         restated here rather than left to the tariff. A shop with
          no row at all is priced by DEFAULT_SHIPPING_RULES above, which still
          holds 10.84 / 9.90 / 9.90. tests/shipping-rate-table.test.ts checks
          both, cell by cell. */

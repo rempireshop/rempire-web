@@ -105,8 +105,17 @@ const countries = (
   .map((c) => c.trim().toUpperCase())
   .filter(Boolean);
 
-/** Same box every quote in this table is priced for — src/lib/shipping/tariffs.ts REFERENCE_PARCEL. */
-const REFERENCE_PARCEL = { length: 30, width: 30, height: 30, weight: 5 };
+/**
+ * Same box every quote in this table is priced for — src/lib/shipping/tariffs.ts
+ * REFERENCE_PARCEL, which is derived from PARCEL_DEFAULTS in parcel.ts. Restated
+ * here only because this is a standalone node script that cannot import
+ * TypeScript; tests/reference-parcel.test.ts fails the day the two differ.
+ *
+ * 25 × 18 × 8 cm at 0.9 kg — Renat's carton, measured 22.09.2026, and the
+ * volumetric weight the shop declares for it (3600 cm³ / 4000). It replaced a
+ * 30 cm cube at 5 kg that priced every international parcel as DPD's L tier.
+ */
+const REFERENCE_PARCEL = { length: 25, width: 18, height: 8, weight: 0.9 };
 
 const log = (...a) => console.log(...a);
 const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;

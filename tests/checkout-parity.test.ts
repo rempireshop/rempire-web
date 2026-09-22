@@ -332,7 +332,8 @@ describe("the checkout total on screen equals the one the server bills", () => {
   /* The floors the shop actually ships with, not a fixture: 59 € at home and
      200 € for the rest of Europe (Dim, 08.09.2026). A 59 € basket to Germany
      is the exact case the audit found — free on screen, 22,29 € of courier off
-     the shop — so it is the one worth pinning on both sides. */
+     the shop (17,59 € since the 22.09.2026 re-quote for the 25 × 18 × 8 cm
+     carton) — so it is the one worth pinning on both sides. */
   it("agrees about the default floors: 59 € at home, 200 € for the rest of Europe", () => {
     const at = (country: string, zone: string, sum: number, iso = "") => {
       const c = client(null, sum, DEFAULT_SHIPPING_RULES, zone, "courier", "", iso);
@@ -341,8 +342,8 @@ describe("the checkout total on screen equals the one the server bills", () => {
       return server;
     };
     expect(at("EE", "EE", 59).price).toBe(0);
-    expect(at("DE", "EU", 59, "DE").price).toBe(22.29);
-    expect(at("DE", "EU", 199.99, "DE").price).toBe(22.29);
+    expect(at("DE", "EU", 59, "DE").price).toBe(17.59);
+    expect(at("DE", "EU", 199.99, "DE").price).toBe(17.59);
     expect(at("DE", "EU", 200, "DE").price).toBe(0);
     expect(at("GR", "EU", 59, "GR").freeFrom).toBe(200);
   });
