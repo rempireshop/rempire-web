@@ -271,6 +271,9 @@ const nextConfig: NextConfig = {
        itself reads nothing from public/ — its photos and texts are imported
        from src/data/catalogue.feed.json (tools/pack-feed.mjs). */
     "/feed/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    /* Merchant Center's «Checkout» link (src/lib/merchant-cart.ts) reads the
+       feed's own input — the same modules, the same reach — to find the id. */
+    "/cart/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
   },
   /**
    * The shop is one static page that now names its screen in the URL, so the
