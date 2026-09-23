@@ -217,16 +217,16 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "needs": [
         "montonio-keys"
       ],
       "title": "Зарегистрировать вебхук посылок",
-      "detail": "Экрана для этого у Montonio нет — только API (их руководство по вебхукам, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. Подписывает shipment.registered, shipment.registrationFailed и shipment.statusUpdated; list показывает, что стоит. Без него посылки доходят, а заказы сами не закрываются. При переезде домена: register на rempireshop.com, потом delete старого.",
+      "detail": "Сделано 23.09.2026: зарегистрирован на https://rempireshop.diipsolutions.eu/api/shipping/notify/, три события; проверка боевого аккаунта после этого — всё зелёное. Экрана для этого у Montonio нет — только API (их руководство по вебхукам, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. Подписывает shipment.registered, shipment.registrationFailed и shipment.statusUpdated; list показывает, что стоит. Без него посылки доходят, а заказы сами не закрываются. При переезде домена: register на rempireshop.com, потом delete старого.",
       "en": {
         "title": "Register the parcel webhook",
-        "detail": "Montonio has no screen for it — API only (their webhooks guide, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. It subscribes shipment.registered, shipment.registrationFailed and shipment.statusUpdated; list shows what is there. Without it parcels arrive and orders never close by themselves. When the domain moves: register rempireshop.com, then delete the old one."
+        "detail": "Done 23.09.2026: registered at https://rempireshop.diipsolutions.eu/api/shipping/notify/, three events; the live-account check afterwards is all green. Montonio has no screen for it — API only (their webhooks guide, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. It subscribes shipment.registered, shipment.registrationFailed and shipment.statusUpdated; list shows what is there. Without it parcels arrive and orders never close by themselves. When the domain moves: register rempireshop.com, then delete the old one."
       }
     },
     {
