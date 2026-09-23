@@ -114,11 +114,11 @@
       "status": "todo",
       "blocking": true,
       "outside": "Railway",
-      "title": "Снять снимок базы на Railway и убедиться, что он есть",
-      "detail": "Не «запустить снятие», а проверить, что снимок существует и из него можно восстановиться. Всё, что ниже, отменяется только через него.",
+      "title": "Снять копию базы и убедиться, что она читается",
+      "detail": "Кнопки на Railway нет: вкладка Backups работает только на плане Pro (23.09.2026). Копия — файл: Railway → Postgres → Variables → DATABASE_PUBLIC_URL в файл .env.railway.txt строкой DATABASE_URL=…, затем node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump в Docker; Docker Desktop должен быть запущен). Файл ложится в домашнюю папку, rempire-backups, и сразу читается обратно; восстановление проверено на пробной базе. Потом .env.railway.txt удалить. Один раз сейчас — для проверки, второй — утром запуска перед чисткой.",
       "en": {
-        "title": "Take a Railway snapshot and verify it exists",
-        "detail": "Not «start one» — confirm it is there and restorable. Everything below is reversible only from this."
+        "title": "Take a copy of the database and verify it reads back",
+        "detail": "Railway has no button for it: the Backups tab works only on the Pro plan (23.09.2026). The copy is a file: Railway → Postgres → Variables → DATABASE_PUBLIC_URL into .env.railway.txt as DATABASE_URL=…, then node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump in Docker; Docker Desktop must be running). The file lands in the home folder, rempire-backups, and is read back at once; restoring was proven on a test database. Then delete .env.railway.txt. Once now as a check, and again on launch morning before the clean-up."
       }
     },
     {
@@ -214,19 +214,19 @@
       "id": "shipping-webhook",
       "area": "montonio",
       "who": [
-        "dim"
+        "dim",
+        "claude"
       ],
       "status": "todo",
       "blocking": true,
-      "outside": "Montonio",
       "needs": [
         "montonio-keys"
       ],
       "title": "Зарегистрировать вебхук посылок",
-      "detail": "Кабинет Montonio → Shipping → Webhooks: https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. События: shipment.registered, shipment.registrationFailed, shipment.statusUpdated. Без него посылки доходят, а заказы сами не закрываются. При переезде домена перевесить на rempireshop.com.",
+      "detail": "Экрана для этого у Montonio нет — только API (их руководство по вебхукам, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. Подписывает shipment.registered, shipment.registrationFailed и shipment.statusUpdated; list показывает, что стоит. Без него посылки доходят, а заказы сами не закрываются. При переезде домена: register на rempireshop.com, потом delete старого.",
       "en": {
         "title": "Register the parcel webhook",
-        "detail": "Montonio panel → Shipping → Webhooks: https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. Events: shipment.registered, shipment.registrationFailed, shipment.statusUpdated. Without it parcels arrive and orders never close by themselves. Re-point it at rempireshop.com when the domain moves."
+        "detail": "Montonio has no screen for it — API only (their webhooks guide, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. It subscribes shipment.registered, shipment.registrationFailed and shipment.statusUpdated; list shows what is there. Without it parcels arrive and orders never close by themselves. When the domain moves: register rempireshop.com, then delete the old one."
       }
     },
     {

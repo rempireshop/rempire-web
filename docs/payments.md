@@ -74,7 +74,8 @@ Montonio — <https://docs.montonio.com/api/stargate/guides/orders> (свере�
 
 Здесь речь только о **платёжном** вебхуке. У доставки с 08.09.2026 есть свой,
 и его как раз надо завести руками: `POST /api/shipping/notify/`, событие
-`shipment.statusUpdated`, «Shipping → Webhooks» в партнёрской системе — см.
+`shipment.statusUpdated` — регистрируется только через API
+(`tools/montonio-webhook.mjs`, экрана для этого у Montonio нет) — см.
 `docs/shipping.md`. Подпись у него проверяется тем же способом, что и здесь
 (HS256, наш секрет, чужой `accessKey` — отказ).
 

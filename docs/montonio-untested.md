@@ -75,7 +75,7 @@ not from our own output.
 | S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | Nothing. We never read the flag and never send dimensions — see Part 5, D6 |
 | ~~S7~~ | ~~**A SmartPosti drop-off code** (`dropOffPin`)~~ · **not applicable, 22.09.2026** | Montonio's written answer of 22.09.2026: a drop-off / door code works **only on the merchant's own direct contract with the carrier**, and only with that carrier's help; it is aimed at marketplaces. A normal merchant simply **scans the label at the parcel machine**. **Omniva has no such option at all.** So this is not «untested» — there is nothing here for a shop like ours to test | Nothing, and nothing wanted. See Part 5, D7 |
 | S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | Not implemented at all | Nothing. The refusal message tells the owner to pass the correction to Dim rather than to press again — see Part 5, D8 |
-| S9 | **The parcel-events webhook being registered** | It is a manual step in the Partner System; nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it |
+| S9 | **The parcel-events webhook being registered** | It is registered through the API only — Montonio's Partner System has no screen for it (their webhooks guide, read 23.09.2026); `tools/montonio-webhook.mjs register` does it. Nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it |
 | S10 | **Which carriers this store is actually contracted for** | Sandbox contracts are not live contracts | `GET /api/admin/montonio/` reads `GET /carriers` (`hasMontonioContract`, `contracts[]`) |
 | ~~S11~~ | ~~**A locker outside the Baltics being priced correctly**~~ · **money risk closed 22.09.2026** | The worry was that our tariff mirror asks one subtype-blind `pickupPoint` price where Montonio has separate `parcelMachine` / `parcelShop` / `postOffice` rates, so a locker could be sold under its cost. Montonio's written answer of 22.09.2026: «Pakiautomaat ja pickupPoint on sama hinnaga aga erinevad väljastuspunktid» — **the same price, different delivery points.** A subtype-blind row therefore cannot underprice a locker, and the margin risk in `docs/montonio-shipping-audit.md` § 3.1 is gone | Nothing more needed for the money. **The other half of § 3.1 still stands**: `contract-prices` is an undocumented, unauthenticated endpoint that can change or vanish without notice, and rebuilding the mirror with keys remains the documented route |
 | S12 | **Ordering a courier pickup** | Montonio's written answer of 22.09.2026: **a pickup cannot be ordered through the API at all.** Their advice is to configure a **recurring pickup** in the Montonio system | Nothing in code, and nothing wanted in code: it is an owner/ops step — Part 2 |
@@ -158,8 +158,9 @@ Nothing in the code can do any of these. In the order they bite.
   > reconcile those credits against Montonio's own report.
 - [ ] **Switch on Shipping** in live mode, and the carriers used: Omniva, DPD,
       SmartPosti, Unisend, Nova Post.
-- [ ] **Register the parcel-events webhook**: Partner System → Shipping →
-      Webhooks → `https://<the live domain>/api/shipping/notify/`.
+- [ ] **Register the parcel-events webhook** — through the API, there is no
+      screen for it: `node --env-file=.env.montonio-live.txt
+      tools/montonio-webhook.mjs register https://<the live domain>/api/shipping/notify/`.
       **The trailing slash matters** — `trailingSlash` is on in
       `next.config.ts`, and a POST without it becomes a 308.
       Events: at least `shipment.registered`, `shipment.registrationFailed`,
