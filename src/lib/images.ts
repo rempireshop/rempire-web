@@ -153,3 +153,113 @@ export async function processImage(input: Uint8Array | Buffer): Promise<Processe
     throw new ImageError("bad_image", 400, err instanceof Error ? err.message : undefined);
   }
 }
+
+/* ---------- a picture for a letter --------------------------------------- */
+
+/*
+ * «Рассылка»'s pictures (src/lib/newsletter-blocks.ts) are read by mail
+ * programs, not by the shop, and mail programs are not browsers:
+ *
+ *   · no WebP. Outlook on Windows draws a WebP as a red cross, and so do a
+ *     good share of the older clients — the shop's own format is the wrong
+ *     one here. A photo becomes a JPEG; a picture that really is transparent
+ *     (a cut-out product, a logo) a PNG, since a JPEG would paint its
+ *     background black-or-white at random across clients.
+ *   · baseline JPEG, never progressive: Outlook 2007–2016 shows only the
+ *     first, blurry pass of a progressive one. (mozjpeg's preset turns
+ *     progressive on, which is why it is not used.)
+ *   · 1200 px wide at most — twice the letter's 600 px (the banner itself is
+ *     504), so it is sharp on a phone's retina screen and not a byte bigger.
+ *     A narrower picture is left as it is, never blown up.
+ *   · a few hundred KB, because a letter of eight banners is downloaded
+ *     whole by every reader, often over a phone connection: a JPEG that
+ *     comes out over EMAIL_TARGET_BYTES is encoded once more at a lower
+ *     quality, a PNG as a 256-colour palette.
+ *
+ * Upright by its EXIF, stripped of every scrap of metadata (GPS included),
+ * the type read off the bytes — the same rules as a product photo above.
+ */
+export const EMAIL_MAX_WIDTH = 1200;
+/** A banner may be tall, but not a whole scroll of phone screenshots. */
+export const EMAIL_MAX_HEIGHT = 4000;
+export const EMAIL_JPEG_QUALITY = 82;
+export const EMAIL_JPEG_QUALITY_SMALL = 70;
+export const EMAIL_TARGET_BYTES = 700 * 1024;
+
+export type EmailImage = {
+  body: Buffer;
+  contentType: "image/jpeg" | "image/png";
+  ext: "jpg" | "png";
+  width: number;
+  height: number;
+  bytes: number;
+  sourceMime: AcceptedMime;
+};
+
+/**
+ * Bytes in, one e-mail-safe picture out. Throws ImageError with the same
+ * codes processImage() does: empty_file, too_large, bad_type,
+ * heic_unsupported, bad_image.
+ */
+export async function processEmailImage(input: Uint8Array | Buffer): Promise<EmailImage> {
+  const buf = Buffer.isBuffer(input) ? input : Buffer.from(input);
+  if (!buf.length) throw new ImageError("empty_file");
+  if (buf.length > MAX_UPLOAD_BYTES) throw new ImageError("too_large", 413, `${buf.length} bytes`);
+
+  const kind = sniffImage(buf);
+  if (kind === "image/heic") throw new ImageError("heic_unsupported", 415);
+  if (!kind) throw new ImageError("bad_type", 415);
+
+  const sharp = await loadSharp();
+  const base = sharp(buf, { limitInputPixels: MAX_PIXELS, failOn: "none" }).rotate();
+
+  let transparent = false;
+  try {
+    const meta = await base.metadata();
+    if (!meta.width || !meta.height) throw new ImageError("bad_image", 400, "no dimensions");
+    // an alpha channel with nothing see-through in it (most screenshots) is a photo
+    if (meta.hasAlpha) transparent = !(await base.clone().stats()).isOpaque;
+  } catch (err) {
+    if (err instanceof ImageError) throw err;
+    throw new ImageError("bad_image", 400, err instanceof Error ? err.message : undefined);
+  }
+
+  const sized = () =>
+    base.clone().resize({ width: EMAIL_MAX_WIDTH, height: EMAIL_MAX_HEIGHT, fit: "inside", withoutEnlargement: true });
+
+  try {
+    if (transparent) {
+      let out = await sized().png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer({ resolveWithObject: true });
+      if (out.data.length > EMAIL_TARGET_BYTES) {
+        out = await sized().png({ compressionLevel: 9, palette: true, quality: 90 }).toBuffer({ resolveWithObject: true });
+      }
+      return {
+        body: out.data,
+        contentType: "image/png",
+        ext: "png",
+        width: out.info.width,
+        height: out.info.height,
+        bytes: out.data.length,
+        sourceMime: kind,
+      };
+    }
+    const jpeg = (quality: number) =>
+      sized()
+        .flatten({ background: "#ffffff" })
+        .jpeg({ quality, progressive: false, mozjpeg: false, chromaSubsampling: "4:2:0" })
+        .toBuffer({ resolveWithObject: true });
+    let out = await jpeg(EMAIL_JPEG_QUALITY);
+    if (out.data.length > EMAIL_TARGET_BYTES) out = await jpeg(EMAIL_JPEG_QUALITY_SMALL);
+    return {
+      body: out.data,
+      contentType: "image/jpeg",
+      ext: "jpg",
+      width: out.info.width,
+      height: out.info.height,
+      bytes: out.data.length,
+      sourceMime: kind,
+    };
+  } catch (err) {
+    throw new ImageError("bad_image", 400, err instanceof Error ? err.message : undefined);
+  }
+}

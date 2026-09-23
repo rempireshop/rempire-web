@@ -62,6 +62,14 @@ import { isEmail, normalizeEmail, normalizeLangCode, type LangCode } from "@/lib
 import { jsonbParam, query, withTx, type Querier } from "@/lib/db";
 import { mailConfigured, sendMail, type SendMailResult } from "@/lib/mail";
 import { roomFor, warnOwnerOnce } from "@/lib/mail-budget";
+import {
+  blocksComplete,
+  blocksHaveContent,
+  blocksProducts,
+  cleanBlocks,
+  htmlHasContent,
+  type NewsBlock,
+} from "@/lib/newsletter-blocks";
 import { getOverrides, writeAuditSafe } from "@/lib/orders";
 
 /* ---------- shapes -------------------------------------------------------- */
@@ -76,7 +84,14 @@ export interface Newsletter {
   status: NewsletterStatus;
   title: string;
   subject: Trilingual;
+  /** The HTML bodies of a letter written before blocks — all "" for a block letter. */
   body: Trilingual;
+  /**
+   * The letter as blocks (src/lib/newsletter-blocks.ts), or null for a letter
+   * written in the old rich-text box, which then renders from `body`.
+   */
+  blocks: NewsBlock[] | null;
+  /** The product ids whose cards the letter draws — for a block letter, derived from its blocks. */
   products: string[];
   createdAt: string;
   updatedAt: string;
@@ -89,12 +104,14 @@ export interface Newsletter {
 }
 
 /** The list row: everything but the texts themselves. */
-export type NewsletterSummary = Omit<Newsletter, "subject" | "body"> & { productCount: number };
+export type NewsletterSummary = Omit<Newsletter, "subject" | "body" | "blocks"> & { productCount: number };
 
 export interface NewsletterInput {
   title?: unknown;
   subject?: unknown;
   body?: unknown;
+  /** A list → a block letter: `body` and `products` are then ignored and derived. */
+  blocks?: unknown;
   products?: unknown;
 }
 
@@ -152,19 +169,8 @@ function line(v: unknown, max: number): string {
   return v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-/** The words of an allowlisted body — tags gone, entities decoded enough to count. */
-function bodyWords(html: string): string {
-  return String(html || "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;|&#160;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 /** A body is something when it has words, a picture or a product card in it. */
-function bodyHasContent(html: string): boolean {
-  return !!bodyWords(html) || /<img\b|data-product=/.test(html);
-}
+const bodyHasContent = htmlHasContent;
 
 function tri(raw: unknown, clean: (v: unknown) => string): Trilingual {
   const src = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
@@ -191,25 +197,58 @@ function cleanProducts(raw: unknown): string[] {
   return out;
 }
 
-/** What POST and PATCH store — the whole draft, every field, nothing trusted. */
+/**
+ * What POST and PATCH store — the whole draft, every field, nothing trusted.
+ *
+ * A `blocks` list makes it a block letter: the blocks are cleaned
+ * (src/lib/newsletter-blocks.ts), the HTML bodies are stored empty, and the
+ * products are the ones the blocks name — a card list the panel could send
+ * out of step with its own blocks is not taken from it at all. Without
+ * `blocks` this is the old letter, exactly as before.
+ */
 export function cleanNewsletterInput(raw: NewsletterInput | null | undefined): {
   title: string;
   subject: Trilingual;
   body: Trilingual;
+  blocks: NewsBlock[] | null;
   products: string[];
 } {
   const src = raw && typeof raw === "object" ? raw : {};
+  const title = line(src.title, TITLE_MAX);
+  const subject = tri(src.subject, (v) => line(v, SUBJECT_MAX));
+  if (Array.isArray(src.blocks)) {
+    const blocks = cleanBlocks(src.blocks);
+    return { title, subject, body: { RU: "", ET: "", EN: "" }, blocks, products: blocksProducts(blocks) };
+  }
   return {
-    title: line(src.title, TITLE_MAX),
-    subject: tri(src.subject, (v) => line(v, SUBJECT_MAX)),
+    title,
+    subject,
     body: tri(src.body, cleanBody),
+    blocks: null,
     products: cleanProducts(src.products),
   };
 }
 
-/** The languages a letter can go out in: a subject line and a body, both. */
-export function readyLangs(n: { subject: Trilingual; body: Trilingual }): NewsLang[] {
-  return NEWS_LANGS.filter((L) => n.subject[L].trim() && bodyHasContent(n.body[L]));
+/** Does the letter say anything in `L` — its blocks, or its old body? */
+function hasBodyIn(n: { body: Trilingual; blocks?: NewsBlock[] | null }, L: NewsLang): boolean {
+  return Array.isArray(n.blocks) ? blocksHaveContent(n.blocks, L) : bodyHasContent(n.body[L]);
+}
+
+/** Is there anything in the letter at all, in any language? */
+export function letterHasBody(n: { body: Trilingual; blocks?: NewsBlock[] | null }): boolean {
+  return NEWS_LANGS.some((L) => hasBodyIn(n, L));
+}
+
+/**
+ * The languages a letter can go out in: a subject line and a body, both —
+ * and, for a block letter, every text and button the letter has written in
+ * that language too. A half-translated letter is not sent half in Russian:
+ * its reader gets the Russian one whole (langFor).
+ */
+export function readyLangs(n: { subject: Trilingual; body: Trilingual; blocks?: NewsBlock[] | null }): NewsLang[] {
+  return NEWS_LANGS.filter(
+    (L) => n.subject[L].trim() && hasBodyIn(n, L) && (!Array.isArray(n.blocks) || blocksComplete(n.blocks, L)),
+  );
 }
 
 /**
@@ -230,6 +269,7 @@ type Row = {
   title: string | null;
   subject: unknown;
   body: unknown;
+  blocks: unknown;
   products: unknown;
   created_at: string | Date;
   updated_at: string | Date;
@@ -241,7 +281,7 @@ type Row = {
 };
 
 const COLS =
-  "id, status, title, subject, body, products, created_at, updated_at, sent_at, sending_at, sent_count, failed_count, audience_count";
+  "id, status, title, subject, body, blocks, products, created_at, updated_at, sent_at, sending_at, sent_count, failed_count, audience_count";
 
 function iso(v: string | Date | null | undefined): string | null {
   if (v == null) return null;
@@ -261,12 +301,16 @@ function json(v: unknown): unknown {
 function mapRow(r: Row): Newsletter {
   const subject = tri(json(r.subject), (v) => line(v, SUBJECT_MAX));
   const body = tri(json(r.body), (v) => (typeof v === "string" ? v.slice(0, BODY_MAX) : ""));
+  /* Cleaned on the way out as well as on the way in: the renderer is handed
+     shapes it can trust even if a row was ever written by something else. */
+  const rawBlocks = json(r.blocks);
   const n: Newsletter = {
     id: String(r.id),
     status: r.status === "sent" ? "sent" : r.status === "sending" ? "sending" : "draft",
     title: r.title ?? "",
     subject,
     body,
+    blocks: Array.isArray(rawBlocks) ? cleanBlocks(rawBlocks) : null,
     products: cleanProducts(json(r.products)),
     createdAt: iso(r.created_at) ?? new Date(0).toISOString(),
     updatedAt: iso(r.updated_at) ?? new Date(0).toISOString(),
@@ -281,10 +325,16 @@ function mapRow(r: Row): Newsletter {
 }
 
 export function summaryOf(n: Newsletter): NewsletterSummary {
-  const { subject, body, ...rest } = n;
+  const { subject, body, blocks, ...rest } = n;
   void subject;
   void body;
+  void blocks;
   return { ...rest, productCount: n.products.length };
+}
+
+/** A `blocks` parameter: SQL null for an old letter — never the JSON value `null`. */
+function blocksParam(blocks: NewsBlock[] | null): string | null {
+  return blocks === null ? null : jsonbParam(blocks);
 }
 
 /* ---------- CRUD ---------------------------------------------------------- */
@@ -305,10 +355,10 @@ export async function getNewsletter(id: string): Promise<Newsletter | null> {
 export async function createNewsletter(raw: NewsletterInput): Promise<Newsletter> {
   const input = cleanNewsletterInput(raw);
   const rows = await query<Row>(
-    `insert into newsletters (title, subject, body, products)
-     values ($1, $2::jsonb, $3::jsonb, $4::jsonb)
+    `insert into newsletters (title, subject, body, blocks, products)
+     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5::jsonb)
      returning ${COLS}`,
-    [input.title, jsonbParam(input.subject), jsonbParam(input.body), jsonbParam(input.products)],
+    [input.title, jsonbParam(input.subject), jsonbParam(input.body), blocksParam(input.blocks), jsonbParam(input.products)],
   );
   return mapRow(rows[0]);
 }
@@ -317,12 +367,15 @@ export async function createNewsletter(raw: NewsletterInput): Promise<Newsletter
 export async function updateNewsletter(id: string, raw: NewsletterInput): Promise<Newsletter> {
   if (!isNewsletterId(id)) throw new NewsletterError("not_found");
   const input = cleanNewsletterInput(raw);
+  /* The whole draft, blocks included: a PATCH from the old editor (no
+     `blocks`) turns a letter back into an old one, which is what that editor
+     is showing. The panel only has the new one since 23.09.2026. */
   const rows = await query<Row>(
     `update newsletters
-        set title = $2, subject = $3::jsonb, body = $4::jsonb, products = $5::jsonb, updated_at = now()
+        set title = $2, subject = $3::jsonb, body = $4::jsonb, blocks = $5::jsonb, products = $6::jsonb, updated_at = now()
       where id = $1 and status = 'draft'
       returning ${COLS}`,
-    [id, input.title, jsonbParam(input.subject), jsonbParam(input.body), jsonbParam(input.products)],
+    [id, input.title, jsonbParam(input.subject), jsonbParam(input.body), blocksParam(input.blocks), jsonbParam(input.products)],
   );
   if (rows.length) return mapRow(rows[0]);
   const current = await getNewsletter(id);
@@ -474,11 +527,42 @@ export async function renderNewsletterFor(
     {
       subject: n.subject[lang],
       body: n.body[lang],
+      blocks: n.blocks,
       products: list,
       unsubscribeUrl: unsubscribeUrl(email, lang, "marketing"),
     },
     normalizeLang(lang),
   );
+}
+
+/** The mailbox the previews draw their «Отписаться» link for. */
+export const PREVIEW_MAILBOX = "klient@example.com";
+
+/**
+ * The live preview under the editor (POST /api/admin/newsletters/preview/):
+ * a draft that may not be saved yet, cleaned exactly as a save would clean it
+ * and drawn by the very function the send uses — so what the panel shows is
+ * what goes out, block for block. Drawn in the language asked for even when
+ * that language is not ready; `ready` says which ones are, so the panel can
+ * say «эти подписчики получат русскую версию» under a half-done Estonian.
+ */
+export async function renderNewsletterDraft(
+  raw: NewsletterInput,
+  lang: LangCode,
+): Promise<{ mail: RenderedEmail; ready: NewsLang[] }> {
+  const input = cleanNewsletterInput(raw);
+  const cards = await newsletterCards(input.products);
+  const mail = renderNewsletter(
+    {
+      subject: input.subject[lang],
+      body: input.body[lang],
+      blocks: input.blocks,
+      products: cards,
+      unsubscribeUrl: unsubscribeUrl(PREVIEW_MAILBOX, lang, "marketing"),
+    },
+    normalizeLang(lang),
+  );
+  return { mail, ready: readyLangs(input) };
 }
 
 /* ---------- the e2e door -------------------------------------------------- */
@@ -512,7 +596,7 @@ export async function sendNewsletterTest(
   lang: LangCode,
 ): Promise<{ result: SendMailResult; lang: NewsLang }> {
   const L = langFor(lang, n.ready);
-  if (!L) throw new NewsletterError(n.body.RU || n.body.ET || n.body.EN ? "no_subject" : "empty_body");
+  if (!L) throw new NewsletterError(letterHasBody(n) ? "no_subject" : "empty_body");
   const addr = normalizeEmail(to);
   const mail = await renderNewsletterFor(n, L, addr);
   const result = await sendMail({
@@ -605,8 +689,7 @@ async function claim(id: string, leaseMs: number): Promise<Newsletter> {
     if (leaseAt && Date.now() - leaseAt < leaseMs) throw new NewsletterError("busy");
 
     if (n.status === "draft") {
-      const hasBody = NEWS_LANGS.some((L) => bodyHasContent(n.body[L]));
-      if (!hasBody) throw new NewsletterError("empty_body");
+      if (!letterHasBody(n)) throw new NewsletterError("empty_body");
       if (!n.ready.length) throw new NewsletterError("no_subject");
       const rowsToQueue = readers
         .map((r) => ({ email: r.email, lang: langFor(r.lang, n.ready) }))

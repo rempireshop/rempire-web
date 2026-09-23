@@ -2429,3 +2429,68 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-progress { height: 8px; border: 1px solid var(--a-ink); background: var(--a-paper); margin: 8px 0; }
 .adm-progress i { display: block; height: 100%; background: var(--a-ink); transition: width .3s ease-out; }
 @media (prefers-reduced-motion: reduce) { .adm-progress i { transition: none; } }
+
+/* ---- the letter as blocks (23.09.2026) ------------------------------------
+   Renat's example is a letter of pictures with a line of text between, built
+   on a phone. So: one card per block, full width, its kind named at the top
+   and its three controls — ↑ ↓ ✕ — at 44 px beside the name; the picture as
+   large as the card; the link it carries as one big row to tap («Куда ведёт
+   картинка · Товар · …  ›»), never a box to type an address into. */
+.adm-nbwrap { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.adm-nbs { display: flex; flex-direction: column; gap: 12px; }
+.adm-nb {
+  border: 1px solid var(--a-rule); background: var(--a-paper); padding: 12px;
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+.adm-nb__head { display: flex; align-items: center; gap: 8px; }
+.adm-nb__kind { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; }
+.adm-nb__ops { display: flex; gap: 6px; flex: none; }
+.adm-nb__del { color: var(--a-warn); }
+.adm-nb__pic { position: relative; border: 1px solid var(--a-rule); background: var(--a-tint); }
+.adm-nb__pic img { display: block; width: 100%; height: auto; max-height: 360px; object-fit: contain; }
+/* the upload's own line, laid over the bottom of the phone's copy of the photo */
+.adm-nb__up { padding: 8px 10px; background: var(--a-tint); }
+.adm-nb__pic .adm-nb__up { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, .92); }
+.adm-nb__up .adm-progress { margin: 6px 0 0; }
+.adm-nb__uptxt { font-size: 13px; }
+.adm-nb__link { display: flex; flex-direction: column; gap: 6px; }
+.adm-nb__target {
+  width: 100%; min-height: 48px; padding: 8px 12px; border: 1px solid var(--a-ink); background: var(--a-paper);
+  color: var(--a-ink); font-size: 15px; text-align: left;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.adm-nb__target--none { border-style: dashed; color: var(--a-muted); }
+.adm-nb__to { min-width: 0; overflow-wrap: anywhere; }
+.adm-nb__chev { flex: none; font-size: 20px; line-height: 1; }
+.adm-nb__url { word-break: break-all; }
+.adm-nb__ta { min-height: 112px; }
+.adm-nb__ru { overflow-wrap: anywhere; }
+.adm-nb__prod { display: flex; align-items: center; gap: 12px; }
+.adm-nb__prodt { display: flex; flex-direction: column; min-width: 0; }
+.adm-nb__br { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--a-muted); }
+/* a letter written before blocks: its old body, read-only, in a box that scrolls rather than a page that does */
+.adm-nb__old { border-left: 2px solid var(--a-rule); padding-left: 12px; max-height: 260px; overflow: auto; font-size: 14px; }
+.adm-nb__old img { max-width: 100%; height: auto; }
+.adm-nb__jump { align-self: flex-start; }
+/* «+ Картинка · + Текст · + Кнопка · + Товар»: four in a row, two by two on a phone */
+.adm-nbadd { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.adm-nbadd .adm-btn { width: 100%; min-width: 0; padding: 0 10px; }
+@media (max-width: 767px) { .adm-nbadd { grid-template-columns: 1fr 1fr; } }
+/* the picker: a search, the places to tap, an address box last */
+.adm-nbpick { border: 1px solid var(--a-ink); padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--a-paper); }
+.adm-nbpick__list { display: flex; flex-direction: column; max-height: 360px; overflow-y: auto; border-top: 1px solid var(--a-rule); }
+.adm-nbpick__row {
+  width: 100%; min-height: 52px; padding: 6px 4px; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: var(--a-paper); color: var(--a-ink); text-align: left;
+  display: flex; align-items: center; gap: 10px;
+}
+.adm-nbpick__row:hover, .adm-nbpick__row:focus-visible { background: var(--a-tint); }
+.adm-nbpick__ico { width: 44px; flex: none; text-align: center; color: var(--a-muted); }
+.adm-nbpick__t { display: flex; flex-direction: column; min-width: 0; }
+.adm-nbpick__k { font-size: 12px; color: var(--a-muted); }
+.adm-nbpick__nm { font-size: 15px; overflow-wrap: anywhere; }
+.adm-nbpick__list .adm-hint { padding: 8px 4px 0; }
+/* «Как увидит покупатель»: the letter itself; the frame grows to it (app.js, the capturing `load`) */
+.adm-nbprev { margin-top: 24px; display: flex; flex-direction: column; gap: 8px; scroll-margin-top: calc(var(--a-hdrh) + 12px); }
+.adm-nbprev:focus { outline: none; }
+.adm-frame--news { height: 560px; }

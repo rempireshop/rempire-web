@@ -1,13 +1,21 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl } from "./fixtures";
 import { assertClean, clearToast, toastText, watch } from "./sweep-helpers";
 
 /**
  * «Маркетинг → Рассылка» — the owner's own letter, end to end, desktop and
- * mobile: two subscribers tick the box at the checkout, the owner writes a
- * letter in Russian and Estonian with a product card, saves it, sends
- * himself a test, and sends it — through the confirm card that names the
- * count, the climbing progress, and the read-only «Отправлено» that follows.
+ * mobile: two subscribers tick the box at the checkout, the owner builds a
+ * letter out of blocks the way Renat's Aromatic 89 example is built — a
+ * picture from the phone that clicks through to a product, a line of text,
+ * a button, a product card — in Russian and Estonian, watches it take shape
+ * in the live preview, sends himself a test, and sends it: through the
+ * confirm card that names the count, the climbing progress, and the
+ * read-only «Отправлено» that follows.
+ *
+ * The picture: this suite has no bucket (playwright.config.ts), so the upload
+ * route is answered from here — the picker, the progress and the block are
+ * what is tested, not R2. The route's own output (a baseline JPEG, 1200 px,
+ * never a WebP) is pinned in tests/upload-news.test.ts.
  *
  * Reading the letters back: the suite runs with no RESEND_API_KEY, so
  * nothing is really sent; `GET /api/e2e/mail/` is the readout of what
@@ -16,12 +24,43 @@ import { assertClean, clearToast, toastText, watch } from "./sweep-helpers";
  * (src/lib/newsletters.ts e2eSinkTransport) — which is what lets this test
  * watch a real send finish. The sink records the recipient, the subject
  * and the links in the plain-text part — enough to prove the Estonian
- * reader got the Estonian letter and every letter carried «Отписаться».
+ * reader got the Estonian letter, the banner led to the Estonian product
+ * page, and every letter carried «Отписаться».
  */
 test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop" && testInfo.project.name !== "mobile",
     "newsletter — desktop and mobile projects, see docs/testing.md");
 });
+
+/** A 1×1 PNG — the upload route is stubbed, so only the picker's contract matters. */
+const PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
+/** What the stubbed bucket answers with — a picture this shop serves itself, so the preview can draw it. */
+const PHOTO_URL = `/shop/img/${PRODUCT.id}-0.webp?v=5`;
+
+/** No bucket in this suite: the probe says «configured», an upload answers with PHOTO_URL. */
+async function stubMedia(page: Page): Promise<string[]> {
+  const kinds: string[] = [];
+  await page.route("**/api/admin/upload/**", async (route) => {
+    const req = route.request();
+    if (req.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, cutout: false, maxBytes: 12 * 1024 * 1024, maxVideoBytes: 60 * 1024 * 1024 }) });
+      return;
+    }
+    /* Chromium does not always hand a multipart body with a file in it to the
+       route — "?" then, and the kind is pinned by the unit test instead
+       (tests/newsletter-editor-client.test.ts, newsXhrUpload). */
+    let body = "";
+    try { body = req.postDataBuffer()?.toString("latin1") || ""; } catch { body = ""; }
+    kinds.push(/name="kind"\r\n\r\n(\w+)/.exec(body)?.[1] || "?");
+    await route.fulfill({ status: 200, contentType: "application/json",
+      body: JSON.stringify({ ok: true, key: "news/1-e2e.jpg", url: PHOTO_URL, width: 1, height: 1, bytes: 10, contentType: "image/jpeg" }) });
+  });
+  return kinds;
+}
 
 /** The tick at the checkout: an order with `newsletter: true` records the consent (src/lib/consent.ts). */
 async function subscribe(page: Page, email: string, lang: "RU" | "ET"): Promise<void> {
@@ -46,10 +85,26 @@ async function captured(page: Page, to: string): Promise<Captured[]> {
   return (await res.json()).mails as Captured[];
 }
 
+/** The blocks on screen, top to bottom, by kind. */
+function blockKinds(page: Page): Promise<string[]> {
+  return page.locator("[data-nbcard]").evaluateAll((els) =>
+    els.map((el) => (el.className.match(/adm-nb--(\w+)/) || [])[1] || "?"));
+}
+
+/** Opens the block's «Куда ведёт …» picker, searches, and taps the row that leads to `to`. */
+async function pickLink(card: Locator, query: string, to: string): Promise<void> {
+  await card.locator('[data-nb="pick"]').click();
+  const picker = card.locator("[data-nbpick]");
+  await expect(picker).toBeVisible();
+  if (query) await picker.locator('[data-nbf="q"]').fill(query);
+  await picker.locator(`[data-nb="to"][data-v="${to}"]`).click();
+  await expect(card.locator("[data-nbpick]"), "the picker stayed open after a pick").toHaveCount(0);
+}
+
 test.describe("admin — newsletter", () => {
   test.use({ extraHTTPHeaders: ipHeaders(190) });
 
-  test("a letter is written in two languages, tested, sent to the subscribers and read back", async ({ page }, testInfo) => {
+  test("a letter is built out of blocks in two languages, tested, sent to the subscribers and read back", async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     const w = watch(page);
     const mobile = testInfo.project.name === "mobile";
@@ -58,6 +113,7 @@ test.describe("admin — newsletter", () => {
     const etReader = freshEmail("news-et");
     await subscribe(page, ruReader, "RU");
     await subscribe(page, etReader, "ET");
+    const uploads = await stubMedia(page);
 
     await loginAsAdmin(page);
     await adminSection(page, "promos", "news");
@@ -75,42 +131,72 @@ test.describe("admin — newsletter", () => {
     await page.screenshot({ path: testInfo.outputPath("news-list.png"), fullPage: true });
 
     await page.locator("[data-newsnew]").click();
-    const box = page.locator("[data-blogbody]");
-    await expect(box, "the letter has no visual editor").toBeVisible();
+    await expect(page.locator("#newsblocks"), "the letter has no block editor").toBeVisible();
+    await expect(page.locator("[data-blogbody]"), "the old rich-text box is still there").toHaveCount(0);
+    // the very sentence Renat stopped at (23.09.2026) must not be on this screen
+    await expect(page.locator("body")).not.toContainText("Загрузка картинок пока не настроена");
 
-    /* ---- Russian: title, subject, text, a product ---------------------- */
     await page.locator('[data-newsf="title"]').fill(`E2E рассылка ${tag}`);
     await page.locator('[data-newsf="subject"]').fill(`E2E тема ${tag}`);
-    await box.click();
-    await page.keyboard.type("Привет! Это тестовая рассылка магазина.");
-    await page.locator("[data-newsq]").fill(PRODUCT.id);
-    await page.locator(`[data-newsproductadd="${PRODUCT.id}"]`).click();
-    await expect(page.locator(`[data-newsproductdel="${PRODUCT.id}"]`), "the picked product is not listed").toBeVisible();
+
+    /* ---- «+ Картинка»: the phone's own picker, then the picture's link --- */
+    const chooser = page.waitForEvent("filechooser");
+    await page.locator('[data-nb="add"][data-v="img"]').click();
+    await (await chooser).setFiles({ name: "banner.png", mimeType: "image/png", buffer: PNG });
+    const pic = page.locator("[data-nbcard].adm-nb--img").first();
+    await expect(pic.locator(`.adm-nb__pic img[src="${PHOTO_URL}"]`), "the uploaded picture is not in its block").toBeVisible({ timeout: 15_000 });
+    expect(uploads, "one picture, one upload").toHaveLength(1);
+    expect(["news", "?"], "the picture did not go up as a letter's picture").toContain(uploads[0]);
+    await pickLink(pic, PRODUCT.id, `product:${PRODUCT.id}`);
+    await expect(pic.locator(".adm-nb__target")).toContainText(PRODUCT.brand);
+
+    /* ---- «+ Текст», «+ Кнопка», «+ Товар» -------------------------------- */
+    await page.locator('[data-nb="add"][data-v="text"]').click();
+    const text = page.locator("[data-nbcard].adm-nb--text").first();
+    await text.locator('[data-nbf="text"]').fill("Привет! Это тестовая рассылка магазина.");
+
+    await page.locator('[data-nb="add"][data-v="btn"]').click();
+    const btn = page.locator("[data-nbcard].adm-nb--btn").first();
+    await btn.locator('[data-nbf="label"]').fill("В магазин");
+    await pickLink(btn, "", "home");
+
+    await page.locator('[data-nb="add"][data-v="product"]').click();
+    const addPicker = page.locator('[data-nbpick="add"]');
+    await addPicker.locator('[data-nbf="q"]').fill(PRODUCT.id);
+    await addPicker.locator(`[data-nb="to"][data-v="product:${PRODUCT.id}"]`).click();
+    expect(await blockKinds(page)).toEqual(["img", "text", "btn", "product"]);
+
+    // the text goes above the picture: one tap on its ↑
+    await text.locator('[data-nb="up"]').click();
+    expect(await blockKinds(page)).toEqual(["text", "img", "btn", "product"]);
     await expect(page.locator("[data-newsdirty]")).toBeVisible();
+
+    /* ---- the live preview is the letter, before anything is saved -------- */
+    const frameEl = page.locator("[data-nbframe]");
+    await frameEl.scrollIntoViewIfNeeded();
+    const letter = page.frameLocator("[data-nbframe]");
+    await expect(letter.locator("body")).toContainText("Это тестовая рассылка магазина", { timeout: 20_000 });
+    await expect(letter.locator("body")).toContainText("В магазин");
+    await expect(letter.locator("body")).toContainText(PRODUCT.brand);
+    await expect(letter.locator("body")).toContainText("Отписаться");
+    // the banner is a link to the product it was pointed at
+    await expect(letter.locator(`a[href$="/shop2/p/${PRODUCT.id}/"] img`).first()).toBeAttached();
 
     await page.locator("[data-newssave]").click();
     expect(await toastText(page)).toContain("Черновик сохранён");
     await clearToast(page);
     await expect(page.locator("[data-newsdirty]")).toBeHidden();
-    // the preview is the letter itself, product card and all — the iframe is
-    // lazy and below the fold, so it is brought into view before it is read
-    const frameEl = page.locator('iframe[src^="/api/admin/newsletters/"]');
-    await expect(frameEl).toBeAttached();
-    await frameEl.scrollIntoViewIfNeeded();
-    const iframe = page.frameLocator('iframe[src^="/api/admin/newsletters/"]');
-    await expect(iframe.locator("body")).toContainText("Это тестовая рассылка магазина", { timeout: 20_000 });
-    await expect(iframe.locator("body")).toContainText(PRODUCT.brand);
-    await expect(iframe.locator("body")).toContainText("Отписаться");
 
-    /* ---- Estonian: the same letter in the reader's own language --------- */
+    /* ---- Estonian: the same blocks, the reader's own words ---------------- */
     await page.locator('[data-newslang="ET"]').click();
     await expect(page.locator('[data-newslang="ET"]')).toHaveAttribute("aria-current", "true");
     await page.locator('[data-newsf="subject"]').fill(`E2E teema ${tag}`);
-    await page.locator("[data-blogbody]").click();
-    await page.keyboard.type("Tere! See on poe testkiri.");
+    await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Tere! See on poe testkiri.");
+    await page.locator('[data-nbcard].adm-nb--btn [data-nbf="label"]').fill("Poodi");
     await page.locator("[data-newssave]").click();
     expect(await toastText(page)).toContain("Черновик сохранён");
     await clearToast(page);
+    await expect(page.frameLocator("[data-nbframe]").locator("body")).toContainText("Tere! See on poe testkiri", { timeout: 20_000 });
     await assertClean(page, w, "newsletter editor");
     await page.screenshot({ path: testInfo.outputPath("news-editor.png"), fullPage: true });
 
@@ -124,6 +210,7 @@ test.describe("admin — newsletter", () => {
     const mine = (await captured(page, me))[0];
     expect(mine.subject).toBe(`[test] E2E teema ${tag}`);
     expect(mine.links.some((l) => l.includes("/api/mail/unsubscribe/")), "the test letter has no unsubscribe link").toBe(true);
+    expect(mine.links.some((l) => l.includes(`/shop2/et/p/${PRODUCT.id}/`)), "the banner does not lead to the Estonian product page").toBe(true);
 
     /* ---- the send: the card names the count, then the count climbs ----- */
     const sendButton = page.locator("[data-newssend]");
@@ -139,7 +226,7 @@ test.describe("admin — newsletter", () => {
     // done: the letter is read-only and says what happened
     await expect(page.locator(".adm-badge--ok", { hasText: "Отправлено" }).first()).toBeVisible({ timeout: 60_000 });
     await expect(page.locator("[data-newssave]"), "a sent letter still offers «Сохранить»").toHaveCount(0);
-    await expect(page.locator("[data-blogbody]"), "a sent letter is still editable").toHaveCount(0);
+    await expect(page.locator("#newsblocks"), "a sent letter is still editable").toHaveCount(0);
     await assertClean(page, w, "newsletter sent");
     await page.screenshot({ path: testInfo.outputPath("news-sent.png"), fullPage: true });
 
@@ -174,12 +261,37 @@ test.describe("admin — newsletter", () => {
     await assertClean(page, w, "newsletter list after the send");
   });
 
-  test("a letter with nothing in it is refused, and a draft can be thrown away", async ({ page }) => {
+  test("a block can be deleted and brought back; a letter with nothing in it is refused, and a draft can be thrown away", async ({ page }, testInfo) => {
     const w = watch(page);
+    await stubMedia(page);
     await loginAsAdmin(page);
     await adminSection(page, "promos", "news");
     await page.locator("[data-newsnew]").click();
     await page.locator('[data-newsf="title"]').fill("E2E пустое письмо");
+
+    // ✕ takes a block away, «Вернуть» puts it back where it stood
+    await page.locator('[data-nb="add"][data-v="text"]').click();
+    await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Удалю и верну");
+    await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
+    await expect(page.locator("[data-nbcard]")).toHaveCount(0);
+    await page.locator('[data-nb="undo"]').click();
+    await expect(page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]')).toHaveValue("Удалю и верну");
+    await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
+
+    // a button with nowhere to go is named before anything is sent
+    await page.locator('[data-newsf="subject"]').fill("E2E тема");
+    await page.locator('[data-nb="add"][data-v="btn"]').click();
+    await page.locator('[data-nbcard].adm-nb--btn [data-nbf="label"]').fill("Смотреть");
+    await page.locator('[data-nb="add"][data-v="text"]').click();
+    await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Текст есть");
+    await page.locator("[data-newssend]").click();
+    expect(await toastText(page)).toContain("У кнопки не выбрано, куда она ведёт");
+    await expect(page.locator("[data-admapply]"), "a letter with a dead button reached the confirm card").toHaveCount(0);
+    await clearToast(page);
+    await page.locator('[data-nbcard].adm-nb--btn [data-nb="del"]').click();
+    await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
+    await page.locator('[data-newsf="subject"]').fill("");
+
     await page.locator("[data-newssend]").click();
     expect(await toastText(page)).toContain("Сначала заполните тему и текст");
     await expect(page.locator("[data-admapply]"), "an empty letter reached the confirm card").toHaveCount(0);
@@ -188,6 +300,10 @@ test.describe("admin — newsletter", () => {
     await page.locator("[data-newssave]").click();
     expect(await toastText(page)).toContain("Черновик сохранён");
     await clearToast(page);
+    if (testInfo.project.name === "mobile") {
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, "the block editor spills sideways at 375 px").toBeLessThanOrEqual(1);
+    }
     await page.locator("[data-newsdel]").click();
     await page.locator("[data-newsdelyes]").click();
     expect(await toastText(page)).toContain("Письмо удалено");

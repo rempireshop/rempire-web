@@ -16,6 +16,13 @@
  * Marketing letter: the footer carries «Отписаться» with the real per-mailbox
  * link (src/lib/consent.ts unsubscribeUrl), and the sender adds the RFC 8058
  * headers — the same pair the birthday and cart letters carry.
+ *
+ * Since 23.09.2026 a letter is usually a list of BLOCKS instead
+ * (src/lib/newsletter-blocks.ts — a picture with its link, a few lines, a
+ * button, a product card), drawn by buildBlocks() below out of the same rows.
+ * A letter written before that keeps its HTML body and this file's walker; a
+ * draft opened in the new editor carries that body along as one `html` block,
+ * drawn by the very same walker — so nothing old looks any different.
  */
 
 import {
@@ -29,6 +36,7 @@ import {
   money,
   normalizeLang,
   pick,
+  rowButton,
   rowTitle,
   shell,
   stripHtml,
@@ -36,6 +44,7 @@ import {
   textFooter,
 } from "./layout";
 import type { Lang, RenderedEmail } from "./types";
+import type { NewsBlock } from "../lib/newsletter-blocks";
 import { translateProductName } from "../lib/product-name";
 
 /* ---------- what the letter shows --------------------------------------- */
@@ -56,8 +65,10 @@ export interface NewsletterCard {
 
 export interface NewsletterInput {
   subject: string;
-  /** Allowlisted HTML (sanitizeHtml), in `lang`. */
+  /** Allowlisted HTML (sanitizeHtml), in `lang`. Ignored when `blocks` is a list. */
   body: string;
+  /** The letter as blocks (cleaned — src/lib/newsletter-blocks.ts), all three languages in each. */
+  blocks?: NewsBlock[] | null;
   /** The cards, in the owner's order. */
   products?: NewsletterCard[];
   /** The per-mailbox link; falls back to the account page. */
@@ -101,6 +112,54 @@ const SEG: Record<Lang, string> = { ru: "", et: "/et", en: "/en" };
 /** `https://rempireshop.com/shop2/et/p/<id>/` — the product page in the reader's language. */
 export function newsletterProductUrl(id: string, lang: Lang): string {
   return `${baseUrl()}/shop2${SEG[lang]}/p/${encodeURIComponent(id)}/`;
+}
+
+/* ---------- a block's link ------------------------------------------------ */
+
+const SHOP_LINKS: Array<[RegExp, (m: RegExpExecArray) => string]> = [
+  [/^home$/, () => "/"],
+  [/^blog$/, () => "/blog/"],
+  [/^gift$/, () => "/gift/"],
+  [/^cat:([a-z0-9][a-z0-9-]{0,39})$/, (m) => `/c/${m[1]}/`],
+  [/^product:([a-z0-9][a-z0-9._-]{0,79})$/i, (m) => `/p/${encodeURIComponent(m[1])}/`],
+  [/^brand:([a-z0-9][a-z0-9-]{0,79})$/, (m) => `/b/${m[1]}/`],
+  [/^post:([a-z0-9][a-z0-9-]{0,79})$/, (m) => `/blog/${m[1]}/`],
+];
+
+/**
+ * One of the shop's own places, written as a token — `cat:hair`,
+ * `product:<id>`, `post:<slug>`… (src/lib/newsletter-blocks.ts) — as the path
+ * under /shop2/<lang>. Null for anything that is not such a token. The one
+ * grammar: the cleaning asks this, and so does the renderer.
+ */
+export function shopLinkPath(href: string): string | null {
+  const h = String(href ?? "");
+  for (const [re, path] of SHOP_LINKS) {
+    const m = re.exec(h);
+    if (m) return path(m);
+  }
+  return null;
+}
+
+/**
+ * Where a block's link goes for a reader in `lang`: a shop token lands on
+ * that page in the reader's own language, an http(s) address is left as it
+ * is, anything else is no link at all.
+ */
+export function newsletterLinkUrl(href: string, lang: Lang): string {
+  const h = String(href ?? "").trim();
+  if (!h) return "";
+  const path = shopLinkPath(h);
+  if (path !== null) return `${baseUrl()}/shop2${SEG[lang]}${path}`;
+  return /^https?:\/\/[^\s<>"'`\\]+$/i.test(h) ? h : "";
+}
+
+/** A block's picture: https as it is, a path on this shop made absolute, nothing else. */
+function blockImageSrc(src: string): string {
+  const s = String(src ?? "").trim();
+  if (/^https:\/\/[^\s<>"'`\\]+$/i.test(s)) return s;
+  if (/^\/(?!\/)[^\s<>"'`\\]*$/.test(s)) return absUrl(s);
+  return "";
 }
 
 /* ---------- a tiny tree over the allowlisted HTML ------------------------ */
@@ -240,6 +299,11 @@ function imageRow(src: string, alt: string, href = ""): string {
     `            ${href ? `<a href="${esc(href)}" style="display:block; text-decoration:none;">${img}</a>` : img}`,
     "4px 48px 20px 48px",
   );
+}
+
+/** A button block: the shell's own bulletproof button, spaced like the rows around it. */
+function buttonRow(url: string, label: string): string {
+  return rowButton(url, label, "8px 48px 24px 48px");
 }
 
 function labelRow(text: string): string {
@@ -449,6 +513,77 @@ function build(html: string, lang: Lang, cards: Map<string, NewsletterCard>): Bu
   return out;
 }
 
+const LANG_KEY: Record<Lang, "RU" | "ET" | "EN"> = { ru: "RU", et: "ET", en: "EN" };
+
+/**
+ * A letter made of blocks, top to bottom, for one reader's language. Every
+ * block is drawn out of the rows above, so a banner is the same Outlook-safe
+ * linked image the walker draws (a block <a> round a block <img>, 504 px) and
+ * a card is the same card. A block with nothing in this language — a text
+ * not written in it, a button with no link yet, a product that has left the
+ * shop — draws nothing; whether a language is complete enough to be sent at
+ * all is decided before this runs (blocksComplete).
+ */
+function buildBlocks(blocks: NewsBlock[], lang: Lang, cards: Map<string, NewsletterCard>): Built {
+  const t = T[lang];
+  const L = LANG_KEY[lang];
+  const out: Built = { rows: [], text: [], preheader: "", placed: new Set() };
+  for (const b of blocks) {
+    if (b.t === "img") {
+      const src = blockImageSrc(b.src);
+      if (!src) continue;
+      const link = newsletterLinkUrl(b.href, lang);
+      const alt = pick(b.alt) || t.picture;
+      out.rows.push(imageRow(src, alt, link));
+      // the plain-text part names where the banner GOES, not the .jpg it is made of
+      out.text.push(`${alt}: ${link || src}`, "");
+      continue;
+    }
+    if (b.t === "text") {
+      const words = String(b.text?.[L] ?? "").trim();
+      if (!words) continue;
+      if (b.style === "h") {
+        const one = words.replace(/\s+/g, " ");
+        out.rows.push(headingRow(one));
+        out.text.push(one.toUpperCase(), "");
+        continue;
+      }
+      for (const para of words.split(/\n\s*\n/)) {
+        const p = para.trim();
+        if (!p) continue;
+        out.rows.push(paragraphRow(esc(p).replace(/\n/g, "<br>")));
+        out.text.push(p, "");
+        if (!out.preheader) out.preheader = p.replace(/\s+/g, " ");
+      }
+      continue;
+    }
+    if (b.t === "btn") {
+      const label = String(b.text?.[L] ?? "").trim();
+      const url = newsletterLinkUrl(b.href, lang);
+      if (!label || !url) continue;
+      out.rows.push(buttonRow(url, label));
+      out.text.push(`${label}: ${url}`, "");
+      continue;
+    }
+    if (b.t === "product") {
+      const card = cards.get(b.id);
+      if (!card) continue;
+      out.placed.add(card.id);
+      out.rows.push(productRow(card, lang));
+      out.text.push(`${cardName(card, lang)} — ${cardPrice(card, lang, false)}: ${newsletterProductUrl(card.id, lang)}`, "");
+      continue;
+    }
+    if (b.t === "html") {
+      const inner = build(String(b.html?.[L] ?? ""), lang, cards);
+      out.rows.push(...inner.rows);
+      out.text.push(...inner.text);
+      for (const id of inner.placed) out.placed.add(id);
+      if (!out.preheader) out.preheader = inner.preheader;
+    }
+  }
+  return out;
+}
+
 /* ---------- the letter -------------------------------------------------- */
 
 export function renderNewsletter(input: NewsletterInput, lang: Lang | string = "ru"): RenderedEmail {
@@ -459,7 +594,9 @@ export function renderNewsletter(input: NewsletterInput, lang: Lang | string = "
   const cards = new Map<string, NewsletterCard>();
   for (const p of input.products ?? []) if (p && p.id && !cards.has(p.id)) cards.set(p.id, p);
 
-  const built = build(String(input.body ?? ""), L, cards);
+  const built = Array.isArray(input.blocks)
+    ? buildBlocks(input.blocks, L, cards)
+    : build(String(input.body ?? ""), L, cards);
   const rest = [...cards.values()].filter((p) => !built.placed.has(p.id));
 
   let body = rowTitle(subject) + `        <tr><td class="em-card" style="padding:0 0 12px 0; background-color:${C.card};"></td></tr>\n` + built.rows.join("");
