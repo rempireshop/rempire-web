@@ -217,12 +217,22 @@ test.describe("admin — the banner editor opens where the owner can see it", ()
 
     /* Nothing INSIDE the pane may move the page — a previous round made
        picking a picture deliberately still (paintHeroPick), and that must
-       survive this one. */
+       survive this one.
+
+       The TILE is brought into view before the page's position is read, not
+       just the list. Playwright scrolls whatever it clicks into view first,
+       and it honours the root's scroll-padding — which on a phone is the
+       save-bar header plus 12 px (admin.css, html.adm-saving). Scrolled by the
+       list, the first tile sat flush under the header, inside that band, so
+       the click itself moved the page those 12 px and this line blamed the
+       app for it. Measured 23.09.2026: a plain mouse tap on the same tile
+       moves nothing, `locator.click()` moved 12 px, and after the tile's own
+       scroll the click moves nothing either. */
     const list = page.locator("#heroimglist");
-    await list.scrollIntoViewIfNeeded();
+    const other = await list.locator('[data-heroimg]:not([aria-current="true"])').first().getAttribute("data-heroimg");
+    await list.locator(`[data-heroimg="${other}"]`).scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
     const y0 = await page.evaluate(() => window.scrollY);
-    const other = await list.locator('[data-heroimg]:not([aria-current="true"])').first().getAttribute("data-heroimg");
     await list.locator(`[data-heroimg="${other}"]`).click();
     await expect(list.locator(`[data-heroimg="${other}"]`)).toHaveAttribute("aria-current", "true");
     await page.waitForTimeout(300);

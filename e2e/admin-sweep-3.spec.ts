@@ -295,12 +295,17 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     /* ---- the browser's Back in the middle of an edit ---------------------
        The panel is one URL, and Back used to leave it altogether with the
        editor still open. Dim answered «yes, make Back close the card»
-       (docs/audit/2026-09-07-admin.md), so the first Back now closes the
-       editor and stays in «Товары»; the presses after it walk back out
-       through the sections this test came in through (round 15, app.js
-       ADM_TRAIL) and the last of them leaves. What has to hold either way is
-       that nothing breaks and that the half-typed price never reached the
-       shop. */
+       (docs/audit/2026-09-07-admin.md), so Back now closes the editor and
+       stays in «Товары»; the presses after it walk back out through the
+       sections this test came in through (round 15, app.js ADM_TRAIL) and the
+       last of them leaves. What has to hold either way is that nothing breaks
+       and that the half-typed price never reached the shop.
+
+       A price typed and not saved is exactly what Back must not throw away
+       in silence: since 19.09.2026 (edec888) the first Back over a touched
+       form asks — the same «Выйти без сохранения» card «← Товары» and
+       «Отмена» show — and the editor stays open under the question. The
+       second Back is the answer, like the second press of «← Товары». */
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     // «Сохранить» carries the open product's id — it is on both editors, the
@@ -308,6 +313,9 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await expect(page.locator("[data-admsavegoods]")).toBeVisible();
     await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").first().fill("999999999");
+    await page.goBack();
+    await expect(page.locator("[data-admbackyes]"), "Back threw a typed price away without asking").toBeVisible();
+    await expect(page.locator("[data-admsavegoods]"), "the question closed the editor under itself").toHaveCount(1);
     await page.goBack();
     await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel too").toBeVisible();

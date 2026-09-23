@@ -300,6 +300,12 @@ test.describe("admin assistant — the microphone listens in the language he cho
     // (the pane's own open/closed state is remembered too, so it may be back
     // on screen already — admPanesSave)
     await page.reload();
+    // Neither the pane nor its button exists until /api/admin/me/ has answered
+    // — the panel is admWaitScreen() until then — so asking «is the pane up?»
+    // the moment the page has loaded could hear «no» from a panel about to draw
+    // it open, and then wait for a button that is never drawn beside an open
+    // pane. Ask once the shell has drawn one of the two.
+    await expect(page.locator(".adm-asst, .adm-fab").first()).toBeVisible();
     if (!(await page.locator(".adm-asst").isVisible())) await page.locator(".adm-fab").click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     const again = page.locator("[data-admvoicelang]");

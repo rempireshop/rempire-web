@@ -18,7 +18,7 @@ import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } 
  *   · a stock number typed in the same grid reaches «Склад» (it travels as a
  *     relative move on the inventory API, like the ± stepper does);
  *   · a barcode typed in the same grid binds to that size;
- *   · the photo grid tags its first picture «главное»;
+ *   · the photo grid tags its first picture «главное», and the sizes that show it;
  *   · a video link round-trips;
  *   · the destructive slot goes through the confirm card.
  *
@@ -170,8 +170,15 @@ test.describe("admin — the product editor", () => {
       // ---- Фото и видео ------------------------------------------------------
       await openEditor(page, id);
       await edTab(page, "media");
-      // the first photo is the main one and wears the tag that says so
-      await expect(page.locator(".adm-photo__tag--ink").first()).toHaveText("главное");
+      // the first photo is the main one and wears the tag that says so. Since
+      // 19.09.2026 (0a8e2fa) the tag also names the sizes that show it —
+      // «главное · 40 мл · 150 мл»; it used to stop at the word, so the one
+      // picture most sizes point at was the one tile that would not admit it.
+      // The word stays a node of its own, which is what lets the dictionary
+      // carry it while the size names beside it travel as they are.
+      const mainTag = page.locator(".adm-photo__tag--ink").first();
+      await expect(mainTag.locator("span").first()).toHaveText("главное");
+      await expect(mainTag, "the main photo does not say which sizes show it").toContainText(VARIANT);
       await expect(page.locator(`[data-galup="${id}"]`), "no «+ Фото с телефона»").toBeVisible();
       // the three video sources, one field behind them
       for (const kind of ["yt", "ig", "up"]) {
@@ -198,10 +205,15 @@ test.describe("admin — the product editor", () => {
       await assertClean(page, w, "editor description tab");
 
       // ---- the destructive slot goes through the confirm card ----------------
+      // On a catalogue product it is «Отметить «нет в наличии»» since
+      // 19.09.2026 (6313532): it never did take the product off sale — the
+      // «Показывать в магазине» switch does that — so it stopped saying it
+      // did. «Снять с продажи» is the owner's own product's word only.
+      await expect(page.locator("[data-admgoodspull]")).toHaveText("Отметить «нет в наличии»");
       await page.locator("[data-admgoodspull]").click();
       const card = page.locator(".adm-confirm");
-      await expect(card, "«Снять с продажи» skipped the confirm card").toBeVisible();
-      await expect(card).toContainText("Снять с продажи?");
+      await expect(card, "«Отметить «нет в наличии»» skipped the confirm card").toBeVisible();
+      await expect(card).toContainText("Отметить «нет в наличии»?");
       // …and «Отмена» really cancels
       await page.locator("[data-admcancel]").click();
       await expect(card).toHaveCount(0);
@@ -209,19 +221,19 @@ test.describe("admin — the product editor", () => {
 
       await page.locator("[data-admgoodspull]").click();
       await page.locator("[data-admapply]").click();
-      expect(await toastText(page)).toMatch(/Снято с продажи/);
+      expect(await toastText(page)).toMatch(/Отмечено «нет в наличии»/);
       // the undo the toast offers is the safety net the README asks for
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
       await page.locator(".adm-toast__undo").click();
       await expect(page.getByRole("status")).toContainText("Отменено");
       await clearToast(page);
-      await assertClean(page, w, "«Снять с продажи» and its undo");
+      await assertClean(page, w, "«Отметить «нет в наличии»» and its undo");
 
-      // the product is on sale again — which is what the undo promised
+      // the product is in stock again — which is what the undo promised
       await openEditor(page, id);
       await edTab(page, "main");
       expect(await page.locator("[data-edstock]").inputValue(),
-        "the undo did not put the product back on sale").not.toBe("out");
+        "the undo did not put the product back in stock").not.toBe("out");
     } finally {
       // Price back to the catalogue's own, the salon override cleared, and the
       // shelf left well stocked — every other spec that buys this product
@@ -652,7 +664,8 @@ test.describe("admin — the product editor", () => {
       }
       expect(new Set(p.ops.map((o) => Math.round(o.t))).size, `tile ${i + 1}: the buttons wrapped onto two lines`).toBe(1);
     });
-    expect(photos[0].tag?.text, "the first photo does not say «главное»").toBe("главное");
+    // the word first, then — since 19.09.2026 (0a8e2fa) — the sizes that show it
+    expect(photos[0].tag?.text, "the first photo does not say «главное»").toMatch(/^главное(?: · |$)/);
     expect(photos[0].tag!.size, "the «главное» tag is too small to read").toBeGreaterThanOrEqual(12);
     await assertClean(page, w, "desktop photo tiles");
   });
@@ -821,8 +834,15 @@ test.describe("admin — what the acceptance run found", () => {
    * write went unannounced and could be walked away from.
    *
    * Nothing here is saved — the shortened ladder lives in S.goodsSizes until
-   * «Сохранить», and this test presses «Отмена» — so PRODUCT's three sizes,
-   * which half this suite reads, are not touched.
+   * «Сохранить», and this test presses «Отмена» and then «Выйти без
+   * сохранения» — so PRODUCT's three sizes, which half this suite reads, are
+   * not touched.
+   *
+   * Since 19.09.2026 (edec888) the same mark is what makes «Отмена» ask
+   * before it throws the form away — the card «← Товары» and Back show too —
+   * so the deletion is announced twice now: once in the bar, once on the way
+   * out. «Отмена» going straight back to the list would mean the ladder had
+   * been walked away from without a word, which is this finding over again.
    */
   test("phone: a size removed with «×» says the form is not saved", async ({ page }, ti) => {
     test.skip(ti.project.name !== "mobile", "the «Не сохранено» note is the phone bar's");
@@ -840,6 +860,9 @@ test.describe("admin — what the acceptance run found", () => {
     await expect(page.locator("[data-edsizedel]")).toHaveCount(n - 1);
     await expect(note, "a deleted size is a real change and nobody was told").toHaveText("Не сохранено");
     await page.locator(".adm-savebar [data-admclose]").click();
+    await expect(page.locator("[data-admbackyes]"), "«Отмена» threw a deleted size away without asking").toBeVisible();
+    await expect(page.locator("#goodslist")).toHaveCount(0);
+    await page.locator("[data-admbackyes]").click();
     await expect(page.locator("#goodslist")).toBeVisible();
     await assertClean(page, w, "a deleted size");
   });
