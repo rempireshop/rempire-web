@@ -400,13 +400,13 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "doing",
       "blocking": true,
       "title": "Собрать фид из каталога магазина и добавить его рядом с фидами Shopify",
-      "detail": "tools/build-merchant-feed.mjs существует, но пишет из старого public/shop/catalogue2.js, со стендовым доменом, и в сборке не запускается — public/feed/google-shopping.xml лежит от 03.09 и никуда не отправлен. Перенацелить на shop2, поставить живой домен, запускать в prebuild. Добавлять рядом с шестью фидами Shopify, а не вместо: пока оба на месте, их видно и можно сравнить.",
+      "detail": "Готово 23.09: магазин сам отдаёт три фида — https://rempireshop.com/feed/google-en.xml, google-et.xml и google-ru.xml (английский, эстонский, русский). Каждый собирается заново при каждом запросе из живого каталога: цена каждого объёма — та же, что берёт касса; наличие по объёмам; скрытые товары в фид не попадают; фото, описания, бренд, штрихкод, если Ренат отсканировал его в «Складе»; доставка по каждой стране — как на кассе. Ссылки всегда ведут на rempireshop.com. Старый tools/build-merchant-feed.mjs и статичный google-shopping.xml удалены. Осталось: в день переключения добавить три фида в Merchant Center рядом с шестью фидами Shopify — по шагам в docs/merchant-feed.md. Номера товаров в фиде новые, Google проверяет каждый 1–3 дня, поэтому фиды Shopify не трогаем, пока наши не одобрены.",
       "en": {
         "title": "Build a feed from the shop's own catalogue and add it alongside the Shopify ones",
-        "detail": "tools/build-merchant-feed.mjs exists but writes from the old public/shop/catalogue2.js with the staging domain, and nothing in the build runs it — public/feed/google-shopping.xml is dated 03.09 and was never submitted. Repoint it at shop2, give it the live domain, run it in prebuild. Add it beside the six Shopify feeds rather than in place of them: while both are there they can be compared."
+        "detail": "Built 23.09: the shop serves three feeds itself — https://rempireshop.com/feed/google-en.xml, google-et.xml and google-ru.xml (English, Estonian, Russian). Each is rebuilt on every fetch from the live catalogue: every size at the price the checkout charges, stock per size, hidden products left out, photos, descriptions, brand, the barcode where Renat has scanned one in «Склад», and delivery per country at the checkout's prices. Links always point at rempireshop.com. The old tools/build-merchant-feed.mjs and the static google-shopping.xml are gone. Left: on the switch day, add the three feeds in Merchant Center beside the six Shopify ones — step by step in docs/merchant-feed.md. The item ids are new, so Google reviews every item (1–3 days); the Shopify sources stay until ours are approved."
       }
     },
     {
@@ -415,13 +415,13 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "doing",
       "blocking": true,
       "title": "Переписать доставку в Merchant Center по настоящим ценам Montonio",
-      "detail": "Сейчас там политика Shopify: плоские 15,00 € и 4–12 дней на каждую страну. Настоящие цены идут примерно от 5 до 60 € по стране и перевозчику. Расхождение фида со страницей товара — самая частая причина блокировки аккаунта, и вскроется оно ровно в день переключения.",
+      "detail": "Закрыто фидом (23.09): у каждого товара в фиде своя доставка по каждой стране — самый дешёвый пакомат и курьер, ровно так, как считает касса, и 0 € от порога бесплатной доставки (59 € по Эстонии, Латвии, Литве и Финляндии, 200 € по остальной Европе). Доставка, указанная у товара, важнее политики аккаунта, так что плоские 15 € от Shopify наши товары не перебьют. Политики Shopify удалить, когда удалены фиды Shopify — docs/merchant-feed.md, шаг C.",
       "en": {
         "title": "Rewrite the Merchant Center shipping policies from the real Montonio prices",
-        "detail": "They are Shopify's today: a flat €15.00, 4–12 days, one per country. The real prices run from about €5 to €60 by country and carrier. A feed that disagrees with the product page is the commonest cause of account suspension, and it would surface on the day of the switch."
+        "detail": "Covered by the feed (23.09): every item carries its own delivery price per country — the cheapest locker and courier, exactly as the checkout computes them, and €0 from the free-delivery threshold (€59 in Estonia, Latvia, Lithuania and Finland, €200 in the rest of Europe). An item's own shipping outranks the account's policies, so Shopify's flat €15 cannot override ours. Delete the Shopify policies once the Shopify sources are gone — docs/merchant-feed.md, step C."
       }
     },
     {

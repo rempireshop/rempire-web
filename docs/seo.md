@@ -744,27 +744,23 @@ block that carries `id="ldjson"` anywhere else is deleted on boot, and a
 product block that does not carry it is never corrected. `check-prerender.mjs`
 asserts the split both ways.
 
-Two places deliberately still read the product word alone:
+One place deliberately still reads the product word alone:
 
 - `src/app/sitemap-products.xml/route.ts` sets `priority` 0.4 for an out
   product and 0.7 otherwise from `Override.stock`. `priority` is advisory and
   Google ignores it, and reading the ladder here would mean a second data
   dependency on the sitemap's hottest path for a hint nobody consumes.
-- `tools/build-merchant-feed.mjs` — see the gaps below; it is a hand-run
-  snapshot and is not wired into `prebuild` at all.
+
+The Google Merchant Center feeds (`/feed/google-{en,et,ru}.xml`,
+`src/lib/merchant-feed.ts`) do NOT read the product word alone: every size is
+its own item, and a size counted to zero is `out_of_stock` while its siblings
+are in stock — availability is the field Merchant Center suspends accounts
+over. The old hand-run `tools/build-merchant-feed.mjs` and its static
+`public/feed/google-shopping.xml` (staging links, file stock only) were
+removed on 23.09.2026; `docs/merchant-feed.md` has the owner's steps.
 
 ## Known gaps
 
-- **The Google Shopping feed is a hand-run snapshot pinned to staging.**
-  `tools/build-merchant-feed.mjs` hardcodes `BASE =
-  https://rempireshop.diipsolutions.eu`, reads `stock` off `catalogue2.js`
-  alone (no `product_overrides`, no shelf, no per-size stock) and is **not in
-  `prebuild`** — so `public/feed/google-shopping.xml` is only ever as fresh as
-  the last time somebody ran it by hand. Submitting it as it stands would
-  point every `g:link` at a `noindex` staging host, and its `g:availability`
-  is the one field Merchant Center suspends accounts over. Before it is
-  submitted it needs the live base and a decision about where its stock comes
-  from; `docs/merchant-feed.md` has the submission steps.
 - **Product cards the assistant writes into an article have no `href`.**
   `src/lib/ai-prompts.ts` tells the model to emit `<a data-product="ID"></a>`
   with no href and no text; `src/lib/blog-html.mjs` `openTag()` only keeps an

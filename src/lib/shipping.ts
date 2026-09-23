@@ -607,8 +607,13 @@ export function resetShippingRulesCache(): void {
  * The countries the «Другие страны Европы» row prices: the EU without the
  * four that have rows of their own, plus the EEA, Switzerland and the UK.
  * Anything else is «Остальные страны» (the `default` cell).
+ *
+ * Exported for the Merchant Center feed (src/lib/merchant-feed.ts): the
+ * checkout offers exactly EE, LV, LT, FI and this list minus `countriesOff`
+ * (EUROPE_ISO in public/shop2/app.js), so that is where the feed says the
+ * shop delivers.
  */
-const EUROPE = new Set([
+export const EUROPE = new Set([
   "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "FR", "DE", "GR", "HU", "IE", "IT", "LU", "MT", "NL", "PL",
   "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "CH", "GB",
 ]);

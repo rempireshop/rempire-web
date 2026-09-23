@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "node tools/minify-shop2.mjs",
     "dev": "next dev --port 3300",
-    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/pack-legal.mjs && node tools/copy-vendor.mjs && node tools/minify-shop2.mjs && node tools/prerender-shop2.mjs",
+    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/pack-legal.mjs && node tools/pack-feed.mjs && node tools/copy-vendor.mjs && node tools/minify-shop2.mjs && node tools/prerender-shop2.mjs",
     "build": "next build",
     "postbuild": "node tools/migrate.mjs --if-configured",
     "start": "next start --port 3300",
@@ -23,6 +23,7 @@
     "i18n:gaps": "node tools/i18n-gaps.mjs",
     "pack:migrations": "node tools/pack-migrations.mjs",
     "pack:content": "node tools/pack-content.mjs",
+    "pack:feed": "node tools/pack-feed.mjs",
     "montonio:routes": "node tools/montonio-route-grid.mjs",
     "pack:legal": "node tools/pack-legal.mjs",
     "e2e": "node tools/e2e-build.mjs && playwright test",
