@@ -3118,47 +3118,45 @@
       "lang": "RU",
       "title": "«Купить через G Pay» — сразу к оплате",
       "steps": [
-        "Войти в кабинет: имя, телефон и «Доставка по умолчанию» с пакоматом заполнены.",
+        "Войти в свой кабинет: имя, телефон и «Доставка по умолчанию» с пакоматом заполнены.",
         "Положить в корзину любой другой товар и закрыть корзину.",
         "Открыть товар с несколькими объёмами и выбрать второй объём.",
-        "Прочитать строки над чёрной кнопкой, нажать её и оплатить на странице Montonio.",
-        "В кабинете выбрать «Курьер до двери», вписать адрес, индекс и город; повторить шаги 3–4.",
-        "В кабинете выбрать Польшу, «Пакомат DPD» и пакомат из поиска; повторить шаги 3–4.",
+        "Прочитать строки над чёрной кнопкой и нажать её.",
+        "На странице Montonio оплатить кошельком или тестовой картой.",
         "Открыть корзину, потом «Заказы» в панели."
       ],
       "expect": [
-        "Над кнопкой видны товар с объёмом, доставка с ценой и итог.",
+        "Над кнопкой видны товар с объёмом, ваш пакомат и цена доставки.",
         "На кнопке написано «Купить за … с доставкой» с итоговой суммой.",
-        "Сразу открылась страница оплаты Montonio, сумма та же, что на кнопке.",
-        "С курьером над кнопкой ваш адрес, и заказ пришёл на этот адрес.",
-        "Польша: сначала строка «Ищем ваш пакомат из кабинета…», потом кнопка с суммой.",
-        "В панели новые заказы с вашей доставкой, другой товар остался в корзине."
+        "Сразу открылась страница оплаты Montonio с Apple Pay или Google Pay.",
+        "Сумма там та же, что на кнопке.",
+        "В панели один новый заказ: этот товар, этот объём, ваш пакомат.",
+        "Другой товар так и остался в корзине."
       ],
-      "why": "Покупатель с заполненным кабинетом — пакомат, самовывоз или курьер — покупает в три касания.",
+      "why": "Покупатель с заполненным кабинетом покупает в три касания — без корзины и оформления.",
       "risk": "high",
       "writes": true,
-      "mark": "redo",
-      "markedAt": "2026-09-23T13:44:30.648Z",
+      "mark": "new",
+      "markedAt": "2026-09-23T13:01:56.720Z",
       "en": {
         "title": "«Купить через G Pay» — straight to payment",
         "steps": [
           "Sign in to your account: name, phone and a default parcel locker are filled in.",
           "Put some other product in the cart and close the cart.",
           "Open a product with several sizes and pick the second size.",
-          "Read the lines above the black button, press it and pay on Montonio's page.",
-          "In the account choose «Курьер до двери», fill in address, postcode and city; repeat steps 3–4.",
-          "In the account choose Poland, «Пакомат DPD» and a locker from the search; repeat steps 3–4.",
+          "Read the lines above the black button and press it.",
+          "On Montonio's page pay with the wallet or the test card.",
           "Open the cart, then «Заказы» in the panel."
         ],
         "expect": [
-          "Above the button: the product with its size, the delivery with its price, the total.",
+          "Above the button: the product with its size, your locker, the delivery price.",
           "The button says «Купить за … с доставкой» with the total.",
-          "Montonio's payment page opened at once, the amount the same as on the button.",
-          "With the courier your address is above the button, and the order carries it.",
-          "Poland: first the line «Ищем ваш пакомат из кабинета…», then the button with the total.",
-          "New orders in the panel carry your delivery; the other product stays in the cart."
+          "Montonio's payment page opened at once, with Apple Pay or Google Pay.",
+          "The amount there is the same as on the button.",
+          "The panel has one new order: this product, this size, your locker.",
+          "The other product is still in the cart."
         ],
-        "why": "A customer with a complete account — locker, pickup or courier — buys in three taps."
+        "why": "A customer with a complete account buys in three taps — no cart, no checkout."
       }
     },
     {
@@ -3169,39 +3167,37 @@
       "lang": "RU",
       "title": "«Купить через G Pay», когда в кабинете чего-то нет",
       "steps": [
-        "В кабинете выбрать «Курьер до двери», вписать только адрес, без индекса и города, и выйти из поля.",
+        "В кабинете в «Доставке по умолчанию» выбрать «Курьер до двери».",
         "Открыть любой товар и нажать чёрную кнопку «Купить через».",
         "Выйти из кабинета, открыть товар и нажать ту же кнопку.",
-        "Войти снова и вернуть доставку по умолчанию."
+        "Войти снова и вернуть пакомат по умолчанию."
       ],
       "expect": [
-        "Под списком: «Впишите адрес, индекс и город — тогда сохраним».",
-        "Пока адреса нет, на кнопке нет суммы — только «Купить через».",
+        "С курьером по умолчанию на кнопке нет суммы — только «Купить через».",
         "Открылось оформление: товар в корзине, выбран Apple Pay / Google Pay.",
         "Сразу открыт шаг доставки, поля адреса подсвечены красным.",
         "Без входа оформление открылось с первого шага, как раньше."
       ],
-      "why": "Чего не хватает в кабинете, покупатель дописывает в оформлении — а не получает ошибку.",
+      "why": "Адреса для курьера кабинет не хранит — чего не хватает, покупатель дописывает в оформлении.",
       "risk": "med",
       "writes": false,
-      "mark": "redo",
-      "markedAt": "2026-09-23T13:44:30.648Z",
+      "mark": "new",
+      "markedAt": "2026-09-23T13:01:56.720Z",
       "en": {
         "title": "«Купить через G Pay» when the account is missing something",
         "steps": [
-          "In the account choose «Курьер до двери», type only the address, no postcode or city, and leave the box.",
+          "In the account, under «Доставка по умолчанию», choose «Курьер до двери».",
           "Open any product and press the black «Купить через» button.",
           "Sign out, open the product and press the same button.",
-          "Sign in again and put the default delivery back."
+          "Sign in again and put the default parcel locker back."
         ],
         "expect": [
-          "Under the list: «Впишите адрес, индекс и город — тогда сохраним».",
-          "While there is no address the button shows no amount — just «Купить через».",
+          "With a courier default the button shows no amount — just «Купить через».",
           "The checkout opened: the product in the cart, Apple Pay / Google Pay chosen.",
           "The delivery step is open at once, the address fields marked red.",
           "Signed out, the checkout opened on its first step, as before."
         ],
-        "why": "Whatever the account is missing, the buyer adds at checkout instead of meeting an error."
+        "why": "The account keeps no courier address — whatever is missing, the buyer adds at checkout."
       }
     },
     {
@@ -4780,7 +4776,7 @@
         "Вернуться в кабинет: «Другая страна Европы», во втором списке Италия, строка «Пакомат DPD».",
         "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
         "Снова открыть оформление и дойти до шага доставки.",
-        "В кабинете выбрать Грецию и «Курьер до двери», вписать адрес, индекс и город, потом снова открыть оформление.",
+        "В кабинете выбрать Грецию и «Курьер до двери», потом снова открыть оформление.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
@@ -4788,7 +4784,7 @@
         "После выбора «Доставка по умолчанию сохранена ✓», касса подставляет её на обоих телефонах.",
         "Италия: вместо длинной фразы кнопка «Выберите пакомат» с поиском, как в оформлении.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
-        "Греция: в оформлении Греция, курьер и ваш адрес уже вписан, цена та же.",
+        "Греция сохраняется Грецией: в оформлении выбраны Греция и курьер, цена та же.",
         "После «Выйти» доставка больше не подставляется."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
@@ -4804,7 +4800,7 @@
           "Back in the account: «Другая страна Европы», Italy in the second list, the «Пакомат DPD» row.",
           "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
           "Open the checkout again and get to the delivery step.",
-          "In the account choose Greece and «Курьер до двери», fill in address, postcode and city, then open the checkout again.",
+          "In the account choose Greece and «Курьер до двери», then open the checkout again.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
@@ -4812,13 +4808,13 @@
           "Once picked, «Доставка по умолчанию сохранена ✓»; the checkout fills it in on both phones.",
           "Italy: no long sentence, but a «Выберите пакомат» button with the checkout's search.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
-          "Greece: the checkout has Greece, the courier and your address filled in, same price.",
+          "Greece stays Greece: the checkout has Greece and the courier, at the same price.",
           "After «Выйти» it stops filling in."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T13:44:30.648Z"
+      "markedAt": "2026-09-23T12:23:20.471Z"
     },
     {
       "id": "acct-refund-sent",

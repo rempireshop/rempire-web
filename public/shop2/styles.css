@@ -1052,8 +1052,6 @@ body:has(.stickybar) .ftr {
 .pdp__exsum .cosum__row > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .pdp__exsum .cosum__row > .num { flex-shrink: 0; }
 .pdp__exsum .err { margin: 0; }
-/* …while the saved machine is still being looked up: the same box, one line */
-.pdp__exsum--wait p { margin: 0; font-size: 13px; }
 .pdp__expt { color: var(--muted); }
 .pdp__legal { text-align: center; margin: -2px 0 10px; }
 .pdp__ship { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
@@ -1343,8 +1341,6 @@ body.is-locked .sbot { display: none; }
    position:fixed to key off. */
 @keyframes stepIn { from { opacity: 0; } }
 .co__zip { display: grid; grid-template-columns: 118px 1fr; gap: 12px; }
-/* the account's «Курьер до двери» address — the checkout's boxes (acctAddrHTML) */
-.acct__addr { margin-top: 8px; }
 .cosrc { font-size: 11.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.45; }
 .cotrust {
   list-style: none; margin: 26px 0 0; padding: 0;

@@ -87,8 +87,6 @@ const ACCT = [
   "acctShipPrice", "shipRulePrice", "shipZoneOf", "orderCountry", "pickupOpen", "carriersFor",
   "courierCarriersFor", "methodCarriers", "deliveryFor", "acctPickCountry", "applyAcctShipPref",
   "pointsForAcct", "acctPointsKey",
-  // the courier row's address (23.09.2026) — the draft carries it, the save compares it
-  "acctAddrOf", "acctAddrWhole", "acctAddrKey",
 ];
 
 /** A fresh S: an Estonian checkout, nothing picked, nothing saved. */
