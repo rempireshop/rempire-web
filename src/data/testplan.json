@@ -1059,7 +1059,9 @@
           "The keyboard stays up while you type and when you clear the field."
         ],
         "why": "An empty answer to «перхоть» is a buyer who walks off to the pharmacy."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "shop-search-empty",
@@ -1451,7 +1453,7 @@
       "why": "Раздел, не открывающийся на телефоне, — это работа с компьютера. Надпись об ошибке на «Обзоре» или «Аналитике» значит, что не ответил сервер, а не что сломалась панель.",
       "risk": "low",
       "writes": false,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Every panel section opens",
         "steps": [
@@ -1466,7 +1468,8 @@
           "Back closes the screen instead of throwing you out."
         ],
         "why": "A section that fails on the phone is work for the computer. An error line on «Обзор» or «Аналитика» means the server did not answer, not that the panel is broken."
-      }
+      },
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "panel-back",
@@ -1943,7 +1946,9 @@
           "The Latvian banks are left exactly as they were."
         ],
         "why": "An empty bank list stops the payment, and extra logos slow it down."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "panel-company-iban",
@@ -3047,7 +3052,9 @@
           "Paying again closes the same order, it makes no new one."
         ],
         "why": "Somebody whose payment failed does not rebuild the cart — they leave."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "checkout-cancel-resume",
@@ -3117,7 +3124,7 @@
       "why": "Письмо тому, кто согласия не давал, — это штраф. Гостевой заказ больше не снимает чужой адрес со стоп-листа: это может только вход в кабинет на тот же ящик.",
       "risk": "high",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "The «Хочу получать скидки и поздравление» tick box",
         "steps": [
@@ -3134,7 +3141,8 @@
           "The customer card says when and where consent was given: a date and «на кассе»."
         ],
         "why": "A letter to somebody who never consented is a fine. A guest order no longer lifts a stranger off the stop list: only signing into that mailbox can."
-      }
+      },
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "checkout-points",
@@ -3761,7 +3769,9 @@
           "No letter goes to the buyer."
         ],
         "why": "An order already collected but still queued is one you chase for nothing."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "order-message",
@@ -4093,48 +4103,6 @@
           "If Montonio refused both times, both answers read alike and no row appears."
         ],
         "why": "A button that said «it did not work» is a button somebody presses again."
-      }
-    },
-    {
-      "id": "order-refund-part",
-      "area": "orders",
-      "who": "dim",
-      "device": "desktop",
-      "lang": "RU",
-      "title": "Вернуть часть денег",
-      "steps": [
-        "Открыть другой оплаченный заказ.",
-        "Нажать «Вернуть деньги», стереть сумму и вписать меньшую — например 1,00.",
-        "Подтвердить и посмотреть карточку.",
-        "Попробовать вернуть сумму больше остатка."
-      ],
-      "expect": [
-        "Вернулась ровно та сумма, которую вписали.",
-        "Заказ так и остался оплаченным.",
-        "Товары на склад не вернулись.",
-        "Сумму больше остатка магазин не принимает.",
-        "Баллы за этот заказ остались как были — их возвращает только полный возврат."
-      ],
-      "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
-      "risk": "high",
-      "writes": true,
-      "mark": "redo",
-      "en": {
-        "title": "Refunding part of the money",
-        "steps": [
-          "Open another paid order.",
-          "Press «Вернуть деньги», clear the amount and type a smaller one — 1.00, say.",
-          "Confirm and look at the card.",
-          "Try to refund more than the remaining balance."
-        ],
-        "expect": [
-          "Exactly the amount typed comes back.",
-          "The order stays paid.",
-          "The goods do not go back into stock.",
-          "The shop refuses an amount above the balance.",
-          "The order's points are untouched — only a full refund moves them."
-        ],
-        "why": "Refunding more than was paid is a gift of money."
       }
     },
     {
@@ -5159,7 +5127,8 @@
           "With a counted zero on the shelf no letter goes at all."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
-      }
+      },
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "mail-abandoned",
@@ -5974,7 +5943,9 @@
           "The old number stays where it was."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "stock-history",
@@ -6147,7 +6118,7 @@
         "Открыть «Салон».",
         "Вписать в поиск штрихкод товара и нажать кнопку с объёмом и ценой.",
         "Добавить второй товар сканером и поправить количество в корзине.",
-        "Вписать скидку в процентах и почту клиента.",
+        "Вписать скидку в процентах и почту, у которой нет аккаунта в магазине.",
         "Нажать «Терминал» и подтвердить «Оформить»."
       ],
       "expect": [
@@ -6155,20 +6126,20 @@
         "Кнопка под ним одна — того объёма, к которому привязан код.",
         "Появился экран «Продажа оформлена».",
         "На нём видно число товаров и способ оплаты.",
-        "Там же сказано, что остатки списаны и чек отправлен.",
+        "Там же сказано, что остатки списаны и чек ушёл — на языке кассы.",
         "Заказ появился в «Заказы» → «Все», и у него есть ссылка на чек."
       ],
       "why": "Продажа с полки, не списавшая остаток, продаст ту же бутылку в интернете.",
       "risk": "high",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "A sale in the salon",
         "steps": [
           "Open «Салон».",
           "Type a product's barcode into the search and press the size-and-price button.",
           "Add a second product with the scanner and fix the quantity in the cart.",
-          "Type a discount in percent and the customer's e-mail.",
+          "Enter a percentage discount and an e-mail that has no account in the shop.",
           "Press «Терминал» (card terminal) and confirm with «Оформить»."
         ],
         "expect": [
@@ -6176,11 +6147,12 @@
           "Under it there is one button — the size the code is bound to.",
           "The «Продажа оформлена» (sale completed) screen appears.",
           "It shows the number of items and the payment method.",
-          "It says the stock is down and the receipt has gone.",
+          "It also says stock was written off and the receipt sent — in the till's language.",
           "The order is under «Заказы» → «Все» and has a link to the receipt."
         ],
         "why": "A shelf sale that leaves stock untouched sells the same bottle online."
-      }
+      },
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "pos-double-tap",
@@ -6888,7 +6860,9 @@
           "It warns that an Estonian reader will see Russian."
         ],
         "why": "Text that vanishes when you switch language puts you off blogging."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "blog-delete",
@@ -7476,7 +7450,9 @@
           "The card itself reads Estonian — the name and «alates», no Russian words."
         ],
         "why": "A translation that lost its product links turns a selling article into just text."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "ai-blog-photo",
@@ -7566,7 +7542,9 @@
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "ai-assistant-voice",
@@ -7998,7 +7976,9 @@
           "The lower list is read-only; nothing there can be changed."
         ],
         "why": "A wrong price must come back in one press, not a phone call."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "settings-hero",
@@ -8288,6 +8268,49 @@
         "why": "Without a working refund it is easy to pay someone twice."
       },
       "markedAt": "2026-09-22T15:49:00.000Z"
+    },
+    {
+      "id": "order-refund-part",
+      "area": "live",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Часть настоящих денег назад",
+      "steps": [
+        "На боевых ключах открыть второй настоящий оплаченный заказ.",
+        "Нажать «Вернуть деньги», стереть сумму и вписать меньшую — например 0,50.",
+        "Подтвердить и посмотреть карточку.",
+        "Попробовать вернуть сумму больше остатка."
+      ],
+      "expect": [
+        "Вернулась ровно та сумма, которую вписали.",
+        "Заказ так и остался оплаченным.",
+        "Товары на склад не вернулись.",
+        "Сумму больше остатка магазин не принимает.",
+        "Баллы за этот заказ остались как были — их возвращает только полный возврат."
+      ],
+      "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
+      "risk": "high",
+      "writes": true,
+      "mark": "redo",
+      "en": {
+        "title": "Part of the real money back",
+        "steps": [
+          "On the live keys, open a second real paid order.",
+          "Press «Вернуть деньги», clear the amount and type a smaller one — e.g. 0.50.",
+          "Confirm and look at the card.",
+          "Try to refund more than the remaining balance."
+        ],
+        "expect": [
+          "Exactly the amount typed comes back.",
+          "The order stays paid.",
+          "The goods do not go back into stock.",
+          "The shop refuses an amount above the balance.",
+          "The order's points are untouched — only a full refund moves them."
+        ],
+        "why": "Refunding more than was paid is a gift of money."
+      },
+      "markedAt": "2026-09-23T12:00:25.282Z"
     },
     {
       "id": "live-apple-pay",
