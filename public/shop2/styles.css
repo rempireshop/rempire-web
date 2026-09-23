@@ -1343,6 +1343,8 @@ body.is-locked .sbot { display: none; }
    position:fixed to key off. */
 @keyframes stepIn { from { opacity: 0; } }
 .co__zip { display: grid; grid-template-columns: 118px 1fr; gap: 12px; }
+/* the account's «Курьер до двери» address — the checkout's boxes (acctAddrHTML) */
+.acct__addr { margin-top: 8px; }
 .cosrc { font-size: 11.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.45; }
 .cotrust {
   list-style: none; margin: 26px 0 0; padding: 0;

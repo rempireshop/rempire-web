@@ -92,7 +92,8 @@ const ONE_SIZE = clientProduct(
 /* ---------- the storefront, sliced ------------------------------------- */
 
 type Point = { id: string; name: string; type: string; address?: string; city?: string };
-type Pref = { country: string; method: string; carrier: string; machine: string } | null;
+type Addr = { addr: string; zip: string; city: string };
+type Pref = { country: string; method: string; carrier: string; machine: string; address?: Addr } | null;
 interface Cust {
   email: string; name: string; phone: string; marketing?: boolean; shipPref: Pref;
 }
@@ -115,7 +116,7 @@ interface Shop {
   expressMarkup(p: unknown): string;
   orderPayload(): Record<string, unknown>;
   localTotal(): number;
-  applyAcctShipPref(): void;
+  applyAcctShipPref(saved?: boolean): void;
   matchAcctPoint(): boolean;
   walletPay(): number;
   eur(n: number): string;
@@ -289,6 +290,8 @@ function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, O
   return made;
 }
 
+/** The door a courier default rings. */
+const MARDI: Addr = { addr: "Mardi 1", zip: "10145", city: "Tallinn" };
 /** A customer whose account holds everything a parcel order needs. */
 const FULL: Cust = {
   email: "renat@example.com",
@@ -323,6 +326,22 @@ describe("expressPlan(): only a complete account goes straight to the wallet", (
     expect((s.expressPlan(SHAMPOO, 1, 1).point as Point).id).toBe("omn-101");
   });
 
+  it("a courier default with its address: the door, and the checkout's first courier", () => {
+    const s = shop(freshState(withPref({ method: "courier", carrier: "", machine: "", address: MARDI })));
+    const plan = s.expressPlan(SHAMPOO, 1, 1);
+    expect(plan).toMatchObject({ ok: true, method: "courier", carrier: "", point: null, address: MARDI });
+    const q = s.expressQuote(plan);
+    expect(q.payload.shipping).toEqual({
+      method: "courier", country: "EE", carrier: "dpd",
+      pointId: null, pointName: null, pointType: null,
+      address: { addr: "Mardi 1", zip: "10145", city: "Tallinn" },
+    });
+    const html = s.expressMarkup(SHAMPOO);
+    expect(html).toContain("Курьер до двери");
+    expect(html).toContain("Mardi 1, 10145 Tallinn");
+    expect(html).toContain("data-express");
+  });
+
   it("a counter in Tallinn needs no phone — shipRequired() does not ask for one", () => {
     const s = shop(freshState(withPref({ method: "pickup", carrier: "", machine: "" }, { phone: "" })));
     const plan = s.expressPlan(SHAMPOO, 1, 1);
@@ -349,7 +368,8 @@ describe("expressPlan(): only a complete account goes straight to the wallet", (
     ["pickup outside Estonia", withPref({ country: "LV", method: "pickup", carrier: "", machine: "" }), "delivery", () => {}],
     ["a parcel with no phone to text", withPref({}, { phone: "" }), "phone", () => {}],
     ["a phone too short to be one", withPref({}, { phone: "12-34" }), "phone", () => {}],
-    ["a courier — the account keeps no street address", withPref({ method: "courier", carrier: "", machine: "" }), "address", () => {}],
+    ["a courier default with no address saved", withPref({ method: "courier", carrier: "", machine: "" }), "address", () => {}],
+    ["a courier address with no postcode", withPref({ method: "courier", carrier: "", machine: "", address: { addr: "Mardi 1", zip: " ", city: "Tallinn" } }), "address", () => {}],
     ["a carrier this country does not offer", withPref({ carrier: "novapost" }), "delivery", () => {}],
     ["a carrier whose list came back empty", withPref({}), "delivery", (s) => { s.POINTS.empty["omniva:EE"] = true; }],
     ["a parcel with no machine chosen", withPref({ machine: "" }), "point", () => {}],
@@ -613,6 +633,9 @@ const PARITY: Array<[string, Cust, ReturnType<typeof clientProduct>, number, num
   ["a Nova Post office in Poland", withPref({ country: "PL", carrier: "novapost", machine: "Nova Post Warszawa 12" }), SHAMPOO, 0, 1],
   ["the counter on Mardi 1", withPref({ method: "pickup", carrier: "", machine: "" }), SHAMPOO, 1, 1],
   ["a product with one volume", FULL, ONE_SIZE, 0, 1],
+  ["a courier to the door in Tallinn", withPref({ method: "courier", carrier: "", machine: "", address: MARDI }), SHAMPOO, 1, 1],
+  ["a courier in Latvia", withPref({ country: "LV", method: "courier", carrier: "", machine: "", address: { addr: "Brīvības iela 12-4", zip: "LV-1010", city: "Rīga" } }), SHAMPOO, 0, 2],
+  ["a courier in Greece, the country with no lockers", withPref({ country: "GR", method: "courier", carrier: "", machine: "", address: { addr: "Ermou 25", zip: "105 63", city: "Athína" } }), SHAMPOO, 2, 1],
 ];
 
 describe("expressQuote(): the order is the one the checkout would place", () => {
