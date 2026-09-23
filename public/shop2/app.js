@@ -2930,11 +2930,7 @@
       "Название — для вас, покупатель его не увидит": "Nimi — sinule, ostja seda ei näe",
       "Тема письма — покупатель увидит её в списке писем": "Kirja teema — ostja näeb seda kirjade loendis",
       "Текст письма": "Kirja tekst",
-      "Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.":
-        "Alusta kirjutamist — või vajuta paremal «✨ Kirjuta». Ülemised nupud lisavad pealkirja, loendi, lingi, pildi või toote.",
       "Товары в письме": "Tooted kirjas",
-      "Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.":
-        "Iga toode loendist läheb kirja lõppu kaardina: foto, nimi, hind ja nupp «Vaata». Nupp «Toode» teksti kohal paneb kaardi otse õigesse kohta.",
       "Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.": "Test läheb ülal valitud keeles, teemas märge [test].",
       "Отправить подписчикам": "Saada tellijatele", "Отправить 1 подписчику": "Saada 1 tellijale",
       "Отправка": "Saatmine",
@@ -2948,11 +2944,8 @@
       "Продолжить": "Jätka", "Ход отправки": "Saatmise käik",
       "О чём письмо": "Millest kiri", "новинки сентября, скидка 10 % до воскресенья": "septembri uudised, 10 % soodustus pühapäevani",
       "✨ Написать": "✨ Kirjuta",
-      "Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.":
-        "Teema ja tekst — vene keeles, siis eesti ja inglise keeles. Loendi tooted lähevad teksti kaartidena. Mustand salvestub ise; sina loed ja saadad.",
       "Точно удалить письмо? Вернуть его будет нельзя.": "Kindlasti kustutada kiri? Tagasi seda ei saa.",
       "Удалить письмо": "Kustuta kiri",
-      "Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.": "Salvesta mustand — allpool ilmub kogu kiri nii, nagu ostja seda näeb.",
       "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.":
         "Muudad venekeelset versiooni. See on kirja keel, mitte paneeli keel — eesti- ja ingliskeelne tekst on eraldi.",
       "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.":
@@ -2976,6 +2969,57 @@
       "Письмо удалено ✓": "Kiri kustutatud ✓",
       "Отправить письмо?": "Saata kiri?",
       "Рассылка отправлена": "Uudiskiri saadetud",
+      /* «Рассылка» as blocks (23.09.2026): the blocks, the picker, the upload, the live letter */
+      "не всё переведено": "kõik pole tõlgitud",
+      "Текст": "Tekst", "Кнопка": "Nupp", "Текст из прежнего редактора": "Tekst varasemast redaktorist",
+      "Главная магазина": "Poe avaleht", "Статья": "Artikkel",
+      "Товар, бренд или статью — найдите по названию выше.": "Toote, brändi või artikli leiad ülal nime järgi.",
+      "Найти: товар, раздел, бренд, статья": "Otsi: toode, jaotis, bränd, artikkel",
+      "Или вставьте адрес страницы": "Või kleebi lehe aadress",
+      "Поставить адрес": "Pane aadress", "Убрать ссылку": "Eemalda link",
+      "Ждёт очереди…": "Ootab järjekorras…", "Готовим фото…": "Valmistame fotot ette…", "Обрабатываем фото…": "Töötleme fotot…",
+      "Загрузка картинки": "Pildi üleslaadimine", "Адрес картинки": "Pildi aadress",
+      "Загрузка фото на сервере не подключена — вставьте адрес картинки.":
+        "Fotode üleslaadimine pole serveris ühendatud — kleebi pildi aadress.",
+      "Поставить картинку": "Pane pilt", "Заменить картинку": "Vaheta pilt",
+      "Выбрать фото": "Vali foto", "Выбрать картинку": "Vali pilt",
+      "Никуда — просто картинка": "Mitte kuhugi — lihtsalt pilt",
+      "По-русски:": "Vene keeles:", "Вид текста": "Teksti liik",
+      "Пара строк о новинках. Пустая строка — новый абзац.": "Paar rida uudistest. Tühi rida — uus lõik.",
+      "Например: Смотреть новинки": "Näiteks: Vaata uudiseid",
+      "Не выбрано": "Valimata",
+      "Выберите, куда ведёт кнопка — без этого её не будет в письме.": "Vali, kuhu nupp viib — muidu seda kirjas ei ole.",
+      "Этого товара больше нет в магазине — в письме его не будет.": "Seda toodet poes enam pole — kirjas seda ei ole.",
+      "В письме: фото, название, цена и кнопка «Смотреть».": "Kirjas: foto, nimi, hind ja nupp «Vaata».",
+      "Этот текст написан в прежнем редакторе. Его можно передвинуть или удалить — новый текст добавьте блоком «+ Текст».":
+        "See tekst on kirjutatud varasemas redaktoris. Seda saab liigutada või kustutada — uue teksti lisa plokiga «+ Tekst».",
+      "На этом языке прежнего текста нет.": "Selles keeles varasemat teksti pole.",
+      "Удалить блок": "Kustuta plokk", "Добавить в письмо": "Lisa kirja",
+      "+ Картинка": "+ Pilt", "+ Текст": "+ Tekst", "+ Кнопка": "+ Nupp",
+      "В письме уже 40 блоков — больше не поместится.": "Kirjas on juba 40 plokki — rohkem ei mahu.",
+      "Посмотреть письмо целиком ↓": "Vaata kogu kirja ↓",
+      "Подождите — картинка ещё загружается": "Oota — pilt laaditakse veel üles",
+      "В письме есть блок без картинки — выберите фото или удалите блок": "Kirjas on plokk ilma pildita — vali foto või kustuta plokk",
+      "У кнопки не выбрано, куда она ведёт": "Nupul pole valitud, kuhu see viib",
+      "Впишите надпись на кнопке": "Kirjuta nupule tekst",
+      "Эстонская версия не готова — эстонские подписчики получат русскую.": "Eestikeelne versioon pole valmis — eesti tellijad saavad venekeelse.",
+      "Английская версия не готова — английские подписчики получат русскую.": "Ingliskeelne versioon pole valmis — inglise tellijad saavad venekeelse.",
+      "Письмо не нарисовалось — попробуйте ещё раз.": "Kirja ei õnnestunud kuvada — proovi uuesti.",
+      "Рисуем письмо…": "Joonistame kirja…",
+      "Добавьте картинку или текст — здесь появится письмо.": "Lisa pilt või tekst — siia ilmub kiri.",
+      "Перевожу на эстонский и английский…": "Tõlgin eesti ja inglise keelde…",
+      "Текст письма слишком длинный для перевода за один раз": "Kirja tekst on ühe korraga tõlkimiseks liiga pikk",
+      "Перевод пришёл неполным — попробуйте ещё раз": "Tõlge tuli poolikuna — proovi uuesti",
+      "В письме уже 8 товаров — больше карточек не поместится.": "Kirjas on juba 8 toodet — rohkem kaarte ei mahu.",
+      "Адрес должен начинаться с https://": "Aadress peab algama https://",
+      "Блок удалён.": "Plokk kustutatud.",
+      "Письмо собирается из блоков: картинка, текст, кнопка, товар. Начните с «+ Картинка» — фото можно снять камерой или выбрать из галереи.":
+        "Kiri pannakse kokku plokkidest: pilt, tekst, nupp, toode. Alusta nupust «+ Pilt» — foto saab teha kaameraga või valida galeriist.",
+      "Как увидит покупатель": "Nii näeb ostja",
+      "Письмо целиком, каким оно уйдёт, — обновляется само. Нажмите на картинку, чтобы проверить, куда она ведёт.":
+        "Kogu kiri sellisena, nagu see välja läheb, — uueneb ise. Vajuta pildile, et kontrollida, kuhu see viib.",
+      "Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.":
+        "Teema ja tekst — vene keeles, siis eesti ja inglise keeles. Tekst läheb kirja lõppu, kirja tooted — kaartidena; liiguta plokke nooltega. Mustand salvestub ise.",
       /* r24 — «Коробка магазина», «Размер ячейки» и «Где предлагать пакомат» */
       "Размер ячейки": "Kapi suurus",
       "Коробка магазина": "Poe karp",
@@ -5853,11 +5897,7 @@
       "Название — для вас, покупатель его не увидит": "A name — for you, the customer never sees it",
       "Тема письма — покупатель увидит её в списке писем": "Subject — what the customer sees in the inbox",
       "Текст письма": "Letter text",
-      "Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.":
-        "Start writing — or press «✨ Write» on the right. The buttons above add a heading, a list, a link, a picture or a product.",
       "Товары в письме": "Products in the letter",
-      "Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.":
-        "Each product in the list goes at the end of the letter as a card: photo, name, price and a «View» button. The «Product» button above the text puts the card right where you want it.",
       "Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.": "The test goes out in the language chosen above, with [test] in the subject.",
       "Отправить подписчикам": "Send to subscribers", "Отправить 1 подписчику": "Send to 1 subscriber",
       "Отправка": "Sending",
@@ -5871,11 +5911,8 @@
       "Продолжить": "Continue", "Ход отправки": "Sending progress",
       "О чём письмо": "What the letter is about", "новинки сентября, скидка 10 % до воскресенья": "September's new arrivals, 10% off until Sunday",
       "✨ Написать": "✨ Write",
-      "Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.":
-        "Subject and text — in Russian, then in Estonian and English. The products in the list go into the text as cards. The draft saves itself; you read and send.",
       "Точно удалить письмо? Вернуть его будет нельзя.": "Really delete the letter? It cannot be brought back.",
       "Удалить письмо": "Delete the letter",
-      "Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.": "Save the draft — the whole letter appears below, as the customer will see it.",
       "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.":
         "You are editing the Russian version. This is the letter's language, not the panel's — the Estonian and English texts live separately.",
       "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.":
@@ -5899,6 +5936,57 @@
       "Письмо удалено ✓": "Letter deleted ✓",
       "Отправить письмо?": "Send the letter?",
       "Рассылка отправлена": "Newsletter sent",
+      /* «Рассылка» as blocks (23.09.2026): the blocks, the picker, the upload, the live letter */
+      "не всё переведено": "not all translated",
+      "Текст": "Text", "Кнопка": "Button", "Текст из прежнего редактора": "Text from the old editor",
+      "Главная магазина": "Shop home page", "Статья": "Article",
+      "Товар, бренд или статью — найдите по названию выше.": "Find a product, a brand or an article by its name above.",
+      "Найти: товар, раздел, бренд, статья": "Find: product, section, brand, article",
+      "Или вставьте адрес страницы": "Or paste a page address",
+      "Поставить адрес": "Use this address", "Убрать ссылку": "Remove the link",
+      "Ждёт очереди…": "Waiting in line…", "Готовим фото…": "Preparing the photo…", "Обрабатываем фото…": "Processing the photo…",
+      "Загрузка картинки": "Picture upload", "Адрес картинки": "Picture address",
+      "Загрузка фото на сервере не подключена — вставьте адрес картинки.":
+        "Photo upload is not connected on the server — paste the picture's address.",
+      "Поставить картинку": "Use this picture", "Заменить картинку": "Replace the picture",
+      "Выбрать фото": "Choose a photo", "Выбрать картинку": "Choose a picture",
+      "Никуда — просто картинка": "Nowhere — just a picture",
+      "По-русски:": "In Russian:", "Вид текста": "Text style",
+      "Пара строк о новинках. Пустая строка — новый абзац.": "A couple of lines about what is new. An empty line starts a new paragraph.",
+      "Например: Смотреть новинки": "For example: See what is new",
+      "Не выбрано": "Not chosen",
+      "Выберите, куда ведёт кнопка — без этого её не будет в письме.": "Choose where the button goes — without that it is left out of the letter.",
+      "Этого товара больше нет в магазине — в письме его не будет.": "This product is no longer in the shop — it will not be in the letter.",
+      "В письме: фото, название, цена и кнопка «Смотреть».": "In the letter: photo, name, price and a «View» button.",
+      "Этот текст написан в прежнем редакторе. Его можно передвинуть или удалить — новый текст добавьте блоком «+ Текст».":
+        "This text was written in the old editor. It can be moved or deleted — add new text with a «+ Text» block.",
+      "На этом языке прежнего текста нет.": "There is no old text in this language.",
+      "Удалить блок": "Delete block", "Добавить в письмо": "Add to the letter",
+      "+ Картинка": "+ Picture", "+ Текст": "+ Text", "+ Кнопка": "+ Button",
+      "В письме уже 40 блоков — больше не поместится.": "The letter already has 40 blocks — no more will fit.",
+      "Посмотреть письмо целиком ↓": "See the whole letter ↓",
+      "Подождите — картинка ещё загружается": "Wait — a picture is still uploading",
+      "В письме есть блок без картинки — выберите фото или удалите блок": "A block in the letter has no picture — choose a photo or delete the block",
+      "У кнопки не выбрано, куда она ведёт": "The button has nowhere to go yet",
+      "Впишите надпись на кнопке": "Write the label on the button",
+      "Эстонская версия не готова — эстонские подписчики получат русскую.": "The Estonian version is not ready — Estonian subscribers get the Russian one.",
+      "Английская версия не готова — английские подписчики получат русскую.": "The English version is not ready — English subscribers get the Russian one.",
+      "Письмо не нарисовалось — попробуйте ещё раз.": "The letter did not draw — try again.",
+      "Рисуем письмо…": "Drawing the letter…",
+      "Добавьте картинку или текст — здесь появится письмо.": "Add a picture or some text — the letter appears here.",
+      "Перевожу на эстонский и английский…": "Translating into Estonian and English…",
+      "Текст письма слишком длинный для перевода за один раз": "The letter's text is too long to translate in one go",
+      "Перевод пришёл неполным — попробуйте ещё раз": "The translation came back incomplete — try again",
+      "В письме уже 8 товаров — больше карточек не поместится.": "The letter already has 8 products — no more cards will fit.",
+      "Адрес должен начинаться с https://": "The address has to start with https://",
+      "Блок удалён.": "Block deleted.",
+      "Письмо собирается из блоков: картинка, текст, кнопка, товар. Начните с «+ Картинка» — фото можно снять камерой или выбрать из галереи.":
+        "A letter is built from blocks: picture, text, button, product. Start with «+ Picture» — take a photo with the camera or choose one from the gallery.",
+      "Как увидит покупатель": "What the buyer will see",
+      "Письмо целиком, каким оно уйдёт, — обновляется само. Нажмите на картинку, чтобы проверить, куда она ведёт.":
+        "The whole letter as it will go out — it updates by itself. Tap a picture to check where it leads.",
+      "Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.":
+        "Subject and text — in Russian, then in Estonian and English. The text goes to the end of the letter, its products as cards; move the blocks with the arrows. The draft saves itself.",
       /* r24 — the declared carton, the locker door and the pickup-point list */
       "Размер ячейки": "Locker size",
       "Коробка магазина": "The shop's box",
@@ -6601,6 +6689,8 @@
        confirm card's one sentence, with and without the «…получат русскую
        версию» tail (NEWS_FALLBACK_NOTE), because the card is one text node. */
     [/^Отправить (\d+) подписчикам$/, { ET: "Saada $1 tellijale", EN: "Send to $1 subscribers" }],
+    // a picture on its way up in a letter's block (newsUpInnerHTML)
+    [/^Загружаем… (\d+) %$/, { ET: "Laadime üles… $1 %", EN: "Uploading… $1 %" }],
     [/^Отправлено (\d+) из (\d+)…$/, { ET: "Saadetud $1 / $2…", EN: "Sent $1 of $2…" }],
     [/^Отправлено (\d+) из (\d+) · ошибок (\d+)$/, { ET: "Saadetud $1 / $2 · vigu $3", EN: "Sent $1 of $2 · $3 failed" }],
     // «Письмо ушло — отправлено …» is up with the invoice rules, above the
@@ -6899,7 +6989,9 @@
      without it trText() gets allowName=false and hands the name back
      untouched, so an English shopper read «Added: … — шампунь». */
   var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.cosum__scope,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
-    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r,.toast";
+    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r,.toast," +
+    // «Рассылка»: a product named in a block — its card, its link, its row in the picker
+    ".adm-nb__nm";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -6919,6 +7011,10 @@
          not labels of ours. Translating them would rewrite his own Russian
          copy on an ET/EN panel and save the translation back as the article. */
       if (el && el.closest && el.closest("[data-blogbody]")) continue;
+      /* …and the owner's own words shown back to him anywhere else: a
+         letter's old body in its block, «По-русски: …» under an empty
+         Estonian text, an article's title in a link. [data-notr] marks them. */
+      if (el && el.closest && el.closest("[data-notr]")) continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
       var tr = trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
@@ -14061,7 +14157,13 @@
         '<button class="link" data-blogtoolcancel>Отмена</button></div>';
     }
     if (t === "image") {
-      return (MEDIA.on === true
+      /* `!== false`, not `=== true`: MEDIA.on is null until mediaProbe() has
+         had its answer, and the letter and the article never asked — so a
+         panel opened straight onto «Рассылка» told the owner that uploads
+         were «not set up» on a shop where they were (Renat, 23.09.2026).
+         Unknown offers the button; only the server's own «no» takes it away,
+         and an upload that meets that «no» says so and flips MEDIA.on. */
+      return (MEDIA.on !== false
         ? '<div class="adm-toolrow">' +
             '<button class="adm-btn adm-btn--row" data-blogtoolupload' + (UP.busy ? " disabled" : "") + ">" +
               (UP.busy ? upBusyText() : "Загрузить картинку") + "</button>" +
@@ -14072,7 +14174,7 @@
           '<input class="adm-input adm-input--row adm-toolrow__in" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
             '" placeholder="https://адрес-картинки" aria-label="Ссылка на картинку">' +
           '<button class="adm-btn adm-btn--row" data-blogtoolok="image">Вставить</button>' +
-          (MEDIA.on === true ? "" : '<button class="adm-link adm-link--muted" data-blogtoolcancel>Отмена</button>') +
+          (MEDIA.on !== false ? "" : '<button class="adm-link adm-link--muted" data-blogtoolcancel>Отмена</button>') +
         "</div>" +
         /* Letters only. Ренат прислал образец — письмо Aromatic 89, целиком
            собранное из баннеров, и у каждого своя ссылка (20.09.2026). В
@@ -14123,6 +14225,11 @@
     S.adminBlogTool = which;
     S.adminBlogToolQ = ""; S.adminBlogToolUrl = ""; S.adminBlogToolHref = "";
     blogToolDraw(true);
+    /* Ask the server now, quietly: its answer redraws this sheet alone, never
+       the page — a render() here would rebuild the box the caret lives in. */
+    if (which === "image" && MEDIA.on === null) {
+      mediaProbe(function () { if (S.adminBlogTool === "image") blogToolDraw(false); });
+    }
   }
   function blogToolClose() {
     S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = ""; S.adminBlogToolHref = "";
@@ -14370,6 +14477,7 @@
       blogInsertImage(r.url);
     }).catch(function (e) {
       UP.busy = 0; UP.total = 0; UP.err = mediaErrText(e);
+      mediaNoteRefusal(e);   // «not configured» from the server: the sheet falls back to the address box
       toast(UP.err); blogToolDraw(false);
     });
   }
@@ -21993,25 +22101,121 @@
      may exist at once (an article the owner walked away from mid-sentence
      survives a tab change), so the tab decides, not the draft. */
   function richDraft() {
-    if (S.adminTab === "news") {
-      return S.newsEdit ? { body: S.newsEdit.body, lang: S.newsLang || "RU", kind: "news" } : null;
-    }
+    /* «Рассылка» has had no rich-text box since 23.09.2026 — a letter is a
+       list of blocks (below) — so only the article can own the box now. */
+    if (S.adminTab === "news") return null;
     return S.adminBlogEdit ? { body: S.adminBlogEdit.body, lang: S.adminBlogLang || "RU", kind: "blog" } : null;
   }
   function newsEmpty3() { return { RU: "", ET: "", EN: "" }; }
   function newsNewDraft() {
-    return { id: "", status: "draft", title: "", subject: newsEmpty3(), body: newsEmpty3(), products: [],
+    return { id: "", status: "draft", title: "", subject: newsEmpty3(), blocks: [], products: [],
       sentAt: null, sentCount: 0, failedCount: 0, audienceCount: 0, updatedAt: "" };
   }
   function newsDraftFrom(n) {
     return {
       id: n.id, status: n.status || "draft", title: n.title || "",
       subject: Object.assign(newsEmpty3(), n.subject),
-      body: blogBody3ToHtml(Object.assign(newsEmpty3(), n.body)),
+      /* A letter written before blocks opens as one: its three bodies as a
+         single «Текст из прежнего редактора» block, the cards it listed but
+         never placed after it. Nothing is stored until «Сохранить». */
+      blocks: Array.isArray(n.blocks)
+        ? n.blocks.map(newsBlockFrom).filter(Boolean)
+        : newsLegacyBlocks(blogBody3ToHtml(Object.assign(newsEmpty3(), n.body)), n.products),
       products: (n.products || []).slice(),
       sentAt: n.sentAt || null, sentCount: n.sentCount || 0, failedCount: n.failedCount || 0,
       audienceCount: n.audienceCount || 0, updatedAt: n.updatedAt || ""
     };
+  }
+  /* ---- the letter as blocks ------------------------------------------------
+     Renat's example (Aromatic 89, 20.09.2026) is a letter built out of
+     pictures, each clicking through to a page of its own, with a line of text
+     between; on 23.09.2026 he stopped at «paste a link to a picture», and Dim
+     asked for the setup to be very simple and logical. So the letter is a
+     list of blocks a thumb can add, move and delete — «+ Картинка» (straight
+     from the camera or the gallery), «+ Текст», «+ Кнопка», «+ Товар» — and
+     under it the letter itself, redrawn by the server's own renderer as it is
+     built (src/lib/newsletter-blocks.ts, src/emails/newsletter.ts).
+
+     A block's `k` is the screen's own name for it: every button addresses a
+     block by it, never by its position, because an upload that finishes
+     after two ↑ taps must land in the block it started in. It never leaves
+     the panel (newsBlockOut). Pictures and cards are the same in every
+     language; a text and a button carry one text per language, edited under
+     the language strip exactly as the subject is. */
+  var NEWS_BLOCKS_MAX = 40, NEWS_PRODUCTS_MAX = 8;
+  var NEWS_LANG3 = ["RU", "ET", "EN"];
+  var NEWS_KEY = 0;
+  function newsKey() { NEWS_KEY += 1; return "b" + NEWS_KEY; }
+  function newsTri(v) {
+    var o = v && typeof v === "object" ? v : {};
+    return { RU: String(o.RU || ""), ET: String(o.ET || ""), EN: String(o.EN || "") };
+  }
+  /** A block as the server sent it → the screen's block, key and all. Null for anything unknown. */
+  function newsBlockFrom(b) {
+    var t = b && b.t;
+    if (t === "img") return { k: newsKey(), t: "img", src: String(b.src || ""), href: String(b.href || ""), alt: String(b.alt || "") };
+    if (t === "text") return { k: newsKey(), t: "text", style: b.style === "h" ? "h" : "p", text: newsTri(b.text) };
+    if (t === "btn") return { k: newsKey(), t: "btn", text: newsTri(b.text), href: String(b.href || "") };
+    if (t === "product") return b.id ? { k: newsKey(), t: "product", id: String(b.id) } : null;
+    // shown as it is inside the block's card — through the article's own allowlist first, as the old box did
+    if (t === "html") return { k: newsKey(), t: "html", html: blogBody3ToHtml(newsTri(b.html)) };
+    return null;
+  }
+  /** An old letter's bodies, and the cards it listed but placed in none of them — as blocks. */
+  function newsLegacyBlocks(body, products) {
+    var b = newsTri(body), out = [];
+    if (newsBodyHas(b.RU) || newsBodyHas(b.ET) || newsBodyHas(b.EN)) out.push({ k: newsKey(), t: "html", html: b });
+    (products || []).forEach(function (id) {
+      var mark = 'data-product="' + String(id) + '"';
+      var placed = NEWS_LANG3.some(function (L) { return b[L].indexOf(mark) >= 0; });
+      if (!placed) out.push({ k: newsKey(), t: "product", id: String(id) });
+    });
+    return out;
+  }
+  /** What is saved: the fields, never the key — and a picture that has no picture yet not at all. */
+  function newsBlockOut(b) {
+    if (!b) return null;
+    if (b.t === "img") return b.src ? { t: "img", src: b.src, href: b.href || "", alt: b.alt || "" } : null;
+    if (b.t === "text") return { t: "text", style: b.style === "h" ? "h" : "p", text: newsTri(b.text) };
+    if (b.t === "btn") return { t: "btn", text: newsTri(b.text), href: b.href || "" };
+    if (b.t === "product") return { t: "product", id: b.id };
+    if (b.t === "html") return { t: "html", html: newsTri(b.html) };
+    return null;
+  }
+  function newsBlocksOut(blocks) {
+    return (blocks || []).map(newsBlockOut).filter(function (b) { return !!b; });
+  }
+  /** Has this block any words in L (a text, a button's label, an old body)? */
+  function newsBlockWords(b, L) {
+    if (b.t === "text" || b.t === "btn") return !!String(b.text[L] || "").trim();
+    if (b.t === "html") return newsBodyHas(b.html[L]);
+    return false;
+  }
+  /** Does it draw anything for a reader in L? The server's own rule (blockHasContent). */
+  function newsBlockHas(b, L) {
+    if (b.t === "img") return !!b.src;
+    if (b.t === "btn") return newsBlockWords(b, L) && !!b.href;
+    if (b.t === "product") return true;
+    return newsBlockWords(b, L);
+  }
+  /** Every word the letter has in some language is there in L as well (blocksComplete). */
+  function newsBlocksComplete(blocks, L) {
+    return (blocks || []).every(function (b) {
+      var any = NEWS_LANG3.some(function (x) { return newsBlockWords(b, x); });
+      return !any || newsBlockWords(b, L);
+    });
+  }
+  function newsBlockByKey(k) {
+    var d = S.newsEdit;
+    if (!d) return null;
+    for (var i = 0; i < d.blocks.length; i++) if (d.blocks[i].k === k) return d.blocks[i];
+    return null;
+  }
+  function newsBlockIndex(k) {
+    var d = S.newsEdit;
+    if (!d) return -1;
+    for (var i = 0; i < d.blocks.length; i++) if (d.blocks[i].k === k) return i;
+    return -1;
   }
   /* The list and the count, once per visit — a letter a month does not
      need a poll; «Повторить» re-asks and every save drops the cached list. */
@@ -22094,11 +22298,20 @@
   }
   /* ---- the draft: what each language holds, and «не сохранено» ---------- */
   function newsBodyHas(html) { return blogTextLen(html) > 0 || /<img\b|data-product=/i.test(String(html || "")); }
-  function newsReady(d, L) { return !!String(d.subject[L] || "").trim() && newsBodyHas(d.body[L]); }
+  /** Anything at all for a reader in L. */
+  function newsHasBody(d, L) {
+    return (d.blocks || []).some(function (b) { return newsBlockHas(b, L); });
+  }
+  /* Ready = what the server will send in L (src/lib/newsletters.ts
+     readyLangs): a subject, something in the letter, and every text and
+     button that is written in some language written in this one too. */
+  function newsReady(d, L) {
+    return !!String(d.subject[L] || "").trim() && newsHasBody(d, L) && newsBlocksComplete(d.blocks, L);
+  }
   function newsLangWords(d, L) {
-    var subj = !!String(d.subject[L] || "").trim(), has = newsBodyHas(d.body[L]);
+    var subj = !!String(d.subject[L] || "").trim(), has = newsHasBody(d, L);
     if (!subj && !has) return ["пусто"];
-    if (subj && has) return ["готово"];
+    if (subj && has) return newsBlocksComplete(d.blocks, L) ? ["готово"] : ["не всё переведено"];
     return [subj ? "без текста" : "без темы"];
   }
   /** The languages whose readers fall back to Russian — only when Russian is there to fall back to. */
@@ -22106,7 +22319,7 @@
     if (!newsReady(d, "RU")) return [];
     return ["ET", "EN"].filter(function (l) { return !newsReady(d, l); });
   }
-  function newsDraftSig(d) { return JSON.stringify([d.title, d.subject, d.body, d.products]); }
+  function newsDraftSig(d) { return JSON.stringify([d.title, d.subject, newsBlocksOut(d.blocks)]); }
   function newsMarkSaved(d) { S.newsSaved = d ? newsDraftSig(d) : ""; S.newsConfirmBack = false; }
   function newsDirty() {
     var d = S.newsEdit;
@@ -22182,31 +22395,483 @@
     var n = Number(aud.total) || 0;
     return n === 1 ? "Отправить 1 подписчику" : "Отправить " + n + " подписчикам";
   }
-  function newsMatches(d) {
-    var q = (S.newsQ || "").trim().toLowerCase();
-    if (!q) return [];
-    return CATALOGUE.filter(function (p) {
-      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
-    }).slice(0, 8);
+  /* ---- the blocks on screen -----------------------------------------------
+     Drawn into their own slot (#newsblocks) and redrawn there alone —
+     newsBlocksDraw(), newsCardPaint() — never through render(): a picture
+     going up, a block moved or a link picked must not rebuild the page, the
+     subject field or the preview under it. Typing writes straight into the
+     draft, like every other field of this editor. */
+  var NEWS_BLOCK_NAME = { img: "Картинка", text: "Текст", btn: "Кнопка", product: "Товар", html: "Текст из прежнего редактора" };
+  /* Pictures on their way up, by block key: { phase: wait | prep | up | proc
+     | err, pct, err, prev } — `prev` the phone's own copy, shown while the
+     upload runs. Never part of the draft. */
+  var NEWS_UP = {};
+  /* What was typed into «Адрес картинки» (no bucket on this server), by block key. */
+  var NEWS_SRC = {};
+  function newsUploading() {
+    for (var k in NEWS_UP) {
+      if (Object.prototype.hasOwnProperty.call(NEWS_UP, k) && NEWS_UP[k].phase !== "err" && newsBlockByKey(k)) return true;
+    }
+    return false;
   }
-  function admNewsPicksHTML(matches) {
-    if (!matches.length) return "";
-    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
-      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
-        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsproductadd="' + esc(p.id) + '">Добавить</button></div>';
-    }).join("") + "</div>";
+  function newsUpReset() { NEWS_UP = {}; NEWS_SRC = {}; }
+  function newsProductIds(d) {
+    var out = [];
+    (d.blocks || []).forEach(function (b) { if (b.t === "product" && out.indexOf(b.id) < 0) out.push(b.id); });
+    return out;
   }
-  function admNewsProductsHTML(d) {
-    var picked = productsById(d.products);
-    return '<div><div class="adm-sec__t">Товары в письме</div>' +
-      '<p class="adm-hint" style="margin:6px 0 8px">Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.</p>' +
-      (picked.length ? '<div class="adm-acts" style="margin:8px 0">' + picked.map(function (p) {
-        return '<span class="adm-badge">' + esc(p.brand + " " + p.name) +
-          ' <button class="adm-link" data-newsproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
-      }).join("") + "</div>" : "") +
-      '<input class="adm-input" data-newsq value="' + esc(S.newsQ || "") + '" placeholder="Найти товар по названию">' +
-      '<div id="admnewsproducts">' + admNewsPicksHTML(newsMatches(d)) + "</div></div>";
+  function newsPostTitle(slug) {
+    var list = S.adminBlog || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].slug === slug) {
+        var t = list[i].title;
+        return (t && typeof t === "object" ? (t.RU || t.ET || t.EN) : t) || slug;
+      }
+    }
+    return slug;
+  }
+  /** Where a link goes, in words — «Товар · Kevin.Murphy …», «Раздел · Стайлинг». Each label its own node. */
+  function newsLinkLabelHTML(href) {
+    var h = String(href || "");
+    if (h === "home") return "<span>Главная магазина</span>";
+    if (h === "blog") return "<span>Блог</span>";
+    if (h === "gift") return "<span>Подарочная карта</span>";
+    if (h.indexOf("cat:") === 0) return "<span>Раздел</span> · <span>" + esc(CAT_NAMES[h.slice(4)] || h.slice(4)) + "</span>";
+    if (h.indexOf("product:") === 0) {
+      var p = productsById([h.slice(8)])[0];
+      return '<span>Товар</span> · <span class="adm-nb__nm">' + esc(p ? p.brand + " " + p.name : h.slice(8)) + "</span>";
+    }
+    if (h.indexOf("brand:") === 0) {
+      return '<span>Бренд</span> · <span data-notr>' + esc(BRAND_BY_SLUG[h.slice(6)] || h.slice(6)) + "</span>";
+    }
+    if (h.indexOf("post:") === 0) return '<span>Статья</span> · <span data-notr>' + esc(newsPostTitle(h.slice(5))) + "</span>";
+    return '<span>Адрес</span> · <span class="adm-nb__url" data-notr>' + esc(h) + "</span>";
+  }
+  /** An address typed by hand: https:// added to a bare «rempireshop.com/…», anything that is not http(s) refused. */
+  function newsUrlOk(raw) {
+    var v = String(raw || "").trim();
+    if (!v) return "";
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(v) && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(v)) v = "https://" + v;
+    return /^https?:\/\/[^\s<>"'`\\]+\.[^\s<>"'`\\]+$/i.test(v) && v.length <= 1000 ? v : "";
+  }
+  /** A picture's address typed by hand: https, or a path on this shop (src/lib/newsletter-blocks.ts cleanImageSrc). */
+  function newsImgOk(raw) {
+    var v = String(raw || "").trim();
+    if (/^https:\/\/[^\s<>"'`\\]+$/i.test(v) && v.length <= 1000) return v;
+    if (/^\/(?!\/)[^\s<>"'`\\]+$/.test(v)) return v;
+    return "";
+  }
+
+  /* ---- the picker: where a picture or a button leads ------------------- */
+  function newsPickRowHTML(v, kind, labelHTML, thumb, nameCls) {
+    return '<button class="adm-nbpick__row" data-nb="to" data-v="' + esc(v) + '">' +
+      (thumb ? '<span class="adm-thumb adm-thumb--sm">' + thumb + "</span>" : '<span class="adm-nbpick__ico" aria-hidden="true">→</span>') +
+      '<span class="adm-nbpick__t">' + (kind ? '<span class="adm-nbpick__k">' + kind + "</span>" : "") +
+        '<span class="' + (nameCls || "adm-nbpick__nm") + '">' + labelHTML + "</span></span></button>";
+  }
+  /** Every place the letter can send a reader, matching what was typed — in either language. */
+  function newsPickRows(q, only) {
+    var words = scanFold(q || "").split(" ").filter(function (w) { return !!w; });
+    var hit = function (text) {
+      if (!words.length) return true;
+      var ru = String(text || "");
+      var hay = scanFold(ru + " " + trText(ru, S.lang, false)), hw = hay.split(" ");
+      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hw, words[i])) return false;
+      return true;
+    };
+    var out = [];
+    if (only !== "product") {
+      [["home", "Главная магазина"], ["blog", "Блог"], ["gift", "Подарочная карта"]].forEach(function (f) {
+        if (hit(f[1])) out.push(newsPickRowHTML(f[0], "", "<span>" + f[1] + "</span>"));
+      });
+      CATS.forEach(function (c) {
+        if (hit(c.name)) out.push(newsPickRowHTML("cat:" + c.id, "Раздел", "<span>" + esc(c.name) + "</span>"));
+      });
+      if (words.length) {
+        var brands = 0;
+        Object.keys(BRAND_BY_SLUG).forEach(function (slug) {
+          if (brands >= 4 || !hit(BRAND_BY_SLUG[slug])) return;
+          brands += 1;
+          out.push(newsPickRowHTML("brand:" + slug, "Бренд", "<span data-notr>" + esc(BRAND_BY_SLUG[slug]) + "</span>"));
+        });
+      }
+    }
+    // products: the ones the search finds; with nothing typed only when a product is what is being picked
+    if (only === "product" || words.length) {
+      heroFind(q || "").forEach(function (p) {
+        out.push(newsPickRowHTML("product:" + p.id, "Товар", esc(p.brand + " " + p.name), media(p, 0, "ph"), "adm-nbpick__nm adm-nb__nm"));
+      });
+    }
+    if (only !== "product" && words.length) {
+      var posts = 0;
+      (S.adminBlog || []).forEach(function (p) {
+        if (posts >= 4 || !p || p.status !== "published" || !p.slug) return;
+        var t = p.title && typeof p.title === "object" ? [p.title.RU, p.title.ET, p.title.EN].join(" ") : String(p.title || "");
+        if (!hit(t)) return;
+        posts += 1;
+        out.push(newsPickRowHTML("post:" + p.slug, "Статья", "<span data-notr>" + esc(newsPostTitle(p.slug)) + "</span>"));
+      });
+    }
+    if (!out.length) return HERO_NOHIT;
+    return out.join("") + (only !== "product" && !words.length
+      ? '<p class="adm-hint">Товар, бренд или статью — найдите по названию выше.</p>' : "");
+  }
+  /** The picker, open under the block it belongs to — or under «+ Товар» (key "add"). */
+  function newsPickerHTML(k) {
+    var pk = S.newsPick || {};
+    var only = pk.only || "";
+    var b = k === "add" ? null : newsBlockByKey(k);
+    return '<div class="adm-nbpick" data-nbpick="' + esc(k) + '">' +
+      '<input class="adm-input" data-nbf="q" data-nbk="' + esc(k) + '" value="' + esc(pk.q || "") + '" autocomplete="off" ' +
+        'placeholder="' + (only === "product" ? "Найти товар: название, бренд…" : "Найти: товар, раздел, бренд, статья") + '" aria-label="Найти">' +
+      '<div class="adm-nbpick__list" data-nbpicklist>' + newsPickRows(pk.q, only) + "</div>" +
+      (only === "product" ? "" :
+        '<label class="adm-field">Или вставьте адрес страницы' +
+          '<input class="adm-input" data-nbf="url" data-nbk="' + esc(k) + '" inputmode="url" placeholder="https://…" value="' + esc(pk.url || "") + '"></label>') +
+      '<div class="adm-acts">' +
+        (only === "product" ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="urlok" data-nbk="' + esc(k) + '">Поставить адрес</button>') +
+        (b && b.href ? '<button class="adm-link adm-link--warn" data-nb="unlink" data-nbk="' + esc(k) + '">Убрать ссылку</button>' : "") +
+        '<button class="adm-link adm-link--muted" data-nb="pickclose">Закрыть</button>' +
+      "</div></div>";
+  }
+  function newsLinkRowHTML(b, label, none) {
+    var open = !!(S.newsPick && S.newsPick.k === b.k);
+    return '<div class="adm-nb__link"><span class="adm-hint">' + label + "</span>" +
+      '<button class="adm-nb__target' + (b.href ? "" : " adm-nb__target--none") + '" data-nb="pick" data-nbk="' + b.k + '" aria-expanded="' + open + '">' +
+        '<span class="adm-nb__to">' + (b.href ? newsLinkLabelHTML(b.href) : "<span>" + none + "</span>") + "</span>" +
+        '<span class="adm-nb__chev" aria-hidden="true">' + (open ? "▴" : "›") + "</span></button>" +
+      (open ? newsPickerHTML(b.k) : "") + "</div>";
+  }
+
+  /* ---- one block ---------------------------------------------------------- */
+  function newsUpInnerHTML(up) {
+    var pct = Math.max(0, Math.min(100, Math.round(up.pct || 0)));
+    var line = up.phase === "wait" ? "Ждёт очереди…"
+      : up.phase === "prep" ? "Готовим фото…"
+      : up.phase === "proc" ? "Обрабатываем фото…"
+      : "Загружаем… " + pct + " %";
+    return '<span class="adm-nb__uptxt">' + line + "</span>" +
+      '<div class="adm-progress" role="progressbar" aria-label="Загрузка картинки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '">' +
+        '<i style="width:' + pct + '%"></i></div>';
+  }
+  function newsImgBodyHTML(b) {
+    var up = NEWS_UP[b.k], busy = !!(up && up.phase !== "err");
+    var show = busy && up.prev ? up.prev : b.src;
+    var bar = busy ? '<div class="adm-nb__up" data-nbup="' + b.k + '" aria-live="polite">' + newsUpInnerHTML(up) + "</div>" : "";
+    var pic = show ? '<div class="adm-nb__pic"><img src="' + esc(show) + '" alt="">' + bar + "</div>" : bar;
+    var err = up && up.phase === "err" ? '<p class="adm-hint adm-hint--warn" role="alert">' + esc(up.err) + "</p>" : "";
+    /* No bucket on this server (MEDIA.on === false, the probe's answer or an
+       upload's): the one way left is an address — said so, not hidden. */
+    var byUrl = !b.src && !busy && MEDIA.on === false
+      ? '<label class="adm-field">Адрес картинки' +
+          '<input class="adm-input" data-nbf="src" data-nbk="' + b.k + '" inputmode="url" placeholder="https://…" value="' + esc(NEWS_SRC[b.k] || "") + '"></label>' +
+        '<p class="adm-hint">Загрузка фото на сервере не подключена — вставьте адрес картинки.</p>' +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="srcok" data-nbk="' + b.k + '">Поставить картинку</button></div>'
+      : "";
+    var pickBtn = MEDIA.on === false ? "" :
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="repic" data-nbk="' + b.k + '"' + (busy ? " disabled" : "") + ">" +
+        (b.src ? "Заменить картинку" : "Выбрать фото") + "</button>" +
+        '<input class="adm-file" type="file" accept="image/*" data-nbfile="' + b.k + '" tabindex="-1" aria-label="Выбрать картинку"></div>';
+    return pic + err + byUrl + pickBtn +
+      (b.src || busy ? newsLinkRowHTML(b, "Куда ведёт картинка", "Никуда — просто картинка") : "");
+  }
+  function newsRuHintHTML(b, L) {
+    if (L === "RU" || String(b.text[L] || "").trim()) return "";
+    var ru = String(b.text.RU || "").trim();
+    return ru ? '<p class="adm-hint adm-nb__ru"><span>По-русски:</span> <span data-notr>' + esc(ru) + "</span></p>" : "";
+  }
+  function newsTextBodyHTML(b, L) {
+    var h = b.style === "h";
+    return '<div class="adm-seg adm-nb__style" role="group" aria-label="Вид текста">' +
+        '<button data-nb="style" data-v="p" data-nbk="' + b.k + '" aria-current="' + !h + '">Текст</button>' +
+        '<button data-nb="style" data-v="h" data-nbk="' + b.k + '" aria-current="' + h + '">Заголовок</button></div>' +
+      (h
+        ? '<input class="adm-input" data-nbf="text" data-nbk="' + b.k + '" maxlength="200" value="' + esc(b.text[L] || "") +
+            '" placeholder="Заголовок" aria-label="Заголовок">'
+        : '<textarea class="adm-input adm-nb__ta" rows="4" data-nbf="text" data-nbk="' + b.k + '" maxlength="3000" aria-label="Текст" ' +
+            'placeholder="Пара строк о новинках. Пустая строка — новый абзац.">' + esc(b.text[L] || "") + "</textarea>") +
+      newsRuHintHTML(b, L);
+  }
+  function newsBtnBodyHTML(b, L) {
+    return '<label class="adm-field">Надпись на кнопке' +
+        '<input class="adm-input" data-nbf="label" data-nbk="' + b.k + '" maxlength="60" value="' + esc(b.text[L] || "") +
+          '" placeholder="Например: Смотреть новинки"></label>' +
+      newsRuHintHTML(b, L) +
+      newsLinkRowHTML(b, "Куда ведёт кнопка", "Не выбрано") +
+      (b.href ? "" : '<p class="adm-hint adm-hint--warn">Выберите, куда ведёт кнопка — без этого её не будет в письме.</p>');
+  }
+  function newsProductBodyHTML(b) {
+    var p = productsById([b.id])[0];
+    if (!p) return '<p class="adm-hint adm-hint--warn">Этого товара больше нет в магазине — в письме его не будет.</p>';
+    return '<div class="adm-nb__prod"><span class="adm-thumb">' + media(p, 0, "ph") + "</span>" +
+      '<span class="adm-nb__prodt"><span class="adm-nb__br" data-notr>' + esc(p.brand) + "</span>" +
+        '<span class="adm-nb__nm">' + esc(p.name) + "</span></span></div>" +
+      '<p class="adm-hint">В письме: фото, название, цена и кнопка «Смотреть».</p>';
+  }
+  function newsHtmlBodyHTML(b, L) {
+    var html = b.html[L] || "";
+    return '<p class="adm-hint">Этот текст написан в прежнем редакторе. Его можно передвинуть или удалить — новый текст добавьте блоком «+ Текст».</p>' +
+      (newsBodyHas(html)
+        ? '<div class="adm-nb__old" data-notr>' + html + "</div>"
+        : '<p class="adm-hint">На этом языке прежнего текста нет.</p>');
+  }
+  function newsBlockHTML(b, i, n, L) {
+    var body = b.t === "img" ? newsImgBodyHTML(b)
+      : b.t === "text" ? newsTextBodyHTML(b, L)
+      : b.t === "btn" ? newsBtnBodyHTML(b, L)
+      : b.t === "product" ? newsProductBodyHTML(b)
+      : newsHtmlBodyHTML(b, L);
+    return '<div class="adm-nb adm-nb--' + b.t + '" data-nbcard="' + b.k + '">' +
+      '<div class="adm-nb__head"><span class="adm-nb__kind">' + NEWS_BLOCK_NAME[b.t] + "</span>" +
+        '<span class="adm-nb__ops">' +
+          '<button class="adm-iconbtn" data-nb="up" data-nbk="' + b.k + '"' + (i === 0 ? " disabled" : "") + ' aria-label="Выше" title="Выше">↑</button>' +
+          '<button class="adm-iconbtn" data-nb="down" data-nbk="' + b.k + '"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже" title="Ниже">↓</button>' +
+          '<button class="adm-iconbtn adm-nb__del" data-nb="del" data-nbk="' + b.k + '" aria-label="Удалить блок" title="Удалить блок">✕</button>' +
+        "</span></div>" + body + "</div>";
+  }
+  function newsAddBarHTML(d) {
+    var full = d.blocks.length >= NEWS_BLOCKS_MAX, dis = full ? " disabled" : "";
+    return '<div class="adm-nbadd" role="group" aria-label="Добавить в письмо">' +
+        '<button class="adm-btn adm-btn--ghost" data-nb="add" data-v="img"' + dis + ">+ Картинка</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-nb="add" data-v="text"' + dis + ">+ Текст</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-nb="add" data-v="btn"' + dis + ">+ Кнопка</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-nb="add" data-v="product"' + dis + ">+ Товар</button>" +
+        // several at once from the gallery: each becomes a picture block of its own
+        '<input class="adm-file" type="file" accept="image/*" multiple data-nbfile="add" tabindex="-1" aria-label="Выбрать картинку">' +
+      "</div>" +
+      (full ? '<p class="adm-hint">В письме уже 40 блоков — больше не поместится.</p>' : "") +
+      (S.newsPick && S.newsPick.k === "add" ? newsPickerHTML("add") : "") +
+      (d.blocks.length ? '<button class="adm-link adm-link--muted adm-nb__jump" data-nb="jump">Посмотреть письмо целиком ↓</button>' : "");
+  }
+  function admNewsBlocksHTML(d, L) {
+    var n = d.blocks.length;
+    return '<div class="adm-sec__t">Письмо</div>' +
+      (S.newsUndo
+        ? '<div class="adm-note adm-nb__undo"><span>Блок удалён.</span>' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="undo">Вернуть</button></div>'
+        : "") +
+      (n
+        ? '<div class="adm-nbs">' + d.blocks.map(function (b, i) { return newsBlockHTML(b, i, n, L); }).join("") + "</div>"
+        : '<p class="adm-hint">Письмо собирается из блоков: картинка, текст, кнопка, товар. Начните с «+ Картинка» — фото можно снять камерой или выбрать из галереи.</p>') +
+      newsAddBarHTML(d);
+  }
+  function newsBlocksDraw() {
+    var slot = document.getElementById("newsblocks");
+    if (!slot || !S.newsEdit) return;
+    slot.innerHTML = admNewsBlocksHTML(S.newsEdit, S.newsLang || "RU");
+    translateTree(slot);
+  }
+  /** One block redrawn in place — an upload landing, a style toggled, a link picked. */
+  function newsCardPaint(k) {
+    var d = S.newsEdit, i = newsBlockIndex(k);
+    var el = document.querySelector('[data-nbcard="' + k + '"]');
+    if (!d || i < 0 || !el || !el.parentNode) return;
+    var holder = document.createElement("div");
+    holder.innerHTML = newsBlockHTML(d.blocks[i], i, d.blocks.length, S.newsLang || "RU");
+    var fresh = holder.firstChild;
+    el.parentNode.replaceChild(fresh, el);
+    translateTree(fresh);
+  }
+  function newsUpPaint(k) {
+    var el = document.querySelector('[data-nbup="' + k + '"]');
+    if (el && NEWS_UP[k]) { el.innerHTML = newsUpInnerHTML(NEWS_UP[k]); translateTree(el); }
+  }
+  /** Every structural change ends here: the blocks, the language strip and the bar, and the preview soon after. */
+  function newsBlocksChanged() {
+    newsBlocksDraw(); newsPaintState(); newsPreviewSoon();
+  }
+
+  /* ---- a picture from the phone ------------------------------------------
+     The same door the product photos use (POST /api/admin/upload/), asked
+     for kind=news: the server makes the e-mail's own picture of it — a JPEG
+     at most 1200 px wide, never a WebP (src/lib/images.ts
+     processEmailImage). XMLHttpRequest rather than fetch() for one reason:
+     it reports how far the bytes have got, and a phone on mobile data
+     showing nothing for twenty seconds reads as a button that did nothing. */
+  function newsXhrUpload(blob, onPct) {
+    return new Promise(function (resolve, reject) {
+      var fd = new FormData();
+      fd.append("file", blob);
+      fd.append("kind", "news");
+      var x = new XMLHttpRequest();
+      x.open("POST", "/api/admin/upload/");
+      if (x.upload) x.upload.onprogress = function (e) { if (e.lengthComputable && e.total) onPct((e.loaded / e.total) * 100); };
+      x.onload = function () {
+        var j = {};
+        try { j = JSON.parse(x.responseText || "{}") || {}; } catch (e) { j = {}; }
+        if (x.status >= 200 && x.status < 300 && j.ok === true && j.url) { resolve(j); return; }
+        if (x.status === 401) { reject(new Error("unauthorized")); return; }
+        // a 413 with no JSON behind it is the platform's body cap, not the route (MEDIA_ERR)
+        reject(new Error(j.error || (x.status === 413 ? "payload_too_large" : "upload_failed")));
+      };
+      x.onerror = function () { reject(new Error("network")); };
+      x.onabort = function () { reject(new Error("network")); };
+      x.send(fd);
+    });
+  }
+  /* The phone's own copy of the photo, shown while it travels: a small JPEG
+     drawn on a canvas and handed over as a data: address — the panel's
+     Content-Security-Policy admits data: pictures and not blob: ones
+     (next.config.ts img-src). Nothing when the browser cannot decode it
+     (HEIC); the upload says what it is. */
+  function newsLocalPreview(file) {
+    if (typeof createImageBitmap !== "function") return Promise.resolve("");
+    return createImageBitmap(file, { imageOrientation: "from-image" }).then(function (bmp) {
+      var s = Math.min(1, 600 / Math.max(bmp.width, 1));
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+      var ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(bmp, 0, 0, c.width, c.height);
+      if (bmp.close) bmp.close();
+      return c.toDataURL("image/jpeg", 0.7);
+    }).catch(function () { return ""; });
+  }
+  /** One file into one picture block. Resolves either way — the queue behind it must go on. */
+  function newsUpload(k, file) {
+    if (!newsBlockByKey(k) || !file) { delete NEWS_UP[k]; return Promise.resolve(); }
+    // the bucket said no to an earlier picture of this batch: straight to the address box
+    if (MEDIA.on === false) { delete NEWS_UP[k]; newsCardPaint(k); return Promise.resolve(); }
+    var up = NEWS_UP[k] = { phase: "prep", pct: 0, err: "", prev: "" };
+    var mine = function () { return NEWS_UP[k] === up; };
+    newsCardPaint(k);
+    newsLocalPreview(file).then(function (url) {
+      if (url && mine() && up.phase !== "err") { up.prev = url; newsCardPaint(k); }
+    });
+    return shrinkPhoto(file).then(function (blob) {
+      if (!mine() || !newsBlockByKey(k)) return null;
+      // over the route's own ceiling even after the redraw — refused here, before it travels
+      if (MEDIA.maxBytes && blob.size > MEDIA.maxBytes) throw new Error("too_large");
+      up.phase = "up"; newsUpPaint(k);
+      return newsXhrUpload(blob, function (p) {
+        if (!mine()) return;
+        up.pct = p;
+        if (p >= 100) up.phase = "proc";   // the bytes are there; the server is making the JPEG
+        newsUpPaint(k);
+      });
+    }).then(function (j) {
+      if (!j || !mine()) return;
+      delete NEWS_UP[k];
+      var blk = newsBlockByKey(k);
+      if (!blk) return;   // deleted while it travelled
+      blk.src = String(j.url);
+      MEDIA.on = true;
+      newsCardPaint(k); newsPaintState(); newsPreviewSoon();
+    }).catch(function (e) {
+      if (!mine()) return;
+      mediaNoteRefusal(e);   // no bucket: every picture block falls back to its address box
+      up.prev = ""; up.phase = "err"; up.err = mediaErrText(e);
+      toast(up.err);
+      if (MEDIA.on === false) newsBlocksDraw(); else newsCardPaint(k);
+    });
+  }
+  /** «+ Картинка» with one photo or five: a block each, uploaded one after another. */
+  function newsAddPictures(files) {
+    var d = S.newsEdit;
+    if (!d || !files || !files.length) return;
+    var room = NEWS_BLOCKS_MAX - d.blocks.length;
+    if (room <= 0) { toast("В письме уже 40 блоков — больше не поместится."); return; }
+    var keys = [];
+    files.slice(0, room).forEach(function () {
+      var b = { k: newsKey(), t: "img", src: "", href: "", alt: "" };
+      d.blocks.push(b); keys.push(b.k);
+      NEWS_UP[b.k] = { phase: "wait", pct: 0, err: "", prev: "" };
+    });
+    S.newsUndo = null; S.newsPick = null;
+    newsBlocksChanged();
+    var first = document.querySelector('[data-nbcard="' + keys[0] + '"]');
+    if (first && first.scrollIntoView) first.scrollIntoView({ block: "center", behavior: "smooth" });
+    var chain = Promise.resolve();
+    keys.forEach(function (k, i) {
+      chain = chain.then(function () { return newsUpload(k, files[i]); });
+    });
+  }
+  /* What stops a test or a send before it starts — one sentence, and the
+     block it is about brought into view. A button with no link would simply
+     not be in the letter, which is the silent kind of wrong. */
+  function newsProblem(d) {
+    if (newsUploading()) return { msg: "Подождите — картинка ещё загружается", k: "" };
+    for (var i = 0; i < d.blocks.length; i++) {
+      var b = d.blocks[i];
+      if (b.t === "img" && !b.src) return { msg: "В письме есть блок без картинки — выберите фото или удалите блок", k: b.k };
+      if (b.t === "btn" && !b.href) return { msg: "У кнопки не выбрано, куда она ведёт", k: b.k };
+      if (b.t === "btn" && !NEWS_LANG3.some(function (x) { return newsBlockWords(b, x); })) return { msg: "Впишите надпись на кнопке", k: b.k };
+    }
+    return null;
+  }
+  function newsShowProblem(pr) {
+    toast(pr.msg);
+    var el = pr.k ? document.querySelector('[data-nbcard="' + pr.k + '"]') : null;
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  /* ---- «Как увидит покупатель»: the letter itself, as it is built ---------
+     POST /api/admin/newsletters/preview/ renders the draft on screen — saved
+     or not — with the very function the send uses, and the answer goes into
+     a sandboxed <iframe srcdoc> (no scripts; a tap on a banner opens the page
+     it leads to in a new tab). Asked for 0.7 s after the last change, and a
+     slower answer that a newer question has overtaken is dropped. */
+  var NEWS_PREV_FALLBACK = {
+    ET: "Эстонская версия не готова — эстонские подписчики получат русскую.",
+    EN: "Английская версия не готова — английские подписчики получат русскую."
+  };
+  function newsPreviewSoon(ms) {
+    clearTimeout(newsPreviewSoon._t);
+    newsPreviewSoon._t = setTimeout(newsPreviewLoad, ms == null ? 700 : ms);
+  }
+  function newsPreviewLoad() {
+    var d = S.newsEdit;
+    if (!d || d.status !== "draft" || SRV.admin !== true) return;
+    var L = S.newsLang || "RU";
+    var body = { lang: L, title: d.title, subject: d.subject, blocks: newsBlocksOut(d.blocks) };
+    var sig = JSON.stringify(body);
+    var pv = S.newsPrev || (S.newsPrev = { html: "", sig: "", busy: false, err: "" });
+    if (pv.sig === sig && (pv.html || pv.busy)) return;
+    pv.sig = sig; pv.busy = true; pv.err = "";
+    newsPreviewPaint();
+    apiSend("/api/admin/newsletters/preview/", "POST", body).then(function (r) {
+      if (S.newsPrev !== pv || pv.sig !== sig) return;   // overtaken by a newer question
+      pv.busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body && r.body.ok) pv.html = String(r.body.html || "");
+      else { pv.err = "Письмо не нарисовалось — попробуйте ещё раз."; pv.sig = ""; }
+      newsPreviewPaint();
+    }).catch(function () {
+      if (S.newsPrev !== pv || pv.sig !== sig) return;
+      pv.busy = false; pv.err = "Сервер не отвечает."; pv.sig = "";
+      newsPreviewPaint();
+    });
+  }
+  function newsPreviewNoteHTML(d, L) {
+    var pv = S.newsPrev || {};
+    if (pv.err) return '<p class="adm-hint adm-hint--warn">' + esc(pv.err) + "</p>";
+    if (!pv.html) {
+      return '<p class="adm-hint">' + (pv.busy ? "Рисуем письмо…" : "Добавьте картинку или текст — здесь появится письмо.") + "</p>";
+    }
+    // the language on screen will not go out as it is: say who gets what instead
+    if (L !== "RU" && !newsReady(d, L) && newsReady(d, "RU")) return '<p class="adm-hint adm-hint--warn">' + NEWS_PREV_FALLBACK[L] + "</p>";
+    return "";
+  }
+  function newsPreviewPaint() {
+    var f = document.querySelector("[data-nbframe]");
+    var pv = S.newsPrev || {};
+    if (f && pv.html && f.getAttribute("srcdoc") !== pv.html) f.setAttribute("srcdoc", pv.html);
+    var note = document.querySelector("[data-nbprevnote]");
+    if (note && S.newsEdit) { note.innerHTML = newsPreviewNoteHTML(S.newsEdit, S.newsLang || "RU"); translateTree(note); }
+  }
+  function admNewsLiveHTML(d, L) {
+    var pv = S.newsPrev || {};
+    /* a render() reuses the letter it already has, and asks again — which
+       costs nothing when the draft and the language are what it last drew
+       (newsPreviewLoad compares) and redraws it when either has moved on */
+    newsPreviewSoon(pv.html ? 300 : 50);
+    return '<div id="newsprev" class="adm-nbprev" tabindex="-1"><div class="adm-sec__t">Как увидит покупатель</div>' +
+      '<p class="adm-hint">Письмо целиком, каким оно уйдёт, — обновляется само. Нажмите на картинку, чтобы проверить, куда она ведёт.</p>' +
+      '<div data-nbprevnote>' + newsPreviewNoteHTML(d, L) + "</div>" +
+      '<iframe class="adm-frame adm-frame--news" data-nbframe title="Предпросмотр письма" ' +
+        'sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"' +
+        (S.newsPrevH ? ' style="height:' + S.newsPrevH + 'px"' : "") +
+        (pv.html ? ' srcdoc="' + esc(pv.html) + '"' : "") + "></iframe></div>";
   }
   function newsProgressHTML(done, total) {
     var pct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
@@ -22254,7 +22919,8 @@
   function newsGenText() {
     var g = S.newsGen;
     if (!g) return "";
-    return g.err || BLOGGEN_STEPS[g.step] || "";
+    // one request translates the letter into both languages (newsTranslateBlocks)
+    return g.err || (g.step === "tr" ? "Перевожу на эстонский и английский…" : BLOGGEN_STEPS[g.step]) || "";
   }
   function admNewsAssistantHTML(d) {
     var gen = S.newsGen, genBusy = !!(gen && !gen.err);
@@ -22265,7 +22931,7 @@
         '" placeholder="новинки сентября, скидка 10 % до воскресенья"' + (genBusy ? " disabled" : "") + "></label>" +
       '<button class="adm-btn" data-newswrite' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "✨ Написать") + "</button>" +
       '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-newsprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(newsGenText()) + "</div>" +
-      '<div class="adm-hint">Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.</div>' +
+      '<div class="adm-hint">Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.</div>' +
       '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
         '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
         '<button class="adm-link" data-newstranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
@@ -22284,7 +22950,8 @@
       : '<button class="adm-link adm-link--warn" data-newsdel>Удалить письмо</button>') + "</div>";
   }
   function admNewsPreviewHTML(d, L) {
-    if (!d.id) return '<p class="adm-hint" style="margin-top:20px">Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.</p>';
+    // a draft is drawn live, saved or not; a letter that went out is what was saved
+    if (d.status === "draft") return admNewsLiveHTML(d, L);
     return '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
       '<iframe class="adm-frame" title="Предпросмотр письма" loading="lazy" style="margin-top:10px" ' +
         'src="/api/admin/newsletters/' + encodeURIComponent(d.id) + "/preview/?lang=" + encodeURIComponent(L) +
@@ -22293,7 +22960,6 @@
   function admNewsEditorHTML(d) {
     var L = S.newsLang || "RU";
     var busy = !!S.newsBusy;
-    blogKeepCaret();   // this render is about to replace the box being typed in
     var left =
       admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
         return newsLangWords(d, code);
@@ -22312,14 +22978,8 @@
       '<p class="adm-hint">Название — для вас, покупатель его не увидит</p>' +
       '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
         '<input class="adm-input" data-newsf="subject" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
-      '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
-        return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
-      }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
-      '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
-      '<div class="adm-canvas" contenteditable="true" data-blogbody="' + L + '" role="textbox" aria-multiline="true" ' +
-        'aria-label="Текст письма" placeholder="Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.">' +
-        (d.body[L] || "") + "</div>" +
-      admNewsProductsHTML(d) +
+      // the letter itself: blocks, redrawn in this slot alone (newsBlocksDraw)
+      '<div class="adm-nbwrap" id="newsblocks">' + admNewsBlocksHTML(d, L) + "</div>" +
       '<label class="adm-field">Адрес для теста' +
         '<input class="adm-input" type="email" data-newsto value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com"></label>' +
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-newstest' + (busy ? " disabled" : "") + ">Отправить мне тест</button></div>" +
@@ -22366,9 +23026,18 @@
   /* ---- opening, saving, closing ------------------------------------------ */
   function newsOpen(d) {
     S.newsEdit = d; newsMarkSaved(d);
-    S.newsLang = "RU"; S.newsQ = ""; S.newsErr = ""; S.newsConfirmDelete = false; S.newsConfirmBack = false;
+    S.newsLang = "RU"; S.newsErr = ""; S.newsConfirmDelete = false; S.newsConfirmBack = false;
     S.newsBrief = ""; if (S.newsGen && S.newsGen.err) S.newsGen = null;
+    S.newsPick = null; S.newsUndo = null; S.newsPrev = null; S.newsPrevH = 0; newsUpReset();
     S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
+    /* Ask now whether this server can take a photo — quietly: the answer only
+       matters if it is «no», and then only the blocks are redrawn (with the
+       address box every picture block falls back to). This question not being
+       asked at all is what told Renat «uploads are not set up» (23.09.2026). */
+    if (d.status === "draft") {
+      mediaProbe(function () { if (MEDIA.on === false && S.newsEdit === d) newsBlocksDraw(); });
+      loadAdminBlog(false);   // the articles a link can point at (the picker's «Статья» rows)
+    }
     window.scrollTo({ top: 0 });
   }
   function openNewsEditor(id) {
@@ -22384,12 +23053,15 @@
   }
   function newsCloseEditor() {
     S.newsEdit = null; S.newsConfirmBack = false; S.newsConfirmDelete = false;
+    S.newsPick = null; S.newsUndo = null; S.newsPrev = null; S.newsPrevH = 0; newsUpReset();
+    clearTimeout(newsPreviewSoon._t);
     S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
     window.scrollTo({ top: 0 }); render();
   }
   function newsPayload(d) {
-    // through the allowlist on the way out, like an article; the server cleans again
-    return { title: d.title, subject: d.subject, body: blogBody3ToHtml(d.body), products: d.products };
+    /* The blocks, and only the blocks: the server derives the cards from them
+       and cleans every field again (src/lib/newsletter-blocks.ts). */
+    return { title: d.title, subject: d.subject, blocks: newsBlocksOut(d.blocks) };
   }
   function saveNewsFields(d) {
     var body = newsPayload(d);
@@ -22410,6 +23082,8 @@
   function saveNewsDraft(then) {
     var d = S.newsEdit;
     if (!d || S.newsBusy) return;
+    // a picture still on its way is not in the draft yet — saving now would save the letter without it
+    if (newsUploading()) { toast("Подождите — картинка ещё загружается"); return; }
     S.newsBusy = true; S.newsErr = ""; render();
     saveNewsFields(d).then(function () {
       S.newsBusy = false;
@@ -22452,6 +23126,8 @@
     if (!newsReady(d, S.newsLang || "RU") && !newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) {
       toast("Сначала заполните тему и текст письма"); return;
     }
+    var pr = newsProblem(d);
+    if (pr) { newsShowProblem(pr); return; }
     // the test is the saved letter — save first, then send the same thing again
     if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsTest(document.querySelector("[data-newstest]")); }); return; }
     if (btn && btn.disabled) return;
@@ -22481,6 +23157,8 @@
     var d = S.newsEdit;
     if (!d || S.newsBusy) return;
     if (!newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) { toast("Сначала заполните тему и текст письма"); return; }
+    var pr = newsProblem(d);
+    if (pr) { newsShowProblem(pr); return; }
     // the letter that goes out is the saved one — save first, then ask
     if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsSendAsk(); }); return; }
     var aud = S.newsAudience;
@@ -22565,9 +23243,133 @@
     });
   }
   /* ---- the assistant: the whole letter, or a translation ------------------ */
+  /* The products the assistant may name and show: the letter's own «Товар» blocks. */
   function newsProductRefs(d) {
-    return productsById(d.products).map(function (p) {
+    return productsById(newsProductIds(d)).map(function (p) {
       return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat };
+    });
+  }
+  /** A node's words with its <br>s as line breaks. */
+  function newsNodeText(el) {
+    var s = "", kids = el.childNodes || [];
+    for (var i = 0; i < kids.length; i++) {
+      var c = kids[i];
+      if (c.nodeType === 3) s += c.nodeValue;
+      else if (c.nodeType === 1) s += c.tagName === "BR" ? "\n" : newsNodeText(c);
+    }
+    return s;
+  }
+  /* The assistant's letter (the blog's HTML — src/lib/ai-prompts.ts
+     buildNewsletterPrompt) as blocks: paragraphs run together into one text
+     block until a heading or a card breaks them, a heading is a heading
+     block, a list its lines with «•», a card on a line of its own a «Товар»
+     block — unless the letter already shows that product. Parsed by
+     DOMParser, which runs nothing it reads. */
+  function newsBlocksFromHtml(html, have) {
+    var out = [], buf = [], doc = null;
+    try { doc = new DOMParser().parseFromString("<body>" + String(html || "") + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return out;
+    var clean = function (s) { return String(s || "").replace(/[ \t ]+/g, " ").replace(/ *\n */g, "\n").trim(); };
+    var flush = function () {
+      if (buf.length) out.push({ k: newsKey(), t: "text", style: "p", text: { RU: buf.join("\n\n"), ET: "", EN: "" } });
+      buf = [];
+    };
+    var shown = (have || []).slice();
+    var kids = doc.body.childNodes;
+    for (var i = 0; i < kids.length; i++) {
+      var n = kids[i];
+      if (n.nodeType === 3) { if (clean(n.nodeValue)) buf.push(clean(n.nodeValue)); continue; }
+      if (n.nodeType !== 1) continue;
+      var tag = n.tagName;
+      var card = n.matches && n.matches("a[data-product]") ? n : (n.querySelector ? n.querySelector("a[data-product]") : null);
+      if (card && !clean(newsNodeText(n)).replace(clean(newsNodeText(card)), "").trim()) {
+        var id = card.getAttribute("data-product") || "";
+        flush();
+        if (id && shown.indexOf(id) < 0) { shown.push(id); out.push({ k: newsKey(), t: "product", id: id }); }
+        continue;
+      }
+      if (/^H[1-6]$/.test(tag)) {
+        flush();
+        var h = clean(newsNodeText(n)).replace(/\s+/g, " ");
+        if (h) out.push({ k: newsKey(), t: "text", style: "h", text: { RU: h.slice(0, 200), ET: "", EN: "" } });
+        continue;
+      }
+      if (tag === "UL" || tag === "OL") {
+        var lis = n.querySelectorAll("li"), lines = [];
+        for (var j = 0; j < lis.length; j++) {
+          var li = clean(newsNodeText(lis[j])).replace(/\s+/g, " ");
+          if (li) lines.push((tag === "OL" ? (lines.length + 1) + ". " : "• ") + li);
+        }
+        if (lines.length) buf.push(lines.join("\n"));
+        continue;
+      }
+      var p = clean(newsNodeText(n));
+      if (p) buf.push(p);
+    }
+    flush();
+    return out;
+  }
+  /* The letter's Russian words as one numbered text for the translate task:
+     [[1]] the subject, then every text and every button label in order. The
+     task copies [[n]] tokens across untouched (src/lib/ai-prompts.ts
+     placeholderRule), and a reply that lost, doubled or reordered one is
+     refused whole — a translation whose third paragraph landed in the fourth
+     block is worse than none. */
+  function newsUnits(d) {
+    var units = [];
+    if (String(d.subject.RU || "").trim()) units.push({ k: "", src: String(d.subject.RU).trim() });
+    (d.blocks || []).forEach(function (b) {
+      if ((b.t === "text" || b.t === "btn") && String(b.text.RU || "").trim()) units.push({ k: b.k, src: String(b.text.RU).trim() });
+    });
+    return units;
+  }
+  function newsPackUnits(units) {
+    return units.map(function (u, i) { return "[[" + (i + 1) + "]] " + u.src; }).join("\n\n");
+  }
+  /** The reply split back by its tokens — null when any token is missing, doubled, out of order or empty. */
+  function newsUnpackUnits(text, n) {
+    var s = String(text || ""), re = /\[\[(\d+)\]\]/g, m, marks = [];
+    while ((m = re.exec(s))) marks.push({ n: Number(m[1]), at: m.index, end: re.lastIndex });
+    if (!n || marks.length !== n) return null;
+    var out = [];
+    for (var i = 0; i < marks.length; i++) {
+      if (marks[i].n !== i + 1) return null;
+      var piece = s.slice(marks[i].end, i + 1 < marks.length ? marks[i + 1].at : s.length).replace(/^\s+|\s+$/g, "");
+      if (!piece) return null;
+      out.push(piece);
+    }
+    return out;
+  }
+  /** Every Russian word of the letter into Estonian and English — one request, both languages. */
+  function newsTranslateBlocks(d) {
+    var units = newsUnits(d);
+    if (!units.length) return Promise.reject(new Error("Сначала напишите письмо по-русски — тему и текст"));
+    var text = newsPackUnits(units);
+    if (text.length > 6000) return Promise.reject(new Error("Текст письма слишком длинный для перевода за один раз"));
+    var keep = productsById(newsProductIds(d)).map(function (p) { return p.brand + " " + p.name; }).slice(0, 20);
+    return apiSend("/api/admin/ai/text/", "POST", {
+      task: "translate", lang: "RU",
+      input: { text: text, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: keep }
+    }).then(function (r) {
+      var texts = r.status === 200 && r.body && r.body.ok && r.body.texts;
+      if (!texts) throw new Error(newsGenErrText(r));
+      var got = {};
+      ["ET", "EN"].forEach(function (L) {
+        got[L] = newsUnpackUnits(texts[L], units.length);
+        if (!got[L]) throw new Error("Перевод пришёл неполным — попробуйте ещё раз");
+      });
+      ["ET", "EN"].forEach(function (L) {
+        units.forEach(function (u, i) {
+          var v = got[L][i];
+          if (!u.k) { d.subject[L] = v.replace(/\s+/g, " ").slice(0, 200); return; }
+          for (var j = 0; j < d.blocks.length; j++) {
+            var b = d.blocks[j];
+            if (b.k !== u.k) continue;
+            b.text[L] = b.t === "btn" ? v.replace(/\s+/g, " ").slice(0, 60)
+              : b.style === "h" ? v.replace(/\s+/g, " ").slice(0, 200) : v.slice(0, 3000);
+          }
+        });
+      });
     });
   }
   function newsGenErrText(r) {
@@ -22578,25 +23380,14 @@
     if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
     return "Не получилось — попробуйте ещё раз";
   }
-  /** The Russian letter into the draft — the cards rebuilt by the same two functions an article's are. */
+  /* The Russian letter into the draft: its text at the END of the letter —
+     the pictures the owner has already laid out stay where he put them, and
+     ↑↓ move the new blocks. A subject he has typed himself is his. */
   function newsApplyWritten(d, tx) {
-    if (txt(tx.subject)) d.subject.RU = txt(tx.subject).slice(0, 200);
-    var wrote = blogCardsOut(txt(tx.body));
-    d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
+    if (txt(tx.subject) && !String(d.subject.RU || "").trim()) d.subject.RU = txt(tx.subject).slice(0, 200);
+    var add = newsBlocksFromHtml(txt(tx.body), newsProductIds(d));
+    Array.prototype.push.apply(d.blocks, add.slice(0, Math.max(0, NEWS_BLOCKS_MAX - d.blocks.length)));
     if (!d.title && d.subject.RU) d.title = d.subject.RU.slice(0, 120);
-  }
-  function newsTranslateOne(d, L) {
-    var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
-    var src = blogCardsOut(d.body.RU);
-    return apiSend("/api/admin/ai/text/", "POST", {
-      task: "post_translate", lang: L,
-      input: { sourceLang: "RU", title: d.subject.RU, body: src.html, keepNames: keep }
-    }).then(function (r) {
-      var tx = r.status === 200 && r.body.ok && r.body.text;
-      if (!tx || !(tx.title || tx.body)) throw new Error(newsGenErrText(r));
-      if (txt(tx.title)) d.subject[L] = txt(tx.title).slice(0, 200);
-      if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(txt(tx.body), src.cards, L));
-    });
   }
   function newsWrite(d, brief) {
     if (!d) return;
@@ -22613,11 +23404,8 @@
       var tx = r.status === 200 && r.body.ok && r.body.text;
       if (!tx || !tx.subject || !tx.body) throw new Error(newsGenErrText(r));
       newsApplyWritten(d, tx);
-      step("et");
-      return newsTranslateOne(d, "ET");
-    }).then(function () {
-      step("en");
-      return newsTranslateOne(d, "EN");
+      step("tr");
+      return newsTranslateBlocks(d);
     }).then(function () {
       step("save");
       return saveNewsFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
@@ -22637,11 +23425,8 @@
     if (!newsReady(d, "RU")) { toast("Сначала напишите письмо по-русски — тему и текст"); return; }
     var paint = function () { if (S.newsEdit === d) render(); };
     var step = function (s) { S.newsGen = { step: s, err: "" }; paint(); };
-    step("et");
-    newsTranslateOne(d, "ET").then(function () {
-      step("en");
-      return newsTranslateOne(d, "EN");
-    }).then(function () {
+    step("tr");
+    newsTranslateBlocks(d).then(function () {
       S.newsGen = null;
       toast("Переведено — проверьте и сохраните");
       paint();
@@ -22666,15 +23451,6 @@
       // another language is another box: the remembered caret belongs to the old one
       S.newsLang = d.newslang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return true;
     }
-    if (d.newsproductadd) {
-      var pd = S.newsEdit;
-      if (pd && pd.products.indexOf(d.newsproductadd) < 0 && pd.products.length < 8) pd.products.push(d.newsproductadd);
-      S.newsQ = ""; render(); return true;
-    }
-    if (d.newsproductdel) {
-      if (S.newsEdit) S.newsEdit.products = S.newsEdit.products.filter(function (id) { return id !== d.newsproductdel; });
-      render(); return true;
-    }
     if (d.newssave !== undefined) {
       if (S.newsEdit && S.newsEdit.id && !newsDirty()) { toast("Изменений нет"); return true; }
       saveNewsDraft(); return true;
@@ -22697,23 +23473,216 @@
     return false;
   }
   /* The fields write straight into the draft — no render() under a caret.
-     The body itself is the shared box: the [data-blogbody] branch of the
-     main input listener syncs it through richDraft(). */
+     A block's own fields ([data-nbf]) the same way: the text of the
+     language on the strip, the picker's search (its list repainted alone),
+     the address boxes. */
   document.addEventListener("input", function (e) {
     var t = e.target;
     if (!t || !t.matches || !S.newsEdit) return;
     if (t.matches("[data-newsf]")) {
       var nd = S.newsEdit, nf = t.dataset.newsf;
       if (nf === "title") nd.title = t.value;
-      else if (nf === "subject") nd.subject[S.newsLang || "RU"] = t.value;
+      else if (nf === "subject") { nd.subject[S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
       newsPaintState();
-    } else if (t.matches("[data-newsq]")) {
-      S.newsQ = t.value;
-      var nlist = document.getElementById("admnewsproducts");
-      if (nlist) { nlist.innerHTML = admNewsPicksHTML(newsMatches(S.newsEdit)); translateTree(nlist); }
+    } else if (t.matches("[data-nbf]")) {
+      var f = t.dataset.nbf, k = t.dataset.nbk || "";
+      if (f === "q") {
+        S.newsPick = S.newsPick || { k: k, q: "" };
+        S.newsPick.q = t.value;
+        var list = t.parentNode && t.parentNode.querySelector("[data-nbpicklist]");
+        if (list) { list.innerHTML = newsPickRows(S.newsPick.q, S.newsPick.only || ""); translateTree(list); }
+        return;
+      }
+      if (f === "url") { if (S.newsPick) S.newsPick.url = t.value; return; }
+      if (f === "src") { NEWS_SRC[k] = t.value; return; }
+      var b = newsBlockByKey(k);
+      if (!b || !b.text) return;
+      b.text[S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language on the strip
+      newsPaintState(); newsPreviewSoon();
     } else if (t.matches("[data-newsto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-newsbrief]")) { S.newsBrief = t.value; }
   });
+  /* The block editor's buttons — every [data-nb], addressed by the block's
+     key. A listener of its own rather than more names in the delegate's
+     selector: nothing else in the panel answers to these. */
+  function newsPickOpen(k, only) {
+    var b = k === "add" ? null : newsBlockByKey(k);
+    S.newsPick = { k: k, q: "", only: only || "", url: b && /^https?:/i.test(b.href || "") ? b.href : "" };
+  }
+  function newsFocus(sel) {
+    var el = document.querySelector(sel);
+    if (!el) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    if (el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  function newsBlockAdd(kind) {
+    var d = S.newsEdit;
+    if (!d || d.blocks.length >= NEWS_BLOCKS_MAX) return;
+    S.newsUndo = null;
+    if (kind === "img") {
+      /* straight to the phone's own picker — camera or gallery; only a server
+         with no bucket gets an empty block with an address box instead */
+      if (MEDIA.on === false) {
+        var pb = { k: newsKey(), t: "img", src: "", href: "", alt: "" };
+        d.blocks.push(pb); S.newsPick = null; newsBlocksChanged();
+        newsFocus('[data-nbf="src"][data-nbk="' + pb.k + '"]');
+        return;
+      }
+      var fin = document.querySelector('[data-nbfile="add"]');
+      if (fin) fin.click();
+      return;
+    }
+    if (kind === "product") {
+      if (S.newsPick && S.newsPick.k === "add") { S.newsPick = null; newsBlocksDraw(); return; }
+      newsPickOpen("add", "product"); newsBlocksDraw();
+      newsFocus('[data-nbpick="add"] [data-nbf="q"]');
+      return;
+    }
+    var b = kind === "btn"
+      ? { k: newsKey(), t: "btn", text: newsEmpty3(), href: "" }
+      : { k: newsKey(), t: "text", style: "p", text: newsEmpty3() };
+    d.blocks.push(b);
+    S.newsPick = null;
+    newsBlocksChanged();
+    newsFocus('[data-nbcard="' + b.k + '"] [data-nbf]');
+  }
+  function newsBlockTo(v) {
+    var d = S.newsEdit, pk = S.newsPick;
+    if (!d || !pk) return;
+    if (pk.k === "add") {
+      var id = String(v).indexOf("product:") === 0 ? String(v).slice(8) : "";
+      if (!id) return;
+      var ids = newsProductIds(d);
+      if (ids.indexOf(id) < 0 && ids.length >= NEWS_PRODUCTS_MAX) { toast("В письме уже 8 товаров — больше карточек не поместится."); return; }
+      var pb = { k: newsKey(), t: "product", id: id };
+      d.blocks.push(pb); S.newsPick = null; S.newsUndo = null;
+      newsBlocksChanged();
+      var el = document.querySelector('[data-nbcard="' + pb.k + '"]');
+      if (el && el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+    var b = newsBlockByKey(pk.k);
+    if (!b) { S.newsPick = null; newsBlocksDraw(); return; }
+    b.href = String(v);
+    S.newsPick = null;
+    newsCardPaint(b.k); newsPaintState(); newsPreviewSoon();
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-nb]") : null;
+    var d = S.newsEdit;
+    if (!t || !d || S.adminTab !== "news" || t.disabled) return;
+    var act = t.getAttribute("data-nb"), k = t.getAttribute("data-nbk") || "", v = t.getAttribute("data-v") || "";
+    var i = k ? newsBlockIndex(k) : -1;
+    e.preventDefault();
+    if (act === "add") { newsBlockAdd(v); return; }
+    if (act === "up" || act === "down") {
+      var j = act === "up" ? i - 1 : i + 1;
+      if (i < 0 || j < 0 || j >= d.blocks.length) return;
+      var tmp = d.blocks[i]; d.blocks[i] = d.blocks[j]; d.blocks[j] = tmp;
+      S.newsUndo = null;
+      newsBlocksChanged();
+      // the thumb stays on the block it is moving, not on the one that took its place
+      newsFocus('[data-nbcard="' + k + '"] [data-nb="' + act + '"]:not([disabled])');
+      return;
+    }
+    if (act === "del") {
+      if (i < 0) return;
+      S.newsUndo = { b: d.blocks[i], i: i };
+      d.blocks.splice(i, 1);
+      delete NEWS_UP[k];   // an upload still on its way finds no block and lands nowhere
+      if (S.newsPick && S.newsPick.k === k) S.newsPick = null;
+      newsBlocksChanged();
+      return;
+    }
+    if (act === "undo") {
+      var u = S.newsUndo;
+      S.newsUndo = null;
+      if (u && d.blocks.length < NEWS_BLOCKS_MAX) d.blocks.splice(Math.min(u.i, d.blocks.length), 0, u.b);
+      newsBlocksChanged();
+      return;
+    }
+    if (act === "style") {
+      var sb = newsBlockByKey(k);
+      if (!sb || sb.t !== "text") return;
+      sb.style = v === "h" ? "h" : "p";
+      newsCardPaint(k); newsPaintState(); newsPreviewSoon();
+      newsFocus('[data-nbcard="' + k + '"] [data-nbf="text"]');
+      return;
+    }
+    if (act === "pick") {
+      if (S.newsPick && S.newsPick.k === k) S.newsPick = null;
+      else newsPickOpen(k, "");
+      newsBlocksDraw();
+      if (S.newsPick) newsFocus('[data-nbpick="' + k + '"] [data-nbf="q"]');
+      return;
+    }
+    if (act === "to") { newsBlockTo(v); return; }
+    if (act === "urlok") {
+      var box = document.querySelector('[data-nbpick="' + k + '"] [data-nbf="url"]');
+      var url = newsUrlOk((box && box.value) || (S.newsPick && S.newsPick.url) || "");
+      if (!url) { toast("Адрес должен начинаться с https://"); if (box) box.focus(); return; }
+      newsBlockTo(url);
+      return;
+    }
+    if (act === "unlink") {
+      var ub = newsBlockByKey(k);
+      if (ub) ub.href = "";
+      S.newsPick = null;
+      newsCardPaint(k); newsPaintState(); newsPreviewSoon();
+      return;
+    }
+    if (act === "pickclose") { S.newsPick = null; newsBlocksDraw(); return; }
+    if (act === "repic") {
+      var rin = document.querySelector('[data-nbfile="' + k + '"]');
+      if (rin) rin.click();
+      return;
+    }
+    if (act === "srcok") {
+      var sEl = document.querySelector('[data-nbf="src"][data-nbk="' + k + '"]');
+      var src = newsImgOk((sEl && sEl.value) || NEWS_SRC[k] || "");
+      if (!src) { toast("Ссылка на картинку должна начинаться с https://"); if (sEl) sEl.focus(); return; }
+      var ib = newsBlockByKey(k);
+      if (!ib) return;
+      ib.src = src; delete NEWS_SRC[k];
+      newsCardPaint(k); newsPaintState(); newsPreviewSoon();
+      return;
+    }
+    if (act === "jump") {
+      var pv = document.getElementById("newsprev");
+      if (pv && pv.scrollIntoView) pv.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+  });
+  // the phone's picker: «+ Картинка» (one photo or several) or «Заменить картинку» on one block
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !t.matches("[data-nbfile]") || !S.newsEdit) return;
+    var files = [].slice.call(t.files || []);   // a copy — clearing the input empties the live list
+    var where = t.getAttribute("data-nbfile");
+    t.value = "";   // so choosing the same file again still fires
+    if (!files.length) return;
+    if (where === "add") newsAddPictures(files);
+    else newsUpload(where, files[0]);
+  });
+  /* The letter's frame grows to the letter, so the phone scrolls one page
+     and not a page inside a page. `load` does not bubble; captured here, it
+     arrives after the pictures inside have loaded too. */
+  document.addEventListener("load", function (e) {
+    var f = e.target;
+    if (!f || f.tagName !== "IFRAME" || !f.hasAttribute("data-nbframe")) return;
+    try {
+      /* the BODY's height: the document's own is never less than the frame
+         it sits in, so a letter that got shorter would keep the old height */
+      var doc = f.contentDocument;
+      var h = doc && doc.body ? doc.body.scrollHeight : 0;
+      if (h > 0) {
+        /* remembered, and written into the markup by admNewsLiveHTML: a
+           render() morphs the frame's attributes to the fresh markup, and a
+           style it did not carry would be taken off again */
+        S.newsPrevH = Math.min(h + 2, 20000);
+        f.style.height = S.newsPrevH + "px";
+      }
+    } catch (err) { /* a frame we cannot read keeps its CSS height */ }
+  }, true);
   /* ---------- /Рассылка ---------------------------------------------------- */
 
   /* ---------- Аналитика ---------------------------------------------------
@@ -26532,7 +27501,7 @@
      A product is NOT a select. Two hundred and twenty names in a <select> is
      the wall this feature was asked not to be, so it is a search box with at
      most six answers under it — the same shape «Рассылка» and «Статьи» already
-     use for picking a product (admNewsPicksHTML). Once one is picked the
+     use for picking a product (newsPickRows). Once one is picked the
      search disappears and the chosen product stands there with «Убрать».
 
      Free delivery has no chips at all, only a sentence saying why: the parcel
@@ -28191,7 +29160,10 @@
      out with a plain sentence, and every other part of the panel is unchanged.
      The prototype with no backend behind it lands in the same place. */
   var MEDIA = { on: null, busy: false, cutout: false, maxBytes: 12 * 1024 * 1024 };
-  function mediaProbe() {
+  /* `then`, when given, replaces the closing render(): the article's and the
+     letter's editors ask from inside a screen whose fields are being typed
+     into, and repaint only their own slot with the answer. */
+  function mediaProbe(then) {
     if (MEDIA.on !== null || MEDIA.busy) return;
     MEDIA.busy = true;
     apiJson("/api/admin/upload/")
@@ -28204,7 +29176,12 @@
         if (MEDIA.on && r.body.maxBytes > 0) MEDIA.maxBytes = Number(r.body.maxBytes);
       })
       .catch(function () { MEDIA.on = false; MEDIA.cutout = false; })
-      .then(function () { MEDIA.busy = false; render(); });
+      .then(function () { MEDIA.busy = false; if (typeof then === "function") then(); else render(); });
+  }
+  /** An upload the server refused for having no bucket is the probe's answer too. */
+  function mediaNoteRefusal(e) {
+    var code = String((e && e.message) || e || "");
+    if (code === "storage_not_configured" || code === "not_configured") MEDIA.on = false;
   }
   /* Every refusal is one sentence: what did not happen, why, what to do.
      Dim (10.09.2026) watched a desktop upload on staging die with nothing
@@ -37602,7 +38579,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -40460,7 +41437,8 @@
     for (i = 0; i < files.length; i++) if (/^image\//.test(files[i].type)) { img = files[i]; break; }
     e.preventDefault();
     if (img) {
-      if (MEDIA.on !== true) { toast("Загрузка картинок пока не настроена — вставьте ссылку на картинку."); return; }
+      // unknown is not «no» — see blogToolSheet(); the upload itself reports a real refusal
+      if (MEDIA.on === false) { toast("Загрузка картинок пока не настроена — вставьте ссылку на картинку."); return; }
       blogSelSave(); blogUploadImage([img]);
       return;
     }
@@ -41373,7 +42351,9 @@
     ["[data-herof],[data-herotick]", "[data-herosave]"],
     // «Рассылка»: Enter in the test-address box sends the test, in the brief asks the assistant
     ["[data-newsto]", "[data-newstest]"],
-    ["[data-newsbrief]", "[data-newswrite]"]
+    ["[data-newsbrief]", "[data-newswrite]"],
+    // …and in a block's «Или вставьте адрес страницы» it puts the address (one picker is open at a time)
+    ['[data-nbf="url"]', '[data-nb="urlok"]']
   ];
   function admEnterTarget(input) {
     for (var i = 0; i < ADM_ENTER_FORMS.length; i++) {

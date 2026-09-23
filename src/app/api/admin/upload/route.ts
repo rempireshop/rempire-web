@@ -4,12 +4,16 @@
  *   multipart/form-data
  *     file        the picture (JPEG / PNG / WebP / AVIF, up to 12 MB)
  *                 or a product video (MP4 / MOV, up to 60 MB, kind=video)
- *     kind        product | hero | review | blog | video
+ *     kind        product | hero | review | blog | video | news
  *     productId   required for kind=product and kind=video
  *     reviewId    required for kind=review
  *     alt         optional caption, echoed back
  *   → { ok, url, thumbUrl, key, width, height, bytes }
  *     video:  { ok, url, key, bytes, contentType }
+ *     news:   { ok, url, key, width, height, bytes, contentType } — a picture
+ *             for «Рассылка»: one JPEG (a PNG when it is really transparent),
+ *             at most 1200 px wide, no WebP and no thumbnail, because a mail
+ *             program reads it (src/lib/images.ts processEmailImage)
  *
  * DELETE /api/admin/upload/?key=products/… — removes one object, and only
  * under the prefixes this shop writes.
@@ -20,7 +24,7 @@
  * docs/media.md.
  */
 import { ADMIN_COOKIE, clientIp, rateLimit, readCookie, requireAdmin } from "@/lib/auth";
-import { ImageError, MAX_UPLOAD_BYTES, processImage } from "@/lib/images";
+import { ImageError, MAX_UPLOAD_BYTES, processEmailImage, processImage } from "@/lib/images";
 import { writeAuditSafe } from "@/lib/orders";
 import {
   deleteObject,
@@ -44,7 +48,7 @@ export const dynamic = "force-dynamic";
 const UPLOADS_PER_HOUR = 60;
 const HOUR = 60 * 60 * 1000;
 
-const KINDS: MediaKind[] = ["product", "hero", "review", "blog", "video"];
+const KINDS: MediaKind[] = ["product", "hero", "review", "blog", "video", "news"];
 
 function bad(error: string, status = 400, detail?: string) {
   return Response.json({ ok: false, error, ...(detail ? { detail } : {}) }, { status });
@@ -80,9 +84,12 @@ export async function POST(req: Request) {
   const kind = kindRaw as MediaKind;
 
   const ownerId = String(form.get(kind === "review" ? "reviewId" : "productId") || "").trim();
-  // hero and blog covers are uploaded before there is any row to attach them
-  // to — the URL rides along in the slide/post draft and is saved with it
-  if (kind !== "hero" && kind !== "blog" && !ownerId) return bad(kind === "review" ? "bad_review" : "bad_product");
+  // hero and blog covers — and a letter's pictures — are uploaded before there
+  // is any row to attach them to: the URL rides along in the slide/post/letter
+  // draft and is saved with it
+  if (kind !== "hero" && kind !== "blog" && kind !== "news" && !ownerId) {
+    return bad(kind === "review" ? "bad_review" : "bad_product");
+  }
 
   const file = form.get("file");
   if (!file || typeof file === "string" || typeof (file as File).arrayBuffer !== "function") return bad("no_file");
@@ -112,6 +119,34 @@ export async function POST(req: Request) {
 
       return Response.json(
         { ok: true, key, url: put.url, bytes: put.bytes, contentType: mime },
+        { headers: { "cache-control": "no-store" } },
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  }
+
+  /* news: a picture for a letter. Mail programs are not browsers — no WebP
+     (Outlook draws a red cross), no progressive JPEG, 1200 px at most — so it
+     is re-encoded for them instead of for the shop, and stored as one object:
+     a letter has no use for a thumbnail. */
+  if (kind === "news") {
+    try {
+      const bytes = Buffer.from(await upload.arrayBuffer());
+      const img = await processEmailImage(bytes);
+      const key = mediaKey("news", upload.name || "picture", null, Date.now(), img.ext);
+      const put = await putObject({ key, body: img.body, contentType: img.contentType });
+      await writeAuditSafe("admin", "media.upload", {
+        key,
+        kind,
+        id: null,
+        bytes: put.bytes,
+        width: img.width,
+        height: img.height,
+        from: img.sourceMime,
+      });
+      return Response.json(
+        { ok: true, key, url: put.url, width: img.width, height: img.height, bytes: put.bytes, contentType: img.contentType },
         { headers: { "cache-control": "no-store" } },
       );
     } catch (err) {

@@ -5324,48 +5324,48 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Рассылка уходит подписчикам на их языке",
+      "title": "Рассылка из картинок уходит подписчикам на их языке",
       "steps": [
-        "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
-        "В тексте письма нажать «Картинка», вставить адрес и заполнить «Куда ведёт картинка».",
-        "Написать название, тему и текст по-русски, добавить товар, «Сохранить».",
-        "Переключить на Eesti, написать тему и текст, «Сохранить».",
-        "Ввести свой адрес, «Отправить мне тест».",
+        "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», вписать название и тему.",
+        "«+ Картинка» — снять фото или выбрать из галереи; «Куда ведёт картинка» — найти и выбрать товар.",
+        "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную.",
+        "Стрелками ↑↓ поменять два блока местами и посмотреть «Как увидит покупатель» ниже.",
+        "Переключить на Eesti: тема, тексты и надпись кнопки; «Сохранить», свой адрес, «Отправить мне тест».",
         "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
       ],
       "expect": [
-        "Тест пришёл с пометкой [test] в теме и карточкой товара.",
-        "Карточка назвала число подписчиков по языкам до отправки.",
-        "Счётчик рос до «Отправлено N из N», письмо стало только для чтения.",
-        "Подписчик с эстонским языком получил эстонскую версию.",
-        "Внизу письма есть «Отписаться», и ссылка работает.",
+        "Фото загружается с процентами и встаёт в письмо — адрес картинки вводить не нужно.",
+        "«Как увидит покупатель» меняется сразу после правки, ещё до «Сохранить».",
+        "Тест пришёл с [test] в теме; каждая картинка и кнопка ведут куда выбрано.",
+        "Карточка назвала число подписчиков по языкам; счётчик дошёл до «Отправлено N из N».",
+        "Подписчик с эстонским языком получил эстонскую версию; внизу работает «Отписаться».",
         "В журнале есть строка «Рассылка «…»: отправлено N, ошибок 0»."
       ],
-      "why": "Одно письмо всем подписчикам — первый раз, когда галочка на кассе что-то значит; ошибка уйдёт сотням.",
+      "why": "Письмо собирается на телефоне из картинок, как у Aromatic 89. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
       "risk": "high",
       "writes": true,
       "en": {
-        "title": "The newsletter reaches subscribers in their language",
+        "title": "A newsletter of pictures reaches subscribers in their language",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
-          "In the letter press «Картинка», paste an address and fill in «Куда ведёт картинка».",
-          "Write a name, subject and text in Russian, add a product, «Сохранить».",
-          "Switch to Eesti, write the subject and text, «Сохранить».",
-          "Enter your address, «Отправить мне тест».",
+          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», write a name and a subject.",
+          "«+ Картинка» — take a photo or pick one from the gallery; «Куда ведёт картинка» — find and pick a product.",
+          "Another «+ Картинка» leading to a section, «+ Текст» with a couple of lines, «+ Кнопка» «В магазин» to the home page.",
+          "Swap two blocks with the ↑↓ arrows and look at «Как увидит покупатель» below.",
+          "Switch to Eesti: the subject, the texts and the button label; «Сохранить», your address, «Отправить мне тест».",
           "Press «Отправить N подписчикам», read the card, «Отправить»."
         ],
         "expect": [
-          "The test arrived with [test] in the subject and a product card.",
-          "The card named the subscriber count per language before sending.",
-          "The counter climbed to «Отправлено N из N», then the letter became read-only.",
-          "The Estonian-language subscriber got the Estonian version.",
-          "The letter ends with «Отписаться», and the link works.",
+          "The photo uploads with a percentage and lands in the letter — no picture address needed.",
+          "«Как увидит покупатель» changes right after each edit, before «Сохранить».",
+          "The test arrived with [test] in the subject; every picture and button goes where chosen.",
+          "The card named the subscribers per language; the counter reached «Отправлено N из N».",
+          "The Estonian-language subscriber got the Estonian version; «Отписаться» at the bottom works.",
           "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
         ],
-        "why": "One letter to every subscriber is the first time the checkout tick means something; a mistake goes to hundreds."
+        "why": "The letter is built on a phone out of pictures, like Aromatic 89's. One letter goes to every subscriber — a mistake goes to hundreds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-21T06:53:00.000Z"
+      "markedAt": "2026-09-23T13:22:36.184Z"
     },
     {
       "id": "mail-daily-limit",
@@ -6776,11 +6776,13 @@
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
         "Написать заголовок и пару абзацев, поставить обложку.",
         "Вставить в текст карточку товара кнопкой «Товар».",
+        "Кнопкой «Картинка» → «Загрузить картинку» вставить в текст фото с телефона.",
         "Нажать «Удалить» под обложкой, затем поставить её снова.",
         "Нажать «Опубликовать» и открыть блог в магазине."
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
+        "Фото с телефона встаёт в текст — ссылку на картинку искать не нужно.",
         "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
         "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
         "Статья видна в блоге магазина вместе с обложкой.",
@@ -6789,25 +6791,28 @@
       "why": "Неопубликованная статья не приводит из Google никого.",
       "risk": "low",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Writing and publishing an article",
         "steps": [
           "Open «Ещё» → «Блог» and press «+ Статья».",
           "Write a title and a couple of paragraphs, set a cover.",
           "Insert a product card into the text with the «Товар» button.",
+          "With «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
           "Press «Удалить» under the cover, then set it again.",
           "Press «Опубликовать» and open the blog in the shop."
         ],
         "expect": [
           "When a product is inserted the panel says which language it went into.",
+          "The phone's photo lands in the text — no picture link to find.",
           "With a cover you see three frames: the blog, the article and social.",
           "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
           "The post is visible in the shop's blog with its cover.",
           "The product card in the text opens the product itself."
         ],
         "why": "An article that did not publish brings nobody from Google."
-      }
+      },
+      "markedAt": "2026-09-23T13:22:36.184Z"
     },
     {
       "id": "blog-cover-frame",

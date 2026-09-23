@@ -30,9 +30,11 @@ export const R2_SERVICE = "s3";
  *  src/lib/video.ts and docs/media.md.
  *  `giftcards/` holds one printable A5 PDF per issued gift-card code, written
  *  by the shop itself on the paid transition (src/lib/giftcard-pdf.ts), never
- *  by an upload form — mediaKey() below cannot produce that prefix. */
-export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/", "videos/", "giftcards/"] as const;
-export type MediaKind = "product" | "hero" | "review" | "blog" | "video";
+ *  by an upload form — mediaKey() below cannot produce that prefix.
+ *  `news/` holds the pictures of «Рассылка» — a JPEG or a PNG, never a WebP,
+ *  because a mail program reads them (src/lib/images.ts processEmailImage). */
+export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/", "videos/", "giftcards/", "news/"] as const;
+export type MediaKind = "product" | "hero" | "review" | "blog" | "video" | "news";
 
 export class StorageError extends Error {
   code: string;
@@ -171,6 +173,7 @@ export function mediaKey(
   const safeExt = /^[a-z0-9]{2,5}$/.test(ext) ? ext : "webp";
   if (kind === "hero") return `hero/${stamp}-${slug}.${safeExt}`;
   if (kind === "blog") return `blog/${stamp}-${slug}.${safeExt}`;
+  if (kind === "news") return `news/${stamp}-${slug}.${safeExt}`;
   if (kind === "product") return `products/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
   if (kind === "review") return `reviews/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
   if (kind === "video") return `videos/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
