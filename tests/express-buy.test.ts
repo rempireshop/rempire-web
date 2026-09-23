@@ -92,7 +92,8 @@ const ONE_SIZE = clientProduct(
 /* ---------- the storefront, sliced ------------------------------------- */
 
 type Point = { id: string; name: string; type: string; address?: string; city?: string };
-type Pref = { country: string; method: string; carrier: string; machine: string } | null;
+type Addr = { addr: string; zip: string; city: string };
+type Pref = { country: string; method: string; carrier: string; machine: string; address?: Addr } | null;
 interface Cust {
   email: string; name: string; phone: string; marketing?: boolean; shipPref: Pref;
 }
@@ -101,17 +102,30 @@ type Quote = { payload: Record<string, unknown>; total: number; goods: number; s
 
 interface Shop {
   S: Record<string, unknown>;
-  POINTS: { by: Record<string, Point[]>; err: Record<string, boolean>; empty: Record<string, boolean> };
+  POINTS: {
+    by: Record<string, Point[]>; err: Record<string, boolean>; empty: Record<string, boolean>;
+    big: Record<string, number>; found: Record<string, Point[]>; failed: Record<string, boolean>; finding: Record<string, boolean>;
+  };
   loads: string[];
+  /** URLs the real pointsFind() asked for (only with `opts.search`). */
+  asked: string[];
+  /** How many times the express slot was asked to redraw itself. */
+  patches(): number;
   expressPlan(p: unknown, si: number, qty: number): Plan;
   expressQuote(plan: Plan): Quote;
   expressMarkup(p: unknown): string;
   orderPayload(): Record<string, unknown>;
   localTotal(): number;
-  applyAcctShipPref(): void;
+  applyAcctShipPref(saved?: boolean): void;
   matchAcctPoint(): boolean;
   walletPay(): number;
   eur(n: number): string;
+}
+/** What the fake /api/shipping/points/ answers a name search with. */
+type Found = { ok: true; points: Point[] } | "fail" | "hang";
+interface ShopOpts {
+  /** Run the real pointsFind()/pointsFoundArrived() against this script. */
+  search?: (url: string) => Found;
 }
 
 /** Locker lists the carriers «answered» with — names are what the account keeps. */
@@ -145,13 +159,13 @@ function freshState(cust: Cust | null, product: ReturnType<typeof clientProduct>
  * so a helper that another branch adds to app.js is picked up for real the
  * day it arrives and stubbed until then.
  */
-function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, ONE_SIZE]): Shop {
+function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, ONE_SIZE], opts: ShopOpts = {}): Shop {
   const body = `
     var S = STATE;
     var CATALOGUE = CAT;
     var CART_MAX_QTY = 99;
-    var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {} };
-    var loads = [];
+    var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {}, failed: {}, rows: [] };
+    var loads = [], asked = [], patches = 0;
     var SHIP_RULES = ${literal("SHIP_RULES")};
     var MONTONIO_PRICE = ${literal("MONTONIO_PRICE")};
     var CARRIERS_BY_COUNTRY = ${literal("CARRIERS_BY_COUNTRY")};
@@ -177,7 +191,18 @@ function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, O
     function giftAmount() { return 0; }
     function pointsOn() { return false; }
     function colourRu(c) { return c; }
+    function patchExpress() { patches++; }
+    function pointResultsChanged() {}
     var PAYLOGOS = undefined;
+    /* the network the real search talks to, when a test brings one: capped,
+       so a retry loop shows up as a count instead of hanging the test */
+    function fetch(url) {
+      asked.push(url);
+      var a = asked.length > 25 ? "hang" : SEARCH(url);
+      if (a === "hang") return new Promise(function () {});
+      if (a === "fail") return Promise.reject(new Error("offline"));
+      return Promise.resolve({ ok: true, json: function () { return Promise.resolve(a); } });
+    }
 
     ${slice("walletPay")}
     ${slice("expressPoint")}
@@ -247,9 +272,12 @@ function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, O
     ${optional("coPointsKey")}
     ${optional("pointNamed")}
     ${optional("pointsForAcct")}
+    ${opts.search ? slice("pointsFind") : ""}
+    ${opts.search ? slice("pointsFoundArrived") : ""}
 
     return {
-      S: S, POINTS: POINTS, loads: loads,
+      S: S, POINTS: POINTS, loads: loads, asked: asked,
+      patches: function () { return patches; },
       expressPlan: expressPlan, expressQuote: expressQuote, expressMarkup: expressMarkup,
       orderPayload: orderPayload, localTotal: localTotal,
       applyAcctShipPref: applyAcctShipPref, matchAcctPoint: matchAcctPoint,
@@ -257,11 +285,13 @@ function shop(state: Record<string, unknown>, catalogue: unknown[] = [SHAMPOO, O
     };
   `;
   // The body is this repository's own source plus fixed stub text.
-  const made = new Function("STATE", "CAT", body)(state, catalogue) as Shop;
+  const made = new Function("STATE", "CAT", "SEARCH", body)(state, catalogue, opts.search ?? (() => "hang")) as Shop;
   for (const [k, v] of Object.entries(LISTS)) made.POINTS.by[k] = v;
   return made;
 }
 
+/** The door a courier default rings. */
+const MARDI: Addr = { addr: "Mardi 1", zip: "10145", city: "Tallinn" };
 /** A customer whose account holds everything a parcel order needs. */
 const FULL: Cust = {
   email: "renat@example.com",
@@ -296,6 +326,22 @@ describe("expressPlan(): only a complete account goes straight to the wallet", (
     expect((s.expressPlan(SHAMPOO, 1, 1).point as Point).id).toBe("omn-101");
   });
 
+  it("a courier default with its address: the door, and the checkout's first courier", () => {
+    const s = shop(freshState(withPref({ method: "courier", carrier: "", machine: "", address: MARDI })));
+    const plan = s.expressPlan(SHAMPOO, 1, 1);
+    expect(plan).toMatchObject({ ok: true, method: "courier", carrier: "", point: null, address: MARDI });
+    const q = s.expressQuote(plan);
+    expect(q.payload.shipping).toEqual({
+      method: "courier", country: "EE", carrier: "dpd",
+      pointId: null, pointName: null, pointType: null,
+      address: { addr: "Mardi 1", zip: "10145", city: "Tallinn" },
+    });
+    const html = s.expressMarkup(SHAMPOO);
+    expect(html).toContain("Курьер до двери");
+    expect(html).toContain("Mardi 1, 10145 Tallinn");
+    expect(html).toContain("data-express");
+  });
+
   it("a counter in Tallinn needs no phone — shipRequired() does not ask for one", () => {
     const s = shop(freshState(withPref({ method: "pickup", carrier: "", machine: "" }, { phone: "" })));
     const plan = s.expressPlan(SHAMPOO, 1, 1);
@@ -322,7 +368,8 @@ describe("expressPlan(): only a complete account goes straight to the wallet", (
     ["pickup outside Estonia", withPref({ country: "LV", method: "pickup", carrier: "", machine: "" }), "delivery", () => {}],
     ["a parcel with no phone to text", withPref({}, { phone: "" }), "phone", () => {}],
     ["a phone too short to be one", withPref({}, { phone: "12-34" }), "phone", () => {}],
-    ["a courier — the account keeps no street address", withPref({ method: "courier", carrier: "", machine: "" }), "address", () => {}],
+    ["a courier default with no address saved", withPref({ method: "courier", carrier: "", machine: "" }), "address", () => {}],
+    ["a courier address with no postcode", withPref({ method: "courier", carrier: "", machine: "", address: { addr: "Mardi 1", zip: " ", city: "Tallinn" } }), "address", () => {}],
     ["a carrier this country does not offer", withPref({ carrier: "novapost" }), "delivery", () => {}],
     ["a carrier whose list came back empty", withPref({}), "delivery", (s) => { s.POINTS.empty["omniva:EE"] = true; }],
     ["a parcel with no machine chosen", withPref({ machine: "" }), "point", () => {}],
@@ -362,6 +409,97 @@ describe("expressPlan(): only a complete account goes straight to the wallet", (
     expect(html).toContain('class="btn btn--wide btn--express" data-buynow="' + SHAMPOO.id + '"');
     expect(html).toContain("Купить через ");
     expect(html).not.toContain("data-express");
+  });
+});
+
+/* ---------- 1a. a big country's saved machine ------------------------- */
+
+/* Poland's DPD is 33 603 points and the shop downloads the first 1 500. A
+   machine saved from the account's search is usually not among them, so it
+   is asked for by name through the server search the sheet uses
+   (pointsFind) — the same query matchAcctPoint() sends, so one answer serves
+   the product page and the checkout. */
+const KRAKOW: Point = { id: "dpd-pl-9001", name: "DPD Pickup Kraków Rynek 7", type: "pickup_point", city: "Kraków" };
+const PL_PREF = withPref({ country: "PL", carrier: "dpd", machine: KRAKOW.name });
+const tick = () => new Promise((r) => setTimeout(r, 0));
+async function ticks(n = 5) { for (let i = 0; i < n; i++) await tick(); }
+
+function bigShop(search: (url: string) => Found, screen = "product") {
+  const state = freshState(PL_PREF);
+  state.screen = screen;
+  const s = shop(state, [SHAMPOO, ONE_SIZE], { search });
+  // the first slice, without the saved machine in it
+  s.POINTS.by["dpd:PL"] = [{ id: "dpd-pl-1", name: "DPD Pickup Warszawa 1", type: "pickup_point" }];
+  s.POINTS.big["dpd:PL"] = 33603;
+  return s;
+}
+
+describe("a big country's saved machine is looked up by name before deciding", () => {
+  it("in flight: neither path — a neutral block, no order button, no fallback", () => {
+    const s = bigShop(() => "hang");
+    expect(s.expressPlan(SHAMPOO, 1, 1)).toMatchObject({ ok: false, why: "wait" });
+    expect(s.asked).toHaveLength(1);
+    expect(s.asked[0]).toContain("country=PL");
+    expect(s.asked[0]).toContain("carrier=dpd");
+    expect(s.asked[0]).toContain("q=" + encodeURIComponent(KRAKOW.name.toLowerCase()));
+    const html = s.expressMarkup(SHAMPOO);
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain("Ищем ваш пакомат из кабинета…");
+    expect(html).toMatch(/<button class="btn btn--wide btn--express" data-buynow="[^"]+" disabled>/);
+    expect(html).not.toContain("data-express");
+    // asked once, however often the page is drawn meanwhile
+    s.expressMarkup(SHAMPOO);
+    s.expressPlan(SHAMPOO, 1, 1);
+    expect(s.asked).toHaveLength(1);
+  });
+
+  it("found: the express path, with the machine the server found", async () => {
+    const s = bigShop(() => ({ ok: true, points: [KRAKOW] }));
+    expect(s.expressPlan(SHAMPOO, 1, 1).why).toBe("wait");
+    await ticks();
+    // the answer redraws the express slot on the product page
+    expect(s.patches()).toBeGreaterThan(0);
+    const plan = s.expressPlan(SHAMPOO, 1, 1);
+    expect(plan.ok).toBe(true);
+    expect((plan.point as Point).id).toBe(KRAKOW.id);
+    expect(s.expressMarkup(SHAMPOO)).toContain("data-express");
+    const q = s.expressQuote(plan);
+    expect((q.payload.shipping as Record<string, unknown>).pointId).toBe(KRAKOW.id);
+    expect((q.payload.shipping as Record<string, unknown>).country).toBe("PL");
+  });
+
+  it("the search answers without that machine: the checkout, which asks for one", async () => {
+    const s = bigShop(() => ({ ok: true, points: [{ id: "x", name: "DPD Pickup Kraków Rynek 8", type: "pickup_point" }] }));
+    s.expressPlan(SHAMPOO, 1, 1);
+    await ticks();
+    expect(s.expressPlan(SHAMPOO, 1, 1)).toMatchObject({ ok: false, why: "point" });
+  });
+
+  it("the search fails: the checkout (step 2), and nobody asks again by themselves", async () => {
+    const s = bigShop(() => "fail");
+    s.expressPlan(SHAMPOO, 1, 1);
+    await ticks();
+    expect(s.expressPlan(SHAMPOO, 1, 1)).toMatchObject({ ok: false, why: "point" });
+    s.expressMarkup(SHAMPOO);
+    await ticks();
+    expect(s.asked).toHaveLength(1);
+    // today's button again — the tap goes to the checkout
+    expect(s.expressMarkup(SHAMPOO)).toContain("Купить через ");
+    expect(s.expressMarkup(SHAMPOO)).not.toContain("disabled");
+  });
+
+  /* Found while building the above: matchAcctPoint() re-asked a failed query
+     every time an answer landed, and every failure is an answer landing — so
+     a search that could not be answered (offline, a 500) was asked again and
+     again, as fast as the failures came back, on the checkout. */
+  it("a failed search is not re-asked in a loop by the checkout's own match", async () => {
+    const s = bigShop(() => "fail", "checkout");
+    Object.assign(s.S, { country: "EU", countryIso: "PL" });
+    (s.S.ship as Record<string, unknown>).carrier = "dpd";
+    s.matchAcctPoint();
+    await ticks(10);
+    expect(s.asked).toHaveLength(1);
+    expect(s.POINTS.failed["dpd:PL|" + KRAKOW.name.toLowerCase()]).toBe(true);
   });
 });
 
@@ -495,6 +633,9 @@ const PARITY: Array<[string, Cust, ReturnType<typeof clientProduct>, number, num
   ["a Nova Post office in Poland", withPref({ country: "PL", carrier: "novapost", machine: "Nova Post Warszawa 12" }), SHAMPOO, 0, 1],
   ["the counter on Mardi 1", withPref({ method: "pickup", carrier: "", machine: "" }), SHAMPOO, 1, 1],
   ["a product with one volume", FULL, ONE_SIZE, 0, 1],
+  ["a courier to the door in Tallinn", withPref({ method: "courier", carrier: "", machine: "", address: MARDI }), SHAMPOO, 1, 1],
+  ["a courier in Latvia", withPref({ country: "LV", method: "courier", carrier: "", machine: "", address: { addr: "Brīvības iela 12-4", zip: "LV-1010", city: "Rīga" } }), SHAMPOO, 0, 2],
+  ["a courier in Greece, the country with no lockers", withPref({ country: "GR", method: "courier", carrier: "", machine: "", address: { addr: "Ermou 25", zip: "105 63", city: "Athína" } }), SHAMPOO, 2, 1],
 ];
 
 describe("expressQuote(): the order is the one the checkout would place", () => {
