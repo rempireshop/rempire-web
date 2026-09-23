@@ -67,6 +67,25 @@ export function tablesWithData(list) {
     .filter((l) => / TABLE DATA /.test(l)).length;
 }
 
+/**
+ * Railway shows two URLs for one database. DATABASE_URL names
+ * `postgres.railway.internal`, which resolves only inside Railway's own
+ * network — the first try on 23.09.2026 got exactly that. From this computer
+ * only DATABASE_PUBLIC_URL (a `*.proxy.rlwy.net` host and port) answers.
+ */
+export function internalHost(url) {
+  let host = "";
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return "DATABASE_URL is not a URL — copy the whole value, starting with postgresql://";
+  }
+  return /\.railway\.internal$/i.test(host)
+    ? "This is Railway's INTERNAL address (postgres.railway.internal) — it only works inside Railway.\n" +
+        "Copy DATABASE_PUBLIC_URL instead (Railway → Postgres → Variables) and put it after DATABASE_URL= in .env.railway.txt."
+    : null;
+}
+
 export function backupName(now = new Date()) {
   const p = (n) => String(n).padStart(2, "0");
   return `rempire-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}_${p(now.getHours())}${p(now.getMinutes())}.dump`;
@@ -76,6 +95,11 @@ async function main() {
   const url = process.env.DATABASE_URL?.trim();
   if (!url) {
     console.error("No DATABASE_URL. Put it in .env.railway.txt and run:\n  node --env-file=.env.railway.txt tools/db-backup.mjs");
+    process.exit(2);
+  }
+  const why = internalHost(url);
+  if (why) {
+    console.error(why);
     process.exit(2);
   }
   const outArg = process.argv.includes("--out") ? process.argv[process.argv.indexOf("--out") + 1] : null;

@@ -6,7 +6,7 @@
  * throwaway Postgres 16, rows deleted, restored, counted).
  */
 import { describe, expect, it } from "vitest";
-import { backupName, majorOf, tablesWithData } from "../tools/db-backup.mjs";
+import { backupName, internalHost, majorOf, tablesWithData } from "../tools/db-backup.mjs";
 import { checkUrl, EVENTS } from "../tools/montonio-webhook.mjs";
 
 describe("db-backup", () => {
@@ -27,6 +27,12 @@ describe("db-backup", () => {
     ].join("\r\n");
     expect(tablesWithData(list)).toBe(2);
     expect(tablesWithData("")).toBe(0);
+  });
+
+  it("stops at Railway's internal address, which only resolves inside Railway", () => {
+    expect(internalHost("postgresql://postgres:pw@postgres.railway.internal:5432/railway")).toMatch(/DATABASE_PUBLIC_URL/);
+    expect(internalHost("postgresql://postgres:pw@shuttle.proxy.rlwy.net:41234/railway")).toBeNull();
+    expect(internalHost("railway")).toMatch(/not a URL/);
   });
 
   it("names the file by date and minute, so two dumps in a day do not collide", () => {
