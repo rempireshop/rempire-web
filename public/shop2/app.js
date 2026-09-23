@@ -16247,6 +16247,39 @@
     toast("Корзина восстановлена ✓");
   }
 
+  /* ---------- ?buy=<qty> — «Купить» from Google Shopping ------------------
+     Merchant Center's «Checkout» link is /cart/<item id>:<qty>. The server
+     turns the id back into the product and the size the feed gave it and
+     sends the shopper to that product's page with ?size=…&buy=<qty>
+     (src/lib/merchant-cart.ts); the basket lives here, so this is where the
+     line goes in — with the checks every other door into the basket makes:
+     nothing out of stock, no size counted to zero, at most CART_MAX_QTY.
+     What is refused stays on the product page, which already says why.
+     `buy` leaves the address first, so a reload or Back never adds the line a
+     second time; `size` stays — it is the page's own. Idempotent like
+     resumeCart(): the same link twice is one line, not two. */
+  function buyFromLink() {
+    var m = String(location.search || "").match(/[?&]buy=(\d{1,3})(?:&|$)/);
+    if (!m) return;
+    var rest = String(location.search).replace(/^\?/, "").split("&").filter(function (kv) {
+      return kv && kv.split("=")[0] !== "buy";
+    }).join("&");
+    try { history.replaceState(history.state || null, "", location.pathname + (rest ? "?" + rest : "")); } catch (e) {}
+    if (S.screen !== "product" || !S.productId) return;
+    var p = byIdOrNull(S.productId);
+    if (!p || p.stock === "out" || sizeOut(p, S.size)) return;
+    var qty = Math.max(1, Math.min(CART_MAX_QTY, Number(m[1]) || 1));
+    var line = null;
+    S.cart.forEach(function (l) { if (l.id === p.id && l.size === S.size && !l.type) line = l; });
+    if (line) line.qty = Math.max(line.qty, qty);
+    else S.cart.push({ id: p.id, size: S.size, qty: qty });
+    persist();
+    cartPush.off = false;   // a new basket — see addToCart()
+    pushCart();
+    track("add_to_cart", { productId: p.id, value: sizePrice(p, S.size) });   // analytics agent
+    go("checkout");
+  }
+
   // ---------- checkout ----------
   /* Which delivery fields matter depends on how the parcel travels: a parcel
      machine needs a name for the label but no street, a courier needs the
@@ -41709,6 +41742,10 @@
      first paint and after the boot replaceState above, which would otherwise
      put ?resume= straight back into the address bar. */
   resumeCart();
+  /* …or from a «Купить» in Google Shopping (/cart/<id>:<qty> → the product
+     page with ?buy=): into the basket and on to the checkout. Before
+     heldAsk(), for the same reason as resumeCart(). */
+  buyFromLink();
 
   /* …and is there a basket still parked against an order this browser was
      sent to the bank with and never heard the end of? Asked after

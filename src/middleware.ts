@@ -6,6 +6,10 @@
  * 2. A catalogue product the owner has switched off with «Показывать в
  *    магазине» must stop having a page — see the second block below.
  *
+ * (And one exception to the first: Merchant Center's «Checkout» link,
+ * `/cart/<item id>:<qty>`, is passed through to its own route rather than
+ * redirected — see src/lib/cart-permalink.ts.)
+ *
  * Middleware rather than `next.config.ts`'s `redirects()`, for three reasons:
  *
  *  - It is a **lookup**, not a pattern. `/products/<handle>` is answered by
@@ -25,6 +29,7 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isCartPermalink } from "@/lib/cart-permalink";
 import { legacyTarget } from "@/lib/legacy-redirects";
 import { noindexShell } from "@/lib/seo-head.mjs";
 
@@ -119,6 +124,13 @@ export async function middleware(req: NextRequest) {
     if (hidden?.has(id)) return (await gone(req.nextUrl.origin)) ?? NextResponse.next();
     return NextResponse.next();
   }
+
+  /* Merchant Center's «Checkout» link — Shopify's cart permalink,
+     `/cart/<item id>:<qty>` — is not a stale Shopify page but a live door:
+     src/app/cart/[...path]/route.ts answers it with the product in the
+     basket. It has to be let through before the legacy rule below, which
+     sends every other `/cart/…` to the catalogue. */
+  if (isCartPermalink(req.nextUrl.pathname)) return NextResponse.next();
 
   const hit = legacyTarget(req.nextUrl.pathname, req.nextUrl.search);
   if (!hit) return NextResponse.next();

@@ -3315,6 +3315,47 @@
       }
     },
     {
+      "id": "checkout-google-cart-link",
+      "area": "checkout",
+      "who": "dim",
+      "device": "any",
+      "lang": "any",
+      "title": "Ссылка «Купить» из Google Shopping",
+      "steps": [
+        "Открыть адрес стенда с /cart/system-4-bio-botanical-shampoo_250ml:2 на конце.",
+        "Посмотреть корзину, потом нажать «Назад» в браузере.",
+        "Открыть адрес стенда с /cart/takogo-net:1 на конце.",
+        "Открыть адрес стенда с /cart/repair-me-wash:1 на конце (его сейчас нет в наличии)."
+      ],
+      "expect": [
+        "Открылось оформление заказа: шампунь System 4, 250 мл, 2 штуки.",
+        "«Назад» ведёт на страницу шампуня, второй раз он в корзину не попадает.",
+        "Неизвестный номер открывает главную страницу магазина.",
+        "Товар без наличия открывает свою страницу и в корзину не попадает."
+      ],
+      "why": "Кнопка «Купить» в Google Shopping ведёт на этот адрес; без него покупатель попадал в каталог с пустой корзиной.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The «Buy» link from Google Shopping",
+        "steps": [
+          "Open the staging address with /cart/system-4-bio-botanical-shampoo_250ml:2 at the end.",
+          "Look at the basket, then press the browser's Back.",
+          "Open the staging address with /cart/takogo-net:1 at the end.",
+          "Open the staging address with /cart/repair-me-wash:1 at the end (it is out of stock now)."
+        ],
+        "expect": [
+          "The checkout opened: System 4 shampoo, 250 ml, two of them.",
+          "Back leads to the shampoo's page, and it is not added a second time.",
+          "An unknown number opens the shop's home page.",
+          "A product out of stock opens its own page and is not added."
+        ],
+        "why": "Google Shopping's «Buy» button leads to this address; without it the shopper landed in the catalogue with an empty basket."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T13:32:52.399Z"
+    },
+    {
       "id": "order-list-chips",
       "area": "orders",
       "who": "renat",
