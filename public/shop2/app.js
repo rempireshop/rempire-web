@@ -31799,7 +31799,7 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0, movesAsked: false, at: 0 };
+  var STOCK = { asked: false, seq: 0, movesAsked: false, movesSeq: 0, at: 0 };
   /** How many «Склад» rows one page of the list holds. The whole warehouse is
       ~320 rows and every one of them has to be reachable (Dim: «We need
       all»), but the list is re-drawn on every keystroke of the search box, so
@@ -32384,9 +32384,12 @@
      used to show the row exactly as before — «штрихкод не привязан», the old
      count — which the owner read as «nothing got added». Only a copy that
      exists is refreshed; the ledger's own copy is dropped so «История»
-     re-reads it the next time it opens. */
+     re-reads it — the «asked» mark with it: dropped alone, the list was gone
+     and loadStockMoves() still thought it had asked, so a history on screen
+     read «Пока пусто» until the panel was reloaded. */
   function scanStockChanged() {
     S.stockMoves = null;
+    STOCK.movesAsked = false;
     if (S.stockLevels || STOCK.asked) reloadStock();
   }
   /** inventory: binds the last scanned code to productId+variant, then
@@ -34102,8 +34105,13 @@
     if ((S.stockMoves || STOCK.movesAsked) && !force) return;
     STOCK.movesAsked = true;
     S.stockMovesBusy = true;
+    /* Every opening asks again now (stockMovesOpen), so two asks can be in
+       the air at once — a chip pressed, the history closed and reopened —
+       and only the newest may write, as in loadStockLevels(). */
+    var mySeq = STOCK.movesSeq = (STOCK.movesSeq || 0) + 1;
     var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
+      if (mySeq !== STOCK.movesSeq) return;
       S.stockMovesBusy = false;
       /* A history that did not answer used to look exactly like a history
          with nothing in it — «Пока пусто» over a 500, and no way to ask
@@ -34111,7 +34119,28 @@
       if (r.status === 200 && r.body.ok) { S.stockMoves = r.body.moves; S.stockMovesErr = ""; }
       else S.stockMovesErr = "История не отвечает — попробуйте ещё раз.";
       render();
-    }).catch(function () { S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render(); });
+    }).catch(function () {
+      if (mySeq !== STOCK.movesSeq) return;
+      S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render();
+    });
+  }
+  /**
+   * «История приёмок и продаж →» and «← Склад».
+   *
+   * The history is read again EVERY time it is opened. It used to be read
+   * once per visit to the panel — so the 'edit' line with the reason typed
+   * under «Править» a minute ago (092_stock_move_edit.sql) was simply not in
+   * the list the owner opened to check it, whenever he had opened the
+   * history once before, and he concluded «Reason is not stored» (Renat,
+   * 23.09.2026). A sale on the website, made in another browser, never
+   * showed up there either. The lines already on screen stay until the new
+   * answer lands (the grey bars are for a history with nothing to show yet),
+   * and a refusal from an earlier visit is cleared by the same new ask.
+   */
+  function stockMovesOpen(open) {
+    S.stockMovesOpen = !!open;
+    if (S.stockMovesOpen) { S.stockMovesErr = ""; loadStockMoves(true); }
+    render();
   }
   /** «Остаток сейчас» → a whole number 0…MAX, or null when it is not one.
       This is a shelf count, so the old `Math.max(0, Math.trunc(Number(v)))`
@@ -41391,13 +41420,7 @@
        him. stockScrollMore() does exactly the same thing unasked. */
     if (d.stockmore !== undefined) { if (!stockGrow()) render(); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
-    if (d.stockmovesopen !== undefined) {
-      S.stockMovesOpen = !!d.stockmovesopen;
-      // coming back to a history that failed asks again, rather than showing
-      // the old refusal for as long as the panel stays open
-      if (S.stockMovesOpen && S.stockMovesErr) { STOCK.movesAsked = false; S.stockMovesErr = ""; }
-      render(); return;
-    }
+    if (d.stockmovesopen !== undefined) { stockMovesOpen(d.stockmovesopen); return; }
     if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}

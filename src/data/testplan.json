@@ -6093,15 +6093,17 @@
       "lang": "RU",
       "title": "Поправить остаток и порог «мало»",
       "steps": [
-        "Нажать «Править» у товара на «Складе».",
+        "На «Складе» открыть «История приёмок и продаж →» и вернуться назад.",
+        "Нажать «Править» у товара.",
         "Поменять только порог «мало» и вписать причину.",
-        "Сохранить и открыть «История приёмок и продаж →».",
-        "Вернуться, поменять остаток и штрихкод, снова сохранить.",
+        "Сохранить и снова открыть «История приёмок и продаж →».",
+        "Вернуться, поменять остаток и штрихкод, вписать другую причину, снова сохранить и открыть историю.",
         "Попробовать вписать в порог букву вместо числа."
       ],
       "expect": [
         "Всё, что вписали, сохранилось.",
-        "Причина от правки карточки видна в истории отдельной строкой.",
+        "Первая строка истории: «правка карточки · ваша причина», без числа справа.",
+        "После второй правки сверху строка «ручная правка · другая причина».",
         "Строка краснеет, когда остаток ниже своего порога.",
         "Букву вместо числа поле не принимает.",
         "Старое число при этом остаётся на месте."
@@ -6112,15 +6114,17 @@
       "en": {
         "title": "Correcting the stock and the «low» threshold",
         "steps": [
-          "On «Склад» press «Править» (edit) on a product.",
+          "On «Склад» open «История приёмок и продаж →» (the history) and come back.",
+          "Press «Править» (edit) on a product.",
           "Change only the «low» threshold and type a reason.",
-          "Save, then open «История приёмок и продаж →».",
-          "Go back, change the stock and the barcode, and save again.",
+          "Save, then open «История приёмок и продаж →» again.",
+          "Go back, change the stock and the barcode, type another reason, save and open the history.",
           "Try typing a letter instead of a number into the threshold."
         ],
         "expect": [
           "Everything you typed has been saved.",
-          "The reason from the card change shows in the history as its own row.",
+          "The history's first row: «правка карточки · your reason», with no number on the right.",
+          "After the second change the top row reads «ручная правка · the other reason».",
           "A row turns red when its stock is below the threshold.",
           "The field refuses a letter where a number belongs.",
           "The old number stays where it was."
@@ -6128,7 +6132,7 @@
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-23T16:55:51.781Z"
     },
     {
       "id": "stock-history",
