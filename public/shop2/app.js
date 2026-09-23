@@ -842,7 +842,9 @@
       "в корзине не осталось товаров": "korvis ei ole enam tooteid",
       "нет промокода для поздравления": "õnnitluse jaoks pole sooduskoodi",
       "почта не приняла письмо": "post ei võtnud kirja vastu",
-      "корзине ещё нет трёх часов": "korv on alla kolme tunni vana",
+      "срок из настройки ещё не прошёл": "seadetes märgitud aeg pole veel möödas",
+      "первое письмо ещё не уходило": "esimest kirja pole veel saadetud",
+      "корзина дешевле суммы для скидки": "korv on soodustuse summast odavam",
       "письмо уже уходило": "kiri on juba läinud",
       "после корзины уже был заказ": "pärast korvi tuli juba tellimus",
       "корзина стала заказом": "korvist sai tellimus",
@@ -3017,7 +3019,7 @@
       "Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.": "See on tellimuste kirjade osa. Null — ja uudiskiri võtab ühel päeval kogu ööpäeva.",
       "Писем в сутки — от 1 до 5000": "Kirju ööpäevas — 1 kuni 5000",
       "Придержать можно меньше, чем всего": "Tagasi hoida saab vähem kui kokku",
-      "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "kord ööpäevas: korvidele, mis on seadetes märgitud ajast vanemad, kui tellimust ikka ei tulnud",
+      "раз в сутки: корзинам старше срока из настройки ниже, если заказа так и не было": "kord ööpäevas: korvidele, mis on allpool seatud ajast vanemad, kui tellimust ikka ei tulnud",
       "Брошенная корзина — письмо со скидкой": "Hüljatud korv — kiri sooduskoodiga",
       "через несколько дней после первого письма, если заказа так и нет": "mõni päev pärast esimest kirja, kui tellimust ikka ei ole",
       "Напоминание — от 1 до 168 часов": "Meeldetuletus — 1 kuni 168 tundi",
@@ -3027,7 +3029,7 @@
       "Брошенные корзины: сохранено ✓": "Hüljatud korvid: salvestatud ✓",
       "Не сохранилось — попробуйте ещё раз": "Ei salvestunud — proovi uuesti",
       "Нет связи с магазином": "Poega ei ole ühendust",
-      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.": "Ostja pani korvi kokku ja lahkus. Kõigepealt pood tuletab korvi meelde ja kui tellimust ikka ei ole, saadab sellele samale korvile soodustuse. Mõlemad kirjad on ülal. Kontroll kord ööpäevas.",
+      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Эти четыре числа — для обоих писем. Проверка раз в сутки.": "Ostja pani korvi kokku ja lahkus. Kõigepealt pood tuletab korvi meelde ja kui tellimust ikka ei ole, saadab sellele samale korvile soodustuse. Need neli arvu kehtivad mõlemale kirjale. Kontroll kord ööpäevas.",
       "Напомнить через, часов": "Tuleta meelde pärast, tundi",
       "Столько корзина должна простоять, чтобы уйти первому письму.": "Nii kaua peab korv seisma, et esimene kiri välja läheks.",
       "Скидку через, дней": "Soodustus pärast, päeva",
@@ -3035,6 +3037,29 @@
       "Размер скидки, %": "Soodustuse suurus, %",
       "Скидку от суммы, €": "Soodustus alates summast, €",
       "Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.": "Odavamad korvid saavad ainult meeldetuletuse. Suurem kui iga korv — teist kirja ei tule.",
+      "Куда присылать примеры писем": "Kuhu kirjade näidised saata",
+      "«Прислать пример» под письмом отправляет его сюда сразу, не дожидаясь расписания. Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.": "«Saada näidis» kirja all saadab selle kohe siia, ajakava ootamata. Korv, tellimus ja sooduskood on näidises välja mõeldud — ostjatele ei lähe midagi.",
+      "Посмотреть письмо сейчас": "Vaata kirja kohe",
+      "пример придёт на адрес вверху страницы": "näidis tuleb lehe ülaosas olevale aadressile",
+      "Прислать пример": "Saada näidis",
+      "Пример отправлен ✓ Проверьте почту": "Näidis saadetud ✓ Vaata postkasti",
+      "включено вместе с первым": "sees koos esimesega",
+      "выключено вместе с первым": "väljas koos esimesega",
+      "Письмо ушло — проверьте ящик магазина": "Kiri läks teele — vaata poe postkasti",
+      "Адрес RESEND_TO не задан — письмо не отправлено": "Aadress RESEND_TO pole määratud — kirja ei saadetud",
+      "Resend не принял письмо — причина в строке «Письмо магазину о заказе»": "Resend ei võtnud kirja vastu — põhjus on real «Kiri poele tellimusest»",
+      "Письмо магазину о заказе": "Kiri poele tellimusest",
+      "Не удалось узнать — обновите страницу.": "Ei õnnestunud teada saada — värskenda lehte.",
+      "Письма не уходят совсем: на сервере нет ключа почты RESEND_API_KEY.": "Kirjad ei lähe üldse: serveris puudub postivõti RESEND_API_KEY.",
+      "Письмо о заказе сейчас не уходит никуда: в Vercel не задана переменная RESEND_TO.": "Kiri tellimusest ei lähe praegu kuhugi: Vercelis pole määratud muutujat RESEND_TO.",
+      "Добавьте её в Vercel → Settings → Environment Variables со значением": "Lisa see Vercelis → Settings → Environment Variables väärtusega",
+      "и опубликуйте сайт заново.": "ja avalda sait uuesti.",
+      "Без неё о заказе, оповещение о котором не дошло до телефона, вы узнаете только из панели.": "Ilma selleta saad tellimusest, mille teavitus telefoni ei jõudnud, teada ainult paneelist.",
+      "Почта не приняла проверочное письмо:": "Post ei võtnud proovikirja vastu:",
+      "Уходит на": "Läheb aadressile",
+      "— только когда оповещение на телефон не дошло ни до одного устройства.": "— ainult siis, kui teavitus ei jõudnud ühessegi seadmesse.",
+      "Отправить проверочное письмо": "Saada proovikiri",
+      "сколько писем в сутки, брошенная корзина, тексты — в «Маркетинг → Письма»": "mitu kirja ööpäevas, hüljatud korv, tekstid — «Turundus → Kirjad»",
       "Этот браузер не умеет оповещения.": "See brauser teavitusi ei oska.",
       "Откройте «Админку» на телефоне — там они работают.": "Ava telefonis «Админка» ikoon — seal need töötavad.",
       "Оповещения ещё не подключены к магазину. Это делает Дим — один раз, ключами на сервере.": "Teavitused ei ole poega veel ühendatud. Seda teeb Dim — üks kord, serveri võtmetega.",
@@ -3800,7 +3825,9 @@
       "в корзине не осталось товаров": "nothing left in the basket",
       "нет промокода для поздравления": "no promo code for the greeting",
       "почта не приняла письмо": "the mail server refused the letter",
-      "корзине ещё нет трёх часов": "the basket is under three hours old",
+      "срок из настройки ещё не прошёл": "the time you set has not passed yet",
+      "первое письмо ещё не уходило": "the first letter has not gone yet",
+      "корзина дешевле суммы для скидки": "the basket is below the discount sum",
       "письмо уже уходило": "the letter has already gone",
       "после корзины уже был заказ": "an order came after the basket",
       "корзина стала заказом": "the basket became an order",
@@ -5940,7 +5967,7 @@
       "Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.": "That is the order letters' share. Zero, and a campaign will one day take the whole allowance.",
       "Писем в сутки — от 1 до 5000": "Letters a day — from 1 to 5000",
       "Придержать можно меньше, чем всего": "You can hold back less than the total",
-      "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было": "once a day: to baskets older than the time set in Settings, if no order ever came",
+      "раз в сутки: корзинам старше срока из настройки ниже, если заказа так и не было": "once a day: to baskets older than the time set below, if no order ever came",
       "Брошенная корзина — письмо со скидкой": "Abandoned cart — the letter with the discount",
       "через несколько дней после первого письма, если заказа так и нет": "some days after the first letter, if there is still no order",
       "Напоминание — от 1 до 168 часов": "The reminder — from 1 to 168 hours",
@@ -5950,7 +5977,7 @@
       "Брошенные корзины: сохранено ✓": "Abandoned carts: saved ✓",
       "Не сохранилось — попробуйте ещё раз": "It did not save — try again",
       "Нет связи с магазином": "No connection to the shop",
-      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.": "The buyer filled a basket and left. First the shop reminds them of it, and if there is still no order it sends a discount on that same basket. Both letters are above. Checked once a day.",
+      "Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Эти четыре числа — для обоих писем. Проверка раз в сутки.": "The buyer filled a basket and left. First the shop reminds them of it, and if there is still no order it sends a discount on that same basket. These four numbers are for both letters. Checked once a day.",
       "Напомнить через, часов": "Remind after, hours",
       "Столько корзина должна простоять, чтобы уйти первому письму.": "This is how long a basket must sit before the first letter goes.",
       "Скидку через, дней": "The discount after, days",
@@ -5958,6 +5985,29 @@
       "Размер скидки, %": "How big the discount is, %",
       "Скидку от суммы, €": "The discount from a sum of, €",
       "Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.": "Cheaper baskets get the reminder only. Above every basket — no second letter at all.",
+      "Куда присылать примеры писем": "Where to send letter samples",
+      "«Прислать пример» под письмом отправляет его сюда сразу, не дожидаясь расписания. Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.": "«Send a sample» under a letter sends it here at once, without waiting for the schedule. The basket, order and promo code in a sample are made up — no buyer gets anything.",
+      "Посмотреть письмо сейчас": "See the letter now",
+      "пример придёт на адрес вверху страницы": "the sample goes to the address at the top of the page",
+      "Прислать пример": "Send a sample",
+      "Пример отправлен ✓ Проверьте почту": "Sample sent ✓ Check your mail",
+      "включено вместе с первым": "on together with the first",
+      "выключено вместе с первым": "off together with the first",
+      "Письмо ушло — проверьте ящик магазина": "The letter went — check the shop mailbox",
+      "Адрес RESEND_TO не задан — письмо не отправлено": "RESEND_TO is not set — the letter was not sent",
+      "Resend не принял письмо — причина в строке «Письмо магазину о заказе»": "Resend refused the letter — the reason is on the «Shop's letter about an order» line",
+      "Письмо магазину о заказе": "Shop's letter about an order",
+      "Не удалось узнать — обновите страницу.": "Could not find out — reload the page.",
+      "Письма не уходят совсем: на сервере нет ключа почты RESEND_API_KEY.": "No letters go at all: the server has no mail key RESEND_API_KEY.",
+      "Письмо о заказе сейчас не уходит никуда: в Vercel не задана переменная RESEND_TO.": "The order letter goes nowhere right now: the RESEND_TO variable is not set in Vercel.",
+      "Добавьте её в Vercel → Settings → Environment Variables со значением": "Add it in Vercel → Settings → Environment Variables with the value",
+      "и опубликуйте сайт заново.": "and redeploy the site.",
+      "Без неё о заказе, оповещение о котором не дошло до телефона, вы узнаете только из панели.": "Without it, an order whose notification never reached a phone shows up only in the panel.",
+      "Почта не приняла проверочное письмо:": "The mail service refused the test letter:",
+      "Уходит на": "Goes to",
+      "— только когда оповещение на телефон не дошло ни до одного устройства.": "— only when the phone notification reached no device.",
+      "Отправить проверочное письмо": "Send a test letter",
+      "сколько писем в сутки, брошенная корзина, тексты — в «Маркетинг → Письма»": "letters per day, abandoned cart, texts — in «Marketing → E-mails»",
       "Этот браузер не умеет оповещения.": "This browser cannot do notifications.",
       "Откройте «Админку» на телефоне — там они работают.": "Open the «Админка» icon on a phone — they work there.",
       "Оповещения ещё не подключены к магазину. Это делает Дим — один раз, ключами на сервере.": "Notifications are not connected to the shop yet. Dim does that — once, with keys on the server.",
@@ -6237,7 +6287,7 @@
     [/^использовано (.+)$/, { ET: "kasutatud $1", EN: "$1 used" }],
     // «Запустить сейчас»: what the run did, and its line in the journal
     [/^Отправлено (\d+) · пропущено (\d+)$/, { ET: "Saadetud $1 · vahele jäetud $2", EN: "Sent $1 · skipped $2" }],
-    /* «Никому не отправлено: корзине ещё нет трёх часов» — the reason is a
+    /* «Никому не отправлено: срок из настройки ещё не прошёл» — the reason is a
        dictionary key of its own, and trText() translates $1 through it. */
     [/^Никому не отправлено: (.+)$/, { ET: "Kellelegi ei saadetud: $1", EN: "Nothing went to anybody: $1" }],
     [/^Письмо «(.+)»: запущено вручную, отправлено (\d+)$/,
@@ -8803,7 +8853,10 @@
     contentOpen: "",     // which sub-block is unfolded ("" = the summary)
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
     mailLang: "",    // letter language; "" = never chosen here → Russian. admPanesLoad() brings back the last one
-    mailTo: "",      // address typed into «отправить тест на…»
+    mailTo: "",      // address typed into «отправить тест на…» / «Куда присылать примеры»; admPanesLoad() brings back the last one that worked
+    mailSampleBusy: "", // «Прислать пример»: the letter being sent right now
+    ownerMailBusy: false, // «Подключения» → «Отправить проверочное письмо» in flight
+    ownerMailTest: null,  // …and what the last one answered ({ ok } or { error, status, detail })
     mailDraft: null, // unsaved subject/intro/signature edits, by letter+language
     /* The language the assistant's microphone listens in: "" = never chosen
        here → the panel's. admPanesLoad() brings back the last one, and once it
@@ -17610,12 +17663,24 @@
         if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
         // …and the microphone's, the same shape and for the same reason
         if (["RU", "ET", "EN"].indexOf(p.voicelang) >= 0) S.voiceLang = p.voicelang;
+        /* …and the owner's own address for samples and tests (23.09.2026): the
+           «Прислать пример» buttons are useless if it has to be typed on every
+           visit. Only something shaped like an address comes back. */
+        if (typeof p.mailto === "string" && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(p.mailto)) {
+          admPanesMailTo = p.mailto;
+          if (!S.mailTo) S.mailTo = p.mailto;
+        }
       }
     } catch (e) {}
   }
+  /* The last address worth keeping: a half-typed one in the box when the
+     sidebar is folded must not wipe the one that worked yesterday. */
+  var admPanesMailTo = "";
   function admPanesSave() {
     try {
-      localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang, voicelang: S.voiceLang }));
+      var typed = (S.mailTo || "").trim();
+      if (/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(typed)) admPanesMailTo = typed;
+      localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang, voicelang: S.voiceLang, mailto: admPanesMailTo }));
     } catch (e) {}
   }
   admPanesLoad();
@@ -17817,6 +17882,45 @@
       else if (!MONTONIO) MONTONIO = { rows: [] };
       render();
     }).catch(function () { loadMontonio._busy = false; if (!MONTONIO) MONTONIO = { rows: [] }; render(); });
+  }
+  /* «Письмо магазину о заказе» — GET /api/admin/notify/ (23.09.2026). Renat:
+     «Phone notification arrived — e-mail to shop@rempireshop.com not.» The
+     letter goes to RESEND_TO, which has no default on purpose
+     (src/lib/notify.ts), and an unset variable was visible only in the log of
+     a payment webhook. `{ key, to }` — whether the mail key is there (never
+     the key) and the address; `{ unknown: true }` when the server could not
+     be asked, which draws grey, not green. */
+  var OWNER_MAIL = null;
+  function loadOwnerMail(force) {
+    if (SRV.admin !== true || loadOwnerMail._busy) return;
+    if (OWNER_MAIL && !force) return;
+    loadOwnerMail._busy = true;
+    apiJson("/api/admin/notify/").then(function (r) {
+      loadOwnerMail._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      OWNER_MAIL = r.status === 200 && r.body.email ? r.body.email : { unknown: true };
+      render();
+    }).catch(function () { loadOwnerMail._busy = false; OWNER_MAIL = { unknown: true }; render(); });
+  }
+  /* «Отправить проверочное письмо»: one real letter through the code a paid
+     order uses when no phone took the push — so a Resend refusal (an
+     unverified domain, a wrong key) comes back as Resend's own sentence. */
+  function srvOwnerMailTest() {
+    if (S.ownerMailBusy) return;
+    S.ownerMailBusy = true; render();
+    apiSend("/api/admin/notify/", "POST", {}).then(function (r) {
+      S.ownerMailBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var b = r.body || {};
+      S.ownerMailTest = b;
+      if (b.ok) toast("Письмо ушло — проверьте ящик магазина");
+      else if (b.error === "not_configured") toast("Адрес RESEND_TO не задан — письмо не отправлено");
+      else if (b.error === "no_api_key") toast("Отправка писем ещё не подключена");
+      else if (b.error === "rate_limited") toast("Слишком много писем — попробуйте позже");
+      else toast("Resend не принял письмо — причина в строке «Письмо магазину о заказе»");
+      loadOwnerMail(true);
+      render();
+    }).catch(function () { S.ownerMailBusy = false; toast("Сервер не отвечает"); render(); });
   }
   /* What the server saw in the key variable — its shape, never its contents
      — so «Подключения» can say what to re-paste. Each sentence is its own
@@ -20920,8 +21024,17 @@
        card that never arrives is money taken for nothing. */
     ["gift-card", "Подарочная карта", "сразу после оплаты, если в заказе есть карта", ""],
     ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
-    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше срока из «Настроек», если заказа так и не было", "abandoned"],
-    ["abandoned-cart-discount", "Брошенная корзина — письмо со скидкой", "через несколько дней после первого письма, если заказа так и нет", "abandonedDiscount"],
+    /* The pair shares ONE switch — `abandoned`, the only one the server reads
+       for either letter (src/lib/flows.ts). Until 23.09.2026 the second row
+       carried a key of its own, «abandonedDiscount», that nothing on the
+       server knows: its switch always read «off», flipping it saved a word
+       nobody reads, and because it was «off» nothing opened under it — no
+       «Запустить сейчас», and the four numbers were a card at the bottom of
+       the page. Dim, on staging: «I cannot manually force … I cannot modify
+       what the discount is». The second row now shows whose switch it obeys,
+       and its group holds the numbers for both letters (admMailHTML). */
+    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше срока из настройки ниже, если заказа так и не было", "abandoned"],
+    ["abandoned-cart-discount", "Брошенная корзина — письмо со скидкой", "через несколько дней после первого письма, если заказа так и нет", "abandoned"],
     ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
@@ -20985,7 +21098,12 @@
      the cron's or this button's alike — «Последний запуск: 10.09 07:00 —
      отправлено 1» — which is also the one place that shows whether the
      schedule reaches this deployment at all. */
-  var FLOW_RUNNABLE = { abandoned: true, birthday: true };
+  var FLOW_RUNNABLE = { abandoned: true, abandonedDiscount: true, birthday: true };
+  /* Which run a letter's row starts — by letter, not by switch, because the
+     two cart letters share a switch and each has its own job (the server's
+     HandRunFlow, src/lib/flows.ts). The discounted one had no button at all
+     until 23.09.2026, though the route has always accepted it. */
+  var MAIL_RUN_FLOW = { "abandoned-cart": "abandoned", "abandoned-cart-discount": "abandonedDiscount", "birthday": "birthday" };
   /** `10.09 07:00`, in this machine's own time — the owner reads his phone's clock, not UTC. */
   function flowRunWhen(iso) {
     var d = new Date(iso);
@@ -21008,17 +21126,25 @@
     empty_cart: "в корзине не осталось товаров",
     no_promo_code: "нет промокода для поздравления",
     send_failed: "почта не приняла письмо",
-    too_fresh: "корзине ещё нет трёх часов",
+    /* «корзине ещё нет трёх часов» until 23.09.2026 — true of the factory
+       setting only, since the wait became the owner's number, and never true
+       of the discounted letter, whose clock is days after the first one. */
+    too_fresh: "срок из настройки ещё не прошёл",
     already_sent: "письмо уже уходило",
     ordered_since: "после корзины уже был заказ",
     recovered: "корзина стала заказом",
     no_birthday: "дата рождения не указана",
     no_marketing: "нет согласия на письма",
     not_in_window: "дата не попадает в это окно",
+    /* the discounted cart letter's own two (SKIP_REASONS, src/lib/flows.ts):
+       they had no words here, so its «Последний запуск» dropped them and read
+       «отправлено 0» with nothing beside it */
+    no_reminder: "первое письмо ещё не уходило",
+    below_min: "корзина дешевле суммы для скидки",
     nobody: "в списке никого нет",
     no_budget: "лимит писем на сегодня исчерпан"
   };
-  /** « · корзине ещё нет трёх часов 2» — every reason the run counted. */
+  /** « · срок из настройки ещё не прошёл 2» — every reason the run counted. */
   function flowSkipsHTML(skips) {
     var out = "";
     for (var k in skips) {
@@ -21072,33 +21198,115 @@
       toast("Не удалось запустить — попробуйте ещё раз."); render();
     }).catch(function () { SRV.flowRunBusy = ""; toast("Сервер не отвечает"); render(); });
   }
+  /* «Прислать пример» (23.09.2026). Dim, testing on staging: «I do not seem to
+     have gotten the letter» — the automatic letters leave once a day at 07:00
+     UTC, so on a test day there was no way to SEE one. Every row with a switch
+     now sends a sample of its letter to the address typed at the top of the
+     page — the same route and the same demo letter as «Отправить мне тест» in
+     the editor (POST /api/admin/mail/test/), so nothing real moves: no cart is
+     stamped, no code is written, and the code in the sample cannot be spent.
+     Offered whether the switch is on or off: seeing the letter is how the
+     owner decides whether to switch it on. */
+  function admMailSampleToHTML() {
+    if (SRV.admin !== true) return "";
+    return '<label class="adm-field" style="margin-bottom:16px">Куда присылать примеры писем' +
+      '<input class="adm-input" type="email" data-mailto value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com">' +
+      '<span class="adm-hint">«Прислать пример» под письмом отправляет его сюда сразу, не дожидаясь расписания. ' +
+        "Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.</span></label>";
+  }
+  function admMailSampleHTML(tpl) {
+    var busy = S.mailSampleBusy === tpl;
+    return '<div class="adm-swrow"><span>Посмотреть письмо сейчас' +
+        '<span class="adm-row__sub">пример придёт на адрес вверху страницы</span></span>' +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailsample="' + tpl + '"' + (busy ? " disabled" : "") + ">" +
+        (busy ? "Отправляем…" : "Прислать пример") + "</button></div>";
+  }
+  /* What the mail route answered, in words — shared by «Отправить мне тест»
+     and «Прислать пример», which hit the same route with the same failures. */
+  function mailSendToast(res, okMsg) {
+    var err = res.j && res.j.error;
+    /* «Подключения» reads this: the only honest signal the panel has about
+       whether letters can be sent at all is a letter it actually tried to
+       send. Anything but a missing key leaves the row alone. */
+    if (res.j && res.j.ok) S.admMailKey = true;
+    else if (err === "no_api_key") S.admMailKey = false;
+    if (res.j && res.j.ok) toast(okMsg);
+    else if (res.code === 401) toast("Нужен вход в админку");
+    else if (err === "no_api_key") toast("Отправка писем ещё не подключена");
+    else if (err === "rate_limited") toast("Слишком много писем — попробуйте позже");
+    else if (err === "bad_email") toast("Введите e-mail — на него придёт образец");
+    else toast("Не получилось — попробуйте ещё раз");
+  }
+  function srvMailSample(tpl) {
+    keepMailTo();
+    var addr = (S.mailTo || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(addr)) {
+      toast("Введите e-mail — на него придёт образец"); refocus("[data-mailto]"); return;
+    }
+    if (S.mailSampleBusy) return;
+    S.mailSampleBusy = tpl; render();
+    fetch("/api/admin/mail/test/", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ template: tpl, to: addr, lang: mailLang() })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
+    }).then(function (res) {
+      S.mailSampleBusy = "";
+      // the address that worked is remembered on this device (admPanesSave)
+      if (res.j && res.j.ok) admPanesSave();
+      mailSendToast(res, "Пример отправлен ✓ Проверьте почту");
+      render();
+    }).catch(function () {
+      S.mailSampleBusy = ""; toast("Не получилось — попробуйте ещё раз"); render();
+    });
+  }
   function admMailHTML() {
     loadMailTexts(false);
     if (SRV.admin === true) loadFlowCounts();
     if (S.mailOpen) return admMailEditorHTML();
-    return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
+    // a switch the page has already drawn: the next row with it only follows
+    var drawn = {};
+    return admMailSampleToHTML() + '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
+      /* The discounted cart letter obeys «Брошенная корзина»'s switch — the
+         server has one switch for the pair — so it says whose it follows
+         instead of drawing a second switch that would move the first. */
+      var follows = !!(flow && drawn[flow]);
+      if (flow) drawn[flow] = true;
+      var run = MAIL_RUN_FLOW[m[0]] || "";
       /* What this letter's switch opens when it is on. Renat, 13.09.2026, on
          his phone: «in e-mails when turning something on, a subsection opens -
          it's really hard to understand for which section the subsection is.»
          They were siblings of the row in one flat list, at the same weight and
          the same left edge. They are a group now — indented behind the row's
          own ink bar, with the list's hairline moved to the bottom of the group
-         instead of splitting it (.adm-sub, admin.css). */
+         instead of splitting it (.adm-sub, admin.css).
+
+         The cart letters' four numbers live here, under the pair, whatever the
+         switch says (23.09.2026). They were a card at the very bottom of the
+         page, below the daily limit, and the row pointed at «Настройки», where
+         they never were — Dim: «I cannot modify what the discount is. Also I
+         cannot modify when it goes out». */
       var subs =
         (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
-        (FLOW_RUNNABLE[flow] && on && SRV.admin === true ? admFlowRunHTML(flow) : "");
+        (m[0] === "abandoned-cart-discount" ? cartFlowSettingsCard() : "") +
+        (run && FLOW_RUNNABLE[run] && on && SRV.admin === true ? admFlowRunHTML(run) : "") +
+        (flow && SRV.admin === true ? admMailSampleHTML(m[0]) : "");
       return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines' +
         (subs ? " adm-row--hassub" : "") + '"' + ADM_ROW_OPEN + ">" +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
-          '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
+          // the queue belongs to the first letter; the second would repeat its number
+          '<span class="adm-row__sub"><span>' + m[2] + "</span>" + (follows ? "" : flowCountLine(flow)) + "</span></button>" +
         // the third line of every row: the switch (or «всегда») on the left, «Изменить» on the right
         '<span class="adm-row__line adm-row__line--split">' +
-        (flow
-          ? admSwitch('data-admflow="' + flow + '"', on, m[1])
-          : '<span class="adm-badge adm-badge--ok">всегда</span>') +
+        (!flow
+          ? '<span class="adm-badge adm-badge--ok">всегда</span>'
+          : follows
+            ? '<span class="adm-badge' + (on ? " adm-badge--ok" : " adm-badge--quiet") + '">' +
+                (on ? "включено вместе с первым" : "выключено вместе с первым") + "</span>"
+            : admSwitch('data-admflow="' + flow + '"', on, m[1])) +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button></span>' +
         "</div>" +
         // the letter's own settings, and the button that runs it now — one
@@ -21118,7 +21326,6 @@
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
       mailBudgetCard() +
-      cartFlowSettingsCard() +
       unpaidSettingsCard();
   }
   /* ---------- «Заказ ждёт оплаты»: the two numbers behind it -----------------
@@ -21150,19 +21357,26 @@
      разрешения не спрашивают вообще и уходят всегда. Поставить резерв в ноль
      можно, и тогда кампания однажды съест сутки, а покупатель не получит ни
      слова об оплаченном заказе — поэтому под полем это написано словами. */
+  /* What the shop runs on. The draft below is made on the first KEYSTROKE, not
+     on the first paint (23.09.2026): the card asks for these numbers on the
+     way in (loadNewsAudience), so the first paint always came before them, and
+     a draft taken then froze the factory 100 / 30 into the boxes — the owner
+     who had saved 4 / 2 opened the page to 100 / 30 and «Изменения не
+     сохранены», and «Сохранить» would have put the factory numbers back. */
+  function mailBudgetStored() {
+    var b = S.newsBudget || {};
+    return {
+      cap: Number(b.cap) || 100,
+      reserve: b.reserve == null ? 30 : Number(b.reserve),
+    };
+  }
   function mailBudgetDraft() {
-    if (!S.mailBudgetDraft) {
-      var b = S.newsBudget || {};
-      S.mailBudgetDraft = {
-        cap: Number(b.cap) || 100,
-        reserve: b.reserve == null ? 30 : Number(b.reserve),
-      };
-    }
+    if (!S.mailBudgetDraft) S.mailBudgetDraft = mailBudgetStored();
     return S.mailBudgetDraft;
   }
   function mailBudgetCard() {
     loadNewsAudience(false);   // тем же запросом приходят cap и reserve
-    var d = mailBudgetDraft();
+    var d = S.mailBudgetDraft || mailBudgetStored();
     return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Сколько писем в сутки</div></div>' +
       '<div class="adm-form" style="margin-top:8px" data-admmailbudget>' +
         '<p class="adm-hint" style="margin:0">У почтового сервиса есть суточный предел. ' +
@@ -21181,9 +21395,8 @@
   }
   function mailBudgetDirty() {
     if (!S.mailBudgetDraft) return false;
-    var b = S.newsBudget || {}, d = S.mailBudgetDraft;
-    return String(d.cap) !== String(Number(b.cap) || 100) ||
-      String(d.reserve) !== String(b.reserve == null ? 30 : Number(b.reserve));
+    var s = mailBudgetStored(), d = S.mailBudgetDraft;
+    return String(d.cap) !== String(s.cap) || String(d.reserve) !== String(s.reserve);
   }
   function mailBudgetActsHTML() {
     var dirty = mailBudgetDirty(), saved = S.mailBudgetSaved && !dirty;
@@ -21214,24 +21427,32 @@
       toast("Не сохранилось — попробуйте ещё раз");
     }).catch(function () { toast("Нет связи с магазином"); });
   }
+  /* The four numbers as the shop runs them; the draft is the owner's typing
+     and is made on his first keystroke — the same rule, and the same reason,
+     as mailBudgetStored() above: a draft taken on the first paint freezes
+     whatever this device last knew, and the settings the server sends a
+     moment later then read as «Изменения не сохранены». */
+  function cartFlowStored() {
+    return {
+      hours: Number(DEMO.flows.abandonedHours) || 3,
+      days: Number(DEMO.flows.abandonedDiscountDays) || 3,
+      percent: Number(DEMO.flows.abandonedDiscountPercent) || 5,
+      min: DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal),
+    };
+  }
   function cartFlowDraft() {
-    if (!S.cartFlowDraft) {
-      S.cartFlowDraft = {
-        hours: Number(DEMO.flows.abandonedHours) || 3,
-        days: Number(DEMO.flows.abandonedDiscountDays) || 3,
-        percent: Number(DEMO.flows.abandonedDiscountPercent) || 5,
-        min: DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal),
-      };
-    }
+    if (!S.cartFlowDraft) S.cartFlowDraft = cartFlowStored();
     return S.cartFlowDraft;
   }
+  /* Drawn inside the group under «Брошенная корзина — письмо со скидкой»
+     (admMailHTML), right below the two letters it times — not as a card of its
+     own at the bottom of the page, where it used to be (23.09.2026). */
   function cartFlowSettingsCard() {
-    var d = cartFlowDraft();
-    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Брошенные корзины</div></div>' +
-      '<div class="adm-form" style="margin-top:8px" data-admcartsettings>' +
+    var d = S.cartFlowDraft || cartFlowStored();
+    return '<div class="adm-form" style="padding:12px 0 16px" data-admcartsettings>' +
         '<p class="adm-hint" style="margin:0">Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, ' +
-          "а если заказа так и нет — пришлёт скидку на эту же корзину. Оба письма выше. Проверка раз в сутки.</p>" +
-        '<div class="adm-edpair" style="margin-top:12px">' +
+          "а если заказа так и нет — пришлёт скидку на эту же корзину. Эти четыре числа — для обоих писем. Проверка раз в сутки.</p>" +
+        '<div class="adm-edpair">' +
           '<label class="adm-field">Напомнить через, часов' +
             '<input class="adm-input" type="number" min="1" max="168" inputmode="numeric" data-cartf="hours" value="' + esc(d.hours) + '">' +
             '<span class="adm-hint">Столько корзина должна простоять, чтобы уйти первому письму.</span></label>' +
@@ -21250,11 +21471,9 @@
   }
   function cartFlowDirty() {
     if (!S.cartFlowDraft) return false;
-    var d = S.cartFlowDraft;
-    return String(d.hours) !== String(Number(DEMO.flows.abandonedHours) || 3) ||
-      String(d.days) !== String(Number(DEMO.flows.abandonedDiscountDays) || 3) ||
-      String(d.percent) !== String(Number(DEMO.flows.abandonedDiscountPercent) || 5) ||
-      String(d.min) !== String(DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal));
+    var d = S.cartFlowDraft, s = cartFlowStored();
+    return String(d.hours) !== String(s.hours) || String(d.days) !== String(s.days) ||
+      String(d.percent) !== String(s.percent) || String(d.min) !== String(s.min);
   }
   function cartFlowActsHTML() {
     var dirty = cartFlowDirty(), saved = S.cartFlowSaved && !dirty;
@@ -21293,17 +21512,19 @@
       toast("Не сохранилось — попробуйте ещё раз");
     }).catch(function () { toast("Нет связи с магазином"); });
   }
+  // the same first-keystroke draft as cartFlowStored() / cartFlowDraft() above
+  function unpaidStored() {
+    return {
+      remind: Number(DEMO.flows.unpaidRemindDays) || 3,
+      cancel: Number(DEMO.flows.unpaidCancelDays) || 7
+    };
+  }
   function unpaidDraft() {
-    if (!S.unpaidDraft) {
-      S.unpaidDraft = {
-        remind: Number(DEMO.flows.unpaidRemindDays) || 3,
-        cancel: Number(DEMO.flows.unpaidCancelDays) || 7
-      };
-    }
+    if (!S.unpaidDraft) S.unpaidDraft = unpaidStored();
     return S.unpaidDraft;
   }
   function unpaidSettingsCard() {
-    var d = unpaidDraft();
+    var d = S.unpaidDraft || unpaidStored();
     return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Неоплаченные заказы</div></div>' +
       '<div class="adm-form" style="margin-top:8px" data-admunpaidsettings>' +
         '<p class="adm-hint" style="margin:0">Покупатель оформил заказ и не оплатил. Сначала магазин напомнит письмом, ' +
@@ -21323,9 +21544,8 @@
   /** Does the card show something other than what the shop runs on? */
   function unpaidDirty() {
     if (!S.unpaidDraft) return false;
-    var d = S.unpaidDraft;
-    return String(d.remind) !== String(Number(DEMO.flows.unpaidRemindDays) || 3) ||
-      String(d.cancel) !== String(Number(DEMO.flows.unpaidCancelDays) || 7);
+    var d = S.unpaidDraft, s = unpaidStored();
+    return String(d.remind) !== String(s.remind) || String(d.cancel) !== String(s.cancel);
   }
   /* The same three states every small form in the panel has since r12 (the
      cabinet's paintAcctBar idiom): nothing to save — a quiet, disabled
@@ -23186,6 +23406,36 @@
           : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
       act: mailOk ? "" : admDevLink() });
 
+    /* The shop's own letter about a paid order (23.09.2026). Green only when
+       the server has an address to send it to and the last check did not come
+       back refused; red — naming the variable, the value and where it is set —
+       when there is none, because then an order whose push reached no phone
+       is an order nobody hears about. Each sentence is its own node, so the
+       translator finds it by key; the address and Resend's own words are not
+       Russian and pass through as they are. */
+    var om = OWNER_MAIL, omTest = S.ownerMailTest;
+    var omRefused = !!(omTest && omTest.error === "send_failed");
+    var omOk = !om || !!om.unknown || (!!om.key && !!om.to && !omRefused);
+    rows.push({ name: "Письмо магазину о заказе", ok: omOk, quiet: !!(om && om.unknown),
+      sub: !om ? "Проверяем…"
+        : om.unknown ? "Не удалось узнать — обновите страницу."
+        : !om.key ? "Письма не уходят совсем: на сервере нет ключа почты RESEND_API_KEY."
+        : !om.to
+          ? "<span>Письмо о заказе сейчас не уходит никуда: в Vercel не задана переменная RESEND_TO.</span> " +
+            "<span>Добавьте её в Vercel → Settings → Environment Variables со значением</span> " +
+            '<span class="adm-mono">shop@rempireshop.com</span> ' +
+            "<span>и опубликуйте сайт заново.</span> " +
+            "<span>Без неё о заказе, оповещение о котором не дошло до телефона, вы узнаете только из панели.</span>"
+        : omRefused
+          ? "<span>Почта не приняла проверочное письмо:</span> " +
+            '<span class="adm-mono">' + esc(String(omTest.detail || omTest.status || "")) + "</span>"
+          : "<span>Уходит на</span> " + '<span class="adm-mono">' + esc(om.to) + "</span> " +
+            "<span>— только когда оповещение на телефон не дошло ни до одного устройства.</span>",
+      act: !om || om.unknown ? ""
+        : !om.key || !om.to ? admDevLink()
+        : '<button class="adm-btn adm-btn--row" data-notifytest' + (S.ownerMailBusy ? " disabled" : "") + ">" +
+            (S.ownerMailBusy ? "Отправляем…" : "Отправить проверочное письмо") + "</button>" });
+
     var gscOk = !GSC || GSC.ok === true;
     rows.push({ name: "Google Search Console", ok: gscOk,
       sub: !GSC ? "Проверяем…" : GSC.ok
@@ -23247,7 +23497,7 @@
     return rows;
   }
   function admAppsHTML() {
-    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadMontonio(); loadAnalytics("7d"); }
+    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadMontonio(); loadOwnerMail(); loadAnalytics("7d"); }
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Подключения", "") +
       /* `--lines`, like every other list in the panel (admin.css § «one shape
@@ -23739,6 +23989,17 @@
     bar.innerHTML = admSetBarInnerHTML(S.admSetPage || "");
     translateTree(bar);
   }
+  /* «Письма» in the settings index — a door, not a page (23.09.2026). The mail
+     settings live in «Маркетинг → Письма», beside the letters they time, but
+     «Настройки» is where the owner looked for the daily limit («There is no
+     «Настройки» → «Письма»»), so the index says where they are and goes
+     there: data-admtab="mail" is the same door the assistant's «Открыть»
+     buttons use. */
+  function admSetMailLinkHTML() {
+    return '<button data-admtab="mail"><span><span class="adm-row__nm">Письма</span>' +
+      '<span class="adm-row__sub">сколько писем в сутки, брошенная корзина, тексты — в «Маркетинг → Письма»</span></span>' +
+      '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+  }
   function admSetupHTML() {
     var page = S.admSetPage || "";
     if (!page) {
@@ -23746,7 +24007,8 @@
         '<div class="adm-idx">' + ADM_SET_PAGES.map(function (p) {
           return '<button data-admsetpage="' + p[0] + '"><span><span class="adm-row__nm">' + p[1] + "</span>" +
             '<span class="adm-row__sub">' + p[2] + "</span></span>" +
-            '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+            '<span class="adm-row__chev" aria-hidden="true">›</span></button>' +
+            (p[0] === "push" ? admSetMailLinkHTML() : "");
         }).join("") + "</div></div>";
     }
     return '<div class="adm-screen adm-screen--tight">' +
@@ -34128,7 +34390,7 @@
     try { srvSaved(apiSend("/api/admin/overrides/", "PUT", body)); } catch (e) {}
   }
 
-  var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии", unpaid: "Заказ ждёт оплаты" };
+  var FLOW_NAMES = { abandoned: "Брошенная корзина", abandonedDiscount: "Брошенная корзина — письмо со скидкой", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии", unpaid: "Заказ ждёт оплаты" };
   // assistant-work: "2026-08" → "август 2026", for the confirm card and the log
   var MONTH_RU = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
   function monthLabelRu(m) {
@@ -37602,7 +37864,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -38927,6 +39189,10 @@
     }
     // «Запустить сейчас»: the daily job's own function, from the panel
     if (d.admflowrun !== undefined) { srvFlowRun(d.admflowrun); return; }
+    // «Прислать пример»: the demo letter to the address at the top of «Письма»
+    if (d.mailsample !== undefined) { srvMailSample(d.mailsample); return; }
+    // «Подключения» → «Письмо магазину о заказе» → one real letter to RESEND_TO
+    if (d.notifytest !== undefined) { srvOwnerMailTest(); return; }
     /* «Доставлен» без кнопки: both halves of settings.delivery apply at once
        with the toast's undo — nothing here sends anything or moves money. */
     if (d.delivcarrier !== undefined) {
@@ -38985,18 +39251,9 @@
         return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
       }).then(function (res) {
         t.disabled = false;
-        var err = res.j && res.j.error;
-        /* «Подключения» reads this: the only honest signal the panel has about
-           whether letters can be sent at all is a letter it actually tried to
-           send. Anything but a missing key leaves the row alone. */
-        if (res.j && res.j.ok) S.admMailKey = true;
-        else if (err === "no_api_key") S.admMailKey = false;
-        if (res.j && res.j.ok) toast("Тест отправлен ✓");
-        else if (res.code === 401) toast("Нужен вход в админку");
-        else if (err === "no_api_key") toast("Отправка писем ещё не подключена");
-        else if (err === "rate_limited") toast("Слишком много писем — попробуйте позже");
-        else if (err === "bad_email") toast("Введите e-mail — на него придёт образец");
-        else toast("Не получилось — попробуйте ещё раз");
+        // the address that worked is remembered on this device (admPanesSave)
+        if (res.j && res.j.ok) admPanesSave();
+        mailSendToast(res, "Тест отправлен ✓");
       }).catch(function () {
         t.disabled = false; toast("Не получилось — попробуйте ещё раз");
       });
@@ -40303,6 +40560,9 @@
     else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
     else if (t.matches("[data-cartf]")) { cartFlowDraft()[t.dataset.cartf] = t.value; S.cartFlowSaved = false; paintCartFlowState(); }
     else if (t.matches("[data-mbf]")) { mailBudgetDraft()[t.dataset.mbf] = t.value; S.mailBudgetSaved = false; paintMailBudgetState(); }
+    /* «Куда присылать примеры писем» / «Адрес для теста»: kept as it is typed,
+       so a switch flipped on the same page (a render) does not take it away */
+    else if (t.matches("[data-mailto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; paintSetBar(); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {

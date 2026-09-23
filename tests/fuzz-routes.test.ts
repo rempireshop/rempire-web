@@ -272,6 +272,11 @@ function routes(): RouteCase[] {
     { name: "POST /api/admin/push/subscribe/", path: "/api/admin/push/subscribe/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/subscribe/route"), auth: "admin", req: admin, body: { endpoint: `${PUSH_ENDPOINT}fuzz`, keys: { p256dh: PUSH_P256DH, auth: PUSH_AUTH }, label: "iPhone" } },
     { name: "POST /api/admin/push/unsubscribe/", path: "/api/admin/push/unsubscribe/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/unsubscribe/route"), auth: "admin", req: admin, body: { endpoint: `${PUSH_ENDPOINT}fuzz` } },
     { name: "POST /api/admin/push/test/", path: "/api/admin/push/test/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/push/test/route"), auth: "admin", req: admin, body: {} },
+    /* «Подключения» → the shop's own order letter (23.09.2026). No RESEND_TO in
+       this suite, so «Проверить» answers 503 not_configured before any network;
+       the GET never reaches one at all. */
+    { name: "GET /api/admin/notify/", path: "/api/admin/notify/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/admin/notify/route"), auth: "admin", req: admin },
+    { name: "POST /api/admin/notify/", path: "/api/admin/notify/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/admin/notify/route"), auth: "admin", req: admin, body: {} },
     { name: "GET /api/admin/upload/", path: "/api/admin/upload/", method: "GET", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin },
     { name: "DELETE /api/admin/upload/", path: "/api/admin/upload/", method: "DELETE", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin, queries: ["?key=products/a.webp", "?key=../../etc/passwd", "?key=", "?key=%00"] },
     /* product creation: «Убрать фон» is off in this suite (no PHOTO_CUTOUT), so
