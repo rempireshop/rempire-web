@@ -635,6 +635,27 @@ export const ldJson = o => JSON.stringify(o)
   .replace(/</g, "\\u003c").replace(/>/g, "\\u003e")
   .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
 
+/* ---------- Google's ownership checks, through the domain move ------------
+   The Shopify home page at https://rempireshop.com/ carries these three
+   google-site-verification tags (read off the live page, 23.09.2026). Search
+   Console and Merchant Center re-check them from time to time, and the day
+   rempireshop.com points at this shop instead, a page without them is a
+   verification lost — and with Merchant Center, the free listings behind it.
+   The first token is also
+   a DNS TXT record, which survives on its own; the other two exist only as
+   tags. «/» redirects to /shop2/ (next.config.ts), so they ride in the one
+   block every page's head is built from: the Russian home page the shell
+   serves for /shop2/, the ET and EN homes, and every other page, which costs
+   nothing and means no page can be the one that lacks them.
+   Tokens only — never a secret: they are public on the live page today. */
+export const GOOGLE_SITE_VERIFICATION = [
+  "KUVTHWQUdqKHip0q8VUKTRnAj9L6isKgUsWE4163wNM",
+  "vnp_AFwYKflLNLDsABZXCMqo_75IxmAD8RLMIgh4ahs",
+  "k3GujBXDQzx0nVeZE5Raig1rp6QDNY8SsR0ONwTb2lw",
+];
+export const verificationMeta = () =>
+  GOOGLE_SITE_VERIFICATION.map(t => `<meta name="google-site-verification" content="${esc(t)}">`).join("\n");
+
 /* Everything a crawler reads, in one block. The prerender writes it between
    the markers in index.html and inlines it verbatim into every generated
    page; the request-time product page writes the same block. `base` is the
@@ -646,6 +667,7 @@ export function headBlock({ base, robots, lang, seg, rest, title, desc, image, i
   return `<title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <meta name="robots" content="${robots}">
+${verificationMeta()}
 ${headLinks(base, seg, rest)}
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="REMPIRE">

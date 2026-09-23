@@ -67,6 +67,17 @@ export async function PUT(req: Request) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
 
+  /* «Сохранить всё равно» (Ренат, 23.09.2026). A delivery price under
+     Montonio's tariff is refused (below_cost, further down) — until the owner
+     has seen the whole list and confirmed it. A cheaper delivery is his
+     decision to make, like «Бесплатно от» always was; what the refusal was for
+     is that nobody makes it by accident. The flag rides beside the settings,
+     never as one of them: taken off the body BEFORE the flat-map reading
+     below, or `{ shipping_rules, acceptBelowCost }` would store a settings row
+     called «acceptBelowCost». */
+  const acceptBelowCost = body.acceptBelowCost === true;
+  delete body.acceptBelowCost;
+
   // {key, value} · {settings:{…}} · a flat map — all mean the same thing here.
   let entries: Array<[string, unknown]>;
   if (typeof body.key === "string" && "value" in body) entries = [[body.key, body.value]];
@@ -80,6 +91,9 @@ export async function PUT(req: Request) {
 
   try {
     for (let [key, value] of entries) {
+      /* the cells the owner confirmed below the tariff — kept in the audit
+         line, so «кто и когда разрешил доставку дешевле Montonio» has an answer */
+      let belowCost: ReturnType<typeof belowCostCells> = [];
       // wholesale/loyalty: clamp to sane bounds regardless of who is
       // writing (panel form, demoApply's undo, or the assistant's
       // set_pricing action) — the same "first door, not the only one"
@@ -103,14 +117,19 @@ export async function PUT(req: Request) {
            pairs the checkout can produce still went out below cost, with the
            *shopper* choosing which. A red hint is a suggestion, this is the
            rule. The message names the carrier, the country and both numbers,
-           so there is nothing to look up. */
+           so there is nothing to look up.
+           …unless the request says the owner saw that list and pressed
+           «Сохранить всё равно» (acceptBelowCost, above). The panel asks
+           before it sends; this refusal is what catches a save that did not
+           ask — the assistant's proposal, an undo, an older tab. */
         const bad = belowCostCells(value as ShippingRules);
-        if (bad.length) {
+        if (bad.length && !acceptBelowCost) {
           return Response.json(
             { ok: false, error: "below_cost", detail: belowCostMessage(bad), cells: bad },
             { status: 400 },
           );
         }
+        belowCost = bad;
       }
       /* «Письма»: the owner's subject / intro / signature per letter and
          language. Unknown template or language keys are dropped, control
@@ -163,7 +182,7 @@ export async function PUT(req: Request) {
          Flows type). Same first door as everything above it. */
       if (key === "flows") value = await stampUnpaidFloor(value);
       await setSetting(key, value);
-      await writeAuditSafe("admin", "setting.set", { key, value });
+      await writeAuditSafe("admin", "setting.set", belowCost.length ? { key, value, belowCost } : { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this
          the owner saves a price in «Настройки → Доставка» and the very next
          checkout still bills the old one — which is exactly the "the panel

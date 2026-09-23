@@ -4,10 +4,15 @@
  *
  * GET    /api/admin/newsletters/            → { ok, newsletters: NewsletterSummary[] }  (newest edited first, no texts)
  * GET    /api/admin/newsletters/?id=<uuid>  → { ok, newsletter: Newsletter }            (whole, for the editor)
- * POST   /api/admin/newsletters/  { title?, subject?, body?, products? }
+ * POST   /api/admin/newsletters/  { title?, subject?, blocks? | body?, products? }
  *                                            → { ok, newsletter }                        (a new draft)
- * PATCH  /api/admin/newsletters/  { id, title?, subject?, body?, products? }
+ * PATCH  /api/admin/newsletters/  { id, title?, subject?, blocks? | body?, products? }
  *                                            → { ok, newsletter }                        (the whole draft, replaced)
+ *
+ * `blocks` (since 23.09.2026) is the letter as the panel builds it — pictures
+ * with links, texts, buttons, cards (src/lib/newsletter-blocks.ts); with it,
+ * `body` and `products` are ignored and derived. Without it, the old letter.
+ * The live preview of an unsaved draft is POST ./preview/.
  * DELETE /api/admin/newsletters/?id=<uuid>  → { ok, newsletter }                        (a draft only)
  *
  * A letter that has gone out (or is going out) is history: PATCH and DELETE

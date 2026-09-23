@@ -194,7 +194,9 @@ describe("a delivery-price save the server refuses", () => {
     const push = slice("srvPush");
     const at = push.indexOf('a.type === "set_shipping_rules"');
     expect(at, "srvPush() no longer has a set_shipping_rules branch").toBeGreaterThan(0);
-    const branch = push.slice(at, at + 600);
+    // 900, not 600: since 23.09.2026 the branch also carries the «Сохраняем…»
+    // flag and the «Сохранить всё равно» card (tests/shipping-below-cost.test.ts)
+    const branch = push.slice(at, at + 900);
     expect(branch).toContain("shipRulesRefused(shipBack)");
     expect(branch).toMatch(/status === 200 && r\.body && r\.body\.ok/);
     // and demoApply has to record what to put back

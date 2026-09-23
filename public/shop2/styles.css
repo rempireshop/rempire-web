@@ -1044,16 +1044,6 @@ body:has(.stickybar) .ftr {
 .pdp__buy { display: flex; gap: 12px; align-items: center; margin: 18px 0; }
 .pdp__add { flex: 1; }
 .pdp__alt { text-align: center; margin-bottom: 20px; }
-/* «Купить за … с доставкой»: what is bought, where it goes and the total,
-   right above the button that orders it (expressHTML in app.js). The rows are
-   the checkout summary's own. */
-.pdp__exsum { display: grid; gap: 8px; border: 1px solid var(--rule); padding: 12px 14px; margin: 0 0 10px; }
-.pdp__exsum .cosum__row { gap: 12px; }
-.pdp__exsum .cosum__row > span:first-child { min-width: 0; overflow-wrap: anywhere; }
-.pdp__exsum .cosum__row > .num { flex-shrink: 0; }
-.pdp__exsum .err { margin: 0; }
-.pdp__expt { color: var(--muted); }
-.pdp__legal { text-align: center; margin: -2px 0 10px; }
 .pdp__ship { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
 
 .stepper { display: inline-flex; border: 1px solid var(--ink); flex-shrink: 0; }
@@ -1925,6 +1915,16 @@ button, a, summary, label { touch-action: manipulation; }
   border: 1px solid var(--rule); padding: 1px 6px;
 }
 .carrier__price { margin-left: auto; padding-left: 12px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+/* The price is the one thing on the card that must never leave it
+   (23.09.2026). Measured at 280 px: SmartPosti's mark is 91 px wide at 20 px
+   high, and with «SmartPosti» beside it the price ran 3 px past the card's
+   edge; Nova Post with «без возврата» ran 10 px past — at larger system text
+   sizes the same happens on an ordinary 360 px phone. So the price keeps its
+   width, the mark gives way first (scaled, never cropped — object-fit), and
+   the Nova Post tag may take two lines. Nothing changes where there is room. */
+.carrier--card .carrier__logo { flex: 0 1 auto; min-width: 28px; object-fit: contain; object-position: left center; }
+.carrier--card .carrier__tag { min-width: 0; white-space: normal; }
+.carrier--card .carrier__price { flex: none; }
 .carriers__note { margin: -6px 0 14px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
 .pointbtn {
