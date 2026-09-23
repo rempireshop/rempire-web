@@ -44,8 +44,24 @@ export function isLiveBase(baseEnv) {
 }
 export const robotsFor = baseEnv => (isLiveBase(baseEnv) ? ROBOTS_OPEN : ROBOTS_CLOSED);
 
+/** The shop's production origin — what every absolute URL means when nobody has said otherwise. */
+export const LIVE_ORIGIN = "https://rempireshop.com";
+
 /** The absolute-URL base: $PUBLIC_BASE_URL, default the live domain, no trailing slash. */
-export const baseFrom = baseEnv => String(baseEnv || "https://rempireshop.com").replace(/\/+$/, "");
+export const baseFrom = baseEnv => String(baseEnv || LIVE_ORIGIN).replace(/\/+$/, "");
+
+/**
+ * The base for a document that is only ever read on the live domain — the
+ * Merchant Center feed (src/lib/merchant-feed.ts). $PUBLIC_BASE_URL when it
+ * names rempireshop.com (or www.), the live origin otherwise.
+ *
+ * baseFrom() is right for a page: a staging page links to staging. A feed is
+ * not a page. Google holds every link in it for as long as the item lives, so
+ * a copy fetched from staging, from a preview or from localhost must still
+ * point at the shop the product is sold in — and before the switch that is
+ * the same file the switch itself will serve.
+ */
+export const liveBaseFrom = baseEnv => (isLiveBase(baseEnv) ? baseFrom(baseEnv) : LIVE_ORIGIN);
 
 /* ---------- small helpers ------------------------------------------------ */
 
@@ -56,8 +72,9 @@ export const eur = n => (Math.round(n * 100) / 100).toFixed(2).replace(".", ",")
    unentity() knows, plus the typographic ones the Shopify export left behind.
    stripTags() produces *plain text*, and a meta description is escaped once on
    the way out: leaving «&amp;» in it published «Mat &amp;amp; Hard Lift-Up
-   Wax» to Google. tools/build-merchant-feed.mjs has decoded these since it was
-   written; the SEO head did not (audit 07.09.2026). */
+   Wax» to Google. The first Merchant Center feed script decoded these from the
+   day it was written; the SEO head did not (audit 07.09.2026). Its successor,
+   src/lib/merchant-feed.ts, decodes them through merchantText() below. */
 const ENTITY = {
   amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", "#39": "'", nbsp: " ",
   ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", hellip: "…"
@@ -127,6 +144,20 @@ const LOWER = "a-zà-öø-ÿšžа-яё";
 const UPPER = "A-ZÀ-ÖØ-ÞŠŽА-ЯЁ";
 const SHOUT = new RegExp("^[^" + LOWER + "]{10,160}?(?=[" + UPPER + "][" + LOWER + "])");
 export const dropShout = s => String(s || "").replace(SHOUT, "").trim();
+
+/* A product text as Google Merchant Center wants its `description`: plain
+   text, the block boundaries kept as sentence breaks (textForSnippet), the
+   shouted heading gone — Merchant Center reads «SPRAY WAX FINISHING HAIRSPRAY
+   BY KEVIN MURPHY.» as excessive capitalisation, and the title already says
+   it — and no longer than the 5 000 characters the attribute takes. One
+   function for both halves of the feed: tools/lib/feed-data.mjs runs it over
+   the static content*.js texts at build, src/lib/merchant-feed.ts over the
+   owner's own description at request time. */
+export const MERCHANT_TEXT_MAX = 5000;
+export function merchantText(html) {
+  const text = textForSnippet(html);
+  return clip(dropShout(text) || text, MERCHANT_TEXT_MAX);
+}
 
 /* Cut at a word, not mid-word: a description that ends "…профессионал" reads
    as a broken page in a result listing. */

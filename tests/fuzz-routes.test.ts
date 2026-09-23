@@ -310,6 +310,11 @@ function routes(): RouteCase[] {
     /* the catalogue's product rows, served rather than written so a product
        hidden after the build leaves the sitemap with it */
     { name: "GET /sitemap-products.xml", path: "/sitemap-products.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-products.xml/route"), jsonBody: false },
+    /* The Google Merchant Center feeds (src/lib/merchant-feed.ts). Three file
+       names are a feed; every other name under /feed/, however hostile, is a
+       404 — never a 5xx, never a path. The good id is the English feed, so the
+       query and body sweeps build a whole one against the fixtures. */
+    { name: "GET /feed/[file]", path: "/feed/x/", method: "GET", exports: ["GET"], load: () => import("@/app/feed/[file]/route"), params: { file: "" }, jsonBody: false },
     /* The request-time blog pages (src/lib/blog-page.ts) — the list and one
        post, three languages — and the OG card drawn for a created product or a
        post (src/lib/og-card.ts). Same rule: hostile slugs/file names are a 404
@@ -404,6 +409,7 @@ function goodIdFor(name: string): string {
   if (name.includes("/shipments/")) return F.paidOrderNumber;
   if (name.includes("/shop2/") || name.includes("/products/")) return F.customId;
   if (name.includes("/newsletters/")) return F.newsletterId;
+  if (name.includes("/feed/")) return "google-en.xml";
   return F.orderId;
 }
 

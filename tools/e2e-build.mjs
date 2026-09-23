@@ -72,6 +72,7 @@ const steps = [
   ["node", ["tools/pack-migrations.mjs"]],
   ["node", ["tools/pack-content.mjs"]],
   ["node", ["tools/pack-legal.mjs"]],
+  ["node", ["tools/pack-feed.mjs"]],
   ["node", ["tools/copy-vendor.mjs"]],
   /* public/shop2/app.min.js — what the shell links and therefore the only
      copy of the shop a browser in this suite ever runs. Gitignored, so

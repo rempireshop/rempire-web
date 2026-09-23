@@ -266,6 +266,11 @@ const nextConfig: NextConfig = {
     /* Both sitemaps list the blog, which is how they reach the card drawer. */
     "/sitemap-custom.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
     "/sitemap-products.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    /* The Merchant Center feeds read getOverrides() and the custom products,
+       and those modules reach the letters and so the gift-card PDF. The feed
+       itself reads nothing from public/ — its photos and texts are imported
+       from src/data/catalogue.feed.json (tools/pack-feed.mjs). */
+    "/feed/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
   },
   /**
    * The shop is one static page that now names its screen in the URL, so the
