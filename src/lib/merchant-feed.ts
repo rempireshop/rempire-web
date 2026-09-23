@@ -609,7 +609,9 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
         el("g:id", id),
         el("g:title", title),
         el("g:description", description),
-        el("g:link", link),
+        /* each size opens on itself — sizeFromQuery() in public/shop2/app.js;
+           one address for all sizes shows the first size's price to Google */
+        el("g:link", slug ? `${link}?size=${encodeURIComponent(slug)}` : link),
         el("g:image_link", absUrl(base, main)),
         ...more.map((u) => el("g:additional_image_link", absUrl(base, u))),
         el("g:availability", available ? "in_stock" : "out_of_stock"),

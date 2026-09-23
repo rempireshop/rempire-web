@@ -509,6 +509,47 @@
       }
     },
     {
+      "id": "shop-size-link",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Ссылка на один объём",
+      "steps": [
+        "Открыть /shop2/p/system-4-bio-botanical-shampoo/?size=500ml на стенде.",
+        "Посмотреть выбранный объём и цену.",
+        "Убрать из адреса ?size=500ml и открыть снова.",
+        "Вписать ?size=999ml и открыть ещё раз."
+      ],
+      "expect": [
+        "С ?size=500ml страница открылась сразу на 500 мл.",
+        "Цена — цена 500 мл, а не 75 мл.",
+        "Без ?size — открылась на первом объёме в наличии.",
+        "С несуществующим объёмом страница открылась как обычно."
+      ],
+      "why": "Google Shopping ведёт на каждый объём своей ссылкой — иначе цены «не совпадают».",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-23T12:08:43.855Z",
+      "en": {
+        "title": "A link to one size",
+        "steps": [
+          "Open /shop2/p/system-4-bio-botanical-shampoo/?size=500ml on staging.",
+          "Look at the selected size and the price.",
+          "Remove ?size=500ml from the address and open it again.",
+          "Type ?size=999ml and open it once more."
+        ],
+        "expect": [
+          "With ?size=500ml the page opened straight on 500 ml.",
+          "The price is the 500 ml price, not the 75 ml one.",
+          "Without ?size it opened on the first size in stock.",
+          "With a size that does not exist the page opened as usual."
+        ],
+        "why": "Google Shopping links each size on its own — otherwise prices «do not match»."
+      }
+    },
+    {
       "id": "shop-size-out",
       "area": "shop",
       "who": "renat",

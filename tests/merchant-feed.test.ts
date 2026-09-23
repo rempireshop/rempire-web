@@ -98,7 +98,7 @@ function items(xml: string): Parsed[] {
   });
 }
 const one = (it: Parsed, key: string) => it.fields[key]?.[0];
-const productOf = (it: Parsed) => decodeURIComponent(/\/p\/([^/]+)\/$/.exec(one(it, "link") ?? "")![1]);
+const productOf = (it: Parsed) => decodeURIComponent(/\/p\/([^/?]+)\/(\?size=[^/]*)?$/.exec(one(it, "link") ?? "")![1]);
 const byProduct = (list: Parsed[], id: string) => list.filter((it) => productOf(it) === id);
 const euros = (price: string) => Number(price.replace(/ EUR$/, ""));
 
@@ -264,7 +264,7 @@ describe("the items", () => {
         const desc = one(it, "description")!;
         expect(desc.length, id).toBeGreaterThan(10);
         expect(desc.length, id).toBeLessThanOrEqual(5000);
-        expect(one(it, "link"), id).toMatch(new RegExp("^https://rempireshop\\.com" + segs[lang] + "[^/]+/$"));
+        expect(one(it, "link"), id).toMatch(new RegExp("^https://rempireshop\\.com" + segs[lang] + "[^/?]+/(\\?size=[a-z0-9-]+)?$"));
         expect(one(it, "image_link"), id).toMatch(/^https:\/\/rempireshop\.com\/shop\/img\/[^?]+\.webp(\?v=\d+)?$/);
         for (const extra of it.fields.additional_image_link ?? []) expect(extra).toMatch(/^https:\/\//);
         expect((it.fields.additional_image_link ?? []).length).toBeLessThanOrEqual(10);
@@ -623,5 +623,60 @@ describe("the small rules", () => {
     expect(a.xml).toBe(b.xml);
     expect(a.stats.items).toBe(CATALOGUE.reduce((n, p) => n + (VARIANTS[p.id]?.sizes.length ?? 1), 0));
     expect(a.stats.skippedNoImage).toEqual([]);
+  });
+});
+
+/* ---------- each size opens on itself ---------------------------------------- */
+
+/** A function of public/shop2/app.js by name, braces balanced — the storefront side of the link. */
+function appFunction(src: string, name: string): string {
+  const at = src.indexOf(`function ${name}(`);
+  if (at < 0) throw new Error(`public/shop2/app.js no longer has ${name}()`);
+  let depth = 0;
+  for (let i = src.indexOf("{", at); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(at, i + 1);
+  }
+  throw new Error(`unbalanced ${name}()`);
+}
+
+describe("a size's link opens the page on that size", () => {
+  const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+  const shop = new Function(
+    "safeDecode",
+    `${appFunction(app, "sizeSlug")}\n${appFunction(app, "sizeFromQuery")}\nreturn { sizeSlug, sizeFromQuery };`,
+  )((s: string) => decodeURIComponent(s)) as {
+    sizeSlug: (l: string) => string;
+    sizeFromQuery: (p: { sizes?: string[] }, q: string) => number | null;
+  };
+
+  it("slugs every size label exactly as the feed does", () => {
+    const labels = Object.values(VARIANTS).flatMap((v) => v.sizes);
+    expect(labels.length).toBeGreaterThan(50);
+    for (const l of labels) expect(shop.sizeSlug(l), l).toBe(sizeSlug(l));
+  });
+
+  it("finds the size each feed link names, on every product with sizes", async () => {
+    const { list } = await feed("ru");
+    let checked = 0;
+    for (const it of list) {
+      const link = one(it, "link")!;
+      const q = link.match(/\?size=.*$/);
+      if (!q) continue;
+      const id = decodeURIComponent(link.match(/\/p\/([^/?]+)\//)![1]);
+      const sizes = VARIANTS[id]?.sizes ?? [];
+      const at = shop.sizeFromQuery({ sizes }, q[0]);
+      expect(at, link).not.toBeNull();
+      expect(one(it, "id"), link).toMatch(new RegExp("_" + q[0].slice(6).replace(/-/g, "\\-") + "$"));
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(50);
+  });
+
+  it("leaves the page as it was for an address with no size or an unknown one", () => {
+    expect(shop.sizeFromQuery({ sizes: ["100 мл", "250 мл"] }, "")).toBeNull();
+    expect(shop.sizeFromQuery({ sizes: ["100 мл", "250 мл"] }, "?size=999ml")).toBeNull();
+    expect(shop.sizeFromQuery({ sizes: ["100 мл", "250 мл"] }, "?size=250ml")).toBe(1);
+    expect(shop.sizeFromQuery({ sizes: ["", ""] }, "?size=v2")).toBe(1);
   });
 });

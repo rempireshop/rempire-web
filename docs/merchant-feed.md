@@ -167,12 +167,12 @@ is what to do about it:
      Renat scans the bottle's barcode in «Склад», the next day's fetch
      carries it. The shop's own brand (Rempire merch and soaps) is marked as
      having no barcode, which is correct.
-   - **"Mismatched price" on a bigger size** (check the wording). The
-     product page opens on the smallest size, so Google's crawler reads that
-     size's price. If this appears for the larger sizes, tell Dim. Also look
-     in **Settings → Automatic improvements → item updates** (check the
-     wording). If Google is "correcting" the 250 ml price down to the 75 ml
-     price there, switch off the automatic **price** updates.
+   - **"Mismatched price" on a size** (check the wording). Should not
+     happen: since 23.09.2026 every size links to its own address
+     (`…/p/<product>/?size=500ml`) and the page opens on that size. If it
+     appears anyway, tell Dim, and in **Settings → Automatic improvements →
+     item updates** (check the wording) switch off automatic **price**
+     updates so Google cannot «correct» a price down.
    - **Image too small:** some product photos are narrow bottle cut-outs,
      only 109–249 pixels on the short side. Google's minimum is 100, so they
      pass, but bigger photos would do better.

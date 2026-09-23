@@ -9158,6 +9158,28 @@
   }
   /** True only for a size somebody has actually counted down to zero. */
   function sizeOut(p, i) { return sizeStockOf(p, i) === "out"; }
+  /** «250 мл» → «250ml», «white / S» → «white-s» — the same slug
+      src/lib/merchant-feed.ts puts in each size's link and item id
+      (tests/merchant-feed.test.ts holds the two equal). */
+  function sizeSlug(label) {
+    return String(label).toLowerCase().replace(/\s+/g, "").replace(/мл/g, "ml").replace(/г/g, "g")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  /** The size index a `?size=` names on this product, or null. The feed
+      writes «<slug>», «<slug>-<n>» when two sizes share a slug, and «v<n>»
+      for a size with no label — n counting from 1. */
+  function sizeFromQuery(p, search) {
+    var m = String(search || "").match(/[?&]size=([^&#]*)/);
+    if (!m) return null;
+    var want = safeDecode(m[1]).toLowerCase(), sizes = (p && p.sizes) || [], i;
+    for (i = 0; i < sizes.length; i++) if (sizeSlug(sizes[i]) === want) return i;
+    var n = want.match(/^(?:(.+)-)?v?(\d+)$/);
+    if (n) {
+      i = Number(n[2]) - 1;
+      if (i >= 0 && i < sizes.length && (!n[1] || sizeSlug(sizes[i]) === n[1])) return i;
+    }
+    return null;
+  }
   /** The first size still on the shelf — what a product page opens on. */
   function firstSizeIdx(p) {
     var sizes = (p && p.sizes) || [];
@@ -40821,6 +40843,16 @@
         // per-size stock (r23): as in the click above — the first size left
         S.size = firstSizeIdx(found); S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
+        /* ?size=250ml — the Google Shopping feed gives every size its own
+           address (sizeSlug() in src/lib/merchant-feed.ts). Opened on the
+           first size instead, the page shows one price for all of them, and
+           Merchant Center calls every other size a price mismatch. A slug no
+           size answers to leaves the page as it always was. */
+        var wantSize = sizeFromQuery(found, location.search);
+        if (wantSize !== null) {
+          S.size = wantSize;
+          if (found.varImg && found.varImg.length > wantSize) S.gallery = found.varImg[wantSize];
+        }
         S.videoOn = false;
         S.screen = "product";
         return true;
