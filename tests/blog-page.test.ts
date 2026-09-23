@@ -12,12 +12,15 @@
  *   · the sitemap the app serves (src/app/sitemap-custom.xml/route.ts) names
  *     the posts the build did not, in three languages, and not the drafts.
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { publishPost, upsertPost } from "@/lib/blog";
 import { postsNotPrerendered } from "@/lib/blog-page";
 import { createCustomProduct } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
 import { upsertOverride } from "@/lib/orders";
+import { translateProductName } from "@/lib/product-name";
 import { setupDb, teardownDb } from "./helpers";
 
 const LIVE = "https://rempireshop.com";
@@ -269,6 +272,64 @@ describe("«Товары из статьи» prices the shelf the way the shop d
     expect(shelf).not.toContain("Easy.Rider");
   });
 
+  /* 191 of the catalogue's 220 names end in a Russian type tail («Bio
+     Botanical Shampoo — шампунь»), and this shelf printed it as it stands on
+     the Estonian and English page of every article published since the last
+     build. The prerendered page never did — it puts the name through app.js. */
+  it("names the products in the page's language, the way the prerendered page does", async () => {
+    expect(await shelfOf([SIZED])).toContain('<span class="pre__nm">Bio Botanical Shampoo — шампунь</span>');
+    const et = await shelfOf([SIZED], "et");
+    expect(et).toContain('<span class="pre__nm">Bio Botanical Shampoo — šampoon</span>');
+    expect(et).not.toMatch(/[а-яё]/i);
+    const row = await upsertPost({ ...POST, products: [SIZED] });
+    await publishPost(row.id);
+    const en = await (await postPage("en", row.slug)).text();
+    expect(en).toContain('<span class="pre__nm">Bio Botanical Shampoo — shampoo</span>');
+  });
+});
+
+/* The request-time page and the build have to name a product the same way,
+   or an article reads differently depending on whether it was published
+   before or after the last deploy. The build lifts trText() out of app.js
+   and calls it with the name allowed (tools/prerender-shop2.mjs, `tr(…,
+   code, true)`); the page calls translateProductName(). Lifted here the way
+   the build lifts it, and run over every name in the catalogue — the shelf's
+   name alone and the card's «brand + name». */
+describe("a product's name on the request-time page is the prerendered page's name", () => {
+  const APP_LINES = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8")
+    .replace(/\r\n?/g, "\n").split("\n");
+  function sliceFrom(startRx: RegExp, endRx: RegExp): string {
+    const i = APP_LINES.findIndex((l) => startRx.test(l));
+    if (i < 0) throw new Error(`app.js no longer has ${startRx}`);
+    for (let j = i + 1; j < APP_LINES.length; j++) if (endRx.test(APP_LINES[j])) return APP_LINES.slice(i, j + 1).join("\n");
+    throw new Error(`no end for ${startRx}`);
+  }
+  const DECL_END = /^ {2}[}\]];$/;
+  const FN_END = /^ {2}}$/;
+  const trText = new Function([
+    sliceFrom(/^ {2}var UI = \{$/, DECL_END),
+    sliceFrom(/^ {2}var UI_RX = \[$/, DECL_END),
+    sliceFrom(/^ {2}var NAME_TAILS = \{$/, DECL_END),
+    sliceFrom(/^ {2}var NAME_FRAGS = \[$/, DECL_END),
+    sliceFrom(/^ {2}var TAIL_EXACT = \{$/, DECL_END),
+    sliceFrom(/^ {2}function trName\(s, lang\) \{$/, FN_END),
+    sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END),
+  ].join("\n") + "\nreturn trText;")() as (s: string, lang: string, allowName: boolean) => string;
+  const catalogue = JSON.parse(readFileSync(fileURLToPath(new URL("../src/data/catalogue.min.json", import.meta.url)), "utf8")) as
+    Array<{ b: string; n: string }>;
+
+  it("agrees on every catalogue name, in Estonian and in English", () => {
+    let tails = 0;
+    for (const p of catalogue) {
+      if (/ — [а-яё]/i.test(p.n)) tails++;
+      for (const L of ["ET", "EN"]) {
+        expect(translateProductName(p.n, L), `${L} ${p.n}`).toBe(trText(p.n, L, true));
+        expect(translateProductName(p.b + " " + p.n, L), `${L} ${p.b} ${p.n}`).toBe(trText(p.b + " " + p.n, L, true));
+      }
+    }
+    // the case this is about is most of the catalogue, not an edge of it
+    expect(tails).toBeGreaterThan(catalogue.length / 2);
+  });
 });
 
 describe("the listing at request time", () => {

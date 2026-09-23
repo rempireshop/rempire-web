@@ -4,13 +4,15 @@
  * `{ ok, posts: [{slug,title,excerpt,coverUrl,coverAlt,coverFocus,tags,publishedAt}],
  *    total, page, perPage }`. `lang` picks which language's title/excerpt
  * come back (falling back to Russian, `pickLang()` in @/lib/blog); `page` is
- * 1-based, 10 posts per page. Cached for a minute — a new post needs a
- * redeploy to be prerendered anyway (docs/blog.md), so the API answer is
- * never the only place a shopper would see it.
+ * 1-based, 10 posts per page. Cached for a minute, and dropped at once by a
+ * save in the panel (src/lib/blog-cache.ts) — a new post needs a redeploy to
+ * be prerendered anyway (docs/blog.md), so the API answer is never the only
+ * place a shopper would see it.
  *
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
 import { listPublished, pickLang } from "@/lib/blog";
+import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -38,7 +40,8 @@ export async function GET(req: Request) {
         page,
         perPage,
       },
-      { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=600" } },
+      // …and dropped by every save the public can see — src/lib/blog-cache.ts
+      { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=600", ...BLOG_CACHE_HEADERS } },
     );
   } catch (err) {
     console.error("blog GET failed", err);

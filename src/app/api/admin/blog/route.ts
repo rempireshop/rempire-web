@@ -26,8 +26,16 @@
  * The editor does not send the header yet, and until it does this route
  * behaves exactly as it did: runOnce() runs an unkeyed call straight through.
  * The client half is a later pass.
+ *
+ * EVERY LANGUAGE AT ONCE. A write the public can see — an edit to a published
+ * article, a publish, an unpublish, a delete — drops the CDN's copies of every
+ * public blog answer (refreshBlogCache, src/lib/blog-cache.ts): all three
+ * languages of the article and the lists come fresh to the next reader, where
+ * each used to wait out its own minute (Dim, 19.09.2026). A draft's edits and
+ * a new draft are nobody's business but the panel's and purge nothing.
  */
 import { requireAdmin } from "@/lib/auth";
+import { refreshBlogCache } from "@/lib/blog-cache";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import {
   BlogError,
@@ -192,6 +200,7 @@ export async function PATCH(req: Request) {
       if (!target) return bad("not_found", 404);
       const post = body.publish ? await publishPost(target) : await unpublishPost(target);
       if (!post) return bad("not_found", 404);
+      refreshBlogCache();   // in, or out: every list and page changes either way
       return Response.json({ ok: true, post }, { headers: NO_STORE });
     }
 
@@ -199,6 +208,7 @@ export async function PATCH(req: Request) {
     const id = idRaw || (await getPostBySlug(slugRaw))?.id;
     if (!id) return bad("not_found", 404);
     const post = await upsertPost({ ...fieldsOf(body), id });
+    if (post.status === "published") refreshBlogCache();
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
     if (err instanceof BlogError) return bad(err.code, err.code === "not_found" ? 404 : 400);
@@ -217,6 +227,8 @@ export async function DELETE(req: Request) {
   try {
     const post = await deletePost(id);
     if (!post) return bad("not_found", 404);
+    // it may have been live a moment ago — the row no longer says, so assume it was
+    refreshBlogCache();
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/blog DELETE failed", err);

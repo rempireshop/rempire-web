@@ -30,10 +30,12 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
+import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 import { coverImgStyle } from "@/lib/blog-cover.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
 import { getOverrides } from "@/lib/orders";
+import { translateProductName } from "@/lib/product-name";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
@@ -142,11 +144,21 @@ function priceLabel(p: ShelfProduct, t: { from: string }): string {
   return (p.priceFrom ? t.from : "") + eur(p.price);
 }
 
-function shelf(products: ShelfProduct[], seg: string, t: { from: string }): string {
+/* A product's name in this page's language. Catalogue names carry a Russian
+   type tail («Bio Botanical Shampoo — шампунь»), and this page printed it as
+   it stands on the Estonian and English pages of every article published
+   since the last build — the prerender puts the same names through app.js's
+   trName() (tools/prerender-shop2.mjs, `tr(…, code, true)`), and
+   translateProductName() is that function on the server, held to it name by
+   name over the whole catalogue (tests/product-name.test.ts,
+   tests/blog-page.test.ts). Russian comes back as it is. */
+const nameIn = (name: string, code: string) => translateProductName(name, code);
+
+function shelf(products: ShelfProduct[], seg: string, t: { from: string }, code: string): string {
   return '<ul class="grid" style="list-style:none;padding:0">' + products.map((p) =>
     '<li><a class="pre__card" href="' + href(seg, "/p/" + encodeURIComponent(p.id) + "/") + '">' +
       '<span class="pre__brand">' + esc(p.brand) + "</span>" +
-      '<span class="pre__nm">' + esc(p.name) + "</span>" +
+      '<span class="pre__nm">' + esc(nameIn(p.name, code)) + "</span>" +
       '<span class="pre__pr num">' + esc(priceLabel(p, t)) + "</span>" +
     "</a></li>").join("") + "</ul>";
 }
@@ -209,7 +221,7 @@ export function renderBlogPostPage(
       seg,
       nameOf: (id: string) => {
         const p = inlineOf(id);
-        return p ? p.brand + " " + p.name : "";
+        return p ? nameIn(p.brand + " " + p.name, code) : "";
       },
       offSale: (id: string) => !!opts.offSale?.has(id),
     },
@@ -237,7 +249,7 @@ export function renderBlogPostPage(
       '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
     "</article>" +
     (opts.products.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t) + "</section>"
+      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t, code) + "</section>"
       : "") +
     (others.length
       ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.otherPosts) + "</h2>" +
@@ -326,12 +338,14 @@ export function renderBlogListPage(
 /* ---------- the responses ------------------------------------------------ */
 
 const HTML = "text/html; charset=utf-8";
-/** Edge-cached for a minute, like the API and the product page: an edit is visible within it. */
+/** Edge-cached for a minute, like the API and the product page — and filed
+    under the blog's tag, so a save in the panel drops every language's copy
+    at once instead of waiting it out (src/lib/blog-cache.ts). */
 const PAGE_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
 const NO_STORE = "no-store";
 
 function html(body: string, status: number, cacheControl: string): Response {
-  return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
+  return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl, ...BLOG_CACHE_HEADERS } });
 }
 
 /** The lowest price of a ladder, and whether the ladder holds more than one.

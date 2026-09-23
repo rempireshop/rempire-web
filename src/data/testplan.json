@@ -6819,41 +6819,43 @@
       "steps": [
         "Открыть «Ещё» → «Блог» и любую статью с обложкой.",
         "Под обложкой нажать «Заполнить рамку».",
-        "Потянуть пальцем по каждой из трёх рамок.",
+        "Потянуть пальцем по каждой из трёх рамок — вбок и вверх-вниз.",
         "Сохранить и открыть эту статью в магазине.",
+        "Сразу переключить статью на EN и на ET.",
         "Нажать «Вся фотография» и сохранить снова.",
         "Открыть список статей в магазине и сравнить обложку с рамкой «В списке статей»."
       ],
       "expect": [
         "Под обложкой есть выбор: «Вся фотография» или «Заполнить рамку».",
-        "Рамок три: в списке статей, в начале статьи и в соцсетях.",
-        "В «Заполнить рамку» фотография двигается пальцем во всех трёх.",
+        "Фото двигается в той рамке, которую тянете пальцем.",
+        "Рамка, куда фото помещается целиком, пишет «Фото помещается целиком — двигать нечего».",
         "В магазине обложка стоит так же, как в рамке «В начале статьи».",
-        "«Вся фотография» показывает снимок целиком в списке и в статье.",
-        "В списке статей обложка стоит так же, как в её рамке в панели."
+        "На EN и ET новая обложка видна сразу, как и по-русски.",
+        "После «Вся фотография» список и статья показывают снимок целиком, как рамки в панели."
       ],
       "why": "Обложка обрезается по-разному в трёх местах сразу, и увидеть это можно было только опубликовав статью. Лицо, срезанное посередине, — это статья, которую не открывают.",
       "risk": "low",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-19T12:00:00.000Z",
+      "markedAt": "2026-09-23T12:22:29.485Z",
       "en": {
         "title": "How an article's cover sits in its frame",
         "steps": [
           "Open «Ещё» → «Блог» and any article that has a cover.",
           "Under the cover press «Заполнить рамку» (fill the frame).",
-          "Drag a finger across each of the three frames.",
+          "Drag a finger across each of the three frames — sideways and up and down.",
           "Save and open that article in the shop.",
+          "Straight away switch the article to EN and then to ET.",
           "Press «Вся фотография» (the whole photo) and save again.",
           "Open the blog list in the shop and compare the cover with the «list» frame."
         ],
         "expect": [
           "Under the cover is a choice: «Вся фотография» or «Заполнить рамку».",
-          "There are three frames: the blog list, the article top and social.",
-          "In «Заполнить рамку» the photo moves under a finger in all three.",
+          "The photo moves in the frame your finger is dragging.",
+          "A frame the whole photo already fits says «двигать нечего» and does not move.",
           "In the shop the cover sits as it does in the «В начале статьи» frame.",
-          "«Вся фотография» shows the whole photo in the list and the article.",
-          "In the blog list the cover sits exactly as it does in its panel frame."
+          "In EN and ET the new cover shows at once, as in Russian.",
+          "After «Вся фотография» list and article show the whole photo, like the panel frames."
         ],
         "why": "A cover is cropped three different ways at once, and the only way to see that was to publish the article. A face cut through the middle is an article nobody opens."
       }
