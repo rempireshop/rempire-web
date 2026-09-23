@@ -830,6 +830,12 @@
       "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
       "Сообщить о наличии": "Anna teada, kui on laos",
       "Корзина восстановлена ✓": "Ostukorv on taastatud ✓",
+      /* the abandoned-cart letter's link, when it cannot do what it says (resumeSay, resumeCode, promoSaid) */
+      "Ссылка из письма повреждена — корзину не восстановить": "Kirjas olev link on vigane — ostukorvi ei saa taastada",
+      "Ссылка из письма устарела — корзину не восстановить": "Kirjas olev link on aegunud — ostukorvi ei saa taastada",
+      "Товаров из письма больше нет в наличии": "Kirjas olnud tooteid ei ole enam laos",
+      "Скидку из письма не удалось проверить — введите код из письма": "Kirja allahindlust ei õnnestunud kontrollida — sisestage kirjas olev kood",
+      "Скидку из письма применить не удалось — причина под полем промокода": "Kirja allahindlust ei õnnestunud rakendada — põhjus on sooduskoodi välja all",
       "Ждут письма:": "Ootavad kirja:", "Ближайшие 7 дней:": "Järgmised 7 päeva:", "подписчиков с датой": "kuupäevaga tellijat",
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Ära oota ajakava", "Запустить сейчас": "Käivita kohe", "Запускаем…": "Käivitame…",
@@ -3864,6 +3870,12 @@
       "День рождения — пришлём скидку": "Birthday — we'll send a discount",
       "Сообщить о наличии": "Tell me when it's back",
       "Корзина восстановлена ✓": "Cart restored ✓",
+      /* the abandoned-cart letter's link, when it cannot do what it says (resumeSay, resumeCode, promoSaid) */
+      "Ссылка из письма повреждена — корзину не восстановить": "The link in the letter is broken — the cart can't be restored",
+      "Ссылка из письма устарела — корзину не восстановить": "The link in the letter has expired — the cart can't be restored",
+      "Товаров из письма больше нет в наличии": "The products from the letter are no longer in stock",
+      "Скидку из письма не удалось проверить — введите код из письма": "Couldn't verify the letter's discount — enter the code from the letter",
+      "Скидку из письма применить не удалось — причина под полем промокода": "Couldn't apply the letter's discount — the reason is under the promo code box",
       "Ждут письма:": "Waiting for a letter:", "Ближайшие 7 дней:": "Next 7 days:", "подписчиков с датой": "subscribers with a date",
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Don't wait for the schedule", "Запустить сейчас": "Run now", "Запускаем…": "Running…",
@@ -9968,6 +9980,17 @@
   function promoLineIn(p, l) {
     if (l.kind === "gift") return false;
     if (!p || !p.scope || p.scope === "order") return true;
+    /* 'cart' — the second abandoned-cart letter's code — names a set of ids,
+       the lines that one basket held, and `scopeValue` is the basket's own id,
+       which no line ever equals. Read the way the other scopes are, it matched
+       nothing: the summary showed no discount and orderPayload() sent no code,
+       so the letter's 5 % was never given either. The ids come back with the
+       promo box's answer (`lines`, POST /api/promos/check); no list matches
+       nothing, which is what promoLineMatches() in src/lib/promos.ts does. */
+    if (p.scope === "cart") {
+      var lid = String(l.id == null ? "" : l.id);
+      return !!lid && !!p.lines && p.lines.indexOf(lid) >= 0;
+    }
     var want = String(p.scopeValue == null ? "" : p.scopeValue).trim();
     if (!want) return false;
     if (p.scope === "brand") return !!l.brand && promoBrandKey(l.brand) === promoBrandKey(want);
@@ -13832,7 +13855,17 @@
       // «The discount applies to “… — шампунь” only».
       (note ? '<div class="cosum__row cosum__row--note"><span class="muted cosum__scope">' + esc(note) + "</span><span></span></div>" : "");
   }
-  function applyPromoCode() {
+  /* `fromLetter`: the abandoned-cart letter's code, applied at boot by
+     resumeCode() rather than typed. Nobody is at the box, so focus is not put
+     back on a button nobody pressed (focus scrolls — on a phone, away from
+     the checkout's first step). An accepted code shows the way a typed one
+     does, in «Ваш заказ»; a refused one is said, because on a phone that
+     block starts folded and the reason under the box would go unseen. */
+  function promoSaid(fromLetter) {
+    if (!fromLetter) { refocus("[data-applypromo]"); return; }
+    if (!S.promoInfo) toast("Скидку из письма применить не удалось — причина под полем промокода");
+  }
+  function applyPromoCode(fromLetter) {
     var code = S.promo.trim();
     if (!code) { S.promoInfo = null; S.promoErr = ""; render(); refocus("[data-applypromo]"); return; }
     if (S.promoBusy) return;
@@ -13851,13 +13884,15 @@
       items: promoLines()
     }).then(function (res) {
       S.promoBusy = false;
-      if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); refocus("[data-applypromo]"); return; }
+      if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); promoSaid(fromLetter); return; }
       apiSeen(true);
       var j = res.body || {};
       if (j.ok) {
         S.promoInfo = {
           code: j.code, kind: j.kind, value: Number(j.value) || 0, minSubtotal: Number(j.minSubtotal) || 0,
-          scope: j.scope || "order", scopeValue: j.scopeValue || null
+          scope: j.scope || "order", scopeValue: j.scopeValue || null,
+          // a 'cart' code's own lines — see promoLineIn()
+          lines: Array.isArray(j.lines) ? j.lines.map(String) : null
         };
         S.promoErr = ""; S.promoMin = 0; S.promoErrScope = ""; S.promoErrValue = "";
         // one order, one code — the mirror of applyGiftCode() above
@@ -13869,9 +13904,10 @@
         S.promoErrScope = j.scope || "";
         S.promoErrValue = j.scopeValue || "";
       }
-      render(); refocus("[data-applypromo]");
+      render(); promoSaid(fromLetter);
     }).catch(function () {
       S.promoBusy = false; S.promoInfo = null; S.promoErr = "unavailable"; render();
+      if (fromLetter) promoSaid(true);
     });
   }
 
@@ -16612,22 +16648,54 @@
      The token is signed by the server, but nothing here trusts it: only
      catalogue ids survive, quantity is capped at CART_MAX_QTY, and the lines are
      merged into whatever is already in the basket. The worst a forged link
-     can do is put products in its own reader's cart. */
-  function resumeCart() {
+     can do is put products in its own reader's cart.
+
+     It is read BEFORE the route is decided (firstPaint()), and that order is
+     the whole fix of 23.09.2026. It used to run after: /shop2/checkout/ with
+     an empty basket is routeHome(), and routeHome() replaceState()s the
+     address to /shop2/ — query and all — so by the time this looked for
+     ?resume= there was none. A letter is read on a phone that never saw the
+     basket, or days later in a browser that has been cleared: the button
+     landed on the home page, basket empty, nothing said. The one browser it
+     worked in was the one that still had the basket and did not need it.
+
+     Merging with a basket that is not empty: a line it already has is raised
+     to the letter's quantity, never added to — the same link opened twice is
+     one line at the letter's count, not two lines and not double. Lines the
+     letter does not mention stay where they are. */
+  /** The ?resume= token as the letter wrote it, "" when the address has none. */
+  function resumeToken() {
     var m = String(location.search || "").match(/[?&]resume=([^&]+)/);
-    if (!m) return;
-    var payload = null;
+    return m ? safeDecode(m[1]) : "";
+  }
+  /** The token's payload, decoded but not believed; null when it will not decode. */
+  function resumePayload(tok) {
     try {
-      var raw = decodeURIComponent(m[1]).split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+      var raw = String(tok || "").split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
       var bin = atob(raw + "===".slice((raw.length + 3) % 4));
       var bytes = new Uint8Array(bin.length);
       for (var bi = 0; bi < bin.length; bi++) bytes[bi] = bin.charCodeAt(bi);
-      payload = JSON.parse(new TextDecoder().decode(bytes));
-    } catch (e) { payload = null; }
-    var list = payload && Array.isArray(payload.i) ? payload.i : null;
-    if (!list) return;
+      var payload = JSON.parse(new TextDecoder().decode(bytes));
+      return payload && Array.isArray(payload.i) ? payload : null;
+    } catch (e) { return null; }
+  }
+  /** Fills the basket from the letter, without a word: the screen is not
+      there yet. resumeSay() speaks once it is. null when the address carries
+      no letter at all. */
+  function resumeCart() {
+    var tok = resumeToken();
+    if (!tok) return null;
+    /* The token is spent whatever it turns out to hold: a reload must not
+       re-add the lines, nor say «ссылка устарела» a second time. */
+    try { history.replaceState(history.state || null, "", location.pathname); } catch (e) {}
+    var payload = resumePayload(tok);
+    if (!payload) return { said: "broken" };
+    /* Thirty days (RESUME_TTL_MS in src/lib/flows.ts), after which the server
+       will not confirm the letter's code either — a basket brought back from
+       a stale link would be the letter's offer without the letter's price. */
+    if (payload.exp != null && Number(payload.exp) <= Date.now()) return { said: "expired" };
     var added = 0;
-    list.slice(0, 50).forEach(function (l) {
+    payload.i.slice(0, 50).forEach(function (l) {
       var id = String(l && l.id || "");
       var known = null;
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = CATALOGUE[i]; break; }
@@ -16655,12 +16723,42 @@
       else S.cart.push({ id: id, size: size, qty: qty });
       added += 1;
     });
-    if (!added) return;
+    if (!added) return { said: "gone" };
     persist();
-    // the token is spent — a reload must not re-add the same lines
-    try { history.replaceState(history.state || null, "", location.pathname); } catch (e) {}
-    render();
+    // the second letter's code: only a candidate until resumeCode() asks
+    return { said: "restored", token: tok, code: typeof payload.p === "string" && payload.p ? payload.p : "" };
+  }
+  /** …and what became of it, said once the first screen is painted. */
+  function resumeSay(r) {
+    if (!r) return;
+    if (r.said === "broken") { toast("Ссылка из письма повреждена — корзину не восстановить"); return; }
+    if (r.said === "expired") { toast("Ссылка из письма устарела — корзину не восстановить"); return; }
+    /* Every line sold out, or off the shelf, since the letter went. Said,
+       because the shopper pressed «back to my cart» and would otherwise be
+       looking at an empty basket wondering what the button was for. */
+    if (r.said === "gone") { toast("Товаров из письма больше нет в наличии"); return; }
     toast("Корзина восстановлена ✓");
+    if (r.code) resumeCode(r.token);
+  }
+  /* The second letter's code rides inside the token (`p`), and a code read
+     out of a payload nothing has verified is a string anybody could have
+     typed into an address bar. So the server checks the signature first
+     (GET /api/carts/resume/), and only then is the code priced like any
+     other (applyPromoCode) — which is also where a spent or expired one is
+     refused, in the promo box's own words. The letter prints the code too,
+     so the refusal here can point at it. */
+  function resumeCode(tok) {
+    var fail = function () { toast("Скидку из письма не удалось проверить — введите код из письма"); };
+    fetch("/api/carts/resume/?t=" + encodeURIComponent(tok)).then(function (r) {
+      // no shop behind this page (the static prototype) — no codes at all
+      if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
+      return r.json().catch(function () { return null; });
+    }).then(function (j) {
+      if (j && j.offline) return;
+      if (!j || !j.ok || !j.code) { fail(); return; }
+      S.promo = j.code;
+      applyPromoCode(true);
+    }).catch(fail);
   }
 
   /* ---------- ?buy=<qty> — «Купить» from Google Shopping ------------------
@@ -43581,6 +43679,11 @@
     } catch (e) {}
   })();
   function firstPaint() {
+  /* account-flows: did they arrive from an abandoned-cart letter? The basket
+     is filled BEFORE the route is read, and silently — resumeCart() says why:
+     the other way round, /shop2/checkout/ with the empty basket such a
+     browser has is routeHome(), which wipes the letter's address unread. */
+  var resumed = resumeCart();
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */
@@ -43601,10 +43704,8 @@
   restartHero();
   intro();
 
-  /* account-flows: did they arrive from an abandoned-cart letter? After the
-     first paint and after the boot replaceState above, which would otherwise
-     put ?resume= straight back into the address bar. */
-  resumeCart();
+  /* …and what became of the letter, now there is a screen to say it on. */
+  resumeSay(resumed);
   /* …or from a «Купить» in Google Shopping (/cart/<id>:<qty> → the product
      page with ?buy=): into the basket and on to the checkout. Before
      heldAsk(), for the same reason as resumeCart(). */
@@ -43666,9 +43767,18 @@
     var bootPath = stripLangPrefix(location.pathname);
     var bootProd = bootPath.match(/\/shop2\/p\/(c-[^/]+)\/?$/);
     var bootBrand = bootPath.match(/\/shop2\/b\/([^/]+)\/?$/);
+    var bootLetter = resumePayload(resumeToken());
     bootWait = !!((bootProd && !byIdOrNull(decodeURIComponent(bootProd[1]))) ||
       // …or a brand page of a brand only the owner's own products carry
-      (bootBrand && !BRAND_BY_SLUG[decodeURIComponent(bootBrand[1])]));
+      (bootBrand && !BRAND_BY_SLUG[decodeURIComponent(bootBrand[1])]) ||
+      /* …or an abandoned-cart letter naming one of the owner's own products,
+         which a browser that has never been here does not have until the feed
+         lands — restored before that, resumeCart() would drop the line as
+         unknown */
+      (bootLetter && bootLetter.i.some(function (l) {
+        var lid = String(l && l.id || "");
+        return lid.indexOf("c-") === 0 && !byIdOrNull(lid);
+      })));
   } catch (e) { bootWait = false; }
   if (bootWait && OV_BOOT) {
     bootHeld = true;
