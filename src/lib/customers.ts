@@ -106,16 +106,43 @@ export function normalizeBirthday(v: unknown): string | null {
  * id: the list is the carrier's live one and ids change under it, while «the
  * machine round the corner» is what the shopper actually chose (app.js
  * matchAcctPoint matches by name).
+ *
+ * `address` is the courier's, and only the courier's (Dim, 23.09.2026: «the
+ * user who always uses courier should still have the option to set a
+ * default/standard address»). It is the checkout's own three fields, in the
+ * order's own words (`shipping.address` — {addr, zip, city}), cleaned the way
+ * createOrder() cleans them (shipText in src/lib/orders.ts: control
+ * characters out, spaces folded, 160 characters), and kept only whole: the
+ * checkout will not take a courier order short of any of the three, so half
+ * an address is not something to fill in. Absent — not empty — otherwise, so
+ * every preference stored before it reads exactly as it did.
  */
+export interface ShipAddress {
+  /** Street and house (and flat) — the checkout's «Адрес». */
+  addr: string;
+  zip: string;
+  city: string;
+}
 export interface ShipPref {
   /** The storefront's zone code — EE, LV, LT, FI, or EU for «другая страна». */
   country: string;
   method: "pickup" | "parcel" | "courier";
   carrier: string;
   machine: string;
+  address?: ShipAddress;
 }
 
 const SHIP_METHODS: ReadonlyArray<ShipPref["method"]> = ["pickup", "parcel", "courier"];
+
+/** A courier address the checkout would take — all three fields — or null. */
+export function normalizeShipAddress(v: unknown): ShipAddress | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const o = v as Record<string, unknown>;
+  const addr = text(o.addr, 160);
+  const zip = text(o.zip, 160);
+  const city = text(o.city, 160);
+  return addr && zip && city ? { addr, zip, city } : null;
+}
 
 /** A well-formed preference or null — a shape the checkout cannot act on is not stored. */
 export function normalizeShipPref(v: unknown): ShipPref | null {
@@ -136,7 +163,10 @@ export function normalizeShipPref(v: unknown): ShipPref | null {
   const parcel = method === "parcel";
   const carrier = parcel ? String(o.carrier ?? "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40) : "";
   const machine = parcel ? text(o.machine, 120) ?? "" : "";
-  return { country, method, carrier, machine };
+  const pref: ShipPref = { country, method, carrier, machine };
+  const address = method === "courier" ? normalizeShipAddress(o.address) : null;
+  if (address) pref.address = address;
+  return pref;
 }
 
 /* ---------- the session cookie ------------------------------------------- */

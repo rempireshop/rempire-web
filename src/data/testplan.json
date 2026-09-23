@@ -4688,16 +4688,17 @@
         "Вернуться в кабинет: «Другая страна Европы», во втором списке Италия, строка «Пакомат DPD».",
         "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
         "Снова открыть оформление и дойти до шага доставки.",
-        "В кабинете выбрать Грецию и «Курьер до двери», потом снова открыть оформление.",
+        "В кабинете выбрать Грецию и «Курьер до двери», вписать только «Адрес» и выйти из поля.",
+        "Дописать «Индекс» и «Город», потом снова открыть оформление и дойти до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "Во всех странах с пакоматами — кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "В каждой стране с пакоматами кнопка «Выберите пакомат» с поиском, как в оформлении.",
         "Эстония: пока пакомат не выбран, под строками «Выберите пакомат — тогда сохраним».",
-        "После выбора «Доставка по умолчанию сохранена ✓», касса подставляет её на обоих телефонах.",
+        "После «…сохранена ✓» касса подставляет её на обоих телефонах, после «Выйти» — нет.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
-        "Греция сохраняется Грецией: в оформлении выбраны Греция и курьер, цена та же.",
-        "После «Выйти» доставка больше не подставляется."
+        "Только «Адрес»: под строками «Впишите адрес, индекс и город — тогда сохраним».",
+        "Греция: в оформлении Греция, курьер и вписанный адрес, цена та же."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4714,21 +4715,22 @@
           "Back in the account: «Другая страна Европы», Italy in the second list, the «Пакомат DPD» row.",
           "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
           "Open the checkout again and get to the delivery step.",
-          "In the account choose Greece and «Курьер до двери», then open the checkout again.",
+          "In the account choose Greece and «Курьер до двери», type only «Адрес» (street) and leave the box.",
+          "Add «Индекс» and «Город» (postcode, city), then open the checkout again and get to the delivery step.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
           "Every locker country: a «Выберите пакомат» button with search, as in the checkout.",
           "Estonia: until a locker is picked, under the rows: «Выберите пакомат — тогда сохраним».",
-          "Once picked, «Доставка по умолчанию сохранена ✓»; the checkout fills it in on both phones.",
+          "After «…сохранена ✓» the checkout fills it in on both phones; after «Выйти» it does not.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
-          "Greece stays Greece: the checkout has Greece and the courier, at the same price.",
-          "After «Выйти» it stops filling in."
+          "Only «Адрес» typed: under the rows «Впишите адрес, индекс и город — тогда сохраним».",
+          "Greece: the checkout has Greece, the courier and the typed address, at the same price."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T15:33:17.993Z"
+      "markedAt": "2026-09-23T18:46:27.418Z"
     },
     {
       "id": "acct-refund-sent",

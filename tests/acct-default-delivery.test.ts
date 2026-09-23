@@ -97,6 +97,8 @@ const ACCT = [
   "acctShipPrice", "shipRulePrice", "shipZoneOf", "orderCountry", "pickupOpen", "carriersFor",
   "courierCarriersFor", "methodCarriers", "deliveryFor", "acctPickCountry", "applyAcctShipPref",
   "pointsForAcct", "acctPointsKey",
+  // the courier row's address (23.09.2026) — the draft carries it, the save compares it
+  "acctAddrOf", "acctAddrWhole", "acctAddrPartial", "acctAddrKey",
 ];
 
 /** The block's locker picker and what it draws with. */
@@ -141,6 +143,7 @@ const SCREEN = `
   function patchSummary() { CALLS.push("summary"); }
   function patchCountry() { CALLS.push("country"); }
   function patchAcctPoint() { CALLS.push("acctpoint"); }
+  function paintAcctAddr() {}
   function patchPointList() { CALLS.push("list"); }
   function paintPointMarkers() { CALLS.push("markers"); }
   function openPointMap() {}
