@@ -193,6 +193,14 @@ describe("public/shop2/index.html", () => {
     const real = (await readFile(path.join(pub, "shop2", "index.html"), "utf8")).replace(/\r\n?/g, "\n");
     expect(currentToken(real)).toBe(await assetToken(real, pub));
   });
+
+  /* 23.09.2026: an e2e build writes its own origin into the canonical, the
+     hreflang links, og:url and the schema.org ids, and 4804ae5 committed that
+     — ten http://localhost:3417 URLs caught only by the pre-push look. */
+  it("names the shop's own origin, never the local server a build ran on", async () => {
+    const real = await readFile(path.join(process.cwd(), "public", "shop2", "index.html"), "utf8");
+    expect(real.match(/https?:\/\/(localhost|127\.0\.0\.1)[:/][^"'\s<]*/g) || []).toEqual([]);
+  });
 });
 
 /* ---------- a tag whose file no checkout holds ---------------------------- */
