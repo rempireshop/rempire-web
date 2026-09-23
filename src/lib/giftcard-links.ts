@@ -10,7 +10,7 @@
  * two apart means the checkout never carries a PDF library it will not use.
  */
 import { giftPdfPath } from "@/lib/giftcard-pdf";
-import { giftCardsByOrder, giftPaidByOrders, giftValidUntil, type GiftPaid } from "@/lib/giftcards";
+import { giftCardsByOrder, giftHoldsByOrder, giftPaidByOrders, giftValidUntil, type GiftPaid } from "@/lib/giftcards";
 
 export interface OrderGiftCardView {
   code: string;
@@ -22,6 +22,12 @@ export interface OrderGiftCardView {
   pdfUrl: string;
   /** Set once the order that bought the card was refunded — the card is dead (151_gift_card_refunds). */
   voidedAt: string | null;
+  /**
+   * True while that refund is only PENDING at Montonio: the card is refused
+   * at the checkout but not changed, and comes back whole if the refund is
+   * cancelled (src/lib/giftcards.ts giftHoldsByOrder). Never with `voidedAt`.
+   */
+  held: boolean;
 }
 
 type Orderish = { id: string; items?: unknown };
@@ -45,10 +51,14 @@ export async function attachGiftCards<T extends Orderish>(
   const soldIds = orders.filter(buysGiftCards).map((o) => o.id);
   let byOrder: Awaited<ReturnType<typeof giftCardsByOrder>> = {};
   let paidBy: Record<string, GiftPaid[]> = {};
+  let holds: Awaited<ReturnType<typeof giftHoldsByOrder>> = {};
   try {
-    [byOrder, paidBy] = await Promise.all([
+    [byOrder, paidBy, holds] = await Promise.all([
       soldIds.length ? giftCardsByOrder(soldIds) : Promise.resolve({}),
       giftPaidByOrders(orders.map((o) => o.id)),
+      /* The same reader the checkout refuses a card by, so the order card
+         and the till cannot disagree about whether the code works. */
+      soldIds.length ? giftHoldsByOrder(soldIds) : Promise.resolve({}),
     ]);
   } catch (err) {
     console.error("[giftcard-links] lookup failed:", err);
@@ -69,6 +79,7 @@ export async function attachGiftCards<T extends Orderish>(
               validUntil: giftValidUntil(c.createdAt),
               pdfUrl: giftPdfPath(c.code),
               voidedAt: c.voidedAt,
+              held: !c.voidedAt && !!holds[order.id],
             })),
           }
         : {}),
