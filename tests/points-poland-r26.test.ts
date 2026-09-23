@@ -104,11 +104,13 @@ describe("the account stops asking once the answer is in", () => {
     );
   });
 
-  it("the hint and the status line can no longer both be on screen", () => {
-    /* The hint says the machine is picked at the checkout; the status line
-       asks for one here. Both are drawn from the same fact, so the pair is
-       only possible while `ship` is stuck on «need» — which is what the
-       re-read above ends. This pins the two readers to the one question. */
+  it("the search button and the status line can no longer contradict each other", () => {
+    /* Until 23.09.2026 a hint here said the machine is picked at the
+       checkout; since then the block draws the checkout's own search button
+       instead (tests/acct-default-delivery.test.ts). Either way the status
+       line asks for a machine only while `ship` is stuck on «need», and both
+       are drawn from the same fact — which is what the re-read above ends.
+       This pins the two readers to the one question. */
     expect(src).toContain("if (acctMachinesTooMany()) {");
     expect(slice("acctMachinesTooMany")).toContain('POINTS.big[x.pm + ":" + acctShipCountry()]');
   });
