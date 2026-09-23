@@ -107,7 +107,8 @@ function fieldsOf(body: Record<string, unknown>): PostInput {
     body: body.body,
     coverUrl: body.coverUrl,
     coverAlt: body.coverAlt,
-    /* `"<mode> <x> <y>"` — writeCoverFocus() in src/lib/blog-cover.mjs is the
+    /* `"<mode> <x> <y>"` or one point and zoom per frame (`"<mode> list <x>
+       <y> <zoom> post … og …"`) — writeCoverFocus() in src/lib/blog-cover.mjs is the
        door, and anything it does not recognise is stored as null, which is
        what a cover with nothing chosen already is. */
     coverFocus: body.coverFocus,

@@ -53,7 +53,7 @@ export {
   sanitizeHtml,
 } from "../../src/lib/blog-html.mjs";
 /* …and the cover's own one-file module, for the same reason. */
-export { coverImgStyle, focusCrop } from "../../src/lib/blog-cover.mjs";
+export { containingCrop, coverImgStyle } from "../../src/lib/blog-cover.mjs";
 
 const LANGS = ["RU", "ET", "EN"];
 const EMPTY3 = { RU: "", ET: "", EN: "" };

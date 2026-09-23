@@ -66,10 +66,11 @@ export interface Post {
   body: Trilingual;
   coverUrl: string | null;
   coverAlt: Trilingual;
-  /** Which part of the cover each frame keeps — `"<mode> <x> <y>"`, or null
-      for the covers written before there was anything to choose. The one
-      reader is src/lib/blog-cover.mjs, whose header says what the words mean
-      and why it is a point and not a crop. */
+  /** Which part of the cover each frame keeps — `"<mode> <x> <y>"` (one point
+      for all three frames) or `"<mode> list <x> <y> <zoom> post … og …"` (a
+      point and a zoom per frame), or null for the covers written before there
+      was anything to choose. The one reader is src/lib/blog-cover.mjs, whose
+      header says what the words mean and why it is a point and not a crop. */
   coverFocus: string | null;
   tags: string[];
   products: string[];
