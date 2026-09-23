@@ -221,15 +221,17 @@ export type CardSpec = {
   fit: "inside" | "cover";
   /**
    * Which part of a `cover` photo the square keeps — the post's own
-   * `cover_focus` (src/lib/blog-cover.mjs). Absent is every article written
-   * before the owner had anything to drag, and keeps the crop those cards
-   * have always had: sharp's `attention`, a guess at where the detail is.
+   * `cover_focus` (src/lib/blog-cover.mjs), its «В соцсетях» frame: the
+   * point and the zoom the owner set on the square in the panel, which is
+   * this box's shape. Absent is every article written before the owner had
+   * anything to drag, and keeps the crop those cards have always had:
+   * sharp's `attention`, a guess at where the detail is.
    *
    * This box is a SQUARE and the article's own frame is 1200×630, so the two
    * never see the same part of a photo however it is cropped. That is the
    * whole complaint — a cover checked on the page came back from WhatsApp
-   * with the face cut — and it is why one point is stored rather than one
-   * rectangle: the point is the only thing both shapes can obey.
+   * with the face cut — and it is why, since 23.09.2026, the square has its
+   * own point and zoom instead of sharing the page's.
    */
   focus?: string | null;
 };
@@ -267,7 +269,7 @@ export async function drawCard(spec: CardSpec): Promise<Buffer> {
         const rect = focusCrop(
           turned ? meta.height : meta.width,
           turned ? meta.width : meta.height,
-          PHOTO.size, PHOTO.size, spec.focus,
+          PHOTO.size, PHOTO.size, spec.focus, "og",
         );
         if (rect) pipeline = pipeline.extract(rect);
       }

@@ -87,14 +87,17 @@ export function postsNotPrerendered<P extends { slug: string }>(posts: P[], prer
 /* ---------- pieces shared by the two pages ------------------------------ */
 
 const dmy = (iso: string | null) => String(iso || "").slice(0, 10).split("-").reverse().join(".");
-/** ` style="object-fit:cover;object-position:…"`, or nothing at all when the
-    owner never chose — src/lib/blog-cover.mjs owns the words. Written on the
-    element rather than into a class because it is one photo's setting, not a
-    rule: there is no stylesheet for «this article's cover sits a third of the
-    way down». It beats `#prerender .pre__img { object-fit: contain }`, which
-    is an id selector and outranks every class this page could reach for. */
-const coverStyle = (focus: string | null) => {
-  const css = coverImgStyle(focus);
+/** ` style="object-fit:cover;object-position:…"` (and the zoom, when the owner
+    zoomed that frame), or nothing at all when the owner never chose —
+    src/lib/blog-cover.mjs owns the words. `where` is the frame: "list" for a
+    tile, "post" for the top of the article — each has its own point and zoom
+    since 23.09.2026. Written on the element rather than into a class because
+    it is one photo's setting, not a rule: there is no stylesheet for «this
+    article's cover sits a third of the way down». It beats `#prerender
+    .pre__img { object-fit: contain }`, which is an id selector and outranks
+    every class this page could reach for. */
+const coverStyle = (focus: string | null, where: "list" | "post") => {
+  const css = coverImgStyle(focus, where);
   return css ? ' style="' + css + '"' : "";
 };
 const stampOf = (p: { updatedAt?: string | null; publishedAt?: string | null }) =>
@@ -130,7 +133,7 @@ function tile(post: PostSummary, seg: string, code: string): string {
     (post.coverUrl
       /* 1200×630 — the shape the tile is actually drawn in, here and in the
          prerendered twin (tools/prerender-shop2.mjs blogTile). */
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="1200" height="630"' + coverStyle(post.coverFocus, "list") + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
@@ -241,7 +244,7 @@ export function renderBlogPostPage(
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<article class="sec blog__post blog__read">' +
       (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630"' + coverStyle(post.coverFocus, "post") + ">"
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +

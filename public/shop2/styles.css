@@ -2263,11 +2263,25 @@ button, a, summary, label { touch-action: manipulation; }
   border-top: 1px solid rgba(28, 26, 0, .13); pointer-events: none;
 }
 .blog__grid > li:last-child .blog__tile::after { display: none; }
-.blog__tile .blog__tileimg { transition: transform .4s var(--ease); }
+.blog__tile .blog__tileimg { transition: transform .4s var(--ease), translate .4s var(--ease); }
 @media (hover: hover) {
   .blog__tile:hover .blog__tiletitle, .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }
   .blog__tile:hover .blog__tileimg { transform: translateY(-2px); }
+  /* A cover the owner zoomed carries its zoom as an inline `transform:
+     scale(…)` (blogCoverBgStyle in app.js), which outranks the rule above —
+     so its lift goes through `translate`, which stacks with a transform
+     instead of replacing it. */
+  .blog__tile:hover .blog__tileimg[style*="scale("] { translate: 0 -2px; }
 }
+/* A zoomed cover is its frame scaled up around the owner's point and cut
+   back to its own box by a clip-path. The clip settles what is painted, not
+   what is laid out: the scaled box still counts as overflow, and at 3× on a
+   phone that is two screens' width of it — a page that slides sideways under
+   the thumb wherever body's own overflow-x does not hold. So the tile, or the
+   article, that holds a zoomed cover clips sideways itself. `clip`, not
+   `hidden`: no scroll container, and the tile's lift (vertical) is untouched.
+   Only where a cover is zoomed — every other tile and article is as it was. */
+.blog__tile:has(> [style*="scale("]), .blog__post:has(> .blog__cover[style*="scale("]) { overflow-x: clip; }
 .blog__tile:focus-visible .blog__tiletitle { text-decoration: underline; text-underline-offset: 3px; }
 /* contain, not cover: most covers are catalogue photos (square, on white) and
    cover-cropping a 1:1 photo into a 1200/630 box zoomed into the label. A real

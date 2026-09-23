@@ -61,7 +61,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
-import { coverImgStyle, fetchPublishedPosts, focusCrop, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
@@ -797,17 +797,20 @@ async function drawCard(file, sources) {
    /shop/img/) is read off disk instead: fetch() has no origin to resolve it
    against in a build script.
 
-   WHICH PART OF IT. The post's own point when it has one (`cover_focus`,
-   src/lib/blog-cover.mjs), worked out as an extract() — sharp's `position`
-   takes a gravity or one of its strategies, never «62% across». Without one,
-   "attention", exactly as before: it picks the most detailed region rather
-   than a plain centre crop, which is better than nothing for a cover shot at
-   an odd aspect ratio and is what every card on disk was drawn with.
+   WHICH PART OF IT. The social frame the owner set in the panel («В
+   соцсетях», `cover_focus`, src/lib/blog-cover.mjs), worked out as an
+   extract() — sharp's `position` takes a gravity or one of its strategies,
+   never «62% across». Without one, "attention", exactly as before: it picks
+   the most detailed region rather than a plain centre crop, which is better
+   than nothing for a cover shot at an odd aspect ratio and is what every
+   card on disk was drawn with.
 
-   This card is 1200×630 and the one drawn at request time
-   (src/lib/og-card.ts) fits the photo into a 518×518 square beside the
-   title — two different shapes for the same cover, which is exactly why the
-   owner is given a point and not a rectangle. */
+   This card is 1200×630 and the frame the owner looked at is the square the
+   request-time card (src/lib/og-card.ts) puts beside the title — two shapes
+   for one setting. containingCrop() takes the square's point and brings its
+   zoom down just enough for this wider rect to hold ALL of the square: what
+   the owner framed for social media is never cut off here, and a frame at
+   zoom 1 gives exactly the crop this card took before frames had a zoom. */
 async function drawBlogCard(file, coverUrl, coverFocus) {
   let buf;
   if (coverUrl.startsWith("/")) {
@@ -825,7 +828,7 @@ async function drawBlogCard(file, coverUrl, coverFocus) {
     // the picture as a reader sees it (same reasoning as src/lib/og-card.ts)
     const meta = await sharp(buf).metadata();
     const turned = (meta.orientation || 0) >= 5;
-    const rect = focusCrop(turned ? meta.height : meta.width, turned ? meta.width : meta.height, OG_W, OG_H, coverFocus);
+    const rect = containingCrop(turned ? meta.height : meta.width, turned ? meta.width : meta.height, OG_W, OG_H, coverFocus, "og");
     if (rect) pipe = pipe.extract(rect);
   }
   await pipe.resize(OG_W, OG_H, { fit: "cover", position: "attention" }).jpeg({ quality: 84 }).toFile(file);
@@ -1546,12 +1549,13 @@ function giftPage(lang) {
    moment it is published, redeploy or not. */
 
 const dmy = iso => String(iso || "").slice(0, 10).split("-").reverse().join(".");
-/* Which part of the cover this frame keeps — the post's own point, read by
+/* Which part of the cover this frame keeps — the frame's own point and zoom
+   ("list" for a tile, "post" for the top of the article), read by
    src/lib/blog-cover.mjs, which the request-time page (src/lib/blog-page.ts)
    reads with the same call. Nothing written at all for a cover nobody has
    chosen for, so every article written before this keeps the bytes it has. */
-const coverStyle = focus => {
-  const css = coverImgStyle(focus);
+const coverStyle = (focus, where) => {
+  const css = coverImgStyle(focus, where);
   return css ? ' style="' + css + '"' : "";
 };
 
@@ -1565,7 +1569,7 @@ function blogTile(post, seg, code, t, i) {
          what reserves the box before the stylesheet arrives, and a square
          one there reserved the wrong shape on the very page that shows a
          dozen of them. */
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="1200" height="630"' + coverStyle(post.coverFocus, "list") + ">"
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
@@ -1727,7 +1731,7 @@ function blogPostPage(post, lang) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<article class="sec blog__post blog__read">' +
       (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630"' + coverStyle(post.coverFocus) + ">"
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630"' + coverStyle(post.coverFocus, "post") + ">"
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +

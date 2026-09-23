@@ -1810,17 +1810,36 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    from WhatsApp with the face halved. */
 .adm-see__one--og { flex: 0 0 132px; }
 .adm-see__og { display: block; aspect-ratio: 1; background: var(--page) center / cover no-repeat; }
-.adm-see__f { display: block; border: 1px solid var(--a-rule); background: var(--a-paper); }
+/* `overflow: hidden` — a zoomed frame is the shop's own element scaled up
+   around its point and cut back to its box by a clip-path (blogCoverBgStyle
+   in app.js). The clip takes care of what is painted; this takes care of
+   what is laid out, so the unclipped, scaled box cannot widen the editor's
+   column into a sideways scroll. It is the panel's box around the shop's
+   frame, not the frame, so it changes nothing about how the frame shows. */
+.adm-see__f { display: block; border: 1px solid var(--a-rule); background: var(--a-paper); overflow: hidden; }
 /* A frame a thumb may move the picture in. `touch-action: none` is what keeps
    the editor still under the finger — without it a drag down the frame
-   scrolls the page instead of moving the photograph; `user-select: none` is
-   what the pointerdown handler deliberately does not preventDefault() for,
-   so the frame can still take focus and answer the arrow keys. */
+   scrolls the page instead of moving the photograph, and two fingers zoom
+   the page instead of the frame; `user-select: none` is what the pointerdown
+   handler deliberately does not preventDefault() for, so the frame can still
+   take focus and answer the arrow keys and «+»/«−». */
 .adm-see__f--pan { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
 .adm-see__f--pan:active { cursor: grabbing; }
+/* the photo fits this frame exactly at zoom 1: a pinch or the slider zooms it, a drag has nowhere to go */
+.adm-see__f--pan[data-coverdrag=""], .adm-see__f--pan[data-coverdrag=""]:active { cursor: default; }
 .adm-see__f--pan:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 /* the shop's own bottom margin on a tile cover has no job inside a frame */
 .adm-see__f .blog__tileimg, .adm-see__f .blog__cover { margin-bottom: 0; }
+/* Under each frame that crops: its zoom, the number, «Сбросить». One row
+   where the column is wide enough; in the 132 px square column the slider
+   takes its own row and the number and the button go under it. The slider
+   is tall enough for a thumb (the phone is where this is worked). */
+.adm-see__z { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
+.adm-see__zr { flex: 1 1 110px; min-width: 0; height: 32px; margin: 0; accent-color: var(--a-ink); }
+.adm-see__zv { font-size: 12px; line-height: 16px; color: var(--a-muted); font-variant-numeric: tabular-nums; min-width: 3.2em; }
+.adm-see__reset { min-height: 32px; font-size: 13px; }
+.adm-see__reset:disabled { opacity: .45; cursor: default; }
+.adm-see__still { margin: 0; }
 .adm-see__note { flex-basis: 100%; margin: 0; }
 @media (max-width: 719px) {
   .adm-see { gap: 14px; }
