@@ -98,7 +98,7 @@ const STATE = `
     acctSt: { name: "", phone: "", birthday: "", marketing: "", ship: "" },
     pointOpen: false, pointFor: ""
   };
-  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {} };
+  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {}, failed: {}, rows: [] };
   var CALLS = [];
 `;
 
@@ -131,6 +131,7 @@ const SCREEN = `
   function refocus() {}
   function settleModalFocus() {}
   function pointSheet() { return "<SHEET>"; }
+  function paintPointSheet() { CALLS.push("sheet"); return false; }
 `;
 
 const courierQuote = (cc: string, carrier?: string) =>
@@ -369,9 +370,12 @@ describe("a country too big for one list gets the checkout's own search", () => 
     expect(html).toContain("изменить");
   });
 
-  it("draws the checkout's sheet under it while the account has it open", () => {
-    expect(acctPoint("", 'S.pointOpen = true; S.pointFor = "acct";')).toContain("<SHEET>");
-    expect(acctPoint("")).not.toContain("<SHEET>");
+  it("never draws the sheet itself — the sheet has a slot of its own", () => {
+    /* It was drawn in here on the first round, and every repaint of this
+       block rebuilt it — the search box and the caret in it with it. See
+       tests/point-sheet-typing.test.ts. */
+    expect(acctPoint("", 'S.pointOpen = true; S.pointFor = "acct";')).not.toContain("<SHEET>");
+    expect(slice("acctPointHTML")).not.toContain("pointSheet()");
   });
 
   it("a list that fits keeps its select", () => {
@@ -409,6 +413,7 @@ describe("a country too big for one list gets the checkout's own search", () => 
       ${SCREEN}
       var URLS = [];
       var fetch = function (u) { URLS.push(u); return new Promise(function () {}); };
+      var POINT_Q_MS = 300, pointQT = 0, pointQFor = "";
       function repaintPicker() {}
       function pointsFoundArrived() {}
       ${BIG}
@@ -416,7 +421,11 @@ describe("a country too big for one list gets the checkout's own search", () => 
       POINTS.q = "20121";
       pointsSearch();
       return URLS;
-    `, { MACHINE: "", LIST: IT_POINTS, shipCarrier: () => "omniva" });
+    `, {
+      MACHINE: "", LIST: IT_POINTS, shipCarrier: () => "omniva",
+      // the typing pause, elapsed at once — tests/point-sheet-typing.test.ts times it for real
+      setTimeout: (fn: () => void) => { fn(); return 1; }, clearTimeout: () => {},
+    });
     expect(urls).toHaveLength(1);
     expect(urls[0]).toContain("country=IT&carrier=dpd&q=20121");
   });
@@ -479,7 +488,7 @@ describe("a country too big for one list gets the checkout's own search", () => 
       pointsArrived();
       return CALLS;
     `, { OPEN: open });
-    expect(calls(true)).toEqual(["list"]);
+    expect(calls(true)).toEqual(["acctpoint", "list"]);
     expect(calls(false)).toEqual(["render"]);
   });
 
@@ -491,12 +500,15 @@ describe("a country too big for one list gets the checkout's own search", () => 
       repaintPicker("[data-pointq]");
       return CALLS;
     `, { SCREEN_NAME: screen });
-    expect(calls("account")).toEqual(["acctpoint"]);
-    expect(calls("checkout")).toEqual(["delivery"]);
+    expect(calls("account")).toEqual(["acctpoint", "sheet"]);
+    expect(calls("checkout")).toEqual(["delivery", "sheet"]);
   });
 
-  it("a background render keeps the caret in the sheet's search box", () => {
-    expect(slice("renderImpl")).toContain('af.hasAttribute("data-pointq") ? "[data-pointq]"');
+  it("a background render leaves the sheet — and its search box — alone", () => {
+    /* render() only asks the sheet's slot whether what it shows changed
+       (paintPointSheet); the body it rewrites no longer holds the sheet. */
+    expect(slice("renderImpl")).toContain("if (paintPointSheet() && S.pointOpen");
+    expect(slice("deliveryPicker")).not.toContain("pointSheet()");
   });
 });
 

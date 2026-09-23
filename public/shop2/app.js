@@ -6924,6 +6924,10 @@
   }
   function translatePage() {
     translateTree(hdrSlot); translateTree(bodySlot); translateTree(navSlot); translateTree(ovl);
+    // the parcel-point sheet's own slot (paintPointSheet) — text nodes only,
+    // the search box and what is typed in it are not touched
+    var ps = document.getElementById("pointslot");
+    if (ps) translateTree(ps);
   }
 
   var BANNERS = [
@@ -8036,7 +8040,10 @@
      list the checkout could ever reach until 19.09.2026; Poland's DPD is
      33 603, Italy's 12 048. Those are not lists to download onto a phone, so
      the route caps its answer and the typing goes to the server instead. */
-  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {} };  // view: "list" | "map" (UX fix 8)
+  /* `failed` — a search the server did not answer (pointsFind); `rows` — the
+     points the list is SHOWING, which is where a tapped row is looked up
+     (pointById). */
+  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {}, failed: {}, rows: [] };  // view: "list" | "map" (UX fix 8)
   /* One sheet, two owners. The checkout's picker chooses the ORDER's point;
      since 23.09.2026 the account's «Доставка по умолчанию» opens the very
      same sheet for its own draft, whose carrier and country need not be the
@@ -8213,10 +8220,39 @@
    * pointsMatching() then filters what it holds, which is the right answer for
    * every country that arrived whole.
    */
+  /* The typing is asked about once it PAUSES, not on every keystroke.
+     Дим on staging, 23.09.2026: «When I type roma the modal blinks a lot …
+     almost impossible to finish typing your number» — every character from
+     the second one on was a request, and every answer repainted the whole
+     sheet. Now a query goes out POINT_Q_MS after the last keystroke, only
+     the list moves when it answers (pointsFoundArrived), and until then the
+     list is the local filter over what this browser holds. */
+  var POINT_Q_MS = 300;
+  var pointQT = 0, pointQFor = "";
   function pointsSearch() {
     var key = pointsKey(), q = POINTS.q.trim().toLowerCase();
     if (!POINTS.big[key] || q.length < 2) return null;
-    return pointsFind(key, q);
+    var fk = key + "|" + q;
+    if (POINTS.found[fk]) return POINTS.found[fk];
+    /* One timer, for the newest query. Asked again with the same words (a
+       repaint reads this too) it is left running; a failed query is not
+       retried by itself — that would be a request every 300 ms — but by the
+       next keystroke or the next opening of the sheet. */
+    if (!POINTS.finding[fk] && !POINTS.failed[fk] && pointQFor !== fk) {
+      pointQFor = fk;
+      clearTimeout(pointQT);
+      pointQT = setTimeout(function () {
+        pointQT = 0; pointQFor = "";
+        // still what the box says, for the list still open?
+        if (pointsKey() + "|" + POINTS.q.trim().toLowerCase() === fk) pointsFind(key, q);
+      }, POINT_Q_MS);
+    }
+    return null;
+  }
+  /** Is the server still to answer what the box says? «Ищем…», not «Ничего не нашли». */
+  function pointsSearchPending() {
+    var key = pointsKey(), q = POINTS.q.trim().toLowerCase(), fk = key + "|" + q;
+    return !!POINTS.big[key] && q.length >= 2 && !POINTS.found[fk] && !POINTS.failed[fk];
   }
   /** The server's answer for one carrier+country (`key`) and one query —
       asked once and kept; null until it is in. The sheet's typing comes
@@ -8229,26 +8265,41 @@
       POINTS.finding[fk] = true;
       var at = key.indexOf(":");
       var carrier = key.slice(0, at), cc = key.slice(at + 1);
+      var failed = function () {
+        POINTS.finding[fk] = false;
+        if (POINTS.found[fk]) return;
+        POINTS.failed[fk] = true;
+        pointsFoundArrived(fk);
+      };
       fetch("/api/shipping/points/?country=" + encodeURIComponent(cc) + "&carrier=" + encodeURIComponent(carrier) +
         "&q=" + encodeURIComponent(q) + "&limit=200")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (j) {
+          if (!(j && j.ok && j.points)) { failed(); return; }
           POINTS.finding[fk] = false;
-          if (j && j.ok && j.points) { POINTS.found[fk] = j.points; pointsFoundArrived(); }
+          POINTS.found[fk] = j.points;
+          pointsFoundArrived(fk);
         })
-        .catch(function () { POINTS.finding[fk] = false; });
+        .catch(failed);
     }
     return null;
   }
-  /* An answer is in: the open sheet's list moves, and the hunt for the saved
-     machine (matchAcctPoint) gets its answer — which may land while the
-     shopper is still on the account screen, right after the save that
-     started it, so the match is made wherever it lands and the checkout
-     finds the machine already chosen. */
-  function pointsFoundArrived() {
+  /* An answer is in, for the query `fk`. The hunt for the saved machine
+     (matchAcctPoint) gets it wherever it lands — it may be the account screen,
+     right after the save that started it — so the checkout finds the machine
+     already chosen. The open sheet shows it only if it answers what the box
+     says NOW: answers land in any order, and an older query's, arriving late,
+     used to repaint over the newer one. It is kept (a backspace may want it)
+     but not shown. And only the list moves — the search box is never
+     rebuilt under the caret (patchPointList). */
+  function pointsFoundArrived(fk) {
     var matched = matchAcctPoint();
-    if (S.pointOpen) repaintPicker("[data-pointq]");
-    else if (matched && S.screen === "checkout") { patchDelivery(); patchSummary(); }
+    if (S.pointOpen) {
+      if (fk === pointsKey() + "|" + POINTS.q.trim().toLowerCase()) pointResultsChanged();
+      if (matched) patchSummary();
+      return;
+    }
+    if (matched && S.screen === "checkout") { patchDelivery(); patchSummary(); }
   }
   /* ---- «ближайший к моему адресу», without a map ---------------------
      Montonio sends no coordinates for a pickup point (22.09.2026: none in
@@ -8309,9 +8360,12 @@
   /* The row tapped is one of the rows SHOWN — and for a country too big for
      one download those are the server's answer to the search, not the first
      slice this browser holds. Looking in the slice alone, a Kraków locker
-     found by typing «krak» closed the sheet with nothing chosen. */
+     found by typing «krak» closed the sheet with nothing chosen (Дим: «I
+     type 91-433, choose the first one in the list but it's not selected»).
+     So the rows on screen come first (POINTS.rows, written by pointRows()),
+     then whatever the search answers now, then the slice. */
   function pointById(id) {
-    var lists = [pointsMatching(), pointsList() || []];
+    var lists = [POINTS.rows || [], pointsMatching(), pointsList() || []];
     for (var j = 0; j < lists.length; j++) {
       for (var i = 0; i < lists[j].length; i++) if (lists[j][i].id === id) return lists[j][i];
     }
@@ -15598,14 +15652,14 @@
       "</section></div>";
   }
   /* The machine under a parcel row of «Доставка по умолчанию»: a select for a
-     list that fits in one, the checkout's own search for one that does not —
-     and, while it is open, that search's sheet. */
+     list that fits in one, the checkout's own search for one that does not.
+     The search's sheet is not drawn here — it has a slot of its own
+     (paintPointSheet), so nothing that redraws this block can touch it. */
   function acctPointHTML() {
-    var sheet = pointsForAcct() ? pointSheet() : "";
     // the live list, so the machine saved here is one the checkout can
     // find again by name — acctMachines(); null while it is in flight
     var mach = acctMachines();
-    if (mach && !mach.length) return sheet;
+    if (mach && !mach.length) return "";
     /* …and a country whose machines do not fit in one list gets no select
        at all: 33 603 <option> elements is not a choice on a phone. Until
        23.09.2026 it got a sentence instead — «Пакомат для этой страны
@@ -15614,7 +15668,7 @@
        button, the same sheet, the same server search by postcode, town or
        street, keyed on this draft's carrier and country (pointsKey). */
     if (acctMachinesTooMany()) {
-      return acctPointButton(mach) + sheet;
+      return acctPointButton(mach);
     }
     var sel = acctMachineName();
     /* The label widens the same way the checkout's does, and for the same
@@ -15632,7 +15686,7 @@
               esc(x.kind + " · " + x.name) + "</option>";
           }).join("")
         : "<option>Загружаем список…</option>") +
-      "</select></span></label>" + sheet;
+      "</select></span></label>";
   }
   /** The checkout's point button (pointField), for the account's draft. The
       saved machine is a name, so the name is what it shows; the count is the
@@ -16484,9 +16538,8 @@
               "отправить его обратно придётся самостоятельно.</p>"
             : "")
         : "") +
-      (cur === "parcel" ? pointField() : "") +
-      // the account's sheet is the account's — never drawn over the order
-      (S.pointOpen && S.pointFor !== "acct" ? pointSheet() : "");
+      // the sheet itself is not in here: it has a slot of its own (paintPointSheet)
+      (cur === "parcel" ? pointField() : "");
   }
   /* The label is built from phrases the dictionary already knows — «Пакомат
      Omniva» matches a UI_RX rule, «Пакомат Omniva — 469 точек» would match
@@ -16525,6 +16578,7 @@
   /** The list is patched in place so typing never costs the input its focus. */
   function pointRows() {
     var list = pointsList();
+    POINTS.rows = [];
     if (!list) {
       return POINTS.err[pointsKey()]
         ? '<p class="muted psheet__msg">Не удалось загрузить список пакоматов — закройте окно и попробуйте ещё раз.</p>'
@@ -16532,7 +16586,13 @@
     }
     if (!list.length) return '<p class="muted psheet__msg">Для этой страны список пока пуст — выберите курьера.</p>';
     var found = pointsFiltered();
-    if (!found.length) return '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
+    if (!found.length) {
+      // the server has not answered these words yet — «nothing» would be a guess
+      return pointsSearchPending()
+        ? '<p class="muted psheet__msg">Ищем…</p>'
+        : '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
+    }
+    POINTS.rows = found;
     return found.map(function (p) {
       return '<button class="prow" data-pointpick="' + esc(p.id) + '"' +
         (pointChosen(p) ? ' aria-current="true"' : "") + ">" +
@@ -16551,12 +16611,60 @@
   }
   /* Typing patches only the list: a full render would take the search input
      down with it and the caret with the input. Everything else — the button's
-     label, the carrier chips — needs the whole step redrawn. */
+     label, the carrier chips — needs the whole step redrawn.
+     …and the list itself only when it has something new to say. The three
+     parts that can change under the box — the rows, the count, the «too many»
+     line — are each compared with what they last drew (pointPaint) and left
+     alone when equal, so a feed or an answer that changes nothing touches
+     nothing on screen. While a finger or a button is down on a row the list
+     is not replaced at all (pointListHeld): a row swapped out between the
+     press and the click takes the click with it. */
+  var pointPaint = {};
   function patchPointList() {
-    var box = document.getElementById("pointlist");
+    if (pointListHeld) { pointListPending = true; return; }
+    pointPatch("pointlist", pointRows, "list");
+    pointPatch("pointcount", pointCountText, "count");
+    pointPatch("pointtoo", pointTooManyHTML, "too");
+  }
+  function pointPatch(id, build, part) {
+    var box = document.getElementById(id);
     if (!box) return;
-    box.innerHTML = pointRows();
+    var html = build();
+    if (html === pointPaint[part]) return;
+    pointPaint[part] = html;
+    box.innerHTML = html;
     translateTree(box);
+  }
+  /** Whatever the rows are drawn from has moved: the list, or the pins. */
+  function pointResultsChanged() {
+    if (POINTS.view === "map" && pmap) { pmap.setView(pointMapCenter(), pmap.getZoom()); paintPointMarkers(); }
+    else patchPointList();
+  }
+  /** A keystroke in the sheet's search box — the list moves, the box does not. */
+  function pointQueryTyped(value) {
+    POINTS.q = value;
+    pointResultsChanged();
+  }
+  /* The press guard. pointerdown on a row holds every list repaint; the
+     release lets them through POINT_HOLD_MS later — after the click the press
+     became, on a phone as on a mouse — and a repaint asked for meanwhile runs
+     then, once. A press that turns into a scroll (pointercancel) releases the
+     same way. */
+  var POINT_HOLD_MS = 350;
+  var pointListHeld = false, pointListPending = false, pointListT = 0;
+  function pointListPress(e) {
+    var t = e && e.target;
+    if (!t || !t.closest || !t.closest("#pointlist")) return;
+    clearTimeout(pointListT);
+    pointListHeld = true;
+  }
+  function pointListRelease() {
+    if (!pointListHeld) return;
+    clearTimeout(pointListT);
+    pointListT = setTimeout(function () {
+      pointListHeld = false;
+      if (pointListPending) { pointListPending = false; patchPointList(); }
+    }, POINT_HOLD_MS);
   }
   function pointsArrived() {
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
@@ -16572,10 +16680,11 @@
          came back to re-read the question (Dim, 20.09.2026). It is re-read
          here: the same rule, now with the answer in hand, and the row saves. */
       if (S.acctSt.ship === "need") acctShipChanged();
-      /* The account's own search sheet is open: only its list moves, as in
-         the checkout below — a render() would rebuild the box being typed in
-         and throw the list's scroll back to the top. */
+      /* The account's own search sheet is open: the block behind it and the
+         sheet's list move, nothing else — a render() would throw the list's
+         scroll back to the top for a feed the shopper is not looking at. */
       if (pointsForAcct()) {
+        patchAcctPoint();
         if (POINTS.view === "map") paintPointMarkers(); else patchPointList();
         return;
       }
@@ -16588,9 +16697,11 @@
        here, so the shopper who set a default finds it already chosen — and
        simply left unchosen when the machine has closed since. */
     matchAcctPoint();
-    if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
-    if (S.pointOpen) patchPointList();
-    // The picker is closed: refresh the carrier chips (an empty carrier can
+    /* The sheet, when it is open, has a slot of its own (paintPointSheet):
+       inside it only the list or the pins move, and the block behind it can
+       be refreshed like any other time without touching the search box. */
+    if (S.pointOpen) { if (POINTS.view === "map") paintPointMarkers(); else patchPointList(); }
+    // Refresh the carrier chips (an empty carrier can
     // now drop out) without touching the rest of the screen — five of these
     // can land back to back (one loadPointsFor() per carrier), and a full
     // render() on each one is exactly the checkout flicker this avoids.
@@ -16598,7 +16709,7 @@
     // pre-selected carrier, so a card struck off can change what the order
     // costs, and the summary kept the old price until something else
     // redrew it (found by the promo sweep: 11,59 € shown, 12,19 € billed).
-    else { patchDelivery(); patchSummary(); }
+    patchDelivery(); patchSummary();
   }
   /* Points with no lat/lng (every Montonio pickup point — docs/shipping.md
      §3: "Координат в ответе Montonio нет вообще") cannot go on the map. */
@@ -16614,10 +16725,27 @@
     for (var i = 0; i < all.length; i++) if (pointGeo(all[i])) return true;
     return false;
   }
+  /* The count is the country's, not the download's: «1500 пакоматов» under a
+     search box that has all 33 603 behind it would be a lie the shopper can
+     catch. */
+  function pointCountText() {
+    var list = pointsList();
+    return list ? points(POINTS.big[pointsKey()] || list.length) : "";
+  }
+  /* Said for as long as the country is too big for one list — not only
+     until the second letter: a line that vanished as the shopper started
+     typing moved the whole list up under the finger. */
+  function pointTooManyHTML() {
+    return POINTS.big[pointsKey()]
+      ? '<p class="psheet__maphint muted">Пакоматов в этой стране слишком много для одного списка — введите город или улицу.</p>'
+      : "";
+  }
   function pointSheet() {
     var canMap = pointsHaveMap();
     var mapOn = canMap && POINTS.view === "map";
     var ungeo = mapOn ? pointsMatching().filter(function (p) { return !pointGeo(p); }).length : 0;
+    // what the three patchable parts are drawn with — see patchPointList()
+    pointPaint = { list: mapOn ? null : pointRows(), count: pointCountText(), too: pointTooManyHTML() };
     return '<div class="scrim" data-pointclose></div>' +
       '<div class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
         '<div class="psheet__head"><span class="display drawer__t">' + carrierLabel() + "</span>" +
@@ -16627,18 +16755,47 @@
           (canMap
             ? '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>"
             : "") +
-          /* The count is the country's, not the download's: «1500 пакоматов»
-             under a search box that has all 33 603 behind it would be a lie
-             the shopper can catch. */
-          (pointsList() ? '<div class="psheet__n muted">' + points(POINTS.big[pointsKey()] || pointsList().length) + "</div>" : "") + "</div>" +
-          (POINTS.big[pointsKey()] && POINTS.q.trim().length < 2
-            ? '<p class="psheet__maphint muted">Пакоматов в этой стране слишком много для одного списка — введите город или улицу.</p>'
-            : "") +
+          '<div class="psheet__n muted" id="pointcount">' + pointPaint.count + "</div></div>" +
+        '<div id="pointtoo">' + pointPaint.too + "</div>" +
         (mapOn
           ? '<div class="psheet__map" id="pointmap"></div>' +
             (ungeo ? '<p class="psheet__maphint muted">Часть пакоматов видна только в списке — у них нет координат для карты.</p>' : "")
-          : '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>") +
+          : '<div class="psheet__list" id="pointlist">' + pointPaint.list + "</div>") +
       "</div>";
+  }
+  /* ---------- the sheet's own slot ----------
+     The sheet used to be drawn INSIDE the block that owns it — the
+     checkout's [data-co-delivery], the account's [data-acct-point] — so
+     everything that repainted that block rebuilt the sheet with it: the
+     search box and the caret in it, and the slide-in animation replayed
+     each time. Every search answer did it (repaintPicker), and so did the
+     carrier logos, the shipping rules, the price refresh and any render()
+     of the account landing while the shopper typed. Дим, staging,
+     23.09.2026: «the modal for the parcels starts blinking, throwing my
+     cursor to the beginning of the text, sometimes losing text — searching
+     is impossible. It touches all modals where lockers are searched.»
+     So it has a slot of its own (#pointslot, beside the drawers' #ovl), and
+     like the drawers it is mounted only when WHAT is shown changes: opened,
+     closed, list ⇄ map, another owner. Nothing else writes to it; inside it
+     only the list, the count and the «too many» line are ever patched. */
+  var pointSheetOn = "";
+  function pointSheetWanted() {
+    if (!S.pointOpen) return "";
+    if (pointsForAcct()) return "acct:" + POINTS.view;
+    if (S.screen === "checkout" && S.pointFor !== "acct") return "co:" + POINTS.view;
+    return "";
+  }
+  /** Mount or unmount the sheet if what should show changed; true when it did. */
+  function paintPointSheet() {
+    var want = pointSheetWanted();
+    if (want === pointSheetOn) return false;
+    var slot = document.getElementById("pointslot");
+    if (!slot) return false;
+    pointSheetOn = want;
+    slot.innerHTML = want ? pointSheet() : "";
+    if (want) translateTree(slot);
+    else pointPaint = {};
+    return true;
   }
 
   /* ---------- parcel-machine map (UX fix 8) ----------
@@ -16691,10 +16848,13 @@
      patchDelivery() rewrites only that block (and patchSummary() the totals
      when the point changes). #pointmap is a fresh node after the patch, so
      the map view re-binds Leaflet to it. */
-  /* …and on the account screen the sheet lives in «Доставка по умолчанию»'s
-     own slot (patchAcctPoint), which is the part redrawn there. */
+  /* The sheet opens, closes or switches list ⇄ map: the block behind it
+     (the checkout's delivery, or «Доставка по умолчанию»'s slot on the
+     account screen) shows the choice, and the sheet's own slot mounts or
+     unmounts it (paintPointSheet) — the only two things that change. */
   function repaintPicker(focusSel) {
     if (S.screen === "account") patchAcctPoint(); else patchDelivery();
+    paintPointSheet();
     if (S.pointOpen && POINTS.view === "map") openPointMap();
     if (focusSel) refocus(focusSel);
     settleModalFocus();   // the sheet is modal — focus in on open, back on close
@@ -16706,7 +16866,7 @@
      failed is asked again the next time the sheet opens, not left dead for
      the rest of the visit. */
   function openPointSheet(who) {
-    POINTS.err = {};
+    POINTS.err = {}; POINTS.failed = {};
     S.pointFor = who === "acct" ? "acct" : "";
     if (S.pointFor) {
       var x = methods()[acctIdx()];
@@ -16727,7 +16887,8 @@
       return;
     }
     S.ship.point = p; S.pointOpen = false; S.shipPicked = true;
-    patchDelivery(); patchSummary(); refocus("[data-pointopen]");
+    // the sheet goes with its own slot now — the delivery block no longer holds it
+    patchDelivery(); patchSummary(); paintPointSheet(); refocus("[data-pointopen]"); settleModalFocus();
   }
   /* Only the markers inside the current view, capped — a country's full list
      can run past 400 points and nobody can read that many pins at once
@@ -35994,7 +36155,7 @@
   var preRendered = document.getElementById("prerender");
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
-    '<div id="ovl"></div><div id="toastslot"></div><div id="cbslot"></div>');
+    '<div id="ovl"></div><div id="pointslot"></div><div id="toastslot"></div><div id="cbslot"></div>');
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
@@ -36472,10 +36633,6 @@
            does — and that one must not leave the shopper's caret on the
            floor either. */
         : af.hasAttribute("data-search2") ? "[data-search2]"
-        /* The parcel-point sheet's search box — the checkout's, or the
-           account's since «Доставка по умолчанию» opens the same sheet: the
-           profile or a feed landing mid-word redraws the screen under it. */
-        : af.hasAttribute("data-pointq") ? "[data-pointq]"
         : null;
       if (!sel) return;
       refocusSel = sel;
@@ -36675,9 +36832,13 @@
     if (S.screen === "blog") blogSyncList(S.lang);
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
     if (S.screen === "admin" && S.adminTab === "blog" && !S.adminBlogEdit) loadAdminBlog(false);
-    // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
-    // Leaflet to it whenever the picker is open in map view
-    if ((S.screen === "checkout" || pointsForAcct()) && S.pointOpen && POINTS.view === "map") openPointMap();
+    /* The parcel-point sheet lives in #pointslot, outside everything this
+       render() just rewrote — it is mounted or unmounted here only when what
+       should show changed (a navigation closed it, say), never rebuilt. So
+       the search box keeps its node, its caret and its text through any
+       render, and #pointmap is new only when the sheet itself is: that is
+       the one time Leaflet has to be bound to it again (UX fix 8). */
+    if (paintPointSheet() && S.pointOpen && POINTS.view === "map") openPointMap();
     // a modal that this paint opened takes the focus; one it closed gives it back
     settleModalFocus();
   }
@@ -40151,11 +40312,7 @@
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = ""; S.promoInfo = null; S.giftErr = ""; }
     /* Only the list (or, in map view, the pins) is redrawn — a full render
        would replace this very input and take the caret with it. */
-    else if (t.matches("[data-pointq]")) {
-      POINTS.q = t.value;
-      if (POINTS.view === "map" && pmap) { pmap.setView(pointMapCenter(), pmap.getZoom()); paintPointMarkers(); }
-      else patchPointList();
-    }
+    else if (t.matches("[data-pointq]")) pointQueryTyped(t.value);
     // features: the gift-card form and the review form keep their own state
     else if (t.matches("[data-giftf]")) { S.gift[t.dataset.giftf] = t.value; }
     /* features: «Получатель», step 2 of an all-gift-card checkout. No render()
@@ -40880,6 +41037,13 @@
     var t = e.target;
     if (t && t.matches && t.matches(".bank__logo,.carrier__logo")) t.replaceWith(document.createTextNode(t.alt));
   }, true);
+
+  /* A row of the parcel-point list is being pressed: its repaints wait until
+     the press is over (pointListPress/pointListRelease) — capture phase, so
+     nothing inside can hide the press from it. */
+  document.addEventListener("pointerdown", pointListPress, true);
+  document.addEventListener("pointerup", pointListRelease, true);
+  document.addEventListener("pointercancel", pointListRelease, true);
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
