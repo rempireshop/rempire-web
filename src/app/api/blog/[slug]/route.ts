@@ -14,6 +14,7 @@
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
 import { getPublishedBySlug, pickLang, renderPostBody } from "@/lib/blog";
+import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug: raw } = await params;
@@ -45,7 +46,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           publishedAt: post.publishedAt,
         },
       },
-      { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=600" } },
+      /* the tag lets a save in the panel drop this copy in every language at
+         once — src/lib/blog-cache.ts */
+      { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=600", ...BLOG_CACHE_HEADERS } },
     );
   } catch (err) {
     console.error("blog/[slug] GET failed", err);

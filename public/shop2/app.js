@@ -11293,7 +11293,14 @@
      mark lives in sessionStorage because the owner reaches the shop by
      navigating, which throws away everything that only lived in S; it expires
      on its own after the stale-while-revalidate window it exists to outlast,
-     and it is this tab's business alone — no shopper's cache is touched. */
+     and it is this tab's business alone — no shopper's cache is touched.
+
+     The third cache is the CDN's — one copy per address, so one per
+     LANGUAGE, each on its own clock — and `cache:"reload"` does not get past
+     a copy that is still fresh there: the language opened first after a save
+     came back new and the next one old (Dim, 19.09.2026). That one is the
+     server's to drop, and it does, for every language at once, on every
+     write a reader can see (src/lib/blog-cache.ts). */
   var BLOG_BUST = "rmp-blog-bust";
   var BLOG_BUST_FOR = 10 * 60 * 1000;   // the API's stale-while-revalidate window
   function blogForget() {

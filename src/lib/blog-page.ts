@@ -30,6 +30,7 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
+import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 import { coverImgStyle } from "@/lib/blog-cover.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
@@ -248,7 +249,7 @@ export function renderBlogPostPage(
       '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
     "</article>" +
     (opts.products.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t) + "</section>"
+      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t, code) + "</section>"
       : "") +
     (others.length
       ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.otherPosts) + "</h2>" +
@@ -337,12 +338,14 @@ export function renderBlogListPage(
 /* ---------- the responses ------------------------------------------------ */
 
 const HTML = "text/html; charset=utf-8";
-/** Edge-cached for a minute, like the API and the product page: an edit is visible within it. */
+/** Edge-cached for a minute, like the API and the product page — and filed
+    under the blog's tag, so a save in the panel drops every language's copy
+    at once instead of waiting it out (src/lib/blog-cache.ts). */
 const PAGE_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
 const NO_STORE = "no-store";
 
 function html(body: string, status: number, cacheControl: string): Response {
-  return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
+  return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl, ...BLOG_CACHE_HEADERS } });
 }
 
 /** The lowest price of a ladder, and whether the ladder holds more than one.
