@@ -5273,17 +5273,18 @@
       "title": "Письмо «Товар снова в наличии»",
       "steps": [
         "Открыть «Ещё» → «Маркетинг» → «Письма» и включить «Товар снова в наличии».",
-        "Убедиться, что на закончившийся товар вы подписались из магазина.",
-        "В панели вернуть этот товар в наличие.",
-        "Проверить почту.",
+        "Товару поставить «Нет в наличии» и подписаться на него из магазина («Сообщить о наличии»).",
+        "В панели поставить этому товару «Мало» и проверить почту.",
+        "Переключить его на «В наличии», потом снова на «Мало», и проверить почту.",
+        "Повторить с другим товаром: «Нет в наличии» → подписка → «В наличии».",
         "Повторить с товаром, у которого на «Складе» посчитан ноль."
       ],
       "expect": [
-        "Письмо пришло сразу, как товар вернулся в наличие.",
-        "В письме название товара и цена.",
-        "Есть ссылка на сам товар.",
-        "Внизу есть «Отписаться»: страница открывается и сама снимает ожидание этого товара.",
-        "Если вместо подтверждения видна кнопка «Отписаться» — нажмите её.",
+        "«Мало» после «Нет в наличии»: письмо приходит сразу, одно.",
+        "«В наличии» после «Нет в наличии»: письмо тоже приходит сразу.",
+        "Переключение между «Мало» и «В наличии» нового письма не шлёт.",
+        "В письме название товара, цена и ссылка на сам товар.",
+        "Внизу «Отписаться»: страница сама снимает ожидание этого товара или просит нажать кнопку.",
         "Если на складе посчитан ноль, письмо не уходит совсем."
       ],
       "why": "Если переключатель выключен, все собранные подписки пропадают зря.",
@@ -5294,22 +5295,23 @@
         "title": "The «Товар снова в наличии» letter",
         "steps": [
           "Open «Ещё» → «Маркетинг» → «Письма» and switch on «Товар снова в наличии».",
-          "Make sure you subscribed to the out-of-stock product from the shop.",
-          "In the panel put that product back in stock.",
-          "Check your mail.",
+          "Set a product to «Нет в наличии» and subscribe to it from the shop («Сообщить о наличии»).",
+          "In the panel set that product to «Мало» (low) and check your mail.",
+          "Switch it to «В наличии», then back to «Мало», and check your mail.",
+          "Repeat with another product: «Нет в наличии» → subscribe → «В наличии».",
           "Repeat with a product counted down to zero on «Склад»."
         ],
         "expect": [
-          "The letter arrives as soon as the product is back.",
-          "It carries the product's name and price.",
-          "There is a link to the product itself.",
-          "«Отписаться» at the bottom opens a page that cancels the wait itself.",
-          "If you see an «Отписаться» button instead of the confirmation, press it.",
+          "«Мало» after «Нет в наличии»: the letter arrives at once, just one.",
+          "«В наличии» after «Нет в наличии»: the letter arrives at once too.",
+          "Switching between «Мало» and «В наличии» sends no new letter.",
+          "It carries the product's name, price and a link to the product.",
+          "«Отписаться» at the bottom: the page cancels the wait itself, or asks you to press.",
           "With a counted zero on the shelf no letter goes at all."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T07:00:15.191Z"
     },
     {
       "id": "mail-abandoned",

@@ -459,7 +459,12 @@ describe("5 · the back-in-stock letter does not contradict the counter", () => 
     expect(sent[0].to).toEqual([SHOPPER]);
   });
 
+  /* Both start from «нет в наличии», which is where the product page offers
+     «Сообщить о наличии» at all: since 24.09.2026 the hook writes on a
+     COMEBACK only (out → in, out → «мало»), and a product that was on sale
+     all along is not coming back (tests/backstock-transitions.test.ts). */
   it("still sends for a product nobody has ever counted", async () => {
+    await upsertOverride(OTHER_PLAIN.id, { stock: "out" });
     await waitFor(OTHER_PLAIN.id);
     await upsertOverride(OTHER_PLAIN.id, { stock: "in" });
     expect(sent).toHaveLength(1);
@@ -468,6 +473,8 @@ describe("5 · the back-in-stock letter does not contradict the counter", () => 
 
   it("sends when the count says «мало» — some is still some", async () => {
     await move({ productId: PLAIN.id, delta: 1, reason: "goods_in", actor: "test" });
+    // taken off sale by hand while the shelf still holds one
+    await upsertOverride(PLAIN.id, { stock: "out" });
     await waitFor(PLAIN.id);
     await upsertOverride(PLAIN.id, { stock: "in" });
     expect(sent).toHaveLength(1);

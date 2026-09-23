@@ -1044,8 +1044,19 @@ export async function pendingStockAlerts(productId?: string): Promise<StockAlert
   return query<StockAlertRow>("select * from stock_alerts where sent_at is null order by created_at limit 500");
 }
 
-export async function markStockAlertSent(id: string): Promise<void> {
-  await query("update stock_alerts set sent_at = now() where id = $1", [id]);
+/**
+ * Stamps one alert spent — and says whether THIS call stamped it. Two runs
+ * can read the same pending row at the same moment (the owner's «мало» and a
+ * scanner count landing together, or either of them and the daily sweep);
+ * only the one whose stamp took the row from pending may send its letter, so
+ * a subscription is answered once however many doors open at the same time.
+ */
+export async function markStockAlertSent(id: string): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    "update stock_alerts set sent_at = now() where id = $1 and sent_at is null returning id",
+    [id],
+  );
+  return rows.length > 0;
 }
 
 /** What the shop knows about a product — the back-in-stock letter's data. */
