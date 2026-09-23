@@ -31,7 +31,8 @@ log.
 | `src/app/api/admin/mail/preview/route.ts` | `GET` — HTML for the admin iframe, `?format=texts` for the editor |
 | `src/app/api/admin/mail/test/route.ts` | `POST` — send a sample (admin only) |
 | `src/emails/newsletter.ts`, `src/lib/newsletters.ts` | «Рассылка» — the owner's own letter: the editor's allowlisted HTML rebuilt as the shell's rows, product cards, the unsubscribe footer; the audience, the resumable batch send (docs/features.md § 8, docs/flows.md § «Рассылка») |
-| `src/app/api/admin/newsletters/*` | the drafts, `audience/` (counts per language), `<id>/test/`, `<id>/send/` (one budgeted batch per call), `<id>/preview/` (the iframe — the owner's draft, so admin-gated unlike `mail/preview`) |
+| `src/app/api/admin/newsletters/*` | the drafts, `audience/` (counts per language), `<id>/test/`, `<id>/send/` (one budgeted batch per call), `<id>/preview/` (the iframe — the owner's draft, so admin-gated unlike `mail/preview`), `preview/` (POST — the live preview of the block editor, an unsaved draft rendered by the send's own function) |
+| `src/lib/newsletter-blocks.ts` | a letter as blocks since 23.09.2026 — picture + link, text, button, product card, an old body as one block; what a block may contain (links http(s) or a shop token, pictures https or ours) |
 | `public/shop/emails/*.html` | **design source of truth**, hand-made, keep |
 | `tests/emails.test.ts`, `tests/mail.test.ts`, `tests/mail-hooks.test.ts`, `tests/mail-texts.test.ts` | `npm test` |
 

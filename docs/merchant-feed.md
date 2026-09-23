@@ -120,6 +120,12 @@ here brings them back. That is expected, not a fault.
    under the source's menu). This starts the first fetch at once, so you do
    not have to wait until tomorrow morning.
 8. **Do not touch the Shopify sources today.**
+9. **The checkout link stays as it is.** Merchant Center → **Business info →
+   Checkout** holds Shopify's cart link, `https://rempireshop.com/cart/{id}:1`.
+   The new shop answers the same address with its own ids: the product goes
+   into the basket at the right size and the checkout opens. Check it once:
+   open `https://rempireshop.com/cart/system-4-bio-botanical-shampoo_250ml:1`
+   — the checkout should open with that shampoo, 250 ml, in the basket.
 
 ## C. Shipping: let our feed decide
 
@@ -224,7 +230,8 @@ is what to do about it:
 | Price | `rungsOf()` restates `priceItems()` in `src/lib/orders.ts`: the owner's ladder, else the file's ladder shifted by his «Цена», else the file. The test prices items through `priceItems()` itself. |
 | Availability | The stock word from `getOverrides()` plus `stockByVariant`: a size counted to zero is `out_of_stock`. Hidden products are left out. |
 | Shipping | `shippingFor()`: `quoteFromRules()` over `settings.shipping_rules` for each carrier `offeredCarriers()` lists, the cheapest per country for parcel (only where `pickupOffered()`) and for courier, with the item's price as the subtotal. Countries are EE, LV, LT, FI and `EUROPE` minus `countriesOff`. Per item, both services, about 2.3 MB per feed raw and about 100 KB gzipped. |
-| IDs | The product id, plus `_<size>` for one size of several. Ids longer than 50 characters get a shortened, hashed stem (`idStem()`). `item_group_id` is the stem. |
+| IDs | The product id, plus `_<size>` for one size of several. Ids longer than 50 characters get a shortened, hashed stem (`idStem()`). `item_group_id` is the stem. All ids are handed out by `planFeed()`, which `feedOffers()` exposes. |
+| Checkout link | `/cart/<id>:<qty>` (Merchant Center → Business info → Checkout). `src/middleware.ts` lets exactly that shape past the legacy `/cart` redirect (`src/lib/cart-permalink.ts`); `src/app/cart/[...path]/route.ts` looks the id up in `feedOffers()` (`src/lib/merchant-cart.ts`) and answers 302 to the product page with `?size=…&buy=<qty>`, which `buyFromLink()` in `public/shop2/app.js` turns into a basket line and the checkout. Sold out: the product page, nothing added. Hidden or unknown: the home page. |
 | GTIN | `stock_levels.ean`, only when it is a valid GTIN-8/12/13/14 outside the in-store ranges. `identifier_exists=no` only for the brand Rempire. |
 | Not in the feed | Sets (bundles); gift cards; custom products with no photo, whose placeholder SVG Google cannot read; `unit_pricing` beyond ml/g sizes; delivery times. |
 

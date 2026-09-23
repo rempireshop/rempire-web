@@ -1,0 +1,22 @@
+-- 204_newsletter_blocks.sql — «Рассылка» as blocks (migration range 200–209)
+--
+-- Renat, 20.09.2026: the letter he wants is the Aromatic 89 kind — built out
+-- of pictures, each one clicking through to its own page, a line of text here
+-- and there. On 23.09.2026 he tried to build one in the rich-text box and
+-- stopped at «paste a link to a picture»; Dim: very simple and logical. So a
+-- letter becomes a list of blocks — a picture with its link, a text, a button,
+-- a product card (src/lib/newsletter-blocks.ts) — kept here, whole, in one
+-- column: `[{"t":"img","src":"…","href":"product:…","alt":""}, {"t":"text",
+-- "style":"p","text":{"RU":"…","ET":"…","EN":"…"}}, …]`.
+--
+-- NULL is a letter written before this: it keeps its HTML `body` and renders
+-- exactly as it did. Nothing is migrated — an old draft opened in the new
+-- editor carries its body along as one `html` block and becomes a block letter
+-- only when it is saved again. A letter that has already gone out is never
+-- touched: updateNewsletter() only writes a draft.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite (the test suite).
+
+alter table newsletters add column if not exists blocks jsonb;

@@ -553,9 +553,9 @@ ${
  * table goes full width and the side padding shrinks (the media block in
  * shell()), so a long Estonian label stays on one line instead of two.
  */
-export function rowButton(url: string, label: string): string {
+export function rowButton(url: string, label: string, pad = "24px 48px 8px 48px"): string {
   return `        <tr>
-          <td class="em-px em-card" align="center" style="padding:24px 48px 8px 48px; background-color:${C.card};">
+          <td class="em-px em-card" align="center" style="padding:${pad}; background-color:${C.card};">
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="em-btn-wrap" style="border-collapse:collapse;">
               <tr>
                 <td align="center" class="em-btn" bgcolor="${C.btnBg}" style="background-color:${C.btnBg}; border:1px solid ${C.btnBg}; mso-padding-alt:15px 38px;">

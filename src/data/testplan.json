@@ -23,19 +23,19 @@
     {
       "id": "checkout",
       "name": "Корзина и оформление",
-      "note": "Самый денежный раздел. Здесь появляются настоящие заказы, и их номера понадобятся дальше. На тестовом магазине деньги не списываются.",
+      "note": "Самый денежный раздел — но всё здесь делается на стенде (rempireshop.diipsolutions.eu): оплата тестовая, через песочницу Montonio, деньги не списываются. Заказы при этом создаются, и их номера понадобятся дальше. Настоящие деньги — только в разделе «Только на боевом магазине».",
       "en": {
         "name": "Cart and checkout",
-        "note": "The section with the money in it. Real orders appear here, and their numbers are needed later. On the test shop no money is taken."
+        "note": "The section with the money in it — but everything here is done on staging (rempireshop.diipsolutions.eu): the payment is a test one, through Montonio's sandbox, and no money is taken. Orders are still created, and their numbers are needed later. Real money only in «Только на боевом магазине»."
       }
     },
     {
       "id": "orders",
       "name": "Панель: заказы",
-      "note": "Работа с заказами, которые вы только что оформили: этикетка, отправка, счёт, возврат, отмена.",
+      "note": "Работа с заказами, которые вы только что оформили: этикетка, отправка, счёт, возврат, отмена. Как и оформление — на стенде: возврат денег идёт через песочницу Montonio, настоящие деньги не двигаются.",
       "en": {
         "name": "The panel: orders",
-        "note": "Working with the orders you have just placed: the label, the dispatch, the invoice, the refund, the cancellation."
+        "note": "Working with the orders you have just placed: the label, the dispatch, the invoice, the refund, the cancellation. Like the checkout, this is staging: refunds go through Montonio's sandbox and no real money moves."
       }
     },
     {
@@ -900,11 +900,12 @@
       "title": "Страницы с правилами",
       "steps": [
         "Открыть «Доставка и оплата», «Возврат товара», «Условия продажи», «Конфиденциальность», «Контакты».",
-        "На каждой найти название фирмы, адрес и регистрационный номер."
+        "На каждой найти название фирмы, адрес и регистрационный номер.",
+        "В «Доставка и оплата» раскрыть «Полные условия доставки» по-русски, по-эстонски и по-английски."
       ],
       "expect": [
-        "Все пять страниц открываются.",
-        "Текст нигде не обрывается.",
+        "Все пять страниц открываются, текст нигде не обрывается.",
+        "В условиях доставки разделы 1–14 по порядку, на трёх языках одинаково.",
         "Название фирмы везде одно и то же.",
         "Адрес и регистрационный номер везде совпадают.",
         "Ссылка «Правовая информация» ведёт на «Условия продажи».",
@@ -917,11 +918,12 @@
         "title": "The policy pages",
         "steps": [
           "Open «Доставка и оплата», «Возврат товара», «Условия продажи», «Конфиденциальность» and «Контакты».",
-          "On each one find the company name, the address and the registration number."
+          "On each one find the company name, the address and the registration number.",
+          "On «Доставка и оплата» open «Полные условия доставки» in Russian, Estonian and English."
         ],
         "expect": [
-          "All five pages open.",
-          "No text is cut off anywhere.",
+          "All five pages open and no text is cut off anywhere.",
+          "The terms of delivery run sections 1–14 in order, the same in all three languages.",
           "The company name is the same on every page.",
           "The address and registration number match everywhere.",
           "The «Правовая информация» link leads to «Условия продажи».",
@@ -930,7 +932,7 @@
         "why": "Two different company names on one site is a question from the inspectorate."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T14:41:00.000Z"
+      "markedAt": "2026-09-23T13:15:55.089Z"
     },
     {
       "id": "shop-delivery-prices",
@@ -973,7 +975,7 @@
         "why": "A buyer can claim back the gap between the page price and the till."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:20:01.825Z"
+      "markedAt": "2026-09-23T12:58:08.234Z"
     },
     {
       "id": "shop-locker-europe",
@@ -1815,7 +1817,56 @@
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:20:01.825Z"
+      "markedAt": "2026-09-23T12:58:08.234Z"
+    },
+    {
+      "id": "panel-delivery-below",
+      "area": "panel",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Цена доставки ниже Montonio",
+      "steps": [
+        "«Ещё» → «Настройки» → «Доставка и оплата».",
+        "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии.",
+        "Нажать «Сохранить» и прочитать карточку до конца.",
+        "Нажать «Сохранить всё равно».",
+        "В кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva, потом вернуться в панель.",
+        "Очистить оба поля, нажать «Сохранить» и подтвердить."
+      ],
+      "expect": [
+        "Карточка «Цена ниже тарифа Montonio» называет обе строки, ничего не обрезано.",
+        "Пока не подтвердили, рядом с «Сохранить» написано «Не сохранено».",
+        "После подтверждения: «Тарифы доставки сохранены» и «Сохранено ✓».",
+        "В кассе у Omniva стоит 1 €.",
+        "В панели в полях по-прежнему 1 и 2.",
+        "После очистки под полями снова цены Montonio: 3,19 € и 4,99 €."
+      ],
+      "why": "Цена ниже тарифа — ваше решение, но случайно его не принять: карточка спрашивает один раз.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "A delivery price below Montonio's",
+        "steps": [
+          "«Ещё» → «Настройки» → «Доставка и оплата».",
+          "Type 1 into Estonia's Omniva box and 2 into Latvia's.",
+          "Press «Сохранить» (save) and read the card to the end.",
+          "Press «Сохранить всё равно» (save anyway).",
+          "At the checkout, with a cart under 59 €, pick Estonia, «Пакомат» and Omniva, then go back to the panel.",
+          "Clear both boxes, press «Сохранить» and confirm."
+        ],
+        "expect": [
+          "The «Цена ниже тарифа Montonio» card names both rows, nothing cut off.",
+          "Until you confirm, «Не сохранено» stands next to «Сохранить».",
+          "After confirming: «Тарифы доставки сохранены» and «Сохранено ✓».",
+          "At the checkout Omniva costs 1 €.",
+          "Back in the panel the boxes still hold 1 and 2.",
+          "After clearing, Montonio's prices are under the boxes again: 3,19 € and 4,99 €."
+        ],
+        "why": "A price below the rate is your call, but never by accident: the card asks once."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T12:58:08.234Z"
     },
     {
       "id": "panel-carton",
@@ -2134,7 +2185,7 @@
       "lang": "RU",
       "title": "Корзина: добавить, изменить, убрать",
       "steps": [
-        "Положить в корзину один товар с объёмом и один набор.",
+        "На стенде: положить в корзину один товар с объёмом и один набор.",
         "Открыть корзину и нажать «+» у товара и у набора.",
         "Нажать «−» до единицы.",
         "Убрать одну строку.",
@@ -2153,7 +2204,7 @@
       "en": {
         "title": "The cart: add, change, remove",
         "steps": [
-          "Put one product with a size and one set into the cart.",
+          "On staging: put one product with a size and one set into the cart.",
           "Open the cart and press «+» on the product and on the set.",
           "Press «−» down to one.",
           "Remove one line.",
@@ -2167,7 +2218,9 @@
           "Remove the last line and the cart closes itself."
         ],
         "why": "A wrong cart total is either your loss or an argument."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-ee-parcel",
@@ -2175,14 +2228,14 @@
       "who": "both",
       "device": "phone",
       "lang": "RU",
-      "title": "Эстония, пакомат — первый настоящий заказ",
+      "title": "Эстония, пакомат — первый заказ на стенде",
       "steps": [
-        "Положить в корзину один товар до 20 €.",
+        "На стенде: положить в корзину один товар до 20 €.",
         "Нажать «Оформить заказ» и ввести почту, которую вы читаете.",
         "Нажать «Далее — доставка».",
         "Выбрать Эстонию, «Пакомат», перевозчика Omniva.",
         "Открыть список пакоматов и выбрать любой.",
-        "Выбрать способ оплаты и оплатить."
+        "Выбрать способ оплаты и оплатить тестовой оплатой — деньги не списываются."
       ],
       "expect": [
         "В сводке доставка стоит 3,19 € — цена Omniva.",
@@ -2194,14 +2247,14 @@
       "risk": "high",
       "writes": true,
       "en": {
-        "title": "Estonia, parcel locker — the first real order",
+        "title": "Estonia, parcel locker — the first order on staging",
         "steps": [
-          "Put one product under 20 € into the cart.",
+          "On staging: put one product under 20 € into the cart.",
           "Press «Оформить заказ» (place order) and enter an e-mail you actually read.",
           "Press «Далее — доставка» (next — delivery).",
           "Choose Estonia, «Пакомат» (parcel locker), the carrier Omniva.",
           "Open the list of lockers and pick any one.",
-          "Choose a payment method and pay."
+          "Choose a payment method and pay with the test payment — no money is taken."
         ],
         "expect": [
           "The summary shows delivery at €3.19 — Omniva's price.",
@@ -2222,7 +2275,7 @@
       "lang": "RU",
       "title": "Бесплатная доставка от 59 € по Эстонии",
       "steps": [
-        "Набрать корзину на 55 €.",
+        "На стенде: набрать корзину на 55 €.",
         "Дойти до шага доставки, выбрав Эстонию и пакомат.",
         "Посмотреть строку доставки.",
         "Вернуться в корзину и добрать больше 59 €.",
@@ -2239,7 +2292,7 @@
       "en": {
         "title": "Free delivery from 59 € inside Estonia",
         "steps": [
-          "Fill the cart to 55 €.",
+          "On staging: fill the cart to 55 €.",
           "Get to the delivery step with Estonia and a parcel locker chosen.",
           "Look at the delivery line.",
           "Go back to the cart and top it up past 59 €.",
@@ -2263,7 +2316,7 @@
       "lang": "RU",
       "title": "Эстония, курьер до двери",
       "steps": [
-        "Набрать корзину меньше чем на 59 €.",
+        "На стенде: набрать корзину меньше чем на 59 €.",
         "На шаге доставки выбрать Эстонию и «Курьер до двери».",
         "Заполнить улицу, дом, квартиру, индекс и город.",
         "Оформить заказ."
@@ -2279,7 +2332,7 @@
       "en": {
         "title": "Estonia, courier to the door",
         "steps": [
-          "Fill the cart to less than 59 €.",
+          "On staging: fill the cart to less than 59 €.",
           "At the delivery step choose Estonia and «Курьер до двери» (courier to the door).",
           "Fill in the street, house, flat, postcode and city.",
           "Place the order."
@@ -2302,7 +2355,7 @@
       "lang": "RU",
       "title": "Самовывоз из салона",
       "steps": [
-        "Набрать корзину.",
+        "На стенде: набрать корзину.",
         "На шаге доставки выбрать «Самовывоз — Mardi 1, Таллинн».",
         "Оформить заказ."
       ],
@@ -2317,7 +2370,7 @@
       "en": {
         "title": "Collection from the salon",
         "steps": [
-          "Fill the cart.",
+          "On staging: fill the cart.",
           "At the delivery step choose «Самовывоз — Mardi 1, Таллинн» (collection).",
           "Place the order."
         ],
@@ -2327,7 +2380,9 @@
           "In the panel the order has two steps: «Оплачен» and «Выдан»."
         ],
         "why": "An extra step or charge on collection puts off your own neighbours."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-lv-parcel",
@@ -2337,7 +2392,7 @@
       "lang": "RU",
       "title": "Латвия, пакомат",
       "steps": [
-        "Набрать корзину меньше чем на 59 €.",
+        "На стенде: набрать корзину меньше чем на 59 €.",
         "На шаге доставки выбрать Латвию и «Пакомат».",
         "Открыть список пакоматов у каждого перевозчика по очереди."
       ],
@@ -2353,7 +2408,7 @@
       "en": {
         "title": "Latvia, parcel locker",
         "steps": [
-          "Fill the cart to less than 59 €.",
+          "On staging: fill the cart to less than 59 €.",
           "At the delivery step choose Latvia and «Пакомат».",
           "Open the locker list for each carrier in turn."
         ],
@@ -2376,7 +2431,7 @@
       "lang": "RU",
       "title": "Литва, пакомат",
       "steps": [
-        "На шаге доставки выбрать Литву и «Пакомат».",
+        "На стенде: на шаге доставки выбрать Литву и «Пакомат».",
         "Открыть список пакоматов и выбрать любой.",
         "Посмотреть цену доставки."
       ],
@@ -2391,7 +2446,7 @@
       "en": {
         "title": "Lithuania, parcel locker",
         "steps": [
-          "At the delivery step choose Lithuania and «Пакомат».",
+          "On staging: at the delivery step choose Lithuania and «Пакомат».",
           "Open the locker list and pick any one.",
           "Look at the delivery price."
         ],
@@ -2401,7 +2456,9 @@
           "The locker you picked is named."
         ],
         "why": "A locker that does not work closes a whole country."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-fi-parcel",
@@ -2411,7 +2468,7 @@
       "lang": "RU",
       "title": "Финляндия, пакомат и курьер",
       "steps": [
-        "На шаге доставки выбрать Финляндию и «Пакомат».",
+        "На стенде: на шаге доставки выбрать Финляндию и «Пакомат».",
         "Открыть список пакоматов.",
         "Набрать в поиске «Helsinki» по букве и нажать любой пункт.",
         "Переключиться на «Курьер до двери» и посмотреть цену."
@@ -2429,7 +2486,7 @@
       "en": {
         "title": "Finland, locker and courier",
         "steps": [
-          "At the delivery step choose Finland and «Пакомат».",
+          "On staging: at the delivery step choose Finland and «Пакомат».",
           "Open the locker list.",
           "Type «Helsinki» into the search letter by letter and tap any point.",
           "Switch to «Курьер до двери» and look at the price."
@@ -2454,7 +2511,7 @@
       "lang": "RU",
       "title": "Другая страна Европы",
       "steps": [
-        "На шаге доставки выбрать «Другая страна Европы».",
+        "На стенде: на шаге доставки выбрать «Другая страна Европы».",
         "Выбрать Германию и посмотреть цены у «Пакомата» и «Курьера».",
         "Выбрать Польшу и открыть список пакоматов.",
         "Выбрать Грецию, потом Венгрию."
@@ -2473,7 +2530,7 @@
       "en": {
         "title": "Another European country",
         "steps": [
-          "At the delivery step choose «Другая страна Европы» (another European country).",
+          "On staging: at the delivery step choose «Другая страна Европы» (another European country).",
           "Choose Germany and look at the prices for the locker and the courier.",
           "Choose Poland and open the list of lockers.",
           "Choose Greece, then Hungary."
@@ -2499,7 +2556,7 @@
       "lang": "RU",
       "title": "Перевозчик: карточки с ценой, как у Montonio",
       "steps": [
-        "Выбрать «Другая страна Европы» и Польшу.",
+        "На стенде: выбрать «Другая страна Европы» и Польшу.",
         "Посмотреть карточки под «Пакоматом».",
         "Выбрать «Курьер до двери» и посмотреть карточки.",
         "Нажать DPD и посмотреть сумму заказа.",
@@ -2519,7 +2576,7 @@
       "en": {
         "title": "Carrier: priced cards, the way Montonio shows them",
         "steps": [
-          "Choose «Другая страна Европы» and Poland.",
+          "On staging: choose «Другая страна Европы» and Poland.",
           "Look at the cards under the locker.",
           "Choose «Курьер до двери» (courier) and look at the cards.",
           "Tap DPD and look at the order total.",
@@ -2546,7 +2603,7 @@
       "lang": "RU",
       "title": "Бесплатная доставка по Европе — от 200 €",
       "steps": [
-        "Набрать корзину примерно на 60 € и выбрать доставку в Германию.",
+        "На стенде: набрать корзину примерно на 60 € и выбрать доставку в Германию.",
         "Посмотреть строку доставки.",
         "Добрать корзину больше 200 € и посмотреть снова."
       ],
@@ -2561,7 +2618,7 @@
       "en": {
         "title": "Free delivery across Europe — from 200 €",
         "steps": [
-          "Fill the cart to about 60 € and choose delivery to Germany.",
+          "On staging: fill the cart to about 60 € and choose delivery to Germany.",
           "Look at the delivery line.",
           "Top the cart up past 200 € and look again."
         ],
@@ -2583,7 +2640,7 @@
       "lang": "RU",
       "title": "Страны, куда магазин не возит",
       "steps": [
-        "На шаге доставки открыть «Другая страна Европы».",
+        "На стенде: на шаге доставки открыть «Другая страна Европы».",
         "Пролистать весь список и поискать Норвегию, Швейцарию, Великобританию, Исландию, Кипр, Мальту и Лихтенштейн."
       ],
       "expect": [
@@ -2595,14 +2652,16 @@
       "en": {
         "title": "Countries the shop does not ship to",
         "steps": [
-          "At the delivery step open «Другая страна Европы».",
+          "On staging: at the delivery step open «Другая страна Европы».",
           "Scroll the whole list and look for Norway, Switzerland, the United Kingdom, Iceland, Cyprus, Malta and Liechtenstein."
         ],
         "expect": [
           "None of those seven countries is in the list."
         ],
         "why": "A paid order nobody can ship is a refund, not a sale."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-promo",
@@ -2612,7 +2671,7 @@
       "lang": "RU",
       "title": "Промокод на кассе",
       "steps": [
-        "Набрать корзину и дойти до сводки заказа.",
+        "На стенде: набрать корзину и дойти до сводки заказа.",
         "В поле «Промокод или подарочная карта» ввести TEST10 и применить.",
         "Стереть и ввести выдуманный код.",
         "Ввести TESTSHIP и посмотреть строку доставки."
@@ -2629,7 +2688,7 @@
       "en": {
         "title": "A promo code at the checkout",
         "steps": [
-          "Fill the cart and get to the order summary.",
+          "On staging: fill the cart and get to the order summary.",
           "In the «Промокод или подарочная карта» field enter TEST10 and apply it.",
           "Clear it and enter a made-up code.",
           "Enter TESTSHIP and look at the delivery line."
@@ -2641,7 +2700,9 @@
           "TESTSHIP makes the delivery free."
         ],
         "why": "A promo code counted wrong is a bigger discount out of your pocket."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-buy-giftcard",
@@ -2651,10 +2712,10 @@
       "lang": "RU",
       "title": "Купить только подарочную карту",
       "steps": [
-        "Положить в корзину подарочную карту на 50 € и больше ничего.",
+        "На стенде: положить в корзину подарочную карту на 50 € и больше ничего.",
         "Нажать «Оформить» и ввести почту.",
         "Пройти второй шаг.",
-        "Оставить включённым «Отправить мне на почту, а не получателю» и оплатить.",
+        "Оставить включённым «Отправить мне на почту, а не получателю» и оплатить тестовой оплатой.",
         "В панели открыть этот заказ и нажать «Вернуть деньги» — не подтверждать."
       ],
       "expect": [
@@ -2671,10 +2732,10 @@
       "en": {
         "title": "Buying a gift card and nothing else",
         "steps": [
-          "Put a 50 € gift card in the cart and nothing else.",
+          "On staging: put a 50 € gift card in the cart and nothing else.",
           "Press «Оформить» and enter an e-mail.",
           "Go through the second step.",
-          "Leave «Отправить мне на почту, а не получателю» on and pay.",
+          "Leave «Отправить мне на почту, а не получателю» on and pay with the test payment.",
           "In the panel open this order and press «Вернуть деньги» — do not confirm."
         ],
         "expect": [
@@ -2686,7 +2747,9 @@
           "The refund box warns the card will be cancelled."
         ],
         "why": "Charging delivery for an e-mail is 5.47 € too much."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-pay-with-giftcard",
@@ -2696,7 +2759,7 @@
       "lang": "RU",
       "title": "Заплатить подарочной картой",
       "steps": [
-        "Взять код карты из предыдущего заказа — он есть в письме и в PDF.",
+        "На стенде: взять код карты из предыдущего заказа — он есть в письме и в PDF.",
         "Набрать корзину примерно на 20 €, меньше номинала карты.",
         "Ввести код в поле «Промокод или подарочная карта».",
         "Оформить заказ."
@@ -2714,7 +2777,7 @@
       "en": {
         "title": "Paying with a gift card",
         "steps": [
-          "Take the card code from the previous order — it is in the e-mail and in the PDF.",
+          "On staging: take the card code from the previous order — it is in the e-mail and in the PDF.",
           "Fill the cart to about 20 €, less than the card is worth.",
           "Enter the code in the «Промокод или подарочная карта» field.",
           "Place the order."
@@ -2727,7 +2790,9 @@
           "The remainder can be spent on the next order."
         ],
         "why": "A balance that burns is the buyer's money you kept."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-zero",
@@ -2737,7 +2802,7 @@
       "lang": "RU",
       "title": "Заказ, который вышел в ноль",
       "steps": [
-        "Собрать заказ, который карта закрывает целиком: карта 50 €, товар 15 €.",
+        "На стенде: собрать заказ, который карта закрывает целиком: карта 50 €, товар 15 €.",
         "Дойти до шага оплаты.",
         "Нажать кнопку внизу.",
         "Открыть панель → «Заказы» → «Отправить»."
@@ -2755,7 +2820,7 @@
       "en": {
         "title": "An order that came to zero",
         "steps": [
-          "Build an order a card covers completely: a 50 € card, a 15 € product.",
+          "On staging: build an order a card covers completely: a 50 € card, a 15 € product.",
           "Get to the payment step.",
           "Press the button at the bottom.",
           "Open the panel → «Заказы» → «Отправить»."
@@ -2768,7 +2833,9 @@
           "«Оплата» says «Подарочная карта · к оплате было 0 €»."
         ],
         "why": "Sending zero to a bank is a refusal and a lost order."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-invoice",
@@ -2778,7 +2845,7 @@
       "lang": "RU",
       "title": "Оплата по счёту — для компаний",
       "steps": [
-        "Набрать корзину, на шаге доставки выбрать Эстонию и дойти до шага оплаты.",
+        "На стенде: набрать корзину, на шаге доставки выбрать Эстонию и дойти до шага оплаты.",
         "Выбрать «По счёту — для компаний».",
         "Заполнить название фирмы, регистрационный номер, KMKR, юридический адрес и почту для счёта.",
         "Оформить заказ."
@@ -2795,7 +2862,7 @@
       "en": {
         "title": "Payment by invoice — for companies",
         "steps": [
-          "Fill the cart, choose Estonia at the delivery step and get to the payment step.",
+          "On staging: fill the cart, choose Estonia at the delivery step and get to the payment step.",
           "Choose «По счёту — для компаний» (by invoice, for companies).",
           "Fill in the company name, the registration number, the KMKR (VAT) number, the legal address and the e-mail for the invoice.",
           "Place the order."
@@ -2807,7 +2874,9 @@
           "It does not join the dispatch queue."
         ],
         "why": "Wrong invoice details are not booked, and goods before payment are credit."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-invoice-abroad",
@@ -2817,7 +2886,7 @@
       "lang": "RU",
       "title": "Счёт для фирмы — только по Эстонии",
       "steps": [
-        "Набрать корзину и на шаге доставки выбрать Латвию.",
+        "На стенде: набрать корзину и на шаге доставки выбрать Латвию.",
         "Перейти на шаг оплаты и прочитать список способов.",
         "Вернуться на доставку, выбрать «Другая страна Европы» и Германию.",
         "Снова открыть шаг оплаты.",
@@ -2835,7 +2904,7 @@
       "en": {
         "title": "An invoice for a company — Estonia only",
         "steps": [
-          "Fill the cart and choose Latvia at the delivery step.",
+          "On staging: fill the cart and choose Latvia at the delivery step.",
           "Go to the payment step and read the list of methods.",
           "Go back to delivery, choose «Другая страна Европы» and Germany.",
           "Open the payment step again.",
@@ -2848,7 +2917,9 @@
           "The other payment methods are all still there."
         ],
         "why": "The invoice is issued at Estonian tax of 24 %, which abroad is a wrong document rather than a missing button."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-invoice-zero",
@@ -2858,7 +2929,7 @@
       "lang": "RU",
       "title": "Счёт на ноль евро",
       "steps": [
-        "Набрать корзину с доставкой по Эстонии и выбрать «По счёту — для компаний».",
+        "На стенде: набрать корзину с доставкой по Эстонии и выбрать «По счёту — для компаний».",
         "Вернуться в сводку и применить подарочную карту, которая закрывает заказ целиком.",
         "Вернуться на шаг оплаты."
       ],
@@ -2873,7 +2944,7 @@
       "en": {
         "title": "A zero-euro invoice",
         "steps": [
-          "Fill the cart with delivery in Estonia and choose «По счёту — для компаний».",
+          "On staging: fill the cart with delivery in Estonia and choose «По счёту — для компаний».",
           "Go back to the summary and apply a gift card that covers the whole order.",
           "Return to the payment step."
         ],
@@ -2883,7 +2954,9 @@
           "The button at the bottom says «Оформить заказ»."
         ],
         "why": "A 0 € invoice can neither be paid nor booked."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-pay-bank",
@@ -2893,10 +2966,10 @@
       "lang": "RU",
       "title": "Оплата банковской ссылкой",
       "steps": [
-        "Набрать корзину и дойти до шага оплаты.",
+        "На стенде: набрать корзину и дойти до шага оплаты.",
         "Выбрать «Банковская ссылка» и свой банк из логотипов.",
         "Нажать кнопку оплаты.",
-        "Подтвердить платёж и вернуться в магазин."
+        "Подтвердить платёж в тестовом банке и вернуться в магазин."
       ],
       "expect": [
         "Открывается страница оплаты.",
@@ -2909,10 +2982,10 @@
       "en": {
         "title": "Paying by bank link",
         "steps": [
-          "Fill the cart and get to the payment step.",
+          "On staging: fill the cart and get to the payment step.",
           "Choose «Банковская ссылка» (bank link) and your own bank from the logos.",
           "Press the pay button.",
-          "Confirm the payment and come back to the shop."
+          "Confirm the payment at the test bank and come back to the shop."
         ],
         "expect": [
           "A payment page opens.",
@@ -2920,7 +2993,9 @@
           "In the panel the «Оплата» block names the method and bank."
         ],
         "why": "This is Estonia's most common way to pay: it fails, the shop fails."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-bank-list",
@@ -2930,7 +3005,7 @@
       "lang": "RU",
       "title": "Список банков зависит от страны доставки",
       "steps": [
-        "Дойти до шага оплаты с доставкой в Эстонию и посмотреть логотипы банков.",
+        "На стенде: дойти до шага оплаты с доставкой в Эстонию и посмотреть логотипы банков.",
         "Вернуться на шаг доставки и поменять страну на Латвию.",
         "Снова открыть шаг оплаты.",
         "Ещё раз поменять страну — на Данию — и открыть шаг оплаты."
@@ -2947,7 +3022,7 @@
       "en": {
         "title": "The bank list follows the delivery country",
         "steps": [
-          "Get to the payment step with delivery to Estonia and look at the bank logos.",
+          "On staging: get to the payment step with delivery to Estonia and look at the bank logos.",
           "Go back to the delivery step and change the country to Latvia.",
           "Open the payment step again.",
           "Change the country once more — to Denmark — and open the payment step."
@@ -2959,7 +3034,9 @@
           "Instead one line: the bank is chosen on the Montonio page."
         ],
         "why": "A buyer who cannot find their bank abandons the payment."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-pay-card",
@@ -2969,7 +3046,7 @@
       "lang": "RU",
       "title": "Оплата банковской картой",
       "steps": [
-        "Набрать корзину и выбрать «Банковская карта».",
+        "На стенде: набрать корзину и выбрать «Банковская карта».",
         "На странице оплаты ввести тестовую карту 4111 1111 1111 1111, срок 03/2030, код 737.",
         "Подтвердить оплату."
       ],
@@ -2983,7 +3060,7 @@
       "en": {
         "title": "Paying by bank card",
         "steps": [
-          "Fill the cart and choose «Банковская карта» (bank card).",
+          "On staging: fill the cart and choose «Банковская карта» (bank card).",
           "On the payment page enter the test card 4111 1111 1111 1111, expiry 03/2030, code 737.",
           "Confirm the payment."
         ],
@@ -2992,7 +3069,9 @@
           "In the panel the «Оплата» block says bank card."
         ],
         "why": "Without a card the whole of Europe cannot buy from you."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-pay-wallet",
@@ -3002,7 +3081,7 @@
       "lang": "RU",
       "title": "Apple Pay / Google Pay",
       "steps": [
-        "Открыть магазин на телефоне — iPhone в Safari или Android в Chrome.",
+        "На стенде: открыть магазин на телефоне — iPhone в Safari или Android в Chrome.",
         "Набрать корзину и выбрать «Apple Pay / Google Pay».",
         "Нажать кнопку оплаты."
       ],
@@ -3017,7 +3096,7 @@
       "en": {
         "title": "Apple Pay / Google Pay",
         "steps": [
-          "Open the shop on a phone — an iPhone in Safari or an Android in Chrome.",
+          "On staging: open the shop on a phone — an iPhone in Safari or an Android in Chrome.",
           "Fill the cart and choose «Apple Pay / Google Pay».",
           "Press the pay button."
         ],
@@ -3027,97 +3106,9 @@
           "In the panel the «Оплата» line says «Apple Pay / Google Pay»."
         ],
         "why": "One-tap paying saves phone orders otherwise abandoned at the card form."
-      }
-    },
-    {
-      "id": "checkout-express-wallet",
-      "area": "checkout",
-      "who": "dim",
-      "device": "phone",
-      "lang": "RU",
-      "title": "«Купить через G Pay» — сразу к оплате",
-      "steps": [
-        "Войти в свой кабинет: имя, телефон и «Доставка по умолчанию» с пакоматом заполнены.",
-        "Положить в корзину любой другой товар и закрыть корзину.",
-        "Открыть товар с несколькими объёмами и выбрать второй объём.",
-        "Прочитать строки над чёрной кнопкой и нажать её.",
-        "На странице Montonio оплатить кошельком или тестовой картой.",
-        "Открыть корзину, потом «Заказы» в панели."
-      ],
-      "expect": [
-        "Над кнопкой видны товар с объёмом, ваш пакомат и цена доставки.",
-        "На кнопке написано «Купить за … с доставкой» с итоговой суммой.",
-        "Сразу открылась страница оплаты Montonio с Apple Pay или Google Pay.",
-        "Сумма там та же, что на кнопке.",
-        "В панели один новый заказ: этот товар, этот объём, ваш пакомат.",
-        "Другой товар так и остался в корзине."
-      ],
-      "why": "Покупатель с заполненным кабинетом покупает в три касания — без корзины и оформления.",
-      "risk": "high",
-      "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-23T13:01:56.720Z",
-      "en": {
-        "title": "«Купить через G Pay» — straight to payment",
-        "steps": [
-          "Sign in to your account: name, phone and a default parcel locker are filled in.",
-          "Put some other product in the cart and close the cart.",
-          "Open a product with several sizes and pick the second size.",
-          "Read the lines above the black button and press it.",
-          "On Montonio's page pay with the wallet or the test card.",
-          "Open the cart, then «Заказы» in the panel."
-        ],
-        "expect": [
-          "Above the button: the product with its size, your locker, the delivery price.",
-          "The button says «Купить за … с доставкой» with the total.",
-          "Montonio's payment page opened at once, with Apple Pay or Google Pay.",
-          "The amount there is the same as on the button.",
-          "The panel has one new order: this product, this size, your locker.",
-          "The other product is still in the cart."
-        ],
-        "why": "A customer with a complete account buys in three taps — no cart, no checkout."
-      }
-    },
-    {
-      "id": "checkout-express-fallback",
-      "area": "checkout",
-      "who": "dim",
-      "device": "phone",
-      "lang": "RU",
-      "title": "«Купить через G Pay», когда в кабинете чего-то нет",
-      "steps": [
-        "В кабинете в «Доставке по умолчанию» выбрать «Курьер до двери».",
-        "Открыть любой товар и нажать чёрную кнопку «Купить через».",
-        "Выйти из кабинета, открыть товар и нажать ту же кнопку.",
-        "Войти снова и вернуть пакомат по умолчанию."
-      ],
-      "expect": [
-        "С курьером по умолчанию на кнопке нет суммы — только «Купить через».",
-        "Открылось оформление: товар в корзине, выбран Apple Pay / Google Pay.",
-        "Сразу открыт шаг доставки, поля адреса подсвечены красным.",
-        "Без входа оформление открылось с первого шага, как раньше."
-      ],
-      "why": "Адреса для курьера кабинет не хранит — чего не хватает, покупатель дописывает в оформлении.",
-      "risk": "med",
-      "writes": false,
-      "mark": "new",
-      "markedAt": "2026-09-23T13:01:56.720Z",
-      "en": {
-        "title": "«Купить через G Pay» when the account is missing something",
-        "steps": [
-          "In the account, under «Доставка по умолчанию», choose «Курьер до двери».",
-          "Open any product and press the black «Купить через» button.",
-          "Sign out, open the product and press the same button.",
-          "Sign in again and put the default parcel locker back."
-        ],
-        "expect": [
-          "With a courier default the button shows no amount — just «Купить через».",
-          "The checkout opened: the product in the cart, Apple Pay / Google Pay chosen.",
-          "The delivery step is open at once, the address fields marked red.",
-          "Signed out, the checkout opened on its first step, as before."
-        ],
-        "why": "The account keeps no courier address — whatever is missing, the buyer adds at checkout."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-double-tap",
@@ -3127,7 +3118,7 @@
       "lang": "RU",
       "title": "Два нажатия «Оплатить» — один заказ",
       "steps": [
-        "Набрать корзину и дойти до кнопки оплаты.",
+        "На стенде: набрать корзину и дойти до кнопки оплаты.",
         "Нажать её дважды подряд, быстро.",
         "Открыть «Заказы» в панели."
       ],
@@ -3140,7 +3131,7 @@
       "en": {
         "title": "Two presses of «Оплатить» — one order",
         "steps": [
-          "Fill the cart and get to the pay button.",
+          "On staging: fill the cart and get to the pay button.",
           "Press it twice in a row, quickly.",
           "Open «Заказы» in the panel."
         ],
@@ -3148,7 +3139,9 @@
           "There is one new order in the list, not two identical ones."
         ],
         "why": "Two orders for one cart means two charges and a refund."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-fail-retry",
@@ -3158,7 +3151,7 @@
       "lang": "RU",
       "title": "Оплата не прошла",
       "steps": [
-        "Дойти до страницы оплаты и нажать в тестовом банке «Банк отклонил платёж».",
+        "На стенде: дойти до страницы оплаты и нажать в тестовом банке «Банк отклонил платёж».",
         "Посмотреть, куда вернул магазин.",
         "Нажать «Оплатить ещё раз».",
         "Выбрать другой способ и довести оплату до конца."
@@ -3176,7 +3169,7 @@
       "en": {
         "title": "The payment failed",
         "steps": [
-          "Get to the payment page and press «Банк отклонил платёж» on the test bank.",
+          "On staging: get to the payment page and press «Банк отклонил платёж» on the test bank.",
           "See where the shop brought you back to.",
           "Press «Оплатить ещё раз» (pay again).",
           "Choose a different method and see the payment through."
@@ -3201,7 +3194,7 @@
       "lang": "RU",
       "title": "Отмена платежа в банке и оплата после неё",
       "steps": [
-        "Набрать корзину и дойти до страницы банка.",
+        "На стенде: набрать корзину и дойти до страницы банка.",
         "Нажать в тестовом банке «Отменить».",
         "Посмотреть экран и заглянуть в корзину магазина.",
         "Нажать «Оплатить ещё раз» и довести оплату до конца."
@@ -3221,7 +3214,7 @@
       "en": {
         "title": "Cancelling at the bank and paying afterwards",
         "steps": [
-          "Fill a cart and get as far as the bank page.",
+          "On staging: fill a cart and get as far as the bank page.",
           "Press «Отменить» (cancel) on the test bank.",
           "Look at the screen and then at the shop's cart.",
           "Press «Оплатить ещё раз» and see the payment through."
@@ -3246,7 +3239,7 @@
       "lang": "RU",
       "title": "Галочка «Хочу получать скидки и поздравление»",
       "steps": [
-        "Оформить заказ, поставив на первом шаге галочку про скидки и поздравление.",
+        "На стенде: оформить заказ, поставив на первом шаге галочку про скидки и поздравление.",
         "Открыть «Ещё» → «Клиенты».",
         "Найти этого покупателя и посмотреть пометку.",
         "Включить фильтр «Подписаны»."
@@ -3265,7 +3258,7 @@
       "en": {
         "title": "The «Хочу получать скидки и поздравление» tick box",
         "steps": [
-          "Place an order with the discounts-and-greeting box ticked on the first step.",
+          "On staging: place an order with the discounts-and-greeting box ticked on the first step.",
           "Open «Ещё» → «Клиенты».",
           "Find that buyer and look at the marker.",
           "Switch on the «Подписаны» (subscribed) filter."
@@ -3289,7 +3282,7 @@
       "lang": "RU",
       "title": "Оплатить часть заказа баллами",
       "steps": [
-        "Убедиться, что «Партнёры и баллы» включены.",
+        "На стенде: убедиться, что «Партнёры и баллы» включены.",
         "Войти в кабинет покупателя, у которого есть баллы.",
         "Набрать корзину и дойти до сводки.",
         "Включить «Использовать баллы» и посмотреть сумму."
@@ -3306,7 +3299,7 @@
       "en": {
         "title": "Paying part of an order with points",
         "steps": [
-          "Make sure «Партнёры и баллы» is switched on.",
+          "On staging: make sure «Партнёры и баллы» is switched on.",
           "Sign into the account of a buyer who has points.",
           "Fill the cart and get to the summary.",
           "Switch on «Использовать баллы» (use points) and look at the total."
@@ -3318,7 +3311,9 @@
           "With fewer points than the minimum, the switch is absent."
         ],
         "why": "Points are your money; counting them wrong overpays the discount."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
       "id": "checkout-abandon",
@@ -3328,7 +3323,7 @@
       "lang": "RU",
       "title": "Бросить корзину — заготовка для письма",
       "steps": [
-        "Набрать корзину из двух товаров.",
+        "На стенде: набрать корзину из двух товаров.",
         "Нажать «Оформить» и ввести почту, которую вы читаете.",
         "Перейти на шаг доставки.",
         "Закрыть вкладку и записать время."
@@ -3345,7 +3340,7 @@
       "en": {
         "title": "Abandoning a cart — the setup for a letter",
         "steps": [
-          "Fill a cart with two products.",
+          "On staging: fill a cart with two products.",
           "Press «Оформить» and enter an e-mail you actually read.",
           "Move to the delivery step.",
           "Close the tab and write down the time."
@@ -3357,7 +3352,50 @@
           "You check it in the «Письма» section."
         ],
         "why": "An abandoned cart is a near-buyer, and the letter brings some back."
-      }
+      },
+      "mark": "reworded",
+      "markedAt": "2026-09-23T13:36:32.960Z"
+    },
+    {
+      "id": "checkout-google-cart-link",
+      "area": "checkout",
+      "who": "dim",
+      "device": "any",
+      "lang": "any",
+      "title": "Ссылка «Купить» из Google Shopping",
+      "steps": [
+        "Открыть адрес стенда с /cart/system-4-bio-botanical-shampoo_250ml:2 на конце.",
+        "Посмотреть корзину, потом нажать «Назад» в браузере.",
+        "Открыть адрес стенда с /cart/takogo-net:1 на конце.",
+        "Открыть адрес стенда с /cart/repair-me-wash:1 на конце (его сейчас нет в наличии)."
+      ],
+      "expect": [
+        "Открылось оформление заказа: шампунь System 4, 250 мл, 2 штуки.",
+        "«Назад» ведёт на страницу шампуня, второй раз он в корзину не попадает.",
+        "Неизвестный номер открывает главную страницу магазина.",
+        "Товар без наличия открывает свою страницу и в корзину не попадает."
+      ],
+      "why": "Кнопка «Купить» в Google Shopping ведёт на этот адрес; без него покупатель попадал в каталог с пустой корзиной.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The «Buy» link from Google Shopping",
+        "steps": [
+          "Open the staging address with /cart/system-4-bio-botanical-shampoo_250ml:2 at the end.",
+          "Look at the basket, then press the browser's Back.",
+          "Open the staging address with /cart/takogo-net:1 at the end.",
+          "Open the staging address with /cart/repair-me-wash:1 at the end (it is out of stock now)."
+        ],
+        "expect": [
+          "The checkout opened: System 4 shampoo, 250 ml, two of them.",
+          "Back leads to the shampoo's page, and it is not added a second time.",
+          "An unknown number opens the shop's home page.",
+          "A product out of stock opens its own page and is not added."
+        ],
+        "why": "Google Shopping's «Buy» button leads to this address; without it the shopper landed in the catalogue with an empty basket."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T13:32:52.399Z"
     },
     {
       "id": "order-list-chips",
@@ -3715,7 +3753,7 @@
         "Вернуться и нажать «A6 для термопринтера ↗».",
         "Посмотреть вес на этикетке: это коробка магазина, а не число товаров.",
         "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой.",
-        "Открыть оплаченный заказ в польский пакомат и посмотреть блок над кнопкой."
+        "До создания этикетки открыть оплаченный заказ в пакомат SmartPosti или Unisend, потом в Omniva или Польшу, и посмотреть блок над кнопкой. Коробку можно поменять у любого оплаченного заказа — так задумано."
       ],
       "expect": [
         "Появилось «Отправление»: перевозчик, пакомат и трек-номер.",
@@ -3723,7 +3761,7 @@
         "На листе A4 под этикеткой — номер заказа крупными цифрами.",
         "Там же написано, куда и кому едет посылка и что внутри.",
         "Наклейка A6 — голая этикетка перевозчика, этих строк на ней нет.",
-        "У польского заказа размера ячейки нет, и написано почему."
+        "Размер ячейки выбирается только у SmartPosti и Unisend — у остальных дверцу подбирает перевозчик."
       ],
       "why": "Этикетка, которая не печатается, — это посылка, которую вы не сдадите сегодня.",
       "risk": "med",
@@ -3737,7 +3775,7 @@
           "Go back and press «A6 для термопринтера ↗».",
           "Look at the weight on the label: it is the shop's box, not the item count.",
           "Open the A4 PDF and check the band under the label is not empty.",
-          "Open a paid order going to a Polish locker and look above the button."
+          "Before creating a label, open a paid order to a SmartPosti or Unisend locker, then one to Omniva or Poland, and look above the button. The box can be changed on any paid order — that is by design."
         ],
         "expect": [
           "«Отправление» appears: carrier, locker and tracking number.",
@@ -3745,7 +3783,7 @@
           "Under the label on A4: the order number in big figures.",
           "The same band says where and to whom it goes and what is inside.",
           "The A6 sticker is the bare carrier label; those lines are not on it.",
-          "A Polish order has no locker size, and says why."
+          "Locker size is chosen only for SmartPosti and Unisend; other carriers pick the door themselves."
         ],
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
@@ -5424,48 +5462,48 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Рассылка уходит подписчикам на их языке",
+      "title": "Рассылка из картинок уходит подписчикам на их языке",
       "steps": [
-        "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
-        "В тексте письма нажать «Картинка», вставить адрес и заполнить «Куда ведёт картинка».",
-        "Написать название, тему и текст по-русски, добавить товар, «Сохранить».",
-        "Переключить на Eesti, написать тему и текст, «Сохранить».",
-        "Ввести свой адрес, «Отправить мне тест».",
+        "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», вписать название и тему.",
+        "«+ Картинка» — снять фото или выбрать из галереи; «Куда ведёт картинка» — найти и выбрать товар.",
+        "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную.",
+        "Стрелками ↑↓ поменять два блока местами и посмотреть «Как увидит покупатель» ниже.",
+        "Переключить на Eesti: тема, тексты и надпись кнопки; «Сохранить», свой адрес, «Отправить мне тест».",
         "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
       ],
       "expect": [
-        "Тест пришёл с пометкой [test] в теме и карточкой товара.",
-        "Карточка назвала число подписчиков по языкам до отправки.",
-        "Счётчик рос до «Отправлено N из N», письмо стало только для чтения.",
-        "Подписчик с эстонским языком получил эстонскую версию.",
-        "Внизу письма есть «Отписаться», и ссылка работает.",
+        "Фото загружается с процентами и встаёт в письмо — адрес картинки вводить не нужно.",
+        "«Как увидит покупатель» меняется сразу после правки, ещё до «Сохранить».",
+        "Тест пришёл с [test] в теме; каждая картинка и кнопка ведут куда выбрано.",
+        "Карточка назвала число подписчиков по языкам; счётчик дошёл до «Отправлено N из N».",
+        "Подписчик с эстонским языком получил эстонскую версию; внизу работает «Отписаться».",
         "В журнале есть строка «Рассылка «…»: отправлено N, ошибок 0»."
       ],
-      "why": "Одно письмо всем подписчикам — первый раз, когда галочка на кассе что-то значит; ошибка уйдёт сотням.",
+      "why": "Письмо собирается на телефоне из картинок, как у Aromatic 89. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
       "risk": "high",
       "writes": true,
       "en": {
-        "title": "The newsletter reaches subscribers in their language",
+        "title": "A newsletter of pictures reaches subscribers in their language",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
-          "In the letter press «Картинка», paste an address and fill in «Куда ведёт картинка».",
-          "Write a name, subject and text in Russian, add a product, «Сохранить».",
-          "Switch to Eesti, write the subject and text, «Сохранить».",
-          "Enter your address, «Отправить мне тест».",
+          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», write a name and a subject.",
+          "«+ Картинка» — take a photo or pick one from the gallery; «Куда ведёт картинка» — find and pick a product.",
+          "Another «+ Картинка» leading to a section, «+ Текст» with a couple of lines, «+ Кнопка» «В магазин» to the home page.",
+          "Swap two blocks with the ↑↓ arrows and look at «Как увидит покупатель» below.",
+          "Switch to Eesti: the subject, the texts and the button label; «Сохранить», your address, «Отправить мне тест».",
           "Press «Отправить N подписчикам», read the card, «Отправить»."
         ],
         "expect": [
-          "The test arrived with [test] in the subject and a product card.",
-          "The card named the subscriber count per language before sending.",
-          "The counter climbed to «Отправлено N из N», then the letter became read-only.",
-          "The Estonian-language subscriber got the Estonian version.",
-          "The letter ends with «Отписаться», and the link works.",
+          "The photo uploads with a percentage and lands in the letter — no picture address needed.",
+          "«Как увидит покупатель» changes right after each edit, before «Сохранить».",
+          "The test arrived with [test] in the subject; every picture and button goes where chosen.",
+          "The card named the subscribers per language; the counter reached «Отправлено N из N».",
+          "The Estonian-language subscriber got the Estonian version; «Отписаться» at the bottom works.",
           "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
         ],
-        "why": "One letter to every subscriber is the first time the checkout tick means something; a mistake goes to hundreds."
+        "why": "The letter is built on a phone out of pictures, like Aromatic 89's. One letter goes to every subscriber — a mistake goes to hundreds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-21T06:53:00.000Z"
+      "markedAt": "2026-09-23T13:22:36.184Z"
     },
     {
       "id": "mail-daily-limit",
@@ -6880,11 +6918,13 @@
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
         "Написать заголовок и пару абзацев, поставить обложку.",
         "Вставить в текст карточку товара кнопкой «Товар».",
+        "Кнопкой «Картинка» → «Загрузить картинку» вставить в текст фото с телефона.",
         "Нажать «Удалить» под обложкой, затем поставить её снова.",
         "Нажать «Опубликовать» и открыть блог в магазине."
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
+        "Фото с телефона встаёт в текст — ссылку на картинку искать не нужно.",
         "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
         "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
         "Статья видна в блоге магазина вместе с обложкой.",
@@ -6893,25 +6933,28 @@
       "why": "Неопубликованная статья не приводит из Google никого.",
       "risk": "low",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Writing and publishing an article",
         "steps": [
           "Open «Ещё» → «Блог» and press «+ Статья».",
           "Write a title and a couple of paragraphs, set a cover.",
           "Insert a product card into the text with the «Товар» button.",
+          "With «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
           "Press «Удалить» under the cover, then set it again.",
           "Press «Опубликовать» and open the blog in the shop."
         ],
         "expect": [
           "When a product is inserted the panel says which language it went into.",
+          "The phone's photo lands in the text — no picture link to find.",
           "With a cover you see three frames: the blog, the article and social.",
           "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
           "The post is visible in the shop's blog with its cover.",
           "The product card in the text opens the product itself."
         ],
         "why": "An article that did not publish brings nobody from Google."
-      }
+      },
+      "markedAt": "2026-09-23T13:22:36.184Z"
     },
     {
       "id": "blog-cover-frame",
@@ -8651,6 +8694,45 @@
         ],
         "why": "A notification can go missing. The money is then with Montonio while the order waits for payment and nobody hears about it."
       }
+    },
+    {
+      "id": "live-google-verified",
+      "area": "live",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "any",
+      "title": "Google признаёт сайт своим после переезда домена",
+      "steps": [
+        "После переключения rempireshop.com открыть главную и посмотреть исходный код страницы.",
+        "Найти в нём google-site-verification.",
+        "В Search Console открыть «Настройки» → «Подтверждение права собственности».",
+        "В Merchant Center открыть сведения о компании и найти сайт."
+      ],
+      "expect": [
+        "В коде главной три тега google-site-verification — те же, что были у Shopify.",
+        "Search Console: права подтверждены, тегом или записью DNS.",
+        "Merchant Center: сайт rempireshop.com подтверждён и заявлен, предупреждений нет."
+      ],
+      "why": "Без подтверждения Merchant Center снимает бесплатные показы товаров — около 175 переходов в месяц.",
+      "risk": "high",
+      "writes": false,
+      "en": {
+        "title": "Google still recognises the site after the domain move",
+        "steps": [
+          "After rempireshop.com is switched, open the home page and view its source.",
+          "Find google-site-verification in it.",
+          "In Search Console open «Settings» → «Ownership verification».",
+          "In Merchant Center open the business details and find the website."
+        ],
+        "expect": [
+          "The home page source has three google-site-verification tags — the same Shopify had.",
+          "Search Console: ownership verified, by tag or by DNS record.",
+          "Merchant Center: rempireshop.com verified and claimed, no warnings."
+        ],
+        "why": "Without verification Merchant Center drops the free product listings — about 175 clicks a month."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T13:19:35.546Z"
     }
   ]
 }
