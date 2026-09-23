@@ -1915,6 +1915,16 @@ button, a, summary, label { touch-action: manipulation; }
   border: 1px solid var(--rule); padding: 1px 6px;
 }
 .carrier__price { margin-left: auto; padding-left: 12px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+/* The price is the one thing on the card that must never leave it
+   (23.09.2026). Measured at 280 px: SmartPosti's mark is 91 px wide at 20 px
+   high, and with «SmartPosti» beside it the price ran 3 px past the card's
+   edge; Nova Post with «без возврата» ran 10 px past — at larger system text
+   sizes the same happens on an ordinary 360 px phone. So the price keeps its
+   width, the mark gives way first (scaled, never cropped — object-fit), and
+   the Nova Post tag may take two lines. Nothing changes where there is room. */
+.carrier--card .carrier__logo { flex: 0 1 auto; min-width: 28px; object-fit: contain; object-position: left center; }
+.carrier--card .carrier__tag { min-width: 0; white-space: normal; }
+.carrier--card .carrier__price { flex: none; }
 .carriers__note { margin: -6px 0 14px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
 .pointbtn {

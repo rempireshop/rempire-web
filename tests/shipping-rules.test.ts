@@ -434,12 +434,16 @@ describe("the rules the shop actually bills on", () => {
       expect(belowCostCells(parseShippingRules({}))).toEqual([]);
     });
 
-    it("lists several at once and stops naming them after six", () => {
+    /* It stopped after six with «и ещё N» until 23.09.2026 — and Ренат, who
+       had typed fourteen, could not see which the other twelve were. */
+    it("lists several at once, every one of them", () => {
       const many = belowCostCells(parseShippingRules({
         carriers: { dpd: { EE: 0.5, LV: 0.5, LT: 0.5, FI: 0.5 }, omniva: { EE: 0.5, LV: 0.5, LT: 0.5 } },
       }));
       expect(many).toHaveLength(7);
-      expect(belowCostMessage(many)).toContain("и ещё 1");
+      const said = belowCostMessage(many);
+      expect(said).not.toContain("и ещё");
+      expect(said.match(/при тарифе/g)).toHaveLength(7);
     });
   });
 

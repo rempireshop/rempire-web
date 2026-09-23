@@ -692,7 +692,8 @@ describe("«Настройки → Доставка»: an empty box stays empty"
 
   it("saves the stored row, never the merged table", () => {
     // the PUT and the journal both travel the row, holes included
-    expect(src).toContain('apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_STORED) })');
+    expect(src).toContain("var shipSent = cloneRules(SHIP_STORED);");
+    expect(src).toContain('apiSend(st, "PUT", shipBody(shipSent, a.belowCost))');
     expect(src).toContain('entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_STORED), full: true }');
     // «Вернуть значения по умолчанию» is the EMPTY row, not today's price list
     expect(src).toContain("rules: cloneRules(SHIP_STORED_DEFAULT), full: true, reset: true");

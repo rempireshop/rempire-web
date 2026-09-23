@@ -226,7 +226,10 @@ describe("srvSaved: «Доставка» keeps the server's refusal in sight", (
   it("puts the sentence in the page's error box, not only in a toast", async () => {
     const out = await run({ status: 400, body: { ok: false, error: "below_cost", detail: DETAIL } });
     expect(out.shipErr).toBe(DETAIL);
-    expect(out.toasts).toEqual([DETAIL]);
+    /* since 23.09.2026 the toast says only what happened: the sentence itself
+       was cut at three lines, and the box and the card list every cell
+       (tests/shipping-below-cost.test.ts) */
+    expect(out.toasts).toEqual(["Не сохранено: цена ниже тарифа Montonio"]);
   });
 
   it("leaves the box empty for a save that went through", async () => {

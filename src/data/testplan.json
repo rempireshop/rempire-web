@@ -973,7 +973,7 @@
         "why": "A buyer can claim back the gap between the page price and the till."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:20:01.825Z"
+      "markedAt": "2026-09-23T12:58:08.234Z"
     },
     {
       "id": "shop-locker-europe",
@@ -1815,7 +1815,56 @@
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:20:01.825Z"
+      "markedAt": "2026-09-23T12:58:08.234Z"
+    },
+    {
+      "id": "panel-delivery-below",
+      "area": "panel",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Цена доставки ниже Montonio",
+      "steps": [
+        "«Ещё» → «Настройки» → «Доставка и оплата».",
+        "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии.",
+        "Нажать «Сохранить» и прочитать карточку до конца.",
+        "Нажать «Сохранить всё равно».",
+        "В кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva, потом вернуться в панель.",
+        "Очистить оба поля, нажать «Сохранить» и подтвердить."
+      ],
+      "expect": [
+        "Карточка «Цена ниже тарифа Montonio» называет обе строки, ничего не обрезано.",
+        "Пока не подтвердили, рядом с «Сохранить» написано «Не сохранено».",
+        "После подтверждения: «Тарифы доставки сохранены» и «Сохранено ✓».",
+        "В кассе у Omniva стоит 1 €.",
+        "В панели в полях по-прежнему 1 и 2.",
+        "После очистки под полями снова цены Montonio: 3,19 € и 4,99 €."
+      ],
+      "why": "Цена ниже тарифа — ваше решение, но случайно его не принять: карточка спрашивает один раз.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "A delivery price below Montonio's",
+        "steps": [
+          "«Ещё» → «Настройки» → «Доставка и оплата».",
+          "Type 1 into Estonia's Omniva box and 2 into Latvia's.",
+          "Press «Сохранить» (save) and read the card to the end.",
+          "Press «Сохранить всё равно» (save anyway).",
+          "At the checkout, with a cart under 59 €, pick Estonia, «Пакомат» and Omniva, then go back to the panel.",
+          "Clear both boxes, press «Сохранить» and confirm."
+        ],
+        "expect": [
+          "The «Цена ниже тарифа Montonio» card names both rows, nothing cut off.",
+          "Until you confirm, «Не сохранено» stands next to «Сохранить».",
+          "After confirming: «Тарифы доставки сохранены» and «Сохранено ✓».",
+          "At the checkout Omniva costs 1 €.",
+          "Back in the panel the boxes still hold 1 and 2.",
+          "After clearing, Montonio's prices are under the boxes again: 3,19 € and 4,99 €."
+        ],
+        "why": "A price below the rate is your call, but never by accident: the card asks once."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T12:58:08.234Z"
     },
     {
       "id": "panel-carton",

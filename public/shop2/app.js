@@ -2760,6 +2760,14 @@
       "Новые цены покупатели увидят сразу при оформлении.":
         "Uusi hindu näevad ostjad kohe tellimuse vormistamisel.",
       "Тарифы доставки сохранены": "Tarnetariifid salvestatud",
+      // a delivery price under Montonio's: the card that asks, and the refusal's box
+      "Цена ниже тарифа Montonio": "Hind on alla Montonio tariifi",
+      "Ваша цена, в скобках — цена Montonio:": "Teie hind, sulgudes Montonio hind:",
+      "Разницу до тарифа магазин доплатит сам.": "Vahe tariifini maksab pood ise juurde.",
+      "Сохранить всё равно": "Salvesta ikkagi",
+      "Не сохранено: цена ниже тарифа Montonio": "Salvestamata: hind on alla Montonio tariifi",
+      "Поднимите цену, очистите поле или нажмите «Сохранить» и подтвердите «Сохранить всё равно».":
+        "Tõstke hinda, tühjendage väli või vajutage «Salvesta» ja kinnitage «Salvesta ikkagi».",
       "Хотя бы один номинал должен остаться": "Vähemalt üks nimiväärtus peab alles jääma",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
         "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera",
@@ -5683,6 +5691,14 @@
       "Новые цены покупатели увидят сразу при оформлении.":
         "Customers see the new prices at checkout straight away.",
       "Тарифы доставки сохранены": "Delivery tariffs saved",
+      // a delivery price under Montonio's: the card that asks, and the refusal's box
+      "Цена ниже тарифа Montonio": "Price below Montonio's rate",
+      "Ваша цена, в скобках — цена Montonio:": "Your price, Montonio's in brackets:",
+      "Разницу до тарифа магазин доплатит сам.": "The shop pays the difference to the rate itself.",
+      "Сохранить всё равно": "Save anyway",
+      "Не сохранено: цена ниже тарифа Montonio": "Not saved: price below Montonio's rate",
+      "Поднимите цену, очистите поле или нажмите «Сохранить» и подтвердите «Сохранить всё равно».":
+        "Raise the price, clear the box, or press «Save» and confirm «Save anyway».",
       "Хотя бы один номинал должен остаться": "At least one amount has to stay",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
         "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera",
@@ -8856,6 +8872,8 @@
     // checkout-gaps: the delivery-price table and the promo-code editor
     shipDraft: null,    // working copy of settings.shipping_rules while editing
     shipErr: "",
+    shipLow: null,         // the cells a refused save named (below_cost), listed in full under shipErr
+    shipSaving: false,     // a tariff PUT is out — the bar says «Сохраняем…», not «Сохранено ✓»
     shipLiveRates: null,   // integration: {EE:[...], LV:[...], ...} once loadShipLiveRates() lands
     shipEuOpen: false,     // «Цены по странам Европы» — kept across a re-render so a country switch does not close it
     admPromos: null,    // admin tab «Промокоды»: [promo] once loaded
@@ -23710,6 +23728,14 @@
   function admSetBarInnerHTML(page) {
     var cards = ADM_SET_CARDS[page] || [];
     if (!cards.length) return "";
+    /* The delivery prices are applied to the screen before the server has
+       answered, so between the tap and the answer there is no draft and
+       nothing is saved yet either: neither «Изменений нет» nor «Сохранено ✓»
+       is true. The answer decides which word comes next (srvPush). */
+    if (page === "delivery" && S.shipSaving) {
+      return '<span class="adm-savebar__note" data-setnote>Сохраняем…</span>' +
+        '<button class="adm-btn adm-savebar__main adm-btn--ghost" data-admshipsave disabled>Сохранить</button>';
+    }
     var dirty = admSetDirtyCards(page);
     var saved = !dirty.length && S.admSetSaved === page;
     var attr = ADM_SET_SAVE_ATTR[(dirty.length ? dirty[0] : cards[0])[0]];
@@ -23791,6 +23817,10 @@
          three tables actually billed; this one needs a sentence. */
       '<p class="adm-notice">Пустое поле — цена Montonio, она написана под полем. ' +
         "Впишете своё число — покупатель заплатит его.</p>" +
+      /* A refused save, above the table rather than under the preview at the
+         bottom: on a phone that was a screen and a half of scrolling away
+         from the save button, and nobody found it (23.09.2026). */
+      admShipErrHTML() +
       '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--head"><span>Страна</span>' +
         SHIP_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
         "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
@@ -23820,7 +23850,6 @@
       '<p class="adm-hint" style="margin-top:4px">Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. ' +
         "При оформлении у каждой точки написано, какая она; цена одна и та же.</p>" +
       admShipPreviewHTML() +
-      (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       // «Сохранить» is the page's bar (admSetBarHTML); these two are the ways
       // back — one to Montonio's prices, one to the numbers the shop shipped with
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -26326,6 +26355,103 @@
   function shipDirty() {
     if (!S.shipDraft) return false;
     try { return shipSig(S.shipDraft) !== shipSig(SHIP_STORED); } catch (e) { return true; }
+  }
+  /* ---- a price under Montonio's: asked about, not refused (23.09.2026) ----
+     Ренат, 23.09.2026: «I did this change, but the text in the message cannot
+     be seen to the end», and one check later: «Now when I go back, the prices
+     are not there anymore.» His save never happened. The server refused it
+     (below_cost), the panel had already said «Тарифы доставки сохранены», and
+     the refusal came as a three-line toast cut after six cells and «и ещё 12».
+
+     A delivery cheaper than Montonio's price is a decision the owner may make
+     on purpose — a promotion, a round number — the way «Бесплатно от» always
+     was. So «Сохранить» asks instead of failing: every such cell, in full, on
+     the confirm card, and «Сохранить всё равно» sends the table with
+     acceptBelowCost. A save that did not ask (an undo, the assistant's card)
+     is still refused by the server, and that refusal opens this same card
+     (shipLowAsk) rather than a toast.
+
+     Mirrors belowCostCells() in src/lib/shipping.ts over the stored row:
+     every carrier cell against that carrier's own price, the courier against
+     the courier price, nothing else. tests/shipping-below-cost.test.ts runs
+     the two side by side. */
+  function shipLowCells(rules) {
+    var out = [];
+    var car = (rules && rules.carriers) || {};
+    Object.keys(car).forEach(function (c) {
+      var row = car[c] || {};
+      var chip = (MONTONIO_PRICE.chips.parcel || {})[c] || {};
+      Object.keys(row).forEach(function (k) {
+        var n = row[k], m = typeof chip[k] === "number" ? chip[k] : (MONTONIO_PRICE.carriers[c] || {})[k];
+        if (typeof n === "number" && typeof m === "number" && n < m) {
+          out.push({ carrier: c, country: k, method: "parcel", charged: n, cost: m });
+        }
+      });
+    });
+    var cour = (rules && rules.methods && rules.methods.courier) || {};
+    Object.keys(cour).forEach(function (k) {
+      var n = cour[k], m = MONTONIO_PRICE.courier[k];
+      if (typeof n === "number" && m && n < m[0]) {
+        out.push({ carrier: "", country: k, method: "courier", charged: n, cost: m[0] });
+      }
+    });
+    return out;
+  }
+  /** «Эстония» for a row of the table, the browser's own name for a country in the fold. */
+  function shipPlaceName(iso) {
+    for (var i = 0; i < SHIP_ROWS.length; i++) if (SHIP_ROWS[i][0] === iso) return SHIP_ROWS[i][1];
+    return countryName(iso);
+  }
+  /** One cell, the way the card and the page list it: the column, the row, his
+      price and Montonio's. Pieces joined by « · », each translated on its own
+      (admPiecesHTML), so no sentence has to be glued around a country name. */
+  function shipLowLine(c) {
+    return (c.method === "courier" ? "Курьер" : (CARRIER_NAMES[c.carrier] || c.carrier)) + " · " +
+      shipPlaceName(c.country) + " · " + eur(c.charged) + " (Montonio " + eur(c.cost) + ")";
+  }
+  /** The confirm card for a table with cells under Montonio's price. */
+  function shipLowAction(rules, low) {
+    return {
+      type: "set_shipping_rules", rules: rules, full: true, overlay: true, belowCost: true,
+      title: "Цена ниже тарифа Montonio",
+      detail: "Ваша цена, в скобках — цена Montonio:\n" + low.map(shipLowLine).join("\n") +
+        "\nРазницу до тарифа магазин доплатит сам.",
+      ok: "Сохранить всё равно"
+    };
+  }
+  /** «Сохранить» on «Доставка и оплата»: the ordinary card, or the one above. */
+  function shipSaveAction(rules) {
+    var low = shipLowCells(rules);
+    if (low.length) return shipLowAction(rules, low);
+    return {
+      type: "set_shipping_rules", rules: rules, full: true, overlay: true,
+      title: "Изменить тарифы доставки?",
+      detail: "Новые цены покупатели увидят сразу при оформлении."
+    };
+  }
+  /** The server refused a table that did not ask (below_cost): the same card,
+      with the server's own list of cells, so the way through is one tap and
+      not a hunt for which box it meant. Never over a card already open. */
+  function shipLowAsk(r, sent) {
+    if (!r || !r.body || r.body.error !== "below_cost" || pendingAction) return;
+    var low = Array.isArray(r.body.cells) && r.body.cells.length ? r.body.cells : shipLowCells(sent);
+    if (!low.length) return;
+    pendingAction = shipLowAction(sent, low);
+    render(); refocus("[data-admapply]");
+  }
+  /** The page's own copy of a refusal, beside the table: every cell, never cut. */
+  function admShipErrHTML() {
+    if (!S.shipErr) return "";
+    if (!S.shipLow || !S.shipLow.length) {
+      return '<div class="adm-err adm-err--block" role="alert">' + esc(S.shipErr) + "</div>";
+    }
+    return '<div class="adm-err adm-err--block" role="alert">' +
+      "<div>Не сохранено: цена ниже тарифа Montonio</div>" +
+      '<ul class="adm-err__list">' + S.shipLow.map(function (c) {
+        return "<li>" + admPiecesHTML(shipLowLine(c)) + "</li>";
+      }).join("") + "</ul>" +
+      "<div>Поднимите цену, очистите поле или нажмите «Сохранить» и подтвердите «Сохранить всё равно».</div>" +
+      "</div>";
   }
   function shipNum(raw, max) {
     var s = String(raw == null ? "" : raw).trim().replace(",", ".");
@@ -32940,9 +33066,17 @@
     /* setShipRules() keeps the row itself in SHIP_STORED — that row, and not
        the merged table it builds, is what «Настройки → Доставка» shows and
        what the next save sends back (r22). */
+    /* …but prices the owner has typed and not saved stay in their boxes. This
+       answer also lands when the shop is looked at again — a tab brought
+       back, the storefront opened to check the checkout — and dropping the
+       draft here took his numbers out of the table while «Не сохранено» was
+       the last thing he had read (Ренат, 23.09.2026: «when I go back, the
+       prices are not there anymore»). Only a draft that differs is kept;
+       an untouched one is simply rebuilt from the new row. */
+    var keepShipDraft = shipDirty();
     var srvRules = feedShipRules(s);
     if (srvRules) setShipRules(srvRules);
-    S.shipDraft = null;
+    if (!keepShipDraft) S.shipDraft = null;
   }
   /** The tariff row inside a feed answer, or null when the shop has none.
       Whatever the key is called, and `{}` is «none» — see adoptServer(). */
@@ -33029,9 +33163,15 @@
            has just scrolled a table of twenty-five rows — the one place it is
            of any use is beside that table. S.shipErr is the box that was built
            for it (shipRulesCard) and had, until 17.09.2026, no writer at all:
-           it was only ever cleared, so the box could never appear. */
+           it was only ever cleared, so the box could never appear.
+           …and the toast is no longer the sentence itself (23.09.2026): three
+           lines of a toast cut it after the sixth cell, in Russian whatever
+           the panel's language. The box lists every cell from `cells`, and
+           shipLowAsk() puts the same list on a card with «Сохранить всё
+           равно»; the toast only says what happened. */
         S.shipErr = String(r.body.detail);
-        toast(r.body.detail); render(); return r;
+        S.shipLow = Array.isArray(r.body.cells) ? r.body.cells : null;
+        toast("Не сохранено: цена ниже тарифа Montonio"); render(); return r;
       }
       if (!(r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить на сервере — попробуйте ещё раз");
       return r;
@@ -33065,6 +33205,23 @@
       the journal line that claimed the save is dropped. The toast is already
       the server's own sentence — it names the carrier, the country and both
       numbers, and now it names a box that is still on screen. */
+  /** The PUT body. «Сохранить всё равно» — the owner saw every cell under
+      Montonio's price and confirmed — rides beside the settings, never inside
+      them: the route takes `acceptBelowCost` off before it reads the rest. */
+  function shipBody(rules, belowCost) {
+    return belowCost ? { settings: { shipping_rules: rules }, acceptBelowCost: true } : { shipping_rules: rules };
+  }
+  function shipSavedText(a) { return a && a.reset ? "Тарифы снова стандартные" : "Тарифы доставки сохранены"; }
+  /** The server took the table: now, and not before, the toast and «Сохранено ✓».
+      An undo (no journal entry) has its own «Отменено» toast already. */
+  function shipSavedOk(a, entry) {
+    S.shipErr = ""; S.shipLow = null;
+    if (entry) {
+      toast(shipSavedText(a), entry);
+      if (S.admSetPage === "delivery") S.admSetSaved = "delivery";
+    }
+    render();
+  }
   function shipRulesRefused(back) {
     if (!back) return;
     setShipRules(back.was);
@@ -33234,11 +33391,16 @@
     else if (a.type === "set_shipping_rules") {
       // the STORED row, not the merged table: a cell the owner left empty is
       // absent from it and goes on following Montonio's tariff (r22)
-      srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_STORED) })).then(function (r) {
+      var shipSent = cloneRules(SHIP_STORED);
+      S.shipSaving = true;
+      srvSaved(apiSend(st, "PUT", shipBody(shipSent, a.belowCost))).then(function (r) {
+        S.shipSaving = false;
         // anything but a 200/ok — the below_cost refusal, a 503, no answer at
         // all: the panel must not go on showing a table the shop is not running
-        if (r && r.status === 200 && r.body && r.body.ok) return;
+        if (r && r.status === 200 && r.body && r.body.ok) { shipSavedOk(a, entry); return; }
         shipRulesRefused(shipBack);
+        if (!shipBack) render();   // an undo has nothing to roll back, but the bar still says «Сохраняем…»
+        shipLowAsk(r, shipSent);
       });
     }
     else if (a.type === "create_promo") {
@@ -34725,6 +34887,10 @@
          «Вернуть» has to put back the row the shop had — cells and holes —
          and a merged table put back as a row would fill every hole in it. */
       entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_STORED), full: true };
+      /* The row being replaced is one the server took. If it sits under
+         Montonio's price, that was confirmed («Сохранить всё равно») when it
+         was saved, so «Отменить» putting it back does not ask a second time. */
+      if (shipLowCells(SHIP_STORED).length) entry.prev.belowCost = true;
       var shipWas = cloneRules(SHIP_STORED);
       // a partial patch (the assistant's) is merged INTO the stored row, so
       // that one is a row too and never a merged table wearing a row's name
@@ -38880,9 +39046,15 @@
         /* «Настройки → Доставка и оплата»: the tariff table names itself in
            the toast, and the journal entry it just wrote is what «Отменить»
            takes back. */
+        /* …once the SERVER has said so (23.09.2026). This toast used to fire
+           here, before the PUT had answered — and when the answer was a
+           refusal the owner had already read «Тарифы доставки сохранены»
+           about prices the shop never took. srvPush() says it on a 200, and
+           the bar reads «Сохраняем…» until then. Without a server (the
+           demo) the apply is the whole save, so it is said now. */
         else if (pa.type === "set_shipping_rules") {
           var shEntry = demoApply(pa);
-          toast(pa.reset ? "Тарифы снова стандартные" : "Тарифы доставки сохранены", shEntry);
+          if (!SRV.admin) toast(shipSavedText(pa), shEntry);
         }
         // «Изменить статус вручную»: confirmed — one PATCH, no journal line
         else if (pa.type === "order_manual") { srvOrderPatch(pa.id, { status: pa.value }); }
@@ -38913,7 +39085,8 @@
         }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         // the settings bar says «Сохранено ✓» for the page whose card just went through
-        if (pa.type === "set_hero" || pa.type === "set_content" || pa.type === "set_pricing" || pa.type === "set_shipping_rules") {
+        if (pa.type === "set_hero" || pa.type === "set_content" || pa.type === "set_pricing" ||
+            (pa.type === "set_shipping_rules" && !SRV.admin)) {
           S.admSetSaved = S.admSetPage || "";
         }
         render();
@@ -39183,12 +39356,10 @@
     /* A delivery price is money the shopper is charged, so since phase 3 it
        goes through the confirm card like shipping an order or cancelling one
        — README § State, «any change that affects the shop or money». */
+    /* …and a price under Montonio's is listed on that card, every cell of it,
+       with «Сохранить всё равно» — see shipLowCells(). */
     if (d.admshipsave !== undefined) {
-      pendingAction = {
-        type: "set_shipping_rules", rules: cloneRules(shipDraft()), full: true, overlay: true,
-        title: "Изменить тарифы доставки?",
-        detail: "Новые цены покупатели увидят сразу при оформлении."
-      };
+      pendingAction = shipSaveAction(cloneRules(shipDraft()));
       render(); refocus("[data-admapply]"); return;
     }
     /* «Доставляем сюда» — a draft change like every price box beside it, so
