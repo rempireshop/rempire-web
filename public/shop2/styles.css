@@ -1044,16 +1044,6 @@ body:has(.stickybar) .ftr {
 .pdp__buy { display: flex; gap: 12px; align-items: center; margin: 18px 0; }
 .pdp__add { flex: 1; }
 .pdp__alt { text-align: center; margin-bottom: 20px; }
-/* «Купить за … с доставкой»: what is bought, where it goes and the total,
-   right above the button that orders it (expressHTML in app.js). The rows are
-   the checkout summary's own. */
-.pdp__exsum { display: grid; gap: 8px; border: 1px solid var(--rule); padding: 12px 14px; margin: 0 0 10px; }
-.pdp__exsum .cosum__row { gap: 12px; }
-.pdp__exsum .cosum__row > span:first-child { min-width: 0; overflow-wrap: anywhere; }
-.pdp__exsum .cosum__row > .num { flex-shrink: 0; }
-.pdp__exsum .err { margin: 0; }
-.pdp__expt { color: var(--muted); }
-.pdp__legal { text-align: center; margin: -2px 0 10px; }
 .pdp__ship { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
 
 .stepper { display: inline-flex; border: 1px solid var(--ink); flex-shrink: 0; }

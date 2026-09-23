@@ -33,6 +33,13 @@ test.beforeEach(async ({}, testInfo) => {
 });
 
 /** A 1×1 PNG — the upload route is stubbed, so only the picker's contract matters. */
+/* «Как увидит покупатель» is an <iframe sandbox> without allow-scripts, and the
+   letter it shows carries no script at all. Playwright itself injects its
+   helpers into every frame, and Chromium refuses them in a sandboxed one with
+   «Blocked script execution in 'about:srcdoc'…» — a line about the test
+   harness, not the shop, so it and nothing else is forgiven here. */
+const SANDBOXED_PREVIEW = /^Blocked script execution in 'about:(srcdoc|blank)' because the document's frame is sandboxed/;
+
 const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
   "base64",
@@ -107,6 +114,7 @@ test.describe("admin — newsletter", () => {
   test("a letter is built out of blocks in two languages, tested, sent to the subscribers and read back", async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     const w = watch(page);
+    w.allow.push(SANDBOXED_PREVIEW);
     const mobile = testInfo.project.name === "mobile";
     const tag = Date.now().toString().slice(-6);
     const ruReader = freshEmail("news-ru");
@@ -263,6 +271,7 @@ test.describe("admin — newsletter", () => {
 
   test("a block can be deleted and brought back; a letter with nothing in it is refused, and a draft can be thrown away", async ({ page }, testInfo) => {
     const w = watch(page);
+    w.allow.push(SANDBOXED_PREVIEW);
     await stubMedia(page);
     await loginAsAdmin(page);
     await adminSection(page, "promos", "news");
