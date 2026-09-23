@@ -202,6 +202,15 @@ sandbox could not tell us.
 
 ### 3.1 Before any customer
 
+- [ ] **Before the keys even reach Vercel**, ask the live account from this
+      machine — GET only, no order, no money (added 23.09.2026):
+      `node --env-file=.env.montonio-live tools/montonio-live-check.mjs`, then
+      `tools/fetch-montonio-tariffs.mjs --dry` with the same file. It reads the
+      enabled payments and EUR banks per country, compares every carrier the
+      checkout offers (lockers and courier, per country) with what the account
+      can book, and checks the parcel webhook. On 23.09 the Partner System showed
+      **Unisend off** although the checkout offers it — the first thing this
+      check is expected to name.
 - [ ] **Open «Подключения» in the panel.** Its Montonio rows are fed by
       `GET /api/admin/montonio/`, which is on this branch; the panel half is a
       patch handed to Dim separately, because `public/shop2/app.js` was owned

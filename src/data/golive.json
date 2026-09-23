@@ -143,14 +143,14 @@
         "dim",
         "renat"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "outside": "Montonio",
       "title": "Завести аккаунт Montonio до конца и получить боевые ключи",
-      "detail": "Montonio, 23.09.2026: Rempire Store OÜ активирована, боевые ключи доступны по их инструкции. Осталось двое: Ренат заводит Диме в Montonio аккаунт с ролью «Juhataja» — так советует сам Montonio, чтобы Дим видел и заказы на их стороне, — и Дим забирает ключи. От этого пункта тянется половина списка.",
+      "detail": "Готово 23.09.2026: Ренат завёл Диме аккаунт с ролью «Juhataja», Дим вошёл и забрал боевые ключи. Ключи живут в менеджере паролей — не в чате, не в Telegram, не в письме. В Vercel они попадают только в день живой проверки, вместе с флагом окружения (пункт ниже).",
       "en": {
         "title": "Finish the Montonio account and obtain live API keys",
-        "detail": "Montonio, 23.09.2026: Rempire Store OÜ is activated and the live keys are available through their guide. Two steps left: Renat creates a «Juhataja»-role account for Dim — Montonio's own advice, so Dim sees the orders on their side too — and Dim takes the keys. Half of this list hangs off it."
+        "detail": "Done 23.09.2026: Renat created a «Juhataja»-role account for Dim, Dim signed in and took the live keys. The keys live in a password manager — not in a chat, Telegram or an e-mail. They go into Vercel only on the day of the live check, together with the environment flag (the item below)."
       }
     },
     {
@@ -159,17 +159,74 @@
       "who": [
         "renat"
       ],
-      "status": "todo",
+      "status": "doing",
       "blocking": true,
       "outside": "Montonio",
       "needs": [
         "montonio-keys"
       ],
       "title": "Включить «Refundable bank payments» в боевом режиме",
-      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). Цена за платёж в Starter не меняется — 0,20 € и так и так (Montonio, 23.09.2026). Меняется только выплата: обычный банковский платёж приходит на счёт сразу и с именем клиента, а с возвратами — на следующий рабочий день одной суммой от имени Rempire Store OÜ. Бухгалтеру: такие поступления сверять по отчёту Montonio, а не по выписке банка.",
+      "detail": "23.09.2026: заявка подана, в панели Montonio продукт стоит «In review». Живой возврат ждёт, пока там не станет «Completed». Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). Цена за платёж в Starter не меняется — 0,20 € и так и так (Montonio, 23.09.2026). Меняется только выплата: обычный банковский платёж приходит на счёт сразу и с именем клиента, а с возвратами — на следующий рабочий день одной суммой от имени Rempire Store OÜ. Бухгалтеру: такие поступления сверять по отчёту Montonio, а не по выписке банка.",
       "en": {
         "title": "Activate «Refundable bank payments» in live mode",
-        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). The per-payment price on Starter does not change — 0.20 € either way (Montonio, 23.09.2026). Only the payout changes: a plain bank payment reaches the account at once and under the customer's name; a refundable one arrives the next business day as one lump sum in the name of Rempire Store OÜ. For the accountant: reconcile those against Montonio's report, not the bank statement."
+        "detail": "23.09.2026: requested — the Montonio panel shows the product «In review». The live refund waits until it says «Completed». A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). The per-payment price on Starter does not change — 0.20 € either way (Montonio, 23.09.2026). Only the payout changes: a plain bank payment reaches the account at once and under the customer's name; a refundable one arrives the next business day as one lump sum in the name of Rempire Store OÜ. For the accountant: reconcile those against Montonio's report, not the bank statement."
+      }
+    },
+    {
+      "id": "montonio-setup",
+      "area": "montonio",
+      "who": [
+        "dim"
+      ],
+      "status": "doing",
+      "blocking": true,
+      "outside": "Montonio",
+      "needs": [
+        "montonio-keys"
+      ],
+      "title": "Настроить боевой кабинет Montonio",
+      "detail": "Смотрено 23.09.2026. Оплаты: банки и карты готовы, возвраты — «In review». Payment links (10 €/мес) и BLIK (только злотые) не нужны: магазин их не использует. Доставка: Omniva, DPD, SmartPosti и International Shipping (Nova Post) включены; Unisend выключен, а магазин его предлагает — включить: сдача в пакомат, размер по умолчанию S, SMS-код возврата включён. Коды возврата включить и у Omniva и DPD. Из дополнений полезно «Parcel delay and risk notifications» — о посылке, которую не забирают; страница и письма отслеживания не нужны: письма шлёт магазин. Адрес отправителя — Mardi 1, туда же приходят возвраты.",
+      "en": {
+        "title": "Set up the live Montonio account",
+        "detail": "Looked at 23.09.2026. Payments: bank links and cards ready, refunds «In review». Payment links (10 €/month) and BLIK (zloty only) are not needed: the shop uses neither. Shipping: Omniva, DPD, SmartPosti and International Shipping (Nova Post) are on; Unisend is off although the shop offers it — turn it on: parcel-machine hand-over, default size S, SMS return code on. Turn return codes on for Omniva and DPD too. Of the add-ons, «Parcel delay and risk notifications» is worth having — it flags a parcel nobody collects; the tracking page and tracking e-mails are not needed: the shop sends its own letters. Sender address is Mardi 1, which is also where returns come back."
+      }
+    },
+    {
+      "id": "montonio-live-check",
+      "area": "montonio",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "needs": [
+        "montonio-keys"
+      ],
+      "title": "Проверить боевой аккаунт без денег",
+      "detail": "tools/montonio-live-check.mjs — только чтение: ни заказа, ни посылки. Дим кладёт боевую пару в файл .env.montonio-live (git его не видит), затем: node --env-file=.env.montonio-live tools/montonio-live-check.mjs. Ответ: какие оплаты и банки включены по странам, может ли аккаунт оформить каждого перевозчика, которого предлагает касса, и зарегистрирован ли вебхук посылок. Цены — тот же файл и tools/fetch-montonio-tariffs.mjs --dry. Потом файл удалить.",
+      "en": {
+        "title": "Check the live account without money",
+        "detail": "tools/montonio-live-check.mjs — read-only: no order, no parcel. Dim puts the live pair in .env.montonio-live (git ignores it), then: node --env-file=.env.montonio-live tools/montonio-live-check.mjs. It answers which payments and banks are on per country, whether the account can book every carrier the checkout offers, and whether the parcel webhook is registered. Prices: the same file with tools/fetch-montonio-tariffs.mjs --dry. Then delete the file."
+      }
+    },
+    {
+      "id": "shipping-webhook",
+      "area": "montonio",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Montonio",
+      "needs": [
+        "montonio-keys"
+      ],
+      "title": "Зарегистрировать вебхук посылок",
+      "detail": "Кабинет Montonio → Shipping → Webhooks: https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. События: shipment.registered, shipment.registrationFailed, shipment.statusUpdated. Без него посылки доходят, а заказы сами не закрываются. При переезде домена перевесить на rempireshop.com.",
+      "en": {
+        "title": "Register the parcel webhook",
+        "detail": "Montonio panel → Shipping → Webhooks: https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. Events: shipment.registered, shipment.registrationFailed, shipment.statusUpdated. Without it parcels arrive and orders never close by themselves. Re-point it at rempireshop.com when the domain moves."
       }
     },
     {
@@ -584,10 +641,10 @@
         "montonio-keys"
       ],
       "title": "Поставить боевые ключи Montonio и флаг окружения — вместе",
-      "detail": "Половина этой пары хуже, чем ни одной.",
+      "detail": "Половина этой пары хуже, чем ни одной. В Vercel → Production: MONTONIO_ACCESS_KEY и MONTONIO_SECRET_KEY (боевая пара) и MONTONIO_ENV=live, потом пересобрать — без пересборки Vercel переменные не видит. Песочную пару сохранить в менеджере паролей: она ещё нужна для проверок. И до этого шага закончить в /test всё, что платит в песочнице: после него каждый заказ на стенде — настоящие деньги.",
       "en": {
         "title": "Set the live Montonio keys and the environment flag together",
-        "detail": "Half of this pair is worse than neither."
+        "detail": "Half of this pair is worse than neither. In Vercel → Production: MONTONIO_ACCESS_KEY and MONTONIO_SECRET_KEY (the live pair) and MONTONIO_ENV=live, then redeploy — Vercel does not see a variable without a rebuild. Keep the sandbox pair in the password manager; later checks still need it. And before this step, finish every /test check that pays in the sandbox: after it, every order on staging is real money."
       }
     },
     {
@@ -598,10 +655,10 @@
       ],
       "status": "todo",
       "title": "Поставить PUBLIC_BASE_URL",
-      "detail": "Без него страницы пересобираются с боевыми адресами, но с «noindex, nofollow» — сегодня они именно такие, а robots.txt стендовый.",
+      "detail": "Без него страницы пересобираются с боевыми адресами, но с «noindex, nofollow» — сегодня они именно такие, а robots.txt стендовый. Но не раньше переезда домена: пока боевые ключи проверяются на diipsolutions, PUBLIC_BASE_URL не ставить. Со значением rempireshop.com, который ещё на Shopify, Montonio отправит подтверждения оплаты туда — и заказы никогда не станут оплаченными.",
       "en": {
         "title": "Set `PUBLIC_BASE_URL`",
-        "detail": "Without it the prerender writes live URLs carrying `noindex` — the pages say «noindex, nofollow» today and `robots.txt` is the staging policy."
+        "detail": "Without it the prerender writes live URLs carrying `noindex` — the pages say «noindex, nofollow» today and `robots.txt` is the staging policy. But not before the domain moves: while the live keys are being tried on diipsolutions, leave PUBLIC_BASE_URL unset. Set to rempireshop.com while that domain is still on Shopify, it sends Montonio's payment confirmations to Shopify — and orders never turn paid."
       }
     },
     {

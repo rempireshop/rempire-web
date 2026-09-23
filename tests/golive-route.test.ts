@@ -205,8 +205,11 @@ describe("gate — «all items done in the diipsolution environment» before the
 
 describe("holdUps — the dependencies, named", () => {
   it("lists a dependency that is not done and drops it once it is", () => {
-    const withDep = PLAN.items.find((i) => (i.needs || []).length > 0)!;
-    const dep = withDep.needs![0];
+    /* a dependency the file itself already calls done is no hold-up — pick
+       one that is still open (montonio-keys closed on 23.09.2026) */
+    const open = (id: string) => PLAN.items.find((i) => i.id === id)?.status !== "done";
+    const withDep = PLAN.items.find((i) => (i.needs || []).some(open))!;
+    const dep = withDep.needs!.find(open)!;
     expect(holdUps(withDep, {})).toContain(dep);
 
     const done: StateMap = {};
