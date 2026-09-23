@@ -15177,6 +15177,9 @@
     });
     var dirty = document.querySelector("[data-blogdirty]");
     if (dirty) dirty.hidden = !blogDirty();
+    // the card's Save buttons carry the state too — they are this editor's bar
+    var saves = document.querySelectorAll("[data-admblogsave]");
+    for (var si = 0; si < saves.length; si++) admDirtyMark(saves[si], blogDirty());
     // …and the «Публикация» card's own line (blogPubStateHTML), which sits
     // beside the buttons it is about
     var pub = document.querySelector("[data-blogpubstate]");
@@ -15187,8 +15190,9 @@
       says so instead of a «Сохранено ✓» it has not earned. */
   function blogPubStateHTML(d, busy) {
     if (busy) return "<span>Сохраняем…</span>";
-    if (!d.id) return '<span class="adm-hint--warn">Ещё не сохранено</span>';
-    if (blogDirty()) return '<span class="adm-hint--warn">Есть несохранённые изменения</span>';
+    // the solid chip the save bars use for the same state (admDirtyNoteHTML)
+    if (!d.id) return '<span class="adm-dirtyword">Ещё не сохранено</span>';
+    if (blogDirty()) return '<span class="adm-dirtyword">Есть несохранённые изменения</span>';
     return '<span class="adm-hint--ok">Сохранено ✓</span>';
   }
 
@@ -22196,8 +22200,7 @@
         return mailLangWords(tpl, code);
       }, LANG_BAR_NOTE) +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
-      '<p class="adm-hint" data-maildirty' + (mailDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-maildirty", mailDirty()) +
       MAIL_FIELDS.map(function (f) { return admMailFieldHTML(tpl, lang, f); }).join("") +
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</p>' +
       '<label class="adm-field">Адрес для теста' +
@@ -22208,7 +22211,7 @@
          sticky one, so «Сохранить» is above the nav on a phone wherever the
          owner is in a long letter, with the same width the other forms have */
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
-      '<div class="adm-savebar" id="mailacts">' + admMailActsHTML() + "</div>";
+      '<div class="adm-savebar' + admDirtyCls(mailDirty()) + '" id="mailacts">' + admMailActsHTML() + "</div>";
     return admBackHTML("data-mailback", "Все письма") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
@@ -22376,8 +22379,7 @@
       admLangBarHTML("data-admbloglang", LANGS, L, "Язык статьи", function (code) {
         return blogLangWords(d, code);
       }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU) +
-      '<p class="adm-hint adm-hint--warn" data-blogdirty' + (blogDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-blogdirty", blogDirty()) +
       '<input class="adm-title-in" data-blogf="title" data-blogl="' + L + '" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
       admBlogCoverHTML(d) +
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
@@ -22450,7 +22452,7 @@
            blogPaintState() on every keystroke, so it never lags the text */
         '<p class="adm-hint" data-blogpubstate style="margin:0">' + blogPubStateHTML(d, busy) + "</p>" +
         (d.status === "published"
-          ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
+          ? '<button class="adm-btn' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
             '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
           /* One language still empty: the same inline question «Удалить
              статью» asks, in the same card, replacing the button that asked
@@ -22463,7 +22465,7 @@
               '<button class="adm-btn" data-admblogpublishyes' + (busy ? " disabled" : "") + ">Опубликовать всё равно</button>" +
               '<button class="adm-link adm-link--muted" data-admblogpublishno>Отмена</button>'
             : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
-            '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
+            '<button class="adm-btn adm-btn--ghost' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
         (d.id
           ? (S.adminBlogConfirmDelete
             ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Она исчезнет из списка и из ' +
@@ -23108,6 +23110,7 @@
     // the bar follows the draft too: ink «Сохранить», «Отменить правки», the status word
     var acts = document.getElementById("newsacts");
     if (acts) { acts.innerHTML = admNewsActsHTML(); translateTree(acts); }
+    admDirtyMark(acts, newsDirty());
   }
   /* ---- the editor ---------------------------------------------------------- */
   /* ---- «Письма за сегодня»: сколько ещё можно отправить ------------------
@@ -23731,8 +23734,7 @@
       admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
         return newsLangWords(d, code);
       }, NEWS_LANG_NOTE[L] || NEWS_LANG_NOTE.RU) +
-      '<p class="adm-hint adm-hint--warn" data-newsdirty' + (newsDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-newsdirty", newsDirty()) +
       /* The word in the box, the sentence under it. `.adm-title-in` is 24 px
          Oswald on a phone, so «Название — для вас, покупатель его не увидит»
          fitted as far as «покупатель е» and stopped — and a placeholder is
@@ -23756,7 +23758,7 @@
          «Сохранить» is its primary, ink while the draft differs; the send is
          the «Отправка» card's own button (admNewsSendCardHTML). Repainted in
          place while typing (newsPaintState), hence the id. */
-      '<div class="adm-savebar" id="newsacts">' + admNewsActsHTML() + "</div>";
+      '<div class="adm-savebar' + admDirtyCls(newsDirty()) + '" id="newsacts">' + admNewsActsHTML() + "</div>";
     return admBackHTML("data-newsback", "Рассылка") +
       (S.newsConfirmBack
         ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
@@ -25417,6 +25419,32 @@
   var SAVEBAR_CANCEL =
     '<span class="adm-savebar__cancel--long">Отменить правки</span>' +
     '<span class="adm-savebar__cancel--short">Отмена</span>';
+  /* ---- unsaved changes: one look, everywhere ------------------------------
+     The owner's /test pass, 23.09.2026 (the blog's cover frames and its
+     languages): «The "Есть несохранённые изменения — нажмите «Сохранить»." is
+     hard to see.» It was a 13-px line in the warn ink, the same size and
+     weight as every grey hint around it; the bars said the same thing with
+     one small word — and on a desktop, for the letters, the newsletter and
+     the product editor, not at all. So the state is one thing now, drawn one
+     way wherever a draft can be lost (admin.css § «unsaved changes»):
+       · the notice over the form, `.adm-dirty` — a warm block with a warn
+         edge and dark text, never a line of small print (admDirtyNoteHTML);
+       · `.is-dirty` on the save bar — the bar takes the warm ground and a
+         warn rule, its status word becomes a solid chip, and «Сохранить» is
+         ringed as THE button to press;
+       · `.is-dirty` on a Save button that stands outside any bar (the blog's
+         «Публикация» card) — the same ring.
+     The render writes the class into the markup (admDirtyCls) and the paints
+     that run under a caret toggle it in place (admDirtyMark), from the same
+     dirty flag in both cases, so the two can never disagree. */
+  function admDirtyNoteHTML(attr, dirty) {
+    return '<p class="adm-dirty" ' + attr + ' role="status"' + (dirty ? "" : " hidden") + ">" +
+      "Есть несохранённые изменения — нажмите «Сохранить».</p>";
+  }
+  function admDirtyCls(dirty) { return dirty ? " is-dirty" : ""; }
+  function admDirtyMark(el, dirty) {
+    if (el && el.classList) el.classList.toggle("is-dirty", !!dirty);
+  }
   function admBarNoteState(kind) {
     var dirty = kind === "mail" ? mailDirty()
       : kind === "news" ? newsDirty()
@@ -25441,6 +25469,8 @@
     el.className = admBarNoteClass(st);
     el.textContent = admBarNoteText(st);
     translateTree(el);
+    // …and the bar around it, which is what the eye finds first
+    admDirtyMark(el.closest && el.closest(".adm-savebar"), st === "dirty");
   }
   /** «Сохранено ✓» in the bar for a moment after a save that leaves the form open (the mail texts, a newsletter draft). */
   function admBarFlash(kind) {
@@ -25471,7 +25501,8 @@
   }
   function admSetBarHTML(page) {
     if (!ADM_SET_CARDS[page]) return "";
-    return '<div class="adm-savebar adm-savebar--set" data-setbar>' + admSetBarInnerHTML(page) + "</div>";
+    return '<div class="adm-savebar adm-savebar--set' + admDirtyCls(admSetDirtyCards(page).length > 0) + '" data-setbar>' +
+      admSetBarInnerHTML(page) + "</div>";
   }
   function admSetBarInnerHTML(page) {
     var cards = ADM_SET_CARDS[page] || [];
@@ -25512,6 +25543,7 @@
     if (!bar) return;
     bar.innerHTML = admSetBarInnerHTML(S.admSetPage || "");
     translateTree(bar);
+    admDirtyMark(bar, admSetDirtyCards(S.admSetPage || "").length > 0);
   }
   /* «Письма» in the settings index — a door, not a page (23.09.2026). The mail
      settings live in «Маркетинг → Письма», beside the letters they time, but
@@ -26876,6 +26908,7 @@
   function paintMailState() {
     var acts = document.getElementById("mailacts");
     if (acts) { acts.innerHTML = admMailActsHTML(); translateTree(acts); }
+    admDirtyMark(acts, mailDirty());
     var dirty = document.querySelector("[data-maildirty]");
     if (dirty) dirty.hidden = !mailDirty();
     paintMailPreview();
@@ -28539,7 +28572,7 @@
       /* the product editor's sticky bar — one shape for every form that
          saves (Renat, 10.09.2026), with the refusal riding in it so it is on
          screen on a phone wherever the owner is in the form */
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
@@ -29223,7 +29256,7 @@
       // the phone's header now and has no slot for it; the confirm card is unchanged
       (f.editing ? '<div class="adm-danger"><button class="adm-link adm-link--warn" data-bundledelete="' + esc(f.id) + '">Удалить набор</button></div>' : "") +
       // the product editor's sticky bar — see promoFormHTML()
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.bundleFormErr ? '<p class="err adm-err adm-savebar__err" role="alert">' + esc(S.bundleFormErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-bundlesave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-bundlecancel>Отмена</button>' +
@@ -29893,7 +29926,7 @@
       "</div>" +
       '<p class="adm-hint" style="margin:0">Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.</p>' +
       // the product editor's sticky bar, the refusal in it — see promoFormHTML()
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.partnerErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.partnerErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpartnercancel>Отмена</button>' +
@@ -31772,7 +31805,7 @@
       // it sits in the sticky save bar, outside the panes, so a refusal is on
       // screen from any tab and on a phone, right above the button that was
       // just pressed, rather than somewhere below the fold.
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         '<p class="adm-err adm-savebar__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
         '<button class="adm-btn adm-savebar__main" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admclose>Отмена</button>' +
