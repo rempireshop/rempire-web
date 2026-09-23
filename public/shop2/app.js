@@ -19641,8 +19641,10 @@
        reload had both come back. On his phone that is a second or two of a
        screen that says nothing happened, and the second tap sent the whole
        thing again. The button now says what it is doing and refuses a second
-       tap until the list comes back with the new status (SRV.stepBusy,
-       cleared in loadSrvOrders). */
+       tap until the server has answered (SRV.stepBusy); the answer writes the
+       new status into the row itself (admOrderLand in srvPush), so no list
+       that left before the change can draw the old step back — which is what
+       still cost Renat a second tap on 23.09.2026. */
     /* An all-gift-card order has no parcel and no hand-over: the card is in
        the customer's inbox the moment the payment lands. The card already
        hides every step for it (showSteps below); the row did not, so a paid
@@ -34258,10 +34260,16 @@
     }
     // «Заказы»: the status the card moved, and the status undo moves back
     else if (a.type === "order_status") {
-      /* The row has no local copy of a status to change, so until the reload
-         comes back it would go on offering the very step just taken — which
-         is how «Выдан клиенту» looked like it had done nothing (r16). The
-         step says «Сохраняем…» in the meantime; loadSrvOrders clears it. */
+      /* The row has no status of its own — it is drawn from a fetched list —
+         so until something new is drawn it would go on offering the very step
+         just taken, which is how «Выдан клиенту» looked like it had done
+         nothing (r16). The step says «Сохраняем…» while the PATCH is out, and
+         the PATCH's own answer ends it: the status it answered with is
+         written into the row (admOrderLand) and the button is given back in
+         the same breath. Until 23.09.2026 it was ended by whichever LIST came
+         back first — including one read before the status moved, which put
+         «Выдан клиенту» straight back and got it tapped twice (Renat, «worked
+         only on second click», both on 13.09 and on 23.09). */
       SRV.stepBusy = String(a.id);
       apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
         .then(function (r) {
@@ -34269,7 +34277,10 @@
              journalDrop(); the render is its own, because toast() paints only
              the toast and admOrdersChanged() renders when its loads come back
              (and not at all when one is already in flight) */
-          if (!(r.status === 200 && r.body.ok)) { toast("Не удалось сохранить статус"); journalDrop(entry); render(); }
+          if (!(r.status === 200 && r.body.ok)) { toast("Не удалось сохранить статус"); journalDrop(entry); }
+          else admOrderLand((r.body && r.body.order) || { id: a.id, status: a.value });
+          SRV.stepBusy = "";
+          render();
           admOrdersChanged();
         }).catch(function () { journalDrop(entry); SRV.stepBusy = ""; render(); });
     }
@@ -34529,29 +34540,41 @@
       ship: srvShipLabel(o.shipping), state: SRV_STATES[o.status] || SRV_STATES.new, srv: o
     };
   }
-  function loadSrvOrders(force) {
+  function loadSrvOrders(force, afterWrite) {
     /* `=== false`, not `!SRV.admin` — see loadOverview() for why the panel's
        cold open must be allowed to ask before it has been told who is asking. */
     if (SRV.admin === false) return;
     /* …which also means this can now be called twice in the same breath —
        once by probeAdmin() and once by the answer it was not waiting for — so
-       one in flight is one enough. */
-    if (loadSrvOrders._busy) return;
+       one in flight is one enough.
+       Except after a WRITE (`afterWrite`, admOrdersChanged). A list already
+       in the air when an order moved on the server may have been read before
+       it moved, and landing it would draw the old status back over the row
+       the owner has just changed — «Выдан клиенту» offered again after the
+       tap that did it (Renat, 23.09.2026). That answer is marked stale: it is
+       thrown away when it lands, and the list is asked for once more. */
+    if (loadSrvOrders._busy) { if (afterWrite) loadSrvOrders._stale = true; return; }
     if (SRV.orders && !force) return;
     loadSrvOrders._busy = true;
+    loadSrvOrders._stale = false;
     apiJson("/api/admin/orders/?limit=100").then(function (r) {
       loadSrvOrders._busy = false;
-      if (r.status === 401) { SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
+      if (r.status === 401) { loadSrvOrders._stale = false; SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
+      if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
       if (r.status === 200) { pushBoot(); pushOpenWanted(); }
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       /* A refresh that failed keeps the list that is on screen, for the same
          reason loadOverview() keeps its figures — «Заказы» going blank after a
          save is worse than «Заказы» being a few seconds old. */
       if (!SRV.ordersErr) SRV.orders = (r.body.orders || []).map(srvRow);
-      // the list is the new status: whatever step was in flight has landed
-      SRV.stepBusy = "";
+      /* Not the end of a step in flight: SRV.stepBusy is the PATCH's to clear
+         (srvPush), because this list may have left before the PATCH landed. */
       render();
-    }).catch(function () { loadSrvOrders._busy = false; SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
+    }).catch(function () {
+      loadSrvOrders._busy = false;
+      if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
+      SRV.ordersErr = true; render();
+    });
   }
   /* ---------- «Заказы»: the search itself, on the server (r22) --------------
    *
@@ -34640,7 +34663,7 @@
       the list the rows and the badge draw from, and the overview's cached
       summary («Сделать сегодня»). */
   function admOrdersChanged() {
-    loadSrvOrders(true);
+    loadSrvOrders(true, true);
     /* …and the search result too, when one is on screen: it is a separate
        hundred rows from a separate query, and the order whose status just
        moved is the one the owner is looking at (r22). */
@@ -34667,6 +34690,22 @@
        alive, with their balance and their PDF button. Dropped, not fetched:
        the next render of that tab asks. */
     S.admGiftCards = null;
+  }
+  /** The order a status PATCH answered with, written over its row in both
+      copies a list of «Заказы» can be drawn from — the newest hundred and a
+      search result — so the row reads the new status the moment the server
+      does, not when a reload finally lands. Merged over the row's own order:
+      a field the answer does not carry (the gift cards the LIST attaches)
+      stays as it was. */
+  function admOrderLand(o) {
+    if (!o || o.id == null) return;
+    var id = String(o.id);
+    [SRV.orders, FOUND.rows].forEach(function (list) {
+      if (!list) return;
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].id) === id) list[i] = srvRow(Object.assign({}, list[i].srv || {}, o));
+      }
+    });
   }
   /**
    * returns: «Обработано» on the order card, and the undo of it.

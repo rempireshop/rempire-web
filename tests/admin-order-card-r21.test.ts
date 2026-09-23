@@ -229,7 +229,7 @@ async function pushStatus(answer: ReplyOrThrow): Promise<{ log: unknown[]; toast
     'else if (a.type === "order_status")',
   );
   const run = new Function(
-    "a", "entry", "SRV", "apiSend", "toast", "journalDrop", "admOrdersChanged", "render",
+    "a", "entry", "SRV", "apiSend", "toast", "journalDrop", "admOrdersChanged", "render", "admOrderLand",
     branch,
   );
   run(
@@ -239,6 +239,7 @@ async function pushStatus(answer: ReplyOrThrow): Promise<{ log: unknown[]; toast
     () => (answer === "throw" ? Promise.reject(new Error("offline")) : Promise.resolve(answer)),
     (m: string) => toasts.push(m),
     journalDrop,
+    () => {},
     () => {},
     () => {},
   );
