@@ -1,7 +1,7 @@
 /**
  * POST /api/promos/check   { code, subtotal?, shipping?, items? }
  *   → { ok: true,  code, kind, value, discount, freeShipping, minSubtotal,
- *                  scope, scopeValue, base }
+ *                  scope, scopeValue, base, lines? }   (lines: scope 'cart' only)
  *   → { ok: false, error, scope, scopeValue }
  *
  * The checkout's «Промокод» box. Read-only: it quotes what the code would take
@@ -135,6 +135,14 @@ export async function POST(req: Request) {
         scope: quote.scope,
         scopeValue: quote.scopeValue,
         base: quote.base,
+        /* A 'cart' code (the second abandoned-cart letter) names a SET of
+           product ids, and `scopeValue` is only the basket's own id — so the
+           checkout cannot tell which lines it covers without being told, and
+           until 23.09.2026 it matched none: no discount on the screen, and no
+           code in the order (promoLineIn(), public/shop2/app.js). The ids it
+           matched in THIS basket, and only those — they are the shopper's own
+           lines, so a guessed code learns nothing about somebody else's. */
+        ...(quote.scope === "cart" ? { lines: quote.lines ?? [] } : {}),
       },
       { headers: NO_STORE },
     );

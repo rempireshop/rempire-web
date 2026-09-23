@@ -5415,14 +5415,14 @@
         "Сразу: в «Последний запуск» — «отправлено 0» и «срок из настройки ещё не прошёл».",
         "Через час — «Отправлено 1» или больше, под письмом «Последний запуск».",
         "Следующее нажатие говорит, что письмо уже уходило.",
-        "Письмо пришло со списком товаров; кнопка открывает магазин с той же корзиной.",
+        "Письмо со списком товаров; его кнопка в окне инкогнито открывает кассу с этой корзиной.",
         "После «Отписаться» следующая брошенная корзина с этого адреса письма не получает."
       ],
       "why": "Настоящее письмо уходит раз в сутки, утром, поэтому в день проверки его видно только через «Прислать пример» и «Запустить сейчас». Адрес получает одно напоминание, пока с него не придёт заказ, — для проверки нужен новый адрес. Второе письмо про ту же корзину надоедает, и человек отписывается.",
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z",
+      "markedAt": "2026-09-23T17:51:40.128Z",
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
@@ -5438,7 +5438,7 @@
           "At once: «Последний запуск» shows «отправлено 0» and «срок из настройки ещё не прошёл».",
           "An hour later — «Отправлено 1» or more, and «Последний запуск» below.",
           "The next press says the letter has already gone.",
-          "The letter lists the cart; its button opens the shop with that cart.",
+          "The letter lists the cart; opened incognito, its button opens checkout with that cart.",
           "After «Отписаться» the next abandoned cart from that address gets no letter."
         ],
         "why": "The real letter goes once a day, in the morning, so on a test day it can only be seen through «Прислать пример» and «Запустить сейчас». An address gets one reminder until an order comes from it — testing needs a fresh address. A second letter about the same cart annoys people into unsubscribing."
@@ -5463,7 +5463,7 @@
         "В полях сохранённые числа, после сохранения кнопка говорит «Сохранено ✓».",
         "Пример пришёл сразу: [test] в теме, ваши 5 %, код в нём ненастоящий.",
         "До первого письма «Запустить сейчас» говорит: первое письмо ещё не уходило.",
-        "Настоящее письмо: промокод на 5 %, кнопка возвращает корзину со скидкой.",
+        "Настоящее письмо: код на 5 %; кнопка в окне инкогнито возвращает корзину уже со скидкой.",
         "Скидка только на товары этой корзины, второй раз код не принимается.",
         "Корзина дешевле 100 € получает только первое письмо."
       ],
@@ -5471,7 +5471,7 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z",
+      "markedAt": "2026-09-23T17:51:40.128Z",
       "en": {
         "title": "The second cart letter — the one with the discount",
         "steps": [
@@ -5486,7 +5486,7 @@
           "The fields hold the saved numbers; after saving the button says «Сохранено ✓».",
           "The sample arrives at once: [test] in the subject, your 5 %, a fake code.",
           "Before the first letter «Запустить сейчас» says: the first letter has not gone yet.",
-          "The real letter: a 5 % code, and its button brings the basket back discounted.",
+          "The real letter: a 5 % code; opened incognito, its button restores the cart discounted.",
           "The discount counts only this basket's products; the same code is refused twice.",
           "A basket under 100 € gets the first letter only."
         ],

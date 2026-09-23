@@ -369,7 +369,7 @@ function sign(payload: string): string {
  *
  * `code` is the second letter's promo (`p` in the payload), and it rides
  * INSIDE the token rather than beside it in the query string for one reason:
- * the storefront strips the whole query the moment it has restored the basket
+ * the storefront strips the whole query the moment it has read the token
  * (`history.replaceState` in resumeCart(), public/shop2/app.js), so anything
  * parked next to `resume=` is gone before it could be applied. Omitted
  * entirely for the first letter, which has no code — an older reader that
