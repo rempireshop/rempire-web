@@ -1512,8 +1512,6 @@
       // 19.09.2026: the lockers of every country DPD serves — lists too long to download
       "Пакоматов в этой стране слишком много для одного списка — введите город или улицу.":
         "Selles riigis on pakiautomaate ühe nimekirja jaoks liiga palju — sisestage linn või tänav.",
-      "Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.":
-        "Selle riigi pakiautomaat valitakse tellimuse vormistamisel — neid on nimekirja jaoks liiga palju.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
@@ -4457,8 +4455,6 @@
       // 19.09.2026: the lockers of every country DPD serves — lists too long to download
       "Пакоматов в этой стране слишком много для одного списка — введите город или улицу.":
         "This country has too many pickup points for one list — type a city or a street.",
-      "Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.":
-        "For this country the pickup point is chosen at checkout — there are too many for a list.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
@@ -6942,6 +6938,10 @@
   }
   function translatePage() {
     translateTree(hdrSlot); translateTree(bodySlot); translateTree(navSlot); translateTree(ovl);
+    // the parcel-point sheet's own slot (paintPointSheet) — text nodes only,
+    // the search box and what is typed in it are not touched
+    var ps = document.getElementById("pointslot");
+    if (ps) translateTree(ps);
   }
 
   var BANNERS = [
@@ -7449,6 +7449,18 @@
     RO: ["novapost", "dpd", "smartpost"], SE: ["dpd", "smartpost"], SI: ["dpd", "smartpost"],
     SK: ["novapost", "dpd", "smartpost"]
   };
+  /* Does the shop deliver to this country at all? ANY delivery type counts —
+     a courier alone included. Greece is why this is said once, here: it is
+     the one served EU country with no pickup point, so it has no row in
+     CARRIERS_BY_COUNTRY, and every «is this a country we know?» that asked
+     that table alone turned a Greek default into «EU» — saved as the zone,
+     priced as generic Europe, and put back into the checkout as «Другая
+     страна Европы» with nothing chosen behind it (Dim, 19.09.2026). «EU»
+     itself answers true: it is the zone the first select can stop at. */
+  function shipServed(cc) {
+    var own = Object.prototype.hasOwnProperty;
+    return own.call(CARRIERS_BY_COUNTRY, cc) || own.call(COURIER_CARRIERS, cc);
+  }
 
   /* ---------- «Доставка и оплата» — the page a customer actually reads ------
      One builder, two renderers. screenDelivery() draws it live from
@@ -8042,8 +8054,20 @@
      list the checkout could ever reach until 19.09.2026; Poland's DPD is
      33 603, Italy's 12 048. Those are not lists to download onto a phone, so
      the route caps its answer and the typing goes to the server instead. */
-  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {} };  // view: "list" | "map" (UX fix 8)
-  function pointsKey() { return shipCarrier() + ":" + orderCountry(); }
+  /* `failed` — a search the server did not answer (pointsFind); `rows` — the
+     points the list is SHOWING, which is where a tapped row is looked up
+     (pointById). */
+  var POINTS = { by: {}, empty: {}, loading: {}, err: {}, q: "", view: "list", big: {}, found: {}, finding: {}, failed: {}, rows: [] };  // view: "list" | "map" (UX fix 8)
+  /* One sheet, two owners. The checkout's picker chooses the ORDER's point;
+     since 23.09.2026 the account's «Доставка по умолчанию» opens the very
+     same sheet for its own draft, whose carrier and country need not be the
+     checkout's (S.pointFor = "acct", set by openPointSheet). Everything the
+     sheet reads goes through pointsKey(), so the search, the rows, the count
+     and the heading follow whoever opened it — and the moment that sheet is
+     not the one open, the key is the order's again. */
+  function pointsForAcct() { return S.pointOpen && S.pointFor === "acct" && S.screen === "account"; }
+  function coPointsKey() { return shipCarrier() + ":" + orderCountry(); }
+  function pointsKey() { return pointsForAcct() ? acctPointsKey() : coPointsKey(); }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
   /* ---------- what a point actually is ----------
      Montonio's pickup-point rows have always carried a kind of their own —
@@ -8210,25 +8234,86 @@
    * pointsMatching() then filters what it holds, which is the right answer for
    * every country that arrived whole.
    */
+  /* The typing is asked about once it PAUSES, not on every keystroke.
+     Дим on staging, 23.09.2026: «When I type roma the modal blinks a lot …
+     almost impossible to finish typing your number» — every character from
+     the second one on was a request, and every answer repainted the whole
+     sheet. Now a query goes out POINT_Q_MS after the last keystroke, only
+     the list moves when it answers (pointsFoundArrived), and until then the
+     list is the local filter over what this browser holds. */
+  var POINT_Q_MS = 300;
+  var pointQT = 0, pointQFor = "";
   function pointsSearch() {
     var key = pointsKey(), q = POINTS.q.trim().toLowerCase();
     if (!POINTS.big[key] || q.length < 2) return null;
+    var fk = key + "|" + q;
+    if (POINTS.found[fk]) return POINTS.found[fk];
+    /* One timer, for the newest query. Asked again with the same words (a
+       repaint reads this too) it is left running; a failed query is not
+       retried by itself — that would be a request every 300 ms — but by the
+       next keystroke or the next opening of the sheet. */
+    if (!POINTS.finding[fk] && !POINTS.failed[fk] && pointQFor !== fk) {
+      pointQFor = fk;
+      clearTimeout(pointQT);
+      pointQT = setTimeout(function () {
+        pointQT = 0; pointQFor = "";
+        // still what the box says, for the list still open?
+        if (pointsKey() + "|" + POINTS.q.trim().toLowerCase() === fk) pointsFind(key, q);
+      }, POINT_Q_MS);
+    }
+    return null;
+  }
+  /** Is the server still to answer what the box says? «Ищем…», not «Ничего не нашли». */
+  function pointsSearchPending() {
+    var key = pointsKey(), q = POINTS.q.trim().toLowerCase(), fk = key + "|" + q;
+    return !!POINTS.big[key] && q.length >= 2 && !POINTS.found[fk] && !POINTS.failed[fk];
+  }
+  /** The server's answer for one carrier+country (`key`) and one query —
+      asked once and kept; null until it is in. The sheet's typing comes
+      through here, and so does the checkout looking for the account's saved
+      machine by name (matchAcctPoint). */
+  function pointsFind(key, q) {
     var fk = key + "|" + q;
     if (POINTS.found[fk]) return POINTS.found[fk];
     if (!POINTS.finding[fk]) {
       POINTS.finding[fk] = true;
       var at = key.indexOf(":");
       var carrier = key.slice(0, at), cc = key.slice(at + 1);
+      var failed = function () {
+        POINTS.finding[fk] = false;
+        if (POINTS.found[fk]) return;
+        POINTS.failed[fk] = true;
+        pointsFoundArrived(fk);
+      };
       fetch("/api/shipping/points/?country=" + encodeURIComponent(cc) + "&carrier=" + encodeURIComponent(carrier) +
         "&q=" + encodeURIComponent(q) + "&limit=200")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (j) {
+          if (!(j && j.ok && j.points)) { failed(); return; }
           POINTS.finding[fk] = false;
-          if (j && j.ok && j.points) { POINTS.found[fk] = j.points; repaintPicker("[data-pointq]"); }
+          POINTS.found[fk] = j.points;
+          pointsFoundArrived(fk);
         })
-        .catch(function () { POINTS.finding[fk] = false; });
+        .catch(failed);
     }
     return null;
+  }
+  /* An answer is in, for the query `fk`. The hunt for the saved machine
+     (matchAcctPoint) gets it wherever it lands — it may be the account screen,
+     right after the save that started it — so the checkout finds the machine
+     already chosen. The open sheet shows it only if it answers what the box
+     says NOW: answers land in any order, and an older query's, arriving late,
+     used to repaint over the newer one. It is kept (a backspace may want it)
+     but not shown. And only the list moves — the search box is never
+     rebuilt under the caret (patchPointList). */
+  function pointsFoundArrived(fk) {
+    var matched = matchAcctPoint();
+    if (S.pointOpen) {
+      if (fk === pointsKey() + "|" + POINTS.q.trim().toLowerCase()) pointResultsChanged();
+      if (matched) patchSummary();
+      return;
+    }
+    if (matched && S.screen === "checkout") { patchDelivery(); patchSummary(); }
   }
   /* ---- «ближайший к моему адресу», without a map ---------------------
      Montonio sends no coordinates for a pickup point (22.09.2026: none in
@@ -8286,9 +8371,18 @@
   function pointsFiltered() {
     return pointsMatching().slice(0, 80);
   }
+  /* The row tapped is one of the rows SHOWN — and for a country too big for
+     one download those are the server's answer to the search, not the first
+     slice this browser holds. Looking in the slice alone, a Kraków locker
+     found by typing «krak» closed the sheet with nothing chosen (Дим: «I
+     type 91-433, choose the first one in the list but it's not selected»).
+     So the rows on screen come first (POINTS.rows, written by pointRows()),
+     then whatever the search answers now, then the slice. */
   function pointById(id) {
-    var all = pointsList() || [];
-    for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    var lists = [POINTS.rows || [], pointsMatching(), pointsList() || []];
+    for (var j = 0; j < lists.length; j++) {
+      for (var i = 0; i < lists[j].length; i++) if (lists[j][i].id === id) return lists[j][i];
+    }
     return null;
   }
 
@@ -8743,6 +8837,8 @@
        over the shopper's own hand. See applyAcctShipPref(). */
     shipPicked: false,
     pointOpen: false,   // the parcel-machine picker sheet
+    // …and whose it is: "" the order's, "acct" the account's default (pointsForAcct)
+    pointFor: "",
     paying: false,      // «Оплатить» is in flight — the button locks
     /* {from, total}: the sum POST /api/orders came back with when it differed
        from this screen's own — see total(). `from` is the local sum it was
@@ -9339,10 +9435,15 @@
      mirror is guarded against the server by tests/checkout-parity.test.ts.
      Labels only. The price beside a row comes from the rules through
      acctShipPrice() and always did. */
+  /* …and through carriersFor(), the checkout's own reader of that table,
+     rather than the table itself: a country the owner has switched off in
+     «Где предлагать пакомат» (SHIP_RULES.pickupOff) offered its lockers here
+     and not at the till, so a default saved from them fell back to the
+     courier on the next order without a word. */
   function acctMethods(cc) {
     var rows = [];
     if (cc === "EE") rows.push({ l: "Самовывоз — Mardi 1, Таллинн", p: 0, pickup: true });
-    (CARRIERS_BY_COUNTRY[cc] || []).forEach(function (c) {
+    carriersFor(cc).forEach(function (c) {
       rows.push({ l: "Пакомат " + (CARRIER_NAMES[c] || c), pm: c });
     });
     /* The courier row names no carrier since 22.09.2026: the carrier is picked
@@ -9352,10 +9453,22 @@
     return rows;
   }
   function methods() { return acctMethods(acctShipCountry()); }
-  /** The country «Доставка по умолчанию» is drawn for: the draft's, else the shop's. */
+  /** The country «Доставка по умолчанию» is drawn for: the draft's, else the shop's.
+      Any country the shop delivers to (shipServed) — Greece, courier only, too. */
   function acctShipCountry() {
     var d = S.acctForm.ship;
-    return d && CARRIERS_BY_COUNTRY[d.country] ? d.country : S.country;
+    return d && shipServed(d.country) ? d.country : S.country;
+  }
+  /* A country picked in the block's selects: the first one («EE» when the
+     value is not a country we deliver to) or the one behind «Другая страна
+     Европы» («EU» then). Another country is another table of rows, so the
+     draft restarts on its first row — and saves itself like a tapped row
+     would (acctShipChanged: a parcel row waits for its machine). */
+  function acctPickCountry(value, fallback) {
+    var cc = shipServed(value) ? value : fallback;
+    S.acctForm.ship = acctShipFromRow(cc, acctMethods(cc)[0]);
+    render();
+    acctShipChanged();
   }
   /* What a row of SHIP means to the checkout: `pickup` is pickup, `pm` is a
      parcel with that carrier, anything else is the courier. */
@@ -9524,12 +9637,17 @@
     return live ? live.map(function (pt) { return { name: pt.name, kind: pointKind(pt) }; }) : null;
   }
   /** True when the draft's country has more machines than one list can carry —
-      Poland's DPD is 33 603 of them. The block then names no machine at all;
-      the checkout's search is where one is picked. */
+      Poland's DPD is 33 603 of them. The block then draws no select: its
+      button opens the checkout's own search sheet instead (acctPointButton). */
   function acctMachinesTooMany() {
     var x = methods()[acctIdx()];
     if (!x || !x.pm) return false;
     return !!POINTS.big[x.pm + ":" + acctShipCountry()];
+  }
+  /** The POINTS key of the draft's row — its carrier, its country — or ":cc". */
+  function acctPointsKey() {
+    var x = methods()[acctIdx()];
+    return (x && x.pm ? x.pm : "") + ":" + acctShipCountry();
   }
   /** The machine the block's select is on: the draft's, while the list still
       has it — else nothing, and the placeholder asks for one. A name and not
@@ -9552,16 +9670,28 @@
      after the block's own save, so «Подставим это при следующем заказе»
      holds for an order placed in this same visit and not only for one after
      a reload. */
-  function applyAcctShipPref() {
-    if (S.shipPicked) return;
+  /* `saved` — the block's own save has just come back. That is the one time
+     the guard gives way: the shopper chose a delivery in the checkout, THEN
+     went to the account and set another default, and the newer of the two
+     choices is the one they meant. S.shipPicked used to hold until the next
+     order was placed, so the checkout came back on the old country (Dim,
+     19.09.2026: «Even if I chose Italy in account, at checkout I still need
+     to choose country»). The checkout is then «not chosen by hand» again,
+     which is also what lets the saved machine be matched when its list lands.
+     A profile that merely ARRIVES (acctApply) still waits behind the guard. */
+  function applyAcctShipPref(saved) {
+    if (S.shipPicked && !saved) return;
     var p = S.cust && S.cust.shipPref;
     if (!p) return;
+    if (saved) S.shipPicked = false;
     var known = { pickup: 1, parcel: 1, courier: 1 };
     /* The preference holds a REAL country — «IT», not the zone it falls in —
        so it is split back into the checkout's two selects. Writing it whole
        into S.country left the first select matching none of its five options,
-       which the browser draws as «Эстония». */
-    if (p.country && CARRIERS_BY_COUNTRY[p.country]) {
+       which the browser draws as «Эстония». Any country the shop delivers to
+       (shipServed): a courier-only Greece asked CARRIERS_BY_COUNTRY and was
+       dropped. */
+    if (p.country && shipServed(p.country)) {
       var zone = shipZoneOf(p.country);
       if (zone !== "default") {
         S.country = zone;
@@ -9586,20 +9716,37 @@
        be told. Without this the preference was in S and nowhere on screen
        unless a parcel feed happened to come back afterwards and repaint it by
        accident. */
-    if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
+    /* …and the country selects above that block, which live outside it: a
+       preference landing while step 2 was open moved the carriers to Italy
+       under a select that still said «Эстония» (patchCountry). */
+    if (S.screen === "checkout") { patchCountry(); patchDelivery(); patchSummary(); }
   }
   /** The saved machine, once the carrier's real list has answered. */
   function matchAcctPoint() {
     if (S.shipPicked || S.ship.point || !isParcel()) return false;
     var p = S.cust && S.cust.shipPref;
     if (!p || !p.machine) return false;
-    var list = pointsList();
+    // the ORDER's list, whichever sheet happens to be open
+    var key = coPointsKey(), list = POINTS.by[key];
     if (!list) return false;
     var want = String(p.machine).toLowerCase();
+    var hit = pointNamed(list, want);
+    /* A country too big for one download holds only its first slice here —
+       Poland's first 1 500 of 33 603 — and a machine saved from the
+       account's search is usually not in it. So it is asked for by name,
+       through the same server search the sheet uses (pointsFind), and
+       pointsFoundArrived() comes back here when the answer is in. */
+    if (!hit && POINTS.big[key]) hit = pointNamed(pointsFind(key, want.slice(0, 60).trim()) || [], want);
+    if (!hit) return false;
+    S.ship.point = hit;
+    return true;
+  }
+  /** The point in `list` whose name is `want` (lower case), or null. */
+  function pointNamed(list, want) {
     for (var i = 0; i < list.length; i++) {
-      if (String(list[i].name || "").toLowerCase() === want) { S.ship.point = list[i]; return true; }
+      if (String(list[i].name || "").toLowerCase() === want) return list[i];
     }
-    return false;
+    return null;
   }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   /* What the applied promo code takes off. The RULE comes from the server
@@ -15553,38 +15700,71 @@
          parcel row still waiting for its machine, «Доставка по умолчанию
          сохранена ✓» once the choice is on the row (acctShipChanged) */
       acctStHTML("ship") +
-      (function () {
-        // the live list, so the machine saved here is one the checkout can
-        // find again by name — acctMachines(); null while it is in flight
-        var mach = acctMachines();
-        if (mach && !mach.length) return "";
-        /* …and a country whose machines do not fit in one list gets no select
-           at all: 33 603 <option> elements is not a choice on a phone. The
-           country and the carrier are remembered, the machine is picked at
-           the checkout, where the search asks the server. */
-        if (acctMachinesTooMany()) {
-          return '<p class="hint" style="margin:8px 0 0">Пакомат для этой страны выбирается при оформлении заказа — их слишком много для списка.</p>';
-        }
-        var sel = acctMachineName();
-        /* The label widens the same way the checkout's does, and for the same
-           reason: this carrier's list may hold counters as well as machines. */
-        var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
-        var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
-        return '<label class="field"><span class="field__label">' +
-          (mach ? head + " — " + points(mach.length) : head) + "</span>" +
-          '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
-          (mach
-            ? '<option value=""' + (sel ? "" : " selected") + ">" +
-              (anyCounter ? "— выберите пакомат или пункт выдачи —" : "— выберите пакомат —") + "</option>" +
-              mach.map(function (x) {
-                return '<option value="' + esc(x.name) + '"' + (x.name === sel ? " selected" : "") + ">" +
-                  esc(x.kind + " · " + x.name) + "</option>";
-              }).join("")
-            : "<option>Загружаем список…</option>") +
-          "</select></span></label>";
-      })() +
+      /* its own slot, so the search sheet opened from it repaints only this
+         (patchAcctPoint) — a render() would take the caret out of the box */
+      "<div data-acct-point>" + acctPointHTML() + "</div>" +
 
       "</section></div>";
+  }
+  /* The machine under a parcel row of «Доставка по умолчанию»: a select for a
+     list that fits in one, the checkout's own search for one that does not.
+     The search's sheet is not drawn here — it has a slot of its own
+     (paintPointSheet), so nothing that redraws this block can touch it. */
+  function acctPointHTML() {
+    // the live list, so the machine saved here is one the checkout can
+    // find again by name — acctMachines(); null while it is in flight
+    var mach = acctMachines();
+    if (mach && !mach.length) return "";
+    /* …and a country whose machines do not fit in one list gets no select
+       at all: 33 603 <option> elements is not a choice on a phone. Until
+       23.09.2026 it got a sentence instead — «Пакомат для этой страны
+       выбирается при оформлении заказа — их слишком много для списка», which
+       Dim marked «not good UX». It gets the checkout's search now: the same
+       button, the same sheet, the same server search by postcode, town or
+       street, keyed on this draft's carrier and country (pointsKey). */
+    if (acctMachinesTooMany()) {
+      return acctPointButton(mach);
+    }
+    var sel = acctMachineName();
+    /* The label widens the same way the checkout's does, and for the same
+       reason: this carrier's list may hold counters as well as machines. */
+    var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
+    var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
+    return '<label class="field"><span class="field__label">' +
+      (mach ? head + " — " + points(mach.length) : head) + "</span>" +
+      '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
+      (mach
+        ? '<option value=""' + (sel ? "" : " selected") + ">" +
+          (anyCounter ? "— выберите пакомат или пункт выдачи —" : "— выберите пакомат —") + "</option>" +
+          mach.map(function (x) {
+            return '<option value="' + esc(x.name) + '"' + (x.name === sel ? " selected" : "") + ">" +
+              esc(x.kind + " · " + x.name) + "</option>";
+          }).join("")
+        : "<option>Загружаем список…</option>") +
+      "</select></span></label>";
+  }
+  /** The checkout's point button (pointField), for the account's draft. The
+      saved machine is a name, so the name is what it shows; the count is the
+      country's, not the first slice's, like the sheet's own. */
+  function acctPointButton(mach) {
+    var d = S.acctForm.ship, chosen = d && d.machine ? d.machine : "";
+    var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
+    var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
+    return '<div class="field"><span class="field__label">' + head + " — " + points(POINTS.big[acctPointsKey()]) + "</span>" +
+      '<button class="pointbtn' + (chosen ? " pointbtn--set" : "") + '" data-pointopen="acct">' +
+        (chosen
+          ? '<span class="pointbtn__nm">' + esc(chosen) + "</span>"
+          : '<span class="pointbtn__nm">' + (anyCounter ? "Выберите пакомат или пункт выдачи" : "Выберите пакомат") + "</span>" +
+            '<span class="pointbtn__ad">Поиск по адресу и городу</span>') +
+        '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button></div>";
+  }
+  /** The slot above, redrawn in place — the sheet opening, closing, picking. */
+  function patchAcctPoint() {
+    if (S.screen !== "account") return;
+    var box = document.querySelector("[data-acct-point]");
+    if (!box) return;
+    box.innerHTML = acctPointHTML();
+    translateTree(box);
   }
 
   /* ---------- account: the five calls ------------------------------------
@@ -15959,8 +16139,9 @@
         if (JSON.stringify(acctFieldPayload(f)) === sent) { acctSeedField(f); acctSt(f, "saved"); }
         else acctSt(f, "");
         // the checkout takes the new default and the new consent straight
-        // away, under their usual guards
-        if (f === "ship") applyAcctShipPref();
+        // away — the default over an earlier tap in the checkout too, since
+        // this save is the newer choice (applyAcctShipPref's `saved`)
+        if (f === "ship") applyAcctShipPref(true);
         if (f === "marketing") acctSyncNewsletter();
         acctNext();
       })
@@ -15991,9 +16172,10 @@
     var d = S.acctForm.ship;
     if (!d) return;
     /* A country whose machines do not fit in one list has no select here to
-       wait for — the checkout's own search picks the machine there. The
-       country and the carrier are still worth remembering, so the row saves
-       without one instead of sitting on «Выберите пакомат» for ever. */
+       wait for. The country and the carrier are worth remembering on their
+       own — the checkout then opens on them and asks only for the machine —
+       so the row saves at once, and the search button under it can add the
+       machine whenever the shopper likes (acctPointButton). */
     if (d.method === "parcel" && !d.machine && !acctMachinesTooMany()) { acctSt("ship", "need"); return; }
     acctQueue("ship");
   }
@@ -16411,14 +16593,17 @@
               "отправить его обратно придётся самостоятельно.</p>"
             : "")
         : "") +
-      (cur === "parcel" ? pointField() : "") +
-      (S.pointOpen ? pointSheet() : "");
+      // the sheet itself is not in here: it has a slot of its own (paintPointSheet)
+      (cur === "parcel" ? pointField() : "");
   }
   /* The label is built from phrases the dictionary already knows — «Пакомат
      Omniva» matches a UI_RX rule, «Пакомат Omniva — 469 точек» would match
      nothing — so the count lives in the sheet instead. */
   function carrierLabel() {
-    var c = CARRIER_NAMES[shipCarrier()];
+    // the carrier of the list the sheet is showing — the account's draft's
+    // when the account opened it, the order's otherwise (pointsKey)
+    var key = pointsKey();
+    var c = CARRIER_NAMES[key.slice(0, key.indexOf(":"))];
     // the heading widens only where the list behind it really is mixed, so
     // Omniva and SmartPosti keep the short word they have always had
     var w = pointsMixed() ? "Пакомат или пункт выдачи" : "Пакомат";
@@ -16448,6 +16633,7 @@
   /** The list is patched in place so typing never costs the input its focus. */
   function pointRows() {
     var list = pointsList();
+    POINTS.rows = [];
     if (!list) {
       return POINTS.err[pointsKey()]
         ? '<p class="muted psheet__msg">Не удалось загрузить список пакоматов — закройте окно и попробуйте ещё раз.</p>'
@@ -16455,10 +16641,16 @@
     }
     if (!list.length) return '<p class="muted psheet__msg">Для этой страны список пока пуст — выберите курьера.</p>';
     var found = pointsFiltered();
-    if (!found.length) return '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
+    if (!found.length) {
+      // the server has not answered these words yet — «nothing» would be a guess
+      return pointsSearchPending()
+        ? '<p class="muted psheet__msg">Ищем…</p>'
+        : '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
+    }
+    POINTS.rows = found;
     return found.map(function (p) {
       return '<button class="prow" data-pointpick="' + esc(p.id) + '"' +
-        (S.ship.point && S.ship.point.id === p.id ? ' aria-current="true"' : "") + ">" +
+        (pointChosen(p) ? ' aria-current="true"' : "") + ">" +
         '<span class="prow__nm">' + esc(p.name) + "</span>" +
         /* the kind first, then the address: a counter is a shop with opening
            hours and a machine is open at night, and that is the difference
@@ -16466,14 +16658,68 @@
         '<span class="prow__ad">' + pointKindLine(p) + "</span></button>";
     }).join("");
   }
+  /** Is this the point already chosen — the account's saved name when the
+      account opened the sheet, the order's point otherwise? */
+  function pointChosen(p) {
+    if (pointsForAcct()) { var d = S.acctForm.ship; return !!d && !!d.machine && d.machine === p.name; }
+    return !!S.ship.point && S.ship.point.id === p.id;
+  }
   /* Typing patches only the list: a full render would take the search input
      down with it and the caret with the input. Everything else — the button's
-     label, the carrier chips — needs the whole step redrawn. */
+     label, the carrier chips — needs the whole step redrawn.
+     …and the list itself only when it has something new to say. The three
+     parts that can change under the box — the rows, the count, the «too many»
+     line — are each compared with what they last drew (pointPaint) and left
+     alone when equal, so a feed or an answer that changes nothing touches
+     nothing on screen. While a finger or a button is down on a row the list
+     is not replaced at all (pointListHeld): a row swapped out between the
+     press and the click takes the click with it. */
+  var pointPaint = {};
   function patchPointList() {
-    var box = document.getElementById("pointlist");
+    if (pointListHeld) { pointListPending = true; return; }
+    pointPatch("pointlist", pointRows, "list");
+    pointPatch("pointcount", pointCountText, "count");
+    pointPatch("pointtoo", pointTooManyHTML, "too");
+  }
+  function pointPatch(id, build, part) {
+    var box = document.getElementById(id);
     if (!box) return;
-    box.innerHTML = pointRows();
+    var html = build();
+    if (html === pointPaint[part]) return;
+    pointPaint[part] = html;
+    box.innerHTML = html;
     translateTree(box);
+  }
+  /** Whatever the rows are drawn from has moved: the list, or the pins. */
+  function pointResultsChanged() {
+    if (POINTS.view === "map" && pmap) { pmap.setView(pointMapCenter(), pmap.getZoom()); paintPointMarkers(); }
+    else patchPointList();
+  }
+  /** A keystroke in the sheet's search box — the list moves, the box does not. */
+  function pointQueryTyped(value) {
+    POINTS.q = value;
+    pointResultsChanged();
+  }
+  /* The press guard. pointerdown on a row holds every list repaint; the
+     release lets them through POINT_HOLD_MS later — after the click the press
+     became, on a phone as on a mouse — and a repaint asked for meanwhile runs
+     then, once. A press that turns into a scroll (pointercancel) releases the
+     same way. */
+  var POINT_HOLD_MS = 350;
+  var pointListHeld = false, pointListPending = false, pointListT = 0;
+  function pointListPress(e) {
+    var t = e && e.target;
+    if (!t || !t.closest || !t.closest("#pointlist")) return;
+    clearTimeout(pointListT);
+    pointListHeld = true;
+  }
+  function pointListRelease() {
+    if (!pointListHeld) return;
+    clearTimeout(pointListT);
+    pointListT = setTimeout(function () {
+      pointListHeld = false;
+      if (pointListPending) { pointListPending = false; patchPointList(); }
+    }, POINT_HOLD_MS);
   }
   function pointsArrived() {
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
@@ -16489,6 +16735,14 @@
          came back to re-read the question (Dim, 20.09.2026). It is re-read
          here: the same rule, now with the answer in hand, and the row saves. */
       if (S.acctSt.ship === "need") acctShipChanged();
+      /* The account's own search sheet is open: the block behind it and the
+         sheet's list move, nothing else — a render() would throw the list's
+         scroll back to the top for a feed the shopper is not looking at. */
+      if (pointsForAcct()) {
+        patchAcctPoint();
+        if (POINTS.view === "map") paintPointMarkers(); else patchPointList();
+        return;
+      }
       render();
       return;
     }
@@ -16498,9 +16752,11 @@
        here, so the shopper who set a default finds it already chosen — and
        simply left unchosen when the machine has closed since. */
     matchAcctPoint();
-    if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
-    if (S.pointOpen) patchPointList();
-    // The picker is closed: refresh the carrier chips (an empty carrier can
+    /* The sheet, when it is open, has a slot of its own (paintPointSheet):
+       inside it only the list or the pins move, and the block behind it can
+       be refreshed like any other time without touching the search box. */
+    if (S.pointOpen) { if (POINTS.view === "map") paintPointMarkers(); else patchPointList(); }
+    // Refresh the carrier chips (an empty carrier can
     // now drop out) without touching the rest of the screen — five of these
     // can land back to back (one loadPointsFor() per carrier), and a full
     // render() on each one is exactly the checkout flicker this avoids.
@@ -16508,7 +16764,7 @@
     // pre-selected carrier, so a card struck off can change what the order
     // costs, and the summary kept the old price until something else
     // redrew it (found by the promo sweep: 11,59 € shown, 12,19 € billed).
-    else { patchDelivery(); patchSummary(); }
+    patchDelivery(); patchSummary();
   }
   /* Points with no lat/lng (every Montonio pickup point — docs/shipping.md
      §3: "Координат в ответе Montonio нет вообще") cannot go on the map. */
@@ -16524,10 +16780,27 @@
     for (var i = 0; i < all.length; i++) if (pointGeo(all[i])) return true;
     return false;
   }
+  /* The count is the country's, not the download's: «1500 пакоматов» under a
+     search box that has all 33 603 behind it would be a lie the shopper can
+     catch. */
+  function pointCountText() {
+    var list = pointsList();
+    return list ? points(POINTS.big[pointsKey()] || list.length) : "";
+  }
+  /* Said for as long as the country is too big for one list — not only
+     until the second letter: a line that vanished as the shopper started
+     typing moved the whole list up under the finger. */
+  function pointTooManyHTML() {
+    return POINTS.big[pointsKey()]
+      ? '<p class="psheet__maphint muted">Пакоматов в этой стране слишком много для одного списка — введите город или улицу.</p>'
+      : "";
+  }
   function pointSheet() {
     var canMap = pointsHaveMap();
     var mapOn = canMap && POINTS.view === "map";
     var ungeo = mapOn ? pointsMatching().filter(function (p) { return !pointGeo(p); }).length : 0;
+    // what the three patchable parts are drawn with — see patchPointList()
+    pointPaint = { list: mapOn ? null : pointRows(), count: pointCountText(), too: pointTooManyHTML() };
     return '<div class="scrim" data-pointclose></div>' +
       '<div class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
         '<div class="psheet__head"><span class="display drawer__t">' + carrierLabel() + "</span>" +
@@ -16537,18 +16810,47 @@
           (canMap
             ? '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>"
             : "") +
-          /* The count is the country's, not the download's: «1500 пакоматов»
-             under a search box that has all 33 603 behind it would be a lie
-             the shopper can catch. */
-          (pointsList() ? '<div class="psheet__n muted">' + points(POINTS.big[pointsKey()] || pointsList().length) + "</div>" : "") + "</div>" +
-          (POINTS.big[pointsKey()] && POINTS.q.trim().length < 2
-            ? '<p class="psheet__maphint muted">Пакоматов в этой стране слишком много для одного списка — введите город или улицу.</p>'
-            : "") +
+          '<div class="psheet__n muted" id="pointcount">' + pointPaint.count + "</div></div>" +
+        '<div id="pointtoo">' + pointPaint.too + "</div>" +
         (mapOn
           ? '<div class="psheet__map" id="pointmap"></div>' +
             (ungeo ? '<p class="psheet__maphint muted">Часть пакоматов видна только в списке — у них нет координат для карты.</p>' : "")
-          : '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>") +
+          : '<div class="psheet__list" id="pointlist">' + pointPaint.list + "</div>") +
       "</div>";
+  }
+  /* ---------- the sheet's own slot ----------
+     The sheet used to be drawn INSIDE the block that owns it — the
+     checkout's [data-co-delivery], the account's [data-acct-point] — so
+     everything that repainted that block rebuilt the sheet with it: the
+     search box and the caret in it, and the slide-in animation replayed
+     each time. Every search answer did it (repaintPicker), and so did the
+     carrier logos, the shipping rules, the price refresh and any render()
+     of the account landing while the shopper typed. Дим, staging,
+     23.09.2026: «the modal for the parcels starts blinking, throwing my
+     cursor to the beginning of the text, sometimes losing text — searching
+     is impossible. It touches all modals where lockers are searched.»
+     So it has a slot of its own (#pointslot, beside the drawers' #ovl), and
+     like the drawers it is mounted only when WHAT is shown changes: opened,
+     closed, list ⇄ map, another owner. Nothing else writes to it; inside it
+     only the list, the count and the «too many» line are ever patched. */
+  var pointSheetOn = "";
+  function pointSheetWanted() {
+    if (!S.pointOpen) return "";
+    if (pointsForAcct()) return "acct:" + POINTS.view;
+    if (S.screen === "checkout" && S.pointFor !== "acct") return "co:" + POINTS.view;
+    return "";
+  }
+  /** Mount or unmount the sheet if what should show changed; true when it did. */
+  function paintPointSheet() {
+    var want = pointSheetWanted();
+    if (want === pointSheetOn) return false;
+    var slot = document.getElementById("pointslot");
+    if (!slot) return false;
+    pointSheetOn = want;
+    slot.innerHTML = want ? pointSheet() : "";
+    if (want) translateTree(slot);
+    else pointPaint = {};
+    return true;
   }
 
   /* ---------- parcel-machine map (UX fix 8) ----------
@@ -16601,15 +16903,47 @@
      patchDelivery() rewrites only that block (and patchSummary() the totals
      when the point changes). #pointmap is a fresh node after the patch, so
      the map view re-binds Leaflet to it. */
+  /* The sheet opens, closes or switches list ⇄ map: the block behind it
+     (the checkout's delivery, or «Доставка по умолчанию»'s slot on the
+     account screen) shows the choice, and the sheet's own slot mounts or
+     unmounts it (paintPointSheet) — the only two things that change. */
   function repaintPicker(focusSel) {
-    patchDelivery();
+    if (S.screen === "account") patchAcctPoint(); else patchDelivery();
+    paintPointSheet();
     if (S.pointOpen && POINTS.view === "map") openPointMap();
     if (focusSel) refocus(focusSel);
     settleModalFocus();   // the sheet is modal — focus in on open, back on close
   }
+  /* The sheet opens for the order («») or for the account's draft («acct»),
+     and asks for the list it is about to show: every carrier of the order's
+     country for the checkout (its chips need them all), the draft's one
+     carrier for the account. The retry is the same for both: a feed that
+     failed is asked again the next time the sheet opens, not left dead for
+     the rest of the visit. */
+  function openPointSheet(who) {
+    POINTS.err = {}; POINTS.failed = {};
+    S.pointFor = who === "acct" ? "acct" : "";
+    if (S.pointFor) {
+      var x = methods()[acctIdx()];
+      if (x && x.pm) loadPointsFor(x.pm, acctShipCountry());
+    } else loadPoints();
+    POINTS.q = ""; S.pointOpen = true; repaintPicker("[data-pointq]");
+  }
   function pickPoint(p) {
+    /* The account's sheet chooses the DEFAULT: the name goes on the draft and
+       saves itself (acctShipChanged), and the order in progress is left
+       exactly as it was — it takes the new default through the save, under
+       applyAcctShipPref's own rule. */
+    if (pointsForAcct()) {
+      S.pointOpen = false;
+      if (S.acctForm.ship) S.acctForm.ship.machine = p.name;
+      repaintPicker("[data-pointopen]");
+      acctShipChanged();
+      return;
+    }
     S.ship.point = p; S.pointOpen = false; S.shipPicked = true;
-    patchDelivery(); patchSummary(); refocus("[data-pointopen]");
+    // the sheet goes with its own slot now — the delivery block no longer holds it
+    patchDelivery(); patchSummary(); paintPointSheet(); refocus("[data-pointopen]"); settleModalFocus();
   }
   /* Only the markers inside the current view, capped — a country's full list
      can run past 400 points and nobody can read that many pins at once
@@ -17235,7 +17569,7 @@
     var btn = document.querySelector('.costep__body [data-step="3"]');
     if (btn) btn.classList.add("btn--nudge");
   }
-  var coBlockHTML = { delivery: "", payment: "", summary: "" };
+  var coBlockHTML = { delivery: "", payment: "", summary: "", country: "" };
   /* Which delivery method step 2's body was last built for — see
      patchDelivery() for why the two can drift apart and why that matters. */
   var coBodyMethod = "";
@@ -17266,6 +17600,24 @@
       '<label class="field"><span class="field__label">Короткое поздравление</span>' +
         '<textarea class="input" rows="3" maxlength="300" data-giftto="message" placeholder="С днём рождения!">' +
         esc(g.message) + "</textarea></label>";
+  }
+  /* Step 2's two country selects, as a block of their own. The account's
+     default can land while the step is open — the profile answers whenever
+     it answers — and it moves the country as well as the delivery; the
+     selects sat outside [data-co-delivery], so the carriers moved to Italy
+     under a first select still reading «Эстония» (Dim, 19.09.2026).
+     patchCountry() rewrites just these two, never the address fields
+     beside them. */
+  function countryBlockHTML() {
+    var out = '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
+      COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
+      // the real country behind «Другая страна Европы» — the carrier needs it
+      (S.country === "EU"
+        ? '<label class="field"><span class="field__label">Какая страна</span><span class="sel sel--box"><select data-countryiso aria-label="Страна доставки">' +
+          europeOptionsHTML(S.countryIso || "") + "</select></span></label>"
+        : "");
+    coBlockHTML.country = out;
+    return out;
   }
   function deliveryBlockHTML() {
     /* Nothing to choose on a digital order, so this block is one fixed
@@ -17419,6 +17771,11 @@
     // here; both are one-shot and both fail quietly.
     loadShipRules();
     if (isParcel()) loadPoints();
+    /* The account's saved machine, if its list is already here — as it is
+       when the default was saved in the account a moment ago and the lists
+       answered there, where nothing matches (pointsArrived on the account
+       screen repaints the account). Guarded like every other match. */
+    matchAcctPoint();
     // account-flows: a signed-in shopper should not retype their own name,
     // address line and phone. One-shot, and silent when nobody is signed in;
     // in a browser that has been signed in before the boot already asked.
@@ -17480,14 +17837,7 @@
             (step === 2 ? '<div class="costep__body">' +
               // no country on a digital order: nothing crosses a border, and
               // the select is the one control that would re-price the parcel
-              (isDigital() ? ""
-                : '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
-                  COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
-                  // the real country behind «Другая страна Европы» — the carrier needs it
-                  (S.country === "EU"
-                    ? '<label class="field"><span class="field__label">Какая страна</span><span class="sel sel--box"><select data-countryiso aria-label="Страна доставки">' +
-                      europeOptionsHTML(S.countryIso || "") + "</select></span></label>"
-                    : "")) +
+              (isDigital() ? "" : '<div data-co-country>' + countryBlockHTML() + "</div>") +
               '<div data-co-delivery data-points-loading="' + pointsLoadingCount() + '">' + deliveryBlockHTML() + "</div>" +
               // features: who the card is for — outside [data-co-delivery], see
               // giftToBlockHTML()'s own comment
@@ -35954,7 +36304,7 @@
   var preRendered = document.getElementById("prerender");
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
-    '<div id="ovl"></div><div id="toastslot"></div><div id="cbslot"></div>');
+    '<div id="ovl"></div><div id="pointslot"></div><div id="toastslot"></div><div id="cbslot"></div>');
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
@@ -36631,9 +36981,13 @@
     if (S.screen === "blog") blogSyncList(S.lang);
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
     if (S.screen === "admin" && S.adminTab === "blog" && !S.adminBlogEdit) loadAdminBlog(false);
-    // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
-    // Leaflet to it whenever the picker is open in map view
-    if (S.screen === "checkout" && S.pointOpen && POINTS.view === "map") openPointMap();
+    /* The parcel-point sheet lives in #pointslot, outside everything this
+       render() just rewrote — it is mounted or unmounted here only when what
+       should show changed (a navigation closed it, say), never rebuilt. So
+       the search box keeps its node, its caret and its text through any
+       render, and #pointmap is new only when the sheet itself is: that is
+       the one time Leaflet has to be bound to it again (UX fix 8). */
+    if (paintPointSheet() && S.pointOpen && POINTS.view === "map") openPointMap();
     // a modal that this paint opened takes the focus; one it closed gives it back
     settleModalFocus();
   }
@@ -36902,6 +37256,11 @@
     if (S.coStep === 2 && shipMethod() !== coBodyMethod) { render(); return; }
     patchBlock("[data-co-delivery]", html, was);
     stampPointsLoading();
+  }
+  /* The two country selects of step 2 — see countryBlockHTML(). */
+  function patchCountry() {
+    var was = coBlockHTML.country;
+    patchBlock("[data-co-country]", countryBlockHTML(), was);
   }
   function patchPayment() {
     var was = coBlockHTML.payment;
@@ -37268,6 +37627,8 @@
   });
 
   function go(screen) {
+    // the account's point sheet belongs to the account screen and closes with it
+    if (S.pointFor === "acct") { S.pointOpen = false; S.pointFor = ""; }
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") {
@@ -37822,12 +38183,8 @@
       if (isParcel()) loadPoints();
       render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
     }
-    if (d.pointopen !== undefined) {
-      // the retry: a feed that failed is asked again the next time the
-      // shopper opens the picker, not left dead for the rest of the visit
-      POINTS.err = {};
-      loadPoints(); POINTS.q = ""; S.pointOpen = true; repaintPicker("[data-pointq]"); return;
-    }
+    // the checkout's button, or «Доставка по умолчанию»'s (data-pointopen="acct")
+    if (d.pointopen !== undefined) { openPointSheet(d.pointopen); return; }
     if (d.pointclose !== undefined) { S.pointOpen = false; repaintPicker("[data-pointopen]"); return; }
     if (d.pointview !== undefined) {
       POINTS.view = POINTS.view === "map" ? "list" : "map";
@@ -40104,11 +40461,7 @@
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = ""; S.promoInfo = null; S.giftErr = ""; }
     /* Only the list (or, in map view, the pins) is redrawn — a full render
        would replace this very input and take the caret with it. */
-    else if (t.matches("[data-pointq]")) {
-      POINTS.q = t.value;
-      if (POINTS.view === "map" && pmap) { pmap.setView(pointMapCenter(), pmap.getZoom()); paintPointMarkers(); }
-      else patchPointList();
-    }
+    else if (t.matches("[data-pointq]")) pointQueryTyped(t.value);
     // features: the gift-card form and the review form keep their own state
     else if (t.matches("[data-giftf]")) { S.gift[t.dataset.giftf] = t.value; }
     /* features: «Получатель», step 2 of an all-gift-card checkout. No render()
@@ -40494,6 +40847,9 @@
     if (t.matches("[data-countryiso]")) {
       S.countryIso = t.value;
       S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
+      // the shopper's own hand, exactly as on the first select below — a
+      // profile landing after this must not put the default back over it
+      S.shipPicked = true;
       if (isParcel()) loadPoints();
       render();
     }
@@ -40511,20 +40867,13 @@
     // …and the consent tick at once, through the same one-at-a-time queue
     else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; acctQueue("marketing"); }
     /* «Доставка по умолчанию»: another country is another table of rows, so
-       the draft restarts on its first row — and saves itself like a tapped
-       row would (acctShipChanged: a parcel row waits for its machine). The
-       account's own country, not S.country — that one belongs to the
-       checkout in progress. */
-    else if (t.matches("[data-acctcountry]")) {
-      var acctCc = CARRIERS_BY_COUNTRY[t.value] ? t.value : "EE";
-      S.acctForm.ship = acctShipFromRow(acctCc, acctMethods(acctCc)[0]); render(); acctShipChanged();
-    }
+       the draft restarts on its first row (acctPickCountry). The account's
+       own country, not S.country — that one belongs to the checkout in
+       progress. */
+    else if (t.matches("[data-acctcountry]")) acctPickCountry(t.value, "EE");
     /* …and the country behind «Другая страна Европы», which is the one the
        rows and the price are actually drawn for. */
-    else if (t.matches("[data-acctcountryiso]")) {
-      var acctIso = CARRIERS_BY_COUNTRY[t.value] ? t.value : "EU";
-      S.acctForm.ship = acctShipFromRow(acctIso, acctMethods(acctIso)[0]); render(); acctShipChanged();
-    }
+    else if (t.matches("[data-acctcountryiso]")) acctPickCountry(t.value, "EU");
     /* returns: the tick on a delivered order goes to the server the moment it
        is ticked. `change` and not the click delegate: the box is inside its
        label, so a tap on the words never reaches the input's own attribute. */
@@ -40850,6 +41199,13 @@
     var t = e.target;
     if (t && t.matches && t.matches(".bank__logo,.carrier__logo")) t.replaceWith(document.createTextNode(t.alt));
   }, true);
+
+  /* A row of the parcel-point list is being pressed: its repaints wait until
+     the press is over (pointListPress/pointListRelease) — capture phase, so
+     nothing inside can hide the press from it. */
+  document.addEventListener("pointerdown", pointListPress, true);
+  document.addEventListener("pointerup", pointListRelease, true);
+  document.addEventListener("pointercancel", pointListRelease, true);
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {

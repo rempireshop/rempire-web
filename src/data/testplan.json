@@ -986,15 +986,15 @@
         "Положить товар в корзину и дойти до доставки.",
         "Выбрать «Другая страна Европы», во втором списке — Италию.",
         "Выбрать «Пакомат» и открыть выбор пакомата.",
-        "Ввести в поиск «Roma» и выбрать любой пункт.",
+        "Печатать в поиске «Roma» по букве и выбрать любой пункт.",
         "Вернуться к стране и выбрать Польшу, потом снова открыть выбор.",
-        "В поиске набрать польский индекс 91-433."
+        "В поиске набрать польский индекс 91-433 и нажать первый пункт."
       ],
       "expect": [
-        "Для Италии предлагается пакомат, а не один курьер.",
-        "Список не грузится весь: сверху написано, что пунктов слишком много.",
+        "Для Италии есть пакомат, а сверху написано, что пунктов слишком много.",
+        "Пока печатаете, окно не мигает, курсор не прыгает и буквы не пропадают.",
         "Поиск по городу находит пункты, которых в первом списке не было.",
-        "Выбранный пункт встаёт в заказ и виден в сводке.",
+        "Нажатый пункт — даже первый из найденных — выбран и виден в сводке.",
         "Смена страны сбрасывает пункт: чужой пакомат не переезжает в Польшу.",
         "Первыми идут пункты с индексом 91-433, дальше ближайшие к нему."
       ],
@@ -1002,22 +1002,22 @@
       "risk": "med",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-22T19:03:00.000Z",
+      "markedAt": "2026-09-23T12:43:19.466Z",
       "en": {
         "title": "A locker in another European country",
         "steps": [
           "Put a product in the basket and get to delivery.",
           "Choose «Другая страна Европы», then Italy in the second list.",
           "Choose «Пакомат» and open the locker picker.",
-          "Type «Roma» into the search and pick any point.",
+          "Type «Roma» into the search letter by letter and pick any point.",
           "Go back to the country, choose Poland, and open the picker again.",
-          "In the search type the Polish postcode 91-433."
+          "In the search type the Polish postcode 91-433 and tap the first point."
         ],
         "expect": [
-          "Italy is offered a locker, not the courier alone.",
-          "The list is not downloaded whole: a line says there are too many.",
+          "Italy has a locker, and a line says there are too many points.",
+          "While you type the window does not blink, the cursor stays and no letter vanishes.",
           "Searching by city finds points the first list did not hold.",
-          "The chosen point lands on the order and shows in the summary.",
+          "The tapped point — even the first one found — is chosen and in the summary.",
           "Changing the country clears the point: no locker travels to Poland.",
           "Points with postcode 91-433 come first, then the nearest to it."
         ],
@@ -2413,10 +2413,13 @@
       "steps": [
         "На шаге доставки выбрать Финляндию и «Пакомат».",
         "Открыть список пакоматов.",
+        "Набрать в поиске «Helsinki» по букве и нажать любой пункт.",
         "Переключиться на «Курьер до двери» и посмотреть цену."
       ],
       "expect": [
         "Пакомат: DPD 12,39 € выбран первым, SmartPosti 9,39 €.",
+        "Пока печатаете «Helsinki», окно не мигает, курсор и буквы на месте.",
+        "Нажатый пункт выбран: его название стоит на кнопке пакомата.",
         "Курьер: DPD 20,09 €, SmartPosti 15,69 €.",
         "Если финских пакоматов ещё нет, «Пакомат» не предлагают пустым."
       ],
@@ -2428,17 +2431,20 @@
         "steps": [
           "At the delivery step choose Finland and «Пакомат».",
           "Open the locker list.",
+          "Type «Helsinki» into the search letter by letter and tap any point.",
           "Switch to «Курьер до двери» and look at the price."
         ],
         "expect": [
           "Locker: DPD €12.39 picked first, SmartPosti €9.39.",
+          "While you type «Helsinki», the window does not blink; cursor and letters stay.",
+          "The tapped point is chosen: its name is on the locker button.",
           "Courier: DPD €20.09, SmartPosti €15.69.",
           "With no Finnish lockers yet, «Пакомат» is not offered empty."
         ],
         "why": "A Finnish parcel costs you 12.39 €; the old 4.99 € was a loss."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:20:01.825Z"
+      "markedAt": "2026-09-23T12:43:19.466Z"
     },
     {
       "id": "checkout-eu-country",
@@ -4546,22 +4552,22 @@
       "title": "Доставка по умолчанию",
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
-        "Выбрать страну и строку «Пакомат», потом сам пакомат из списка.",
-        "Набрать новую корзину и дойти до шага доставки.",
-        "Войти в кабинет с другого телефона и снова дойти до шага доставки.",
-        "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз.",
-        "Переключить страну на Латвию, потом на Польшу, и посмотреть список способов.",
-        "Сравнить список с тем, что предлагает оформление в ту же страну: он должен совпасть.",
-        "Выбрать «Другая страна Европы»: появится второй список — взять в нём Италию.",
-        "Проверить, что среди способов есть пакомат, а цена та же, что в оформлении."
+        "Выбрать Эстонию, строку «Пакомат», потом сам пакомат из списка.",
+        "Набрать новую корзину и дойти до шага доставки, потом то же с другого телефона.",
+        "На шаге доставки вручную выбрать Латвию, заказ не оформлять.",
+        "Вернуться в кабинет: «Другая страна Европы», во втором списке Италия, строка «Пакомат DPD».",
+        "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
+        "Снова открыть оформление и дойти до шага доставки.",
+        "В кабинете выбрать Грецию и «Курьер до двери», потом снова открыть оформление.",
+        "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "Пока пакомат не выбран, под списком: «Выберите пакомат — тогда сохраним».",
-        "После выбора пакомата под списком «Доставка по умолчанию сохранена ✓»; кнопки нет.",
-        "У Польши списка пакоматов нет, и строка сохраняется без него.",
-        "Сохранённая доставка подставляется в кассу сама.",
-        "На другом телефоне после входа она подставляется тоже.",
-        "После «Выйти» она больше не подставляется."
+        "Эстония: пока пакомат не выбран, под списком «Выберите пакомат — тогда сохраним».",
+        "После выбора «Доставка по умолчанию сохранена ✓», касса подставляет её на обоих телефонах.",
+        "Италия: вместо длинной фразы кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
+        "Греция сохраняется Грецией: в оформлении выбраны Греция и курьер, цена та же.",
+        "После «Выйти» доставка больше не подставляется."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4570,27 +4576,27 @@
         "title": "Default delivery",
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
-          "Choose a country and a «Пакомат» row, then the locker itself from the list.",
-          "Fill a new cart and get to the delivery step.",
-          "Sign in on another phone and get to the delivery step again.",
-          "Go back to the account, press «Выйти» (sign out) and go through the checkout once more.",
-          "Switch the country to Latvia, then to Poland, and look at the list of methods.",
-          "Compare that list with what the checkout offers for the same country: they must match.",
-          "Choose «Другая страна Европы»: a second list appears — pick Italy in it.",
-          "Check that a locker is among the methods, at the same price as the checkout."
+          "Choose Estonia, the «Пакомат» row, then the locker itself from the list.",
+          "Fill a new cart and get to the delivery step, then do the same on another phone.",
+          "On the delivery step pick Latvia by hand; do not place the order.",
+          "Back in the account: «Другая страна Европы», Italy in the second list, the «Пакомат DPD» row.",
+          "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
+          "Open the checkout again and get to the delivery step.",
+          "In the account choose Greece and «Курьер до двери», then open the checkout again.",
+          "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
-          "Once the locker is picked, «Доставка по умолчанию сохранена ✓» shows under the list; no button.",
-          "Poland has no list of lockers, and the row saves without one.",
-          "The saved delivery fills itself in at the checkout.",
-          "On the other phone, once signed in, it fills in too.",
+          "Estonia: until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
+          "Once picked, «Доставка по умолчанию сохранена ✓»; the checkout fills it in on both phones.",
+          "Italy: no long sentence, but a «Выберите пакомат» button with the checkout's search.",
+          "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
+          "Greece stays Greece: the checkout has Greece and the courier, at the same price.",
           "After «Выйти» it stops filling in."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T18:58:00.000Z"
+      "markedAt": "2026-09-23T12:23:20.471Z"
     },
     {
       "id": "acct-refund-sent",
