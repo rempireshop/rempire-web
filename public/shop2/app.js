@@ -421,6 +421,7 @@
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
       // the product page's express button — «Купить за … с доставкой» (expressMarkup)
       "Нажимая «Купить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Osta“ nõustud tingimuste ja tagastuspoliitikaga.",
+      "Ищем ваш пакомат из кабинета…": "Otsime kontole salvestatud pakiautomaati…",
       "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-päevane tagastusõigus. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
       "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-päevane tagastusõigus. Särki võib proovida ja tagastada, kui see ei sobi.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Päris poes tuleb siia tellimuse number, arve e-postile ja paki jälgimisnumber.",
@@ -3381,6 +3382,7 @@
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
       // the product page's express button — «Купить за … с доставкой» (expressMarkup)
       "Нажимая «Купить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Buy” you agree to the terms and the return policy.",
+      "Ищем ваш пакомат из кабинета…": "Looking up the parcel locker saved in your account…",
       "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-day returns. Opened cosmetics cannot be returned for hygiene reasons.",
       "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-day returns. You can try the tee on and return it if it doesn't fit.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
@@ -8287,7 +8289,13 @@
   function pointsFind(key, q) {
     var fk = key + "|" + q;
     if (POINTS.found[fk]) return POINTS.found[fk];
-    if (!POINTS.finding[fk]) {
+    /* A query that failed is asked again only once POINTS.failed is cleared —
+       the sheet opening (openPointSheet) or the next keystroke's own query.
+       Re-asked here, the hunt for the saved machine looped: every failure is
+       an answer landing (pointsFoundArrived → matchAcctPoint → here), so an
+       offline phone asked the same question as fast as the failures came
+       back. */
+    if (!POINTS.finding[fk] && !POINTS.failed[fk]) {
       POINTS.finding[fk] = true;
       var at = key.indexOf(":");
       var carrier = key.slice(0, at), cc = key.slice(at + 1);
@@ -8320,6 +8328,9 @@
      rebuilt under the caret (patchPointList). */
   function pointsFoundArrived(fk) {
     var matched = matchAcctPoint();
+    /* …and the product page's express block, which may be waiting for this
+       very answer — the saved machine of a big country (expressPlan) */
+    if (S.screen === "product") { patchExpress(); return; }
     if (S.pointOpen) {
       if (fk === pointsKey() + "|" + POINTS.q.trim().toLowerCase()) pointResultsChanged();
       if (matched) patchSummary();
@@ -17632,6 +17643,20 @@
       var list = POINTS.by[key];
       if (!list) return { ok: false, why: POINTS.err[key] ? "point" : "wait" };
       point = expressPoint(list, pref.machine);
+      /* A country too big for one download — Poland's DPD is 33 603 points,
+         the list holds the first 1 500 — and a machine saved from the
+         account's search is usually not in that slice. It is asked for by
+         name through the server search, with the very query matchAcctPoint()
+         sends, so one answer serves this page and the checkout. Until it
+         answers the block shows neither path ("wait"); a search that failed
+         is not asked again from here, and sends the tap to the checkout. */
+      if (!point && POINTS.big[key]) {
+        var want = String(pref.machine).toLowerCase(), q = want.slice(0, 60).trim();
+        if (POINTS.failed[key + "|" + q]) return { ok: false, why: "point" };
+        var found = pointsFind(key, q);
+        if (!found) return { ok: false, why: "wait" };
+        point = expressPoint(found, pref.machine);
+      }
       if (!point) return { ok: false, why: "point" };
     }
     return {
@@ -17711,6 +17736,16 @@
   var expressShown = "";
   function expressMarkup(p) {
     var plan = expressPlan(p, S.size, S.qty);
+    /* The saved machine is still being looked for — its carrier's list, or a
+       big country's server search. Neither path yet: drawing today's button
+       here would flash the checkout's way in and then swap it for the
+       express one. A disabled button under one quiet line instead; the answer
+       redraws the slot (pointsArrived, pointsFoundArrived). «Другие способы
+       оплаты» under it is live all along. */
+    if (plan.why === "wait") {
+      return '<div class="pdp__exsum pdp__exsum--wait" aria-busy="true"><p class="muted">Ищем ваш пакомат из кабинета…</p></div>' +
+        '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '" disabled>Купить через ' + gpayOnDark() + "</button>";
+    }
     /* Not everything is there: today's button, and the tap goes to the
        checkout (the click handler, expressGapStep). */
     if (!plan.ok) return '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>";

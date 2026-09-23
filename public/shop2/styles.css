@@ -1052,6 +1052,8 @@ body:has(.stickybar) .ftr {
 .pdp__exsum .cosum__row > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .pdp__exsum .cosum__row > .num { flex-shrink: 0; }
 .pdp__exsum .err { margin: 0; }
+/* …while the saved machine is still being looked up: the same box, one line */
+.pdp__exsum--wait p { margin: 0; font-size: 13px; }
 .pdp__expt { color: var(--muted); }
 .pdp__legal { text-align: center; margin: -2px 0 10px; }
 .pdp__ship { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
