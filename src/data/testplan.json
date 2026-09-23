@@ -900,11 +900,12 @@
       "title": "Страницы с правилами",
       "steps": [
         "Открыть «Доставка и оплата», «Возврат товара», «Условия продажи», «Конфиденциальность», «Контакты».",
-        "На каждой найти название фирмы, адрес и регистрационный номер."
+        "На каждой найти название фирмы, адрес и регистрационный номер.",
+        "В «Доставка и оплата» раскрыть «Полные условия доставки» по-русски, по-эстонски и по-английски."
       ],
       "expect": [
-        "Все пять страниц открываются.",
-        "Текст нигде не обрывается.",
+        "Все пять страниц открываются, текст нигде не обрывается.",
+        "В условиях доставки разделы 1–14 по порядку, на трёх языках одинаково.",
         "Название фирмы везде одно и то же.",
         "Адрес и регистрационный номер везде совпадают.",
         "Ссылка «Правовая информация» ведёт на «Условия продажи».",
@@ -917,11 +918,12 @@
         "title": "The policy pages",
         "steps": [
           "Open «Доставка и оплата», «Возврат товара», «Условия продажи», «Конфиденциальность» and «Контакты».",
-          "On each one find the company name, the address and the registration number."
+          "On each one find the company name, the address and the registration number.",
+          "On «Доставка и оплата» open «Полные условия доставки» in Russian, Estonian and English."
         ],
         "expect": [
-          "All five pages open.",
-          "No text is cut off anywhere.",
+          "All five pages open and no text is cut off anywhere.",
+          "The terms of delivery run sections 1–14 in order, the same in all three languages.",
           "The company name is the same on every page.",
           "The address and registration number match everywhere.",
           "The «Правовая информация» link leads to «Условия продажи».",
@@ -930,7 +932,7 @@
         "why": "Two different company names on one site is a question from the inspectorate."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T14:41:00.000Z"
+      "markedAt": "2026-09-23T13:15:55.089Z"
     },
     {
       "id": "shop-delivery-prices",
