@@ -159,17 +159,17 @@
       "who": [
         "renat"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "outside": "Montonio",
       "needs": [
         "montonio-keys"
       ],
       "title": "Включить «Refundable bank payments» в боевом режиме",
-      "detail": "23.09.2026: заявка подана, в панели Montonio продукт стоит «In review». Живой возврат ждёт, пока там не станет «Completed». Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). Цена за платёж в Starter не меняется — 0,20 € и так и так (Montonio, 23.09.2026). Меняется только выплата: обычный банковский платёж приходит на счёт сразу и с именем клиента, а с возвратами — на следующий рабочий день одной суммой от имени Rempire Store OÜ. Бухгалтеру: такие поступления сверять по отчёту Montonio, а не по выписке банка.",
+      "detail": "Сделано 23.09.2026: Montonio письмом подтвердил — возвраты для Rempire Shop активированы, делать их можно в Partner System и через API. Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). Цена за платёж в Starter не меняется — 0,20 € и так и так (Montonio, 23.09.2026). Меняется только выплата: обычный банковский платёж приходит на счёт сразу и с именем клиента, а с возвратами — на следующий рабочий день одной суммой от имени Rempire Store OÜ. Бухгалтеру: такие поступления сверять по отчёту Montonio, а не по выписке банка.",
       "en": {
         "title": "Activate «Refundable bank payments» in live mode",
-        "detail": "23.09.2026: requested — the Montonio panel shows the product «In review». The live refund waits until it says «Completed». A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). The per-payment price on Starter does not change — 0.20 € either way (Montonio, 23.09.2026). Only the payout changes: a plain bank payment reaches the account at once and under the customer's name; a refundable one arrives the next business day as one lump sum in the name of Rempire Store OÜ. For the accountant: reconcile those against Montonio's report, not the bank statement."
+        "detail": "Done 23.09.2026: Montonio confirmed by e-mail that refunds are activated for Rempire Shop, from the Partner System and through the API. A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). The per-payment price on Starter does not change — 0.20 € either way (Montonio, 23.09.2026). Only the payout changes: a plain bank payment reaches the account at once and under the customer's name; a refundable one arrives the next business day as one lump sum in the name of Rempire Store OÜ. For the accountant: reconcile those against Montonio's report, not the bank statement."
       }
     },
     {
@@ -385,13 +385,13 @@
         "dim",
         "renat"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "title": "Выяснить, на что сейчас указывает rempireshop.com и какой домен подтверждён в Merchant Center",
-      "detail": "От этого зависит, будет переключение подменой фида или ещё и повторным подтверждением домена. Аккаунт 5819586565, «Rempire Tower Shop». Пока ответа нет, остальные пункты этого раздела нельзя спланировать.",
+      "detail": "Выяснено 23.09.2026: rempireshop.com сейчас указывает на Shopify; Merchant Center заявил и подтвердил rempireshop.com — TXT-записью в DNS (Cloudflare) и мета-тегами на главной Shopify. TXT переживает переключение, мета-теги магазин носит сам (добавлены в шапку). Значит переключение — подмена фида, повторно подтверждать домен не нужно.",
       "en": {
         "title": "Find out where rempireshop.com points today and which domain the Merchant Center account has claimed",
-        "detail": "This decides whether the cutover is a feed swap or also a re-verification. Account 5819586565, «Rempire Tower Shop». Until it is answered the rest of this area cannot be planned."
+        "detail": "Found 23.09.2026: rempireshop.com points to Shopify today; Merchant Center claimed and verified rempireshop.com — by a DNS TXT record (Cloudflare) and meta tags on Shopify's homepage. The TXT survives the switch and the shop carries the meta tags itself (added to its head). So the switch is a feed swap; no re-verification."
       }
     },
     {
@@ -433,10 +433,10 @@
       "status": "todo",
       "blocking": false,
       "title": "Убрать фиды Shopify — только после того, как свой отработал сутки",
-      "detail": "Шесть источников Shopify App API по 328 товаров: Эстония, Латвия, Литва и Финляндия по-английски, русский на Беларусь, Грузию и Казахстан и один на 82 страны. В магазине около 224 товаров против 328 — стоит заранее посмотреть, какие карточки исчезнут. «Found by Google» с сайта нашёл всего 2, так что сам себя каталог Google не соберёт.",
+      "detail": "Состояние на 23.09.2026: шесть источников Shopify App API по 327 товаров, ещё 7 товаров «Найдено Google» с rempireshop.com; 22 правила доставки Shopify «flat 15 € / 4–12 дней» — у наших товаров своя доставка в фиде, она важнее. Ссылка «Оформить» в Business info — https://rempireshop.com/cart/{id}:1 (формат Shopify): магазин её понимает, id — наши id из фида. В день переключения Claude добавляет три наших фида в Merchant Center; источники Shopify удаляются только когда наши товары «Одобрены».",
       "en": {
         "title": "Remove the Shopify feeds — only after ours has run for a day",
-        "detail": "Six Shopify App API sources of 328 products each: Estonia, Latvia, Lithuania and Finland in English, a Russian one for Belarus, Georgia and Kazakhstan, and one covering 82 countries. The shop has about 224 products against 328 — worth seeing in advance which listings would vanish. «Found by Google», crawling the site, has found 2, so Google will not assemble the catalogue by itself."
+        "detail": "State on 23.09.2026: six Shopify App API sources of 327 products each, plus 7 products «Found by Google» on rempireshop.com; 22 Shopify shipping policies «flat €15 / 4–12 days» — our items carry their own shipping in the feed, which wins. The checkout link in Business info is https://rempireshop.com/cart/{id}:1 (Shopify's format): the shop answers it, with our feed ids. On switch day Claude adds our three feeds in Merchant Center; the Shopify sources are deleted only once our products are «Approved»."
       }
     },
     {
@@ -733,10 +733,10 @@
       ],
       "status": "todo",
       "title": "Направить домен на Vercel",
-      "detail": "DNS лежит в ASCIO.",
+      "detail": "DNS rempireshop.com обслуживает Cloudflare (серверы имён albert/april.ns.cloudflare.com; ASCIO — только регистратор), проверено 23.09.2026. Переключение — записи A/CNAME для rempireshop.com и www в Cloudflare на Vercel, режим «DNS only» (серое облако), иначе Cloudflare встанет между Vercel и его сертификатом. НЕ трогать: TXT google-site-verification (на нём держится подтверждение сайта в Merchant Center), MX route1–3.mx.cloudflare.net и SPF — на них живёт почта домена. За день до переключения поставить TTL записей 5 минут.",
       "en": {
         "title": "Point the domain at Vercel",
-        "detail": "DNS is at ASCIO."
+        "detail": "DNS for rempireshop.com is served by Cloudflare (nameservers albert/april.ns.cloudflare.com; ASCIO is only the registrar), checked 23.09.2026. The switch: A/CNAME records for rempireshop.com and www in Cloudflare pointing at Vercel, «DNS only» (grey cloud), or Cloudflare sits between Vercel and its certificate. Do NOT touch: the TXT google-site-verification record (Merchant Center's site verification rests on it), MX route1–3.mx.cloudflare.net and SPF — the domain's mail lives on them. Set the records' TTL to 5 minutes a day before."
       }
     },
     {
