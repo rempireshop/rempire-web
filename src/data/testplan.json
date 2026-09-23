@@ -4267,20 +4267,20 @@
       "lang": "RU",
       "title": "«Вернуть деньги» с подарочной картой",
       "steps": [
-        "Открыть заказ, которым купили карту, нажать «Вернуть деньги» и подтвердить.",
+        "Шаги 1–3 — для уже частично потраченной карты: ею целиком оплачен другой заказ. Открыть заказ, где карту купили, нажать «Вернуть деньги» и подтвердить.",
         "Открыть заказ, оплаченный этой картой, и нажать «Вернуть деньги».",
         "Прочитать окошко и подтвердить.",
-        "Снова открыть заказ с картой и вернуть деньги.",
-        "На кассе ввести код карты.",
-        "Прочитать предупреждение перед возвратом: оно должно назвать подтверждение банка."
+        "Снова открыть заказ, где купили карту, и нажать «Вернуть деньги»: предупреждение должно назвать подтверждение банка.",
+        "Дальше только на боевом магазине — в песочнице Montonio возвраты не проводит. Подтвердить возврат и сразу ввести код карты на кассе.",
+        "Когда Montonio подтвердил возврат, снова ввести код на кассе."
       ],
       "expect": [
         "Первый возврат отказан: «…уже потрачена на … — вернуть заказ целиком нельзя».",
         "Окошко показывает «Вернём на подарочную карту» всю сумму, «на счёт покупателя: 0 €».",
         "Заказ стал «возврат», в «Оплата» — «На подарочную карту … вернулось …».",
-        "Теперь заказ с картой возвращается: банк подтвердил — у кода «Аннулирована», «Карта PDF» пропала.",
-        "На кассе код больше не принимается.",
-        "Покупателю ушло письмо «Деньги возвращены» с названием карты."
+        "Покупателю ушло письмо «Деньги возвращены» с названием карты.",
+        "Только вживую, пока возврат в пути: у кода «Заморожена», касса карту не принимает.",
+        "Только вживую, после подтверждения: у кода «Аннулирована», «Карта PDF» пропала, код не принимается."
       ],
       "why": "Возврат на карту, которую уже потратили, — двойные деньги; карта без возврата — деньги в никуда.",
       "risk": "high",
@@ -4289,24 +4289,24 @@
       "en": {
         "title": "«Вернуть деньги» with a gift card",
         "steps": [
-          "Open the order that bought the card, press «Вернуть деньги» and confirm.",
+          "Steps 1–3 need a card that is already partly spent: another order was paid in full with it. Open the order that bought the card, press «Вернуть деньги» and confirm.",
           "Open the order paid with that card and press «Вернуть деньги».",
           "Read the box and confirm.",
-          "Open the card's order again and refund it.",
-          "Enter the card code at the checkout.",
-          "Read the warning before refunding: it must mention the bank's confirmation."
+          "Open the card's order again and press «Вернуть деньги»: the warning must mention the bank's confirmation.",
+          "From here on the live shop only — Montonio makes no refunds in the sandbox. Confirm the refund and enter the card code at the checkout straight away.",
+          "Once Montonio has confirmed the refund, enter the code at the checkout again."
         ],
         "expect": [
           "The first refund is refused: «…уже потрачена на … — вернуть заказ целиком нельзя».",
           "The box shows the whole sum under «Вернём на подарочную карту», «на счёт покупателя: 0 €».",
           "The order is «возврат», and «Оплата» says «На подарочную карту … вернулось …».",
-          "Now the card's order refunds: once the bank confirms, «Аннулирована» and no PDF.",
-          "The checkout no longer accepts the code.",
-          "The buyer got the «Деньги возвращены» letter naming the card."
+          "The buyer got the «Деньги возвращены» letter naming the card.",
+          "Live only, while the refund is pending: «Заморожена» on the code, the checkout refuses it.",
+          "Live only, once confirmed: «Аннулирована», no «Карта PDF», and the checkout refuses the code."
         ],
         "why": "A refund onto a card already spent is double money; a card never refunded is money lost."
       },
-      "markedAt": "2026-09-19T12:00:00.000Z"
+      "markedAt": "2026-09-23T12:18:21.818Z"
     },
     {
       "id": "acct-code-login",

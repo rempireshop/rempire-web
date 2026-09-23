@@ -4,7 +4,7 @@ import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { toPaymentOrder, orderLang } from "@/lib/payments/order";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { giftLinks, receiptUrl } from "@/lib/payments/receipt";
-import { settleWithoutPayment } from "@/lib/payments/settle";
+import { coveredBy, settleWithoutPayment } from "@/lib/payments/settle";
 import {
   PaymentError,
   paymentMethodKind,
@@ -117,8 +117,10 @@ export async function POST(req: Request) {
     } catch (err) {
       /* not_covered: the card or the points quoted at checkout are no longer
          there (spent by another order in between). The order stays open and
-         untouched; the checkout tells the shopper to look at the basket. */
-      if (err instanceof PaymentError && err.code === "not_covered") return bad("not_covered", 409);
+         untouched; the checkout tells the shopper to look at the basket.
+         gift_held: the card is all there but held — the order that sold it
+         is being refunded (src/lib/giftcards.ts giftHoldsByOrder). */
+      if (err instanceof PaymentError && (err.code === "not_covered" || err.code === "gift_held")) return bad(err.code, 409);
       console.error("payments/create: settling a zero-total order failed", err);
       return bad("db_unavailable", 503);
     }
@@ -130,6 +132,25 @@ export async function POST(req: Request) {
       ref: "",
       redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift }),
     });
+  }
+
+  /* A gift card that pays PART of this order is spent only once the bank's
+     money is in (src/lib/payments/apply.ts), and by then the order is paid
+     whatever the card says. So a card that has become HELD since the checkout
+     quoted it — the order that sold it is being refunded
+     (src/lib/giftcards.ts giftHoldsByOrder) — is refused here, before the
+     shopper is sent to the bank, rather than found out after. Only `held`: a
+     card that merely emptied keeps the shortfall path it has always had. The
+     redeem on the paid transition re-checks either way; this is the earlier
+     of the two doors, not the only one. */
+  try {
+    const cover = await coveredBy(row as Parameters<typeof coveredBy>[0]);
+    if (cover.gift) {
+      const { checkGiftCard } = await import("@/lib/giftcards");
+      if ((await checkGiftCard(cover.gift.code)).error === "held") return bad("gift_held", 409);
+    }
+  } catch (err) {
+    console.error("payments/create: gift-card hold check failed", err);
   }
 
   let provider;

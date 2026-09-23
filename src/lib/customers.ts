@@ -461,8 +461,12 @@ export interface CustomerOrder {
      download through the account page.» The token is the same HMAC the
      receipt and the letter carry, and it is only ever handed to a request
      that already proved it owns this mailbox (the signed rmp_cust cookie in
-     /api/account/me), so nothing new is exposed. */
-  giftCards: Array<{ code: string; amount: number; pdfUrl: string }>;
+     /api/account/me), so nothing new is exposed.
+     `held` rides along only while a refund of this order is pending at
+     Montonio: the checkout refuses the card until the refund is confirmed
+     (the card is then gone from this list) or cancelled (it works again,
+     whole) — src/lib/giftcards.ts giftHoldsByOrder. */
+  giftCards: Array<{ code: string; amount: number; pdfUrl: string; held?: true }>;
   /* The invoice of an order paid «По счёту — для компаний» — its number and
      the link to /api/account/orders/<number>/invoice/, the same PDF the
      «Счёт на оплату» letter attached. Null on every other order. Since
@@ -527,6 +531,23 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
      that graph. */
   const invoiceOf = rows.some((r) => r.invoice != null) ? (await import("@/lib/invoices")).invoiceOf : null;
 
+  /* A card is HELD while the refund of the order that sold it is pending
+     (src/lib/giftcards.ts giftHoldsByOrder — the same reader the checkout
+     refuses it by). Asked only for an order that sold a card AND carries a
+     pending refund line, so every other visit to «Мои заказы» costs nothing
+     more than it did; best effort, like the cards themselves. */
+  const holdIds = rows
+    .filter((r) => cardsByOrder.has(r.id) && refundedMoney(parseJson<Record<string, unknown>>(r.payment, {}), "pending") > 0)
+    .map((r) => r.id);
+  let holds: Record<string, unknown> = {};
+  if (holdIds.length) {
+    try {
+      holds = await (await import("@/lib/giftcards")).giftHoldsByOrder(holdIds);
+    } catch (err) {
+      console.error("[customers] gift-card holds unavailable:", err);
+    }
+  }
+
   return rows.map((r) => {
     const items = parseJson<Array<Record<string, unknown>>>(r.items, []);
     const payment = parseJson<Record<string, unknown>>(r.payment, {});
@@ -567,7 +588,7 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
          tell «отправлен» from «возвращено» instead of guessing from status. */
       refunded: refundedMoney(payment, "done"),
       refundPending: refundedMoney(payment, "pending"),
-      giftCards: cardsByOrder.get(r.id) ?? [],
+      giftCards: (cardsByOrder.get(r.id) ?? []).map((c) => (holds[r.id] ? { ...c, held: true as const } : c)),
       invoice: inv ? { number: inv.number, pdfUrl: accountInvoicePath(r.number) } : null,
       returnable: canRequestReturn(ret),
       returnRequestedAt: returnRequestedAt(ret),

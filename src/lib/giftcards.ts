@@ -3,6 +3,9 @@ import { jsonbParam, query, withTx, type Querier } from "@/lib/db";
 /* «Действует до …» is a date on a printed card — the shop's calendar day, not
    the server's (src/lib/day.ts). */
 import { shopDay, ymdParts } from "@/lib/day";
+/* Pure ledger readers only — refund.ts pulls in nothing but node:crypto, so
+   the public check route does not grow a payments graph behind it. */
+import { refundPendingInFull } from "@/lib/payments/refund";
 
 /**
  * Gift cards — issue, check, apply, redeem.
@@ -18,6 +21,9 @@ import { shopDay, ymdParts } from "@/lib/day";
  *     spend anything, so a checkout that then fails costs the customer nothing.
  *   · redeemGiftCard(code, amount, orderId) — spends it, once the order exists.
  *   · checkGiftCard(code)            — behind POST /api/giftcards/check.
+ *
+ * All three refuse a HELD card (`error: "held"`) — one whose selling order has
+ * a refund Montonio has accepted and not yet paid out; see giftHoldsByOrder().
  *
  * Money never becomes a float here beyond two decimals: every value that goes
  * to the database is rounded to cents first.
@@ -370,6 +376,72 @@ export async function giftCardsByOrder(orderIds: string[]): Promise<Record<strin
   return out;
 }
 
+/* ---------- held: the refund of the order that sold the card ----------- */
+
+/**
+ * A card is HELD while the order that SOLD it has a refund Montonio has
+ * accepted and not yet paid out — one that, once confirmed, covers the order
+ * (refundPendingInFull in src/lib/payments/refund.ts).
+ *
+ * Why. A confirmed full refund voids the cards the order sold
+ * (settleRefund → voidGiftCards), and a PENDING one deliberately voids nothing:
+ * Montonio may still cancel it after ten days, and a void cannot be undone.
+ * Until 23.09.2026 nothing refused the card in between either, so it could be
+ * spent while the refund was in flight, and the void that followed zeroed only
+ * what was left — the spent part was money the shop had handed back twice.
+ * The owner did exactly that: refunded R-100050, which bought a card, and paid
+ * R-100054 with the same card. The «уже потрачена» guard in the refund route
+ * only runs when the button is pressed, and the spend came after it.
+ *
+ * Derived, never stored. The source is `orders.payment.refunds` — the ledger
+ * settleRefund() writes and pendingRefunds() reads — so the hold starts the
+ * moment the pending line is written and ends the moment Montonio's webhook
+ * turns it `done` (the card is then voided, as before) or `failed` (the card
+ * works again with everything that was on it, because nothing was taken).
+ * There is no flag to set, to clear or to drift.
+ *
+ * Reversible by construction: a held card is refused, not changed. Its balance
+ * and its ledger are exactly what they were.
+ */
+export interface GiftHold {
+  /** The order that sold the card and has the pending refund. */
+  orderId: string;
+  number: string;
+}
+
+/**
+ * `{ <orderId>: hold }` for those of `orderIds` whose refund holds the cards
+ * they sold — one query however many orders. The `@>` test is the same one
+ * pendingRefunds() narrows on; the sum of the positive card-ledger rows is
+ * what a gift card PAID for that order, the half of refundValue() that is not
+ * `orders.total`.
+ */
+export async function giftHoldsByOrder(orderIds: Array<string | null | undefined>, q: Querier = query): Promise<Record<string, GiftHold>> {
+  const ids = [...new Set(orderIds.filter((id): id is string => !!id))];
+  if (!ids.length) return {};
+  const rows = await q<{ id: string; number: string; total: string | number | null; payment: unknown; gift_paid: string | number | null }>(
+    `select o.id, o.number, o.total, o.payment,
+            coalesce((select sum(u.amount) from gift_card_uses u
+                       where u.order_id = o.id and u.amount > 0), 0) as gift_paid
+       from orders o
+      where o.id = any($1)
+        and o.payment -> 'refunds' @> '[{"status":"pending"}]'::jsonb`,
+    [ids],
+  );
+  const out: Record<string, GiftHold> = {};
+  for (const r of rows) {
+    const value = cents((Number(r.total) || 0) + (Number(r.gift_paid) || 0));
+    if (refundPendingInFull(value, r.payment)) out[r.id] = { orderId: r.id, number: r.number };
+  }
+  return out;
+}
+
+/** The hold on this card, or null — a hand-made card (no order) is never held. */
+export async function giftCardHold(card: Pick<GiftCard, "orderId" | "voidedAt">, q: Querier = query): Promise<GiftHold | null> {
+  if (!card.orderId || card.voidedAt) return null;
+  return (await giftHoldsByOrder([card.orderId], q))[card.orderId] ?? null;
+}
+
 /* ---------- check / apply / redeem ------------------------------------ */
 
 export async function getGiftCard(code: string): Promise<GiftCard | null> {
@@ -385,20 +457,25 @@ export async function getGiftCard(code: string): Promise<GiftCard | null> {
 
 export interface GiftCheck {
   ok: boolean;
-  /** "not_found" | "empty" | "bad_code" */
+  /** "not_found" | "empty" | "held" | "bad_code" */
   error?: string;
   code?: string;
   balance?: number;
   amount?: number;
 }
 
-/** Public lookup: says whether the code is real and what is left on it. */
+/**
+ * Public lookup: says whether the code is real and what is left on it.
+ * A held card (giftCardHold above) answers `held` — the storefront says why in
+ * the shopper's language — and never which order or whose refund.
+ */
 export async function checkGiftCard(code: string): Promise<GiftCheck> {
   const norm = normaliseCode(code);
   if (!norm) return { ok: false, error: "bad_code" };
   const card = await getGiftCard(norm);
   if (!card) return { ok: false, error: "not_found" };
   if (card.balance <= 0) return { ok: false, error: "empty", code: card.code, balance: 0, amount: card.amount };
+  if (await giftCardHold(card)) return { ok: false, error: "held", code: card.code, balance: card.balance, amount: card.amount };
   return { ok: true, code: card.code, balance: card.balance, amount: card.amount };
 }
 
@@ -423,6 +500,10 @@ export async function applyGiftCard(code: string, total: number): Promise<GiftAp
   const card = await getGiftCard(norm);
   if (!card) return { ok: false, error: "not_found", discount: 0, remaining: 0 };
   if (card.balance <= 0) return { ok: false, error: "empty", code: card.code, discount: 0, remaining: 0 };
+  /* createOrder() prices a refused card at no discount, and the checkout
+     stops on «Сумма изменилась» before the bank — so a card held between
+     «Применить» and «Оплатить» costs the shopper a look, never the shop. */
+  if (await giftCardHold(card)) return { ok: false, error: "held", code: card.code, discount: 0, remaining: 0 };
 
   const want = Math.max(0, cents(Number(total) || 0));
   const discount = cents(Math.min(card.balance, want));
@@ -539,6 +620,23 @@ export async function redeemGiftCard(
           taken: seen.amount,
           remaining: card.length ? cents(Number(card[0].balance) || 0) : 0,
         };
+      }
+
+      /* A held card is refused at the moment of spending, not only at
+         «Применить» (giftHoldsByOrder above). The code is quoted onto an
+         order at checkout and spent here, on the payment — and the refund of
+         the order that sold it can go out in between. A zero-total order is
+         then stopped before it is paid (settleWithoutPayment → gift_held); a
+         bank payment that has already arrived keeps its order paid and writes
+         `giftcard_redeem_failed` with this error, the way a card emptied in
+         between always has. After the «already» answer above on purpose: a
+         retry of a spend that happened BEFORE the hold is still that spend. */
+      const own = await q<{ order_id: string | null; voided_at: Date | string | null; balance: string | number }>(
+        `select order_id, voided_at, balance from gift_cards where code = $1`,
+        [norm],
+      );
+      if (own.length && (await giftCardHold({ orderId: own[0].order_id, voidedAt: iso(own[0].voided_at) }, q))) {
+        return { ok: false, error: "held", code: norm, taken: 0, remaining: cents(Number(own[0].balance) || 0) };
       }
 
       const rows = await q<GiftRow>(

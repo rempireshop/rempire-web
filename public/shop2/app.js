@@ -716,6 +716,7 @@
       "Этот заказ уже закрыт": "See tellimus on juba suletud",
       "Банк не отвечает — попробуйте через минуту": "Pank ei vasta — proovi minuti pärast uuesti",
       "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз": "Kinkekaart või punktid on juba kasutatud — vaata ostukorv üle ja proovi uuesti",
+      "Подарочная карта заморожена: по её заказу идёт возврат — уберите карту и попробуйте ещё раз": "Kinkekaart on külmutatud: selle tellimuse eest tagastatakse raha — eemalda kaart ja proovi uuesti",
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
@@ -916,6 +917,9 @@
       "Останется на карте": "Kaardile jääb",
       "На этой карте не осталось денег.": "Sellel kaardil pole enam raha.",
       "Карта не найдена — проверьте код.": "Kaarti ei leitud — kontrolli koodi.",
+      // 23.09.2026: the card's own order is being refunded and the bank has not confirmed it yet
+      "Карта заморожена: по заказу, в котором её купили, идёт возврат.": "Kaart on külmutatud: tellimuse eest, millega see osteti, tagastatakse raha.",
+      "Карта заморожена, пока идёт возврат.": "Kaart on tagasimakse ajaks külmutatud.",
       "Сейчас не получилось проверить карту. Попробуйте позже.": "Praegu ei õnnestunud kaarti kontrollida. Proovi hiljem.",
       "Проверенный отзыв": "Kontrollitud arvustus", "Оставить отзыв": "Jäta arvustus",
       "Ваш отзыв": "Sinu arvustus", "Как вас зовут": "Kuidas sind kutsuda", "Оценка": "Hinnang",
@@ -2074,6 +2078,8 @@
       "Заказ закрыт — возврат не оформить.": "Tellimus on suletud — tagasimakset ei saa vormistada.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Tühistatud",
+      // 23.09.2026: the order's refund is pending, the card is refused until it settles
+      "Заморожена": "Külmutatud",
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "Tellimuse kinkekaardi saab tagastada ainult koos kogu tellimuse jäägiga.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "Raha ei õnnestunud kinkekaardile tagastada — kontrollige seda jaotises «Kinkekaardid».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio ei vasta — proovige minuti pärast.",
@@ -3666,6 +3672,7 @@
       "Этот заказ уже закрыт": "This order is already closed",
       "Банк не отвечает — попробуйте через минуту": "The bank is not responding — try again in a minute",
       "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз": "The gift card or points have already been spent — check the basket and try again",
+      "Подарочная карта заморожена: по её заказу идёт возврат — уберите карту и попробуйте ещё раз": "The gift card is on hold: the order it came from is being refunded — remove the card and try again",
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
@@ -3863,6 +3870,9 @@
       "Останется на карте": "Left on the card",
       "На этой карте не осталось денег.": "There is nothing left on this card.",
       "Карта не найдена — проверьте код.": "Card not found — check the code.",
+      // 23.09.2026: the card's own order is being refunded and the bank has not confirmed it yet
+      "Карта заморожена: по заказу, в котором её купили, идёт возврат.": "This card is on hold: the order it was bought with is being refunded.",
+      "Карта заморожена, пока идёт возврат.": "The card is on hold while the refund goes through.",
       "Сейчас не получилось проверить карту. Попробуйте позже.": "We couldn't check the card just now. Please try later.",
       "Проверенный отзыв": "Verified review", "Оставить отзыв": "Write a review",
       "Ваш отзыв": "Your review", "Как вас зовут": "Your name", "Оценка": "Rating",
@@ -4996,6 +5006,8 @@
       "Заказ закрыт — возврат не оформить.": "The order is closed — no refund can be made.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Cancelled",
+      // 23.09.2026: the order's refund is pending, the card is refused until it settles
+      "Заморожена": "On hold",
       "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "A gift card from an order can only be refunded together with the whole of what is left of the order.",
       "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "The money could not be put back on the gift card — check it under «Gift cards».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio is not answering — try again in a minute.",
@@ -13305,7 +13317,12 @@
         } else {
           S.giftCard = null;
           var er = (j && j.error) || "";
+          /* `held`: the order the card was bought with is being refunded and
+             Montonio has not confirmed it yet (src/lib/giftcards.ts
+             giftHoldsByOrder). The money is all still on the card — it just
+             cannot pay until the refund is settled one way or the other. */
           S.giftErr = er === "empty" ? "На этой карте не осталось денег."
+            : er === "held" ? "Карта заморожена: по заказу, в котором её купили, идёт возврат."
             : er === "unavailable" || er === "rate_limited"
               ? "Сейчас не получилось проверить карту. Попробуйте позже."
               : "Карта не найдена — проверьте код.";
@@ -15366,7 +15383,14 @@
     var docs = cards.map(function (c) {
       return '<a class="link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">' +
         "<span>Скачать подарочную карту (PDF)</span>" +
-        (cards.length > 1 ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
+        (cards.length > 1 ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>" +
+        /* `held` (listCustomerOrders): this order's refund is on its way, so
+           the checkout refuses the card until the bank confirms it — then the
+           card is cancelled and drops off this list — or the refund is
+           cancelled and the card works again, whole. Its own line and node,
+           the way «возврат отправлен» above is, so the dictionary can
+           translate it. */
+        (c.held ? '<span class="muted" data-giftheld="' + esc(c.code) + '">Карта заморожена, пока идёт возврат.</span>' : "");
     });
     /* documents: «Скачать счёт (PDF)» on an order paid «По счёту» — the same
        file the «Счёт на оплату» letter carried, on the same line the card
@@ -16899,6 +16923,8 @@
     order_closed: "Этот заказ уже закрыт",
     not_found: "Заказ не найден",
     not_covered: "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз",
+    // the card is whole but held: its own order is being refunded (giftHoldsByOrder)
+    gift_held: "Подарочная карта заморожена: по её заказу идёт возврат — уберите карту и попробуйте ещё раз",
     provider_unreachable: "Банк не отвечает — попробуйте через минуту"
   };
   function payErrText(code) {
@@ -19590,8 +19616,13 @@
          for nothing any more, so no PDF either), or partly spent — the amount
          the refund route would name if the owner tried to refund this order. */
       var used = Math.round((Number(c.amount) - Number(c.balance)) * 100) / 100;
+      /* «Заморожена» (23.09.2026): the order's refund is pending at Montonio,
+         so the till refuses the code until it is confirmed (then
+         «Аннулирована») or cancelled (then the card works again, whole) —
+         `held` from src/lib/giftcard-links.ts. */
       var state = c.voidedAt
         ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>'
+        : c.held ? '<span class="adm-badge adm-badge--quiet" data-giftheld="' + esc(c.code) + '">Заморожена</span>'
         : used > 0.004 ? '<span class="adm-hint" data-giftused="' + esc(c.code) + '">использовано ' + eur(used) + "</span>" : "";
       return '<div class="adm-gifts__c">' +
         '<span class="adm-mono adm-gifts__code">' + esc(c.code) + "</span>" + state +
@@ -20793,7 +20824,9 @@
     return '<div class="adm-row adm-row--stack">' +
       '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
         '<span class="adm-row__nm adm-mono">' + esc(c.code) +
-          (dead ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>' : "") +
+          (dead ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>'
+            // the order's refund is pending — same badge the order card draws (admGiftCardsHTML)
+            : c.held ? '<span class="adm-badge adm-badge--quiet" data-giftheld="' + esc(c.code) + '">Заморожена</span>' : "") +
         "</span>" +
         '<span class="adm-row__amt">' + eur(c.balance) + "</span></span>" +
       '<span class="adm-row__sub" style="width:100%">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +

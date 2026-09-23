@@ -19,7 +19,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { giftPdfPath } from "@/lib/giftcard-pdf";
-import { giftValidUntil, listGiftCards } from "@/lib/giftcards";
+import { giftHoldsByOrder, giftValidUntil, listGiftCards } from "@/lib/giftcards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,6 +33,9 @@ export async function GET(req: Request) {
     const cards = await listGiftCards();
     const unspent = Math.round(cards.reduce((sum, c) => sum + c.balance, 0) * 100) / 100;
     const issued = Math.round(cards.reduce((sum, c) => sum + c.amount, 0) * 100) / 100;
+    /* Held: the refund of the order that sold the card is pending at
+       Montonio, so the checkout refuses the code for now (giftHoldsByOrder). */
+    const holds = await giftHoldsByOrder(cards.filter((c) => !c.voidedAt).map((c) => c.orderId));
     /* Dim, 07.09.2026: the panel showed a code and no way to get the card
        itself, so the owner asked for the buyer's PDF from an order card
        instead. Both derived, not stored — the same two the order card already
@@ -41,6 +44,7 @@ export async function GET(req: Request) {
       ...c,
       validUntil: giftValidUntil(c.createdAt),
       pdfUrl: giftPdfPath(c.code),
+      held: !c.voidedAt && !!(c.orderId && holds[c.orderId]),
     }));
     return Response.json({ ok: true, cards: view, unspent, issued }, { headers: NO_STORE });
   } catch (err) {

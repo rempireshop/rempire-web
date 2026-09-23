@@ -349,7 +349,10 @@ async function takeCoverage(order: Order, cover: Coverage): Promise<Partial<Appl
   if (!cover.gift) return {};
   const { redeemGiftCard } = await import("@/lib/giftcards");
   const taken = await redeemGiftCard(cover.gift.code, cover.gift.amount, order.id);
-  if (!taken.ok) throw new PaymentError("not_covered");
+  /* `held`: the order that sold the card is being refunded (giftHoldsByOrder
+     in src/lib/giftcards.ts). Its own code, because «уже потрачена» would be
+     untrue — the money is all still on the card, it just cannot pay yet. */
+  if (!taken.ok) throw new PaymentError(taken.error === "held" ? "gift_held" : "not_covered");
   // already charged — apply.ts must not charge it a second time
   return { redeemGiftCard: async () => ({ ok: true }) };
 }

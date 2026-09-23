@@ -390,3 +390,25 @@ export function giftRefundRef(orderId: string, seq: number, amount: number): str
 export function fullyRefunded(total: number, refunded: number): boolean {
   return num(total) > 0 ? refunded >= num(total) - 0.005 : refunded > 0;
 }
+
+/**
+ * True while a refund of this order is PENDING and, once confirmed, would
+ * cover the order — the state in which settleRefund() has not voided the gift
+ * cards the order sold yet, but will the moment Montonio says SUCCESSFUL.
+ *
+ * It is settleRefund()'s own `fully` asked one step early: there the pending
+ * lines are left out of the sum (a refund Montonio has only accepted voids
+ * nothing), here they are counted as if they had gone through. A partial
+ * refund of the goods that is still pending answers false — confirming it
+ * voids nothing, so there is nothing to hold. A pending line that turns
+ * `failed` drops out of refundedTotal() and the answer goes back to false by
+ * itself.
+ *
+ * `value` is what the customer gave for the order (refundValue() in
+ * src/lib/payments/settle.ts): the money plus what a gift card paid.
+ * src/lib/giftcards.ts giftHoldsByOrder() is the reader.
+ */
+export function refundPendingInFull(value: number, payment: unknown): boolean {
+  if (!refundsOf(payment).some((r) => r.status === "pending")) return false;
+  return fullyRefunded(value, refundedTotal(payment));
+}
