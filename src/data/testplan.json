@@ -8596,6 +8596,45 @@
         ],
         "why": "A notification can go missing. The money is then with Montonio while the order waits for payment and nobody hears about it."
       }
+    },
+    {
+      "id": "live-google-verified",
+      "area": "live",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "any",
+      "title": "Google признаёт сайт своим после переезда домена",
+      "steps": [
+        "После переключения rempireshop.com открыть главную и посмотреть исходный код страницы.",
+        "Найти в нём google-site-verification.",
+        "В Search Console открыть «Настройки» → «Подтверждение права собственности».",
+        "В Merchant Center открыть сведения о компании и найти сайт."
+      ],
+      "expect": [
+        "В коде главной три тега google-site-verification — те же, что были у Shopify.",
+        "Search Console: права подтверждены, тегом или записью DNS.",
+        "Merchant Center: сайт rempireshop.com подтверждён и заявлен, предупреждений нет."
+      ],
+      "why": "Без подтверждения Merchant Center снимает бесплатные показы товаров — около 175 переходов в месяц.",
+      "risk": "high",
+      "writes": false,
+      "en": {
+        "title": "Google still recognises the site after the domain move",
+        "steps": [
+          "After rempireshop.com is switched, open the home page and view its source.",
+          "Find google-site-verification in it.",
+          "In Search Console open «Settings» → «Ownership verification».",
+          "In Merchant Center open the business details and find the website."
+        ],
+        "expect": [
+          "The home page source has three google-site-verification tags — the same Shopify had.",
+          "Search Console: ownership verified, by tag or by DNS record.",
+          "Merchant Center: rempireshop.com verified and claimed, no warnings."
+        ],
+        "why": "Without verification Merchant Center drops the free product listings — about 175 clicks a month."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-23T13:19:35.546Z"
     }
   ]
 }
