@@ -34,6 +34,7 @@ import { coverImgStyle } from "@/lib/blog-cover.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
 import { getOverrides } from "@/lib/orders";
+import { translateProductName } from "@/lib/product-name";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
@@ -142,11 +143,21 @@ function priceLabel(p: ShelfProduct, t: { from: string }): string {
   return (p.priceFrom ? t.from : "") + eur(p.price);
 }
 
-function shelf(products: ShelfProduct[], seg: string, t: { from: string }): string {
+/* A product's name in this page's language. Catalogue names carry a Russian
+   type tail («Bio Botanical Shampoo — шампунь»), and this page printed it as
+   it stands on the Estonian and English pages of every article published
+   since the last build — the prerender puts the same names through app.js's
+   trName() (tools/prerender-shop2.mjs, `tr(…, code, true)`), and
+   translateProductName() is that function on the server, held to it name by
+   name over the whole catalogue (tests/product-name.test.ts,
+   tests/blog-page.test.ts). Russian comes back as it is. */
+const nameIn = (name: string, code: string) => translateProductName(name, code);
+
+function shelf(products: ShelfProduct[], seg: string, t: { from: string }, code: string): string {
   return '<ul class="grid" style="list-style:none;padding:0">' + products.map((p) =>
     '<li><a class="pre__card" href="' + href(seg, "/p/" + encodeURIComponent(p.id) + "/") + '">' +
       '<span class="pre__brand">' + esc(p.brand) + "</span>" +
-      '<span class="pre__nm">' + esc(p.name) + "</span>" +
+      '<span class="pre__nm">' + esc(nameIn(p.name, code)) + "</span>" +
       '<span class="pre__pr num">' + esc(priceLabel(p, t)) + "</span>" +
     "</a></li>").join("") + "</ul>";
 }
@@ -209,7 +220,7 @@ export function renderBlogPostPage(
       seg,
       nameOf: (id: string) => {
         const p = inlineOf(id);
-        return p ? p.brand + " " + p.name : "";
+        return p ? nameIn(p.brand + " " + p.name, code) : "";
       },
       offSale: (id: string) => !!opts.offSale?.has(id),
     },

@@ -460,7 +460,9 @@ describe("the article as it is served: the price is the shop's, not the article'
 
     const et = articleBody(await postPage("et", post.slug));
     expect(et).toContain(`href="/shop2/et/p/${SHAMPOO}/"`);
-    expect(et).toContain("21,40 €");
+    // …and the name in Estonian, as the prerendered page writes it — not «— шампунь»
+    expect(et).toContain("System 4 Bio Botanical Shampoo — šampoon — 21,40 €");
+    expect(et).not.toMatch(/[а-яё]/i);
   });
 
   /* The card a crawler follows must never be a 404: a hidden product's /p/
