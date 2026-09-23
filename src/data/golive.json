@@ -143,14 +143,14 @@
         "dim",
         "renat"
       ],
-      "status": "todo",
+      "status": "doing",
       "blocking": true,
       "outside": "Montonio",
       "title": "Завести аккаунт Montonio до конца и получить боевые ключи",
-      "detail": "Запланировано на воскресенье вместе с Ренатом. От этого пункта тянется половина списка.",
+      "detail": "Montonio, 23.09.2026: Rempire Store OÜ активирована, боевые ключи доступны по их инструкции. Осталось двое: Ренат заводит Диме в Montonio аккаунт с ролью «Juhataja» — так советует сам Montonio, чтобы Дим видел и заказы на их стороне, — и Дим забирает ключи. От этого пункта тянется половина списка.",
       "en": {
         "title": "Finish the Montonio account and obtain live API keys",
-        "detail": "Planned for Sunday with Renat. Half of this list hangs off it."
+        "detail": "Montonio, 23.09.2026: Rempire Store OÜ is activated and the live keys are available through their guide. Two steps left: Renat creates a «Juhataja»-role account for Dim — Montonio's own advice, so Dim sees the orders on their side too — and Dim takes the keys. Half of this list hangs off it."
       }
     },
     {
@@ -159,17 +159,17 @@
       "who": [
         "renat"
       ],
-      "status": "blocked",
+      "status": "todo",
       "blocking": true,
       "outside": "Montonio",
       "needs": [
         "montonio-keys"
       ],
       "title": "Включить «Refundable bank payments» в боевом режиме",
-      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). И плата за это есть: с включёнными возвратами выплаты приходят на один рабочий день позже и от имени самой фирмы магазина.",
+      "detail": "Это отдельный продукт, и в тестовом режиме его нельзя включить вообще — так написано у них в панели. Один «Bank payments» возвратов не даёт. Именно из-за этого 18.09 не прошли три возврата: дело было не в коде и не в балансе. Нажать может только аккаунт Montonio с ролью «Juhataja» (руководитель) и выше — то есть аккаунт Рената, а не Димы (письменный ответ Montonio, 22.09.2026). Цена за платёж в Starter не меняется — 0,20 € и так и так (Montonio, 23.09.2026). Меняется только выплата: обычный банковский платёж приходит на счёт сразу и с именем клиента, а с возвратами — на следующий рабочий день одной суммой от имени Rempire Store OÜ. Бухгалтеру: такие поступления сверять по отчёту Montonio, а не по выписке банка.",
       "en": {
         "title": "Activate «Refundable bank payments» in live mode",
-        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). It has a price: with refunds on, payouts arrive one business day later and in the merchant's own company name."
+        "detail": "A separate product, and it cannot be activated in test mode at all — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's (Montonio, in writing, 22.09.2026). The per-payment price on Starter does not change — 0.20 € either way (Montonio, 23.09.2026). Only the payout changes: a plain bank payment reaches the account at once and under the customer's name; a refundable one arrives the next business day as one lump sum in the name of Rempire Store OÜ. For the accountant: reconcile those against Montonio's report, not the bank statement."
       }
     },
     {
@@ -199,10 +199,10 @@
         "montonio-keys"
       ],
       "title": "Пересобрать зеркало тарифов — уже с ключами",
-      "detail": "Чтобы цены посылочных автоматов брались из подтипа parcelMachine, а не из строки без подтипа с недокументированного адреса. tools/fetch-montonio-tariffs.mjs уже предпочитает нужный тариф — он просто ни разу не запускался с доступами.",
+      "detail": "Подтипы больше не причина: пакомат и пункт выдачи у Montonio стоят одинаково (ответ 22.09.2026). Остаётся одна: наложить собственные цены магазина по договору поверх прейскуранта Montonio. tools/fetch-montonio-tariffs.mjs с 22.09 добавляет НДС и на этом пути — раньше первый запуск с ключами поставил бы цены на 19 % ниже себестоимости.",
       "en": {
         "title": "Rebuild the tariff mirror with keys",
-        "detail": "So locker prices come from the `parcelMachine` subtype instead of a subtype-blind row from an undocumented endpoint. `tools/fetch-montonio-tariffs.mjs` already prefers the right rate — it has only ever run without credentials."
+        "detail": "Subtypes are no longer the reason: a locker and a pickup point cost the same at Montonio (answer of 22.09.2026). One reason remains: overlay the store's own contract prices on Montonio's list. Since 22.09 tools/fetch-montonio-tariffs.mjs adds VAT on that path too — before, the first keyed run would have priced 19 % under cost."
       }
     },
     {
@@ -211,16 +211,16 @@
       "who": [
         "claude"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "needs": [
         "tariff-mirror"
       ],
       "title": "Собрать таблицу цен: страна × вес × размер ячейки — и точку безубыточности по зонам",
-      "detail": "Инструмент и docs/delivery-pricing.md готовы (npm run delivery:pricing). Без живых ключей таблица собирается по вчерашнему зеркалу тарифов, поэтому настоящая ждёт ключей. Взвешивание товара для неё НЕ нужно: объёмный вес коробки 30×30×30 — 5,4 кг, и на здешних посылках платят за коробку (решение 18.09).",
+      "detail": "Готово 22.09.2026: docs/montonio-routes.md (npm run montonio:routes) — 25 стран, все перевозчики, пакомат и курьер, размеры XS–L, по тем же ценам, что и калькулятор Montonio. Магазин считает за коробку Рената, 25 × 18 × 8 см; куб 30 × 30 × 30, на котором держались прежние цены, давал за границей самый дорогой тариф DPD.",
       "en": {
         "title": "Produce the pricing grid — country × weight band × locker size — and the break-even flat price per zone",
-        "detail": "The tool and docs/delivery-pricing.md are ready (npm run delivery:pricing). Without live keys the grid is built from yesterday's tariff mirror, so the real one waits for the keys. It does NOT need the products weighed: a 30×30×30 carton is 5.4 kg volumetric, and at this shop's parcel sizes the box is what gets paid for (decision of 18.09)."
+        "detail": "Done 22.09.2026: docs/montonio-routes.md (npm run montonio:routes) — 25 countries, every carrier, locker and courier, sizes XS–L, at the prices Montonio's own calculator uses. The shop prices Renat's carton, 25 × 18 × 8 cm; the 30 cm cube the old prices stood on put every foreign parcel on DPD's dearest tier."
       }
     },
     {
@@ -230,17 +230,17 @@
         "renat",
         "dim"
       ],
-      "status": "blocked",
-      "blocking": true,
+      "status": "done",
+      "blocking": false,
       "needs": [
         "pricing-grid",
         "weigh-products"
       ],
-      "title": "Выбрать единую цену на зону по этой таблице",
-      "detail": "Ренат берёт одну цену за страну и разницу гасит сам — это решение про его маржу, и принимать его надо по настоящим числам, а не на глаз.",
+      "title": "Выбрать единую цену на зону — отменено 22.09",
+      "detail": "Решение пошло другим путём. Дим, 22.09.2026: доставка как в калькуляторе Montonio — сначала способ, потом перевозчик, у каждого своя цена. Цены посчитаны за настоящую коробку Рената, 25 × 18 × 8 см, а не за куб 30 × 30 × 30. Единой цены на зону больше нет.",
       "en": {
-        "title": "Choose the flat price per zone from that grid",
-        "detail": "Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses."
+        "title": "Choose the flat price per zone — cancelled 22.09",
+        "detail": "The decision went another way. Dim, 22.09.2026: delivery as in Montonio's calculator — delivery type first, then the carrier, each at its own price. Prices are worked out for Renat's real carton, 25 × 18 × 8 cm, not a 30 cm cube. There is no flat price per zone any more."
       }
     },
     {

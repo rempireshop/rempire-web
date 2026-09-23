@@ -148,6 +148,14 @@ Nothing in the code can do any of these. In the order they bite.
   > 0,15 €.) **Refunds themselves are listed as free.** What does change:
   > **payouts arrive with one business day's delay, and in our own company's
   > name.** All figures are ex-VAT.
+  >
+  > **Confirmed by Montonio on 23.09.2026**, in so many words: on Starter
+  > switching refunds on does not change the per-transaction price. What
+  > changes is how the money lands: a plain bank payment reaches the bank
+  > account at once, one credit per customer and under the customer's name; a
+  > refundable one arrives the **next business day as one lump sum in the name
+  > of Rempire Store OÜ**. So the bank statement stops naming customers —
+  > reconcile those credits against Montonio's own report.
 - [ ] **Switch on Shipping** in live mode, and the carriers used: Omniva, DPD,
       SmartPosti, Unisend, Nova Post.
 - [ ] **Register the parcel-events webhook**: Partner System → Shipping →
@@ -212,6 +220,9 @@ sandbox could not tell us.
 ### 3.2 One real order, bought with your own money
 
 - [ ] Place a real order in the shop. A small one — it will be refunded.
+      Montonio agreed in writing (23.09.2026) that a few real €1 orders to
+      ourselves, refunded by us, are fine — exactly to walk the refund and
+      the carrier-refusal paths once for real.
 - [ ] Pay it with a **bank link** (not a card): that is the method most
       customers use and the only one whose refundability is in doubt.
 - [ ] Back in the shop, the address should be `/shop2/done/?n=R-…&s=paid` and
