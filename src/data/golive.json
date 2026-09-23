@@ -111,14 +111,14 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "outside": "Railway",
       "title": "Снять копию базы и убедиться, что она читается",
-      "detail": "Кнопки на Railway нет: вкладка Backups работает только на плане Pro (23.09.2026). Копия — файл: Railway → Postgres → Variables → DATABASE_PUBLIC_URL в файл .env.railway.txt строкой DATABASE_URL=…, затем node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump в Docker; Docker Desktop должен быть запущен). Файл ложится в домашнюю папку, rempire-backups, и сразу читается обратно; восстановление проверено на пробной базе. Потом .env.railway.txt удалить. Один раз сейчас — для проверки, второй — утром запуска перед чисткой.",
+      "detail": "Первая копия снята 23.09.2026: 0,23 МБ, 30 таблиц; восстановлена в чистую базу — число строк во всех 30 совпало с живой (61 заказ, 6 клиентов). Вторая — утром запуска, шаг 1 чистки. Кнопки на Railway нет: вкладка Backups работает только на плане Pro (23.09.2026). Копия — файл: Railway → Postgres → Variables → DATABASE_PUBLIC_URL в файл .env.railway.txt строкой DATABASE_URL=…, затем node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump в Docker; Docker Desktop должен быть запущен). Файл ложится в домашнюю папку, rempire-backups, и сразу читается обратно; восстановление проверено на пробной базе. Потом .env.railway.txt удалить. Один раз сейчас — для проверки, второй — утром запуска перед чисткой.",
       "en": {
         "title": "Take a copy of the database and verify it reads back",
-        "detail": "Railway has no button for it: the Backups tab works only on the Pro plan (23.09.2026). The copy is a file: Railway → Postgres → Variables → DATABASE_PUBLIC_URL into .env.railway.txt as DATABASE_URL=…, then node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump in Docker; Docker Desktop must be running). The file lands in the home folder, rempire-backups, and is read back at once; restoring was proven on a test database. Then delete .env.railway.txt. Once now as a check, and again on launch morning before the clean-up."
+        "detail": "First copy taken 23.09.2026: 0.23 MB, 30 tables; restored into a clean database — row counts matched the live one in all 30 (61 orders, 6 customers). The second is on launch morning, step 1 of the clean-up. Railway has no button for it: the Backups tab works only on the Pro plan (23.09.2026). The copy is a file: Railway → Postgres → Variables → DATABASE_PUBLIC_URL into .env.railway.txt as DATABASE_URL=…, then node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump in Docker; Docker Desktop must be running). The file lands in the home folder, rempire-backups, and is read back at once; restoring was proven on a test database. Then delete .env.railway.txt. Once now as a check, and again on launch morning before the clean-up."
       }
     },
     {
