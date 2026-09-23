@@ -229,8 +229,9 @@ function sliceBranch(head: string): string {
 
 type Draft = { coverFocus: string };
 
-/** A drag of (dx, dy) pixels on a `w`×`h` frame, from `from`. */
-function drag(from: string, w: number, h: number, dx: number, dy: number): string {
+/** A drag of (dx, dy) pixels on a `w`×`h` frame, from `from` — on a frame
+    that moves the way `axis` says (`data-coverdrag`; absent is both ways). */
+function drag(from: string, w: number, h: number, dx: number, dy: number, axis?: string): string {
   const d: Draft = { coverFocus: from };
   const start = twin.blogCoverFocus(from) ?? { fill: false, x: 50, y: 50 };
   const run = new Function(
@@ -239,7 +240,7 @@ function drag(from: string, w: number, h: number, dx: number, dy: number): strin
   ) as (...a: unknown[]) => void;
   run(
     { adminBlogEdit: d },
-    { px: 1000, py: 500, w, h, fill: start.fill, x: start.x, y: start.y },
+    { px: 1000, py: 500, w, h, fill: start.fill, x: start.x, y: start.y, axis },
     twin.blogCoverWrite,
     () => {},
     dx, dy,
@@ -283,6 +284,119 @@ describe("dragging the picture — what a thumb does to the point", () => {
 
   it("survives a frame with no width — a drag before layout must not write NaN", () => {
     expect(drag("fill 40 60", 0, 0, 30, 30)).toBe("fill 40 60");
+  });
+});
+
+/* «Когда пытаюсь двигать фото "в начале статьи", двигается то, что "в
+   соцсетях"» — Dim, 19.09.2026. A photograph that fills a frame is cropped
+   along one side only, and the 1200×630 frames and the square usually crop
+   DIFFERENT sides of the same photograph. A thumb that moved the point along
+   the side its own frame does not crop moved nothing under the finger and
+   something in the frame next to it. */
+describe("each frame moves the photograph only the way it crops it", () => {
+  const shape = new Function(
+    `${sliceVar("COVER_WIDE")} ${slice("blogCoverAxis")} return { axis: blogCoverAxis, WIDE: COVER_WIDE };`,
+  )() as { axis: (dims: { w: number; h: number } | null, frame: number) => string | null; WIDE: number };
+
+  it("knows the shop frames' shape from styles.css", () => {
+    const css = readFileSync(fileURLToPath(new URL("../public/shop2/styles.css", import.meta.url)), "utf8");
+    expect(css).toMatch(/\.blog__tileimg \{[^}]*aspect-ratio: 1200 \/ 630/);
+    expect(css).toMatch(/\.blog__cover \{[^}]*aspect-ratio: 1200 \/ 630/);
+    expect(shape.WIDE).toBe(1200 / 630);
+  });
+
+  it("works out which side a photograph is cut along in each frame", () => {
+    const { axis, WIDE } = shape;
+    // an ordinary landscape photo: top and bottom in the shop, left and right in the square
+    for (const [w, h] of [[1600, 1200], [1500, 1000], [1920, 1080]]) {
+      expect(axis({ w, h }, WIDE), `${w}×${h} in 1200×630`).toBe("y");
+      expect(axis({ w, h }, 1), `${w}×${h} in the square`).toBe("x");
+    }
+    // the size the hint recommends: nothing to cut in the shop, only the square cuts
+    expect(axis({ w: 1200, h: 630 }, WIDE)).toBe("");
+    expect(axis({ w: 1210, h: 630 }, WIDE)).toBe("");      // within 2%
+    expect(axis({ w: 1200, h: 630 }, 1)).toBe("x");
+    // a panorama: sideways everywhere; a portrait: up and down everywhere
+    expect(axis({ w: 3000, h: 1000 }, WIDE)).toBe("x");
+    expect(axis({ w: 800, h: 1200 }, WIDE)).toBe("y");
+    expect(axis({ w: 800, h: 1200 }, 1)).toBe("y");
+    // a square catalogue photo loses nothing to the square
+    expect(axis({ w: 1000, h: 1000 }, 1)).toBe("");
+    // not measured yet: both ways, as it was
+    expect(axis(null, WIDE)).toBeNull();
+  });
+
+  it("a frame that cuts top and bottom does not move the point sideways", () => {
+    expect(drag("fill 50 50", 400, 210, -200, 0, "y")).toBe("fill 50 50");
+    expect(drag("fill 50 50", 400, 210, -200, -105, "y")).toBe("fill 50 100");
+    expect(drag("fill 50 50", 132, 132, -66, -66, "x")).toBe("fill 100 50");
+    expect(drag("fill 50 50", 132, 132, -66, -66, "xy")).toBe("fill 100 100");
+  });
+
+  type Dims = { w: number; h: number } | null;
+  /** The three frames admBlogSeeHTML() draws for a photo of this shape, one string each. */
+  function frames(dims: Dims, focus: string): Record<"list" | "post" | "og", string> & { all: string } {
+    const run = new Function(
+      "blogCoverDims", "blogCoverFrameHTML", "esc",
+      `${sliceVar("BLOG_FOCUS_RX")} ${sliceVar("COVER_WIDE")}
+       ${sliceVar("BLOG_COVER_FILL_NOTE")} ${sliceVar("BLOG_COVER_OG_NOTE")} ${sliceVar("BLOG_COVER_OG_GUESS")} ${sliceVar("BLOG_COVER_STILL")}
+       ${slice("blogCoverFocus")} ${slice("blogCoverAxis")} ${slice("admBlogSeeHTML")}
+       return admBlogSeeHTML("/c.jpg", "Обложка", arguments[3]);`,
+    ) as (...a: unknown[]) => string;
+    const html = run(
+      () => dims,
+      (where: string) => `<span class="${where === "list" ? "blog__tileimg" : "blog__cover"}"></span>`,
+      (s: string) => s,
+      focus,
+    );
+    const part = (where: string) => {
+      const at = html.indexOf(`adm-see__one--${where}"`);
+      const next = html.indexOf("adm-see__one--", at + 1);
+      return html.slice(at, next < 0 ? html.indexOf('adm-see__note"') : next);
+    };
+    return { list: part("list"), post: part("post"), og: part("og"), all: html };
+  }
+  const STILL = "Фото помещается целиком — двигать нечего.";
+
+  it("a 1200×630 photo: the shop frames say there is nothing to move and take no thumb", () => {
+    const f = frames({ w: 1200, h: 630 }, "fill 50 50");
+    for (const where of ["list", "post"] as const) {
+      expect(f[where], where).not.toContain("data-coverdrag");
+      expect(f[where], where).toContain(STILL);
+    }
+    expect(f.og).toContain('data-coverdrag="x"');
+    expect(f.og).not.toContain(STILL);
+  });
+
+  it("a 4:3 photo: the shop frames move it up and down, the square sideways", () => {
+    const f = frames({ w: 1600, h: 1200 }, "fill 50 50");
+    expect(f.list).toContain('data-coverdrag="y"');
+    expect(f.post).toContain('data-coverdrag="y"');
+    expect(f.og).toContain('data-coverdrag="x"');
+    expect(f.all).not.toContain(STILL);
+  });
+
+  it("«Вся фотография»: the shop frames take no thumb and need no excuse; the square still moves", () => {
+    const f = frames({ w: 1200, h: 630 }, "fit 50 50");
+    for (const where of ["list", "post"] as const) {
+      expect(f[where], where).not.toContain("data-coverdrag");
+      expect(f[where], where).not.toContain(STILL);
+    }
+    expect(f.og).toContain('data-coverdrag="x"');
+  });
+
+  it("a square photo: the square has nothing to cut, and the line about its crop goes too", () => {
+    const f = frames({ w: 1000, h: 1000 }, "fill 50 50");
+    expect(f.og).not.toContain("data-coverdrag");
+    expect(f.og).toContain(STILL);
+    expect(f.all).not.toContain("data-covernote");
+    expect(f.post).toContain('data-coverdrag="y"');
+  });
+
+  it("before the photograph is measured every frame that crops moves both ways, as it did", () => {
+    const f = frames(null, "fill 50 50");
+    for (const where of ["list", "post", "og"] as const) expect(f[where], where).toContain('data-coverdrag="xy"');
+    expect(f.all).not.toContain(STILL);
   });
 });
 

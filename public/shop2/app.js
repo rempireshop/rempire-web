@@ -2507,6 +2507,7 @@
         "Ruut läheb sotsiaalmeedia lingile: see lõigatakse alati, ükskõik kuidas kaanepilt poes seisab.",
       "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
         "Kuni ruutu pole tõmmatud, lõikab pood selle pildi ise — nagu välja tuleb.",
+      "Фото помещается целиком — двигать нечего.": "Foto mahub tervikuna — pole midagi liigutada.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Pildi suurus",
       "Куда сдвинуть картинку": "Kuhu pilti nihutada",
@@ -5428,6 +5429,7 @@
         "The square goes into the link preview on social media: it is always cropped, however the cover stands in the shop.",
       "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.":
         "Until the square is dragged, the shop crops this picture itself — however it turns out.",
+      "Фото помещается целиком — двигать нечего.": "The whole photo fits — nothing to move.",
       /* the four sizes and the two steps a picture in the text has (admFigBarHTML) */
       "Размер картинки": "Picture size",
       "Куда сдвинуть картинку": "Where to move the picture",
@@ -21690,24 +21692,84 @@
   var BLOG_COVER_FILL_NOTE = "Фотография заполняет окно, края обрезаются. Потяните её пальцем — выберите, что останется видно.";
   var BLOG_COVER_OG_NOTE = "Квадрат уходит в ссылку для соцсетей: его обрезают всегда, как бы обложка ни стояла в магазине.";
   var BLOG_COVER_OG_GUESS = "Пока квадрат не потянули, магазин обрезает эту картинку сам — как получится.";
+  var BLOG_COVER_STILL = "Фото помещается целиком — двигать нечего.";
+
+  /* ---- which way the photograph can move in each frame -------------------
+     «Когда пытаюсь двигать фото "в начале статьи", двигается то, что "в
+     соцсетях"» — Dim, 19.09.2026. The shared point was not the fault; a frame
+     offering a thumb in a direction it cannot move was. A photograph that
+     fills a frame is cropped along ONE side only — the side it is too long
+     on — and background-position does nothing along the other. The shop
+     frames are 1200×630 and the square is 1:1, so an ordinary landscape photo
+     (4:3, 3:2, 16:9) is cut top and bottom in the shop frames and left and
+     right in the square: a sideways drag on «В начале статьи» moved x, which
+     only the square shows. A photo already 1200×630 — the size the hint
+     recommends — is not cut by either shop frame at all, so every drag there
+     moved the square alone.
+
+     So each frame measures the photograph against its own shape: it moves
+     the point only along the side it cuts, and a frame that cuts nothing
+     says so and takes no thumb. Still one point — one column in the row, the
+     one og-card.ts crops to — so where two frames cut the same side, the
+     same spot moves in both, which is what one point means. */
+  var COVER_WIDE = 1200 / 630;   // .blog__tileimg and .blog__cover in styles.css
+  var COVER_DIMS = {};           // url → {w, h}; false while it loads, or if it never does
+  var COVER_REPAINT_DUE = false; // the shape arrived mid-drag — see coverDragEnd()
+  function blogCoverDims(url) {
+    if (!url) return null;
+    if (COVER_DIMS[url] !== undefined) return COVER_DIMS[url] || null;
+    COVER_DIMS[url] = false;
+    var img = new Image();
+    img.onload = function () {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      COVER_DIMS[url] = { w: img.naturalWidth, h: img.naturalHeight };
+      admBlogRepaintSee(url);
+    };
+    img.src = url;
+    return null;
+  }
+  /** "x" — wider than the frame, moves sideways; "y" — taller, moves up and
+      down; "" — the frame's own shape, within 2%, nothing to move; null — the
+      shape is not known yet, so both ways, as before it was measured. */
+  function blogCoverAxis(dims, frame) {
+    if (!dims) return null;
+    var r = dims.w / dims.h / frame;
+    if (Math.abs(r - 1) < 0.02) return "";
+    return r > 1 ? "x" : "y";
+  }
 
   function admBlogSeeHTML(url, alt, focus) {
     var f = blogCoverFocus(focus);
     var fill = !!(f && f.fill);
+    var dims = blogCoverDims(url);
     /* Only a frame that actually crops is worth a thumb. In «Вся фотография»
        the two shop frames show the whole picture and there is nothing under
-       the finger to move; the square crops whatever the page does, so it is
-       draggable always — which is the answer to the complaint underneath the
-       complaint, a face that survived the page and came back halved from
-       WhatsApp. */
-    /* Both openings written out whole rather than assembled from pieces:
+       the finger to move; the square crops whatever the page does — which is
+       the answer to the complaint underneath the complaint, a face that
+       survived the page and came back halved from WhatsApp — unless the
+       photograph is square itself. `mode` is "off" (no thumb), "still" (would
+       crop, but the photo already has the frame's shape), or the directions
+       the thumb moves the point in: "x", "y", "xy". */
+    var modeFor = function (on, frame) {
+      if (!on) return "off";
+      var a = blogCoverAxis(dims, frame);
+      return a === null ? "xy" : a || "still";
+    };
+    /* The openings written out whole rather than assembled from pieces:
        translateTree() reads an aria-label off a finished attribute, and
        tools/i18n-gaps.mjs can only see one in a literal that is a whole tag. */
-    var pan = function (on, inner) {
-      return (on
-        ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag tabindex="0" aria-label="Двигать фотографию">'
-        : '<span class="adm-see__f">') + inner + "</span>";
+    var pan = function (mode, inner) {
+      var open = mode === "x"
+        ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag="x" tabindex="0" aria-label="Двигать фотографию">'
+        : mode === "y"
+          ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag="y" tabindex="0" aria-label="Двигать фотографию">'
+          : mode === "xy"
+            ? '<span class="adm-see__f adm-see__f--pan" data-coverdrag="xy" tabindex="0" aria-label="Двигать фотографию">'
+            : '<span class="adm-see__f">';
+      return open + inner + "</span>" +
+        (mode === "still" ? '<span class="adm-hint adm-see__still">' + BLOG_COVER_STILL + "</span>" : "");
     };
+    var ogMode = modeFor(true, 1);
     /* The two shop frames are drawn by the shop's own blogCoverFrameHTML()
        under the shop's own classes, against styles.css — so this is not a
        copy of the cropping rule, it IS the rule (see the note above). The
@@ -21718,11 +21780,11 @@
     var one = function (where, title) {
       return '<span class="adm-see__one adm-see__one--' + where + '">' +
         '<span class="adm-see__t">' + title + "</span>" +
-        pan(fill, blogCoverFrameHTML(where, url, alt, f)) + "</span>";
+        pan(modeFor(fill, COVER_WIDE), blogCoverFrameHTML(where, url, alt, f)) + "</span>";
     };
     var square = '<span class="adm-see__one adm-see__one--og">' +
       '<span class="adm-see__t">В соцсетях</span>' +
-      pan(true, '<span class="adm-see__og" style="background-image:url(\'' + esc(url) + "')" +
+      pan(ogMode, '<span class="adm-see__og" style="background-image:url(\'' + esc(url) + "')" +
         (f ? ";background-position:" + f.x + "% " + f.y + "%" : "") +
         '" role="img" aria-label="' + esc(alt || "") + '"></span>') + "</span>";
     return '<div class="adm-see">' +
@@ -21733,8 +21795,35 @@
           : "Так обложку увидят в магазине: она вписывается в окно целиком, " +
             "по бокам остаётся пустое поле. Ровнее всего ложится широкая фотография 1200×630.") +
       "</span>" +
-      '<span class="adm-hint adm-see__note" data-covernote>' + (f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS) + "</span>" +
+      // a square photograph loses nothing to the square, so there is no crop to talk about
+      (ogMode === "still" ? "" :
+        '<span class="adm-hint adm-see__note" data-covernote>' + (f ? BLOG_COVER_OG_NOTE : BLOG_COVER_OG_GUESS) + "</span>") +
       "</div>";
+  }
+  /* The photograph's shape arrives after the frames were drawn (blogCoverDims),
+     so the three are drawn again, and nothing else is: a render() would
+     rebuild the editor under a caret that may be in the text — the reason
+     admBlogPaintCover() below exists. Not in the middle of a drag, which the
+     new markup would take the pointer capture from; coverDragEnd() calls
+     this again once the thumb is lifted. */
+  function admBlogRepaintSee(url) {
+    var d = S.adminBlogEdit;
+    var el = document.querySelector(".adm-cover .adm-see");
+    if (!d || d.coverUrl !== url || !el) return;
+    if (COVERDRAG) { COVER_REPAINT_DUE = true; return; }
+    COVER_REPAINT_DUE = false;
+    var box = document.createElement("div");
+    box.innerHTML = admBlogSeeHTML(d.coverUrl, admBlogCoverWords(d).say, d.coverFocus);
+    var fresh = box.firstChild;
+    el.parentNode.replaceChild(fresh, el);
+    translateTree(fresh);
+  }
+  /** The cover's caption in the language being edited, and what the frames
+      read out: the caption, or — the shop's own fallback — the title. */
+  function admBlogCoverWords(d) {
+    var L = S.adminBlogLang || "RU";
+    var alt = String(d.coverAlt[L] || d.coverAlt.RU || d.coverAlt.ET || d.coverAlt.EN || "").trim();
+    return { alt: alt, say: alt || String(d.title[L] || d.title.RU || d.title.ET || d.title.EN || "").trim() };
   }
   /* The frames repaint themselves while a thumb is on one of them. A render()
      here would rebuild the editor under the finger and take the pointer
@@ -21778,12 +21867,10 @@
     var file = '<input class="adm-file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">';
     var err = UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "";
     if (d.coverUrl) {
-      var L = S.adminBlogLang || "RU";
-      var alt = String(d.coverAlt[L] || d.coverAlt.RU || d.coverAlt.ET || d.coverAlt.EN || "").trim();
-      // the shop's own fallback for a cover with no caption yet: the title
-      var say = alt || String(d.title[L] || d.title.RU || d.title.ET || d.title.EN || "").trim();
+      var words = admBlogCoverWords(d);
+      var alt = words.alt;
       return '<div class="adm-cover" data-galdrop="blog">' +
-        admBlogSeeHTML(d.coverUrl, say, d.coverFocus) +
+        admBlogSeeHTML(d.coverUrl, words.say, d.coverFocus) +
         (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
         '<div class="adm-cover__acts">' +
           /* «размер»: the two ways one photograph can stand in a frame. It
@@ -40562,18 +40649,25 @@
      A drag across the whole width of a frame sweeps the point from one edge
      of the picture to the other. So the wide article frame is fine and the
      small square is coarse, which is the right way round: the frame you want
-     to be exact in is the one you are looking at. Dragging any of the three
-     moves all three, because it is one point — that is how the owner finds
-     out, without publishing, that the square does not keep what the page
-     keeps. */
+     to be exact in is the one you are looking at.
+
+     A frame moves the point only along the side it crops (`data-coverdrag`,
+     «x», «y», or «xy» while the photograph's shape is not known yet — see
+     blogCoverAxis()). Moving it along the other side is invisible in the
+     frame under the finger and visible only in another one, which is exactly
+     what the owner reported: he dragged the article frame and the square
+     moved (Dim, 19.09.2026). Where two frames crop the same side they share
+     the movement, because it is one point — that is how the owner finds out,
+     without publishing, that the square does not keep what the page keeps. */
   var COVERDRAG = null;
   function coverDragTo(clientX, clientY) {
     var d = S.adminBlogEdit;
     if (!COVERDRAG || !d) return;
+    var ax = COVERDRAG.axis || "xy";
     d.coverFocus = blogCoverWrite(
       COVERDRAG.fill,
-      COVERDRAG.x - (COVERDRAG.w ? ((clientX - COVERDRAG.px) / COVERDRAG.w) * 100 : 0),
-      COVERDRAG.y - (COVERDRAG.h ? ((clientY - COVERDRAG.py) / COVERDRAG.h) * 100 : 0),
+      COVERDRAG.x - (COVERDRAG.w && ax.indexOf("x") >= 0 ? ((clientX - COVERDRAG.px) / COVERDRAG.w) * 100 : 0),
+      COVERDRAG.y - (COVERDRAG.h && ax.indexOf("y") >= 0 ? ((clientY - COVERDRAG.py) / COVERDRAG.h) * 100 : 0),
     );
     admBlogPaintCover();
   }
@@ -40587,6 +40681,7 @@
     COVERDRAG = {
       px: e.clientX, py: e.clientY, w: r.width, h: r.height,
       fill: !!(f && f.fill), x: f ? f.x : 50, y: f ? f.y : 50,
+      axis: z.getAttribute("data-coverdrag") || "xy",
     };
     if (z.setPointerCapture) { try { z.setPointerCapture(e.pointerId); } catch (err) { /* no capture, the document listeners still see the move */ } }
     /* No preventDefault() here on purpose: it would keep the frame from
@@ -40604,7 +40699,9 @@
     COVERDRAG = null;
     /* The note under the frames and the state of the two words change with
        the mode, not with the point, so only the «не сохранено» line has
-       anything to say after a drag. */
+       anything to say after a drag… unless the photograph's shape arrived
+       while the thumb was down (admBlogRepaintSee). */
+    if (COVER_REPAINT_DUE && S.adminBlogEdit) admBlogRepaintSee(S.adminBlogEdit.coverUrl);
     blogPaintState();
   }
   document.addEventListener("pointerup", coverDragEnd);
@@ -40618,6 +40715,9 @@
     var step = z && COVER_KEY_STEP[e.key];
     var d = S.adminBlogEdit;
     if (!step || !d) return;
+    // …and only the way this frame can move — the same rule as the thumb
+    var ax = z.getAttribute("data-coverdrag") || "xy";
+    if ((step[0] && ax.indexOf("x") < 0) || (step[1] && ax.indexOf("y") < 0)) return;
     var f = blogCoverFocus(d.coverFocus);
     d.coverFocus = blogCoverWrite(!!(f && f.fill), (f ? f.x : 50) + step[0], (f ? f.y : 50) + step[1]);
     admBlogPaintCover();
