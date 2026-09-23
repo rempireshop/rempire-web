@@ -41,7 +41,7 @@ import { readRefundStatusDescription } from "@/lib/montonio-problems";
 import { createOrder, getOrder, listAudit, setOrderPayment, setOrderStatus } from "@/lib/orders";
 import { signHs256, verifyHs256 } from "@/lib/payments/jwt";
 import { refundsOf } from "@/lib/payments/refund";
-import { fetchEnabledPaymentMethods } from "@/lib/payments/methods";
+import { fetchEnabledPaymentMethods, fetchPaymentMethods } from "@/lib/payments/methods";
 import { MontonioProvider } from "@/lib/payments/montonio";
 import { pendingRefunds } from "@/lib/payments/pending-refunds";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
@@ -420,6 +420,44 @@ describe("GET /stores/payment-methods — presence of a key is the activation si
     withKeys();
     stubFetch([[/payment-methods$/, () => json({ message: "nope" }, 500)]]);
     expect(await fetchEnabledPaymentMethods()).toBeNull();
+  });
+});
+
+describe("a euro order is never offered a bank that only takes zloty", () => {
+  /* The guide: «Bank Payments EUR, PLN». Since 22.09.2026 a parcel to Poland
+     shows Poland's banks, and this shop only charges in euro. */
+  const bank = (code: string, supportedCurrencies?: string[]) => ({
+    code,
+    name: code,
+    logoUrl: "",
+    ...(supportedCurrencies ? { supportedCurrencies } : {}),
+  });
+  const body = {
+    paymentMethods: {
+      paymentInitiation: {
+        setup: {
+          EE: { supportedCurrencies: ["EUR"], paymentMethods: [bank("HABAEE2X", ["EUR"]), bank("LHVBEE22")] },
+          PL: {
+            supportedCurrencies: ["EUR", "PLN"],
+            paymentMethods: [bank("PKOPPLPW", ["PLN"]), bank("REVOLT21", ["EUR", "PLN"])],
+          },
+          XX: { supportedCurrencies: ["PLN"], paymentMethods: [bank("ZLOTYONLY")] },
+        },
+      },
+    },
+  };
+
+  it("drops a PLN-only bank and a PLN-only country, keeps a bank that did not say", async () => {
+    withKeys();
+    delete (globalThis as { __rempirePayMethods?: unknown }).__rempirePayMethods;
+    stubFetch([[/payment-methods$/, () => json(body)]]);
+    const got = await fetchPaymentMethods();
+    expect(got!.banks.map((b) => `${b.country}:${b.code}`)).toEqual([
+      "EE:HABAEE2X",
+      "EE:LHVBEE22",
+      "PL:REVOLT21",
+    ]);
+    delete (globalThis as { __rempirePayMethods?: unknown }).__rempirePayMethods;
   });
 });
 

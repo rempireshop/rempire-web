@@ -348,8 +348,8 @@ from a webhook, or what the shop charges.
 | D6 | Read `constraints.parcelDimensionsRequired` and declare a carton (S6) | shipping audit § 1.6 |
 | ~~D7~~ | ~~`lockerSize`, or `defaultLockerSize` on the contract (S7)~~ · **closed 22.09.2026, not applicable.** Montonio's written answer: a drop-off code works only on the merchant's own direct contract with the carrier, with that carrier's help, and is aimed at marketplaces; Omniva has no such option at all. A normal merchant scans the label at the parcel machine. There is nothing left to decide | shipping audit § 4 |
 | D8 | Implement `PATCH /shipments/{id}` so a refused parcel can be repaired from the panel (S8) | shipping audit § 1.5 |
-| D9 | **A pending refund still sends the customer «Деньги возвращены».** `notifyOrderClosed()` fires for anything that is not `failed`, so a refund Montonio has only accepted — and may cancel in ten days — is announced to the customer as done. Changing it changes what a customer is told about money, so it is a decision, not a fix | this branch, `src/app/api/admin/orders/[id]/refund/route.ts` |
-| D10 | Drop non-EUR banks from the checkout list | payments audit § C2 |
+| ~~D9~~ | ~~A pending refund still sends the customer «Деньги возвращены»~~ · **done 19.09.2026** (b361c71). A refund Montonio has only accepted now sends its own letter, «Возврат отправлен», and «Деньги возвращены» waits for the webhook | this branch, `src/app/api/admin/orders/[id]/refund/route.ts` |
+| ~~D10~~ | ~~Drop non-EUR banks from the checkout list~~ · **done 23.09.2026**. It stopped being latent on 22.09, when the checkout began shipping to Poland and offering the delivery country's banks: `mapBanks()` now skips a bank or a country group whose `supportedCurrencies` lacks EUR — `tests/montonio-docs-payloads.test.ts`. First seen for real in the /test check `live-banks-country` | payments audit § C2 |
 
 ---
 

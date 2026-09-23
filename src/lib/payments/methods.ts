@@ -57,25 +57,41 @@ function authToken(config: MontonioConfig): string {
   });
 }
 
-type RawBank = { code?: unknown; name?: unknown; logoUrl?: unknown };
+type RawBank = { code?: unknown; name?: unknown; logoUrl?: unknown; supportedCurrencies?: unknown };
 type RawResponse = {
   paymentMethods?: {
     cardPayments?: { logoUrl?: unknown } | null;
     mobilePay?: { logoUrl?: unknown } | null;
     // keyed by country code (EE, LV, LT, FI, PL, …) — country is the object
     // key, there is no separate `country` field per Montonio's own example
-    paymentInitiation?: { setup?: Record<string, { paymentMethods?: RawBank[] } | undefined> } | null;
+    paymentInitiation?: {
+      setup?: Record<string, { supportedCurrencies?: unknown; paymentMethods?: RawBank[] } | undefined>;
+    } | null;
   };
 };
+
+/**
+ * Can this bank (or country group) take a euro payment? The shop is EUR-only
+ * (payments/order.ts), and Montonio's guide lists bank payments as «EUR, PLN»
+ * — so a Polish bank can be PLN-only. Since 22.09.2026 the checkout ships to
+ * Poland and offers the delivery country's banks, so a PLN-only bank would
+ * reach a euro order (payments audit § C2). No list at all means Montonio did
+ * not say: keep the bank rather than empty a country on a missing field.
+ */
+function takesEur(v: unknown): boolean {
+  if (!Array.isArray(v) || !v.length) return true;
+  return v.some((c) => str(c).toUpperCase() === "EUR");
+}
 
 function mapBanks(raw: RawResponse): PaymentBank[] {
   const setup = raw.paymentMethods?.paymentInitiation?.setup;
   if (!setup || typeof setup !== "object") return [];
   const out: PaymentBank[] = [];
   for (const [country, group] of Object.entries(setup)) {
+    if (!takesEur(group?.supportedCurrencies)) continue;
     for (const b of group?.paymentMethods ?? []) {
       const code = str(b.code);
-      if (!code) continue;
+      if (!code || !takesEur(b.supportedCurrencies)) continue;
       out.push({ code, name: str(b.name) || code, country: country.toUpperCase(), logoUrl: str(b.logoUrl) });
     }
   }

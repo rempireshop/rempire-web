@@ -8145,6 +8145,47 @@
       "markedAt": "2026-09-19T00:00:00.000Z"
     },
     {
+      "id": "live-banks-country",
+      "area": "live",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Банки по странам на боевых ключах",
+      "steps": [
+        "После переключения на боевые ключи дойти до выбора оплаты.",
+        "Кнопку «Оплатить» не нажимать — это проверка без денег.",
+        "Выбрать доставку по очереди в Эстонию, Латвию, Литву и Финляндию.",
+        "Потом выбрать Польшу и посмотреть кнопки банков."
+      ],
+      "expect": [
+        "У каждой страны свои банки, у каждого свой логотип.",
+        "Польша: только банки, которые берут евро, или сразу карта.",
+        "Банковская карта есть в каждой стране.",
+        "В кабинете Montonio не появилось ни одного платежа."
+      ],
+      "why": "Польские банки бывают только в злотых, а магазин берёт евро.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-23T10:28:06.877Z",
+      "en": {
+        "title": "Banks per country on the live keys",
+        "steps": [
+          "Once the live keys are on, go as far as choosing a payment method.",
+          "Do not press «Оплатить» — this check moves no money.",
+          "Pick delivery to Estonia, Latvia, Lithuania and Finland in turn.",
+          "Then pick Poland and look at the bank buttons."
+        ],
+        "expect": [
+          "Each country shows its own banks, each with its own logo.",
+          "Poland: only banks that take euro, or straight to card.",
+          "Bank card is there for every country.",
+          "No payment appeared in the Montonio account."
+        ],
+        "why": "Polish banks can be zloty-only, and this shop charges in euro."
+      }
+    },
+    {
       "id": "live-bank-order",
       "area": "live",
       "who": "both",
@@ -8317,12 +8358,12 @@
       "title": "Настоящая этикетка и настоящая посылка",
       "steps": [
         "В боевом магазине создать этикетку для настоящего заказа.",
-        "Напечатать, наклеить и сдать посылку в пакомат по коду.",
+        "Напечатать, наклеить и сдать посылку: отсканировать этикетку в пакомате.",
         "Отследить по трек-номеру из письма покупателя.",
         "Дождаться, пока покупатель заберёт посылку."
       ],
       "expect": [
-        "Пакомат принял посылку по коду сдачи.",
+        "Пакомат принял посылку по этикетке, без кода сдачи.",
         "Трек-номер настоящий: по нему видно, где посылка.",
         "Покупатель забрал заказ.",
         "После этого заказ сам перешёл в «Доставлен».",
@@ -8332,17 +8373,17 @@
       "risk": "high",
       "writes": true,
       "mark": "reworded",
-      "markedAt": "2026-09-18T17:10:00.000Z",
+      "markedAt": "2026-09-23T10:28:06.877Z",
       "en": {
         "title": "A real label and a real parcel",
         "steps": [
           "On the live shop, make a label for a real order.",
-          "Print it, stick it on, drop the parcel with its code.",
+          "Print it, stick it on, drop it off by scanning the label.",
           "Track it by the number from the buyer's letter.",
           "Wait until the buyer collects the parcel."
         ],
         "expect": [
-          "The locker took the parcel against the code.",
+          "The locker took the parcel off its label, no drop-off code.",
           "The tracking number is real and shows where the parcel is.",
           "The buyer collected the order.",
           "After that the order moved itself to «Доставлен».",
