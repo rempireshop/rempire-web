@@ -16804,6 +16804,23 @@
     return !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
   }
   function giftToBad() { return S.giftToTouched && giftToEmailBad(); }
+  /**
+   * The first checkout step that still needs the shopper — judged by the same
+   * three tests the «Далее» buttons make (the e-mail; the delivery fields, the
+   * parcel machine and a gift card's recipient), but without drawing errors:
+   * nobody has typed anything yet. 3 when both are already complete.
+   *
+   * Dim, 23.09.2026 («A»): a signed-in customer whose account filled contact
+   * and delivery goes from the product page's «Купить через G Pay» straight
+   * to «Оплата». The two steps above stay on screen as their ticked,
+   * editable heads, and step 3 shows the total with delivery right above
+   * «Оплатить» — so the shop gains no new screen, only a shorter walk.
+   */
+  function coFirstOpenStep() {
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email)) return 1;
+    if (shipMissing().length || pointMissing() || (isDigital() && giftToEmailBad())) return 2;
+    return 3;
+  }
 
   function shipField(key, label, ph, auto, mode) {
     var bad = shipBad(key);
@@ -39618,7 +39635,14 @@
       if (t.classList.contains("btn--express")) {
         for (var wi = 0; wi < PAYS.length; wi++) if (PAYS[wi].k === "wallet") S.pay = wi;
       }
-      addToCart(d.buynow); go("checkout"); return;
+      addToCart(d.buynow); go("checkout");
+      /* a signed-in customer skips the steps the account already filled
+         (coFirstOpenStep); a guest, or anything missing, opens where it did */
+      if (S.loggedIn) {
+        var open = coFirstOpenStep();
+        if (open > 1) { S.coStep = open; render(); refocus('.costep__head[data-step="' + open + '"]'); }
+      }
+      return;
     }
     if (d.cart !== undefined) { openDrawer("cart"); return; }
     if (d.closecart !== undefined) { closeDrawers(); return; }

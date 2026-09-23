@@ -3111,6 +3111,47 @@
       "markedAt": "2026-09-23T13:36:32.960Z"
     },
     {
+      "id": "checkout-wallet-account",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Кошелёк из заполненного кабинета",
+      "steps": [
+        "На стенде: войти в кабинет, где сохранены имя, телефон и доставка по умолчанию.",
+        "Открыть товар и нажать «Купить через G Pay».",
+        "Нажать «Оплатить», в Montonio — Google Pay или Apple Pay.",
+        "Выйти из кабинета и нажать ту же кнопку ещё раз."
+      ],
+      "expect": [
+        "Оформление открылось сразу на шаге «Оплата».",
+        "Контакты и доставка свёрнуты с галочкой, их можно открыть.",
+        "На кнопке «Оплатить» — сумма вместе с доставкой.",
+        "Без входа оформление открывается с первого шага, как раньше."
+      ],
+      "why": "Покупатель с заполненным кабинетом платит в четыре касания.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-23T18:00:24.561Z",
+      "en": {
+        "title": "Wallet from a filled-in account",
+        "steps": [
+          "On staging: sign in to an account with name, phone and a default delivery saved.",
+          "Open a product and press «Купить через G Pay».",
+          "Press «Оплатить», then Google Pay or Apple Pay at Montonio.",
+          "Sign out and press the same button again."
+        ],
+        "expect": [
+          "The checkout opened straight on the «Оплата» step.",
+          "Contact and delivery are folded with a tick and can be opened.",
+          "The «Оплатить» button shows the total including delivery.",
+          "Signed out, the checkout opens on the first step as before."
+        ],
+        "why": "A customer with a filled-in account pays in four taps."
+      }
+    },
+    {
       "id": "checkout-double-tap",
       "area": "checkout",
       "who": "dim",
