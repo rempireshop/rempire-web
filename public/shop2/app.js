@@ -419,6 +419,8 @@
       "Оплата через банк — данные карты магазин не видит": "Makse toimub panga kaudu — pood ei näe kaardiandmeid",
       "30 дней на возврат": "30-päevane tagastusõigus",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
+      // the product page's express button — «Купить за … с доставкой» (expressMarkup)
+      "Нажимая «Купить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Osta“ nõustud tingimuste ja tagastuspoliitikaga.",
       "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-päevane tagastusõigus. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
       "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-päevane tagastusõigus. Särki võib proovida ja tagastada, kui see ei sobi.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Päris poes tuleb siia tellimuse number, arve e-postile ja paki jälgimisnumber.",
@@ -741,6 +743,9 @@
         "Iga kaart läheb oma saajale — nad on ostukorvis kirjas.",
       "Каждому свой": "Igaühele oma",
       "Сумма изменилась — проверьте заказ": "Summa muutus — vaata tellimus üle",
+      "Цена изменилась, пока вы смотрели товар. Проверьте итог и нажмите ещё раз.":
+        "Hind muutus sel ajal, kui toodet vaatasid. Vaata kokku üle ja vajuta uuesti.",
+      "Данные заказа обновились — проверьте и нажмите ещё раз": "Tellimuse andmed uuenesid — vaata üle ja vajuta uuesti",
       "Сумма изменилась, пока вы оформляли заказ — скидка или карта больше не действуют. Проверьте итог и нажмите ещё раз.":
         "Summa muutus tellimuse vormistamise ajal — soodustus või kinkekaart enam ei kehti. Vaata kokku üle ja vajuta uuesti.",
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
@@ -3376,6 +3381,8 @@
       "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
       "30 дней на возврат": "30-day returns",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
+      // the product page's express button — «Купить за … с доставкой» (expressMarkup)
+      "Нажимая «Купить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Buy” you agree to the terms and the return policy.",
       "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "30-day returns. Opened cosmetics cannot be returned for hygiene reasons.",
       "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.": "30-day returns. You can try the tee on and return it if it doesn't fit.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
@@ -3698,6 +3705,9 @@
         "Each card goes to its own recipient — they are listed in the basket.",
       "Каждому свой": "One each",
       "Сумма изменилась — проверьте заказ": "The total has changed — check the order",
+      "Цена изменилась, пока вы смотрели товар. Проверьте итог и нажмите ещё раз.":
+        "The price changed while you were looking at the product. Check the total and tap again.",
+      "Данные заказа обновились — проверьте и нажмите ещё раз": "The order details have changed — check them and tap again",
       "Сумма изменилась, пока вы оформляли заказ — скидка или карта больше не действуют. Проверьте итог и нажмите ещё раз.":
         "The total changed while you were checking out — the discount or the card no longer applies. Check the total and tap again.",
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
@@ -6429,6 +6439,8 @@
     [/^Показать 1 товар$/, { ET: "Näita 1 toodet", EN: "Show 1 product" }],
     [/^Показать (\d+) товар(?:|а|ов)$/, { ET: "Näita $1 toodet", EN: "Show $1 products" }],
     [/^Оплатить (.+)$/, { ET: "Maksa $1", EN: "Pay $1" }],
+    // the product page's express button, the total with delivery in the middle
+    [/^Купить за (.+) с доставкой$/, { ET: "Osta $1 eest koos tarnega", EN: "Buy for $1 with delivery" }],
     [/^Пакомат или пункт выдачи по умолчанию — (\d+) (?:точка|точки|точек)$/,
       { ET: "Vaikimisi pakiautomaat või pakipunkt — $1 punkti",
         EN: "Default parcel locker or pickup point — $1 locations" }],
@@ -12913,7 +12925,10 @@
                 '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num" data-qtynum>' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
                 '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
               "</div>" +
-              '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
+              /* «Купить через G Pay» — or, for a signed-in shopper whose
+                 account holds the whole order, «Купить за … с доставкой»
+                 with what is bought and where it goes (expressHTML) */
+              "<div data-express>" + expressHTML(p) + "</div>" +
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
@@ -16476,6 +16491,10 @@
     translateTree(box);
   }
   function pointsArrived() {
+    /* The product page asks for the saved machine's list (expressPlan): its
+       express block waits for it. The machine is matched for the checkout
+       too, while the list is here — the checkout would not ask again. */
+    if (S.screen === "product") { matchAcctPoint(); patchExpress(); return; }
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
        asks for it from inside a render — so the answer has to bring a repaint
        with it or the select stays on «Загружаем список…» until something
@@ -16969,8 +16988,12 @@
       if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
         throw new Error(payErrText(pay.body && pay.body.error));
       }
-      holdCart(orderId);
-      if (S.cart.length) clearOrderState();
+      /* An express order never took the basket (expressOwns): the cart is the
+         shopper's next order, not this one's, and stays as it is. */
+      if (!expressOwns(orderId)) {
+        holdCart(orderId);
+        if (S.cart.length) clearOrderState();
+      }
       location.href = pay.body.redirectUrl;
     }).catch(function (err) {
       S.paying = false; render();
@@ -17183,6 +17206,345 @@
       cartPush.off = false;
       toast(err && err.message ? err.message : "Не получилось оформить заказ");
     });
+  }
+
+  /* ---------- «Купить через G Pay» — straight to the wallet ----------------
+     Dim, 23.09.2026: «If they are logged in and everything is set (shipping
+     method etc.) and they press it, route them straight to the Google Pay /
+     Apple Pay payment page, and that's it. If we miss any data, route them to
+     checkout to add it. … it takes 3 clicks.»
+
+     Three taps: the product, this button, the wallet on Montonio's page. The
+     button may promise that only when the account already holds everything
+     the checkout would have asked for, so expressPlan() asks the account the
+     checkout's own questions. The order is then made by the checkout's own
+     two calls (POST /api/orders/, POST /api/payments/create/) with the
+     checkout's own body — orderPayload(), run over this one line and the
+     account's delivery (expressRun). There is no second pricing path: the
+     server prices it in createOrder() like every other order, and the total
+     on the button is localTotal(), the arithmetic the checkout prints over
+     «Оплатить».
+
+     The account holds a name, a phone and {country, method, carrier,
+     machine} (ShipPref in src/lib/customers.ts) — no street address, so a
+     courier default always goes through the checkout, which asks for one.
+     Whatever is missing, the checkout opens on the step «Оплатить» itself
+     would send the shopper back to, fields marked (expressGapStep). A guest's
+     button is exactly what it was.
+
+     EU consumer law and Montonio's terms: right before the order the shopper
+     sees what they buy, the delivery and the total with delivery, and the
+     button says it is a purchase — «Купить за 34,59 € с доставкой». The
+     basket is never touched: this buys the item on the page, and whatever
+     else is in the cart stays there (expressOwns keeps the receipt off it). */
+
+  /** The PAYS row of Apple Pay / Google Pay — by key; the position is not a contract. */
+  function walletPay() {
+    for (var i = 0; i < PAYS.length; i++) if (PAYS[i].k === "wallet") return i;
+    return 0;
+  }
+  /** The saved machine in a carrier's live list — matched by name, as matchAcctPoint() does. */
+  function expressPoint(list, name) {
+    var want = String(name || "").toLowerCase();
+    if (!want) return null;
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].name || "").toLowerCase() === want) return list[i];
+    }
+    return null;
+  }
+  /**
+   * Can this product go straight to the wallet? The account's answers to the
+   * checkout's own questions: `{ ok: true, … }` with everything the order
+   * needs, or `{ ok: false, why }` with the first thing that is not there.
+   * "guest", "stock" and "wait" are not gaps in the account — a visitor, a
+   * size that is gone, and the saved machine's list still on its way (the
+   * block is redrawn when it lands: pointsArrived).
+   */
+  function expressPlan(p, si, qty) {
+    if (!S.loggedIn || !S.cust) return { ok: false, why: "guest" };
+    if (!p || soldOut(p) || sizeOut(p, si)) return { ok: false, why: "stock" };
+    var c = S.cust, pref = c.shipPref || null;
+    var email = String(c.email || "").trim();
+    // emailBad()'s own test, without its «touched» half
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email)) return { ok: false, why: "email" };
+    var name = String(c.name || "").trim();
+    if (!name) return { ok: false, why: "name" };
+    if (!pref || !pref.method) return { ok: false, why: "delivery" };
+    /* A real country the shop posts to. «EU» alone is the zone the first
+       select stops at — a parcel cannot be addressed to it — and a country
+       the owner switched off is refused by createOrder() anyway. */
+    var cc = String(pref.country || "").toUpperCase();
+    var zone = shipZoneOf(cc);
+    if (zone === "default" || cc === "EU" || countryOff(cc)) return { ok: false, why: "country" };
+    var m = pref.method, offered = false;
+    deliveryFor(cc).forEach(function (d) { if (d.k === m) offered = true; });
+    if (!offered) return { ok: false, why: "delivery" };
+    // shipRequired(): the courier rings it and the machine texts it; the counter does not ask
+    var phone = String(c.phone || "").trim();
+    if (m !== "pickup" && phone.replace(/\D/g, "").length < 7) return { ok: false, why: "phone" };
+    // the account keeps no street address — the checkout asks for it
+    if (m === "courier") return { ok: false, why: "address" };
+    var carrier = "", point = null;
+    if (m === "parcel") {
+      carrier = String(pref.carrier || "");
+      if (carriersFor(cc).indexOf(carrier) < 0) return { ok: false, why: "delivery" };
+      if (!pref.machine) return { ok: false, why: "point" };
+      /* The order carries the carrier's id for the machine, and the account
+         keeps only its name: the live list is what turns one into the other.
+         A machine that has closed since is simply not found — to the
+         checkout, which asks for another. */
+      var key = carrier + ":" + cc;
+      loadPointsFor(carrier, cc);
+      var list = POINTS.by[key];
+      if (!list) return { ok: false, why: POINTS.err[key] ? "point" : "wait" };
+      point = expressPoint(list, pref.machine);
+      if (!point) return { ok: false, why: "point" };
+    }
+    return {
+      ok: true, id: p.id, size: si, qty: Math.max(1, Math.min(CART_MAX_QTY, qty || 1)),
+      name: name, email: email, phone: phone,
+      country: cc, zone: zone, method: m, carrier: carrier, point: point
+    };
+  }
+  /**
+   * Run `fn` the way the checkout would run it for this plan: the one line in
+   * the basket, the account's delivery, no promo code, no gift card, no
+   * points, the wallet chosen, the newsletter box left alone. Everything the
+   * checkout prices and sends with reads S, so S is what is set — for one
+   * synchronous call, and put back in `finally`, so nothing is rendered,
+   * stored or sent while it is swapped.
+   */
+  function expressRun(plan, fn) {
+    var keys = ["cart", "country", "countryIso", "ship", "email", "promoInfo", "giftCard", "loyaltyRedeem", "newsletter", "pay", "billed"];
+    var keep = {};
+    keys.forEach(function (k) { keep[k] = S[k]; });
+    try {
+      S.cart = [{ id: plan.id, size: plan.size, qty: plan.qty }];
+      // the two selects, exactly as applyAcctShipPref() fills them
+      S.country = plan.zone;
+      S.countryIso = plan.zone === "EU" ? plan.country : "";
+      S.ship = { name: plan.name, addr: "", zip: "", city: "", phone: plan.phone, method: plan.method, carrier: plan.carrier, point: plan.point };
+      S.email = plan.email;
+      S.promoInfo = null; S.giftCard = null; S.loyaltyRedeem = false;
+      /* «newsletter untouched»: false is what an unticked box sends, and the
+         server only ever switches the consent ON — it never withdraws it */
+      S.newsletter = false;
+      S.pay = walletPay();
+      S.billed = null;
+      return fn();
+    } finally {
+      keys.forEach(function (k) { S[k] = keep[k]; });
+    }
+  }
+  /** The body, the figures and the delivery line — all the checkout's own. */
+  function expressQuote(plan) {
+    return expressRun(plan, function () {
+      return {
+        payload: orderPayload(),
+        line: S.cart[0],
+        goods: Math.round(cartSum() * 100) / 100,
+        ship: shipCost(),
+        total: localTotal(),
+        shipLabel: shipMethodLabel()
+      };
+    });
+  }
+  /* Which wallet the button names. Safari says whether Apple Pay is set up
+     (ApplePaySession.canMakePayments), an Android phone is Google Pay's, and
+     anything else gets both marks — Montonio's card page shows whichever the
+     device has. */
+  function walletMarks() {
+    if (typeof PAYLOGOS === "undefined") return "";
+    var apple = false, android = false;
+    try { apple = !!(window.ApplePaySession && window.ApplePaySession.canMakePayments()); } catch (e) {}
+    try { android = /Android/i.test(navigator.userAgent || ""); } catch (e) {}
+    var keys = apple ? ["applepay"] : android ? ["gpay"] : ["applepay", "gpay"];
+    return keys.map(function (k) {
+      return PAYLOGOS[k] ? '<span class="gpay-mark">' + PAYLOGOS[k] + "</span>" : "";
+    }).join("");
+  }
+
+  var expressBusy = false;
+  /* The order this button already made, with the body it was made from —
+     payNow()'s `pendingOrder`, for this button: the payment failed or the
+     price moved, and the next tap pays THIS order instead of making another. */
+  var expressOrder = null;              // { id, number, sig }
+  var expressIdem = { sig: "", key: "" };
+  /* The till answered with another total (the owner changed a price in the
+     meantime): shown, and the next tap pays it — see payNow()'s S.billed. */
+  var expressBilled = null;             // { sig, from, total }
+  /** What the express slot draws — and so what the tap will order. */
+  var expressShown = "";
+  function expressMarkup(p) {
+    var plan = expressPlan(p, S.size, S.qty);
+    /* Not everything is there: today's button, and the tap goes to the
+       checkout (the click handler, expressGapStep). */
+    if (!plan.ok) return '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>";
+    var q = expressQuote(plan);
+    var sig = JSON.stringify(q.payload);
+    var billed = expressBilled && expressBilled.sig === sig && expressBilled.from === q.total ? expressBilled.total : null;
+    var tot = billed != null ? billed : q.total;
+    return '<div class="pdp__exsum">' +
+        '<div class="cosum__row"><span>' + esc(lineTitle(q.line)) + lineLabelHTML(q.line) + " × " + q.line.qty + "</span>" +
+          '<span class="num">' + eur(q.goods) + "</span></div>" +
+        '<div class="cosum__row"><span><span>Доставка</span> — <span>' + q.shipLabel + "</span>" +
+          (plan.point ? ' · <span class="pdp__expt">' + esc(plan.point.name) + "</span>" : "") + "</span>" +
+          '<span class="num">' + (q.ship ? eur(q.ship) : "Бесплатно") + "</span></div>" +
+        '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(tot) + "</span></div>" +
+        (billed != null ? '<p class="err" role="alert">Цена изменилась, пока вы смотрели товар. Проверьте итог и нажмите ещё раз.</p>' : "") +
+      "</div>" +
+      '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '" data-express' + (expressBusy ? " disabled" : "") + ">" +
+        (expressBusy ? "Готовим оплату…" : "<span>Купить за " + eur(tot) + " с доставкой</span>" + walletMarks()) + "</button>" +
+      '<p class="cosum__legal pdp__legal">Нажимая «Купить», вы соглашаетесь с условиями и политикой возврата.</p>';
+  }
+  function expressHTML(p) {
+    expressShown = expressMarkup(p);
+    return expressShown;
+  }
+  /** The slot redrawn in place — the saved machine's list landing, a size or
+      a quantity tapped, the button's own busy state. Only when it changed:
+      a button rebuilt under a keyboard user's focus is a focus lost. */
+  function patchExpress() {
+    if (S.screen !== "product") return;
+    var box = document.querySelector("[data-express]");
+    if (!box) return;
+    var html = expressMarkup(byId(S.productId));
+    if (html === expressShown) return;
+    expressShown = html;
+    box.innerHTML = html;
+    translateTree(box);
+  }
+  /**
+   * The tap. The order is the one the slot is showing — if the screen is
+   * stale (anything moved since it was drawn), it is redrawn and the tap asks
+   * for a second, deliberate one rather than ordering what nobody saw.
+   */
+  function expressBuy(p, plan) {
+    if (expressBusy) return;
+    if (expressMarkup(p) !== expressShown) {
+      patchExpress();
+      toast("Данные заказа обновились — проверьте и нажмите ещё раз");
+      return;
+    }
+    var q = expressQuote(plan);
+    var sig = JSON.stringify(q.payload);
+    var known = expressOrder && expressOrder.sig === sig ? expressOrder : null;
+    // «сделать один раз» — the same key for as long as the answer is unknown (idemNewKey)
+    if (expressIdem.sig !== sig) expressIdem = { sig: sig, key: idemNewKey() };
+    expressBusy = true; patchExpress();
+    /* The funnel's two steps this tap stands in for — «В корзину» and the
+       checkout — so a purchase that skipped both still has them behind it
+       (addToCart() and go("checkout") send the same two; distinct per visit). */
+    if (!known) {
+      track("add_to_cart", { productId: p.id, value: sizePrice(p, plan.size) });
+      track("checkout", { value: q.goods });
+    }
+    (known
+      ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
+      : postJSON("/api/orders/", q.payload, null, expressIdem.key)
+    ).then(function (res) {
+      // the first tap's order is still being made under this very key
+      if (res.status === 409 && res.body && res.body.error === "in_progress") {
+        expressBusy = false; patchExpress();
+        toast("Заказ уже оформляется — подождите пару секунд и нажмите ещё раз");
+        return;
+      }
+      if (res.status === 409 && res.body && res.body.error === "key_reused") expressIdem = { sig: "", key: "" };
+      // lost, not refused: the key is kept, so the next tap is handed this order back
+      if (res.lost) throw new Error("Магазин не ответил. Проверьте почту: если письмо о заказе пришло, заказ создан — иначе попробуйте ещё раз");
+      expressIdem = { sig: "", key: "" };
+      if (res.offline) throw new Error(payErrText(""));
+      apiSeen(true);
+      if (!res.body || !res.body.ok || !res.body.orderId) throw new Error(orderErrText(res.body && res.body.error));
+      var orderId = res.body.orderId, number = res.body.number || "";
+      expressOrder = { id: orderId, number: number, sig: sig };
+      /* The till's figure is the one Montonio is about to be asked for. When
+         it is not the one on the button, stop and show it — the order is
+         remembered above, so the next tap pays it (a remembered order comes
+         back with no total, and passes). */
+      var billed = Number(res.body.total);
+      if (isFinite(billed) && Math.abs(billed - q.total) > 0.009) {
+        expressBilled = { sig: sig, from: q.total, total: Math.round(billed * 100) / 100 };
+        expressBusy = false; patchExpress();
+        toast("Сумма изменилась — проверьте заказ");
+        return;
+      }
+      /* The wallet: Montonio's card page (cardPayments), opened on its
+         Apple Pay / Google Pay half (preferredMethod "wallet") — the same
+         method the checkout's «Apple Pay / Google Pay» radio sends. */
+      return postJSON("/api/payments/create/", { orderId: orderId, method: "wallet", lang: S.lang }).then(function (pay) {
+        if (pay.lost) throw new Error("Не получилось открыть оплату. Заказ сохранён — попробуйте ещё раз");
+        if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
+          var code = pay.body && pay.body.error;
+          if (code === "already_paid" || code === "order_closed" || code === "not_found") expressOrder = null;
+          throw new Error(payErrText(code));
+        }
+        expressMark(orderId, number);
+        location.href = pay.body.redirectUrl;
+      });
+    }).catch(function (err) {
+      expressBusy = false; patchExpress();
+      toast(err && err.message ? err.message : "Не получилось оформить заказ");
+    });
+  }
+  /* Something is missing: the item goes into the basket and the checkout
+     opens on the step «Оплатить» itself would send the shopper back to —
+     payNow()'s own checks, in its order, with the fields marked. Nothing
+     found missing (a street typed into the checkout earlier this visit, say)
+     leaves the checkout on its first step, as before. */
+  function expressGapStep() {
+    if (S.screen !== "checkout" || !S.cart.length) return;
+    // the list may already be here — the product page asked for it
+    matchAcctPoint();
+    var was = { e: S.emailTouched, s: S.shipTouched };
+    S.emailTouched = true; S.shipTouched = true;
+    var gap = emailBad() ? [1, "Проверьте e-mail — на него придёт подтверждение заказа"]
+      : !isDigital() && S.country === "EU" && !S.countryIso ? [2, "Выберите страну доставки"]
+      : shipMissing().length ? [2, "Заполните данные доставки"]
+      : pointMissing() ? [2, "Выберите пакомат"]
+      : null;
+    if (!gap) { S.emailTouched = was.e; S.shipTouched = was.s; return; }
+    /* failStep()'s three moves. go() has just drawn step 1 in this same
+       frame, so render() folds this draw into the next one — and the caret
+       has to wait for it there, or it looks for the marked field in the step
+       that is about to go. */
+    S.coStep = gap[0];
+    render();
+    toast(gap[1]);
+    requestAnimationFrame(function () { refocus('.costep__body [aria-invalid="true"]'); });
+  }
+  /* Back from Montonio with the browser's back button, the page restored from
+     its cache: the button is not «Готовим оплату…» any more. The order is
+     still remembered, so the next tap pays it rather than making another. */
+  window.addEventListener("pageshow", function (e) {
+    if (e && e.persisted && expressBusy) { expressBusy = false; patchExpress(); }
+  });
+  /* An express order never took the basket, so its receipt must not settle
+     the basket either: doneDropHeld() empties the cart on a paid receipt,
+     restoreHeldCart() puts a parked one back on a failed one, and payAgain()
+     parks and empties it — each right for a checkout order, whose basket it
+     was, and each wrong here, where the cart holds whatever the shopper is
+     still collecting. So the order is remembered by id and by number (a paid
+     receipt carries only the number) for a day. */
+  var EXPRESS_LS = "rmp-express-orders";
+  function expressRead() {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem(EXPRESS_LS) || "[]"); } catch (e) {}
+    if (!Array.isArray(list)) return [];
+    var now = Date.now();
+    return list.filter(function (x) {
+      return !!x && typeof x === "object" && now - Number(x.at || 0) < 864e5;
+    });
+  }
+  function expressMark(orderId, number) {
+    var list = expressRead().filter(function (x) { return x.order !== String(orderId); });
+    list.unshift({ order: String(orderId), number: String(number || ""), at: Date.now() });
+    try { localStorage.setItem(EXPRESS_LS, JSON.stringify(list.slice(0, 5))); } catch (e) {}
+  }
+  function expressOwns(orderId, number) {
+    var o = String(orderId || ""), n = String(number || "");
+    if (!o && !n) return false;
+    return expressRead().some(function (x) { return (!!o && x.order === o) || (!!n && x.number === n); });
   }
 
   /* ---------- checkout blocks (patchable) ----------
@@ -35466,8 +35828,12 @@
        payNow()) is settled here, once, on the same one-shot as the beacon
        above: given back when this receipt says the order was not paid, let go
        when it says it was. */
-    if (s === "paid" || s === "invoice") doneDropHeld();
-    else if (S.done.order) restoreHeldCart(S.done.order);
+    /* …unless the order was an express one (expressOwns): it never took the
+       basket, and whatever is in the cart now is not its to drop or refill. */
+    if (!expressOwns(S.done.order, S.done.number)) {
+      if (s === "paid" || s === "invoice") doneDropHeld();
+      else if (S.done.order) restoreHeldCart(S.done.order);
+    }
     return S.done;
   }
   /* ---------- the basket that went to the bank ------------------------------
@@ -36730,6 +37096,8 @@
     });
     var cn = document.querySelector("[data-colourname]");
     if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
+    // another size or quantity is another order, at another total
+    patchExpress();
   }
 
   /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
@@ -37673,7 +38041,18 @@
          «Другие способы оплаты» shares the attribute and leaves the choice
          alone. Looked up by key: the radio's position is not a contract. */
       if (t.classList.contains("btn--express")) {
+        /* Dim, 23.09.2026: a signed-in shopper whose account holds everything
+           the order needs goes straight to the wallet (expressBuy) — the
+           basket and the checkout are not involved at all. */
+        var xp = byId(d.buynow), xplan = expressPlan(xp, S.size, S.qty);
+        if (xplan.ok) { expressBuy(xp, xplan); return; }
         for (var wi = 0; wi < PAYS.length; wi++) if (PAYS[wi].k === "wallet") S.pay = wi;
+        addToCart(d.buynow); go("checkout");
+        /* …and one who is signed in but short of something lands on the step
+           that asks for it. A guest — and a saved machine whose list has not
+           answered yet — keep the checkout's first step, as before. */
+        if (xplan.why !== "guest" && xplan.why !== "wait" && xplan.why !== "stock") expressGapStep();
+        return;
       }
       addToCart(d.buynow); go("checkout"); return;
     }

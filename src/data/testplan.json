@@ -3024,6 +3024,96 @@
       }
     },
     {
+      "id": "checkout-express-wallet",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«Купить через G Pay» — сразу к оплате",
+      "steps": [
+        "Войти в свой кабинет: имя, телефон и «Доставка по умолчанию» с пакоматом заполнены.",
+        "Положить в корзину любой другой товар и закрыть корзину.",
+        "Открыть товар с несколькими объёмами и выбрать второй объём.",
+        "Прочитать строки над чёрной кнопкой и нажать её.",
+        "На странице Montonio оплатить кошельком или тестовой картой.",
+        "Открыть корзину, потом «Заказы» в панели."
+      ],
+      "expect": [
+        "Над кнопкой видны товар с объёмом, ваш пакомат и цена доставки.",
+        "На кнопке написано «Купить за … с доставкой» с итоговой суммой.",
+        "Сразу открылась страница оплаты Montonio с Apple Pay или Google Pay.",
+        "Сумма там та же, что на кнопке.",
+        "В панели один новый заказ: этот товар, этот объём, ваш пакомат.",
+        "Другой товар так и остался в корзине."
+      ],
+      "why": "Покупатель с заполненным кабинетом покупает в три касания — без корзины и оформления.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-23T13:01:56.720Z",
+      "en": {
+        "title": "«Купить через G Pay» — straight to payment",
+        "steps": [
+          "Sign in to your account: name, phone and a default parcel locker are filled in.",
+          "Put some other product in the cart and close the cart.",
+          "Open a product with several sizes and pick the second size.",
+          "Read the lines above the black button and press it.",
+          "On Montonio's page pay with the wallet or the test card.",
+          "Open the cart, then «Заказы» in the panel."
+        ],
+        "expect": [
+          "Above the button: the product with its size, your locker, the delivery price.",
+          "The button says «Купить за … с доставкой» with the total.",
+          "Montonio's payment page opened at once, with Apple Pay or Google Pay.",
+          "The amount there is the same as on the button.",
+          "The panel has one new order: this product, this size, your locker.",
+          "The other product is still in the cart."
+        ],
+        "why": "A customer with a complete account buys in three taps — no cart, no checkout."
+      }
+    },
+    {
+      "id": "checkout-express-fallback",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«Купить через G Pay», когда в кабинете чего-то нет",
+      "steps": [
+        "В кабинете в «Доставке по умолчанию» выбрать «Курьер до двери».",
+        "Открыть любой товар и нажать чёрную кнопку «Купить через».",
+        "Выйти из кабинета, открыть товар и нажать ту же кнопку.",
+        "Войти снова и вернуть пакомат по умолчанию."
+      ],
+      "expect": [
+        "С курьером по умолчанию на кнопке нет суммы — только «Купить через».",
+        "Открылось оформление: товар в корзине, выбран Apple Pay / Google Pay.",
+        "Сразу открыт шаг доставки, поля адреса подсвечены красным.",
+        "Без входа оформление открылось с первого шага, как раньше."
+      ],
+      "why": "Адреса для курьера кабинет не хранит — чего не хватает, покупатель дописывает в оформлении.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-23T13:01:56.720Z",
+      "en": {
+        "title": "«Купить через G Pay» when the account is missing something",
+        "steps": [
+          "In the account, under «Доставка по умолчанию», choose «Курьер до двери».",
+          "Open any product and press the black «Купить через» button.",
+          "Sign out, open the product and press the same button.",
+          "Sign in again and put the default parcel locker back."
+        ],
+        "expect": [
+          "With a courier default the button shows no amount — just «Купить через».",
+          "The checkout opened: the product in the cart, Apple Pay / Google Pay chosen.",
+          "The delivery step is open at once, the address fields marked red.",
+          "Signed out, the checkout opened on its first step, as before."
+        ],
+        "why": "The account keeps no courier address — whatever is missing, the buyer adds at checkout."
+      }
+    },
+    {
       "id": "checkout-double-tap",
       "area": "checkout",
       "who": "dim",
