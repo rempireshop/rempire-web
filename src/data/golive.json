@@ -185,10 +185,10 @@
         "montonio-keys"
       ],
       "title": "Настроить боевой кабинет Montonio",
-      "detail": "Смотрено 23.09.2026. Оплаты: банки и карты готовы, возвраты — «In review». Payment links (10 €/мес) и BLIK (только злотые) не нужны: магазин их не использует. Доставка: Omniva, DPD, SmartPosti и International Shipping (Nova Post) включены; Unisend выключен, а магазин его предлагает — включить: сдача в пакомат, размер по умолчанию S, SMS-код возврата включён. Коды возврата включить и у Omniva и DPD. Из дополнений полезно «Parcel delay and risk notifications» — о посылке, которую не забирают; страница и письма отслеживания не нужны: письма шлёт магазин. Адрес отправителя — Mardi 1, туда же приходят возвраты.",
+      "detail": "Смотрено 23.09.2026. Оплаты: банки и карты готовы, возвраты — «In review». Payment links (10 €/мес) и BLIK (только злотые) не нужны: магазин их не использует. Доставка: Omniva, DPD, SmartPosti и International Shipping (Nova Post) включены; Unisend выключен, а магазин его предлагает — включить: сдача в пакомат, размер по умолчанию S, SMS-код возврата включён. Коды возврата включить и у Omniva и DPD. Из дополнений полезно «Parcel delay and risk notifications» — о посылке, которую не забирают; страница и письма отслеживания не нужны: письма шлёт магазин. Адрес отправителя — Mardi 1, туда же приходят возвраты. Проверка 23.09: все 105 маршрутов кассы оформляются, Unisend включён. Осталось: коды возврата у Omniva и DPD, уведомления о задержках, размер S по умолчанию.",
       "en": {
         "title": "Set up the live Montonio account",
-        "detail": "Looked at 23.09.2026. Payments: bank links and cards ready, refunds «In review». Payment links (10 €/month) and BLIK (zloty only) are not needed: the shop uses neither. Shipping: Omniva, DPD, SmartPosti and International Shipping (Nova Post) are on; Unisend is off although the shop offers it — turn it on: parcel-machine hand-over, default size S, SMS return code on. Turn return codes on for Omniva and DPD too. Of the add-ons, «Parcel delay and risk notifications» is worth having — it flags a parcel nobody collects; the tracking page and tracking e-mails are not needed: the shop sends its own letters. Sender address is Mardi 1, which is also where returns come back."
+        "detail": "Looked at 23.09.2026. Payments: bank links and cards ready, refunds «In review». Payment links (10 €/month) and BLIK (zloty only) are not needed: the shop uses neither. Shipping: Omniva, DPD, SmartPosti and International Shipping (Nova Post) are on; Unisend is off although the shop offers it — turn it on: parcel-machine hand-over, default size S, SMS return code on. Turn return codes on for Omniva and DPD too. Of the add-ons, «Parcel delay and risk notifications» is worth having — it flags a parcel nobody collects; the tracking page and tracking e-mails are not needed: the shop sends its own letters. Sender address is Mardi 1, which is also where returns come back. Check of 23.09: all 105 checkout routes can be booked, Unisend is on. Left: return codes on Omniva and DPD, delay notifications, default size S."
       }
     },
     {
@@ -198,16 +198,16 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "needs": [
         "montonio-keys"
       ],
       "title": "Проверить боевой аккаунт без денег",
-      "detail": "tools/montonio-live-check.mjs — только чтение: ни заказа, ни посылки. Дим кладёт боевую пару в файл .env.montonio-live (git его не видит), затем: node --env-file=.env.montonio-live tools/montonio-live-check.mjs. Ответ: какие оплаты и банки включены по странам, может ли аккаунт оформить каждого перевозчика, которого предлагает касса, и зарегистрирован ли вебхук посылок. Цены — тот же файл и tools/fetch-montonio-tariffs.mjs --dry. Потом файл удалить.",
+      "detail": "Сделано 23.09.2026, боевые ключи, только чтение. Оплаты: банковские ссылки в EE, FI, LT, LV и PL, карта, Apple Pay, Google Pay, MobilePay. В Польше 11 банков берут только злотые — касса их прячет (правка того же дня), остаются Revolut, N26 и Wise. Все 105 маршрутов, которые предлагает касса, аккаунт оформить может. Вебхук посылок не зарегистрирован — отдельный пункт. Повторить: node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs.",
       "en": {
         "title": "Check the live account without money",
-        "detail": "tools/montonio-live-check.mjs — read-only: no order, no parcel. Dim puts the live pair in .env.montonio-live (git ignores it), then: node --env-file=.env.montonio-live tools/montonio-live-check.mjs. It answers which payments and banks are on per country, whether the account can book every carrier the checkout offers, and whether the parcel webhook is registered. Prices: the same file with tools/fetch-montonio-tariffs.mjs --dry. Then delete the file."
+        "detail": "Done 23.09.2026, live keys, read-only. Payments: bank links in EE, FI, LT, LV and PL, card, Apple Pay, Google Pay, MobilePay. In Poland 11 banks take zloty only — the checkout hides them (fixed the same day), leaving Revolut, N26 and Wise. All 105 routes the checkout offers can be booked by the account. The parcel webhook is not registered — its own item. To repeat: node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs."
       }
     },
     {
@@ -250,16 +250,16 @@
       "who": [
         "claude"
       ],
-      "status": "blocked",
+      "status": "done",
       "blocking": true,
       "needs": [
         "montonio-keys"
       ],
       "title": "Пересобрать зеркало тарифов — уже с ключами",
-      "detail": "Подтипы больше не причина: пакомат и пункт выдачи у Montonio стоят одинаково (ответ 22.09.2026). Остаётся одна: наложить собственные цены магазина по договору поверх прейскуранта Montonio. tools/fetch-montonio-tariffs.mjs с 22.09 добавляет НДС и на этом пути — раньше первый запуск с ключами поставил бы цены на 19 % ниже себестоимости.",
+      "detail": "Сделано 23.09.2026 с боевыми ключами (tools/fetch-montonio-tariffs.mjs --dry): договорные цены магазина совпали с таблицей во всех 111 строках — накладывать нечего. Цена в кассе = цена калькулятора Montonio + 24 % НДС, округлённая вверх до …,X9; калькулятор показывает цены без НДС («+VAT»).",
       "en": {
         "title": "Rebuild the tariff mirror with keys",
-        "detail": "Subtypes are no longer the reason: a locker and a pickup point cost the same at Montonio (answer of 22.09.2026). One reason remains: overlay the store's own contract prices on Montonio's list. Since 22.09 tools/fetch-montonio-tariffs.mjs adds VAT on that path too — before, the first keyed run would have priced 19 % under cost."
+        "detail": "Done 23.09.2026 with the live keys (tools/fetch-montonio-tariffs.mjs --dry): the store's contract prices matched the table in all 111 rows — nothing to overlay. The checkout price is Montonio's calculator price + 24 % VAT, rounded up to …,X9; the calculator shows prices without VAT («+VAT»)."
       }
     },
     {
@@ -353,13 +353,13 @@
         "renat",
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": false,
       "title": "Решить, делать ли вторую ступень напоминания о брошенной корзине",
-      "detail": "Одно письмо есть уже: через 3 часа после того, как корзина затихла, и только если заказа с этого адреса так и не пришло. Переключатель «Брошенная корзина» по умолчанию выключен — его надо включить, иначе не уходит ничего. Ренат 20.09 предложил делить по сумме: до 100 € — просто напоминание в первые сутки, свыше 100 € — через три дня скидка 5 %. Первая половина уже работает (3 часа — это «в течение суток»). Вторая — новое письмо: порог суммы, свой штамп в carts, свой промокод на каждую корзину и срок его жизни. Скидка уходит тем, кто, возможно, купил бы и так, поэтому это решение о деньгах, а не о коде.",
+      "detail": "Решено и сделано 21.09.2026 (7edec0b) по словам Рената: первое письмо — напоминание, через сколько часов — настройка; второе — скидка одноразовым кодом на эту корзину, через сколько дней, какой процент и от какой суммы — тоже настройки. Сумма и есть выключатель второго письма. Сам «Брошенная корзина» по-прежнему выключен, пока Ренат его не включит.",
       "en": {
         "title": "Decide whether the abandoned cart gets a second, discounted reminder",
-        "detail": "One letter already exists: three hours after the cart went quiet, and only while no order has come from that address. The «Брошенная корзина» switch is off by default — nothing is sent until it is on. Renat proposed splitting by value on 20.09: under 100 € a plain reminder within a day, over 100 € a 5 % discount after three days. The first half already works. The second is a new letter: a value threshold, its own stamp on carts, a promo code per cart and an expiry. The discount goes to people who might have bought anyway, so this is a decision about money, not about code."
+        "detail": "Decided and built 21.09.2026 (7edec0b) as Renat described: the first letter is a reminder, its delay in hours a setting; the second is a one-off discount code for that cart, with the days, the percentage and the minimum sum all settings. The sum is the second letter's switch. «Брошенная корзина» itself stays off until Renat turns it on."
       }
     },
     {
@@ -369,13 +369,13 @@
         "renat",
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": false,
       "title": "Решить, каким должен быть баннер в рассылке",
-      "detail": "Ренат 20.09 попросил «+ фото» в «Маркетинг → Рассылка» и прислал образец — письмо Aromatic 89, где всё письмо собрано из картинок, и каждая ведёт на свою страницу. Кнопка «Картинка» в редакторе уже есть, и картинка уходит во всю ширину письма (504 px). Чего нет — ссылки на картинке: <a> вокруг <img> письмо роняет, остаются одни слова. Это и надо решить: достаточно ли «картинка + кнопка под ней» или нужен кликающий баннер.",
+      "detail": "Решено и сделано 21.09.2026 (7b3969a): картинка в письме теперь кликается — баннер со своей ссылкой, как в образце Aromatic 89 — и больше не пропадает молча.",
       "en": {
         "title": "Decide what a newsletter banner has to be",
-        "detail": "Renat asked for «+ photo» in «Маркетинг → Рассылка» on 20.09 and sent an example — an Aromatic 89 letter built entirely out of pictures, each linking somewhere of its own. The editor already has a «Картинка» button and the picture goes out at the letter's full width (504 px). What is missing is a link ON the picture: an <a> around an <img> is dropped by the letter and only the words survive. That is the decision: is «a picture with a button under it» enough, or is a clickable banner the thing."
+        "detail": "Decided and built 21.09.2026 (7b3969a): a picture in a letter is now clickable — a banner with its own link, as in the Aromatic 89 example — and no longer vanishes silently."
       }
     },
     {
@@ -460,13 +460,13 @@
       "who": [
         "claude"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "title": "Четыре решения по доставке из восьми отвеченных",
-      "detail": "Читать флаг обязательных габаритов и объявлять коробку; выбирать размер ячейки в момент печати наклейки, с автоматической заготовкой; открыть остальную Европу списком, который можно править; показывать отказ в регистрации, а не рапортовать об успехе.",
+      "detail": "Сделано 18–19.09.2026 (3be3ae6, ed0aa3e, 9fefa3b): флаг обязательных размеров читается, и там, где Montonio их требует, коробка объявляется; размер ячейки выбирается у этикетки и подставляется сам — по последним двадцати этикеткам; остальная Европа — редактируемый список; отказ перевозчика показывается как отказ. С 23.09 коробка 25 × 18 × 8, ячейка по умолчанию S (миграция 203).",
       "en": {
         "title": "The four shipping ones of the eight answered go-live decisions",
-        "detail": "Read the required-dimensions flag and declare a carton; choose locker size at label time with an automated default; open the rest of Europe as an editable list; show a refused registration instead of reporting success."
+        "detail": "Done 18–19.09.2026 (3be3ae6, ed0aa3e, 9fefa3b): the required-dimensions flag is read and the carton declared wherever Montonio asks; the locker size is chosen at the label and filled in by itself from the last twenty labels; the rest of Europe is an editable list; a carrier's refusal is shown as a refusal. Since 23.09 the carton is 25 × 18 × 8 and the default locker S (migration 203)."
       }
     },
     {
@@ -490,13 +490,13 @@
       "who": [
         "claude"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "title": "Укрепить всё, что песочница не проверяет, и написать docs/montonio-untested.md",
-      "detail": "Честный перечень того, что ни разу не работало и что придётся проверить руками в первый живой час.",
+      "detail": "Сделано: docs/montonio-untested.md — что ни разу не запускалось, чем это подстраховано и что проверять руками в первый живой час; обновлён по письменным ответам Montonio 22–23.09. Сам первый час — пункт «Пройти docs/montonio-untested.md руками».",
       "en": {
         "title": "Harden every path the sandbox cannot exercise, and write `docs/montonio-untested.md`",
-        "detail": "The honest inventory of what has never run and what must be checked by hand in the first live hour."
+        "detail": "Done: docs/montonio-untested.md — what has never run, what stands in for it and what to check by hand in the first live hour; brought up to date with Montonio's written answers of 22–23.09. The hour itself is the item «Work through docs/montonio-untested.md by hand»."
       }
     },
     {
@@ -520,13 +520,13 @@
       "who": [
         "claude"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "title": "Инструмент обнуления перед запуском и docs/go-live-reset.md",
-      "detail": "По умолчанию сухой прогон, чистка только по отдельному подтверждению, и проверка, что список сохраняемого уцелел.",
+      "detail": "Сделано 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md и tests/go-live-reset.test.ts. Без аргументов только печатает, что сделал бы; стирает лишь с длинным подтверждением и проверяет, что оставляемое осталось. Запуск — пункт «Запустить чистку» в день переключения.",
       "en": {
         "title": "The go-live reset tool and `docs/go-live-reset.md`",
-        "detail": "Dry run by default, explicit confirmation to clear, asserts the keep-list survived."
+        "detail": "Done 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md and tests/go-live-reset.test.ts. Without arguments it only prints what it would do; it clears only with a long confirmation and checks that the keep-list survived. Running it is the item «Run the reset tool» on the day."
       }
     },
     {
@@ -667,12 +667,12 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "title": "Поставить SESSION_SECRET",
-      "detail": "Он теперь держит токен статуса заказа, по которому возвращается брошенная корзина. Без него всё закрывается молча: возврат корзины просто не работает, и никто об этом не скажет.",
+      "detail": "Стоит: вход в панель без него невозможен — /api/admin/login отвечает not_configured, если SESSION_SECRET нет или он короче 16 знаков, а Дим и Ренат входят на стенде. Живой домен обслуживает тот же проект Vercel.",
       "en": {
         "title": "Set `SESSION_SECRET`",
-        "detail": "It is now load-bearing for the order-status token that recovers an abandoned basket. Unset, it fails closed silently: basket recovery simply never works and nothing says so."
+        "detail": "Set: the panel cannot be entered without it — /api/admin/login answers not_configured when SESSION_SECRET is missing or under 16 characters, and Dim and Renat sign in on staging. The live domain is served by the same Vercel project."
       }
     },
     {

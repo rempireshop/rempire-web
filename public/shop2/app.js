@@ -25629,7 +25629,7 @@
      a smaller default box then and we don't bother with weights»; and on
      22.09.2026 he measured the real one — 25 × 18 × 8, which is DPD's XS. */
   var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
-  var PARCEL_DEFAULT = { length: 25, width: 18, height: 8, lockerSize: "M", recent: [] };
+  var PARCEL_DEFAULT = { length: 25, width: 18, height: 8, lockerSize: "S", recent: [] };
   /** «около 0,9 кг» — volumetricKg() in src/lib/shipping/parcel.ts, and the
       figure this shop DECLARES to Montonio on every label since 19.09.2026. */
   function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }

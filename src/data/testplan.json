@@ -1780,12 +1780,13 @@
       "title": "Коробка магазина: 25 × 18 × 8",
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
-        "Проверить три размера и строку с весом под ними.",
+        "Проверить три размера, строку с весом и размер ячейки.",
         "Поставить высоту 10 и выйти из поля.",
         "Вернуть высоту 8 и выйти из поля."
       ],
       "expect": [
         "Размеры 25, 18 и 8 см, вес около 0,9 кг.",
+        "Размер ячейки по умолчанию — S.",
         "С высотой 10 под весом появилось предупреждение про цены за границу.",
         "С высотой 8 предупреждение исчезло.",
         "Каждое изменение подтверждено «Сохранено ✓»."
@@ -1797,20 +1798,21 @@
         "title": "The shop's box: 25 × 18 × 8",
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
-          "Check the three sides and the weight line under them.",
+          "Check the three sides, the weight line and the locker size.",
           "Set the height to 10 and leave the field.",
           "Set it back to 8 and leave the field."
         ],
         "expect": [
           "Sides 25, 18 and 8 cm, weight about 0.9 kg.",
+          "The default locker size is S.",
           "With a height of 10 a warning about prices abroad appears.",
           "With a height of 8 the warning is gone.",
           "Each change is confirmed with «Сохранено ✓»."
         ],
         "why": "A box bigger than the one prices are worked out for loses money on every parcel abroad."
       },
-      "mark": "new",
-      "markedAt": "2026-09-22T17:36:00.000Z"
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:06:56.864Z"
     },
     {
       "id": "panel-delivery-folds",

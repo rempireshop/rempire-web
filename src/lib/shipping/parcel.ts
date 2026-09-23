@@ -120,27 +120,22 @@
  * actually been shipping — the commonest of the last twenty labels, ties
  * broken by the most recent — and `rememberLockerSize()` is what learns it.
  *
- * The seed, before he has ever pressed the button, is `M`, and it is the
- * declared box's own tier read off the carriers' door lists
- * (public/shop/shipping-data.js). Written for a 25 × 18 × 10 cm box, when
- * that was an M at Omniva and DPD. The real carton (22.09.2026) is 8 cm tall
- * and goes through Omniva's S (9 × 38 × 64), DPD's XS (8 × 18 × 61) and
- * SmartPosti's S (12 × 34 × 42) — so M is now one size generous everywhere.
- * It stays the seed on purpose: a door too small is a failed drop-off in a
- * car park and a door one size too big costs nothing inside the Baltics,
- * where Montonio's price does not move with size. And he has long since sent
- * enough labels for his last twenty to decide it anyway.
+ * The seed, before he has ever pressed the button, is `S`. Only Unisend,
+ * SmartPosti and Latvian Post take the field at all, and the carton
+ * (25 × 18 × 8, 22.09.2026) goes through Unisend's S (8 × 35 × 61) and
+ * SmartPosti's S (12 × 34 × 42); Unisend's XS (8 × 18.5 × 61) would leave
+ * 5 mm. It was `M` until 23.09.2026 — written for a 10 cm box and kept as
+ * «one size generous» — and M bought nothing: all three carriers price a
+ * locker flat, at every size and to every country they reach (checked against
+ * Montonio's contract prices that day), so the door is a question of fit
+ * alone. His own last twenty labels overrule the seed anyway.
  *
- * **The contract default stays underneath as the safety net.** For SmartPosti
- * with neither a request value nor a contract default the parcel registers
- * with *no drop-off code at all* — and a blank code on the A4 slip
- * (src/lib/shipping/label-pdf.ts) is exactly Renat's complaint of 13.09.2026.
- * This module can only ever put a value on the request; setting
- * `defaultLockerSize` on the SmartPosti contract in the Partner System is his,
- * and so is switching DPD's PIN service on. The panel names both, in Russian,
- * right under the carton («Коробка магазина» in public/shop2/app.js), so that
- * neither is forgotten and so that a blank drop-off code has an explanation
- * rather than a mystery.
+ * **The contract default stays underneath.** Omitted on the request,
+ * Montonio uses the carrier's `defaultLockerSize` from the Partner System —
+ * which since 23.09.2026 says S for Unisend too. A blank drop-off code on the
+ * A4 slip is normal: Montonio, in writing on 22.09.2026, a door code needs the
+ * merchant's own direct contract with the carrier, and the label is scanned
+ * at the machine instead.
  */
 import { jsonbParam, query } from "@/lib/db";
 
@@ -198,7 +193,7 @@ export const PARCEL_DEFAULTS: ParcelSettings = {
   length: 25,
   width: 18,
   height: 8,
-  lockerSize: "M",
+  lockerSize: "S",
   recent: [],
 };
 
@@ -298,7 +293,7 @@ export function parcelMetres(p: ParcelSettings): { length: number; width: number
  * The commonest of the last twenty labels; a tie goes to the one used most
  * recently, because `recent` is newest-first and the scan keeps the first
  * winner it meets. With no history at all it is `lockerSize`, the owner's own
- * default, seeded at `M` — `PARCEL_DEFAULTS.lockerSize`, and the head of this
+ * default, seeded at `S` — `PARCEL_DEFAULTS.lockerSize`, and the head of this
  * file says why it is the size that fits all three carriers' doors.
  */
 export function suggestedLockerSize(p: ParcelSettings): LockerSize {
@@ -385,11 +380,20 @@ export async function getParcelSettings(): Promise<ParcelSettings> {
 export async function noteLockerSize(size: LockerSize): Promise<void> {
   try {
     const current = await getParcelSettings();
-    const next = rememberLockerSize(current, size);
+    const { recent } = rememberLockerSize(current, size);
+    /* `recent` alone. Writing the whole cleaned object stored the code's
+       defaults as if the owner had typed them: the first label ever printed
+       froze the carton of that day, and the panel still said 25 × 18 × 10 a
+       day after the code said 8 (migration 203, 23.09.2026). A field the
+       owner never set has to stay absent, so it follows the code. */
     await query(
       `insert into settings (key, value, updated_at) values ('shipping_parcel', $1::jsonb, now())
-       on conflict (key) do update set value = $1::jsonb, updated_at = now()`,
-      [jsonbParam(next)],
+       on conflict (key) do update
+         set value = case when jsonb_typeof(settings.value) = 'object'
+                          then settings.value || $1::jsonb
+                          else $1::jsonb end,
+             updated_at = now()`,
+      [jsonbParam({ recent })],
     );
   } catch (err) {
     console.error("[shipping parcel] could not remember the locker size —", err);
