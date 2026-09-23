@@ -4642,7 +4642,9 @@
       "title": "Доставка по умолчанию",
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
-        "Выбрать Эстонию, строку «Пакомат», потом сам пакомат из списка.",
+        "Выбрать Эстонию и строку «Пакомат Omniva».",
+        "Нажать «Выберите пакомат», набрать «Tallinn» или индекс и выбрать пункт из найденных (или на «Карте»).",
+        "То же проверить для Латвии, Литвы и Финляндии, в конце снова выбрать пакомат в Эстонии.",
         "Набрать новую корзину и дойти до шага доставки, потом то же с другого телефона.",
         "На шаге доставки вручную выбрать Латвию, заказ не оформлять.",
         "Вернуться в кабинет: «Другая страна Европы», во втором списке Италия, строка «Пакомат DPD».",
@@ -4652,9 +4654,9 @@
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "Эстония: пока пакомат не выбран, под списком «Выберите пакомат — тогда сохраним».",
+        "Во всех странах с пакоматами — кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "Эстония: пока пакомат не выбран, под строками «Выберите пакомат — тогда сохраним».",
         "После выбора «Доставка по умолчанию сохранена ✓», касса подставляет её на обоих телефонах.",
-        "Италия: вместо длинной фразы кнопка «Выберите пакомат» с поиском, как в оформлении.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
         "Греция сохраняется Грецией: в оформлении выбраны Греция и курьер, цена та же.",
         "После «Выйти» доставка больше не подставляется."
@@ -4666,7 +4668,9 @@
         "title": "Default delivery",
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
-          "Choose Estonia, the «Пакомат» row, then the locker itself from the list.",
+          "Choose Estonia and the «Пакомат Omniva» row.",
+          "Press «Выберите пакомат», type «Tallinn» or a postcode and pick one of the points found (or on the «Карта» map).",
+          "Check the same for Latvia, Lithuania and Finland; at the end pick an Estonian locker again.",
           "Fill a new cart and get to the delivery step, then do the same on another phone.",
           "On the delivery step pick Latvia by hand; do not place the order.",
           "Back in the account: «Другая страна Европы», Italy in the second list, the «Пакомат DPD» row.",
@@ -4676,9 +4680,9 @@
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Estonia: until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
+          "Every locker country: a «Выберите пакомат» button with search, as in the checkout.",
+          "Estonia: until a locker is picked, under the rows: «Выберите пакомат — тогда сохраним».",
           "Once picked, «Доставка по умолчанию сохранена ✓»; the checkout fills it in on both phones.",
-          "Italy: no long sentence, but a «Выберите пакомат» button with the checkout's search.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
           "Greece stays Greece: the checkout has Greece and the courier, at the same price.",
           "After «Выйти» it stops filling in."
@@ -4686,7 +4690,7 @@
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:23:20.471Z"
+      "markedAt": "2026-09-23T15:33:17.993Z"
     },
     {
       "id": "acct-refund-sent",

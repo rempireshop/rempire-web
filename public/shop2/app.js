@@ -686,7 +686,6 @@
       "Выберите пакомат или пункт выдачи — туда приедет посылка.":
         "Vali pakiautomaat või pakipunkt — sinna pakk saabubki.",
       "Пакомат или пункт выдачи по умолчанию": "Vaikimisi pakiautomaat või pakipunkt",
-      "— выберите пакомат или пункт выдачи —": "— vali pakiautomaat või pakipunkt —",
       "Поиск по адресу и городу": "Otsi aadressi või linna järgi",
       "Загружаем список…": "Laadime nimekirja…",
       "Список не загрузился — нажмите ещё раз": "Nimekiri ei laadinud — vajuta uuesti",
@@ -802,7 +801,7 @@
       "Сохраняем…": "Salvestame…", "Изменения не сохранены": "Muudatused on salvestamata",
       "Доставка по умолчанию сохранена ✓": "Vaikimisi tarne salvestatud ✓",
       "Выберите пакомат — тогда сохраним": "Vali pakiautomaat — siis salvestame",
-      "— выберите пакомат —": "— vali pakiautomaat —", "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
+      "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
       /* ---- account-flows: кабинет, код входа, письма-автоматы ---- */
       "Войти": "Logi sisse", "Другой e-mail": "Teine e-posti aadress",
       "Код из письма": "Kood kirjast",
@@ -3672,7 +3671,6 @@
       "Выберите пакомат или пункт выдачи — туда приедет посылка.":
         "Choose a parcel locker or pickup point — that is where the parcel goes.",
       "Пакомат или пункт выдачи по умолчанию": "Default parcel locker or pickup point",
-      "— выберите пакомат или пункт выдачи —": "— choose a parcel locker or pickup point —",
       "Поиск по адресу и городу": "Search by address or city",
       "Загружаем список…": "Loading the list…",
       "Список не загрузился — нажмите ещё раз": "The list did not load — tap again",
@@ -3788,7 +3786,7 @@
       "Сохраняем…": "Saving…", "Изменения не сохранены": "Changes not saved",
       "Доставка по умолчанию сохранена ✓": "Default delivery saved ✓",
       "Выберите пакомат — тогда сохраним": "Choose a parcel locker — then we'll save it",
-      "— выберите пакомат —": "— choose a parcel locker —", "Пакомат по умолчанию": "Default parcel locker",
+      "Пакомат по умолчанию": "Default parcel locker",
       /* ---- account-flows: account, login code, automatic letters ---- */
       "Войти": "Sign in", "Другой e-mail": "Use another e-mail",
       "Код из письма": "Code from the e-mail",
@@ -9704,8 +9702,9 @@
     return live ? live.map(function (pt) { return { name: pt.name, kind: pointKind(pt) }; }) : null;
   }
   /** True when the draft's country has more machines than one list can carry —
-      Poland's DPD is 33 603 of them. The block then draws no select: its
-      button opens the checkout's own search sheet instead (acctPointButton). */
+      Poland's DPD is 33 603 of them. Its row then saves before a machine is
+      picked (acctShipChanged), and its search asks the server (pointsSearch).
+      The button is the same one either way (acctPointButton). */
   function acctMachinesTooMany() {
     var x = methods()[acctIdx()];
     if (!x || !x.pm) return false;
@@ -9715,17 +9714,6 @@
   function acctPointsKey() {
     var x = methods()[acctIdx()];
     return (x && x.pm ? x.pm : "") + ":" + acctShipCountry();
-  }
-  /** The machine the block's select is on: the draft's, while the list still
-      has it — else nothing, and the placeholder asks for one. A name and not
-      an index, because the list is the carrier's live one: it changes under
-      a stored index, and «the machine round the corner» is the thing the
-      shopper actually chose. */
-  function acctMachineName() {
-    var d = S.acctForm.ship, mach = acctMachines();
-    if (!d || !d.machine || !mach) return "";
-    for (var i = 0; i < mach.length; i++) if (mach[i].name === d.machine) return d.machine;
-    return "";
   }
   /* Put the saved preference into the checkout — country, method and
      carrier — unless the shopper has already chosen a delivery in this
@@ -15841,57 +15829,65 @@
 
       "</section></div>";
   }
-  /* The machine under a parcel row of «Доставка по умолчанию»: a select for a
-     list that fits in one, the checkout's own search for one that does not.
-     The search's sheet is not drawn here — it has a slot of its own
+  /* The machine under a parcel row of «Доставка по умолчанию»: the
+     checkout's own picker, for every country and every carrier — the same
+     button, the same sheet, the same search by postcode, town or street,
+     and the map wherever the points have coordinates, keyed on this draft's
+     carrier and country (pointsKey).
+     Until 23.09.2026 only a country whose list did not fit in one download
+     (Italy, Poland) got it; a list that fitted — Estonia, Latvia, Lithuania,
+     Finland — got a plain <select> of up to 1 768 names in alphabetical
+     order, with nothing to type into. Дим, staging, 23.09.2026: «I cannot
+     search for parcel lockers for Estonia — but I can for Italy for example
+     in my account.» The sheet is not drawn here — it has a slot of its own
      (paintPointSheet), so nothing that redraws this block can touch it. */
   function acctPointHTML() {
     // the live list, so the machine saved here is one the checkout can
     // find again by name — acctMachines(); null while it is in flight
     var mach = acctMachines();
     if (mach && !mach.length) return "";
-    /* …and a country whose machines do not fit in one list gets no select
-       at all: 33 603 <option> elements is not a choice on a phone. Until
-       23.09.2026 it got a sentence instead — «Пакомат для этой страны
-       выбирается при оформлении заказа — их слишком много для списка», which
-       Dim marked «not good UX». It gets the checkout's search now: the same
-       button, the same sheet, the same server search by postcode, town or
-       street, keyed on this draft's carrier and country (pointsKey). */
-    if (acctMachinesTooMany()) {
-      return acctPointButton(mach);
-    }
-    var sel = acctMachineName();
+    return acctPointButton(mach);
+  }
+  /** The checkout's point button (pointField), for the account's draft. The
+      saved machine is a name, so the name is what it shows — with the kind
+      and the address under it wherever this browser holds that point
+      (acctPointNamed). A list that arrived whole and no longer has the name
+      shows nothing chosen, as the select before it did: a machine that has
+      closed is not a default. The count is the country's, not the first
+      slice's, like the sheet's own. */
+  function acctPointButton(mach) {
+    var key = acctPointsKey(), d = S.acctForm.ship, want = d && d.machine ? d.machine : "";
+    var pt = want ? acctPointNamed(want) : null;
+    var gone = !!want && !!mach && !POINTS.big[key] && !pt;
+    var chosen = gone ? "" : want;
     /* The label widens the same way the checkout's does, and for the same
        reason: this carrier's list may hold counters as well as machines. */
     var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
     var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
-    return '<label class="field"><span class="field__label">' +
-      (mach ? head + " — " + points(mach.length) : head) + "</span>" +
-      '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
-      (mach
-        ? '<option value=""' + (sel ? "" : " selected") + ">" +
-          (anyCounter ? "— выберите пакомат или пункт выдачи —" : "— выберите пакомат —") + "</option>" +
-          mach.map(function (x) {
-            return '<option value="' + esc(x.name) + '"' + (x.name === sel ? " selected" : "") + ">" +
-              esc(x.kind + " · " + x.name) + "</option>";
-          }).join("")
-        : "<option>Загружаем список…</option>") +
-      "</select></span></label>";
-  }
-  /** The checkout's point button (pointField), for the account's draft. The
-      saved machine is a name, so the name is what it shows; the count is the
-      country's, not the first slice's, like the sheet's own. */
-  function acctPointButton(mach) {
-    var d = S.acctForm.ship, chosen = d && d.machine ? d.machine : "";
-    var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
-    var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
-    return '<div class="field"><span class="field__label">' + head + " — " + points(POINTS.big[acctPointsKey()]) + "</span>" +
+    return '<div class="field"><span class="field__label">' +
+      (mach ? head + " — " + points(POINTS.big[key] || mach.length) : head) + "</span>" +
       '<button class="pointbtn' + (chosen ? " pointbtn--set" : "") + '" data-pointopen="acct">' +
         (chosen
-          ? '<span class="pointbtn__nm">' + esc(chosen) + "</span>"
+          ? '<span class="pointbtn__nm">' + esc(chosen) + "</span>" +
+            (pt ? '<span class="pointbtn__ad">' + pointKindLine(pt) + "</span>" : "")
           : '<span class="pointbtn__nm">' + (anyCounter ? "Выберите пакомат или пункт выдачи" : "Выберите пакомат") + "</span>" +
-            '<span class="pointbtn__ad">Поиск по адресу и городу</span>') +
+            '<span class="pointbtn__ad">' + (mach ? "Поиск по адресу и городу"
+              // a feed that failed is not a feed that is still coming — and
+              // the tap that opens the sheet asks for it again (openPointSheet)
+              : POINTS.err[key] ? "Список не загрузился — нажмите ещё раз" : "Загружаем список…") + "</span>") +
         '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button></div>";
+  }
+  /** The saved name's point, wherever this browser holds it: the draft's
+      carrier list, else — a country too big for one — an answer the search
+      brought back (the sheet's own, or matchAcctPoint's by name). */
+  function acctPointNamed(name) {
+    var key = acctPointsKey(), want = String(name).toLowerCase();
+    var hit = pointNamed(POINTS.by[key] || [], want);
+    if (hit || !POINTS.big[key]) return hit;
+    for (var fk in POINTS.found) {
+      if (fk.indexOf(key + "|") === 0 && (hit = pointNamed(POINTS.found[fk] || [], want))) return hit;
+    }
+    return null;
   }
   /** The slot above, redrawn in place — the sheet opening, closing, picking. */
   function patchAcctPoint() {
@@ -16306,11 +16302,13 @@
   function acctShipChanged() {
     var d = S.acctForm.ship;
     if (!d) return;
-    /* A country whose machines do not fit in one list has no select here to
-       wait for. The country and the carrier are worth remembering on their
-       own — the checkout then opens on them and asks only for the machine —
-       so the row saves at once, and the search button under it can add the
-       machine whenever the shopper likes (acctPointButton). */
+    /* A country whose machines do not fit in one list saves without one.
+       The country and the carrier are worth remembering on their own — the
+       checkout then opens on them and asks only for the machine — so the row
+       saves at once, and the search button under it can add the machine
+       whenever the shopper likes (acctPointButton). A list that arrived
+       whole has every machine one tap away under the same button, so there
+       the row still waits for its pick. */
     if (d.method === "parcel" && !d.machine && !acctMachinesTooMany()) { acctSt("ship", "need"); return; }
     acctQueue("ship");
   }
@@ -16863,7 +16861,7 @@
     if (S.screen === "product") { matchAcctPoint(); patchExpress(); return; }
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
        asks for it from inside a render — so the answer has to bring a repaint
-       with it or the select stays on «Загружаем список…» until something
+       with it or the button stays on «Загружаем список…» until something
        else redraws the screen. */
     if (S.screen === "account") {
       /* …and the list that lands can settle a row that was waiting for it.
@@ -41765,11 +41763,6 @@
       var bsIt = S.bundleForm.items[Number(t.dataset.bundlesize)];
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
-    }
-    // the machine is a name (acctMachineName); "" is the placeholder — none
-    // chosen yet. Its pick is what saves a parcel row (acctShipChanged).
-    else if (t.matches("[data-acctmachine]")) {
-      if (S.acctForm.ship) { S.acctForm.ship.machine = t.value; acctShipChanged(); }
     }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture

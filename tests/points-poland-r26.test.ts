@@ -106,12 +106,15 @@ describe("the account stops asking once the answer is in", () => {
 
   it("the search button and the status line can no longer contradict each other", () => {
     /* Until 23.09.2026 a hint here said the machine is picked at the
-       checkout; since then the block draws the checkout's own search button
-       instead (tests/acct-default-delivery.test.ts). Either way the status
-       line asks for a machine only while `ship` is stuck on «need», and both
-       are drawn from the same fact — which is what the re-read above ends.
-       This pins the two readers to the one question. */
-    expect(src).toContain("if (acctMachinesTooMany()) {");
+       checkout; then the block drew the checkout's own search button for the
+       big countries only, and a select for the rest; since the owner's
+       «I cannot search for parcel lockers for Estonia» (23.09.2026) the
+       button is drawn for every list (tests/acct-default-delivery.test.ts).
+       The status line asks for a machine only while `ship` is stuck on
+       «need», and the size of the list is read from the one place —
+       which is what the re-read above ends. */
+    expect(slice("acctPointHTML")).toContain("return acctPointButton(mach);");
+    expect(src).not.toContain("data-acctmachine");
     expect(slice("acctMachinesTooMany")).toContain('POINTS.big[x.pm + ":" + acctShipCountry()]');
   });
 });
