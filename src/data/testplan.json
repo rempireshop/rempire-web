@@ -901,15 +901,15 @@
       "steps": [
         "Открыть «Доставка и оплата» и выписать цены по всем странам.",
         "Положить в корзину один недорогой товар и дойти до шага доставки.",
-        "Выбрать те же страны по очереди и сравнить с выписанным."
+        "Выбрать те же страны и сравнить самую дешёвую карточку с выписанным."
       ],
       "expect": [
-        "Эстония: 5,47 € пакомат, 10,84 € курьер.",
-        "Латвия и Литва: 5,59 € пакомат, курьер 16,29 € и 17,79 €.",
-        "Финляндия: 7,89 € и 16,29 €.",
+        "Эстония: пакомат от 2,49 €, курьер от 6,89 €.",
+        "Латвия и Литва: пакомат от 3,79 €, курьер от 8,09 €.",
+        "Финляндия: пакомат от 9,39 €, курьер от 15,69 €.",
         "Бесплатно от 59 €: Эстония, Латвия, Литва, Финляндия.",
         "Для остальной Европы бесплатно от 200 €.",
-        "На кассе всё то же самое, до цента."
+        "На кассе самая дешёвая карточка стоит столько же, до цента."
       ],
       "why": "Разницу между ценой на странице и ценой на кассе покупатель потребует назад.",
       "risk": "high",
@@ -919,18 +919,20 @@
         "steps": [
           "Open «Доставка и оплата» and write down the prices for every country.",
           "Put one cheap product in the cart and get to the delivery step.",
-          "Pick the same countries in turn and compare them with what you wrote down."
+          "Pick the same countries and compare the cheapest card with your notes."
         ],
         "expect": [
-          "Estonia: 5.47 € parcel locker, 10.84 € courier.",
-          "Latvia and Lithuania: 5.59 € locker, courier 16.29 € and 17.79 €.",
-          "Finland: 7.89 € and 16.29 €.",
+          "Estonia: locker from €2.49, courier from €6.89.",
+          "Latvia and Lithuania: locker from €3.79, courier from €8.09.",
+          "Finland: locker from €9.39, courier from €15.69.",
           "Free from 59 €: Estonia, Latvia, Lithuania, Finland.",
           "The rest of Europe: free from 200 €.",
-          "The checkout shows the same, to the cent."
+          "At the till the cheapest card costs the same, to the cent."
         ],
         "why": "A buyer can claim back the gap between the page price and the till."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "shop-locker-europe",
@@ -1740,11 +1742,11 @@
         "Найти блок с перечнем стран, куда не возим."
       ],
       "expect": [
-        "Эстония 5,47 / 10,84 €, Латвия 5,59 / 16,29 €, Литва 5,59 / 17,79 €.",
-        "Финляндия 7,89 / 16,29 €.",
+        "Под полями Эстонии: Omniva 3,19, SmartPosti 2,59, DPD 2,59, Unisend 2,49 €.",
+        "Курьер Эстонии пустой, под ним «Montonio: 6,89 €».",
+        "Латвия и Литва: Unisend 3,79 €, курьер Montonio 8,09 €.",
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
-        "Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
-        "На кассе у каждого перевозчика своя цена: в Эстонии от 2,49 €.",
+        "Курьер: Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
         "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
@@ -1759,17 +1761,17 @@
           "Find the block listing the countries we do not ship to."
         ],
         "expect": [
-          "Estonia 5.47 / 10.84 €, Latvia 5.59 / 16.29 €, Lithuania 5.59 / 17.79 €.",
-          "Finland 7.89 / 16.29 €.",
-          "«Бесплатно от»: 59 € in the four home countries, 200 € in the rest of Europe.",
-          "Germany 17.59 €, Poland 15.99 €, Greece 28.89 €.",
-          "At the checkout each carrier has its own price: in Estonia from €2.49.",
-          "Not shipped to: Norway, Switzerland, the United Kingdom, Iceland, Cyprus, Malta, Liechtenstein."
+          "Under Estonia's boxes: Omniva 3.19, SmartPosti 2.59, DPD 2.59, Unisend 2.49 €.",
+          "Estonia's courier box is empty, with «Montonio: 6,89 €» under it.",
+          "Latvia and Lithuania: Unisend €3.79, courier Montonio €8.09.",
+          "«Бесплатно от»: €59 in the four home countries, €200 in the rest of Europe.",
+          "Courier: Germany €17.59, Poland €15.99, Greece €28.89.",
+          "Not served: Norway, Switzerland, UK, Iceland, Cyprus, Malta, Liechtenstein."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T18:58:00.000Z"
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "panel-carton",
@@ -2137,7 +2139,7 @@
         "Выбрать способ оплаты и оплатить."
       ],
       "expect": [
-        "В сводке доставка стоит 5,47 €.",
+        "В сводке доставка стоит 3,19 € — цена Omniva.",
         "Там же написано название выбранного пакомата.",
         "После оплаты видно «Заказ оплачен» и номер вида R-1000хх.",
         "Номер записан — он понадобится в следующих проверках."
@@ -2156,13 +2158,15 @@
           "Choose a payment method and pay."
         ],
         "expect": [
-          "The summary shows delivery at 5.47 €.",
+          "The summary shows delivery at €3.19 — Omniva's price.",
           "It also names the parcel locker you chose.",
           "After paying you see «Заказ оплачен» and a number like R-1000xx.",
           "The number is written down — later checks need it."
         ],
         "why": "This is the shop's most common order: if it breaks, nothing works."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-ee-free59",
@@ -2179,9 +2183,9 @@
         "Снова дойти до шага доставки."
       ],
       "expect": [
-        "Корзина меньше 59 € — доставка 5,47 €.",
+        "Корзина меньше 59 € — доставка 2,59 €: первым выбран DPD.",
         "Корзина от 59 € — в строке доставки «бесплатно».",
-        "Сумма к оплате стала на 5,47 € меньше."
+        "Сумма к оплате стала на 2,59 € меньше."
       ],
       "why": "Не срабатывает порог — покупатель не добирает корзину.",
       "risk": "high",
@@ -2196,12 +2200,14 @@
           "Return to the delivery step."
         ],
         "expect": [
-          "Cart under 59 € — delivery is 5.47 €.",
+          "Basket under €59 — delivery €2.59: DPD is picked first.",
           "Cart from 59 € — the delivery line says «бесплатно».",
-          "The amount due drops by 5.47 €."
+          "The total went down by €2.59."
         ],
         "why": "If the threshold does not fire, the buyer does not top up."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-ee-courier",
@@ -2217,7 +2223,7 @@
         "Оформить заказ."
       ],
       "expect": [
-        "Доставка стоит 10,84 €.",
+        "Доставка 6,89 €: первым выбран DPD, SmartPosti стоит 7,39 €.",
         "Без адреса дальше не пускает.",
         "В панели у заказа виден полный адрес."
       ],
@@ -2233,12 +2239,14 @@
           "Place the order."
         ],
         "expect": [
-          "Delivery costs 10.84 €.",
+          "Delivery €6.89: DPD is picked first, SmartPosti costs €7.39.",
           "Without an address it will not let you on.",
           "In the panel the order shows the full address."
         ],
         "why": "An incomplete address means a parcel back and a delivery paid twice."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-ee-pickup",
@@ -2362,8 +2370,8 @@
         "Переключиться на «Курьер до двери» и посмотреть цену."
       ],
       "expect": [
-        "Пакомат стоит 12,39 €.",
-        "Курьер стоит 15,69 €.",
+        "Пакомат: DPD 12,39 € выбран первым, SmartPosti 9,39 €.",
+        "Курьер: DPD 20,09 €, SmartPosti 15,69 €.",
         "Если финских пакоматов ещё нет, «Пакомат» не предлагают пустым."
       ],
       "why": "Финская посылка стоит вам 12,39 €: старая цена 4,99 € — убыток.",
@@ -2377,12 +2385,14 @@
           "Switch to «Курьер до двери» and look at the price."
         ],
         "expect": [
-          "The locker costs 12.39 €.",
-          "The courier costs 15.69 €.",
+          "Locker: DPD €12.39 picked first, SmartPosti €9.39.",
+          "Courier: DPD €20.09, SmartPosti €15.69.",
           "With no Finnish lockers yet, «Пакомат» is not offered empty."
         ],
         "why": "A Finnish parcel costs you 12.39 €; the old 4.99 € was a loss."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-eu-country",
@@ -2449,7 +2459,7 @@
         "У курьера: Nova Post 7,09 €, DPD 23,89 €, SmartPosti 15,99 €.",
         "После DPD сумма заказа выросла, строчка про возврат пропала.",
         "В Эстонии Nova Post нет ни у пакомата, ни у курьера.",
-        "У курьера в Эстонии каждая карточка стоит 10,84 €."
+        "У курьера в Эстонии: DPD и Omniva 6,89 €, SmartPosti 7,39 €."
       ],
       "why": "Перевозчик и его цена видны до оплаты — так же, как в калькуляторе Montonio.",
       "risk": "high",
@@ -2469,12 +2479,12 @@
           "Courier: Nova Post €7.09, DPD €23.89, SmartPosti €15.99.",
           "After DPD the total went up and the returns line is gone.",
           "In Estonia there is no Nova Post, for a locker or a courier.",
-          "Every courier card in Estonia costs €10.84."
+          "Courier in Estonia: DPD and Omniva €6.89, SmartPosti €7.39."
         ],
         "why": "The carrier and its price are visible before paying — as in Montonio's calculator."
       },
       "mark": "new",
-      "markedAt": "2026-09-22T18:58:00.000Z"
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-eu-free200",
@@ -2489,7 +2499,7 @@
         "Добрать корзину больше 200 € и посмотреть снова."
       ],
       "expect": [
-        "Корзина 60 € — доставка платная, 22,29 €.",
+        "Корзина 60 € — доставка платная: Nova Post 8,89 €.",
         "Корзина от 200 € — в строке доставки «бесплатно».",
         "Эстонский порог 59 € в Германии не срабатывает."
       ],
@@ -2504,12 +2514,14 @@
           "Top the cart up past 200 € and look again."
         ],
         "expect": [
-          "Cart at 60 € — delivery is charged, 22.29 €.",
+          "Basket €60 — delivery is charged: Nova Post €8.89.",
           "Cart from 200 € — the delivery line says «бесплатно».",
           "The Estonian 59 € threshold does not fire for Germany."
         ],
         "why": "A 59 € cart used to reach Greece free against a 43 € delivery."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-23T11:20:01.825Z"
     },
     {
       "id": "checkout-country-off",
