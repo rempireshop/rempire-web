@@ -487,6 +487,111 @@ function photosOf(p: FeedProduct, o: Override | undefined, rungCount: number): {
   return { photos, varImg };
 }
 
+/* ---------- which items the feed carries, and their ids ------------------
+
+   One pass, shared by the feed and by the checkout link Merchant Center
+   builds from those ids (`/cart/<id>:<qty>`, resolveCartLink() below), so the
+   two can never disagree about which product and which size an id means.
+   The order matters: an id that collides takes a numbered suffix, and which
+   one collides depends on what came before it — so the pass walks the
+   products, skips the hidden and the unsellable ones, and hands out ids in
+   exactly the order buildFeed() writes them. */
+
+type PlannedRung = Rung & { index: number };
+type PlannedProduct = {
+  p: FeedProduct;
+  o: Override | undefined;
+  rungs: PlannedRung[];
+  photos: string[];
+  varImg: number[];
+  usable: string[];
+  group: boolean;
+  stem: string;
+  slugs: Array<string | undefined>;
+  ids: string[];
+};
+type FeedPlan = { products: PlannedProduct[]; hidden: number; skippedNoImage: string[] };
+
+function planFeed(products: FeedProduct[], overrides: Record<string, Override>): FeedPlan {
+  const plan: FeedPlan = { products: [], hidden: 0, skippedNoImage: [] };
+  const seen = new Set<string>();
+  for (const p of products) {
+    const o = overrides[p.id];
+    if (o?.hidden) {
+      plan.hidden++;
+      continue;
+    }
+    const ladder = rungsOf(p, o);
+    /* A size with no price the till could charge is not an offer. Its index
+       is kept — it is what the per-size photo map is keyed by. */
+    const rungs = ladder.map((r, index) => ({ ...r, index })).filter((r) => Number.isFinite(r.price) && r.price > 0);
+    if (!rungs.length) continue;
+    const { photos, varImg } = photosOf(p, o, ladder.length);
+    const usable = photos.filter(usableImage);
+    if (!usable.length) {
+      plan.skippedNoImage.push(p.id);
+      continue;
+    }
+    const group = rungs.length > 1;
+    /* Every size's id suffix first, so the product's ids can share one stem. */
+    const taken = new Set<string>();
+    const slugs = rungs.map((r) => {
+      if (!group) return undefined;
+      let slug = (r.label && sizeSlug(r.label)) || "v" + (r.index + 1);
+      if (taken.has(slug)) slug += "-" + (r.index + 1);
+      taken.add(slug);
+      return slug;
+    });
+    const stem = idStem(p.id, Math.max(0, ...slugs.map((s) => (s ? s.length + 1 : 0))));
+    const ids = rungs.map((r, i) => {
+      const slug = slugs[i];
+      let id = merchantId(stem, slug);
+      if (seen.has(id)) id = merchantId(stem, (slug ? slug + "-" : "v") + (r.index + 1));
+      seen.add(id);
+      return id;
+    });
+    plan.products.push({ p, o, rungs, photos, varImg, usable, group, stem, slugs, ids });
+  }
+  return plan;
+}
+
+/** One item of the feed, as the checkout link has to find it again. */
+export type FeedOffer = {
+  /** The Merchant Center id — g:id. */
+  id: string;
+  productId: string;
+  /** The size label («250 мл»), null for a product sold in one size. */
+  label: string | null;
+  /** The size's position in the product's ladder — the cart line's `size`. */
+  index: number;
+  /** The `?size=` the item's g:link carries, "" when it carries none. */
+  slug: string;
+  price: number;
+  available: boolean;
+};
+
+/** Every item the feed carries today, with its id — in the feed's own order. */
+export function feedOffers(input: Pick<FeedInput, "overrides" | "descriptions" | "custom">): FeedOffer[] {
+  const products = [...catalogueProducts(input.descriptions), ...customProducts(input.custom)];
+  const out: FeedOffer[] = [];
+  for (const pp of planFeed(products, input.overrides).products) {
+    const word = (pp.o?.stock ?? pp.p.fileStock) as StockState;
+    pp.rungs.forEach((r, i) => {
+      const sizeOut = pp.o?.stockByVariant?.[r.label ?? ""] === "out";
+      out.push({
+        id: pp.ids[i],
+        productId: pp.p.id,
+        label: r.label,
+        index: r.index,
+        slug: pp.slugs[i] ?? "",
+        price: r.price,
+        available: word !== "out" && !sizeOut,
+      });
+    });
+  }
+  return out;
+}
+
 /* ---------- the feed ---------------------------------------------------- */
 
 export type FeedStats = {
@@ -534,27 +639,15 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     return xml;
   };
 
-  const seen = new Set<string>();
   const items: string[] = [];
   const products = [...catalogueProducts(opts.descriptions), ...customProducts(opts.custom)];
+  /* Which products, which sizes and which ids — planFeed(), the pass the
+     checkout link (resolveCartLink) reads the same ids from. */
+  const plan = planFeed(products, overrides);
+  stats.hidden = plan.hidden;
+  stats.skippedNoImage = plan.skippedNoImage;
 
-  for (const p of products) {
-    const o = overrides[p.id];
-    if (o?.hidden) {
-      stats.hidden++;
-      continue;
-    }
-    const ladder = rungsOf(p, o);
-    /* A size with no price the till could charge is not an offer. Its index
-       is kept — it is what the per-size photo map is keyed by. */
-    const rungs = ladder.map((r, index) => ({ ...r, index })).filter((r) => Number.isFinite(r.price) && r.price > 0);
-    if (!rungs.length) continue;
-    const { photos, varImg } = photosOf(p, o, ladder.length);
-    const usable = photos.filter(usableImage);
-    if (!usable.length) {
-      stats.skippedNoImage.push(p.id);
-      continue;
-    }
+  for (const { p, o, rungs, photos, varImg, usable, group, stem, slugs, ids } of plan.products) {
     stats.products++;
 
     const name = feedName(p.name, lang);
@@ -570,17 +663,6 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     })();
     const link = base + langPath(seg, "/p/" + encodeURIComponent(p.id) + "/");
     const word: StockState = (o?.stock ?? p.fileStock) as StockState;
-    const group = rungs.length > 1;
-    /* Every size's id suffix first, so the product's ids can share one stem. */
-    const taken = new Set<string>();
-    const slugs = rungs.map((r) => {
-      if (!group) return undefined;
-      let slug = (r.label && sizeSlug(r.label)) || "v" + (r.index + 1);
-      if (taken.has(slug)) slug += "-" + (r.index + 1);
-      taken.add(slug);
-      return slug;
-    });
-    const stem = idStem(p.id, Math.max(0, ...slugs.map((s) => (s ? s.length + 1 : 0))));
     const apparel = p.cat === "merch" && rungs.some((r) => r.label && apparelOf(r.label));
     const category = apparel ? APPAREL_CATEGORY : GOOGLE_CATEGORY[p.cat];
     const own = OWN_BRANDS.has(p.brand.trim().toLowerCase());
@@ -589,9 +671,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     rungs.forEach((r, i) => {
       /* ---- id ---- */
       const slug = slugs[i];
-      let id = merchantId(stem, slug);
-      if (seen.has(id)) id = merchantId(stem, (slug ? slug + "-" : "v") + (r.index + 1));
-      seen.add(id);
+      const id = ids[i];
 
       /* ---- the facts ---- */
       const sizeText = r.label ? translateVariant(r.label, lang) : "";

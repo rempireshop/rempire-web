@@ -337,6 +337,10 @@ function routes(): RouteCase[] {
        an unfinished escape, a very long segment, a traversal attempt — none
        of which may become a 5xx or reach a file. */
     { name: "GET /shop2/[...path]/", path: "/shop2/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/[...path]/route"), jsonBody: false },
+    /* Merchant Center's «Checkout» link, /cart/<item id>:<qty>
+       (src/lib/merchant-cart.ts). A redirect and nothing else: every id —
+       real, stale, hostile — is a 302 into the shop, never a 5xx. */
+    { name: "GET /cart/[...path]/", path: "/cart/x/", method: "GET", exports: ["GET"], load: () => import("@/app/cart/[...path]/route"), jsonBody: false, queries: ["", "?buy=1", "?x=%00"] },
 
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },

@@ -676,7 +676,9 @@ function eur(n: number): string {
  * should use those, we do not need to make them up». The panel already prints
  * the cost under each box and reddens it when the price is under; that was not
  * enough to stop nine of fourteen carrier-country pairs going out below cost,
- * so the save now refuses.
+ * so the save now refuses — until the owner confirms the list («Сохранить всё
+ * равно», 23.09.2026: a cheaper delivery is his call, made on purpose; see
+ * `acceptBelowCost` in src/app/api/admin/settings/route.ts).
  *
  * The floor is **the number the screen prints under the box** — the price an
  * empty box charges (`carrierPrice()` / `methodPrice()`), not the rawer tariff
@@ -747,14 +749,21 @@ export function belowCostCells(rules: ShippingRules): BelowCostCell[] {
   return out;
 }
 
-/** The sentence the panel shows when a save is refused — plain Russian, with both numbers. */
+/**
+ * The sentence a refused save carries — plain Russian, with both numbers.
+ *
+ * Every cell, not the first six and «и ещё 12» (Ренат, 23.09.2026: «the text
+ * in the message cannot be seen to the end»): a list that stops is a list he
+ * cannot act on. The panel draws its own list from `cells` in the owner's
+ * language (shipLowLine() in public/shop2/app.js); this sentence is what any
+ * other caller gets, and it names the way through as well as the two ways
+ * back.
+ */
 export function belowCostMessage(cells: BelowCostCell[]): string {
   const listed = cells
-    .slice(0, 6)
     .map((c) => `${cellName(c)} — ${eur(c.charged)} при тарифе ${eur(c.cost)}`)
     .join("; ");
-  const more = cells.length > 6 ? ` и ещё ${cells.length - 6}` : "";
-  return `Цена ниже тарифа Montonio: ${listed}${more}. Поднимите цену или очистите поле — пустое поле берёт тариф Montonio само.`;
+  return `Цена ниже тарифа Montonio: ${listed}. Поднимите цену, очистите поле (пустое поле берёт тариф Montonio само) или подтвердите «Сохранить всё равно».`;
 }
 
 /**

@@ -744,12 +744,26 @@
   position: fixed; inset: 0; background: var(--a-scrim); z-index: 70;
   display: flex; align-items: center; justify-content: center; padding: 24px;
 }
+/* A card never taller than the screen, and the text is the part that
+   scrolls (23.09.2026): «Цена ниже тарифа Montonio» lists every cell he typed
+   under the tariff — fourteen lines on the day it was reported — and a card
+   that grew past the viewport lost its heading above the top and its two
+   buttons below the bottom, with nothing to scroll. The title and the
+   buttons keep their size; the detail between them gives way. */
 .adm-confirm__card {
   width: 100%; max-width: 440px; background: var(--a-paper); border: 1px solid var(--a-ink); padding: 20px;
   display: flex; flex-direction: column; gap: 14px; animation: adm-up .2s;
+  max-height: 100%;
 }
-.adm-confirm__t { font-weight: 600; font-size: 17px; }
-.adm-confirm__d { line-height: 22px; white-space: pre-line; }
+.adm-confirm__t { font-weight: 600; font-size: 17px; flex: none; }
+.adm-confirm__d {
+  line-height: 22px; white-space: pre-line; overflow-wrap: anywhere;
+  min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+}
+.adm-confirm__acts { flex: none; }
+/* a refused tariff save lists its cells one per line (admShipErrHTML) */
+.adm-err__list { margin: 6px 0; padding-left: 18px; font-weight: 400; }
+.adm-err__list li { margin: 2px 0; overflow-wrap: anywhere; }
 .adm-confirm__acts { display: flex; gap: 8px; }
 .adm-confirm__acts .adm-btn { flex: 1; }
 
