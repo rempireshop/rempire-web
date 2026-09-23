@@ -53,7 +53,7 @@ Railway, into the project's environment settings.
 | `PUBLIC_BASE_URL` | absolute image and link URLs | e.g. `https://rempireshop.com`. Default is that same value; set it on staging or every letter links to production. |
 | `MAIL_PENDING_PAYMENT` | `onOrderCreated` | `1`/`true`/`on` turns on the "order received, awaiting payment" letter. **Off by default** — see below. |
 | `MAIL_RETRY_DELAY_MS` | the 5xx retry pause | default `400`. Tests set `0`. |
-| `RESEND_TO`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | the *shop's own* ping on a paid order | owned by `src/lib/notify.ts`, documented here because `onOrderPaid` uses it. |
+| `RESEND_TO`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | the *shop's own* ping on a paid order | owned by `src/lib/notify.ts`, documented here because `onOrderPaid` uses it. Since 21.09.2026 the letter to `RESEND_TO` goes only when the Web Push reached no device (the log says so per order). «Ещё → Подключения» → «Письмо магазину о заказе» is red while `RESEND_TO` is unset and has «Отправить проверочное письмо» once it is (`/api/admin/notify/`, 23.09.2026). |
 
 ## The day's allowance — `settings.mail_budget` (21.09.2026)
 

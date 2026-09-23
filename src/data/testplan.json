@@ -5275,45 +5275,45 @@
       "lang": "RU",
       "title": "Письмо про брошенную корзину",
       "steps": [
-        "В «Письмах» включить «Брошенная корзина» и посмотреть блок «Брошенные корзины» внизу.",
-        "Набрать корзину, ввести почту на кассе и не оплачивать.",
-        "Сразу нажать «Запустить сейчас» под письмом.",
-        "Выждать срок из настройки и нажать «Запустить сейчас» ещё два раза.",
-        "Проверить почту и нажать кнопку возврата к корзине.",
-        "Нажать «Отписаться» внизу письма."
+        "«Ещё» → «Маркетинг» → «Письма»: вверху вписать свой адрес в «Куда присылать примеры писем».",
+        "Под «Брошенная корзина» нажать «Прислать пример» и проверить почту.",
+        "Включить «Брошенная корзина», в «Напомнить через, часов» поставить 1 и нажать «Сохранить».",
+        "В магазине набрать корзину и на кассе ввести адрес, на который напоминание ещё не приходило (например, имя+cart1@gmail.com). Не платить.",
+        "Сразу нажать «Запустить сейчас» под письмом, через час — ещё два раза.",
+        "Проверить почту, нажать кнопку возврата к корзине, потом «Отписаться» внизу письма."
       ],
       "expect": [
-        "Сразу после корзины тост говорит: корзина ещё моложе срока из настроек.",
-        "Позже — «Отправлено 1 · пропущено 0», под письмом «Последний запуск».",
+        "Пример приходит сразу, в теме [test], корзина в нём придуманная.",
+        "Сразу: в «Последний запуск» — «отправлено 0» и «срок из настройки ещё не прошёл».",
+        "Через час — «Отправлено 1» или больше, под письмом «Последний запуск».",
         "Следующее нажатие говорит, что письмо уже уходило.",
-        "Письмо пришло со списком товаров, кнопка открывает магазин с той же корзиной.",
-        "После «Отписаться» страница подтверждает отписку сама; если нет — нажмите кнопку на ней.",
-        "Следующая брошенная корзина с этой почты письма не получает."
+        "Письмо пришло со списком товаров; кнопка открывает магазин с той же корзиной.",
+        "После «Отписаться» следующая брошенная корзина с этого адреса письма не получает."
       ],
-      "why": "Второе письмо про ту же корзину надоедает, и человек отписывается.",
+      "why": "Настоящее письмо уходит раз в сутки, утром, поэтому в день проверки его видно только через «Прислать пример» и «Запустить сейчас». Адрес получает одно напоминание, пока с него не придёт заказ, — для проверки нужен новый адрес. Второе письмо про ту же корзину надоедает, и человек отписывается.",
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-21T07:04:00.000Z",
+      "markedAt": "2026-09-23T13:08:05.761Z",
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
-          "In «Письма» switch on «Брошенная корзина» and look at the «Брошенные корзины» block below.",
-          "Fill a cart, enter an e-mail at the checkout and do not pay.",
-          "Press «Запустить сейчас» under the letter straight away.",
-          "Wait out the time from the setting and press «Запустить сейчас» twice more.",
-          "Check your mail and press the button back to the cart.",
-          "Press «Отписаться» at the bottom of the letter."
+          "«Ещё» → «Маркетинг» → «Письма»: at the top type your address into «Куда присылать примеры писем».",
+          "Under «Брошенная корзина» press «Прислать пример» and check your mail.",
+          "Switch «Брошенная корзина» on, set «Напомнить через, часов» to 1 and press «Сохранить».",
+          "In the shop fill a basket and at the checkout enter an address that has never had a reminder (e.g. name+cart1@gmail.com). Do not pay.",
+          "Press «Запустить сейчас» under the letter at once, then twice more an hour later.",
+          "Check your mail, press the button back to the cart, then «Отписаться» at the bottom."
         ],
         "expect": [
-          "Straight after the cart the toast says the basket is younger than the setting.",
-          "Later — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
+          "The sample arrives at once, [test] in the subject, with a made-up basket.",
+          "At once: «Последний запуск» shows «отправлено 0» and «срок из настройки ещё не прошёл».",
+          "An hour later — «Отправлено 1» or more, and «Последний запуск» below.",
           "The next press says the letter has already gone.",
-          "The letter lists the cart, and its button opens the shop with that cart.",
-          "After «Отписаться» the page confirms it by itself; if not, press the button on it.",
-          "The next abandoned cart from that address gets no letter."
+          "The letter lists the cart; its button opens the shop with that cart.",
+          "After «Отписаться» the next abandoned cart from that address gets no letter."
         ],
-        "why": "A second letter about the same cart annoys people into unsubscribing."
+        "why": "The real letter goes once a day, in the morning, so on a test day it can only be seen through «Прислать пример» and «Запустить сейчас». An address gets one reminder until an order comes from it — testing needs a fresh address. A second letter about the same cart annoys people into unsubscribing."
       }
     },
     {
@@ -5324,45 +5324,45 @@
       "lang": "RU",
       "title": "Второе письмо про корзину — со скидкой",
       "steps": [
-        "В «Настройках» → «Письма» открыть блок «Брошенные корзины».",
-        "Поставить: напомнить через 1 ч, скидку через 1 день, 5 %, от 100 €.",
-        "Набрать корзину дороже 100 €, ввести почту на кассе и не оплачивать.",
-        "Дождаться первого письма, потом второго, запуская «Запустить сейчас».",
-        "Открыть скидку из письма и дойти до оплаты.",
+        "«Ещё» → «Маркетинг» → «Письма»: под «Брошенная корзина — письмо со скидкой» — четыре поля.",
+        "Включить «Брошенная корзина» и поставить: через 1 ч, скидка через 1 день, 5 %, от 100 €. Нажать «Сохранить».",
+        "Нажать «Прислать пример» под письмом со скидкой и проверить почту.",
+        "Набрать корзину дороже 100 € на новый адрес и не платить; через час нажать «Запустить сейчас» под «Брошенная корзина».",
+        "Через сутки нажать «Запустить сейчас» под письмом со скидкой; открыть скидку из письма и дойти до оплаты.",
         "Повторить всё с корзиной дешевле 100 €."
       ],
       "expect": [
-        "Второе письмо уходит только после первого, не раньше.",
-        "В нём промокод и обещанные 5 %.",
-        "Кнопка письма возвращает ту же корзину, и скидка уже применена.",
-        "Скидка считается только с товаров этой корзины.",
-        "Второй раз тот же код не принимается.",
+        "В полях сохранённые числа, после сохранения кнопка говорит «Сохранено ✓».",
+        "Пример пришёл сразу: [test] в теме, ваши 5 %, код в нём ненастоящий.",
+        "До первого письма «Запустить сейчас» говорит: первое письмо ещё не уходило.",
+        "Настоящее письмо: промокод на 5 %, кнопка возвращает корзину со скидкой.",
+        "Скидка только на товары этой корзины, второй раз код не принимается.",
         "Корзина дешевле 100 € получает только первое письмо."
       ],
-      "why": "Скидка уходит тем, кто, возможно, купил бы и так. Неверный порог или код на весь заказ — это подаренные деньги.",
+      "why": "Скидка уходит тем, кто, возможно, купил бы и так. Неверный порог или код на весь заказ — это подаренные деньги. Код в примере придуман и на кассе не сработает — так и должно быть.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-21T07:04:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-23T13:08:05.761Z",
       "en": {
         "title": "The second cart letter — the one with the discount",
         "steps": [
-          "In «Настройки» → «Письма» open the «Брошенные корзины» block.",
-          "Set: remind after 1 h, discount after 1 day, 5 %, from 100 €.",
-          "Fill a basket over 100 €, enter an e-mail at the checkout and do not pay.",
-          "Wait for the first letter, then the second, using «Запустить сейчас».",
-          "Open the discount from the letter and go through to payment.",
+          "«Ещё» → «Маркетинг» → «Письма»: under «Брошенная корзина — письмо со скидкой» there are four fields.",
+          "Switch «Брошенная корзина» on and set: after 1 h, discount after 1 day, 5 %, from 100 €. Press «Сохранить».",
+          "Press «Прислать пример» under the discount letter and check your mail.",
+          "Fill a basket over 100 € on a fresh address and do not pay; an hour later press «Запустить сейчас» under «Брошенная корзина».",
+          "A day later press «Запустить сейчас» under the discount letter; open the discount from it and go through to payment.",
           "Do it all again with a basket under 100 €."
         ],
         "expect": [
-          "The second letter goes only after the first, never before.",
-          "It carries a promo code and the 5 % promised.",
-          "Its button brings back that basket with the discount already applied.",
-          "The discount counts only the products from that basket.",
-          "The same code is refused the second time.",
+          "The fields hold the saved numbers; after saving the button says «Сохранено ✓».",
+          "The sample arrives at once: [test] in the subject, your 5 %, a fake code.",
+          "Before the first letter «Запустить сейчас» says: the first letter has not gone yet.",
+          "The real letter: a 5 % code, and its button brings the basket back discounted.",
+          "The discount counts only this basket's products; the same code is refused twice.",
           "A basket under 100 € gets the first letter only."
         ],
-        "why": "The discount goes to people who might have bought anyway. A wrong threshold, or a code that pays for the whole order, is money given away."
+        "why": "The discount goes to people who might have bought anyway. A wrong threshold, or a code that pays for the whole order, is money given away. The code in the sample is made up and will not work at the checkout — that is intended."
       }
     },
     {
@@ -5471,43 +5471,43 @@
       "lang": "RU",
       "title": "Дневной лимит писем",
       "steps": [
-        "«Настройки» → «Письма» → блок «Сколько писем в сутки».",
-        "Поставить всего 4, придержать 2, сохранить.",
+        "«Ещё» → «Настройки» → «Письма» (это «Маркетинг» → «Письма»): блок «Сколько писем в сутки» под списком писем.",
+        "Поставить всего 4, придержать 2, сохранить и обновить страницу.",
         "Проверить, что подписчиков больше двух; если нет — добавить.",
         "Открыть рассылку и нажать отправку.",
         "Оформить и оплатить заказ, пока лимит занят.",
-        "На следующий день открыть рассылку снова."
+        "На следующий день открыть рассылку снова, потом вернуть 100 и 30."
       ],
       "expect": [
+        "После обновления в полях 4 и 2, без «Изменения не сохранены».",
         "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
         "Рассылка останавливается на двух и говорит, что продолжится завтра.",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
         "На телефон приходит одно оповещение о лимите, а не по одному на письмо.",
-        "Назавтра рассылка доходит до конца сама, без повторов.",
-        "Никто не получил письмо дважды."
+        "Назавтра рассылка доходит до конца сама, и никто не получил письмо дважды."
       ],
       "why": "Рассылка может тихо съесть сутки, и тогда не уйдёт «Заказ принят». Это оплаченный заказ, о котором покупатель не получил ни слова.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-21T09:19:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-23T13:08:05.761Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
-          "«Настройки» → «Письма» → the «Сколько писем в сутки» block.",
-          "Set the total to 4, hold back 2, save.",
+          "«Ещё» → «Настройки» → «Письма» (that is «Маркетинг» → «Письма»): the «Сколько писем в сутки» block below the letters.",
+          "Set the total to 4, hold back 2, save and reload the page.",
           "Check there are more than two subscribers; add some if not.",
           "Open a campaign and press send.",
           "Place and pay for an order while the allowance is spent.",
-          "Open the campaign again the next day."
+          "Open the campaign again the next day, then put back 100 and 30."
         ],
         "expect": [
+          "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
           "Under the button: how many went today and how many the campaign may use.",
           "The campaign stops at two and says it continues tomorrow.",
           "The «Заказ принят» letter still reaches the buyer.",
           "One phone notification about the limit, not one per letter.",
-          "Next day the campaign finishes by itself, with no repeats.",
-          "Nobody received the letter twice."
+          "Next day the campaign finishes by itself, and nobody got the letter twice."
         ],
         "why": "A campaign can quietly eat the day and then «Заказ принят» cannot send. That is a paid order whose buyer heard nothing."
       }
@@ -5601,36 +5601,40 @@
       "lang": "RU",
       "title": "Уведомление магазину о новом заказе",
       "steps": [
-        "Оформить и оплатить любой заказ.",
+        "«Ещё» → «Подключения» → строка «Письмо магазину о заказе».",
+        "Если строка красная — сделать, что в ней написано, или переслать её Диму. Если зелёная — нажать «Отправить проверочное письмо».",
         "Открыть почту магазина shop@rempireshop.com.",
-        "Посмотреть, пришло ли оповещение на телефон (если оно включено)."
+        "Оформить и оплатить любой заказ, телефон с оповещениями держать рядом.",
+        "Проверить ящик магазина ещё раз."
       ],
       "expect": [
-        "В ящике магазина лежит короткое письмо о заказе.",
-        "В нём номер заказа и имя покупателя.",
-        "Там же способ доставки, список товаров и сумма.",
-        "Если оповещения включены, на телефон пришло то же самое."
+        "Строка зелёная и называет shop@rempireshop.com; красная называет RESEND_TO и Vercel.",
+        "Проверочное письмо пришло в ящик магазина за минуту.",
+        "На телефон пришло оповещение: сумма, покупатель и товар.",
+        "Письма об этом заказе в ящике нет — пока телефон получает оповещения, так задумано."
       ],
-      "why": "Без этого письма вы узнаёте о заказе, только когда сами откроете панель.",
+      "why": "С 21.09 письмо магазину — запасной путь: оно уходит, только если оповещение не дошло ни до одного телефона, и так не тратит суточный лимит писем. Без RESEND_TO в Vercel не уходит и оно — тогда о таком заказе вы узнаете только из панели.",
       "risk": "med",
       "writes": true,
       "en": {
         "title": "The shop's own notice of a new order",
         "steps": [
-          "Place and pay for any order.",
+          "«Ещё» → «Подключения» → the «Письмо магазину о заказе» row.",
+          "If the row is red, do what it says or forward it to Dim. If it is green, press «Отправить проверочное письмо».",
           "Open the shop mailbox shop@rempireshop.com.",
-          "Check whether the phone notification arrived too, if it is switched on."
+          "Place and pay for any order, with the notifying phone at hand.",
+          "Check the shop mailbox again."
         ],
         "expect": [
-          "A short letter about the order is in the shop mailbox.",
-          "It gives the order number and the buyer's name.",
-          "It also gives the delivery, the products and the total.",
-          "With notifications on, the same thing arrived on the phone."
+          "The row is green and names shop@rempireshop.com; red, it names RESEND_TO and Vercel.",
+          "The test letter reaches the shop mailbox within a minute.",
+          "The phone got the notification: the sum, the buyer and the product.",
+          "No letter about this order arrives — intended while the phone gets notifications."
         ],
-        "why": "Without this letter you learn about an order only by opening the panel."
+        "why": "Since 21.09 the shop's letter is the fallback: it goes only when the notification reached no phone, so it does not spend the daily letter allowance. Without RESEND_TO in Vercel it does not go either — and then you learn about such an order only from the panel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-21T06:53:00.000Z"
+      "markedAt": "2026-09-23T13:08:05.761Z"
     },
     {
       "id": "mail-not-spam",

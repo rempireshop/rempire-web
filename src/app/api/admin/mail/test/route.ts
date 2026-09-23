@@ -12,6 +12,14 @@ import { getFlows } from "@/lib/flows";
  * to whatever address the admin typed. Subject carries a [test] prefix so a
  * sample «Заказ принят» in a real inbox is never mistaken for a real order.
  *
+ * Two buttons reach it: «Отправить мне тест» in a letter's editor, and
+ * «Прислать пример» on the letter's own row in «Маркетинг → Письма» (23.09.2026
+ * — the automatic letters go out once a day, and on a test day there was no
+ * other way to see one). Both send the DEMO letter and nothing else: no cart
+ * is stamped, no promo code is written, no «Последний запуск» moves. The code
+ * a sample prints (REM-CART-2417, REM-BDAY-2417) is not a shape the shop's own
+ * generators produce, so it cannot be spent — tests/mail-flow-samples.test.ts.
+ *
  * NB trailing slash: next.config has trailingSlash:true — POST to
  * "/api/admin/mail/test/" or the request 308s and the body is dropped.
  */
@@ -80,9 +88,17 @@ export async function POST(req: Request): Promise<Response> {
   // The owner's own subject / intro / signature — the sample has to be the
   // letter, not the factory default (src/lib/mail-texts.ts).
   await loadMailTexts();
-  // …and the birthday percent the shop really offers, exactly as the preview
-  // iframe beside this button reads it (src/app/api/admin/mail/preview).
-  const demo = { birthdayPercent: (await getFlows()).birthdayPercent };
+  /* …and both percents the shop really offers, exactly as the preview iframe
+     beside this button reads them (src/app/api/admin/mail/preview). Until
+     23.09.2026 only the birthday one was passed, so the sample of «Брошенная
+     корзина — письмо со скидкой» promised the factory 5 % whatever the owner
+     had typed into «Размер скидки». Since that date this route is also the
+     one behind «Прислать пример» on every letter's row. */
+  const flows = await getFlows();
+  const demo = {
+    birthdayPercent: flows.birthdayPercent,
+    cartDiscountPercent: flows.abandonedDiscountPercent,
+  };
 
   let mail;
   try {

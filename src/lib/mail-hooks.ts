@@ -215,7 +215,17 @@ async function pingOwner(subject: string, body: string, push?: PushMessage): Pro
   /* A ping with no push message at all (a future caller that has nothing to
      put on a lock screen) falls through to the letter, which is what every
      caller used to do. */
-  if (pushed) return true;
+  if (pushed) {
+    /* Said out loud, once per order (Renat, 23.09.2026: «Phone notification
+       arrived — e-mail to shop@rempireshop.com not»). The missing letter is
+       the design, not a fault, and the log is where anybody asking «why no
+       e-mail» will look — so it answers there. */
+    console.info(
+      `[mail-hooks] ${subject}: the push reached a phone, so no letter to RESEND_TO — ` +
+        "the shop's letter is only the fallback for when no device takes the push (since 21.09.2026).",
+    );
+    return true;
+  }
 
   const mail = await forwardEmail(subject, body);
   /* forwardEmail() posts to Resend itself rather than through sendMail(), so

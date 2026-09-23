@@ -38,6 +38,19 @@ export const maxDuration = 60;
 
 const NO_STORE = { "cache-control": "no-store" };
 
+/** `abandoned: sent 1, skipped 2 (too_fresh) · abandonedDiscount: …` — counts and codes only, never an address. */
+function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>): string {
+  const flows = ["abandoned", "abandonedDiscount", "backstock", "birthday", "unpaid"] as const;
+  return (
+    flows
+      .map((k) => {
+        const r = report[k];
+        return `${k}: sent ${r.sent}, skipped ${r.skipped}${r.reason ? ` (${r.reason})` : ""}`;
+      })
+      .join(" · ") + ` · ${report.ms} ms`
+  );
+}
+
 function authorized(req: Request): boolean {
   const secret = (process.env.CRON_SECRET ?? "").trim();
   if (!secret) return false;
@@ -58,6 +71,12 @@ export async function GET(req: Request) {
   }
   try {
     const report = await runFlows();
+    /* One line in the log per morning (Dim, 23.09.2026: an abandoned-cart
+       letter that did not come, and nothing anywhere to say whether the 07:00
+       run had even looked at the basket). The panel's «Последний запуск» says
+       the same thing per letter; this is the copy that survives in Vercel's
+       log beside everything else that happened at that hour. */
+    console.info(`[api/cron/flows] ${flowsLogLine(report)}`);
     /* …and, on the same daily trip, the lost-webhook sweep
        (/api/cron/payments-reconcile, src/lib/payments/reconcile.ts). It rides
        here because Vercel's Hobby plan allows exactly two cron jobs and both
