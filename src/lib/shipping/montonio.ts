@@ -1222,36 +1222,29 @@ export function carrierHint(order: Order, opts: CreateShipmentOptions = {}): str
 }
 
 /**
- * Register one order with a carrier through Montonio.
+ * The half of a shipment that both booking and repair send: the shipping
+ * method (pickup point + locker door, or a courier service), the receiver, and
+ * the one parcel — its declared weight, and its sides where they are wanted.
  *
- * Synchronous by default: the admin presses a button and wants the tracking
- * code on the screen, not a webhook twenty seconds later. Asynchronous mode
- * still works (`synchronous: false`), it just answers with status `pending` and
- * empty tracking fields — reference § Create Shipment.
+ * Shared on purpose. `POST /shipments` books with it, and
+ * `PATCH /shipments/{id}` — the repair of a refused registration, Montonio's
+ * answer of 24.09.2026 — sends the same three fields rebuilt from the order as
+ * it stands now, so a corrected phone, address, box or door reaches the
+ * carrier exactly the way a first booking would have carried it.
  */
-export async function createMontonioShipment(
+async function shipmentParts(
   order: Order,
-  opts: CreateShipmentOptions = {},
-): Promise<MontonioShipment> {
-  const mock = shippingMockOn();
-  const config = mock ? null : montonioShippingConfig();
-  if (!mock && !config) throw new MontonioShippingError("not_configured");
-
-  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
-  const country = String(ship.country || "EE").toUpperCase();
-  const method = normalizeMethod(ship.method);
-  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
-  if ((order.items ?? []).every((i) => i.kind === "gift")) {
-    throw new MontonioShippingError("not_shippable", "gift_only");
-  }
-
-  const hint = carrierHint(order, opts);
-  /* The e2e suite's carrier: the same refusals as above (a pickup order or a
-     gift-only one is not a parcel for the mock either), then a registered
-     parcel without a network in sight — src/lib/shipping/montonio-mock.ts. */
-  if (mock || !config) {
-    return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
-  }
+  opts: CreateShipmentOptions,
+  config: MontonioConfig,
+  ctx: { hint: string; method: "parcel" | "courier"; country: string },
+): Promise<{
+  carrier: string;
+  shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
+  sentLockerSize: LockerSize | undefined;
+  receiver: Record<string, unknown>;
+  parcel: Record<string, number>;
+}> {
+  const { hint, method, country } = ctx;
   let carrier = hint;
   let shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
   let sentLockerSize: LockerSize | undefined;
@@ -1354,6 +1347,47 @@ export async function createMontonioShipment(
     }
   }
 
+  return { carrier, shippingMethod, sentLockerSize, receiver, parcel };
+}
+
+/**
+ * Register one order with a carrier through Montonio.
+ *
+ * Synchronous by default: the admin presses a button and wants the tracking
+ * code on the screen, not a webhook twenty seconds later. Asynchronous mode
+ * still works (`synchronous: false`), it just answers with status `pending` and
+ * empty tracking fields — reference § Create Shipment.
+ */
+export async function createMontonioShipment(
+  order: Order,
+  opts: CreateShipmentOptions = {},
+): Promise<MontonioShipment> {
+  const mock = shippingMockOn();
+  const config = mock ? null : montonioShippingConfig();
+  if (!mock && !config) throw new MontonioShippingError("not_configured");
+
+  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
+  const country = String(ship.country || "EE").toUpperCase();
+  const method = normalizeMethod(ship.method);
+  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
+  if ((order.items ?? []).every((i) => i.kind === "gift")) {
+    throw new MontonioShippingError("not_shippable", "gift_only");
+  }
+
+  const hint = carrierHint(order, opts);
+  /* The e2e suite's carrier: the same refusals as above (a pickup order or a
+     gift-only one is not a parcel for the mock either), then a registered
+     parcel without a network in sight — src/lib/shipping/montonio-mock.ts. */
+  if (mock || !config) {
+    return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
+  }
+  const { carrier, shippingMethod, sentLockerSize, receiver, parcel } = await shipmentParts(
+    order,
+    opts,
+    config,
+    { hint, method, country },
+  );
+
   /* Every bound here is Montonio's own (reference § Create Shipment →
      products): sku 100, name 255, quantity «Max value is 999». The quantity
      ceiling was missing until 18.09.2026, and it is not cosmetic — one line
@@ -1412,6 +1446,89 @@ export async function createMontonioShipment(
     trackingUrl: str(first?.trackingLink),
     dropOffPin: str(first?.dropOffPin),
     createdAt: str(body.createdAt) || new Date().toISOString(),
+  };
+}
+
+/**
+ * Send a REFUSED shipment to the carrier again — the same shipment, never a
+ * second one.
+ *
+ * Montonio support, 24.09.2026, on «PATCH or a new shipment for
+ * `registrationFailed`?»: «Yes, that's exactly the right and recommended
+ * approach and you don't need to create a new shipment. `registrationFailed`
+ * is one of three states from which a shipment can be updated via PATCH, and
+ * PATCH automatically triggers a new registration attempt with the carrier.
+ * If the attempt fails again, the shipment simply stays in that same
+ * `registrationFailed` state (nothing is lost), and you can just try again.»
+ * (The reference names two of the three: `registrationFailed` and
+ * `registered`. The shop only ever patches the first — see the route.)
+ *
+ * The body is `shipmentParts()` rebuilt from the order as it stands now —
+ * shipping method with the door on the card, receiver, parcel — so whatever
+ * was corrected since the refusal (the phone, the address, «Другая коробка»,
+ * the locker size) is what the carrier sees. Products are not sent: the
+ * reference says they cannot be updated.
+ *
+ * The reply is the shipment as Montonio now has it: `registered` with a
+ * tracking code, `registrationFailed` again, or `pending` while it asks the
+ * carrier — then `shipment.registered` / `registrationFailed` arrive by
+ * webhook, and the nightly poll is the backup (src/lib/shipping/shipment-sync.ts).
+ */
+export async function repairMontonioShipment(
+  order: Order,
+  stored: Pick<MontonioShipment, "shipmentId" | "carrier">,
+  opts: CreateShipmentOptions = {},
+): Promise<MontonioShipment> {
+  const mock = shippingMockOn();
+  const config = mock ? null : montonioShippingConfig();
+  if (!mock && !config) throw new MontonioShippingError("not_configured");
+
+  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
+  const country = String(ship.country || "EE").toUpperCase();
+  const method = normalizeMethod(ship.method);
+  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
+
+  /* The carrier the shipment was booked with, unless the owner names another:
+     a repair is the same parcel, so it goes to the same carrier by default. */
+  const hint = carrierHint(order, { ...opts, carrier: opts.carrier || stored.carrier || undefined });
+  if (mock || !config) {
+    // the e2e carrier never refuses, so a repair there is simply a registered parcel
+    return {
+      ...mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country }),
+      shipmentId: stored.shipmentId,
+    };
+  }
+
+  const { carrier, shippingMethod, sentLockerSize, receiver, parcel } = await shipmentParts(order, opts, config, {
+    hint,
+    method,
+    country,
+  });
+
+  const body = await call<{
+    id?: string;
+    status?: string;
+    createdAt?: string;
+    shippingMethod?: { carrierCode?: string; countryCode?: string };
+    parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
+  }>(config, `/shipments/${encodeURIComponent(stored.shipmentId)}`, {
+    method: "PATCH",
+    body: { shippingMethod, receiver, parcels: [parcel] },
+  });
+
+  const first = body.parcels?.[0];
+  return {
+    provider: "montonio",
+    shipmentId: str(body.id) || stored.shipmentId,
+    status: str(body.status) || "pending",
+    carrier: str(body.shippingMethod?.carrierCode) || carrier,
+    country: (str(body.shippingMethod?.countryCode) || country).toUpperCase(),
+    method: shippingMethod.type,
+    lockerSize: sentLockerSize,
+    trackingCode: str(first?.carrierParcelId),
+    trackingUrl: str(first?.trackingLink),
+    dropOffPin: str(first?.dropOffPin),
+    createdAt: str(body.createdAt),
   };
 }
 
@@ -1592,6 +1709,37 @@ export async function claimShipmentSlot(orderId: string): Promise<boolean> {
 /** Give the slot back — the booking failed, so the next press may try again. */
 export async function releaseShipmentSlot(orderId: string): Promise<void> {
   await saveShipmentOnOrder(orderId, { bookingAt: null });
+}
+
+/**
+ * The same claim for a REPAIR — «Создать этикетку» pressed on a shipment the
+ * carrier refused, which sends that shipment again with `PATCH` (Montonio,
+ * 24.09.2026). A second PATCH while the first is still with the carrier would
+ * start a second registration attempt of the same parcel; the timed-out tap
+ * on a phone is exactly how that happens. Its own field, `repairAt`, because
+ * the booking claim above only works while there is no shipment yet.
+ */
+export async function claimRepairSlot(orderId: string): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `update orders
+        set shipping = coalesce(shipping, '{}'::jsonb)
+                       || jsonb_build_object('montonio',
+                            coalesce(shipping -> 'montonio', '{}'::jsonb)
+                            || jsonb_build_object('repairAt', (extract(epoch from now()) * 1000)::bigint)),
+            updated_at = now()
+      where id = $1
+        and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') <> ''
+        and coalesce((shipping -> 'montonio' ->> 'repairAt')::bigint, 0)
+            < (extract(epoch from now()) * 1000)::bigint - $2::bigint
+      returning id`,
+    [orderId, SHIPMENT_CLAIM_MS],
+  );
+  return rows.length > 0;
+}
+
+/** Give the repair slot back — the next press may try again at once. */
+export async function releaseRepairSlot(orderId: string): Promise<void> {
+  await saveShipmentOnOrder(orderId, { repairAt: null });
 }
 
 /* ---------- what this store is actually signed up for --------------------- */

@@ -8730,6 +8730,51 @@
       }
     },
     {
+      "id": "live-label-repair",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Перевозчик не принял посылку: та же кнопка ещё раз",
+      "steps": [
+        "Дима ставит в оплаченный заказ с пакоматом неверный телефон получателя.",
+        "Открыть заказ в панели и нажать «Создать этикетку».",
+        "Дима возвращает правильный телефон.",
+        "Снова нажать «Создать этикетку» в том же заказе."
+      ],
+      "expect": [
+        "После первого нажатия: «Перевозчик не принял», трек-номера и PDF нет.",
+        "Кнопка осталась «Создать этикетку», а не «Отправлен».",
+        "В журнале строка «Перевозчик не принял посылку».",
+        "После второго нажатия есть трек-номер, PDF открывается.",
+        "В Montonio у заказа одно отправление, не два.",
+        "В журнале строка «Посылка снова отправлена перевозчику»."
+      ],
+      "why": "Отказ перевозчика чинится той же кнопкой — без второй посылки и второй оплаты.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "The carrier refused the parcel: the same button again",
+        "steps": [
+          "Dim puts a wrong receiver phone on a paid order to a locker.",
+          "Open the order in the panel and press «Создать этикетку».",
+          "Dim puts the right phone back.",
+          "Press «Создать этикетку» again on the same order."
+        ],
+        "expect": [
+          "After the first press: «Перевозчик не принял», no tracking number and no PDF.",
+          "The button is still «Создать этикетку», not «Отправлен».",
+          "The journal has «Перевозчик не принял посылку».",
+          "After the second press there is a tracking number and the PDF opens.",
+          "Montonio holds one shipment for the order, not two.",
+          "The journal has «Посылка снова отправлена перевозчику»."
+        ],
+        "why": "A carrier's refusal is repaired with the same button — no second parcel, no second charge."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-24T17:01:49.156Z"
+    },
+    {
       "id": "live-cron",
       "area": "live",
       "who": "dim",

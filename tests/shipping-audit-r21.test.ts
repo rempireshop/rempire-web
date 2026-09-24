@@ -152,10 +152,17 @@ describe("«Отправление» — the parcel as Montonio really has it", 
   it("says so when the carrier refused the registration", () => {
     const html = shipmentBox({ shipmentId: "shp-1", status: "registrationFailed" });
     expect(html).toContain("Перевозчик не принял");
-    expect(html).toContain("Montonio отметил отправление как непринятое");
+    /* Since 24.09.2026 the fix is the same button, pressed again: it sends
+       this same shipment with PATCH (Montonio: «you can just try again»). It
+       used to say «set the label aside and create it anew», which only ever
+       repeated the refusal. */
+    expect(html).toContain("Нажмите «Создать этикетку» ещё раз");
+    expect(html).toContain("второй посылки не будет");
     expect(html, "the parcel is not waiting for anybody").not.toContain(
       "Трек-номер появится, когда перевозчик примет посылку.",
     );
+    // and no PDF to open: there is no label, and the label route answers 409
+    expect(html).not.toContain("data-labelpdf");
   });
 
   it("leaves a shipment on its way exactly as it was", () => {

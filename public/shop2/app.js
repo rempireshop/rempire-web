@@ -571,6 +571,8 @@
         "Tagasimakse ei jõudnud kliendini",
       "Перевозчик не принял посылку":
         "Vedaja ei võtnud pakki vastu",
+      "Посылка снова отправлена перевозчику":
+        "Pakk saadeti vedajale uuesti",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -2062,8 +2064,8 @@
       "Трек-номер появится, когда перевозчик примет посылку.": "Jälgimisnumber ilmub, kui vedaja paki vastu võtab.",
       // …and when Montonio says the carrier refused the registration
       "Перевозчик не принял": "Vedaja ei võtnud vastu",
-      "Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.":
-        "Montonio märkis saadetise vastu võtmata jäänuks: jälgimisnumbrit ei tule ja selle sildiga pakki vastu ei võeta. Pange silt kõrvale ja looge see uuesti.",
+      "Перевозчик не принял посылку: трек-номера нет. Нажмите «Создать этикетку» ещё раз — Montonio повторит это же отправление, второй посылки не будет. Не прошло снова — чаще всего неверен телефон или адрес: напишите Диму.":
+        "Vedaja ei võtnud pakki vastu: jälgimisnumbrit ei ole. Vajutage uuesti «Loo silt» — Montonio kordab sama saadetist, teist pakki ei teki. Kui jälle ei õnnestu, on enamasti vale telefon või aadress: kirjutage Dimile.",
       "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
@@ -3622,6 +3624,8 @@
         "The refund did not reach the customer",
       "Перевозчик не принял посылку":
         "The carrier would not take the parcel",
+      "Посылка снова отправлена перевозчику":
+        "The parcel was sent to the carrier again",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -5086,8 +5090,8 @@
       "Трек-номер появится, когда перевозчик примет посылку.": "The tracking number appears once the carrier accepts the parcel.",
       // …and when Montonio says the carrier refused the registration
       "Перевозчик не принял": "The carrier refused it",
-      "Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.":
-        "Montonio marked this shipment as not registered: no tracking number is coming and the parcel will not be accepted with this label. Set the label aside and make a new one.",
+      "Перевозчик не принял посылку: трек-номера нет. Нажмите «Создать этикетку» ещё раз — Montonio повторит это же отправление, второй посылки не будет. Не прошло снова — чаще всего неверен телефон или адрес: напишите Диму.":
+        "The carrier would not take the parcel: there is no tracking number. Press «Create label» again — Montonio repeats this same shipment, no second parcel appears. If it fails again, the phone or address is usually wrong: write to Dim.",
       "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
@@ -19348,7 +19352,11 @@
        cannot be cancelled there); `dismissed` is the journal's undo of the
        label step — the sticker exists, the step is shown as not done. */
     var hasShipment = !!(mont && mont.shipmentId);
-    var labeled = hasShipment && !mont.dismissed;
+    /* A shipment the carrier REFUSED is not a label either: the step stays
+       «Создать этикетку», and pressing it sends that same shipment again —
+       PATCH, Montonio's answer of 24.09.2026 (POST /api/admin/shipments).
+       Until then the step read «Отправлен» over a parcel that could not move. */
+    var labeled = hasShipment && !mont.dismissed && !shipRegFailed(mont.status);
     /* «По счёту — для компаний»: the invoice record the server put on the
        order (src/lib/invoices.ts) and the company it is made out to. An
        unpaid order with an invoice is waiting for a bank transfer, not for
@@ -20515,8 +20523,12 @@
       /* A refused registration first, because the two sentences under it are
          both false about one: there is no tracking code coming, and the
          parcel is not «waiting for the carrier». */
+      /* Since 24.09.2026 the fix is the button above: «Создать этикетку»
+         sends this same shipment again (PATCH — Montonio: «you can just try
+         again»). It used to say «set the label aside and create it anew»,
+         which only ever repeated the refusal. */
       (failed
-        ? '<div class="adm-hint">Montonio отметил отправление как непринятое: трек-номера не будет и посылку по этой этикетке не примут. Отложите этикетку и создайте её заново.</div>'
+        ? '<div class="adm-hint">Перевозчик не принял посылку: трек-номера нет. Нажмите «Создать этикетку» ещё раз — Montonio повторит это же отправление, второй посылки не будет. Не прошло снова — чаще всего неверен телефон или адрес: напишите Диму.</div>'
         : code
         ? '<div class="adm-ship__row adm-ship__row--code"><span><span class="adm-hint">Трек-номер</span><br>' +
             '<span class="adm-ship__code" data-trackingcode>' + esc(code) + "</span></span>" +
@@ -20524,6 +20536,9 @@
               ' aria-label="Скопировать трек-номер">Скопировать</button></div>'
         : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
       (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
+      /* No PDF for a refused parcel: there is no label to print, and the label
+         route answers 409 registration_failed for it. */
+      (failed ? "" :
       '<div class="adm-ship__links">' +
         /* One label button, A4 (Dim, 07.09.2026): two equal buttons made Renat
            choose a paper size before he could print, and the office printer is
@@ -20534,7 +20549,7 @@
         // http(s) only: an href is a place a "javascript:" string would run
         (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
           ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
-      "</div>" +
+      "</div>") +
       "</div>";
   }
   function admOrderCardHTML() {
@@ -27458,6 +27473,9 @@
     "order.payment_recovered": "Оплата нашлась при ночной сверке",
     "order.payment_odd": "Montonio считает заказ возвращённым, а он не оплачен",
     "shipment.registration_failed": "Перевозчик не принял посылку",
+    /* «Создать этикетку» on a refused parcel — the same shipment sent to the
+       carrier again with PATCH (Montonio, 24.09.2026). */
+    "shipment.repair": "Посылка снова отправлена перевозчику",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
     /* Seven actions the server writes and this table did not name, so the
@@ -37025,12 +37043,16 @@
       var shipErr = r.body && r.body.error;
       /* `registration_failed` — the carrier turned the parcel down. The
          server sends the sentence (srvMsg): the parcel EXISTS at Montonio
-         unregistered, a second press repeats the same refusal by design, and
-         the fix is a corrected phone or address passed on, not a retry.
-         Sandbox can never produce this — it calls no carriers at all
+         unregistered, and since 24.09.2026 the next press sends that same
+         shipment again (PATCH — Montonio: «you can just try again»), so the
+         sentence says to press again and, if it fails again, to have the phone
+         or address corrected. The lists are re-read so the card shows the
+         refused shipment and the button that repairs it. Sandbox can never
+         produce this — it calls no carriers at all
          (docs/montonio-untested.md § S1). */
       toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail)
         : srvMsg(r.body) || SHIP_ERR[shipErr] || "Не удалось создать этикетку");
+      if (shipErr === "registration_failed") admOrderListsReload();
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }

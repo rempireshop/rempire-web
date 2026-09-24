@@ -893,8 +893,15 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     expect(audit.some((a) => a.action === "shipment.registration_failed")).toBe(true);
     expect(audit.some((a) => a.action === "shipment.create")).toBe(false);
 
-    /* …and a second press says the same thing rather than «Этикетка снова на
-       месте ✓», without touching Montonio again. */
+    /* …and a second press is the REPAIR (Montonio, 24.09.2026: PATCH the same
+       shipment, «you can just try again»): it asks Montonio, sends the SAME
+       shipment again, and — the carrier still refusing here — answers the
+       same refusal rather than «Этикетка снова на месте ✓». Never a second
+       POST /shipments. (tests/shipment-repair.test.ts has the rest.) */
+    const repair = stubFetch([
+      [new RegExp(`/shipments/${REFUSED.id}$`), () => json(REFUSED)],
+      [/\/shipping-methods$/, () => json({ countries: [] })],
+    ]);
     const again = await POST(
       req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.number }) }, admin),
     );
@@ -902,6 +909,8 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     const againBody = (await again.json()) as RouteBody;
     expect(againBody.error).toBe("registration_failed");
     expect(againBody.reused).toBeUndefined();
+    expect(repair.filter((c) => /\/shipments\//.test(c.url)).map((c) => c.init?.method ?? "GET")).toEqual(["GET", "PATCH"]);
+    expect(repair.some((c) => (c.init?.method ?? "GET") === "POST")).toBe(false);
 
     /* …and asking for its label says the same thing too, instead of failing
        somewhere inside Montonio with nothing behind it. */
