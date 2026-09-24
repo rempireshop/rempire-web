@@ -53,6 +53,8 @@ function tap(d: Record<string, string>) {
   };
   const body = `
     ${block("var ADM_SECTION_OF = {")};
+    ${block("function admLeaveAsks(")}
+    ${block("function admGoTab(")}
     (function () { ${block("if (d.admtab) {")} })();
     return ADM_SECTION_OF;
   `;

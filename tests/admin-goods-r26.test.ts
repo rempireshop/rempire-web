@@ -144,7 +144,11 @@ describe("the product editor stops throwing work away", () => {
   function dirty(open: string, touched: string | null): boolean {
     const bodySrc = `
       var S = { adminEdit: OPEN, goodsNew: null, barTouched: TOUCHED, bundleForm: null, promoForm: null, partnerForm: null };
+      // the drafts a button changes are tests/admin-button-edits-dirty.test.ts — untouched here
+      function edMediaDirty() { return false; }
+      function admDraftDiffers() { return false; }
       ${slice("admBarIdent")}
+      ${slice("admFormDirty")}
       ${slice("goodsEditDirty")}
       return goodsEditDirty();
     `;

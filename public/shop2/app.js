@@ -968,8 +968,8 @@
         "MP4 või MOV, kuni 60 MB. Fail läheb sinu enda hoidlasse — võõrastele saitidele ei lähe midagi.",
       "Загрузка видео пока не настроена — нужно подключить хранилище.":
         "Video üleslaadimine pole veel seadistatud — tuleb hoidla ühendada.",
-      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
-        "Fail on suurem kui 60 MB — tee lühem klipp või pakenda see kokku.",
+      "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.":
+        "Klipp on suurem kui 4 MB — server rohkem vastu ei võta. Tee lühem klipp või pakenda see kokku.",
       "Ролик слишком большой для сервера — снимите короче или сожмите его.":
         "Klipp on serveri jaoks liiga suur — tee lühem või pakenda see kokku.",
       "Не удалось загрузить видео — попробуйте ещё раз.":
@@ -2327,7 +2327,7 @@
       "Загрузить": "Laadi üles",
       "Ссылка на reel или пост": "Reeli või postituse link",
       "Ссылка на видео": "Video link",
-      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Vali telefonist video · MP4 või MOV kuni 60 MB",
+      "Выбрать видео на телефоне · MP4 или MOV до 4 МБ": "Vali telefonist video · MP4 või MOV kuni 4 MB",
       "Убрать видео": "Eemalda video",
       "Пусто — блока с видео на странице товара нет.": "Tühi — tootelehel videoplokki ei ole.",
       "Язык описания": "Kirjelduse keel",
@@ -4028,8 +4028,8 @@
         "MP4 or MOV, up to 60 MB. The file goes into your own storage — nothing is sent to anyone else’s site.",
       "Загрузка видео пока не настроена — нужно подключить хранилище.":
         "Video upload is not set up yet — the storage has to be connected.",
-      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
-        "The file is over 60 MB — record a shorter clip or compress it.",
+      "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.":
+        "The clip is over 4 MB — the server takes nothing bigger. Record a shorter one or compress it.",
       "Ролик слишком большой для сервера — снимите короче или сожмите его.":
         "The clip is too big for the server — record a shorter one or compress it.",
       "Не удалось загрузить видео — попробуйте ещё раз.":
@@ -5361,7 +5361,7 @@
       "Загрузить": "Upload",
       "Ссылка на reel или пост": "Link to a reel or a post",
       "Ссылка на видео": "Video link",
-      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Pick a video on the phone · MP4 or MOV up to 60 MB",
+      "Выбрать видео на телефоне · MP4 или MOV до 4 МБ": "Pick a video on the phone · MP4 or MOV up to 4 MB",
       "Убрать видео": "Remove the video",
       "Пусто — блока с видео на странице товара нет.": "Empty — there is no video block on the product page.",
       "Язык описания": "Description language",
@@ -9484,6 +9484,7 @@
     // ---- админка, этап 3 ----
     admSetPage: "",        // «Настройки»: "" is the index, else one of ADM_SET_PAGES
     mailOpen: false,       // «Маркетинг → Письма»: false is the list, true the editor for S.mailTpl
+    mailConfirmBack: false, // the letter's «Правки не сохранены…» question is up (an object: the nav's destination)
     admGiftCards: null,    // {cards, unspent} once GET /api/admin/giftcards/ answers
     admGiftErr: "",
     admMailKey: null       // «Подключения»: null unknown, false once a test letter came back with no key
@@ -18890,7 +18891,12 @@
       var p = JSON.parse(localStorage.getItem(ADM_PANES_LS));
       if (p && typeof p === "object") {
         if (typeof p.nav === "boolean") S.admNav = p.nav;
-        if (typeof p.ai === "boolean") S.admAi = p.ai;
+        /* …but not the phone's sheet: a 75 % sheet left up came back by
+           itself over «Обзор» on the next visit (map of the panel,
+           23.09.2026, #8). On a phone it opens when he taps it. */
+        var asstPhone = false;
+        try { asstPhone = window.matchMedia("(max-width: 899px)").matches; } catch (e2) {}
+        if (typeof p.ai === "boolean") S.admAi = p.ai && !asstPhone;
         // one of the three, spelled out: anything else and mailLang() keeps Russian
         if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
         // …and the microphone's, the same shape and for the same reason
@@ -23070,6 +23076,12 @@
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
       '<div class="adm-savebar' + admDirtyCls(mailDirty()) + '" id="mailacts">' + admMailActsHTML() + "</div>";
     return admBackHTML("data-mailback", "Все письма") +
+      // the same card «← Товары» and «← Блог» show (map of the panel, 23.09.2026, #14)
+      (S.mailConfirmBack
+        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailbackyes>Выйти без сохранения</button>' +
+          '<button class="adm-link adm-link--muted" data-mailbackno>Остаться</button></div>'
+        : "") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
         /* not loading="lazy": the morph keeps this element and only changes
@@ -26427,7 +26439,7 @@
   function admBarNoteState(kind) {
     var dirty = kind === "mail" ? mailDirty()
       : kind === "news" ? newsDirty()
-      : !!(S.barTouched && S.barTouched === admBarIdent());
+      : admFormDirty();   // typed in, or a draft a button changed (admFill, beside admBarTouched)
     if (dirty) return "dirty";
     return S.barSaved && S.barSaved === kind ? "saved" : "";
   }
@@ -27882,7 +27894,36 @@
     });
     return out.join("\n");
   }
-  function mailDirty() { return mailSig(mailDraft()) !== mailSig(mailSaved()); }
+  /* The draft covers all the letters, but the editor shows ONE: its «Не
+     сохранено», «Отменить правки» and the question on the way out are about
+     the letter that is open — all three languages of it — and never about
+     one the owner cannot see (map of the panel, 23.09.2026, #14: «Отменить
+     правки» threw away the edits of every letter at once). */
+  function mailOne(map, tpl) {
+    var o = {};
+    if (map && map[tpl]) o[tpl] = map[tpl];
+    return o;
+  }
+  /* Both ask S.mailDraft itself, never mailDraft(): the exits call them
+     before the texts may have landed, and a draft made then would be made
+     from an empty «saved» — the owner's own texts would read as edits to
+     throw away, or be saved over. No draft yet is nothing typed yet. */
+  function mailDirty() {
+    if (!MAIL_TEXTS || !S.mailDraft) return false;
+    var tpl = mailTpl();
+    return mailSig(mailOne(S.mailDraft, tpl)) !== mailSig(mailOne(mailSaved(), tpl));
+  }
+  /** One letter back to what is saved; the others keep whatever they hold. */
+  function mailRevertOne(tpl) {
+    if (!MAIL_TEXTS || !S.mailDraft) return;
+    var d = S.mailDraft, s = mailSaved();
+    if (s[tpl]) d[tpl] = s[tpl]; else delete d[tpl];
+  }
+  /** Out of the letter editor — its unsaved words go with it, as the question says. */
+  function mailCloseEditor() {
+    mailRevertOne(mailTpl());
+    S.mailOpen = false; S.mailConfirmBack = false;
+  }
   /** What actually gets saved: trimmed, clamped, empties dropped. The server
       sanitises again (cleanMailTexts) — this only keeps the blob tidy. */
   function mailClean(map) {
@@ -28403,6 +28444,30 @@
     var d = contentDraft();
     if (page === "home") { d.announcement = conf.announcement; return; }
     Object.keys(conf).forEach(function (k) { if (k !== "announcement") d[k] = conf[k]; });
+  }
+  /* …and the two buttons that WRITE keep to the same split. «Сбросить к
+     стандартному» under «Верхняя полоска» used to diff the whole document
+     against the defaults — resetting the strip put back the default company
+     name, an empty IBAN, the default phone and socials, and wiped the letter
+     footer — and one «Сохранить» on either page saved what the other page's
+     form held too (map of the panel, 23.09.2026, #15). Off these two pages
+     (nothing draws the card there) the whole document counts, as before. */
+  function contentOnPage(key, page) {
+    if (page !== "home" && page !== "company") return true;
+    return page === "home" ? key === "announcement" : key !== "announcement";
+  }
+  /** A diff cut down to the part one page may write. */
+  function contentPart(patch, page) {
+    var out = {};
+    Object.keys(patch || {}).forEach(function (k) { if (contentOnPage(k, page)) out[k] = patch[k]; });
+    return out;
+  }
+  /** After one page's save or reset: what is still typed on the other page
+      is carried into the fresh draft instead of going with the old one. */
+  function contentKeepOther(page, old) {
+    if (!old || typeof old !== "object") return;
+    var d = contentDraft();
+    Object.keys(old).forEach(function (k) { if (!contentOnPage(k, page)) d[k] = old[k]; });
   }
   function cInput(path, label, ph, max, hint) {
     return '<label class="adm-field">' + label +
@@ -31433,8 +31498,8 @@
         if (r.status === 200 && r.body.ok && r.body.text) {
           var hooks = SEO_HOOKS[L] || SEO_HOOKS.RU;
           var ti = document.querySelector(hooks[0]), de = document.querySelector(hooks[1]);
-          if (ti && txt(r.body.text.title)) ti.value = txt(r.body.text.title);
-          if (de && txt(r.body.text.description)) de.value = txt(r.body.text.description);
+          if (ti && txt(r.body.text.title)) admFill(ti, txt(r.body.text.title));
+          if (de && txt(r.body.text.description)) admFill(de, txt(r.body.text.description));
           okN++;
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else failed = (r.body && r.body.error) || "error";
@@ -31669,8 +31734,17 @@
      failed. `payload_too_large` is the common one: the platform refuses a
      body over its own cap (4,5 МБ on a Vercel function, docs/HOSTING.md § 4)
      before any code of ours runs, and answers 413 with no JSON in it. */
+  /* …and that cap, not the route's 60 MB (src/lib/video.ts), is the one a
+     clip meets on this host: one request, one body, 4.5 MB. The button used
+     to promise «до 60 МБ», and a 20 MB clip travelled over mobile data for
+     as long as it took to come back as a bare 413 (map of the panel,
+     23.09.2026, #16). Going around the cap would take a presigned PUT
+     straight into the bucket and a CORS rule on it — until then the panel
+     says the real number and refuses a bigger file before a byte is sent.
+     4 MB, not 4.5: the form around the file travels in the same body. */
+  var VIDEO_SEND_MAX = 4 * 1024 * 1024;
   var VIDEO_ERR = {
-    too_large: "Файл больше 60 МБ — снимите ролик короче или сожмите его.",
+    too_large: "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.",
     payload_too_large: "Ролик слишком большой для сервера — снимите короче или сожмите его.",
     upload_failed: "Не удалось загрузить видео — попробуйте ещё раз.",
     bad_video_type: "Такой файл не подходит: нужен MP4 или MOV.",
@@ -31700,6 +31774,8 @@
   }
   function videoUpload(files, p) {
     if (!files || !files.length || !p) return;
+    // over the platform's cap — refused here, before it travels (VIDEO_SEND_MAX)
+    if (files[0].size > VIDEO_SEND_MAX) { vidFail(new Error("too_large")); return; }
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
     uploadVideo(files[0], p.id).then(function (r) {
       UP.busy = 0; UP.total = 0;
@@ -32078,7 +32154,7 @@
   function edBrandPick(name) {
     var e = edBrandEls();
     if (!e) return;
-    e.input.value = String(name || "").slice(0, 60);
+    admFill(e.input, String(name || "").slice(0, 60));
     edBrandClose();
     EDB.hush = true;   // the focus goes back to the box without the list opening again
     e.input.focus();
@@ -32498,7 +32574,7 @@
       (vk === "up"
         ? '<button class="adm-btn adm-btn--dash adm-btn--tall" data-vidup="' + esc(p.id) + '"' +
             (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
-            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 60 МБ") + "</button>" +
+            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 4 МБ") + "</button>" +
           '<input class="adm-photo__file" type="file" accept="video/mp4,video/quicktime" data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
           (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "")
         : "") +
@@ -33893,7 +33969,7 @@
     var box = key ? document.querySelector('[data-edean="' + key + '"]') : null;
     closeScannerState();
     if (!box) { render(); return; }   // the editor is gone from under the overlay — nothing to fill
-    box.value = code;
+    admFill(box, code);
     scanBeep();
     render();
     var after = document.querySelector('[data-edean="' + key + '"]');
@@ -38119,8 +38195,11 @@
        cannot say what a field looked like before it existed. */
     else if (a.type === "set_content") {
       entry.prev = { type: "set_content", whole: DEMO.content };
+      var cWas = S.contentDraft;
       DEMO.content = contentApply(contentConf(), a.value);
       S.contentDraft = null;
+      // one settings page's save or reset: the other page's typing stays typed
+      if (a.page) contentKeepOther(a.page, cWas);
     }
     /* wholesale/loyalty: settings.pricing has no demo layer either (same
        reasoning as delivery prices above) — S.pricingLoaded IS the last
@@ -40536,6 +40615,12 @@
       a card first, then the phone's «Ещё» sheet, then a confirm card — and the
       scanner last of all, since its viewfinder is mounted outside the panel
       (scanMount) and covers every one of them. */
+  /** Is «Помощник» a sheet over the panel right now (a phone, ≤ 899 px) rather
+      than the desktop's docked column? The same markup either way — admin.css
+      switches at 900, and admVvSheet() asks the same question. */
+  function admAsstSheet() {
+    return !!(ADM_PHONE_MQ && ADM_PHONE_MQ.matches);
+  }
   function admLayers() {
     if (S.screen !== "admin") return [];
     var l = [];
@@ -40560,6 +40645,12 @@
     else if (S.newsEdit && S.adminTab === "news") l.push("news");
     else if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
     if (S.admMore) l.push("more");
+    /* «Помощник» on a phone: a 75 % sheet with a scrim over whatever is open.
+       Back used to walk the section trail UNDER it — the owner pressed Back
+       to put the sheet away and landed on the previous section with the
+       sheet still up (map of the panel, 23.09.2026, #8). Not on a desktop,
+       where it is a docked column kept open while he works. */
+    if (S.admAi && admAsstSheet()) l.push("asst");
     if (pendingAction) l.push("confirm");
     /* The scanner: an overlay the owner opens with a phone in one hand and a
        bottle in the other — the one screen in the panel where Back is the
@@ -40578,6 +40669,7 @@
     else if (top === "scan") closeScannerState();
     else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
+    else if (top === "asst") { S.admAi = false; admPanesSave(); }
     /* blog: the same question «← Блог» asks. A swipe back is the gesture the
        owner closes a card with on a phone, and it used to throw an unsaved
        article away without a word — the confirmation lived in the button's
@@ -40607,7 +40699,12 @@
       S.adminOrder = 0;
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
     } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
-    else if (top === "mail") S.mailOpen = false;
+    /* the letter: the question «← Все письма» asks — the first Back asks,
+       the next one leaves and its unsaved words go (map #14) */
+    else if (top === "mail") {
+      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; return true; }
+      mailCloseEditor();
+    }
     else if (top === "setpage") S.admSetPage = "";
     // «← Склад»: the list the history was opened from
     else if (top === "moves") S.stockMovesOpen = false;
@@ -40619,6 +40716,75 @@
       newsCloseEditor();
     }
     return true;
+  }
+  /* ---------- …and out through the nav ------------------------------------
+     «←» and the phone's Back ask before an unsaved product or article is
+     thrown away. Every `data-admtab` did not — the phone's bottom bar, the
+     desktop sidebar, the tab strips, the «Ещё» sheet, the assistant's
+     «Открыть …»: one tap on «Заказы» dropped a typed price or a whole article
+     in silence (map of the panel, 23.09.2026, #2). They ask the same
+     question now, at the top of the editor, and the question remembers where
+     the owner was going: the confirm flag holds the destination instead of
+     `true`, so «Выйти без сохранения» goes on there, and «Остаться» — like
+     anything else that clears the flag — forgets it. A second tap on the nav
+     while the question is up goes, as a second «←» or Back does. */
+  function admLeaveAsks(go) {
+    if (S.adminEdit && goodsEditDirty()) {
+      if (S.goodsConfirmBack) return false;
+      S.goodsConfirmBack = go;
+    } else if (S.adminBlogEdit && S.adminTab === "blog") {
+      // the box repaints itself: read the screen before asking about it
+      blogReadForm();
+      if (!blogDirty() || S.adminBlogConfirmBack) return false;
+      S.adminBlogConfirmBack = go;
+    } else if (S.mailOpen && S.adminTab === "mail") {
+      // a letter's own words — the tab strip of «Маркетинг» stands above it (map #14)
+      if (!mailDirty() || S.mailConfirmBack) return false;
+      S.mailConfirmBack = go;
+    } else return false;
+    /* The question stands above the editor, so it has to be in sight: the
+       «Ещё» sheet a row was tapped in, and the phone's assistant sheet an
+       «Открыть …» was tapped in, would both cover it. */
+    S.admMore = false;
+    if (S.admAi && admAsstSheet()) S.admAi = false;
+    window.scrollTo({ top: 0 });
+    return true;
+  }
+  /** «Выйти без сохранения» after a question the nav raised: on to where it was going. */
+  function admLeaveGo(flag) {
+    if (flag && typeof flag === "object" && flag.tab) admGoTab(flag);
+  }
+  /** One door into every section, still addressed by the key it has always
+      had (ADM_SECTION_OF) — the `data-admtab` handler, once nothing unsaved
+      stands in the way. */
+  function admGoTab(go) {
+    var tab = go.tab;
+    // the product editor closes the way «← Товары» closes it: its drafts go with it
+    if (S.adminEdit) {
+      S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+    }
+    // a letter left through the nav after its question: its unsaved words go, as the question said
+    if (S.mailOpen && S.mailConfirmBack) mailRevertOne(mailTpl());
+    S.goodsConfirmBack = false; S.adminBlogConfirmBack = false; S.mailConfirmBack = false;
+    S.adminTab = tab; S.adminOrder = 0; S.adminEdit = "";
+    S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
+    S.admMore = false;
+    /* Every section opens at its own front door: «Настройки» on the index of
+       six, «Письма» on the list of letters, «Клиенты» on the list rather than
+       whichever card was left open last time. */
+    S.admSetPage = ""; S.mailOpen = false; S.admCustOpen = "";
+    // «Каталог» and «Наборы» are the same old tab key with a different shelf
+    if (tab === "goods") S.goodsTab = "goods";
+    // a queue row on «Обзор» carries the filter its section should open on
+    if (go.filter && tab === "orders") S.admOrderFilter = go.filter;
+    if (go.filter && tab === "people") S.admCustTier = go.filter;
+    /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
+       «Скрытые», and the shelf it wants starts at the top of that list. */
+    if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; }
+    // …and a queue row may name the settings page it wants («Заполните IBAN»)
+    if (go.setpage && tab === "setup") S.admSetPage = go.setpage;
+    window.scrollTo({ top: 0 }); render();
   }
   /** One parked entry while anything is open, none while nothing is. Called
       from every render(), so no opener has to remember to call it. */
@@ -41023,7 +41189,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -41297,24 +41463,10 @@
        opens Маркетинг on «Письма», and so on (ADM_SECTION_OF). The assistant's
        «Открыть …» buttons and the e2e suite both come through here. */
     if (d.admtab) {
-      S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
-      S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
-      S.admMore = false;
-      /* Every section opens at its own front door: «Настройки» on the index of
-         six, «Письма» on the list of letters, «Клиенты» on the list rather than
-         whichever card was left open last time. */
-      S.admSetPage = ""; S.mailOpen = false; S.admCustOpen = "";
-      // «Каталог» and «Наборы» are the same old tab key with a different shelf
-      if (d.admtab === "goods") S.goodsTab = "goods";
-      // a queue row on «Обзор» carries the filter its section should open on
-      if (d.admfilter && d.admtab === "orders") S.admOrderFilter = d.admfilter;
-      if (d.admfilter && d.admtab === "people") S.admCustTier = d.admfilter;
-      /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
-         «Скрытые», and the shelf it wants starts at the top of that list. */
-      if (d.admfilter && d.admtab === "goods") { S.goodsFilter = d.admfilter; S.goodsShown = 40; }
-      // …and a queue row may name the settings page it wants («Заполните IBAN»)
-      if (d.admsetpage && d.admtab === "setup") S.admSetPage = d.admsetpage;
-      window.scrollTo({ top: 0 }); render(); return;
+      var goTo = { tab: d.admtab, filter: d.admfilter || "", setpage: d.admsetpage || "" };
+      // an unsaved product or article asks first, as «←» and Back do (admLeaveAsks)
+      if (admLeaveAsks(goTo)) { render(); return; }
+      admGoTab(goTo); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
     if (d.admfilter) { S.admOrderFilter = d.admfilter; S.ordersShown = ORDERS_PAGE; render(); return; }
@@ -41618,6 +41770,10 @@
       if (d.admbackyes === undefined && goodsEditDirty() && !S.goodsConfirmBack) {
         S.goodsConfirmBack = true; render(); return;
       }
+      // the question came from the nav: «Выйти без сохранения» goes where it was going
+      if (d.admbackyes !== undefined && S.goodsConfirmBack && S.goodsConfirmBack.tab) {
+        admGoTab(S.goodsConfirmBack); return;
+      }
       var closeId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null;   // product creation
@@ -41669,7 +41825,7 @@
        from the warehouse copy, which still carries the code. */
     if (d.edunbind !== undefined) {
       var unEl = document.querySelector('[data-edean="' + d.edunbind + '"]');
-      if (unEl) { unEl.value = ""; unEl.focus(); }
+      if (unEl) { admFill(unEl, ""); unEl.focus(); }
       t.hidden = true;
       toast("Штрихкод убран — нажмите «Сохранить»");
       return;
@@ -41886,6 +42042,7 @@
       if (row) row.querySelectorAll("[data-vpick]").forEach(function (b2) {
         b2.setAttribute("aria-current", String(b2 === t));
       });
+      admBarPaintNote();   // the pick is a draft edit: the bar asks edMediaDirty()
       return;
     }
     /* ---- assistant-work: goods-editor AI buttons --------------------------
@@ -41916,7 +42073,7 @@
           var ru = document.querySelector("[data-eddescru]");
           var body = txt(r.body.text.description);
           var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
-          if (ru) ru.value = bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body;
+          admFill(ru, bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body);
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -41940,8 +42097,8 @@
         trBtn.disabled = false; trBtn.textContent = trLabel;
         if (r.status === 200 && r.body.ok && r.body.texts) {
           var etEl = document.querySelector("[data-eddescet]"), enEl = document.querySelector("[data-eddescen]");
-          if (etEl && r.body.texts.ET) etEl.value = r.body.texts.ET;
-          if (enEl && r.body.texts.EN) enEl.value = r.body.texts.EN;
+          if (etEl && r.body.texts.ET) admFill(etEl, r.body.texts.ET);
+          if (enEl && r.body.texts.EN) admFill(enEl, r.body.texts.EN);
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -41971,6 +42128,8 @@
           if (L === (S.heroLang || "RU")) { var hEl = document.querySelector('[data-herof="' + f + '"]'); if (hEl) hEl.value = tx[f]; }
         });
         paintHeroPreview();
+        // the draft moved without a keystroke: the page's bar says so now, not at the next render
+        paintSetBar();
       });
       return;
     }
@@ -41987,14 +42146,14 @@
         return { brand: nbEl ? nbEl.value.trim() : "", name: typedName, category: CAT_NAMES[ncEl ? ncEl.value : ""] || "" };
       }, function (L, tx) {
         if (!tx.name) return;
-        if (nnEl) nnEl.value = txt(tx.name).slice(0, 120);
+        admFill(nnEl, txt(tx.name).slice(0, 120));
         edNameHintPaint(txt(tx.name));
       });
       return;
     }
     if (d.admdescundo !== undefined) {
       if (!AI_UNDO) return;
-      var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
+      var setv = function (sel, v) { admFill(document.querySelector(sel), v || ""); };
       setv("[data-eddescru]", AI_UNDO.descRU); setv("[data-eddescet]", AI_UNDO.descET); setv("[data-eddescen]", AI_UNDO.descEN);
       setv("[data-edseot]", AI_UNDO.seoT); setv("[data-edseod]", AI_UNDO.seoD);
       setv("[data-edseotet]", AI_UNDO.seoTet); setv("[data-edseodet]", AI_UNDO.seoDet);
@@ -42399,10 +42558,24 @@
     /* A letter's row opens its editor; «← Все письма» closes it. Both keep the
        half-typed test address — the panel rebuilds on every click. */
     if (d.mailtpl !== undefined) {
-      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail";
+      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail"; S.mailConfirmBack = false;
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.mailback !== undefined) { keepMailTo(); S.mailOpen = false; render(); return; }
+    /* …and unsaved words in the letter are asked about first — the question
+       «← Товары» and «← Блог» ask (map of the panel, 23.09.2026, #14). They
+       used to stay behind in the draft, unseen, and went out with the next
+       «Сохранить» of another letter. */
+    if (d.mailback !== undefined) {
+      keepMailTo();
+      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; window.scrollTo({ top: 0 }); render(); return; }
+      mailCloseEditor(); render(); return;
+    }
+    if (d.mailbackyes !== undefined) {
+      keepMailTo();
+      var mailGo = S.mailConfirmBack;   // the nav's destination, when the nav asked (admLeaveAsks)
+      mailCloseEditor(); render(); admLeaveGo(mailGo); return;
+    }
+    if (d.mailbackno !== undefined) { S.mailConfirmBack = false; render(); return; }
     /* Remembered on the switch, not on the way out: the language the editor
        was closed in is the last one switched to, and there is no other door
        out of it — «← Все письма», another section, a closed tab. */
@@ -42417,9 +42590,18 @@
       t.disabled = true;
       /* trailing slash on purpose: next.config has trailingSlash:true, and a
          308 on a POST drops the body */
+      /* The letter on the screen, saved or not (map of the panel, 23.09.2026,
+         #14): it used to mail the SAVED text while the fields showed the
+         draft. The route lays these three strings over the saved ones for
+         this one render; {} is «the standard text», as a save of it would be. */
+      var mailBody = { template: mailTpl(), to: mailAddr, lang: mailLang() };
+      if (MAIL_TEXTS) {
+        var mailOwn = mailDraft()[mailTpl()];
+        mailBody.texts = (mailOwn && mailOwn[mailLangCode(mailLang())]) || {};
+      }
       fetch("/api/admin/mail/test/", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ template: mailTpl(), to: mailAddr, lang: mailLang() })
+        body: JSON.stringify(mailBody)
       }).then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
       }).then(function (res) {
@@ -42453,7 +42635,8 @@
       setMailDraftField(mailTpl(), mailLang(), d.mailreset, "");
       render(); return;
     }
-    if (d.mailrevert !== undefined) { S.mailDraft = null; render(); return; }
+    // «Отменить правки»: this letter's — not every letter's (map of the panel, 23.09.2026, #14)
+    if (d.mailrevert !== undefined) { mailRevertOne(mailTpl()); render(); return; }
     /* «Сохранить» saves. Renat, 13.09.2026: «I have currently "save" on top
        and I have also, after when I save an "apply" button. Needs to be
        better.» It was two save-shaped actions for one edit: the button armed
@@ -42587,10 +42770,11 @@
     if (d.contentsave !== undefined) {
       // never the defaults over the real document — see contentLoaded()
       if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      var cPatch = contentDiff(contentConf(), contentDraft());
+      // this page's part only — the other page's typing waits for its own bar (contentPart)
+      var cPatch = contentPart(contentDiff(contentConf(), contentDraft()), S.admSetPage || "");
       if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
       pendingAction = {
-        type: "set_content", value: cPatch, overlay: true,
+        type: "set_content", value: cPatch, page: S.admSetPage || "", overlay: true,
         title: "Изменить данные магазина?", detail: contentConfirmDetail(cPatch)
       };
       render(); refocus("[data-admapply]"); return;
@@ -42599,10 +42783,11 @@
       // same gate: «вернуть стандартные» must mean «back to the defaults from
       // what is really stored», not «write the defaults over the unknown»
       if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      var cBack = contentDiff(contentConf(), CONTENT_DEFAULT);
+      // …and only what is on this page: the strip's reset is not the company's
+      var cBack = contentPart(contentDiff(contentConf(), CONTENT_DEFAULT), S.admSetPage || "");
       if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
       pendingAction = {
-        type: "set_content", value: cBack, overlay: true,
+        type: "set_content", value: cBack, page: S.admSetPage || "", overlay: true,
         title: "Вернуть стандартные данные?", detail: contentConfirmDetail(cBack)
       };
       render(); refocus("[data-admapply]"); return;
@@ -42963,7 +43148,9 @@
     }
     if (d.bundlenew !== undefined) {
       S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
-      render(); refocus('[data-bundlef="id"]'); return;
+      // the name, the first box of the form — the address writes itself from
+      // it (paintBundleId; Dim, 19.09.2026: ask for the name, not the address)
+      render(); refocus('[data-bundlef="title"]'); return;
     }
     if (d.bundleedit) {
       var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
@@ -43033,6 +43220,7 @@
           var dEl = document.querySelector('[data-bundlef="desc"]');
           if (dEl) dEl.value = txt(tx.text);
         }
+        admBarPaintNote();   // the draft moved: the bar asks admDraftDiffers()
       });
       return;
     }
@@ -43055,6 +43243,7 @@
             var bEl = document.querySelector('[data-bundlef="desc"]');
             if (bEl) bEl.value = r.body.texts[bCur];
           }
+          admBarPaintNote();
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -43073,6 +43262,7 @@
       BUNDLE_AI_UNDO = null;
       var undoSlot = document.querySelector("[data-bundleundoslot]");
       if (undoSlot) undoSlot.textContent = "";
+      admBarPaintNote();
       return;
     }
     if (d.admask) { S.adminAsk = d.admask; render(); admAsk(d.admask); return; }
@@ -43221,7 +43411,11 @@
       if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; render(); return; }
       blogCloseEditor(); return;
     }
-    if (d.admblogbackyes !== undefined) { blogCloseEditor(); return; }
+    if (d.admblogbackyes !== undefined) {
+      // a question the nav raised carries where it was going (admLeaveAsks)
+      var blogTo = S.adminBlogConfirmBack;
+      blogCloseEditor(); admLeaveGo(blogTo); return;
+    }
     if (d.admblogbackno !== undefined) { S.adminBlogConfirmBack = false; render(); return; }
     if (d.admbloglang) {
       /* Another language is another box: the remembered caret belongs to the
@@ -44404,6 +44598,13 @@
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
       // the phone's «Ещё» sheet
       else if (S.admMore) { S.admMore = false; render(); }
+      /* «Помощник»: the phone's sheet like any other sheet; the desktop's
+         docked column only from inside it — Escape pressed over a form must
+         not put away a pane the owner keeps open while he works */
+      else if (S.admAi && S.screen === "admin" && (admAsstSheet() ||
+          (document.activeElement && document.activeElement.closest && document.activeElement.closest(".adm-asst")))) {
+        S.admAi = false; admPanesSave(); render(); refocus("[data-admai]");
+      }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
@@ -44734,12 +44935,67 @@
     S.barTouched = id;
     admBarPaintNote();
   }
+  /* «Every button that edits the draft should say so here» was a rule each
+     new button had to remember, and most did not: ★, ✂, a dropped photo, a
+     size's photo, the video's chips, «Загрузить» and ×, «Отвязать», a code
+     from the scanner and every AI fill left the bar at «Изменений нет» and
+     the way out unguarded (map of the panel, 23.09.2026, #3). So the rule
+     now lives in three shared places instead of forty handlers:
+       · a field filled by code goes through admFill(), which marks the bar
+         the way a keystroke does;
+       · the product editor's photo list, size photos and video are drafts
+         (GAL, VID) and are asked whether they differ from what is saved —
+         edMediaDirty();
+       · the forms that keep their draft in S (a set, a promo code, a partner)
+         are asked the same of their draft — admDraftDiffers(). */
+  function admFill(el, value) {
+    if (!el) return;
+    el.value = value;
+    // a box filled after its form was closed marks nothing
+    if (el.isConnected !== false) admBarTouched();
+  }
+  function edMediaDirty() {
+    var p = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
+    if (!p || p.isNew) return false;
+    if (galDirty(p)) return true;
+    // a size's photo picked by hand — compared the way «Сохранить» compares it
+    if (GAL.id === p.id && GAL.picks && Object.keys(GAL.picks).length && p.sizes && p.sizes.length > 1) {
+      var picked = p.sizes.map(function (sz, si) { return galSizePick(p, si); });
+      if (varImgChanged(picked, p.varImg)) return true;
+    }
+    // the video: a draft address that is not the saved one (VID.url null = no draft)
+    if (VID.id === p.id && VID.url !== null) {
+      var savedVid = (DEMO.video && DEMO.video[p.id]) || p.video || "";
+      if (String(VID.url).trim() !== savedVid) return true;
+    }
+    return false;
+  }
+  /* The yardstick of a form with a draft in S is the draft as it was when the
+     form's bar was first drawn — the render that opened it — so no opener has
+     to remember to take it. `lang` is which language is on screen, not
+     something the save writes. */
+  var ADM_FORM_BASE = { form: null, sig: "" };
+  function admFormSig(f) {
+    return JSON.stringify(f, function (k, v) { return k === "lang" ? undefined : v; });
+  }
+  function admDraftDiffers() {
+    var f = S.bundleForm || S.promoForm || S.partnerForm;
+    if (!f || typeof f !== "object" || f !== admBarIdent()) return false;
+    if (ADM_FORM_BASE.form !== f) { ADM_FORM_BASE.form = f; ADM_FORM_BASE.sig = admFormSig(f); return false; }
+    return admFormSig(f) !== ADM_FORM_BASE.sig;
+  }
+  /** «Не сохранено» for the forms with the touch bar: typed in, or a draft that differs. */
+  function admFormDirty() {
+    if (S.barTouched && S.barTouched === admBarIdent()) return true;
+    if (S.adminEdit) return edMediaDirty();
+    return admDraftDiffers();
+  }
   /** Is there anything in the open product editor worth asking about?
       The same flag the save bar reads, so «Не сохранено» in the header and
       the question on the way out can never disagree — one of them appearing
       without the other is how the owner learns not to trust either. */
   function goodsEditDirty() {
-    return !!(S.adminEdit || S.goodsNew) && S.barTouched === admBarIdent();
+    return !!(S.adminEdit || S.goodsNew) && admFormDirty();
   }
   document.addEventListener("input", admBarTouch);
   document.addEventListener("change", admBarTouch);

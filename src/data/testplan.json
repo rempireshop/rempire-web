@@ -1525,7 +1525,7 @@
         "В «Заказах» открыть карточку заказа и нажать «Назад» телефона.",
         "Открыть её снова, нажать «Отправлен» и на вопросе нажать «Назад» дважды.",
         "В «Товарах» открыть товар на правку и нажать «Назад».",
-        "Нажать «Ещё», потом «Назад».",
+        "Нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
         "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад».",
         "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется."
@@ -1533,7 +1533,7 @@
       "expect": [
         "Карточка заказа закрывается, а панель остаётся.",
         "Первое «Назад» убирает вопрос, второе — карточку.",
-        "Редактор товара и «Ещё» закрываются так же.",
+        "Редактор товара, «Ещё» и «Помощник» закрываются так же; раздел под ними остаётся.",
         "Сканер закрывается, камера гаснет, панель на месте.",
         "«Назад» возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
         "Ни одно нажатие не проходит впустую."
@@ -1547,7 +1547,7 @@
           "In «Заказы» open an order card and press the phone's back button.",
           "Open it again, press «Отправлен», and press back twice on the question.",
           "In «Товары» open a product for editing and press back.",
-          "Press «Ещё», then back.",
+          "Press «Ещё», then back; open «Помощник» and press back again.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
           "Open a product for editing again, close it with «← Товары», then press back.",
           "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes."
@@ -1555,13 +1555,15 @@
         "expect": [
           "The order card closes and the panel stays.",
           "The first back clears the question, the second the card.",
-          "The product editor and «Ещё» close the same way.",
+          "The product editor, «Ещё» and «Помощник» close the same way; the section under them stays.",
           "The scanner closes, the camera goes out, the panel stays.",
           "Back returns to the previous section; only «Обзор» leaves the panel.",
           "No press does nothing at all."
         ],
         "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:40:29.277Z"
     },
     {
       "id": "panel-overview",
@@ -4927,13 +4929,17 @@
         "Открыть «Ещё» → «Маркетинг» → «Письма».",
         "Открыть «Заказ принят».",
         "Внизу вписать свой адрес и нажать «Отправить мне тест».",
-        "Проверить почту."
+        "Проверить почту.",
+        "Поменять тему, не сохраняя, и снова нажать «Отправить мне тест».",
+        "Нажать «← Все письма», не сохраняя."
       ],
       "expect": [
         "В ваш ящик пришло письмо от shop@rempireshop.com.",
         "В начале темы стоит [test].",
         "Письмо выглядит так же, как предпросмотр на экране.",
-        "Ответ на это письмо уходит на info@rempireshop.com."
+        "Ответ на это письмо уходит на info@rempireshop.com.",
+        "В тесте — новая тема с экрана, хотя она ещё не сохранена.",
+        "Панель спросит, выходить ли без сохранения; «Выйти» убирает правки только этого письма."
       ],
       "why": "Это единственная кнопка, которая доказывает, что почта вообще работает.",
       "risk": "med",
@@ -4944,16 +4950,22 @@
           "Open «Ещё» → «Маркетинг» → «Письма».",
           "Open «Заказ принят» (order received).",
           "At the bottom type your address and press «Отправить мне тест» (send test).",
-          "Check your mail."
+          "Check your mail.",
+          "Change the subject without saving and press «Отправить мне тест» again.",
+          "Press «← Все письма» without saving."
         ],
         "expect": [
           "A letter from shop@rempireshop.com is in your own mailbox.",
           "The subject starts with [test].",
           "The letter looks the same as the preview on screen.",
-          "Press reply and it goes to info@rempireshop.com."
+          "Press reply and it goes to info@rempireshop.com.",
+          "The test carries the new subject from the screen, though it is not saved.",
+          "The panel asks whether to leave unsaved; «Выйти» drops this letter's edits only."
         ],
         "why": "This is the one button that proves mail works at all."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T18:01:04.338Z"
     },
     {
       "id": "mail-edit-text",
@@ -6622,14 +6634,16 @@
         "Нажать «Сохранить».",
         "Открыть товар в магазине и посмотреть цену.",
         "Положить его в корзину.",
-        "Поменять цену и нажать «← Товары», не сохраняя."
+        "Поменять цену и нажать «← Товары», не сохраняя.",
+        "Снова поменять цену и нажать «Заказы» в меню внизу (на компьютере — слева)."
       ],
       "expect": [
         "В магазине у товара стоит новая цена.",
         "В корзине та же самая цена.",
         "В итоге заказа та же самая сумма.",
-        "Панель спросит, выходить ли без сохранения, а не выйдет молча.",
-        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки."
+        "И на «←», и на кнопке раздела панель спросит, выходить ли без сохранения.",
+        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки.",
+        "«Выйти без сохранения» после кнопки раздела открывает этот раздел."
       ],
       "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
       "risk": "high",
@@ -6642,19 +6656,21 @@
           "Press «Сохранить».",
           "Open the product in the shop and look at the price.",
           "Put it in the cart.",
-          "Change the price and press «← Товары» without saving."
+          "Change the price and press «← Товары» without saving.",
+          "Change the price again and press «Заказы» in the bottom bar (on a computer, in the sidebar)."
         ],
         "expect": [
           "The shop shows the new price on the product.",
           "The cart shows the same price.",
           "The order total uses the same price.",
-          "The panel asks whether to leave without saving instead of just leaving.",
-          "The unsaved-work question stands out: colour, a ground and two different buttons."
+          "Both on «←» and on a section button the panel asks whether to leave unsaved.",
+          "The unsaved-work question stands out: colour, a ground and two different buttons.",
+          "«Выйти без сохранения» after a section button opens that section."
         ],
         "why": "A price that differs in the cart costs you money or a complaint."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-24T17:54:34.627Z"
     },
     {
       "id": "goods-sizes",
@@ -6814,7 +6830,7 @@
         "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
         "Дождаться конца, сохранить и открыть товар в магазине.",
         "На новом товаре выбрать фото на шаге «Фото» до сохранения.",
-        "Переставить фото стрелками: вверху должно появиться «Не сохранено».",
+        "Нажать ★ у другого фото или переставить стрелками: вверху должно появиться «Не сохранено».",
         "На подписи главного фото должны стоять и размеры, которые его показывают."
       ],
       "expect": [
@@ -6837,7 +6853,7 @@
           "While it is being cut out, make another photo the main one with the star.",
           "Wait for it to finish, save and open the product in the shop.",
           "On a new product pick a photo on the «Фото» step before saving.",
-          "Reorder the photos with the arrows: the top bar must say it is unsaved.",
+          "Press ★ on another photo, or reorder with the arrows: the top bar must say it is unsaved.",
           "The main photo's tag must also carry the sizes that show it."
         ],
         "expect": [
@@ -6851,7 +6867,7 @@
         "why": "A product with no photo is barely bought at all."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "goods-video",
@@ -6863,11 +6879,13 @@
       "steps": [
         "Вставить ссылку на видео с YouTube на вкладке «Фото и видео».",
         "Сохранить и открыть товар в магазине.",
-        "Нажать на видео."
+        "Нажать на видео.",
+        "В редакторе нажать «Загрузить» и выбрать ролик больше 4 МБ."
       ],
       "expect": [
         "Видео видно на странице товара.",
-        "По нажатию оно начинает играть."
+        "По нажатию оно начинает играть.",
+        "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -6877,14 +6895,18 @@
         "steps": [
           "In the editor, on the «Фото и видео» tab, paste a link to a YouTube video.",
           "Save and open the product in the shop.",
-          "Press the video."
+          "Press the video.",
+          "In the editor press «Загрузить» and pick a clip over 4 MB."
         ],
         "expect": [
           "The video is there on the product page.",
-          "Pressing it starts the video playing."
+          "Pressing it starts the video playing.",
+          "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason."
         ],
         "why": "A styling video sells a wax better than any description."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:33:35.367Z"
     },
     {
       "id": "goods-new",
@@ -6982,7 +7004,7 @@
         ],
         "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
       },
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-24T17:30:55.116Z"
     },
     {
       "id": "bundles-hide",
@@ -8332,7 +8354,7 @@
       "title": "Большая картинка на главной",
       "steps": [
         "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-        "Поправить текст первого слайда и выбрать другую картинку из плиток.",
+        "Поправить текст первого слайда кнопкой ✨ и выбрать другую картинку из плиток.",
         "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
         "Нажать «Сохранить» (на телефоне — вверху экрана), подтвердить и открыть главную магазина."
       ],
@@ -8351,7 +8373,7 @@
         "title": "The big picture at the top",
         "steps": [
           "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-          "Edit the first slide's text and pick another picture from the tiles.",
+          "Rewrite the first slide's text with ✨ and pick another picture from the tiles.",
           "Add a gift-card slide; keep adding slides until the button goes grey.",
           "Press «Сохранить» (on the phone — at the top), confirm and open the shop's home page."
         ],
@@ -8364,7 +8386,9 @@
           "The gift-card slide shows the card, not a shampoo bottle."
         ],
         "why": "A button leading to the wrong place wastes the shop's best screen."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "settings-content",
@@ -8376,13 +8400,17 @@
       "steps": [
         "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
         "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин."
+        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин.",
+        "На «О компании» поменять телефон, не сохраняя; на «Главной странице» сохранить полоску.",
+        "На «Главной странице» нажать «Сбросить к стандартному» у полоски."
       ],
       "expect": [
         "Пока вы печатаете, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — название карточки).",
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Узкая полоска с вашим текстом стоит над магазином.",
-        "Она есть и на эстонском, и на английском."
+        "Она есть и на эстонском, и на английском.",
+        "Сохранение полоски не сохраняет телефон; он так и ждёт своего «Сохранить».",
+        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются."
       ],
       "why": "Без часов работы вам будут звонить и спрашивать, открыты ли вы.",
       "risk": "low",
@@ -8392,16 +8420,22 @@
         "steps": [
           "«Настройки» → «О компании»: fill in the opening hours and social links.",
           "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop."
+          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop.",
+          "On «О компании» change the phone without saving; on «Главная страница» save the strip.",
+          "On «Главная страница» press «Сбросить к стандартному» under the strip."
         ],
         "expect": [
           "While you type, «Не сохранено» stands next to «Сохранить» (on a computer the card name).",
           "The opening hours show on «Контакты» and at the foot of every page.",
           "The thin strip with your text sits above the shop.",
-          "It is there in Estonian and in English too."
+          "It is there in Estonian and in English too.",
+          "Saving the strip does not save the phone; it still waits for its own «Сохранить».",
+          "Resetting the strip changes the strip only; details and IBAN, hours and socials stay."
         ],
         "why": "With no opening hours, people phone you to ask if you're open."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:37:33.147Z"
     },
     {
       "id": "settings-delivered-auto",
