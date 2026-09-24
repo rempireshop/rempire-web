@@ -300,7 +300,7 @@ describe("readShipmentRefusal — a parcel the carrier would not take", () => {
        correcting. */
     expect(read.messages.RU).toMatch(/ещё раз/i);
     expect(read.messages.RU).toMatch(/второй посылки не будет/i);
-    expect(read.messages.EN).toMatch(/press «Create label» again/i);
+    expect(read.messages.EN).toMatch(/press «Send again»/i);
     expect(read.messages.EN).toMatch(/no second parcel/i);
   });
 

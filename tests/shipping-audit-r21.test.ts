@@ -152,12 +152,14 @@ describe("«Отправление» — the parcel as Montonio really has it", 
   it("says so when the carrier refused the registration", () => {
     const html = shipmentBox({ shipmentId: "shp-1", status: "registrationFailed" });
     expect(html).toContain("Перевозчик не принял");
-    /* Since 24.09.2026 the fix is the same button, pressed again: it sends
-       this same shipment with PATCH (Montonio: «you can just try again»). It
-       used to say «set the label aside and create it anew», which only ever
-       repeated the refusal. */
-    expect(html).toContain("Нажмите «Создать этикетку» ещё раз");
+    /* Since 24.09.2026 the fix is one button — «Отправить заново», the order's
+       own step button on a refused parcel — which sends this same shipment
+       with PATCH (Montonio: «you can just try again»). It used to say «set the
+       label aside and create it anew», which the server refused (audit
+       18.09.2026 F15; map defect #19). */
+    expect(html).toContain("Нажмите «Отправить заново»");
     expect(html).toContain("второй посылки не будет");
+    expect(html).not.toContain("Отложите этикетку");
     expect(html, "the parcel is not waiting for anybody").not.toContain(
       "Трек-номер появится, когда перевозчик примет посылку.",
     );
@@ -177,6 +179,43 @@ describe("«Отправление» — the parcel as Montonio really has it", 
     // an order booked before the status was ever stored keeps the old box
     const old = shipmentBox({ shipmentId: "shp-4" });
     expect(old).toContain("Трек-номер появится, когда перевозчик примет посылку.");
+  });
+
+  /* Map defect #19 (audit 18.09.2026 F15): the card's instruction and its
+     button must match what the server does. On a refused parcel the order's
+     step button is «Отправить заново» and it posts to the same route, which
+     PATCHes the same shipment — never «Отправлен» over a parcel that cannot
+     move, never advice the server refuses. */
+  it("offers «Отправить заново» as the one step on a refused parcel", () => {
+    const vm = new Function(`
+      ${slice("shipRegFailed")}
+      return function (mont) {
+        var hasShipment = !!(mont && mont.shipmentId);
+        return { labeled: hasShipment && !mont.dismissed && !shipRegFailed(mont.status),
+                 shipRefused: hasShipment && shipRegFailed(mont.status) };
+      };
+    `)() as (m: Mont) => { labeled: boolean; shipRefused: boolean };
+    // the view model's own two lines, not a copy: the test above holds the words
+    expect(src).toContain("var labeled = hasShipment && !mont.dismissed && !shipRegFailed(mont.status);");
+    expect(src).toContain("var shipRefused = hasShipment && shipRegFailed(mont.status);");
+
+    const step = new Function(`
+      var SRV = { shipBusy: false, stepBusy: "" };
+      ${slice("esc")}
+      ${slice("admOrderStepBtn")}
+      return admOrderStepBtn;
+    `)() as (v: Record<string, unknown>, row: boolean) => string;
+
+    const refused = { id: "o1", paid: true, ...vm({ shipmentId: "s1", status: "registrationFailed" }) };
+    const html = step(refused, false);
+    expect(html).toContain("Отправить заново");
+    expect(html).toContain('data-admlabel="o1"');
+    expect(html).not.toContain("Отправлен<");
+
+    const fresh = { id: "o2", paid: true, labeled: false, shipRefused: false };
+    expect(step(fresh, false)).toContain("Создать этикетку");
+    const booked = { id: "o3", paid: true, ...vm({ shipmentId: "s3", status: "registered" }) };
+    expect(step(booked, false)).toContain("data-admshipnow");
   });
 
   it("reads the word however Montonio spells it, and nothing else", () => {

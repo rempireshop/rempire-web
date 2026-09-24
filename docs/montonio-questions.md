@@ -246,8 +246,10 @@ again, the shipment simply stays in that same `registrationFailed` state
 (nothing is lost), and you can just try again. This fits well with the "one
 clear button" solution you described.»
 
-Done (commit «Отказ перевозчика чинится той же кнопкой…»): «Создать этикетку»
-on a refused parcel asks `GET /shipments/{id}` first (Montonio also retries on
+Done (commit «Отказ перевозчика чинится той же кнопкой…»): the order's step
+button on a refused parcel reads «Отправить заново» (the card no longer advises
+setting the label aside, which the server refused — audit 18.09 F15) and
+asks `GET /shipments/{id}` first (Montonio also retries on
 its own, and PATCH on a shipment registered since would register it again),
 then PATCHes the SAME shipment with the receiver, parcel and shipping method
 rebuilt from the order as it stands now; refused again is the same message, and

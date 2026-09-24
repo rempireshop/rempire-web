@@ -579,15 +579,15 @@ const SHIPMENT_TEXT: Record<Exclude<ShipmentRefusal, "unknown">, Trilingual> = {
   registration_failed: {
     RU:
       "Перевозчик не принял посылку — этикетки нет. Отправление в Montonio одно и остаётся тем же: " +
-      "нажмите «Создать этикетку» ещё раз — Montonio попробует снова, второй посылки не будет. " +
+      "нажмите «Отправить заново» — Montonio попробует ещё раз, второй посылки не будет. " +
       "Чаще всего дело в телефоне или адресе получателя: если снова не прошло, проверьте их в заказе, уточните у покупателя и напишите Диму — он исправит, и кнопка сработает.",
     ET:
       "Vedaja ei võtnud pakki vastu — silti ei ole. Saadetis on Montonios üks ja jääb samaks: " +
-      "vajutage uuesti «Loo silt» — Montonio proovib uuesti, teist pakki ei teki. " +
+      "vajutage «Saada uuesti» — Montonio proovib uuesti, teist pakki ei teki. " +
       "Kõige sagedamini on asi saaja telefonis või aadressis: kui ka uuesti ei õnnestu, kontrollige neid tellimuses, täpsustage kliendiga ja kirjutage Dimile — tema parandab ja nupp töötab.",
     EN:
       "The carrier would not take the parcel — there is no label. There is one shipment at Montonio and it stays the same one: " +
-      "press «Create label» again and Montonio tries again — no second parcel appears. " +
+      "press «Send again» and Montonio tries again — no second parcel appears. " +
       "The usual cause is the receiver's phone or address: if it fails again, check them on the order, confirm with the customer and write to Dim — he corrects it and the button works.",
   },
   bad_phone: {

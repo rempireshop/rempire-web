@@ -8740,13 +8740,13 @@
         "Дима ставит в оплаченный заказ с пакоматом неверный телефон получателя.",
         "Открыть заказ в панели и нажать «Создать этикетку».",
         "Дима возвращает правильный телефон.",
-        "Снова нажать «Создать этикетку» в том же заказе."
+        "В том же заказе нажать «Отправить заново»."
       ],
       "expect": [
         "После первого нажатия: «Перевозчик не принял», трек-номера и PDF нет.",
-        "Кнопка осталась «Создать этикетку», а не «Отправлен».",
+        "Кнопка стала «Отправить заново», а не «Отправлен».",
         "В журнале строка «Перевозчик не принял посылку».",
-        "После второго нажатия есть трек-номер, PDF открывается.",
+        "После «Отправить заново» есть трек-номер, PDF открывается.",
         "В Montonio у заказа одно отправление, не два.",
         "В журнале строка «Посылка снова отправлена перевозчику»."
       ],
@@ -8759,20 +8759,20 @@
           "Dim puts a wrong receiver phone on a paid order to a locker.",
           "Open the order in the panel and press «Создать этикетку».",
           "Dim puts the right phone back.",
-          "Press «Создать этикетку» again on the same order."
+          "On the same order press «Отправить заново» (send again)."
         ],
         "expect": [
           "After the first press: «Перевозчик не принял», no tracking number and no PDF.",
-          "The button is still «Создать этикетку», not «Отправлен».",
+          "The button now reads «Отправить заново», not «Отправлен».",
           "The journal has «Перевозчик не принял посылку».",
-          "After the second press there is a tracking number and the PDF opens.",
+          "After «Отправить заново» there is a tracking number and the PDF opens.",
           "Montonio holds one shipment for the order, not two.",
           "The journal has «Посылка снова отправлена перевозчику»."
         ],
         "why": "A carrier's refusal is repaired with the same button — no second parcel, no second charge."
       },
       "mark": "new",
-      "markedAt": "2026-09-24T17:01:49.156Z"
+      "markedAt": "2026-09-24T17:20:14.754Z"
     },
     {
       "id": "live-cron",

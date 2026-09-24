@@ -1076,8 +1076,10 @@ Authorization: Bearer <HS256 { accessKey, exp }>
 § 1.4–1.5). С 24.09.2026 он и **чинится той же кнопкой**: Montonio ответил, что
 новое отправление не нужно — `PATCH /shipments/{id}` запускает новую попытку
 регистрации, «If the attempt fails again, the shipment simply stays in that same
-`registrationFailed` state (nothing is lost), and you can just try again». Второе
-нажатие «Создать этикетку» на отказанном заказе: спрашивает `GET /shipments/{id}`
+`registrationFailed` state (nothing is lost), and you can just try again». На
+отказанном заказе кнопка шага называется **«Отправить заново»** (тот же маршрут;
+под ней больше нет совета «отложить этикетку», который сервер отклонял — аудит
+18.09 F15, дефект карты № 19). Она спрашивает `GET /shipments/{id}`
 (Montonio повторяет регистрацию и сам — уже зарегистрированное отправление
 PATCH зарегистрировал бы ещё раз), потом шлёт **то же** отправление PATCH'ем с
 получателем и посылкой из заказа как он есть сейчас. Снова отказ — тот же ответ,
