@@ -6973,15 +6973,16 @@
         "Под рамкой «В начале статьи» сдвинуть ползунок вправо, потом потянуть фото пальцем — вверх-вниз и вбок.",
         "Под рамкой «В списке статей» сдвинуть ползунок, потом нажать «Сбросить» под ней.",
         "В квадрате «В соцсетях» развести два пальца на фото и потянуть его.",
+        "Посмотреть на плашку над статьёй и на кнопку «Сохранить» — на телефоне и на компьютере.",
         "Сохранить и открыть эту статью в магазине, потом список статей.",
         "Сразу переключить магазин на EN и на ET.",
         "Нажать «Вся фотография» и сохранить снова."
       ],
       "expect": [
-        "Каждая рамка двигается сама: две другие при этом стоят на месте.",
+        "Каждая рамка двигается и сбрасывается (в центр, без увеличения) сама: другие стоят на месте.",
         "Ползунок или два пальца увеличивают фото только в этой рамке, до 3×.",
         "Увеличенное фото двигается в любую сторону, даже там, где было «двигать нечего».",
-        "«Сбросить» возвращает только свою рамку: в центр и без увеличения.",
+        "До «Сохранить» над статьёй тёплая плашка и обведённая кнопка: после сохранения их нет.",
         "В магазине на RU, ET и EN обложка сразу стоит как в своих рамках.",
         "После «Вся фотография» список и статья показывают снимок целиком, как рамки в панели."
       ],
@@ -6989,7 +6990,7 @@
       "risk": "low",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:14:06.211Z",
+      "markedAt": "2026-09-24T07:00:42.145Z",
       "en": {
         "title": "An article's cover: three frames, each on its own",
         "steps": [
@@ -6998,15 +6999,16 @@
           "Under the «В начале статьи» (top of the article) frame move the slider right, then drag the photo with a finger — up, down and sideways.",
           "Under the «В списке статей» (list) frame move the slider, then press «Сбросить» (reset) under it.",
           "In the «В соцсетях» (social media) square spread two fingers on the photo, then drag it.",
+          "Look at the notice above the article and at the «Сохранить» (save) button — on a phone and on a computer.",
           "Save and open this article in the shop, then the blog list.",
           "Straight away switch the shop to EN and then to ET.",
           "Press «Вся фотография» (the whole photo) and save again."
         ],
         "expect": [
-          "Each frame moves on its own: the other two stay where they were.",
+          "Each frame moves and resets (to the centre, no zoom) on its own: the others stay.",
           "The slider or two fingers zoom the photo in that frame only, up to 3×.",
           "A zoomed photo moves every way, even where it said «двигать нечего».",
-          "«Сбросить» resets only its own frame: to the centre, with no zoom.",
+          "Before saving: a warm notice above the article and a ringed Save; after saving, both gone.",
           "In the shop in RU, ET and EN the cover sits as in its frames.",
           "After «Вся фотография» list and article show the whole photo, like the panel frames."
         ],

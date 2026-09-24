@@ -31341,7 +31341,7 @@
       (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset && !p.custom
         ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
         : "") +
-      (galDirty(p) ? '<p class="adm-hint adm-hint--warn">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      (galDirty(p) ? admDirtyNoteHTML("data-galdirty", true) : "") +
       (p.sizes && p.sizes.length > 1 && g.length > 1
         ? '<div class="adm-sec"><span class="adm-sec__t">Фото по объёмам</span></div>' +
           '<p class="adm-hint">Какое фото показывать для каждого объёма.</p>' +

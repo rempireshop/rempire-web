@@ -77,7 +77,10 @@ describe("the notice over the form", () => {
     for (const attr of ["data-blogdirty", "data-maildirty", "data-newsdirty"]) {
       expect(src, `${attr} is still drawn by hand`).toContain(`admDirtyNoteHTML("${attr}"`);
     }
-    expect(src.match(/Есть несохранённые изменения — нажмите «Сохранить»\.<\/p>/g) ?? [], "a hand-drawn copy is left").toHaveLength(0);
+    // the component's own copy is the only one left
+    expect(src.match(/Есть несохранённые изменения — нажмите «Сохранить»\.<\/p>/g) ?? [], "a hand-drawn copy is left").toHaveLength(1);
+    expect(slice("admDirtyNoteHTML")).toContain("Есть несохранённые изменения — нажмите «Сохранить».</p>");
+    expect(src, "the photo strip's notice is drawn by hand").toContain('admDirtyNoteHTML("data-galdirty"');
   });
 
   /* display:flex on a class beats the UA's [hidden] rule — a notice that is
@@ -156,7 +159,7 @@ describe("the save bar takes the state", () => {
   it("the bar's look: warm ground, a solid status chip, «Сохранить» ringed — phone and desktop", () => {
     expect(css).toMatch(/\.adm-savebar\.is-dirty\s*\{[^}]*background:/);
     expect(css).toMatch(/\.adm-savebar\.is-dirty \.adm-savebar__main:not\(\[disabled\]\)/);
-    expect(css).toMatch(/\.adm-savebar__note--warn\s*\{[^}]*background:/);
+    expect(css).toMatch(/\.adm-savebar__note--warn,\s*\.adm-dirtyword\s*\{[^}]*background:/);
     // the desktop used to hide the status word of these bars altogether
     expect(css).not.toMatch(/\.adm-savebar__note--phone, \.adm-savebar__note--short \{ display: none; \}/);
   });
