@@ -364,6 +364,28 @@ describe("the code is for THAT basket", () => {
     const { code } = await issue();
     expect(await quotePromo(code, 200, 0)).toMatchObject({ ok: false, error: "no_match" });
   });
+
+  it("tells the checkout's promo box WHICH lines it covers — the box cannot know", async () => {
+    /* `scopeValue` of a cart code is the basket's id, which no line equals, so
+       until 23.09.2026 the storefront matched nothing: no discount on screen
+       and no code in the order (promoLineIn(), public/shop2/app.js). The
+       answer now names the lines it matched in THIS basket, and only those. */
+    const { code } = await issue();
+    const { POST } = await import("@/app/api/promos/check/route");
+    const res = await POST(makeRequest("/api/promos/check/", {
+      method: "POST",
+      body: {
+        code,
+        subtotal: 200,
+        shipping: 0,
+        items: basket([{ id: "stranger", kind: "product", brand: "Proraso", sum: 80 }]),
+      },
+    }));
+    expect(res.status).toBe(200);
+    const j = await res.json();
+    expect(j).toMatchObject({ ok: true, code, scope: "cart", discount: 6, base: 120 });
+    expect(j.lines).toEqual(["cart-a", "cart-b"]);
+  });
 });
 
 /* ---------- the link and the code under it ---------------------------------- */
@@ -406,6 +428,33 @@ describe("the letter's button restores the basket and carries the code", () => {
     await cart("plain@example.com", { quietMs: 4 * HOUR });
     expect((await runAbandonedCarts(NOW)).sent).toBe(1);
     expect(readResumeToken(resumeTokenIn(sent[0].text))?.code).toBe("");
+  });
+
+  it("the letters' other links: an unsubscribe that answers, and nothing else to break", async () => {
+    /* The product rows carry no link of their own — the button is the way
+       back to the basket. What else is in the letter is the shop's address,
+       the shop's mailbox and «Отписаться», and that one has to open. */
+    await on();
+    await cart("plain@example.com", { quietMs: 4 * HOUR });
+    expect((await runAbandonedCarts(NOW)).sent).toBe(1);
+    await cart("links@example.com", { remindedAgoMs: 4 * DAY });
+    expect((await runAbandonedCartsDiscount(NOW)).sent).toBe(1);
+    expect(sent).toHaveLength(2);
+
+    const { GET } = await import("@/app/api/mail/unsubscribe/route");
+    for (const letter of sent) {
+      const hrefs = [...letter.html.matchAll(/href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+      const unsub = hrefs.filter((h) => h.includes("/api/mail/unsubscribe/"));
+      expect(unsub, letter.subject).toHaveLength(1);
+      expect(hrefs.filter((h) => RESUME_RX.test(h)), letter.subject).toHaveLength(1);
+      for (const h of hrefs) {
+        const known = RESUME_RX.test(h) || h === unsub[0] || h.startsWith("mailto:") || /^https:\/\/[^/]+\/$/.test(h);
+        expect(known, `${letter.subject}: a link nobody checked — ${h}`).toBe(true);
+      }
+      const u = new URL(unsub[0]);
+      const res = await GET(makeRequest(u.pathname + u.search));
+      expect(res.status, letter.subject).toBe(200);
+    }
   });
 });
 

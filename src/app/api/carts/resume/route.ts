@@ -17,7 +17,9 @@
  * the token (`p`), and a code read out of an unverified payload is a string
  * anybody could have written — so the shop must not say «скидка применена»
  * on the strength of it. This route checks the HMAC before it answers, which
- * makes it the one place a code from a letter can be believed. Nothing is
+ * makes it the one place a code from a letter can be believed — the storefront
+ * asks it for exactly that and nothing else (resumeCode(), public/shop2/app.js),
+ * and only when the payload carries a code at all. Nothing is
  * spent here either way: the checkout looks the code up and prices it like
  * any other (quotePromo), and a `cart` code that meets a basket it was not
  * written for simply finds no lines to discount.
