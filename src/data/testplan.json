@@ -4026,12 +4026,15 @@
         "Нажать «Написать клиенту».",
         "В поле сверху вставить выдуманный вопрос клиента.",
         "Поправить черновик ответа.",
-        "Нажать «Отправить» и подтвердить в окошке."
+        "Нажать «Отправить» и подтвердить в окошке.",
+        "Вернуться к списку, снова открыть заказ и нажать «Написать клиенту»."
       ],
       "expect": [
         "Перед отправкой магазин показывает адрес покупателя и текст письма.",
         "Там же предупреждение: отправленное письмо назад не вернуть.",
-        "После отправки переписка осталась в карточке заказа.",
+        "После отправки в карточке блок «Переписка»: вопрос клиента и ваше письмо.",
+        "Поле для вопроса клиента после отправки пустое.",
+        "После нового открытия «Переписка» на месте.",
         "Письмо пришло на почту покупателя."
       ],
       "why": "Письмо, ушедшее не туда или не с тем текстом, назад не забрать.",
@@ -4044,16 +4047,21 @@
           "Press «Написать клиенту» (write to the customer).",
           "Paste a made-up customer question into the top field.",
           "Edit the draft reply.",
-          "Press «Отправить» and confirm in the box."
+          "Press «Отправить» and confirm in the box.",
+          "Go back to the list, open the order again and press «Написать клиенту»."
         ],
         "expect": [
           "Before sending, the shop shows the address and the text.",
           "It warns that a sent letter cannot be taken back.",
-          "After sending, the exchange stays in the order card.",
+          "After sending the card shows «Переписка»: the customer's question and your letter.",
+          "The box for the customer's question is empty after sending.",
+          "Opened again, «Переписка» is still there.",
           "The letter arrives in the buyer's mailbox."
         ],
         "why": "A letter sent to the wrong person cannot be taken back."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:31:40.229Z"
     },
     {
       "id": "order-invoice-card",
@@ -4106,13 +4114,15 @@
       "steps": [
         "В том же заказе нажать «Отправить счёт ещё раз».",
         "Проверить почту, на которую выписан счёт.",
-        "Прочитать строку про счёт в карточке заказа."
+        "Прочитать строку про счёт в карточке заказа.",
+        "Пока IBAN пуст, открыть «Обзор» и нажать строку «Заполните IBAN»."
       ],
       "expect": [
         "Письмо со счётом пришло второй раз.",
         "К письму приложен PDF счёта.",
         "Без IBAN карточка пишет, что счёт не отправлен и где его заполнить.",
-        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз."
+        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз.",
+        "Строка «Заполните IBAN» открывает «Настройки → О компании», а не «Обзор» снова."
       ],
       "why": "Компания, не получившая счёт, не заплатит, а вы будете думать, что она тянет.",
       "risk": "med",
@@ -4122,16 +4132,20 @@
         "steps": [
           "In the same order press «Отправить счёт ещё раз» (send the invoice again).",
           "Check the mailbox the invoice was made out to.",
-          "Read the invoice line on the order card."
+          "Read the invoice line on the order card.",
+          "While the IBAN is empty, open «Обзор» and tap the «Заполните IBAN» row."
         ],
         "expect": [
           "The invoice letter arrives a second time.",
           "The invoice PDF is attached to it.",
           "With no IBAN the card says the invoice was not sent, and where to fix it.",
-          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз»."
+          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз».",
+          "The «Заполните IBAN» row opens «Настройки → О компании», not «Обзор» again."
         ],
         "why": "A company that never got the invoice will not pay — and you blame them."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:27:32.176Z"
     },
     {
       "id": "order-invoice-paid",
@@ -4146,6 +4160,7 @@
         "Посмотреть, куда переехал заказ."
       ],
       "expect": [
+        "После «Оплачен» окошко закрывается сразу, кнопка пишет «Сохраняем…».",
         "Заказ стал оплаченным.",
         "Он появился в списке «Отправить».",
         "Покупателю ушло письмо «Заказ принят»."
@@ -4161,12 +4176,15 @@
           "See where the order has moved to."
         ],
         "expect": [
+          "After «Оплачен» the box closes at once and the button says «Сохраняем…».",
           "The order has become paid.",
           "It shows up in the «Отправить» list.",
           "The buyer has had the «Заказ принят» letter."
         ],
         "why": "Pressed by mistake, this button sends goods out against an unpaid invoice."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:41:07.420Z"
     },
     {
       "id": "order-returns-chip",
@@ -7282,13 +7300,14 @@
       "title": "Одобрить партнёра",
       "steps": [
         "Открыть «Клиенты» и нажать «Заявки Pro».",
-        "Нажать «Одобрить Pro» и прочитать окошко с вопросом.",
+        "Открыть карточку клиента с заявкой, нажать «Одобрить Pro» и прочитать окошко с вопросом.",
         "Подтвердить.",
         "Войти в кабинет этого покупателя и посмотреть цены товаров.",
         "Вернуть этого партнёра на обычные цены и одобрить его снова."
       ],
       "expect": [
         "Перед одобрением выходит окошко с вопросом.",
+        "После одобрения заказы, факты и отзывы на карточке остаются, серых полос нет.",
         "После одобрения партнёру ушло письмо.",
         "В его кабинете стоят цены для салонов.",
         "Второе одобрение того же человека письма уже не шлёт."
@@ -7301,19 +7320,21 @@
         "title": "Approving a partner",
         "steps": [
           "Open «Клиенты» and press the «Заявки Pro» chip.",
-          "Press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
+          "Open the card of a customer with a request, press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
           "Confirm.",
           "Sign into that buyer's account and look at the product prices.",
           "Put that partner back on retail prices and approve them again."
         ],
         "expect": [
           "A box asks you to confirm before approving.",
+          "After approval the card keeps its orders, facts and reviews, with no grey bars.",
           "After approval a letter has gone to the partner.",
           "In their account the salon prices are shown.",
           "Approving the same person a second time sends no letter."
         ],
         "why": "Approval turns on wholesale prices for good and sends a letter you cannot recall."
-      }
+      },
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-add-partner",
@@ -7325,12 +7346,14 @@
       "steps": [
         "Открыть «Клиенты» и нажать «+ Партнёр».",
         "Вписать почту, название салона и регистрационный номер.",
-        "Сохранить и проверить почту партнёра."
+        "Сохранить и проверить почту партнёра.",
+        "Снова нажать «+ Партнёр», вписать ту же почту и сохранить."
       ],
       "expect": [
         "Партнёр появился в списке с пометкой партнёра.",
         "На его почту пришло письмо.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду.",
+        "Второй раз выходит «Уже партнёр» — без кнопки «Отменить»."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -7340,15 +7363,19 @@
         "steps": [
           "«Клиенты» → «+ Партнёр».",
           "Type in the e-mail, the salon name and the registration number.",
-          "Save and check the partner's mail."
+          "Save and check the partner's mail.",
+          "Press «+ Партнёр» again, type the same e-mail and save."
         ],
         "expect": [
           "The partner is in the list with a partner marker.",
           "A letter has arrived in their mailbox.",
-          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view."
+          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view.",
+          "The second time it says «Уже партнёр», with no «Отменить» button."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:43:29.371Z"
     },
     {
       "id": "people-remove-partner",
@@ -7402,11 +7429,13 @@
         "Открыть карточку клиента.",
         "Вписать в баллах плюс десять и применить.",
         "Открыть кабинет этого клиента и посмотреть баллы.",
-        "Списать те же десять обратно."
+        "Списать те же десять обратно.",
+        "Вписать в баллах пять, не применять и открыть карточку другого клиента."
       ],
       "expect": [
         "После начисления в кабинете стало на десять больше.",
-        "После списания число вернулось к прежнему."
+        "После списания число вернулось к прежнему.",
+        "У другого клиента поля баллов и заметки к ним пустые."
       ],
       "why": "Баллы, начисленные по ошибке, потом тратятся на кассе как ваши деньги.",
       "risk": "med",
@@ -7417,14 +7446,18 @@
           "Open a customer's card.",
           "In the points block type plus ten and apply it.",
           "Open that customer's account and look at the points.",
-          "Take the same ten back off."
+          "Take the same ten back off.",
+          "Type five in the points block, do not apply it, and open another customer's card."
         ],
         "expect": [
           "After crediting, the account shows ten more points.",
-          "After taking them off, the number is back."
+          "After taking them off, the number is back.",
+          "On the other customer's card the points field and its note are empty."
         ],
         "why": "Points credited by mistake are spent at the till as your money."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-csv",
@@ -8579,14 +8612,16 @@
       "steps": [
         "На боевых ключах открыть второй настоящий оплаченный заказ.",
         "Нажать «Вернуть деньги», стереть сумму и вписать меньшую — например 0,50.",
-        "Подтвердить и посмотреть карточку.",
-        "Попробовать вернуть сумму больше остатка."
+        "Прочитать текст в окошке.",
+        "Вписать сумму больше остатка и нажать «Вернуть деньги».",
+        "Исправить сумму на 0,50, нажать «Вернуть деньги» ещё раз и посмотреть карточку."
       ],
       "expect": [
+        "В окошке: «Вернём 0,50 € из …», статус заказа и склад не изменятся.",
+        "Сумму больше остатка магазин не принимает, а окошко остаётся открытым.",
+        "Исправленная сумма уходит с той же кнопки, окошко открывать заново не нужно.",
         "Вернулась ровно та сумма, которую вписали.",
-        "Заказ так и остался оплаченным.",
-        "Товары на склад не вернулись.",
-        "Сумму больше остатка магазин не принимает.",
+        "Заказ так и остался оплаченным, товары на склад не вернулись.",
         "Баллы за этот заказ остались как были — их возвращает только полный возврат."
       ],
       "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
@@ -8598,19 +8633,21 @@
         "steps": [
           "On the live keys, open a second real paid order.",
           "Press «Вернуть деньги», clear the amount and type a smaller one — e.g. 0.50.",
-          "Confirm and look at the card.",
-          "Try to refund more than the remaining balance."
+          "Read the text in the box.",
+          "Type an amount above the balance and press «Вернуть деньги».",
+          "Correct the amount to 0.50, press «Вернуть деньги» again and look at the card."
         ],
         "expect": [
+          "The box says: «Вернём 0,50 € из …», the order's status and stock stay.",
+          "The shop refuses an amount above the balance, and the box stays open.",
+          "The corrected amount goes from the same button, with no need to reopen the box.",
           "Exactly the amount typed comes back.",
-          "The order stays paid.",
-          "The goods do not go back into stock.",
-          "The shop refuses an amount above the balance.",
+          "The order stays paid, and the goods do not go back into stock.",
           "The order's points are untouched — only a full refund moves them."
         ],
         "why": "Refunding more than was paid is a gift of money."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T17:38:05.777Z"
     },
     {
       "id": "live-apple-pay",

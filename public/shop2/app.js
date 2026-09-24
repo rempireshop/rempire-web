@@ -2153,6 +2153,7 @@
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
       "Черновик подготовил помощник": "Mustandi kirjutas abiline",
+      "Переписка": "Kirjavahetus", "Клиент написал": "Klient kirjutas", "Вы написали": "Teie kirjutasite",
       "+ Набор": "+ Komplekt",
       "+ Товар": "+ Toode",
       "Приёмка": "Vastuvõtt",
@@ -5181,6 +5182,7 @@
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
       "Черновик подготовил помощник": "The assistant wrote this draft",
+      "Переписка": "Letters so far", "Клиент написал": "The customer wrote", "Вы написали": "You wrote",
       "+ Набор": "+ Set",
       "+ Товар": "+ Product",
       "Приёмка": "Goods in",
@@ -6919,6 +6921,13 @@
     [/^По заказу уже возвращено (.+)\. Осталось (.+) — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо\.$/,
       { ET: "Tellimuse eest on juba tagastatud $1. Jäänud on $2 — raha läheb Montonio kaudu sama teed, kust tuli, ja klient saab kirja.",
         EN: "$1 has already been refunded on this order. $2 is left — the money goes back through Montonio the way it came, and the customer gets a letter." }],
+    /* …and a part of what is left, typed into the box (admRefundConfirmText) */
+    [/^Вернём (.+) из (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, статус заказа и склад не изменятся\.$/,
+      { ET: "Tagastame $1 summast $2 Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, tellimuse staatus ja laoseis ei muutu.",
+        EN: "We will send $1 of $2 back through Montonio, the way the money came. The customer gets a letter; the order's status and the stock stay as they are." }],
+    [/^По заказу уже возвращено (.+)\. Вернём ещё (.+) из оставшихся (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, статус заказа и склад не изменятся\.$/,
+      { ET: "Tellimuse eest on juba tagastatud $1. Tagastame veel $2 (jäänud on $3) Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, tellimuse staatus ja laoseis ei muutu.",
+        EN: "$1 has already been refunded on this order. We will send $2 more of the $3 left back through Montonio, the way the money came. The customer gets a letter; the order's status and the stock stay as they are." }],
     /* the gift-card split: two facts of one list, so two rules rather than
        one sentence with a « · » inside it (admRefundConfirmText) */
     [/^Вернём на подарочную карту: (.+)$/,
@@ -19683,7 +19692,10 @@
     if (noIban) tasks += admTaskRow("!",
       "Заполните IBAN — счета не уходят",
       "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»",
-      'data-admtab="settings" data-admsetpage="company"', true);
+      /* `setup` is the key of «Настройки» (ADM_SECTION_OF). This row said
+         "settings" — a key no section has, so the tap fell back to «Обзор»
+         and redrew the screen it was on (map defect 1, 24.09.2026). */
+      'data-admtab="setup" data-admsetpage="company"', true);
     if (overN) tasks += admTaskRow(overN,
       pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
       names(overdue, function (v) { return v.who; }),
@@ -20258,8 +20270,7 @@
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     // an invoice order's one step is the transfer arriving — the row can record it without opening the card
-    else if (v.unpaid && v.invoice) acts =
-      '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
+    else if (v.unpaid && v.invoice) acts = admInvPaidBtnHTML(v, "adm-btn adm-btn--row");
     /* …but not on a held order. «Написать» here means «ask him to pay», and
        he has paid — just not enough. The row has no action of its own: the
        badge says what happened, and what to do about it is two figures and a
@@ -20591,8 +20602,7 @@
     /* «По счёту»: while the transfer is awaited the primary is «Отметить
        оплаченным»; the invoice itself stays downloadable for as long as the
        order exists, and can be sent again while it is unpaid. */
-    if (v.invoice && v.unpaid) acts +=
-      '<button class="adm-btn" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
+    if (v.invoice && v.unpaid) acts += admInvPaidBtnHTML(v, "adm-btn");
     if (v.invoice) acts +=
       '<a class="adm-btn adm-btn--ghost" href="/api/admin/orders/' + encodeURIComponent(v.id) + '/invoice/" target="_blank" rel="noopener" data-adminvpdf="' + esc(v.invoice.number) + '">Скачать счёт</a>';
     if (v.invoice && v.unpaid) acts +=
@@ -21054,12 +21064,38 @@
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
   }
+  /** The letters already exchanged on this order, oldest first, so the newest
+      sits right above the box the next one is typed into. S.orderMsgs is the
+      thread GET …/messages/ fetched when the card opened, and the whole thread
+      again in the answer of every send — it was fetched and never drawn, so
+      after «Отправить» the card showed an empty box and no trace of the letter
+      (/test «order-message»; map defect 5, 24.09.2026). Each message names
+      the order it belongs to, which is what is matched: a card opened by its
+      number and one opened by its id ask the same question.
+      The box is on the card from the first paint, hidden while empty: the
+      panel is patched node by node in order (admMorphChildren), and a block
+      that appeared in front of the two text boxes when the thread landed
+      would hand them to other nodes and throw away what was typed in them. */
+  function admOrderThreadHTML(o) {
+    if (!o) return "";
+    var list = (S.orderMsgs || []).filter(function (m) { return m && String(m.orderId) === String(o.id); });
+    return '<div data-ordermsgs' + (list.length ? "" : " hidden") + ">" + (list.length
+      ? '<div class="adm-sec__t">Переписка</div>' +
+        '<div class="adm-list">' + list.map(function (m) {
+          return '<div class="adm-row adm-row--stack">' +
+            '<span class="adm-row__sub"><span>' + (m.direction === "in" ? "Клиент написал" : "Вы написали") + "</span> · " +
+              "<span>" + esc(flowRunWhen(m.createdAt)) + "</span></span>" +
+            '<span class="adm-revtext" style="white-space:pre-line">' + esc(m.body) + "</span></div>";
+        }).join("") + "</div>"
+      : "") + "</div>";
+  }
   /** «Написать клиенту» — the inline card with the assistant's draft in it. */
   function admOrderMsgHTML(v) {
     var o = v.srv;
     return '<div class="adm-card">' +
       '<div class="adm-card__head"><div class="adm-sec__t">Сообщение клиенту</div>' +
         '<div class="adm-hint">' + esc((o && o.email) || "") + "</div></div>" +
+      admOrderThreadHTML(o) +
       (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
         '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' : "") +
       '<textarea class="adm-input" rows="4" data-orderreplydraft aria-label="Текст письма клиенту">' +
@@ -30429,6 +30465,9 @@
   function admCustRowsHTML() {
     var list = filteredAdminCustomers();
     if (!list.length) {
+      // a list that did not load is not a shop with no customers: the error
+      // above says what happened, with «Повторить» (map defect 7)
+      if (S.admCustErr) return "";
       return S.admCustomers
         ? '<div class="adm-empty">Никого не нашлось</div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
@@ -30540,9 +30579,11 @@
     var d = S.admCustDetail;
     var back = admBackHTML("data-admcustclose", "Все клиенты");
     if (!d || d.customer.id !== S.admCustOpen) {
-      // grey bars mean «loading»; a card that will never load says so instead
+      // grey bars mean «loading»; a card that will never load says so instead,
+      // with the «Повторить» every other screen of the panel has (map defect 7)
       return back + (S.admCustDetailErr
-        ? '<div class="adm-note">' + esc(S.admCustDetailErr) + "</div>"
+        ? '<div class="adm-error"><span>' + esc(S.admCustDetailErr) + "</span>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="customer">Повторить</button></div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>');
     }
     var c = d.customer;
@@ -30814,7 +30855,8 @@
     loadAdminCustomers(false);
     if (S.admCustOpen) return admCustomerCardHTML();
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
-    return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
+    return (S.admCustErr ? '<div class="adm-error"><span>' + esc(S.admCustErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="customers">Повторить</button></div>' : "") +
       admCustLeadHTML() +
       (partnersOn() && S.partnerForm ? admPartnerFormHTML() : "") +
       '<div class="adm-acts">' +
@@ -30996,7 +31038,14 @@
       S.admCustBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.admCustDetail = { customer: r.body.customer, history: (S.admCustDetail && S.admCustDetail.history) || [] };
+        /* The answer is the customer's row, nothing more. It used to become
+           the whole card — `{ customer, history }` — so the orders, the facts
+           and the reviews the card's GET had brought went back to grey bars
+           until the refetch below landed (map defect 17, 24.09.2026). The row
+           goes onto the card that is there; a card of somebody else lends
+           this one nothing, not even its points history. */
+        var was = S.admCustDetail && String(S.admCustDetail.customer.id) === String(id) ? S.admCustDetail : null;
+        S.admCustDetail = was ? mergeInto(was, { customer: r.body.customer }) : { customer: r.body.customer, history: [] };
         loadAdminCustomerDetail(id, true);
         loadAdminCustomers(true);
         /* Three outcomes, not two. `skipped` is the route deciding the letter
@@ -36761,6 +36810,10 @@
       if (r.status === 200 && r.body.ok) {
         S.orderReplyDraft = "";
         S.orderMsgs = r.body.messages || null; S.orderMsgsFor = pa.id;
+        /* the customer's words are in the thread above now (admOrderThreadHTML);
+           left in their box, the next «Отправить» would file them a second time */
+        var askedEl = document.querySelector("[data-ordercustmsg]");
+        if (askedEl) askedEl.value = "";
         journalNote("Письмо клиенту · заказ " + pa.number);
         toast("Письмо отправлено ✓");
       } else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
@@ -36768,8 +36821,24 @@
       render();
     }).catch(function () { toast("Не удалось отправить письмо"); render(); });
   }
+  /** «Отметить оплаченным» — in a row of «Заказы» and on the card; «Сохраняем…»
+      while that order's POST is out, so a second tap cannot ask twice. */
+  function admInvPaidBtnHTML(v, cls) {
+    var busy = SRV.invPaidBusy === String(v.id);
+    return '<button class="' + cls + '" data-adminvpaid="' + esc(v.id) + '"' + (busy ? " disabled" : "") + ">" +
+      (busy ? "Сохраняем…" : "Отметить оплаченным") + "</button>";
+  }
+  /* The confirm card goes the moment «Оплачен» is pressed. The «Применить»
+     handler has already dropped the action, and this drew nothing until the
+     server answered — on success only the lists it asked for redrew the
+     screen, and after a refusal nothing did: the card stayed up for good over
+     a button with nothing behind it (map defect 10, 24.09.2026). The refund
+     beside it has always drawn at once; this is the same shape. */
   function srvInvoicePaid(id, number, invoiceNumber) {
+    if (SRV.invPaidBusy) { render(); return; }
+    SRV.invPaidBusy = String(id); render();
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "paid" }).then(function (r) {
+      SRV.invPaidBusy = "";
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var paidLine = "Заказ " + number + ": оплачен по счёту " + invoiceNumber;
@@ -36784,10 +36853,12 @@
           : r.body.sent === false ? number + " оплачен по счёту · письмо не ушло"
           : number + " оплачен по счёту · письмо ушло");
         admOrdersChanged();
+        render();
         return;
       }
       toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
-    }).catch(function () { toast("Сервер не отвечает"); });
+      render();
+    }).catch(function () { SRV.invPaidBusy = ""; toast("Сервер не отвечает"); render(); });
   }
   /* The server's own sentence for an answer, in the panel's language.
      `messages` is {RU,ET,EN} and it is built on the SERVER
@@ -36858,8 +36929,8 @@
       the text), so what he confirms is what the server will do. */
   function admRefundConfirmText(v, typed) {
     var rv = v.refund || { gift: 0, money: v.refundable };
+    var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
     if (rv.gift > 0.004) {
-      var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
       var gift = Math.round(Math.min(amount, rv.gift) * 100) / 100;
       var money = Math.round((amount - gift) * 100) / 100;
       /* The split is a LIST and what follows it is prose, so they are two
@@ -36875,6 +36946,21 @@
       return v.number + " · " + v.who +
         "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
         "\nКартой снова можно будет платить. Клиенту уйдёт письмо.";
+    }
+    /* A part of what is left. The box used to be read on gift-card orders
+       only, so every other order went on promising «48 € … товары вернутся на
+       склад, заказ станет «возврат»» over a box that said 10 — and a partial
+       refund does neither: the server moves the order and its shelf only once
+       the refunds cover all of it (settleRefund). Map defect 9, 24.09.2026. */
+    if (amount < v.refundable - 0.004 && v.refunded > 0.004) {
+      return v.number + " · " + v.who +
+        "\nПо заказу уже возвращено " + eur(v.refunded) + ". Вернём ещё " + eur(amount) + " из оставшихся " + eur(v.refundable) +
+        " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, статус заказа и склад не изменятся.";
+    }
+    if (amount < v.refundable - 0.004) {
+      return v.number + " · " + v.who +
+        "\nВернём " + eur(amount) + " из " + eur(v.refundable) +
+        " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, статус заказа и склад не изменятся.";
     }
     if (v.refunded > 0.004) {
       return v.number + " · " + v.who +
@@ -36897,10 +36983,33 @@
     pendingAction.detail = text;
     translateTree(node.parentElement || node);
   }
+  /** The sum typed into the refund card, or NaN when the server would refuse
+      it: not a number, under a cent, or more than is left (`max`). */
+  function admRefundAmount(typed, max) {
+    var amount = Math.round(Number(String(typed).replace(",", ".")) * 100) / 100;
+    return !isFinite(amount) || amount < 0.01 || amount > max + 0.005 ? NaN : amount;
+  }
+  /* The refund card's «Вернуть деньги». The «Применить» handler clears the
+     pending action before it gets here, and a sum out of range used to end on
+     a toast and nothing else — no render, so the card stayed on screen with a
+     button that had no action behind it any more (map defect 9, 24.09.2026).
+     The card now stays a working card: the action is put back and the box
+     has the focus, so the owner corrects the number and presses again. */
+  function admRefundApply(pa) {
+    var amtEl = document.querySelector("[data-admrefundamt]");
+    var typed = amtEl ? amtEl.value : pa.amount;
+    if (isNaN(admRefundAmount(typed, Number(pa.amount)))) {
+      pendingAction = pa;
+      toast(REFUND_ERR.bad_amount);
+      refocus("[data-admrefundamt]");
+      return;
+    }
+    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount));
+  }
   function srvOrderRefund(id, number, typed, max) {
     if (SRV.refundBusy) return;
-    var amount = Math.round(Number(String(typed).replace(",", ".")) * 100) / 100;
-    if (!isFinite(amount) || amount < 0.01 || amount > max + 0.005) { toast(REFUND_ERR.bad_amount); return; }
+    var amount = admRefundAmount(typed, max);
+    if (isNaN(amount)) { toast(REFUND_ERR.bad_amount); return; }
     SRV.refundBusy = true; render();
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", { amount: amount }).then(function (r) {
       SRV.refundBusy = false;
@@ -40546,12 +40655,16 @@
   }
   /** `undo` is the journal entry this toast can take back — see admUndoToast().
       An undoable admin toast stays up for six seconds, everything else for the
-      usual 2.6: an «Отменить» nobody has time to read is not an offer. */
+      usual 2.6: an «Отменить» nobody has time to read is not an offer.
+      …and an entry with no way back (`prev` null) is no offer either: «+ Партнёр»
+      on an address that was a partner already journals the press with nothing
+      to put back, and its «Отменить» did nothing, said «Отменено» and wrote an
+      «Отмена: …» line all the same (map defect 12, 24.09.2026). */
   function toast(msg, undo) {
-    S.toast = msg; S.toastUndo = undo || null;
+    S.toast = msg; S.toastUndo = undo && undo.prev ? undo : null;
     paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, undo ? 6000 : 2600);
+    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, S.toastUndo ? 6000 : 2600);
   }
   /** Take the standing toast down now, before its timer is up. */
   function toastOff() {
@@ -41093,7 +41206,7 @@
          «Скрытые», and the shelf it wants starts at the top of that list. */
       if (d.admfilter && d.admtab === "goods") { S.goodsFilter = d.admfilter; S.goodsShown = 40; }
       // …and a queue row may name the settings page it wants («Заполните IBAN»)
-      if (d.admsetpage && d.admtab === "settings") S.admSetPage = d.admsetpage;
+      if (d.admsetpage && d.admtab === "setup") S.admSetPage = d.admsetpage;
       window.scrollTo({ top: 0 }); render(); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
@@ -41119,6 +41232,11 @@
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       // the one GET behind «Цены и баллы», «Доставлен» без кнопки and the banks
       else if (d.admreload === "pricing") { S.pricingLoadErr = false; loadAdminPricing(true); }
+      /* «Клиенты»: the list (grey bars while it is asked again — the failed
+         read left an empty list, which would read as «nobody») and one
+         customer's card, forced past the error it remembers (map defect 7) */
+      else if (d.admreload === "customers") { S.admCustErr = ""; S.admCustomers = null; loadAdminCustomers(true); }
+      else if (d.admreload === "customer") loadAdminCustomerDetail(S.admCustOpen, true);
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
@@ -42074,12 +42192,9 @@
         else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
         /* «Вернуть деньги»: the sum is read off the card before the render
            below takes it away. No undo — money that left Montonio does not
-           come back from a toast. */
-        else if (pa.type === "order_refund") {
-          var amtEl = document.querySelector("[data-admrefundamt]");
-          srvOrderRefund(pa.id, pa.number, amtEl ? amtEl.value : pa.amount, Number(pa.amount));
-          return;
-        }
+           come back from a toast. A sum out of range keeps the card up
+           (admRefundApply). */
+        else if (pa.type === "order_refund") { admRefundApply(pa); return; }
         // «Написать клиенту»: the letter the card just asked about — no undo,
         // which is exactly why it was asked
         else if (pa.type === "order_mail") { srvOrderMailSend(pa); return; }
@@ -42494,6 +42609,10 @@
        render() leaving the page exactly where the finger left it. */
     if (d.admcustopen) {
       S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null;
+      /* …and the points form and the note's «Сохранено ✓» with it: they live
+         in S, shared by every card, and a number typed for one customer and
+         never applied stood ready on the next one's «Применить» (map defect 17) */
+      S.admCustPoints = ""; S.admCustNote = ""; S.custNoteSaved = false;
       // opening a card is also how a card whose GET failed is asked for again
       S.admCustDetailErr = "";
       window.scrollTo({ top: 0 }); render(); return;
