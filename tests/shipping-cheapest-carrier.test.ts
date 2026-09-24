@@ -57,7 +57,7 @@ function literalSrc(name: string): string {
 }
 
 type Shop = {
-  S: { country: string; countryIso: string; ship: { method: string; carrier: string }; cart: unknown[] };
+  S: { country: string; countryIso: string; ship: { method: string; carrier: string }; cart: unknown[]; acctForm: unknown };
   POINTS: { empty: Record<string, boolean> };
   SHIP_RULES: { carriers: Record<string, Record<string, number>> };
   shipCarrier: () => string;
