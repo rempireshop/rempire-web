@@ -869,7 +869,7 @@
       "risk": "low",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-18T19:30:00.000Z",
+      "markedAt": "2026-09-24T15:02:43.537Z",
       "en": {
         "title": "The blog",
         "steps": [
@@ -5530,20 +5530,21 @@
       "steps": [
         "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», вписать название и тему.",
         "«+ Картинка» — снять фото или выбрать из галереи; «Куда ведёт картинка» — найти и выбрать товар.",
+        "Под фото нажать «Убрать», потом большую кнопку «Добавить фото» и снять или выбрать другое.",
         "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную.",
         "Стрелками ↑↓ поменять два блока местами и посмотреть «Как увидит покупатель» ниже.",
         "Переключить на Eesti: тема, тексты и надпись кнопки; «Сохранить», свой адрес, «Отправить мне тест».",
         "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
       ],
       "expect": [
-        "Фото загружается с процентами и встаёт в письмо — адрес картинки вводить не нужно.",
+        "Фото встаёт в письмо с процентами загрузки; фразы «не настроена» нигде нет.",
+        "Под фото «Заменить» и «Убрать»; «Убрать» оставляет большую «Добавить фото», ссылку — мелко под ней.",
         "«Как увидит покупатель» меняется сразу после правки, ещё до «Сохранить».",
         "Тест пришёл с [test] в теме; каждая картинка и кнопка ведут куда выбрано.",
         "Карточка назвала число подписчиков по языкам; счётчик дошёл до «Отправлено N из N».",
-        "Подписчик с эстонским языком получил эстонскую версию; внизу работает «Отписаться».",
-        "В журнале есть строка «Рассылка «…»: отправлено N, ошибок 0»."
+        "Эстонец получил эстонскую версию с рабочим «Отписаться»; журнал: «отправлено N, ошибок 0»."
       ],
-      "why": "Письмо собирается на телефоне из картинок, как у Aromatic 89. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
+      "why": "Письмо собирается на телефоне из фото, как у Aromatic 89, — адреса картинок Ренат искать не будет. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
       "risk": "high",
       "writes": true,
       "en": {
@@ -5551,23 +5552,24 @@
         "steps": [
           "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», write a name and a subject.",
           "«+ Картинка» — take a photo or pick one from the gallery; «Куда ведёт картинка» — find and pick a product.",
+          "Under the photo press «Убрать», then the big «Добавить фото» button and take or pick another.",
           "Another «+ Картинка» leading to a section, «+ Текст» with a couple of lines, «+ Кнопка» «В магазин» to the home page.",
           "Swap two blocks with the ↑↓ arrows and look at «Как увидит покупатель» below.",
           "Switch to Eesti: the subject, the texts and the button label; «Сохранить», your address, «Отправить мне тест».",
           "Press «Отправить N подписчикам», read the card, «Отправить»."
         ],
         "expect": [
-          "The photo uploads with a percentage and lands in the letter — no picture address needed.",
+          "The photo lands in the letter with an upload percentage; «не настроена» appears nowhere.",
+          "«Заменить» and «Убрать» under the photo; «Убрать» leaves a big «Добавить фото», link below.",
           "«Как увидит покупатель» changes right after each edit, before «Сохранить».",
           "The test arrived with [test] in the subject; every picture and button goes where chosen.",
           "The card named the subscribers per language; the counter reached «Отправлено N из N».",
-          "The Estonian-language subscriber got the Estonian version; «Отписаться» at the bottom works.",
-          "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
+          "The Estonian reader got Estonian with a working «Отписаться»; journal: «отправлено N, ошибок 0»."
         ],
-        "why": "The letter is built on a phone out of pictures, like Aromatic 89's. One letter goes to every subscriber — a mistake goes to hundreds."
+        "why": "The letter is built on a phone out of photos, like Aromatic 89's — Renat will not go hunting for picture addresses. One letter goes to every subscriber — a mistake goes to hundreds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T13:22:36.184Z"
+      "markedAt": "2026-09-24T15:00:29.690Z"
     },
     {
       "id": "mail-daily-limit",
@@ -6984,21 +6986,22 @@
       "title": "Написать и опубликовать статью",
       "steps": [
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
-        "Написать заголовок и пару абзацев, поставить обложку.",
-        "Вставить в текст карточку товара кнопкой «Товар».",
-        "Кнопкой «Картинка» → «Загрузить картинку» вставить в текст фото с телефона.",
+        "Написать заголовок и одну строку текста, поставить обложку.",
+        "Сразу после строки кнопкой «Картинка» → «Загрузить картинку» вставить фото с телефона.",
+        "Дописать абзац и вставить в текст карточку товара кнопкой «Товар».",
+        "Нажать «Сохранить», вернуться в «Блог» и открыть статью снова.",
         "Нажать «Удалить» под обложкой, затем поставить её снова.",
-        "Нажать «Опубликовать» и открыть блог в магазине."
+        "Нажать «Опубликовать» и открыть статью в магазине."
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
         "Фото с телефона встаёт в текст — ссылку на картинку искать не нужно.",
+        "Открытая заново статья — тот же текст с фото, а не HTML-код.",
         "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
         "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
-        "Статья видна в блоге магазина вместе с обложкой.",
-        "Карточка товара в тексте открывает сам товар."
+        "В магазине у статьи обложка и фото в тексте; карточка товара открывает товар."
       ],
-      "why": "Неопубликованная статья не приводит из Google никого.",
+      "why": "Неопубликованная статья не приводит из Google никого, а статья, открывшаяся HTML-кодом, теряет фото и текст.",
       "risk": "low",
       "writes": true,
       "mark": "redo",
@@ -7006,23 +7009,24 @@
         "title": "Writing and publishing an article",
         "steps": [
           "Open «Ещё» → «Блог» and press «+ Статья».",
-          "Write a title and a couple of paragraphs, set a cover.",
-          "Insert a product card into the text with the «Товар» button.",
-          "With «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
+          "Write a title and one line of text, set a cover.",
+          "Right after that line, with «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
+          "Write another paragraph and insert a product card with the «Товар» button.",
+          "Press «Сохранить», go back to «Блог» and open the article again.",
           "Press «Удалить» under the cover, then set it again.",
-          "Press «Опубликовать» and open the blog in the shop."
+          "Press «Опубликовать» and open the article in the shop."
         ],
         "expect": [
           "When a product is inserted the panel says which language it went into.",
           "The phone's photo lands in the text — no picture link to find.",
+          "Reopened, the article is the same text with its photo — not HTML code.",
           "With a cover you see three frames: the blog, the article and social.",
           "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
-          "The post is visible in the shop's blog with its cover.",
-          "The product card in the text opens the product itself."
+          "In the shop: cover and in-text photo shown; the product card opens the product."
         ],
-        "why": "An article that did not publish brings nobody from Google."
+        "why": "An article that did not publish brings nobody from Google, and one that reopens as HTML code loses its photo and its text."
       },
-      "markedAt": "2026-09-23T13:22:36.184Z"
+      "markedAt": "2026-09-24T15:02:43.537Z"
     },
     {
       "id": "blog-cover-frame",
