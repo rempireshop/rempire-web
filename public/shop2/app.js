@@ -40385,6 +40385,64 @@
     }
     return true;
   }
+  /* ---------- …and out through the nav ------------------------------------
+     «←» and the phone's Back ask before an unsaved product or article is
+     thrown away. Every `data-admtab` did not — the phone's bottom bar, the
+     desktop sidebar, the tab strips, the «Ещё» sheet, the assistant's
+     «Открыть …»: one tap on «Заказы» dropped a typed price or a whole article
+     in silence (map of the panel, 23.09.2026, #2). They ask the same
+     question now, at the top of the editor, and the question remembers where
+     the owner was going: the confirm flag holds the destination instead of
+     `true`, so «Выйти без сохранения» goes on there, and «Остаться» — like
+     anything else that clears the flag — forgets it. A second tap on the nav
+     while the question is up goes, as a second «←» or Back does. */
+  function admLeaveAsks(go) {
+    if (S.adminEdit && goodsEditDirty()) {
+      if (S.goodsConfirmBack) return false;
+      S.goodsConfirmBack = go;
+    } else if (S.adminBlogEdit && S.adminTab === "blog") {
+      // the box repaints itself: read the screen before asking about it
+      blogReadForm();
+      if (!blogDirty() || S.adminBlogConfirmBack) return false;
+      S.adminBlogConfirmBack = go;
+    } else return false;
+    window.scrollTo({ top: 0 });   // the question stands above the editor
+    return true;
+  }
+  /** «Выйти без сохранения» after a question the nav raised: on to where it was going. */
+  function admLeaveGo(flag) {
+    if (flag && typeof flag === "object" && flag.tab) admGoTab(flag);
+  }
+  /** One door into every section, still addressed by the key it has always
+      had (ADM_SECTION_OF) — the `data-admtab` handler, once nothing unsaved
+      stands in the way. */
+  function admGoTab(go) {
+    var tab = go.tab;
+    // the product editor closes the way «← Товары» closes it: its drafts go with it
+    if (S.adminEdit) {
+      S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+    }
+    S.goodsConfirmBack = false; S.adminBlogConfirmBack = false;
+    S.adminTab = tab; S.adminOrder = 0; S.adminEdit = "";
+    S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
+    S.admMore = false;
+    /* Every section opens at its own front door: «Настройки» on the index of
+       six, «Письма» on the list of letters, «Клиенты» on the list rather than
+       whichever card was left open last time. */
+    S.admSetPage = ""; S.mailOpen = false; S.admCustOpen = "";
+    // «Каталог» and «Наборы» are the same old tab key with a different shelf
+    if (tab === "goods") S.goodsTab = "goods";
+    // a queue row on «Обзор» carries the filter its section should open on
+    if (go.filter && tab === "orders") S.admOrderFilter = go.filter;
+    if (go.filter && tab === "people") S.admCustTier = go.filter;
+    /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
+       «Скрытые», and the shelf it wants starts at the top of that list. */
+    if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; }
+    // …and a queue row may name the settings page it wants («Заполните IBAN»)
+    if (go.setpage && tab === "settings") S.admSetPage = go.setpage;
+    window.scrollTo({ top: 0 }); render();
+  }
   /** One parked entry while anything is open, none while nothing is. Called
       from every render(), so no opener has to remember to call it. */
   function admSyncHistory() {
@@ -41058,24 +41116,10 @@
        opens Маркетинг on «Письма», and so on (ADM_SECTION_OF). The assistant's
        «Открыть …» buttons and the e2e suite both come through here. */
     if (d.admtab) {
-      S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
-      S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
-      S.admMore = false;
-      /* Every section opens at its own front door: «Настройки» on the index of
-         six, «Письма» on the list of letters, «Клиенты» on the list rather than
-         whichever card was left open last time. */
-      S.admSetPage = ""; S.mailOpen = false; S.admCustOpen = "";
-      // «Каталог» and «Наборы» are the same old tab key with a different shelf
-      if (d.admtab === "goods") S.goodsTab = "goods";
-      // a queue row on «Обзор» carries the filter its section should open on
-      if (d.admfilter && d.admtab === "orders") S.admOrderFilter = d.admfilter;
-      if (d.admfilter && d.admtab === "people") S.admCustTier = d.admfilter;
-      /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
-         «Скрытые», and the shelf it wants starts at the top of that list. */
-      if (d.admfilter && d.admtab === "goods") { S.goodsFilter = d.admfilter; S.goodsShown = 40; }
-      // …and a queue row may name the settings page it wants («Заполните IBAN»)
-      if (d.admsetpage && d.admtab === "settings") S.admSetPage = d.admsetpage;
-      window.scrollTo({ top: 0 }); render(); return;
+      var goTo = { tab: d.admtab, filter: d.admfilter || "", setpage: d.admsetpage || "" };
+      // an unsaved product or article asks first, as «←» and Back do (admLeaveAsks)
+      if (admLeaveAsks(goTo)) { render(); return; }
+      admGoTab(goTo); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
     if (d.admfilter) { S.admOrderFilter = d.admfilter; S.ordersShown = ORDERS_PAGE; render(); return; }
@@ -41373,6 +41417,10 @@
     if (d.admclose !== undefined || d.admbackyes !== undefined) {
       if (d.admbackyes === undefined && goodsEditDirty() && !S.goodsConfirmBack) {
         S.goodsConfirmBack = true; render(); return;
+      }
+      // the question came from the nav: «Выйти без сохранения» goes where it was going
+      if (d.admbackyes !== undefined && S.goodsConfirmBack && S.goodsConfirmBack.tab) {
+        admGoTab(S.goodsConfirmBack); return;
       }
       var closeId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
@@ -42986,7 +43034,11 @@
       if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; render(); return; }
       blogCloseEditor(); return;
     }
-    if (d.admblogbackyes !== undefined) { blogCloseEditor(); return; }
+    if (d.admblogbackyes !== undefined) {
+      // a question the nav raised carries where it was going (admLeaveAsks)
+      var blogTo = S.adminBlogConfirmBack;
+      blogCloseEditor(); admLeaveGo(blogTo); return;
+    }
     if (d.admblogbackno !== undefined) { S.adminBlogConfirmBack = false; render(); return; }
     if (d.admbloglang) {
       /* Another language is another box: the remembered caret belongs to the

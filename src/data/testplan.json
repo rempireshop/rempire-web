@@ -6594,14 +6594,16 @@
         "Нажать «Сохранить».",
         "Открыть товар в магазине и посмотреть цену.",
         "Положить его в корзину.",
-        "Поменять цену и нажать «← Товары», не сохраняя."
+        "Поменять цену и нажать «← Товары», не сохраняя.",
+        "Снова поменять цену и нажать «Заказы» в меню внизу (на компьютере — слева)."
       ],
       "expect": [
         "В магазине у товара стоит новая цена.",
         "В корзине та же самая цена.",
         "В итоге заказа та же самая сумма.",
-        "Панель спросит, выходить ли без сохранения, а не выйдет молча.",
-        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки."
+        "И на «←», и на кнопке раздела панель спросит, выходить ли без сохранения.",
+        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки.",
+        "«Выйти без сохранения» после кнопки раздела открывает этот раздел."
       ],
       "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
       "risk": "high",
@@ -6614,19 +6616,21 @@
           "Press «Сохранить».",
           "Open the product in the shop and look at the price.",
           "Put it in the cart.",
-          "Change the price and press «← Товары» without saving."
+          "Change the price and press «← Товары» without saving.",
+          "Change the price again and press «Заказы» in the bottom bar (on a computer, in the sidebar)."
         ],
         "expect": [
           "The shop shows the new price on the product.",
           "The cart shows the same price.",
           "The order total uses the same price.",
-          "The panel asks whether to leave without saving instead of just leaving.",
-          "The unsaved-work question stands out: colour, a ground and two different buttons."
+          "Both on «←» and on a section button the panel asks whether to leave unsaved.",
+          "The unsaved-work question stands out: colour, a ground and two different buttons.",
+          "«Выйти без сохранения» after a section button opens that section."
         ],
         "why": "A price that differs in the cart costs you money or a complaint."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-24T17:54:34.627Z"
     },
     {
       "id": "goods-sizes",
