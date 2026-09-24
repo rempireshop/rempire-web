@@ -28262,6 +28262,30 @@
     if (page === "home") { d.announcement = conf.announcement; return; }
     Object.keys(conf).forEach(function (k) { if (k !== "announcement") d[k] = conf[k]; });
   }
+  /* …and the two buttons that WRITE keep to the same split. «Сбросить к
+     стандартному» under «Верхняя полоска» used to diff the whole document
+     against the defaults — resetting the strip put back the default company
+     name, an empty IBAN, the default phone and socials, and wiped the letter
+     footer — and one «Сохранить» on either page saved what the other page's
+     form held too (map of the panel, 23.09.2026, #15). Off these two pages
+     (nothing draws the card there) the whole document counts, as before. */
+  function contentOnPage(key, page) {
+    if (page !== "home" && page !== "company") return true;
+    return page === "home" ? key === "announcement" : key !== "announcement";
+  }
+  /** A diff cut down to the part one page may write. */
+  function contentPart(patch, page) {
+    var out = {};
+    Object.keys(patch || {}).forEach(function (k) { if (contentOnPage(k, page)) out[k] = patch[k]; });
+    return out;
+  }
+  /** After one page's save or reset: what is still typed on the other page
+      is carried into the fresh draft instead of going with the old one. */
+  function contentKeepOther(page, old) {
+    if (!old || typeof old !== "object") return;
+    var d = contentDraft();
+    Object.keys(old).forEach(function (k) { if (!contentOnPage(k, page)) d[k] = old[k]; });
+  }
   function cInput(path, label, ph, max, hint) {
     return '<label class="adm-field">' + label +
       '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
@@ -37839,8 +37863,11 @@
        cannot say what a field looked like before it existed. */
     else if (a.type === "set_content") {
       entry.prev = { type: "set_content", whole: DEMO.content };
+      var cWas = S.contentDraft;
       DEMO.content = contentApply(contentConf(), a.value);
       S.contentDraft = null;
+      // one settings page's save or reset: the other page's typing stays typed
+      if (a.page) contentKeepOther(a.page, cWas);
     }
     /* wholesale/loyalty: settings.pricing has no demo layer either (same
        reasoning as delivery prices above) — S.pricingLoaded IS the last
@@ -42301,10 +42328,11 @@
     if (d.contentsave !== undefined) {
       // never the defaults over the real document — see contentLoaded()
       if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      var cPatch = contentDiff(contentConf(), contentDraft());
+      // this page's part only — the other page's typing waits for its own bar (contentPart)
+      var cPatch = contentPart(contentDiff(contentConf(), contentDraft()), S.admSetPage || "");
       if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
       pendingAction = {
-        type: "set_content", value: cPatch, overlay: true,
+        type: "set_content", value: cPatch, page: S.admSetPage || "", overlay: true,
         title: "Изменить данные магазина?", detail: contentConfirmDetail(cPatch)
       };
       render(); refocus("[data-admapply]"); return;
@@ -42313,10 +42341,11 @@
       // same gate: «вернуть стандартные» must mean «back to the defaults from
       // what is really stored», not «write the defaults over the unknown»
       if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      var cBack = contentDiff(contentConf(), CONTENT_DEFAULT);
+      // …and only what is on this page: the strip's reset is not the company's
+      var cBack = contentPart(contentDiff(contentConf(), CONTENT_DEFAULT), S.admSetPage || "");
       if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
       pendingAction = {
-        type: "set_content", value: cBack, overlay: true,
+        type: "set_content", value: cBack, page: S.admSetPage || "", overlay: true,
         title: "Вернуть стандартные данные?", detail: contentConfirmDetail(cBack)
       };
       render(); refocus("[data-admapply]"); return;

@@ -8337,13 +8337,17 @@
       "steps": [
         "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
         "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин."
+        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин.",
+        "На «О компании» поменять телефон, не сохраняя; на «Главной странице» сохранить полоску.",
+        "На «Главной странице» нажать «Сбросить к стандартному» у полоски."
       ],
       "expect": [
         "Пока вы печатаете, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — название карточки).",
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Узкая полоска с вашим текстом стоит над магазином.",
-        "Она есть и на эстонском, и на английском."
+        "Она есть и на эстонском, и на английском.",
+        "Сохранение полоски не сохраняет телефон; он так и ждёт своего «Сохранить».",
+        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются."
       ],
       "why": "Без часов работы вам будут звонить и спрашивать, открыты ли вы.",
       "risk": "low",
@@ -8353,16 +8357,22 @@
         "steps": [
           "«Настройки» → «О компании»: fill in the opening hours and social links.",
           "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop."
+          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop.",
+          "On «О компании» change the phone without saving; on «Главная страница» save the strip.",
+          "On «Главная страница» press «Сбросить к стандартному» under the strip."
         ],
         "expect": [
           "While you type, «Не сохранено» stands next to «Сохранить» (on a computer the card name).",
           "The opening hours show on «Контакты» and at the foot of every page.",
           "The thin strip with your text sits above the shop.",
-          "It is there in Estonian and in English too."
+          "It is there in Estonian and in English too.",
+          "Saving the strip does not save the phone; it still waits for its own «Сохранить».",
+          "Resetting the strip changes the strip only; details and IBAN, hours and socials stay."
         ],
         "why": "With no opening hours, people phone you to ask if you're open."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:37:33.147Z"
     },
     {
       "id": "settings-delivered-auto",
