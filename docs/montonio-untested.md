@@ -10,6 +10,12 @@ Success Manager (e-mail of 22.09.2026) and the published price list at
 closed, changed or opened says so on its own line — nothing here is inferred
 from them.
 
+**Updated 24.09.2026** against Montonio support's answer of that day (volumetric
+weight, webhook events and retries, PATCH for a refused shipment, Nova Post
+returns, international pricing per carrier). Quoted and matched to our
+questions in `docs/montonio-questions.md` § «Answers, 24.09.2026»; the rows
+it changed here are S5, S8, S9, S14 and D8.
+
 ---
 
 ## Why this document exists
@@ -71,11 +77,11 @@ not from our own output.
 | S2 | **Phone-number validation** | Sandbox guide: «The POST /shipments endpoint skips phone number and address validation.» Every wrong `phoneCountryCode` we ever sent passed. | `tests/shipping-montonio.test.ts` (`splitPhone` across all 32 destinations, fixed 18.09.2026) + S1's refusal path |
 | S3 | **Address validation** | Same sentence | Same |
 | S4 | **A real label PDF** | Sandbox guide: «The system generates dummy labels.» `normaliseLabelPdf()` has never seen a real Montonio label. | `tests/shipping-label-pdf.test.ts` rebuilds the same nesting with pdf-lib. An unrecognised file is served unchanged, so the failure is soft |
-| S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one |
+| S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one. **24.09.2026:** a lost event is no longer lost for good — Montonio retries for 1.5–2 days, and on their advice the daily cron re-asks `GET /shipments/{id}` for every shipment quiet for 12 hours (`syncStaleShipments`, `tests/shipment-poll.test.ts`) |
 | S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | Nothing. We never read the flag and never send dimensions — see Part 5, D6 |
 | ~~S7~~ | ~~**A SmartPosti drop-off code** (`dropOffPin`)~~ · **not applicable, 22.09.2026** | Montonio's written answer of 22.09.2026: a drop-off / door code works **only on the merchant's own direct contract with the carrier**, and only with that carrier's help; it is aimed at marketplaces. A normal merchant simply **scans the label at the parcel machine**. **Omniva has no such option at all.** So this is not «untested» — there is nothing here for a shop like ours to test | Nothing, and nothing wanted. See Part 5, D7 |
-| S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | Not implemented at all | Nothing. The refusal message tells the owner to pass the correction to Dim rather than to press again — see Part 5, D8 |
-| S9 | **The parcel-events webhook being registered** | It is registered through the API only — Montonio's Partner System has no screen for it (their webhooks guide, read 23.09.2026); `tools/montonio-webhook.mjs register` does it. Nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it |
+| S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | **Implemented 24.09.2026**, but a refusal cannot happen in sandbox (S1), so the PATCH has never met a real carrier | Montonio's answer of 24.09.2026 (below) made it the design: «Создать этикетку» on a refused parcel PATCHes the SAME shipment, as often as pressed — `tests/shipment-repair.test.ts`; live check `live-label-repair` in /test. Part 5, D8 |
+| S9 | **The parcel-events webhook being registered** | It is registered through the API only — Montonio's Partner System has no screen for it (their webhooks guide, read 23.09.2026); `tools/montonio-webhook.mjs register` does it. Nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it. Registered 23.09.2026 with three events; **24.09.2026: must be registered again with four** (`shipment.labelsCreated` added — docs/go-live.md) |
 | S10 | **Which carriers this store is actually contracted for** | Sandbox contracts are not live contracts | `GET /api/admin/montonio/` reads `GET /carriers` (`hasMontonioContract`, `contracts[]`) |
 | ~~S11~~ | ~~**A locker outside the Baltics being priced correctly**~~ · **money risk closed 22.09.2026** | The worry was that our tariff mirror asks one subtype-blind `pickupPoint` price where Montonio has separate `parcelMachine` / `parcelShop` / `postOffice` rates, so a locker could be sold under its cost. Montonio's written answer of 22.09.2026: «Pakiautomaat ja pickupPoint on sama hinnaga aga erinevad väljastuspunktid» — **the same price, different delivery points.** A subtype-blind row therefore cannot underprice a locker, and the margin risk in `docs/montonio-shipping-audit.md` § 3.1 is gone | Nothing more needed for the money. **The other half of § 3.1 still stands**: `contract-prices` is an undocumented, unauthenticated endpoint that can change or vanish without notice, and rebuilding the mirror with keys remains the documented route |
 | S12 | **Ordering a courier pickup** | Montonio's written answer of 22.09.2026: **a pickup cannot be ordered through the API at all.** Their advice is to configure a **recurring pickup** in the Montonio system | Nothing in code, and nothing wanted in code: it is an owner/ops step — Part 2 |
@@ -108,17 +114,23 @@ to send something back does not find it out for us.
   `public/shop2/app.js`, `tests/returns-novapost.test.ts`). When Montonio
   announces Nova Post returns, those three places change together.
 
-**Asked on 22.09.2026 and still unanswered.** Montonio's reply left four
-questions open. They stay visible here until there is an answer to strike them
-with:
+**Asked on 22.09.2026.** Montonio's reply left four questions open; the
+answer of 24.09.2026 closed three of them (the full text and what the code
+did with it: `docs/montonio-questions.md`, «Answers, 24.09.2026»):
 
-1. **Dimension and weight limits per country and per method** — and whether
-   `POST /v2/shipping-methods/filter-by-parcels` is the right way to ask for
-   them (S6, and Part 5 D6).
-2. **Which webhooks actually fire, and who registers them** (S9).
-3. Whether **`PATCH /v2/shipments/{id}`** is the documented repair for a
-   `registrationFailed` shipment (S8, and Part 5 D8).
-4. Whether a **return label** is reachable through the API at all (S14).
+1. ~~**Dimension and weight limits per country and per method**~~ — withdrawn
+   by us on 22.09 (we take them from Montonio's calculator); and **pricing is
+   by REAL weight** for now (24.09), the volumetric divisor 4000 exists but is
+   not applied to the price (`MONTONIO_PRICES_VOLUMETRIC` in
+   `src/lib/shipping/parcel.ts`).
+2. ~~**Which webhooks actually fire, and who registers them**~~ — **answered
+   24.09**: the merchant registers them with `POST /webhooks`; six events;
+   15 retries over 1.5–2 days; poll `GET` as a backup (S5, S9).
+3. ~~Whether **`PATCH /v2/shipments/{id}`** is the documented repair~~ —
+   **answered 24.09: yes**, the recommended way, repeatable (S8).
+4. Whether a **return label** is reachable through the API at all (S14) —
+   **still open**: Nova Post returns are not supported yet (24.09); the DPD
+   return label answer is promised separately and has not come.
 
 ### Products that cannot be activated in test mode at all
 
@@ -261,8 +273,11 @@ sandbox could not tell us.
     off. If it is wrong, the A6 option (`?size=A6`) is the fallback.
   - If it is refused: the panel now says **why**, in your language, and the
     order journal has a `shipment.registration_failed` row. The parcel exists
-    at Montonio but is not registered — **do not press the button again**, it
-    will repeat the same refusal by design.
+    at Montonio but is not registered. **Since 24.09.2026 pressing
+    «Создать этикетку» again is the repair** — it sends the same shipment
+    again (`PATCH`, Montonio's recommended way), never a second one. Refused
+    again usually means a wrong phone or address: have it corrected, press
+    again.
 - [ ] **Do not look for a drop-off code on the A4 slip.** Blank is correct.
       Montonio, in writing on 22.09.2026: a door code needs the merchant's own
       direct contract with the carrier and is aimed at marketplaces, and Omniva
@@ -271,7 +286,9 @@ sandbox could not tell us.
 - [ ] Hand the parcel over and watch the order: within a day or two the
       `shipment.statusUpdated` webhook should move it to «Доставлен» by itself.
       If it never does, S9 (the webhook) or S5 (an unknown status word) is why;
-      `settings.shipping_statuses` will show which.
+      `settings.shipping_statuses` will show which. The nightly re-ask
+      (24.09.2026) closes it a day later even if the webhook is lost — the
+      Vercel log line «shipments: checked …» says whether it looked.
 
 ### 3.4 The refund — the whole point of this document
 
@@ -368,7 +385,7 @@ from a webhook, or what the shop charges.
 | D5 | Enforce Montonio's own 0.05 € refund floor in the panel | payments audit § C3 |
 | D6 | Read `constraints.parcelDimensionsRequired` and declare a carton (S6) | shipping audit § 1.6 |
 | ~~D7~~ | ~~`lockerSize`, or `defaultLockerSize` on the contract (S7)~~ · **closed 22.09.2026, not applicable.** Montonio's written answer: a drop-off code works only on the merchant's own direct contract with the carrier, with that carrier's help, and is aimed at marketplaces; Omniva has no such option at all. A normal merchant scans the label at the parcel machine. There is nothing left to decide | shipping audit § 4 |
-| D8 | Implement `PATCH /shipments/{id}` so a refused parcel can be repaired from the panel (S8) | shipping audit § 1.5 |
+| ~~D8~~ | ~~Implement `PATCH /shipments/{id}` so a refused parcel can be repaired from the panel (S8)~~ · **done 24.09.2026**, on Montonio's written «that's exactly the right and recommended approach». «Создать этикетку» on a refused parcel asks `GET` first, then PATCHes the same shipment; repeatable — `src/app/api/admin/shipments/route.ts`, `tests/shipment-repair.test.ts` | shipping audit § 1.5 |
 | ~~D9~~ | ~~A pending refund still sends the customer «Деньги возвращены»~~ · **done 19.09.2026** (b361c71). A refund Montonio has only accepted now sends its own letter, «Возврат отправлен», and «Деньги возвращены» waits for the webhook | this branch, `src/app/api/admin/orders/[id]/refund/route.ts` |
 | ~~D10~~ | ~~Drop non-EUR banks from the checkout list~~ · **done 23.09.2026**. It stopped being latent on 22.09, when the checkout began shipping to Poland and offering the delivery country's banks: `mapBanks()` now skips a bank or a country group whose `supportedCurrencies` lacks EUR — `tests/montonio-docs-payloads.test.ts`. First seen for real in the /test check `live-banks-country` | payments audit § C2 |
 
