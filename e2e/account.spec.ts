@@ -167,7 +167,9 @@ test.describe("account — «Хочу вернуть заказ»", () => {
     // instead of «В пути», among all the other parcels
     const queueRow = page.locator('.adm-row--click[data-admfilter="returns"]');
     await expect(queueRow, "«Обзор» never listed the return request").toBeVisible();
-    await expect(queueRow).toContainText("заявка на возврат");
+    // any count: every earlier run leaves its own open request in the e2e
+    // database, and the row says «3 заявки», «5 заявок» as they pile up
+    await expect(queueRow).toContainText(/заявк[аи] на возврат|заявок на возврат/);
     await queueRow.click();
 
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
