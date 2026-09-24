@@ -22,10 +22,16 @@ test.use({ extraHTTPHeaders: ipHeaders(81) });
  *  «Сообщить о наличии»). */
 const SLUGS = ["uhod-za-borodoy-zimoy", "kak-vybrat-shampun-po-tipu-kozhi-golovy", "pasta-vosk-ili-glina"];
 
-async function cursorOf(page: Page, selector: string): Promise<string> {
+/** The pointer, read off whatever node is on screen at the moment of reading.
+ *  It used to be `evaluate(getComputedStyle)` on a node found a step earlier:
+ *  the listing's tiles are in before /api/blog/ answers, that answer repaints
+ *  <main> (the same swap crumbEdges() below waits out), and a node read across
+ *  it is a detached one — cursor "" (e2e run of 24.09.2026, 1 in 3 on the
+ *  phone). toHaveCSS finds the node and reads it in one go, and retries. */
+async function expectPointer(page: Page, selector: string): Promise<void> {
   const el = page.locator(selector).first();
   await expect(el).toBeVisible();
-  return el.evaluate((node) => getComputedStyle(node).cursor);
+  await expect(el).toHaveCSS("cursor", "pointer");
 }
 
 /** The breadcrumbs' left edge and the left edge of the column they must line
@@ -69,16 +75,16 @@ test.describe("blog — tiles read as links", () => {
     await waitForScreen(page, "blog");
     // a real link (Ctrl-click opens a tab, the keyboard reaches it) — and the pointer says so
     await expect(page.locator(".blog__tile").first()).toHaveAttribute("href", /\/shop2\/blog\/[^/]+\/$/);
-    expect(await cursorOf(page, ".blog__tile")).toBe("pointer");
+    await expectPointer(page, ".blog__tile");
 
     await page.locator(`.blog__tile[data-go-blog="${SLUGS[0]}"]`).click();
     await waitForScreen(page, "blogpost");
     // «Другие статьи» is the last thing to land (the list after the post) —
     // once it is there nothing repaints under the measurements below
     await expect(page.locator(".blog__shelf .blog__tile").first()).toBeVisible();
-    expect(await cursorOf(page, ".blog__body .blog__prod")).toBe("pointer");
+    await expectPointer(page, ".blog__body .blog__prod");
     // «Другие статьи» — the same tiles, the same pointer
-    expect(await cursorOf(page, ".blog__shelf .blog__tile")).toBe("pointer");
+    await expectPointer(page, ".blog__shelf .blog__tile");
   });
 });
 

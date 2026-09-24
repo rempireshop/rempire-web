@@ -68,7 +68,13 @@ test.describe("the assistant's «скидка для салонов», asked fro
       const answer = page.locator("[data-aians]");
       await expect(answer).toContainText("Ставлю оптовую скидку 25 %");
 
-      const put = page.waitForRequest((r) => r.url().includes("/api/admin/settings/") && r.method() === "PUT");
+      /* The PUT waits on a GET first — «Применить» reads the saved numbers
+         before merging (that is the fix this file holds), and the assistant
+         has just asked /api/admin/upload/ whether pictures can go up
+         (ensureMedia). Under `next dev` each is a first-hit compile, the
+         settings GET behind it took 11.8 s in the run of 24.09.2026 and the
+         PUT left 20 ms after the default 10 s. Room for that, not a retry. */
+      const put = page.waitForRequest((r) => r.url().includes("/api/admin/settings/") && r.method() === "PUT", { timeout: 30_000 });
       await answer.locator(".adm-propose [data-admapply]").click();
       const sent = JSON.parse((await put).postData() || "{}") as { pricing?: typeof SAVED };
 
@@ -82,6 +88,11 @@ test.describe("the assistant's «скидка для салонов», asked fro
       const now = await (await page.request.get("/api/admin/settings/")).json();
       expect(now.settings.pricing).toMatchObject({ ...SAVED, proDiscountPct: 25 });
     } finally {
+      /* The panel first: a PUT it has not sent yet must not land after the
+         restore below. On 24.09.2026 it did — SAVED with 25 % stayed in the
+         shop, and five tests in two later files (admin-lang-r20,
+         admin-sections) failed on numbers this test had left behind. */
+      await page.close();
       await page.request.put("/api/admin/settings/", { data: { pricing: before } });
     }
   });

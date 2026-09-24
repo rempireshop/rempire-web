@@ -126,6 +126,12 @@ test.describe("admin — наборы", () => {
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(180) });
     test("builds a set from two products and the shop sells it at that price", async ({ page, browser }) => {
+      /* The panel, then a second browser through the whole checkout: 13 s
+         alone, but in a full run `next dev` compiles routes on first hit and
+         the checkout shell alone took 6 s — the default 30 s ran out in the
+         `finally` that closes the shop (24.09.2026), and this suite is serial,
+         so the six tests after it never ran. */
+      test.setTimeout(60_000);
       await loginAsAdmin(page);
       await openSets(page);
 

@@ -26285,9 +26285,13 @@
          «Публикация» card) — the same ring.
      The render writes the class into the markup (admDirtyCls) and the paints
      that run under a caret toggle it in place (admDirtyMark), from the same
-     dirty flag in both cases, so the two can never disagree. */
+     dirty flag in both cases, so the two can never disagree.
+     `aria-live`, not `role="status"`: that role is the toast's, and the one
+     hook everything listening for a toast reads (paintToast). With it on this
+     note too, a notice standing over an unsaved form answered for the toast
+     under it — «Черновик сохранён» read back as «Есть несохранённые…». */
   function admDirtyNoteHTML(attr, dirty) {
-    return '<p class="adm-dirty" ' + attr + ' role="status"' + (dirty ? "" : " hidden") + ">" +
+    return '<p class="adm-dirty" ' + attr + ' aria-live="polite"' + (dirty ? "" : " hidden") + ">" +
       "Есть несохранённые изменения — нажмите «Сохранить».</p>";
   }
   function admDirtyCls(dirty) { return dirty ? " is-dirty" : ""; }

@@ -74,7 +74,9 @@ test.describe("admin — the row under the pointer", () => {
     await expect.poll(() => bg(rows.nth(1))).toBe(PAPER);
     await rows.nth(1).locator("[data-admorder]").focus();
     await expect.poll(() => bg(rows.nth(1)), { message: "focus does not light the row" }).toBe(TINT);
-    expect(await barOpacity(rows.nth(1)), "focus draws no ink bar").toBe(1);
+    // polled like the hover's: the bar fades in with the tint (0.9986 read
+    // mid-transition on 24.09.2026)
+    await expect.poll(() => barOpacity(rows.nth(1)), { message: "focus draws no ink bar" }).toBe(1);
     expect(await bg(rows.nth(0)), "the other row lit up on focus").toBe(PAPER);
   });
 
