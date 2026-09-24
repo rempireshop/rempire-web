@@ -4024,12 +4024,15 @@
         "Нажать «Написать клиенту».",
         "В поле сверху вставить выдуманный вопрос клиента.",
         "Поправить черновик ответа.",
-        "Нажать «Отправить» и подтвердить в окошке."
+        "Нажать «Отправить» и подтвердить в окошке.",
+        "Вернуться к списку, снова открыть заказ и нажать «Написать клиенту»."
       ],
       "expect": [
         "Перед отправкой магазин показывает адрес покупателя и текст письма.",
         "Там же предупреждение: отправленное письмо назад не вернуть.",
-        "После отправки переписка осталась в карточке заказа.",
+        "После отправки в карточке блок «Переписка»: вопрос клиента и ваше письмо.",
+        "Поле для вопроса клиента после отправки пустое.",
+        "После нового открытия «Переписка» на месте.",
         "Письмо пришло на почту покупателя."
       ],
       "why": "Письмо, ушедшее не туда или не с тем текстом, назад не забрать.",
@@ -4042,16 +4045,21 @@
           "Press «Написать клиенту» (write to the customer).",
           "Paste a made-up customer question into the top field.",
           "Edit the draft reply.",
-          "Press «Отправить» and confirm in the box."
+          "Press «Отправить» and confirm in the box.",
+          "Go back to the list, open the order again and press «Написать клиенту»."
         ],
         "expect": [
           "Before sending, the shop shows the address and the text.",
           "It warns that a sent letter cannot be taken back.",
-          "After sending, the exchange stays in the order card.",
+          "After sending the card shows «Переписка»: the customer's question and your letter.",
+          "The box for the customer's question is empty after sending.",
+          "Opened again, «Переписка» is still there.",
           "The letter arrives in the buyer's mailbox."
         ],
         "why": "A letter sent to the wrong person cannot be taken back."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:31:40.229Z"
     },
     {
       "id": "order-invoice-card",

@@ -2147,6 +2147,7 @@
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
       "Черновик подготовил помощник": "Mustandi kirjutas abiline",
+      "Переписка": "Kirjavahetus", "Клиент написал": "Klient kirjutas", "Вы написали": "Teie kirjutasite",
       "+ Набор": "+ Komplekt",
       "+ Товар": "+ Toode",
       "Приёмка": "Vastuvõtt",
@@ -5169,6 +5170,7 @@
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
       "Черновик подготовил помощник": "The assistant wrote this draft",
+      "Переписка": "Letters so far", "Клиент написал": "The customer wrote", "Вы написали": "You wrote",
       "+ Набор": "+ Set",
       "+ Товар": "+ Product",
       "Приёмка": "Goods in",
@@ -21006,12 +21008,38 @@
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
   }
+  /** The letters already exchanged on this order, oldest first, so the newest
+      sits right above the box the next one is typed into. S.orderMsgs is the
+      thread GET …/messages/ fetched when the card opened, and the whole thread
+      again in the answer of every send — it was fetched and never drawn, so
+      after «Отправить» the card showed an empty box and no trace of the letter
+      (/test «order-message»; map defect 5, 24.09.2026). Each message names
+      the order it belongs to, which is what is matched: a card opened by its
+      number and one opened by its id ask the same question.
+      The box is on the card from the first paint, hidden while empty: the
+      panel is patched node by node in order (admMorphChildren), and a block
+      that appeared in front of the two text boxes when the thread landed
+      would hand them to other nodes and throw away what was typed in them. */
+  function admOrderThreadHTML(o) {
+    if (!o) return "";
+    var list = (S.orderMsgs || []).filter(function (m) { return m && String(m.orderId) === String(o.id); });
+    return '<div data-ordermsgs' + (list.length ? "" : " hidden") + ">" + (list.length
+      ? '<div class="adm-sec__t">Переписка</div>' +
+        '<div class="adm-list">' + list.map(function (m) {
+          return '<div class="adm-row adm-row--stack">' +
+            '<span class="adm-row__sub"><span>' + (m.direction === "in" ? "Клиент написал" : "Вы написали") + "</span> · " +
+              "<span>" + esc(flowRunWhen(m.createdAt)) + "</span></span>" +
+            '<span class="adm-revtext" style="white-space:pre-line">' + esc(m.body) + "</span></div>";
+        }).join("") + "</div>"
+      : "") + "</div>";
+  }
   /** «Написать клиенту» — the inline card with the assistant's draft in it. */
   function admOrderMsgHTML(v) {
     var o = v.srv;
     return '<div class="adm-card">' +
       '<div class="adm-card__head"><div class="adm-sec__t">Сообщение клиенту</div>' +
         '<div class="adm-hint">' + esc((o && o.email) || "") + "</div></div>" +
+      admOrderThreadHTML(o) +
       (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
         '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' : "") +
       '<textarea class="adm-input" rows="4" data-orderreplydraft aria-label="Текст письма клиенту">' +
@@ -36693,6 +36721,10 @@
       if (r.status === 200 && r.body.ok) {
         S.orderReplyDraft = "";
         S.orderMsgs = r.body.messages || null; S.orderMsgsFor = pa.id;
+        /* the customer's words are in the thread above now (admOrderThreadHTML);
+           left in their box, the next «Отправить» would file them a second time */
+        var askedEl = document.querySelector("[data-ordercustmsg]");
+        if (askedEl) askedEl.value = "";
         journalNote("Письмо клиенту · заказ " + pa.number);
         toast("Письмо отправлено ✓");
       } else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
