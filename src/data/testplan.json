@@ -6833,11 +6833,13 @@
       "steps": [
         "Вставить ссылку на видео с YouTube на вкладке «Фото и видео».",
         "Сохранить и открыть товар в магазине.",
-        "Нажать на видео."
+        "Нажать на видео.",
+        "В редакторе нажать «Загрузить» и выбрать ролик больше 4 МБ."
       ],
       "expect": [
         "Видео видно на странице товара.",
-        "По нажатию оно начинает играть."
+        "По нажатию оно начинает играть.",
+        "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -6847,14 +6849,18 @@
         "steps": [
           "In the editor, on the «Фото и видео» tab, paste a link to a YouTube video.",
           "Save and open the product in the shop.",
-          "Press the video."
+          "Press the video.",
+          "In the editor press «Загрузить» and pick a clip over 4 MB."
         ],
         "expect": [
           "The video is there on the product page.",
-          "Pressing it starts the video playing."
+          "Pressing it starts the video playing.",
+          "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason."
         ],
         "why": "A styling video sells a wax better than any description."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:33:35.367Z"
     },
     {
       "id": "goods-new",

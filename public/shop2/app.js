@@ -966,8 +966,8 @@
         "MP4 või MOV, kuni 60 MB. Fail läheb sinu enda hoidlasse — võõrastele saitidele ei lähe midagi.",
       "Загрузка видео пока не настроена — нужно подключить хранилище.":
         "Video üleslaadimine pole veel seadistatud — tuleb hoidla ühendada.",
-      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
-        "Fail on suurem kui 60 MB — tee lühem klipp või pakenda see kokku.",
+      "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.":
+        "Klipp on suurem kui 4 MB — server rohkem vastu ei võta. Tee lühem klipp või pakenda see kokku.",
       "Ролик слишком большой для сервера — снимите короче или сожмите его.":
         "Klipp on serveri jaoks liiga suur — tee lühem või pakenda see kokku.",
       "Не удалось загрузить видео — попробуйте ещё раз.":
@@ -2315,7 +2315,7 @@
       "Загрузить": "Laadi üles",
       "Ссылка на reel или пост": "Reeli või postituse link",
       "Ссылка на видео": "Video link",
-      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Vali telefonist video · MP4 või MOV kuni 60 MB",
+      "Выбрать видео на телефоне · MP4 или MOV до 4 МБ": "Vali telefonist video · MP4 või MOV kuni 4 MB",
       "Убрать видео": "Eemalda video",
       "Пусто — блока с видео на странице товара нет.": "Tühi — tootelehel videoplokki ei ole.",
       "Язык описания": "Kirjelduse keel",
@@ -4014,8 +4014,8 @@
         "MP4 or MOV, up to 60 MB. The file goes into your own storage — nothing is sent to anyone else’s site.",
       "Загрузка видео пока не настроена — нужно подключить хранилище.":
         "Video upload is not set up yet — the storage has to be connected.",
-      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
-        "The file is over 60 MB — record a shorter clip or compress it.",
+      "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.":
+        "The clip is over 4 MB — the server takes nothing bigger. Record a shorter one or compress it.",
       "Ролик слишком большой для сервера — снимите короче или сожмите его.":
         "The clip is too big for the server — record a shorter one or compress it.",
       "Не удалось загрузить видео — попробуйте ещё раз.":
@@ -5337,7 +5337,7 @@
       "Загрузить": "Upload",
       "Ссылка на reel или пост": "Link to a reel or a post",
       "Ссылка на видео": "Video link",
-      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Pick a video on the phone · MP4 or MOV up to 60 MB",
+      "Выбрать видео на телефоне · MP4 или MOV до 4 МБ": "Pick a video on the phone · MP4 or MOV up to 4 MB",
       "Убрать видео": "Remove the video",
       "Пусто — блока с видео на странице товара нет.": "Empty — there is no video block on the product page.",
       "Язык описания": "Description language",
@@ -31464,8 +31464,17 @@
      failed. `payload_too_large` is the common one: the platform refuses a
      body over its own cap (4,5 МБ on a Vercel function, docs/HOSTING.md § 4)
      before any code of ours runs, and answers 413 with no JSON in it. */
+  /* …and that cap, not the route's 60 MB (src/lib/video.ts), is the one a
+     clip meets on this host: one request, one body, 4.5 MB. The button used
+     to promise «до 60 МБ», and a 20 MB clip travelled over mobile data for
+     as long as it took to come back as a bare 413 (map of the panel,
+     23.09.2026, #16). Going around the cap would take a presigned PUT
+     straight into the bucket and a CORS rule on it — until then the panel
+     says the real number and refuses a bigger file before a byte is sent.
+     4 MB, not 4.5: the form around the file travels in the same body. */
+  var VIDEO_SEND_MAX = 4 * 1024 * 1024;
   var VIDEO_ERR = {
-    too_large: "Файл больше 60 МБ — снимите ролик короче или сожмите его.",
+    too_large: "Ролик больше 4 МБ — сервер больше не принимает. Снимите короче или сожмите его.",
     payload_too_large: "Ролик слишком большой для сервера — снимите короче или сожмите его.",
     upload_failed: "Не удалось загрузить видео — попробуйте ещё раз.",
     bad_video_type: "Такой файл не подходит: нужен MP4 или MOV.",
@@ -31495,6 +31504,8 @@
   }
   function videoUpload(files, p) {
     if (!files || !files.length || !p) return;
+    // over the platform's cap — refused here, before it travels (VIDEO_SEND_MAX)
+    if (files[0].size > VIDEO_SEND_MAX) { vidFail(new Error("too_large")); return; }
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
     uploadVideo(files[0], p.id).then(function (r) {
       UP.busy = 0; UP.total = 0;
@@ -32293,7 +32304,7 @@
       (vk === "up"
         ? '<button class="adm-btn adm-btn--dash adm-btn--tall" data-vidup="' + esc(p.id) + '"' +
             (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
-            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 60 МБ") + "</button>" +
+            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 4 МБ") + "</button>" +
           '<input class="adm-photo__file" type="file" accept="video/mp4,video/quicktime" data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
           (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "")
         : "") +
