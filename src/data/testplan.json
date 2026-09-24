@@ -6736,7 +6736,7 @@
         "Открыть товар в магазине.",
         "Поставить «Мало», потом «В наличии».",
         "То же самое проделать с товаром, у которого остаток посчитан.",
-        "Открыть «Каталог» и сверить чип «Нет в наличии» со «Складом»."
+        "Открыть «Каталог», нажать чип «Нет в наличии» и прочитать значки строк."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
@@ -6744,7 +6744,7 @@
         "Вместо неё появляется «Сообщить о наличии».",
         "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
         "А «Мало» и «В наличии» у него перебиваются тем, что посчитано.",
-        "Оба раздела считают одно и то же: посчитанный остаток, если он есть."
+        "Под «Нет в наличии» — только товары, которые магазин не продаёт; у каждого значок «Нет»."
       ],
       "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
       "risk": "med",
@@ -6758,7 +6758,7 @@
           "Open the product in the shop.",
           "Set «Мало» (low), then «В наличии» (in stock).",
           "Do the same on a product whose stock has been counted.",
-          "Open the catalogue and compare its out-of-stock chip with the warehouse."
+          "Open the catalogue, tap its «Нет в наличии» chip and read the rows' badges."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
@@ -6766,11 +6766,11 @@
           "«Сообщить о наличии» appears in its place.",
           "On a counted product «Нет в наличии» stops the sale too.",
           "But its «Мало» and «В наличии» are overruled by the count.",
-          "Both tabs count the same thing: the counted shelf wherever there is one."
+          "Under «Нет в наличии» only products the shop will not sell, each with a «Нет» badge."
         ],
         "why": "Without it you cannot stop sales of stock nobody has counted yet."
       },
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:41:02.129Z"
     },
     {
       "id": "goods-photo",

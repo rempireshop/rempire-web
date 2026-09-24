@@ -21138,20 +21138,39 @@
    * — `customProduct()` hard-codes `stock: "in"` — could never appear under
    * this chip at all.
    *
-   * The counted shelf wins wherever there is one, because that is the number
-   * the shop sells against; the manual flag answers for everything nobody has
-   * counted. Same order as the badge beside it (goodsStockWord).
+   * The chip and the row's badge read ONE word now, goodsStockWord() below.
+   * Until 24.09.2026 only the chip did: the badge still read `p.stock` alone,
+   * so a row listed under «Нет в наличии» could wear a green «В наличии»
+   * (map-defects #6), and the chip read the FIRST shelf row of a product, so
+   * a 500 мл at zero put a product whose 75 мл was on the shelf under «Нет».
    */
-  function goodsIsOut(p) {
-    var lv = goodsShelf(p);
-    if (lv && lv.tracked) return lv.state === "out";
-    return p.stock === "out";
-  }
-  /** The warehouse row for a product with no size chosen, or null. */
-  function goodsShelf(p) {
-    var rows = S.stockLevels || [];
-    for (var i = 0; i < rows.length; i++) if (rows[i].productId === p.id) return rows[i];
-    return null;
+  function goodsIsOut(p) { return goodsStockWord(p) === "out"; }
+  /**
+   * "in" | "low" | "out" — the one word «Каталог» has for a product's stock,
+   * in the order the shop itself sells by (getOverrides in src/lib/orders.ts,
+   * stockStates in src/lib/inventory.ts):
+   *   · «Нет в наличии» set by hand stops the sale whatever the shelf says —
+   *     a count may say a product is gone, never that it is on sale again;
+   *   · then the counted shelf, read fresh off «Склад»: «мало» if a counted
+   *     size is low, «в наличии» while any counted size is left, and «нет»
+   *     only once EVERY size is counted and at zero;
+   *   · then the manual flag, for a product nobody has counted (or whose
+   *     sizes are only partly counted, all of them at zero).
+   */
+  function goodsStockWord(p) {
+    if (p.stock === "out") return "out";
+    var rows = S.stockLevels || [], all = 0, counted = 0, out = 0, low = 0;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].productId !== p.id) continue;
+      all++;
+      if (!rows[i].tracked) continue;
+      counted++;
+      if (rows[i].state === "out") out++;
+      else if (rows[i].state === "low") low++;
+    }
+    if (counted && out < counted) return low ? "low" : "in";
+    if (counted && counted === all) return "out";
+    return p.stock === "low" ? "low" : "in";
   }
   function goodsMatchesFilter(p, f) {
     if (f === "off") return goodsOffSale(p);
@@ -21323,9 +21342,11 @@
       : eur(lo).replace(/\s?€$/, "") + "–" + eur(hi);
     // product creation: a hidden custom product says so instead of a stock badge
     // — migration 147: and so does a catalogue product taken out of the shop
+    // …and the stock word is the chip's own (goodsStockWord), not `p.stock` alone
+    var word = goodsStockWord(p);
     var badge = (p.custom && p.active === false) || shopHidden(p.id) ? ["Скрыт", "adm-badge--quiet"]
-      : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
-      : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
+      : word === "out" ? ["Нет", "adm-badge--warnfill"]
+      : word === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
     return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admgoods="' + esc(p.id) + '">' +
       '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +

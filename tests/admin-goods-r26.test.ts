@@ -57,7 +57,7 @@ function matches(p: Product, f: string, levels: Shelf[] = [], hidden: string[] =
     function shopHidden(id) { return HIDDEN.indexOf(id) >= 0; }
     ${slice("goodsOffSale")}
     ${slice("goodsIsOut")}
-    ${slice("goodsShelf")}
+    ${slice("goodsStockWord")}
     ${slice("goodsMatchesFilter")}
     return goodsMatchesFilter(P, F);
   `;
