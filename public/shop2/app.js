@@ -1154,6 +1154,11 @@
       "Промокод выключен ✓": "Sooduskood välja lülitatud ✓",
       "Промокод удалён ✓": "Sooduskood kustutatud ✓",
       "Не получилось сохранить промокод.": "Sooduskoodi ei õnnestunud salvestada.",
+      "Такой промокод уже есть.": "Selline sooduskood on juba olemas.", "Открыть его": "Ava see",
+      "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.":
+        "Ostukorvi kirja koodil pole selle korvi tooteid — vali kogu tellimus, bränd või toode.",
+      "Код из письма о брошенной корзине: скидка только на товары этой корзины.":
+        "Kood hüljatud ostukorvi kirjast: soodustus kehtib ainult selle korvi toodetele.",
       "Не получилось удалить промокод": "Sooduskoodi ei õnnestunud kustutada",
       "Код уже использован — его можно только выключить":
         "Koodi on juba kasutatud — selle saab ainult välja lülitada",
@@ -4209,6 +4214,11 @@
       "Промокод выключен ✓": "Promo code switched off ✓",
       "Промокод удалён ✓": "Promo code deleted ✓",
       "Не получилось сохранить промокод.": "The promo code could not be saved.",
+      "Такой промокод уже есть.": "This promo code already exists.", "Открыть его": "Open it",
+      "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.":
+        "This code from the cart e-mail has no products of its cart left — choose the whole order, a brand or a product.",
+      "Код из письма о брошенной корзине: скидка только на товары этой корзины.":
+        "A code from the abandoned-cart e-mail: the discount is on that cart's products only.",
       "Не получилось удалить промокод": "The promo code could not be deleted",
       "Код уже использован — его можно только выключить":
         "The code has already been used — it can only be switched off",
@@ -21215,20 +21225,39 @@
    * — `customProduct()` hard-codes `stock: "in"` — could never appear under
    * this chip at all.
    *
-   * The counted shelf wins wherever there is one, because that is the number
-   * the shop sells against; the manual flag answers for everything nobody has
-   * counted. Same order as the badge beside it (goodsStockWord).
+   * The chip and the row's badge read ONE word now, goodsStockWord() below.
+   * Until 24.09.2026 only the chip did: the badge still read `p.stock` alone,
+   * so a row listed under «Нет в наличии» could wear a green «В наличии»
+   * (map-defects #6), and the chip read the FIRST shelf row of a product, so
+   * a 500 мл at zero put a product whose 75 мл was on the shelf under «Нет».
    */
-  function goodsIsOut(p) {
-    var lv = goodsShelf(p);
-    if (lv && lv.tracked) return lv.state === "out";
-    return p.stock === "out";
-  }
-  /** The warehouse row for a product with no size chosen, or null. */
-  function goodsShelf(p) {
-    var rows = S.stockLevels || [];
-    for (var i = 0; i < rows.length; i++) if (rows[i].productId === p.id) return rows[i];
-    return null;
+  function goodsIsOut(p) { return goodsStockWord(p) === "out"; }
+  /**
+   * "in" | "low" | "out" — the one word «Каталог» has for a product's stock,
+   * in the order the shop itself sells by (getOverrides in src/lib/orders.ts,
+   * stockStates in src/lib/inventory.ts):
+   *   · «Нет в наличии» set by hand stops the sale whatever the shelf says —
+   *     a count may say a product is gone, never that it is on sale again;
+   *   · then the counted shelf, read fresh off «Склад»: «мало» if a counted
+   *     size is low, «в наличии» while any counted size is left, and «нет»
+   *     only once EVERY size is counted and at zero;
+   *   · then the manual flag, for a product nobody has counted (or whose
+   *     sizes are only partly counted, all of them at zero).
+   */
+  function goodsStockWord(p) {
+    if (p.stock === "out") return "out";
+    var rows = S.stockLevels || [], all = 0, counted = 0, out = 0, low = 0;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].productId !== p.id) continue;
+      all++;
+      if (!rows[i].tracked) continue;
+      counted++;
+      if (rows[i].state === "out") out++;
+      else if (rows[i].state === "low") low++;
+    }
+    if (counted && out < counted) return low ? "low" : "in";
+    if (counted && counted === all) return "out";
+    return p.stock === "low" ? "low" : "in";
   }
   function goodsMatchesFilter(p, f) {
     if (f === "off") return goodsOffSale(p);
@@ -21400,9 +21429,11 @@
       : eur(lo).replace(/\s?€$/, "") + "–" + eur(hi);
     // product creation: a hidden custom product says so instead of a stock badge
     // — migration 147: and so does a catalogue product taken out of the shop
+    // …and the stock word is the chip's own (goodsStockWord), not `p.stock` alone
+    var word = goodsStockWord(p);
     var badge = (p.custom && p.active === false) || shopHidden(p.id) ? ["Скрыт", "adm-badge--quiet"]
-      : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
-      : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
+      : word === "out" ? ["Нет", "adm-badge--warnfill"]
+      : word === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
     return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admgoods="' + esc(p.id) + '">' +
       '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
@@ -22290,8 +22321,9 @@
       '<div><div class="adm-sec__t">Номиналы в магазине</div>' +
         '<div class="adm-amts" role="group" aria-label="Номиналы карты" style="margin-top:10px">' +
           GIFT_AMOUNTS.map(function (v) {
+            // eur(): «25 €» in RU and ET, «€25» in EN — like every other price in the panel
             return '<button class="adm-amt" data-admgiftamt="' + v + '" aria-pressed="' +
-              (on.indexOf(v) >= 0) + '">' + v + " €</button>";
+              (on.indexOf(v) >= 0) + '">' + eur(v) + "</button>";
           }).join("") + "</div>" +
         '<p class="adm-hint" style="margin:8px 0 0">Нажмите, чтобы включить или скрыть номинал. ' +
           "Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».</p></div>" +
@@ -23974,7 +24006,7 @@
   function newsPlanWord() {
     var p = S.newsPlan;
     if (!p || !(Number(p.days) > 1)) return "";
-    return " · " + plainDays(Number(p.days));
+    return "· " + plainDays(Number(p.days));
   }
   /* «2 дня» / «5 дней» — одним словом, потому что строку целиком переводит
      словарь, а число в ней собирается на лету (UI_RX). */
@@ -23988,6 +24020,17 @@
     if (!aud) return "Отправить подписчикам";
     var n = Number(aud.total) || 0;
     return n === 1 ? "Отправить 1 подписчику" : "Отправить " + n + " подписчикам";
+  }
+  /* «Отправить 40 подписчикам» и «· 3 дня» — два текстовых узла, а не один:
+     translateTree() переводит узел целиком, и склеенная строка «Отправить 40
+     подписчикам · 3 дня» не подходила ни под «^Отправить (\d+) подписчикам$»,
+     ни под «^· (\d+) дня$» (UI_RX) — на ET/EN кнопка оставалась русской,
+     как только план выходил за один день. Общий <span> вокруг обоих держит
+     обычный пробел между ними: у .adm-btn flex с gap, и два отдельных
+     элемента разошлись бы на 10 px. */
+  function newsSendHTML(aud) {
+    var plan = newsPlanWord();
+    return plan ? "<span><span>" + newsSendLabel(aud) + "</span> <span>" + plan + "</span></span>" : newsSendLabel(aud);
   }
   /* ---- the blocks on screen -----------------------------------------------
      Drawn into their own slot (#newsblocks) and redrawn there alone —
@@ -24547,7 +24590,7 @@
            the phone's header (11.09.2026): the count above it, the confirm
            card behind it as before (newsSendAsk) */
         '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" +
-          newsSendLabel(aud) + newsPlanWord() + "</button>" + newsBudgetLineHTML();
+          newsSendHTML(aud) + "</button>" + newsBudgetLineHTML();
     }
     return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
   }
@@ -29428,8 +29471,24 @@
       startsAt: p.startsAt || null,
       maxUses: p.maxUses == null ? "" : p.maxUses, note: p.note || "", active: p.active,
       // a code saved before 170 has neither field; both read as «весь заказ»
-      scope: p.scope || "order", scopeValue: p.scopeValue || ""
+      scope: p.scope || "order", scopeValue: p.scopeValue || "",
+      /* …and a REM-CART code (scope 'cart', 197) is its basket's lines. They
+         have no field here either, and the server refuses a 'cart' body
+         without them (`bad_scope_lines`), so they ride along like startsAt —
+         without them the code could not be saved at all, only its generic
+         «Не получилось сохранить промокод.» came back. */
+      scopeLines: p.scopeLines || null
     };
+  }
+  /* A new kind starts with an empty discount. The number was typed for the
+     other unit: 150 € stayed in the box as 150 % and was refused only at
+     «Создать», and 10 % quietly became 10 € when it was not refused at all.
+     Replaces the old `[data-promof="kind"]` change handler, dead since kind
+     became chips. */
+  function promoSetKind(f, kind) {
+    if (!f || f.kind === kind) return;
+    f.kind = kind;
+    f.value = "";
   }
   function promoKindLabel(p) {
     if (p.kind === "free_shipping") return "бесплатная доставка";
@@ -29499,7 +29558,12 @@
         { id: String(f.scopeValue), brand: "", name: String(f.scopeValue) };
     }
     var body = "";
-    if (f.scope === "brand") {
+    /* A REM-CART code lights none of the three chips — nobody types one, the
+       abandoned-cart letter mints it — so the form says what it is instead of
+       looking like a code with nothing chosen. */
+    if (f.scope === "cart") {
+      body = '<p class="adm-hint" style="margin-top:10px">Код из письма о брошенной корзине: скидка только на товары этой корзины.</p>';
+    } else if (f.scope === "brand") {
       var chosen = String(f.scopeValue || "");
       var list = promoBrandList();
       /* A code saved for a brand the catalogue no longer carries keeps that
@@ -29587,7 +29651,11 @@
          saves (Renat, 10.09.2026), with the refusal riding in it so it is on
          screen on a phone wherever the owner is in the form */
       '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
+        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) +
+          /* «Создать» with a code that is already there: the way to the code
+             itself, rather than a dead end (savePromo, `exists`) */
+          (f.dup ? ' <button class="adm-link" data-admpromoedit="' + esc(f.dup) + '">Открыть его</button>' : "") +
+          "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
         admBarNoteHTML("touch") + "</div></div>";
@@ -29669,6 +29737,12 @@
       scope: scope,
       scopeValue: scope === "order" ? null : text(f.scopeValue)
     };
+    // a REM-CART code's basket lines, exactly as they were loaded (promoFormFrom)
+    if (scope === "cart") body.scopeLines = f.scopeLines || [];
+    /* «Создать» may only make a code that is not there yet — the server
+       answers `exists` rather than rewriting somebody's live code with this
+       form's values (insertPromo in src/lib/promos.ts). */
+    if (!f.editing) body.create = true;
     return body;
   }
   var PROMO_SAVE_ERRS = {
@@ -29685,19 +29759,30 @@
     bad_scope: "Выберите, на что действует код: весь заказ, бренд или товар.",
     bad_scope_value: "Выберите бренд или товар — без этого код не на что применить.",
     scope_free_shipping: "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.",
+    /* a REM-CART code whose list of basket lines is gone (emptied by hand):
+       there is nothing left for it to discount, and «Весь заказ», a brand or
+       a product is the owner's way out */
+    bad_scope_lines: "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.",
+    exists: "Такой промокод уже есть.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
   function savePromo() {
     if (!S.promoForm || savePromo._busy) return;   // a second tap while the first is on its way
     savePromo._busy = true;
     S.promoFormErr = "";
-    apiSend("/api/admin/promos/", "POST", promoFormPayload()).then(function (r) {
+    S.promoForm.dup = "";
+    var sent = promoFormPayload();
+    apiSend("/api/admin/promos/", "POST", sent).then(function (r) {
       savePromo._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.promoForm = null; toast("Промокод сохранён ✓"); loadAdminPromos(true); return;
       }
       S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
+      /* The code is taken: the form keeps what was typed and offers the one
+         that exists («Открыть его» → data-admpromoedit), and the list is asked
+         again so that row is there to open even if it was made elsewhere. */
+      if (r.body && r.body.error === "exists" && S.promoForm) { S.promoForm.dup = sent.code; loadAdminPromos(true); }
       render();
     }).catch(function () { savePromo._busy = false; S.promoFormErr = "Сервер не отвечает."; render(); });
   }
@@ -36123,6 +36208,20 @@
     DEMO.log = DEMO.log.filter(function (e) { return e !== entry; });
     demoSave();
   }
+  /* A denomination the server refused goes back where it was, like the promo
+     switch and the partner switch beside it. It used to stay in its new state
+     — lit, or dark — over a shop that still sold the old list, with only the
+     toast to say otherwise, until the next reload (map-defects #18). Only
+     while the chips still show what was sent: a tap made since then is a
+     save of its own, with its own answer. The journal line goes too — it
+     described a change the server never took. */
+  function giftAmountsBack(sent, back, entry) {
+    if (!Array.isArray(back) || String(giftAmountsOn()) !== String(sent)) return;
+    DEMO.giftAmounts = back.slice();
+    journalDrop(entry);
+    demoSave();
+    render();
+  }
   /**
    * «Отменить» has to put back exactly what left the shelf, not what was
    * asked for.
@@ -36337,7 +36436,14 @@
       });
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
-    else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
+    else if (a.type === "set_gift_amounts") {
+      var giftSent = giftAmountsOn();
+      // the list before this push: the journal line's own undo, or — for an undo — what it replaced
+      var giftBack = entry && entry.prev ? entry.prev.value : a.was;
+      srvSaved(apiSend(st, "PUT", { gift_amounts: giftSent })).then(function (r) {
+        if (!(r && r.status === 200 && r.body && r.body.ok)) giftAmountsBack(giftSent, giftBack, entry);
+      });
+    }
     // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
     // proMinOrder) only ever travels through this admin-only route — never
     // the public /api/overrides one. adjust_points is a manual credit on one
@@ -38004,7 +38110,8 @@
        list travels, so undo re-sends the previous one — same reasoning as the
        banner and the content document. */
     else if (a.type === "set_gift_amounts") {
-      entry.prev = { type: "set_gift_amounts", value: giftAmountsOn() };
+      // `was`: where the chips go back to if the server refuses the undo itself (giftAmountsBack)
+      entry.prev = { type: "set_gift_amounts", value: giftAmountsOn(), was: a.value.slice() };
       DEMO.giftAmounts = a.value.slice();
     }
     /* content: the action carries a PATCH («поменяй телефон» touches one
@@ -42688,7 +42795,7 @@
     }
     // the promo form's kind chips — the same three kinds the radio row had
     if (d.promokind) {
-      if (S.promoForm) { S.promoForm.kind = d.promokind; render(); refocus('[data-promokind="' + d.promokind + '"]'); }
+      if (S.promoForm) { promoSetKind(S.promoForm, d.promokind); render(); refocus('[data-promokind="' + d.promokind + '"]'); }
       return;
     }
     /* «На что действует» — the same chip idiom one row below. Switching away
@@ -43958,16 +44065,6 @@
       if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, ""); translateTree(subSlot); }
     }
     // the card's size picker — state first, then patch the price in place
-    /* checkout-gaps: the promo kind decides whether there is a «сколько»
-       field at all, so this one does need a redraw. */
-    else if (t.matches('[data-promof="kind"]')) {
-      if (S.promoForm) {
-        S.promoForm.kind = t.value;
-        if (t.value === "percent" && !(Number(S.promoForm.value) >= 1 && Number(S.promoForm.value) <= 90)) S.promoForm.value = 10;
-        if (t.value === "fixed" && !(Number(S.promoForm.value) > 0)) S.promoForm.value = 5;
-        render();
-      }
-    }
     /* «Бренд» — a native <select> of twenty-six names, so the phone's own
        wheel does the scrolling. Only the hint under it depends on the choice,
        and it says the same thing either way, so nothing is re-rendered. */

@@ -1660,18 +1660,19 @@
       "title": "Создать промокод",
       "steps": [
         "«Ещё» → «Маркетинг» → «+ Промокод».",
-        "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
-        "Нажать «Создать».",
+        "Ввести код TEST10, выбрать «Сумма в евро», вписать 150, потом выбрать «Процент».",
+        "Поставить 10 % и нажать «Создать».",
         "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
-        "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
+        "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать».",
+        "Открыть код REM-CART-…, если он есть: прочитать серую строку, открыть и нажать «Сохранить»."
       ],
       "expect": [
-        "TEST10 стоит в списке.",
-        "TESTSHIP стоит в списке.",
-        "У обоих переключатель стоит на «включён».",
+        "После «Процент» поле скидки пустое — 150 не превращается в 150 %.",
+        "TEST10 и TESTSHIP стоят в списке, у обоих переключатель на «включён».",
+        "Второй TEST10 не создаётся: «Такой промокод уже есть.» и кнопка «Открыть его».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
-        "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
+        "У REM-CART-… «на корзину из письма», без кода корзины; «Сохранить» проходит без ошибки."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
@@ -1681,22 +1682,23 @@
         "title": "Creating a promo code",
         "steps": [
           "«Ещё» → «Маркетинг» → «+ Промокод».",
-          "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
-          "Press «Создать» (create).",
+          "Enter the code TEST10, choose «Сумма в евро» (amount), type 150, then choose «Процент» (percent).",
+          "Set 10 % and press «Создать» (create).",
           "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
-          "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
+          "«+ Промокод» once more, enter TEST10 with any discount and press «Создать».",
+          "Find a REM-CART-… code, if there is one: read its grey line, open it and press «Сохранить»."
         ],
         "expect": [
-          "TEST10 is in the list.",
-          "TESTSHIP is in the list.",
-          "Both stand at «включён» (on).",
+          "After «Процент» the discount box is empty — 150 does not turn into 150 %.",
+          "TEST10 and TESTSHIP are in the list, both switched to «включён» (on).",
+          "The second TEST10 is not created: «Такой промокод уже есть.» and an «Открыть его» button.",
           "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
-          "A REM-CART-… code reads «на корзину из письма», with no long basket id."
+          "REM-CART-… reads «на корзину из письма», no basket id; «Сохранить» goes through without an error."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-24T12:18:59.171Z"
+      "markedAt": "2026-09-24T17:38:26.560Z"
     },
     {
       "id": "panel-gift-amounts",
@@ -1710,13 +1712,17 @@
         "Выключить номинал 25 €.",
         "Открыть страницу подарочной карты в магазине.",
         "Вернуться и включить 25 € обратно.",
-        "Открыть «Оформление» и нажать то, что там есть."
+        "Открыть «Оформление» и нажать то, что там есть.",
+        "Включить режим полёта, нажать 75 €, выключить режим полёта.",
+        "Переключить панель на EN и прочитать номиналы."
       ],
       "expect": [
         "Выключенная сумма пропадает с кнопок на странице карты.",
         "Она пропадает и из текста под кнопками.",
         "Включённая обратно — возвращается.",
-        "Оформление открывает настоящую карту PDF и письмо к ней."
+        "Оформление открывает настоящую карту PDF и письмо к ней.",
+        "Без сети 75 € возвращается как был, и видно «Сервер не отвечает».",
+        "На EN номиналы написаны «€25», как все цены в панели."
       ],
       "why": "Сумма, которой нет в продаже, — это заказ, который сорвётся на кассе.",
       "risk": "med",
@@ -1728,18 +1734,22 @@
           "Switch the 25 € amount off.",
           "Open the gift-card page in the shop.",
           "Come back and switch 25 € on again.",
-          "Open «Оформление» and press what is there."
+          "Open «Оформление» and press what is there.",
+          "Turn flight mode on, tap 75 €, turn flight mode off.",
+          "Switch the panel to EN and read the amounts."
         ],
         "expect": [
           "An amount switched off leaves the buttons on the card page.",
           "It leaves the line of text under them too.",
           "Switched back on, it comes back.",
-          "The design block opens a real card PDF and the letter it arrives with."
+          "The design block opens a real card PDF and the letter it arrives with.",
+          "Offline, 75 € goes back to how it was, and «Сервер не отвечает» shows.",
+          "In EN the amounts read «€25», like every price in the panel."
         ],
         "why": "An amount not on sale is an order that dies at the checkout."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:44:28.205Z"
     },
     {
       "id": "panel-gift-issued",
@@ -5606,14 +5616,14 @@
         "«Ещё» → «Настройки» → «Письма» (это «Маркетинг» → «Письма»): блок «Сколько писем в сутки» под списком писем.",
         "Поставить всего 4, придержать 2, сохранить и обновить страницу.",
         "Проверить, что подписчиков больше двух; если нет — добавить.",
-        "Открыть рассылку и нажать отправку.",
+        "Открыть рассылку, прочитать кнопку отправки на EN, вернуть RU и нажать её.",
         "Оформить и оплатить заказ, пока лимит занят.",
         "Вернуть 100 и 30; «Продолжить» у рассылки не нажимать.",
         "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
         "После обновления в полях 4 и 2, без «Изменения не сохранены».",
-        "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
+        "Под кнопкой — сколько ушло сегодня и доступно; на EN вся кнопка по-английски.",
         "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
         "Одно оповещение о лимите: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
@@ -5623,21 +5633,21 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T15:12:48.378Z",
+      "markedAt": "2026-09-24T17:47:00.480Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
           "«Ещё» → «Настройки» → «Письма» (that is «Маркетинг» → «Письма»): the «Сколько писем в сутки» block below the letters.",
           "Set the total to 4, hold back 2, save and reload the page.",
           "Check there are more than two subscribers; add some if not.",
-          "Open a campaign and press send.",
+          "Open a campaign, read its send button in EN, switch back to RU and press it.",
           "Place and pay for an order while the allowance is spent.",
           "Put back 100 and 30; do not press the campaign's «Продолжить».",
           "The next day after 10:00, open the campaign again."
         ],
         "expect": [
           "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
-          "Under the button: how many went today and how many the campaign may use.",
+          "Under the button: sent today and still available; in EN the whole button is English.",
           "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
           "The «Заказ принят» letter still reaches the buyer.",
           "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
@@ -6754,7 +6764,7 @@
         "Открыть товар в магазине.",
         "Поставить «Мало», потом «В наличии».",
         "То же самое проделать с товаром, у которого остаток посчитан.",
-        "Открыть «Каталог» и сверить чип «Нет в наличии» со «Складом»."
+        "Открыть «Каталог», нажать чип «Нет в наличии» и прочитать значки строк."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
@@ -6762,7 +6772,7 @@
         "Вместо неё появляется «Сообщить о наличии».",
         "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
         "А «Мало» и «В наличии» у него перебиваются тем, что посчитано.",
-        "Оба раздела считают одно и то же: посчитанный остаток, если он есть."
+        "Под «Нет в наличии» — только товары, которые магазин не продаёт; у каждого значок «Нет»."
       ],
       "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
       "risk": "med",
@@ -6776,7 +6786,7 @@
           "Open the product in the shop.",
           "Set «Мало» (low), then «В наличии» (in stock).",
           "Do the same on a product whose stock has been counted.",
-          "Open the catalogue and compare its out-of-stock chip with the warehouse."
+          "Open the catalogue, tap its «Нет в наличии» chip and read the rows' badges."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
@@ -6784,11 +6794,11 @@
           "«Сообщить о наличии» appears in its place.",
           "On a counted product «Нет в наличии» stops the sale too.",
           "But its «Мало» and «В наличии» are overruled by the count.",
-          "Both tabs count the same thing: the counted shelf wherever there is one."
+          "Under «Нет в наличии» only products the shop will not sell, each with a «Нет» badge."
         ],
         "why": "Without it you cannot stop sales of stock nobody has counted yet."
       },
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:41:02.129Z"
     },
     {
       "id": "goods-photo",

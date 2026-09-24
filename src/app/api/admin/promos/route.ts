@@ -3,8 +3,12 @@
  *
  * GET    /api/admin/promos/            → { ok, promos }
  * POST   /api/admin/promos/  {code, kind, value, minSubtotal, startsAt,
- *                             endsAt, maxUses, active, note}
+ *                             endsAt, maxUses, active, note, create?}
  *                                      → { ok, promo }   (create or edit)
+ *                                      → 409 { ok:false, error:"exists" }
+ *                                        when `create: true` names a code
+ *                                        that is already there (the form's
+ *                                        «Создать»; nothing is written)
  * PATCH  /api/admin/promos/  {code, active}
  *                                      → { ok, promo }   (switch one on/off)
  * DELETE /api/admin/promos/?code=SUVI10
@@ -22,7 +26,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
 import {
-  deletePromo, listPromos, normalisePromoCode, setPromoActive, upsertPromo, validatePromo,
+  deletePromo, insertPromo, listPromos, normalisePromoCode, setPromoActive, upsertPromo, validatePromo,
 } from "@/lib/promos";
 
 export const runtime = "nodejs";
@@ -64,7 +68,11 @@ export async function POST(req: Request) {
   if (!check.ok) return Response.json({ ok: false, error: check.error }, { status: 400, headers: NO_STORE });
 
   try {
-    const promo = await upsertPromo(check.value);
+    /* «Создать» says `create: true` and may only make a code that is not
+       there yet — see insertPromo. Anything else (the form's «Сохранить» on
+       an open code, the assistant's create_promo) edits as before. */
+    const promo = body.create === true ? await insertPromo(check.value) : await upsertPromo(check.value);
+    if (!promo) return Response.json({ ok: false, error: "exists" }, { status: 409, headers: NO_STORE });
     await writeAuditSafe("admin", "promo.set", { code: promo.code, kind: promo.kind, value: promo.value });
     return Response.json({ ok: true, promo }, { headers: NO_STORE });
   } catch (err) {
