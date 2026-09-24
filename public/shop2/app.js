@@ -26302,7 +26302,7 @@
   function admBarNoteState(kind) {
     var dirty = kind === "mail" ? mailDirty()
       : kind === "news" ? newsDirty()
-      : !!(S.barTouched && S.barTouched === admBarIdent());
+      : admFormDirty();   // typed in, or a draft a button changed (admFill, beside admBarTouched)
     if (dirty) return "dirty";
     return S.barSaved && S.barSaved === kind ? "saved" : "";
   }
@@ -31257,8 +31257,8 @@
         if (r.status === 200 && r.body.ok && r.body.text) {
           var hooks = SEO_HOOKS[L] || SEO_HOOKS.RU;
           var ti = document.querySelector(hooks[0]), de = document.querySelector(hooks[1]);
-          if (ti && txt(r.body.text.title)) ti.value = txt(r.body.text.title);
-          if (de && txt(r.body.text.description)) de.value = txt(r.body.text.description);
+          if (ti && txt(r.body.text.title)) admFill(ti, txt(r.body.text.title));
+          if (de && txt(r.body.text.description)) admFill(de, txt(r.body.text.description));
           okN++;
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else failed = (r.body && r.body.error) || "error";
@@ -31913,7 +31913,7 @@
   function edBrandPick(name) {
     var e = edBrandEls();
     if (!e) return;
-    e.input.value = String(name || "").slice(0, 60);
+    admFill(e.input, String(name || "").slice(0, 60));
     edBrandClose();
     EDB.hush = true;   // the focus goes back to the box without the list opening again
     e.input.focus();
@@ -33728,7 +33728,7 @@
     var box = key ? document.querySelector('[data-edean="' + key + '"]') : null;
     closeScannerState();
     if (!box) { render(); return; }   // the editor is gone from under the overlay — nothing to fill
-    box.value = code;
+    admFill(box, code);
     scanBeep();
     render();
     var after = document.querySelector('[data-edean="' + key + '"]');
@@ -41425,7 +41425,7 @@
        from the warehouse copy, which still carries the code. */
     if (d.edunbind !== undefined) {
       var unEl = document.querySelector('[data-edean="' + d.edunbind + '"]');
-      if (unEl) { unEl.value = ""; unEl.focus(); }
+      if (unEl) { admFill(unEl, ""); unEl.focus(); }
       t.hidden = true;
       toast("Штрихкод убран — нажмите «Сохранить»");
       return;
@@ -41642,6 +41642,7 @@
       if (row) row.querySelectorAll("[data-vpick]").forEach(function (b2) {
         b2.setAttribute("aria-current", String(b2 === t));
       });
+      admBarPaintNote();   // the pick is a draft edit: the bar asks edMediaDirty()
       return;
     }
     /* ---- assistant-work: goods-editor AI buttons --------------------------
@@ -41672,7 +41673,7 @@
           var ru = document.querySelector("[data-eddescru]");
           var body = txt(r.body.text.description);
           var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
-          if (ru) ru.value = bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body;
+          admFill(ru, bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body);
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -41696,8 +41697,8 @@
         trBtn.disabled = false; trBtn.textContent = trLabel;
         if (r.status === 200 && r.body.ok && r.body.texts) {
           var etEl = document.querySelector("[data-eddescet]"), enEl = document.querySelector("[data-eddescen]");
-          if (etEl && r.body.texts.ET) etEl.value = r.body.texts.ET;
-          if (enEl && r.body.texts.EN) enEl.value = r.body.texts.EN;
+          if (etEl && r.body.texts.ET) admFill(etEl, r.body.texts.ET);
+          if (enEl && r.body.texts.EN) admFill(enEl, r.body.texts.EN);
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -41727,6 +41728,8 @@
           if (L === (S.heroLang || "RU")) { var hEl = document.querySelector('[data-herof="' + f + '"]'); if (hEl) hEl.value = tx[f]; }
         });
         paintHeroPreview();
+        // the draft moved without a keystroke: the page's bar says so now, not at the next render
+        paintSetBar();
       });
       return;
     }
@@ -41743,14 +41746,14 @@
         return { brand: nbEl ? nbEl.value.trim() : "", name: typedName, category: CAT_NAMES[ncEl ? ncEl.value : ""] || "" };
       }, function (L, tx) {
         if (!tx.name) return;
-        if (nnEl) nnEl.value = txt(tx.name).slice(0, 120);
+        admFill(nnEl, txt(tx.name).slice(0, 120));
         edNameHintPaint(txt(tx.name));
       });
       return;
     }
     if (d.admdescundo !== undefined) {
       if (!AI_UNDO) return;
-      var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
+      var setv = function (sel, v) { admFill(document.querySelector(sel), v || ""); };
       setv("[data-eddescru]", AI_UNDO.descRU); setv("[data-eddescet]", AI_UNDO.descET); setv("[data-eddescen]", AI_UNDO.descEN);
       setv("[data-edseot]", AI_UNDO.seoT); setv("[data-edseod]", AI_UNDO.seoD);
       setv("[data-edseotet]", AI_UNDO.seoTet); setv("[data-edseodet]", AI_UNDO.seoDet);
@@ -42792,6 +42795,7 @@
           var dEl = document.querySelector('[data-bundlef="desc"]');
           if (dEl) dEl.value = txt(tx.text);
         }
+        admBarPaintNote();   // the draft moved: the bar asks admDraftDiffers()
       });
       return;
     }
@@ -42814,6 +42818,7 @@
             var bEl = document.querySelector('[data-bundlef="desc"]');
             if (bEl) bEl.value = r.body.texts[bCur];
           }
+          admBarPaintNote();
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
@@ -42832,6 +42837,7 @@
       BUNDLE_AI_UNDO = null;
       var undoSlot = document.querySelector("[data-bundleundoslot]");
       if (undoSlot) undoSlot.textContent = "";
+      admBarPaintNote();
       return;
     }
     if (d.admask) { S.adminAsk = d.admask; render(); admAsk(d.admask); return; }
@@ -44510,12 +44516,67 @@
     S.barTouched = id;
     admBarPaintNote();
   }
+  /* «Every button that edits the draft should say so here» was a rule each
+     new button had to remember, and most did not: ★, ✂, a dropped photo, a
+     size's photo, the video's chips, «Загрузить» and ×, «Отвязать», a code
+     from the scanner and every AI fill left the bar at «Изменений нет» and
+     the way out unguarded (map of the panel, 23.09.2026, #3). So the rule
+     now lives in three shared places instead of forty handlers:
+       · a field filled by code goes through admFill(), which marks the bar
+         the way a keystroke does;
+       · the product editor's photo list, size photos and video are drafts
+         (GAL, VID) and are asked whether they differ from what is saved —
+         edMediaDirty();
+       · the forms that keep their draft in S (a set, a promo code, a partner)
+         are asked the same of their draft — admDraftDiffers(). */
+  function admFill(el, value) {
+    if (!el) return;
+    el.value = value;
+    // a box filled after its form was closed marks nothing
+    if (el.isConnected !== false) admBarTouched();
+  }
+  function edMediaDirty() {
+    var p = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
+    if (!p || p.isNew) return false;
+    if (galDirty(p)) return true;
+    // a size's photo picked by hand — compared the way «Сохранить» compares it
+    if (GAL.id === p.id && GAL.picks && Object.keys(GAL.picks).length && p.sizes && p.sizes.length > 1) {
+      var picked = p.sizes.map(function (sz, si) { return galSizePick(p, si); });
+      if (varImgChanged(picked, p.varImg)) return true;
+    }
+    // the video: a draft address that is not the saved one (VID.url null = no draft)
+    if (VID.id === p.id && VID.url !== null) {
+      var savedVid = (DEMO.video && DEMO.video[p.id]) || p.video || "";
+      if (String(VID.url).trim() !== savedVid) return true;
+    }
+    return false;
+  }
+  /* The yardstick of a form with a draft in S is the draft as it was when the
+     form's bar was first drawn — the render that opened it — so no opener has
+     to remember to take it. `lang` is which language is on screen, not
+     something the save writes. */
+  var ADM_FORM_BASE = { form: null, sig: "" };
+  function admFormSig(f) {
+    return JSON.stringify(f, function (k, v) { return k === "lang" ? undefined : v; });
+  }
+  function admDraftDiffers() {
+    var f = S.bundleForm || S.promoForm || S.partnerForm;
+    if (!f || typeof f !== "object" || f !== admBarIdent()) return false;
+    if (ADM_FORM_BASE.form !== f) { ADM_FORM_BASE.form = f; ADM_FORM_BASE.sig = admFormSig(f); return false; }
+    return admFormSig(f) !== ADM_FORM_BASE.sig;
+  }
+  /** «Не сохранено» for the forms with the touch bar: typed in, or a draft that differs. */
+  function admFormDirty() {
+    if (S.barTouched && S.barTouched === admBarIdent()) return true;
+    if (S.adminEdit) return edMediaDirty();
+    return admDraftDiffers();
+  }
   /** Is there anything in the open product editor worth asking about?
       The same flag the save bar reads, so «Не сохранено» in the header and
       the question on the way out can never disagree — one of them appearing
       without the other is how the owner learns not to trust either. */
   function goodsEditDirty() {
-    return !!(S.adminEdit || S.goodsNew) && S.barTouched === admBarIdent();
+    return !!(S.adminEdit || S.goodsNew) && admFormDirty();
   }
   document.addEventListener("input", admBarTouch);
   document.addEventListener("change", admBarTouch);

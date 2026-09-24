@@ -6786,7 +6786,7 @@
         "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
         "Дождаться конца, сохранить и открыть товар в магазине.",
         "На новом товаре выбрать фото на шаге «Фото» до сохранения.",
-        "Переставить фото стрелками: вверху должно появиться «Не сохранено».",
+        "Нажать ★ у другого фото или переставить стрелками: вверху должно появиться «Не сохранено».",
         "На подписи главного фото должны стоять и размеры, которые его показывают."
       ],
       "expect": [
@@ -6809,7 +6809,7 @@
           "While it is being cut out, make another photo the main one with the star.",
           "Wait for it to finish, save and open the product in the shop.",
           "On a new product pick a photo on the «Фото» step before saving.",
-          "Reorder the photos with the arrows: the top bar must say it is unsaved.",
+          "Press ★ on another photo, or reorder with the arrows: the top bar must say it is unsaved.",
           "The main photo's tag must also carry the sizes that show it."
         ],
         "expect": [
@@ -6823,7 +6823,7 @@
         "why": "A product with no photo is barely bought at all."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "goods-video",
@@ -8295,7 +8295,7 @@
       "title": "Большая картинка на главной",
       "steps": [
         "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-        "Поправить текст первого слайда и выбрать другую картинку из плиток.",
+        "Поправить текст первого слайда кнопкой ✨ и выбрать другую картинку из плиток.",
         "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
         "Нажать «Сохранить» (на телефоне — вверху экрана), подтвердить и открыть главную магазина."
       ],
@@ -8314,7 +8314,7 @@
         "title": "The big picture at the top",
         "steps": [
           "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-          "Edit the first slide's text and pick another picture from the tiles.",
+          "Rewrite the first slide's text with ✨ and pick another picture from the tiles.",
           "Add a gift-card slide; keep adding slides until the button goes grey.",
           "Press «Сохранить» (on the phone — at the top), confirm and open the shop's home page."
         ],
@@ -8327,7 +8327,9 @@
           "The gift-card slide shows the card, not a shampoo bottle."
         ],
         "why": "A button leading to the wrong place wastes the shop's best screen."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "settings-content",
