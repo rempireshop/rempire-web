@@ -8591,14 +8591,16 @@
       "steps": [
         "На боевых ключах открыть второй настоящий оплаченный заказ.",
         "Нажать «Вернуть деньги», стереть сумму и вписать меньшую — например 0,50.",
-        "Подтвердить и посмотреть карточку.",
-        "Попробовать вернуть сумму больше остатка."
+        "Прочитать текст в окошке.",
+        "Вписать сумму больше остатка и нажать «Вернуть деньги».",
+        "Исправить сумму на 0,50, нажать «Вернуть деньги» ещё раз и посмотреть карточку."
       ],
       "expect": [
+        "В окошке: «Вернём 0,50 € из …», статус заказа и склад не изменятся.",
+        "Сумму больше остатка магазин не принимает, а окошко остаётся открытым.",
+        "Исправленная сумма уходит с той же кнопки, окошко открывать заново не нужно.",
         "Вернулась ровно та сумма, которую вписали.",
-        "Заказ так и остался оплаченным.",
-        "Товары на склад не вернулись.",
-        "Сумму больше остатка магазин не принимает.",
+        "Заказ так и остался оплаченным, товары на склад не вернулись.",
         "Баллы за этот заказ остались как были — их возвращает только полный возврат."
       ],
       "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
@@ -8610,19 +8612,21 @@
         "steps": [
           "On the live keys, open a second real paid order.",
           "Press «Вернуть деньги», clear the amount and type a smaller one — e.g. 0.50.",
-          "Confirm and look at the card.",
-          "Try to refund more than the remaining balance."
+          "Read the text in the box.",
+          "Type an amount above the balance and press «Вернуть деньги».",
+          "Correct the amount to 0.50, press «Вернуть деньги» again and look at the card."
         ],
         "expect": [
+          "The box says: «Вернём 0,50 € из …», the order's status and stock stay.",
+          "The shop refuses an amount above the balance, and the box stays open.",
+          "The corrected amount goes from the same button, with no need to reopen the box.",
           "Exactly the amount typed comes back.",
-          "The order stays paid.",
-          "The goods do not go back into stock.",
-          "The shop refuses an amount above the balance.",
+          "The order stays paid, and the goods do not go back into stock.",
           "The order's points are untouched — only a full refund moves them."
         ],
         "why": "Refunding more than was paid is a gift of money."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T17:38:05.777Z"
     },
     {
       "id": "live-apple-pay",

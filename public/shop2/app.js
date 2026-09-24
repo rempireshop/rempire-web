@@ -6904,6 +6904,13 @@
     [/^По заказу уже возвращено (.+)\. Осталось (.+) — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо\.$/,
       { ET: "Tellimuse eest on juba tagastatud $1. Jäänud on $2 — raha läheb Montonio kaudu sama teed, kust tuli, ja klient saab kirja.",
         EN: "$1 has already been refunded on this order. $2 is left — the money goes back through Montonio the way it came, and the customer gets a letter." }],
+    /* …and a part of what is left, typed into the box (admRefundConfirmText) */
+    [/^Вернём (.+) из (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, статус заказа и склад не изменятся\.$/,
+      { ET: "Tagastame $1 summast $2 Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, tellimuse staatus ja laoseis ei muutu.",
+        EN: "We will send $1 of $2 back through Montonio, the way the money came. The customer gets a letter; the order's status and the stock stay as they are." }],
+    [/^По заказу уже возвращено (.+)\. Вернём ещё (.+) из оставшихся (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, статус заказа и склад не изменятся\.$/,
+      { ET: "Tellimuse eest on juba tagastatud $1. Tagastame veel $2 (jäänud on $3) Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, tellimuse staatus ja laoseis ei muutu.",
+        EN: "$1 has already been refunded on this order. We will send $2 more of the $3 left back through Montonio, the way the money came. The customer gets a letter; the order's status and the stock stay as they are." }],
     /* the gift-card split: two facts of one list, so two rules rather than
        one sentence with a « · » inside it (admRefundConfirmText) */
     [/^Вернём на подарочную карту: (.+)$/,
@@ -36828,8 +36835,8 @@
       the text), so what he confirms is what the server will do. */
   function admRefundConfirmText(v, typed) {
     var rv = v.refund || { gift: 0, money: v.refundable };
+    var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
     if (rv.gift > 0.004) {
-      var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
       var gift = Math.round(Math.min(amount, rv.gift) * 100) / 100;
       var money = Math.round((amount - gift) * 100) / 100;
       /* The split is a LIST and what follows it is prose, so they are two
@@ -36845,6 +36852,21 @@
       return v.number + " · " + v.who +
         "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
         "\nКартой снова можно будет платить. Клиенту уйдёт письмо.";
+    }
+    /* A part of what is left. The box used to be read on gift-card orders
+       only, so every other order went on promising «48 € … товары вернутся на
+       склад, заказ станет «возврат»» over a box that said 10 — and a partial
+       refund does neither: the server moves the order and its shelf only once
+       the refunds cover all of it (settleRefund). Map defect 9, 24.09.2026. */
+    if (amount < v.refundable - 0.004 && v.refunded > 0.004) {
+      return v.number + " · " + v.who +
+        "\nПо заказу уже возвращено " + eur(v.refunded) + ". Вернём ещё " + eur(amount) + " из оставшихся " + eur(v.refundable) +
+        " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, статус заказа и склад не изменятся.";
+    }
+    if (amount < v.refundable - 0.004) {
+      return v.number + " · " + v.who +
+        "\nВернём " + eur(amount) + " из " + eur(v.refundable) +
+        " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, статус заказа и склад не изменятся.";
     }
     if (v.refunded > 0.004) {
       return v.number + " · " + v.who +
@@ -36867,10 +36889,33 @@
     pendingAction.detail = text;
     translateTree(node.parentElement || node);
   }
+  /** The sum typed into the refund card, or NaN when the server would refuse
+      it: not a number, under a cent, or more than is left (`max`). */
+  function admRefundAmount(typed, max) {
+    var amount = Math.round(Number(String(typed).replace(",", ".")) * 100) / 100;
+    return !isFinite(amount) || amount < 0.01 || amount > max + 0.005 ? NaN : amount;
+  }
+  /* The refund card's «Вернуть деньги». The «Применить» handler clears the
+     pending action before it gets here, and a sum out of range used to end on
+     a toast and nothing else — no render, so the card stayed on screen with a
+     button that had no action behind it any more (map defect 9, 24.09.2026).
+     The card now stays a working card: the action is put back and the box
+     has the focus, so the owner corrects the number and presses again. */
+  function admRefundApply(pa) {
+    var amtEl = document.querySelector("[data-admrefundamt]");
+    var typed = amtEl ? amtEl.value : pa.amount;
+    if (isNaN(admRefundAmount(typed, Number(pa.amount)))) {
+      pendingAction = pa;
+      toast(REFUND_ERR.bad_amount);
+      refocus("[data-admrefundamt]");
+      return;
+    }
+    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount));
+  }
   function srvOrderRefund(id, number, typed, max) {
     if (SRV.refundBusy) return;
-    var amount = Math.round(Number(String(typed).replace(",", ".")) * 100) / 100;
-    if (!isFinite(amount) || amount < 0.01 || amount > max + 0.005) { toast(REFUND_ERR.bad_amount); return; }
+    var amount = admRefundAmount(typed, max);
+    if (isNaN(amount)) { toast(REFUND_ERR.bad_amount); return; }
     SRV.refundBusy = true; render();
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", { amount: amount }).then(function (r) {
       SRV.refundBusy = false;
@@ -42045,12 +42090,9 @@
         else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
         /* «Вернуть деньги»: the sum is read off the card before the render
            below takes it away. No undo — money that left Montonio does not
-           come back from a toast. */
-        else if (pa.type === "order_refund") {
-          var amtEl = document.querySelector("[data-admrefundamt]");
-          srvOrderRefund(pa.id, pa.number, amtEl ? amtEl.value : pa.amount, Number(pa.amount));
-          return;
-        }
+           come back from a toast. A sum out of range keeps the card up
+           (admRefundApply). */
+        else if (pa.type === "order_refund") { admRefundApply(pa); return; }
         // «Написать клиенту»: the letter the card just asked about — no undo,
         // which is exactly why it was asked
         else if (pa.type === "order_mail") { srvOrderMailSend(pa); return; }
