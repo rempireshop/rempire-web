@@ -226,6 +226,9 @@ function panel(scope: {
     var SHIP_ROWS = ${literalSrc("SHIP_ROWS")};
     var CARRIER_NAMES = ${literalSrc("CARRIER_NAMES")};
     var pendingAction = null, shipRollback = null;
+    // a save the server took is remembered over a stale feed (shipping-save-sticks.test.ts)
+    var shipFresh = null, SHIP_FRESH_LS = "rempire-ship-fresh";
+    var localStorage = { getItem: function () { return null; }, setItem: function () {}, removeItem: function () {} };
     var SHIP_STORED = STORED;
     var DEMO = { log: [] };
     function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
@@ -247,6 +250,7 @@ function panel(scope: {
     ${slice("shipBody")}
     ${slice("shipSavedText")}
     ${slice("shipSavedOk")}
+    ${slice("shipFreshNote")}
     ${slice("shipRulesRefused")}
     ${slice("srvSaved")}
     ${slice("srvPush")}

@@ -944,7 +944,7 @@
       "steps": [
         "Открыть «Доставка и оплата» и выписать цены по всем странам.",
         "Положить в корзину один недорогой товар и дойти до шага доставки.",
-        "Выбрать те же страны и сравнить самую дешёвую карточку с выписанным."
+        "Выбрать те же страны и посмотреть, какая карточка отмечена сразу."
       ],
       "expect": [
         "Эстония: пакомат от 2,49 €, курьер от 6,89 €.",
@@ -952,7 +952,7 @@
         "Финляндия: пакомат от 9,39 €, курьер от 15,69 €.",
         "Бесплатно от 59 €: Эстония, Латвия, Литва, Финляндия.",
         "Для остальной Европы бесплатно от 200 €.",
-        "На кассе самая дешёвая карточка стоит столько же, до цента."
+        "Отмечена сразу самая дешёвая карточка, её цена та же до цента."
       ],
       "why": "Разницу между ценой на странице и ценой на кассе покупатель потребует назад.",
       "risk": "high",
@@ -962,7 +962,7 @@
         "steps": [
           "Open «Доставка и оплата» and write down the prices for every country.",
           "Put one cheap product in the cart and get to the delivery step.",
-          "Pick the same countries and compare the cheapest card with your notes."
+          "Pick the same countries and see which card is already ticked."
         ],
         "expect": [
           "Estonia: locker from €2.49, courier from €6.89.",
@@ -970,12 +970,12 @@
           "Finland: locker from €9.39, courier from €15.69.",
           "Free from 59 €: Estonia, Latvia, Lithuania, Finland.",
           "The rest of Europe: free from 200 €.",
-          "At the till the cheapest card costs the same, to the cent."
+          "The cheapest card is ticked on arrival and costs the same, to the cent."
         ],
         "why": "A buyer can claim back the gap between the page price and the till."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "markedAt": "2026-09-24T14:58:11.284Z"
     },
     {
       "id": "shop-locker-europe",
@@ -1791,16 +1791,17 @@
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
         "Проверить шесть строк: Эстония, Латвия, Литва, Финляндия, «Другие страны Европы», «Остальные страны».",
-        "Раскрыть «Цены по странам Европы» и найти Германию, Польшу и Грецию.",
-        "Найти блок с перечнем стран, куда не возим."
+        "Раскрыть «Цены по странам Европы» и найти Польшу, Венгрию и Грецию.",
+        "Вписать 4 в поле DPD у Польши и раскрыть «Что увидит покупатель».",
+        "Нажать «вернуть» под этим полем, ничего не сохранять."
       ],
       "expect": [
         "Под полями Эстонии: Omniva 3,19, SmartPosti 2,59, DPD 2,59, Unisend 2,49 €.",
-        "Курьер Эстонии пустой, под ним «Montonio: 6,89 €».",
-        "Латвия и Литва: Unisend 3,79 €, курьер Montonio 8,09 €.",
+        "Курьер пустой, под ним Montonio: Эстония 6,89 €, Латвия и Литва 8,09 €.",
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
-        "Курьер: Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
-        "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
+        "Польша: пакомат Nova Post 5,49 €, DPD 7,49 €, курьер 15,99 €.",
+        "Венгрия: пакомат только Nova Post 7,09 €; Греция: пакомата нет, курьер 28,89 €.",
+        "DPD Польши 4: «Ниже Montonio: 7,49 € · вернуть», в предпросмотре Европа «от 4 €»."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
       "risk": "high",
@@ -1810,21 +1811,22 @@
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
           "Check six rows: Estonia, Latvia, Lithuania, Finland, «Другие страны Европы», «Остальные страны».",
-          "Expand «Цены по странам Европы» and find Germany, Poland and Greece.",
-          "Find the block listing the countries we do not ship to."
+          "Expand «Цены по странам Европы» and find Poland, Hungary and Greece.",
+          "Type 4 into Poland's DPD box and open «Что увидит покупатель».",
+          "Press «вернуть» under that box; save nothing."
         ],
         "expect": [
           "Under Estonia's boxes: Omniva 3.19, SmartPosti 2.59, DPD 2.59, Unisend 2.49 €.",
-          "Estonia's courier box is empty, with «Montonio: 6,89 €» under it.",
-          "Latvia and Lithuania: Unisend €3.79, courier Montonio €8.09.",
+          "Courier boxes empty, Montonio under them: Estonia €6.89, Latvia and Lithuania €8.09.",
           "«Бесплатно от»: €59 in the four home countries, €200 in the rest of Europe.",
-          "Courier: Germany €17.59, Poland €15.99, Greece €28.89.",
-          "Not served: Norway, Switzerland, UK, Iceland, Cyprus, Malta, Liechtenstein."
+          "Poland: locker Nova Post €5.49, DPD €7.49, courier €15.99.",
+          "Hungary: locker Nova Post only, €7.09; Greece: no locker, courier €28.89.",
+          "Poland's DPD at 4: «Ниже Montonio: 7,49 € · вернуть», preview Europe «от 4 €»."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "markedAt": "2026-09-24T15:03:40.794Z"
     },
     {
       "id": "panel-delivery-below",
@@ -1838,15 +1840,16 @@
         "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии.",
         "Нажать «Сохранить» и прочитать карточку до конца.",
         "Нажать «Сохранить всё равно».",
-        "В кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva, потом вернуться в панель.",
+        "Сразу в кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva.",
+        "Свернуть браузер и вернуться, потом обновить страницу и открыть панель.",
         "Очистить оба поля, нажать «Сохранить» и подтвердить."
       ],
       "expect": [
         "Карточка «Цена ниже тарифа Montonio» называет обе строки, ничего не обрезано.",
         "Пока не подтвердили, рядом с «Сохранить» написано «Не сохранено».",
         "После подтверждения: «Тарифы доставки сохранены» и «Сохранено ✓».",
-        "В кассе у Omniva стоит 1 €.",
-        "В панели в полях по-прежнему 1 и 2.",
+        "В кассе у Omniva 1 € — и после возврата в браузер, и после обновления.",
+        "В панели после обновления в полях по-прежнему 1 и 2.",
         "После очистки под полями снова цены Montonio: 3,19 € и 4,99 €."
       ],
       "why": "Цена ниже тарифа — ваше решение, но случайно его не принять: карточка спрашивает один раз.",
@@ -1859,21 +1862,22 @@
           "Type 1 into Estonia's Omniva box and 2 into Latvia's.",
           "Press «Сохранить» (save) and read the card to the end.",
           "Press «Сохранить всё равно» (save anyway).",
-          "At the checkout, with a cart under 59 €, pick Estonia, «Пакомат» and Omniva, then go back to the panel.",
+          "Straight away, at the checkout with a cart under 59 €, pick Estonia, «Пакомат» and Omniva.",
+          "Put the browser in the background and come back, then reload and open the panel.",
           "Clear both boxes, press «Сохранить» and confirm."
         ],
         "expect": [
           "The «Цена ниже тарифа Montonio» card names both rows, nothing cut off.",
           "Until you confirm, «Не сохранено» stands next to «Сохранить».",
           "After confirming: «Тарифы доставки сохранены» and «Сохранено ✓».",
-          "At the checkout Omniva costs 1 €.",
-          "Back in the panel the boxes still hold 1 and 2.",
+          "At the checkout Omniva is 1 € — after coming back and after the reload.",
+          "Back in the panel after the reload the boxes still hold 1 and 2.",
           "After clearing, Montonio's prices are under the boxes again: 3,19 € and 4,99 €."
         ],
         "why": "A price below the rate is your call, but never by accident: the card asks once."
       },
-      "mark": "new",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "mark": "redo",
+      "markedAt": "2026-09-24T15:09:21.235Z"
     },
     {
       "id": "panel-carton",
@@ -4741,7 +4745,7 @@
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
         "Выбрать Эстонию и строку «Пакомат Omniva».",
-        "Нажать «Выберите пакомат», набрать «Tallinn» или индекс и выбрать пункт из найденных (или на «Карте»).",
+        "Нажать «Выберите пакомат», набрать индекс 10120 и выбрать пункт из найденных (или на «Карте»).",
         "То же проверить для Латвии, Литвы и Финляндии, в конце снова выбрать пакомат в Эстонии.",
         "Набрать новую корзину и дойти до шага доставки, потом то же с другого телефона.",
         "На шаге доставки вручную выбрать Латвию, заказ не оформлять.",
@@ -4753,12 +4757,12 @@
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "В каждой стране с пакоматами кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "10120 у Omniva: сначала центр Таллина; в Финляндии поиск без «Карты».",
         "Эстония: пока пакомат не выбран, под строками «Выберите пакомат — тогда сохраним».",
         "После «…сохранена ✓» касса подставляет её на обоих телефонах, после «Выйти» — нет.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
         "Только «Адрес»: под строками «Впишите адрес, индекс и город — тогда сохраним».",
-        "Греция: в оформлении Греция, курьер и вписанный адрес, цена та же."
+        "Греция: в кабинете «только курьером до двери», в оформлении курьер, адрес и та же цена."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4768,7 +4772,7 @@
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
           "Choose Estonia and the «Пакомат Omniva» row.",
-          "Press «Выберите пакомат», type «Tallinn» or a postcode and pick one of the points found (or on the «Карта» map).",
+          "Press «Выберите пакомат», type the postcode 10120 and pick one of the points found (or on the «Карта» map).",
           "Check the same for Latvia, Lithuania and Finland; at the end pick an Estonian locker again.",
           "Fill a new cart and get to the delivery step, then do the same on another phone.",
           "On the delivery step pick Latvia by hand; do not place the order.",
@@ -4780,17 +4784,17 @@
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Every locker country: a «Выберите пакомат» button with search, as in the checkout.",
+          "10120 at Omniva: Tallinn's centre first; Finland has search, no «Карта» map.",
           "Estonia: until a locker is picked, under the rows: «Выберите пакомат — тогда сохраним».",
           "After «…сохранена ✓» the checkout fills it in on both phones; after «Выйти» it does not.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
           "Only «Адрес» typed: under the rows «Впишите адрес, индекс и город — тогда сохраним».",
-          "Greece: the checkout has Greece, the courier and the typed address, at the same price."
+          "Greece: the account says «только курьером до двери»; the checkout has courier, address, same price."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T14:56:34.522Z"
+      "markedAt": "2026-09-24T15:18:05.686Z"
     },
     {
       "id": "acct-refund-sent",

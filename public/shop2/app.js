@@ -1092,6 +1092,7 @@
       "Доставка по умолчанию": "Vaikimisi tarneviis",
       "Подставим это при следующем заказе — менять можно в любой момент.":
         "Täidame selle järgmisel tellimusel automaatselt — muuta saad igal ajal.",
+      "В эту страну доставляем только курьером до двери.": "Sellesse riiki toimetame ainult kulleriga ukseni.",
       "доставлен": "kohale toimetatud", "активен": "kehtiv",
       "−10% ко дню рождения · до 30.09": "−10% sünnipäevaks · kuni 30.09",
 
@@ -3054,8 +3055,12 @@
       "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
         "Üleandmiskoodi pakil tavaliselt ei ole: seda antakse ainult vedajaga sõlmitud otselepingu korral ja Omniva ei anna üldse. See on normaalne — pakk antakse üle pakisildi järgi, skaneerides selle pakiautomaadis. Tühi rida A4-lehel ei ole viga.",
       "Сторона коробки — от 1 до 200 см.": "Karbi külg on 1 kuni 200 cm.",
-      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "Pakiautomaadi hind nendes riikides tuleb selle riigi «Pakiautomaadi» veerust, eraldi vedajahinda siin ei ole. Hinna all on see, mis pood võtab, kui väli tühjendada, ja millise vedajaga pakk läheb.",
+      "Пакомат — своя цена у каждого перевозчика, как у Эстонии.":
+        "Pakiautomaat — igal vedajal oma hind, nagu Eestis.",
+      "Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.":
+        "Kuller: tühi väli — igal vedajal oma Montonio hind, sinu number — üks hind kõigile.",
+      "Под полем — сколько магазин возьмёт, если поле очистить.":
+        "Välja all on see, mis pood võtab, kui väli tühjendada.",
       "Где предлагать пакомат": "Kus pakiautomaati pakkuda",
       "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
         "Montonio viib pakiautomaatidesse ja pakipunktidesse kõigis neis riikides. Lülita riik välja — ja kassas jääb sellele ainult kuller.",
@@ -4135,6 +4140,7 @@
       "Доставка по умолчанию": "Default delivery",
       "Подставим это при следующем заказе — менять можно в любой момент.":
         "We will fill this in on your next order — you can change it at any time.",
+      "В эту страну доставляем только курьером до двери.": "To this country we deliver by courier to the door only.",
       "доставлен": "delivered", "активен": "active",
       "−10% ко дню рождения · до 30.09": "−10% birthday discount · until 30.09",
 
@@ -6066,8 +6072,12 @@
       "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
         "A parcel usually has no drop-off code: it is issued only on a direct contract with the carrier, and Omniva issues none at all. That is normal — the parcel is handed over by its label, scanned at the machine. A blank line on the A4 sheet is not a fault.",
       "Сторона коробки — от 1 до 200 см.": "A side of the box is 1 to 200 cm.",
-      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "The pickup-point price in these countries comes from that country's «Pickup point» column; there is no separate per-carrier price here. Under the price is what the shop charges if the box is cleared, and which carrier the parcel goes with.",
+      "Пакомат — своя цена у каждого перевозчика, как у Эстонии.":
+        "Pickup point — each carrier has its own price, as for Estonia.",
+      "Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.":
+        "Courier: an empty box — each carrier at its own Montonio price; your number — one price for all.",
+      "Под полем — сколько магазин возьмёт, если поле очистить.":
+        "Under a box is what the shop charges if the box is cleared.",
       "Где предлагать пакомат": "Where to offer a pickup point",
       "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
         "Montonio delivers to lockers and pickup points in every one of these countries. Switch a country off and its checkout keeps the courier alone.",
@@ -8127,12 +8137,62 @@
       if (!j || !j.ok) return;
       apiSeen(true);
       var s = j.settings || {};
-      applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
+      /* …and the edge's own copy is no better than the browser's while a
+         row this browser has just saved is younger than it (shipFreshRow):
+         merged over the saved row it put an old cell straight back into the
+         till (Дим, /test 24.09.2026). The saved row, whole, instead. */
+      var fresh = shipFreshRow();
+      if (fresh) setShipRules(fresh);
+      else applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
       // Rules move both the delivery-method prices/free-shipping hint and the
       // shipping row + total in the summary — never the contact block, so
       // never a full render() (see patchDelivery/patchSummary near patchEmail).
       patchDelivery(); patchSummary();
     }).catch(function () { apiSeen(false); });
+  }
+  /* ---- a row just saved outranks the edge's copy of the old one -----------
+     Дим, /test 24.09.2026, «Цена доставки ниже Montonio»: «First save did
+     not save and the change in checkout could not be seen. I saved another
+     time … and then the second time it worked.» The save had landed. What
+     took it off the screen was the next READ: /api/overrides/ goes out
+     `public, s-maxage=30, stale-while-revalidate=120`
+     (src/app/api/overrides/route.ts), so for up to two and a half minutes
+     after «Сохранить» the edge hands back the row from BEFORE it — and the
+     shop brought back to the front (refreshFeeds → adoptServer), the
+     checkout's first visit (loadShipRules) or a reload took that row as the
+     truth: the till quoted the old price, the panel showed the old boxes, and
+     a second save built on them sent the old row back to the server.
+
+     So the row the server has just taken is remembered, with the time it was
+     taken — in memory, and in this browser's storage for the next page it
+     opens — and for SHIP_FRESH_MS every feed answer is read as that row.
+     After it the edge has caught up and the feed is the truth again (another
+     phone may have saved since). The panel's own read of the settings,
+     GET /api/admin/settings, is never cached and counts the same way, in
+     memory only (loadAdminPricing). A customer's browser never writes one. */
+  var SHIP_FRESH_MS = 180000;
+  var SHIP_FRESH_LS = "rempire-ship-fresh";
+  var shipFresh = null;
+  /** `row` is what the server holds as of now; `keep` — remember it for the
+      next page this browser opens too (a save; not a read). */
+  function shipFreshNote(row, keep) {
+    shipFresh = { at: Date.now(), row: cloneRules(row) };
+    if (!keep) return;
+    try { localStorage.setItem(SHIP_FRESH_LS, JSON.stringify(shipFresh)); } catch (e) {}
+  }
+  /** The newest such row still younger than SHIP_FRESH_MS, or null. */
+  function shipFreshRow() {
+    var now = Date.now(), best = null, kept = null;
+    function young(f) {
+      return !!f && !!f.row && typeof f.row === "object" && typeof f.at === "number" &&
+        now - f.at >= 0 && now - f.at <= SHIP_FRESH_MS;
+    }
+    try { kept = JSON.parse(localStorage.getItem(SHIP_FRESH_LS) || "null"); } catch (e) { kept = null; }
+    // a note past its time is only noise in the owner's storage — dropped once seen
+    if (kept && !young(kept)) { kept = null; try { localStorage.removeItem(SHIP_FRESH_LS); } catch (e) {} }
+    if (young(shipFresh)) best = shipFresh;
+    if (kept && (!best || kept.at > best.at)) best = kept;
+    return best ? best.row : null;
   }
 
   /**
@@ -8209,13 +8269,33 @@
   function methodCarriers(m, country) {
     return m === "parcel" ? carriersFor(country) : m === "courier" ? courierCarriersFor(country) : [];
   }
-  /* The carrier this order goes with: the one the shopper tapped, if the
-     current delivery type still offers it, else the FIRST of the list —
-     Montonio's own calculator pre-selects exactly that way (Дим, 22.09.2026:
-     «first the parcel is preselected and then after a provider»). */
+  /* The carrier this order goes with: the one the shopper tapped (or the
+     account's «Доставка по умолчанию» brought in — applyAcctShipPref), if
+     the current delivery type still offers it, else the CHEAPEST of the list.
+     Until 24.09.2026 it was the first, the way Montonio's calculator
+     pre-selects (Дим, 22.09.2026: «first the parcel is preselected and then
+     after a provider») — and the row above the cards said «от 2,49 €» while
+     the card ticked under it was DPD's 2,59 €. Дим, /test, 24.09.2026:
+     «when we show "from ..." then we should also pre-select the cheapest
+     one.» The cards keep Montonio's order; only the tick moves. */
   function shipCarrier() {
-    var list = methodCarriers(shipMethod());
-    return list.indexOf(S.ship.carrier) >= 0 ? S.ship.carrier : (list[0] || "");
+    var m = shipMethod(), list = methodCarriers(m);
+    return list.indexOf(S.ship.carrier) >= 0 ? S.ship.carrier : cheapestCarrier(m, list);
+  }
+  /** The cheapest of `list` for delivery type `m`, first on a tie — so a
+      country whose carriers all cost the same (Estonia's courier, the
+      owner's 10,84 € for every one) still ticks the first card. Priced by
+      the rules, not by the basket: a cart that has earned free delivery
+      shows «Бесплатно» on every card and must not tick a different one for
+      it. `country` as shipRulePrice() takes it — the checkout's own when
+      left out, the account's draft's from acctShipPrice(). */
+  function cheapestCarrier(m, list, country) {
+    var best = list[0] || "", low = Infinity;
+    for (var i = 0; i < list.length; i++) {
+      var p = shipRulePrice(m, list[i], country);
+      if (p < low - 0.001) { low = p; best = list[i]; }
+    }
+    return best;
   }
   function isParcel() { return shipMethod() === "parcel"; }
   function shipMethodLabel() {
@@ -8525,40 +8605,125 @@
      «LV-1010» — orders the whole list nearest-first instead of filtering it.
      The same rules run on the server for the lists too big to hold
      (src/lib/shipping/point-search.ts); tests/point-search.test.ts holds the
-     two to the same order. */
+     two to the same order.
+
+     Omniva is the exception, both ways round (Дим, /test 24.09.2026: 10120
+     «does not find "nearest" or almost anything close to»). Its `zip` is the
+     machine's terminal code — 96001 for Tallinn's Balti Jaam — never a
+     postcode, so it is not read as one (zipIsPostcode); what its points DO
+     have is coordinates, so a postcode typed over them is turned into a
+     place (POSTCODE_GEO, the middle of the committed points whose postcode
+     starts the same way — tools/postcode-geo.mjs) and they are ordered by
+     their distance from it: 10120 opens on Stockmann, Viru Keskus and
+     Solaris instead of Kihnu, Vormsi and Ruhnu. Estonia only — nothing
+     committed places a Latvian or Lithuanian postcode — and there a postcode
+     over an Omniva list is searched as words, which says «Ничего не нашли»
+     instead of handing back the whole country in an order that only looks
+     like an answer. POSTCODE_GEO is src/data/postcode-geo.json to the digit
+     (tests/point-search-estonia.test.ts). */
+  var POSTCODE_GEO = {
+    EE: {
+      "10": [59.43, 24.73], "11": [59.416, 24.753], "12": [59.421, 24.704], "13": [59.43, 24.772], "19": [59.426, 24.784], "20": [59.381, 28.184],
+      "21": [59.377, 28.165], "30": [59.392, 27.266], "31": [59.332, 27.422], "40": [59.391, 27.783], "41": [59.317, 27.416], "42": [58.99, 27],
+      "43": [59.389, 26.937], "44": [59.38, 26.415], "45": [59.328, 26.092], "46": [59.209, 26.5], "48": [58.731, 26.315], "49": [58.703, 26.607],
+      "50": [58.374, 26.731], "51": [58.381, 26.721], "60": [58.497, 26.852], "61": [58.273, 26.546], "62": [58.351, 26.789], "63": [58.034, 26.938],
+      "64": [57.99, 27.485], "65": [57.822, 27.055], "66": [57.828, 26.529], "67": [58.093, 26.51], "68": [57.868, 25.986], "69": [58.143, 25.496],
+      "70": [58.503, 25.608], "71": [58.401, 25.56], "72": [58.865, 25.568], "73": [59.065, 25.917], "74": [59.476, 25.141], "75": [59.306, 24.949],
+      "76": [59.339, 24.428], "78": [58.853, 24.397], "79": [59.022, 24.782], "80": [58.384, 24.52], "85": [58.409, 24.553], "86": [58.271, 24.635],
+      "87": [58.592, 24.724], "88": [58.385, 24.312], "90": [58.859, 23.68], "91": [59.004, 23.62], "92": [58.954, 22.758], "93": [58.206, 22.572],
+      "94": [58.49, 23.045], "101": [59.432, 24.761], "103": [59.445, 24.699], "104": [59.449, 24.72], "106": [59.427, 24.711], "109": [59.356, 24.629],
+      "112": [59.369, 24.738], "113": [59.406, 24.725], "114": [59.425, 24.81], "116": [59.386, 24.683], "117": [59.452, 24.718], "118": [59.393, 24.719],
+      "119": [59.468, 24.832], "121": [59.497, 24.829], "127": [59.411, 24.682], "129": [59.408, 24.683], "134": [59.403, 24.7], "135": [59.419, 24.642],
+      "136": [59.44, 24.837], "138": [59.441, 24.878], "139": [59.448, 24.868], "190": [59.426, 24.784], "203": [59.378, 28.189], "206": [59.384, 28.179],
+      "210": [59.377, 28.165], "303": [59.402, 27.285], "305": [59.354, 27.192], "310": [59.332, 27.422], "402": [59.391, 27.783], "412": [59.202, 27.535],
+      "413": [59.225, 27.296], "415": [59.358, 27.416], "420": [58.948, 27.048], "421": [58.986, 26.87], "422": [59.036, 27.081], "431": [59.358, 26.975],
+      "434": [59.451, 26.861], "441": [59.5, 26.519], "442": [59.394, 26.566], "443": [59.356, 26.378], "444": [59.365, 26.34], "451": [59.265, 25.965],
+      "452": [59.342, 26.131], "453": [59.426, 26.268], "462": [59.13, 26.252], "466": [59.235, 26.582], "481": [58.652, 25.983], "483": [58.746, 26.391],
+      "484": [58.729, 26.337], "485": [58.826, 26.653], "490": [58.577, 26.29], "492": [58.685, 26.586], "496": [58.848, 26.945], "501": [58.36, 26.727],
+      "503": [58.398, 26.719], "504": [58.367, 26.696], "505": [58.358, 26.675], "506": [58.378, 26.748], "507": [58.373, 26.767], "510": [58.381, 26.721],
+      "601": [58.661, 27.161], "602": [58.601, 27.132], "604": [58.526, 27.076], "605": [58.406, 26.746], "606": [58.471, 26.36], "610": [58.144, 26.249],
+      "614": [58.361, 26.651], "615": [58.221, 26.406], "616": [58.273, 26.53], "617": [58.323, 26.699], "622": [58.351, 26.789], "630": [57.967, 27],
+      "631": [57.984, 26.817], "633": [58.058, 27.059], "634": [58.066, 26.729], "635": [58.076, 26.841], "640": [57.958, 27.631], "642": [57.947, 27.215],
+      "645": [58.098, 27.464], "652": [57.732, 27.284], "656": [57.84, 27.009], "664": [57.828, 26.529], "674": [58.059, 26.498], "675": [58.126, 26.522],
+      "682": [57.778, 26.031], "686": [58.004, 25.919], "691": [58.096, 25.562], "693": [58.116, 25.199], "694": [58.126, 25.356], "697": [58.235, 25.866],
+      "701": [58.359, 25.639], "704": [58.518, 25.625], "706": [58.631, 25.56], "710": [58.362, 25.586], "715": [58.536, 25.465], "722": [58.808, 25.43],
+      "724": [58.745, 25.769], "726": [58.945, 25.643], "727": [58.885, 25.549], "730": [58.964, 26.028], "733": [59.038, 25.884], "735": [59.192, 25.84],
+      "740": [59.53, 24.865], "741": [59.48, 24.998], "742": [59.476, 25.111], "743": [59.335, 25.333], "744": [59.316, 25.346], "746": [59.446, 25.439],
+      "747": [59.606, 25.498], "748": [59.579, 25.728], "750": [59.104, 25.263], "751": [59.194, 25.134], "752": [59.365, 25.112], "753": [59.378, 24.859],
+      "754": [59.318, 24.8], "755": [59.264, 24.67], "760": [59.227, 24.164], "761": [59.248, 24.239], "764": [59.321, 24.582], "765": [59.324, 24.554],
+      "766": [59.311, 24.419], "767": [59.378, 24.239], "768": [59.35, 24.059], "769": [59.436, 24.525], "780": [58.712, 24.365], "781": [58.918, 24.169],
+      "782": [58.819, 24.59], "783": [58.907, 24.43], "790": [58.926, 24.872], "791": [58.775, 24.818], "795": [58.995, 24.808], "796": [59.041, 24.669],
+      "797": [59.221, 24.672], "798": [59.167, 24.755], "800": [58.384, 24.522], "805": [58.387, 24.504], "850": [58.409, 24.553], "860": [58.081, 24.5],
+      "863": [58.148, 24.949], "865": [58.245, 24.53], "866": [58.375, 24.62], "867": [58.405, 24.652], "868": [58.483, 24.813], "872": [58.607, 24.502],
+      "873": [58.519, 24.565], "875": [58.586, 24.785], "877": [58.656, 25.043], "881": [58.329, 24.015], "883": [58.404, 24.411], "901": [58.579, 23.532],
+      "903": [58.682, 23.823], "904": [58.938, 23.577], "905": [58.94, 23.542], "906": [58.771, 23.924], "909": [58.999, 24.059], "910": [58.996, 23.718],
+      "912": [59.013, 23.522], "921": [58.831, 22.775], "924": [58.996, 22.753], "930": [57.803, 23.245], "935": [58.335, 22.264], "938": [58.261, 22.498],
+      "941": [58.306, 22.82], "946": [58.559, 23.082], "947": [58.606, 23.232]
+    }
+  };
   function normZip(s) {
     return String(s == null ? "" : s).toUpperCase()
       .replace(/^[A-Z]{2}(?=[-\s]?\d)/, "").replace(/[^0-9A-Z]/g, "");
   }
   function isPostcodeQuery(q) { return /^\d{2,}$/.test(normZip(q)); }
+  /** Omniva's `zip` is its terminal code, never a postcode (see above). */
+  function zipIsPostcode(p) { return String(p.carrier || "").toLowerCase() !== "omniva"; }
   function pointZip(p) {
+    if (!zipIsPostcode(p)) return "";
     var own = normZip(p.zip);
     if (own) return own;
     var m = String(p.name || "").match(/\b(\d{2}-\d{3}|\d{4,5})\b/);
     return m ? normZip(m[1]) : "";
   }
-  function rankByPostcode(points, q) {
+  /** Where the typed postcode is, by its longest known prefix, or null. */
+  function postcodeAnchor(country, q) {
+    var table = POSTCODE_GEO[String(country || "").toUpperCase()];
+    if (!table) return null;
+    var want = normZip(q);
+    for (var n = Math.min(3, want.length); n >= 2; n--) {
+      var at = table[want.slice(0, n)];
+      if (at) return at;
+    }
+    return null;
+  }
+  /** Squared distance in degrees of latitude — or Infinity without coordinates. */
+  function geoGap(a, p) {
+    if (typeof p.lat !== "number" || typeof p.lng !== "number" || !isFinite(p.lat) || !isFinite(p.lng)) return Infinity;
+    var k = Math.cos(a[0] * Math.PI / 180), dy = p.lat - a[0], dx = (p.lng - a[1]) * k;
+    return dy * dy + dx * dx;
+  }
+  function rankByPostcode(points, q, country) {
     var want = normZip(q), n = want.length, target = parseInt(want, 10);
+    var anchor = postcodeAnchor(country, want);
     return points.map(function (p, i) {
       var zip = pointZip(p), shared = 0;
-      while (shared < n && shared < zip.length && zip.charAt(shared) === want.charAt(shared)) shared++;
-      var head = parseInt(zip.slice(0, n), 10);
-      return { p: p, i: i, zip: zip, shared: shared, gap: zip && isFinite(head) ? Math.abs(head - target) : Infinity };
+      if (zip) {
+        while (shared < n && shared < zip.length && zip.charAt(shared) === want.charAt(shared)) shared++;
+        var head = parseInt(zip.slice(0, n), 10);
+        return { p: p, i: i, zip: zip, tier: 0, shared: shared, gap: isFinite(head) ? Math.abs(head - target) : Infinity };
+      }
+      var far = anchor ? geoGap(anchor, p) : Infinity;
+      return { p: p, i: i, zip: zip, tier: isFinite(far) ? 1 : 2, shared: 0, gap: far };
     }).sort(function (a, b) {
-      return (b.shared - a.shared) || (a.gap - b.gap) ||
+      return (a.tier - b.tier) || (b.shared - a.shared) || (a.gap - b.gap) ||
         (a.zip < b.zip ? -1 : a.zip > b.zip ? 1 : 0) || (a.i - b.i);
     }).map(function (x) { return x.p; });
   }
   function matchesWords(p, q) {
     var words = q.toLowerCase().split(/\s+/).filter(Boolean);
     var hay = ((p.name || "") + " " + (p.address || "") + " " + (p.city || "") + " " +
-      (p.zip || "") + " " + pointZip(p)).toLowerCase();
+      (zipIsPostcode(p) ? (p.zip || "") : "") + " " + pointZip(p)).toLowerCase();
     for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
     return true;
   }
-  function searchPoints(points, q) {
+  /** `country` is the list's own — it says where a typed postcode is. */
+  function searchPoints(points, q, country) {
     var query = q.trim();
-    if (isPostcodeQuery(query)) return rankByPostcode(points, query);
+    if (isPostcodeQuery(query)) {
+      var anchor = postcodeAnchor(country, query);
+      var measurable = points.some(function (p) { return !!pointZip(p) || (!!anchor && isFinite(geoGap(anchor, p))); });
+      if (measurable) return rankByPostcode(points, query, country);
+    }
     return points.filter(function (p) { return matchesWords(p, query); });
   }
   function pointsMatching() {
@@ -8567,7 +8732,9 @@
     var all = pointsList() || [];
     var q = POINTS.q.trim().toLowerCase();
     if (!q) return all;
-    return searchPoints(all, q);
+    // the list's own country — «carrier:cc», the checkout's or the account's
+    var key = pointsKey();
+    return searchPoints(all, q, key.slice(key.indexOf(":") + 1));
   }
   /** Typeahead over name, address and city — the three things people type. */
   function pointsFiltered() {
@@ -9654,8 +9821,9 @@
       rows.push({ l: "Пакомат " + (CARRIER_NAMES[c] || c), pm: c });
     });
     /* The courier row names no carrier since 22.09.2026: the carrier is picked
-       at the checkout, from the cards under «Курьер до двери», and the first
-       one is pre-selected — so this row's price is that first carrier's. */
+       at the checkout, from the cards under «Курьер до двери», and the
+       cheapest one is pre-selected (since 24.09.2026, cheapestCarrier) — so
+       this row's price is that cheapest carrier's. */
     rows.push({ l: "Курьер до двери" });
     return rows;
   }
@@ -9787,7 +9955,8 @@
   function acctShipPrice(x) {
     if (x.pickup) return 0;
     var cc = acctShipCountry();
-    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || (COURIER_CARRIERS[cc] || [])[0] || "", cc);
+    // the courier card the checkout ticks on arrival: the cheapest (shipCarrier)
+    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || cheapestCarrier("courier", COURIER_CARRIERS[cc] || [], cc), cc);
   }
 
   /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
@@ -16119,6 +16288,8 @@
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
           '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
+      // a country with no locker at all says so, rather than one row and silence
+      acctCourierOnlyHTML(m) +
       /* the block's one line: «Выберите пакомат — тогда сохраним» under a
          parcel row still waiting for its machine, «Доставка по умолчанию
          сохранена ✓» once the choice is on the row (acctShipChanged) */
@@ -16151,6 +16322,22 @@
     return '<div class="acct__addr">' + box("addr", "Адрес", "улица, дом", "street-address", "") +
       '<div class="co__zip">' + box("zip", "Индекс", "12345", "postal-code", "numeric") +
       box("city", "Город", "Город", "address-level2", "") + "</div></div>";
+  }
+  /* A country whose rows are the courier alone — Greece, the one country the
+     shop serves with no pickup point at any carrier (staging, 24.09.2026:
+     DPD, SmartPosti and Nova Post all answer none), or one the owner switched
+     the locker off for in «Где предлагать пакомат» — says so in words. One
+     row and nothing under it read like a list still loading.
+     Every other country the block offers has lockers: Finland too — DPD
+     2 572 points and SmartPosti 1 777 on staging, searched on the server by
+     postcode, town or street like Poland's. What Finland has no map for is
+     coordinates: Montonio sends none for a Finnish point, so the sheet has
+     no «Карта» there (pointsHaveMap), exactly as for Poland or Italy (Дим,
+     /test 24.09.2026: «Finland does not have a map — not sure if it
+     should»). */
+  function acctCourierOnlyHTML(rows) {
+    for (var i = 0; i < rows.length; i++) if (rows[i].pm || rows[i].pickup) return "";
+    return '<p class="muted" style="margin:8px 0 0">В эту страну доставляем только курьером до двери.</p>';
   }
   /* The machine under a parcel row of «Доставка по умолчанию»: the
      checkout's own picker, for every country and every carrier — the same
@@ -17268,7 +17455,8 @@
      price. Not just a bunch of chips.» So: the delivery type first — each
      row priced «от» its cheapest carrier — and under the chosen type the
      carriers for it, one card each with its own price, in Montonio's order,
-     the first pre-selected. A country with one carrier still shows its one
+     the cheapest pre-selected (since 24.09.2026 — the card the «от» names;
+     it was the first). A country with one carrier still shows its one
      card, so the step reads the same everywhere. Nova Post carries «без
      возврата» on its card and a line under the list when it is picked:
      it is the cheapest almost everywhere abroad and the one carrier with no
@@ -17471,8 +17659,8 @@
     // now drop out) without touching the rest of the screen — five of these
     // can land back to back (one loadPointsFor() per carrier), and a full
     // render() on each one is exactly the checkout flicker this avoids.
-    // …and the totals with it: since 22.09.2026 the first card is the
-    // pre-selected carrier, so a card struck off can change what the order
+    // …and the totals with it: since 22.09.2026 a card is pre-selected (the
+    // cheapest, since 24.09.2026), so a card struck off can change what the order
     // costs, and the summary kept the old price until something else
     // redrew it (found by the promo sweep: 11,59 € shown, 12,19 € billed).
     patchDelivery(); patchSummary();
@@ -26633,8 +26821,8 @@
     var cell = input.parentNode, html = "";
     if (!cell || !cell.className || cell.className.indexOf("adm-rates__c") < 0) return;
     if (parts[0] === "c") {
-      var row = MONTONIO_PRICE.carriers[parts[1]];
-      var price = row && row[parts[2]];
+      // Montonio's price for this card — abroad as well as at home (24.09.2026)
+      var price = shipLockerMontonio(parts[1], parts[2]);
       if (typeof price !== "number") return;
       html = admRateFootHTML(key, String(input.value).trim(), price, "");
     } else if (parts[0] === "m" && parts[1] === "courier") {
@@ -26762,19 +26950,22 @@
    * learnt to read them.
    * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
    * real country can be switched off, not a zone.
-   * `cols` false leaves the carrier boxes out altogether — the European fold
-   * uses it, because the checkout offers a locker in none of those twenty-one
-   * countries and twenty-one rows of five dashes is noise, not information.
+   * `cols` is the carrier columns to draw — SHIP_CARRIER_COLS when left out.
+   * The European fold passes SHIP_EU_CARRIER_COLS: its countries have lockers
+   * at Nova Post and DPD only, and until 24.09.2026 it drew no locker box at
+   * all — the checkout sold those lockers at Montonio's price and the owner
+   * had nothing to type over it (Дим, /test, 24.09.2026).
    */
   function admShipRowHTML(key, name, iso, cols) {
+    var eu = cols === SHIP_EU_CARRIER_COLS;
     var off = iso ? shipCountryOff(iso) : false;
     var head = "<span>" + (iso
       ? '<span class="adm-tariffs__c">' + esc(name) +
           admSwitch('data-shipcountry="' + iso + '"', !off,
             off ? "Доставлять в эту страну" : "Не доставлять в эту страну") + "</span>"
       : name) + "</span>";
-    var carriers = cols === false ? "" : SHIP_CARRIER_COLS.map(function (c) {
-      var price = MONTONIO_PRICE.carriers[c[0]] && MONTONIO_PRICE.carriers[c[0]][key];
+    var carriers = (cols || SHIP_CARRIER_COLS).map(function (c) {
+      var price = shipLockerMontonio(c[0], key);
       var label = c[1] + " — " + name;
       if (typeof price !== "number") return admRateNoneHTML(c[1]);
       var cell = shipCarrierCell(c[0], key);
@@ -26782,7 +26973,7 @@
         admRateFootHTML("c:" + c[0] + ":" + key, cell, price, ""));
     }).join("");
     var courier = shipCell("courier", key);
-    return '<div class="adm-tariffs adm-tariffs--rates' + (cols === false ? " adm-tariffs--eu" : "") +
+    return '<div class="adm-tariffs adm-tariffs--rates' + (eu ? " adm-tariffs--eu" : "") +
       (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head + carriers +
       admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name, "Курьер, €",
         admShipCourierFoot(key, courier)) +
@@ -26822,9 +27013,13 @@
    * from the zone whose price it overrides. Country names come from the
    * browser, so all three languages get them free.
    *
-   * Three columns inside, not eight: the checkout offers a locker chip in none
-   * of them, so the five carrier columns would be a hundred and five dashes.
-   * The line above the list says that once instead.
+   * Five columns inside, not eight: a locker box for each of the two carriers
+   * that have lockers in these countries (SHIP_EU_CARRIER_COLS — Nova Post
+   * and DPD), then the courier and «Бесплатно от». Until 24.09.2026 there
+   * were three, and the line above the list said there was no per-carrier
+   * price here — while the checkout sold each of those lockers at its own
+   * Montonio price. Omniva, SmartPosti and Unisend would be sixty-three
+   * dashes, so they stay out.
    *
    * 18.09.2026 — the fold no longer says «только курьер». Ренат opened every
    * country DPD serves, so eighteen of these twenty-one now offer a pickup
@@ -26846,13 +27041,19 @@
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. ' +
-          "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
+        /* One sentence per column kind, each a whole dictionary key. The
+           courier half is not the locker half: an empty courier box lets
+           every carrier charge its own Montonio price, a typed one is one
+           price for all of them (shipRulePrice, quoteFromRules). */
+        '<p class="adm-hint" style="margin:0 0 4px">Пакомат — своя цена у каждого перевозчика, как у Эстонии.</p>' +
+        '<p class="adm-hint" style="margin:0 0 4px">Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.</p>' +
+        '<p class="adm-hint" style="margin:0 0 10px">Под полем — сколько магазин возьмёт, если поле очистить.</p>' +
         '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
+          SHIP_EU_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
           "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
         SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
-          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], false); }).join("") +
+          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], SHIP_EU_CARRIER_COLS); }).join("") +
         admShipPickupHTML() +
         admShipUnservedHTML() +
       "</div></details>";
@@ -28366,11 +28567,27 @@
     if (S.pricingLoadErr && !force) return;
     if (loadAdminPricing._busy) return;
     loadAdminPricing._busy = true;
+    var askedAt = Date.now();
     apiJson("/api/admin/settings/").then(function (r) {
       loadAdminPricing._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var st0 = r.body.settings || {};
+        /* The tariff row, from the one read of it no edge can have kept
+           (no-store). The panel used to show whatever /api/overrides/ last
+           said — up to two and a half minutes behind a save — so a reload
+           right after «Сохранить» showed the old boxes, and the next save
+           sent the old row back (Дим, /test 24.09.2026; shipFreshRow). Not
+           while a save is on its way, and not if one landed after this read
+           was asked for: then this answer is the older of the two. Prices
+           typed and not saved stay in their boxes, as in adoptServer(). */
+        var ownShip = feedShipRules(st0);
+        if (ownShip && !S.shipSaving && !(shipFresh && shipFresh.at >= askedAt)) {
+          var keepShipDraft = shipDirty();
+          setShipRules(ownShip);
+          if (!keepShipDraft) S.shipDraft = null;
+          shipFreshNote(ownShip, false);
+        }
         /* The form's own draft is seeded from S.pricingLoaded, and the first
            paint happens before this answer lands — so a draft made from the
            empty defaults has to go, or the card would keep drawing «Партнёры
@@ -28741,6 +28958,30 @@
   var SHIP_CARRIER_COLS = [
     ["omniva", "Omniva"], ["smartpost", "SmartPosti"], ["dpd", "DPD"], ["unisend", "Unisend"]
   ];
+  /* …and the locker columns of the twenty-one countries in the fold under
+     «Другие страны Европы» (24.09.2026). Дим, /test: «Poland, Germany .. I
+     can only, as it seems change the price for the courier, but I think some
+     have also parcels … the info for the shipping is then taken from
+     somewhere which we cannot override.» It was: since 18.09.2026 the
+     checkout offers a locker in every country DPD serves and Nova Post's in
+     nine, each card at its own Montonio price (MONTONIO_PRICE.chips), while
+     the fold drew a courier box and nothing else. Outside the Baltics and
+     Finland these two are the only carriers with lockers (CARRIERS_BY_COUNTRY
+     — on staging DPD answers points in eighteen of the countries, Nova Post
+     in nine, nobody in Greece), so two columns, in Montonio's order.
+     quoteFromRules() has always read a carrier cell for any country, so a
+     number typed here bills as typed. tests/shipping-eu-locker-cells.test.ts
+     holds the list to that table and to the grid in admin.css. */
+  var SHIP_EU_CARRIER_COLS = [["novapost", "Nova Post"], ["dpd", "DPD"]];
+  /** What an EMPTY locker box of carrier `c` charges in `cc` — Montonio's own
+      price for that card (chipPriceTable() on the server) — or undefined
+      where that carrier has no locker there: a dash, not a box. */
+  function shipLockerMontonio(c, cc) {
+    var chip = (MONTONIO_PRICE.chips.parcel || {})[c];
+    if (chip && typeof chip[cc] === "number") return chip[cc];
+    var row = MONTONIO_PRICE.carriers[c];
+    return row && typeof row[cc] === "number" ? row[cc] : undefined;
+  }
   /* `MONTONIO_TARIFFS` (raw per-carrier tariffs) and `MONTONIO_COST` (the
      per-country cost basis) stood here until 14.09.2026, with
      `shipRoundUpToX9()`, `montonioPrice()`, `loadShipLiveRates()`,
@@ -35588,7 +35829,12 @@
        prices are not there anymore»). Only a draft that differs is kept;
        an untouched one is simply rebuilt from the new row. */
     var keepShipDraft = shipDirty();
-    var srvRules = feedShipRules(s);
+    /* …and a row saved here (or read from the panel's own settings) in the
+       last three minutes is newer than anything the edge can hand back:
+       adopting the feed over it put the table from BEFORE a confirmed save
+       back on screen and into the till (Дим, /test 24.09.2026 — see
+       shipFreshRow). */
+    var srvRules = shipFreshRow() || feedShipRules(s);
     if (srvRules) setShipRules(srvRules);
     if (!keepShipDraft) S.shipDraft = null;
   }
@@ -35920,7 +36166,12 @@
         S.shipSaving = false;
         // anything but a 200/ok — the below_cost refusal, a 503, no answer at
         // all: the panel must not go on showing a table the shop is not running
-        if (r && r.status === 200 && r.body && r.body.ok) { shipSavedOk(a, entry); return; }
+        if (r && r.status === 200 && r.body && r.body.ok) {
+          // …and a feed the edge still holds from before this must not bring
+          // the old table back over it (shipFreshRow)
+          shipFreshNote(shipSent, true);
+          shipSavedOk(a, entry); return;
+        }
         shipRulesRefused(shipBack);
         if (!shipBack) render();   // an undo has nothing to roll back, but the bar still says «Сохраняем…»
         shipLowAsk(r, shipSent);
@@ -40690,7 +40941,7 @@
       // from here on this order's delivery is the shopper's own — the
       // account's «Доставка по умолчанию» stops filling anything in
       S.shipPicked = true;
-      // each type has its own carriers — start from its first, like Montonio
+      // each type has its own carriers — start from its cheapest (shipCarrier)
       S.ship.carrier = "";
       if (d.dm !== "parcel") S.ship.point = null;
       else loadPoints();

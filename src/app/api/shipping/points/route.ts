@@ -165,7 +165,8 @@ export async function GET(req: Request) {
 
   /* A query shorter than two letters narrows nothing and would only make the
      edge cache hold a second copy of the same list, so it is ignored. */
-  const matched = q.length >= MIN_QUERY ? searchPoints(points, q) : points;
+  // the country says where a typed postcode is — Omniva's points are placed by it
+  const matched = q.length >= MIN_QUERY ? searchPoints(points, q, country) : points;
   const shown = matched.slice(0, limit);
 
   return NextResponse.json(
