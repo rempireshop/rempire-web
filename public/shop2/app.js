@@ -22227,8 +22227,8 @@
     var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
     var own = val !== mailDefault(tpl, lang, field);
     var box = field === "intro"
-      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '">' + esc(val) + "</textarea>"
-      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
+      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '">' + esc(val) + "</textarea>"
+      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '" value="' + esc(val) + '">';
     return '<label class="adm-field">' + f[1] + box + "</label>" +
       '<div class="adm-acts" style="gap:6px;margin-top:-6px">' + MAIL_PH.map(function (p) {
         return '<button class="adm-chip adm-chip--tok" data-mailph="' + field + ":" + p[0] +
@@ -23356,15 +23356,15 @@
         '<button data-nb="style" data-v="p" data-nbk="' + b.k + '" aria-current="' + !h + '">Текст</button>' +
         '<button data-nb="style" data-v="h" data-nbk="' + b.k + '" aria-current="' + h + '">Заголовок</button></div>' +
       (h
-        ? '<input class="adm-input" data-nbf="text" data-nbk="' + b.k + '" maxlength="200" value="' + esc(b.text[L] || "") +
+        ? '<input class="adm-input" data-nbf="text" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="200" value="' + esc(b.text[L] || "") +
             '" placeholder="Заголовок" aria-label="Заголовок">'
-        : '<textarea class="adm-input adm-nb__ta" rows="4" data-nbf="text" data-nbk="' + b.k + '" maxlength="3000" aria-label="Текст" ' +
+        : '<textarea class="adm-input adm-nb__ta" rows="4" data-nbf="text" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="3000" aria-label="Текст" ' +
             'placeholder="Пара строк о новинках. Пустая строка — новый абзац.">' + esc(b.text[L] || "") + "</textarea>") +
       newsRuHintHTML(b, L);
   }
   function newsBtnBodyHTML(b, L) {
     return '<label class="adm-field">Надпись на кнопке' +
-        '<input class="adm-input" data-nbf="label" data-nbk="' + b.k + '" maxlength="60" value="' + esc(b.text[L] || "") +
+        '<input class="adm-input" data-nbf="label" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="60" value="' + esc(b.text[L] || "") +
           '" placeholder="Например: Смотреть новинки"></label>' +
       newsRuHintHTML(b, L) +
       newsLinkRowHTML(b, "Куда ведёт кнопка", "Не выбрано") +
@@ -23746,7 +23746,7 @@
         'aria-label="Название" value="' + esc(d.title) + '">' +
       '<p class="adm-hint">Название — для вас, покупатель его не увидит</p>' +
       '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
-        '<input class="adm-input" data-newsf="subject" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
+        '<input class="adm-input" data-newsf="subject" data-newsl="' + L + '" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
       // the letter itself: blocks, redrawn in this slot alone (newsBlocksDraw)
       '<div class="adm-nbwrap" id="newsblocks">' + admNewsBlocksHTML(d, L) + "</div>" +
       '<label class="adm-field">Адрес для теста' +
@@ -24251,7 +24251,9 @@
     if (t.matches("[data-newsf]")) {
       var nd = S.newsEdit, nf = t.dataset.newsf;
       if (nf === "title") nd.title = t.value;
-      else if (nf === "subject") { nd.subject[S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
+      /* the language the BOX holds (data-newsl), not the one S has moved on
+         to — the blog's rule (blogSync), for the same tap-then-keystroke gap */
+      else if (nf === "subject") { nd.subject[t.dataset.newsl || S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
       newsPaintState();
     } else if (t.matches("[data-nbf]")) {
       var f = t.dataset.nbf, k = t.dataset.nbk || "";
@@ -24266,7 +24268,7 @@
       if (f === "src") { NEWS_SRC[k] = t.value; return; }
       var b = newsBlockByKey(k);
       if (!b || !b.text) return;
-      b.text[S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language on the strip
+      b.text[t.dataset.nbl || S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language the box holds
       newsPaintState(); newsPreviewSoon();
     } else if (t.matches("[data-newsto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-newsbrief]")) { S.newsBrief = t.value; }
@@ -27073,8 +27075,8 @@
     var hint = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
     return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '">' + esc(val) + "</textarea>"
-        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" value="' + esc(val) + '">') +
+        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '" value="' + esc(val) + '">') +
       hint + "</label>";
   }
   /* The slide's own form, opened under the list by «Изменить»: the texts in
@@ -29211,10 +29213,10 @@
       }).join("") + "</div>" +
       '<label class="adm-field">' +
         (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") +
-        '<input class="adm-input" data-bundlef="title" maxlength="120" value="' + esc(f.title[lang] || "") +
+        '<input class="adm-input" data-bundlef="title" data-bundlel="' + lang + '" maxlength="120" value="' + esc(f.title[lang] || "") +
         '" placeholder="' + (lang === "RU" ? "Борода — стартовый набор" : esc(f.title.RU || "")) + '"></label>' +
       '<label class="adm-field">Описание — две-три простые фразы' +
-        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
+        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" data-bundlel="' + lang + '" placeholder="' +
         (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
         esc(f.desc[lang] || "") + "</textarea></label>" +
       /* «Написать черновик» / «Перевести с русского» — the same pair the goods
@@ -38352,6 +38354,20 @@
     for (var i = 0; i < opts.length; i++) if (opts[i].hasAttribute("selected")) return i;
     return opts.length ? 0 : -1;
   }
+  /** Which field a box IS: the data-* attributes that name it — data-blogf
+      and data-blogl, data-nbk and data-nbl, data-edqty «id size». The marks
+      the app itself puts on a live box (data-edauto, set when a salon price
+      is typed by hand; data-sx, measured) are not names and are left out,
+      so a render can never mistake them for another field. */
+  function admFieldKey(el) {
+    var out = [], a;
+    for (var i = 0; i < el.attributes.length; i++) {
+      a = el.attributes[i];
+      if (a.name.indexOf("data-") !== 0 || a.name === "data-edauto" || a.name === "data-sx") continue;
+      out.push(a.name + "=" + a.value);
+    }
+    return out.sort().join("\n");
+  }
   function admMorphNode(from, to) {
     if (from.nodeType !== to.nodeType || (from.nodeType === 1 && from.tagName !== to.tagName)) {
       from.parentNode.replaceChild(to, from);
@@ -38365,6 +38381,15 @@
     // a value/checked/selected the app changed is applied; one the owner
     // changed by hand survives the render, which a rebuild never let it do
     var valWas = from.getAttribute("value"), chkWas = from.hasAttribute("checked");
+    /* …but only while the box is still the SAME field. The blog's title box
+       is one <input> in RU and in EN, told apart by data-blogl alone; a new
+       article's title is empty in both, so the markup said "" before the
+       switch and "" after it, and the Russian title typed a moment ago stood
+       in the English box — on screen, in no draft, and filed as the English
+       title by the next read of the form («it can be seen, but it does not
+       seem to be stored», the owner, 23.09.2026). A box handed to another
+       field takes that field's text, typed-over or not. */
+    var otherField = (tag === "INPUT" || tag === "TEXTAREA") && admFieldKey(from) !== admFieldKey(to);
     admMorphAttrs(from, to);
     if (tag === "INPUT") {
       var valNow = to.getAttribute("value");
@@ -38376,12 +38401,12 @@
          jumps to the end of the field, which is only invisible for as long as
          he never goes back to fix a digit. */
       var valWant = valNow == null ? "" : valNow;
-      if (valNow !== valWas && from.value !== valWant) from.value = valWant;
-      if (to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
+      if ((otherField || valNow !== valWas) && from.value !== valWant) from.value = valWant;
+      if (otherField || to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
       return;
     }
     if (tag === "TEXTAREA") {
-      if (from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
+      if (otherField || from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
       return;
     }
     if (tag === "SELECT") {

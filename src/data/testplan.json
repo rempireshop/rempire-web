@@ -7023,19 +7023,21 @@
       "lang": "RU",
       "title": "Язык статьи — не язык панели",
       "steps": [
-        "Открыть статью на правку и найти кнопки «Язык статьи».",
-        "Написать русский текст, переключиться на английский и написать другой.",
-        "Вернуться на русский и нажать «Сохранить».",
-        "Выйти из статьи, открыть её заново и посмотреть оба языка.",
-        "Нажать «Опубликовать», не заполнив эстонский."
+        "В «Блоге» нажать «+ Статья» и найти кнопки «Язык статьи».",
+        "По-русски вписать заголовок «test», анонс и немного текста.",
+        "Переключиться на английский и посмотреть на заголовок и анонс, ничего не трогая.",
+        "Написать английский текст, вернуться на русский и нажать «Сохранить».",
+        "Выйти из статьи, открыть её заново и посмотреть все три языка.",
+        "Нажать «Опубликовать», не заполнив эстонский.",
+        "В «Рассылке» нажать «+ Письмо», вписать тему по-русски и переключиться на EN."
       ],
       "expect": [
-        "У каждого языка свой текст.",
-        "После переключения русский текст остался на месте.",
-        "После «Сохранить» и повторного открытия оба языка на месте.",
-        "Ни один из них не переписан другим.",
-        "При пустом эстонском панель один раз переспрашивает.",
-        "Она предупреждает, что эстонец увидит русский текст."
+        "На английском заголовок и анонс пустые: русский «test» туда не переходит.",
+        "У каждого языка свой текст — и после «Сохранить» с повторным открытием.",
+        "Английский не стал «test», эстонский так и остался пустым.",
+        "Пока не сохранили, над статьёй тёплая плашка «Есть несохранённые изменения».",
+        "При пустом эстонском панель один раз переспрашивает: эстонец увидит русский текст.",
+        "В рассылке тема на EN пустая, русская тема на месте на RU."
       ],
       "why": "Текст, пропавший из-за переключения языка, отбивает желание вести блог.",
       "risk": "low",
@@ -7043,24 +7045,26 @@
       "en": {
         "title": "The article's language is not the panel's language",
         "steps": [
-          "Open an article for editing and find the «Язык статьи» (article language) buttons.",
-          "Write the Russian text, switch to English and write something else.",
-          "Switch back to Russian and press «Сохранить».",
-          "Leave the article, open it again and look at both languages.",
-          "Without filling in Estonian, press «Опубликовать»."
+          "In «Блог» press «+ Статья» and find the «Язык статьи» (article language) buttons.",
+          "In Russian type the title «test», a lead and some text.",
+          "Switch to English and look at the title and the lead without touching them.",
+          "Write English text, switch back to Russian and press «Сохранить».",
+          "Leave the article, open it again and look at all three languages.",
+          "Without filling in Estonian, press «Опубликовать».",
+          "In «Рассылка» press «+ Письмо», type a subject in Russian and switch to EN."
         ],
         "expect": [
-          "Each language holds its own text.",
-          "After switching back, the Russian text is still there.",
-          "After saving and reopening, both languages are still there.",
-          "Neither has been overwritten by the other.",
-          "With Estonian empty the panel asks once before publishing.",
-          "It warns that an Estonian reader will see Russian."
+          "In English the title and lead are empty: the Russian «test» does not carry over.",
+          "Each language keeps its own text — after «Сохранить» and reopening too.",
+          "English did not become «test»; Estonian is still empty.",
+          "Until saved, a warm «Есть несохранённые изменения» notice stands above the article.",
+          "With Estonian empty the panel asks once: an Estonian reader will see Russian.",
+          "In the newsletter the EN subject is empty; the Russian one stays on RU."
         ],
         "why": "Text that vanishes when you switch language puts you off blogging."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T09:57:03.616Z"
     },
     {
       "id": "blog-delete",
