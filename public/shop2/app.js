@@ -1092,6 +1092,7 @@
       "Доставка по умолчанию": "Vaikimisi tarneviis",
       "Подставим это при следующем заказе — менять можно в любой момент.":
         "Täidame selle järgmisel tellimusel automaatselt — muuta saad igal ajal.",
+      "В эту страну доставляем только курьером до двери.": "Sellesse riiki toimetame ainult kulleriga ukseni.",
       "доставлен": "kohale toimetatud", "активен": "kehtiv",
       "−10% ко дню рождения · до 30.09": "−10% sünnipäevaks · kuni 30.09",
 
@@ -4133,6 +4134,7 @@
       "Доставка по умолчанию": "Default delivery",
       "Подставим это при следующем заказе — менять можно в любой момент.":
         "We will fill this in on your next order — you can change it at any time.",
+      "В эту страну доставляем только курьером до двери.": "To this country we deliver by courier to the door only.",
       "доставлен": "delivered", "активен": "active",
       "−10% ко дню рождения · до 30.09": "−10% birthday discount · until 30.09",
 
@@ -8588,40 +8590,125 @@
      «LV-1010» — orders the whole list nearest-first instead of filtering it.
      The same rules run on the server for the lists too big to hold
      (src/lib/shipping/point-search.ts); tests/point-search.test.ts holds the
-     two to the same order. */
+     two to the same order.
+
+     Omniva is the exception, both ways round (Дим, /test 24.09.2026: 10120
+     «does not find "nearest" or almost anything close to»). Its `zip` is the
+     machine's terminal code — 96001 for Tallinn's Balti Jaam — never a
+     postcode, so it is not read as one (zipIsPostcode); what its points DO
+     have is coordinates, so a postcode typed over them is turned into a
+     place (POSTCODE_GEO, the middle of the committed points whose postcode
+     starts the same way — tools/postcode-geo.mjs) and they are ordered by
+     their distance from it: 10120 opens on Stockmann, Viru Keskus and
+     Solaris instead of Kihnu, Vormsi and Ruhnu. Estonia only — nothing
+     committed places a Latvian or Lithuanian postcode — and there a postcode
+     over an Omniva list is searched as words, which says «Ничего не нашли»
+     instead of handing back the whole country in an order that only looks
+     like an answer. POSTCODE_GEO is src/data/postcode-geo.json to the digit
+     (tests/point-search-estonia.test.ts). */
+  var POSTCODE_GEO = {
+    EE: {
+      "10": [59.43, 24.73], "11": [59.416, 24.753], "12": [59.421, 24.704], "13": [59.43, 24.772], "19": [59.426, 24.784], "20": [59.381, 28.184],
+      "21": [59.377, 28.165], "30": [59.392, 27.266], "31": [59.332, 27.422], "40": [59.391, 27.783], "41": [59.317, 27.416], "42": [58.99, 27],
+      "43": [59.389, 26.937], "44": [59.38, 26.415], "45": [59.328, 26.092], "46": [59.209, 26.5], "48": [58.731, 26.315], "49": [58.703, 26.607],
+      "50": [58.374, 26.731], "51": [58.381, 26.721], "60": [58.497, 26.852], "61": [58.273, 26.546], "62": [58.351, 26.789], "63": [58.034, 26.938],
+      "64": [57.99, 27.485], "65": [57.822, 27.055], "66": [57.828, 26.529], "67": [58.093, 26.51], "68": [57.868, 25.986], "69": [58.143, 25.496],
+      "70": [58.503, 25.608], "71": [58.401, 25.56], "72": [58.865, 25.568], "73": [59.065, 25.917], "74": [59.476, 25.141], "75": [59.306, 24.949],
+      "76": [59.339, 24.428], "78": [58.853, 24.397], "79": [59.022, 24.782], "80": [58.384, 24.52], "85": [58.409, 24.553], "86": [58.271, 24.635],
+      "87": [58.592, 24.724], "88": [58.385, 24.312], "90": [58.859, 23.68], "91": [59.004, 23.62], "92": [58.954, 22.758], "93": [58.206, 22.572],
+      "94": [58.49, 23.045], "101": [59.432, 24.761], "103": [59.445, 24.699], "104": [59.449, 24.72], "106": [59.427, 24.711], "109": [59.356, 24.629],
+      "112": [59.369, 24.738], "113": [59.406, 24.725], "114": [59.425, 24.81], "116": [59.386, 24.683], "117": [59.452, 24.718], "118": [59.393, 24.719],
+      "119": [59.468, 24.832], "121": [59.497, 24.829], "127": [59.411, 24.682], "129": [59.408, 24.683], "134": [59.403, 24.7], "135": [59.419, 24.642],
+      "136": [59.44, 24.837], "138": [59.441, 24.878], "139": [59.448, 24.868], "190": [59.426, 24.784], "203": [59.378, 28.189], "206": [59.384, 28.179],
+      "210": [59.377, 28.165], "303": [59.402, 27.285], "305": [59.354, 27.192], "310": [59.332, 27.422], "402": [59.391, 27.783], "412": [59.202, 27.535],
+      "413": [59.225, 27.296], "415": [59.358, 27.416], "420": [58.948, 27.048], "421": [58.986, 26.87], "422": [59.036, 27.081], "431": [59.358, 26.975],
+      "434": [59.451, 26.861], "441": [59.5, 26.519], "442": [59.394, 26.566], "443": [59.356, 26.378], "444": [59.365, 26.34], "451": [59.265, 25.965],
+      "452": [59.342, 26.131], "453": [59.426, 26.268], "462": [59.13, 26.252], "466": [59.235, 26.582], "481": [58.652, 25.983], "483": [58.746, 26.391],
+      "484": [58.729, 26.337], "485": [58.826, 26.653], "490": [58.577, 26.29], "492": [58.685, 26.586], "496": [58.848, 26.945], "501": [58.36, 26.727],
+      "503": [58.398, 26.719], "504": [58.367, 26.696], "505": [58.358, 26.675], "506": [58.378, 26.748], "507": [58.373, 26.767], "510": [58.381, 26.721],
+      "601": [58.661, 27.161], "602": [58.601, 27.132], "604": [58.526, 27.076], "605": [58.406, 26.746], "606": [58.471, 26.36], "610": [58.144, 26.249],
+      "614": [58.361, 26.651], "615": [58.221, 26.406], "616": [58.273, 26.53], "617": [58.323, 26.699], "622": [58.351, 26.789], "630": [57.967, 27],
+      "631": [57.984, 26.817], "633": [58.058, 27.059], "634": [58.066, 26.729], "635": [58.076, 26.841], "640": [57.958, 27.631], "642": [57.947, 27.215],
+      "645": [58.098, 27.464], "652": [57.732, 27.284], "656": [57.84, 27.009], "664": [57.828, 26.529], "674": [58.059, 26.498], "675": [58.126, 26.522],
+      "682": [57.778, 26.031], "686": [58.004, 25.919], "691": [58.096, 25.562], "693": [58.116, 25.199], "694": [58.126, 25.356], "697": [58.235, 25.866],
+      "701": [58.359, 25.639], "704": [58.518, 25.625], "706": [58.631, 25.56], "710": [58.362, 25.586], "715": [58.536, 25.465], "722": [58.808, 25.43],
+      "724": [58.745, 25.769], "726": [58.945, 25.643], "727": [58.885, 25.549], "730": [58.964, 26.028], "733": [59.038, 25.884], "735": [59.192, 25.84],
+      "740": [59.53, 24.865], "741": [59.48, 24.998], "742": [59.476, 25.111], "743": [59.335, 25.333], "744": [59.316, 25.346], "746": [59.446, 25.439],
+      "747": [59.606, 25.498], "748": [59.579, 25.728], "750": [59.104, 25.263], "751": [59.194, 25.134], "752": [59.365, 25.112], "753": [59.378, 24.859],
+      "754": [59.318, 24.8], "755": [59.264, 24.67], "760": [59.227, 24.164], "761": [59.248, 24.239], "764": [59.321, 24.582], "765": [59.324, 24.554],
+      "766": [59.311, 24.419], "767": [59.378, 24.239], "768": [59.35, 24.059], "769": [59.436, 24.525], "780": [58.712, 24.365], "781": [58.918, 24.169],
+      "782": [58.819, 24.59], "783": [58.907, 24.43], "790": [58.926, 24.872], "791": [58.775, 24.818], "795": [58.995, 24.808], "796": [59.041, 24.669],
+      "797": [59.221, 24.672], "798": [59.167, 24.755], "800": [58.384, 24.522], "805": [58.387, 24.504], "850": [58.409, 24.553], "860": [58.081, 24.5],
+      "863": [58.148, 24.949], "865": [58.245, 24.53], "866": [58.375, 24.62], "867": [58.405, 24.652], "868": [58.483, 24.813], "872": [58.607, 24.502],
+      "873": [58.519, 24.565], "875": [58.586, 24.785], "877": [58.656, 25.043], "881": [58.329, 24.015], "883": [58.404, 24.411], "901": [58.579, 23.532],
+      "903": [58.682, 23.823], "904": [58.938, 23.577], "905": [58.94, 23.542], "906": [58.771, 23.924], "909": [58.999, 24.059], "910": [58.996, 23.718],
+      "912": [59.013, 23.522], "921": [58.831, 22.775], "924": [58.996, 22.753], "930": [57.803, 23.245], "935": [58.335, 22.264], "938": [58.261, 22.498],
+      "941": [58.306, 22.82], "946": [58.559, 23.082], "947": [58.606, 23.232]
+    }
+  };
   function normZip(s) {
     return String(s == null ? "" : s).toUpperCase()
       .replace(/^[A-Z]{2}(?=[-\s]?\d)/, "").replace(/[^0-9A-Z]/g, "");
   }
   function isPostcodeQuery(q) { return /^\d{2,}$/.test(normZip(q)); }
+  /** Omniva's `zip` is its terminal code, never a postcode (see above). */
+  function zipIsPostcode(p) { return String(p.carrier || "").toLowerCase() !== "omniva"; }
   function pointZip(p) {
+    if (!zipIsPostcode(p)) return "";
     var own = normZip(p.zip);
     if (own) return own;
     var m = String(p.name || "").match(/\b(\d{2}-\d{3}|\d{4,5})\b/);
     return m ? normZip(m[1]) : "";
   }
-  function rankByPostcode(points, q) {
+  /** Where the typed postcode is, by its longest known prefix, or null. */
+  function postcodeAnchor(country, q) {
+    var table = POSTCODE_GEO[String(country || "").toUpperCase()];
+    if (!table) return null;
+    var want = normZip(q);
+    for (var n = Math.min(3, want.length); n >= 2; n--) {
+      var at = table[want.slice(0, n)];
+      if (at) return at;
+    }
+    return null;
+  }
+  /** Squared distance in degrees of latitude — or Infinity without coordinates. */
+  function geoGap(a, p) {
+    if (typeof p.lat !== "number" || typeof p.lng !== "number" || !isFinite(p.lat) || !isFinite(p.lng)) return Infinity;
+    var k = Math.cos(a[0] * Math.PI / 180), dy = p.lat - a[0], dx = (p.lng - a[1]) * k;
+    return dy * dy + dx * dx;
+  }
+  function rankByPostcode(points, q, country) {
     var want = normZip(q), n = want.length, target = parseInt(want, 10);
+    var anchor = postcodeAnchor(country, want);
     return points.map(function (p, i) {
       var zip = pointZip(p), shared = 0;
-      while (shared < n && shared < zip.length && zip.charAt(shared) === want.charAt(shared)) shared++;
-      var head = parseInt(zip.slice(0, n), 10);
-      return { p: p, i: i, zip: zip, shared: shared, gap: zip && isFinite(head) ? Math.abs(head - target) : Infinity };
+      if (zip) {
+        while (shared < n && shared < zip.length && zip.charAt(shared) === want.charAt(shared)) shared++;
+        var head = parseInt(zip.slice(0, n), 10);
+        return { p: p, i: i, zip: zip, tier: 0, shared: shared, gap: isFinite(head) ? Math.abs(head - target) : Infinity };
+      }
+      var far = anchor ? geoGap(anchor, p) : Infinity;
+      return { p: p, i: i, zip: zip, tier: isFinite(far) ? 1 : 2, shared: 0, gap: far };
     }).sort(function (a, b) {
-      return (b.shared - a.shared) || (a.gap - b.gap) ||
+      return (a.tier - b.tier) || (b.shared - a.shared) || (a.gap - b.gap) ||
         (a.zip < b.zip ? -1 : a.zip > b.zip ? 1 : 0) || (a.i - b.i);
     }).map(function (x) { return x.p; });
   }
   function matchesWords(p, q) {
     var words = q.toLowerCase().split(/\s+/).filter(Boolean);
     var hay = ((p.name || "") + " " + (p.address || "") + " " + (p.city || "") + " " +
-      (p.zip || "") + " " + pointZip(p)).toLowerCase();
+      (zipIsPostcode(p) ? (p.zip || "") : "") + " " + pointZip(p)).toLowerCase();
     for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
     return true;
   }
-  function searchPoints(points, q) {
+  /** `country` is the list's own — it says where a typed postcode is. */
+  function searchPoints(points, q, country) {
     var query = q.trim();
-    if (isPostcodeQuery(query)) return rankByPostcode(points, query);
+    if (isPostcodeQuery(query)) {
+      var anchor = postcodeAnchor(country, query);
+      var measurable = points.some(function (p) { return !!pointZip(p) || (!!anchor && isFinite(geoGap(anchor, p))); });
+      if (measurable) return rankByPostcode(points, query, country);
+    }
     return points.filter(function (p) { return matchesWords(p, query); });
   }
   function pointsMatching() {
@@ -8630,7 +8717,9 @@
     var all = pointsList() || [];
     var q = POINTS.q.trim().toLowerCase();
     if (!q) return all;
-    return searchPoints(all, q);
+    // the list's own country — «carrier:cc», the checkout's or the account's
+    var key = pointsKey();
+    return searchPoints(all, q, key.slice(key.indexOf(":") + 1));
   }
   /** Typeahead over name, address and city — the three things people type. */
   function pointsFiltered() {
@@ -16111,6 +16200,8 @@
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
           '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
+      // a country with no locker at all says so, rather than one row and silence
+      acctCourierOnlyHTML(m) +
       /* the block's one line: «Выберите пакомат — тогда сохраним» under a
          parcel row still waiting for its machine, «Доставка по умолчанию
          сохранена ✓» once the choice is on the row (acctShipChanged) */
@@ -16143,6 +16234,22 @@
     return '<div class="acct__addr">' + box("addr", "Адрес", "улица, дом", "street-address", "") +
       '<div class="co__zip">' + box("zip", "Индекс", "12345", "postal-code", "numeric") +
       box("city", "Город", "Город", "address-level2", "") + "</div></div>";
+  }
+  /* A country whose rows are the courier alone — Greece, the one country the
+     shop serves with no pickup point at any carrier (staging, 24.09.2026:
+     DPD, SmartPosti and Nova Post all answer none), or one the owner switched
+     the locker off for in «Где предлагать пакомат» — says so in words. One
+     row and nothing under it read like a list still loading.
+     Every other country the block offers has lockers: Finland too — DPD
+     2 572 points and SmartPosti 1 777 on staging, searched on the server by
+     postcode, town or street like Poland's. What Finland has no map for is
+     coordinates: Montonio sends none for a Finnish point, so the sheet has
+     no «Карта» there (pointsHaveMap), exactly as for Poland or Italy (Дим,
+     /test 24.09.2026: «Finland does not have a map — not sure if it
+     should»). */
+  function acctCourierOnlyHTML(rows) {
+    for (var i = 0; i < rows.length; i++) if (rows[i].pm || rows[i].pickup) return "";
+    return '<p class="muted" style="margin:8px 0 0">В эту страну доставляем только курьером до двери.</p>';
   }
   /* The machine under a parcel row of «Доставка по умолчанию»: the
      checkout's own picker, for every country and every carrier — the same

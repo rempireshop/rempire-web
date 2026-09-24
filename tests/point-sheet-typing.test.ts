@@ -71,7 +71,8 @@ const SHEET = [
   "pointListPress", "pointListRelease", "pointsSearch", "pointsSearchPending", "pointsFind", "pointsFoundArrived",
   "pointsMatching", "pointsFiltered", "pointsList", "pointsKey", "coPointsKey", "pointsForAcct", "pointsHaveMap",
   "pointGeo", "pointsMixed", "carrierLabel", "pointKind", "pointKindLine", "pointChosen", "pointById", "pickPoint",
-  "searchPoints", "matchesWords", "isPostcodeQuery", "normZip", "pointZip", "rankByPostcode", "orderCountry",
+  "searchPoints", "matchesWords", "isPostcodeQuery", "normZip", "zipIsPostcode", "pointZip", "postcodeAnchor",
+  "geoGap", "rankByPostcode", "orderCountry",
   "esc", "points", "pl",
 ];
 
@@ -186,6 +187,7 @@ function sheet(owner: "co" | "acct" = "co") {
     var pointQT = 0, pointQFor = "", pointPaint = {}, pointSheetOn = "";
     var pointListHeld = false, pointListPending = false, pointListT = 0;
     var pmap = null;
+    var POSTCODE_GEO = ${JSON.stringify(literal("POSTCODE_GEO"))};
     ${SHEET.map(slice).join("\n")}
     function translateTree() {}
     function patchDelivery() { CALLS.push("delivery"); }

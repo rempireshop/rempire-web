@@ -43,10 +43,24 @@ function slice(name: string): string {
   }
   throw new Error(`unbalanced braces around ${name}()`);
 }
+/** The SOURCE of `var <name> = {…};` in app.js. */
+function literalSrc(name: string): string {
+  const at = src.indexOf(`var ${name} = `);
+  if (at < 0) throw new Error(`public/shop2/app.js no longer has var ${name}`);
+  const open = at + `var ${name} = `.length;
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(open, i + 1);
+  }
+  throw new Error(`unterminated literal for ${name}`);
+}
 const shopSearch = new Function(
-  ["normZip", "isPostcodeQuery", "pointZip", "rankByPostcode", "matchesWords", "searchPoints"].map(slice).join("\n") +
+  `var POSTCODE_GEO = ${literalSrc("POSTCODE_GEO")};\n` +
+    ["normZip", "isPostcodeQuery", "zipIsPostcode", "pointZip", "postcodeAnchor", "geoGap", "rankByPostcode",
+      "matchesWords", "searchPoints"].map(slice).join("\n") +
     "\nreturn searchPoints;",
-)() as (points: P[], q: string) => P[];
+)() as (points: P[], q: string, country?: string) => P[];
 
 const ids = (list: P[]) => list.map((p) => p.id);
 

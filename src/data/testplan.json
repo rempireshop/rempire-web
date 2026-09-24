@@ -4739,7 +4739,7 @@
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
         "Выбрать Эстонию и строку «Пакомат Omniva».",
-        "Нажать «Выберите пакомат», набрать «Tallinn» или индекс и выбрать пункт из найденных (или на «Карте»).",
+        "Нажать «Выберите пакомат», набрать индекс 10120 и выбрать пункт из найденных (или на «Карте»).",
         "То же проверить для Латвии, Литвы и Финляндии, в конце снова выбрать пакомат в Эстонии.",
         "Набрать новую корзину и дойти до шага доставки, потом то же с другого телефона.",
         "На шаге доставки вручную выбрать Латвию, заказ не оформлять.",
@@ -4751,12 +4751,12 @@
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "В каждой стране с пакоматами кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "10120 у Omniva: сначала центр Таллина; в Финляндии поиск без «Карты».",
         "Эстония: пока пакомат не выбран, под строками «Выберите пакомат — тогда сохраним».",
         "После «…сохранена ✓» касса подставляет её на обоих телефонах, после «Выйти» — нет.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
         "Только «Адрес»: под строками «Впишите адрес, индекс и город — тогда сохраним».",
-        "Греция: в оформлении Греция, курьер и вписанный адрес, цена та же."
+        "Греция: в кабинете «только курьером до двери», в оформлении курьер, адрес и та же цена."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4766,7 +4766,7 @@
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
           "Choose Estonia and the «Пакомат Omniva» row.",
-          "Press «Выберите пакомат», type «Tallinn» or a postcode and pick one of the points found (or on the «Карта» map).",
+          "Press «Выберите пакомат», type the postcode 10120 and pick one of the points found (or on the «Карта» map).",
           "Check the same for Latvia, Lithuania and Finland; at the end pick an Estonian locker again.",
           "Fill a new cart and get to the delivery step, then do the same on another phone.",
           "On the delivery step pick Latvia by hand; do not place the order.",
@@ -4778,17 +4778,17 @@
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Every locker country: a «Выберите пакомат» button with search, as in the checkout.",
+          "10120 at Omniva: Tallinn's centre first; Finland has search, no «Карта» map.",
           "Estonia: until a locker is picked, under the rows: «Выберите пакомат — тогда сохраним».",
           "After «…сохранена ✓» the checkout fills it in on both phones; after «Выйти» it does not.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
           "Only «Адрес» typed: under the rows «Впишите адрес, индекс и город — тогда сохраним».",
-          "Greece: the checkout has Greece, the courier and the typed address, at the same price."
+          "Greece: the account says «только курьером до двери»; the checkout has courier, address, same price."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T18:46:27.418Z"
+      "markedAt": "2026-09-24T15:18:05.686Z"
     },
     {
       "id": "acct-refund-sent",
