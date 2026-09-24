@@ -38,7 +38,7 @@ describe("the picture sheet before the media probe has answered", () => {
       var MEDIA = { on: ${JSON.stringify(on)}, busy: false };
       var UP = { busy: 0, total: 0 };
       var probed = 0;
-      function mediaProbe() { probed += 1; }
+      function ensureMedia() { probed += 1; }
       function esc(s) { return String(s); }
       function upBusyText() { return "…"; }
       function blogToolMatches() { return ""; }
@@ -297,11 +297,12 @@ describe("the block editor draws", () => {
     ${sliceFn("newsBlockHTML")}
     ${sliceFn("newsAddBarHTML")}
     ${sliceFn("admNewsBlocksHTML")}
-    ({ S: S, MEDIA: MEDIA, NEWS_UP: NEWS_UP, admNewsBlocksHTML: admNewsBlocksHTML, newsPickRows: newsPickRows })
+    ({ S: S, MEDIA: MEDIA, NEWS_UP: NEWS_UP, NEWS_SRC: NEWS_SRC, admNewsBlocksHTML: admNewsBlocksHTML, newsPickRows: newsPickRows })
   `) as {
     S: { newsEdit: unknown; newsPick: unknown; newsUndo: unknown; lang: string };
     MEDIA: { on: boolean | null };
     NEWS_UP: Record<string, { phase: string; pct: number; err: string; prev: string }>;
+    NEWS_SRC: Record<string, string>;
     admNewsBlocksHTML: (d: { blocks: ClientBlock[] }, L: string) => string;
     newsPickRows: (q: string, only: string) => string;
   };
@@ -339,28 +340,65 @@ describe("the block editor draws", () => {
     expect(html).toMatch(/<input class="adm-file" type="file" accept="image\/\*" multiple data-nbfile="add"/);
   });
 
-  it("while a picture travels its block shows how far it has got, and its buttons wait", () => {
+  it("while a picture travels its block shows how far it has got, and nothing to press", () => {
     ui.NEWS_UP.b9 = { phase: "up", pct: 42.4, err: "", prev: "data:image/jpeg;base64,AAAA" };
     const html = ui.admNewsBlocksHTML({ blocks: [{ k: "b9", t: "img", src: "", href: "", alt: "" }] }, "RU");
     expect(html).toContain("Загружаем… 42 %");
     expect(html).toContain('aria-valuenow="42"');
     expect(html).toContain('<img src="data:image/jpeg;base64,AAAA" alt="">');
-    expect(html).toMatch(/data-nb="repic" data-nbk="b9" disabled/);
+    expect(html).not.toContain('data-nb="repic"');
+    expect(html).not.toContain('data-nb="unpic"');
     ui.NEWS_UP.b9 = { phase: "err", pct: 0, err: "Не удалось загрузить фото: нет связи — проверьте интернет и попробуйте ещё раз.", prev: "" };
     const failed = ui.admNewsBlocksHTML({ blocks: [{ k: "b9", t: "img", src: "", href: "", alt: "" }] }, "RU");
     expect(failed).toContain('role="alert">Не удалось загрузить фото: нет связи');
-    expect(failed).toContain(">Выбрать фото</button>");
+    // …and the one big button again, to try another photo
+    expect(failed).toMatch(/<button class="adm-btn adm-btn--tall adm-nb__add" data-nb="repic" data-nbk="b9">[\s\S]*<span>Добавить фото<\/span><\/button>/);
     delete ui.NEWS_UP.b9;
+  });
+
+  /* Dim, 24.09.2026: «we need picture upload … it needs to be very simple». */
+  it("a picture block with no picture is one big «Добавить фото», the address only a small link under it", () => {
+    const html = ui.admNewsBlocksHTML({ blocks: [{ k: "b7", t: "img", src: "", href: "", alt: "" }] }, "RU");
+    expect(html).toContain('<button class="adm-btn adm-btn--tall adm-nb__add" data-nb="repic" data-nbk="b7">');
+    expect(html).toContain('<input class="adm-file" type="file" accept="image/*" data-nbfile="b7"');
+    expect(html).toContain('data-nb="srcopen" data-nbk="b7">или вставить ссылку на картинку</button>');
+    expect(html, "the address box is open before anybody asked for it").not.toContain('data-nbf="src"');
+    expect(html).not.toContain("не подключена");
+    // the small link opens the box — and the upload is still offered above it
+    ui.NEWS_SRC.b7 = "";
+    const open = ui.admNewsBlocksHTML({ blocks: [{ k: "b7", t: "img", src: "", href: "", alt: "" }] }, "RU");
+    expect(open).toContain('data-nbf="src" data-nbk="b7"');
+    expect(open).toContain('data-nb="srcok" data-nbk="b7"');
+    expect(open).toContain("adm-nb__add");
+    expect(open).not.toContain("не подключена");
+    delete ui.NEWS_SRC.b7;
+  });
+
+  it("a picture in the letter: the photo, «Заменить» and «Убрать», and where it leads", () => {
+    const html = ui.admNewsBlocksHTML({ blocks: [{ k: "b6", t: "img", src: IMG, href: "", alt: "" }] }, "RU");
+    expect(html).toContain(`<img src="${IMG}" alt="">`);
+    expect(html).toContain('data-nb="repic" data-nbk="b6">Заменить</button>');
+    expect(html).toContain('data-nb="unpic" data-nbk="b6">Убрать</button>');
+    expect(html).not.toContain("Добавить фото");
+    expect(html).not.toContain('data-nbf="src"');
+    expect(html).toContain("Куда ведёт картинка");
   });
 
   it("with no bucket on the server a picture block asks for an address instead of a photo", () => {
     ui.MEDIA.on = false;
     const html = ui.admNewsBlocksHTML({ blocks: [{ k: "b8", t: "img", src: "", href: "", alt: "" }] }, "RU");
     expect(html).toContain('data-nbf="src" data-nbk="b8"');
+    expect(html).toContain("Загрузка фото на сервере не подключена — вставьте адрес картинки.");
     expect(html).not.toContain('data-nb="repic"');
+    // a picture already in the letter can still be taken out
+    const inLetter = ui.admNewsBlocksHTML({ blocks: [{ k: "b8", t: "img", src: IMG, href: "", alt: "" }] }, "RU");
+    expect(inLetter).toContain('data-nb="unpic"');
+    expect(inLetter).not.toContain('data-nb="repic"');
     ui.MEDIA.on = null;
     const unknown = ui.admNewsBlocksHTML({ blocks: [{ k: "b8", t: "img", src: "", href: "", alt: "" }] }, "RU");
     expect(unknown, "an unanswered probe is not a «no»").toContain('data-nb="repic"');
+    expect(unknown).toContain("Добавить фото");
+    expect(unknown).not.toContain("не подключена");
     ui.MEDIA.on = true;
   });
 

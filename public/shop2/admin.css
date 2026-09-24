@@ -2520,6 +2520,13 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-nb__pic .adm-nb__up { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, .92); }
 .adm-nb__up .adm-progress { margin: 6px 0 0; }
 .adm-nb__uptxt { font-size: 13px; }
+/* a picture block with no picture yet: one big button to the phone's camera
+   or gallery, the address box only a small link under it (Dim, 24.09.2026:
+   «it needs to be very simple»); with the picture in, «Заменить» and
+   «Убрать» side by side */
+.adm-nb__add { font-size: 16px; }
+.adm-nb__bylink { align-self: flex-start; }
+.adm-nb__picacts .adm-btn { flex: 1; }
 .adm-nb__link { display: flex; flex-direction: column; gap: 6px; }
 .adm-nb__target {
   width: 100%; min-height: 48px; padding: 8px 12px; border: 1px solid var(--a-ink); background: var(--a-paper);

@@ -2997,8 +2997,9 @@
       "Загрузка картинки": "Pildi üleslaadimine", "Адрес картинки": "Pildi aadress",
       "Загрузка фото на сервере не подключена — вставьте адрес картинки.":
         "Fotode üleslaadimine pole serveris ühendatud — kleebi pildi aadress.",
-      "Поставить картинку": "Pane pilt", "Заменить картинку": "Vaheta pilt",
-      "Выбрать фото": "Vali foto", "Выбрать картинку": "Vali pilt",
+      "Поставить картинку": "Pane pilt", "Заменить": "Vaheta",
+      "Добавить фото": "Lisa foto", "Выбрать картинку": "Vali pilt",
+      "или вставить ссылку на картинку": "või kleebi pildi link",
       "Никуда — просто картинка": "Mitte kuhugi — lihtsalt pilt",
       "По-русски:": "Vene keeles:", "Вид текста": "Teksti liik",
       "Пара строк о новинках. Пустая строка — новый абзац.": "Paar rida uudistest. Tühi rida — uus lõik.",
@@ -3015,7 +3016,7 @@
       "В письме уже 40 блоков — больше не поместится.": "Kirjas on juba 40 plokki — rohkem ei mahu.",
       "Посмотреть письмо целиком ↓": "Vaata kogu kirja ↓",
       "Подождите — картинка ещё загружается": "Oota — pilt laaditakse veel üles",
-      "В письме есть блок без картинки — выберите фото или удалите блок": "Kirjas on plokk ilma pildita — vali foto või kustuta plokk",
+      "В письме есть блок без картинки — добавьте фото или удалите блок": "Kirjas on plokk ilma pildita — lisa foto või kustuta plokk",
       "У кнопки не выбрано, куда она ведёт": "Nupul pole valitud, kuhu see viib",
       "Впишите надпись на кнопке": "Kirjuta nupule tekst",
       "Эстонская версия не готова — эстонские подписчики получат русскую.": "Eestikeelne versioon pole valmis — eesti tellijad saavad venekeelse.",
@@ -6003,8 +6004,9 @@
       "Загрузка картинки": "Picture upload", "Адрес картинки": "Picture address",
       "Загрузка фото на сервере не подключена — вставьте адрес картинки.":
         "Photo upload is not connected on the server — paste the picture's address.",
-      "Поставить картинку": "Use this picture", "Заменить картинку": "Replace the picture",
-      "Выбрать фото": "Choose a photo", "Выбрать картинку": "Choose a picture",
+      "Поставить картинку": "Use this picture", "Заменить": "Replace",
+      "Добавить фото": "Add a photo", "Выбрать картинку": "Choose a picture",
+      "или вставить ссылку на картинку": "or paste a link to a picture",
       "Никуда — просто картинка": "Nowhere — just a picture",
       "По-русски:": "In Russian:", "Вид текста": "Text style",
       "Пара строк о новинках. Пустая строка — новый абзац.": "A couple of lines about what is new. An empty line starts a new paragraph.",
@@ -6021,7 +6023,7 @@
       "В письме уже 40 блоков — больше не поместится.": "The letter already has 40 blocks — no more will fit.",
       "Посмотреть письмо целиком ↓": "See the whole letter ↓",
       "Подождите — картинка ещё загружается": "Wait — a picture is still uploading",
-      "В письме есть блок без картинки — выберите фото или удалите блок": "A block in the letter has no picture — choose a photo or delete the block",
+      "В письме есть блок без картинки — добавьте фото или удалите блок": "A block in the letter has no picture — add a photo or delete the block",
       "У кнопки не выбрано, куда она ведёт": "The button has nowhere to go yet",
       "Впишите надпись на кнопке": "Write the label on the button",
       "Эстонская версия не готова — эстонские подписчики получат русскую.": "The Estonian version is not ready — Estonian subscribers get the Russian one.",
@@ -14505,7 +14507,7 @@
         '<button class="link" data-blogtoolcancel>Отмена</button></div>';
     }
     if (t === "image") {
-      /* `!== false`, not `=== true`: MEDIA.on is null until mediaProbe() has
+      /* `!== false`, not `=== true`: MEDIA.on is null until ensureMedia() has
          had its answer, and the letter and the article never asked — so a
          panel opened straight onto «Рассылка» told the owner that uploads
          were «not set up» on a shop where they were (Renat, 23.09.2026).
@@ -14576,9 +14578,15 @@
     /* Ask the server now, quietly: its answer redraws this sheet alone, never
        the page — a render() here would rebuild the box the caret lives in. */
     if (which === "image" && MEDIA.on === null) {
-      mediaProbe(function () { if (S.adminBlogTool === "image") blogToolDraw(false); });
+      ensureMedia(function () { if (S.adminBlogTool === "image") blogToolDraw(false); });
     }
   }
+  /* …and the article's other picture control, «+ Обложка», asks whenever the
+     editor is drawn (admBlogEditorScreen — once answered, that is a no-op).
+     Unknown and «yes» draw the same upload button, so only the server's «no»
+     has anything to repaint. Named, so two draws in one flight queue once. */
+  function blogMediaRepaint() { if (MEDIA.on === false && S.adminBlogEdit) render(); }
+  function blogMediaAsk() { ensureMedia(blogMediaRepaint); }
   function blogToolClose() {
     S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = ""; S.adminBlogToolHref = "";
     blogToolDraw(false);
@@ -21386,6 +21394,10 @@
      a 75 %-tall sheet over it on a phone (admin.css does the switching). One
      markup rather than two, because `[data-aians]` — where askAdminAI() writes
      the answer — has to be the only one of its kind on the page. */
+  function admClipPaint() {
+    var b = document.querySelector("[data-admattach]");
+    if (b) b.disabled = MEDIA.on === false;
+  }
   function admAsstHTML() {
     /* speed, 07.09.2026: the 30-day summary analyticsForAI() puts in the
        prompt used to be fetched from probeAdmin(), i.e. by every cold open of
@@ -21395,6 +21407,9 @@
        its own data: when the assistant is on screen. By the time a question is
        typed the answer has long landed. */
     loadAnalytics("30d");
+    /* …and the paperclip is a picture control like any other: the upload
+       question is asked when it is on screen, and only a «no» changes it. */
+    ensureMedia(admClipPaint);
     // data-admdrop: a photo dragged onto the pane is attached (the drop
     // listener next to the gallery's own, at the bottom of this file)
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
@@ -22691,6 +22706,7 @@
     var gen = S.adminBlogGen && S.adminBlogGen.d === d ? S.adminBlogGen : null, genBusy = !!(gen && !gen.err);
     var placedLine = S.adminBlogPlaced && S.adminBlogPlaced.d === d ? "Добавлены товары: " + S.adminBlogPlaced.names.join(", ") : "";
     blogKeepCaret();   // this render is about to replace the box being typed in
+    blogMediaAsk();    // «+ Обложка» and «Картинка» are on this screen
     var picked = productsById(d.products);
     var q = (S.adminBlogQ || "").trim().toLowerCase();
     var matches = q ? CATALOGUE.filter(function (p) {
@@ -23654,19 +23670,39 @@
     var bar = busy ? '<div class="adm-nb__up" data-nbup="' + b.k + '" aria-live="polite">' + newsUpInnerHTML(up) + "</div>" : "";
     var pic = show ? '<div class="adm-nb__pic"><img src="' + esc(show) + '" alt="">' + bar + "</div>" : bar;
     var err = up && up.phase === "err" ? '<p class="adm-hint adm-hint--warn" role="alert">' + esc(up.err) + "</p>" : "";
-    /* No bucket on this server (MEDIA.on === false, the probe's answer or an
-       upload's): the one way left is an address — said so, not hidden. */
-    var byUrl = !b.src && !busy && MEDIA.on === false
-      ? '<label class="adm-field">Адрес картинки' +
-          '<input class="adm-input" data-nbf="src" data-nbk="' + b.k + '" inputmode="url" placeholder="https://…" value="' + esc(NEWS_SRC[b.k] || "") + '"></label>' +
-        '<p class="adm-hint">Загрузка фото на сервере не подключена — вставьте адрес картинки.</p>' +
-        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="srcok" data-nbk="' + b.k + '">Поставить картинку</button></div>'
-      : "";
-    var pickBtn = MEDIA.on === false ? "" :
-      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="repic" data-nbk="' + b.k + '"' + (busy ? " disabled" : "") + ">" +
-        (b.src ? "Заменить картинку" : "Выбрать фото") + "</button>" +
-        '<input class="adm-file" type="file" accept="image/*" data-nbfile="' + b.k + '" tabindex="-1" aria-label="Выбрать картинку"></div>';
-    return pic + err + byUrl + pickBtn +
+    /* Dim, 24.09.2026: «we need picture upload, Renat will not start getting
+       URLs. Also, it needs to be very simple to do.» So a picture block is
+       one of three things, and never more than two buttons:
+         no picture yet   one big «Добавить фото» — the phone's own camera
+                          or gallery — and, small under it, the address box
+                          for whoever does have a link;
+         on its way       the photo itself with how far it has got;
+         in the letter    the photo, «Заменить» and «Убрать».
+       «Добавить фото» is there while the upload question is unanswered too:
+       only the server's own «no bucket» (MEDIA.on === false — see
+       ensureMedia()) turns the block into the address box, and says why. */
+    var file = '<input class="adm-file" type="file" accept="image/*" data-nbfile="' + b.k + '" tabindex="-1" aria-label="Выбрать картинку">';
+    var byUrl = '<label class="adm-field">Адрес картинки' +
+        '<input class="adm-input" data-nbf="src" data-nbk="' + b.k + '" inputmode="url" placeholder="https://…" value="' + esc(NEWS_SRC[b.k] || "") + '"></label>' +
+      (MEDIA.on === false ? '<p class="adm-hint">Загрузка фото на сервере не подключена — вставьте адрес картинки.</p>' : "") +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="srcok" data-nbk="' + b.k + '">Поставить картинку</button></div>';
+    var ctl = "";
+    if (busy) ctl = "";   // the bar says how far it has got; nothing to press until it lands
+    else if (b.src) {
+      ctl = '<div class="adm-acts adm-nb__picacts">' +
+        (MEDIA.on === false ? "" :
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="repic" data-nbk="' + b.k + '">Заменить</button>' + file) +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-nb="unpic" data-nbk="' + b.k + '">Убрать</button></div>';
+    } else if (MEDIA.on === false) ctl = byUrl;
+    else {
+      ctl = '<button class="adm-btn adm-btn--tall adm-nb__add" data-nb="repic" data-nbk="' + b.k + '">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+          '<path d="M4 8h3.5L9 5.5h6L16.5 8H20v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path></svg>' +
+          "<span>Добавить фото</span></button>" + file +
+        (Object.prototype.hasOwnProperty.call(NEWS_SRC, b.k) ? byUrl :
+          '<button class="adm-link adm-link--muted adm-nb__bylink" data-nb="srcopen" data-nbk="' + b.k + '">или вставить ссылку на картинку</button>');
+    }
+    return pic + err + ctl +
       (b.src || busy ? newsLinkRowHTML(b, "Куда ведёт картинка", "Никуда — просто картинка") : "");
   }
   function newsRuHintHTML(b, L) {
@@ -23848,7 +23884,7 @@
       delete NEWS_UP[k];
       var blk = newsBlockByKey(k);
       if (!blk) return;   // deleted while it travelled
-      blk.src = String(j.url);
+      blk.src = String(j.url); delete NEWS_SRC[k];
       MEDIA.on = true;
       newsCardPaint(k); newsPaintState(); newsPreviewSoon();
     }).catch(function (e) {
@@ -23887,7 +23923,7 @@
     if (newsUploading()) return { msg: "Подождите — картинка ещё загружается", k: "" };
     for (var i = 0; i < d.blocks.length; i++) {
       var b = d.blocks[i];
-      if (b.t === "img" && !b.src) return { msg: "В письме есть блок без картинки — выберите фото или удалите блок", k: b.k };
+      if (b.t === "img" && !b.src) return { msg: "В письме есть блок без картинки — добавьте фото или удалите блок", k: b.k };
       if (b.t === "btn" && !b.href) return { msg: "У кнопки не выбрано, куда она ведёт", k: b.k };
       if (b.t === "btn" && !NEWS_LANG3.some(function (x) { return newsBlockWords(b, x); })) return { msg: "Впишите надпись на кнопке", k: b.k };
     }
@@ -24128,7 +24164,7 @@
        address box every picture block falls back to). This question not being
        asked at all is what told Renat «uploads are not set up» (23.09.2026). */
     if (d.status === "draft") {
-      mediaProbe(function () { if (MEDIA.on === false && S.newsEdit === d) newsBlocksDraw(); });
+      ensureMedia(function () { if (MEDIA.on === false && S.newsEdit === d) newsBlocksDraw(); });
       loadAdminBlog(false);   // the articles a link can point at (the picker's «Статья» rows)
     }
     window.scrollTo({ top: 0 });
@@ -24730,6 +24766,25 @@
     if (act === "repic") {
       var rin = document.querySelector('[data-nbfile="' + k + '"]');
       if (rin) rin.click();
+      return;
+    }
+    /* «Убрать»: the picture goes, the block stays where it is with its big
+       «Добавить фото» — and with its link, for the photo that replaces it.
+       ✕ in the block's head is what takes the whole block away. */
+    if (act === "unpic") {
+      var xb = newsBlockByKey(k);
+      if (!xb || xb.t !== "img") return;
+      xb.src = ""; delete NEWS_UP[k];
+      if (S.newsPick && S.newsPick.k === k) S.newsPick = null;
+      newsCardPaint(k); newsPaintState(); newsPreviewSoon();
+      newsFocus('[data-nbcard="' + k + '"] [data-nb="repic"]');
+      return;
+    }
+    // the small «или вставить ссылку на картинку» under «Добавить фото»
+    if (act === "srcopen") {
+      NEWS_SRC[k] = NEWS_SRC[k] || "";
+      newsCardPaint(k);
+      newsFocus('[data-nbf="src"][data-nbk="' + k + '"]');
       return;
     }
     if (act === "srcok") {
@@ -30442,30 +30497,59 @@
 
      Without the bucket configured the server says so once, the button greys
      out with a plain sentence, and every other part of the panel is unchanged.
-     The prototype with no backend behind it lands in the same place. */
-  var MEDIA = { on: null, busy: false, cutout: false, maxBytes: 12 * 1024 * 1024 };
-  /* `then`, when given, replaces the closing render(): the article's and the
+     A server that did not answer at all has not said so: see ensureMedia(). */
+  var MEDIA = { on: null, busy: false, cutout: false, maxBytes: 12 * 1024 * 1024, wait: [], retryAt: 0 };
+  /* The one question every picture control asks: can this server take a
+     photo? — GET /api/admin/upload/, asked once per panel and remembered.
+
+     MEDIA.on is three-valued, and only the server's own answer moves it off
+     null: `true` for {ok:true, configured:true}, `false` for {ok:true,
+     configured:false}. Everything else — no connection, a cold function that
+     timed out, a 401 from a cookie that ran out, a page that is not JSON — is
+     NO answer, and leaves it null: the upload button stays, and the next
+     screen that shows a picture control asks again (not sooner than
+     MEDIA_RETRY_MS, so a server that is down is not asked on every repaint).
+     Until 24.09.2026 every one of those failures was written down as «not
+     configured» for the rest of the session, and the letter's picture block
+     told the owner to paste addresses on a shop whose bucket was fine.
+
+     `then`, when given, replaces the closing render(): the article's and the
      letter's editors ask from inside a screen whose fields are being typed
-     into, and repaint only their own slot with the answer. */
-  function mediaProbe(then) {
-    if (MEDIA.on !== null || MEDIA.busy) return;
+     into, and repaint only their own slot with the answer. Two screens asking
+     while one question is in the air both get their answer — the second
+     caller's `then` used to be dropped on the floor. Nothing is repainted when
+     no answer came: nothing on screen changed. */
+  var MEDIA_RETRY_MS = 15000;
+  function ensureMedia(then) {
+    if (MEDIA.on !== null) return;
+    var cb = typeof then === "function" ? then : render;
+    if (MEDIA.wait.indexOf(cb) < 0) MEDIA.wait.push(cb);
+    if (MEDIA.busy) return;
+    if (Date.now() < MEDIA.retryAt) { MEDIA.wait = []; return; }
     MEDIA.busy = true;
     apiJson("/api/admin/upload/")
       .then(function (r) {
-        MEDIA.on = r.status === 200 && r.body.ok === true && r.body.configured === true;
+        if (r.status !== 200 || !r.body || r.body.ok !== true) return;
+        MEDIA.on = r.body.configured === true;
         // «Убрать фон» is offered only when the server says it can do it
         MEDIA.cutout = MEDIA.on && r.body.cutout === true;
         // the ceiling the route enforces (src/lib/images.ts MAX_UPLOAD_BYTES),
         // checked here first so a file over it is refused before it travels
         if (MEDIA.on && r.body.maxBytes > 0) MEDIA.maxBytes = Number(r.body.maxBytes);
       })
-      .catch(function () { MEDIA.on = false; MEDIA.cutout = false; })
-      .then(function () { MEDIA.busy = false; if (typeof then === "function") then(); else render(); });
+      .catch(function () {})
+      .then(function () {
+        MEDIA.busy = false;
+        var wait = MEDIA.wait;
+        MEDIA.wait = [];
+        if (MEDIA.on === null) { MEDIA.retryAt = Date.now() + MEDIA_RETRY_MS; return; }
+        wait.forEach(function (cb) { cb(); });
+      });
   }
   /** An upload the server refused for having no bucket is the probe's answer too. */
   function mediaNoteRefusal(e) {
     var code = String((e && e.message) || e || "");
-    if (code === "storage_not_configured" || code === "not_configured") MEDIA.on = false;
+    if (code === "storage_not_configured" || code === "not_configured") { MEDIA.on = false; MEDIA.cutout = false; }
   }
   /* Every refusal is one sentence: what did not happen, why, what to do.
      Dim (10.09.2026) watched a desktop upload on staging die with nothing
@@ -31929,7 +32013,7 @@
       S.adminTab = "goods"; S.adminEdit = product.id; S.goodsNew = null; S.goodsSizes = null; S.goodsErr = "";
       GAL.id = ""; AI_UNDO = null; S.goodsEditTab = "media"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       pendingAction = null;
-      mediaProbe();
+      ensureMedia();
       window.scrollTo({ top: 0 });
       toast(from === "assistant" ? "Товар создан ✓ — добавьте фото"
         : from === "photo" ? "Товар создан ✓ — загружаем фото" : "Товар создан ✓ — теперь добавьте фото", entry);
@@ -38831,7 +38915,7 @@
     /* Same problem, one screen over, with a worse ending. The goods editor is
        the only admin form with no draft in S at all: every field is read
        straight off the DOM when «Сохранить» is pressed. So a background probe
-       landing mid-edit — mediaProbe(), loadAdminPricing(), the analytics
+       landing mid-edit — ensureMedia(), loadAdminPricing(), the analytics
        warm-up in probeAdmin(), each of which ends in render() — rebuilt the
        form from the SAVED product and silently threw away everything typed
        since; the next «Сохранить» then stored the old values back and said
@@ -39060,7 +39144,7 @@
        Deliberately OUTSIDE the coalescing above — it reads S, not the DOM, and
        a call folded into the next frame has still changed what is open. Inside
        it, a card opened in the same frame as any other render (a background
-       answer landing — mediaProbe, the overview poll) parked no entry at all
+       answer landing — ensureMedia, the overview poll) parked no entry at all
        and the next «Назад» walked out of the panel, while a card closed in
        such a frame never spent the entry it had parked and the next «Назад»
        did nothing. Renat, 09.09.2026: «иногда выкидывает из админки». */
@@ -40575,7 +40659,7 @@
       render(); refocus("[data-admapply]"); return;
     }
     if (d.admgoods !== undefined) {
-      S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
+      S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; ensureMedia();   // media
       S.goodsConfirmBack = false;   // a fresh card never opens mid-question
       S.goodsSizes = null; S.goodsNew = null;   // product creation: the size rows start from what is saved
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
@@ -40666,7 +40750,7 @@
     if (d.goodsclear !== undefined) { S.goodsQ = ""; S.goodsFilter = "all"; S.goodsShown = 40; render(); return; }
     if (d.admgoodsnew !== undefined) {
       S.adminTab = "goods"; S.adminEdit = "new"; S.goodsNew = { brand: "", name: "", cat: "hair", subcat: "" };
-      S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); mediaProbe();
+      S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); ensureMedia();
       S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       window.scrollTo({ top: 0 }); render(); refocus("[data-edbrand]"); return;
     }
@@ -41475,7 +41559,7 @@
       // the row's own button toggles: a second tap is «Свернуть» (heroRowHTML)
       if (S.heroEdit === Number(d.heroedit)) { heroCloseEdit(); return; }
       S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
-      UP.err = ""; mediaProbe();   // media: the «Загрузить» button under the picture
+      UP.err = ""; ensureMedia();   // media: the «Загрузить» button under the picture
       render(); heroOpenEdit(); return;
     }
     if (d.heroclose !== undefined) { heroCloseEdit(); return; }

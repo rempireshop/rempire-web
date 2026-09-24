@@ -5524,20 +5524,21 @@
       "steps": [
         "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», вписать название и тему.",
         "«+ Картинка» — снять фото или выбрать из галереи; «Куда ведёт картинка» — найти и выбрать товар.",
+        "Под фото нажать «Убрать», потом большую кнопку «Добавить фото» и снять или выбрать другое.",
         "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную.",
         "Стрелками ↑↓ поменять два блока местами и посмотреть «Как увидит покупатель» ниже.",
         "Переключить на Eesti: тема, тексты и надпись кнопки; «Сохранить», свой адрес, «Отправить мне тест».",
         "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
       ],
       "expect": [
-        "Фото загружается с процентами и встаёт в письмо — адрес картинки вводить не нужно.",
+        "Фото встаёт в письмо с процентами загрузки; фразы «не настроена» нигде нет.",
+        "Под фото «Заменить» и «Убрать»; «Убрать» оставляет большую «Добавить фото», ссылку — мелко под ней.",
         "«Как увидит покупатель» меняется сразу после правки, ещё до «Сохранить».",
         "Тест пришёл с [test] в теме; каждая картинка и кнопка ведут куда выбрано.",
         "Карточка назвала число подписчиков по языкам; счётчик дошёл до «Отправлено N из N».",
-        "Подписчик с эстонским языком получил эстонскую версию; внизу работает «Отписаться».",
-        "В журнале есть строка «Рассылка «…»: отправлено N, ошибок 0»."
+        "Эстонец получил эстонскую версию с рабочим «Отписаться»; журнал: «отправлено N, ошибок 0»."
       ],
-      "why": "Письмо собирается на телефоне из картинок, как у Aromatic 89. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
+      "why": "Письмо собирается на телефоне из фото, как у Aromatic 89, — адреса картинок Ренат искать не будет. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
       "risk": "high",
       "writes": true,
       "en": {
@@ -5545,23 +5546,24 @@
         "steps": [
           "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», write a name and a subject.",
           "«+ Картинка» — take a photo or pick one from the gallery; «Куда ведёт картинка» — find and pick a product.",
+          "Under the photo press «Убрать», then the big «Добавить фото» button and take or pick another.",
           "Another «+ Картинка» leading to a section, «+ Текст» with a couple of lines, «+ Кнопка» «В магазин» to the home page.",
           "Swap two blocks with the ↑↓ arrows and look at «Как увидит покупатель» below.",
           "Switch to Eesti: the subject, the texts and the button label; «Сохранить», your address, «Отправить мне тест».",
           "Press «Отправить N подписчикам», read the card, «Отправить»."
         ],
         "expect": [
-          "The photo uploads with a percentage and lands in the letter — no picture address needed.",
+          "The photo lands in the letter with an upload percentage; «не настроена» appears nowhere.",
+          "«Заменить» and «Убрать» under the photo; «Убрать» leaves a big «Добавить фото», link below.",
           "«Как увидит покупатель» changes right after each edit, before «Сохранить».",
           "The test arrived with [test] in the subject; every picture and button goes where chosen.",
           "The card named the subscribers per language; the counter reached «Отправлено N из N».",
-          "The Estonian-language subscriber got the Estonian version; «Отписаться» at the bottom works.",
-          "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
+          "The Estonian reader got Estonian with a working «Отписаться»; journal: «отправлено N, ошибок 0»."
         ],
-        "why": "The letter is built on a phone out of pictures, like Aromatic 89's. One letter goes to every subscriber — a mistake goes to hundreds."
+        "why": "The letter is built on a phone out of photos, like Aromatic 89's — Renat will not go hunting for picture addresses. One letter goes to every subscriber — a mistake goes to hundreds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T13:22:36.184Z"
+      "markedAt": "2026-09-24T15:00:29.690Z"
     },
     {
       "id": "mail-daily-limit",
