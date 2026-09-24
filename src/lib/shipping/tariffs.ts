@@ -76,7 +76,13 @@ import { declaredWeightKg, PARCEL_DEFAULTS } from "./parcel";
  *
  * The weight is `declaredWeightKg()` of the same carton, because that is the
  * number `POST /shipments` sends — pricing one box and declaring another is
- * the exact mistake this replaces.
+ * the exact mistake this replaces. Since 24.09.2026 that is a REAL weight,
+ * `ORDINARY_PARCEL_KG` = 0.9 kg (Montonio prices real weight, not volume; the
+ * figure did not move, only its meaning — see MONTONIO_PRICES_VOLUMETRIC in
+ * ./parcel). Every weight-priced row is therefore looked up in the tier a
+ * real ordinary parcel lands in, ≤ 1 kg; the DPD lockers abroad are looked up
+ * by the carton's size category, which Montonio's own endpoint resolves to XS
+ * for these sides (docs/montonio-evidence-2026-09-24.txt).
  */
 export const REFERENCE_PARCEL = {
   weightKg: declaredWeightKg(PARCEL_DEFAULTS),

@@ -20,8 +20,8 @@ import { query, withTx } from "@/lib/db";
  *     the single transition into `paid`, next to the gift-card redeem. One
  *     conditional UPDATE plus a unique (code, order_id) row, so a webhook
  *     retry cannot count the same order twice.
- *   · listPromos / upsertPromo / setPromoActive — the admin panel and the
- *     assistant's create_promo / toggle_promo actions.
+ *   · listPromos / upsertPromo / insertPromo / setPromoActive — the admin
+ *     panel and the assistant's create_promo / toggle_promo actions.
  *
  * A code and a gift card share one input box in the checkout. They are told
  * apart by shape (RMP-XXXX-XXXX is a card, see src/lib/giftcards.ts); this
@@ -726,11 +726,8 @@ export async function listPromos(limit = 200): Promise<Promo[]> {
  * validatePromo, and the assistant's create_promo, which cannot name one.
  */
 export async function upsertPromo(input: PromoInput): Promise<Promo> {
-  const scope = input.scope ?? null;
-  const lines = scope === "cart" ? (input.scopeLines ?? []).slice(0, PROMO_MAX_CART_LINES) : null;
   const rows = await query<PromoRow>(
-    `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note, scope, scope_value, scope_lines)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, coalesce($10::text, 'order'), $11::text, $12::jsonb)
+    `${PROMO_INSERT}
      on conflict (code) do update set
        kind = excluded.kind,
        value = excluded.value,
@@ -744,22 +741,55 @@ export async function upsertPromo(input: PromoInput): Promise<Promo> {
        scope_value = case when $10::text is null then promo_codes.scope_value else $11::text end,
        scope_lines = case when $10::text is null then promo_codes.scope_lines else $12::jsonb end
      returning ${COLS}`,
-    [
-      input.code,
-      input.kind,
-      input.value,
-      input.minSubtotal,
-      input.startsAt,
-      input.endsAt,
-      input.maxUses,
-      input.active,
-      input.note,
-      scope,
-      scope && scope !== "order" ? input.scopeValue ?? null : null,
-      lines && lines.length ? JSON.stringify(lines) : null,
-    ],
+    promoParams(input),
   );
   return toPromo(rows[0]);
+}
+
+/**
+ * «Создать» in the panel — a NEW code, and nothing else. Null when the code is
+ * already there, and that row is left exactly as it was.
+ *
+ * The panel's form used upsertPromo() for both of its buttons, so «Создать»
+ * with a code somebody had already made — SUVI10 typed a second time, a month
+ * later — silently rewrote that code: its percent, its dates, its limit and its
+ * scope, with «Промокод сохранён ✓» on top. The owner meant a new code and got
+ * an edit of an old one that customers may be holding. The route answers 409
+ * `exists` instead, and the form offers to open the code that is there
+ * (map-defects #4, 24.09.2026). «Сохранить» on an open code and the
+ * assistant's create_promo still go through upsertPromo().
+ */
+export async function insertPromo(input: PromoInput): Promise<Promo | null> {
+  const rows = await query<PromoRow>(
+    `${PROMO_INSERT}
+     on conflict (code) do nothing
+     returning ${COLS}`,
+    promoParams(input),
+  );
+  return rows.length ? toPromo(rows[0]) : null;
+}
+
+/** The row both writers above put down, `$10` null meaning «scope not said». */
+const PROMO_INSERT = `insert into promo_codes (code, kind, value, min_subtotal, starts_at, ends_at, max_uses, active, note, scope, scope_value, scope_lines)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, coalesce($10::text, 'order'), $11::text, $12::jsonb)`;
+
+function promoParams(input: PromoInput): unknown[] {
+  const scope = input.scope ?? null;
+  const lines = scope === "cart" ? (input.scopeLines ?? []).slice(0, PROMO_MAX_CART_LINES) : null;
+  return [
+    input.code,
+    input.kind,
+    input.value,
+    input.minSubtotal,
+    input.startsAt,
+    input.endsAt,
+    input.maxUses,
+    input.active,
+    input.note,
+    scope,
+    scope && scope !== "order" ? input.scopeValue ?? null : null,
+    lines && lines.length ? JSON.stringify(lines) : null,
+  ];
 }
 
 /** Switch one code on or off. Returns null when there is no such code. */

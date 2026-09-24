@@ -1874,6 +1874,17 @@ export interface FlowsReport {
   unpaid: UnpaidRun;
   /** «Доставлен» closed without anybody pressing it — src/lib/delivery.ts. */
   delivered: { closed: number; checked: number; returned?: number; reason?: string };
+  /** Montonio re-asked about shipments whose webhook went quiet — src/lib/shipping/shipment-sync.ts. */
+  shipments: {
+    checked: number;
+    changed: number;
+    tracking: number;
+    refused: number;
+    closed: number;
+    errors: number;
+    left: number;
+    reason?: string;
+  };
   ms: number;
 }
 
@@ -2009,6 +2020,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     invoices: { reminded: 0, cancelled: 0, skipped: 0, reason: "error" },
     unpaid: { sent: 0, skipped: 0, cancelled: 0, reason: "error" },
     delivered: { closed: 0, checked: 0, reason: "error" },
+    shipments: { checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, errors: 0, left: 0, reason: "error" },
     ms: 0,
   };
   /* «Брошенная корзина» first, then its discounted follow-up: the second
@@ -2059,6 +2071,21 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
      the one thing the shop runs on a schedule, and once a day is exactly the
      right frequency for «дошла ли посылка». Loaded lazily and guarded like
      everything else: a carrier that is down must not stop the letters. */
+  /* The backup Montonio asked for (support, 24.09.2026): «we'd still
+     recommend occasionally polling shipment status via GET as a backup, in
+     case an event ever ends up undelivered». Every shipment that has been
+     quiet for half a day is re-asked and the answer applied exactly as the
+     webhook would have — a status, a tracking code that arrived late, a
+     refusal for the journal, a delivery that closes the order. Before the
+     close below, so an order this finds delivered is not asked twice. Bounded
+     and time-boxed, never throws; loaded lazily like the close. */
+  try {
+    const { syncStaleShipments } = await import("@/lib/shipping/shipment-sync");
+    out.shipments = await syncStaleShipments({ now });
+  } catch (err) {
+    console.error("[flows] shipments failed:", err);
+    out.shipments = { checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, errors: 0, left: 0, reason: "error" };
+  }
   try {
     const { closeDeliveredOrders } = await import("@/lib/delivery");
     out.delivered = await closeDeliveredOrders(now);

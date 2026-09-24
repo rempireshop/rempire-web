@@ -394,8 +394,10 @@ test.describe("sweep — the content card", () => {
     try {
       /* The content card is split across two settings pages since the phase-3
          redesign — the announcement bar belongs to «Главная страница» and the
-         socials to «О компании» — but the DRAFT is one, so both edits travel in
-         a single set_content action from whichever page saves. */
+         socials to «О компании». The draft is one, but each page's «Сохранить»
+         writes only its own part (map of the panel, 23.09.2026, #15) and keeps
+         the other page's typing — so the socials are saved on «О компании»
+         and the strip, still typed, on «Главная страница». */
       await page.locator('[data-contentblock="announcement"]').click();
       await page.locator('[data-contentf="announcement.link"]').fill("javascript:alert(1)");
       await page.locator('[data-contentf="announcement.text.RU"]').fill("Тестовая полоска");
@@ -407,6 +409,12 @@ test.describe("sweep — the content card", () => {
       const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
       await page.locator("[data-admapply]").click();
       await put;
+      await openSettings(page, "home");
+      await page.locator("[data-contentsave]").click();
+      await expect(page.locator("[data-admapply]")).toBeVisible();
+      const put2 = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+      await page.locator("[data-admapply]").click();
+      await put2;
 
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("", "/"));
@@ -421,12 +429,15 @@ test.describe("sweep — the content card", () => {
       await assertClean(shop.page, shop.w, "home with a script URL in settings");
       await shop.close();
     } finally {
-      await openSettings(page, "company");
-      await page.locator("[data-contentreset]").click();
-      if (await page.locator("[data-admapply]").count()) {
-        const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-        await page.locator("[data-admapply]").click();
-        await back;
+      // each page's «Сбросить к стандартному» resets that page's part only
+      for (const sub of ["company", "home"]) {
+        await openSettings(page, sub);
+        await page.locator("[data-contentreset]").click();
+        if (await page.locator("[data-admapply]").count()) {
+          const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+          await page.locator("[data-admapply]").click();
+          await back;
+        }
       }
     }
   });

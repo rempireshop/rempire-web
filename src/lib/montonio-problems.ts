@@ -571,19 +571,24 @@ export interface ShipmentRefusalReading {
 }
 
 const SHIPMENT_TEXT: Record<Exclude<ShipmentRefusal, "unknown">, Trilingual> = {
+  /* Since 24.09.2026 a second press is the REPAIR: Montonio's answer that day —
+     PATCH the same shipment, «PATCH automatically triggers a new registration
+     attempt with the carrier … you can just try again» — and
+     POST /api/admin/shipments does exactly that. Until then this said a second
+     press was pointless, which was true of the code and is not any more. */
   registration_failed: {
     RU:
-      "Перевозчик не принял посылку — этикетки нет. Отправление в Montonio есть, но не зарегистрировано: " +
-      "второй раз кнопку жать бесполезно, посылка не задвоится и не поедет. " +
-      "Чаще всего дело в телефоне или адресе получателя: проверьте их в заказе, исправьте у покупателя и напишите Диму — он отправит исправление в Montonio.",
+      "Перевозчик не принял посылку — этикетки нет. Отправление в Montonio одно и остаётся тем же: " +
+      "нажмите «Отправить заново» — Montonio попробует ещё раз, второй посылки не будет. " +
+      "Чаще всего дело в телефоне или адресе получателя: если снова не прошло, проверьте их в заказе, уточните у покупателя и напишите Диму — он исправит, и кнопка сработает.",
     ET:
-      "Vedaja ei võtnud pakki vastu — silti ei ole. Saadetis on Montonios olemas, kuid registreerimata: " +
-      "nuppu teist korda vajutada ei ole mõtet, pakk ei dubleeru ega liigu. " +
-      "Kõige sagedamini on asi saaja telefonis või aadressis: kontrollige neid tellimuses, täpsustage kliendiga ja kirjutage Dimile — tema saadab paranduse Montoniosse.",
+      "Vedaja ei võtnud pakki vastu — silti ei ole. Saadetis on Montonios üks ja jääb samaks: " +
+      "vajutage «Saada uuesti» — Montonio proovib uuesti, teist pakki ei teki. " +
+      "Kõige sagedamini on asi saaja telefonis või aadressis: kui ka uuesti ei õnnestu, kontrollige neid tellimuses, täpsustage kliendiga ja kirjutage Dimile — tema parandab ja nupp töötab.",
     EN:
-      "The carrier would not take the parcel — there is no label. The shipment exists at Montonio but is not registered: " +
-      "pressing the button again does nothing, the parcel will neither double nor move. " +
-      "The usual cause is the receiver's phone or address: check them on the order, confirm with the customer and write to Dim — he sends the correction to Montonio.",
+      "The carrier would not take the parcel — there is no label. There is one shipment at Montonio and it stays the same one: " +
+      "press «Send again» and Montonio tries again — no second parcel appears. " +
+      "The usual cause is the receiver's phone or address: if it fails again, check them on the order, confirm with the customer and write to Dim — he corrects it and the button works.",
   },
   bad_phone: {
     RU:
@@ -1045,20 +1050,20 @@ export function montonioReadinessRows(state: ReadinessState): ReadinessRow[] {
             }
           : hook.state === "none"
             ? {
-                RU: "Montonio не знает, куда сообщать о посылках. Заказы не будут закрываться сами, а отказ перевозчика останется незамеченным. Адрес прописывается один раз: Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
-                ET: "Montonio ei tea, kuhu pakkidest teatada. Tellimused ei sulgu ise ja vedaja keeldumine jääb märkamata. Aadress sisestatakse üks kord: Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
-                EN: "Montonio does not know where to report parcels. Orders will not close by themselves and a carrier's refusal will go unnoticed. The address is entered once, in Partner System → Shipping → Webhooks" + urlTail(hook.expectedUrl) + ".",
+                RU: "Montonio не знает, куда сообщать о посылках. Заказы не будут закрываться сами, а отказ перевозчика останется незамеченным. Экрана для этого в Montonio нет (Partner System его не показывает): адрес регистрирует Дим одной командой, один раз" + urlTail(hook.expectedUrl) + ".",
+                ET: "Montonio ei tea, kuhu pakkidest teatada. Tellimused ei sulgu ise ja vedaja keeldumine jääb märkamata. Montonios pole selleks ekraani (Partner System seda ei näita): aadressi registreerib Dim ühe käsuga, üks kord" + urlTail(hook.expectedUrl) + ".",
+                EN: "Montonio does not know where to report parcels. Orders will not close by themselves and a carrier's refusal will go unnoticed. Montonio has no screen for this (the Partner System does not show it): Dim registers the address once, with one command" + urlTail(hook.expectedUrl) + ".",
               }
             : hook.state === "wrong_url"
               ? {
-                  RU: "Montonio сообщает о посылках не сюда: у него записано «" + listOf(hook.urls) + "», а нужно «" + hook.expectedUrl + "». Адрес должен совпадать до последнего знака, включая слэш в конце. Пока так, заказы не будут закрываться сами. Исправляется в Partner System → Shipping → Webhooks.",
-                  ET: "Montonio ei teata pakkidest siia: tal on kirjas „" + listOf(hook.urls) + "\", aga vaja on „" + hook.expectedUrl + "\". Aadress peab kattuma viimse märgini, kaasa arvatud kaldkriips lõpus. Seni ei sulgu tellimused ise. Parandatakse: Partner System → Shipping → Webhooks.",
-                  EN: "Montonio does not report parcels here: it has \"" + listOf(hook.urls) + "\" written down, and it needs \"" + hook.expectedUrl + "\". The address must match to the last character, the trailing slash included. Until then orders will not close by themselves. Fix it in Partner System → Shipping → Webhooks.",
+                  RU: "Montonio сообщает о посылках не сюда: у него записано «" + listOf(hook.urls) + "», а нужно «" + hook.expectedUrl + "». Адрес должен совпадать до последнего знака, включая слэш в конце. Пока так, заказы не будут закрываться сами. Экрана для этого в Montonio нет (Partner System его не показывает): исправляет Дим одной командой.",
+                  ET: "Montonio ei teata pakkidest siia: tal on kirjas „" + listOf(hook.urls) + "\", aga vaja on „" + hook.expectedUrl + "\". Aadress peab kattuma viimse märgini, kaasa arvatud kaldkriips lõpus. Seni ei sulgu tellimused ise. Montonios pole selleks ekraani (Partner System seda ei näita): parandab Dim ühe käsuga.",
+                  EN: "Montonio does not report parcels here: it has \"" + listOf(hook.urls) + "\" written down, and it needs \"" + hook.expectedUrl + "\". The address must match to the last character, the trailing slash included. Until then orders will not close by themselves. Montonio has no screen for this (the Partner System does not show it): Dim fixes it with one command.",
                 }
               : {
-                  RU: "Адрес записан верно, но у вебхука не отмечены события: " + listOf(hook.missingEvents) + ". Без них заказ не станет «Доставлен» сам, а отказ перевозчика не попадёт в журнал. Отмечаются там же: Partner System → Shipping → Webhooks.",
-                  ET: "Aadress on õigesti kirjas, aga veebihaagil ei ole märgitud sündmusi: " + listOf(hook.missingEvents) + ". Ilma nendeta ei muutu tellimus ise olekuks «Доставлен» ja vedaja keeldumine ei jõua päevikusse. Märgitakse sealsamas: Partner System → Shipping → Webhooks.",
-                  EN: "The address is right, but the webhook does not have these events ticked: " + listOf(hook.missingEvents) + ". Without them an order will not turn «Доставлен» by itself and a carrier's refusal will not reach the journal. Tick them in the same place: Partner System → Shipping → Webhooks.",
+                  RU: "Адрес записан верно, но у вебхука не отмечены события: " + listOf(hook.missingEvents) + ". Без них заказ не станет «Доставлен» сам, а отказ перевозчика не попадёт в журнал. Экрана для этого в Montonio нет (Partner System его не показывает): Дим регистрирует вебхук заново с этими событиями.",
+                  ET: "Aadress on õigesti kirjas, aga veebihaagil ei ole märgitud sündmusi: " + listOf(hook.missingEvents) + ". Ilma nendeta ei muutu tellimus ise olekuks «Доставлен» ja vedaja keeldumine ei jõua päevikusse. Montonios pole selleks ekraani (Partner System seda ei näita): Dim registreerib veebihaagi uuesti koos nende sündmustega.",
+                  EN: "The address is right, but the webhook does not have these events ticked: " + listOf(hook.missingEvents) + ". Without them an order will not turn «Доставлен» by itself and a carrier's refusal will not reach the journal. Montonio has no screen for this (the Partner System does not show it): Dim registers the webhook again with these events.",
                 },
   });
 

@@ -539,7 +539,11 @@ test.describe("admin — the product editor", () => {
     await clearToast(page);
     // the scan itself wrote nothing — like a typed code, it is bound by «Сохранить»
     expect(await stockEan(page, id, VARIANT), "the scan bound the code on its own").toBe(eanWas);
-    // Back now closes the editor — the one layer left — and stays in the panel
+    /* Back now closes the editor — the one layer left — and stays in the
+       panel. The scanned code is an unsaved edit like a typed one (map of the
+       panel, 23.09.2026, #3), so the first Back asks and the second leaves. */
+    await page.goBack();
+    await expect(page.locator("[data-admbackyes]"), "Back threw the scanned code away without asking").toBeVisible();
     await page.goBack();
     await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
     await expect(page.locator('body[data-screen="admin"]'), "Back left the admin").toBeAttached();

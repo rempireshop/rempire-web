@@ -457,6 +457,7 @@ function returnsRig(orders: Row[]) {
                srv: { id: o.id, status: o.status, channel: "web", shipping: o.shipping || {} } };
     }) };
     ${slice("admOrderVM")}
+    ${slice("shipRegFailed")}
     ${slice("admReturnAskedAt")}
     ${slice("admReturnDoneAt")}
     ${slice("admRefundView")}

@@ -51,10 +51,15 @@ function hook(body: unknown): Request {
 }
 
 /** A `shipped` order carrying the shipment the webhooks below talk about. */
-async function shippedOrder(number = NUMBER): Promise<string> {
+async function shippedOrder(
+  number = NUMBER,
+  shipmentStatus = "registered",
+  extra: Record<string, unknown> = {},
+  orderStatus = "shipped",
+): Promise<string> {
   const rows = await query<{ id: string }>(
     `insert into orders (number, email, name, status, shipping)
-     values ($1, $2, $3, 'shipped', $4::jsonb) returning id`,
+     values ($1, $2, $3, $5, $4::jsonb) returning id`,
     [
       number,
       "buyer@example.com",
@@ -62,11 +67,27 @@ async function shippedOrder(number = NUMBER): Promise<string> {
       JSON.stringify({
         method: "parcel",
         country: "EE",
-        montonio: { provider: "montonio", shipmentId: SHIPMENT, status: "registered", carrier: "omniva" },
+        montonio: {
+          provider: "montonio",
+          shipmentId: SHIPMENT,
+          status: shipmentStatus,
+          carrier: "omniva",
+          trackingCode: "CC000000001EE",
+          ...extra,
+        },
       }),
+      orderStatus,
     ],
   );
   return rows[0].id;
+}
+
+async function montonioOf(id: string): Promise<Record<string, unknown>> {
+  const rows = await query<{ m: Record<string, unknown> | null }>(
+    "select shipping->'montonio' as m from orders where id = $1",
+    [id],
+  );
+  return rows[0].m ?? {};
 }
 
 async function statusOf(id: string): Promise<string> {
@@ -309,6 +330,8 @@ describe("the envelope Montonio documents", () => {
       orderRef: NUMBER,
       status: "delivered",
       trackingCode: "CC548936341EE",
+      trackingUrl: "https://minu.omniva.ee/track/CC548936341EE?language=et",
+      dropOffPin: "",
     });
   });
 
@@ -393,7 +416,12 @@ describe("the shipment webhook, spoken the way Montonio speaks it", () => {
        ticks by name when he registers the webhook, and a shipment still
        sitting at `pending` (audit F23). Before 19.09.2026 no journal row was
        written here and the owner heard it from the customer. */
-    const id = await shippedOrder();
+    /* A shipment still `pending` on our side — booked asynchronously, or
+       re-registering after a PATCH. Until 24.09.2026 this fixture's shipment
+       said `registered`, and a refusal of a registered parcel is a late copy
+       of old news (it can only follow `pending`), so it no longer writes a row
+       — see «a two-day-old refusal» below. */
+    const id = await shippedOrder(NUMBER, "pending");
 
     const res = await POST(
       hook({
@@ -447,5 +475,152 @@ describe("the shipment webhook without Montonio keys", () => {
     expect(await res.json()).toMatchObject({ ok: false, error: "not_configured" });
     expect(await statusOf(id)).toBe("shipped");
     expect(await readStatusBook()).toEqual({});
+  });
+});
+
+/**
+ * Montonio's answer of 24.09.2026: six events, and «15 attempts total … over
+ * roughly 1.5–2 days». What that changes here, each case failing against the
+ * route as it stood that morning:
+ *   · the two `labelFile.*` events are about a PDF — acknowledged, never
+ *     recorded as a parcel status («failed» would read as a refused parcel);
+ *   · a retried event can land after a newer one — it never moves a parcel
+ *     backwards, and a late refusal of a registered parcel is not news;
+ *   · a parcel registered after the button press (a repaired refusal) gets its
+ *     tracking code from `shipment.registered`;
+ *   · news about a shipment the order does not hold writes nothing.
+ */
+describe("the six events, and news that arrives late", () => {
+  beforeAll(async () => {
+    await setupDb();
+    process.env.MONTONIO_ACCESS_KEY = ACCESS;
+    process.env.MONTONIO_SECRET_KEY = SECRET;
+  });
+  afterAll(async () => {
+    delete process.env.MONTONIO_ACCESS_KEY;
+    delete process.env.MONTONIO_SECRET_KEY;
+    await teardownDb();
+  });
+  beforeEach(async () => {
+    await truncateAll();
+    resetRateLimits();
+  });
+
+  const LABEL_FILE = "5b1d4a52-2222-4444-8888-bbbbbbbbbbbb";
+
+  it("acknowledges `labelFile.creationFailed` and records no «failed» parcel", async () => {
+    const id = await shippedOrder();
+    const res = await POST(
+      hook({
+        payload: signHs256(
+          {
+            accessKey: ACCESS,
+            eventType: "labelFile.creationFailed",
+            data: { id: LABEL_FILE, status: "failed" },
+          },
+          SECRET,
+          { expiresInSeconds: 600 },
+        ),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, ignored: "label_file" });
+    expect(await readStatusBook()).toEqual({});
+    expect(await shipmentStatusOf(id)).toBe("registered");
+  });
+
+  it("acknowledges `labelFile.ready` even though it names no shipment and no order", async () => {
+    /* Refused as «no reference», it would be a 400 — and fifteen redeliveries. */
+    const res = await POST(
+      hook({
+        payload: signHs256(
+          { accessKey: ACCESS, eventType: "labelFile.ready", labelFileId: LABEL_FILE, data: { status: "ready" } },
+          SECRET,
+          { expiresInSeconds: 600 },
+        ),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, ignored: "label_file" });
+    expect(await readStatusBook()).toEqual({});
+  });
+
+  it("does not move a parcel backwards on a two-day-old retry", async () => {
+    const id = await shippedOrder(NUMBER, "inTransit");
+    const res = await POST(
+      hook({ payload: guideToken({ eventType: "shipment.registered", data: { status: "registered" } }) }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, status: "registered", stale: true });
+    expect(await shipmentStatusOf(id)).toBe("inTransit");
+    // the word is still written down — the vocabulary is a field notebook
+    expect((await readStatusBook()).registered).toMatchObject({ count: 1 });
+  });
+
+  it("takes `labelsCreated` forward, like any newer status", async () => {
+    const id = await shippedOrder(NUMBER, "registered");
+    const res = await POST(
+      hook({ payload: guideToken({ eventType: "shipment.labelsCreated", data: { status: "labelsCreated" } }) }),
+    );
+    expect(res.status).toBe(200);
+    expect(await shipmentStatusOf(id)).toBe("labelsCreated");
+  });
+
+  it("writes no refusal for a two-day-old `registrationFailed` about a registered parcel", async () => {
+    const id = await shippedOrder(NUMBER, "registered");
+    const res = await POST(
+      hook({
+        payload: guideToken({ eventType: "shipment.registrationFailed", data: { status: "registrationFailed" } }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await journal("shipment.registration_failed")).toHaveLength(0);
+    expect(await shipmentStatusOf(id)).toBe("registered");
+  });
+
+  it("fills in the tracking code of a parcel registered after the button press", async () => {
+    /* A refusal repaired with PATCH that answered `pending`: no code on the
+       order yet. `shipment.registered` brings it. */
+    const id = await shippedOrder(NUMBER, "pending", { trackingCode: "", trackingUrl: "" }, "paid");
+    const res = await POST(
+      hook({ payload: guideToken({ eventType: "shipment.registered", data: { status: "registered" } }) }),
+    );
+    expect(res.status).toBe(200);
+    const m = await montonioOf(id);
+    expect(m).toMatchObject({
+      status: "registered",
+      trackingCode: "CC548936341EE",
+      trackingUrl: "https://minu.omniva.ee/track/CC548936341EE?language=et",
+    });
+    expect(await statusOf(id)).toBe("paid");
+  });
+
+  it("never overwrites a tracking code the order already has", async () => {
+    const id = await shippedOrder(NUMBER, "registered");
+    await POST(hook({ payload: guideToken({ data: { status: "inTransit" } }) }));
+    expect((await montonioOf(id)).trackingCode).toBe("CC000000001EE");
+  });
+
+  it("writes nothing about a shipment this order does not hold", async () => {
+    const id = await shippedOrder(NUMBER, "registered");
+    const other = "7c7c7c7c-3333-4444-8888-cccccccccccc";
+    const res = await POST(
+      hook({
+        payload: signHs256(
+          {
+            accessKey: ACCESS,
+            eventType: "shipment.statusUpdated",
+            shipmentId: other,
+            data: { id: other, status: "delivered", merchantReference: NUMBER },
+          },
+          SECRET,
+          { expiresInSeconds: 600 },
+        ),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, ignored: "other_shipment" });
+    expect(await shipmentStatusOf(id)).toBe("registered");
+    expect(await statusOf(id)).toBe("shipped");
   });
 });

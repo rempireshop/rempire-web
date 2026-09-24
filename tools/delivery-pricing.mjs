@@ -385,12 +385,17 @@ async function main() {
       kgFmt(c.actualKg),
       kgFmt(c.volumetricKg),
       kgFmt(c.chargeableKg),
-      c.volumetricKg !== null && c.actualKg !== null && c.volumetricKg > c.actualKg ? "платим за КОРОБКУ" : "платим за вес",
+      /* Montonio, 24.09.2026: the tariff takes the REAL weight; the helper's
+         chargeableWeight is not applied to the price «for time being».
+         MONTONIO_PRICES_VOLUMETRIC in src/lib/shipping/parcel.ts. */
+      c.volumetricKg !== null && c.actualKg !== null && c.volumetricKg > c.actualKg
+        ? "коробка тяжелее, но цена — по весу"
+        : "цена — по весу",
     ]);
   }
   if (chargeRows.length) {
     say("");
-    say("— за что Montonio берёт деньги (его собственный расчёт, calculationDetails) —");
+    say("— как Montonio считает посылку (его calculationDetails; цена сейчас по настоящему весу — ответ 24.09.2026) —");
     say("");
     say(table(["Полка", "коробка", "вес", "объёмный", "тарифный", "что решает"], chargeRows, ["l", "l", "r", "r", "r", "l"]));
     say("");
@@ -502,8 +507,8 @@ async function main() {
     say("Вес НИКТО не мерил: в каталоге 220 товаров и ни у одного нет веса и габаритов.");
     say(`Тут взято: ${bands[typicalBand].units} ${plural(bands[typicalBand].units, ["единица", "единицы", "единиц"])} → ${kgFmt(bands[typicalBand].kg)}.`);
     say("Это формула estimateWeightKg() из src/lib/shipping/montonio.ts — оценка магазина,");
-    say("а не выдуманная здесь. Montonio при этом объявляется коробка (declaredWeightKg),");
-    say("одна и та же на каждой посылке: вес заказа мы не считаем. Другое число — --units N;");
+    say("а не выдуманная здесь. Montonio при этом объявляется один вес (declaredWeightKg, 0,9 кг),");
+    say("один и тот же на каждой посылке: вес заказа мы не считаем. Другое число — --units N;");
     say("таблица выше говорит, насколько сильно от него зависит ответ.");
   }
 

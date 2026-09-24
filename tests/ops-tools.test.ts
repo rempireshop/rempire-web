@@ -49,7 +49,16 @@ describe("montonio-webhook", () => {
     expect(checkUrl("not a url")).toMatch(/URL/);
   });
 
-  it("subscribes to the three events the notify route reads", () => {
-    expect(EVENTS).toEqual(["shipment.registered", "shipment.registrationFailed", "shipment.statusUpdated"]);
+  it("subscribes to the four shipment events the notify route acts on — not the label-file pair", () => {
+    /* Montonio's enum has six (support, 24.09.2026). `labelFile.ready` and
+       `labelFile.creationFailed` are about a PDF the shop makes synchronously;
+       the route acknowledges them and does nothing, so they are not asked for. */
+    expect(EVENTS).toEqual([
+      "shipment.registered",
+      "shipment.registrationFailed",
+      "shipment.statusUpdated",
+      "shipment.labelsCreated",
+    ]);
+    expect(EVENTS.some((e: string) => e.startsWith("labelFile."))).toBe(false);
   });
 });

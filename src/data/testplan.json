@@ -1525,7 +1525,7 @@
         "В «Заказах» открыть карточку заказа и нажать «Назад» телефона.",
         "Открыть её снова, нажать «Отправлен» и на вопросе нажать «Назад» дважды.",
         "В «Товарах» открыть товар на правку и нажать «Назад».",
-        "Нажать «Ещё», потом «Назад».",
+        "Нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
         "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад».",
         "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется."
@@ -1533,7 +1533,7 @@
       "expect": [
         "Карточка заказа закрывается, а панель остаётся.",
         "Первое «Назад» убирает вопрос, второе — карточку.",
-        "Редактор товара и «Ещё» закрываются так же.",
+        "Редактор товара, «Ещё» и «Помощник» закрываются так же; раздел под ними остаётся.",
         "Сканер закрывается, камера гаснет, панель на месте.",
         "«Назад» возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
         "Ни одно нажатие не проходит впустую."
@@ -1547,7 +1547,7 @@
           "In «Заказы» open an order card and press the phone's back button.",
           "Open it again, press «Отправлен», and press back twice on the question.",
           "In «Товары» open a product for editing and press back.",
-          "Press «Ещё», then back.",
+          "Press «Ещё», then back; open «Помощник» and press back again.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
           "Open a product for editing again, close it with «← Товары», then press back.",
           "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes."
@@ -1555,13 +1555,15 @@
         "expect": [
           "The order card closes and the panel stays.",
           "The first back clears the question, the second the card.",
-          "The product editor and «Ещё» close the same way.",
+          "The product editor, «Ещё» and «Помощник» close the same way; the section under them stays.",
           "The scanner closes, the camera goes out, the panel stays.",
           "Back returns to the previous section; only «Обзор» leaves the panel.",
           "No press does nothing at all."
         ],
         "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:40:29.277Z"
     },
     {
       "id": "panel-overview",
@@ -1660,18 +1662,19 @@
       "title": "Создать промокод",
       "steps": [
         "«Ещё» → «Маркетинг» → «+ Промокод».",
-        "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
-        "Нажать «Создать».",
+        "Ввести код TEST10, выбрать «Сумма в евро», вписать 150, потом выбрать «Процент».",
+        "Поставить 10 % и нажать «Создать».",
         "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
-        "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
+        "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать».",
+        "Открыть код REM-CART-…, если он есть: прочитать серую строку, открыть и нажать «Сохранить»."
       ],
       "expect": [
-        "TEST10 стоит в списке.",
-        "TESTSHIP стоит в списке.",
-        "У обоих переключатель стоит на «включён».",
+        "После «Процент» поле скидки пустое — 150 не превращается в 150 %.",
+        "TEST10 и TESTSHIP стоят в списке, у обоих переключатель на «включён».",
+        "Второй TEST10 не создаётся: «Такой промокод уже есть.» и кнопка «Открыть его».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
-        "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
+        "У REM-CART-… «на корзину из письма», без кода корзины; «Сохранить» проходит без ошибки."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
@@ -1681,22 +1684,23 @@
         "title": "Creating a promo code",
         "steps": [
           "«Ещё» → «Маркетинг» → «+ Промокод».",
-          "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
-          "Press «Создать» (create).",
+          "Enter the code TEST10, choose «Сумма в евро» (amount), type 150, then choose «Процент» (percent).",
+          "Set 10 % and press «Создать» (create).",
           "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
-          "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
+          "«+ Промокод» once more, enter TEST10 with any discount and press «Создать».",
+          "Find a REM-CART-… code, if there is one: read its grey line, open it and press «Сохранить»."
         ],
         "expect": [
-          "TEST10 is in the list.",
-          "TESTSHIP is in the list.",
-          "Both stand at «включён» (on).",
+          "After «Процент» the discount box is empty — 150 does not turn into 150 %.",
+          "TEST10 and TESTSHIP are in the list, both switched to «включён» (on).",
+          "The second TEST10 is not created: «Такой промокод уже есть.» and an «Открыть его» button.",
           "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
-          "A REM-CART-… code reads «на корзину из письма», with no long basket id."
+          "REM-CART-… reads «на корзину из письма», no basket id; «Сохранить» goes through without an error."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-24T12:18:59.171Z"
+      "markedAt": "2026-09-24T17:38:26.560Z"
     },
     {
       "id": "panel-gift-amounts",
@@ -1710,13 +1714,17 @@
         "Выключить номинал 25 €.",
         "Открыть страницу подарочной карты в магазине.",
         "Вернуться и включить 25 € обратно.",
-        "Открыть «Оформление» и нажать то, что там есть."
+        "Открыть «Оформление» и нажать то, что там есть.",
+        "Включить режим полёта, нажать 75 €, выключить режим полёта.",
+        "Переключить панель на EN и прочитать номиналы."
       ],
       "expect": [
         "Выключенная сумма пропадает с кнопок на странице карты.",
         "Она пропадает и из текста под кнопками.",
         "Включённая обратно — возвращается.",
-        "Оформление открывает настоящую карту PDF и письмо к ней."
+        "Оформление открывает настоящую карту PDF и письмо к ней.",
+        "Без сети 75 € возвращается как был, и видно «Сервер не отвечает».",
+        "На EN номиналы написаны «€25», как все цены в панели."
       ],
       "why": "Сумма, которой нет в продаже, — это заказ, который сорвётся на кассе.",
       "risk": "med",
@@ -1728,18 +1736,22 @@
           "Switch the 25 € amount off.",
           "Open the gift-card page in the shop.",
           "Come back and switch 25 € on again.",
-          "Open «Оформление» and press what is there."
+          "Open «Оформление» and press what is there.",
+          "Turn flight mode on, tap 75 €, turn flight mode off.",
+          "Switch the panel to EN and read the amounts."
         ],
         "expect": [
           "An amount switched off leaves the buttons on the card page.",
           "It leaves the line of text under them too.",
           "Switched back on, it comes back.",
-          "The design block opens a real card PDF and the letter it arrives with."
+          "The design block opens a real card PDF and the letter it arrives with.",
+          "Offline, 75 € goes back to how it was, and «Сервер не отвечает» shows.",
+          "In EN the amounts read «€25», like every price in the panel."
         ],
         "why": "An amount not on sale is an order that dies at the checkout."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:44:28.205Z"
     },
     {
       "id": "panel-gift-issued",
@@ -1893,13 +1905,14 @@
         "Вернуть высоту 8 и выйти из поля."
       ],
       "expect": [
-        "Размеры 25, 18 и 8 см, вес около 0,9 кг.",
+        "Размеры 25, 18 и 8 см; строка: «На этикетке вес 0,9 кг».",
+        "С высотой 10 вес на этикетке остался 0,9 кг.",
         "Размер ячейки по умолчанию — S.",
-        "С высотой 10 под весом появилось предупреждение про цены за границу.",
+        "С высотой 10 появилось предупреждение про пакоматы DPD за границей.",
         "С высотой 8 предупреждение исчезло.",
         "Каждое изменение подтверждено «Сохранено ✓»."
       ],
-      "why": "Коробка больше той, для которой посчитаны цены, — убыток на каждой посылке за границу.",
+      "why": "Коробка больше той, для которой посчитаны цены, — убыток на каждом пакомате DPD за границей.",
       "risk": "high",
       "writes": true,
       "en": {
@@ -1911,16 +1924,17 @@
           "Set it back to 8 and leave the field."
         ],
         "expect": [
-          "Sides 25, 18 and 8 cm, weight about 0.9 kg.",
+          "Sides 25, 18 and 8 cm; the line says «На этикетке вес 0,9 кг».",
+          "With a height of 10 the label weight stays 0.9 kg.",
           "The default locker size is S.",
-          "With a height of 10 a warning about prices abroad appears.",
+          "With a height of 10 a warning about DPD lockers abroad appears.",
           "With a height of 8 the warning is gone.",
           "Each change is confirmed with «Сохранено ✓»."
         ],
-        "why": "A box bigger than the one prices are worked out for loses money on every parcel abroad."
+        "why": "A box bigger than the one prices are worked out for loses money on every DPD locker abroad."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:06:56.864Z"
+      "markedAt": "2026-09-24T16:37:14.361Z"
     },
     {
       "id": "panel-delivery-folds",
@@ -3811,7 +3825,7 @@
         "Нажать «Создать этикетку» и подождать пару секунд.",
         "Нажать «Открыть PDF (A4) ↗».",
         "Вернуться и нажать «A6 для термопринтера ↗».",
-        "Посмотреть вес на этикетке: это коробка магазина, а не число товаров.",
+        "Посмотреть вес на этикетке: 0,9 кг при любом числе товаров, даже с «Другой коробкой».",
         "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой.",
         "До создания этикетки открыть оплаченный заказ в пакомат SmartPosti или Unisend, потом в Omniva или Польшу, и посмотреть блок над кнопкой. Коробку можно поменять у любого оплаченного заказа — так задумано."
       ],
@@ -3833,7 +3847,7 @@
           "Press «Создать этикетку» (create label) and wait a couple of seconds.",
           "Press «Открыть PDF (A4) ↗».",
           "Go back and press «A6 для термопринтера ↗».",
-          "Look at the weight on the label: it is the shop's box, not the item count.",
+          "Look at the weight on the label: 0.9 kg whatever the item count, even with «Другая коробка».",
           "Open the A4 PDF and check the band under the label is not empty.",
           "Before creating a label, open a paid order to a SmartPosti or Unisend locker, then one to Omniva or Poland, and look above the button. The box can be changed on any paid order — that is by design."
         ],
@@ -3848,7 +3862,7 @@
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T15:49:00.000Z"
+      "markedAt": "2026-09-24T16:37:14.361Z"
     },
     {
       "id": "order-shipped",
@@ -4024,12 +4038,15 @@
         "Нажать «Написать клиенту».",
         "В поле сверху вставить выдуманный вопрос клиента.",
         "Поправить черновик ответа.",
-        "Нажать «Отправить» и подтвердить в окошке."
+        "Нажать «Отправить» и подтвердить в окошке.",
+        "Вернуться к списку, снова открыть заказ и нажать «Написать клиенту»."
       ],
       "expect": [
         "Перед отправкой магазин показывает адрес покупателя и текст письма.",
         "Там же предупреждение: отправленное письмо назад не вернуть.",
-        "После отправки переписка осталась в карточке заказа.",
+        "После отправки в карточке блок «Переписка»: вопрос клиента и ваше письмо.",
+        "Поле для вопроса клиента после отправки пустое.",
+        "После нового открытия «Переписка» на месте.",
         "Письмо пришло на почту покупателя."
       ],
       "why": "Письмо, ушедшее не туда или не с тем текстом, назад не забрать.",
@@ -4042,16 +4059,21 @@
           "Press «Написать клиенту» (write to the customer).",
           "Paste a made-up customer question into the top field.",
           "Edit the draft reply.",
-          "Press «Отправить» and confirm in the box."
+          "Press «Отправить» and confirm in the box.",
+          "Go back to the list, open the order again and press «Написать клиенту»."
         ],
         "expect": [
           "Before sending, the shop shows the address and the text.",
           "It warns that a sent letter cannot be taken back.",
-          "After sending, the exchange stays in the order card.",
+          "After sending the card shows «Переписка»: the customer's question and your letter.",
+          "The box for the customer's question is empty after sending.",
+          "Opened again, «Переписка» is still there.",
           "The letter arrives in the buyer's mailbox."
         ],
         "why": "A letter sent to the wrong person cannot be taken back."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:31:40.229Z"
     },
     {
       "id": "order-invoice-card",
@@ -4104,13 +4126,15 @@
       "steps": [
         "В том же заказе нажать «Отправить счёт ещё раз».",
         "Проверить почту, на которую выписан счёт.",
-        "Прочитать строку про счёт в карточке заказа."
+        "Прочитать строку про счёт в карточке заказа.",
+        "Пока IBAN пуст, открыть «Обзор» и нажать строку «Заполните IBAN»."
       ],
       "expect": [
         "Письмо со счётом пришло второй раз.",
         "К письму приложен PDF счёта.",
         "Без IBAN карточка пишет, что счёт не отправлен и где его заполнить.",
-        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз."
+        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз.",
+        "Строка «Заполните IBAN» открывает «Настройки → О компании», а не «Обзор» снова."
       ],
       "why": "Компания, не получившая счёт, не заплатит, а вы будете думать, что она тянет.",
       "risk": "med",
@@ -4120,16 +4144,20 @@
         "steps": [
           "In the same order press «Отправить счёт ещё раз» (send the invoice again).",
           "Check the mailbox the invoice was made out to.",
-          "Read the invoice line on the order card."
+          "Read the invoice line on the order card.",
+          "While the IBAN is empty, open «Обзор» and tap the «Заполните IBAN» row."
         ],
         "expect": [
           "The invoice letter arrives a second time.",
           "The invoice PDF is attached to it.",
           "With no IBAN the card says the invoice was not sent, and where to fix it.",
-          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз»."
+          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз».",
+          "The «Заполните IBAN» row opens «Настройки → О компании», not «Обзор» again."
         ],
         "why": "A company that never got the invoice will not pay — and you blame them."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:27:32.176Z"
     },
     {
       "id": "order-invoice-paid",
@@ -4144,6 +4172,7 @@
         "Посмотреть, куда переехал заказ."
       ],
       "expect": [
+        "После «Оплачен» окошко закрывается сразу, кнопка пишет «Сохраняем…».",
         "Заказ стал оплаченным.",
         "Он появился в списке «Отправить».",
         "Покупателю ушло письмо «Заказ принят»."
@@ -4159,12 +4188,15 @@
           "See where the order has moved to."
         ],
         "expect": [
+          "After «Оплачен» the box closes at once and the button says «Сохраняем…».",
           "The order has become paid.",
           "It shows up in the «Отправить» list.",
           "The buyer has had the «Заказ принят» letter."
         ],
         "why": "Pressed by mistake, this button sends goods out against an unpaid invoice."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:41:07.420Z"
     },
     {
       "id": "order-returns-chip",
@@ -4897,13 +4929,17 @@
         "Открыть «Ещё» → «Маркетинг» → «Письма».",
         "Открыть «Заказ принят».",
         "Внизу вписать свой адрес и нажать «Отправить мне тест».",
-        "Проверить почту."
+        "Проверить почту.",
+        "Поменять тему, не сохраняя, и снова нажать «Отправить мне тест».",
+        "Нажать «← Все письма», не сохраняя."
       ],
       "expect": [
         "В ваш ящик пришло письмо от shop@rempireshop.com.",
         "В начале темы стоит [test].",
         "Письмо выглядит так же, как предпросмотр на экране.",
-        "Ответ на это письмо уходит на info@rempireshop.com."
+        "Ответ на это письмо уходит на info@rempireshop.com.",
+        "В тесте — новая тема с экрана, хотя она ещё не сохранена.",
+        "Панель спросит, выходить ли без сохранения; «Выйти» убирает правки только этого письма."
       ],
       "why": "Это единственная кнопка, которая доказывает, что почта вообще работает.",
       "risk": "med",
@@ -4914,16 +4950,22 @@
           "Open «Ещё» → «Маркетинг» → «Письма».",
           "Open «Заказ принят» (order received).",
           "At the bottom type your address and press «Отправить мне тест» (send test).",
-          "Check your mail."
+          "Check your mail.",
+          "Change the subject without saving and press «Отправить мне тест» again.",
+          "Press «← Все письма» without saving."
         ],
         "expect": [
           "A letter from shop@rempireshop.com is in your own mailbox.",
           "The subject starts with [test].",
           "The letter looks the same as the preview on screen.",
-          "Press reply and it goes to info@rempireshop.com."
+          "Press reply and it goes to info@rempireshop.com.",
+          "The test carries the new subject from the screen, though it is not saved.",
+          "The panel asks whether to leave unsaved; «Выйти» drops this letter's edits only."
         ],
         "why": "This is the one button that proves mail works at all."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T18:01:04.338Z"
     },
     {
       "id": "mail-edit-text",
@@ -5586,14 +5628,14 @@
         "«Ещё» → «Настройки» → «Письма» (это «Маркетинг» → «Письма»): блок «Сколько писем в сутки» под списком писем.",
         "Поставить всего 4, придержать 2, сохранить и обновить страницу.",
         "Проверить, что подписчиков больше двух; если нет — добавить.",
-        "Открыть рассылку и нажать отправку.",
+        "Открыть рассылку, прочитать кнопку отправки на EN, вернуть RU и нажать её.",
         "Оформить и оплатить заказ, пока лимит занят.",
         "Вернуть 100 и 30; «Продолжить» у рассылки не нажимать.",
         "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
         "После обновления в полях 4 и 2, без «Изменения не сохранены».",
-        "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
+        "Под кнопкой — сколько ушло сегодня и доступно; на EN вся кнопка по-английски.",
         "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
         "Одно оповещение о лимите: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
@@ -5603,21 +5645,21 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T15:12:48.378Z",
+      "markedAt": "2026-09-24T17:47:00.480Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
           "«Ещё» → «Настройки» → «Письма» (that is «Маркетинг» → «Письма»): the «Сколько писем в сутки» block below the letters.",
           "Set the total to 4, hold back 2, save and reload the page.",
           "Check there are more than two subscribers; add some if not.",
-          "Open a campaign and press send.",
+          "Open a campaign, read its send button in EN, switch back to RU and press it.",
           "Place and pay for an order while the allowance is spent.",
           "Put back 100 and 30; do not press the campaign's «Продолжить».",
           "The next day after 10:00, open the campaign again."
         ],
         "expect": [
           "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
-          "Under the button: how many went today and how many the campaign may use.",
+          "Under the button: sent today and still available; in EN the whole button is English.",
           "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
           "The «Заказ принят» letter still reaches the buyer.",
           "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
@@ -6592,14 +6634,16 @@
         "Нажать «Сохранить».",
         "Открыть товар в магазине и посмотреть цену.",
         "Положить его в корзину.",
-        "Поменять цену и нажать «← Товары», не сохраняя."
+        "Поменять цену и нажать «← Товары», не сохраняя.",
+        "Снова поменять цену и нажать «Заказы» в меню внизу (на компьютере — слева)."
       ],
       "expect": [
         "В магазине у товара стоит новая цена.",
         "В корзине та же самая цена.",
         "В итоге заказа та же самая сумма.",
-        "Панель спросит, выходить ли без сохранения, а не выйдет молча.",
-        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки."
+        "И на «←», и на кнопке раздела панель спросит, выходить ли без сохранения.",
+        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки.",
+        "«Выйти без сохранения» после кнопки раздела открывает этот раздел."
       ],
       "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
       "risk": "high",
@@ -6612,19 +6656,21 @@
           "Press «Сохранить».",
           "Open the product in the shop and look at the price.",
           "Put it in the cart.",
-          "Change the price and press «← Товары» without saving."
+          "Change the price and press «← Товары» without saving.",
+          "Change the price again and press «Заказы» in the bottom bar (on a computer, in the sidebar)."
         ],
         "expect": [
           "The shop shows the new price on the product.",
           "The cart shows the same price.",
           "The order total uses the same price.",
-          "The panel asks whether to leave without saving instead of just leaving.",
-          "The unsaved-work question stands out: colour, a ground and two different buttons."
+          "Both on «←» and on a section button the panel asks whether to leave unsaved.",
+          "The unsaved-work question stands out: colour, a ground and two different buttons.",
+          "«Выйти без сохранения» after a section button opens that section."
         ],
         "why": "A price that differs in the cart costs you money or a complaint."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-24T17:54:34.627Z"
     },
     {
       "id": "goods-sizes",
@@ -6734,7 +6780,7 @@
         "Открыть товар в магазине.",
         "Поставить «Мало», потом «В наличии».",
         "То же самое проделать с товаром, у которого остаток посчитан.",
-        "Открыть «Каталог» и сверить чип «Нет в наличии» со «Складом»."
+        "Открыть «Каталог», нажать чип «Нет в наличии» и прочитать значки строк."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
@@ -6742,7 +6788,7 @@
         "Вместо неё появляется «Сообщить о наличии».",
         "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
         "А «Мало» и «В наличии» у него перебиваются тем, что посчитано.",
-        "Оба раздела считают одно и то же: посчитанный остаток, если он есть."
+        "Под «Нет в наличии» — только товары, которые магазин не продаёт; у каждого значок «Нет»."
       ],
       "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
       "risk": "med",
@@ -6756,7 +6802,7 @@
           "Open the product in the shop.",
           "Set «Мало» (low), then «В наличии» (in stock).",
           "Do the same on a product whose stock has been counted.",
-          "Open the catalogue and compare its out-of-stock chip with the warehouse."
+          "Open the catalogue, tap its «Нет в наличии» chip and read the rows' badges."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
@@ -6764,11 +6810,11 @@
           "«Сообщить о наличии» appears in its place.",
           "On a counted product «Нет в наличии» stops the sale too.",
           "But its «Мало» and «В наличии» are overruled by the count.",
-          "Both tabs count the same thing: the counted shelf wherever there is one."
+          "Under «Нет в наличии» only products the shop will not sell, each with a «Нет» badge."
         ],
         "why": "Without it you cannot stop sales of stock nobody has counted yet."
       },
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:41:02.129Z"
     },
     {
       "id": "goods-photo",
@@ -6784,7 +6830,7 @@
         "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
         "Дождаться конца, сохранить и открыть товар в магазине.",
         "На новом товаре выбрать фото на шаге «Фото» до сохранения.",
-        "Переставить фото стрелками: вверху должно появиться «Не сохранено».",
+        "Нажать ★ у другого фото или переставить стрелками: вверху должно появиться «Не сохранено».",
         "На подписи главного фото должны стоять и размеры, которые его показывают."
       ],
       "expect": [
@@ -6807,7 +6853,7 @@
           "While it is being cut out, make another photo the main one with the star.",
           "Wait for it to finish, save and open the product in the shop.",
           "On a new product pick a photo on the «Фото» step before saving.",
-          "Reorder the photos with the arrows: the top bar must say it is unsaved.",
+          "Press ★ on another photo, or reorder with the arrows: the top bar must say it is unsaved.",
           "The main photo's tag must also carry the sizes that show it."
         ],
         "expect": [
@@ -6821,7 +6867,7 @@
         "why": "A product with no photo is barely bought at all."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "goods-video",
@@ -6833,11 +6879,13 @@
       "steps": [
         "Вставить ссылку на видео с YouTube на вкладке «Фото и видео».",
         "Сохранить и открыть товар в магазине.",
-        "Нажать на видео."
+        "Нажать на видео.",
+        "В редакторе нажать «Загрузить» и выбрать ролик больше 4 МБ."
       ],
       "expect": [
         "Видео видно на странице товара.",
-        "По нажатию оно начинает играть."
+        "По нажатию оно начинает играть.",
+        "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -6847,14 +6895,18 @@
         "steps": [
           "In the editor, on the «Фото и видео» tab, paste a link to a YouTube video.",
           "Save and open the product in the shop.",
-          "Press the video."
+          "Press the video.",
+          "In the editor press «Загрузить» and pick a clip over 4 MB."
         ],
         "expect": [
           "The video is there on the product page.",
-          "Pressing it starts the video playing."
+          "Pressing it starts the video playing.",
+          "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason."
         ],
         "why": "A styling video sells a wax better than any description."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:33:35.367Z"
     },
     {
       "id": "goods-new",
@@ -6952,7 +7004,7 @@
         ],
         "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
       },
-      "markedAt": "2026-09-19T14:34:03.000Z"
+      "markedAt": "2026-09-24T17:30:55.116Z"
     },
     {
       "id": "bundles-hide",
@@ -7280,13 +7332,14 @@
       "title": "Одобрить партнёра",
       "steps": [
         "Открыть «Клиенты» и нажать «Заявки Pro».",
-        "Нажать «Одобрить Pro» и прочитать окошко с вопросом.",
+        "Открыть карточку клиента с заявкой, нажать «Одобрить Pro» и прочитать окошко с вопросом.",
         "Подтвердить.",
         "Войти в кабинет этого покупателя и посмотреть цены товаров.",
         "Вернуть этого партнёра на обычные цены и одобрить его снова."
       ],
       "expect": [
         "Перед одобрением выходит окошко с вопросом.",
+        "После одобрения заказы, факты и отзывы на карточке остаются, серых полос нет.",
         "После одобрения партнёру ушло письмо.",
         "В его кабинете стоят цены для салонов.",
         "Второе одобрение того же человека письма уже не шлёт."
@@ -7299,19 +7352,21 @@
         "title": "Approving a partner",
         "steps": [
           "Open «Клиенты» and press the «Заявки Pro» chip.",
-          "Press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
+          "Open the card of a customer with a request, press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
           "Confirm.",
           "Sign into that buyer's account and look at the product prices.",
           "Put that partner back on retail prices and approve them again."
         ],
         "expect": [
           "A box asks you to confirm before approving.",
+          "After approval the card keeps its orders, facts and reviews, with no grey bars.",
           "After approval a letter has gone to the partner.",
           "In their account the salon prices are shown.",
           "Approving the same person a second time sends no letter."
         ],
         "why": "Approval turns on wholesale prices for good and sends a letter you cannot recall."
-      }
+      },
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-add-partner",
@@ -7323,12 +7378,14 @@
       "steps": [
         "Открыть «Клиенты» и нажать «+ Партнёр».",
         "Вписать почту, название салона и регистрационный номер.",
-        "Сохранить и проверить почту партнёра."
+        "Сохранить и проверить почту партнёра.",
+        "Снова нажать «+ Партнёр», вписать ту же почту и сохранить."
       ],
       "expect": [
         "Партнёр появился в списке с пометкой партнёра.",
         "На его почту пришло письмо.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду.",
+        "Второй раз выходит «Уже партнёр» — без кнопки «Отменить»."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -7338,15 +7395,19 @@
         "steps": [
           "«Клиенты» → «+ Партнёр».",
           "Type in the e-mail, the salon name and the registration number.",
-          "Save and check the partner's mail."
+          "Save and check the partner's mail.",
+          "Press «+ Партнёр» again, type the same e-mail and save."
         ],
         "expect": [
           "The partner is in the list with a partner marker.",
           "A letter has arrived in their mailbox.",
-          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view."
+          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view.",
+          "The second time it says «Уже партнёр», with no «Отменить» button."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:43:29.371Z"
     },
     {
       "id": "people-remove-partner",
@@ -7400,11 +7461,13 @@
         "Открыть карточку клиента.",
         "Вписать в баллах плюс десять и применить.",
         "Открыть кабинет этого клиента и посмотреть баллы.",
-        "Списать те же десять обратно."
+        "Списать те же десять обратно.",
+        "Вписать в баллах пять, не применять и открыть карточку другого клиента."
       ],
       "expect": [
         "После начисления в кабинете стало на десять больше.",
-        "После списания число вернулось к прежнему."
+        "После списания число вернулось к прежнему.",
+        "У другого клиента поля баллов и заметки к ним пустые."
       ],
       "why": "Баллы, начисленные по ошибке, потом тратятся на кассе как ваши деньги.",
       "risk": "med",
@@ -7415,14 +7478,18 @@
           "Open a customer's card.",
           "In the points block type plus ten and apply it.",
           "Open that customer's account and look at the points.",
-          "Take the same ten back off."
+          "Take the same ten back off.",
+          "Type five in the points block, do not apply it, and open another customer's card."
         ],
         "expect": [
           "After crediting, the account shows ten more points.",
-          "After taking them off, the number is back."
+          "After taking them off, the number is back.",
+          "On the other customer's card the points field and its note are empty."
         ],
         "why": "Points credited by mistake are spent at the till as your money."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-csv",
@@ -8287,7 +8354,7 @@
       "title": "Большая картинка на главной",
       "steps": [
         "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-        "Поправить текст первого слайда и выбрать другую картинку из плиток.",
+        "Поправить текст первого слайда кнопкой ✨ и выбрать другую картинку из плиток.",
         "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
         "Нажать «Сохранить» (на телефоне — вверху экрана), подтвердить и открыть главную магазина."
       ],
@@ -8306,7 +8373,7 @@
         "title": "The big picture at the top",
         "steps": [
           "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-          "Edit the first slide's text and pick another picture from the tiles.",
+          "Rewrite the first slide's text with ✨ and pick another picture from the tiles.",
           "Add a gift-card slide; keep adding slides until the button goes grey.",
           "Press «Сохранить» (on the phone — at the top), confirm and open the shop's home page."
         ],
@@ -8319,7 +8386,9 @@
           "The gift-card slide shows the card, not a shampoo bottle."
         ],
         "why": "A button leading to the wrong place wastes the shop's best screen."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:48:59.431Z"
     },
     {
       "id": "settings-content",
@@ -8331,13 +8400,17 @@
       "steps": [
         "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
         "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин."
+        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин.",
+        "На «О компании» поменять телефон, не сохраняя; на «Главной странице» сохранить полоску.",
+        "На «Главной странице» нажать «Сбросить к стандартному» у полоски."
       ],
       "expect": [
         "Пока вы печатаете, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — название карточки).",
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Узкая полоска с вашим текстом стоит над магазином.",
-        "Она есть и на эстонском, и на английском."
+        "Она есть и на эстонском, и на английском.",
+        "Сохранение полоски не сохраняет телефон; он так и ждёт своего «Сохранить».",
+        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются."
       ],
       "why": "Без часов работы вам будут звонить и спрашивать, открыты ли вы.",
       "risk": "low",
@@ -8347,16 +8420,22 @@
         "steps": [
           "«Настройки» → «О компании»: fill in the opening hours and social links.",
           "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop."
+          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop.",
+          "On «О компании» change the phone without saving; on «Главная страница» save the strip.",
+          "On «Главная страница» press «Сбросить к стандартному» under the strip."
         ],
         "expect": [
           "While you type, «Не сохранено» stands next to «Сохранить» (on a computer the card name).",
           "The opening hours show on «Контакты» and at the foot of every page.",
           "The thin strip with your text sits above the shop.",
-          "It is there in Estonian and in English too."
+          "It is there in Estonian and in English too.",
+          "Saving the strip does not save the phone; it still waits for its own «Сохранить».",
+          "Resetting the strip changes the strip only; details and IBAN, hours and socials stay."
         ],
         "why": "With no opening hours, people phone you to ask if you're open."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:37:33.147Z"
     },
     {
       "id": "settings-delivered-auto",
@@ -8577,14 +8656,16 @@
       "steps": [
         "На боевых ключах открыть второй настоящий оплаченный заказ.",
         "Нажать «Вернуть деньги», стереть сумму и вписать меньшую — например 0,50.",
-        "Подтвердить и посмотреть карточку.",
-        "Попробовать вернуть сумму больше остатка."
+        "Прочитать текст в окошке.",
+        "Вписать сумму больше остатка и нажать «Вернуть деньги».",
+        "Исправить сумму на 0,50, нажать «Вернуть деньги» ещё раз и посмотреть карточку."
       ],
       "expect": [
+        "В окошке: «Вернём 0,50 € из …», статус заказа и склад не изменятся.",
+        "Сумму больше остатка магазин не принимает, а окошко остаётся открытым.",
+        "Исправленная сумма уходит с той же кнопки, окошко открывать заново не нужно.",
         "Вернулась ровно та сумма, которую вписали.",
-        "Заказ так и остался оплаченным.",
-        "Товары на склад не вернулись.",
-        "Сумму больше остатка магазин не принимает.",
+        "Заказ так и остался оплаченным, товары на склад не вернулись.",
         "Баллы за этот заказ остались как были — их возвращает только полный возврат."
       ],
       "why": "Вернуть больше, чем заплатили, значит подарить деньги.",
@@ -8596,19 +8677,21 @@
         "steps": [
           "On the live keys, open a second real paid order.",
           "Press «Вернуть деньги», clear the amount and type a smaller one — e.g. 0.50.",
-          "Confirm and look at the card.",
-          "Try to refund more than the remaining balance."
+          "Read the text in the box.",
+          "Type an amount above the balance and press «Вернуть деньги».",
+          "Correct the amount to 0.50, press «Вернуть деньги» again and look at the card."
         ],
         "expect": [
+          "The box says: «Вернём 0,50 € из …», the order's status and stock stay.",
+          "The shop refuses an amount above the balance, and the box stays open.",
+          "The corrected amount goes from the same button, with no need to reopen the box.",
           "Exactly the amount typed comes back.",
-          "The order stays paid.",
-          "The goods do not go back into stock.",
-          "The shop refuses an amount above the balance.",
+          "The order stays paid, and the goods do not go back into stock.",
           "The order's points are untouched — only a full refund moves them."
         ],
         "why": "Refunding more than was paid is a gift of money."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T17:38:05.777Z"
     },
     {
       "id": "live-apple-pay",
@@ -8728,6 +8811,51 @@
       }
     },
     {
+      "id": "live-label-repair",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Перевозчик не принял посылку: та же кнопка ещё раз",
+      "steps": [
+        "Дима ставит в оплаченный заказ с пакоматом неверный телефон получателя.",
+        "Открыть заказ в панели и нажать «Создать этикетку».",
+        "Дима возвращает правильный телефон.",
+        "В том же заказе нажать «Отправить заново»."
+      ],
+      "expect": [
+        "После первого нажатия: «Перевозчик не принял», трек-номера и PDF нет.",
+        "Кнопка стала «Отправить заново», а не «Отправлен».",
+        "В журнале строка «Перевозчик не принял посылку».",
+        "После «Отправить заново» есть трек-номер, PDF открывается.",
+        "В Montonio у заказа одно отправление, не два.",
+        "В журнале строка «Посылка снова отправлена перевозчику»."
+      ],
+      "why": "Отказ перевозчика чинится той же кнопкой — без второй посылки и второй оплаты.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "The carrier refused the parcel: the same button again",
+        "steps": [
+          "Dim puts a wrong receiver phone on a paid order to a locker.",
+          "Open the order in the panel and press «Создать этикетку».",
+          "Dim puts the right phone back.",
+          "On the same order press «Отправить заново» (send again)."
+        ],
+        "expect": [
+          "After the first press: «Перевозчик не принял», no tracking number and no PDF.",
+          "The button now reads «Отправить заново», not «Отправлен».",
+          "The journal has «Перевозчик не принял посылку».",
+          "After «Отправить заново» there is a tracking number and the PDF opens.",
+          "Montonio holds one shipment for the order, not two.",
+          "The journal has «Посылка снова отправлена перевозчику»."
+        ],
+        "why": "A carrier's refusal is repaired with the same button — no second parcel, no second charge."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-24T17:20:14.754Z"
+    },
+    {
       "id": "live-cron",
       "area": "live",
       "who": "dim",
@@ -8743,7 +8871,8 @@
       "expect": [
         "Письма пришли сами, без единого нажатия.",
         "Счётчики «Ждут письма» сдвинулись.",
-        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж."
+        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж.",
+        "В логе утреннего запуска Vercel есть «shipments: checked …» — сверка посылок с Montonio."
       ],
       "why": "Расписание одно на все автоматические письма: не запустилось — не ушло ни одно.",
       "risk": "high",
@@ -8759,12 +8888,13 @@
         "expect": [
           "The letters arrived on their own, with nothing pressed.",
           "The «Ждут письма» counters have moved.",
-          "The order became paid by itself: the nightly check asked Montonio and found the payment."
+          "The order became paid by itself: the nightly check asked Montonio and found the payment.",
+          "The morning run's Vercel log has «shipments: checked …» — the parcel check with Montonio."
         ],
         "why": "One schedule carries every automatic letter: if it stops, none go."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-24T16:52:23.267Z"
     },
     {
       "id": "live-reconcile",

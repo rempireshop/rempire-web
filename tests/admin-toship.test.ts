@@ -66,6 +66,7 @@ type Panel = {
 function panel(orders: ReturnType<typeof row>[]): Panel {
   const body = `
     ${slice("admOrderVM")}
+    ${slice("shipRegFailed")}
     ${slice("admWaitingCount")}
     ${slice("admLiveToShip")}
     ${slice("admWaitingSplit")}
@@ -137,6 +138,7 @@ describe("the admin's «Отправить» queue", () => {
   it("keeps a digital order «paid» — money is money, only the queue is a parcel queue", () => {
     const body = `
       ${slice("admOrderVM")}
+      ${slice("shipRegFailed")}
       ${slice("admReturnAskedAt")}
     ${slice("admReturnDoneAt")}
       ${slice("admRefundView")}
