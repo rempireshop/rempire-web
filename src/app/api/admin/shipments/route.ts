@@ -241,7 +241,9 @@ async function repairRefused(order: Order, existing: MontonioShipment & Record<s
        AGAIN. So the shipment is only sent while Montonio itself still calls it
        refused. (The e2e carrier never refuses and has no GET.) */
     const now = shippingMockOn() ? existing : await getMontonioShipment(existing.shipmentId);
-    if (!registrationRefused(now)) {
+    /* An empty status says nothing either way; the shipment was refused as
+       far as anyone knows, so it is sent again. */
+    if (String(now.status ?? "").trim() && !registrationRefused(now)) {
       shipment = {
         ...existing,
         status: now.status || existing.status,

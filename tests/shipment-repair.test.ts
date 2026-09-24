@@ -231,6 +231,22 @@ describe("repairing a refused parcel — PATCH the same shipment", () => {
     expect(await montonioOf(id)).toMatchObject({ status: "registered", trackingCode: "CC999EE" });
   });
 
+  it("sends it again when Montonio's answer names no status at all", async () => {
+    /* Nothing says it has registered since, so it is still refused as far as
+       anyone knows — and a repair that silently did nothing would be the old
+       dead end again. */
+    const id = await refusedOrder();
+    const calls = montonio(
+      () => json({ ...shipmentBody("registrationFailed"), status: "" }),
+      () => json(shipmentBody("registered", "CC555EE")),
+    );
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const res = await POST(press(id));
+    expect(res.status).toBe(200);
+    expect(calls.filter((c) => c.method === "PATCH")).toHaveLength(1);
+    expect(await montonioOf(id)).toMatchObject({ status: "registered", trackingCode: "CC555EE" });
+  });
+
   it("sends nothing when Montonio cannot be asked, and the button works again at once", async () => {
     const id = await refusedOrder();
     const calls = montonio(
