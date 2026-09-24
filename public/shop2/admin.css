@@ -721,8 +721,11 @@
 .adm-sheet__grab { display: flex; justify-content: center; padding: 10px 0 2px; flex: none; }
 .adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-rule); }
 .adm-sheet__body { overflow: auto; padding: 8px 20px 0; }
+/* The sheet stands on the bottom edge of the screen, so its last row clears
+   the iPhone's home indicator the way the bar does (--a-barh) — 24 px on a
+   phone without one, 24 px plus the inset on one with it. */
 .adm-sheet__foot {
-  padding: 16px 20px 24px; display: flex; align-items: center; justify-content: center;
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; justify-content: center;
   gap: 12px 24px; flex-wrap: wrap; flex: none;
 }
 .adm-sheet--tall { height: 75%; }
@@ -946,6 +949,11 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
     height: min(var(--a-vvh, 100%), max(75%, min(100%, 520px)));
     border-left: 0; border-top: 1px solid var(--a-ink); animation: adm-up .2s;
   }
+  /* the compose row is the sheet's bottom edge and the screen's: it clears
+     the home indicator — except with the keys up, when the sheet already
+     stands on the keyboard (--a-vvbot) and the inset would be a gap */
+  .adm-asst__foot { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  body.adm-typing .adm-asst__foot { padding-bottom: 16px; }
   .adm-asst__chev { display: none; }
   .adm-asst__x { display: inline; font-size: 22px; line-height: 1; color: var(--a-muted); }
   .adm-asst__fold { width: 44px; height: 44px; border: 0; }
@@ -958,7 +966,13 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
     border-top: 1px solid var(--a-rule); background: var(--a-paper); z-index: 50;
   }
   .adm-confirm { align-items: flex-end; padding: 0; }
-  .adm-confirm__card { max-width: none; border-left: 0; border-right: 0; border-bottom: 0; }
+  /* a bottom sheet here: «Отмена» and the verb clear the home indicator,
+     and a field in the card (the refund's sum) sits on the keys without it */
+  .adm-confirm__card {
+    max-width: none; border-left: 0; border-right: 0; border-bottom: 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  body.adm-typing .adm-confirm__card { padding-bottom: 20px; }
   .adm-toast { bottom: calc(var(--a-barh) + 20px); }
   .adm-fab { bottom: calc(var(--a-barh) + 20px); }
   /* the toast owns the strip above the bar while it is up */
@@ -1561,7 +1575,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__zoom {
   position: absolute; right: 8px; bottom: 8px; pointer-events: none;
   padding: 3px 8px; background: rgba(0, 0, 0, .6); color: #fff;
-  font-family: var(--a-num, inherit); font-size: 13px; line-height: 18px; letter-spacing: .02em;
+  /* was `font-family: var(--a-num, inherit)` — a token nothing ever defined,
+     so it always fell back to the inherited face; the figures keep one width
+     so «2,4×» does not jitter while the pinch moves */
+  font-variant-numeric: tabular-nums; font-size: 13px; line-height: 18px; letter-spacing: .02em;
 }
 /* No camera (denied, absent, or a desktop): the viewfinder is dead space and
    the manual field is the interface — see scanRenderPanel(). A card on screen
@@ -2393,8 +2410,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* «Оповещения на телефон». Разрешение даёт телефон, а не магазин, поэтому
    на экране сначала ЭТОТ телефон — одна кнопка во всю ширину, которую видно
    с порога, — и только потом список остальных. */
+/* --a-tint, the ground of .adm-notice: this box used to name `--a-shell`,
+   which admin.css never defined, so it was drawn with no ground at all */
 .adm-push__here {
-  border: 1px solid var(--a-rule); background: var(--a-shell);
+  border: 1px solid var(--a-rule); background: var(--a-tint);
   padding: 14px; margin-bottom: 10px;
   display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
 }
