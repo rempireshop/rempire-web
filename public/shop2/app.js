@@ -1152,6 +1152,7 @@
       "Промокод выключен ✓": "Sooduskood välja lülitatud ✓",
       "Промокод удалён ✓": "Sooduskood kustutatud ✓",
       "Не получилось сохранить промокод.": "Sooduskoodi ei õnnestunud salvestada.",
+      "Такой промокод уже есть.": "Selline sooduskood on juba olemas.", "Открыть его": "Ava see",
       "Не получилось удалить промокод": "Sooduskoodi ei õnnestunud kustutada",
       "Код уже использован — его можно только выключить":
         "Koodi on juba kasutatud — selle saab ainult välja lülitada",
@@ -4200,6 +4201,7 @@
       "Промокод выключен ✓": "Promo code switched off ✓",
       "Промокод удалён ✓": "Promo code deleted ✓",
       "Не получилось сохранить промокод.": "The promo code could not be saved.",
+      "Такой промокод уже есть.": "This promo code already exists.", "Открыть его": "Open it",
       "Не получилось удалить промокод": "The promo code could not be deleted",
       "Код уже использован — его можно только выключить":
         "The code has already been used — it can only be switched off",
@@ -29480,7 +29482,11 @@
          saves (Renat, 10.09.2026), with the refusal riding in it so it is on
          screen on a phone wherever the owner is in the form */
       '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
+        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) +
+          /* «Создать» with a code that is already there: the way to the code
+             itself, rather than a dead end (savePromo, `exists`) */
+          (f.dup ? ' <button class="adm-link" data-admpromoedit="' + esc(f.dup) + '">Открыть его</button>' : "") +
+          "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
         admBarNoteHTML("touch") + "</div></div>";
@@ -29562,6 +29568,10 @@
       scope: scope,
       scopeValue: scope === "order" ? null : text(f.scopeValue)
     };
+    /* «Создать» may only make a code that is not there yet — the server
+       answers `exists` rather than rewriting somebody's live code with this
+       form's values (insertPromo in src/lib/promos.ts). */
+    if (!f.editing) body.create = true;
     return body;
   }
   var PROMO_SAVE_ERRS = {
@@ -29578,19 +29588,26 @@
     bad_scope: "Выберите, на что действует код: весь заказ, бренд или товар.",
     bad_scope_value: "Выберите бренд или товар — без этого код не на что применить.",
     scope_free_shipping: "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.",
+    exists: "Такой промокод уже есть.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
   function savePromo() {
     if (!S.promoForm || savePromo._busy) return;   // a second tap while the first is on its way
     savePromo._busy = true;
     S.promoFormErr = "";
-    apiSend("/api/admin/promos/", "POST", promoFormPayload()).then(function (r) {
+    S.promoForm.dup = "";
+    var sent = promoFormPayload();
+    apiSend("/api/admin/promos/", "POST", sent).then(function (r) {
       savePromo._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.promoForm = null; toast("Промокод сохранён ✓"); loadAdminPromos(true); return;
       }
       S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
+      /* The code is taken: the form keeps what was typed and offers the one
+         that exists («Открыть его» → data-admpromoedit), and the list is asked
+         again so that row is there to open even if it was made elsewhere. */
+      if (r.body && r.body.error === "exists" && S.promoForm) { S.promoForm.dup = sent.code; loadAdminPromos(true); }
       render();
     }).catch(function () { savePromo._busy = false; S.promoFormErr = "Сервер не отвечает."; render(); });
   }

@@ -1663,12 +1663,12 @@
         "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
         "Нажать «Создать».",
         "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
+        "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать».",
         "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
       ],
       "expect": [
-        "TEST10 стоит в списке.",
-        "TESTSHIP стоит в списке.",
-        "У обоих переключатель стоит на «включён».",
+        "TEST10 и TESTSHIP стоят в списке, у обоих переключатель на «включён».",
+        "Второй TEST10 не создаётся: «Такой промокод уже есть.» и кнопка «Открыть его».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
         "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
@@ -1684,19 +1684,19 @@
           "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
           "Press «Создать» (create).",
           "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
+          "«+ Промокод» once more, enter TEST10 with any discount and press «Создать».",
           "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
         ],
         "expect": [
-          "TEST10 is in the list.",
-          "TESTSHIP is in the list.",
-          "Both stand at «включён» (on).",
+          "TEST10 and TESTSHIP are in the list, both switched to «включён» (on).",
+          "The second TEST10 is not created: «Такой промокод уже есть.» and an «Открыть его» button.",
           "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
           "A REM-CART-… code reads «на корзину из письма», with no long basket id."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-24T12:18:59.171Z"
+      "markedAt": "2026-09-24T17:33:45.316Z"
     },
     {
       "id": "panel-gift-amounts",
