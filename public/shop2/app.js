@@ -20105,6 +20105,11 @@
     if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
       '<div class="adm-empty">Заказ не найден</div></div>';
     var o = v.srv;
+    /* «Оплата» names the bank from Montonio's list (bankNameOf), which the
+       panel otherwise asks for only on «Подключения» and «Доставка и оплата» —
+       so a card opened first printed the BIC. One-shot; its arrival repaints
+       the card, as the order list's own reload does. */
+    if (SRV.admin === true && o && o.payment && o.payment.method === "bank" && o.payment.bank) loadPayMethods();
     var closed = v.status === "cancelled" || v.status === "refunded";
     var showSteps = !v.pos && !v.digital && !closed;
 
@@ -20290,12 +20295,23 @@
     for (var i = 0; i < list.length; i++) if (list[i]) out.push("<span>" + esc(String(list[i])) + "</span>");
     return out.join(" · ");
   }
-  /** The bank behind a BIC: the live Montonio list when it loaded, else ours. */
+  /* The three banks outside the Baltics and Finland that Montonio offers, by
+     their BICs. The last word before a bare code: the order card printed
+     «Bank link · RVUALT2V» whenever Montonio's list had not been fetched yet
+     (staging, 24.09.2026). */
+  var BANK_NAMES_ABROAD = { RVUALT2V: "Revolut", NTSBDEB1: "N26", TRWIGB2L: "Wise" };
+  /** The bank behind a BIC: Montonio's own name for it — from the WHOLE list,
+      so a bank the owner has since switched off in «Доставка и оплата» keeps
+      its name on the orders it already paid — then the checkout's list, the
+      built-in five, the three international ones, and the code only when
+      nothing is known. */
   function bankNameOf(code) {
-    var real = PAYMETHODS.banks || [];
-    for (var i = 0; i < real.length; i++) if (real[i].code === code) return real[i].name || code;
+    var lists = [PAYMETHODS.all || [], PAYMETHODS.banks || []];
+    for (var l = 0; l < lists.length; l++) {
+      for (var i = 0; i < lists[l].length; i++) if (lists[l][i].code === code) return lists[l][i].name || code;
+    }
     for (var k in BANK_CODES) if (BANK_CODES[k] === code) return k;
-    return code;
+    return Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : code;
   }
   function admPaymentHTML(o) {
     var p = o && o.payment;

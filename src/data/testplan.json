@@ -3575,10 +3575,11 @@
       "steps": [
         "Открыть «Заказы» и нажать на оплаченный заказ.",
         "Найти «Оплата».",
-        "Пролистать карточку до «Состав», «Покупатель», «Доставка»."
+        "Пролистать карточку до «Состав», «Покупатель», «Доставка».",
+        "Открыть заказ, оплаченный через Revolut, N26, Wise или банк Латвии, Литвы, Финляндии, если такой есть."
       ],
       "expect": [
-        "В «Оплата» написано, чем платили: картой или банком.",
+        "В «Оплата» написано, чем платили: картой или банком — и название банка, не код.",
         "Там же видно, прошёл платёж или нет.",
         "Есть ссылка на этот платёж у банка.",
         "В «Состав» те же товары, что покупали.",
@@ -3593,10 +3594,11 @@
         "steps": [
           "Open «Заказы» and tap a paid order.",
           "Find «Оплата».",
-          "Scroll the card down to «Состав», «Покупатель» and «Доставка»."
+          "Scroll the card down to «Состав», «Покупатель» and «Доставка».",
+          "Open an order paid through Revolut, N26, Wise or a Latvian, Lithuanian or Finnish bank, if there is one."
         ],
         "expect": [
-          "«Оплата» says what was paid with: card or bank.",
+          "«Оплата» says what was paid with: card or bank — named, never a code.",
           "It also shows whether the payment went through.",
           "There is a link to that payment at the bank.",
           "«Состав» holds the same products that were bought.",
@@ -3606,7 +3608,7 @@
         "why": "When a buyer argues about money, this screen is your only answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-24T12:16:18.409Z"
     },
     {
       "id": "order-paid-short",
