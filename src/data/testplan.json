@@ -7298,13 +7298,14 @@
       "title": "Одобрить партнёра",
       "steps": [
         "Открыть «Клиенты» и нажать «Заявки Pro».",
-        "Нажать «Одобрить Pro» и прочитать окошко с вопросом.",
+        "Открыть карточку клиента с заявкой, нажать «Одобрить Pro» и прочитать окошко с вопросом.",
         "Подтвердить.",
         "Войти в кабинет этого покупателя и посмотреть цены товаров.",
         "Вернуть этого партнёра на обычные цены и одобрить его снова."
       ],
       "expect": [
         "Перед одобрением выходит окошко с вопросом.",
+        "После одобрения заказы, факты и отзывы на карточке остаются, серых полос нет.",
         "После одобрения партнёру ушло письмо.",
         "В его кабинете стоят цены для салонов.",
         "Второе одобрение того же человека письма уже не шлёт."
@@ -7317,19 +7318,21 @@
         "title": "Approving a partner",
         "steps": [
           "Open «Клиенты» and press the «Заявки Pro» chip.",
-          "Press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
+          "Open the card of a customer with a request, press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
           "Confirm.",
           "Sign into that buyer's account and look at the product prices.",
           "Put that partner back on retail prices and approve them again."
         ],
         "expect": [
           "A box asks you to confirm before approving.",
+          "After approval the card keeps its orders, facts and reviews, with no grey bars.",
           "After approval a letter has gone to the partner.",
           "In their account the salon prices are shown.",
           "Approving the same person a second time sends no letter."
         ],
         "why": "Approval turns on wholesale prices for good and sends a letter you cannot recall."
-      }
+      },
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-add-partner",
@@ -7424,11 +7427,13 @@
         "Открыть карточку клиента.",
         "Вписать в баллах плюс десять и применить.",
         "Открыть кабинет этого клиента и посмотреть баллы.",
-        "Списать те же десять обратно."
+        "Списать те же десять обратно.",
+        "Вписать в баллах пять, не применять и открыть карточку другого клиента."
       ],
       "expect": [
         "После начисления в кабинете стало на десять больше.",
-        "После списания число вернулось к прежнему."
+        "После списания число вернулось к прежнему.",
+        "У другого клиента поля баллов и заметки к ним пустые."
       ],
       "why": "Баллы, начисленные по ошибке, потом тратятся на кассе как ваши деньги.",
       "risk": "med",
@@ -7439,14 +7444,18 @@
           "Open a customer's card.",
           "In the points block type plus ten and apply it.",
           "Open that customer's account and look at the points.",
-          "Take the same ten back off."
+          "Take the same ten back off.",
+          "Type five in the points block, do not apply it, and open another customer's card."
         ],
         "expect": [
           "After crediting, the account shows ten more points.",
-          "After taking them off, the number is back."
+          "After taking them off, the number is back.",
+          "On the other customer's card the points field and its note are empty."
         ],
         "why": "Points credited by mistake are spent at the till as your money."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:46:27.540Z"
     },
     {
       "id": "people-csv",

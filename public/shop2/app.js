@@ -30967,7 +30967,14 @@
       S.admCustBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.admCustDetail = { customer: r.body.customer, history: (S.admCustDetail && S.admCustDetail.history) || [] };
+        /* The answer is the customer's row, nothing more. It used to become
+           the whole card — `{ customer, history }` — so the orders, the facts
+           and the reviews the card's GET had brought went back to grey bars
+           until the refetch below landed (map defect 17, 24.09.2026). The row
+           goes onto the card that is there; a card of somebody else lends
+           this one nothing, not even its points history. */
+        var was = S.admCustDetail && String(S.admCustDetail.customer.id) === String(id) ? S.admCustDetail : null;
+        S.admCustDetail = was ? mergeInto(was, { customer: r.body.customer }) : { customer: r.body.customer, history: [] };
         loadAdminCustomerDetail(id, true);
         loadAdminCustomers(true);
         /* Three outcomes, not two. `skipped` is the route deciding the letter
@@ -42527,6 +42534,10 @@
        render() leaving the page exactly where the finger left it. */
     if (d.admcustopen) {
       S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null;
+      /* …and the points form and the note's «Сохранено ✓» with it: they live
+         in S, shared by every card, and a number typed for one customer and
+         never applied stood ready on the next one's «Применить» (map defect 17) */
+      S.admCustPoints = ""; S.admCustNote = ""; S.custNoteSaved = false;
       // opening a card is also how a card whose GET failed is asked for again
       S.admCustDetailErr = "";
       window.scrollTo({ top: 0 }); render(); return;
