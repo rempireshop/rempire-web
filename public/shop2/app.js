@@ -40451,7 +40451,12 @@
       if (!mailDirty() || S.mailConfirmBack) return false;
       S.mailConfirmBack = go;
     } else return false;
-    window.scrollTo({ top: 0 });   // the question stands above the editor
+    /* The question stands above the editor, so it has to be in sight: the
+       «Ещё» sheet a row was tapped in, and the phone's assistant sheet an
+       «Открыть …» was tapped in, would both cover it. */
+    S.admMore = false;
+    if (S.admAi && admAsstSheet()) S.admAi = false;
+    window.scrollTo({ top: 0 });
     return true;
   }
   /** «Выйти без сохранения» after a question the nav raised: on to where it was going. */

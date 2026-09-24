@@ -51,7 +51,7 @@ function panel(): Panel {
   const dirty = { goods: false, blog: false };
   const rows: string[] = [];
   const click = new Function(
-    "S", "DIRTY", "ROWS", "window",
+    "S", "DIRTY", "ROWS", "window", "PHONE",
     `var GAL = { id: "" }, AI_UNDO = null, BLOGSEL = null, BLOGCARET = null;
      function render() {}
      function refocus() {}
@@ -64,6 +64,7 @@ function panel(): Panel {
        S.adminBlogConfirmPublish = ""; S.adminBlogPlaced = null; render();
      }
      function goodsBackToRow(id) { ROWS.push(id); }
+     function admAsstSheet() { return PHONE; }
      ${maybe("admLeaveAsks")}
      ${maybe("admLeaveGo")}
      ${maybe("admGoTab")}
@@ -74,7 +75,7 @@ function panel(): Panel {
        ${branch("if (d.admblogbackyes !== undefined)")}
        ${branch("if (d.admblogbackno !== undefined)")}
      };`,
-  )(S, dirty, rows, { scrollTo() {} }) as (d: Record<string, string>) => void;
+  )(S, dirty, rows, { scrollTo() {} }, true) as (d: Record<string, string>) => void;
   return { S, click, dirty, rows };
 }
 
@@ -124,6 +125,20 @@ describe("the nav over an unsaved product", () => {
     expect(p.S.adminEdit).toBe("");
     expect(p.S.adminTab).toBe("orders");
     expect(p.S.goodsConfirmBack).toBe(false);
+  });
+
+  it("the question is in sight: the «Ещё» sheet and the phone's assistant sheet step aside", () => {
+    const p = panel(); editing(p); p.dirty.goods = true;
+    p.S.admMore = true;                          // a row of «Ещё» was tapped…
+    p.click({ admtab: "people" });
+    expect(p.S.goodsConfirmBack).toBeTruthy();
+    expect(p.S.admMore, "the question is under the «Ещё» sheet").toBe(false);
+
+    const q = panel(); editing(q); q.dirty.goods = true;
+    q.S.admAi = true;                            // …or «Открыть …» in the assistant on a phone
+    q.click({ admtab: "orders" });
+    expect(q.S.goodsConfirmBack).toBeTruthy();
+    expect(q.S.admAi, "the question is under the assistant sheet").toBe(false);
   });
 
   it("a product with nothing unsaved closes at once, as before", () => {
