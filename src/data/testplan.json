@@ -869,7 +869,7 @@
       "risk": "low",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-18T19:30:00.000Z",
+      "markedAt": "2026-09-24T15:02:43.537Z",
       "en": {
         "title": "The blog",
         "steps": [
@@ -6980,21 +6980,22 @@
       "title": "Написать и опубликовать статью",
       "steps": [
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
-        "Написать заголовок и пару абзацев, поставить обложку.",
-        "Вставить в текст карточку товара кнопкой «Товар».",
-        "Кнопкой «Картинка» → «Загрузить картинку» вставить в текст фото с телефона.",
+        "Написать заголовок и одну строку текста, поставить обложку.",
+        "Сразу после строки кнопкой «Картинка» → «Загрузить картинку» вставить фото с телефона.",
+        "Дописать абзац и вставить в текст карточку товара кнопкой «Товар».",
+        "Нажать «Сохранить», вернуться в «Блог» и открыть статью снова.",
         "Нажать «Удалить» под обложкой, затем поставить её снова.",
-        "Нажать «Опубликовать» и открыть блог в магазине."
+        "Нажать «Опубликовать» и открыть статью в магазине."
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
         "Фото с телефона встаёт в текст — ссылку на картинку искать не нужно.",
+        "Открытая заново статья — тот же текст с фото, а не HTML-код.",
         "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
         "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
-        "Статья видна в блоге магазина вместе с обложкой.",
-        "Карточка товара в тексте открывает сам товар."
+        "В магазине у статьи обложка и фото в тексте; карточка товара открывает товар."
       ],
-      "why": "Неопубликованная статья не приводит из Google никого.",
+      "why": "Неопубликованная статья не приводит из Google никого, а статья, открывшаяся HTML-кодом, теряет фото и текст.",
       "risk": "low",
       "writes": true,
       "mark": "redo",
@@ -7002,23 +7003,24 @@
         "title": "Writing and publishing an article",
         "steps": [
           "Open «Ещё» → «Блог» and press «+ Статья».",
-          "Write a title and a couple of paragraphs, set a cover.",
-          "Insert a product card into the text with the «Товар» button.",
-          "With «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
+          "Write a title and one line of text, set a cover.",
+          "Right after that line, with «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
+          "Write another paragraph and insert a product card with the «Товар» button.",
+          "Press «Сохранить», go back to «Блог» and open the article again.",
           "Press «Удалить» under the cover, then set it again.",
-          "Press «Опубликовать» and open the blog in the shop."
+          "Press «Опубликовать» and open the article in the shop."
         ],
         "expect": [
           "When a product is inserted the panel says which language it went into.",
           "The phone's photo lands in the text — no picture link to find.",
+          "Reopened, the article is the same text with its photo — not HTML code.",
           "With a cover you see three frames: the blog, the article and social.",
           "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
-          "The post is visible in the shop's blog with its cover.",
-          "The product card in the text opens the product itself."
+          "In the shop: cover and in-text photo shown; the product card opens the product."
         ],
-        "why": "An article that did not publish brings nobody from Google."
+        "why": "An article that did not publish brings nobody from Google, and one that reopens as HTML code loses its photo and its text."
       },
-      "markedAt": "2026-09-23T13:22:36.184Z"
+      "markedAt": "2026-09-24T15:02:43.537Z"
     },
     {
       "id": "blog-cover-frame",

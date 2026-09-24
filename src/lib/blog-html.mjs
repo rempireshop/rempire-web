@@ -399,14 +399,26 @@ export function sanitizeHtml(input) {
 /**
  * Is this body HTML from the visual editor, or markdown from before it?
  *
- * Only a body that OPENS with one of the block tags the editor itself writes
- * counts as HTML. That is deliberately narrow: a markdown body starting with
- * a pasted `<script>` must not be mistaken for HTML and handed to the
- * sanitiser — it belongs in `markdownToHtml()`, which escapes it as the text
- * it is. Getting this wrong either way is a wrong-looking article, never an
+ * HTML as soon as it holds one tag of the kind the editor's box itself
+ * writes — a paragraph, a line break, a <div>, a heading, a list, a quote,
+ * a picture or its <figure> — anywhere in it. Until 24.09.2026 only a body
+ * that OPENED with a block tag counted, and the box's own HTML often does
+ * not: the first line typed into an empty box is a bare text node, Enter
+ * makes a <div>. «A line of text, then a picture» was read as markdown and
+ * escaped, and the article showed its own HTML source with the picture gone
+ * into it (Dim on /test, «blog-new-post»). The panel now lays the box out in
+ * paragraphs before it saves (blogBoxToBody() in public/shop2/app.js), and
+ * this is the same rule, so a body some other writer left starting with bare
+ * words is still read as what it is. `BLOG_HTML_TAG` in app.js is this very
+ * pattern — tests/blog-inline-picture.test.ts holds the two together.
+ *
+ * Still narrow where it matters: a markdown body that merely contains a
+ * pasted `<script>` (or any tag the editor never writes) is not mistaken for
+ * HTML — it belongs in `markdownToHtml()`, which escapes it as the text it
+ * is. Getting this wrong either way is a wrong-looking article, never an
  * unsafe one: both branches end in an allowlist.
  */
-const HTML_BODY_RE = /^\s*<(?:p|h2|h3|ul|ol|figure|blockquote)(?:\s[^>]*)?>/i;
+const HTML_BODY_RE = /<(?:p|div|figure|img|br|h[1-6]|ul|ol|li|blockquote)(?:\s[^>]*)?\/?>/i;
 export function looksLikeHtmlBody(body) {
   return HTML_BODY_RE.test(String(body || ""));
 }

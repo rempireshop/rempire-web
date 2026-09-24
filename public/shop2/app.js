@@ -14863,14 +14863,80 @@
      A body written before the visual editor is markdown, so it is converted
      once when the post is opened and saved back as HTML — the reader sees
      the same article either way (renderPostBody() in src/lib/blog.ts picks
-     the renderer per body), and nothing had to be migrated. */
-  function blogBodyToHtml(body) {
-    var s = String(body || "");
-    if (!s.trim()) return "";
-    return blogCleanHtml(/^\s*<(?:p|h2|h3|ul|ol|figure|blockquote)(?:\s[^>]*)?>/i.test(s) ? s : blogMdToHtml(s));
+     the renderer per body), and nothing had to be migrated.
+
+     Which of the two a stored body is: HTML as soon as it holds one tag of
+     the kind the box itself writes — anywhere in it, not only at its start.
+     Until 24.09.2026 only a body that OPENED with a block tag counted, and
+     the box's own HTML often does not: the first line typed into an empty
+     box is a bare text node, and Enter makes a <div>. So «a line of text,
+     then a picture» was taken for markdown and escaped — by the save, on the
+     way out — and the article opened again as its own HTML source, the
+     picture gone into it (Dim on /test, «blog-new-post»). The same rule as
+     looksLikeHtmlBody() in src/lib/blog-html.mjs; tests/blog-inline-picture
+     .test.ts holds the two to one pattern. */
+  var BLOG_HTML_TAG = /<(?:p|div|figure|img|br|h[1-6]|ul|ol|li|blockquote)(?:\s[^>]*)?\/?>/i;
+  /* …and an article that save already turned into its source: one <p> of
+     escaped tags with not one real tag in it. Opened, it is the HTML it was
+     meant to be, and the next save stores it that way. Only that exact
+     shape — a paragraph that merely mentions «&lt;p&gt;» next to real
+     markup is left as the words it is. */
+  var BLOG_ESCAPED = /^<p>([^<]*&lt;(?:p|div|figure|img|br|h[1-6]|ul|ol|li|blockquote)(?:\s|&gt;|\/)[^<]*)<\/p>$/i;
+  function blogUnescapeBody(s) {
+    var m = BLOG_ESCAPED.exec(s.trim());
+    if (!m) return s;
+    return m[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
   }
-  function blogBody3ToHtml(b) {
-    return { RU: blogBodyToHtml(b && b.RU), ET: blogBodyToHtml(b && b.ET), EN: blogBodyToHtml(b && b.EN) };
+  function blogBodyToHtml(body) {
+    var s = blogUnescapeBody(String(body || ""));
+    if (!s.trim()) return "";
+    return BLOG_HTML_TAG.test(s) ? blogBoxToBody(s) : blogCleanHtml(blogMdToHtml(s));
+  }
+  /* The box → the article: every line a block. A contenteditable writes what
+     it likes at the top level — a bare text node for the first line typed
+     into an empty box, a <div> for every Enter in Chrome and Safari — and an
+     article is blocks: a run of loose words, bold and links becomes one <p>,
+     a <div> becomes the paragraphs it holds, and a block the allowlist knows
+     stays that block. Everything passes through blogCleanNode(), so nothing
+     the allowlist does not write is written. What the save sends always
+     opens with a block tag, so the server's renderPostBody() and every later
+     open read it as the HTML it is. */
+  var BLOG_TOP_BLOCKS = { P: 1, H2: 1, H3: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, FIGURE: 1 };
+  var BLOG_TOP_WRAPS = { DIV: 1, SECTION: 1, ARTICLE: 1, MAIN: 1, HEADER: 1, FOOTER: 1, ASIDE: 1 };
+  function blogBlocksOf(parent, depth) {
+    var out = "", run = "", kids = parent.childNodes, i;
+    var flush = function () {
+      // a run of nothing but line breaks and spaces is the box's empty line, not a paragraph —
+      // a picture or a product card with no words beside it is still something
+      if (/<img\b|\bdata-product=/i.test(run) || run.replace(/<[^>]*>/g, "").replace(/&nbsp;|&#160;|\s/g, "")) out += "<p>" + run + "</p>";
+      run = "";
+    };
+    for (i = 0; i < kids.length; i++) {
+      var n = kids[i], tag = n.nodeType === 1 ? String(n.tagName).toUpperCase() : "";
+      tag = BLOG_ALIAS[tag] || tag;
+      if (BLOG_TOP_WRAPS[tag] && depth < BLOG_MAX_DEPTH) { flush(); out += blogBlocksOf(n, depth + 1); continue; }
+      if (BLOG_TOP_BLOCKS[tag]) { flush(); out += blogCleanNode(n, depth, false); continue; }
+      run += blogCleanNode(n, depth, false);
+    }
+    flush();
+    return out;
+  }
+  function blogBoxToBody(html) {
+    var src = String(html || "");
+    if (!src.trim()) return "";
+    var doc = null;
+    try { doc = new DOMParser().parseFromString("<body>" + src + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return "";
+    return blogBlocksOf(doc.body, 0);
+  }
+  /* `fromBox`: the draft on its way to the save. What the box holds is HTML
+     whatever it looks like — a line with no tag in it is words, never
+     markdown — so it is laid out in blocks and cleaned, never guessed at.
+     Without it: a stored body on its way into the box, which may still be
+     the markdown of an article written before the editor. */
+  function blogBody3ToHtml(b, fromBox) {
+    var one = fromBox ? blogBoxToBody : blogBodyToHtml;
+    return { RU: one(b && b.RU), ET: one(b && b.ET), EN: one(b && b.EN) };
   }
   /* The other direction: the model's translate task wants text, not tags.
      Everything between two blocks is one line of it, whatever that stretch
@@ -15105,8 +15171,9 @@
       /* Through the allowlist on the way out too: the box holds whatever the
          browser's own editing commands left behind, and the server sanitises
          again on the way in — this is the same list, one step earlier, so
-         what is stored is what the shop will show. */
-      body: blogBody3ToHtml(d.body),
+         what is stored is what the shop will show. As the box's HTML, laid
+         out in blocks — see blogBoxToBody() for the picture this lost. */
+      body: blogBody3ToHtml(d.body, true),
       coverUrl: d.coverUrl || null, coverAlt: d.coverAlt,
       /* One point for all four frames — «fill 62 28» or nothing at all.
          writeCoverFocus() in src/lib/blog-cover.mjs measures it again on the
@@ -42911,6 +42978,14 @@
      apply to nothing. */
   document.addEventListener("selectionchange", function () {
     if (richDraft()) blogSelSave();
+  });
+  /* blog: Enter in the article box makes a paragraph, not a <div>. Chrome and
+     Safari write a <div> per line unless told otherwise, and the article's
+     allowlist has no <div> — blogBoxToBody() turns them into paragraphs on
+     the way out anyway; this makes the box hold paragraphs to begin with. */
+  document.addEventListener("focusin", function (e) {
+    if (!e.target || !e.target.matches || !e.target.matches("[data-blogbody]")) return;
+    try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (err) {}
   });
 
   /* blog: a tile the pointer has reached, a finger has landed on or the focus
