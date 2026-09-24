@@ -89,6 +89,7 @@ function renderAll(lang: string): string {
     function shortDate() { return "22.09"; }
     function admOrderById() { return null; }
     function admInvoiceOverdue() { return 0; }
+    function admProdName(s) { return String(s); }
     ${slice("eur")}
     ${slice("payPiecesHTML")}
     ${slice("bankNameOf")}

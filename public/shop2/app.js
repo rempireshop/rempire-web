@@ -19172,6 +19172,17 @@
 
   /* ---------- Обзор ------------------------------------------------------ */
 
+  /** A product's name in the panel's language — the shop's own trName(), the
+      one the catalogue cards get. translateTree() does the same to a whole
+      text node, but it anchors the Russian tail on the END of the node, so
+      four names glued with « · » kept three tails: «Repair.Me.Wash — шампунь
+      · Beard balm — бальзам для бороды · … — toner» on an English panel
+      (staging, 24.09.2026). Named one at a time, before any joining. RU gets
+      the catalogue's own words back. */
+  function admProdName(s) {
+    s = String(s == null ? "" : s);
+    return S.lang === "ET" || S.lang === "EN" ? trName(s, S.lang) : s;
+  }
   function admTaskRow(n, label, detail, attrs, warn) {
     return '<button class="adm-row adm-row--click" ' + attrs + '>' +
       '<span class="adm-row__big' + (warn ? " adm-row__big--warn" : "") + '">' + n + "</span>" +
@@ -19254,7 +19265,7 @@
       'data-admtab="orders" data-admfilter="held"', true);
     if (lowN) tasks += admTaskRow(lowN,
       pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
-      names(lowItems, function (p) { return p.name; }),
+      names(lowItems, function (p) { return admProdName(p.name); }),
       'data-admtab="stock"', true);
     /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
        number above is «закажите ещё», and a product taken off sale is not
@@ -19269,7 +19280,7 @@
        ones, so the list is a place to look rather than a place to search. */
     if (hidLow) tasks += admTaskRow(hidLow,
       pl(hidLow, "скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"),
-      hidItems.length ? names(hidItems, function (p) { return p.name; }) : "сняты с продажи — закажите, если вернёте в магазин",
+      hidItems.length ? names(hidItems, function (p) { return admProdName(p.name); }) :"сняты с продажи — закажите, если вернёте в магазин",
       'data-admtab="goods" data-admfilter="off"', true);
     if (revN) tasks += admTaskRow(revN,
       pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
@@ -20154,7 +20165,7 @@
 
     var lines = o ? (o.items || []).map(function (l) {
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
-        '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + admProdName(l.title || l.id)) + "</span>" +
         // the volume and the count are two text nodes, not one: glued, «75 мл ·
         // 1 товар» is a string no dictionary has and an English panel read it
         // in Russian (the same glue as admPaymentHTML's, found beside it)
@@ -29858,7 +29869,7 @@
     };
     return '<button class="adm-row adm-row--click adm-row--lines" data-admorder="' + esc(o.id) + '">' +
       '<span class="adm-row__body"><span class="adm-row__nm"><span class="adm-mono">' + esc(o.number) + "</span> · " + esc(shortDate(o.createdAt)) + "</span>" +
-        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(o.firstItem) : "") + "</span></span>" +
+        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(admProdName(o.firstItem)) : "") + "</span></span>" +
       '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(o.total) + "</span></button>";
   }
@@ -32111,7 +32122,7 @@
        black at 4. */
     var low = r.tracked && r.state !== "in";
     return '<div class="adm-row adm-row--tall adm-row--stock adm-row--lines">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(admProdName(r.name)) +
         // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
         (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
         /* The grey line is the barcode's alone now. The volume used to open
@@ -32409,7 +32420,7 @@
         (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
           var sign = m.delta > 0 ? "+" : "";
           return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
-              esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") + "</span>" +
+              esc(m.brand || m.productId) + (m.brand ? " — " + esc(admProdName(m.name)) : "") + "</span>" +
               // the volume in a box of its own, as on «Склад» — a bare «150 мл ·»
               // under a cut-off product name read as the end of the name
               '<span class="adm-row__sub">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span> " : "") +
