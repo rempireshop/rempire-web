@@ -944,7 +944,7 @@
       "steps": [
         "Открыть «Доставка и оплата» и выписать цены по всем странам.",
         "Положить в корзину один недорогой товар и дойти до шага доставки.",
-        "Выбрать те же страны и сравнить самую дешёвую карточку с выписанным."
+        "Выбрать те же страны и посмотреть, какая карточка отмечена сразу."
       ],
       "expect": [
         "Эстония: пакомат от 2,49 €, курьер от 6,89 €.",
@@ -952,7 +952,7 @@
         "Финляндия: пакомат от 9,39 €, курьер от 15,69 €.",
         "Бесплатно от 59 €: Эстония, Латвия, Литва, Финляндия.",
         "Для остальной Европы бесплатно от 200 €.",
-        "На кассе самая дешёвая карточка стоит столько же, до цента."
+        "Отмечена сразу самая дешёвая карточка, её цена та же до цента."
       ],
       "why": "Разницу между ценой на странице и ценой на кассе покупатель потребует назад.",
       "risk": "high",
@@ -962,7 +962,7 @@
         "steps": [
           "Open «Доставка и оплата» and write down the prices for every country.",
           "Put one cheap product in the cart and get to the delivery step.",
-          "Pick the same countries and compare the cheapest card with your notes."
+          "Pick the same countries and see which card is already ticked."
         ],
         "expect": [
           "Estonia: locker from €2.49, courier from €6.89.",
@@ -970,12 +970,12 @@
           "Finland: locker from €9.39, courier from €15.69.",
           "Free from 59 €: Estonia, Latvia, Lithuania, Finland.",
           "The rest of Europe: free from 200 €.",
-          "At the till the cheapest card costs the same, to the cent."
+          "The cheapest card is ticked on arrival and costs the same, to the cent."
         ],
         "why": "A buyer can claim back the gap between the page price and the till."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "markedAt": "2026-09-24T14:58:11.284Z"
     },
     {
       "id": "shop-locker-europe",

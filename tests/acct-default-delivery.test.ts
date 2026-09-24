@@ -94,7 +94,7 @@ const TABLES = {
 /** The account block and what it leans on — the draft, its rows, its country. */
 const ACCT = [
   "shipServed", "acctShipCountry", "acctMethods", "methods", "rowKind", "acctIdx", "acctShipFromRow",
-  "acctShipPrice", "shipRulePrice", "shipZoneOf", "orderCountry", "pickupOpen", "carriersFor",
+  "acctShipPrice", "cheapestCarrier", "shipRulePrice", "shipZoneOf", "orderCountry", "pickupOpen", "carriersFor",
   "courierCarriersFor", "methodCarriers", "deliveryFor", "acctPickCountry", "applyAcctShipPref",
   "pointsForAcct", "acctPointsKey",
   // the courier row's address (23.09.2026) — the draft carries it, the save compares it
@@ -169,19 +169,21 @@ describe("Greece: a country with a courier and no locker is still a country", ()
       acctPickCountry("GR", "EU");   // second select: Greece
       var rows = methods();
       /* …and what the checkout itself charges for the same Greek courier:
-         its first courier card, pre-selected */
+         its cheapest courier card, pre-selected (since 24.09.2026) */
       S.country = "EU"; S.countryIso = "GR";
+      var cards = methodCarriers("courier").map(function (c) { return shipRulePrice("courier", c); });
       return {
         draft: S.acctForm.ship.country, country: acctShipCountry(), rows: rows.map(rowKind),
         price: acctShipPrice(rows[0]),
-        checkout: shipRulePrice("courier", methodCarriers("courier")[0])
+        checkout: Math.min.apply(null, cards)
       };
     `, { shipCarrier: () => "" });
+    const cheapest = Math.min(...COURIER_CARRIERS.GR.map((c) => courierQuote("GR", c)));
     expect(out.draft, "the draft fell back to the zone").toBe("GR");
     expect(out.country).toBe("GR");
     expect(out.rows).toEqual(["courier"]);
     expect(out.price, "the account and the checkout disagree on a Greek courier").toBe(out.checkout);
-    expect(out.price).toBe(courierQuote("GR", COURIER_CARRIERS.GR[0]));
+    expect(out.price).toBe(cheapest);
     // the fixture discriminates: a generic-Europe price would not pass
     expect(out.price).not.toBe(courierQuote("EU", COURIER_CARRIERS.GR[0]));
   });

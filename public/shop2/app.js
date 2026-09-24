@@ -8194,13 +8194,33 @@
   function methodCarriers(m, country) {
     return m === "parcel" ? carriersFor(country) : m === "courier" ? courierCarriersFor(country) : [];
   }
-  /* The carrier this order goes with: the one the shopper tapped, if the
-     current delivery type still offers it, else the FIRST of the list —
-     Montonio's own calculator pre-selects exactly that way (Дим, 22.09.2026:
-     «first the parcel is preselected and then after a provider»). */
+  /* The carrier this order goes with: the one the shopper tapped (or the
+     account's «Доставка по умолчанию» brought in — applyAcctShipPref), if
+     the current delivery type still offers it, else the CHEAPEST of the list.
+     Until 24.09.2026 it was the first, the way Montonio's calculator
+     pre-selects (Дим, 22.09.2026: «first the parcel is preselected and then
+     after a provider») — and the row above the cards said «от 2,49 €» while
+     the card ticked under it was DPD's 2,59 €. Дим, /test, 24.09.2026:
+     «when we show "from ..." then we should also pre-select the cheapest
+     one.» The cards keep Montonio's order; only the tick moves. */
   function shipCarrier() {
-    var list = methodCarriers(shipMethod());
-    return list.indexOf(S.ship.carrier) >= 0 ? S.ship.carrier : (list[0] || "");
+    var m = shipMethod(), list = methodCarriers(m);
+    return list.indexOf(S.ship.carrier) >= 0 ? S.ship.carrier : cheapestCarrier(m, list);
+  }
+  /** The cheapest of `list` for delivery type `m`, first on a tie — so a
+      country whose carriers all cost the same (Estonia's courier, the
+      owner's 10,84 € for every one) still ticks the first card. Priced by
+      the rules, not by the basket: a cart that has earned free delivery
+      shows «Бесплатно» on every card and must not tick a different one for
+      it. `country` as shipRulePrice() takes it — the checkout's own when
+      left out, the account's draft's from acctShipPrice(). */
+  function cheapestCarrier(m, list, country) {
+    var best = list[0] || "", low = Infinity;
+    for (var i = 0; i < list.length; i++) {
+      var p = shipRulePrice(m, list[i], country);
+      if (p < low - 0.001) { low = p; best = list[i]; }
+    }
+    return best;
   }
   function isParcel() { return shipMethod() === "parcel"; }
   function shipMethodLabel() {
@@ -9639,8 +9659,9 @@
       rows.push({ l: "Пакомат " + (CARRIER_NAMES[c] || c), pm: c });
     });
     /* The courier row names no carrier since 22.09.2026: the carrier is picked
-       at the checkout, from the cards under «Курьер до двери», and the first
-       one is pre-selected — so this row's price is that first carrier's. */
+       at the checkout, from the cards under «Курьер до двери», and the
+       cheapest one is pre-selected (since 24.09.2026, cheapestCarrier) — so
+       this row's price is that cheapest carrier's. */
     rows.push({ l: "Курьер до двери" });
     return rows;
   }
@@ -9772,7 +9793,8 @@
   function acctShipPrice(x) {
     if (x.pickup) return 0;
     var cc = acctShipCountry();
-    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || (COURIER_CARRIERS[cc] || [])[0] || "", cc);
+    // the courier card the checkout ticks on arrival: the cheapest (shipCarrier)
+    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || cheapestCarrier("courier", COURIER_CARRIERS[cc] || [], cc), cc);
   }
 
   /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
@@ -17081,7 +17103,8 @@
      price. Not just a bunch of chips.» So: the delivery type first — each
      row priced «от» its cheapest carrier — and under the chosen type the
      carriers for it, one card each with its own price, in Montonio's order,
-     the first pre-selected. A country with one carrier still shows its one
+     the cheapest pre-selected (since 24.09.2026 — the card the «от» names;
+     it was the first). A country with one carrier still shows its one
      card, so the step reads the same everywhere. Nova Post carries «без
      возврата» on its card and a line under the list when it is picked:
      it is the cheapest almost everywhere abroad and the one carrier with no
@@ -17284,8 +17307,8 @@
     // now drop out) without touching the rest of the screen — five of these
     // can land back to back (one loadPointsFor() per carrier), and a full
     // render() on each one is exactly the checkout flicker this avoids.
-    // …and the totals with it: since 22.09.2026 the first card is the
-    // pre-selected carrier, so a card struck off can change what the order
+    // …and the totals with it: since 22.09.2026 a card is pre-selected (the
+    // cheapest, since 24.09.2026), so a card struck off can change what the order
     // costs, and the summary kept the old price until something else
     // redrew it (found by the promo sweep: 11,59 € shown, 12,19 € billed).
     patchDelivery(); patchSummary();
@@ -40216,7 +40239,7 @@
       // from here on this order's delivery is the shopper's own — the
       // account's «Доставка по умолчанию» stops filling anything in
       S.shipPicked = true;
-      // each type has its own carriers — start from its first, like Montonio
+      // each type has its own carriers — start from its cheapest (shipCarrier)
       S.ship.carrier = "";
       if (d.dm !== "parcel") S.ship.point = null;
       else loadPoints();

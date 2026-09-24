@@ -482,8 +482,8 @@ test.describe("account — «Доставка по умолчанию»", () => 
     );
     expect(acctPickup).toBe(await priceOf(page, "Самовывоз"));
     /* …and the account's «Курьер до двери» names no carrier since the same
-       day: it is priced by the country's FIRST courier carrier, the one the
-       checkout pre-selects under «Курьер до двери». */
+       day: it is priced by the country's CHEAPEST courier carrier, the one
+       the checkout pre-selects under «Курьер до двери» (since 24.09.2026). */
     await page.locator('input[data-dm="courier"]').check();
     const pickedCourier = page.locator('.carrier[aria-current="true"] .carrier__price');
     await expect(pickedCourier, "no courier carrier is pre-selected").toBeVisible();
@@ -681,18 +681,21 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await page.locator("[data-logincode]").click();
     await expect(page.locator("[data-logout]")).toBeVisible();
 
-    /* «Пакомат SmartPosti» is not the checkout's first carrier card (since
-       22.09.2026 that is DPD, in Montonio's order, or Omniva where DPD has no
-       points, as in an e2e run) — and the account checks no row at all until a preference
-       exists — so finding it selected at the till can only mean the
-       preference travelled. The block promised «Подставим это при следующем
-       заказе» and did nothing at all until 07.09.2026. */
-    const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат SmartPosti" }).first();
+    /* «Пакомат Omniva» is not the card the checkout ticks on arrival (since
+       24.09.2026 that is the CHEAPEST card — SmartPosti's 2,59 € in an e2e
+       run, where DPD and Unisend have no points — against Omniva's 3,19 €)
+       — and the account checks no row at all until a preference exists — so
+       finding it selected at the till can only mean the preference
+       travelled. SmartPosti stood here until the tick moved to the cheapest
+       card, and would now pass with no preference at all. The block
+       promised «Подставим это при следующем заказе» and did nothing at all
+       until 07.09.2026. */
+    const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат Omniva" }).first();
     await expect(row).toBeVisible();
     /* The machine list is the checkout's own live feed now, not the static
        copy the account used to keep — so the name saved here is one the till
        can find again. Wait for that carrier's feed before reading it. */
-    const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=smartpost"));
+    const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=omniva"));
     await row.locator("input[data-acctm]").check();
     await feed;
     /* The checkout's own picker since 23.09.2026, for every country: the
@@ -727,7 +730,7 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await continueButton(page, 2).click();
 
     await expect(page.locator('input[data-dm="parcel"]')).toBeChecked();
-    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-carrier="omniva"]')).toHaveAttribute("aria-current", "true");
     // …and the machine itself, matched by name against the live list
     await expect(page.locator("[data-pointopen]")).toContainText(machine);
 
@@ -740,7 +743,7 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await waitForScreen(page, "checkout");
     await page.locator("[data-email]").fill(email);
     await continueButton(page, 2).click();
-    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-carrier="omniva"]')).toHaveAttribute("aria-current", "true");
   });
 });
 

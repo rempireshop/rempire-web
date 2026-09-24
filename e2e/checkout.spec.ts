@@ -462,11 +462,14 @@ test.describe("checkout — the carrier's own mark", () => {
        --hover is 5% ink and an alpha channel read on its own would read as
        black as the fill it replaced.
 
-       Omniva is the first card here only because the feeds have settled:
-       since 22.09.2026 Estonia's cards are in Montonio's order — DPD, Omniva,
-       Unisend, SmartPosti — and an e2e run has no DPD or Unisend points, so
-       both are struck off and Omniva is what is left at the top. */
-    await expect(omniva, "the first carrier is no longer picked on arrival").toHaveAttribute("aria-current", "true");
+       Omniva is tapped here rather than waited for: since 24.09.2026 the
+       card picked on arrival is the CHEAPEST (Дим: «when we show "from ..."
+       then we should also pre-select the cheapest one»), and with DPD and
+       Unisend struck off — an e2e run has no points for either — that is
+       SmartPosti's 2,59 €, whose mark this test breaks on purpose below.
+       A tapped chip and a pre-selected one are drawn by the same rule. */
+    await omniva.click();
+    await expect(omniva, "the tapped carrier is not the picked one").toHaveAttribute("aria-current", "true");
     const lum = await omniva.evaluate((el: Element) => {
       const parse = (css: string) => {
         const n = (css.match(/[\d.]+/g) || []).map(Number);
