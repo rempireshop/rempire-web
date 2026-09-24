@@ -126,6 +126,7 @@ const BODY = `
   function admOrders() { return SRV.orders; }
   ${decl("ADM_ORDER_FILTERS")}
   ${slice("admOrderVM")}
+  ${slice("shipRegFailed")}
   ${slice("admRefundView")}
   ${slice("admReturnAskedAt")}
   ${slice("admReturnDoneAt")}

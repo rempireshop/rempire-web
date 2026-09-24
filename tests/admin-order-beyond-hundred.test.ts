@@ -120,6 +120,7 @@ function panel(opts: { orders: Order[]; found?: { q: string; rows: Order[] }; wa
     function admReturnAskedAt() { return ""; }
     function admReturnDoneAt() { return ""; }
     ${slice("admOrderVM")}
+    ${slice("shipRegFailed")}
     ${slice("admShipConfirmText")}
     ${slice("srvMsg")}
     ${slice("shipCourierErr")}
