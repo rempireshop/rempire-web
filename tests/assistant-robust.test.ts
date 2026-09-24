@@ -81,12 +81,16 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(26);   // r25: the article open in the editor, and the photo action for its text
+    expect(body.v).toBe(27);   // r27: draft_post keeps the owner's own subject and words
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);
     expect(body.retry).toBeUndefined();
-    expect(body.action).toEqual({ type: "draft_post", topic: "Как ухаживать за бородой зимой", lang: "RU", hint: "" });
+    // …with the owner's own words on it (draftPostWithAsk): they, not the model's topic line, decide the subject
+    expect(body.action).toEqual({
+      type: "draft_post", topic: "Как ухаживать за бородой зимой", lang: "RU", hint: "",
+      ask: "напиши статью про уход за бородой зимой",
+    });
     expect(body.tab).toBe("blog");
   });
 

@@ -7625,13 +7625,19 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Перевод статьи со вставленным товаром",
+      "title": "Статья от помощника: своя тема и перевод с товаром",
       "steps": [
-        "В статье с карточкой товара — своей или от помощника — нажать «Перевести на ET и EN».",
+        "В чате помощника написать «напиши статью про cool vibes» и подтвердить.",
+        "В открывшейся статье посмотреть на поле «Тема статьи» в карточке «Помощник».",
+        "Вписать туда «летний образ» и нажать «Написать статью целиком».",
+        "В статье с карточкой товара нажать «Перевести на ET и EN».",
         "Открыть эстонский и найти в тексте этот товар.",
         "Опубликовать и открыть эстонскую статью в магазине."
       ],
       "expect": [
+        "Статья из чата — про «cool vibes»: заголовок об этом, не общий уход за волосами.",
+        "Поле «Тема статьи» пустое: заголовок статьи в нём только серой подсказкой.",
+        "Вторая статья — про летний образ, старый заголовок к теме не приклеился.",
         "В эстонской статье товар остался на месте.",
         "Нажатие на него открывает эстонскую страницу того же товара.",
         "Карточка товара написана по-эстонски — название и «alates», без русских слов."
@@ -7640,13 +7646,19 @@
       "risk": "low",
       "writes": true,
       "en": {
-        "title": "Translating an article with a product in it",
+        "title": "An assistant's article: your own topic, and a translation with a product",
         "steps": [
-          "In an article with a product card — yours or the assistant's — press «Перевести на ET и EN».",
+          "In the assistant's chat write «напиши статью про cool vibes» (an article about cool vibes) and confirm.",
+          "In the article that opens, look at the «Тема статьи» (topic) box in the «Помощник» card.",
+          "Type «летний образ» (a summer look) there and press «Написать статью целиком».",
+          "In an article with a product card press «Перевести на ET и EN».",
           "Switch to Estonian and find that product in the text.",
           "Publish and open the Estonian article in the shop."
         ],
         "expect": [
+          "The chat's article is about «cool vibes»: its title says so, not generic hair care.",
+          "The «Тема статьи» box is empty: the article's title is only a grey hint in it.",
+          "The second article is about a summer look; the old title stayed out of it.",
           "The product is still there in the Estonian article.",
           "Tapping it opens the Estonian page of that same product.",
           "The card itself reads Estonian — the name and «alates», no Russian words."
@@ -7654,7 +7666,7 @@
         "why": "A translation that lost its product links turns a selling article into just text."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T12:16:57.240Z"
     },
     {
       "id": "ai-blog-photo",

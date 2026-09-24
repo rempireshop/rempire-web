@@ -462,6 +462,18 @@ Respond with exactly this JSON shape and nothing else: {"reply": "..."}`;
   };
 }
 
+/* ---------- the topic is the subject -------------------------------------------
+ * The owner, /test pass of 23.09.2026: «When I gave the assistant the topic
+ * "cool vibes" it still writes me about "Create a Stylish Look with Proper
+ * Hair Care and Styling".» Told only «a grooming-advice article on the topic»
+ * and handed a list of hair products, a model reads a loose topic as licence
+ * to write the generic article those products suggest. Both blog tasks carry
+ * this rule: the owner's words are the subject, the title says so, and the
+ * products never choose it. */
+function subjectRule(lang: Lang3): string {
+  return `THE SUBJECT: the topic under INPUT is the owner's own words, and the article is about exactly that — not about whatever PRODUCTS happen to be listed (they never choose the subject), and not a general piece on hair care or styling that could have been written for any topic. The title names the topic's subject in plain words: keep the owner's key words, translated into ${LANG_NAME[lang]} when they are in another language. A short, loose or playful topic («cool vibes», «лето», «первое свидание») is read generously and tied to grooming — how to look and feel that way — but it stays the subject: whoever reads the title can tell what the owner asked for.`;
+}
+
 /* ---------- blog_outline -----------------------------------------------------
  * topic → title, 6 H2s, meta title/description, in `lang`. */
 
@@ -484,6 +496,7 @@ export function buildBlogOutlinePrompt(lang: Lang3, rawInput: unknown): PromptRe
 ${SEO_RULES}
 
 TASK: plan a grooming-advice blog article for the shop's own blog, in ${LANG_NAME[lang]}, on the topic given under INPUT. This is a skeleton for the owner to write into, not a finished article — do not invent product names, brand claims or statistics; keep every heading generic enough that no fact-check is needed.
+${subjectRule(lang)}
 - "title": an article title, plain and specific to the topic, under 70 characters.
 - "h2": exactly 6 section headings (H2s) that would structure a genuinely useful article on this topic, in a sensible reading order, each under 60 characters, no numbering. Each one should read like a question a reader would actually ask, not like a chapter of a textbook.
 - "metaTitle": SEO title for this article, at most ${TITLE_MAX} characters INCLUDING spaces — count them. The topic in the reader's own search words.
@@ -531,6 +544,10 @@ export interface PostFullInput {
   products?: PostProductRef[];
   /** A sentence or two from the owner — the angle, who it is for. */
   hint?: string;
+  /** The owner's own request, word for word, when the chat assistant wrote
+      the topic line from it (draftPostWithAsk) — it decides the subject
+      where the two differ. */
+  ask?: string;
 }
 
 export const POST_WORDS = [600, 900] as const;
@@ -559,11 +576,11 @@ function cleanProductRefs(raw: unknown): PostProductRef[] {
   return out;
 }
 
-function cleanPostFullInput(raw: unknown): { topic: string; products: PostProductRef[]; hint: string } {
+function cleanPostFullInput(raw: unknown): { topic: string; products: PostProductRef[]; hint: string; ask: string } {
   const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const topic = line(src.topic, 200);
   if (!topic) throw new AiInputError("missing_topic");
-  return { topic, products: cleanProductRefs(src.products), hint: para(src.hint, 600) };
+  return { topic, products: cleanProductRefs(src.products), hint: para(src.hint, 600), ask: line(src.ask, 300) };
 }
 
 export function buildPostFullPrompt(lang: Lang3, rawInput: unknown): PromptResult {
@@ -579,6 +596,7 @@ export function buildPostFullPrompt(lang: Lang3, rawInput: unknown): PromptResul
 ${SEO_RULES}
 
 TASK: write a complete grooming-advice article for the shop's own blog, in ${LANG_NAME[lang]}, on the topic under INPUT. This is the finished piece the owner will read once and publish — not an outline, not a stub. Practical, specific, honest; general grooming knowledge is fine, invented facts about products, ingredients or studies are not.
+${subjectRule(lang)}
 - "title": the article title, plain and specific, under 80 characters, no trailing punctuation.
 - "excerpt": two sentences (under 300 characters) that say what the reader will learn — shown in the list and in search.
 - "body": ${POST_WORDS[0]}–${POST_WORDS[1]} words of clean HTML. Use ONLY these tags: <h2> for section headings (4 to 6 sections, in a sensible reading order), <p> for paragraphs (2–4 sentences each), <ul><li> for one or two lists where a list genuinely helps (steps, a short checklist), <strong> for a key phrase now and then, plus the product card below. No <h1>, no <h3>, no images, no links of your own, no inline styles, no markdown, no comments. Start with an opening paragraph before the first <h2>. Mention 1–3 of the PRODUCTS by their exact name inside the advice where they fit, at most once each, and never as a sales pitch — a recommendation a barber would make out loud. End with one short closing paragraph that invites the reader to ask at the Rempire barbershop (Mardi 1, Tallinn) or in the shop — no prices, no discounts, no promises.
@@ -589,7 +607,14 @@ TASK: write a complete grooming-advice article for the shop's own blog, in ${LAN
 - "products": the ids (from PRODUCTS) of the products the body actually mentions or shows a card for, in the order they appear — an empty list if none.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "<p>...</p><h2>...</h2><p>...</p><p><a data-product=\\"id\\"></a></p>", "tags": ["...", "...", "..."], "seoTitle": "...", "seoDescription": "...", "products": ["id"]}`;
 
-  const user = [`INPUT:\nTopic: ${input.topic}`, input.hint ? `The owner's note: ${input.hint}` : "", products]
+  const user = [
+    `INPUT:\nTopic: ${input.topic}`,
+    input.ask
+      ? `The owner's own request, word for word: «${input.ask}». The topic above was written from it; where the two differ, these words decide what the article is about.`
+      : "",
+    input.hint ? `The owner's note: ${input.hint}` : "",
+    products,
+  ]
     .filter(Boolean)
     .join("\n\n");
   return { system, user };

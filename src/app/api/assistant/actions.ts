@@ -552,6 +552,20 @@ export function sanitizeDraftTopic(raw: unknown): { topic: string; lang: string;
   return { topic, lang, hint: oneLine(x.hint, 400) };
 }
 
+/* The owner's own words ride on a draft_post, put there by the route and
+   never taken from the model (sanitizeDraftTopic drops any `ask` it sent).
+   The model writes the topic line itself, in Russian, and a model told to
+   stay on grooming «tidied» «cool vibes» into a generic hair-care subject —
+   the article that came back was about that, not about what was asked for
+   (the owner, /test 23.09.2026). The article generator is handed the words
+   as well and told they win (buildPostFullPrompt, src/lib/ai-prompts.ts). */
+const DRAFT_ASK_MAX = 300;
+export function draftPostWithAsk<T>(action: T, lastUser: string): T {
+  if (!action || typeof action !== "object" || (action as { type?: unknown }).type !== "draft_post") return action;
+  const ask = oneLine(lastUser, DRAFT_ASK_MAX);
+  return ask ? ({ ...(action as object), ask } as T) : action;
+}
+
 /** A post the assistant cannot even name in Russian is not a draft. */
 export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;

@@ -10,6 +10,7 @@ import {
   briefAttachments,
   briefHero,
   briefOpenPost,
+  draftPostWithAsk,
   sanitizeAction,
   type AttachmentBrief,
   type OpenPostBrief,
@@ -40,7 +41,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 26; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 27; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -487,7 +488,7 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"toggle_promo","code":"SUVI10","value":false} — switch an existing promo code off (or back on)
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
-  {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a NEW blog article written, one that does not exist yet: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Only ever for a new article — never to change, shorten, extend, retitle or illustrate one that is already there, and never twice in one conversation about the same article: a second draft_post is a second article in the owner's list, which is the thing he has to clean up by hand. Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
+  {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a NEW blog article written, one that does not exist yet: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Only ever for a new article — never to change, shorten, extend, retitle or illustrate one that is already there, and never twice in one conversation about the same article: a second draft_post is a second article in the owner's list, which is the thing he has to clean up by hand. Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. The topic is the owner's OWN subject: his words, translated faithfully into Russian, his key words kept — asked for «cool vibes», the topic is «Cool vibes: …», never swapped for another or a more generic subject such as «уход за волосами и укладка». Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
   {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${attachments.length ? `
   {"type":"add_product_photo","id":"<catalogue id>","key":"<a key from PHOTOS above>","main":true|false} — put one of the attached PHOTOS onto a product's page («вот фото для Bio Botanical Shampoo, сделай главным» → main:true; «добавь это фото к маслу Proraso» → main:false). One photo per action; several photos are several replies.
   {"type":"set_post_cover","slug":"<post slug from BLOG POSTS${openPost ? `, or «${openPost.slug}» — the article he has open` : ""}>","key":"<a key from PHOTOS above>"} — make one of the attached PHOTOS a blog post's COVER, the picture above the title and in the blog list («это обложка для статьи про бороду», «поставь сюда обложку»).
@@ -541,7 +542,7 @@ THE BANNER (set_hero) in detail. Always send the WHOLE banner — every slide, i
 EXAMPLE — owner: «оставь на главной один баннер — скидка 20 % на бороду»
 {"reply":"Собрал баннер про скидку на уход за бородой — один слайд, остальные убрал. Посмотрите и подтвердите.","product_ids":[],"tab":"setup","action":{"type":"set_hero","value":{"slides":[{"id":"s1","eyebrow":{"RU":"Только сейчас","ET":"Ainult praegu","EN":"Right now"},"title":{"RU":"−20 % на бороду","ET":"−20 % habemele","EN":"−20 % on beard care"},"sub":{"RU":"Масла, бальзамы и воски — до конца месяца.","ET":"Õlid, palsamid ja vahad — kuu lõpuni.","EN":"Oils, balms and waxes — until the end of the month."},"cta":{"RU":"Смотреть","ET":"Vaata","EN":"Shop now"},"go":"cat:beard","image":"proraso-wood-spice-beard-balm-100ml","on":true}],"interval":6000}}}
 
-BLOG POSTS (draft_post, publish_post) in detail. The shop has a blog — articles in "Блог" in the admin, shown to customers at /shop2/blog/. draft_post is a REQUEST for an article, not the article: {"type":"draft_post","topic":"…","lang":"RU","hint":"…"} — topic is one plain Russian line (what the article is about), hint is optional (the owner's angle: who it is for, what to stress, a product he named). The article itself — title, excerpt, a 600–900-word text with sections, tags, products from the catalogue, the Google title and description, in Russian and then translated into Estonian and English — is written by the panel's own article generator after the owner confirms, and opens in the blog editor as a draft for him to read and publish. Never publish, never write the body, the translations or the snippet inside this JSON. publish_post takes a slug from the BLOG POSTS list above and flips it live, or takes it down again — nothing else about the post changes.
+BLOG POSTS (draft_post, publish_post) in detail. The shop has a blog — articles in "Блог" in the admin, shown to customers at /shop2/blog/. draft_post is a REQUEST for an article, not the article: {"type":"draft_post","topic":"…","lang":"RU","hint":"…"} — topic is one plain Russian line (what the article is about — the owner's OWN subject in his own key words, never a tidier or more generic one), hint is optional (the owner's angle: who it is for, what to stress, a product he named). The article itself — title, excerpt, a 600–900-word text with sections, tags, products from the catalogue, the Google title and description, in Russian and then translated into Estonian and English — is written by the panel's own article generator after the owner confirms, and opens in the blog editor as a draft for him to read and publish. Never publish, never write the body, the translations or the snippet inside this JSON. publish_post takes a slug from the BLOG POSTS list above and flips it live, or takes it down again — nothing else about the post changes.
 EXAMPLE — owner: «напиши статью о том, как ухаживать за бородой зимой»
 {"reply":"Напишу статью целиком — про уход за бородой зимой: заголовок, текст с разделами, теги, товары из каталога и текст для Google, по-русски, а потом на эстонском и английском. Подтвердите — она откроется в редакторе блога черновиком, вы прочитаете и опубликуете.","product_ids":[],"tab":"blog","action":{"type":"draft_post","topic":"Как ухаживать за бородой зимой","lang":"RU"}}${attachments.length ? `
 EXAMPLE — owner: «вот фото для Bio Botanical Shampoo, сделай главным» (with a photo attached)
@@ -813,11 +814,14 @@ export async function POST(req: NextRequest) {
     adminBlogLines.split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean),
   );
   if (openPost) postSlugs.add(openPost.slug);
-  let action = sanitizeAction(rawAction, known, isAdmin, {
+  /* draft_post leaves with the owner's own words on it — the topic line is
+     the model's, and a model «tidied» «cool vibes» into another subject
+     (draftPostWithAsk in ./actions). */
+  let action = draftPostWithAsk(sanitizeAction(rawAction, known, isAdmin, {
     attachedKeys: new Set(attachments.map((a) => a.key)),
     openPostSlug: openPost?.slug ?? "",
     postSlugs,
-  });
+  }), lastUser);
 
   let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
   let retry = false;

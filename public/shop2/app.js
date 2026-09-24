@@ -15275,6 +15275,25 @@
   function blogTopicValue(d) {
     return S.adminBlogTopic || d.title.RU || d.title.ET || d.title.EN || "";
   }
+  /**
+   * The «Тема статьи» box: what the owner typed, and nothing else.
+   *
+   * It used to be pre-filled with the article's own title as its VALUE. On a
+   * phone a tap puts the caret at the end of that text, so a new topic was
+   * typed onto the old title — «Создайте стильный образ… cool vibes» — and
+   * the article came back about the stylish look again (the owner, /test
+   * 23.09.2026: «When I gave the assistant the topic "cool vibes" it still
+   * writes me about "Create a Stylish Look…"»). The title is the grey hint
+   * now: an empty box still writes the article its title names (the click
+   * handler falls back to blogTopicValue), and a typed topic is exactly the
+   * words typed.
+   */
+  function admBlogTopicFieldHTML(d, busy) {
+    var hint = d.title.RU || d.title.ET || d.title.EN || "уход за бородой зимой";
+    return '<label class="adm-field">Тема статьи' +
+      '<input class="adm-input" data-admblogtopic value="' + esc(S.adminBlogTopic || "") + '" placeholder="' + esc(hint) + '"' +
+      (busy ? " disabled" : "") + "></label>";
+  }
   function blogTags(d) {
     return String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
   }
@@ -15352,7 +15371,10 @@
       if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
     });
   }
-  function admBlogWriteFull(d, topic, hint) {
+  /* `ask` — the owner's own words when the chat assistant named the topic
+     (draftPostWithAsk, src/app/api/assistant/actions.ts): the generator is
+     told they decide the subject where the assistant's topic line drifted. */
+  function admBlogWriteFull(d, topic, hint, ask) {
     if (!d) return;
     if (S.adminBlogGen && !S.adminBlogGen.err) { toast("Подождите — статья ещё пишется"); return; }
     topic = String(topic || "").trim();
@@ -15366,7 +15388,7 @@
     apiSend("/api/admin/ai/text/", "POST", {
       task: "post_full", lang: "RU",
       input: {
-        topic: topic, hint: hint || "",
+        topic: topic, hint: hint || "", ask: ask || "",
         products: productsById(d.products).map(function (p) { return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat }; })
       }
     }).then(function (r) {
@@ -22481,9 +22503,7 @@
          written. The older helpers — a plan of headings, a translation of
          what is already there — stay behind «Только часть». */
       '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
-        '<label class="adm-field">Тема статьи' +
-          '<input class="adm-input" data-admblogtopic value="' + esc(blogTopicValue(d)) + '" placeholder="уход за бородой зимой"' +
-          (genBusy ? " disabled" : "") + "></label>" +
+        admBlogTopicFieldHTML(d, genBusy) +
         '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
         '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
         // the products the article came with — the toast's sentence, standing (admBlogWriteFull)
@@ -37394,7 +37414,7 @@
     S.admMore = false;
     window.scrollTo({ top: 0 });
     render();
-    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "");
+    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "", a.ask || "");
   }
   function adminAnswer(q) {
     var low = lowStock();
@@ -41902,8 +41922,12 @@
     if (d.admblogfull !== undefined) {
       if (t.disabled || !S.adminBlogEdit) return;
       var topicElF = document.querySelector("[data-admblogtopic]");
-      var topicF = ((topicElF && topicElF.value) || blogTopicValue(S.adminBlogEdit) || "").trim();
-      S.adminBlogTopic = topicF;
+      var typedF = ((topicElF && topicElF.value) || "").trim();
+      var topicF = (typedF || blogTopicValue(S.adminBlogEdit) || "").trim();
+      /* only what was TYPED is kept in the box: an empty box wrote the
+         article its title names, and pinning that title in as the box's text
+         would make it the next topic too, after the article has a new one */
+      S.adminBlogTopic = typedF;
       admBlogWriteFull(S.adminBlogEdit, topicF, "");
       return;
     }
