@@ -4721,22 +4721,25 @@
       "title": "Доставка по умолчанию",
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
-        "Выбрать Эстонию, строку «Пакомат», потом сам пакомат из списка.",
+        "Выбрать Эстонию и строку «Пакомат Omniva».",
+        "Нажать «Выберите пакомат», набрать «Tallinn» или индекс и выбрать пункт из найденных (или на «Карте»).",
+        "То же проверить для Латвии, Литвы и Финляндии, в конце снова выбрать пакомат в Эстонии.",
         "Набрать новую корзину и дойти до шага доставки, потом то же с другого телефона.",
         "На шаге доставки вручную выбрать Латвию, заказ не оформлять.",
         "Вернуться в кабинет: «Другая страна Европы», во втором списке Италия, строка «Пакомат DPD».",
         "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
         "Снова открыть оформление и дойти до шага доставки.",
-        "В кабинете выбрать Грецию и «Курьер до двери», потом снова открыть оформление.",
+        "В кабинете выбрать Грецию и «Курьер до двери», вписать только «Адрес» и выйти из поля.",
+        "Дописать «Индекс» и «Город», потом снова открыть оформление и дойти до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "Эстония: пока пакомат не выбран, под списком «Выберите пакомат — тогда сохраним».",
-        "После выбора «Доставка по умолчанию сохранена ✓», касса подставляет её на обоих телефонах.",
-        "Италия: вместо длинной фразы кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "В каждой стране с пакоматами кнопка «Выберите пакомат» с поиском, как в оформлении.",
+        "Эстония: пока пакомат не выбран, под строками «Выберите пакомат — тогда сохраним».",
+        "После «…сохранена ✓» касса подставляет её на обоих телефонах, после «Выйти» — нет.",
         "Оформление открывается на Италии, DPD и этом пакомате, хотя раньше выбирали Латвию.",
-        "Греция сохраняется Грецией: в оформлении выбраны Греция и курьер, цена та же.",
-        "После «Выйти» доставка больше не подставляется."
+        "Только «Адрес»: под строками «Впишите адрес, индекс и город — тогда сохраним».",
+        "Греция: в оформлении Греция, курьер и вписанный адрес, цена та же."
       ],
       "why": "Чужой пакомат, подставленный следующему покупателю, — это посылка не тому человеку.",
       "risk": "high",
@@ -4745,27 +4748,30 @@
         "title": "Default delivery",
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
-          "Choose Estonia, the «Пакомат» row, then the locker itself from the list.",
+          "Choose Estonia and the «Пакомат Omniva» row.",
+          "Press «Выберите пакомат», type «Tallinn» or a postcode and pick one of the points found (or on the «Карта» map).",
+          "Check the same for Latvia, Lithuania and Finland; at the end pick an Estonian locker again.",
           "Fill a new cart and get to the delivery step, then do the same on another phone.",
           "On the delivery step pick Latvia by hand; do not place the order.",
           "Back in the account: «Другая страна Европы», Italy in the second list, the «Пакомат DPD» row.",
           "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
           "Open the checkout again and get to the delivery step.",
-          "In the account choose Greece and «Курьер до двери», then open the checkout again.",
+          "In the account choose Greece and «Курьер до двери», type only «Адрес» (street) and leave the box.",
+          "Add «Индекс» and «Город» (postcode, city), then open the checkout again and get to the delivery step.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Estonia: until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
-          "Once picked, «Доставка по умолчанию сохранена ✓»; the checkout fills it in on both phones.",
-          "Italy: no long sentence, but a «Выберите пакомат» button with the checkout's search.",
+          "Every locker country: a «Выберите пакомат» button with search, as in the checkout.",
+          "Estonia: until a locker is picked, under the rows: «Выберите пакомат — тогда сохраним».",
+          "After «…сохранена ✓» the checkout fills it in on both phones; after «Выйти» it does not.",
           "The checkout opens on Italy, DPD and that locker, although Latvia was picked before.",
-          "Greece stays Greece: the checkout has Greece and the courier, at the same price.",
-          "After «Выйти» it stops filling in."
+          "Only «Адрес» typed: under the rows «Впишите адрес, индекс и город — тогда сохраним».",
+          "Greece: the checkout has Greece, the courier and the typed address, at the same price."
         ],
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:23:20.471Z"
+      "markedAt": "2026-09-23T18:46:27.418Z"
     },
     {
       "id": "acct-refund-sent",
@@ -5308,17 +5314,18 @@
       "title": "Письмо «Товар снова в наличии»",
       "steps": [
         "Открыть «Ещё» → «Маркетинг» → «Письма» и включить «Товар снова в наличии».",
-        "Убедиться, что на закончившийся товар вы подписались из магазина.",
-        "В панели вернуть этот товар в наличие.",
-        "Проверить почту.",
+        "Товару поставить «Нет в наличии» и подписаться на него из магазина («Сообщить о наличии»).",
+        "В панели поставить этому товару «Мало» и проверить почту.",
+        "Переключить его на «В наличии», потом снова на «Мало», и проверить почту.",
+        "Повторить с другим товаром: «Нет в наличии» → подписка → «В наличии».",
         "Повторить с товаром, у которого на «Складе» посчитан ноль."
       ],
       "expect": [
-        "Письмо пришло сразу, как товар вернулся в наличие.",
-        "В письме название товара и цена.",
-        "Есть ссылка на сам товар.",
-        "Внизу есть «Отписаться»: страница открывается и сама снимает ожидание этого товара.",
-        "Если вместо подтверждения видна кнопка «Отписаться» — нажмите её.",
+        "«Мало» после «Нет в наличии»: письмо приходит сразу, одно.",
+        "«В наличии» после «Нет в наличии»: письмо тоже приходит сразу.",
+        "Переключение между «Мало» и «В наличии» нового письма не шлёт.",
+        "В письме название товара, цена и ссылка на сам товар.",
+        "Внизу «Отписаться»: страница сама снимает ожидание этого товара или просит нажать кнопку.",
         "Если на складе посчитан ноль, письмо не уходит совсем."
       ],
       "why": "Если переключатель выключен, все собранные подписки пропадают зря.",
@@ -5329,22 +5336,23 @@
         "title": "The «Товар снова в наличии» letter",
         "steps": [
           "Open «Ещё» → «Маркетинг» → «Письма» and switch on «Товар снова в наличии».",
-          "Make sure you subscribed to the out-of-stock product from the shop.",
-          "In the panel put that product back in stock.",
-          "Check your mail.",
+          "Set a product to «Нет в наличии» and subscribe to it from the shop («Сообщить о наличии»).",
+          "In the panel set that product to «Мало» (low) and check your mail.",
+          "Switch it to «В наличии», then back to «Мало», and check your mail.",
+          "Repeat with another product: «Нет в наличии» → subscribe → «В наличии».",
           "Repeat with a product counted down to zero on «Склад»."
         ],
         "expect": [
-          "The letter arrives as soon as the product is back.",
-          "It carries the product's name and price.",
-          "There is a link to the product itself.",
-          "«Отписаться» at the bottom opens a page that cancels the wait itself.",
-          "If you see an «Отписаться» button instead of the confirmation, press it.",
+          "«Мало» after «Нет в наличии»: the letter arrives at once, just one.",
+          "«В наличии» after «Нет в наличии»: the letter arrives at once too.",
+          "Switching between «Мало» and «В наличии» sends no new letter.",
+          "It carries the product's name, price and a link to the product.",
+          "«Отписаться» at the bottom: the page cancels the wait itself, or asks you to press.",
           "With a counted zero on the shelf no letter goes at all."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T07:00:15.191Z"
     },
     {
       "id": "mail-abandoned",

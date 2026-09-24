@@ -22,6 +22,16 @@
  *      pickup point, so it had no row in CARRIERS_BY_COUNTRY — the table every
  *      «do we know this country?» asked — and became «EU».
  *
+ * …and the owner's «bad» of 23.09.2026 on staging, after the first fix:
+ *
+ *   «I cannot search for parcel lockers for Estonia — but I can for Italy for
+ *   example in my account.» (Dim)
+ *
+ *   5. **Only the big countries had the search.** A list that fitted in one
+ *      download (Estonia, Latvia, Lithuania, Finland) still got a plain
+ *      <select> of every name in alphabetical order. Every list gets the
+ *      checkout's button and sheet now — «every list gets the picker» below.
+ *
  * The storefront's own functions, sliced out of public/shop2/app.js by source
  * text and run over stubs, as tests/checkout-country.test.ts does; the server
  * half is imported for real.
@@ -87,6 +97,14 @@ const ACCT = [
   "acctShipPrice", "shipRulePrice", "shipZoneOf", "orderCountry", "pickupOpen", "carriersFor",
   "courierCarriersFor", "methodCarriers", "deliveryFor", "acctPickCountry", "applyAcctShipPref",
   "pointsForAcct", "acctPointsKey",
+  // the courier row's address (23.09.2026) — the draft carries it, the save compares it
+  "acctAddrOf", "acctAddrWhole", "acctAddrPartial", "acctAddrKey",
+];
+
+/** The block's locker picker and what it draws with. */
+const PICKER = [
+  "acctPointHTML", "acctPointButton", "acctPointNamed", "pointNamed", "acctMachines", "acctMachinesTooMany",
+  "pointKind", "pointKindLine", "points", "pl", "esc",
 ];
 
 /** A fresh S: an Estonian checkout, nothing picked, nothing saved. */
@@ -125,6 +143,7 @@ const SCREEN = `
   function patchSummary() { CALLS.push("summary"); }
   function patchCountry() { CALLS.push("country"); }
   function patchAcctPoint() { CALLS.push("acctpoint"); }
+  function paintAcctAddr() {}
   function patchPointList() { CALLS.push("list"); }
   function paintPointMarkers() { CALLS.push("markers"); }
   function openPointMap() {}
@@ -345,8 +364,7 @@ describe("a country too big for one list gets the checkout's own search", () => 
     POINTS.by["dpd:IT"] = LIST; POINTS.big["dpd:IT"] = 12048;
   `;
   const acctPoint = (machine: string, extra = "") => run<string>(`
-    ${fns(...ACCT, "acctPointHTML", "acctPointButton", "acctMachines", "acctMachinesTooMany", "acctMachineName",
-      "pointKind", "points", "pl", "esc")}
+    ${fns(...ACCT, ...PICKER)}
     ${SCREEN}
     ${BIG}
     ${extra}
@@ -378,10 +396,13 @@ describe("a country too big for one list gets the checkout's own search", () => 
     expect(slice("acctPointHTML")).not.toContain("pointSheet()");
   });
 
-  it("a list that fits keeps its select", () => {
+  it("a list that fits gets the same button — not a select", () => {
+    /* It kept a <select> until 23.09.2026 — see «every list gets the
+       picker» below for the four countries that were left with one. */
     const html = acctPoint("", 'POINTS.big["dpd:IT"] = 0;');
-    expect(html).toContain("data-acctmachine");
-    expect(html).not.toContain('data-pointopen="acct"');
+    expect(html).toContain('data-pointopen="acct"');
+    expect(html).not.toContain("<select");
+    expect(html).toContain("Пакомат по умолчанию — 2 точки");
   });
 
   it("the old sentence is gone from the shop", () => {
@@ -571,6 +592,203 @@ describe("a locker found by the server's search is a locker the checkout can hol
     const out = state();
     expect(out.point).toEqual(KRAKOW);
     expect(out.calls).toContain("delivery");
+  });
+});
+
+/* ------------------------------------------------------------------------ */
+
+describe("every list gets the picker — Estonia as much as Italy", () => {
+  /* Dim on staging, 23.09.2026: «I cannot search for parcel lockers for
+     Estonia — but I can for Italy for example in my account.» A list that
+     fitted in one download still got a <select> — every name of the
+     carrier, alphabetical, nothing to type into. */
+  const EE_POINTS = [
+    { id: "om-1", name: "Tallinna Kristiine keskuse pakiautomaat", address: "Endla 45", city: "Tallinn", zip: "10615", type: "parcel_machine", lat: 59.427, lng: 24.724 },
+    { id: "om-2", name: "Tartu Lõunakeskuse pakiautomaat", address: "Ringtee 75", city: "Tartu", zip: "50501", type: "parcel_machine", lat: 58.358, lng: 26.678 },
+    { id: "om-3", name: "Pärnu Kaubamajaka pakiautomaat", address: "Papiniidu 8", city: "Pärnu", zip: "80042", type: "parcel_machine", lat: 58.37, lng: 24.531 },
+  ];
+
+  type Block = { html: string; carrier: string; calls: string[] };
+  /** The block over the draft's parcel row in `cc` — the first carrier, or
+      `carrier` — with `list` as that carrier's feed (null: still in flight),
+      `big` its country-wide count when the feed came capped. */
+  const blockFor = (cc: string, o: { big?: number; list?: unknown; machine?: string; carrier?: string; extra?: string } = {}) => run<Block>(`
+    ${fns(...ACCT, ...PICKER)}
+    ${SCREEN}
+    var row = acctMethods(CC).filter(function (x) { return x.pm && (!CARRIER || x.pm === CARRIER); })[0];
+    S.acctForm.ship = { country: CC, method: "parcel", carrier: row.pm, machine: MACHINE };
+    if (LIST) POINTS.by[row.pm + ":" + CC] = LIST;
+    POINTS.big[row.pm + ":" + CC] = BIG;
+    ${o.extra ?? ""}
+    return { html: acctPointHTML(), carrier: row.pm, calls: CALLS };
+  `, { CC: cc, BIG: o.big ?? 0, LIST: o.list === undefined ? EE_POINTS : o.list, MACHINE: o.machine ?? "", CARRIER: o.carrier ?? "" });
+
+  for (const cc of ["EE", "LV", "LT", "FI"]) {
+    it(`${cc}: a list that fits in one download gets the checkout's button, not a select`, () => {
+      const out = blockFor(cc);
+      expect(out.html).toContain('data-pointopen="acct"');
+      expect(out.html).toContain("Выберите пакомат");
+      expect(out.html).toContain("Поиск по адресу и городу");
+      expect(out.html).toContain("Пакомат по умолчанию — 3 точки");
+      expect(out.html).not.toContain("<select");
+      expect(out.html).not.toContain("<option");
+    });
+  }
+
+  it("IT: the same button, counted over the whole country", () => {
+    const out = blockFor("IT", { carrier: "dpd", big: 12048 });
+    expect(out.carrier).toBe("dpd");
+    expect(out.html).toContain('data-pointopen="acct"');
+    expect(out.html).toContain("Пакомат по умолчанию — 12048 точек");
+    expect(out.html).not.toContain("<select");
+  });
+
+  it("every carrier of every locker country draws the button, never a select", () => {
+    const selects: string[] = [];
+    for (const cc of Object.keys(CARRIERS_BY_COUNTRY)) {
+      for (const carrier of CARRIERS_BY_COUNTRY[cc]) {
+        const html = blockFor(cc, { carrier }).html;
+        if (!html.includes('data-pointopen="acct"') || html.includes("<select")) selects.push(`${carrier}:${cc}`);
+      }
+    }
+    expect(selects).toEqual([]);
+  });
+
+  it("names the saved locker with its kind and address", () => {
+    const html = blockFor("EE", { carrier: "omniva", machine: "Tartu Lõunakeskuse pakiautomaat" }).html;
+    expect(html).toContain("pointbtn--set");
+    expect(html).toContain('<span class="pointbtn__nm">Tartu Lõunakeskuse pakiautomaat</span>');
+    expect(html).toContain("Пакомат · Ringtee 75, Tartu");
+    expect(html).toContain("изменить");
+  });
+
+  it("a whole list that no longer has the saved locker shows nothing chosen, as the select did", () => {
+    const html = blockFor("EE", { carrier: "omniva", machine: "Suletud pakiautomaat" }).html;
+    expect(html).not.toContain("pointbtn--set");
+    expect(html).not.toContain("Suletud pakiautomaat");
+    expect(html).toContain("Выберите пакомат");
+  });
+
+  it("a capped list cannot say a locker is gone — the saved name stands", () => {
+    const html = blockFor("IT", { carrier: "dpd", big: 12048, machine: "ROMA, VIA APPIA 7" }).html;
+    expect(html).toContain("pointbtn--set");
+    expect(html).toContain("ROMA, VIA APPIA 7");
+  });
+
+  it("…and names its address once a search brought that locker back", () => {
+    const roma = { id: "it-9", name: "ROMA, VIA APPIA 7", address: "Via Appia 7", city: "Roma", zip: "00179", type: "parcel_machine" };
+    const html = blockFor("IT", {
+      carrier: "dpd", big: 12048, machine: "ROMA, VIA APPIA 7",
+      extra: `POINTS.found["dpd:IT|roma, via appia 7"] = [${JSON.stringify(roma)}];`,
+    }).html;
+    expect(html).toContain("Пакомат · Via Appia 7, Roma");
+  });
+
+  it("says the list is on its way, and asks for it", () => {
+    const out = blockFor("EE", { carrier: "omniva", list: null });
+    expect(out.html).toContain('data-pointopen="acct"');
+    expect(out.html).toContain("Загружаем список…");
+    expect(out.html).toContain(">Пакомат по умолчанию</span>");
+    expect(out.calls).toContain("load:omniva:EE");
+  });
+
+  it("a feed that failed says so — the tap asks again", () => {
+    const html = blockFor("EE", { carrier: "omniva", list: null, extra: 'POINTS.err["omniva:EE"] = true;' }).html;
+    expect(html).toContain("Список не загрузился — нажмите ещё раз");
+  });
+
+  it("a carrier with nothing behind it draws no picker at all", () => {
+    expect(blockFor("EE", { carrier: "omniva", list: [] }).html).toBe("");
+  });
+
+  /** The sheet the account opens, drawn for real over the draft's list. */
+  const sheetFor = (list: unknown, view = "list") => run<string>(`
+    ${fns(...ACCT, "pointSheet", "pointsHaveMap", "pointGeo", "pointsMatching", "pointsSearch", "pointsSearchPending",
+      "pointsList", "pointsKey", "coPointsKey", "pointRows", "pointChosen", "pointsFiltered", "searchPoints", "matchesWords",
+      "isPostcodeQuery", "normZip", "pointZip", "rankByPostcode", "pointCountText", "pointTooManyHTML", "carrierLabel",
+      "pointsMixed", "pointKind", "pointKindLine", "points", "pl", "esc")}
+    ${SCREEN.replace('function pointSheet() { return "<SHEET>"; }', "")}
+    var pointPaint = {};
+    S.acctForm.ship = { country: "EE", method: "parcel", carrier: "omniva", machine: "" };
+    POINTS.by["omniva:EE"] = LIST; POINTS.view = VIEW;
+    S.pointOpen = true; S.pointFor = "acct";
+    return pointSheet();
+  `, { LIST: list, VIEW: view, shipCarrier: () => "dpd" });
+
+  it("the account's sheet is the checkout's: search box, the draft's carrier, its rows", () => {
+    const html = sheetFor(EE_POINTS);
+    expect(html).toContain("data-pointq");
+    expect(html).toContain('placeholder="Индекс, город или улица"');
+    expect(html).toContain("Пакомат Omniva");
+    expect(html).toContain('data-pointpick="om-1"');
+    expect(html).toContain('data-pointpick="om-3"');
+  });
+
+  it("…with the map where the points have coordinates, and without it where they have none", () => {
+    expect(sheetFor(EE_POINTS)).toContain("data-pointview");
+    expect(sheetFor(EE_POINTS, "map")).toContain('id="pointmap"');
+    const bare = EE_POINTS.map(({ lat: _lat, lng: _lng, ...p }) => p);
+    expect(sheetFor(bare)).not.toContain("data-pointview");
+    expect(sheetFor(bare, "map")).not.toContain('id="pointmap"');
+  });
+
+  it("an Estonian locker picked in the account is saved, and the checkout opens on it", async () => {
+    const bodies: Array<{ shipPref?: unknown }> = [];
+    const state = run<() => Record<string, unknown>>(`
+      ${fns(...ACCT, ...PICKER, "openPointSheet", "pickPoint", "acctShipChanged", "acctQueue", "acctNext", "acctFieldDirty",
+        "shipKey", "acctFieldPayload", "acctSeedField", "shipDraftFrom", "matchAcctPoint", "coPointsKey", "shipCarrier",
+        "shipMethod", "isParcel", "giftOnlyCart", "pointField", "carrierLabel", "pointsKey", "pointsList", "pointsMixed", "pickWord")}
+      ${SCREEN.replace('function acctShipChanged() { CALLS.push("save"); }', "")}
+      var acctQ = [], acctInflight = "", acctGen = 0;
+      function acctSt(f, st) { S.acctSt[f] = st; }
+      function acctForget() {} function toast() {} function acctSyncNewsletter() {}
+      function repaintPicker() { CALLS.push("repaint"); }
+      var fetch = FETCH;
+      S.cart = [];
+      /* what the row held before: the counter in Tallinn */
+      S.cust = { shipPref: { country: "EE", method: "pickup", carrier: "", machine: "" } };
+      POINTS.by["omniva:EE"] = LIST;
+      /* the «Пакомат Omniva» row, tapped — a parcel row waits for its machine */
+      S.acctForm.ship = acctShipFromRow("EE", acctMethods("EE").filter(function (x) { return x.pm === "omniva"; })[0]);
+      acctShipChanged();
+      var waiting = S.acctSt.ship, before = acctPointHTML();
+      openPointSheet("acct");
+      var opened = S.pointOpen && S.pointFor === "acct";
+      pickPoint(LIST[1]);
+      return function () {
+        var block = acctPointHTML();
+        S.screen = "checkout";
+        return { waiting: waiting, before: before, opened: opened, line: S.acctSt.ship, block: block,
+          country: S.country, method: S.ship.method, carrier: S.ship.carrier, point: S.ship.point,
+          picked: S.shipPicked, field: pointField() };
+      };
+    `, {
+      LIST: EE_POINTS,
+      FETCH: (_url: string, init: { body: string }) => {
+        const body = JSON.parse(String(init.body)) as { shipPref?: unknown };
+        bodies.push(body);
+        return Promise.resolve({ status: 200, json: () => Promise.resolve({ ok: true, customer: { shipPref: body.shipPref } }) });
+      },
+    });
+    await new Promise((r) => setTimeout(r, 10));
+    const out = state();
+    expect(out.waiting, "a parcel row with no locker saved itself").toBe("need");
+    expect(out.before).toContain('data-pointopen="acct"');
+    expect(out.opened).toBe(true);
+    // one PATCH, carrying the locker picked in the sheet
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].shipPref).toEqual({ country: "EE", method: "parcel", carrier: "omniva", machine: "Tartu Lõunakeskuse pakiautomaat" });
+    expect(out.line).toBe("saved");
+    expect(out.block).toContain("Tartu Lõunakeskuse pakiautomaat");
+    expect(out.block).toContain("pointbtn--set");
+    // …and the checkout starts on it: Estonia, Omniva, that very locker
+    expect(out.country).toBe("EE");
+    expect(out.method).toBe("parcel");
+    expect(out.carrier).toBe("omniva");
+    expect(out.point).toEqual(EE_POINTS[1]);
+    expect(out.picked, "the default must not count as the shopper's own hand").toBe(false);
+    expect(out.field).toContain("Tartu Lõunakeskuse pakiautomaat");
+    expect(out.field).toContain("Пакомат · Ringtee 75, Tartu");
   });
 });
 

@@ -750,6 +750,28 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
     throw new OrderError("bad_stock", String(cols.stock));
   }
 
+  /* «Снова в наличии» (account-flows) is for a COMEBACK: the storefront said
+     «нет в наличии» before this save and says something it sells after it —
+     «в наличии» or «мало», which is on sale just the same. Renat, staging,
+     23.09.2026: «When it's "in stock" the letter arrives; when it's "low" no
+     letter goes out» — this hook fired for "in" alone. And a product that
+     was on sale all along is not coming back: «мало» → «в наличии» used to
+     send any alert still pending, so the word before the save is read here,
+     the way the page reads it (shopStockOf: the manual word, the count, the
+     catalogue file). Only a save that can put the product on sale asks. */
+  let flowsMod: typeof import("@/lib/flows") | null = null;
+  let stockBefore: string | null = null;
+  if ("stock" in cols && cols.stock !== "out") {
+    try {
+      flowsMod = await import("@/lib/flows");
+      stockBefore = await flowsMod.shopStockOf(productId);
+    } catch (err) {
+      // unknown: runBackInStock() below still checks the page's word after
+      // the save, and a stamped alert is never sent twice
+      console.error("[orders] stock before the save unknown:", err);
+    }
+  }
+
   const keys = Object.keys(cols);
   const params: unknown[] = [productId, ...keys.map((k) => cols[k])];
   const JSONB = new Set(["var_img", "gallery", "sizes"]);
@@ -765,14 +787,14 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
        returning *`;
   const rows = await query<OverrideRow>(sql, params);
 
-  /* «Снова в наличии» (account-flows). Pending stock_alerts rows only exist
-     for a product somebody found sold out, so "the owner set stock to in and
-     there are rows waiting" IS the out→in transition — no before/after read
-     needed. Loaded lazily and swallowed: a mail problem must never stop the
-     owner saving a price. */
-  if (cols.stock === "in") {
+  /* …and it was «нет в наличии» (or could not be read): the people waiting
+     hear about it. runBackInStock() itself holds the letter while the page
+     still says «нет в наличии» — a counted zero outvotes the owner's word —
+     so «after» is its question, not this one's. Loaded lazily and swallowed:
+     a mail problem must never stop the owner saving a price. */
+  if ("stock" in cols && cols.stock !== "out" && (stockBefore === null || stockBefore === "out")) {
     try {
-      const { runBackInStock } = await import("@/lib/flows");
+      const { runBackInStock } = flowsMod ?? (await import("@/lib/flows"));
       await runBackInStock(productId);
     } catch (err) {
       console.error("[orders] back-in-stock flow failed:", err);
