@@ -965,7 +965,8 @@ export async function sendNewsletterBatch(
        itself once the counter rolls. The panel that understands `parked`
        should stop calling altogether and say «продолжится завтра». */
     progress.retryAfterMs = PARKED_RETRY_MS;
-    await warnOwnerOnce();
+    // the notice counts this campaign, in the panel's words (limitNoticeBody)
+    await warnOwnerOnce(Date.now(), { sent: c.sent + c.failed, total: c.total });
   }
   return { progress, newsletter: fresh };
 }
@@ -986,7 +987,9 @@ export interface NewsletterResumeReport {
   reason?: string;
 }
 
-/** A parked campaign may hold the daily job for this long before it gives the rest of the run its turn. */
+/** A parked campaign may hold the daily job for this long before it gives the rest of the run its turn.
+    The cron route passes what is left of its own function time instead (budgetMs) — about three quarters
+    of a minute, room for a whole day's allowance (70 letters at two a second is 35 s). */
 const RESUME_BUDGET_MS = 20_000;
 
 /**
@@ -997,8 +1000,9 @@ const RESUME_BUDGET_MS = 20_000;
  * (sendNewsletterBatch). Nothing in a serverless shop would ever call it back:
  * the panel only loops while the tab is open, and the tab is closed by the
  * time the allowance matters. So /api/cron/flows, the one scheduled job this
- * shop has, carries it — 07:00 Tallinn, which is well after the counter rolls
- * at UTC midnight, so the first thing it meets is a full day.
+ * shop has, carries it — 07:00 UTC (Vercel's crons run on UTC: 10:00 in
+ * Tallinn in summer), which is well after the counter rolls at UTC midnight,
+ * so the first thing it meets is a full day.
  *
  * Every letter still 'sending' with queued rows, oldest first, until the
  * allowance or the time budget runs out. Each one goes through the ordinary
@@ -1040,10 +1044,27 @@ export async function resumeParkedNewsletters(opts: BatchOptions & { budgetMs?: 
          difference is taken here rather than printing yesterday's work again
          in this morning's line. */
       const before = await newsletterProgress(row.id);
-      const { progress } = await sendNewsletterBatch(row.id, {
-        ...opts,
-        budgetMs: Math.min(opts.budgetMs ?? DEFAULTS.budgetMs, Math.max(0, until - Date.now())),
-      });
+      /* One batch is one panel call's worth — DEFAULTS.budgetMs, about a
+         dozen letters at Resend's two a second — so the same letter is
+         batched again until it is done, parks, or the sweep's own time is up.
+         Until 24.09.2026 each letter got ONE batch per morning: a campaign
+         parked with sixty left took five mornings to finish, while the panel
+         promised «продолжится завтра» (Dim's limit test). */
+      let progress: BatchProgress | null = null;
+      let lastLeft = Number.POSITIVE_INFINITY;
+      while (Date.now() < until) {
+        ({ progress } = await sendNewsletterBatch(row.id, {
+          ...opts,
+          budgetMs: Math.min(DEFAULTS.budgetMs, Math.max(0, until - Date.now())),
+        }));
+        if (progress.done || progress.parked) break;
+        // Resend's «two a second» pause: wait it out, inside the sweep's time
+        if (progress.retryAfterMs) await sleep(Math.min(progress.retryAfterMs, Math.max(0, until - Date.now())));
+        // …and never spin on a batch that moved nothing
+        else if (progress.left >= lastLeft) break;
+        lastLeft = progress.left;
+      }
+      if (!progress) break;
       out.sent += Math.max(0, progress.sent - (before?.sent ?? 0));
       out.failed += Math.max(0, progress.failed - (before?.failed ?? 0));
       out.left += progress.left;

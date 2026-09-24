@@ -47,6 +47,7 @@ import { quotaRefusal, sendMail } from "@/lib/mail";
 import {
   campaignPlan,
   cleanMailBudget,
+  limitNoticeBody,
   mailBudgetView,
   MAIL_CAP_DEFAULT,
   MAIL_RESERVE_DEFAULT,
@@ -388,6 +389,50 @@ describe("a campaign bigger than the day", () => {
   });
 });
 
+/* ---------- 4b. …at the pace the shop really sends ------------------------ */
+
+/*
+ * Dim, 24.09.2026, after the limit test: «Will the newsletters send
+ * themselves automatically, when I get this message?». They were meant to —
+ * but the morning run gave each parked letter ONE batch, and a batch is one
+ * panel call's worth (6.5 s, about a dozen letters at Resend's two a second).
+ * The tests above send at a thousand a second, so one batch always finished;
+ * at the real pace a campaign parked with sixty left took five mornings.
+ *
+ * Here every request to Resend moves a fake clock on by a second — the pace
+ * the defaults keep — and the morning run is called with its defaults.
+ */
+describe("the morning run finishes what the limit left, at the real pace", () => {
+  it("sends every remaining letter the day allows — not one batch's dozen", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-09-24T09:00:00.000Z") });
+    try {
+      const resend = globalThis.fetch;
+      vi.stubGlobal("fetch", async (url: unknown, init: RequestInit) => {
+        vi.setSystemTime(Date.now() + 1000);
+        return resend(url as string, init);
+      });
+      await budget(2, 0);
+      const readers = await audience(14);
+      const n = await createNewsletter(draft());
+
+      const first = await sendNewsletterBatch(n.id);
+      expect(first.progress).toMatchObject({ parked: true, sent: 2, left: 12 });
+
+      // the next morning, with the owner's usual numbers back
+      await query("update mail_sends_daily set day = $1", [utcDay(Date.now() - 24 * 60 * 60 * 1000)]);
+      await budget(100, 30);
+      const resumed = await resumeParkedNewsletters();
+
+      expect(resumed, "the morning run stopped after one batch").toMatchObject({ picked: 1, sent: 12, left: 0, finished: 1 });
+      expect((await getNewsletter(n.id))?.status).toBe("sent");
+      expect([...sent].sort()).toEqual([...readers].sort());
+      expect(new Set(sent).size).toBe(14);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 /* ---------- 5. Resend's own refusal --------------------------------------- */
 
 describe("a quota refusal is not an ordinary failure", () => {
@@ -473,6 +518,29 @@ describe("the owner is told once a day, on his phone", () => {
 
     const marketing = (await rows()).find((r) => r.kind === "marketing");
     expect(marketing?.warned).toBe(true);
+  });
+
+  /* Dim, 24.09.2026: «Will the newsletters send themselves automatically, when
+     I get this message?». The notice said «Рассылка остановлена». It says
+     what happens next now — in the panel's words, with the campaign's count. */
+  it("says the rest goes out by itself tomorrow — and that nothing needs pressing", async () => {
+    await budget(2, 0);
+    await audience(5);
+    const n = await createNewsletter(draft());
+
+    await sendNewsletterBatch(n.id, { perSecond: 1000, concurrency: 1 });
+    const payload = JSON.parse(wp.sent[0].payload) as { body: string };
+    expect(payload.body).toContain("Рассылка: отправлено 2 из 5 — остальные уйдут автоматически завтра");
+    expect(payload.body).toContain("нажимать ничего не нужно");
+    expect(payload.body, "the notice still reads as a stop").not.toContain("остановлена");
+  });
+
+  it("a limit met by the reminders, not a campaign, says the same about tomorrow", () => {
+    const line = limitNoticeBody({ total: 70, blocked: false }, { cap: 100, reserve: 30 });
+    expect(line).toContain("Сегодня отправлено 70 из 100");
+    expect(line).toContain("продолжатся завтра сами");
+    expect(limitNoticeBody({ total: 12, blocked: true }, { cap: 100, reserve: 30 }, { sent: 12, total: 40 }))
+      .toContain("отправлено 12 из 40 — остальные уйдут автоматически завтра");
   });
 
   it("never by e-mail — that is the thing that has run out", async () => {

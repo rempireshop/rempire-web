@@ -2961,6 +2961,7 @@
       "Английского текста нет — эти подписчики получат русскую версию.": "Ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
       "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
       "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Saatmine katkes — vajuta «Jätka» ja kiri läheb ülejäänutele.",
+      "Можно не ждать — «Продолжить» отправит остальным сейчас.": "Ei pea ootama — «Jätka» saadab ülejäänutele kohe.",
       "Продолжить": "Jätka", "Ход отправки": "Saatmise käik",
       "О чём письмо": "Millest kiri", "новинки сентября, скидка 10 % до воскресенья": "septembri uudised, 10 % soodustus pühapäevani",
       "✨ Написать": "✨ Kirjuta",
@@ -5972,6 +5973,7 @@
       "Английского текста нет — эти подписчики получат русскую версию.": "There is no English text — these subscribers get the Russian version.",
       "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "There is no Estonian or English text — these subscribers get the Russian version.",
       "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Sending was interrupted — press «Continue» and the letter goes to the rest.",
+      "Можно не ждать — «Продолжить» отправит остальным сейчас.": "No need to wait — «Continue» sends it to the rest now.",
       "Продолжить": "Continue", "Ход отправки": "Sending progress",
       "О чём письмо": "What the letter is about", "новинки сентября, скидка 10 % до воскресенья": "September's new arrivals, 10% off until Sunday",
       "✨ Написать": "✨ Write",
@@ -6306,8 +6308,10 @@
     [/^· (\d+) дней$/, { ET: "· $1 päeva", EN: "· $1 days" }],
     [/^(\d+) дня$/, { ET: "$1 päeva", EN: "$1 days" }],
     [/^(\d+) дней$/, { ET: "$1 päeva", EN: "$1 days" }],
-    [/^Рассылка: отправлено (\d+) из (\d+), продолжится завтра$/,
-      { ET: "Uudiskiri: saadetud $1 / $2, jätkub homme", EN: "Campaign: $1 of $2 sent, continues tomorrow" }],
+    [/^Рассылка: отправлено (\d+) из (\d+) — остальные уйдут автоматически завтра$/,
+      { ET: "Uudiskiri: saadetud $1 / $2 — ülejäänud lähevad homme automaatselt", EN: "Campaign: $1 of $2 sent — the rest go out automatically tomorrow" }],
+    [/^Отправлено (\d+) из (\d+) — остальные уйдут автоматически завтра\.$/,
+      { ET: "Saadetud $1 / $2 — ülejäänud lähevad homme automaatselt.", EN: "Sent $1 of $2 — the rest go out automatically tomorrow." }],
     [/^Писем в сутки: (\d+), придержано (\d+)$/,
       { ET: "Kirju ööpäevas: $1, tagasi hoitud $2", EN: "Letters a day: $1, held back $2" }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
@@ -16509,8 +16513,17 @@
   /** The form from the row — on every profile fetch, so «unchanged» always
       means «same as the server», never «same as before». */
   function acctSeedForm() {
-    var c = S.cust;
+    var c = S.cust, was = S.acctForm || {};
     S.acctForm = { name: c.name || "", phone: c.phone || "", birthday: c.birthday || "", marketing: !!c.marketing, ship: shipDraftFrom(c.shipPref) };
+    /* …except a field whose save is still on its way (queued, in flight, or
+       waiting for the typing to stop — acctAutoSave). Opening the checkout
+       re-reads the profile (acctRefresh) in the same moment it flushes what
+       was just typed (acctFlush), and a profile read before that save landed
+       would put the old value back over the new one — the queue would then
+       find nothing to send. The save's own answer re-reads the row (acctNext). */
+    ["name", "phone", "birthday", "marketing", "ship"].forEach(function (f) {
+      if (f in was && (acctPending(f) || acctAutoT[f])) S.acctForm[f] = was[f];
+    });
   }
   /** One field of the form back from the row, after its own save. */
   function acctSeedField(f) {
@@ -16590,6 +16603,8 @@
     S.acctSt = { name: "", phone: "", birthday: "", marketing: "", ship: "" };
     acctQ.length = 0; acctInflight = ""; acctGen++;
     clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+    for (var a in acctAutoT) clearTimeout(acctAutoT[a]);
+    acctAutoT = {};
     for (var k in acctStT) clearTimeout(acctStT[k]);
   }
 
@@ -16610,7 +16625,8 @@
     if (!S.cust || !acctFieldDirty(f)) { if (S.acctSt[f] === "busy") acctSt(f, ""); acctNext(); return; }
     acctInflight = f;
     var gen = acctGen, sent = JSON.stringify(acctFieldPayload(f));
-    fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: sent })
+    // keepalive: a save that left while the page was being closed still lands (acctLeave)
+    fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: sent, keepalive: true })
       .then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return { status: r.status }; }); })
       .then(function (res) {
         if (gen !== acctGen) return;   // signed out while it was out
@@ -16643,6 +16659,8 @@
      («0019») is outside the box's own min/max: not a date to store. */
   var acctBirthdayT = 0;
   function acctFieldChange(f, el) {
+    // the box was left: its save goes now, and the pause-in-typing one is spent
+    clearTimeout(acctAutoT[f]); delete acctAutoT[f];
     if (f === "birthday") {
       clearTimeout(acctBirthdayT); acctBirthdayT = 0;
       if (el && el.validity && !el.validity.valid) return;
@@ -16651,8 +16669,93 @@
     }
     /* the checkout's own rule and words for a number with too few digits
        (phoneOk / shipMsg): nothing is sent, the server keeps the number it had */
-    if (f === "phone" && S.acctForm.phone.trim() && S.acctForm.phone.replace(/\D/g, "").length < 7) { acctSt("phone", "err:bad_phone"); return; }
+    if (f === "phone" && acctPhoneShort()) { acctSt("phone", "err:bad_phone"); return; }
+    /* Already saved by the pause in typing (acctAutoSave): leaving the box
+       then changes nothing, and a second request would only put «Сохраняем…»
+       over the «Сохранено ✓» that is standing. */
+    if (!acctFieldDirty(f) && !acctPending(f)) return;
     acctQueue(f);
+  }
+  /** A number typed with too few digits for a phone (the checkout's phoneOk rule). */
+  function acctPhoneShort() {
+    return !!S.acctForm.phone.trim() && S.acctForm.phone.replace(/\D/g, "").length < 7;
+  }
+  /* ---- what is typed is never lost ----------------------------------------
+     Dim, 24.09.2026, on /test «acct-default-delivery»: «not sure, if after
+     typing and going away from page the information is stored — me as a
+     developer I know that after I typed and then did one click with mouse, it
+     then stored». A box saved only when it was LEFT, and a shopper does not
+     always leave it: the phone's Back, switching to another app, closing the
+     tab — none of those is a blur, and the typing died with the page.
+
+     So a box also saves itself a moment after the typing stops
+     (ACCT_AUTOSAVE_MS), through the same one-at-a-time queue and under the
+     same «Сохраняем…» / «Сохранено ✓» line as the blur. Leaving the screen
+     sends whatever is still waiting at once (acctFlush, from go() and
+     popstate), and a page going away sends it with keepalive (acctLeave).
+     A pause is not a verdict: a phone number still too short and half a
+     courier address wait quietly — the blur is what says what is missing. */
+  var ACCT_AUTOSAVE_MS = 800;
+  var acctAutoT = {};   // field → the timer of a save waiting for the typing to stop
+  /** A keystroke in a profile box: the draft follows it, the save waits for a pause. */
+  function acctTyped(f, value) {
+    S.acctForm[f] = value;
+    /* A standing «Сохранено ✓» or a refusal under the box is stale the
+       moment something new is typed; only «Сохраняем…» stays, that request
+       is out. */
+    if (S.acctSt[f] && S.acctSt[f] !== "busy") acctSt(f, "");
+    // the birthday has its own clock: its box fires `change` as it is typed (acctFieldChange)
+    if (f !== "birthday") acctAutoSave(f);
+  }
+  /** …and in one of the courier's address boxes, onto the delivery draft. */
+  function acctAddrTyped(k, value) {
+    var d = S.acctForm.ship;
+    if (d) { if (!d.address) d.address = acctAddrOf(null); d.address[k] = value; }
+    if (S.acctSt.ship && S.acctSt.ship !== "busy") { acctSt("ship", ""); paintAcctAddr(); }
+    if (d) acctAutoSave("ship");
+  }
+  function acctAutoSave(f) {
+    clearTimeout(acctAutoT[f]);
+    acctAutoT[f] = setTimeout(function () { delete acctAutoT[f]; acctAutoRun(f); }, ACCT_AUTOSAVE_MS);
+  }
+  /** The pause's save — the blur's, minus the refusals a pause is too early for. */
+  function acctAutoRun(f) {
+    if (!S.cust) return;
+    if (f === "ship") {
+      var d = S.acctForm.ship;
+      // a whole address saves; half of one waits for the rest (acctShipChanged says so on the blur)
+      if (d && d.method === "courier" && acctAddrWhole(acctAddrOf(d.address)) && acctFieldDirty("ship")) acctShipChanged();
+      return;
+    }
+    if (f === "phone" && acctPhoneShort()) return;
+    if (acctFieldDirty(f)) acctQueue(f);
+  }
+  /** Leaving the account screen: every save still waiting for a pause goes now. */
+  function acctFlush() {
+    Object.keys(acctAutoT).forEach(function (f) { clearTimeout(acctAutoT[f]); delete acctAutoT[f]; acctAutoRun(f); });
+    if (acctBirthdayT) { clearTimeout(acctBirthdayT); acctBirthdayT = 0; acctQueue("birthday"); }
+  }
+  /* The page itself is going away (pagehide), or may be about to (hidden —
+     the last moment a phone reliably gives). The queue sends one field at a
+     time and the page may not live to see its turn, so whatever waits behind
+     the request in flight rides one keepalive PATCH now — the route takes
+     any subset of the fields. If the page comes back instead, the queue
+     carries on and sends them again: the same value twice, harmless. */
+  function acctLeave() {
+    acctFlush();
+    if (!S.cust) return;
+    var body = { lang: S.lang }, n = 0;
+    acctQ.forEach(function (f) {
+      if (!acctFieldDirty(f)) return;
+      var one = acctFieldPayload(f);
+      for (var k in one) body[k] = one[k];
+      n++;
+    });
+    if (!n) return;
+    try {
+      fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body), keepalive: true })
+        .catch(noop);
+    } catch (e) {}
   }
   /* «Доставка по умолчанию»: the row, the country and the machine each come
      through here. A parcel row without a machine is not a preference yet —
@@ -20528,7 +20631,14 @@
 
      Only a number that means something outside the shop is offered: Montonio
      and the test bank issue one, «отмечено вручную» writes the literal
-     «manual», and a salon sale or an order a gift card covered has none. */
+     «manual», and a salon sale or an order a gift card covered has none.
+
+     Checked again 24.09.2026 (Dim: «There is no link to that payment at the
+     bank — just an id»): docs.montonio.com's order guide and API reference
+     name no page for one order, and Montonio's help centre only ever says
+     «Orders → paste the order number or UUID into the search». So still no
+     link — but the number itself now copies on a tap too, not only the
+     button beside it: on a phone the number is what the thumb lands on. */
   function admPayRefHTML(p) {
     var ref = String((p && p.ref) || "");
     if (!ref || ref === "manual") return "";
@@ -20536,7 +20646,8 @@
     if (provider !== "montonio" && provider !== "mock") return "";
     return '<div class="adm-ship__row adm-ship__row--code" style="margin-top:12px">' +
       '<span><span class="adm-hint">Номер платежа в Montonio</span><br>' +
-        '<span class="adm-ship__code" data-payref>' + esc(ref) + "</span></span>" +
+        '<span class="adm-ship__code" data-payref data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓">' +
+          esc(ref) + "</span></span>" +
       '<button class="adm-copy" data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓"' +
         ' aria-label="Скопировать номер платежа">Скопировать</button></div>' +
       '<p class="adm-hint" style="margin:6px 0 0">Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.</p>';
@@ -24116,6 +24227,17 @@
     var note = NEWS_FALLBACK_NOTE[miss.join(",")];
     return note ? '<div class="adm-hint adm-hint--warn" style="margin-top:8px">' + note + "</div>" : "";
   }
+  /** A letter left half-sent: how far it got, and that the rest needs nobody. One sentence for the translator (UI_RX). */
+  function newsWaitLine(done, total) {
+    return "Отправлено " + done + " из " + total + " — остальные уйдут автоматически завтра.";
+  }
+  /** Can «Продолжить» send anything today? Not known yet counts as yes — the server decides and parks again if not. */
+  function newsRoomNow() {
+    var b = S.newsBudget;
+    if (!b) return true;
+    if (b.known === false || b.blocked) return false;
+    return Number(b.marketingRoom) > 0;
+  }
   /** The right-hand «Отправка» card: the draft's advice, the climbing count, or what was sent. */
   function admNewsSendCardHTML(d) {
     var st = S.newsSend && S.newsSend.id === d.id ? S.newsSend : null;
@@ -24125,9 +24247,19 @@
       inner = newsProgressHTML(st.sent + st.failed, st.total || d.audienceCount) +
         '<div class="adm-hint" aria-live="polite">' + newsProgressLine(st) + "</div>";
     } else if (d.status === "sending") {
+      /* Dim, 24.09.2026, after the limit test: «Will the newsletters send
+         themselves automatically … I had to click "send"». They do — the
+         morning job sends the rest of any letter left half-sent (parked at
+         the limit or broken off), src/lib/newsletters.ts
+         resumeParkedNewsletters — but this card said «Отправка прервалась —
+         нажмите «Продолжить»». It says what will happen now; the button
+         stays only for a day that still has room, as a way not to wait. */
       inner = newsProgressHTML(d.sentCount + d.failedCount, d.audienceCount) +
-        (err || '<div class="adm-hint adm-hint--warn">Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.</div>') +
-        '<button class="adm-btn" data-newsresume>Продолжить</button>';
+        '<div class="adm-hint" aria-live="polite">' + newsWaitLine(d.sentCount + d.failedCount, d.audienceCount) + "</div>" + err +
+        (newsRoomNow()
+          ? '<div class="adm-hint">Можно не ждать — «Продолжить» отправит остальным сейчас.</div>' +
+            '<button class="adm-btn" data-newsresume>Продолжить</button>'
+          : newsBudgetLineHTML());
     } else if (d.status === "sent") {
       inner = '<div><span class="adm-badge adm-badge--ok">Отправлено</span></div>' +
         '<div class="adm-hint">' + "Отправлено " + d.sentCount + " из " + d.audienceCount + " · ошибок " + d.failedCount + "</div>" +
@@ -24455,7 +24587,8 @@
          правильный ответ тот, что ниже: остановиться и сказать словами. */
       if (r.body.parked) {
         st.busy = false; st.parked = true;
-        var pline = "Рассылка: отправлено " + st.sent + " из " + st.total + ", продолжится завтра";
+        // the card's own words (newsWaitLine) — the phone's notice says the same (limitNoticeBody)
+        var pline = "Рассылка: отправлено " + (st.sent + st.failed) + " из " + st.total + " — остальные уйдут автоматически завтра";
         journalNote(pline); toast(pline);
         render(); return;
       }
@@ -25660,17 +25793,32 @@
      заказы не приехали, открывать нечего, поэтому номер запоминается и
      срабатывает один раз, когда список пришёл. Не нашли — просто «Заказы»:
      заказ мог быть удалён, а пустой экран в ответ на нажатие — это тупик. */
+  /* Дим, 24.09.2026 (/test «mail-owner-ping»): «When I click on the phone
+     notification of a completed order, then it should bring me to that order —
+     currently it just logs me in to admin». Номер терялся не в оповещении и
+     не во входе: адрес доезжал до панели целым, но loadSrvOrders() звала эту
+     функцию ДО того, как пришедший список попадал в SRV.orders. При первом
+     открытии панели списка ещё нет — номер запоминался, и больше её никто не
+     звал: владелец оказывался на «Обзоре». Теперь её зовут после списка.
+     Сработавший номер убирается из адреса — иначе каждое обновление
+     страницы открывало бы тот же заказ снова. */
   function pushOpenWanted() {
     /* Читается один раз и лениво: на момент загрузки файла адреса ещё может
        не быть тем, каким он станет, а тесты режут этот файл на куски и гоняют
        функции отдельно — чтение location в литерале сломало бы их все. */
     if (PUSH.want === null) {
-      var m = String(location.search || "").match(/[?&]order=([^&]+)/);
-      PUSH.want = m ? decodeURIComponent(m[1]).toUpperCase() : "";
+      var m = String(location.search || "").match(/[?&]order=([^&#]+)/), n = m ? m[1] : "";
+      try { n = decodeURIComponent(n); } catch (e) {}   // «%E0» из обрезанной ссылки — не повод уронить список
+      PUSH.want = n.trim().toUpperCase();
     }
     if (!PUSH.want || !SRV.orders) return;
     var want = PUSH.want;
     PUSH.want = "";
+    try {
+      var rest = String(location.search || "").replace(/^\?/, "").split("&")
+        .filter(function (kv) { return kv && kv.split("=")[0] !== "order"; }).join("&");
+      history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + (location.hash || ""));
+    } catch (e) {}
     S.adminTab = "orders";
     // по номеру — во всех списках, которые есть у панели (admOrderRaw)
     var row = admOrderRaw(want);
@@ -25679,6 +25827,8 @@
       render();
       return;
     }
+    /* другая открытая карточка уступает: нажали оповещение о ЭТОМ заказе */
+    S.adminOrder = 0;
     render();
     /* Не среди ста последних — оповещение открыли через неделю: этот один
        заказ спрашивается отдельно (loadOrderOne), и карточка открывается,
@@ -25688,6 +25838,33 @@
       if (o && S.adminTab === "orders" && !S.adminOrder) S.adminOrder = String(o.id);
     });
   }
+  /* Панель уже открыта, и оповещение нажали. Service worker её больше не
+     перезагружает — navigate() теряет недописанное, а на iPhone его нет
+     вовсе, и вкладка просто всплывала на том экране, где её оставили. Он
+     присылает адрес сюда (public/shop2/admin-sw.js) и ждёт «понял» в
+     переданном порту; без ответа (вкладка со старым кодом) — перезагружает
+     её по-старому, и номер подхватывает pushOpenWanted() при запуске. */
+  function pushOpenFrom(url) {
+    var m = String(url || "").match(/[?&]order=([^&#]+)/), n = m ? m[1] : "";
+    try { n = decodeURIComponent(n); } catch (e) {}
+    n = n.trim().toUpperCase();
+    if (!n) return;
+    PUSH.want = n;
+    /* Свежий список — заказ новее того, что на экране, — и по его приходу
+       pushOpenWanted(). Не вошёл в панель: вход ведёт тем же путём. */
+    if (SRV.admin === true) loadSrvOrders(true);
+  }
+  try {
+    if (typeof navigator !== "undefined" && navigator.serviceWorker && navigator.serviceWorker.addEventListener) {
+      navigator.serviceWorker.addEventListener("message", function (e) {
+        var d = (e && e.data) || {};
+        if (d.type !== "rempire:open") return;
+        pushOpenFrom(d.url);
+        if (e.ports && e.ports[0]) e.ports[0].postMessage({ ok: true });
+      });
+      if (navigator.serviceWorker.startMessages) navigator.serviceWorker.startMessages();
+    }
+  } catch (e) {}
   function pushBoot() {
     if (pushBoot._done) return;
     if (SRV.admin !== true || !pushCan() || Notification.permission !== "granted") return;
@@ -35947,12 +36124,17 @@
       loadSrvOrders._busy = false;
       if (r.status === 401) { loadSrvOrders._stale = false; SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
       if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
-      if (r.status === 200) { pushBoot(); pushOpenWanted(); }
+      if (r.status === 200) pushBoot();
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       /* A refresh that failed keeps the list that is on screen, for the same
          reason loadOverview() keeps its figures — «Заказы» going blank after a
          save is worse than «Заказы» being a few seconds old. */
       if (!SRV.ordersErr) SRV.orders = (r.body.orders || []).map(srvRow);
+      /* …and only now the notification's order (?order=, pushOpenWanted).
+         Until 24.09.2026 it was asked BEFORE the line above: on the panel's
+         first open there was no list yet to look in, the number was put
+         aside and nothing asked again — the tap opened «Обзор». */
+      if (!SRV.ordersErr) pushOpenWanted();
       /* Not the end of a step in flight: SRV.stepBusy is the PATCH's to clear
          (srvPush), because this list may have left before the PATCH landed. */
       render();
@@ -39826,6 +40008,15 @@
     /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
        question 6 was about cards, not about which section they belong to. */
     else if (S.adminBlogEdit) l.push("blog");
+    /* …and the two sub-screens that were missing here, so the phone's Back
+       walked straight past them to the section before (Dim, 24.09.2026:
+       «Using phone / back button should also go back from "История приёмок и
+       продаж" currently it goes back to dashboard»): the stock history under
+       «Склад» and a letter opened under «Рассылка». Each counts only on its
+       own tab — neither is closed by a move to another section, and a layer
+       nobody can see must not eat the Back meant for the section. */
+    else if (S.newsEdit && S.adminTab === "news") l.push("news");
+    else if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
     if (S.admMore) l.push("more");
     if (pendingAction) l.push("confirm");
     /* The scanner: an overlay the owner opens with a phone in one hand and a
@@ -39876,6 +40067,15 @@
     } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
     else if (top === "mail") S.mailOpen = false;
     else if (top === "setpage") S.admSetPage = "";
+    // «← Склад»: the list the history was opened from
+    else if (top === "moves") S.stockMovesOpen = false;
+    /* «← Рассылка», and the same question it asks about unsaved work: the
+       first Back asks, the layer stays open and the next one closes — as
+       the blog and the product editor above do. */
+    else if (top === "news") {
+      if (newsDirty() && !S.newsConfirmBack) { S.newsConfirmBack = true; return true; }
+      newsCloseEditor();
+    }
     return true;
   }
   /** One parked entry while anything is open, none while nothing is. Called
@@ -39924,6 +40124,8 @@
        admLayers above); admCloseTop() answers false everywhere else, including
        every screen of the shop. */
     if (!st.adm && admCloseTop()) { render(); return; }
+    // the phone's Back off «Мой кабинет» is no blur: send what was typed (acctFlush)
+    acctFlush();
     S.histDrawer = !!st.drawer;
     S.langOpen = false;
     routeFromPath();
@@ -39936,6 +40138,9 @@
   });
 
   function go(screen) {
+    /* whatever was typed on «Мой кабинет» and is still waiting for a pause
+       goes now — before the checkout below re-reads the profile (acctFlush) */
+    acctFlush();
     // the account's point sheet belongs to the account screen and closes with it
     if (S.pointFor === "acct") { S.pointOpen = false; S.pointFor = ""; }
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
@@ -42736,21 +42941,13 @@
     }
     else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
     /* the profile form: the draft follows the keystrokes — no render(), the
-       caret stays put — and the field saves itself when it is left (the
-       "change" listener, acctFieldChange). A standing «Сохранено ✓» or a
-       refusal under it is stale the moment something new is typed; only
-       «Сохраняем…» stays, that request is out. */
-    else if (t.matches("[data-acctf]")) {
-      S.acctForm[t.dataset.acctf] = t.value;
-      if (S.acctSt[t.dataset.acctf] && S.acctSt[t.dataset.acctf] !== "busy") acctSt(t.dataset.acctf, "");
-    }
+       caret stays put — and the field saves itself a moment after the typing
+       stops (acctTyped → acctAutoSave) and again when it is left (the
+       "change" listener, acctFieldChange). */
+    else if (t.matches("[data-acctf]")) acctTyped(t.dataset.acctf, t.value);
     // …and the courier's address boxes: the same, onto the delivery draft
-    // (a whole address saves when a box is left — acctShipChanged)
-    else if (t.matches("[data-acctaddr]")) {
-      var adrD = S.acctForm.ship;
-      if (adrD) { if (!adrD.address) adrD.address = acctAddrOf(null); adrD.address[t.dataset.acctaddr] = t.value; }
-      if (S.acctSt.ship && S.acctSt.ship !== "busy") { acctSt("ship", ""); paintAcctAddr(); }
-    }
+    // (a whole address saves — acctShipChanged)
+    else if (t.matches("[data-acctaddr]")) acctAddrTyped(t.dataset.acctaddr, t.value);
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
@@ -43192,6 +43389,10 @@
     var f = t.dataset.acctf;
     if (acctFieldDirty(f) && !acctPending(f)) acctFieldChange(f, t);
   });
+  /* …and the page going away with the typing still in it: a closed tab, the
+     phone switching to another app (acctLeave). */
+  window.addEventListener("pagehide", acctLeave);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) acctLeave(); });
 
   document.addEventListener("change", function (e) {
     var t = e.target;
@@ -43231,7 +43432,14 @@
        are there (acctShipChanged); a line under the rows says what is short */
     else if (t.matches("[data-acctaddr]")) {
       var adrC = S.acctForm.ship;
-      if (adrC) { if (!adrC.address) adrC.address = acctAddrOf(null); adrC.address[t.dataset.acctaddr] = t.value; acctShipChanged(); }
+      if (adrC) {
+        if (!adrC.address) adrC.address = acctAddrOf(null);
+        adrC.address[t.dataset.acctaddr] = t.value;
+        clearTimeout(acctAutoT.ship); delete acctAutoT.ship;
+        /* …unless the pause in typing saved it already: a second save of the
+           same address would only put «Сохраняем…» over «…сохранена ✓» */
+        if (acctFieldDirty("ship") || acctAddrPartial(adrC.address)) acctShipChanged();
+      }
     }
     /* …and the country behind «Другая страна Европы», which is the one the
        rows and the price are actually drawn for. */

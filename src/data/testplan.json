@@ -3585,14 +3585,14 @@
       "title": "Карточка заказа: блок «Оплата»",
       "steps": [
         "Открыть «Заказы» и нажать на оплаченный заказ.",
-        "Найти «Оплата».",
+        "Найти «Оплата» и нажать на номер платежа под ней — прямой ссылки на платёж Montonio не даёт.",
         "Пролистать карточку до «Состав», «Покупатель», «Доставка».",
         "Открыть заказ, оплаченный через Revolut, N26, Wise или банк Латвии, Литвы, Финляндии, если такой есть."
       ],
       "expect": [
         "В «Оплата» написано, чем платили: картой или банком — и название банка, не код.",
         "Там же видно, прошёл платёж или нет.",
-        "Есть ссылка на этот платёж у банка.",
+        "Нажатие на номер платежа копирует его: «Номер платежа скопирован ✓».",
         "В «Состав» те же товары, что покупали.",
         "Сумма в «Состав» совпадает с суммой в корзине.",
         "Если денег пришло меньше, чем стоит заказ, в «Оплате» стоит предупреждение и заказ НЕ оплачен."
@@ -3604,14 +3604,14 @@
         "title": "The order card: the «Оплата» block",
         "steps": [
           "Open «Заказы» and tap a paid order.",
-          "Find «Оплата».",
+          "Find «Оплата» and tap the payment number under it — Montonio offers no direct link to a payment.",
           "Scroll the card down to «Состав», «Покупатель» and «Доставка».",
           "Open an order paid through Revolut, N26, Wise or a Latvian, Lithuanian or Finnish bank, if there is one."
         ],
         "expect": [
           "«Оплата» says what was paid with: card or bank — named, never a code.",
           "It also shows whether the payment went through.",
-          "There is a link to that payment at the bank.",
+          "Tapping the payment number copies it: «Номер платежа скопирован ✓».",
           "«Состав» holds the same products that were bought.",
           "The total in «Состав» matches the cart's total.",
           "If less money arrived than the order costs, «Оплата» warns and the order is NOT paid."
@@ -3619,7 +3619,7 @@
         "why": "When a buyer argues about money, this screen is your only answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T12:16:18.409Z"
+      "markedAt": "2026-09-24T14:50:46.012Z"
     },
     {
       "id": "order-paid-short",
@@ -4749,7 +4749,7 @@
         "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
         "Снова открыть оформление и дойти до шага доставки.",
         "В кабинете выбрать Грецию и «Курьер до двери», вписать только «Адрес» и выйти из поля.",
-        "Дописать «Индекс» и «Город», потом снова открыть оформление и дойти до шага доставки.",
+        "Дописать «Индекс» и «Город», не выходя из поля дождаться «…сохранена ✓», нажать «Назад» телефона и снова дойти в оформлении до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
@@ -4776,7 +4776,7 @@
           "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
           "Open the checkout again and get to the delivery step.",
           "In the account choose Greece and «Курьер до двери», type only «Адрес» (street) and leave the box.",
-          "Add «Индекс» and «Город» (postcode, city), then open the checkout again and get to the delivery step.",
+          "Add «Индекс» and «Город» (postcode, city); without leaving the box wait for «…сохранена ✓», press the phone's Back, then get to the checkout's delivery step again.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
@@ -4790,7 +4790,7 @@
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T18:46:27.418Z"
+      "markedAt": "2026-09-24T14:56:34.522Z"
     },
     {
       "id": "acct-refund-sent",
@@ -5584,21 +5584,22 @@
         "Проверить, что подписчиков больше двух; если нет — добавить.",
         "Открыть рассылку и нажать отправку.",
         "Оформить и оплатить заказ, пока лимит занят.",
-        "На следующий день открыть рассылку снова, потом вернуть 100 и 30."
+        "Вернуть 100 и 30; «Продолжить» у рассылки не нажимать.",
+        "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
         "После обновления в полях 4 и 2, без «Изменения не сохранены».",
         "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
-        "Рассылка останавливается на двух и говорит, что продолжится завтра.",
+        "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
-        "На телефон приходит одно оповещение о лимите, а не по одному на письмо.",
-        "Назавтра рассылка доходит до конца сама, и никто не получил письмо дважды."
+        "Одно оповещение о лимите: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
+        "Назавтра рассылка дошла до конца сама, без нажатий, и никто не получил письмо дважды."
       ],
       "why": "Рассылка может тихо съесть сутки, и тогда не уйдёт «Заказ принят». Это оплаченный заказ, о котором покупатель не получил ни слова.",
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z",
+      "markedAt": "2026-09-24T15:12:48.378Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
@@ -5607,15 +5608,16 @@
           "Check there are more than two subscribers; add some if not.",
           "Open a campaign and press send.",
           "Place and pay for an order while the allowance is spent.",
-          "Open the campaign again the next day, then put back 100 and 30."
+          "Put back 100 and 30; do not press the campaign's «Продолжить».",
+          "The next day after 10:00, open the campaign again."
         ],
         "expect": [
           "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
           "Under the button: how many went today and how many the campaign may use.",
-          "The campaign stops at two and says it continues tomorrow.",
+          "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
           "The «Заказ принят» letter still reaches the buyer.",
-          "One phone notification about the limit, not one per letter.",
-          "Next day the campaign finishes by itself, and nobody got the letter twice."
+          "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
+          "Next day the campaign finished by itself, nothing pressed, and nobody got it twice."
         ],
         "why": "A campaign can quietly eat the day and then «Заказ принят» cannot send. That is a paid order whose buyer heard nothing."
       }
@@ -5713,12 +5715,16 @@
         "Если строка красная — сделать, что в ней написано, или переслать её Диму. Если зелёная — нажать «Отправить проверочное письмо».",
         "Открыть почту магазина shop@rempireshop.com.",
         "Оформить и оплатить любой заказ, телефон с оповещениями держать рядом.",
+        "Нажать на оповещение; если панель попросит пароль — войти.",
+        "Оформить второй заказ, оставить панель открытой на «Обзоре» и нажать новое оповещение.",
         "Проверить ящик магазина ещё раз."
       ],
       "expect": [
         "Строка зелёная и называет shop@rempireshop.com; красная называет RESEND_TO и Vercel.",
         "Проверочное письмо пришло в ящик магазина за минуту.",
         "На телефон пришло оповещение: сумма, покупатель и товар.",
+        "Нажатие на оповещение открывает карточку этого заказа — и после входа по паролю.",
+        "При открытой панели оповещение второго заказа открывает его карточку, без перезагрузки.",
         "Письма об этом заказе в ящике нет — пока телефон получает оповещения, так задумано."
       ],
       "why": "С 21.09 письмо магазину — запасной путь: оно уходит, только если оповещение не дошло ни до одного телефона, и так не тратит суточный лимит писем. Без RESEND_TO в Vercel не уходит и оно — тогда о таком заказе вы узнаете только из панели.",
@@ -5731,18 +5737,22 @@
           "If the row is red, do what it says or forward it to Dim. If it is green, press «Отправить проверочное письмо».",
           "Open the shop mailbox shop@rempireshop.com.",
           "Place and pay for any order, with the notifying phone at hand.",
+          "Tap the notification; if the panel asks for the password, sign in.",
+          "Place a second order, leave the panel open on «Обзор» and tap the new notification.",
           "Check the shop mailbox again."
         ],
         "expect": [
           "The row is green and names shop@rempireshop.com; red, it names RESEND_TO and Vercel.",
           "The test letter reaches the shop mailbox within a minute.",
           "The phone got the notification: the sum, the buyer and the product.",
+          "Tapping the notification opens that order's card — after a password sign-in too.",
+          "With the panel open, the second order's notification opens its card without a reload.",
           "No letter about this order arrives — intended while the phone gets notifications."
         ],
         "why": "Since 21.09 the shop's letter is the fallback: it goes only when the notification reached no phone, so it does not spend the daily letter allowance. Without RESEND_TO in Vercel it does not go either — and then you learn about such an order only from the panel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z"
+      "markedAt": "2026-09-24T15:05:38.188Z"
     },
     {
       "id": "mail-not-spam",
@@ -6159,7 +6169,7 @@
       "lang": "RU",
       "title": "Поправить остаток и порог «мало»",
       "steps": [
-        "На «Складе» открыть «История приёмок и продаж →» и вернуться назад.",
+        "На «Складе» открыть «История приёмок и продаж →» и вернуться кнопкой «Назад» телефона.",
         "Нажать «Править» у товара.",
         "Поменять только порог «мало» и вписать причину.",
         "Сохранить и снова открыть «История приёмок и продаж →».",
@@ -6168,11 +6178,11 @@
       ],
       "expect": [
         "Всё, что вписали, сохранилось.",
+        "«Назад» телефона из истории возвращает на «Склад», а не на «Обзор».",
         "Первая строка истории: «правка карточки · ваша причина», без числа справа.",
         "После второй правки сверху строка «ручная правка · другая причина».",
         "Строка краснеет, когда остаток ниже своего порога.",
-        "Букву вместо числа поле не принимает.",
-        "Старое число при этом остаётся на месте."
+        "Букву вместо числа поле не принимает, старое число остаётся на месте."
       ],
       "why": "Стёртый порог означает, что товар кончится, а вы об этом не узнаете.",
       "risk": "med",
@@ -6180,7 +6190,7 @@
       "en": {
         "title": "Correcting the stock and the «low» threshold",
         "steps": [
-          "On «Склад» open «История приёмок и продаж →» (the history) and come back.",
+          "On «Склад» open «История приёмок и продаж →» (the history) and come back with the phone's Back button.",
           "Press «Править» (edit) on a product.",
           "Change only the «low» threshold and type a reason.",
           "Save, then open «История приёмок и продаж →» again.",
@@ -6189,16 +6199,16 @@
         ],
         "expect": [
           "Everything you typed has been saved.",
+          "The phone's Back from the history returns to «Склад», not to «Обзор».",
           "The history's first row: «правка карточки · your reason», with no number on the right.",
           "After the second change the top row reads «ручная правка · the other reason».",
           "A row turns red when its stock is below the threshold.",
-          "The field refuses a letter where a number belongs.",
-          "The old number stays where it was."
+          "The field refuses a letter where a number belongs; the old number stays."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T16:55:51.781Z"
+      "markedAt": "2026-09-24T14:48:44.241Z"
     },
     {
       "id": "stock-history",

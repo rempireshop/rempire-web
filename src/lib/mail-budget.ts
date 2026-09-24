@@ -264,6 +264,38 @@ function classOf(kind: MailKind | string | undefined): MailKind {
 
 /* ---------- telling the owner --------------------------------------------- */
 
+/** A campaign that stopped at the limit, as the notice counts it. */
+export interface ParkedCampaign {
+  /** Letters that went out, across every day of this campaign. */
+  sent: number;
+  /** Its whole audience. */
+  total: number;
+}
+
+/**
+ * The notice's one line. It says what happens next, because that is the only
+ * question the notice raises. Dim, 24.09.2026, after the limit test: «Will the
+ * newsletters send themselves automatically, when I get this message? … I had
+ * to click "send"». They do — the daily cron sends the rest
+ * (resumeParkedNewsletters) — but the notice said «Рассылка остановлена» and
+ * the panel said «Отправка прервалась — нажмите «Продолжить»». A campaign that
+ * parked passes its own count, so the line reads like the panel's:
+ * «отправлено N из M — остальные уйдут автоматически завтра».
+ */
+export function limitNoticeBody(
+  spent: Pick<MailSpent, "total" | "blocked">,
+  budget: MailBudgetSettings,
+  campaign?: ParkedCampaign,
+): string {
+  const head = spent.blocked
+    ? `Resend отказал: дневная квота исчерпана, отправлено ${spent.total}.`
+    : `Сегодня отправлено ${spent.total} из ${budget.cap}; ${budget.reserve} писем держим для заказов.`;
+  const next = campaign
+    ? `Рассылка: отправлено ${campaign.sent} из ${campaign.total} — остальные уйдут автоматически завтра, нажимать ничего не нужно.`
+    : "Рассылка и напоминания продолжатся завтра сами, нажимать ничего не нужно.";
+  return `${head} ${next}`;
+}
+
 /**
  * «Дневной лимит писем исчерпан» — once a day, on his phone.
  *
@@ -281,7 +313,7 @@ function classOf(kind: MailKind | string | undefined): MailKind {
  *
  * True when this call is the one that claimed the day.
  */
-export async function warnOwnerOnce(now: number = Date.now()): Promise<boolean> {
+export async function warnOwnerOnce(now: number = Date.now(), campaign?: ParkedCampaign): Promise<boolean> {
   const day = utcDay(now);
   let claimed = false;
   try {
@@ -299,10 +331,8 @@ export async function warnOwnerOnce(now: number = Date.now()): Promise<boolean> 
   }
   if (!claimed) return false;
 
-  const [{ cap, reserve }, spent] = await Promise.all([mailBudgetSettings(), spentToday(now)]);
-  const body = spent.blocked
-    ? `Resend отказал: дневная квота исчерпана. Отправлено ${spent.total}. Рассылка продолжится завтра.`
-    : `Отправлено ${spent.total} из ${cap}. Рассылка остановлена, ${reserve} писем держим для заказов.`;
+  const [settings, spent] = await Promise.all([mailBudgetSettings(), spentToday(now)]);
+  const body = limitNoticeBody(spent, settings, campaign);
   const message = {
     title: "✉️ Лимит писем на сегодня",
     body,
