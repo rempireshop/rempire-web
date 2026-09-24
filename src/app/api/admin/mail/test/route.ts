@@ -3,10 +3,18 @@ import { renderDemo, isTemplateId, TEMPLATE_IDS } from "@/emails";
 import { normalizeLang } from "@/emails/layout";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { loadMailTexts } from "@/lib/mail-texts";
+import { mailTextsOverride, setMailTextsOverride, type MailTexts } from "@/emails/texts";
 import { getFlows } from "@/lib/flows";
 
 /**
- * POST /api/admin/mail/test/  { template, to, lang }
+ * POST /api/admin/mail/test/  { template, to, lang, texts? }
+ *
+ * `texts` — { subject?, intro?, signature? }: the letter's own three strings
+ * in this language as the editor has them on screen, saved or not. The
+ * editor's «Отправить мне тест» sends them (map of the panel, 23.09.2026,
+ * #14 — it used to mail the SAVED text while the screen showed the draft);
+ * «Прислать пример» on a row sends none and gets what is saved. An empty
+ * object means «the standard text», exactly as a save of it would.
  *
  * Sends one sample letter, filled with the same demo data the preview shows,
  * to whatever address the admin typed. Subject carries a [test] prefix so a
@@ -26,7 +34,9 @@ import { getFlows } from "@/lib/flows";
 
 export const dynamic = "force-dynamic";
 
-const MAX_BYTES = 4_000;
+/* Room for the three strings of one letter (1 500 + 300 + 200 characters,
+   newlines and quotes escaped in JSON) beside the address. */
+const MAX_BYTES = 8_000;
 const EMAIL_RX = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
 
 export async function POST(req: Request): Promise<Response> {
@@ -48,7 +58,7 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ ok: false, error: "too_large" }, { status: 413 });
   }
 
-  let body: { template?: unknown; to?: unknown; lang?: unknown };
+  let body: { template?: unknown; to?: unknown; lang?: unknown; texts?: unknown };
   try {
     body = JSON.parse(raw || "{}");
   } catch {
@@ -100,12 +110,28 @@ export async function POST(req: Request): Promise<Response> {
     cartDiscountPercent: flows.abandonedDiscountPercent,
   };
 
+  /* The editor's draft of this letter, if it sent one: laid over the saved
+     texts for this one render, cleaned exactly as a save would clean it
+     (setMailTextsOverride → cleanMailTexts). The override is one process
+     global, but renderDemo() is synchronous, so the saved texts are back in
+     place before this request yields — no other letter can be rendered with
+     the draft in between. */
+  const draft = body.texts;
+  const useDraft = !!draft && typeof draft === "object" && !Array.isArray(draft);
+  const saved = mailTextsOverride();
   let mail;
   try {
+    if (useDraft) {
+      const next = { ...saved } as Record<string, unknown>;
+      next[template] = { ...((saved as Record<string, Record<string, unknown>>)[template] ?? {}), [lang]: draft };
+      setMailTextsOverride(next as MailTexts);
+    }
     mail = renderDemo(template, lang, demo);
   } catch (err) {
     console.error("[mail-test] render failed", template, lang, err);
     return Response.json({ ok: false, error: "render_failed" }, { status: 500 });
+  } finally {
+    if (useDraft) setMailTextsOverride(saved);
   }
 
   const res = await sendMail({

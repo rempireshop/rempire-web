@@ -4899,13 +4899,17 @@
         "Открыть «Ещё» → «Маркетинг» → «Письма».",
         "Открыть «Заказ принят».",
         "Внизу вписать свой адрес и нажать «Отправить мне тест».",
-        "Проверить почту."
+        "Проверить почту.",
+        "Поменять тему, не сохраняя, и снова нажать «Отправить мне тест».",
+        "Нажать «← Все письма», не сохраняя."
       ],
       "expect": [
         "В ваш ящик пришло письмо от shop@rempireshop.com.",
         "В начале темы стоит [test].",
         "Письмо выглядит так же, как предпросмотр на экране.",
-        "Ответ на это письмо уходит на info@rempireshop.com."
+        "Ответ на это письмо уходит на info@rempireshop.com.",
+        "В тесте — новая тема с экрана, хотя она ещё не сохранена.",
+        "Панель спросит, выходить ли без сохранения; «Выйти» убирает правки только этого письма."
       ],
       "why": "Это единственная кнопка, которая доказывает, что почта вообще работает.",
       "risk": "med",
@@ -4916,16 +4920,22 @@
           "Open «Ещё» → «Маркетинг» → «Письма».",
           "Open «Заказ принят» (order received).",
           "At the bottom type your address and press «Отправить мне тест» (send test).",
-          "Check your mail."
+          "Check your mail.",
+          "Change the subject without saving and press «Отправить мне тест» again.",
+          "Press «← Все письма» without saving."
         ],
         "expect": [
           "A letter from shop@rempireshop.com is in your own mailbox.",
           "The subject starts with [test].",
           "The letter looks the same as the preview on screen.",
-          "Press reply and it goes to info@rempireshop.com."
+          "Press reply and it goes to info@rempireshop.com.",
+          "The test carries the new subject from the screen, though it is not saved.",
+          "The panel asks whether to leave unsaved; «Выйти» drops this letter's edits only."
         ],
         "why": "This is the one button that proves mail works at all."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T18:01:04.338Z"
     },
     {
       "id": "mail-edit-text",

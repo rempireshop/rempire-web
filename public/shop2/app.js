@@ -9448,6 +9448,7 @@
     // ---- админка, этап 3 ----
     admSetPage: "",        // «Настройки»: "" is the index, else one of ADM_SET_PAGES
     mailOpen: false,       // «Маркетинг → Письма»: false is the list, true the editor for S.mailTpl
+    mailConfirmBack: false, // the letter's «Правки не сохранены…» question is up (an object: the nav's destination)
     admGiftCards: null,    // {cards, unspent} once GET /api/admin/giftcards/ answers
     admGiftErr: "",
     admMailKey: null       // «Подключения»: null unknown, false once a test letter came back with no key
@@ -22956,6 +22957,12 @@
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
       '<div class="adm-savebar' + admDirtyCls(mailDirty()) + '" id="mailacts">' + admMailActsHTML() + "</div>";
     return admBackHTML("data-mailback", "Все письма") +
+      // the same card «← Товары» and «← Блог» show (map of the panel, 23.09.2026, #14)
+      (S.mailConfirmBack
+        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailbackyes>Выйти без сохранения</button>' +
+          '<button class="adm-link adm-link--muted" data-mailbackno>Остаться</button></div>'
+        : "") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
         /* not loading="lazy": the morph keeps this element and only changes
@@ -27745,7 +27752,27 @@
     });
     return out.join("\n");
   }
-  function mailDirty() { return mailSig(mailDraft()) !== mailSig(mailSaved()); }
+  /* The draft covers all the letters, but the editor shows ONE: its «Не
+     сохранено», «Отменить правки» and the question on the way out are about
+     the letter that is open — all three languages of it — and never about
+     one the owner cannot see (map of the panel, 23.09.2026, #14: «Отменить
+     правки» threw away the edits of every letter at once). */
+  function mailOne(map, tpl) {
+    var o = {};
+    if (map && map[tpl]) o[tpl] = map[tpl];
+    return o;
+  }
+  function mailDirty() { var tpl = mailTpl(); return mailSig(mailOne(mailDraft(), tpl)) !== mailSig(mailOne(mailSaved(), tpl)); }
+  /** One letter back to what is saved; the others keep whatever they hold. */
+  function mailRevertOne(tpl) {
+    var d = mailDraft(), s = mailSaved();
+    if (s[tpl]) d[tpl] = s[tpl]; else delete d[tpl];
+  }
+  /** Out of the letter editor — its unsaved words go with it, as the question says. */
+  function mailCloseEditor() {
+    mailRevertOne(mailTpl());
+    S.mailOpen = false; S.mailConfirmBack = false;
+  }
   /** What actually gets saved: trimmed, clamped, empties dropped. The server
       sanitises again (cleanMailTexts) — this only keeps the blob tidy. */
   function mailClean(map) {
@@ -40372,7 +40399,12 @@
       S.adminOrder = 0;
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
     } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
-    else if (top === "mail") S.mailOpen = false;
+    /* the letter: the question «← Все письма» asks — the first Back asks,
+       the next one leaves and its unsaved words go (map #14) */
+    else if (top === "mail") {
+      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; return true; }
+      mailCloseEditor();
+    }
     else if (top === "setpage") S.admSetPage = "";
     // «← Склад»: the list the history was opened from
     else if (top === "moves") S.stockMovesOpen = false;
@@ -40405,6 +40437,10 @@
       blogReadForm();
       if (!blogDirty() || S.adminBlogConfirmBack) return false;
       S.adminBlogConfirmBack = go;
+    } else if (S.mailOpen && S.adminTab === "mail") {
+      // a letter's own words — the tab strip of «Маркетинг» stands above it (map #14)
+      if (!mailDirty() || S.mailConfirmBack) return false;
+      S.mailConfirmBack = go;
     } else return false;
     window.scrollTo({ top: 0 });   // the question stands above the editor
     return true;
@@ -40423,7 +40459,9 @@
       S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
     }
-    S.goodsConfirmBack = false; S.adminBlogConfirmBack = false;
+    // a letter left through the nav after its question: its unsaved words go, as the question said
+    if (S.mailOpen && S.mailConfirmBack) mailRevertOne(mailTpl());
+    S.goodsConfirmBack = false; S.adminBlogConfirmBack = false; S.mailConfirmBack = false;
     S.adminTab = tab; S.adminOrder = 0; S.adminEdit = "";
     S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
     S.admMore = false;
@@ -40842,7 +40880,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -42209,10 +42247,24 @@
     /* A letter's row opens its editor; «← Все письма» closes it. Both keep the
        half-typed test address — the panel rebuilds on every click. */
     if (d.mailtpl !== undefined) {
-      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail";
+      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail"; S.mailConfirmBack = false;
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.mailback !== undefined) { keepMailTo(); S.mailOpen = false; render(); return; }
+    /* …and unsaved words in the letter are asked about first — the question
+       «← Товары» and «← Блог» ask (map of the panel, 23.09.2026, #14). They
+       used to stay behind in the draft, unseen, and went out with the next
+       «Сохранить» of another letter. */
+    if (d.mailback !== undefined) {
+      keepMailTo();
+      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; window.scrollTo({ top: 0 }); render(); return; }
+      mailCloseEditor(); render(); return;
+    }
+    if (d.mailbackyes !== undefined) {
+      keepMailTo();
+      var mailGo = S.mailConfirmBack;   // the nav's destination, when the nav asked (admLeaveAsks)
+      mailCloseEditor(); render(); admLeaveGo(mailGo); return;
+    }
+    if (d.mailbackno !== undefined) { S.mailConfirmBack = false; render(); return; }
     /* Remembered on the switch, not on the way out: the language the editor
        was closed in is the last one switched to, and there is no other door
        out of it — «← Все письма», another section, a closed tab. */
@@ -42227,9 +42279,18 @@
       t.disabled = true;
       /* trailing slash on purpose: next.config has trailingSlash:true, and a
          308 on a POST drops the body */
+      /* The letter on the screen, saved or not (map of the panel, 23.09.2026,
+         #14): it used to mail the SAVED text while the fields showed the
+         draft. The route lays these three strings over the saved ones for
+         this one render; {} is «the standard text», as a save of it would be. */
+      var mailBody = { template: mailTpl(), to: mailAddr, lang: mailLang() };
+      if (MAIL_TEXTS) {
+        var mailOwn = mailDraft()[mailTpl()];
+        mailBody.texts = (mailOwn && mailOwn[mailLangCode(mailLang())]) || {};
+      }
       fetch("/api/admin/mail/test/", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ template: mailTpl(), to: mailAddr, lang: mailLang() })
+        body: JSON.stringify(mailBody)
       }).then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
       }).then(function (res) {
@@ -42263,7 +42324,8 @@
       setMailDraftField(mailTpl(), mailLang(), d.mailreset, "");
       render(); return;
     }
-    if (d.mailrevert !== undefined) { S.mailDraft = null; render(); return; }
+    // «Отменить правки»: this letter's — not every letter's (map of the panel, 23.09.2026, #14)
+    if (d.mailrevert !== undefined) { mailRevertOne(mailTpl()); render(); return; }
     /* «Сохранить» saves. Renat, 13.09.2026: «I have currently "save" on top
        and I have also, after when I save an "apply" button. Needs to be
        better.» It was two save-shaped actions for one edit: the button armed
