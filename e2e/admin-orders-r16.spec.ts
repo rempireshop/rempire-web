@@ -219,7 +219,8 @@ test.describe("admin — the payment's number can be taken away", () => {
     // it left the muted grey line it used to be buried in
     await expect(page.locator(".adm-kv").filter({ hasText: "оплачен" })).not.toContainText(id);
 
-    await page.locator(`[data-admcopy="${id}"]`).click();
+    // the button — the number itself copies on a tap too (24.09.2026), so the attribute alone matches two
+    await page.locator(`button[data-admcopy="${id}"]`).click();
     await expect(page.getByRole("status")).toContainText("Номер платежа скопирован");
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(id);
   });

@@ -20422,7 +20422,14 @@
 
      Only a number that means something outside the shop is offered: Montonio
      and the test bank issue one, «отмечено вручную» writes the literal
-     «manual», and a salon sale or an order a gift card covered has none. */
+     «manual», and a salon sale or an order a gift card covered has none.
+
+     Checked again 24.09.2026 (Dim: «There is no link to that payment at the
+     bank — just an id»): docs.montonio.com's order guide and API reference
+     name no page for one order, and Montonio's help centre only ever says
+     «Orders → paste the order number or UUID into the search». So still no
+     link — but the number itself now copies on a tap too, not only the
+     button beside it: on a phone the number is what the thumb lands on. */
   function admPayRefHTML(p) {
     var ref = String((p && p.ref) || "");
     if (!ref || ref === "manual") return "";
@@ -20430,7 +20437,8 @@
     if (provider !== "montonio" && provider !== "mock") return "";
     return '<div class="adm-ship__row adm-ship__row--code" style="margin-top:12px">' +
       '<span><span class="adm-hint">Номер платежа в Montonio</span><br>' +
-        '<span class="adm-ship__code" data-payref>' + esc(ref) + "</span></span>" +
+        '<span class="adm-ship__code" data-payref data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓">' +
+          esc(ref) + "</span></span>" +
       '<button class="adm-copy" data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓"' +
         ' aria-label="Скопировать номер платежа">Скопировать</button></div>' +
       '<p class="adm-hint" style="margin:6px 0 0">Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.</p>';
