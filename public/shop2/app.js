@@ -20865,11 +20865,72 @@
       return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
     }).join("") + "</div>";
   }
+  /* ---- the assistant's answer, as something to read at a glance -----------
+     The owner, /test 23.09.2026, on «Что заканчивается и что дозаказать?»:
+     «Hard to read the answer — it's just a list of words». Twelve products
+     came as one comma-joined sentence (the prompt asked for «1-3 short
+     sentences») and the bubble printed it as one escaped string. The prompt
+     now asks for one item a line — «• name — state» (src/app/api/assistant/
+     route.ts) — and this draws such lines as a list: one item a line, the
+     count or state at its end, «нет» marked. The run-on sentence an older or
+     wayward answer still brings («…на складе: A (нет), B (мало), C (нет).»)
+     is split the same way.
+     Built from TEXT: every piece is escaped before it goes into the markup,
+     so a model that writes «<img …>» shows those characters. The answer is
+     [data-notr]: it is written in the language of the QUESTION, and the
+     panel's dictionary must not turn a word of it into the panel's own. */
+  /** One item: its name, and — when it ends in one — its state. */
+  function admReplyItem(s) {
+    var REPLY_STATE = /^(?:нет|мало|закончил(?:ся|ась|ось|ись)?|в наличии|out|low|in stock|sold out|otsas|vähe|laos|puudub|\d+(?:\s*(?:шт|tk|pcs))?)$/i;
+    var REPLY_OUT = /^(?:нет|закончил|out\b|sold out|otsas|puudub|0(?:\s|$))/i;
+    var name = s, st = "";
+    var at = s.lastIndexOf(" — ");
+    var tail = at > 0 ? s.slice(at + 3).trim() : "";
+    var paren = /^(.*\S)\s*\(([^()]{1,32})\)\s*[.;,]?$/.exec(s);
+    // «… — нет (0 шт)»: the state after the last dash, count and all
+    if (tail && tail.length <= 40 && REPLY_STATE.test(tail.replace(/\s*\([^()]*\)\s*[.;,]?$/, ""))) {
+      name = s.slice(0, at); st = tail.replace(/[.;,]$/, "");
+    }
+    // «… маска 40 мл (нет)»: the state in the closing brackets
+    else if (paren) { name = paren[1]; st = paren[2]; }
+    return '<span class="adm-msg__nm">' + esc(name.trim()) + "</span>" +
+      (st ? '<span class="adm-msg__st' + (REPLY_OUT.test(st) ? " adm-msg__st--out" : "") + '">' + esc(st.trim()) + "</span>" : "");
+  }
+  function admReplyHTML(text) {
+    var REPLY_BULLET = /^\s*(?:[•·*\-–]|\d{1,2}[.)])\s+/;
+    var out = "", list = [];
+    var flush = function () {
+      if (!list.length) return;
+      out += '<ul class="adm-msg__list">' + list.map(function (s) {
+        return '<li class="adm-msg__li">' + admReplyItem(s) + "</li>";
+      }).join("") + "</ul>";
+      list = [];
+    };
+    var para = function (s) { flush(); out += '<p class="adm-msg__p">' + esc(s) + "</p>"; };
+    String(text || "").split(/\r?\n/).forEach(function (raw) {
+      var ln = raw.trim();
+      if (!ln) { flush(); return; }
+      if (REPLY_BULLET.test(ln)) { list.push(ln.replace(REPLY_BULLET, "")); return; }
+      /* «Заканчиваются: A (нет), B (мало), C (нет). Могу…» — three or more
+         items, each closing on its bracketed state, after a short lead */
+      var m = /^([^:]{3,80}:)\s+(.+)$/.exec(ln);
+      var parts = m ? m[2].split(/\),\s+/) : [];
+      var end = parts.length >= 3 ? /^(.*?\([^()]{1,32}\))\s*[.;]?\s*(.*)$/.exec(parts[parts.length - 1]) : null;
+      var ok = !!end && parts.slice(0, -1).every(function (p) { return /\([^()]{1,32}$/.test(p); });
+      if (!ok) { para(ln); return; }
+      para(m[1]);
+      parts.slice(0, -1).forEach(function (p) { list.push(p + ")"); });
+      list.push(end[1]);
+      if (end[2]) para(end[2]); else flush();
+    });
+    flush();
+    return '<div class="adm-msg__txt" data-notr>' + out + "</div>";
+  }
   function admAnswerHTML() {
     var a = S.adminAns;
     if (!a || a.q !== S.adminAsk) return "…";
     if (a.fallback) return adminAnswer(a.q);
-    return esc(a.reply || "") +
+    return admReplyHTML(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
       (a.ask && !a.action ? admAskChipsHTML(a.ask) : "") +
       (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +

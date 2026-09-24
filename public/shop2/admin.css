@@ -822,6 +822,23 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-asst__foot .adm-input { flex: 1; }
 .adm-asst__foot .adm-btn { padding: 0 16px; }
 .adm-msg { max-width: 90%; white-space: pre-line; align-self: flex-start; }
+/* The assistant's own answer, built from its text (app.js admReplyHTML):
+   paragraphs, and a list drawn as a list — one item a line, the count or
+   state at its right, «нет» on a warm chip (the owner, 23.09.2026: «it's
+   just a list of words»). The markup carries its own breaks, so pre-line
+   stops here. */
+.adm-msg__txt { white-space: normal; }
+.adm-msg__p { margin: 0 0 8px; }
+.adm-msg__p:last-child { margin-bottom: 0; }
+.adm-msg__list { list-style: none; margin: 4px 0 10px; padding: 0; border-top: 1px solid var(--a-rule); }
+.adm-msg__list:last-child { margin-bottom: 0; }
+.adm-msg__li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--a-rule); line-height: 20px;
+}
+.adm-msg__nm { flex: 1 1 auto; min-width: 0; }
+.adm-msg__st { flex: none; text-align: right; font-weight: 600; white-space: nowrap; }
+.adm-msg__st--out { color: var(--a-warmink); background: var(--a-warmbg); padding: 0 6px; }
 .adm-msg--me { align-self: flex-end; background: var(--a-tint); padding: 10px 14px; }
 .adm-asst__chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .adm-asst__chips button {

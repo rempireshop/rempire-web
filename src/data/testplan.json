@@ -7734,6 +7734,7 @@
         "Ответ пришёл на языке вопроса: на русский — по-русски, на английский — по-английски.",
         "Язык панели при этом не менялся.",
         "В ответе настоящие номера заказов и названия товаров.",
+        "На «Что заканчивается…» — список: по товару на строке, справа выделенное «нет» или «мало».",
         "Общих отговорок вместо конкретики нет.",
         "Кнопки под ответом открывают нужный раздел."
       ],
@@ -7752,13 +7753,14 @@
           "The answer comes in the language of the question: Russian for Russian, English for English.",
           "The panel's own language did not change.",
           "It holds real order numbers and real product names.",
+          "«Что заканчивается…» comes back as a list: a product a line, «нет»/«мало» at the right.",
           "No vague answers instead of specifics.",
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T12:23:11.393Z"
     },
     {
       "id": "ai-assistant-voice",
