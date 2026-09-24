@@ -1660,18 +1660,19 @@
       "title": "Создать промокод",
       "steps": [
         "«Ещё» → «Маркетинг» → «+ Промокод».",
-        "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
-        "Нажать «Создать».",
+        "Ввести код TEST10, выбрать «Сумма в евро», вписать 150, потом выбрать «Процент».",
+        "Поставить 10 % и нажать «Создать».",
         "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
         "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать».",
-        "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
+        "Открыть код REM-CART-…, если он есть: прочитать серую строку, открыть и нажать «Сохранить»."
       ],
       "expect": [
+        "После «Процент» поле скидки пустое — 150 не превращается в 150 %.",
         "TEST10 и TESTSHIP стоят в списке, у обоих переключатель на «включён».",
         "Второй TEST10 не создаётся: «Такой промокод уже есть.» и кнопка «Открыть его».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
         "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
-        "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
+        "У REM-CART-… «на корзину из письма», без кода корзины; «Сохранить» проходит без ошибки."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
@@ -1681,22 +1682,23 @@
         "title": "Creating a promo code",
         "steps": [
           "«Ещё» → «Маркетинг» → «+ Промокод».",
-          "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
-          "Press «Создать» (create).",
+          "Enter the code TEST10, choose «Сумма в евро» (amount), type 150, then choose «Процент» (percent).",
+          "Set 10 % and press «Создать» (create).",
           "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
           "«+ Промокод» once more, enter TEST10 with any discount and press «Создать».",
-          "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
+          "Find a REM-CART-… code, if there is one: read its grey line, open it and press «Сохранить»."
         ],
         "expect": [
+          "After «Процент» the discount box is empty — 150 does not turn into 150 %.",
           "TEST10 and TESTSHIP are in the list, both switched to «включён» (on).",
           "The second TEST10 is not created: «Такой промокод уже есть.» and an «Открыть его» button.",
           "An unused code can be deleted; one already paid with can only be switched off.",
           "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
-          "A REM-CART-… code reads «на корзину из письма», with no long basket id."
+          "REM-CART-… reads «на корзину из письма», no basket id; «Сохранить» goes through without an error."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-24T17:33:45.316Z"
+      "markedAt": "2026-09-24T17:38:26.560Z"
     },
     {
       "id": "panel-gift-amounts",

@@ -11,6 +11,11 @@
  * промокод уже есть.» with «Открыть его» beside it. «Сохранить» on an open
  * code edits exactly as before.
  *
+ * map-defects #11: a REM-CART code (the abandoned-cart letter's, scope
+ * 'cart') could not be saved from the form at all — its basket lines were
+ * neither loaded nor sent, and the server's `bad_scope_lines` had no sentence.
+ * And switching the kind kept the number: 150 € became 150 %.
+ *
  * Real Postgres (PGlite) and the real route for the server half; the browser
  * half is sliced out of public/shop2/app.js by source text and run over stubs
  * (the tests/promos-r21.test.ts technique), and its sentences go through the
@@ -20,7 +25,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { exec } from "@/lib/db";
-import { getPromo, upsertPromo } from "@/lib/promos";
+import { getPromo, upsertPromo, validatePromo } from "@/lib/promos";
 import { adminCookieHeader, makeRequest, setFuzzEnv } from "./fuzz-harness";
 import { setupDb, teardownDb } from "./helpers";
 
@@ -96,25 +101,27 @@ function formHTML(S: Record<string, unknown>): string {
 
 /* ========================================================================= */
 
+let restoreEnv: () => void = () => {};
+beforeAll(async () => {
+  restoreEnv = setFuzzEnv();
+  await setupDb();
+});
+afterAll(async () => {
+  restoreEnv();
+  await teardownDb();
+});
+
+/** POST /api/admin/promos/ as the signed-in owner. */
+async function post(body: Record<string, unknown>) {
+  const { POST } = await import("@/app/api/admin/promos/route");
+  const res = await POST(makeRequest("/api/admin/promos/", { method: "POST", body, cookie: adminCookieHeader() }));
+  return { status: res.status, body: (await res.json()) as Record<string, unknown> };
+}
+
 describe("the promo route: «Создать» never rewrites a code that is there", () => {
-  let restoreEnv: () => void = () => {};
-  beforeAll(async () => {
-    restoreEnv = setFuzzEnv();
-    await setupDb();
-  });
-  afterAll(async () => {
-    restoreEnv();
-    await teardownDb();
-  });
   beforeEach(async () => {
     await exec("truncate promo_code_uses, promo_codes restart identity cascade");
   });
-
-  async function post(body: Record<string, unknown>) {
-    const { POST } = await import("@/app/api/admin/promos/route");
-    const res = await POST(makeRequest("/api/admin/promos/", { method: "POST", body, cookie: adminCookieHeader() }));
-    return { status: res.status, body: (await res.json()) as Record<string, unknown> };
-  }
 
   const LIVE = {
     code: "SUVI10", kind: "percent" as const, value: 10, minSubtotal: 30,
@@ -213,4 +220,95 @@ describe("the form: «Создать» says so, and a taken code gets a sentence
       expect(got).toEqual(expect.arrayContaining([...want]));
     });
   }
+});
+
+/* ========================================================================= */
+
+describe("a REM-CART code opens in the form and saves (map-defects #11)", () => {
+  /* The second abandoned-cart letter mints REM-CART-… codes, scope 'cart'
+     (db/migrations/197). The form loaded one without its basket lines and
+     posted it without them, so validatePromo refused every save with
+     `bad_scope_lines` — which had no sentence, so the owner read «Не
+     получилось сохранить промокод.» and could not change so much as the date. */
+  const UUID = "3f2a9c1e-7b4d-4e8a-9f0c-2d6b1a5e8c47";
+  const LINES = ["kmrepair", "davines-oi-shampoo"];
+
+  beforeEach(async () => {
+    await exec("truncate promo_code_uses, promo_codes restart identity cascade");
+  });
+
+  it("the form carries the basket lines through a save, and the route keeps them", async () => {
+    const made = await upsertPromo({
+      code: "REM-CART-7K2Q9X", kind: "percent", value: 10, minSubtotal: 0,
+      startsAt: null, endsAt: "2026-10-01T20:59:59.000Z", maxUses: 1, active: true, note: "Брошенная корзина",
+      scope: "cart", scopeValue: UUID, scopeLines: LINES,
+    });
+    const S: Record<string, unknown> = {};
+    S.promoForm = build<(p: unknown) => Record<string, unknown>>(["promoFormFrom"], { S })(made);
+    const body = build<() => Record<string, unknown>>(["promoFormPayload"], { S })();
+
+    expect(body.scope).toBe("cart");
+    expect(body.scopeLines).toEqual(LINES);
+    expect(validatePromo(body).ok, JSON.stringify(validatePromo(body))).toBe(true);
+
+    const out = await post(body);
+    expect(out.status, JSON.stringify(out.body)).toBe(200);
+    const kept = (await getPromo("REM-CART-7K2Q9X"))!;
+    expect(kept.scope).toBe("cart");
+    expect(kept.scopeValue).toBe(UUID);
+    expect(kept.scopeLines).toEqual(LINES);
+  });
+
+  it("a code of any other scope sends no basket lines", () => {
+    const S: Record<string, unknown> = { promoForm: { ...build<() => Record<string, unknown>>(["blankPromo"], {})(), code: "X1", scope: "brand", scopeValue: "Davines" } };
+    expect("scopeLines" in build<() => Record<string, unknown>>(["promoFormPayload"], { S })()).toBe(false);
+  });
+
+  it("the form says what a cart code is, in the panel's language", () => {
+    const html = build<(f: unknown) => string>(["promoScopeFormHTML"], {
+      S: { promoQ: "" },
+      esc,
+      PROMO_SCOPE_ROWS: [["order", "Весь заказ"], ["brand", "Бренд"], ["product", "Товар"]],
+    })({ kind: "percent", scope: "cart", scopeValue: UUID });
+    expect(nodes(html, "RU")).toContain("Код из письма о брошенной корзине: скидка только на товары этой корзины.");
+    expect(html).not.toContain(UUID);
+    for (const lang of ["ET", "EN"] as const) {
+      expect(nodes(html, lang).filter((t) => CYR.test(t)), lang).toEqual([]);
+    }
+  });
+
+  it("`bad_scope_lines` has a sentence of its own, translated", () => {
+    const errs = new Function(`${decl("PROMO_SAVE_ERRS")} return PROMO_SAVE_ERRS;`)() as Record<string, string>;
+    const line = errs.bad_scope_lines;
+    expect(line, "the refusal falls through to «Не получилось сохранить промокод.»").toBeTruthy();
+    for (const lang of ["ET", "EN"]) expect(trText(line, lang, false), lang).not.toMatch(CYR);
+  });
+});
+
+describe("switching the kind empties the discount (map-defects #11)", () => {
+  const setKind = (f: Record<string, unknown>, k: string) =>
+    build<(f: Record<string, unknown>, k: string) => void>(["promoSetKind"], {})(f, k);
+
+  it("150 € does not become 150 %", () => {
+    const f: Record<string, unknown> = { kind: "fixed", value: "150" };
+    setKind(f, "percent");
+    expect(f).toMatchObject({ kind: "percent", value: "" });
+    // …so «Создать» answers with the sentence about the size, never a quiet 150 %
+    const S = { promoForm: { ...build<() => Record<string, unknown>>(["blankPromo"], {})(), ...f, code: "X150" } };
+    expect(validatePromo(build<() => Record<string, unknown>>(["promoFormPayload"], { S })())).toEqual({ ok: false, error: "bad_value" });
+  });
+
+  it("10 % does not quietly become 10 €, and tapping the chip that is on changes nothing", () => {
+    const f: Record<string, unknown> = { kind: "percent", value: 10 };
+    setKind(f, "percent");
+    expect(f.value).toBe(10);
+    setKind(f, "fixed");
+    expect(f).toMatchObject({ kind: "fixed", value: "" });
+  });
+
+  it("the kind chips go through it", () => {
+    expect(src).toContain("promoSetKind(S.promoForm, d.promokind)");
+    // the change handler of the <select> the chips replaced is gone, not left to disagree
+    expect(src).not.toContain(`t.matches('[data-promof="kind"]')`);
+  });
 });

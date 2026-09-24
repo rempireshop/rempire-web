@@ -1153,6 +1153,10 @@
       "Промокод удалён ✓": "Sooduskood kustutatud ✓",
       "Не получилось сохранить промокод.": "Sooduskoodi ei õnnestunud salvestada.",
       "Такой промокод уже есть.": "Selline sooduskood on juba olemas.", "Открыть его": "Ava see",
+      "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.":
+        "Ostukorvi kirja koodil pole selle korvi tooteid — vali kogu tellimus, bränd või toode.",
+      "Код из письма о брошенной корзине: скидка только на товары этой корзины.":
+        "Kood hüljatud ostukorvi kirjast: soodustus kehtib ainult selle korvi toodetele.",
       "Не получилось удалить промокод": "Sooduskoodi ei õnnestunud kustutada",
       "Код уже использован — его можно только выключить":
         "Koodi on juba kasutatud — selle saab ainult välja lülitada",
@@ -4202,6 +4206,10 @@
       "Промокод удалён ✓": "Promo code deleted ✓",
       "Не получилось сохранить промокод.": "The promo code could not be saved.",
       "Такой промокод уже есть.": "This promo code already exists.", "Открыть его": "Open it",
+      "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.":
+        "This code from the cart e-mail has no products of its cart left — choose the whole order, a brand or a product.",
+      "Код из письма о брошенной корзине: скидка только на товары этой корзины.":
+        "A code from the abandoned-cart e-mail: the discount is on that cart's products only.",
       "Не получилось удалить промокод": "The promo code could not be deleted",
       "Код уже использован — его можно только выключить":
         "The code has already been used — it can only be switched off",
@@ -29323,8 +29331,24 @@
       startsAt: p.startsAt || null,
       maxUses: p.maxUses == null ? "" : p.maxUses, note: p.note || "", active: p.active,
       // a code saved before 170 has neither field; both read as «весь заказ»
-      scope: p.scope || "order", scopeValue: p.scopeValue || ""
+      scope: p.scope || "order", scopeValue: p.scopeValue || "",
+      /* …and a REM-CART code (scope 'cart', 197) is its basket's lines. They
+         have no field here either, and the server refuses a 'cart' body
+         without them (`bad_scope_lines`), so they ride along like startsAt —
+         without them the code could not be saved at all, only its generic
+         «Не получилось сохранить промокод.» came back. */
+      scopeLines: p.scopeLines || null
     };
+  }
+  /* A new kind starts with an empty discount. The number was typed for the
+     other unit: 150 € stayed in the box as 150 % and was refused only at
+     «Создать», and 10 % quietly became 10 € when it was not refused at all.
+     Replaces the old `[data-promof="kind"]` change handler, dead since kind
+     became chips. */
+  function promoSetKind(f, kind) {
+    if (!f || f.kind === kind) return;
+    f.kind = kind;
+    f.value = "";
   }
   function promoKindLabel(p) {
     if (p.kind === "free_shipping") return "бесплатная доставка";
@@ -29394,7 +29418,12 @@
         { id: String(f.scopeValue), brand: "", name: String(f.scopeValue) };
     }
     var body = "";
-    if (f.scope === "brand") {
+    /* A REM-CART code lights none of the three chips — nobody types one, the
+       abandoned-cart letter mints it — so the form says what it is instead of
+       looking like a code with nothing chosen. */
+    if (f.scope === "cart") {
+      body = '<p class="adm-hint" style="margin-top:10px">Код из письма о брошенной корзине: скидка только на товары этой корзины.</p>';
+    } else if (f.scope === "brand") {
       var chosen = String(f.scopeValue || "");
       var list = promoBrandList();
       /* A code saved for a brand the catalogue no longer carries keeps that
@@ -29568,6 +29597,8 @@
       scope: scope,
       scopeValue: scope === "order" ? null : text(f.scopeValue)
     };
+    // a REM-CART code's basket lines, exactly as they were loaded (promoFormFrom)
+    if (scope === "cart") body.scopeLines = f.scopeLines || [];
     /* «Создать» may only make a code that is not there yet — the server
        answers `exists` rather than rewriting somebody's live code with this
        form's values (insertPromo in src/lib/promos.ts). */
@@ -29588,6 +29619,10 @@
     bad_scope: "Выберите, на что действует код: весь заказ, бренд или товар.",
     bad_scope_value: "Выберите бренд или товар — без этого код не на что применить.",
     scope_free_shipping: "Бесплатная доставка действует на весь заказ — бренд или товар для неё выбрать нельзя.",
+    /* a REM-CART code whose list of basket lines is gone (emptied by hand):
+       there is nothing left for it to discount, and «Весь заказ», a brand or
+       a product is the owner's way out */
+    bad_scope_lines: "У кода из письма о корзине нет её товаров — выберите весь заказ, бренд или товар.",
     exists: "Такой промокод уже есть.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
@@ -42511,7 +42546,7 @@
     }
     // the promo form's kind chips — the same three kinds the radio row had
     if (d.promokind) {
-      if (S.promoForm) { S.promoForm.kind = d.promokind; render(); refocus('[data-promokind="' + d.promokind + '"]'); }
+      if (S.promoForm) { promoSetKind(S.promoForm, d.promokind); render(); refocus('[data-promokind="' + d.promokind + '"]'); }
       return;
     }
     /* «На что действует» — the same chip idiom one row below. Switching away
@@ -43781,16 +43816,6 @@
       if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, ""); translateTree(subSlot); }
     }
     // the card's size picker — state first, then patch the price in place
-    /* checkout-gaps: the promo kind decides whether there is a «сколько»
-       field at all, so this one does need a redraw. */
-    else if (t.matches('[data-promof="kind"]')) {
-      if (S.promoForm) {
-        S.promoForm.kind = t.value;
-        if (t.value === "percent" && !(Number(S.promoForm.value) >= 1 && Number(S.promoForm.value) <= 90)) S.promoForm.value = 10;
-        if (t.value === "fixed" && !(Number(S.promoForm.value) > 0)) S.promoForm.value = 5;
-        render();
-      }
-    }
     /* «Бренд» — a native <select> of twenty-six names, so the phone's own
        wheel does the scrolling. Only the hint under it depends on the choice,
        and it says the same thing either way, so nothing is re-rendered. */
