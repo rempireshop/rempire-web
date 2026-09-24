@@ -1252,6 +1252,10 @@
       "Заканчиваются": "Lõppemas",
       "нужно дозаказать": "vaja juurde tellida",
       "всё в наличии": "kõik on laos",
+      // the assistant's offline answer to «Что заканчивается…» (adminAnswer)
+      "Могу собрать заказ поставщику и отправить его вам на подпись.":
+        "Võin koostada tarnijale tellimuse ja saata selle sulle allkirjastamiseks.",
+      "Ничего не заканчивается — все товары в наличии.": "Midagi ei ole lõppemas — kõik tooted on laos.",
       /* «Обзор» с настоящими цифрами (analytics) */
       "Заказы и выручка — только оплаченные, по дате заказа.":
         "Tellimused ja käive — ainult makstud, tellimuse kuupäeva järgi.",
@@ -4284,6 +4288,10 @@
       "Заканчиваются": "Running low",
       "нужно дозаказать": "need reordering",
       "всё в наличии": "everything is in stock",
+      // the assistant's offline answer to «Что заканчивается…» (adminAnswer)
+      "Могу собрать заказ поставщику и отправить его вам на подпись.":
+        "I can put a supplier order together and send it to you to sign.",
+      "Ничего не заканчивается — все товары в наличии.": "Nothing is running low — every product is in stock.",
       /* «Обзор» with real figures (analytics) */
       "Заказы и выручка — только оплаченные, по дате заказа.":
         "Orders and revenue count paid orders only, by the date the order was placed.",
@@ -6622,9 +6630,10 @@
     [/^Показаны первые 24 из (\d+)$/, { ET: "Kuvatud esimesed 24, kokku $1", EN: "First 24 shown, $1 in total" }],
     [/^(\d+) товар(?:|а|ов) по запросу «(.+)»$/,
       { ET: "$1 toodet otsingule „$2“", EN: "$1 products for “$2”" }],
-    [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно: (.+)\. Могу собрать заказ поставщику и отправить его вам на подпись\.$/,
-      { ET: "Lõppemas on $1 toodet. Kiireloomulised: $2. Võin koostada tarnijale tellimuse ja saata selle sulle allkirjastamiseks.",
-        EN: "$1 products are running low. Urgent: $2. I can put a supplier order together and send it to you to sign." }],
+    /* the assistant's offline answer (adminAnswer): the lead over its list —
+       the names below it are nodes of their own, one a line */
+    [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно:$/,
+      { ET: "Lõppemas on $1 toodet. Kiireloomulised:", EN: "$1 products are running low. Urgent:" }],
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
     [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
     // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
@@ -19986,21 +19995,44 @@
 
   /* ---------- Заказ (карточка) -------------------------------------------- */
 
-  /** The order the card is on, as a view model — or null. */
-  function admCurOrder() {
-    var list = admOrders();
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].id) === String(S.adminOrder)) return admOrderVM(list[i]);
+  /**
+   * One order as the panel holds it — the row, not a view model — by its id,
+   * or by its number (what a notification and a letter carry).
+   *
+   * Every copy the panel has is looked through, not only the newest hundred
+   * (Dim, 24.09.2026). The search reaches every order the shop ever took
+   * (FOUND.rows, r22), and for an older one its row offered «Отправлен»,
+   * «Выдан клиенту» and «Создать этикетку» that answered nothing, and its
+   * card said «Заказ не найден»: each of them looked the order up in
+   * SRV.orders alone. The third copy is an order in neither list, fetched on
+   * its own for the card (ORDER_ONE, loadOrderOne). The newest hundred is
+   * asked first, so an order in two lists is the copy the counters read.
+   * The demo shop has one list, and looks in that.
+   */
+  function admOrderRaw(key) {
+    if (key == null || key === "" || key === 0) return null;
+    var k = String(key), up = k.toUpperCase();
+    var lists = [admOrders()];
+    if (SRV.admin === true) lists.push(FOUND.rows, ORDER_ONE.rows);
+    var i, j, list;
+    for (i = 0; i < lists.length; i++) {
+      list = lists[i] || [];
+      for (j = 0; j < list.length; j++) if (String(list[j].id) === k) return list[j];
+    }
+    for (i = 0; i < lists.length; i++) {
+      list = lists[i] || [];
+      for (j = 0; j < list.length; j++) if (list[j].number && String(list[j].number).toUpperCase() === up) return list[j];
     }
     return null;
   }
+  /** The order the card is on, as a view model — or null. */
+  function admCurOrder() {
+    return admOrderById(S.adminOrder);
+  }
   /** One order by id, as a view model — the rows and the card both act by id. */
   function admOrderById(id) {
-    var list = admOrders();
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].id) === String(id)) return admOrderVM(list[i]);
-    }
-    return null;
+    var o = admOrderRaw(id);
+    return o ? admOrderVM(o) : null;
   }
   /** What the confirm card says before the shop or the money moves. The
       letter is the reason «Отправлен» asks first, so the card names it — with
@@ -20234,8 +20266,7 @@
   }
   function admOrderCardHTML() {
     var v = admCurOrder();
-    if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
-      '<div class="adm-empty">Заказ не найден</div></div>';
+    if (!v) return admOrderMissingHTML('<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>');
     var o = v.srv;
     /* «Оплата» names the bank from Montonio's list (bankNameOf), which the
        panel otherwise asks for only on «Подключения» and «Доставка и оплата» —
@@ -25625,17 +25656,22 @@
     if (!PUSH.want || !SRV.orders) return;
     var want = PUSH.want;
     PUSH.want = "";
-    var list = SRV.orders || [];
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].number || "").toUpperCase() === want) {
-        S.adminOrder = String(list[i].id);
-        S.adminTab = "orders";
-        render();
-        return;
-      }
-    }
     S.adminTab = "orders";
+    // по номеру — во всех списках, которые есть у панели (admOrderRaw)
+    var row = admOrderRaw(want);
+    if (row) {
+      S.adminOrder = String(row.id);
+      render();
+      return;
+    }
     render();
+    /* Не среди ста последних — оповещение открыли через неделю: этот один
+       заказ спрашивается отдельно (loadOrderOne), и карточка открывается,
+       когда он пришёл, если владелец за это время никуда не ушёл. Не нашли —
+       так и остаются «Заказы». */
+    loadOrderOne(want, false, function (o) {
+      if (o && S.adminTab === "orders" && !S.adminOrder) S.adminOrder = String(o.id);
+    });
   }
   function pushBoot() {
     if (pushBoot._done) return;
@@ -30193,29 +30229,15 @@
      «← К клиенту», and the browser's Back does the same (admLayers closes the
      order first; the customer's card is still open underneath). The list the
      order card reads is the last hundred (loadSrvOrders); an older order of
-     this customer is fetched on its own, once, and set beside them. */
-  var CUST_ORDER = { id: "", busy: false, missing: "" };
+     this customer is fetched on its own, once — the fallback every order card
+     has (admOrderMissingHTML). It used to be pushed INTO the hundred, where
+     the counters read it as one of the newest, and the next reload of the
+     list (every step does one) took it out again: the card turned into
+     «Заказ не найден» right after a step on it. */
   function admCustOrderCardHTML() {
-    var id = String(S.adminOrder);
     loadSrvOrders(false);
-    if (SRV.orders && !admOrderById(id) && CUST_ORDER.id !== id) {
-      CUST_ORDER = { id: id, busy: true, missing: "" };
-      apiJson("/api/admin/orders/" + encodeURIComponent(id) + "/").then(function (r) {
-        CUST_ORDER.busy = false;
-        if (r.status === 200 && r.body.ok && r.body.order) {
-          if (SRV.orders && !admOrderById(id)) SRV.orders.push(srvRow(r.body.order));
-        } else CUST_ORDER.missing = id;
-        render();
-      }).catch(function () { CUST_ORDER.busy = false; CUST_ORDER.missing = id; render(); });
-    }
-    var back = admBackHTML('data-admorder=""', "К клиенту");
-    if (!SRV.orders || (CUST_ORDER.id === id && CUST_ORDER.busy)) {
-      return '<div class="adm-screen adm-screen--card">' + back + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
-    }
-    if (CUST_ORDER.id === id && CUST_ORDER.missing === id && !admOrderById(id)) {
-      return '<div class="adm-screen adm-screen--card">' + back + '<div class="adm-empty">Заказ не найден</div></div>';
-    }
-    return admOrderCardHTML();
+    if (admCurOrder()) return admOrderCardHTML();
+    return admOrderMissingHTML('<div class="adm-screen adm-screen--card">' + admBackHTML('data-admorder=""', "К клиенту"));
   }
   /** Quiet while the box holds what the server holds; ink the moment it
       differs; «Сохранено ✓» once it is back in step — the cabinet's
@@ -35812,6 +35834,7 @@
   function admLogout() {
     apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
       SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
+      ORDER_ONE.rows = []; ORDER_ONE.gone = ""; ORDER_ONE.err = "";
       // …and the summary goes with them, so signing back in asks again
       OVERVIEW.data = null; OVERVIEW.err = null; OVERVIEW.asked = false;
       // same for a settings read that had failed: it keeps «Цены и баллы» on
@@ -35977,16 +36000,92 @@
       FOUND.busy = false; FOUND.err = true; render();
     });
   }
-  /** After anything that moves an order's status — shipped, cancelled, marked
-      paid, a salon sale, an undo — both copies of the count are refreshed:
-      the list the rows and the badge draw from, and the overview's cached
-      summary («Сделать сегодня»). */
-  function admOrdersChanged() {
+  /* ---------- one order on its own -------------------------------------------
+   *
+   * The card of an order in neither list: older than the newest hundred and
+   * not in the search on screen. A customer's card lists every order he ever
+   * placed, and a notification can be tapped a week later. GET
+   * /api/admin/orders/<id>/ answers with that one order (the route takes the
+   * number too), and it is kept HERE — beside the two lists and never inside
+   * SRV.orders, for the reason FOUND is: eight things count that hundred.
+   * One at a time, because the card shows one order.
+   *
+   * `gone` is the key the server said it does not have — «Заказ не найден».
+   * `err` is the key it did not answer about: «не найден» over a dropped
+   * connection would be untrue, so the card says the server is not answering
+   * and offers «Повторить».
+   */
+  var ORDER_ONE = { rows: [], busy: "", gone: "", err: "", seq: 0 };
+  /** Ask for one order. `force` asks again whatever is known (a write, or
+      «Повторить»); `then(row|null)` runs when the answer is in, before the
+      render. A forced re-read that fails keeps the copy on screen — the rule
+      loadSrvOrders() keeps for the list. */
+  function loadOrderOne(key, force, then) {
+    if (SRV.admin !== true || !key) return;
+    key = String(key);
+    if (!force && (ORDER_ONE.busy === key || ORDER_ONE.gone === key || ORDER_ONE.err === key)) return;
+    ORDER_ONE.busy = key;
+    if (ORDER_ONE.gone === key) ORDER_ONE.gone = "";
+    if (ORDER_ONE.err === key) ORDER_ONE.err = "";
+    var seq = ++ORDER_ONE.seq;
+    var had = function () {
+      return ORDER_ONE.rows.some(function (r) { return String(r.id) === key; });
+    };
+    apiJson("/api/admin/orders/" + encodeURIComponent(key) + "/").then(function (r) {
+      if (seq !== ORDER_ONE.seq) return;       // a newer question has gone out since
+      ORDER_ONE.busy = "";
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var o = r.status === 200 && r.body && r.body.ok === true && r.body.order ? r.body.order : null;
+      if (o) ORDER_ONE.rows = [srvRow(o)];
+      else if (!had()) { if (r.status === 404) ORDER_ONE.gone = key; else ORDER_ONE.err = key; }
+      if (then) then(o ? ORDER_ONE.rows[0] : null);
+      render();
+    }).catch(function () {
+      if (seq !== ORDER_ONE.seq) return;
+      ORDER_ONE.busy = "";
+      if (!had()) ORDER_ONE.err = key;
+      if (then) then(null);
+      render();
+    });
+  }
+  /** Is the card waiting for its order to come on its own? Asks for it the
+      first time — once the newest hundred is in (the order is nearly always
+      there) and only when no list has it. */
+  function admOrderOneWait(id) {
+    if (SRV.admin !== true || !id || admOrderRaw(id)) return false;
+    if (!SRV.orders && !SRV.ordersErr) { loadSrvOrders(false); return true; }
+    loadOrderOne(id);
+    return ORDER_ONE.busy === String(id);
+  }
+  /** The card of an order no list holds: bars while it is being fetched, then
+      the honest answer. `head` opens the screen and carries its way back —
+      «← Заказы», or «← К клиенту» over a customer's card. */
+  function admOrderMissingHTML(head) {
+    var id = S.adminOrder;
+    if (admOrderOneWait(id)) return head + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    if (SRV.admin === true && ORDER_ONE.err && ORDER_ONE.err === String(id)) {
+      return head + '<div class="adm-error"><span>Сервер заказов не отвечает — попробуйте ещё раз.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="order">Повторить</button></div></div>';
+    }
+    return head + '<div class="adm-empty">Заказ не найден</div></div>';
+  }
+  /** Every copy of an order read again after a write: the newest hundred,
+      the search on screen — a separate hundred from a separate query (r22) —
+      and the order fetched on its own. The row or the card the owner just
+      used was drawn from one of the three, and it is the one he is looking
+      at. */
+  function admOrderListsReload() {
     loadSrvOrders(true, true);
-    /* …and the search result too, when one is on screen: it is a separate
-       hundred rows from a separate query, and the order whose status just
-       moved is the one the owner is looking at (r22). */
     if (FOUND.q != null) loadOrderSearch(FOUND.q, true);
+    if (ORDER_ONE.rows.length) loadOrderOne(ORDER_ONE.rows[0].id, true);
+  }
+  /** After anything that moves an order's status — shipped, cancelled, marked
+      paid, a salon sale, an undo — every copy of the count is refreshed:
+      the lists the rows, the card and the badge draw from
+      (admOrderListsReload), and the overview's cached summary («Сделать
+      сегодня»). */
+  function admOrdersChanged() {
+    admOrderListsReload();
     loadOverview(true);
     /* Everything else that counts orders is now a stale copy: «Ждут письма»
        on «Письма» and the accountant's month on «Отчёты». Marked old rather
@@ -36010,16 +36109,16 @@
        the next render of that tab asks. */
     S.admGiftCards = null;
   }
-  /** The order a status PATCH answered with, written over its row in both
-      copies a list of «Заказы» can be drawn from — the newest hundred and a
-      search result — so the row reads the new status the moment the server
-      does, not when a reload finally lands. Merged over the row's own order:
-      a field the answer does not carry (the gift cards the LIST attaches)
-      stays as it was. */
+  /** The order a status PATCH answered with, written over its row in every
+      copy a row or a card of «Заказы» can be drawn from — the newest hundred,
+      a search result and the order fetched on its own (ORDER_ONE) — so the
+      row reads the new status the moment the server does, not when a reload
+      finally lands. Merged over the row's own order: a field the answer does
+      not carry (the gift cards the LIST attaches) stays as it was. */
   function admOrderLand(o) {
     if (!o || o.id == null) return;
     var id = String(o.id);
-    [SRV.orders, FOUND.rows].forEach(function (list) {
+    [SRV.orders, FOUND.rows, ORDER_ONE.rows].forEach(function (list) {
       if (!list) return;
       for (var i = 0; i < list.length; i++) {
         if (String(list[i].id) === id) list[i] = srvRow(Object.assign({}, list[i].srv || {}, o));
@@ -36417,7 +36516,10 @@
            and the suggestion has just learned this one. Re-read rather than
            patched locally — the server decides what `recent` says. */
         admShipSpent();
-        loadSrvOrders(true);
+        /* …and every copy of the order, not only the newest hundred: the
+           label may have been made on a row the search found, and that row
+           went on offering «Создать этикетку» until the search was re-read. */
+        admOrderListsReload();
         return;
       }
       var shipErr = r.body && r.body.error;
@@ -36450,16 +36552,16 @@
   }
 
   /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() --------- */
-  /** The full server order object for the order currently open, or null —
-   *  never falls back to "some other order" the way a list
-   *  filter does, because sending mail to the wrong order would be worse
-   *  than doing nothing. */
+  /** The order currently open, as the card's view model with the server's
+   *  order on `.srv` — or null, never "some other order" the way a list
+   *  filter falls back, because sending mail to the wrong order would be
+   *  worse than doing nothing. Found wherever the card found it
+   *  (admCurOrder): an order the search reached beyond the newest hundred
+   *  could be opened but not written to. A demo order has no `.srv` and is
+   *  nobody to write to. */
   function currentAdminOrderRow() {
-    if (!SRV.orders) return null;
-    for (var i = 0; i < SRV.orders.length; i++) {
-      if (String(SRV.orders[i].id) === String(S.adminOrder)) return SRV.orders[i];
-    }
-    return null;
+    var v = admCurOrder();
+    return v && v.srv ? v : null;
   }
   function srvLoadOrderMessages(orderId) {
     if (!orderId) return;
@@ -37838,9 +37940,25 @@
   function adminAnswer(q) {
     var low = lowStock();
     if (/заканчива|дозаказ/i.test(q)) {
-      return "Заканчиваются " + low.length + " " + plural(low.length) + ". Срочно: " +
-        low.slice(0, 3).map(function (p) { return esc(p.brand) + " " + esc(p.name); }).join(", ") +
-        ". Могу собрать заказ поставщику и отправить его вам на подпись.";
+      if (!low.length) return "Ничего не заканчивается — все товары в наличии.";
+      /* One product a line, drawn the way the assistant's own answer is
+         (admReplyHTML: «name — state», «нет» marked). The three names used
+         to be glued into one sentence — one text node, so they ran together
+         and, on an ET/EN panel, translateTree() could reach only the tail at
+         the END of the node: «— шампунь» stayed Russian in the middle (the
+         owner's /test note of 23.09.2026 was about this very question). Each
+         name goes through admProdName() before it is drawn; the sentences
+         and the states are nodes of their own, and NOT [data-notr] the way
+         the model's answer is — these are the panel's words, and the
+         dictionary translates them. */
+      return '<div class="adm-msg__txt"><p class="adm-msg__p">' +
+        "Заканчиваются " + low.length + " " + plural(low.length) + ". Срочно:" + "</p>" +
+        '<ul class="adm-msg__list">' + low.slice(0, 3).map(function (p) {
+          var out = p.stock === "out";
+          return '<li class="adm-msg__li"><span class="adm-msg__nm">' + esc(admProdName(p.brand + " " + p.name)) + "</span>" +
+            '<span class="adm-msg__st' + (out ? " adm-msg__st--out" : "") + '">' + (out ? "нет" : "мало") + "</span></li>";
+        }).join("") + "</ul>" +
+        '<p class="adm-msg__p">Могу собрать заказ поставщику и отправить его вам на подпись.</p></div>';
     }
     /* The week's takings, when the assistant itself is off (no key on the
        server — probeAdmAI). The chip «Сколько продали за неделю?» lands here
@@ -40436,6 +40554,8 @@
       else if (d.admreload === "orders") loadSrvOrders(true);
       // «Заказы»: the search is its own request and its own error (r22)
       else if (d.admreload === "search") loadOrderSearch(S.admOrderQ, true);
+      // the card of an order fetched on its own, which did not come (admOrderMissingHTML)
+      else if (d.admreload === "order") loadOrderOne(S.adminOrder, true);
       else if (d.admreload === "stock") reloadStock();
       else if (d.admreload === "moves") reloadStockMoves();
       else if (d.admreload === "bundles") loadAdminBundles(true);

@@ -146,13 +146,19 @@ describe("this device first, the others as a list", () => {
 describe("a tapped notification lands on that order", () => {
   const fn = slice("pushOpenWanted");
 
+  /* The lookup is the panel's one helper since 24.09.2026 (admOrderRaw: id
+     first, then the number, in every list the panel holds) — and an order
+     older than the newest hundred is fetched on its own. Both are driven for
+     real in tests/admin-order-beyond-hundred.test.ts; these pin the wiring. */
   it("reads the order NUMBER — that is what the notification prints", () => {
     expect(fn).toMatch(/order=\(\[\^&\]\+\)/);
-    expect(fn).toContain("String(list[i].number || \"\").toUpperCase() === want");
+    expect(fn).toContain("admOrderRaw(want)");
+    expect(slice("admOrderRaw")).toContain("String(list[j].number).toUpperCase() === up");
   });
 
   it("opens the order card, not merely the section", () => {
-    expect(fn).toContain("S.adminOrder = String(list[i].id);");
+    expect(fn).toContain("S.adminOrder = String(row.id);");
+    expect(fn).toContain("loadOrderOne(want, false,");
   });
 
   it("an order that is gone still lands somewhere real", () => {

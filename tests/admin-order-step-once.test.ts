@@ -63,16 +63,23 @@ function panel(opts: { rows: Order[]; search?: string }) {
   const FOUND = opts.search
     ? { q: opts.search, want: opts.search, rows: opts.rows.map(srvRow) as Row[] | null, err: false, busy: false, seq: 1 }
     : { q: null as string | null, want: "", rows: null as Row[] | null, err: false, busy: false, seq: 0 };
+  /* The third copy an order can be drawn from — one fetched on its own for
+     the card (admin-order-beyond-hundred.test.ts). Empty here: these rows are
+     all in a list. */
+  const ORDER_ONE = { rows: [] as Row[], busy: "", gone: "", err: "", seq: 0 };
   const names = [
-    "SRV", "FOUND", "S", "apiJson", "apiSend", "render", "toast", "journalDrop", "pushBoot", "pushOpenWanted",
+    "SRV", "FOUND", "ORDER_ONE", "S", "apiJson", "apiSend", "render", "toast", "journalDrop", "pushBoot", "pushOpenWanted",
     "srvRow", "loadOverview", "scanStockChanged", "shipRollback", "flowCountsAt", "reportSummaryAt",
   ];
-  const own = ["admOrderQClean", "loadOrderSearch", "loadSrvOrders", "admOrdersChanged", "admOrderLand", "srvPush"];
+  const own = [
+    "admOrderQClean", "loadOrderSearch", "loadSrvOrders", "loadOrderOne", "admOrderListsReload",
+    "admOrdersChanged", "admOrderLand", "srvPush",
+  ];
   const fns = new Function(
     ...names,
     own.map(slice).join("\n") + "\nreturn { loadSrvOrders: loadSrvOrders, srvPush: srvPush };",
   )(
-    SRV, FOUND, { admGiftCards: null }, (url: string) => ask(url, "GET"),
+    SRV, FOUND, ORDER_ONE, { admGiftCards: null }, (url: string) => ask(url, "GET"),
     (url: string, method: string, body: unknown) => ask(url, method, body),
     () => {}, (m: string) => toasts.push(m), () => {}, () => {}, () => {},
     srvRow, () => {}, () => {}, null, 0, 0,
