@@ -4158,6 +4158,7 @@
         "Посмотреть, куда переехал заказ."
       ],
       "expect": [
+        "После «Оплачен» окошко закрывается сразу, кнопка пишет «Сохраняем…».",
         "Заказ стал оплаченным.",
         "Он появился в списке «Отправить».",
         "Покупателю ушло письмо «Заказ принят»."
@@ -4173,12 +4174,15 @@
           "See where the order has moved to."
         ],
         "expect": [
+          "After «Оплачен» the box closes at once and the button says «Сохраняем…».",
           "The order has become paid.",
           "It shows up in the «Отправить» list.",
           "The buyer has had the «Заказ принят» letter."
         ],
         "why": "Pressed by mistake, this button sends goods out against an unpaid invoice."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:41:07.420Z"
     },
     {
       "id": "order-returns-chip",

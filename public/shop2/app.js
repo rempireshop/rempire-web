@@ -20238,8 +20238,7 @@
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     // an invoice order's one step is the transfer arriving — the row can record it without opening the card
-    else if (v.unpaid && v.invoice) acts =
-      '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
+    else if (v.unpaid && v.invoice) acts = admInvPaidBtnHTML(v, "adm-btn adm-btn--row");
     /* …but not on a held order. «Написать» here means «ask him to pay», and
        he has paid — just not enough. The row has no action of its own: the
        badge says what happened, and what to do about it is two figures and a
@@ -20564,8 +20563,7 @@
     /* «По счёту»: while the transfer is awaited the primary is «Отметить
        оплаченным»; the invoice itself stays downloadable for as long as the
        order exists, and can be sent again while it is unpaid. */
-    if (v.invoice && v.unpaid) acts +=
-      '<button class="adm-btn" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
+    if (v.invoice && v.unpaid) acts += admInvPaidBtnHTML(v, "adm-btn");
     if (v.invoice) acts +=
       '<a class="adm-btn adm-btn--ghost" href="/api/admin/orders/' + encodeURIComponent(v.id) + '/invoice/" target="_blank" rel="noopener" data-adminvpdf="' + esc(v.invoice.number) + '">Скачать счёт</a>';
     if (v.invoice && v.unpaid) acts +=
@@ -36745,8 +36743,24 @@
       render();
     }).catch(function () { toast("Не удалось отправить письмо"); render(); });
   }
+  /** «Отметить оплаченным» — in a row of «Заказы» and on the card; «Сохраняем…»
+      while that order's POST is out, so a second tap cannot ask twice. */
+  function admInvPaidBtnHTML(v, cls) {
+    var busy = SRV.invPaidBusy === String(v.id);
+    return '<button class="' + cls + '" data-adminvpaid="' + esc(v.id) + '"' + (busy ? " disabled" : "") + ">" +
+      (busy ? "Сохраняем…" : "Отметить оплаченным") + "</button>";
+  }
+  /* The confirm card goes the moment «Оплачен» is pressed. The «Применить»
+     handler has already dropped the action, and this drew nothing until the
+     server answered — on success only the lists it asked for redrew the
+     screen, and after a refusal nothing did: the card stayed up for good over
+     a button with nothing behind it (map defect 10, 24.09.2026). The refund
+     beside it has always drawn at once; this is the same shape. */
   function srvInvoicePaid(id, number, invoiceNumber) {
+    if (SRV.invPaidBusy) { render(); return; }
+    SRV.invPaidBusy = String(id); render();
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "paid" }).then(function (r) {
+      SRV.invPaidBusy = "";
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var paidLine = "Заказ " + number + ": оплачен по счёту " + invoiceNumber;
@@ -36761,10 +36775,12 @@
           : r.body.sent === false ? number + " оплачен по счёту · письмо не ушло"
           : number + " оплачен по счёту · письмо ушло");
         admOrdersChanged();
+        render();
         return;
       }
       toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
-    }).catch(function () { toast("Сервер не отвечает"); });
+      render();
+    }).catch(function () { SRV.invPaidBusy = ""; toast("Сервер не отвечает"); render(); });
   }
   /* The server's own sentence for an answer, in the panel's language.
      `messages` is {RU,ET,EN} and it is built on the SERVER
