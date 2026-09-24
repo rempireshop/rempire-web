@@ -233,4 +233,48 @@ describe("the salon price the panel could not see", () => {
   it("is asked for on the way into «Каталог»", () => {
     expect(src).toContain("loadProOverrides(false)");
   });
+
+  /* The e2e run of 24.09.2026 (sweep-admin-goods): the owner opened a product
+     while that answer was still on its way, saved «Салон, €» = 5, and the
+     answer — read on the server BEFORE the save — landed after it and put the
+     old «none» back. The box reopened empty, and the next «Сохранить» with an
+     empty box is «убрать свою цену»: the saved price would have been erased. */
+  it("does not put back a salon price the panel saved while it was on its way", async () => {
+    const DEMO = { proPrice: {} as Record<string, number> };
+    let answer: (v: unknown) => void = () => {};
+    const apiJson = () => new Promise((r) => { answer = r; });
+    const api = new Function(
+      "SRV", "DEMO", "apiJson", "applyDemoOverrides", "render", "S", "noop",
+      `var PRO_OV = { asked: false };
+       ${slice("proOvWrote")}
+       ${slice("loadProOverrides")}
+       return { load: loadProOverrides, wrote: proOvWrote };`,
+    )({ admin: true }, DEMO, apiJson, () => {}, () => {}, { adminEdit: "" }, () => {}) as {
+      load: (force: boolean) => void; wrote: (id: string) => void;
+    };
+
+    api.load(false);
+    // «Сохранить» while the feed is in flight: demoApply writes, and says so
+    DEMO.proPrice.saved = 5;
+    api.wrote("saved");
+    answer({
+      status: 200,
+      body: { ok: true, overrides: { saved: { price: 12.5, proPrice: null }, other: { price: 3, proPrice: 2 } } },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(DEMO.proPrice.saved, "a stale answer took back the salon price just saved").toBe(5);
+    expect(DEMO.proPrice.other, "…and the rest of the answer still lands").toBe(2);
+
+    // the next ask is a fresh one: what the server says then is the truth
+    api.load(true);
+    answer({ status: 200, body: { ok: true, overrides: { saved: { price: 12.5, proPrice: null } } } });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(DEMO.proPrice.saved).toBeUndefined();
+  });
+
+  it("every local write of a salon price says so (demoApply, demoUndo)", () => {
+    expect(slice("demoApply")).toMatch(/set_pro_price[^\n]*proOvWrote\(a\.id\)/);
+    expect(slice("demoUndo")).toMatch(/set_pro_price[^\n]*proOvWrote\(a\.id\)/);
+  });
 });
