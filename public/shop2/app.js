@@ -39557,6 +39557,15 @@
     /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
        question 6 was about cards, not about which section they belong to. */
     else if (S.adminBlogEdit) l.push("blog");
+    /* …and the two sub-screens that were missing here, so the phone's Back
+       walked straight past them to the section before (Dim, 24.09.2026:
+       «Using phone / back button should also go back from "История приёмок и
+       продаж" currently it goes back to dashboard»): the stock history under
+       «Склад» and a letter opened under «Рассылка». Each counts only on its
+       own tab — neither is closed by a move to another section, and a layer
+       nobody can see must not eat the Back meant for the section. */
+    else if (S.newsEdit && S.adminTab === "news") l.push("news");
+    else if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
     if (S.admMore) l.push("more");
     if (pendingAction) l.push("confirm");
     /* The scanner: an overlay the owner opens with a phone in one hand and a
@@ -39607,6 +39616,15 @@
     } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
     else if (top === "mail") S.mailOpen = false;
     else if (top === "setpage") S.admSetPage = "";
+    // «← Склад»: the list the history was opened from
+    else if (top === "moves") S.stockMovesOpen = false;
+    /* «← Рассылка», and the same question it asks about unsaved work: the
+       first Back asks, the layer stays open and the next one closes — as
+       the blog and the product editor above do. */
+    else if (top === "news") {
+      if (newsDirty() && !S.newsConfirmBack) { S.newsConfirmBack = true; return true; }
+      newsCloseEditor();
+    }
     return true;
   }
   /** One parked entry while anything is open, none while nothing is. Called

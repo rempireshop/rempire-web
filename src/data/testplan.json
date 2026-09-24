@@ -6151,7 +6151,7 @@
       "lang": "RU",
       "title": "Поправить остаток и порог «мало»",
       "steps": [
-        "На «Складе» открыть «История приёмок и продаж →» и вернуться назад.",
+        "На «Складе» открыть «История приёмок и продаж →» и вернуться кнопкой «Назад» телефона.",
         "Нажать «Править» у товара.",
         "Поменять только порог «мало» и вписать причину.",
         "Сохранить и снова открыть «История приёмок и продаж →».",
@@ -6160,11 +6160,11 @@
       ],
       "expect": [
         "Всё, что вписали, сохранилось.",
+        "«Назад» телефона из истории возвращает на «Склад», а не на «Обзор».",
         "Первая строка истории: «правка карточки · ваша причина», без числа справа.",
         "После второй правки сверху строка «ручная правка · другая причина».",
         "Строка краснеет, когда остаток ниже своего порога.",
-        "Букву вместо числа поле не принимает.",
-        "Старое число при этом остаётся на месте."
+        "Букву вместо числа поле не принимает, старое число остаётся на месте."
       ],
       "why": "Стёртый порог означает, что товар кончится, а вы об этом не узнаете.",
       "risk": "med",
@@ -6172,7 +6172,7 @@
       "en": {
         "title": "Correcting the stock and the «low» threshold",
         "steps": [
-          "On «Склад» open «История приёмок и продаж →» (the history) and come back.",
+          "On «Склад» open «История приёмок и продаж →» (the history) and come back with the phone's Back button.",
           "Press «Править» (edit) on a product.",
           "Change only the «low» threshold and type a reason.",
           "Save, then open «История приёмок и продаж →» again.",
@@ -6181,16 +6181,16 @@
         ],
         "expect": [
           "Everything you typed has been saved.",
+          "The phone's Back from the history returns to «Склад», not to «Обзор».",
           "The history's first row: «правка карточки · your reason», with no number on the right.",
           "After the second change the top row reads «ручная правка · the other reason».",
           "A row turns red when its stock is below the threshold.",
-          "The field refuses a letter where a number belongs.",
-          "The old number stays where it was."
+          "The field refuses a letter where a number belongs; the old number stays."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T16:55:51.781Z"
+      "markedAt": "2026-09-24T14:48:44.241Z"
     },
     {
       "id": "stock-history",
