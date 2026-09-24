@@ -684,7 +684,6 @@
       "Выберите пакомат или пункт выдачи — туда приедет посылка.":
         "Vali pakiautomaat või pakipunkt — sinna pakk saabubki.",
       "Пакомат или пункт выдачи по умолчанию": "Vaikimisi pakiautomaat või pakipunkt",
-      "— выберите пакомат или пункт выдачи —": "— vali pakiautomaat või pakipunkt —",
       "Поиск по адресу и городу": "Otsi aadressi või linna järgi",
       "Загружаем список…": "Laadime nimekirja…",
       "Список не загрузился — нажмите ещё раз": "Nimekiri ei laadinud — vajuta uuesti",
@@ -797,7 +796,8 @@
       "Сохраняем…": "Salvestame…", "Изменения не сохранены": "Muudatused on salvestamata",
       "Доставка по умолчанию сохранена ✓": "Vaikimisi tarne salvestatud ✓",
       "Выберите пакомат — тогда сохраним": "Vali pakiautomaat — siis salvestame",
-      "— выберите пакомат —": "— vali pakiautomaat —", "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
+      "Впишите адрес, индекс и город — тогда сохраним": "Kirjuta aadress, sihtnumber ja linn — siis salvestame",
+      "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
       /* ---- account-flows: кабинет, код входа, письма-автоматы ---- */
       "Войти": "Logi sisse", "Другой e-mail": "Teine e-posti aadress",
       "Код из письма": "Kood kirjast",
@@ -830,6 +830,12 @@
       "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
       "Сообщить о наличии": "Anna teada, kui on laos",
       "Корзина восстановлена ✓": "Ostukorv on taastatud ✓",
+      /* the abandoned-cart letter's link, when it cannot do what it says (resumeSay, resumeCode, promoSaid) */
+      "Ссылка из письма повреждена — корзину не восстановить": "Kirjas olev link on vigane — ostukorvi ei saa taastada",
+      "Ссылка из письма устарела — корзину не восстановить": "Kirjas olev link on aegunud — ostukorvi ei saa taastada",
+      "Товаров из письма больше нет в наличии": "Kirjas olnud tooteid ei ole enam laos",
+      "Скидку из письма не удалось проверить — введите код из письма": "Kirja allahindlust ei õnnestunud kontrollida — sisestage kirjas olev kood",
+      "Скидку из письма применить не удалось — причина под полем промокода": "Kirja allahindlust ei õnnestunud rakendada — põhjus on sooduskoodi välja all",
       "Ждут письма:": "Ootavad kirja:", "Ближайшие 7 дней:": "Järgmised 7 päeva:", "подписчиков с датой": "kuupäevaga tellijat",
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Ära oota ajakava", "Запустить сейчас": "Käivita kohe", "Запускаем…": "Käivitame…",
@@ -3717,7 +3723,6 @@
       "Выберите пакомат или пункт выдачи — туда приедет посылка.":
         "Choose a parcel locker or pickup point — that is where the parcel goes.",
       "Пакомат или пункт выдачи по умолчанию": "Default parcel locker or pickup point",
-      "— выберите пакомат или пункт выдачи —": "— choose a parcel locker or pickup point —",
       "Поиск по адресу и городу": "Search by address or city",
       "Загружаем список…": "Loading the list…",
       "Список не загрузился — нажмите ещё раз": "The list did not load — tap again",
@@ -3830,7 +3835,8 @@
       "Сохраняем…": "Saving…", "Изменения не сохранены": "Changes not saved",
       "Доставка по умолчанию сохранена ✓": "Default delivery saved ✓",
       "Выберите пакомат — тогда сохраним": "Choose a parcel locker — then we'll save it",
-      "— выберите пакомат —": "— choose a parcel locker —", "Пакомат по умолчанию": "Default parcel locker",
+      "Впишите адрес, индекс и город — тогда сохраним": "Fill in the address, postcode and city — then we'll save it",
+      "Пакомат по умолчанию": "Default parcel locker",
       /* ---- account-flows: account, login code, automatic letters ---- */
       "Войти": "Sign in", "Другой e-mail": "Use another e-mail",
       "Код из письма": "Code from the e-mail",
@@ -3864,6 +3870,12 @@
       "День рождения — пришлём скидку": "Birthday — we'll send a discount",
       "Сообщить о наличии": "Tell me when it's back",
       "Корзина восстановлена ✓": "Cart restored ✓",
+      /* the abandoned-cart letter's link, when it cannot do what it says (resumeSay, resumeCode, promoSaid) */
+      "Ссылка из письма повреждена — корзину не восстановить": "The link in the letter is broken — the cart can't be restored",
+      "Ссылка из письма устарела — корзину не восстановить": "The link in the letter has expired — the cart can't be restored",
+      "Товаров из письма больше нет в наличии": "The products from the letter are no longer in stock",
+      "Скидку из письма не удалось проверить — введите код из письма": "Couldn't verify the letter's discount — enter the code from the letter",
+      "Скидку из письма применить не удалось — причина под полем промокода": "Couldn't apply the letter's discount — the reason is under the promo code box",
       "Ждут письма:": "Waiting for a letter:", "Ближайшие 7 дней:": "Next 7 days:", "подписчиков с датой": "subscribers with a date",
       /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
       "Не ждать расписания": "Don't wait for the schedule", "Запустить сейчас": "Run now", "Запускаем…": "Running…",
@@ -9789,7 +9801,16 @@
   function acctShipFromRow(country, x) {
     var prev = S.acctForm.ship, carrier = x.pm || "";
     var same = !!prev && prev.country === country && prev.method === rowKind(x) && (prev.carrier || "") === carrier;
-    return { country: country, method: rowKind(x), carrier: carrier, machine: same ? prev.machine : "" };
+    var d = { country: country, method: rowKind(x), carrier: carrier, machine: same ? prev.machine : "" };
+    /* The courier's address belongs to the country it is in: back on the
+       courier row of the same country it is still there — the draft's, else
+       the one on the row — and another country starts with empty boxes. */
+    if (d.method === "courier") {
+      var saved = S.cust && S.cust.shipPref;
+      d.address = acctAddrOf(prev && prev.country === country && prev.address ? prev.address
+        : saved && saved.country === country ? saved.address : null);
+    }
+    return d;
   }
   /* The machines the account offers: the same live /api/shipping/points/
      list the checkout shows, per carrier and for the draft's country. Two
@@ -9812,8 +9833,9 @@
     return live ? live.map(function (pt) { return { name: pt.name, kind: pointKind(pt) }; }) : null;
   }
   /** True when the draft's country has more machines than one list can carry —
-      Poland's DPD is 33 603 of them. The block then draws no select: its
-      button opens the checkout's own search sheet instead (acctPointButton). */
+      Poland's DPD is 33 603 of them. Its row then saves before a machine is
+      picked (acctShipChanged), and its search asks the server (pointsSearch).
+      The button is the same one either way (acctPointButton). */
   function acctMachinesTooMany() {
     var x = methods()[acctIdx()];
     if (!x || !x.pm) return false;
@@ -9823,17 +9845,6 @@
   function acctPointsKey() {
     var x = methods()[acctIdx()];
     return (x && x.pm ? x.pm : "") + ":" + acctShipCountry();
-  }
-  /** The machine the block's select is on: the draft's, while the list still
-      has it — else nothing, and the placeholder asks for one. A name and not
-      an index, because the list is the carrier's live one: it changes under
-      a stored index, and «the machine round the corner» is the thing the
-      shopper actually chose. */
-  function acctMachineName() {
-    var d = S.acctForm.ship, mach = acctMachines();
-    if (!d || !d.machine || !mach) return "";
-    for (var i = 0; i < mach.length; i++) if (mach[i].name === d.machine) return d.machine;
-    return "";
   }
   /* Put the saved preference into the checkout — country, method and
      carrier — unless the shopper has already chosen a delivery in this
@@ -9879,6 +9890,23 @@
        can only be an earlier match of an earlier preference — cleared, or a
        machine just changed in the account would never replace it. */
     S.ship.point = null;
+    /* A courier default brings its door (ShipPref.address, whole or not at
+       all) into the checkout's three boxes — as one thing: into boxes that
+       are all still empty, or over them when the account's own save is the
+       newer choice (`saved`), never mixed into an address being typed. */
+    var pa = p.method === "courier" && p.address && p.address.addr && p.address.zip && p.address.city ? p.address : null;
+    var typing = !!(String(S.ship.addr || "").trim() || String(S.ship.zip || "").trim() || String(S.ship.city || "").trim());
+    if (pa && (saved || !typing)) {
+      S.ship.addr = pa.addr || ""; S.ship.zip = pa.zip || ""; S.ship.city = pa.city || "";
+      // step 2's boxes live outside the patched blocks below — set in place,
+      // except the one the shopper is in: a value written under a caret moves it
+      if (S.screen === "checkout") {
+        ["addr", "zip", "city"].forEach(function (k) {
+          var box = document.querySelector('[data-shipf="' + k + '"]');
+          if (box && document.activeElement !== box) box.value = S.ship[k];
+        });
+      }
+    }
     if (isParcel()) loadPoints();
     /* The carrier's list is usually already here by now — the checkout asks
        for every carrier of the country at its first paint, and the profile
@@ -9968,6 +9996,17 @@
   function promoLineIn(p, l) {
     if (l.kind === "gift") return false;
     if (!p || !p.scope || p.scope === "order") return true;
+    /* 'cart' — the second abandoned-cart letter's code — names a set of ids,
+       the lines that one basket held, and `scopeValue` is the basket's own id,
+       which no line ever equals. Read the way the other scopes are, it matched
+       nothing: the summary showed no discount and orderPayload() sent no code,
+       so the letter's 5 % was never given either. The ids come back with the
+       promo box's answer (`lines`, POST /api/promos/check); no list matches
+       nothing, which is what promoLineMatches() in src/lib/promos.ts does. */
+    if (p.scope === "cart") {
+      var lid = String(l.id == null ? "" : l.id);
+      return !!lid && !!p.lines && p.lines.indexOf(lid) >= 0;
+    }
     var want = String(p.scopeValue == null ? "" : p.scopeValue).trim();
     if (!want) return false;
     if (p.scope === "brand") return !!l.brand && promoBrandKey(l.brand) === promoBrandKey(want);
@@ -13832,7 +13871,17 @@
       // «The discount applies to “… — шампунь” only».
       (note ? '<div class="cosum__row cosum__row--note"><span class="muted cosum__scope">' + esc(note) + "</span><span></span></div>" : "");
   }
-  function applyPromoCode() {
+  /* `fromLetter`: the abandoned-cart letter's code, applied at boot by
+     resumeCode() rather than typed. Nobody is at the box, so focus is not put
+     back on a button nobody pressed (focus scrolls — on a phone, away from
+     the checkout's first step). An accepted code shows the way a typed one
+     does, in «Ваш заказ»; a refused one is said, because on a phone that
+     block starts folded and the reason under the box would go unseen. */
+  function promoSaid(fromLetter) {
+    if (!fromLetter) { refocus("[data-applypromo]"); return; }
+    if (!S.promoInfo) toast("Скидку из письма применить не удалось — причина под полем промокода");
+  }
+  function applyPromoCode(fromLetter) {
     var code = S.promo.trim();
     if (!code) { S.promoInfo = null; S.promoErr = ""; render(); refocus("[data-applypromo]"); return; }
     if (S.promoBusy) return;
@@ -13851,13 +13900,15 @@
       items: promoLines()
     }).then(function (res) {
       S.promoBusy = false;
-      if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); refocus("[data-applypromo]"); return; }
+      if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); promoSaid(fromLetter); return; }
       apiSeen(true);
       var j = res.body || {};
       if (j.ok) {
         S.promoInfo = {
           code: j.code, kind: j.kind, value: Number(j.value) || 0, minSubtotal: Number(j.minSubtotal) || 0,
-          scope: j.scope || "order", scopeValue: j.scopeValue || null
+          scope: j.scope || "order", scopeValue: j.scopeValue || null,
+          // a 'cart' code's own lines — see promoLineIn()
+          lines: Array.isArray(j.lines) ? j.lines.map(String) : null
         };
         S.promoErr = ""; S.promoMin = 0; S.promoErrScope = ""; S.promoErrValue = "";
         // one order, one code — the mirror of applyGiftCode() above
@@ -13869,9 +13920,10 @@
         S.promoErrScope = j.scope || "";
         S.promoErrValue = j.scopeValue || "";
       }
-      render(); refocus("[data-applypromo]");
+      render(); promoSaid(fromLetter);
     }).catch(function () {
       S.promoBusy = false; S.promoInfo = null; S.promoErr = "unavailable"; render();
+      if (fromLetter) promoSaid(true);
     });
   }
 
@@ -15981,60 +16033,91 @@
       /* its own slot, so the search sheet opened from it repaints only this
          (patchAcctPoint) — a render() would take the caret out of the box */
       "<div data-acct-point>" + acctPointHTML() + "</div>" +
+      // …and under «Курьер до двери», the door the courier rings (acctAddrHTML)
+      (S.acctForm.ship && S.acctForm.ship.method === "courier" ? acctAddrHTML() : "") +
 
       "</section></div>";
   }
-  /* The machine under a parcel row of «Доставка по умолчанию»: a select for a
-     list that fits in one, the checkout's own search for one that does not.
-     The search's sheet is not drawn here — it has a slot of its own
+  /* The courier's address under «Курьер до двери» — the checkout's courier
+     step, field for field: the same three boxes, words and autocomplete, so
+     what is typed here is what the checkout would have asked for and fills
+     in (applyAcctShipPref). Дим, 23.09.2026: «the user who always uses
+     courier should still have the option to set a default/standard
+     address.» It saves with the rest of the row when a box is left
+     (acctShipChanged) — once all three are there, which is the checkout's own
+     rule for a courier order; until then the line under the rows says so. */
+  function acctAddrHTML() {
+    var d = S.acctForm.ship, a = (d && d.address) || acctAddrOf(null);
+    var short = S.acctSt.ship === "addr";
+    function box(k, label, ph, auto, mode) {
+      return '<label class="field"><span class="field__label">' + label + "</span>" +
+        '<input class="input" data-acctaddr="' + k + '" value="' + esc(a[k]) + '" placeholder="' + ph + '"' +
+        (auto ? ' autocomplete="' + auto + '"' : "") + (mode ? ' inputmode="' + mode + '"' : "") +
+        ' aria-describedby="acctst-ship"' + (short && !a[k].trim() ? ' aria-invalid="true"' : "") + "></label>";
+    }
+    return '<div class="acct__addr">' + box("addr", "Адрес", "улица, дом", "street-address", "") +
+      '<div class="co__zip">' + box("zip", "Индекс", "12345", "postal-code", "numeric") +
+      box("city", "Город", "Город", "address-level2", "") + "</div></div>";
+  }
+  /* The machine under a parcel row of «Доставка по умолчанию»: the
+     checkout's own picker, for every country and every carrier — the same
+     button, the same sheet, the same search by postcode, town or street,
+     and the map wherever the points have coordinates, keyed on this draft's
+     carrier and country (pointsKey).
+     Until 23.09.2026 only a country whose list did not fit in one download
+     (Italy, Poland) got it; a list that fitted — Estonia, Latvia, Lithuania,
+     Finland — got a plain <select> of up to 1 768 names in alphabetical
+     order, with nothing to type into. Дим, staging, 23.09.2026: «I cannot
+     search for parcel lockers for Estonia — but I can for Italy for example
+     in my account.» The sheet is not drawn here — it has a slot of its own
      (paintPointSheet), so nothing that redraws this block can touch it. */
   function acctPointHTML() {
     // the live list, so the machine saved here is one the checkout can
     // find again by name — acctMachines(); null while it is in flight
     var mach = acctMachines();
     if (mach && !mach.length) return "";
-    /* …and a country whose machines do not fit in one list gets no select
-       at all: 33 603 <option> elements is not a choice on a phone. Until
-       23.09.2026 it got a sentence instead — «Пакомат для этой страны
-       выбирается при оформлении заказа — их слишком много для списка», which
-       Dim marked «not good UX». It gets the checkout's search now: the same
-       button, the same sheet, the same server search by postcode, town or
-       street, keyed on this draft's carrier and country (pointsKey). */
-    if (acctMachinesTooMany()) {
-      return acctPointButton(mach);
-    }
-    var sel = acctMachineName();
+    return acctPointButton(mach);
+  }
+  /** The checkout's point button (pointField), for the account's draft. The
+      saved machine is a name, so the name is what it shows — with the kind
+      and the address under it wherever this browser holds that point
+      (acctPointNamed). A list that arrived whole and no longer has the name
+      shows nothing chosen, as the select before it did: a machine that has
+      closed is not a default. The count is the country's, not the first
+      slice's, like the sheet's own. */
+  function acctPointButton(mach) {
+    var key = acctPointsKey(), d = S.acctForm.ship, want = d && d.machine ? d.machine : "";
+    var pt = want ? acctPointNamed(want) : null;
+    var gone = !!want && !!mach && !POINTS.big[key] && !pt;
+    var chosen = gone ? "" : want;
     /* The label widens the same way the checkout's does, and for the same
        reason: this carrier's list may hold counters as well as machines. */
     var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
     var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
-    return '<label class="field"><span class="field__label">' +
-      (mach ? head + " — " + points(mach.length) : head) + "</span>" +
-      '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
-      (mach
-        ? '<option value=""' + (sel ? "" : " selected") + ">" +
-          (anyCounter ? "— выберите пакомат или пункт выдачи —" : "— выберите пакомат —") + "</option>" +
-          mach.map(function (x) {
-            return '<option value="' + esc(x.name) + '"' + (x.name === sel ? " selected" : "") + ">" +
-              esc(x.kind + " · " + x.name) + "</option>";
-          }).join("")
-        : "<option>Загружаем список…</option>") +
-      "</select></span></label>";
-  }
-  /** The checkout's point button (pointField), for the account's draft. The
-      saved machine is a name, so the name is what it shows; the count is the
-      country's, not the first slice's, like the sheet's own. */
-  function acctPointButton(mach) {
-    var d = S.acctForm.ship, chosen = d && d.machine ? d.machine : "";
-    var anyCounter = !!mach && mach.some(function (x) { return x.kind !== "Пакомат"; });
-    var head = anyCounter ? "Пакомат или пункт выдачи по умолчанию" : "Пакомат по умолчанию";
-    return '<div class="field"><span class="field__label">' + head + " — " + points(POINTS.big[acctPointsKey()]) + "</span>" +
+    return '<div class="field"><span class="field__label">' +
+      (mach ? head + " — " + points(POINTS.big[key] || mach.length) : head) + "</span>" +
       '<button class="pointbtn' + (chosen ? " pointbtn--set" : "") + '" data-pointopen="acct">' +
         (chosen
-          ? '<span class="pointbtn__nm">' + esc(chosen) + "</span>"
+          ? '<span class="pointbtn__nm">' + esc(chosen) + "</span>" +
+            (pt ? '<span class="pointbtn__ad">' + pointKindLine(pt) + "</span>" : "")
           : '<span class="pointbtn__nm">' + (anyCounter ? "Выберите пакомат или пункт выдачи" : "Выберите пакомат") + "</span>" +
-            '<span class="pointbtn__ad">Поиск по адресу и городу</span>') +
+            '<span class="pointbtn__ad">' + (mach ? "Поиск по адресу и городу"
+              // a feed that failed is not a feed that is still coming — and
+              // the tap that opens the sheet asks for it again (openPointSheet)
+              : POINTS.err[key] ? "Список не загрузился — нажмите ещё раз" : "Загружаем список…") + "</span>") +
         '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button></div>";
+  }
+  /** The saved name's point, wherever this browser holds it: the draft's
+      carrier list, else — a country too big for one — an answer the search
+      brought back (the sheet's own, or matchAcctPoint's by name). */
+  function acctPointNamed(name) {
+    var key = acctPointsKey(), want = String(name).toLowerCase();
+    var hit = pointNamed(POINTS.by[key] || [], want);
+    if (hit || !POINTS.big[key]) return hit;
+    for (var fk in POINTS.found) {
+      if (fk.indexOf(key + "|") === 0 && (hit = pointNamed(POINTS.found[fk] || [], want))) return hit;
+    }
+    return null;
   }
   /** The slot above, redrawn in place — the sheet opening, closing, picking. */
   function patchAcctPoint() {
@@ -16095,6 +16178,14 @@
     S.acctCode = ""; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false, ship: null };
     S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
+    /* …and what the account poured into this page's checkout: the e-mail, the
+       name, the phone, the courier address and the chosen parcel machine.
+       Before 24.09.2026 they stayed in the open tab after «Выйти», so on a
+       shared computer the next person's checkout opened on the last one's
+       details. The method and carrier are no one's data and stay. */
+    S.email = "";
+    S.ship.name = ""; S.ship.phone = ""; S.ship.addr = ""; S.ship.zip = ""; S.ship.city = ""; S.ship.point = null;
+    S.emailTouched = false; S.shipTouched = false; S.shipPicked = false;
     // …including the "somebody signs in here" flag, so the next visit from
     // this browser is an anonymous one again and asks nothing at boot
     acctHint(false);
@@ -16294,7 +16385,37 @@
      consent exactly as before (applyAcctShipPref, acctSyncNewsletter), and
      the consent stamps are still the server's (PATCH marketing). */
   function shipDraftFrom(p) {
-    return p ? { country: p.country, method: p.method, carrier: p.carrier || "", machine: p.machine || "" } : null;
+    if (!p) return null;
+    var d = { country: p.country, method: p.method, carrier: p.carrier || "", machine: p.machine || "" };
+    // a courier row carries its three boxes, filled from the row or empty
+    if (p.method === "courier") d.address = acctAddrOf(p.address);
+    return d;
+  }
+  /* ---- the courier's address in «Доставка по умолчанию» -------------------
+     {addr, zip, city} — the order's own `shipping.address`, and what the
+     server keeps only whole (normalizeShipAddress in src/lib/customers.ts). */
+  /** A copy of an address, every field a string. */
+  function acctAddrOf(a) {
+    return { addr: String((a && a.addr) || ""), zip: String((a && a.zip) || ""), city: String((a && a.city) || "") };
+  }
+  /** The checkout's rule for a courier: all three there (shipRequired / shipEmpty). */
+  function acctAddrWhole(a) { return !!a && !!a.addr.trim() && !!a.zip.trim() && !!a.city.trim(); }
+  /** Something typed, not everything — nothing to save yet, and the line says so. */
+  function acctAddrPartial(a) { return !!a && !acctAddrWhole(a) && !!(a.addr.trim() || a.zip.trim() || a.city.trim()); }
+  /** The address as the server will keep it — folded like text() there, or "" when not whole. */
+  function acctAddrKey(a) {
+    if (!a || !acctAddrWhole(acctAddrOf(a))) return "";
+    return [a.addr, a.zip, a.city].map(function (v) { return String(v).replace(/\s+/g, " ").trim(); }).join("|");
+  }
+  /** The boxes marked (or not) in place — the line under the rows is painted by acctSt. */
+  function paintAcctAddr() {
+    var d = S.acctForm.ship, a = d && d.address, short = S.acctSt.ship === "addr";
+    var boxes = document.querySelectorAll("[data-acctaddr]");
+    for (var i = 0; i < boxes.length; i++) {
+      var k = boxes[i].getAttribute("data-acctaddr");
+      if (short && a && !String(a[k] || "").trim()) boxes[i].setAttribute("aria-invalid", "true");
+      else boxes[i].removeAttribute("aria-invalid");
+    }
   }
   /** The form from the row — on every profile fetch, so «unchanged» always
       means «same as the server», never «same as before». */
@@ -16313,7 +16434,7 @@
     var box = document.querySelector('[data-acctf="' + f + '"]');
     if (box && document.activeElement !== box && box.value !== S.acctForm[f]) box.value = S.acctForm[f];
   }
-  function shipKey(p) { return p ? [p.country, p.method, p.carrier || "", p.machine || ""].join("|") : ""; }
+  function shipKey(p) { return p ? [p.country, p.method, p.carrier || "", p.machine || "", p.method === "courier" ? acctAddrKey(p.address) : ""].join("|") : ""; }
   /** Does this one field differ from what the server holds? Only then is it sent. */
   function acctFieldDirty(f) {
     var c = S.cust, d = S.acctForm;
@@ -16352,6 +16473,7 @@
     if (st === "busy") return "Сохраняем…";
     if (st === "saved") return f === "ship" ? "Доставка по умолчанию сохранена ✓" : "Сохранено ✓";
     if (st === "need") return "Выберите пакомат — тогда сохраним";
+    if (st === "addr") return "Впишите адрес, индекс и город — тогда сохраним";
     if (st.indexOf("err:") === 0) return acctErrWord(st.slice(4));
     return "";
   }
@@ -16449,13 +16571,20 @@
   function acctShipChanged() {
     var d = S.acctForm.ship;
     if (!d) return;
-    /* A country whose machines do not fit in one list has no select here to
-       wait for. The country and the carrier are worth remembering on their
-       own — the checkout then opens on them and asks only for the machine —
-       so the row saves at once, and the search button under it can add the
-       machine whenever the shopper likes (acctPointButton). */
+    /* A country whose machines do not fit in one list saves without one.
+       The country and the carrier are worth remembering on their own — the
+       checkout then opens on them and asks only for the machine — so the row
+       saves at once, and the search button under it can add the machine
+       whenever the shopper likes (acctPointButton). A list that arrived
+       whole has every machine one tap away under the same button, so there
+       the row still waits for its pick. */
     if (d.method === "parcel" && !d.machine && !acctMachinesTooMany()) { acctSt("ship", "need"); return; }
+    /* A courier row saves at once with no address (the checkout then asks
+       for one, as before), and with a whole one; half an address waits for
+       the rest — the server would keep none of it (normalizeShipAddress). */
+    if (d.method === "courier" && acctAddrPartial(d.address)) { acctSt("ship", "addr"); paintAcctAddr(); return; }
     acctQueue("ship");
+    paintAcctAddr();
   }
   /* «Хочу получать новости и скидки» at the checkout starts from the
      account's own consent: Renat, signed in and subscribed, found it unticked
@@ -16638,22 +16767,54 @@
      The token is signed by the server, but nothing here trusts it: only
      catalogue ids survive, quantity is capped at CART_MAX_QTY, and the lines are
      merged into whatever is already in the basket. The worst a forged link
-     can do is put products in its own reader's cart. */
-  function resumeCart() {
+     can do is put products in its own reader's cart.
+
+     It is read BEFORE the route is decided (firstPaint()), and that order is
+     the whole fix of 23.09.2026. It used to run after: /shop2/checkout/ with
+     an empty basket is routeHome(), and routeHome() replaceState()s the
+     address to /shop2/ — query and all — so by the time this looked for
+     ?resume= there was none. A letter is read on a phone that never saw the
+     basket, or days later in a browser that has been cleared: the button
+     landed on the home page, basket empty, nothing said. The one browser it
+     worked in was the one that still had the basket and did not need it.
+
+     Merging with a basket that is not empty: a line it already has is raised
+     to the letter's quantity, never added to — the same link opened twice is
+     one line at the letter's count, not two lines and not double. Lines the
+     letter does not mention stay where they are. */
+  /** The ?resume= token as the letter wrote it, "" when the address has none. */
+  function resumeToken() {
     var m = String(location.search || "").match(/[?&]resume=([^&]+)/);
-    if (!m) return;
-    var payload = null;
+    return m ? safeDecode(m[1]) : "";
+  }
+  /** The token's payload, decoded but not believed; null when it will not decode. */
+  function resumePayload(tok) {
     try {
-      var raw = decodeURIComponent(m[1]).split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+      var raw = String(tok || "").split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
       var bin = atob(raw + "===".slice((raw.length + 3) % 4));
       var bytes = new Uint8Array(bin.length);
       for (var bi = 0; bi < bin.length; bi++) bytes[bi] = bin.charCodeAt(bi);
-      payload = JSON.parse(new TextDecoder().decode(bytes));
-    } catch (e) { payload = null; }
-    var list = payload && Array.isArray(payload.i) ? payload.i : null;
-    if (!list) return;
+      var payload = JSON.parse(new TextDecoder().decode(bytes));
+      return payload && Array.isArray(payload.i) ? payload : null;
+    } catch (e) { return null; }
+  }
+  /** Fills the basket from the letter, without a word: the screen is not
+      there yet. resumeSay() speaks once it is. null when the address carries
+      no letter at all. */
+  function resumeCart() {
+    var tok = resumeToken();
+    if (!tok) return null;
+    /* The token is spent whatever it turns out to hold: a reload must not
+       re-add the lines, nor say «ссылка устарела» a second time. */
+    try { history.replaceState(history.state || null, "", location.pathname); } catch (e) {}
+    var payload = resumePayload(tok);
+    if (!payload) return { said: "broken" };
+    /* Thirty days (RESUME_TTL_MS in src/lib/flows.ts), after which the server
+       will not confirm the letter's code either — a basket brought back from
+       a stale link would be the letter's offer without the letter's price. */
+    if (payload.exp != null && Number(payload.exp) <= Date.now()) return { said: "expired" };
     var added = 0;
-    list.slice(0, 50).forEach(function (l) {
+    payload.i.slice(0, 50).forEach(function (l) {
       var id = String(l && l.id || "");
       var known = null;
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = CATALOGUE[i]; break; }
@@ -16681,12 +16842,42 @@
       else S.cart.push({ id: id, size: size, qty: qty });
       added += 1;
     });
-    if (!added) return;
+    if (!added) return { said: "gone" };
     persist();
-    // the token is spent — a reload must not re-add the same lines
-    try { history.replaceState(history.state || null, "", location.pathname); } catch (e) {}
-    render();
+    // the second letter's code: only a candidate until resumeCode() asks
+    return { said: "restored", token: tok, code: typeof payload.p === "string" && payload.p ? payload.p : "" };
+  }
+  /** …and what became of it, said once the first screen is painted. */
+  function resumeSay(r) {
+    if (!r) return;
+    if (r.said === "broken") { toast("Ссылка из письма повреждена — корзину не восстановить"); return; }
+    if (r.said === "expired") { toast("Ссылка из письма устарела — корзину не восстановить"); return; }
+    /* Every line sold out, or off the shelf, since the letter went. Said,
+       because the shopper pressed «back to my cart» and would otherwise be
+       looking at an empty basket wondering what the button was for. */
+    if (r.said === "gone") { toast("Товаров из письма больше нет в наличии"); return; }
     toast("Корзина восстановлена ✓");
+    if (r.code) resumeCode(r.token);
+  }
+  /* The second letter's code rides inside the token (`p`), and a code read
+     out of a payload nothing has verified is a string anybody could have
+     typed into an address bar. So the server checks the signature first
+     (GET /api/carts/resume/), and only then is the code priced like any
+     other (applyPromoCode) — which is also where a spent or expired one is
+     refused, in the promo box's own words. The letter prints the code too,
+     so the refusal here can point at it. */
+  function resumeCode(tok) {
+    var fail = function () { toast("Скидку из письма не удалось проверить — введите код из письма"); };
+    fetch("/api/carts/resume/?t=" + encodeURIComponent(tok)).then(function (r) {
+      // no shop behind this page (the static prototype) — no codes at all
+      if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
+      return r.json().catch(function () { return null; });
+    }).then(function (j) {
+      if (j && j.offline) return;
+      if (!j || !j.ok || !j.code) { fail(); return; }
+      S.promo = j.code;
+      applyPromoCode(true);
+    }).catch(fail);
   }
 
   /* ---------- ?buy=<qty> — «Купить» from Google Shopping ------------------
@@ -16830,6 +17021,23 @@
     return !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
   }
   function giftToBad() { return S.giftToTouched && giftToEmailBad(); }
+  /**
+   * The first checkout step that still needs the shopper — judged by the same
+   * three tests the «Далее» buttons make (the e-mail; the delivery fields, the
+   * parcel machine and a gift card's recipient), but without drawing errors:
+   * nobody has typed anything yet. 3 when both are already complete.
+   *
+   * Dim, 23.09.2026 («A»): a signed-in customer whose account filled contact
+   * and delivery goes from the product page's «Купить через G Pay» straight
+   * to «Оплата». The two steps above stay on screen as their ticked,
+   * editable heads, and step 3 shows the total with delivery right above
+   * «Оплатить» — so the shop gains no new screen, only a shorter walk.
+   */
+  function coFirstOpenStep() {
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email)) return 1;
+    if (shipMissing().length || pointMissing() || (isDigital() && giftToEmailBad())) return 2;
+    return 3;
+  }
 
   function shipField(key, label, ph, auto, mode) {
     var bad = shipBad(key);
@@ -17035,7 +17243,7 @@
   function pointsArrived() {
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
        asks for it from inside a render — so the answer has to bring a repaint
-       with it or the select stays on «Загружаем список…» until something
+       with it or the button stays on «Загружаем список…» until something
        else redraws the screen. */
     if (S.screen === "account") {
       /* …and the list that lands can settle a row that was waiting for it.
@@ -39825,7 +40033,14 @@
       if (t.classList.contains("btn--express")) {
         for (var wi = 0; wi < PAYS.length; wi++) if (PAYS[wi].k === "wallet") S.pay = wi;
       }
-      addToCart(d.buynow); go("checkout"); return;
+      addToCart(d.buynow); go("checkout");
+      /* a signed-in customer skips the steps the account already filled
+         (coFirstOpenStep); a guest, or anything missing, opens where it did */
+      if (S.loggedIn) {
+        var open = coFirstOpenStep();
+        if (open > 1) { S.coStep = open; render(); refocus('.costep__head[data-step="' + open + '"]'); }
+      }
+      return;
     }
     if (d.cart !== undefined) { openDrawer("cart"); return; }
     if (d.closecart !== undefined) { closeDrawers(); return; }
@@ -42215,6 +42430,13 @@
       S.acctForm[t.dataset.acctf] = t.value;
       if (S.acctSt[t.dataset.acctf] && S.acctSt[t.dataset.acctf] !== "busy") acctSt(t.dataset.acctf, "");
     }
+    // …and the courier's address boxes: the same, onto the delivery draft
+    // (a whole address saves when a box is left — acctShipChanged)
+    else if (t.matches("[data-acctaddr]")) {
+      var adrD = S.acctForm.ship;
+      if (adrD) { if (!adrD.address) adrD.address = acctAddrOf(null); adrD.address[t.dataset.acctaddr] = t.value; }
+      if (S.acctSt.ship && S.acctSt.ship !== "busy") { acctSt("ship", ""); paintAcctAddr(); }
+    }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
@@ -42683,6 +42905,12 @@
        own country, not S.country — that one belongs to the checkout in
        progress. */
     else if (t.matches("[data-acctcountry]")) acctPickCountry(t.value, "EE");
+    /* the courier's address: a box left saves the row — once all three boxes
+       are there (acctShipChanged); a line under the rows says what is short */
+    else if (t.matches("[data-acctaddr]")) {
+      var adrC = S.acctForm.ship;
+      if (adrC) { if (!adrC.address) adrC.address = acctAddrOf(null); adrC.address[t.dataset.acctaddr] = t.value; acctShipChanged(); }
+    }
     /* …and the country behind «Другая страна Европы», which is the one the
        rows and the price are actually drawn for. */
     else if (t.matches("[data-acctcountryiso]")) acctPickCountry(t.value, "EU");
@@ -42779,11 +43007,6 @@
       var bsIt = S.bundleForm.items[Number(t.dataset.bundlesize)];
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
-    }
-    // the machine is a name (acctMachineName); "" is the placeholder — none
-    // chosen yet. Its pick is what saves a parcel row (acctShipChanged).
-    else if (t.matches("[data-acctmachine]")) {
-      if (S.acctForm.ship) { S.acctForm.ship.machine = t.value; acctShipChanged(); }
     }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
@@ -43762,6 +43985,11 @@
     } catch (e) {}
   })();
   function firstPaint() {
+  /* account-flows: did they arrive from an abandoned-cart letter? The basket
+     is filled BEFORE the route is read, and silently — resumeCart() says why:
+     the other way round, /shop2/checkout/ with the empty basket such a
+     browser has is routeHome(), which wipes the letter's address unread. */
+  var resumed = resumeCart();
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */
@@ -43782,10 +44010,8 @@
   restartHero();
   intro();
 
-  /* account-flows: did they arrive from an abandoned-cart letter? After the
-     first paint and after the boot replaceState above, which would otherwise
-     put ?resume= straight back into the address bar. */
-  resumeCart();
+  /* …and what became of the letter, now there is a screen to say it on. */
+  resumeSay(resumed);
   /* …or from a «Купить» in Google Shopping (/cart/<id>:<qty> → the product
      page with ?buy=): into the basket and on to the checkout. Before
      heldAsk(), for the same reason as resumeCart(). */
@@ -43847,9 +44073,18 @@
     var bootPath = stripLangPrefix(location.pathname);
     var bootProd = bootPath.match(/\/shop2\/p\/(c-[^/]+)\/?$/);
     var bootBrand = bootPath.match(/\/shop2\/b\/([^/]+)\/?$/);
+    var bootLetter = resumePayload(resumeToken());
     bootWait = !!((bootProd && !byIdOrNull(decodeURIComponent(bootProd[1]))) ||
       // …or a brand page of a brand only the owner's own products carry
-      (bootBrand && !BRAND_BY_SLUG[decodeURIComponent(bootBrand[1])]));
+      (bootBrand && !BRAND_BY_SLUG[decodeURIComponent(bootBrand[1])]) ||
+      /* …or an abandoned-cart letter naming one of the owner's own products,
+         which a browser that has never been here does not have until the feed
+         lands — restored before that, resumeCart() would drop the line as
+         unknown */
+      (bootLetter && bootLetter.i.some(function (l) {
+        var lid = String(l && l.id || "");
+        return lid.indexOf("c-") === 0 && !byIdOrNull(lid);
+      })));
   } catch (e) { bootWait = false; }
   if (bootWait && OV_BOOT) {
     bootHeld = true;

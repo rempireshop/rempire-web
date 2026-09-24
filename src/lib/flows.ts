@@ -369,7 +369,7 @@ function sign(payload: string): string {
  *
  * `code` is the second letter's promo (`p` in the payload), and it rides
  * INSIDE the token rather than beside it in the query string for one reason:
- * the storefront strips the whole query the moment it has restored the basket
+ * the storefront strips the whole query the moment it has read the token
  * (`history.replaceState` in resumeCart(), public/shop2/app.js), so anything
  * parked next to `resume=` is gone before it could be applied. Omitted
  * entirely for the first letter, which has no code — an older reader that
@@ -1052,10 +1052,12 @@ async function explainEmptyDiscountQueue(
 /* ---------- «Товар снова в наличии» --------------------------------------- */
 
 /**
- * Everybody waiting for one product gets one letter. Called from
- * `upsertOverride` in src/lib/orders.ts the moment the owner sets stock to
- * «в наличии» — pending rows only exist for a product that was sold out, so
- * "no pending rows" is the same statement as "it was not out".
+ * Everybody waiting for one product gets one letter. Called the moment the
+ * product comes BACK — from «нет в наличии» to anything the shop sells, «мало»
+ * included: `upsertOverride` in src/lib/orders.ts for the owner's own
+ * «Наличие» word, move()/setQty() in src/lib/inventory.ts for a size counted
+ * up from zero. Deciding what a comeback is belongs to those two callers;
+ * this only sends.
  *
  * …as long as the shop agrees. The owner writing «в наличии» is one of two
  * voices on that question: for a product anybody has actually counted, the
@@ -1064,15 +1066,19 @@ async function explainEmptyDiscountQueue(
  * could be flipped on a shelf the scanner had already counted down to zero,
  * and the shop would post «Снова в наличии» over a page that says «нет в
  * наличии». Dim, 17.09.2026: do not send when the count is zero — the shop
- * must not contradict itself in writing.
+ * must not contradict itself in writing. And the other way round: a count
+ * coming up from zero may not talk past the owner's «Снять с продажи» (a
+ * manual «нет в наличии»), which the page goes on showing however full the
+ * shelf is. Both are one question — what does the storefront say? — asked of
+ * shopStockOf(), which merges the three voices the way the page does.
  *
  * Nothing is stamped when that happens: the alerts stay pending, and the
- * daily sweep sends them the day the shelf really has something on it.
+ * daily sweep sends them the day the page really says something is there.
  */
 export async function runBackInStock(productId: string): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
-  if (await countedOut(productId)) return { sent: 0, skipped: 0 };
+  if ((await shopStockOf(productId)) === "out") return { sent: 0, skipped: 0 };
   /* The owner's own subject / intro / signature, exactly as the sweep below
      loads them. This is the PRIMARY path — the stock switch in the panel calls
      it (upsertOverride, src/lib/orders.ts) — and without this line the letter
@@ -1085,26 +1091,53 @@ export async function runBackInStock(productId: string): Promise<FlowRun> {
 }
 
 /**
- * Does the counted shelf say this product is empty?
+ * The storefront's own word for a product, from its three voices, in the
+ * order getOverrides() in src/lib/orders.ts merges them for the badge and the
+ * buy button: the owner's manual «нет в наличии» is «Снять с продажи» and
+ * beats any count; otherwise the count, for a product anybody has counted
+ * (src/lib/inventory.ts, «tracked»); otherwise the owner's manual word;
+ * otherwise the catalogue file's own.
  *
- * Only ever `true` for a product somebody has actually counted and counted to
- * zero. A product nobody has ever scanned has no count and is absent from the
- * map (src/lib/inventory.ts, «tracked»), and «мало» is still something on the
- * shelf — neither of those is a reason to hold a letter back.
- *
- * Best effort and dynamically imported, exactly as sweepBackInStock() reads
- * the same numbers: an inventory module that cannot answer leaves the owner's
- * own word in charge, which is what this hook did before the question was
- * asked at all.
+ * «мало» is on sale. Only "out" is not.
  */
-async function countedOut(productId: string): Promise<boolean> {
+export function shopStock(
+  manual: string | null | undefined,
+  counted: string | null | undefined,
+  file: string | null | undefined,
+): string {
+  if (manual === "out") return "out";
+  return counted || manual || file || "out";
+}
+
+/**
+ * shopStock() for one product, read now — null for a product neither the
+ * catalogue nor the owner's own rows know (the caller treats its alerts as
+ * spent, as sendStockAlerts() always has).
+ *
+ * Best effort on the two optional voices, exactly as sweepBackInStock() reads
+ * the same numbers: no overrides table, or an inventory module that cannot
+ * answer, leaves the voices that did answer in charge — which is what the
+ * hook did before the question was asked at all. Dynamically imported from
+ * @/lib/inventory, never statically: see this module's note on the cycle.
+ */
+export async function shopStockOf(productId: string): Promise<string | null> {
+  const p = (await productsForAlerts([productId])).get(productId);
+  if (!p) return null;
+  let manual: string | null = null;
+  try {
+    const rows = await query<{ stock: string | null }>("select stock from product_overrides where product_id = $1", [productId]);
+    manual = rows.length ? rows[0].stock : null;
+  } catch {
+    /* no overrides table — the catalogue's own stock is the answer */
+  }
+  let counted: string | undefined;
   try {
     const { productStockStates } = await import("@/lib/inventory");
-    return (await productStockStates([productId]))[productId] === "out";
+    counted = (await productStockStates([productId]))[productId];
   } catch (err) {
     console.error("[flows] numeric stock unavailable, trusting the switch:", err);
-    return false;
   }
+  return shopStock(manual, counted, p.stock);
 }
 
 /**
@@ -1156,11 +1189,10 @@ export async function sweepBackInStock(): Promise<FlowRun> {
   const ready = alerts.filter((a) => {
     const p = products.get(a.product_id);
     if (!p) return false;
-    const manual = overrides.get(a.product_id);
     // the same order getOverrides() merges in: a manual «нет в наличии» is
     // «Снять с продажи» and beats any count; otherwise the count wins, and
     // an uncounted product falls back to the override, then to the file
-    const stock = manual === "out" ? "out" : (counted.get(a.product_id) ?? manual ?? p.stock);
+    const stock = shopStock(overrides.get(a.product_id), counted.get(a.product_id), p.stock);
     /* «not out», not «in» — the same rule runBackInStock() applies, and the
        owner's decision of 17.09.2026 says it in those words: the letter does
        not go at a counted ZERO. «Мало» is something on the shelf, and telling
@@ -1185,8 +1217,12 @@ async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, Aler
       skipped += 1;
       continue;
     }
-    // Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
-    await markStockAlertSent(alert.id);
+    /* Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
+       …and only by the run whose stamp took the row from pending: another
+       run that read the same row a moment earlier — the owner's «мало» and a
+       scanner count landing together, or either and the daily sweep — has
+       already written, and this one says nothing. */
+    if (!(await markStockAlertSent(alert.id))) continue;
     const lang = normalizeLangCode(alert.lang);
     /* Kind "backstock", not "marketing": this letter was asked for by name,
        so the stop list does not apply to it — and its own link cancels the

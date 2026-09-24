@@ -695,19 +695,26 @@ test.describe("account — the default delivery reaches the checkout", () => {
     const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=smartpost"));
     await row.locator("input[data-acctm]").check();
     await feed;
-    const machines = page.locator("[data-acctmachine]");
-    await expect(machines).toBeEnabled();
-    await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
-    /* The select opens on a placeholder — a machine is chosen, never assumed
-       (the alphabetically first one is in Abja-Paluoja) — and since
-       12.09.2026 the block saves itself: a parcel row waits for its machine
-       and says so under the list, and the pick of the machine is what puts
-       the choice on the row (account-settings.spec.ts has the whole flow). */
+    /* The checkout's own picker since 23.09.2026, for every country: the
+       button opens on nothing chosen — a machine is chosen, never assumed —
+       and since 12.09.2026 the block saves itself: a parcel row waits for its
+       machine and says so under the rows, and the tap on a machine in the
+       sheet is what puts the choice on the row (account-settings.spec.ts has
+       the whole flow). */
     const line = page.locator('[data-acctst="ship"]');
     await expect(line).toHaveText("Выберите пакомат — тогда сохраним");
-    await machines.selectOption({ index: 1 });
-    const machine = (await machines.inputValue()).trim();
+    const picker = page.locator('[data-pointopen="acct"]');
+    await expect(picker).toContainText("Выберите пакомат");
+    await picker.click();
+    const sheet = page.getByRole("dialog", { name: "Выбор пакомата" });
+    await expect(sheet).toBeVisible();
+    const first = sheet.locator("[data-pointpick]").first();
+    await expect(first).toBeVisible({ timeout: 15_000 });
+    const machine = ((await first.locator(".prow__nm").textContent()) || "").trim();
     expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
+    await first.click();
+    await expect(sheet).toBeHidden();
+    await expect(picker).toContainText(machine);
     await expect(line).toContainText("✓");
 
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));

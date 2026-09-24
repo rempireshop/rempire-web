@@ -124,7 +124,12 @@ describe("resumeCart: the abandoned-cart link and stock", () => {
     ];
     const S = { cart: [] as Array<{ id: string; size: number; qty: number }> };
     const toasts: string[] = [];
-    const body = `${slice("sizeStockOf")} ${slice("sizeOut")} ${slice("resumeCart")} resumeCart();`;
+    /* Since 23.09.2026 the basket is filled before the first paint, without a
+       word, and resumeSay() speaks once the screen is there — so the pair is
+       what «the letter's link» is. tests/resume-link.test.ts runs it inside
+       the real boot. */
+    const body = `${slice("sizeStockOf")} ${slice("sizeOut")} ${slice("safeDecode")} ${slice("resumeToken")}
+      ${slice("resumePayload")} ${slice("resumeCart")} ${slice("resumeSay")} resumeSay(resumeCart());`;
     new Function("location", "CATALOGUE", "S", "CART_MAX_QTY", "persist", "history", "render", "toast", body)(
       { search: `?resume=${encodeURIComponent(token(items))}`, pathname: "/shop2/" },
       CATALOGUE,
@@ -147,10 +152,15 @@ describe("resumeCart: the abandoned-cart link and stock", () => {
       .toEqual([{ id: "in", size: 0, qty: 1 }]);
   });
 
-  it("says nothing at all when every line of the letter has sold out", () => {
+  it("restores nothing when every line of the letter has sold out — and says that much", () => {
+    /* It used to say nothing at all. That was harmless while the link only
+       ever worked in a browser that still had a basket; once it works where
+       letters are actually opened (23.09.2026), silence here is an empty
+       home page after «вернуться к корзине», which is the bug that was
+       fixed. One sentence, no list. */
     const out = run([{ id: "gone", q: 1 }]);
     expect(out.cart).toEqual([]);
-    expect(out.toasts).toEqual([]);
+    expect(out.toasts).toEqual(["Товаров из письма больше нет в наличии"]);
   });
 
   it("drops the VOLUME that sold out and keeps the one that did not", () => {

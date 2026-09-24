@@ -97,15 +97,26 @@ test.describe("account — the settings reach the checkout", () => {
     await row.locator("input[data-acctm]").check();
     await expect(ship).toHaveText("Выберите пакомат — тогда сохраним");
     await feed;
-    const machines = page.locator("[data-acctmachine]");
-    await expect(machines).toBeEnabled();
-    await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
     // the pickup row is still what the server holds until the machine is picked
     expect((await profile(page)).shipPref?.method).toBe("pickup");
-    // index 0 is the placeholder: a machine is chosen, never assumed — and its pick is the save
-    await machines.selectOption({ index: 1 });
-    const machine = (await machines.inputValue()).trim();
+    /* The checkout's own picker, for Estonia as for Italy (Dim, 23.09.2026:
+       «I cannot search for parcel lockers for Estonia — but I can for Italy»):
+       the button opens the search sheet, nothing is chosen until a row is
+       tapped — a machine is chosen, never assumed — and the tap is the save. */
+    const picker = page.locator('[data-pointopen="acct"]');
+    await expect(picker).toContainText("Выберите пакомат");
+    await expect(page.locator("[data-acctmachine]"), "the old select is back in the account").toHaveCount(0);
+    await picker.click();
+    const sheet = page.getByRole("dialog", { name: "Выбор пакомата" });
+    await expect(sheet).toBeVisible();
+    await sheet.locator("[data-pointq]").fill("Tallinn");
+    const first = sheet.locator("[data-pointpick]").first();
+    await expect(first).toBeVisible({ timeout: 15_000 });
+    const machine = ((await first.locator(".prow__nm").textContent()) || "").trim();
     expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
+    await first.click();
+    await expect(sheet).toBeHidden();
+    await expect(picker).toContainText(machine);
     await expect(ship).toHaveText("Доставка по умолчанию сохранена ✓");
 
     // the server really holds both
