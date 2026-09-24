@@ -3536,33 +3536,39 @@
         "Открыть «Заказы» и пролистать список до самого низа, нажимая «Показать ещё».",
         "Взять номер заказа, которого в списке нет, — из старого письма покупателю.",
         "Ввести этот номер в поиск и подождать.",
+        "Нажать на найденный заказ, потом «← Заказы».",
+        "Если в строке найденного заказа есть «Доставлен» или «Выдан клиенту» — нажать и сразу «Отменить».",
         "Стереть пару знаков и дописать их обратно, быстро.",
         "Ввести номер, которого нет вообще."
       ],
       "expect": [
         "Пока ищем, над списком написано «Ищем…».",
         "Старый заказ нашёлся, хотя в самом списке его не было.",
+        "Старый заказ открывается карточкой, а кнопка в его строке срабатывает с первого нажатия.",
         "После быстрой правки список отвечает на то, что в поле сейчас.",
         "На несуществующий номер написано «Ничего не нашли» и по чему мы ищем.",
         "Числа на чипах «Отправить», «По счёту» и «Возвраты» от поиска не изменились."
       ],
       "why": "Заказ, который покупатель называет по телефону, обычно старый — он-то в сотне последних и не лежит.",
       "risk": "med",
-      "writes": false,
-      "mark": "new",
-      "markedAt": "2026-09-17T13:58:37.000Z",
+      "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-24T14:50:13.454Z",
       "en": {
         "title": "The order search looks through the whole shop",
         "steps": [
           "Open «Заказы» and scroll to the very bottom, pressing «Показать ещё».",
           "Take an order number that is NOT in that list — from an old letter to a customer.",
           "Type that number into the search and wait.",
+          "Tap the order that was found, then «← Заказы».",
+          "If its row has «Доставлен» or «Выдан клиенту», press it and then «Отменить» at once.",
           "Delete a couple of characters and type them back, quickly.",
           "Type a number that does not exist at all."
         ],
         "expect": [
           "While it is looking, «Ищем…» stands above the list.",
           "The old order is found, although it was not in the list itself.",
+          "The old order opens its card; its row's button works on the first tap.",
           "After the quick edit the list answers what is in the box, not the previous word.",
           "A number that does not exist gets «Ничего не нашли» and what we search by.",
           "The numbers on the «Отправить», «По счёту» and «Возвраты» chips did not move."
@@ -7818,7 +7824,7 @@
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T12:23:11.393Z"
+      "markedAt": "2026-09-24T14:50:13.454Z"
     },
     {
       "id": "ai-assistant-voice",

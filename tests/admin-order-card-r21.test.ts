@@ -152,9 +152,12 @@ async function makeLabel(answer: Reply): Promise<string[]> {
      the locker door and «Другая коробка» — and both read panel state this
      harness has none of, so they are stubbed rather than sliced. What is under
      test here is the toast, and the toast does not depend on either. */
+  /* admOrderListsReload is the re-read after a label — every copy of the
+     order, the search's too (tests/admin-order-beyond-hundred.test.ts) — and
+     is stubbed like the two extras below. */
   const run = new Function(
     "SRV", "admOrderById", "render", "apiSend", "demoApply", "toast", "loadSrvOrders", "countryName",
-    "admShipBody", "admShipSpent",
+    "admShipBody", "admShipSpent", "admOrderListsReload",
     /* srvMsg is sliced in, not stubbed: since r23-live-ready the server names
        which refusal this is and sends the sentence, and srvCreateShipment
        prints it ahead of SHIP_ERR. Stubbing it would test our fallback map
@@ -170,6 +173,7 @@ async function makeLabel(answer: Reply): Promise<string[]> {
     () => {},
     (c: string) => c,
     (id: string) => ({ orderId: id }),
+    () => {},
     () => {},
   ) as (id: string) => void;
   run("ord-1");
