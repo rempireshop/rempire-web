@@ -8120,12 +8120,62 @@
       if (!j || !j.ok) return;
       apiSeen(true);
       var s = j.settings || {};
-      applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
+      /* …and the edge's own copy is no better than the browser's while a
+         row this browser has just saved is younger than it (shipFreshRow):
+         merged over the saved row it put an old cell straight back into the
+         till (Дим, /test 24.09.2026). The saved row, whole, instead. */
+      var fresh = shipFreshRow();
+      if (fresh) setShipRules(fresh);
+      else applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
       // Rules move both the delivery-method prices/free-shipping hint and the
       // shipping row + total in the summary — never the contact block, so
       // never a full render() (see patchDelivery/patchSummary near patchEmail).
       patchDelivery(); patchSummary();
     }).catch(function () { apiSeen(false); });
+  }
+  /* ---- a row just saved outranks the edge's copy of the old one -----------
+     Дим, /test 24.09.2026, «Цена доставки ниже Montonio»: «First save did
+     not save and the change in checkout could not be seen. I saved another
+     time … and then the second time it worked.» The save had landed. What
+     took it off the screen was the next READ: /api/overrides/ goes out
+     `public, s-maxage=30, stale-while-revalidate=120`
+     (src/app/api/overrides/route.ts), so for up to two and a half minutes
+     after «Сохранить» the edge hands back the row from BEFORE it — and the
+     shop brought back to the front (refreshFeeds → adoptServer), the
+     checkout's first visit (loadShipRules) or a reload took that row as the
+     truth: the till quoted the old price, the panel showed the old boxes, and
+     a second save built on them sent the old row back to the server.
+
+     So the row the server has just taken is remembered, with the time it was
+     taken — in memory, and in this browser's storage for the next page it
+     opens — and for SHIP_FRESH_MS every feed answer is read as that row.
+     After it the edge has caught up and the feed is the truth again (another
+     phone may have saved since). The panel's own read of the settings,
+     GET /api/admin/settings, is never cached and counts the same way, in
+     memory only (loadAdminPricing). A customer's browser never writes one. */
+  var SHIP_FRESH_MS = 180000;
+  var SHIP_FRESH_LS = "rempire-ship-fresh";
+  var shipFresh = null;
+  /** `row` is what the server holds as of now; `keep` — remember it for the
+      next page this browser opens too (a save; not a read). */
+  function shipFreshNote(row, keep) {
+    shipFresh = { at: Date.now(), row: cloneRules(row) };
+    if (!keep) return;
+    try { localStorage.setItem(SHIP_FRESH_LS, JSON.stringify(shipFresh)); } catch (e) {}
+  }
+  /** The newest such row still younger than SHIP_FRESH_MS, or null. */
+  function shipFreshRow() {
+    var now = Date.now(), best = null, kept = null;
+    function young(f) {
+      return !!f && !!f.row && typeof f.row === "object" && typeof f.at === "number" &&
+        now - f.at >= 0 && now - f.at <= SHIP_FRESH_MS;
+    }
+    try { kept = JSON.parse(localStorage.getItem(SHIP_FRESH_LS) || "null"); } catch (e) { kept = null; }
+    // a note past its time is only noise in the owner's storage — dropped once seen
+    if (kept && !young(kept)) { kept = null; try { localStorage.removeItem(SHIP_FRESH_LS); } catch (e) {} }
+    if (young(shipFresh)) best = shipFresh;
+    if (kept && (!best || kept.at > best.at)) best = kept;
+    return best ? best.row : null;
   }
 
   /**
@@ -28075,11 +28125,27 @@
     if (S.pricingLoadErr && !force) return;
     if (loadAdminPricing._busy) return;
     loadAdminPricing._busy = true;
+    var askedAt = Date.now();
     apiJson("/api/admin/settings/").then(function (r) {
       loadAdminPricing._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var st0 = r.body.settings || {};
+        /* The tariff row, from the one read of it no edge can have kept
+           (no-store). The panel used to show whatever /api/overrides/ last
+           said — up to two and a half minutes behind a save — so a reload
+           right after «Сохранить» showed the old boxes, and the next save
+           sent the old row back (Дим, /test 24.09.2026; shipFreshRow). Not
+           while a save is on its way, and not if one landed after this read
+           was asked for: then this answer is the older of the two. Prices
+           typed and not saved stay in their boxes, as in adoptServer(). */
+        var ownShip = feedShipRules(st0);
+        if (ownShip && !S.shipSaving && !(shipFresh && shipFresh.at >= askedAt)) {
+          var keepShipDraft = shipDirty();
+          setShipRules(ownShip);
+          if (!keepShipDraft) S.shipDraft = null;
+          shipFreshNote(ownShip, false);
+        }
         /* The form's own draft is seeded from S.pricingLoaded, and the first
            paint happens before this answer lands — so a draft made from the
            empty defaults has to go, or the card would keep drawing «Партнёры
@@ -35306,7 +35372,12 @@
        prices are not there anymore»). Only a draft that differs is kept;
        an untouched one is simply rebuilt from the new row. */
     var keepShipDraft = shipDirty();
-    var srvRules = feedShipRules(s);
+    /* …and a row saved here (or read from the panel's own settings) in the
+       last three minutes is newer than anything the edge can hand back:
+       adopting the feed over it put the table from BEFORE a confirmed save
+       back on screen and into the till (Дим, /test 24.09.2026 — see
+       shipFreshRow). */
+    var srvRules = shipFreshRow() || feedShipRules(s);
     if (srvRules) setShipRules(srvRules);
     if (!keepShipDraft) S.shipDraft = null;
   }
@@ -35638,7 +35709,12 @@
         S.shipSaving = false;
         // anything but a 200/ok — the below_cost refusal, a 503, no answer at
         // all: the panel must not go on showing a table the shop is not running
-        if (r && r.status === 200 && r.body && r.body.ok) { shipSavedOk(a, entry); return; }
+        if (r && r.status === 200 && r.body && r.body.ok) {
+          // …and a feed the edge still holds from before this must not bring
+          // the old table back over it (shipFreshRow)
+          shipFreshNote(shipSent, true);
+          shipSavedOk(a, entry); return;
+        }
         shipRulesRefused(shipBack);
         if (!shipBack) render();   // an undo has nothing to roll back, but the bar still says «Сохраняем…»
         shipLowAsk(r, shipSent);

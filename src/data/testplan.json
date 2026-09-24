@@ -1840,15 +1840,16 @@
         "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии.",
         "Нажать «Сохранить» и прочитать карточку до конца.",
         "Нажать «Сохранить всё равно».",
-        "В кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva, потом вернуться в панель.",
+        "Сразу в кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva.",
+        "Свернуть браузер и вернуться, потом обновить страницу и открыть панель.",
         "Очистить оба поля, нажать «Сохранить» и подтвердить."
       ],
       "expect": [
         "Карточка «Цена ниже тарифа Montonio» называет обе строки, ничего не обрезано.",
         "Пока не подтвердили, рядом с «Сохранить» написано «Не сохранено».",
         "После подтверждения: «Тарифы доставки сохранены» и «Сохранено ✓».",
-        "В кассе у Omniva стоит 1 €.",
-        "В панели в полях по-прежнему 1 и 2.",
+        "В кассе у Omniva 1 € — и после возврата в браузер, и после обновления.",
+        "В панели после обновления в полях по-прежнему 1 и 2.",
         "После очистки под полями снова цены Montonio: 3,19 € и 4,99 €."
       ],
       "why": "Цена ниже тарифа — ваше решение, но случайно его не принять: карточка спрашивает один раз.",
@@ -1861,21 +1862,22 @@
           "Type 1 into Estonia's Omniva box and 2 into Latvia's.",
           "Press «Сохранить» (save) and read the card to the end.",
           "Press «Сохранить всё равно» (save anyway).",
-          "At the checkout, with a cart under 59 €, pick Estonia, «Пакомат» and Omniva, then go back to the panel.",
+          "Straight away, at the checkout with a cart under 59 €, pick Estonia, «Пакомат» and Omniva.",
+          "Put the browser in the background and come back, then reload and open the panel.",
           "Clear both boxes, press «Сохранить» and confirm."
         ],
         "expect": [
           "The «Цена ниже тарифа Montonio» card names both rows, nothing cut off.",
           "Until you confirm, «Не сохранено» stands next to «Сохранить».",
           "After confirming: «Тарифы доставки сохранены» and «Сохранено ✓».",
-          "At the checkout Omniva costs 1 €.",
-          "Back in the panel the boxes still hold 1 and 2.",
+          "At the checkout Omniva is 1 € — after coming back and after the reload.",
+          "Back in the panel after the reload the boxes still hold 1 and 2.",
           "After clearing, Montonio's prices are under the boxes again: 3,19 € and 4,99 €."
         ],
         "why": "A price below the rate is your call, but never by accident: the card asks once."
       },
-      "mark": "new",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "mark": "redo",
+      "markedAt": "2026-09-24T15:09:21.235Z"
     },
     {
       "id": "panel-carton",
