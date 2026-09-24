@@ -151,7 +151,7 @@ describe("a tapped notification lands on that order", () => {
      older than the newest hundred is fetched on its own. Both are driven for
      real in tests/admin-order-beyond-hundred.test.ts; these pin the wiring. */
   it("reads the order NUMBER — that is what the notification prints", () => {
-    expect(fn).toMatch(/order=\(\[\^&\]\+\)/);
+    expect(fn).toMatch(/order=\(\[\^&#?\]\+\)/);
     expect(fn).toContain("admOrderRaw(want)");
     expect(slice("admOrderRaw")).toContain("String(list[j].number).toUpperCase() === up");
   });

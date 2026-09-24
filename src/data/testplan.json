@@ -5711,12 +5711,16 @@
         "Если строка красная — сделать, что в ней написано, или переслать её Диму. Если зелёная — нажать «Отправить проверочное письмо».",
         "Открыть почту магазина shop@rempireshop.com.",
         "Оформить и оплатить любой заказ, телефон с оповещениями держать рядом.",
+        "Нажать на оповещение; если панель попросит пароль — войти.",
+        "Оформить второй заказ, оставить панель открытой на «Обзоре» и нажать новое оповещение.",
         "Проверить ящик магазина ещё раз."
       ],
       "expect": [
         "Строка зелёная и называет shop@rempireshop.com; красная называет RESEND_TO и Vercel.",
         "Проверочное письмо пришло в ящик магазина за минуту.",
         "На телефон пришло оповещение: сумма, покупатель и товар.",
+        "Нажатие на оповещение открывает карточку этого заказа — и после входа по паролю.",
+        "При открытой панели оповещение второго заказа открывает его карточку, без перезагрузки.",
         "Письма об этом заказе в ящике нет — пока телефон получает оповещения, так задумано."
       ],
       "why": "С 21.09 письмо магазину — запасной путь: оно уходит, только если оповещение не дошло ни до одного телефона, и так не тратит суточный лимит писем. Без RESEND_TO в Vercel не уходит и оно — тогда о таком заказе вы узнаете только из панели.",
@@ -5729,18 +5733,22 @@
           "If the row is red, do what it says or forward it to Dim. If it is green, press «Отправить проверочное письмо».",
           "Open the shop mailbox shop@rempireshop.com.",
           "Place and pay for any order, with the notifying phone at hand.",
+          "Tap the notification; if the panel asks for the password, sign in.",
+          "Place a second order, leave the panel open on «Обзор» and tap the new notification.",
           "Check the shop mailbox again."
         ],
         "expect": [
           "The row is green and names shop@rempireshop.com; red, it names RESEND_TO and Vercel.",
           "The test letter reaches the shop mailbox within a minute.",
           "The phone got the notification: the sum, the buyer and the product.",
+          "Tapping the notification opens that order's card — after a password sign-in too.",
+          "With the panel open, the second order's notification opens its card without a reload.",
           "No letter about this order arrives — intended while the phone gets notifications."
         ],
         "why": "Since 21.09 the shop's letter is the fallback: it goes only when the notification reached no phone, so it does not spend the daily letter allowance. Without RESEND_TO in Vercel it does not go either — and then you learn about such an order only from the panel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z"
+      "markedAt": "2026-09-24T15:05:38.188Z"
     },
     {
       "id": "mail-not-spam",

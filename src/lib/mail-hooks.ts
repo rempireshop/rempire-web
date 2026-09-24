@@ -17,7 +17,7 @@ import { renderOrderShipped } from "@/emails/order-shipped";
 import { renderOrderUnpaid } from "@/emails/order-unpaid";
 import { renderPosReceipt } from "@/emails/pos-receipt";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
-import { money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
+import { baseUrl, money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
 import {
   customerName,
@@ -152,9 +152,21 @@ function ownerSummary(order: OrderLike, headline: string): string {
     ...lines,
     `Итого: ${money(order.total ?? 0)}`,
     `Язык письма: ${lang.toUpperCase()}`,
+    /* The same door the notification opens (ownerPush): the panel, on this
+       order's card — also after the sign-in, if the session has run out. */
+    `Открыть в панели: ${ownerOrderUrl(order)}`,
   ]
     .filter((l): l is string => typeof l === "string")
     .join("\n");
+}
+
+/** The panel on this order's card — the path a push carries. */
+export function ownerOrderPath(order: OrderLike): string {
+  return `/shop2/admin/?order=${encodeURIComponent(orderNumber(order))}`;
+}
+/** …and the whole address, for the letter and Telegram, which have no origin of their own. */
+function ownerOrderUrl(order: OrderLike): string {
+  return baseUrl() + ownerOrderPath(order);
 }
 
 /**
@@ -168,8 +180,9 @@ function ownerSummary(order: OrderLike, headline: string): string {
  *
  * `url` is a path, not an absolute address: the worker resolves it against its
  * own origin, so the stand's notification opens the stand's panel. The panel
- * has no `?order=` handler yet (Dim draws that side); until it does, the tap
- * lands on «Админка», which is where he was going anyway.
+ * opens that order's card from `?order=` (public/shop2/app.js pushOpenWanted,
+ * which since 24.09.2026 runs after the order list is in — before, the first
+ * open of the panel lost the number and the tap landed on «Обзор»).
  */
 function ownerPush(order: OrderLike): PushMessage {
   const items = Array.isArray(order.items) ? order.items : [];
@@ -181,7 +194,7 @@ function ownerPush(order: OrderLike): PushMessage {
     body: [money(order.total ?? 0), who, first + (items.length > 1 ? ` +${items.length - 1}` : "")]
       .filter(Boolean)
       .join(" · "),
-    url: `/shop2/admin/?order=${encodeURIComponent(number)}`,
+    url: ownerOrderPath(order),
     /* One line per ORDER. A retried webhook that reaches this hook twice
        replaces the notification instead of adding a second one that says the
        same thing; two different orders never collide. */

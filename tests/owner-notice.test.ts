@@ -213,6 +213,21 @@ describe("a paid order: the log says why the shop's letter did or did not go", (
     expect(logged).toContain("not verified");
   });
 
+  /* Dim, 24.09.2026 (mail-owner-ping): the notification now opens the order's
+     card, and the letter — the fallback for the day no phone answers — carries
+     the same door, with the shop's own address in front of it. */
+  it("the fallback letter links to the order's card in the panel", async () => {
+    process.env.RESEND_TO = "shop@rempireshop.com";
+    process.env.PUBLIC_BASE_URL = BASE;
+    const { onOrderPaid } = await import("@/lib/mail-hooks");
+    const res = await onOrderPaid(ORDER);
+    expect(res.notified).toBe(true);
+    expect(resend).toHaveLength(1);
+    expect(resend[0].text ?? "", "the shop's letter has no way into the order").toContain(
+      `Открыть в панели: ${BASE}/shop2/admin/?order=R-100099`,
+    );
+  });
+
   it("no phone answered and RESEND_TO is missing — the log names the variable", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const { onOrderPaid } = await import("@/lib/mail-hooks");

@@ -100,6 +100,39 @@ self.addEventListener("push", function (event) {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+/* How long an open panel has to say «понял» before it is reloaded instead. */
+var ASK_MS = 1500;
+
+/**
+ * Hand the tapped address to a panel that is already open, and answer
+ * whether it took it. The panel (app.js, pushOpenFrom) opens the order card in
+ * place and replies on the port; a tab still running code from before this
+ * existed never replies, and the timer answers false for it.
+ */
+function tell(client, href) {
+  return new Promise(function (resolve) {
+    var done = false;
+    function end(v) {
+      if (done) return;
+      done = true;
+      resolve(v);
+    }
+    try {
+      var ch = new MessageChannel();
+      ch.port1.onmessage = function (e) {
+        end(!!(e.data && e.data.ok));
+      };
+      client.postMessage({ type: "rempire:open", url: href }, [ch.port2]);
+    } catch (e) {
+      end(false);
+      return;
+    }
+    setTimeout(function () {
+      end(false);
+    }, ASK_MS);
+  });
+}
+
 /**
  * He tapped it.
  *
@@ -107,6 +140,15 @@ self.addEventListener("push", function (event) {
  * phone a duplicate window is confusing, and on the counter Mac it would lose
  * whatever he was in the middle of. `includeUncontrolled` catches a tab that
  * was loaded before this worker took over.
+ *
+ * Dim, 24.09.2026: «When I click on the phone notification of a completed
+ * order, then it should bring me to that order — currently it just logs me in
+ * to admin». An open panel used to be navigate()d — a reload that loses a
+ * half-typed note — and on iOS, which has no navigate(), merely focused on
+ * whatever screen it was left on. Now it is focused first (while the tap still
+ * allows it) and told the address; only a panel that does not answer is
+ * reloaded onto it. A closed panel opens on the address itself, and the panel
+ * opens the card once its order list is in (app.js pushOpenWanted).
  */
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
@@ -118,13 +160,16 @@ self.addEventListener("notificationclick", function (event) {
       for (var i = 0; i < windows.length; i++) {
         var client = windows[i];
         if (client.url.indexOf(target.origin + PANEL) !== 0) continue;
-        /* Same panel, different order: move it before focusing, so the card he
-           was sent to is what he sees. navigate() is not implemented
-           everywhere (iOS), hence the fallback to a plain focus — he is then
-           on the panel, one tap from the order. */
-        return (client.navigate ? client.navigate(target.href).catch(function () { return client; }) : Promise.resolve(client))
-          .then(function (c) {
-            return (c || client).focus();
+        return Promise.resolve(client.focus ? client.focus() : client)
+          .catch(function () {
+            return client;
+          })
+          .then(function () {
+            return tell(client, target.href);
+          })
+          .then(function (heard) {
+            if (heard || !client.navigate) return;
+            return client.navigate(target.href).catch(function () {});
           });
       }
       return self.clients.openWindow(target.href);

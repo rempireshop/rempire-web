@@ -25645,17 +25645,32 @@
      заказы не приехали, открывать нечего, поэтому номер запоминается и
      срабатывает один раз, когда список пришёл. Не нашли — просто «Заказы»:
      заказ мог быть удалён, а пустой экран в ответ на нажатие — это тупик. */
+  /* Дим, 24.09.2026 (/test «mail-owner-ping»): «When I click on the phone
+     notification of a completed order, then it should bring me to that order —
+     currently it just logs me in to admin». Номер терялся не в оповещении и
+     не во входе: адрес доезжал до панели целым, но loadSrvOrders() звала эту
+     функцию ДО того, как пришедший список попадал в SRV.orders. При первом
+     открытии панели списка ещё нет — номер запоминался, и больше её никто не
+     звал: владелец оказывался на «Обзоре». Теперь её зовут после списка.
+     Сработавший номер убирается из адреса — иначе каждое обновление
+     страницы открывало бы тот же заказ снова. */
   function pushOpenWanted() {
     /* Читается один раз и лениво: на момент загрузки файла адреса ещё может
        не быть тем, каким он станет, а тесты режут этот файл на куски и гоняют
        функции отдельно — чтение location в литерале сломало бы их все. */
     if (PUSH.want === null) {
-      var m = String(location.search || "").match(/[?&]order=([^&]+)/);
-      PUSH.want = m ? decodeURIComponent(m[1]).toUpperCase() : "";
+      var m = String(location.search || "").match(/[?&]order=([^&#]+)/), n = m ? m[1] : "";
+      try { n = decodeURIComponent(n); } catch (e) {}   // «%E0» из обрезанной ссылки — не повод уронить список
+      PUSH.want = n.trim().toUpperCase();
     }
     if (!PUSH.want || !SRV.orders) return;
     var want = PUSH.want;
     PUSH.want = "";
+    try {
+      var rest = String(location.search || "").replace(/^\?/, "").split("&")
+        .filter(function (kv) { return kv && kv.split("=")[0] !== "order"; }).join("&");
+      history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + (location.hash || ""));
+    } catch (e) {}
     S.adminTab = "orders";
     // по номеру — во всех списках, которые есть у панели (admOrderRaw)
     var row = admOrderRaw(want);
@@ -25664,6 +25679,8 @@
       render();
       return;
     }
+    /* другая открытая карточка уступает: нажали оповещение о ЭТОМ заказе */
+    S.adminOrder = 0;
     render();
     /* Не среди ста последних — оповещение открыли через неделю: этот один
        заказ спрашивается отдельно (loadOrderOne), и карточка открывается,
@@ -25673,6 +25690,33 @@
       if (o && S.adminTab === "orders" && !S.adminOrder) S.adminOrder = String(o.id);
     });
   }
+  /* Панель уже открыта, и оповещение нажали. Service worker её больше не
+     перезагружает — navigate() теряет недописанное, а на iPhone его нет
+     вовсе, и вкладка просто всплывала на том экране, где её оставили. Он
+     присылает адрес сюда (public/shop2/admin-sw.js) и ждёт «понял» в
+     переданном порту; без ответа (вкладка со старым кодом) — перезагружает
+     её по-старому, и номер подхватывает pushOpenWanted() при запуске. */
+  function pushOpenFrom(url) {
+    var m = String(url || "").match(/[?&]order=([^&#]+)/), n = m ? m[1] : "";
+    try { n = decodeURIComponent(n); } catch (e) {}
+    n = n.trim().toUpperCase();
+    if (!n) return;
+    PUSH.want = n;
+    /* Свежий список — заказ новее того, что на экране, — и по его приходу
+       pushOpenWanted(). Не вошёл в панель: вход ведёт тем же путём. */
+    if (SRV.admin === true) loadSrvOrders(true);
+  }
+  try {
+    if (typeof navigator !== "undefined" && navigator.serviceWorker && navigator.serviceWorker.addEventListener) {
+      navigator.serviceWorker.addEventListener("message", function (e) {
+        var d = (e && e.data) || {};
+        if (d.type !== "rempire:open") return;
+        pushOpenFrom(d.url);
+        if (e.ports && e.ports[0]) e.ports[0].postMessage({ ok: true });
+      });
+      if (navigator.serviceWorker.startMessages) navigator.serviceWorker.startMessages();
+    }
+  } catch (e) {}
   function pushBoot() {
     if (pushBoot._done) return;
     if (SRV.admin !== true || !pushCan() || Notification.permission !== "granted") return;
@@ -35903,12 +35947,17 @@
       loadSrvOrders._busy = false;
       if (r.status === 401) { loadSrvOrders._stale = false; SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
       if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
-      if (r.status === 200) { pushBoot(); pushOpenWanted(); }
+      if (r.status === 200) pushBoot();
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       /* A refresh that failed keeps the list that is on screen, for the same
          reason loadOverview() keeps its figures — «Заказы» going blank after a
          save is worse than «Заказы» being a few seconds old. */
       if (!SRV.ordersErr) SRV.orders = (r.body.orders || []).map(srvRow);
+      /* …and only now the notification's order (?order=, pushOpenWanted).
+         Until 24.09.2026 it was asked BEFORE the line above: on the panel's
+         first open there was no list yet to look in, the number was put
+         aside and nothing asked again — the tap opened «Обзор». */
+      if (!SRV.ordersErr) pushOpenWanted();
       /* Not the end of a step in flight: SRV.stepBusy is the PATCH's to clear
          (srvPush), because this list may have left before the PATCH landed. */
       render();
