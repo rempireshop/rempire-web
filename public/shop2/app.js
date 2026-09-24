@@ -42662,7 +42662,9 @@
     }
     if (d.bundlenew !== undefined) {
       S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
-      render(); refocus('[data-bundlef="id"]'); return;
+      // the name, the first box of the form — the address writes itself from
+      // it (paintBundleId; Dim, 19.09.2026: ask for the name, not the address)
+      render(); refocus('[data-bundlef="title"]'); return;
     }
     if (d.bundleedit) {
       var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
