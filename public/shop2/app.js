@@ -40573,12 +40573,16 @@
   }
   /** `undo` is the journal entry this toast can take back — see admUndoToast().
       An undoable admin toast stays up for six seconds, everything else for the
-      usual 2.6: an «Отменить» nobody has time to read is not an offer. */
+      usual 2.6: an «Отменить» nobody has time to read is not an offer.
+      …and an entry with no way back (`prev` null) is no offer either: «+ Партнёр»
+      on an address that was a partner already journals the press with nothing
+      to put back, and its «Отменить» did nothing, said «Отменено» and wrote an
+      «Отмена: …» line all the same (map defect 12, 24.09.2026). */
   function toast(msg, undo) {
-    S.toast = msg; S.toastUndo = undo || null;
+    S.toast = msg; S.toastUndo = undo && undo.prev ? undo : null;
     paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, undo ? 6000 : 2600);
+    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, S.toastUndo ? 6000 : 2600);
   }
   /** Take the standing toast down now, before its timer is up. */
   function toastOff() {

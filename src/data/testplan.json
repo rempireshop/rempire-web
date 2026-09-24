@@ -7341,12 +7341,14 @@
       "steps": [
         "Открыть «Клиенты» и нажать «+ Партнёр».",
         "Вписать почту, название салона и регистрационный номер.",
-        "Сохранить и проверить почту партнёра."
+        "Сохранить и проверить почту партнёра.",
+        "Снова нажать «+ Партнёр», вписать ту же почту и сохранить."
       ],
       "expect": [
         "Партнёр появился в списке с пометкой партнёра.",
         "На его почту пришло письмо.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду.",
+        "Второй раз выходит «Уже партнёр» — без кнопки «Отменить»."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -7356,15 +7358,19 @@
         "steps": [
           "«Клиенты» → «+ Партнёр».",
           "Type in the e-mail, the salon name and the registration number.",
-          "Save and check the partner's mail."
+          "Save and check the partner's mail.",
+          "Press «+ Партнёр» again, type the same e-mail and save."
         ],
         "expect": [
           "The partner is in the list with a partner marker.",
           "A letter has arrived in their mailbox.",
-          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view."
+          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view.",
+          "The second time it says «Уже партнёр», with no «Отменить» button."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:43:29.371Z"
     },
     {
       "id": "people-remove-partner",
