@@ -157,9 +157,10 @@ export interface CreateShipmentOptions {
   /**
    * Parcel weight in kg.
    *
-   * Default: the declared carton's own volumetric weight
-   * (`declaredWeightKg()`), the same number whatever the order holds. It is
-   * **not** derived from the basket — see that function and F24.
+   * Default: `declaredWeightKg()` — the ordinary parcel's real weight, 0.9 kg,
+   * the same number whatever the order holds and whatever box is on the
+   * card (Montonio prices the real weight, 24.09.2026). It is **not**
+   * derived from the basket — see that function and F24.
    */
   weight?: number;
   /**
@@ -1221,36 +1222,29 @@ export function carrierHint(order: Order, opts: CreateShipmentOptions = {}): str
 }
 
 /**
- * Register one order with a carrier through Montonio.
+ * The half of a shipment that both booking and repair send: the shipping
+ * method (pickup point + locker door, or a courier service), the receiver, and
+ * the one parcel — its declared weight, and its sides where they are wanted.
  *
- * Synchronous by default: the admin presses a button and wants the tracking
- * code on the screen, not a webhook twenty seconds later. Asynchronous mode
- * still works (`synchronous: false`), it just answers with status `pending` and
- * empty tracking fields — reference § Create Shipment.
+ * Shared on purpose. `POST /shipments` books with it, and
+ * `PATCH /shipments/{id}` — the repair of a refused registration, Montonio's
+ * answer of 24.09.2026 — sends the same three fields rebuilt from the order as
+ * it stands now, so a corrected phone, address, box or door reaches the
+ * carrier exactly the way a first booking would have carried it.
  */
-export async function createMontonioShipment(
+async function shipmentParts(
   order: Order,
-  opts: CreateShipmentOptions = {},
-): Promise<MontonioShipment> {
-  const mock = shippingMockOn();
-  const config = mock ? null : montonioShippingConfig();
-  if (!mock && !config) throw new MontonioShippingError("not_configured");
-
-  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
-  const country = String(ship.country || "EE").toUpperCase();
-  const method = normalizeMethod(ship.method);
-  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
-  if ((order.items ?? []).every((i) => i.kind === "gift")) {
-    throw new MontonioShippingError("not_shippable", "gift_only");
-  }
-
-  const hint = carrierHint(order, opts);
-  /* The e2e suite's carrier: the same refusals as above (a pickup order or a
-     gift-only one is not a parcel for the mock either), then a registered
-     parcel without a network in sight — src/lib/shipping/montonio-mock.ts. */
-  if (mock || !config) {
-    return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
-  }
+  opts: CreateShipmentOptions,
+  config: MontonioConfig,
+  ctx: { hint: string; method: "parcel" | "courier"; country: string },
+): Promise<{
+  carrier: string;
+  shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
+  sentLockerSize: LockerSize | undefined;
+  receiver: Record<string, unknown>;
+  parcel: Record<string, number>;
+}> {
+  const { hint, method, country } = ctx;
   let carrier = hint;
   let shippingMethod: { type: "pickupPoint" | "courier"; id: string; lockerSize?: string };
   let sentLockerSize: LockerSize | undefined;
@@ -1298,22 +1292,22 @@ export async function createMontonioShipment(
     }
   }
 
-  /* The weight is the DECLARED BOX, not the basket.
+  /* The weight is ONE number, not the basket.
      Ренат, 18.09.2026: «one small default carton, no weight modelling». Until
      19.09.2026 this line sent `estimateWeightKg(order)` — 0.4 kg a unit plus
      0.2 — on every booking, so the shop's cost per parcel climbed with the
      line count while the customer paid one flat price (audit 18.09.2026,
-     F24). And since dimensions go out only where
-     `constraints.parcelDimensionsRequired` is true, on most routes Montonio
-     has nothing of its own to compare against and this number IS the bill —
-     which is exactly why the estimate was expensive.
-     Which box: the one the owner typed for THIS parcel («эта посылка другая»)
-     if he typed all three sides, otherwise the shop's carton. Declaring a
-     weight that disagrees with the dimensions beside it buys nothing —
-     Montonio bills max(actual, volumetric) and would compute the volumetric
-     from those very sides. `opts` is metres, the settings are centimetres
-     (parcel.ts § Units), so the override is converted back before the weight
-     is taken off it.
+     F24).
+     Montonio prices the REAL weight (support, 24.09.2026: «our pricing for
+     time being takes into account real weight»), so this number is the tier
+     the parcel is billed in. Until that answer it was the volumetric weight
+     of the box on the card — 0.9 kg for the default carton, and 6 kg for a
+     40 × 30 × 20 «Другая коробка», i.e. the 6 kg tier for a parcel weighing
+     one. `declaredWeightKg()` now answers `ORDINARY_PARCEL_KG` whatever the
+     box; the box is still passed so that MONTONIO_PRICES_VOLUMETRIC, if it
+     is ever switched on, can make the weight agree with the sides again.
+     `opts` is metres, the settings are centimetres (parcel.ts § Units), so
+     the override is converted back first.
      A weight typed into the label form still wins over both: a parcel he has
      actually put on a scale beats any default. */
   const declaredBox =
@@ -1337,11 +1331,12 @@ export async function createMontonioShipment(
      when the question could not be answered. Dimensions are a size tier and a
      size tier is money: a route that books today without them has to keep
      booking without them, or a network blip could quietly reprice it.
-     Sending nothing is also the CHEAPER default, which is worth knowing:
-     Montonio bills `max(actualWeight, volumetricWeight)`, so a declared box is
-     a floor under the bill. The default carton is 25 × 18 × 8 cm — 0.9 kg,
-     Renat's own box as he measured it on 22.09.2026 — for exactly that reason;
-     see src/lib/shipping/parcel.ts. */
+     Sides matter to the price only where a route is priced by box category —
+     DPD's lockers abroad, XS/S/M/L (Montonio, 24.09.2026; the 25 × 18 × 8
+     carton is XS, docs/montonio-evidence-2026-09-24.txt). Weight-priced
+     routes look up the REAL weight whatever the sides say, so the old
+     reasoning here — «a declared box is a floor under the bill» — holds only
+     if MONTONIO_PRICES_VOLUMETRIC is ever switched on. */
   if (!measured) {
     const needed = await parcelDimensionsRequired(carrier, country, shippingMethod.type);
     if (needed) {
@@ -1351,6 +1346,47 @@ export async function createMontonioShipment(
       parcel.height = metres.height;
     }
   }
+
+  return { carrier, shippingMethod, sentLockerSize, receiver, parcel };
+}
+
+/**
+ * Register one order with a carrier through Montonio.
+ *
+ * Synchronous by default: the admin presses a button and wants the tracking
+ * code on the screen, not a webhook twenty seconds later. Asynchronous mode
+ * still works (`synchronous: false`), it just answers with status `pending` and
+ * empty tracking fields — reference § Create Shipment.
+ */
+export async function createMontonioShipment(
+  order: Order,
+  opts: CreateShipmentOptions = {},
+): Promise<MontonioShipment> {
+  const mock = shippingMockOn();
+  const config = mock ? null : montonioShippingConfig();
+  if (!mock && !config) throw new MontonioShippingError("not_configured");
+
+  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
+  const country = String(ship.country || "EE").toUpperCase();
+  const method = normalizeMethod(ship.method);
+  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
+  if ((order.items ?? []).every((i) => i.kind === "gift")) {
+    throw new MontonioShippingError("not_shippable", "gift_only");
+  }
+
+  const hint = carrierHint(order, opts);
+  /* The e2e suite's carrier: the same refusals as above (a pickup order or a
+     gift-only one is not a parcel for the mock either), then a registered
+     parcel without a network in sight — src/lib/shipping/montonio-mock.ts. */
+  if (mock || !config) {
+    return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
+  }
+  const { carrier, shippingMethod, sentLockerSize, receiver, parcel } = await shipmentParts(
+    order,
+    opts,
+    config,
+    { hint, method, country },
+  );
 
   /* Every bound here is Montonio's own (reference § Create Shipment →
      products): sku 100, name 255, quantity «Max value is 999». The quantity
@@ -1410,6 +1446,89 @@ export async function createMontonioShipment(
     trackingUrl: str(first?.trackingLink),
     dropOffPin: str(first?.dropOffPin),
     createdAt: str(body.createdAt) || new Date().toISOString(),
+  };
+}
+
+/**
+ * Send a REFUSED shipment to the carrier again — the same shipment, never a
+ * second one.
+ *
+ * Montonio support, 24.09.2026, on «PATCH or a new shipment for
+ * `registrationFailed`?»: «Yes, that's exactly the right and recommended
+ * approach and you don't need to create a new shipment. `registrationFailed`
+ * is one of three states from which a shipment can be updated via PATCH, and
+ * PATCH automatically triggers a new registration attempt with the carrier.
+ * If the attempt fails again, the shipment simply stays in that same
+ * `registrationFailed` state (nothing is lost), and you can just try again.»
+ * (The reference names two of the three: `registrationFailed` and
+ * `registered`. The shop only ever patches the first — see the route.)
+ *
+ * The body is `shipmentParts()` rebuilt from the order as it stands now —
+ * shipping method with the door on the card, receiver, parcel — so whatever
+ * was corrected since the refusal (the phone, the address, «Другая коробка»,
+ * the locker size) is what the carrier sees. Products are not sent: the
+ * reference says they cannot be updated.
+ *
+ * The reply is the shipment as Montonio now has it: `registered` with a
+ * tracking code, `registrationFailed` again, or `pending` while it asks the
+ * carrier — then `shipment.registered` / `registrationFailed` arrive by
+ * webhook, and the nightly poll is the backup (src/lib/shipping/shipment-sync.ts).
+ */
+export async function repairMontonioShipment(
+  order: Order,
+  stored: Pick<MontonioShipment, "shipmentId" | "carrier">,
+  opts: CreateShipmentOptions = {},
+): Promise<MontonioShipment> {
+  const mock = shippingMockOn();
+  const config = mock ? null : montonioShippingConfig();
+  if (!mock && !config) throw new MontonioShippingError("not_configured");
+
+  const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
+  const country = String(ship.country || "EE").toUpperCase();
+  const method = normalizeMethod(ship.method);
+  if (method === "pickup") throw new MontonioShippingError("not_shippable", "pickup");
+
+  /* The carrier the shipment was booked with, unless the owner names another:
+     a repair is the same parcel, so it goes to the same carrier by default. */
+  const hint = carrierHint(order, { ...opts, carrier: opts.carrier || stored.carrier || undefined });
+  if (mock || !config) {
+    // the e2e carrier never refuses, so a repair there is simply a registered parcel
+    return {
+      ...mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country }),
+      shipmentId: stored.shipmentId,
+    };
+  }
+
+  const { carrier, shippingMethod, sentLockerSize, receiver, parcel } = await shipmentParts(order, opts, config, {
+    hint,
+    method,
+    country,
+  });
+
+  const body = await call<{
+    id?: string;
+    status?: string;
+    createdAt?: string;
+    shippingMethod?: { carrierCode?: string; countryCode?: string };
+    parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
+  }>(config, `/shipments/${encodeURIComponent(stored.shipmentId)}`, {
+    method: "PATCH",
+    body: { shippingMethod, receiver, parcels: [parcel] },
+  });
+
+  const first = body.parcels?.[0];
+  return {
+    provider: "montonio",
+    shipmentId: str(body.id) || stored.shipmentId,
+    status: str(body.status) || "pending",
+    carrier: str(body.shippingMethod?.carrierCode) || carrier,
+    country: (str(body.shippingMethod?.countryCode) || country).toUpperCase(),
+    method: shippingMethod.type,
+    lockerSize: sentLockerSize,
+    trackingCode: str(first?.carrierParcelId),
+    trackingUrl: str(first?.trackingLink),
+    dropOffPin: str(first?.dropOffPin),
+    createdAt: str(body.createdAt),
   };
 }
 
@@ -1592,6 +1711,37 @@ export async function releaseShipmentSlot(orderId: string): Promise<void> {
   await saveShipmentOnOrder(orderId, { bookingAt: null });
 }
 
+/**
+ * The same claim for a REPAIR — «Создать этикетку» pressed on a shipment the
+ * carrier refused, which sends that shipment again with `PATCH` (Montonio,
+ * 24.09.2026). A second PATCH while the first is still with the carrier would
+ * start a second registration attempt of the same parcel; the timed-out tap
+ * on a phone is exactly how that happens. Its own field, `repairAt`, because
+ * the booking claim above only works while there is no shipment yet.
+ */
+export async function claimRepairSlot(orderId: string): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `update orders
+        set shipping = coalesce(shipping, '{}'::jsonb)
+                       || jsonb_build_object('montonio',
+                            coalesce(shipping -> 'montonio', '{}'::jsonb)
+                            || jsonb_build_object('repairAt', (extract(epoch from now()) * 1000)::bigint)),
+            updated_at = now()
+      where id = $1
+        and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') <> ''
+        and coalesce((shipping -> 'montonio' ->> 'repairAt')::bigint, 0)
+            < (extract(epoch from now()) * 1000)::bigint - $2::bigint
+      returning id`,
+    [orderId, SHIPMENT_CLAIM_MS],
+  );
+  return rows.length > 0;
+}
+
+/** Give the repair slot back — the next press may try again at once. */
+export async function releaseRepairSlot(orderId: string): Promise<void> {
+  await saveShipmentOnOrder(orderId, { repairAt: null });
+}
+
 /* ---------- what this store is actually signed up for --------------------- */
 
 /** One row of `GET /carriers`, reduced to what a readiness screen needs. */
@@ -1726,17 +1876,22 @@ export const SHIPMENT_WEBHOOK_PATH = "/api/shipping/notify/";
  *     "delivered"`);
  *   · `shipment.registrationFailed` — the only event that puts a carrier's
  *     refusal in the journal. Without it a parcel refused after an
- *     asynchronous booking is one word in a settings blob and nothing else.
+ *     asynchronous booking is one word in a settings blob and nothing else;
+ *   · `shipment.registered` — required since 24.09.2026. A refused parcel is
+ *     now repaired in place with `PATCH /shipments/{id}` (Montonio's answer
+ *     of that day), and a re-registration that does not finish inside the
+ *     PATCH arrives only here, with its tracking code.
  *
- * `shipment.registered` and `shipment.labelsCreated` are *not* needed while
- * booking is synchronous — the status and the label come back in the answer to
- * the button press — so they are not required here. Ticking them is harmless
- * (the route answers 200 and records the word), which is why this checks for
- * missing events and never complains about extra ones.
+ * `shipment.labelsCreated` is subscribed by tools/montonio-webhook.mjs (it
+ * keeps the stored status current) but not required: nothing stops working
+ * without it. Ticking more is harmless — the route answers 200, and the
+ * `labelFile.*` pair is acknowledged and ignored — which is why this checks
+ * for missing events and never complains about extra ones.
  */
 export const REQUIRED_SHIPMENT_EVENTS: readonly string[] = [
   "shipment.statusUpdated",
   "shipment.registrationFailed",
+  "shipment.registered",
 ];
 
 /** Where Montonio has to send parcel events — «» when PUBLIC_BASE_URL is unset. */

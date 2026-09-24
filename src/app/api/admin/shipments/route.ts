@@ -43,25 +43,51 @@
  *     `messages` naming what to fix (src/lib/montonio-problems.ts);
  *   · written to the journal as `shipment.registration_failed`, not as
  *     `shipment.create`.
- * A second press on the same order repeats that refusal rather than reporting
- * «Этикетка снова на месте ✓». The documented repair is `PATCH /shipments/{id}`
- * with the corrected receiver, which this shop does not have yet — so the
- * messages say to pass the correction on rather than to press again.
- * Sandbox cannot produce this state at all: it never calls a carrier
- * (docs/montonio-untested.md, S1).
+ *
+ * **And the next press REPAIRS it** (since 24.09.2026). Montonio's answer that
+ * day: «you don't need to create a new shipment. `registrationFailed` is one
+ * of three states from which a shipment can be updated via PATCH, and PATCH
+ * automatically triggers a new registration attempt with the carrier. If the
+ * attempt fails again, the shipment simply stays in that same
+ * `registrationFailed` state (nothing is lost), and you can just try again.
+ * This fits well with the "one clear button" solution you described». So the
+ * button stays «Создать этикетку», and on a refused shipment it:
+ *   1. takes the repair slot (claimRepairSlot — a timed-out tap cannot send
+ *      the same parcel twice at once);
+ *   2. asks Montonio first (`GET /shipments/{id}`): Montonio re-tries a
+ *      refusal by itself, and a PATCH on a shipment that has registered since
+ *      would register it AGAIN — so a shipment that is no longer refused is
+ *      simply stored as it now is;
+ *   3. otherwise sends the SAME shipment again, `PATCH /shipments/{id}`, built
+ *      from the order as it stands now (repairMontonioShipment) — a corrected
+ *      phone or address, a different box or door, all go with it;
+ *   4. stores the answer; a refusal again is the same 502 as before, and the
+ *      press after it tries again. Never a second shipment, never a second
+ *      booking to pay for.
+ * Until that answer a second press repeated the stored refusal without asking
+ * Montonio, and the panel told the owner to set the label aside and «create it
+ * anew» — which could only ever repeat the refusal. Sandbox cannot produce
+ * this state at all: it never calls a carrier (docs/montonio-untested.md, S1).
  */
 import { requireAdmin } from "@/lib/auth";
 import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
+import type { Order } from "@/lib/orders";
 import {
   MontonioShippingError,
+  claimRepairSlot,
   claimShipmentSlot,
   createMontonioShipment,
+  getMontonioShipment,
+  releaseRepairSlot,
   releaseShipmentSlot,
+  repairMontonioShipment,
   saveShipmentOnOrder,
   shipmentOnOrder,
+  type CreateShipmentOptions,
   type MontonioShipment,
 } from "@/lib/shipping/montonio";
+import { shippingMockOn } from "@/lib/shipping/montonio-mock";
 import {
   getParcelSettings,
   noteLockerSize,
@@ -123,20 +149,194 @@ function cleanBox(raw: unknown): { length: number; width: number; height: number
   return out as { length: number; width: number; height: number };
 }
 
+/** A Montonio call that failed, as the panel reads it — booking and repair alike. */
+function montonioFailure(err: unknown, what: "create" | "repair"): Response {
+  if (err instanceof MontonioShippingError) {
+    const status = err.code === "not_configured" ? 501 : CLIENT_ERRORS.has(err.code) ? 400 : 502;
+    console.error(`[api/admin/shipments] montonio refused the ${what}:`, err.code, err.detail);
+    /* Only for the refusals whose cause is inside Montonio's own words —
+       `rejected` carries «400 {…}» from the transport. The codes the panel
+       already has a sentence for (not_shippable, point_unresolved,
+       no_courier_service, not_configured) keep theirs: they are ours, they
+       are right, and two sources for one message is how they drift. */
+    const reading = err.code === "rejected" ? shipmentRegistrationFailed(err.detail) : null;
+    return Response.json(
+      {
+        ok: false,
+        error: err.code,
+        detail: err.detail,
+        ...(reading ? { reason: reading.reason, messages: reading.messages } : {}),
+      },
+      { status },
+    );
+  }
+  console.error(`[api/admin/shipments] ${what} failed:`, err);
+  return Response.json({ ok: false, error: "shipment_failed" }, { status: 502 });
+}
+
+type Body = {
+  orderId?: unknown;
+  order?: unknown;
+  weight?: unknown;
+  carrier?: unknown;
+  lockerSize?: unknown;
+  box?: unknown;
+};
+
+/** The label-time choices a press carries: weight, carrier, door, box. */
+async function pressOptions(body: Body): Promise<CreateShipmentOptions> {
+  /* The locker door, and the only place it can honestly be decided: the owner
+     is standing over the box he has just packed. The panel pre-selects one and
+     posts it, so pressing the button is a confirmation and not a question —
+     but the *default* is the server's, not the panel's, so a press from a tab
+     that never loaded the settings (or from the assistant, or from a test)
+     still books with the size he has been shipping rather than with none at
+     all. Ренат, 18.09.2026: «use recommended, but we have also option that
+     some default is set and used + automate it». */
+  const parcel = await getParcelSettings();
+  const lockerSize = toLockerSize(body.lockerSize) ?? suggestedLockerSize(parcel);
+
+  /* «Другая коробка» — this parcel's own measurements, in **centimetres**,
+     which is what the three fields on the card say and what the owner reads
+     off a tape. They are converted once, here, because `POST /shipments` is
+     metric (reference § Create Shipment → parcels) while
+     `POST /shipping-methods/rates` is centimetric; both are right and neither
+     is to be made to agree with the other.
+     An explicit box always goes out. The shop's *declared* carton does not —
+     createMontonioShipment() fills that in only where Montonio says the route
+     requires dimensions, so nothing this adds can move a size tier on a
+     booking that already worked. This one is the owner saying «эта посылка
+     другая», and it is honoured. */
+  const box = cleanBox(body.box);
+  return {
+    weight: typeof body.weight === "number" && body.weight > 0 ? body.weight : undefined,
+    carrier: typeof body.carrier === "string" && body.carrier ? body.carrier : undefined,
+    lockerSize,
+    ...(box ?? {}),
+  };
+}
+
+/**
+ * «Создать этикетку» on a shipment the carrier refused: the SAME shipment,
+ * sent again — never a new one, as often as he presses. See the header.
+ */
+async function repairRefused(order: Order, existing: MontonioShipment & Record<string, unknown>, body: Body) {
+  let claimed = false;
+  try {
+    claimed = await claimRepairSlot(order.id);
+  } catch (err) {
+    console.error("[api/admin/shipments] could not claim the repair slot:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+  if (!claimed) return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
+
+  const attempts = Math.max(0, Math.trunc(Number(existing.repairs) || 0));
+  let shipment: MontonioShipment;
+  let patched = false;
+  try {
+    /* Ask before sending. Montonio re-tries a refused registration by itself
+       («Our system will automatically attempt to register the Shipment again
+       if the status is registrationFailed» — shipments guide), and PATCH is
+       also allowed on a `registered` shipment, where it registers the parcel
+       AGAIN. So the shipment is only sent while Montonio itself still calls it
+       refused. (The e2e carrier never refuses and has no GET.) */
+    const now = shippingMockOn() ? existing : await getMontonioShipment(existing.shipmentId);
+    /* An empty status says nothing either way; the shipment was refused as
+       far as anyone knows, so it is sent again. */
+    if (String(now.status ?? "").trim() && !registrationRefused(now)) {
+      shipment = {
+        ...existing,
+        status: now.status || existing.status,
+        trackingCode: now.trackingCode || existing.trackingCode,
+        trackingUrl: now.trackingUrl || existing.trackingUrl,
+        dropOffPin: now.dropOffPin || existing.dropOffPin,
+      };
+    } else {
+      const opts = await pressOptions(body);
+      const repaired = await repairMontonioShipment(order, existing, opts);
+      patched = true;
+      shipment = {
+        ...existing,
+        ...repaired,
+        // the booking's own date stays the booking's; the repair has its own stamp
+        createdAt: existing.createdAt || repaired.createdAt,
+        trackingCode: repaired.trackingCode || existing.trackingCode,
+      };
+    }
+  } catch (err) {
+    // nothing changed at Montonio that we know of: the button must work again at once
+    await releaseRepairSlot(order.id).catch(() => {});
+    return montonioFailure(err, "repair");
+  }
+
+  const at = new Date().toISOString();
+  const record: Record<string, unknown> = {
+    status: shipment.status,
+    statusAt: at,
+    carrier: shipment.carrier,
+    trackingCode: shipment.trackingCode,
+    trackingUrl: shipment.trackingUrl,
+    dropOffPin: shipment.dropOffPin,
+    // the label step is his again — a repaired parcel is not «set aside»
+    dismissed: false,
+    repairAt: null,
+  };
+  if (patched) {
+    record.repairs = attempts + 1;
+    record.repairedAt = at;
+    if (shipment.lockerSize) record.lockerSize = shipment.lockerSize;
+  }
+  try {
+    await saveShipmentOnOrder(order.id, record);
+  } catch (err) {
+    console.error("[api/admin/shipments] could not store the repaired shipment:", err);
+    await releaseRepairSlot(order.id).catch(() => {});
+    return Response.json({ ok: false, error: "store_failed", shipment }, { status: 500 });
+  }
+  const stored = { ...existing, ...record, dismissed: false } as MontonioShipment & Record<string, unknown>;
+
+  if (registrationRefused(shipment)) {
+    console.error(`[api/admin/shipments] carrier refused ${order.number} again (attempt ${attempts + 1})`);
+    await writeAuditSafe("admin", "shipment.registration_failed", {
+      orderId: order.id,
+      number: order.number,
+      provider: "montonio",
+      shipmentId: shipment.shipmentId,
+      carrier: shipment.carrier,
+      code: shipment.status,
+      reason: shipmentRegistrationFailed(shipment.status).reason,
+      attempt: attempts + 1,
+    });
+    return refusedResponse(stored);
+  }
+
+  if (patched && shipment.method === "pickupPoint" && shipment.lockerSize) {
+    await noteLockerSize(shipment.lockerSize);
+  }
+  await writeAuditSafe("admin", "shipment.repair", {
+    orderId: order.id,
+    number: order.number,
+    provider: "montonio",
+    shipmentId: shipment.shipmentId,
+    carrier: shipment.carrier,
+    code: shipment.status,
+    trackingCode: shipment.trackingCode || undefined,
+    // false: Montonio had registered it by itself before the press
+    patched,
+  });
+  return Response.json(
+    { ok: true, repaired: true, patched, shipment: stored, order },
+    { headers: { "cache-control": "no-store" } },
+  );
+}
+
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
-  let body: {
-    orderId?: unknown;
-    order?: unknown;
-    weight?: unknown;
-    carrier?: unknown;
-    lockerSize?: unknown;
-    box?: unknown;
-  };
+  let body: Body;
   try {
-    body = (await req.json()) as typeof body;
+    body = (await req.json()) as Body;
   } catch {
     return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
   }
@@ -162,11 +362,10 @@ export async function POST(req: Request) {
 
   const existing = shipmentOnOrder(order);
   if (existing) {
-    /* A refused registration is stored so nobody books a second parcel — but
-       it is still a refusal, and answering «reused: true» would paint the
-       label step green for a parcel the carrier turned down. Same words every
-       time it is asked for. */
-    if (registrationRefused(existing)) return refusedResponse(existing);
+    /* A refused registration is stored so nobody books a second parcel — and
+       the press is the repair: the SAME shipment, sent again with PATCH
+       (Montonio, 24.09.2026; see the header). */
+    if (registrationRefused(existing)) return repairRefused(order, existing, body);
     if (existing.dismissed) {
       try {
         await saveShipmentOnOrder(order.id, { dismissed: false });
@@ -202,62 +401,14 @@ export async function POST(req: Request) {
   }
   if (!claimed) return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
 
-  /* The locker door, and the only place it can honestly be decided: the owner
-     is standing over the box he has just packed. The panel pre-selects one and
-     posts it, so pressing the button is a confirmation and not a question —
-     but the *default* is the server's, not the panel's, so a press from a tab
-     that never loaded the settings (or from the assistant, or from a test)
-     still books with the size he has been shipping rather than with none at
-     all. Ренат, 18.09.2026: «use recommended, but we have also option that
-     some default is set and used + automate it». */
-  const parcel = await getParcelSettings();
-  const lockerSize = toLockerSize(body.lockerSize) ?? suggestedLockerSize(parcel);
-
-  /* «Другая коробка» — this parcel's own measurements, in **centimetres**,
-     which is what the three fields on the card say and what the owner reads
-     off a tape. They are converted once, here, because `POST /shipments` is
-     metric (reference § Create Shipment → parcels) while
-     `POST /shipping-methods/rates` is centimetric; both are right and neither
-     is to be made to agree with the other.
-     An explicit box always goes out. The shop's *declared* carton does not —
-     createMontonioShipment() fills that in only where Montonio says the route
-     requires dimensions, so nothing this adds can move a size tier on a
-     booking that already worked. This one is the owner saying «эта посылка
-     другая», and it is honoured. */
-  const box = cleanBox(body.box);
-
   let shipment;
   try {
-    shipment = await createMontonioShipment(order, {
-      weight: typeof body.weight === "number" && body.weight > 0 ? body.weight : undefined,
-      carrier: typeof body.carrier === "string" && body.carrier ? body.carrier : undefined,
-      lockerSize,
-      ...(box ?? {}),
-    });
+    // the door and «Другая коробка» — pressOptions() above says how each is decided
+    shipment = await createMontonioShipment(order, await pressOptions(body));
   } catch (err) {
     // nothing was booked, so the button must work again at once
     await releaseShipmentSlot(order.id).catch(() => {});
-    if (err instanceof MontonioShippingError) {
-      const status = err.code === "not_configured" ? 501 : CLIENT_ERRORS.has(err.code) ? 400 : 502;
-      console.error("[api/admin/shipments] montonio refused:", err.code, err.detail);
-      /* Only for the refusals whose cause is inside Montonio's own words —
-         `rejected` carries «400 {…}» from the transport. The codes the panel
-         already has a sentence for (not_shippable, point_unresolved,
-         no_courier_service, not_configured) keep theirs: they are ours, they
-         are right, and two sources for one message is how they drift. */
-      const reading = err.code === "rejected" ? shipmentRegistrationFailed(err.detail) : null;
-      return Response.json(
-        {
-          ok: false,
-          error: err.code,
-          detail: err.detail,
-          ...(reading ? { reason: reading.reason, messages: reading.messages } : {}),
-        },
-        { status },
-      );
-    }
-    console.error("[api/admin/shipments] create failed:", err);
-    return Response.json({ ok: false, error: "shipment_failed" }, { status: 502 });
+    return montonioFailure(err, "create");
   }
 
   try {

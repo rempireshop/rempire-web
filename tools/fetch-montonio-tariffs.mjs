@@ -111,9 +111,13 @@ const countries = (
  * here only because this is a standalone node script that cannot import
  * TypeScript; tests/reference-parcel.test.ts fails the day the two differ.
  *
- * 25 × 18 × 8 cm at 0.9 kg — Renat's carton, measured 22.09.2026, and the
- * volumetric weight the shop declares for it (3600 cm³ / 4000). It replaced a
- * 30 cm cube at 5 kg that priced every international parcel as DPD's L tier.
+ * 25 × 18 × 8 cm at 0.9 kg — Renat's carton, measured 22.09.2026, at the
+ * weight a label declares for an ordinary parcel (ORDINARY_PARCEL_KG in
+ * src/lib/shipping/parcel.ts). Until 24.09.2026 the 0.9 was read as the
+ * carton's volumetric weight (3600 cm³ / 4000); Montonio answered that day
+ * that it prices the REAL weight, so it is now read as that — same number,
+ * same tier (≤ 1 kg). It replaced a 30 cm cube at 5 kg that priced every
+ * international parcel as DPD's L tier.
  */
 const REFERENCE_PARCEL = { length: 25, width: 18, height: 8, weight: 0.9 };
 

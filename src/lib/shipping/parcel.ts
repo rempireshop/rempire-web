@@ -18,13 +18,26 @@
  * size, overridable». So the shop declares **one carton**, he can change it,
  * and it is what goes out wherever Montonio asks for dimensions.
  *
- * ## Why the box is SMALL, and why that is the whole feature
+ * ## Montonio prices the REAL weight (answer of 24.09.2026)
+ *
+ * Everything in the next section was written believing the opposite, and is
+ * kept because the box is still the right size for other reasons (the locker
+ * door, and DPD's size categories abroad). Montonio support, 24.09.2026: «our
+ * pricing for time being takes into account real weight. If that will
+ * change, then we'd let them know.» The divisor 4000 is real — it lives in
+ * their `VolumetricWeightHelper` — but it does not set the price. See
+ * `MONTONIO_PRICES_VOLUMETRIC` below: the one switch that brings the old rule
+ * back, and what `declaredWeightKg()` now declares (`ORDINARY_PARCEL_KG`,
+ * whatever box is on the card).
+ *
+ * ## Why the box is SMALL (as reasoned 18.09.2026)
  *
  * Montonio bills **`chargeableWeight = max(actualWeight, volumetricWeight)`** —
  * its own words, in the `calculationDetails.estimatedParcels[]` block of the
  * `POST /shipping-methods/rates` response (reference § Calculate shipping
  * costs). `fetchMontonioRates()` throws that block away today, which is why
- * nobody here had seen it.
+ * nobody here had seen it. [24.09.2026: that block describes the helper's
+ * arithmetic, not the tariff — see the section above.]
  *
  * Volumetric weight is the box's volume over a divisor. The reference prints
  * **no formula at all**, only one worked example: **20 × 15 × 10 cm → 0.75 kg**.
@@ -73,21 +86,21 @@
  * (audit 18.09.2026, F24). And on most routes `parcelDimensionsRequired` is
  * false, so there is no volumetric weight on Montonio's side to compare
  * against and the declared weight is the whole bill. Ренат, 18.09.2026 23:10:
- * remove the estimate and declare the box. `declaredWeightKg()` is therefore
+ * remove the estimate and declare the box. `declaredWeightKg()` was therefore
  * `volumetricKg()` of this carton — one number, the same on a one-line order
- * and a nine-line one, and the same number the panel already prints under
- * «Коробка магазина». An explicit weight typed into the label form still wins.
+ * and a nine-line one. Since 24.09.2026 it is `ORDINARY_PARCEL_KG` (the same
+ * 0.9 kg for this carton, and no longer 6 kg for a 40 × 30 × 20 one) — still
+ * one number, now a real weight. An explicit weight typed into the label form
+ * still wins.
  *
- * ## What this box is NOT, and it matters
+ * ## The price table is quoted for this box
  *
- * It is **not** the box the price table was quoted for. `REFERENCE_PARCEL`
- * (src/lib/shipping/tariffs.ts) is still 5 kg, 30 × 30 × 30 cm, and that is
- * the shape `tools/fetch-montonio-tariffs.mjs` and `liveTariffsForCountry()`
- * ask Montonio to price. So src/data/montonio-tariffs.json now **overstates**
- * what a parcel of this size costs. That is the safe direction — every shelf
- * price sits above cost rather than under it, and the save-time guard is
- * conservative rather than wrong — but it is a real gap, and closing it is a
- * pricing decision (it moves every shelf price down) rather than this one.
+ * Since 22.09.2026 `REFERENCE_PARCEL` (src/lib/shipping/tariffs.ts) is this
+ * carton at `declaredWeightKg()` — 25 × 18 × 8 cm, 0.9 kg — and it is the
+ * shape `tools/fetch-montonio-tariffs.mjs` and `liveTariffsForCountry()` ask
+ * Montonio to price (until then it was a 30 cm cube at 5 kg, which priced
+ * every DPD locker abroad as the L category). `tests/reference-parcel.test.ts`
+ * holds the two together.
  *
  * ## Units — the two endpoints really do differ
  *
@@ -198,50 +211,102 @@ export const PARCEL_DEFAULTS: ParcelSettings = {
 };
 
 /**
- * What Montonio will bill this box as, in kilograms — `volumetricWeight` in
- * its own `calculationDetails`.
+ * **Does Montonio price a parcel by its volumetric weight? Not today.**
  *
- * **This is an estimate and it has to be read as one.** The reference prints
- * no formula, only the single worked example 20 × 15 × 10 cm → 0.75 kg, and
- * 3000 cm³ / 0.75 kg is the /4000 below. Nothing else about it is documented:
- * in particular `bufferApplied` is *not* part of it — the reference calls it a
- * buffer percentage applied to **height** for stacking, and prints 15 %. The
- * one number that is not a guess is `chargeableWeight`, which comes back on
- * `POST /shipping-methods/rates` and which `tools/lib/delivery-pricing.mjs`
- * reads. `docs/montonio-questions.md § 6` asks Montonio for the divisor.
+ * Montonio support, 24.09.2026, in answer to «is the divisor 4000?»:
  *
- * Two readers, and both want the same number:
- *   · the panel prints it beside the three boxes («около N кг»), so the owner
- *     can see a bigger carton costing more before he saves it;
- *   · `declaredWeightKg()` is this, and it is what goes out as
- *     `parcels[].weight` on every shipment.
+ *   «Volumetric divisor — confirmed `4000` in `VolumetricWeightHelper`. For a
+ *   single parcel item there is 0% height padding, so 20×15×10cm / 4000 =
+ *   0.75kg exactly … For multiple items in one shipment, the helper adds 15%
+ *   padding to the combined stacked height before dividing … Important to
+ *   know is that our pricing for time being takes into account real weight.
+ *   If that will change, then we'd let them know.»
+ *
+ * So the rule this file was built on in September — `chargeableWeight =
+ * max(actual, volumetric)`, «the box, not the contents, is what gets paid
+ * for» — is how Montonio's helper computes a number, not how Montonio prices.
+ * The price is the REAL weight's tier (and, on some DPD routes abroad, the
+ * box's size category — XS/S/M/L — which is a different thing again: see
+ * docs/montonio-routes.md and docs/montonio-evidence-2026-09-24.txt).
+ *
+ * This constant is the one place the volumetric rule can come back from. Flip
+ * it the day Montonio writes that it has changed, and `chargeableKg()`,
+ * `declaredWeightKg()` and the panel's copy of both (PARCEL_PRICES_VOLUMETRIC
+ * in public/shop2/app.js, held equal by tests/shipping-real-weight.test.ts)
+ * go back to max(actual, volumetric) together.
+ */
+export const MONTONIO_PRICES_VOLUMETRIC = false;
+
+/**
+ * The real weight an ordinary Rempire parcel is declared at when nobody has
+ * put it on a scale — 0.9 kg.
+ *
+ * One or two bottles and the 25 × 18 × 8 carton: `estimateWeightKg()` makes a
+ * one-unit order 0.6 kg and a two-unit one 1.0 kg. 0.9 is under the 1 kg line
+ * where the first weight tier of Montonio's routes out of Estonia ends
+ * (src/data/montonio-tariffs.json: `maxWeightKg: 1` on every `weightBased`
+ * row except DPD's couriers to LV and LT, whose first tier runs to 10 kg),
+ * and it is the number the tariff mirror is quoted at, so
+ * shelf price and bill are looked up in the same tier. It is also the figure
+ * the label declared before 24.09.2026 — the default carton's volumetric
+ * weight happened to be exactly this — so no price moved when the reason for
+ * it changed.
+ *
+ * Ренат, 18.09.2026: «no weight modelling». This is still one number for every
+ * parcel, not an estimate per basket; a genuinely heavy order is re-weighed by
+ * the carrier and surcharged, the small loss he accepted in exchange for one
+ * stable price.
+ */
+export const ORDINARY_PARCEL_KG = 0.9;
+
+/**
+ * The box's volumetric weight, in kilograms — `volumetricWeight` in Montonio's
+ * own `calculationDetails`.
+ *
+ * The divisor is Montonio's, confirmed 24.09.2026 (`VolumetricWeightHelper`,
+ * 4000, no height padding for a single item; 15 % on the stacked height when a
+ * shipment has several items — the shop always sends one). Until then it was
+ * inferred from the reference's one worked example, 20 × 15 × 10 cm → 0.75 kg.
+ *
+ * **It does not set the price** while MONTONIO_PRICES_VOLUMETRIC is false —
+ * see there. It stays for the day it does, and for `chargeableKg()`.
  */
 export function volumetricKg(p: Pick<ParcelSettings, "length" | "width" | "height">): number {
   return Math.round(((p.length * p.width * p.height) / 4000) * 100) / 100;
 }
 
 /**
- * The weight this shop declares on `POST /shipments` — the box, never the
- * basket.
+ * The weight Montonio looks a price tier up at, for a parcel of `realKg` in
+ * box `p`: the real weight today, max(real, volumetric) if Montonio ever
+ * switches (MONTONIO_PRICES_VOLUMETRIC).
+ */
+export function chargeableKg(realKg: number, p: Pick<ParcelSettings, "length" | "width" | "height">): number {
+  const real = Math.round(Math.max(0, Number(realKg) || 0) * 100) / 100;
+  return MONTONIO_PRICES_VOLUMETRIC ? Math.max(real, volumetricKg(p)) : real;
+}
+
+/**
+ * The weight this shop declares on `POST /shipments` when nobody weighed the
+ * parcel — one number, never the basket.
  *
- * Ренат, 18.09.2026: «one small default carton, no weight modelling». That is
- * a decision about money, not about tidiness: dimensions go out only where
- * `constraints.parcelDimensionsRequired` is true, so on most routes Montonio
- * has no volumetric weight of its own to compare against and **the declared
- * weight is the entire bill**. A per-unit estimate therefore made the shop's
- * cost per parcel climb with the line count while the customer paid one flat
- * price — which is what `estimateWeightKg()` did on every booking until
- * 19.09.2026 (audit 18.09.2026, F24).
+ * Ренат, 18.09.2026: «one small default carton, no weight modelling». A
+ * per-unit estimate made the shop's cost per parcel climb with the line count
+ * while the customer paid one flat price — which is what `estimateWeightKg()`
+ * did on every booking until 19.09.2026 (audit 18.09.2026, F24).
  *
- * So: one number, derived from the carton he set, identical on a one-line
- * order and a nine-line one. The edge case is accepted out loud — a genuinely
- * heavy parcel is re-weighed by the carrier and surcharged, and that is the
- * small loss traded for a figure that never surprises him.
+ * Until 24.09.2026 that one number was the VOLUMETRIC weight of the box on the
+ * card — right by coincidence for the default carton (0.9 kg either way) and
+ * wrong for any other: «Другая коробка» 40 × 30 × 20 declared 6 kg, and
+ * Montonio prices the real weight, so a 6 kg declaration is the 6 kg tier.
+ * Now it is `ORDINARY_PARCEL_KG` whatever box is on the card, and the box
+ * only enters through `chargeableKg()` if MONTONIO_PRICES_VOLUMETRIC is ever
+ * switched on (then the declared weight agrees with the sides beside it, as it
+ * used to). A weight typed into the label form still wins over both.
  */
 export function declaredWeightKg(p: Pick<ParcelSettings, "length" | "width" | "height">): number {
   /* Montonio's own floor: `weight` must be a positive number, and a carton
      small enough to round to zero would be refused rather than cheap. */
-  return Math.max(0.1, volumetricKg(p));
+  return Math.max(0.1, chargeableKg(ORDINARY_PARCEL_KG, p));
 }
 
 export const PARCEL_SETTINGS_KEY = "shipping_parcel";

@@ -391,12 +391,15 @@ describe("what createMontonioShipment actually posts", () => {
   });
 
   it("honours an explicit box even where the flag is false — «эта посылка другая»", async () => {
-    /* …and the weight follows that box rather than the settings one: 40 × 30 ×
-       20 cm is 6 kg volumetric, which is what Montonio would work out from the
-       sides beside it anyway (`chargeableWeight = max(actual, volumetric)`).
-       Declaring 0.9 kg next to those three numbers would be a figure nobody
-       could reconcile with the parcel. */
+    /* …but the WEIGHT does not follow that box any more. Until 24.09.2026 it
+       did: 40 × 30 × 20 cm is 6 kg volumetric, and the label declared 6 kg on
+       the belief that Montonio bills max(actual, volumetric). Montonio,
+       24.09.2026: «our pricing for time being takes into account real
+       weight» — so a declared 6 kg was the 6 kg tier, paid for a parcel that
+       weighs one. The sides still go out (a DPD locker abroad is priced by
+       its size category); the weight is the ordinary parcel's
+       (MONTONIO_PRICES_VOLUMETRIC, src/lib/shipping/parcel.ts). */
     const body = await book(false, "smartpost", { length: 0.4, width: 0.3, height: 0.2 });
-    expect(body.parcels).toEqual([{ weight: 6, length: 0.4, width: 0.3, height: 0.2 }]);
+    expect(body.parcels).toEqual([{ weight: 0.9, length: 0.4, width: 0.3, height: 0.2 }]);
   });
 });

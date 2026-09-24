@@ -1,0 +1,46 @@
+Hard evidence gathered 2026-09-24T16:28:50Z — public, no keys.
+
+## 1. shipping-calculator.montonio.com live bundle main-35YJWUPN.js
+Aliases:
+var{EE:de,LV:Oe,LT:vt,FI:Fe,SE:bd,PL:at,AT:ua,BE:Dd,BG:wd,CZ:ha,DE:fa,DK:Ed,ES:pa,FR:lo,GR:ga,HR:Sd,HU:co,IE:Md,IT:ma,LU:Od,NL:uo,PT:Rd,RO:_a,SI:Pd,SK:va}
+,q=[de,Oe,vt]
+,ig=[at,ua,Dd,wd,ha,fa,Ed,pa,lo,ga,Sd,co,Md,ma,Od,uo,Rd,_a,bd,Pd,va]
+SmartPosti entry:
+[W.SMARTPOSTI]:{code:W.SMARTPOSTI,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:[...q,Fe],[Oe]:[...q,Fe],[vt]:[...q,Fe]},[X.COURIER]:{[de]:[...q,Fe,...ig],[Oe]:[...q,Fe],[vt]:[...q,Fe]}},parcelSizes:ei,courierLimits:{maxWeight:35,maxDimensions:{length:100,width:80,height:60}},pickupPointLimits:{maxWeight:35,maxDimensions:{length:60,width:60,height:36}}
+DPD entry:
+[W.DPD]:{code:W.DPD,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:rg,[Oe]:q},[X.COURIER]:{[de]:xd,[Oe]:q}},parcelSizes:ng,courierLimits:{maxWeight:31.5},pickupPointLimits:{maxWeight:31.5},hasParcelExamples:!0,hasCustomDimensions:!0,customDimensionsWeightOnly:!0,customDimensionsDestinations:[...q],flatRateRoutes:{[X.PICKUP_POINT]:{[de]:q,[Oe]:q},[X.COURIER]:{[de]:[de]}},showInsuranceInfo:!1},[W.OMNIVA]:{code:W.OMNIVA,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:q,[Oe]:q,[vt]:q
+Omniva/Unisend/NovaPost entries:
+[W.OMNIVA]:{code:W.OMNIVA,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:q,[Oe]:q,[vt]:q},[X.COURIER]:{[de]:q,[Oe]:q,[vt]:q}},parcelSizes:ei,courierLimits:{maxWeight:30},pickupPointLimits:{maxWeight:30,maxDimensions:{length:64,width:39,height:38}},hasParcelExamples:!1,hasCusto
+[W.UNISEND]:{code:W.UNISEND,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:q,[Oe]:q,[vt]:q}},parcelSizes:ei,courierLimits:{maxWeight:30},pickupPointLimits:{maxWeight:30,maxDimensions:{length:74,width:61,height:35}},hasParcelExamples:!1,hasCustomDimensions:!1,customDimensionsWeig
+[W.NOVA_POST]:{code:W.NOVA_POST,defaultSourceCountry:de,routes:{[X.PICKUP_POINT]:{[de]:da,[Oe]:da,[vt]:da},[X.COURIER]:{[de]:ao,[Oe]:ao,[vt]:ao}},parcelSizes:ei,courierLimits:{maxWeight:30,maxDimensions:{length:120,width:120,height:120}},pickupPointLimits:{maxWeight:30,maxDimensions:{length
+Decoded: q=[EE,LV,LT], Fe=FI, ig=21 EU countries. SmartPosti pickupPoint EE->[EE,LV,LT,FI]; courier EE->[EE,LV,LT,FI]+21 EU.
+
+## 2. GET https://shipping.montonio.com/api/v2/contract-prices (source=EE, 0.5 kg, 25x18x8), ex-VAT
+smartpost EE pickupPoint -> "pricePerParcel":2.05 "pricingStrategy":"flat" "size":null 
+smartpost EE courier -> "pricePerParcel":5.95 "pricingStrategy":"flat" "size":null 
+smartpost LV pickupPoint -> "pricePerParcel":3.95 "pricingStrategy":"flat" "size":null 
+smartpost LV courier -> "pricePerParcel":6.45 "pricingStrategy":"flat" "size":null 
+smartpost LT pickupPoint -> "pricePerParcel":3.95 "pricingStrategy":"flat" "size":null 
+smartpost LT courier -> "pricePerParcel":6.45 "pricingStrategy":"flat" "size":null 
+smartpost FI pickupPoint -> "pricePerParcel":7.5 "pricingStrategy":"flat" "size":null 
+smartpost FI courier -> "pricePerParcel":12.6 "pricingStrategy":"flat" "size":null 
+smartpost SE pickupPoint -> NONE ([])
+smartpost SE courier -> "pricePerParcel":22.7 "pricingStrategy":"weightBased" "size":null 
+smartpost PL pickupPoint -> NONE ([])
+smartpost PL courier -> "pricePerParcel":12.88 "pricingStrategy":"weightBased" "size":null 
+smartpost DE pickupPoint -> NONE ([])
+smartpost DE courier -> "pricePerParcel":14.15 "pricingStrategy":"weightBased" "size":null 
+dpd EE pickupPoint -> "pricePerParcel":2.09 "pricingStrategy":"flat" "size":null 
+dpd EE courier -> "pricePerParcel":5.5 "pricingStrategy":"flat" "size":null 
+dpd LV pickupPoint -> "pricePerParcel":4.5 "pricingStrategy":"flat" "size":null 
+dpd LV courier -> "pricePerParcel":7.8 "pricingStrategy":"weightBased" "size":null 
+dpd LT pickupPoint -> "pricePerParcel":4.5 "pricingStrategy":"flat" "size":null 
+dpd LT courier -> "pricePerParcel":8.4 "pricingStrategy":"weightBased" "size":null 
+dpd FI pickupPoint -> "pricePerParcel":9.99 "pricingStrategy":"flat" "size":null 
+dpd FI courier -> "pricePerParcel":16.2 "pricingStrategy":"weightBased" "size":null 
+dpd SE pickupPoint -> "pricePerParcel":10.99 "pricingStrategy":"flat" "size":null 
+dpd SE courier -> "pricePerParcel":17.4 "pricingStrategy":"weightBased" "size":null 
+dpd PL pickupPoint -> "pricePerParcel":6 "pricingStrategy":"sizeBased" "size":"XS" 
+dpd PL courier -> "pricePerParcel":19.2 "pricingStrategy":"weightBased" "size":null 
+dpd DE pickupPoint -> "pricePerParcel":13.2 "pricingStrategy":"sizeBased" "size":"XS" 
+dpd DE courier -> "pricePerParcel":19.2 "pricingStrategy":"weightBased" "size":null 

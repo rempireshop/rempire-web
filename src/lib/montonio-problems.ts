@@ -571,19 +571,24 @@ export interface ShipmentRefusalReading {
 }
 
 const SHIPMENT_TEXT: Record<Exclude<ShipmentRefusal, "unknown">, Trilingual> = {
+  /* Since 24.09.2026 a second press is the REPAIR: Montonio's answer that day —
+     PATCH the same shipment, «PATCH automatically triggers a new registration
+     attempt with the carrier … you can just try again» — and
+     POST /api/admin/shipments does exactly that. Until then this said a second
+     press was pointless, which was true of the code and is not any more. */
   registration_failed: {
     RU:
-      "Перевозчик не принял посылку — этикетки нет. Отправление в Montonio есть, но не зарегистрировано: " +
-      "второй раз кнопку жать бесполезно, посылка не задвоится и не поедет. " +
-      "Чаще всего дело в телефоне или адресе получателя: проверьте их в заказе, исправьте у покупателя и напишите Диму — он отправит исправление в Montonio.",
+      "Перевозчик не принял посылку — этикетки нет. Отправление в Montonio одно и остаётся тем же: " +
+      "нажмите «Отправить заново» — Montonio попробует ещё раз, второй посылки не будет. " +
+      "Чаще всего дело в телефоне или адресе получателя: если снова не прошло, проверьте их в заказе, уточните у покупателя и напишите Диму — он исправит, и кнопка сработает.",
     ET:
-      "Vedaja ei võtnud pakki vastu — silti ei ole. Saadetis on Montonios olemas, kuid registreerimata: " +
-      "nuppu teist korda vajutada ei ole mõtet, pakk ei dubleeru ega liigu. " +
-      "Kõige sagedamini on asi saaja telefonis või aadressis: kontrollige neid tellimuses, täpsustage kliendiga ja kirjutage Dimile — tema saadab paranduse Montoniosse.",
+      "Vedaja ei võtnud pakki vastu — silti ei ole. Saadetis on Montonios üks ja jääb samaks: " +
+      "vajutage «Saada uuesti» — Montonio proovib uuesti, teist pakki ei teki. " +
+      "Kõige sagedamini on asi saaja telefonis või aadressis: kui ka uuesti ei õnnestu, kontrollige neid tellimuses, täpsustage kliendiga ja kirjutage Dimile — tema parandab ja nupp töötab.",
     EN:
-      "The carrier would not take the parcel — there is no label. The shipment exists at Montonio but is not registered: " +
-      "pressing the button again does nothing, the parcel will neither double nor move. " +
-      "The usual cause is the receiver's phone or address: check them on the order, confirm with the customer and write to Dim — he sends the correction to Montonio.",
+      "The carrier would not take the parcel — there is no label. There is one shipment at Montonio and it stays the same one: " +
+      "press «Send again» and Montonio tries again — no second parcel appears. " +
+      "The usual cause is the receiver's phone or address: if it fails again, check them on the order, confirm with the customer and write to Dim — he corrects it and the button works.",
   },
   bad_phone: {
     RU:

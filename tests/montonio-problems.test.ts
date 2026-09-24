@@ -294,10 +294,14 @@ describe("readShipmentRefusal — a parcel the carrier would not take", () => {
     expect(read.reason).toBe("registration_failed");
     speaksAllThree(read.messages);
     /* Two facts the owner cannot get anywhere else: the parcel exists at
-       Montonio (so a second press is pointless) and the fix is a correction
-       somebody must send, not a retry. */
-    expect(read.messages.RU).toMatch(/второй раз/i);
-    expect(read.messages.EN).toMatch(/again does nothing/i);
+       Montonio, ONE shipment — and since 24.09.2026 pressing again is the
+       repair (PATCH the same shipment; Montonio: «you can just try again»),
+       with no second parcel; if it fails again, the phone or address needs
+       correcting. */
+    expect(read.messages.RU).toMatch(/ещё раз/i);
+    expect(read.messages.RU).toMatch(/второй посылки не будет/i);
+    expect(read.messages.EN).toMatch(/press «Send again»/i);
+    expect(read.messages.EN).toMatch(/no second parcel/i);
   });
 
   it("quotes the carrier for anything it has not been taught", () => {

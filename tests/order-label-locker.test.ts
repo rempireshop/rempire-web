@@ -42,6 +42,7 @@ const card = new Function(`
   function loadAdminPricing() {}
   function parcelConf() { return { length: 25, width: 18, height: 8, lockerSize: "S", recent: [] }; }
   function parcelVolKg() { return 0.9; }
+  function parcelDeclaredKg() { return 0.9; }
   function kgNum(n) { return String(n).replace(".", ","); }
   function suggestLocker() { return "S"; }
   function lockerReason() { return "обычно S"; }

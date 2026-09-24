@@ -475,6 +475,9 @@ describe("the shipping webhook Montonio documents", () => {
       orderRef: "order 1",
       status: "registered",
       trackingCode: "CC548936341EE",
+      // the documented sample's parcel carries a trackingLink and no dropOffPin
+      trackingUrl: "https://minu.omniva.ee/track/CC548936341EE?language=et",
+      dropOffPin: "",
     });
   });
 
@@ -557,7 +560,9 @@ describe("GET /carriers and GET /webhooks — what this store is signed up for",
  */
 describe("readWebhookSetup — registered is not registered HERE", () => {
   const OURS = "https://rempireshop.com/api/shipping/notify/";
-  const both = ["shipment.statusUpdated", "shipment.registrationFailed"];
+  /* The three the shop cannot do without since 24.09.2026 — `registered`
+     joined when refusals started being repaired with PATCH. */
+  const both = ["shipment.statusUpdated", "shipment.registrationFailed", "shipment.registered"];
 
   it("refuses the reference's own example webhook, which used to pass", () => {
     const setup = readWebhookSetup(
@@ -585,14 +590,21 @@ describe("readWebhookSetup — registered is not registered HERE", () => {
     ).toBe("ok");
 
     const half = readWebhookSetup(
-      [{ id: "1", url: OURS, events: ["shipment.statusUpdated", "shipment.registered"] }],
+      [{ id: "1", url: OURS, events: ["shipment.statusUpdated", "shipment.registered", "shipment.labelsCreated"] }],
       OURS,
     );
     expect(half.state).toBe("missing_events");
-    /* `shipment.registered` is not required — booking is synchronous, so the
-       status comes back in the answer to the button press — and an extra
-       event is never a complaint. */
+    /* An extra event (`labelsCreated`) is never a complaint. `registered` is
+       required since 24.09.2026: a refused parcel is repaired with PATCH, and
+       a re-registration that does not finish inside the PATCH brings its
+       tracking code only in that event. */
     expect(half.missingEvents).toEqual(["shipment.registrationFailed"]);
+
+    const three = readWebhookSetup(
+      [{ id: "1", url: OURS, events: ["shipment.statusUpdated", "shipment.registrationFailed"] }],
+      OURS,
+    );
+    expect(three.missingEvents).toEqual(["shipment.registered"]);
   });
 
   it("ignores the scheme and the case, because the address is still ours", () => {
@@ -881,8 +893,15 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     expect(audit.some((a) => a.action === "shipment.registration_failed")).toBe(true);
     expect(audit.some((a) => a.action === "shipment.create")).toBe(false);
 
-    /* …and a second press says the same thing rather than «Этикетка снова на
-       месте ✓», without touching Montonio again. */
+    /* …and a second press is the REPAIR (Montonio, 24.09.2026: PATCH the same
+       shipment, «you can just try again»): it asks Montonio, sends the SAME
+       shipment again, and — the carrier still refusing here — answers the
+       same refusal rather than «Этикетка снова на месте ✓». Never a second
+       POST /shipments. (tests/shipment-repair.test.ts has the rest.) */
+    const repair = stubFetch([
+      [new RegExp(`/shipments/${REFUSED.id}$`), () => json(REFUSED)],
+      [/\/shipping-methods$/, () => json({ countries: [] })],
+    ]);
     const again = await POST(
       req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.number }) }, admin),
     );
@@ -890,6 +909,8 @@ describe("the paths sandbox can never reach, on the real routes", () => {
     const againBody = (await again.json()) as RouteBody;
     expect(againBody.error).toBe("registration_failed");
     expect(againBody.reused).toBeUndefined();
+    expect(repair.filter((c) => /\/shipments\//.test(c.url)).map((c) => c.init?.method ?? "GET")).toEqual(["GET", "PATCH"]);
+    expect(repair.some((c) => (c.init?.method ?? "GET") === "POST")).toBe(false);
 
     /* …and asking for its label says the same thing too, instead of failing
        somewhere inside Montonio with nothing behind it. */

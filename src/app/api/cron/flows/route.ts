@@ -41,13 +41,19 @@ const NO_STORE = { "cache-control": "no-store" };
 /** `abandoned: sent 1, skipped 2 (too_fresh) · abandonedDiscount: …` — counts and codes only, never an address. */
 function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>): string {
   const flows = ["abandoned", "abandonedDiscount", "backstock", "birthday", "unpaid"] as const;
+  const s = report.shipments;
+  /* The parcel backup poll (src/lib/shipping/shipment-sync.ts) on the same
+     line: a lost webhook it found is otherwise visible nowhere. */
+  const parcels = s
+    ? ` · shipments: checked ${s.checked}, changed ${s.changed}, errors ${s.errors}${s.reason ? ` (${s.reason})` : ""}`
+    : "";
   return (
     flows
       .map((k) => {
         const r = report[k];
         return `${k}: sent ${r.sent}, skipped ${r.skipped}${r.reason ? ` (${r.reason})` : ""}`;
       })
-      .join(" · ") + ` · ${report.ms} ms`
+      .join(" · ") + parcels + ` · ${report.ms} ms`
   );
 }
 

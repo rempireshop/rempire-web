@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
-import { getOrderByNumber, getOrderByShipmentId, setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
+import { getOrderByNumber, getOrderByShipmentId, type Order } from "@/lib/orders";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { montonioShippingConfig, saveShipmentOnOrder } from "@/lib/shipping/montonio";
+import { montonioShippingConfig } from "@/lib/shipping/montonio";
+import { applyShipmentUpdate } from "@/lib/shipping/shipment-sync";
 import {
+  isLabelFileEvent,
   recordShipmentStatus,
   ShipmentWebhookError,
   verifyShipmentWebhook,
@@ -11,7 +12,7 @@ import {
 } from "@/lib/shipping/webhook";
 
 /**
- * POST /api/shipping/notify/ — Montonio Shipping's `shipment.statusUpdated`.
+ * POST /api/shipping/notify/ — Montonio Shipping's parcel events.
  *
  * The parcel half of what /api/payments/notify/ is for money, and built to the
  * same rules, because the reasons are the same ones:
@@ -23,16 +24,13 @@ import {
  *   · a 200 for anything it has understood — including a repeat, and including
  *     an event about a shipment this shop has no order for; 4xx only when the
  *     token itself is unusable, which no retry can fix; 503 when our own
- *     database is the thing that failed. NOTE, because this file's own header
- *     says a guess is the bug: «Montonio retries for 48 hours and expects
- *     200/201» is the STARGATE webhooks guide, about payments. The Shipping v2
- *     webhooks guide documents the envelope, the signature, two source IPs and
- *     a ten-webhook limit, and says nothing about retries, attempt counts or
- *     the expected response code (checked twice — audit F27). So the 503 may
- *     buy a redelivery or may simply lose the event. What saves us either way
- *     is that delivered and returned are re-derived by the nightly poll
- *     (src/lib/delivery.ts) and a lost registrationFailed is moot while
- *     bookings are synchronous. Ask Montonio and delete this paragraph;
+ *     database is the thing that failed. The retry policy is Montonio's
+ *     answer of 24.09.2026, no longer a guess (audit F27 asked): «15 attempts
+ *     total. The first retry happens after about 10 seconds, and the interval
+ *     grows exponentially … roughly 1.5–2 days». So a 503 buys a redelivery,
+ *     and an event can arrive two days late — after a newer one, which is why
+ *     applyShipmentUpdate() (src/lib/shipping/shipment-sync.ts) never moves a
+ *     parcel backwards on a webhook;
  *   · nothing here is written twice. The status word goes into
  *     `settings.shipping_statuses` under its own name, and the order only
  *     changes on the one transition that has not happened yet.
@@ -45,10 +43,21 @@ import {
  * the white list still decides what to do with one, and stays marked as the
  * stopgap it is.
  *
- * Renat has to point Montonio at this address once — Partner system →
- * Shipping → Webhooks — the same way `notificationUrl` points at the payment
- * one. The trailing slash matters: `trailingSlash` is on in next.config.ts and
- * a POST without it becomes a 308. See docs/shipping.md.
+ * Montonio is pointed at this address once, by API — it has no screen for it:
+ * `tools/montonio-webhook.mjs register <url>` (Dim, with the live keys). The
+ * trailing slash matters: `trailingSlash` is on in next.config.ts and a POST
+ * without it becomes a 308. See docs/shipping.md and docs/go-live.md.
+ *
+ * Which of Montonio's six events do what here (enum confirmed 24.09.2026):
+ *   · `shipment.statusUpdated`, `shipment.registered`,
+ *     `shipment.registrationFailed`, `shipment.labelsCreated` — a shipment's
+ *     status, applied by applyShipmentUpdate(). `registered` also brings the
+ *     tracking code of a parcel registered after the button press (a repaired
+ *     refusal); `labelsCreated` keeps the stored status current. These four
+ *     are tools/montonio-webhook.mjs EVENTS.
+ *   · `labelFile.ready`, `labelFile.creationFailed` — about a PDF, not a
+ *     parcel. Acknowledged and ignored (isLabelFileEvent): labels are made
+ *     synchronously, on the owner's press, and their URL lives five minutes.
  */
 
 export const runtime = "nodejs";
@@ -93,6 +102,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "bad_token" }, { status: 400 });
   }
 
+  /* A label file is not a parcel: its `data.status` is «ready» or «failed»,
+     and «failed» in the status vocabulary — or on an order — would read as a
+     refused shipment. Signed and ours, so 200; nothing to do. */
+  if (isLabelFileEvent(event.event)) {
+    return NextResponse.json({ ok: true, ignored: "label_file" });
+  }
+
   /* The recording comes before anything else this route does. It is the
      reason the endpoint exists, it is the same one line whether or not the
      order is ours, and a database that cannot take it is worth a retry. */
@@ -125,65 +141,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, status: seen.word, ignored: "unknown_shipment" });
   }
 
-  /* Only the status is merged into `orders.shipping.montonio`, never an id or
-     a tracking code: those were written by «Создать этикетку» from Montonio's
-     own answer, and a webhook is not the place to invent a parcel the panel
-     never booked. */
+  /* Everything that follows is applyShipmentUpdate() —
+     src/lib/shipping/shipment-sync.ts, one update whoever brings the news:
+     the word onto the order (never backwards: a retried event can be two days
+     late), a tracking code the order lacks (a parcel registered after the
+     button press — a repaired refusal), the journal row for a refusal, and
+     «delivered» closing a `shipped` order. Only the status and a missing
+     tracking code are ever written: the id was written by «Создать этикетку»
+     from Montonio's own answer, and a webhook is not the place to invent a
+     parcel the panel never booked.
+
+     The refusal is read TWO ways, because only one is documented: the word
+     `registrationFailed`, and the event NAME `shipment.registrationFailed`
+     that the webhook is registered with (audit F23) — a live body may carry
+     the shipment at `pending` with the failure only in `eventType`. Sandbox
+     never sends it; it calls no carriers (docs/montonio-untested.md, S1). */
+  let result;
   try {
-    await saveShipmentOnOrder(order.id, { status: seen.word, statusAt: new Date().toISOString() });
+    result = await applyShipmentUpdate(
+      order,
+      {
+        status: seen.word,
+        event: event.event,
+        shipmentId: event.shipmentId,
+        trackingCode: event.trackingCode,
+        trackingUrl: event.trackingUrl,
+        dropOffPin: event.dropOffPin,
+      },
+      { source: "webhook" },
+    );
   } catch (err) {
-    // Worth recording, not worth a redelivery: the vocabulary already has it.
-    console.error("shipping/notify: could not store the status on the order", err);
-  }
-
-  /* `shipment.registrationFailed` — the carrier turned the parcel down.
-     recordShipmentStatus() writes the WORD to the journal, and only the first
-     time it is ever seen, which is right for a vocabulary and wrong for this:
-     the news here is the ORDER, every single time. Without this row a refused
-     parcel booked asynchronously is one word in a settings blob and nothing
-     else, and the owner finds out when the customer asks where the parcel is.
-     Sandbox never sends this event — it calls no carriers at all
-     (docs/montonio-untested.md, S1).
-
-     TWO ways in, because only one of them is documented. Montonio's webhooks
-     guide prints exactly one sample — `shipment.registered`, with
-     `data.status: "registered"` — so reading the failure off `data.status` was
-     an inference, and every fixture we have for it is that sample edited by
-     hand (audit F23). The event NAME is the half Montonio actually promises:
-     `shipment.registrationFailed` is one of the events the owner ticks when he
-     registers the webhook. If the live body carries the shipment at `pending`
-     with the failure only in `eventType`, the word test alone would write no
-     journal row at all and he would hear it from the customer. */
-  const failedWord = String(seen.word).toLowerCase() === "registrationfailed";
-  const failedEvent = String(event.event || "").toLowerCase() === "shipment.registrationfailed";
-  if (failedWord || failedEvent) {
-    console.error(`shipping/notify: carrier refused the parcel for ${order.number}`);
-    await writeAuditSafe("system", "shipment.registration_failed", {
-      orderId: order.id,
-      number: order.number,
-      provider: "montonio",
-      shipmentId: event.shipmentId || undefined,
-      code: seen.word,
-      reason: shipmentRegistrationFailed(seen.word).reason,
-      event: event.event || undefined,
-    });
-  }
-
-  /* The white-list fallback, doing the one thing it is trusted with. Only from
-     `shipped`, so an order Renat has already closed by hand is not touched, a
-     repeat of the same webhook finds nothing to do, and a parcel that has come
-     back (looksReturned → "returned") is deliberately left open: it is on its
-     way to Renat, not to the customer. `system` is the actor the nightly cron
-     uses for the same transition, and the journal says «магазин сам». */
-  let applied = "";
-  if (seen.meaning === "delivered" && order.status === "shipped") {
-    try {
-      await setOrderStatus(order.id, "delivered", "system");
-      applied = "delivered";
-    } catch (err) {
-      console.error(`shipping/notify: could not close ${order.number}`, err);
-      return NextResponse.json({ ok: false, error: "apply_failed" }, { status: 503 });
-    }
+    console.error(`shipping/notify: could not close ${order.number}`, err);
+    return NextResponse.json({ ok: false, error: "apply_failed" }, { status: 503 });
   }
 
   return NextResponse.json({
@@ -191,7 +180,9 @@ export async function POST(req: Request) {
     status: seen.word,
     meaning: seen.meaning || "unknown",
     number: order.number,
-    applied: applied || undefined,
+    applied: result.applied || undefined,
+    stale: result.stale || undefined,
+    ignored: result.otherShipment ? "other_shipment" : undefined,
   });
 }
 

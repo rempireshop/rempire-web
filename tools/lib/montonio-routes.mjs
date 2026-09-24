@@ -19,6 +19,14 @@
  * in its bundle; do not edit it from a support answer alone, because the
  * answer we got in prose (Montonio, 22.09.2026) was correct but coarser than
  * this — it named the carriers and not the per-method differences below.
+ *
+ * Re-checked 24.09.2026 against the LIVE bundle (main-35YJWUPN.js), after
+ * Montonio's written «SmartPosti has courier deliveries only» for
+ * international shipments: SmartPosti's pickup-point route from EE is still
+ * exactly EE, LV, LT, FI, so that sentence means the rest of Europe. Every
+ * carrier matches; the one drift is DPD's Romanian lockers, deliberate (see
+ * DPD_LOCKER). docs/montonio-evidence-2026-09-24.txt is the verbatim
+ * evidence and tests/montonio-evidence.test.ts holds this file to it.
  */
 
 /**
