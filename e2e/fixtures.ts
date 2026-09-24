@@ -154,7 +154,12 @@ export function freshEmail(tag: string): string {
 export async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto(shopUrl("", "/admin/"));
   const pwField = page.locator("[data-admpw]");
-  await expect(pwField).toBeVisible();
+  /* The card waits on two answers — /api/overrides/ (until it lands the panel
+     does not know there is a server, SRV.on) and /api/admin/me/. Late in a
+     full run `next dev` recompiles routes it has dropped from memory, and on
+     24.09.2026 that held both for 8.7–9.1 s, four times: the panel was fine,
+     the 8-s default was not. A wait for the door, not a speed check. */
+  await expect(pwField).toBeVisible({ timeout: 20_000 });
   /* Re-check the value right before the click. app.js now carries the typed
      password across a render (renderImpl's `pwKeep`), but a render landing
      between `fill` and `click` still replaces the node the click was aimed
