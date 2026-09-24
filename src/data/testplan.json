@@ -4743,7 +4743,7 @@
         "Нажать «Выберите пакомат», ввести индекс 20121 и выбрать пункт из найденных.",
         "Снова открыть оформление и дойти до шага доставки.",
         "В кабинете выбрать Грецию и «Курьер до двери», вписать только «Адрес» и выйти из поля.",
-        "Дописать «Индекс» и «Город», потом снова открыть оформление и дойти до шага доставки.",
+        "Дописать «Индекс» и «Город», не выходя из поля дождаться «…сохранена ✓», нажать «Назад» телефона и снова дойти в оформлении до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
@@ -4770,7 +4770,7 @@
           "Press «Выберите пакомат», type the postcode 20121 and pick one of the points found.",
           "Open the checkout again and get to the delivery step.",
           "In the account choose Greece and «Курьер до двери», type only «Адрес» (street) and leave the box.",
-          "Add «Индекс» and «Город» (postcode, city), then open the checkout again and get to the delivery step.",
+          "Add «Индекс» and «Город» (postcode, city); without leaving the box wait for «…сохранена ✓», press the phone's Back, then get to the checkout's delivery step again.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
@@ -4784,7 +4784,7 @@
         "why": "Somebody else's locker filled in means a parcel to the wrong person."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T18:46:27.418Z"
+      "markedAt": "2026-09-24T14:56:34.522Z"
     },
     {
       "id": "acct-refund-sent",

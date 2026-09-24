@@ -16425,8 +16425,17 @@
   /** The form from the row — on every profile fetch, so «unchanged» always
       means «same as the server», never «same as before». */
   function acctSeedForm() {
-    var c = S.cust;
+    var c = S.cust, was = S.acctForm || {};
     S.acctForm = { name: c.name || "", phone: c.phone || "", birthday: c.birthday || "", marketing: !!c.marketing, ship: shipDraftFrom(c.shipPref) };
+    /* …except a field whose save is still on its way (queued, in flight, or
+       waiting for the typing to stop — acctAutoSave). Opening the checkout
+       re-reads the profile (acctRefresh) in the same moment it flushes what
+       was just typed (acctFlush), and a profile read before that save landed
+       would put the old value back over the new one — the queue would then
+       find nothing to send. The save's own answer re-reads the row (acctNext). */
+    ["name", "phone", "birthday", "marketing", "ship"].forEach(function (f) {
+      if (f in was && (acctPending(f) || acctAutoT[f])) S.acctForm[f] = was[f];
+    });
   }
   /** One field of the form back from the row, after its own save. */
   function acctSeedField(f) {
@@ -16506,6 +16515,8 @@
     S.acctSt = { name: "", phone: "", birthday: "", marketing: "", ship: "" };
     acctQ.length = 0; acctInflight = ""; acctGen++;
     clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+    for (var a in acctAutoT) clearTimeout(acctAutoT[a]);
+    acctAutoT = {};
     for (var k in acctStT) clearTimeout(acctStT[k]);
   }
 
@@ -16526,7 +16537,8 @@
     if (!S.cust || !acctFieldDirty(f)) { if (S.acctSt[f] === "busy") acctSt(f, ""); acctNext(); return; }
     acctInflight = f;
     var gen = acctGen, sent = JSON.stringify(acctFieldPayload(f));
-    fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: sent })
+    // keepalive: a save that left while the page was being closed still lands (acctLeave)
+    fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: sent, keepalive: true })
       .then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return { status: r.status }; }); })
       .then(function (res) {
         if (gen !== acctGen) return;   // signed out while it was out
@@ -16559,6 +16571,8 @@
      («0019») is outside the box's own min/max: not a date to store. */
   var acctBirthdayT = 0;
   function acctFieldChange(f, el) {
+    // the box was left: its save goes now, and the pause-in-typing one is spent
+    clearTimeout(acctAutoT[f]); delete acctAutoT[f];
     if (f === "birthday") {
       clearTimeout(acctBirthdayT); acctBirthdayT = 0;
       if (el && el.validity && !el.validity.valid) return;
@@ -16567,8 +16581,93 @@
     }
     /* the checkout's own rule and words for a number with too few digits
        (phoneOk / shipMsg): nothing is sent, the server keeps the number it had */
-    if (f === "phone" && S.acctForm.phone.trim() && S.acctForm.phone.replace(/\D/g, "").length < 7) { acctSt("phone", "err:bad_phone"); return; }
+    if (f === "phone" && acctPhoneShort()) { acctSt("phone", "err:bad_phone"); return; }
+    /* Already saved by the pause in typing (acctAutoSave): leaving the box
+       then changes nothing, and a second request would only put «Сохраняем…»
+       over the «Сохранено ✓» that is standing. */
+    if (!acctFieldDirty(f) && !acctPending(f)) return;
     acctQueue(f);
+  }
+  /** A number typed with too few digits for a phone (the checkout's phoneOk rule). */
+  function acctPhoneShort() {
+    return !!S.acctForm.phone.trim() && S.acctForm.phone.replace(/\D/g, "").length < 7;
+  }
+  /* ---- what is typed is never lost ----------------------------------------
+     Dim, 24.09.2026, on /test «acct-default-delivery»: «not sure, if after
+     typing and going away from page the information is stored — me as a
+     developer I know that after I typed and then did one click with mouse, it
+     then stored». A box saved only when it was LEFT, and a shopper does not
+     always leave it: the phone's Back, switching to another app, closing the
+     tab — none of those is a blur, and the typing died with the page.
+
+     So a box also saves itself a moment after the typing stops
+     (ACCT_AUTOSAVE_MS), through the same one-at-a-time queue and under the
+     same «Сохраняем…» / «Сохранено ✓» line as the blur. Leaving the screen
+     sends whatever is still waiting at once (acctFlush, from go() and
+     popstate), and a page going away sends it with keepalive (acctLeave).
+     A pause is not a verdict: a phone number still too short and half a
+     courier address wait quietly — the blur is what says what is missing. */
+  var ACCT_AUTOSAVE_MS = 800;
+  var acctAutoT = {};   // field → the timer of a save waiting for the typing to stop
+  /** A keystroke in a profile box: the draft follows it, the save waits for a pause. */
+  function acctTyped(f, value) {
+    S.acctForm[f] = value;
+    /* A standing «Сохранено ✓» or a refusal under the box is stale the
+       moment something new is typed; only «Сохраняем…» stays, that request
+       is out. */
+    if (S.acctSt[f] && S.acctSt[f] !== "busy") acctSt(f, "");
+    // the birthday has its own clock: its box fires `change` as it is typed (acctFieldChange)
+    if (f !== "birthday") acctAutoSave(f);
+  }
+  /** …and in one of the courier's address boxes, onto the delivery draft. */
+  function acctAddrTyped(k, value) {
+    var d = S.acctForm.ship;
+    if (d) { if (!d.address) d.address = acctAddrOf(null); d.address[k] = value; }
+    if (S.acctSt.ship && S.acctSt.ship !== "busy") { acctSt("ship", ""); paintAcctAddr(); }
+    if (d) acctAutoSave("ship");
+  }
+  function acctAutoSave(f) {
+    clearTimeout(acctAutoT[f]);
+    acctAutoT[f] = setTimeout(function () { delete acctAutoT[f]; acctAutoRun(f); }, ACCT_AUTOSAVE_MS);
+  }
+  /** The pause's save — the blur's, minus the refusals a pause is too early for. */
+  function acctAutoRun(f) {
+    if (!S.cust) return;
+    if (f === "ship") {
+      var d = S.acctForm.ship;
+      // a whole address saves; half of one waits for the rest (acctShipChanged says so on the blur)
+      if (d && d.method === "courier" && acctAddrWhole(acctAddrOf(d.address)) && acctFieldDirty("ship")) acctShipChanged();
+      return;
+    }
+    if (f === "phone" && acctPhoneShort()) return;
+    if (acctFieldDirty(f)) acctQueue(f);
+  }
+  /** Leaving the account screen: every save still waiting for a pause goes now. */
+  function acctFlush() {
+    Object.keys(acctAutoT).forEach(function (f) { clearTimeout(acctAutoT[f]); delete acctAutoT[f]; acctAutoRun(f); });
+    if (acctBirthdayT) { clearTimeout(acctBirthdayT); acctBirthdayT = 0; acctQueue("birthday"); }
+  }
+  /* The page itself is going away (pagehide), or may be about to (hidden —
+     the last moment a phone reliably gives). The queue sends one field at a
+     time and the page may not live to see its turn, so whatever waits behind
+     the request in flight rides one keepalive PATCH now — the route takes
+     any subset of the fields. If the page comes back instead, the queue
+     carries on and sends them again: the same value twice, harmless. */
+  function acctLeave() {
+    acctFlush();
+    if (!S.cust) return;
+    var body = { lang: S.lang }, n = 0;
+    acctQ.forEach(function (f) {
+      if (!acctFieldDirty(f)) return;
+      var one = acctFieldPayload(f);
+      for (var k in one) body[k] = one[k];
+      n++;
+    });
+    if (!n) return;
+    try {
+      fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body), keepalive: true })
+        .catch(noop);
+    } catch (e) {}
   }
   /* «Доставка по умолчанию»: the row, the country and the machine each come
      through here. A parcel row without a machine is not a preference yet —
@@ -39681,6 +39780,8 @@
        admLayers above); admCloseTop() answers false everywhere else, including
        every screen of the shop. */
     if (!st.adm && admCloseTop()) { render(); return; }
+    // the phone's Back off «Мой кабинет» is no blur: send what was typed (acctFlush)
+    acctFlush();
     S.histDrawer = !!st.drawer;
     S.langOpen = false;
     routeFromPath();
@@ -39693,6 +39794,9 @@
   });
 
   function go(screen) {
+    /* whatever was typed on «Мой кабинет» and is still waiting for a pause
+       goes now — before the checkout below re-reads the profile (acctFlush) */
+    acctFlush();
     // the account's point sheet belongs to the account screen and closes with it
     if (S.pointFor === "acct") { S.pointOpen = false; S.pointFor = ""; }
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
@@ -42491,21 +42595,13 @@
     }
     else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
     /* the profile form: the draft follows the keystrokes — no render(), the
-       caret stays put — and the field saves itself when it is left (the
-       "change" listener, acctFieldChange). A standing «Сохранено ✓» or a
-       refusal under it is stale the moment something new is typed; only
-       «Сохраняем…» stays, that request is out. */
-    else if (t.matches("[data-acctf]")) {
-      S.acctForm[t.dataset.acctf] = t.value;
-      if (S.acctSt[t.dataset.acctf] && S.acctSt[t.dataset.acctf] !== "busy") acctSt(t.dataset.acctf, "");
-    }
+       caret stays put — and the field saves itself a moment after the typing
+       stops (acctTyped → acctAutoSave) and again when it is left (the
+       "change" listener, acctFieldChange). */
+    else if (t.matches("[data-acctf]")) acctTyped(t.dataset.acctf, t.value);
     // …and the courier's address boxes: the same, onto the delivery draft
-    // (a whole address saves when a box is left — acctShipChanged)
-    else if (t.matches("[data-acctaddr]")) {
-      var adrD = S.acctForm.ship;
-      if (adrD) { if (!adrD.address) adrD.address = acctAddrOf(null); adrD.address[t.dataset.acctaddr] = t.value; }
-      if (S.acctSt.ship && S.acctSt.ship !== "busy") { acctSt("ship", ""); paintAcctAddr(); }
-    }
+    // (a whole address saves — acctShipChanged)
+    else if (t.matches("[data-acctaddr]")) acctAddrTyped(t.dataset.acctaddr, t.value);
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
@@ -42939,6 +43035,10 @@
     var f = t.dataset.acctf;
     if (acctFieldDirty(f) && !acctPending(f)) acctFieldChange(f, t);
   });
+  /* …and the page going away with the typing still in it: a closed tab, the
+     phone switching to another app (acctLeave). */
+  window.addEventListener("pagehide", acctLeave);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) acctLeave(); });
 
   document.addEventListener("change", function (e) {
     var t = e.target;
@@ -42978,7 +43078,14 @@
        are there (acctShipChanged); a line under the rows says what is short */
     else if (t.matches("[data-acctaddr]")) {
       var adrC = S.acctForm.ship;
-      if (adrC) { if (!adrC.address) adrC.address = acctAddrOf(null); adrC.address[t.dataset.acctaddr] = t.value; acctShipChanged(); }
+      if (adrC) {
+        if (!adrC.address) adrC.address = acctAddrOf(null);
+        adrC.address[t.dataset.acctaddr] = t.value;
+        clearTimeout(acctAutoT.ship); delete acctAutoT.ship;
+        /* …unless the pause in typing saved it already: a second save of the
+           same address would only put «Сохраняем…» over «…сохранена ✓» */
+        if (acctFieldDirty("ship") || acctAddrPartial(adrC.address)) acctShipChanged();
+      }
     }
     /* …and the country behind «Другая страна Европы», which is the one the
        rows and the price are actually drawn for. */
