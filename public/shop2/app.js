@@ -23919,7 +23919,7 @@
   function newsPlanWord() {
     var p = S.newsPlan;
     if (!p || !(Number(p.days) > 1)) return "";
-    return " · " + plainDays(Number(p.days));
+    return "· " + plainDays(Number(p.days));
   }
   /* «2 дня» / «5 дней» — одним словом, потому что строку целиком переводит
      словарь, а число в ней собирается на лету (UI_RX). */
@@ -23933,6 +23933,17 @@
     if (!aud) return "Отправить подписчикам";
     var n = Number(aud.total) || 0;
     return n === 1 ? "Отправить 1 подписчику" : "Отправить " + n + " подписчикам";
+  }
+  /* «Отправить 40 подписчикам» и «· 3 дня» — два текстовых узла, а не один:
+     translateTree() переводит узел целиком, и склеенная строка «Отправить 40
+     подписчикам · 3 дня» не подходила ни под «^Отправить (\d+) подписчикам$»,
+     ни под «^· (\d+) дня$» (UI_RX) — на ET/EN кнопка оставалась русской,
+     как только план выходил за один день. Общий <span> вокруг обоих держит
+     обычный пробел между ними: у .adm-btn flex с gap, и два отдельных
+     элемента разошлись бы на 10 px. */
+  function newsSendHTML(aud) {
+    var plan = newsPlanWord();
+    return plan ? "<span><span>" + newsSendLabel(aud) + "</span> <span>" + plan + "</span></span>" : newsSendLabel(aud);
   }
   /* ---- the blocks on screen -----------------------------------------------
      Drawn into their own slot (#newsblocks) and redrawn there alone —
@@ -24492,7 +24503,7 @@
            the phone's header (11.09.2026): the count above it, the confirm
            card behind it as before (newsSendAsk) */
         '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" +
-          newsSendLabel(aud) + newsPlanWord() + "</button>" + newsBudgetLineHTML();
+          newsSendHTML(aud) + "</button>" + newsBudgetLineHTML();
     }
     return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
   }

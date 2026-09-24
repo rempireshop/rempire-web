@@ -5596,14 +5596,14 @@
         "«Ещё» → «Настройки» → «Письма» (это «Маркетинг» → «Письма»): блок «Сколько писем в сутки» под списком писем.",
         "Поставить всего 4, придержать 2, сохранить и обновить страницу.",
         "Проверить, что подписчиков больше двух; если нет — добавить.",
-        "Открыть рассылку и нажать отправку.",
+        "Открыть рассылку, прочитать кнопку отправки на EN, вернуть RU и нажать её.",
         "Оформить и оплатить заказ, пока лимит занят.",
         "Вернуть 100 и 30; «Продолжить» у рассылки не нажимать.",
         "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
         "После обновления в полях 4 и 2, без «Изменения не сохранены».",
-        "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
+        "Под кнопкой — сколько ушло сегодня и доступно; на EN вся кнопка по-английски.",
         "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
         "Одно оповещение о лимите: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
@@ -5613,21 +5613,21 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T15:12:48.378Z",
+      "markedAt": "2026-09-24T17:47:00.480Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
           "«Ещё» → «Настройки» → «Письма» (that is «Маркетинг» → «Письма»): the «Сколько писем в сутки» block below the letters.",
           "Set the total to 4, hold back 2, save and reload the page.",
           "Check there are more than two subscribers; add some if not.",
-          "Open a campaign and press send.",
+          "Open a campaign, read its send button in EN, switch back to RU and press it.",
           "Place and pay for an order while the allowance is spent.",
           "Put back 100 and 30; do not press the campaign's «Продолжить».",
           "The next day after 10:00, open the campaign again."
         ],
         "expect": [
           "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
-          "Under the button: how many went today and how many the campaign may use.",
+          "Under the button: sent today and still available; in EN the whole button is English.",
           "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
           "The «Заказ принят» letter still reaches the buyer.",
           "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
