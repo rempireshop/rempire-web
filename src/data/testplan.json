@@ -4104,13 +4104,15 @@
       "steps": [
         "В том же заказе нажать «Отправить счёт ещё раз».",
         "Проверить почту, на которую выписан счёт.",
-        "Прочитать строку про счёт в карточке заказа."
+        "Прочитать строку про счёт в карточке заказа.",
+        "Пока IBAN пуст, открыть «Обзор» и нажать строку «Заполните IBAN»."
       ],
       "expect": [
         "Письмо со счётом пришло второй раз.",
         "К письму приложен PDF счёта.",
         "Без IBAN карточка пишет, что счёт не отправлен и где его заполнить.",
-        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз."
+        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз.",
+        "Строка «Заполните IBAN» открывает «Настройки → О компании», а не «Обзор» снова."
       ],
       "why": "Компания, не получившая счёт, не заплатит, а вы будете думать, что она тянет.",
       "risk": "med",
@@ -4120,16 +4122,20 @@
         "steps": [
           "In the same order press «Отправить счёт ещё раз» (send the invoice again).",
           "Check the mailbox the invoice was made out to.",
-          "Read the invoice line on the order card."
+          "Read the invoice line on the order card.",
+          "While the IBAN is empty, open «Обзор» and tap the «Заполните IBAN» row."
         ],
         "expect": [
           "The invoice letter arrives a second time.",
           "The invoice PDF is attached to it.",
           "With no IBAN the card says the invoice was not sent, and where to fix it.",
-          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз»."
+          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз».",
+          "The «Заполните IBAN» row opens «Настройки → О компании», not «Обзор» again."
         ],
         "why": "A company that never got the invoice will not pay — and you blame them."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-24T17:27:32.176Z"
     },
     {
       "id": "order-invoice-paid",

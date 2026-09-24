@@ -19656,7 +19656,10 @@
     if (noIban) tasks += admTaskRow("!",
       "Заполните IBAN — счета не уходят",
       "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»",
-      'data-admtab="settings" data-admsetpage="company"', true);
+      /* `setup` is the key of «Настройки» (ADM_SECTION_OF). This row said
+         "settings" — a key no section has, so the tap fell back to «Обзор»
+         and redrew the screen it was on (map defect 1, 24.09.2026). */
+      'data-admtab="setup" data-admsetpage="company"', true);
     if (overN) tasks += admTaskRow(overN,
       pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
       names(overdue, function (v) { return v.who; }),
@@ -41018,7 +41021,7 @@
          «Скрытые», and the shelf it wants starts at the top of that list. */
       if (d.admfilter && d.admtab === "goods") { S.goodsFilter = d.admfilter; S.goodsShown = 40; }
       // …and a queue row may name the settings page it wants («Заполните IBAN»)
-      if (d.admsetpage && d.admtab === "settings") S.admSetPage = d.admsetpage;
+      if (d.admsetpage && d.admtab === "setup") S.admSetPage = d.admsetpage;
       window.scrollTo({ top: 0 }); render(); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
