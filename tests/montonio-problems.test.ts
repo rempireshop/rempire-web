@@ -489,7 +489,10 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
     });
     const hook = rows.find((r) => r.key === "ship_webhook")!;
     expect(hook.ok).toBe(false);
-    expect(hook.sub.RU).toMatch(/Partner System/);
+    // Montonio has no screen for the parcel webhook (API only, confirmed 24.09.2026):
+    // the row must not send the owner to look for one
+    expect(hook.sub.RU).toMatch(/нет/);
+    for (const lang of MONTONIO_LANGS) expect(hook.sub[lang]).not.toMatch(/Shipping → Webhooks/);
     // the address to paste, printed where he is standing
     for (const lang of MONTONIO_LANGS) expect(hook.sub[lang]).toContain(HOOK_URL);
   });
