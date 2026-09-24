@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(26);   // r25: the article open in the editor, and the photo action for its text
+    expect(body.v).toBe(27);   // r27: draft_post keeps the owner's own subject and words
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];

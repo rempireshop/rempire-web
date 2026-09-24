@@ -15234,6 +15234,9 @@
     });
     var dirty = document.querySelector("[data-blogdirty]");
     if (dirty) dirty.hidden = !blogDirty();
+    // the card's Save buttons carry the state too — they are this editor's bar
+    var saves = document.querySelectorAll("[data-admblogsave]");
+    for (var si = 0; si < saves.length; si++) admDirtyMark(saves[si], blogDirty());
     // …and the «Публикация» card's own line (blogPubStateHTML), which sits
     // beside the buttons it is about
     var pub = document.querySelector("[data-blogpubstate]");
@@ -15244,8 +15247,9 @@
       says so instead of a «Сохранено ✓» it has not earned. */
   function blogPubStateHTML(d, busy) {
     if (busy) return "<span>Сохраняем…</span>";
-    if (!d.id) return '<span class="adm-hint--warn">Ещё не сохранено</span>';
-    if (blogDirty()) return '<span class="adm-hint--warn">Есть несохранённые изменения</span>';
+    // the solid chip the save bars use for the same state (admDirtyNoteHTML)
+    if (!d.id) return '<span class="adm-dirtyword">Ещё не сохранено</span>';
+    if (blogDirty()) return '<span class="adm-dirtyword">Есть несохранённые изменения</span>';
     return '<span class="adm-hint--ok">Сохранено ✓</span>';
   }
 
@@ -15328,6 +15332,25 @@
   function blogTopicValue(d) {
     return S.adminBlogTopic || d.title.RU || d.title.ET || d.title.EN || "";
   }
+  /**
+   * The «Тема статьи» box: what the owner typed, and nothing else.
+   *
+   * It used to be pre-filled with the article's own title as its VALUE. On a
+   * phone a tap puts the caret at the end of that text, so a new topic was
+   * typed onto the old title — «Создайте стильный образ… cool vibes» — and
+   * the article came back about the stylish look again (the owner, /test
+   * 23.09.2026: «When I gave the assistant the topic "cool vibes" it still
+   * writes me about "Create a Stylish Look…"»). The title is the grey hint
+   * now: an empty box still writes the article its title names (the click
+   * handler falls back to blogTopicValue), and a typed topic is exactly the
+   * words typed.
+   */
+  function admBlogTopicFieldHTML(d, busy) {
+    var hint = d.title.RU || d.title.ET || d.title.EN || "уход за бородой зимой";
+    return '<label class="adm-field">Тема статьи' +
+      '<input class="adm-input" data-admblogtopic value="' + esc(S.adminBlogTopic || "") + '" placeholder="' + esc(hint) + '"' +
+      (busy ? " disabled" : "") + "></label>";
+  }
   function blogTags(d) {
     return String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
   }
@@ -15405,7 +15428,10 @@
       if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
     });
   }
-  function admBlogWriteFull(d, topic, hint) {
+  /* `ask` — the owner's own words when the chat assistant named the topic
+     (draftPostWithAsk, src/app/api/assistant/actions.ts): the generator is
+     told they decide the subject where the assistant's topic line drifted. */
+  function admBlogWriteFull(d, topic, hint, ask) {
     if (!d) return;
     if (S.adminBlogGen && !S.adminBlogGen.err) { toast("Подождите — статья ещё пишется"); return; }
     topic = String(topic || "").trim();
@@ -15419,7 +15445,7 @@
     apiSend("/api/admin/ai/text/", "POST", {
       task: "post_full", lang: "RU",
       input: {
-        topic: topic, hint: hint || "",
+        topic: topic, hint: hint || "", ask: ask || "",
         products: productsById(d.products).map(function (p) { return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat }; })
       }
     }).then(function (r) {
@@ -19668,8 +19694,10 @@
        reload had both come back. On his phone that is a second or two of a
        screen that says nothing happened, and the second tap sent the whole
        thing again. The button now says what it is doing and refuses a second
-       tap until the list comes back with the new status (SRV.stepBusy,
-       cleared in loadSrvOrders). */
+       tap until the server has answered (SRV.stepBusy); the answer writes the
+       new status into the row itself (admOrderLand in srvPush), so no list
+       that left before the change can draw the old step back — which is what
+       still cost Renat a second tap on 23.09.2026. */
     /* An all-gift-card order has no parcel and no hand-over: the card is in
        the customer's inbox the moment the payment lands. The card already
        hides every step for it (showSteps below); the row did not, so a paid
@@ -21080,11 +21108,72 @@
       return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
     }).join("") + "</div>";
   }
+  /* ---- the assistant's answer, as something to read at a glance -----------
+     The owner, /test 23.09.2026, on «Что заканчивается и что дозаказать?»:
+     «Hard to read the answer — it's just a list of words». Twelve products
+     came as one comma-joined sentence (the prompt asked for «1-3 short
+     sentences») and the bubble printed it as one escaped string. The prompt
+     now asks for one item a line — «• name — state» (src/app/api/assistant/
+     route.ts) — and this draws such lines as a list: one item a line, the
+     count or state at its end, «нет» marked. The run-on sentence an older or
+     wayward answer still brings («…на складе: A (нет), B (мало), C (нет).»)
+     is split the same way.
+     Built from TEXT: every piece is escaped before it goes into the markup,
+     so a model that writes «<img …>» shows those characters. The answer is
+     [data-notr]: it is written in the language of the QUESTION, and the
+     panel's dictionary must not turn a word of it into the panel's own. */
+  /** One item: its name, and — when it ends in one — its state. */
+  function admReplyItem(s) {
+    var REPLY_STATE = /^(?:нет|мало|закончил(?:ся|ась|ось|ись)?|в наличии|out|low|in stock|sold out|otsas|vähe|laos|puudub|\d+(?:\s*(?:шт|tk|pcs))?)$/i;
+    var REPLY_OUT = /^(?:нет|закончил|out\b|sold out|otsas|puudub|0(?:\s|$))/i;
+    var name = s, st = "";
+    var at = s.lastIndexOf(" — ");
+    var tail = at > 0 ? s.slice(at + 3).trim() : "";
+    var paren = /^(.*\S)\s*\(([^()]{1,32})\)\s*[.;,]?$/.exec(s);
+    // «… — нет (0 шт)»: the state after the last dash, count and all
+    if (tail && tail.length <= 40 && REPLY_STATE.test(tail.replace(/\s*\([^()]*\)\s*[.;,]?$/, ""))) {
+      name = s.slice(0, at); st = tail.replace(/[.;,]$/, "");
+    }
+    // «… маска 40 мл (нет)»: the state in the closing brackets
+    else if (paren) { name = paren[1]; st = paren[2]; }
+    return '<span class="adm-msg__nm">' + esc(name.trim()) + "</span>" +
+      (st ? '<span class="adm-msg__st' + (REPLY_OUT.test(st) ? " adm-msg__st--out" : "") + '">' + esc(st.trim()) + "</span>" : "");
+  }
+  function admReplyHTML(text) {
+    var REPLY_BULLET = /^\s*(?:[•·*\-–]|\d{1,2}[.)])\s+/;
+    var out = "", list = [];
+    var flush = function () {
+      if (!list.length) return;
+      out += '<ul class="adm-msg__list">' + list.map(function (s) {
+        return '<li class="adm-msg__li">' + admReplyItem(s) + "</li>";
+      }).join("") + "</ul>";
+      list = [];
+    };
+    var para = function (s) { flush(); out += '<p class="adm-msg__p">' + esc(s) + "</p>"; };
+    String(text || "").split(/\r?\n/).forEach(function (raw) {
+      var ln = raw.trim();
+      if (!ln) { flush(); return; }
+      if (REPLY_BULLET.test(ln)) { list.push(ln.replace(REPLY_BULLET, "")); return; }
+      /* «Заканчиваются: A (нет), B (мало), C (нет). Могу…» — three or more
+         items, each closing on its bracketed state, after a short lead */
+      var m = /^([^:]{3,80}:)\s+(.+)$/.exec(ln);
+      var parts = m ? m[2].split(/\),\s+/) : [];
+      var end = parts.length >= 3 ? /^(.*?\([^()]{1,32}\))\s*[.;]?\s*(.*)$/.exec(parts[parts.length - 1]) : null;
+      var ok = !!end && parts.slice(0, -1).every(function (p) { return /\([^()]{1,32}$/.test(p); });
+      if (!ok) { para(ln); return; }
+      para(m[1]);
+      parts.slice(0, -1).forEach(function (p) { list.push(p + ")"); });
+      list.push(end[1]);
+      if (end[2]) para(end[2]); else flush();
+    });
+    flush();
+    return '<div class="adm-msg__txt" data-notr>' + out + "</div>";
+  }
   function admAnswerHTML() {
     var a = S.adminAns;
     if (!a || a.q !== S.adminAsk) return "…";
     if (a.fallback) return adminAnswer(a.q);
-    return esc(a.reply || "") +
+    return admReplyHTML(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
       (a.ask && !a.action ? admAskChipsHTML(a.ask) : "") +
       (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +
@@ -22437,8 +22526,7 @@
         return mailLangWords(tpl, code);
       }, LANG_BAR_NOTE) +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
-      '<p class="adm-hint" data-maildirty' + (mailDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-maildirty", mailDirty()) +
       MAIL_FIELDS.map(function (f) { return admMailFieldHTML(tpl, lang, f); }).join("") +
       '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</p>' +
       '<label class="adm-field">Адрес для теста' +
@@ -22449,7 +22537,7 @@
          sticky one, so «Сохранить» is above the nav on a phone wherever the
          owner is in a long letter, with the same width the other forms have */
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
-      '<div class="adm-savebar" id="mailacts">' + admMailActsHTML() + "</div>";
+      '<div class="adm-savebar' + admDirtyCls(mailDirty()) + '" id="mailacts">' + admMailActsHTML() + "</div>";
     return admBackHTML("data-mailback", "Все письма") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
@@ -22465,8 +22553,8 @@
     var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
     var own = val !== mailDefault(tpl, lang, field);
     var box = field === "intro"
-      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '">' + esc(val) + "</textarea>"
-      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
+      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '">' + esc(val) + "</textarea>"
+      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '" value="' + esc(val) + '">';
     return '<label class="adm-field">' + f[1] + box + "</label>" +
       '<div class="adm-acts" style="gap:6px;margin-top:-6px">' + MAIL_PH.map(function (p) {
         return '<button class="adm-chip adm-chip--tok" data-mailph="' + field + ":" + p[0] +
@@ -22617,8 +22705,7 @@
       admLangBarHTML("data-admbloglang", LANGS, L, "Язык статьи", function (code) {
         return blogLangWords(d, code);
       }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU) +
-      '<p class="adm-hint adm-hint--warn" data-blogdirty' + (blogDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-blogdirty", blogDirty()) +
       '<input class="adm-title-in" data-blogf="title" data-blogl="' + L + '" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
       admBlogCoverHTML(d) +
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
@@ -22691,7 +22778,7 @@
            blogPaintState() on every keystroke, so it never lags the text */
         '<p class="adm-hint" data-blogpubstate style="margin:0">' + blogPubStateHTML(d, busy) + "</p>" +
         (d.status === "published"
-          ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
+          ? '<button class="adm-btn' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
             '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
           /* One language still empty: the same inline question «Удалить
              статью» asks, in the same card, replacing the button that asked
@@ -22704,7 +22791,7 @@
               '<button class="adm-btn" data-admblogpublishyes' + (busy ? " disabled" : "") + ">Опубликовать всё равно</button>" +
               '<button class="adm-link adm-link--muted" data-admblogpublishno>Отмена</button>'
             : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
-            '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
+            '<button class="adm-btn adm-btn--ghost' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
         (d.id
           ? (S.adminBlogConfirmDelete
             ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Она исчезнет из списка и из ' +
@@ -22720,9 +22807,7 @@
          written. The older helpers — a plan of headings, a translation of
          what is already there — stay behind «Только часть». */
       '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
-        '<label class="adm-field">Тема статьи' +
-          '<input class="adm-input" data-admblogtopic value="' + esc(blogTopicValue(d)) + '" placeholder="уход за бородой зимой"' +
-          (genBusy ? " disabled" : "") + "></label>" +
+        admBlogTopicFieldHTML(d, genBusy) +
         '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
         '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
         // the products the article came with — the toast's sentence, standing (admBlogWriteFull)
@@ -23349,6 +23434,7 @@
     // the bar follows the draft too: ink «Сохранить», «Отменить правки», the status word
     var acts = document.getElementById("newsacts");
     if (acts) { acts.innerHTML = admNewsActsHTML(); translateTree(acts); }
+    admDirtyMark(acts, newsDirty());
   }
   /* ---- the editor ---------------------------------------------------------- */
   /* ---- «Письма за сегодня»: сколько ещё можно отправить ------------------
@@ -23594,15 +23680,15 @@
         '<button data-nb="style" data-v="p" data-nbk="' + b.k + '" aria-current="' + !h + '">Текст</button>' +
         '<button data-nb="style" data-v="h" data-nbk="' + b.k + '" aria-current="' + h + '">Заголовок</button></div>' +
       (h
-        ? '<input class="adm-input" data-nbf="text" data-nbk="' + b.k + '" maxlength="200" value="' + esc(b.text[L] || "") +
+        ? '<input class="adm-input" data-nbf="text" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="200" value="' + esc(b.text[L] || "") +
             '" placeholder="Заголовок" aria-label="Заголовок">'
-        : '<textarea class="adm-input adm-nb__ta" rows="4" data-nbf="text" data-nbk="' + b.k + '" maxlength="3000" aria-label="Текст" ' +
+        : '<textarea class="adm-input adm-nb__ta" rows="4" data-nbf="text" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="3000" aria-label="Текст" ' +
             'placeholder="Пара строк о новинках. Пустая строка — новый абзац.">' + esc(b.text[L] || "") + "</textarea>") +
       newsRuHintHTML(b, L);
   }
   function newsBtnBodyHTML(b, L) {
     return '<label class="adm-field">Надпись на кнопке' +
-        '<input class="adm-input" data-nbf="label" data-nbk="' + b.k + '" maxlength="60" value="' + esc(b.text[L] || "") +
+        '<input class="adm-input" data-nbf="label" data-nbk="' + b.k + '" data-nbl="' + L + '" maxlength="60" value="' + esc(b.text[L] || "") +
           '" placeholder="Например: Смотреть новинки"></label>' +
       newsRuHintHTML(b, L) +
       newsLinkRowHTML(b, "Куда ведёт кнопка", "Не выбрано") +
@@ -23972,8 +24058,7 @@
       admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
         return newsLangWords(d, code);
       }, NEWS_LANG_NOTE[L] || NEWS_LANG_NOTE.RU) +
-      '<p class="adm-hint adm-hint--warn" data-newsdirty' + (newsDirty() ? "" : " hidden") + ">" +
-        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      admDirtyNoteHTML("data-newsdirty", newsDirty()) +
       /* The word in the box, the sentence under it. `.adm-title-in` is 24 px
          Oswald on a phone, so «Название — для вас, покупатель его не увидит»
          fitted as far as «покупатель е» and stopped — and a placeholder is
@@ -23985,7 +24070,7 @@
         'aria-label="Название" value="' + esc(d.title) + '">' +
       '<p class="adm-hint">Название — для вас, покупатель его не увидит</p>' +
       '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
-        '<input class="adm-input" data-newsf="subject" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
+        '<input class="adm-input" data-newsf="subject" data-newsl="' + L + '" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
       // the letter itself: blocks, redrawn in this slot alone (newsBlocksDraw)
       '<div class="adm-nbwrap" id="newsblocks">' + admNewsBlocksHTML(d, L) + "</div>" +
       '<label class="adm-field">Адрес для теста' +
@@ -23997,7 +24082,7 @@
          «Сохранить» is its primary, ink while the draft differs; the send is
          the «Отправка» card's own button (admNewsSendCardHTML). Repainted in
          place while typing (newsPaintState), hence the id. */
-      '<div class="adm-savebar" id="newsacts">' + admNewsActsHTML() + "</div>";
+      '<div class="adm-savebar' + admDirtyCls(newsDirty()) + '" id="newsacts">' + admNewsActsHTML() + "</div>";
     return admBackHTML("data-newsback", "Рассылка") +
       (S.newsConfirmBack
         ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
@@ -24490,7 +24575,9 @@
     if (t.matches("[data-newsf]")) {
       var nd = S.newsEdit, nf = t.dataset.newsf;
       if (nf === "title") nd.title = t.value;
-      else if (nf === "subject") { nd.subject[S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
+      /* the language the BOX holds (data-newsl), not the one S has moved on
+         to — the blog's rule (blogSync), for the same tap-then-keystroke gap */
+      else if (nf === "subject") { nd.subject[t.dataset.newsl || S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
       newsPaintState();
     } else if (t.matches("[data-nbf]")) {
       var f = t.dataset.nbf, k = t.dataset.nbk || "";
@@ -24505,7 +24592,7 @@
       if (f === "src") { NEWS_SRC[k] = t.value; return; }
       var b = newsBlockByKey(k);
       if (!b || !b.text) return;
-      b.text[S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language on the strip
+      b.text[t.dataset.nbl || S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language the box holds
       newsPaintState(); newsPreviewSoon();
     } else if (t.matches("[data-newsto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-newsbrief]")) { S.newsBrief = t.value; }
@@ -25658,6 +25745,32 @@
   var SAVEBAR_CANCEL =
     '<span class="adm-savebar__cancel--long">Отменить правки</span>' +
     '<span class="adm-savebar__cancel--short">Отмена</span>';
+  /* ---- unsaved changes: one look, everywhere ------------------------------
+     The owner's /test pass, 23.09.2026 (the blog's cover frames and its
+     languages): «The "Есть несохранённые изменения — нажмите «Сохранить»." is
+     hard to see.» It was a 13-px line in the warn ink, the same size and
+     weight as every grey hint around it; the bars said the same thing with
+     one small word — and on a desktop, for the letters, the newsletter and
+     the product editor, not at all. So the state is one thing now, drawn one
+     way wherever a draft can be lost (admin.css § «unsaved changes»):
+       · the notice over the form, `.adm-dirty` — a warm block with a warn
+         edge and dark text, never a line of small print (admDirtyNoteHTML);
+       · `.is-dirty` on the save bar — the bar takes the warm ground and a
+         warn rule, its status word becomes a solid chip, and «Сохранить» is
+         ringed as THE button to press;
+       · `.is-dirty` on a Save button that stands outside any bar (the blog's
+         «Публикация» card) — the same ring.
+     The render writes the class into the markup (admDirtyCls) and the paints
+     that run under a caret toggle it in place (admDirtyMark), from the same
+     dirty flag in both cases, so the two can never disagree. */
+  function admDirtyNoteHTML(attr, dirty) {
+    return '<p class="adm-dirty" ' + attr + ' role="status"' + (dirty ? "" : " hidden") + ">" +
+      "Есть несохранённые изменения — нажмите «Сохранить».</p>";
+  }
+  function admDirtyCls(dirty) { return dirty ? " is-dirty" : ""; }
+  function admDirtyMark(el, dirty) {
+    if (el && el.classList) el.classList.toggle("is-dirty", !!dirty);
+  }
   function admBarNoteState(kind) {
     var dirty = kind === "mail" ? mailDirty()
       : kind === "news" ? newsDirty()
@@ -25682,6 +25795,8 @@
     el.className = admBarNoteClass(st);
     el.textContent = admBarNoteText(st);
     translateTree(el);
+    // …and the bar around it, which is what the eye finds first
+    admDirtyMark(el.closest && el.closest(".adm-savebar"), st === "dirty");
   }
   /** «Сохранено ✓» in the bar for a moment after a save that leaves the form open (the mail texts, a newsletter draft). */
   function admBarFlash(kind) {
@@ -25712,7 +25827,8 @@
   }
   function admSetBarHTML(page) {
     if (!ADM_SET_CARDS[page]) return "";
-    return '<div class="adm-savebar adm-savebar--set" data-setbar>' + admSetBarInnerHTML(page) + "</div>";
+    return '<div class="adm-savebar adm-savebar--set' + admDirtyCls(admSetDirtyCards(page).length > 0) + '" data-setbar>' +
+      admSetBarInnerHTML(page) + "</div>";
   }
   function admSetBarInnerHTML(page) {
     var cards = ADM_SET_CARDS[page] || [];
@@ -25753,6 +25869,7 @@
     if (!bar) return;
     bar.innerHTML = admSetBarInnerHTML(S.admSetPage || "");
     translateTree(bar);
+    admDirtyMark(bar, admSetDirtyCards(S.admSetPage || "").length > 0);
   }
   /* «Письма» in the settings index — a door, not a page (23.09.2026). The mail
      settings live in «Маркетинг → Письма», beside the letters they time, but
@@ -27117,6 +27234,7 @@
   function paintMailState() {
     var acts = document.getElementById("mailacts");
     if (acts) { acts.innerHTML = admMailActsHTML(); translateTree(acts); }
+    admDirtyMark(acts, mailDirty());
     var dirty = document.querySelector("[data-maildirty]");
     if (dirty) dirty.hidden = !mailDirty();
     paintMailPreview();
@@ -27281,8 +27399,8 @@
     var hint = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
     return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '">' + esc(val) + "</textarea>"
-        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" value="' + esc(val) + '">') +
+        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '" value="' + esc(val) + '">') +
       hint + "</label>";
   }
   /* The slide's own form, opened under the list by «Изменить»: the texts in
@@ -28785,7 +28903,7 @@
       /* the product editor's sticky bar — one shape for every form that
          saves (Renat, 10.09.2026), with the refusal riding in it so it is on
          screen on a phone wherever the owner is in the form */
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
@@ -29427,10 +29545,10 @@
       }).join("") + "</div>" +
       '<label class="adm-field">' +
         (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") +
-        '<input class="adm-input" data-bundlef="title" maxlength="120" value="' + esc(f.title[lang] || "") +
+        '<input class="adm-input" data-bundlef="title" data-bundlel="' + lang + '" maxlength="120" value="' + esc(f.title[lang] || "") +
         '" placeholder="' + (lang === "RU" ? "Борода — стартовый набор" : esc(f.title.RU || "")) + '"></label>' +
       '<label class="adm-field">Описание — две-три простые фразы' +
-        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
+        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" data-bundlel="' + lang + '" placeholder="' +
         (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
         esc(f.desc[lang] || "") + "</textarea></label>" +
       /* «Написать черновик» / «Перевести с русского» — the same pair the goods
@@ -29472,7 +29590,7 @@
       // the phone's header now and has no slot for it; the confirm card is unchanged
       (f.editing ? '<div class="adm-danger"><button class="adm-link adm-link--warn" data-bundledelete="' + esc(f.id) + '">Удалить набор</button></div>' : "") +
       // the product editor's sticky bar — see promoFormHTML()
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.bundleFormErr ? '<p class="err adm-err adm-savebar__err" role="alert">' + esc(S.bundleFormErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-bundlesave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-bundlecancel>Отмена</button>' +
@@ -30142,7 +30260,7 @@
       "</div>" +
       '<p class="adm-hint" style="margin:0">Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.</p>' +
       // the product editor's sticky bar, the refusal in it — see promoFormHTML()
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         (S.partnerErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.partnerErr) + "</p>" : "") +
         '<button class="adm-btn adm-savebar__main" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpartnercancel>Отмена</button>' +
@@ -31557,7 +31675,7 @@
       (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset && !p.custom
         ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
         : "") +
-      (galDirty(p) ? '<p class="adm-hint adm-hint--warn">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      (galDirty(p) ? admDirtyNoteHTML("data-galdirty", true) : "") +
       (p.sizes && p.sizes.length > 1 && g.length > 1
         ? '<div class="adm-sec"><span class="adm-sec__t">Фото по объёмам</span></div>' +
           '<p class="adm-hint">Какое фото показывать для каждого объёма.</p>' +
@@ -32021,7 +32139,7 @@
       // it sits in the sticky save bar, outside the panes, so a refusal is on
       // screen from any tab and on a phone, right above the button that was
       // just pressed, rather than somewhere below the fold.
-      '<div class="adm-savebar">' +
+      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
         '<p class="adm-err adm-savebar__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
         '<button class="adm-btn adm-savebar__main" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
         '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admclose>Отмена</button>' +
@@ -32048,7 +32166,7 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0, movesAsked: false, at: 0 };
+  var STOCK = { asked: false, seq: 0, movesAsked: false, movesSeq: 0, at: 0 };
   /** How many «Склад» rows one page of the list holds. The whole warehouse is
       ~320 rows and every one of them has to be reachable (Dim: «We need
       all»), but the list is re-drawn on every keystroke of the search box, so
@@ -32633,9 +32751,12 @@
      used to show the row exactly as before — «штрихкод не привязан», the old
      count — which the owner read as «nothing got added». Only a copy that
      exists is refreshed; the ledger's own copy is dropped so «История»
-     re-reads it the next time it opens. */
+     re-reads it — the «asked» mark with it: dropped alone, the list was gone
+     and loadStockMoves() still thought it had asked, so a history on screen
+     read «Пока пусто» until the panel was reloaded. */
   function scanStockChanged() {
     S.stockMoves = null;
+    STOCK.movesAsked = false;
     if (S.stockLevels || STOCK.asked) reloadStock();
   }
   /** inventory: binds the last scanned code to productId+variant, then
@@ -34351,8 +34472,13 @@
     if ((S.stockMoves || STOCK.movesAsked) && !force) return;
     STOCK.movesAsked = true;
     S.stockMovesBusy = true;
+    /* Every opening asks again now (stockMovesOpen), so two asks can be in
+       the air at once — a chip pressed, the history closed and reopened —
+       and only the newest may write, as in loadStockLevels(). */
+    var mySeq = STOCK.movesSeq = (STOCK.movesSeq || 0) + 1;
     var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
+      if (mySeq !== STOCK.movesSeq) return;
       S.stockMovesBusy = false;
       /* A history that did not answer used to look exactly like a history
          with nothing in it — «Пока пусто» over a 500, and no way to ask
@@ -34360,7 +34486,28 @@
       if (r.status === 200 && r.body.ok) { S.stockMoves = r.body.moves; S.stockMovesErr = ""; }
       else S.stockMovesErr = "История не отвечает — попробуйте ещё раз.";
       render();
-    }).catch(function () { S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render(); });
+    }).catch(function () {
+      if (mySeq !== STOCK.movesSeq) return;
+      S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render();
+    });
+  }
+  /**
+   * «История приёмок и продаж →» and «← Склад».
+   *
+   * The history is read again EVERY time it is opened. It used to be read
+   * once per visit to the panel — so the 'edit' line with the reason typed
+   * under «Править» a minute ago (092_stock_move_edit.sql) was simply not in
+   * the list the owner opened to check it, whenever he had opened the
+   * history once before, and he concluded «Reason is not stored» (Renat,
+   * 23.09.2026). A sale on the website, made in another browser, never
+   * showed up there either. The lines already on screen stay until the new
+   * answer lands (the grey bars are for a history with nothing to show yet),
+   * and a refusal from an earlier visit is cleared by the same new ask.
+   */
+  function stockMovesOpen(open) {
+    S.stockMovesOpen = !!open;
+    if (S.stockMovesOpen) { S.stockMovesErr = ""; loadStockMoves(true); }
+    render();
   }
   /** «Остаток сейчас» → a whole number 0…MAX, or null when it is not one.
       This is a shelf count, so the old `Math.max(0, Math.trunc(Number(v)))`
@@ -35320,10 +35467,16 @@
     }
     // «Заказы»: the status the card moved, and the status undo moves back
     else if (a.type === "order_status") {
-      /* The row has no local copy of a status to change, so until the reload
-         comes back it would go on offering the very step just taken — which
-         is how «Выдан клиенту» looked like it had done nothing (r16). The
-         step says «Сохраняем…» in the meantime; loadSrvOrders clears it. */
+      /* The row has no status of its own — it is drawn from a fetched list —
+         so until something new is drawn it would go on offering the very step
+         just taken, which is how «Выдан клиенту» looked like it had done
+         nothing (r16). The step says «Сохраняем…» while the PATCH is out, and
+         the PATCH's own answer ends it: the status it answered with is
+         written into the row (admOrderLand) and the button is given back in
+         the same breath. Until 23.09.2026 it was ended by whichever LIST came
+         back first — including one read before the status moved, which put
+         «Выдан клиенту» straight back and got it tapped twice (Renat, «worked
+         only on second click», both on 13.09 and on 23.09). */
       SRV.stepBusy = String(a.id);
       apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
         .then(function (r) {
@@ -35331,7 +35484,10 @@
              journalDrop(); the render is its own, because toast() paints only
              the toast and admOrdersChanged() renders when its loads come back
              (and not at all when one is already in flight) */
-          if (!(r.status === 200 && r.body.ok)) { toast("Не удалось сохранить статус"); journalDrop(entry); render(); }
+          if (!(r.status === 200 && r.body.ok)) { toast("Не удалось сохранить статус"); journalDrop(entry); }
+          else admOrderLand((r.body && r.body.order) || { id: a.id, status: a.value });
+          SRV.stepBusy = "";
+          render();
           admOrdersChanged();
         }).catch(function () { journalDrop(entry); SRV.stepBusy = ""; render(); });
     }
@@ -35596,29 +35752,41 @@
       ship: srvShipLabel(o.shipping), state: SRV_STATES[o.status] || SRV_STATES.new, srv: o
     };
   }
-  function loadSrvOrders(force) {
+  function loadSrvOrders(force, afterWrite) {
     /* `=== false`, not `!SRV.admin` — see loadOverview() for why the panel's
        cold open must be allowed to ask before it has been told who is asking. */
     if (SRV.admin === false) return;
     /* …which also means this can now be called twice in the same breath —
        once by probeAdmin() and once by the answer it was not waiting for — so
-       one in flight is one enough. */
-    if (loadSrvOrders._busy) return;
+       one in flight is one enough.
+       Except after a WRITE (`afterWrite`, admOrdersChanged). A list already
+       in the air when an order moved on the server may have been read before
+       it moved, and landing it would draw the old status back over the row
+       the owner has just changed — «Выдан клиенту» offered again after the
+       tap that did it (Renat, 23.09.2026). That answer is marked stale: it is
+       thrown away when it lands, and the list is asked for once more. */
+    if (loadSrvOrders._busy) { if (afterWrite) loadSrvOrders._stale = true; return; }
     if (SRV.orders && !force) return;
     loadSrvOrders._busy = true;
+    loadSrvOrders._stale = false;
     apiJson("/api/admin/orders/?limit=100").then(function (r) {
       loadSrvOrders._busy = false;
-      if (r.status === 401) { SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
+      if (r.status === 401) { loadSrvOrders._stale = false; SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
+      if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
       if (r.status === 200) { pushBoot(); pushOpenWanted(); }
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
       /* A refresh that failed keeps the list that is on screen, for the same
          reason loadOverview() keeps its figures — «Заказы» going blank after a
          save is worse than «Заказы» being a few seconds old. */
       if (!SRV.ordersErr) SRV.orders = (r.body.orders || []).map(srvRow);
-      // the list is the new status: whatever step was in flight has landed
-      SRV.stepBusy = "";
+      /* Not the end of a step in flight: SRV.stepBusy is the PATCH's to clear
+         (srvPush), because this list may have left before the PATCH landed. */
       render();
-    }).catch(function () { loadSrvOrders._busy = false; SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
+    }).catch(function () {
+      loadSrvOrders._busy = false;
+      if (loadSrvOrders._stale) { loadSrvOrders._stale = false; loadSrvOrders(true); return; }
+      SRV.ordersErr = true; render();
+    });
   }
   /* ---------- «Заказы»: the search itself, on the server (r22) --------------
    *
@@ -35707,7 +35875,7 @@
       the list the rows and the badge draw from, and the overview's cached
       summary («Сделать сегодня»). */
   function admOrdersChanged() {
-    loadSrvOrders(true);
+    loadSrvOrders(true, true);
     /* …and the search result too, when one is on screen: it is a separate
        hundred rows from a separate query, and the order whose status just
        moved is the one the owner is looking at (r22). */
@@ -35734,6 +35902,22 @@
        alive, with their balance and their PDF button. Dropped, not fetched:
        the next render of that tab asks. */
     S.admGiftCards = null;
+  }
+  /** The order a status PATCH answered with, written over its row in both
+      copies a list of «Заказы» can be drawn from — the newest hundred and a
+      search result — so the row reads the new status the moment the server
+      does, not when a reload finally lands. Merged over the row's own order:
+      a field the answer does not carry (the gift cards the LIST attaches)
+      stays as it was. */
+  function admOrderLand(o) {
+    if (!o || o.id == null) return;
+    var id = String(o.id);
+    [SRV.orders, FOUND.rows].forEach(function (list) {
+      if (!list) return;
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].id) === id) list[i] = srvRow(Object.assign({}, list[i].srv || {}, o));
+      }
+    });
   }
   /**
    * returns: «Обработано» on the order card, and the undo of it.
@@ -37542,7 +37726,7 @@
     S.admMore = false;
     window.scrollTo({ top: 0 });
     render();
-    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "");
+    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "", a.ask || "");
   }
   function adminAnswer(q) {
     var low = lowStock();
@@ -38502,6 +38686,20 @@
     for (var i = 0; i < opts.length; i++) if (opts[i].hasAttribute("selected")) return i;
     return opts.length ? 0 : -1;
   }
+  /** Which field a box IS: the data-* attributes that name it — data-blogf
+      and data-blogl, data-nbk and data-nbl, data-edqty «id size». The marks
+      the app itself puts on a live box (data-edauto, set when a salon price
+      is typed by hand; data-sx, measured) are not names and are left out,
+      so a render can never mistake them for another field. */
+  function admFieldKey(el) {
+    var out = [], a;
+    for (var i = 0; i < el.attributes.length; i++) {
+      a = el.attributes[i];
+      if (a.name.indexOf("data-") !== 0 || a.name === "data-edauto" || a.name === "data-sx") continue;
+      out.push(a.name + "=" + a.value);
+    }
+    return out.sort().join("\n");
+  }
   function admMorphNode(from, to) {
     if (from.nodeType !== to.nodeType || (from.nodeType === 1 && from.tagName !== to.tagName)) {
       from.parentNode.replaceChild(to, from);
@@ -38515,6 +38713,15 @@
     // a value/checked/selected the app changed is applied; one the owner
     // changed by hand survives the render, which a rebuild never let it do
     var valWas = from.getAttribute("value"), chkWas = from.hasAttribute("checked");
+    /* …but only while the box is still the SAME field. The blog's title box
+       is one <input> in RU and in EN, told apart by data-blogl alone; a new
+       article's title is empty in both, so the markup said "" before the
+       switch and "" after it, and the Russian title typed a moment ago stood
+       in the English box — on screen, in no draft, and filed as the English
+       title by the next read of the form («it can be seen, but it does not
+       seem to be stored», the owner, 23.09.2026). A box handed to another
+       field takes that field's text, typed-over or not. */
+    var otherField = (tag === "INPUT" || tag === "TEXTAREA") && admFieldKey(from) !== admFieldKey(to);
     admMorphAttrs(from, to);
     if (tag === "INPUT") {
       var valNow = to.getAttribute("value");
@@ -38526,12 +38733,12 @@
          jumps to the end of the field, which is only invisible for as long as
          he never goes back to fix a digit. */
       var valWant = valNow == null ? "" : valNow;
-      if (valNow !== valWas && from.value !== valWant) from.value = valWant;
-      if (to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
+      if ((otherField || valNow !== valWas) && from.value !== valWant) from.value = valWant;
+      if (otherField || to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
       return;
     }
     if (tag === "TEXTAREA") {
-      if (from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
+      if (otherField || from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
       return;
     }
     if (tag === "SELECT") {
@@ -41610,13 +41817,7 @@
        him. stockScrollMore() does exactly the same thing unasked. */
     if (d.stockmore !== undefined) { if (!stockGrow()) render(); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
-    if (d.stockmovesopen !== undefined) {
-      S.stockMovesOpen = !!d.stockmovesopen;
-      // coming back to a history that failed asks again, rather than showing
-      // the old refusal for as long as the panel stays open
-      if (S.stockMovesOpen && S.stockMovesErr) { STOCK.movesAsked = false; S.stockMovesErr = ""; }
-      render(); return;
-    }
+    if (d.stockmovesopen !== undefined) { stockMovesOpen(d.stockmovesopen); return; }
     if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
@@ -42040,8 +42241,12 @@
     if (d.admblogfull !== undefined) {
       if (t.disabled || !S.adminBlogEdit) return;
       var topicElF = document.querySelector("[data-admblogtopic]");
-      var topicF = ((topicElF && topicElF.value) || blogTopicValue(S.adminBlogEdit) || "").trim();
-      S.adminBlogTopic = topicF;
+      var typedF = ((topicElF && topicElF.value) || "").trim();
+      var topicF = (typedF || blogTopicValue(S.adminBlogEdit) || "").trim();
+      /* only what was TYPED is kept in the box: an empty box wrote the
+         article its title names, and pinning that title in as the box's text
+         would make it the next topic too, after the article has a new one */
+      S.adminBlogTopic = typedF;
       admBlogWriteFull(S.adminBlogEdit, topicF, "");
       return;
     }

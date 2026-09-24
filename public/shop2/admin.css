@@ -822,6 +822,23 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-asst__foot .adm-input { flex: 1; }
 .adm-asst__foot .adm-btn { padding: 0 16px; }
 .adm-msg { max-width: 90%; white-space: pre-line; align-self: flex-start; }
+/* The assistant's own answer, built from its text (app.js admReplyHTML):
+   paragraphs, and a list drawn as a list — one item a line, the count or
+   state at its right, «нет» on a warm chip (the owner, 23.09.2026: «it's
+   just a list of words»). The markup carries its own breaks, so pre-line
+   stops here. */
+.adm-msg__txt { white-space: normal; }
+.adm-msg__p { margin: 0 0 8px; }
+.adm-msg__p:last-child { margin-bottom: 0; }
+.adm-msg__list { list-style: none; margin: 4px 0 10px; padding: 0; border-top: 1px solid var(--a-rule); }
+.adm-msg__list:last-child { margin-bottom: 0; }
+.adm-msg__li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--a-rule); line-height: 20px;
+}
+.adm-msg__nm { flex: 1 1 auto; min-width: 0; }
+.adm-msg__st { flex: none; text-align: right; font-weight: 600; white-space: nowrap; }
+.adm-msg__st--out { color: var(--a-warmink); background: var(--a-warmbg); padding: 0 6px; }
 .adm-msg--me { align-self: flex-end; background: var(--a-tint); padding: 10px 14px; }
 .adm-asst__chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .adm-asst__chips button {
@@ -1365,11 +1382,61 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 }
 @keyframes adm-fade { from { opacity: 0; } to { opacity: 1; } }
 /* the status word of the bars that had none is the phone header's; on a
-   desktop their buttons say enough, and the settings bar keeps its own line */
+   desktop the settings bar keeps its own line. The other bars' word shows
+   there too once it SAYS something — «Не сохранено», «Сохранено ✓» — and
+   stays out of the way while there is nothing to say: «their buttons say
+   enough» was what left a desktop with no word at all that a letter, a
+   newsletter or a product had not been saved (23.09.2026). */
 @media (min-width: 768px) {
-  .adm-savebar__note--phone, .adm-savebar__note--short { display: none; }
+  .adm-savebar__note--short { display: none; }
+  .adm-savebar__note--phone:not(.adm-savebar__note--warn):not(.adm-savebar__note--ok) { display: none; }
   /* the desktop has room for the exact word, so it says it */
   .adm-savebar__cancel--short { display: none; }
+}
+
+/* ---------- unsaved changes: one look, everywhere --------------------------
+   The owner's /test pass, 23.09.2026: «The "Есть несохранённые изменения —
+   нажмите «Сохранить»." is hard to see.» It was 13 px of warn ink among grey
+   hints of the same size and weight. One state, one look, set by app.js
+   (admDirtyNoteHTML, admDirtyCls, admDirtyMark) and nowhere else:
+     · .adm-dirty — the notice over a form: a warm ground, a warn edge and
+       dark ink, 14 px semibold (about 10:1 against its ground);
+     · .adm-savebar.is-dirty — the bar takes the same ground and a warn rule,
+       its status word becomes a solid chip (white on warn, 6.7:1), and
+       «Сохранить» is ink with a warn ring: THE button to press;
+     · .adm-btn.is-dirty — the same ring on a Save outside any bar (the
+       blog's «Публикация» card); a ghost Save turns ink for as long.
+   Colour is never the only cue: the words say it too. */
+:root { --a-warmbg: #fbefe4; --a-warmink: #5c2c12; }
+.adm-dirty {
+  display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px;
+  background: var(--a-warmbg); border-left: 4px solid var(--a-warn);
+  color: var(--a-warmink); font-size: 14px; line-height: 20px; font-weight: 600;
+}
+.adm-dirty::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 6px; background: var(--a-warn); }
+/* display:flex above beats the browser's own [hidden] rule — a saved form
+   must not go on saying it is not saved */
+.adm-dirty[hidden] { display: none; }
+.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: #fff; font-weight: 600; padding: 2px 8px; }
+.adm-dirtyword { display: inline-block; font-size: 13px; line-height: 18px; }
+/* the ground bleeds past the column's edges, like a lit row, and the rule is
+   the existing hairline recoloured and doubled inside — nothing in the bar
+   moves by a pixel when the first key is pressed */
+.adm-savebar.is-dirty {
+  background: var(--a-warmbg); border-top-color: var(--a-warn);
+  box-shadow: inset 0 1px 0 var(--a-warn), -12px 0 0 var(--a-warmbg), 12px 0 0 var(--a-warmbg);
+}
+.adm-savebar.is-dirty .adm-savebar__main:not([disabled]), .adm-btn.is-dirty:not([disabled]) {
+  background-color: var(--a-ink); border-color: var(--a-ink); color: #fff;
+  box-shadow: 0 0 0 3px var(--a-warn);
+}
+@media (max-width: 767px) {
+  /* the bar is the phone's header here: the rule is the one under it */
+  .adm-savebar.is-dirty { border-bottom-color: var(--a-warn); box-shadow: inset 0 -1px 0 var(--a-warn); }
+  /* the status word is a chip in the middle of the row, not a stretched band */
+  .adm-savebar.is-dirty .adm-savebar__note--warn { flex: 0 1 auto; margin: 0 auto; }
+  /* the 2-px transparent border is the button's thumb margin (44 around 40) — it stays transparent */
+  .adm-savebar.is-dirty .adm-savebar__main:not([disabled]) { border-color: transparent; box-shadow: 0 0 0 2px var(--a-warn); }
 }
 
 /* ---------- Салон (POS) ---------------------------------------------------- */

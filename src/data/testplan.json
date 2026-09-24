@@ -3965,13 +3965,15 @@
       "lang": "RU",
       "title": "Самовывоз: «Выдан клиенту»",
       "steps": [
-        "Найти заказ с самовывозом в списке «Заказы».",
-        "Нажать «Выдан клиенту» прямо в строке — один раз — и смотреть на кнопку.",
+        "Найти заказ с самовывозом: вписать его номер в поиск «Заказов».",
+        "Переключиться на другое приложение телефона и сразу вернуться в панель.",
+        "Тут же нажать «Выдан клиенту» прямо в строке — один раз — и смотреть на кнопку.",
         "Открыть карточку заказа."
       ],
       "expect": [
         "Кнопка срабатывает с первого нажатия, карточка заказа не открывается.",
         "Пока сервер отвечает, на кнопке написано «Сохраняем…» и второе нажатие не проходит.",
+        "Потом кнопка пропадает и больше не возвращается, в строке — «Доставлен».",
         "Заказ закрыт.",
         "В карточке два шага: «Оплачен» и «Выдан».",
         "Покупателю письмо не ушло."
@@ -3982,13 +3984,15 @@
       "en": {
         "title": "Collection: «Выдан клиенту»",
         "steps": [
-          "Find an order for collection in the «Заказы» list.",
-          "Press «Выдан клиенту» right in the row — once — and watch the button.",
+          "Find an order for collection: type its number into the «Заказы» search.",
+          "Switch to another app on the phone and come straight back to the panel.",
+          "At once press «Выдан клиенту» right in the row — once — and watch the button.",
           "Open the order card."
         ],
         "expect": [
           "The button works on the first tap; the order card does not open.",
           "While the server answers the button says «Сохраняем…» and refuses a second tap.",
+          "Then the button disappears and never comes back; the row reads «Доставлен».",
           "The order is closed.",
           "The card shows two steps: «Оплачен» and «Выдан».",
           "No letter goes to the buyer."
@@ -3996,7 +4000,7 @@
         "why": "An order already collected but still queued is one you chase for nothing."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-23T15:31:47.446Z"
     },
     {
       "id": "order-message",
@@ -6147,15 +6151,17 @@
       "lang": "RU",
       "title": "Поправить остаток и порог «мало»",
       "steps": [
-        "Нажать «Править» у товара на «Складе».",
+        "На «Складе» открыть «История приёмок и продаж →» и вернуться назад.",
+        "Нажать «Править» у товара.",
         "Поменять только порог «мало» и вписать причину.",
-        "Сохранить и открыть «История приёмок и продаж →».",
-        "Вернуться, поменять остаток и штрихкод, снова сохранить.",
+        "Сохранить и снова открыть «История приёмок и продаж →».",
+        "Вернуться, поменять остаток и штрихкод, вписать другую причину, снова сохранить и открыть историю.",
         "Попробовать вписать в порог букву вместо числа."
       ],
       "expect": [
         "Всё, что вписали, сохранилось.",
-        "Причина от правки карточки видна в истории отдельной строкой.",
+        "Первая строка истории: «правка карточки · ваша причина», без числа справа.",
+        "После второй правки сверху строка «ручная правка · другая причина».",
         "Строка краснеет, когда остаток ниже своего порога.",
         "Букву вместо числа поле не принимает.",
         "Старое число при этом остаётся на месте."
@@ -6166,15 +6172,17 @@
       "en": {
         "title": "Correcting the stock and the «low» threshold",
         "steps": [
-          "On «Склад» press «Править» (edit) on a product.",
+          "On «Склад» open «История приёмок и продаж →» (the history) and come back.",
+          "Press «Править» (edit) on a product.",
           "Change only the «low» threshold and type a reason.",
-          "Save, then open «История приёмок и продаж →».",
-          "Go back, change the stock and the barcode, and save again.",
+          "Save, then open «История приёмок и продаж →» again.",
+          "Go back, change the stock and the barcode, type another reason, save and open the history.",
           "Try typing a letter instead of a number into the threshold."
         ],
         "expect": [
           "Everything you typed has been saved.",
-          "The reason from the card change shows in the history as its own row.",
+          "The history's first row: «правка карточки · your reason», with no number on the right.",
+          "After the second change the top row reads «ручная правка · the other reason».",
           "A row turns red when its stock is below the threshold.",
           "The field refuses a letter where a number belongs.",
           "The old number stays where it was."
@@ -6182,7 +6190,7 @@
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-23T16:55:51.781Z"
     },
     {
       "id": "stock-history",
@@ -7023,15 +7031,16 @@
         "Под рамкой «В начале статьи» сдвинуть ползунок вправо, потом потянуть фото пальцем — вверх-вниз и вбок.",
         "Под рамкой «В списке статей» сдвинуть ползунок, потом нажать «Сбросить» под ней.",
         "В квадрате «В соцсетях» развести два пальца на фото и потянуть его.",
+        "Посмотреть на плашку над статьёй и на кнопку «Сохранить» — на телефоне и на компьютере.",
         "Сохранить и открыть эту статью в магазине, потом список статей.",
         "Сразу переключить магазин на EN и на ET.",
         "Нажать «Вся фотография» и сохранить снова."
       ],
       "expect": [
-        "Каждая рамка двигается сама: две другие при этом стоят на месте.",
+        "Каждая рамка двигается и сбрасывается (в центр, без увеличения) сама: другие стоят на месте.",
         "Ползунок или два пальца увеличивают фото только в этой рамке, до 3×.",
         "Увеличенное фото двигается в любую сторону, даже там, где было «двигать нечего».",
-        "«Сбросить» возвращает только свою рамку: в центр и без увеличения.",
+        "До «Сохранить» над статьёй тёплая плашка и обведённая кнопка: после сохранения их нет.",
         "В магазине на RU, ET и EN обложка сразу стоит как в своих рамках.",
         "После «Вся фотография» список и статья показывают снимок целиком, как рамки в панели."
       ],
@@ -7039,7 +7048,7 @@
       "risk": "low",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:14:06.211Z",
+      "markedAt": "2026-09-24T07:00:42.145Z",
       "en": {
         "title": "An article's cover: three frames, each on its own",
         "steps": [
@@ -7048,15 +7057,16 @@
           "Under the «В начале статьи» (top of the article) frame move the slider right, then drag the photo with a finger — up, down and sideways.",
           "Under the «В списке статей» (list) frame move the slider, then press «Сбросить» (reset) under it.",
           "In the «В соцсетях» (social media) square spread two fingers on the photo, then drag it.",
+          "Look at the notice above the article and at the «Сохранить» (save) button — on a phone and on a computer.",
           "Save and open this article in the shop, then the blog list.",
           "Straight away switch the shop to EN and then to ET.",
           "Press «Вся фотография» (the whole photo) and save again."
         ],
         "expect": [
-          "Each frame moves on its own: the other two stay where they were.",
+          "Each frame moves and resets (to the centre, no zoom) on its own: the others stay.",
           "The slider or two fingers zoom the photo in that frame only, up to 3×.",
           "A zoomed photo moves every way, even where it said «двигать нечего».",
-          "«Сбросить» resets only its own frame: to the centre, with no zoom.",
+          "Before saving: a warm notice above the article and a ringed Save; after saving, both gone.",
           "In the shop in RU, ET and EN the cover sits as in its frames.",
           "After «Вся фотография» list and article show the whole photo, like the panel frames."
         ],
@@ -7071,19 +7081,21 @@
       "lang": "RU",
       "title": "Язык статьи — не язык панели",
       "steps": [
-        "Открыть статью на правку и найти кнопки «Язык статьи».",
-        "Написать русский текст, переключиться на английский и написать другой.",
-        "Вернуться на русский и нажать «Сохранить».",
-        "Выйти из статьи, открыть её заново и посмотреть оба языка.",
-        "Нажать «Опубликовать», не заполнив эстонский."
+        "В «Блоге» нажать «+ Статья» и найти кнопки «Язык статьи».",
+        "По-русски вписать заголовок «test», анонс и немного текста.",
+        "Переключиться на английский и посмотреть на заголовок и анонс, ничего не трогая.",
+        "Написать английский текст, вернуться на русский и нажать «Сохранить».",
+        "Выйти из статьи, открыть её заново и посмотреть все три языка.",
+        "Нажать «Опубликовать», не заполнив эстонский.",
+        "В «Рассылке» нажать «+ Письмо», вписать тему по-русски и переключиться на EN."
       ],
       "expect": [
-        "У каждого языка свой текст.",
-        "После переключения русский текст остался на месте.",
-        "После «Сохранить» и повторного открытия оба языка на месте.",
-        "Ни один из них не переписан другим.",
-        "При пустом эстонском панель один раз переспрашивает.",
-        "Она предупреждает, что эстонец увидит русский текст."
+        "На английском заголовок и анонс пустые: русский «test» туда не переходит.",
+        "У каждого языка свой текст — и после «Сохранить» с повторным открытием.",
+        "Английский не стал «test», эстонский так и остался пустым.",
+        "Пока не сохранили, над статьёй тёплая плашка «Есть несохранённые изменения».",
+        "При пустом эстонском панель один раз переспрашивает: эстонец увидит русский текст.",
+        "В рассылке тема на EN пустая, русская тема на месте на RU."
       ],
       "why": "Текст, пропавший из-за переключения языка, отбивает желание вести блог.",
       "risk": "low",
@@ -7091,24 +7103,26 @@
       "en": {
         "title": "The article's language is not the panel's language",
         "steps": [
-          "Open an article for editing and find the «Язык статьи» (article language) buttons.",
-          "Write the Russian text, switch to English and write something else.",
-          "Switch back to Russian and press «Сохранить».",
-          "Leave the article, open it again and look at both languages.",
-          "Without filling in Estonian, press «Опубликовать»."
+          "In «Блог» press «+ Статья» and find the «Язык статьи» (article language) buttons.",
+          "In Russian type the title «test», a lead and some text.",
+          "Switch to English and look at the title and the lead without touching them.",
+          "Write English text, switch back to Russian and press «Сохранить».",
+          "Leave the article, open it again and look at all three languages.",
+          "Without filling in Estonian, press «Опубликовать».",
+          "In «Рассылка» press «+ Письмо», type a subject in Russian and switch to EN."
         ],
         "expect": [
-          "Each language holds its own text.",
-          "After switching back, the Russian text is still there.",
-          "After saving and reopening, both languages are still there.",
-          "Neither has been overwritten by the other.",
-          "With Estonian empty the panel asks once before publishing.",
-          "It warns that an Estonian reader will see Russian."
+          "In English the title and lead are empty: the Russian «test» does not carry over.",
+          "Each language keeps its own text — after «Сохранить» and reopening too.",
+          "English did not become «test»; Estonian is still empty.",
+          "Until saved, a warm «Есть несохранённые изменения» notice stands above the article.",
+          "With Estonian empty the panel asks once: an Estonian reader will see Russian.",
+          "In the newsletter the EN subject is empty; the Russian one stays on RU."
         ],
         "why": "Text that vanishes when you switch language puts you off blogging."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T09:57:03.616Z"
     },
     {
       "id": "blog-delete",
@@ -7669,13 +7683,19 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Перевод статьи со вставленным товаром",
+      "title": "Статья от помощника: своя тема и перевод с товаром",
       "steps": [
-        "В статье с карточкой товара — своей или от помощника — нажать «Перевести на ET и EN».",
+        "В чате помощника написать «напиши статью про cool vibes» и подтвердить.",
+        "В открывшейся статье посмотреть на поле «Тема статьи» в карточке «Помощник».",
+        "Вписать туда «летний образ» и нажать «Написать статью целиком».",
+        "В статье с карточкой товара нажать «Перевести на ET и EN».",
         "Открыть эстонский и найти в тексте этот товар.",
         "Опубликовать и открыть эстонскую статью в магазине."
       ],
       "expect": [
+        "Статья из чата — про «cool vibes»: заголовок об этом, не общий уход за волосами.",
+        "Поле «Тема статьи» пустое: заголовок статьи в нём только серой подсказкой.",
+        "Вторая статья — про летний образ, старый заголовок к теме не приклеился.",
         "В эстонской статье товар остался на месте.",
         "Нажатие на него открывает эстонскую страницу того же товара.",
         "Карточка товара написана по-эстонски — название и «alates», без русских слов."
@@ -7684,13 +7704,19 @@
       "risk": "low",
       "writes": true,
       "en": {
-        "title": "Translating an article with a product in it",
+        "title": "An assistant's article: your own topic, and a translation with a product",
         "steps": [
-          "In an article with a product card — yours or the assistant's — press «Перевести на ET и EN».",
+          "In the assistant's chat write «напиши статью про cool vibes» (an article about cool vibes) and confirm.",
+          "In the article that opens, look at the «Тема статьи» (topic) box in the «Помощник» card.",
+          "Type «летний образ» (a summer look) there and press «Написать статью целиком».",
+          "In an article with a product card press «Перевести на ET и EN».",
           "Switch to Estonian and find that product in the text.",
           "Publish and open the Estonian article in the shop."
         ],
         "expect": [
+          "The chat's article is about «cool vibes»: its title says so, not generic hair care.",
+          "The «Тема статьи» box is empty: the article's title is only a grey hint in it.",
+          "The second article is about a summer look; the old title stayed out of it.",
           "The product is still there in the Estonian article.",
           "Tapping it opens the Estonian page of that same product.",
           "The card itself reads Estonian — the name and «alates», no Russian words."
@@ -7698,7 +7724,7 @@
         "why": "A translation that lost its product links turns a selling article into just text."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T12:16:57.240Z"
     },
     {
       "id": "ai-blog-photo",
@@ -7766,6 +7792,7 @@
         "Ответ пришёл на языке вопроса: на русский — по-русски, на английский — по-английски.",
         "Язык панели при этом не менялся.",
         "В ответе настоящие номера заказов и названия товаров.",
+        "На «Что заканчивается…» — список: по товару на строке, справа выделенное «нет» или «мало».",
         "Общих отговорок вместо конкретики нет.",
         "Кнопки под ответом открывают нужный раздел."
       ],
@@ -7784,13 +7811,14 @@
           "The answer comes in the language of the question: Russian for Russian, English for English.",
           "The panel's own language did not change.",
           "It holds real order numbers and real product names.",
+          "«Что заканчивается…» comes back as a list: a product a line, «нет»/«мало» at the right.",
           "No vague answers instead of specifics.",
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-24T12:23:11.393Z"
     },
     {
       "id": "ai-assistant-voice",
