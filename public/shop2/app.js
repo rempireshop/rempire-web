@@ -3048,8 +3048,12 @@
       "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
         "Üleandmiskoodi pakil tavaliselt ei ole: seda antakse ainult vedajaga sõlmitud otselepingu korral ja Omniva ei anna üldse. See on normaalne — pakk antakse üle pakisildi järgi, skaneerides selle pakiautomaadis. Tühi rida A4-lehel ei ole viga.",
       "Сторона коробки — от 1 до 200 см.": "Karbi külg on 1 kuni 200 cm.",
-      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "Pakiautomaadi hind nendes riikides tuleb selle riigi «Pakiautomaadi» veerust, eraldi vedajahinda siin ei ole. Hinna all on see, mis pood võtab, kui väli tühjendada, ja millise vedajaga pakk läheb.",
+      "Пакомат — своя цена у каждого перевозчика, как у Эстонии.":
+        "Pakiautomaat — igal vedajal oma hind, nagu Eestis.",
+      "Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.":
+        "Kuller: tühi väli — igal vedajal oma Montonio hind, sinu number — üks hind kõigile.",
+      "Под полем — сколько магазин возьмёт, если поле очистить.":
+        "Välja all on see, mis pood võtab, kui väli tühjendada.",
       "Где предлагать пакомат": "Kus pakiautomaati pakkuda",
       "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
         "Montonio viib pakiautomaatidesse ja pakipunktidesse kõigis neis riikides. Lülita riik välja — ja kassas jääb sellele ainult kuller.",
@@ -6054,8 +6058,12 @@
       "Кода сдачи у посылки обычно не будет: его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. Пустая строка на листе A4 не ошибка.":
         "A parcel usually has no drop-off code: it is issued only on a direct contract with the carrier, and Omniva issues none at all. That is normal — the parcel is handed over by its label, scanned at the machine. A blank line on the A4 sheet is not a fault.",
       "Сторона коробки — от 1 до 200 см.": "A side of the box is 1 to 200 cm.",
-      "Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.":
-        "The pickup-point price in these countries comes from that country's «Pickup point» column; there is no separate per-carrier price here. Under the price is what the shop charges if the box is cleared, and which carrier the parcel goes with.",
+      "Пакомат — своя цена у каждого перевозчика, как у Эстонии.":
+        "Pickup point — each carrier has its own price, as for Estonia.",
+      "Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.":
+        "Courier: an empty box — each carrier at its own Montonio price; your number — one price for all.",
+      "Под полем — сколько магазин возьмёт, если поле очистить.":
+        "Under a box is what the shop charges if the box is cleared.",
       "Где предлагать пакомат": "Where to offer a pickup point",
       "Montonio возит в пакоматы и пункты выдачи во всех этих странах. Выключите страну — и в кассе для неё останется только курьер.":
         "Montonio delivers to lockers and pickup points in every one of these countries. Switch a country off and its checkout keeps the courier alone.",
@@ -26321,8 +26329,8 @@
     var cell = input.parentNode, html = "";
     if (!cell || !cell.className || cell.className.indexOf("adm-rates__c") < 0) return;
     if (parts[0] === "c") {
-      var row = MONTONIO_PRICE.carriers[parts[1]];
-      var price = row && row[parts[2]];
+      // Montonio's price for this card — abroad as well as at home (24.09.2026)
+      var price = shipLockerMontonio(parts[1], parts[2]);
       if (typeof price !== "number") return;
       html = admRateFootHTML(key, String(input.value).trim(), price, "");
     } else if (parts[0] === "m" && parts[1] === "courier") {
@@ -26450,19 +26458,22 @@
    * learnt to read them.
    * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
    * real country can be switched off, not a zone.
-   * `cols` false leaves the carrier boxes out altogether — the European fold
-   * uses it, because the checkout offers a locker in none of those twenty-one
-   * countries and twenty-one rows of five dashes is noise, not information.
+   * `cols` is the carrier columns to draw — SHIP_CARRIER_COLS when left out.
+   * The European fold passes SHIP_EU_CARRIER_COLS: its countries have lockers
+   * at Nova Post and DPD only, and until 24.09.2026 it drew no locker box at
+   * all — the checkout sold those lockers at Montonio's price and the owner
+   * had nothing to type over it (Дим, /test, 24.09.2026).
    */
   function admShipRowHTML(key, name, iso, cols) {
+    var eu = cols === SHIP_EU_CARRIER_COLS;
     var off = iso ? shipCountryOff(iso) : false;
     var head = "<span>" + (iso
       ? '<span class="adm-tariffs__c">' + esc(name) +
           admSwitch('data-shipcountry="' + iso + '"', !off,
             off ? "Доставлять в эту страну" : "Не доставлять в эту страну") + "</span>"
       : name) + "</span>";
-    var carriers = cols === false ? "" : SHIP_CARRIER_COLS.map(function (c) {
-      var price = MONTONIO_PRICE.carriers[c[0]] && MONTONIO_PRICE.carriers[c[0]][key];
+    var carriers = (cols || SHIP_CARRIER_COLS).map(function (c) {
+      var price = shipLockerMontonio(c[0], key);
       var label = c[1] + " — " + name;
       if (typeof price !== "number") return admRateNoneHTML(c[1]);
       var cell = shipCarrierCell(c[0], key);
@@ -26470,7 +26481,7 @@
         admRateFootHTML("c:" + c[0] + ":" + key, cell, price, ""));
     }).join("");
     var courier = shipCell("courier", key);
-    return '<div class="adm-tariffs adm-tariffs--rates' + (cols === false ? " adm-tariffs--eu" : "") +
+    return '<div class="adm-tariffs adm-tariffs--rates' + (eu ? " adm-tariffs--eu" : "") +
       (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head + carriers +
       admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name, "Курьер, €",
         admShipCourierFoot(key, courier)) +
@@ -26510,9 +26521,13 @@
    * from the zone whose price it overrides. Country names come from the
    * browser, so all three languages get them free.
    *
-   * Three columns inside, not eight: the checkout offers a locker chip in none
-   * of them, so the five carrier columns would be a hundred and five dashes.
-   * The line above the list says that once instead.
+   * Five columns inside, not eight: a locker box for each of the two carriers
+   * that have lockers in these countries (SHIP_EU_CARRIER_COLS — Nova Post
+   * and DPD), then the courier and «Бесплатно от». Until 24.09.2026 there
+   * were three, and the line above the list said there was no per-carrier
+   * price here — while the checkout sold each of those lockers at its own
+   * Montonio price. Omniva, SmartPosti and Unisend would be sixty-three
+   * dashes, so they stay out.
    *
    * 18.09.2026 — the fold no longer says «только курьер». Ренат opened every
    * country DPD serves, so eighteen of these twenty-one now offer a pickup
@@ -26534,13 +26549,19 @@
       '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
-        '<p class="adm-hint" style="margin:0 0 10px">Цена пакомата в этих странах — из колонки «Пакомат» этой страны, отдельной цены по перевозчику тут нет. ' +
-          "Под ценой — сколько магазин возьмёт, если поле очистить, и каким перевозчиком посылка поедет.</p>" +
+        /* One sentence per column kind, each a whole dictionary key. The
+           courier half is not the locker half: an empty courier box lets
+           every carrier charge its own Montonio price, a typed one is one
+           price for all of them (shipRulePrice, quoteFromRules). */
+        '<p class="adm-hint" style="margin:0 0 4px">Пакомат — своя цена у каждого перевозчика, как у Эстонии.</p>' +
+        '<p class="adm-hint" style="margin:0 0 4px">Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.</p>' +
+        '<p class="adm-hint" style="margin:0 0 10px">Под полем — сколько магазин возьмёт, если поле очистить.</p>' +
         '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
+          SHIP_EU_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
           "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
         SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
-          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], false); }).join("") +
+          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], SHIP_EU_CARRIER_COLS); }).join("") +
         admShipPickupHTML() +
         admShipUnservedHTML() +
       "</div></details>";
@@ -28429,6 +28450,30 @@
   var SHIP_CARRIER_COLS = [
     ["omniva", "Omniva"], ["smartpost", "SmartPosti"], ["dpd", "DPD"], ["unisend", "Unisend"]
   ];
+  /* …and the locker columns of the twenty-one countries in the fold under
+     «Другие страны Европы» (24.09.2026). Дим, /test: «Poland, Germany .. I
+     can only, as it seems change the price for the courier, but I think some
+     have also parcels … the info for the shipping is then taken from
+     somewhere which we cannot override.» It was: since 18.09.2026 the
+     checkout offers a locker in every country DPD serves and Nova Post's in
+     nine, each card at its own Montonio price (MONTONIO_PRICE.chips), while
+     the fold drew a courier box and nothing else. Outside the Baltics and
+     Finland these two are the only carriers with lockers (CARRIERS_BY_COUNTRY
+     — on staging DPD answers points in eighteen of the countries, Nova Post
+     in nine, nobody in Greece), so two columns, in Montonio's order.
+     quoteFromRules() has always read a carrier cell for any country, so a
+     number typed here bills as typed. tests/shipping-eu-locker-cells.test.ts
+     holds the list to that table and to the grid in admin.css. */
+  var SHIP_EU_CARRIER_COLS = [["novapost", "Nova Post"], ["dpd", "DPD"]];
+  /** What an EMPTY locker box of carrier `c` charges in `cc` — Montonio's own
+      price for that card (chipPriceTable() on the server) — or undefined
+      where that carrier has no locker there: a dash, not a box. */
+  function shipLockerMontonio(c, cc) {
+    var chip = (MONTONIO_PRICE.chips.parcel || {})[c];
+    if (chip && typeof chip[cc] === "number") return chip[cc];
+    var row = MONTONIO_PRICE.carriers[c];
+    return row && typeof row[cc] === "number" ? row[cc] : undefined;
+  }
   /* `MONTONIO_TARIFFS` (raw per-carrier tariffs) and `MONTONIO_COST` (the
      per-country cost basis) stood here until 14.09.2026, with
      `shipRoundUpToX9()`, `montonioPrice()`, `loadShipLiveRates()`,

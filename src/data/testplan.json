@@ -1791,16 +1791,17 @@
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
         "Проверить шесть строк: Эстония, Латвия, Литва, Финляндия, «Другие страны Европы», «Остальные страны».",
-        "Раскрыть «Цены по странам Европы» и найти Германию, Польшу и Грецию.",
-        "Найти блок с перечнем стран, куда не возим."
+        "Раскрыть «Цены по странам Европы» и найти Польшу, Венгрию и Грецию.",
+        "Вписать 4 в поле DPD у Польши и раскрыть «Что увидит покупатель».",
+        "Нажать «вернуть» под этим полем, ничего не сохранять."
       ],
       "expect": [
         "Под полями Эстонии: Omniva 3,19, SmartPosti 2,59, DPD 2,59, Unisend 2,49 €.",
-        "Курьер Эстонии пустой, под ним «Montonio: 6,89 €».",
-        "Латвия и Литва: Unisend 3,79 €, курьер Montonio 8,09 €.",
+        "Курьер пустой, под ним Montonio: Эстония 6,89 €, Латвия и Литва 8,09 €.",
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
-        "Курьер: Германия 17,59 €, Польша 15,99 €, Греция 28,89 €.",
-        "Не возим: Норвегия, Швейцария, Великобритания, Исландия, Кипр, Мальта, Лихтенштейн."
+        "Польша: пакомат Nova Post 5,49 €, DPD 7,49 €, курьер 15,99 €.",
+        "Венгрия: пакомат только Nova Post 7,09 €; Греция: пакомата нет, курьер 28,89 €.",
+        "DPD Польши 4: «Ниже Montonio: 7,49 € · вернуть», в предпросмотре Европа «от 4 €»."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
       "risk": "high",
@@ -1810,21 +1811,22 @@
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
           "Check six rows: Estonia, Latvia, Lithuania, Finland, «Другие страны Европы», «Остальные страны».",
-          "Expand «Цены по странам Европы» and find Germany, Poland and Greece.",
-          "Find the block listing the countries we do not ship to."
+          "Expand «Цены по странам Европы» and find Poland, Hungary and Greece.",
+          "Type 4 into Poland's DPD box and open «Что увидит покупатель».",
+          "Press «вернуть» under that box; save nothing."
         ],
         "expect": [
           "Under Estonia's boxes: Omniva 3.19, SmartPosti 2.59, DPD 2.59, Unisend 2.49 €.",
-          "Estonia's courier box is empty, with «Montonio: 6,89 €» under it.",
-          "Latvia and Lithuania: Unisend €3.79, courier Montonio €8.09.",
+          "Courier boxes empty, Montonio under them: Estonia €6.89, Latvia and Lithuania €8.09.",
           "«Бесплатно от»: €59 in the four home countries, €200 in the rest of Europe.",
-          "Courier: Germany €17.59, Poland €15.99, Greece €28.89.",
-          "Not served: Norway, Switzerland, UK, Iceland, Cyprus, Malta, Liechtenstein."
+          "Poland: locker Nova Post €5.49, DPD €7.49, courier €15.99.",
+          "Hungary: locker Nova Post only, €7.09; Greece: no locker, courier €28.89.",
+          "Poland's DPD at 4: «Ниже Montonio: 7,49 € · вернуть», preview Europe «от 4 €»."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:58:08.234Z"
+      "markedAt": "2026-09-24T15:03:40.794Z"
     },
     {
       "id": "panel-delivery-below",

@@ -2188,10 +2188,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    So a carrier column costs the phone one more labelled field, not a pixel of
    width — which is why adding Nova Post needed no new breakpoint. */
 .adm-tariffs--rates { grid-template-columns: 1.25fr repeat(7, minmax(0, 1fr)); gap: 8px 6px; }
-/* the twenty-one European countries: the checkout offers a locker in none of
-   them, so the five carrier columns would be a hundred and five dashes —
-   three columns instead */
-.adm-tariffs--eu { grid-template-columns: 1.25fr minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+/* the twenty-one European countries: lockers there are Nova Post's and DPD's
+   only (SHIP_EU_CARRIER_COLS in app.js), so two carrier columns, then the
+   courier and «Бесплатно от» — five tracks, not eight. Until 24.09.2026 it
+   was three, with no locker box at all. */
+.adm-tariffs--eu { grid-template-columns: 1.25fr repeat(4, minmax(0, 1fr)); gap: 8px 6px; }
 .adm-rates__c { display: block; min-width: 0; }
 /* prices line up digit under digit: a column of money read at a glance is the
    whole job of this screen */
