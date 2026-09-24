@@ -18854,7 +18854,12 @@
       var p = JSON.parse(localStorage.getItem(ADM_PANES_LS));
       if (p && typeof p === "object") {
         if (typeof p.nav === "boolean") S.admNav = p.nav;
-        if (typeof p.ai === "boolean") S.admAi = p.ai;
+        /* …but not the phone's sheet: a 75 % sheet left up came back by
+           itself over «Обзор» on the next visit (map of the panel,
+           23.09.2026, #8). On a phone it opens when he taps it. */
+        var asstPhone = false;
+        try { asstPhone = window.matchMedia("(max-width: 899px)").matches; } catch (e2) {}
+        if (typeof p.ai === "boolean") S.admAi = p.ai && !asstPhone;
         // one of the three, spelled out: anything else and mailLang() keeps Russian
         if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
         // …and the microphone's, the same shape and for the same reason
@@ -40283,6 +40288,12 @@
       a card first, then the phone's «Ещё» sheet, then a confirm card — and the
       scanner last of all, since its viewfinder is mounted outside the panel
       (scanMount) and covers every one of them. */
+  /** Is «Помощник» a sheet over the panel right now (a phone, ≤ 899 px) rather
+      than the desktop's docked column? The same markup either way — admin.css
+      switches at 900, and admVvSheet() asks the same question. */
+  function admAsstSheet() {
+    return !!(ADM_PHONE_MQ && ADM_PHONE_MQ.matches);
+  }
   function admLayers() {
     if (S.screen !== "admin") return [];
     var l = [];
@@ -40307,6 +40318,12 @@
     else if (S.newsEdit && S.adminTab === "news") l.push("news");
     else if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
     if (S.admMore) l.push("more");
+    /* «Помощник» on a phone: a 75 % sheet with a scrim over whatever is open.
+       Back used to walk the section trail UNDER it — the owner pressed Back
+       to put the sheet away and landed on the previous section with the
+       sheet still up (map of the panel, 23.09.2026, #8). Not on a desktop,
+       where it is a docked column kept open while he works. */
+    if (S.admAi && admAsstSheet()) l.push("asst");
     if (pendingAction) l.push("confirm");
     /* The scanner: an overlay the owner opens with a phone in one hand and a
        bottle in the other — the one screen in the panel where Back is the
@@ -40325,6 +40342,7 @@
     else if (top === "scan") closeScannerState();
     else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
+    else if (top === "asst") { S.admAi = false; admPanesSave(); }
     /* blog: the same question «← Блог» asks. A swipe back is the gesture the
        owner closes a card with on a phone, and it used to throw an unsaved
        article away without a word — the confirmation lived in the button's
@@ -44155,6 +44173,13 @@
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
       // the phone's «Ещё» sheet
       else if (S.admMore) { S.admMore = false; render(); }
+      /* «Помощник»: the phone's sheet like any other sheet; the desktop's
+         docked column only from inside it — Escape pressed over a form must
+         not put away a pane the owner keeps open while he works */
+      else if (S.admAi && S.screen === "admin" && (admAsstSheet() ||
+          (document.activeElement && document.activeElement.closest && document.activeElement.closest(".adm-asst")))) {
+        S.admAi = false; admPanesSave(); render(); refocus("[data-admai]");
+      }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
