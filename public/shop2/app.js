@@ -30389,6 +30389,9 @@
   function admCustRowsHTML() {
     var list = filteredAdminCustomers();
     if (!list.length) {
+      // a list that did not load is not a shop with no customers: the error
+      // above says what happened, with «Повторить» (map defect 7)
+      if (S.admCustErr) return "";
       return S.admCustomers
         ? '<div class="adm-empty">Никого не нашлось</div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
@@ -30500,9 +30503,11 @@
     var d = S.admCustDetail;
     var back = admBackHTML("data-admcustclose", "Все клиенты");
     if (!d || d.customer.id !== S.admCustOpen) {
-      // grey bars mean «loading»; a card that will never load says so instead
+      // grey bars mean «loading»; a card that will never load says so instead,
+      // with the «Повторить» every other screen of the panel has (map defect 7)
       return back + (S.admCustDetailErr
-        ? '<div class="adm-note">' + esc(S.admCustDetailErr) + "</div>"
+        ? '<div class="adm-error"><span>' + esc(S.admCustDetailErr) + "</span>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="customer">Повторить</button></div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>');
     }
     var c = d.customer;
@@ -30774,7 +30779,8 @@
     loadAdminCustomers(false);
     if (S.admCustOpen) return admCustomerCardHTML();
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
-    return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
+    return (S.admCustErr ? '<div class="adm-error"><span>' + esc(S.admCustErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="customers">Повторить</button></div>' : "") +
       admCustLeadHTML() +
       (partnersOn() && S.partnerForm ? admPartnerFormHTML() : "") +
       '<div class="adm-acts">' +
@@ -41079,6 +41085,11 @@
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       // the one GET behind «Цены и баллы», «Доставлен» без кнопки and the banks
       else if (d.admreload === "pricing") { S.pricingLoadErr = false; loadAdminPricing(true); }
+      /* «Клиенты»: the list (grey bars while it is asked again — the failed
+         read left an empty list, which would read as «nobody») and one
+         customer's card, forced past the error it remembers (map defect 7) */
+      else if (d.admreload === "customers") { S.admCustErr = ""; S.admCustomers = null; loadAdminCustomers(true); }
+      else if (d.admreload === "customer") loadAdminCustomerDetail(S.admCustOpen, true);
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
