@@ -3161,10 +3161,10 @@
         "Link peab algama https:// — pilt lisati ilma selleta",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "Selle vedaja puhul luugi suurust ei valita — ta valib selle ise.",
-      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
-        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Välismaale arvestab Montonio karbi mõõtude järgi, nii et väiksem karp on otsene kokkuhoid igalt välismaa pakilt. Eestis, Lätis, Leedus, Soomes ja Rootsis hind karbi suurusest ei sõltu.",
-      "Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
-        "Välismaa tarnehinnad on arvutatud karbile 25 × 18 × 8 cm. Suurema karbiga võtab Montonio paki eest rohkem, kui ostja maksab — harva ette tuleva suure paki puhul muutke mõõte otse tellimuses.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу пакомат DPD считается по размеру коробки, поэтому коробка поменьше — прямая экономия на такой посылке. Курьер и Nova Post считаются по весу. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
+        "Mõni vedaja ei võta pakki vastu ilma mõõtudeta. Toodetel mõõte ei ole, seega kuulutab pood välja ühe karbi — selle. Välismaale arvestatakse DPD pakiautomaadi hind karbi suuruse järgi, nii et väiksem karp on otsene kokkuhoid sellise paki pealt. Kulleri ja Nova Posti hind arvestatakse kaalu järgi. Eestis, Lätis, Leedus, Soomes ja Rootsis hind karbi suurusest ei sõltu.",
+      "Цены пакоматов DPD за границей посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за такую посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
+        "DPD pakiautomaatide hinnad välismaale on arvutatud karbile 25 × 18 × 8 cm. Suurema karbiga võtab Montonio sellise paki eest rohkem, kui ostja maksab — harva ette tuleva suure paki puhul muutke mõõte otse tellimuses.",
       "по умолчанию": "vaikimisi",
       "как в прошлый раз": "nagu eelmisel korral",
       "чаще всего": "kõige sagedamini",
@@ -6178,10 +6178,10 @@
         "A link has to start with https:// — the picture went in without one",
       "Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.":
         "This carrier does not take a locker size — it picks the door itself.",
-      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу Montonio считает по размеру коробки, поэтому коробка поменьше — прямая экономия на каждой заграничной посылке. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
-        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Abroad Montonio charges by the size of the box, so a smaller box is a direct saving on every parcel that leaves the country. Inside Estonia, Latvia, Lithuania, Finland and Sweden the price does not depend on the size.",
-      "Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
-        "Delivery prices abroad are worked out for a 25 × 18 × 8 cm box. With a bigger box Montonio charges more for the parcel than the buyer pays — for the rare large parcel, change the size in the order itself.",
+      "Некоторые перевозчики не примут посылку без размеров. Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. За границу пакомат DPD считается по размеру коробки, поэтому коробка поменьше — прямая экономия на такой посылке. Курьер и Nova Post считаются по весу. По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.":
+        "Some carriers will not take a parcel without its measurements. The products have none, so the shop declares one box — this one. Abroad a DPD locker is priced by the size of the box, so a smaller box is a direct saving on such a parcel. Couriers and Nova Post are priced by weight. Inside Estonia, Latvia, Lithuania, Finland and Sweden the price does not depend on the size.",
+      "Цены пакоматов DPD за границей посчитаны для коробки 25 × 18 × 8 см. С коробкой больше Montonio возьмёт за такую посылку больше, чем заплатит покупатель — для редкой большой посылки поменяйте размер прямо в заказе.":
+        "DPD locker prices abroad are worked out for a 25 × 18 × 8 cm box. With a bigger box Montonio charges more for such a parcel than the buyer pays — for the rare large parcel, change the size in the order itself.",
       "по умолчанию": "by default",
       "как в прошлый раз": "as last time",
       "чаще всего": "most often",
@@ -6283,6 +6283,11 @@
     [/^Montonio посчитает эту коробку примерно как (.+) кг\.$/,
       { ET: "Montonio arvestab selle karbi umbes $1 kg järgi.",
         EN: "Montonio will count this box as roughly $1 kg." }],
+    /* …and what the settings line says while Montonio prices the real weight
+       (24.09.2026) — admParcelKgLine() */
+    [/^На этикетке вес (.+) кг: Montonio считает цену по весу посылки, а не по объёму коробки\.$/,
+      { ET: "Sildil on kaal $1 kg: Montonio arvestab hinna paki kaalu, mitte karbi mahu järgi.",
+        EN: "The label says $1 kg: Montonio prices the parcel by its weight, not by the box's volume." }],
     [/^Пакомат включён: (\d+) из (\d+)\.$/,
       { ET: "Pakiautomaat sees: $1 riigis $2-st.", EN: "Pickup point on: $1 of $2." }],
     [/^Коробка магазина: (.+) × (.+) × (.+) см · ячейка (.+)$/,
@@ -20170,14 +20175,15 @@
     loadAdminPricing(false);   // the same GET /api/admin/settings every card makes
     var box = admBoxPick();
     var pick = admLockerPick();
-    /* The box, first, because it is the one that costs money on every parcel:
-       Montonio bills the greater of the real weight and the weight of the box,
-       so a smaller carton is the cheapest lever the shop has. The declared one
-       is shown, and «Другая коробка» is one tap away — for THIS parcel, saving
-       nothing, changing no setting. Ренат, 18.09.2026: «In any case if needed
-       we have the possibility to override and adjust along the way.» */
+    /* The box, first: some routes refuse a parcel without its sides, and a
+       DPD locker abroad is priced by its size category. The weight beside it
+       is what the label DECLARES — one number, whatever the box (Montonio
+       prices the real weight, 24.09.2026; parcelDeclaredKg). The declared box
+       is shown, and «Другая коробка» is one tap away — for THIS parcel,
+       saving nothing, changing no setting. Ренат, 18.09.2026: «In any case if
+       needed we have the possibility to override and adjust along the way.» */
     var boxBlock = '<div class="adm-ship__row"><span class="adm-sec__t">Коробка</span>' +
-      '<span class="adm-hint">' + admBoxLine(box.length, box.width, box.height, parcelVolKg(box)) + "</span></div>" +
+      '<span class="adm-hint">' + admBoxLine(box.length, box.width, box.height, parcelDeclaredKg(box)) + "</span></div>" +
       (S.boxOpen
         ? '<div class="adm-parcel">' +
             ["length", "width", "height"].map(function (f, i) {
@@ -26527,12 +26533,13 @@
    * parcel size, overridable». This is that box.
    *
    * 25 × 18 × 8 cm — Renat's own carton, measured 22.09.2026 — and small on
-   * purpose: Montonio bills
-   * `max(actualWeight, volumetricWeight)` and the volumetric half is the box's
-   * own volume, so at this shop's parcel sizes the carton — not what is in it
-   * — is what gets paid for. The line under the boxes prints what Montonio
-   * will count this one as, so a bigger carton costs visibly more before it is
-   * saved. Centimetres, because that is what a tape measure says; the metres
+   * purpose. It was chosen believing Montonio bills
+   * `max(actualWeight, volumetricWeight)`. Montonio, 24.09.2026: the price
+   * takes the REAL weight; the box decides only DPD's size category abroad
+   * (XS/S/M/L — this carton is XS) and the locker door. So the line under the
+   * boxes now prints the weight a label declares (parcelDeclaredKg), and the
+   * warning below it names the DPD lockers abroad as what a bigger box costs.
+   * Centimetres, because that is what a tape measure says; the metres
    * Montonio wants are converted once, on the server.
    *
    * The locker door beside it is only the seed. What is actually pre-selected
@@ -26549,8 +26556,8 @@
     return '<div class="adm-sec__t" style="margin-top:24px">Коробка магазина</div>' +
       '<p class="adm-hint" style="margin:0 0 10px">Некоторые перевозчики не примут посылку без размеров. ' +
         "Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. " +
-        "За границу Montonio считает по размеру коробки, поэтому коробка поменьше — " +
-        "прямая экономия на каждой заграничной посылке. " +
+        "За границу пакомат DPD считается по размеру коробки, поэтому коробка поменьше — " +
+        "прямая экономия на такой посылке. Курьер и Nova Post считаются по весу. " +
         "По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.</p>" +
       '<div class="adm-parcel">' +
         '<label class="adm-field"><span>Длина, см</span>' +
@@ -26563,10 +26570,11 @@
           '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
             'data-parcelbox="height" value="' + esc(String(p.height)) + '"></label>' +
       "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">' + admParcelVolLine(parcelVolKg(p)) + "</p>" +
+      '<p class="adm-hint" style="margin-top:8px">' +
+        (PARCEL_PRICES_VOLUMETRIC ? admParcelVolLine(parcelVolKg(p)) : admParcelKgLine(parcelDeclaredKg(p))) + "</p>" +
       (parcelBeyondPriced(p)
-        ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Цены доставки за границу посчитаны для коробки 25 × 18 × 8 см. ' +
-          "С коробкой больше Montonio возьмёт за посылку больше, чем заплатит покупатель — " +
+        ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Цены пакоматов DPD за границей посчитаны для коробки 25 × 18 × 8 см. ' +
+          "С коробкой больше Montonio возьмёт за такую посылку больше, чем заплатит покупатель — " +
           "для редкой большой посылки поменяйте размер прямо в заказе.</p>"
         : "") +
       '<label class="adm-field" style="margin-top:12px"><span>Размер ячейки по умолчанию</span>' +
@@ -26599,11 +26607,14 @@
   /* The price table (src/data/montonio-tariffs.json) is quoted for ONE box —
      PARCEL_DEFAULT, which is src/lib/shipping/parcel.ts PARCEL_DEFAULTS, which
      is Renat's own carton as he measured it on 22.09.2026. The carton saved
-     here is what every label DECLARES. If he ever saves a bigger one, abroad
-     Montonio bills a bigger tier than the shelf price was worked out for, on
-     every parcel, and nothing else in the panel would show it. So this says
-     so the moment it is saved. Sorted, because a box goes in whichever way
-     round fits. Inside the Baltics size does not move the price at all.
+     here is what every label DECLARES. If he ever saves a bigger one, a DPD
+     locker abroad is billed a bigger size category than the shelf price was
+     worked out for (XS → S/M/L — Montonio, 24.09.2026: DPD abroad is flat,
+     weight-only or a box category, route by route), and nothing else in the
+     panel would show it. So this says so the moment it is saved. Sorted,
+     because a box goes in whichever way round fits. Couriers and Nova Post
+     are priced by real weight, and inside the Baltics size does not move the
+     price at all.
      tests/reference-parcel.test.ts holds the sentence's numbers to the box. */
   function parcelBeyondPriced(p) {
     var up = function (x, y) { return x - y; };
@@ -26611,8 +26622,12 @@
     var b = [PARCEL_DEFAULT.length, PARCEL_DEFAULT.width, PARCEL_DEFAULT.height].sort(up);
     return a[0] > b[0] || a[1] > b[1] || a[2] > b[2];
   }
-  /** «Montonio посчитает эту коробку примерно как 0,9 кг.» One text node. */
+  /** «Montonio посчитает эту коробку примерно как 0,9 кг.» One text node.
+      Drawn only if PARCEL_PRICES_VOLUMETRIC is switched on — until then it
+      would be untrue (Montonio, 24.09.2026). */
   function admParcelVolLine(kg) { return "Montonio посчитает эту коробку примерно как " + kgNum(kg) + " кг."; }
+  /** «На этикетке вес 0,9 кг: …» — what the label declares, and why the box does not move it. One text node. */
+  function admParcelKgLine(kg) { return "На этикетке вес " + kgNum(kg) + " кг: Montonio считает цену по весу посылки, а не по объёму коробки."; }
   function admParcelLearnedLine(size) {
     return "Чаще всего вы отправляете " + size + " — этот размер и будет предложен.";
   }
@@ -28454,18 +28469,26 @@
      and this is what LOCKER_SIZES below suggests from. The panel carries it
      through untouched so that saving the boxes cannot erase the history the
      suggestion is learned from (the server holds the same line — mergeParcel).
-     The default is SMALL on purpose. Montonio bills
-     `max(actualWeight, volumetricWeight)` and volumetric weight is the box's
-     own volume, so at this shop's parcel sizes the carton — not what is in it
-     — is what gets paid for. 25 × 18 × 8 cm is 0,9 kg; the 30 × 30 × 30 that
-     REFERENCE_PARCEL used to be would be five to seven. Ренат, 18.09.2026: «use
-     a smaller default box then and we don't bother with weights»; and on
-     22.09.2026 he measured the real one — 25 × 18 × 8, which is DPD's XS. */
+     The default is SMALL on purpose. It was chosen believing Montonio bills
+     `max(actualWeight, volumetricWeight)`; Montonio answered on 24.09.2026
+     that the price takes the REAL weight, so what the box still decides is
+     the locker door and, abroad, DPD's size category — and 25 × 18 × 8 is
+     DPD's XS. Ренат, 18.09.2026: «use a smaller default box then and we don't
+     bother with weights»; on 22.09.2026 he measured the real one. */
   var LOCKER_SIZES = ["XS", "S", "M", "L", "XL"];
   var PARCEL_DEFAULT = { length: 25, width: 18, height: 8, lockerSize: "S", recent: [] };
-  /** «около 0,9 кг» — volumetricKg() in src/lib/shipping/parcel.ts, and the
-      figure this shop DECLARES to Montonio on every label since 19.09.2026. */
+  /** The box's volumetric weight — volumetricKg() in src/lib/shipping/parcel.ts.
+      Until 24.09.2026 this was also the figure every label DECLARED. */
   function parcelVolKg(b) { return Math.round(((b.length * b.width * b.height) / 5000) * 1.25 * 100) / 100; }
+  /* Montonio prices the REAL weight, not the box's volume — support,
+     24.09.2026: «our pricing for time being takes into account real weight.
+     If that will change, then we'd let them know.» MONTONIO_PRICES_VOLUMETRIC
+     and ORDINARY_PARCEL_KG in src/lib/shipping/parcel.ts; the two copies are
+     held equal by tests/shipping-real-weight.test.ts. */
+  var PARCEL_PRICES_VOLUMETRIC = false;
+  var PARCEL_ORDINARY_KG = 0.9;
+  /** «около 0,9 кг» — the weight a label declares for box `b`: declaredWeightKg() on the server. */
+  function parcelDeclaredKg(b) { return Math.max(0.1, PARCEL_PRICES_VOLUMETRIC ? Math.max(PARCEL_ORDINARY_KG, parcelVolKg(b)) : PARCEL_ORDINARY_KG); }
   /* 1.1 → «1,1». A REGEX and not a string literal on purpose: tools/i18n-gaps.mjs
      re-joins `+`-glued string literals to reproduce what reaches the DOM, so a
      `.replace(".", ",")` written inline splices two stray literals into the

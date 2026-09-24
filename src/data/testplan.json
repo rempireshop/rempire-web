@@ -1893,13 +1893,14 @@
         "Вернуть высоту 8 и выйти из поля."
       ],
       "expect": [
-        "Размеры 25, 18 и 8 см, вес около 0,9 кг.",
+        "Размеры 25, 18 и 8 см; строка: «На этикетке вес 0,9 кг».",
+        "С высотой 10 вес на этикетке остался 0,9 кг.",
         "Размер ячейки по умолчанию — S.",
-        "С высотой 10 под весом появилось предупреждение про цены за границу.",
+        "С высотой 10 появилось предупреждение про пакоматы DPD за границей.",
         "С высотой 8 предупреждение исчезло.",
         "Каждое изменение подтверждено «Сохранено ✓»."
       ],
-      "why": "Коробка больше той, для которой посчитаны цены, — убыток на каждой посылке за границу.",
+      "why": "Коробка больше той, для которой посчитаны цены, — убыток на каждом пакомате DPD за границей.",
       "risk": "high",
       "writes": true,
       "en": {
@@ -1911,16 +1912,17 @@
           "Set it back to 8 and leave the field."
         ],
         "expect": [
-          "Sides 25, 18 and 8 cm, weight about 0.9 kg.",
+          "Sides 25, 18 and 8 cm; the line says «На этикетке вес 0,9 кг».",
+          "With a height of 10 the label weight stays 0.9 kg.",
           "The default locker size is S.",
-          "With a height of 10 a warning about prices abroad appears.",
+          "With a height of 10 a warning about DPD lockers abroad appears.",
           "With a height of 8 the warning is gone.",
           "Each change is confirmed with «Сохранено ✓»."
         ],
-        "why": "A box bigger than the one prices are worked out for loses money on every parcel abroad."
+        "why": "A box bigger than the one prices are worked out for loses money on every DPD locker abroad."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T11:06:56.864Z"
+      "markedAt": "2026-09-24T16:37:14.361Z"
     },
     {
       "id": "panel-delivery-folds",
@@ -3811,7 +3813,7 @@
         "Нажать «Создать этикетку» и подождать пару секунд.",
         "Нажать «Открыть PDF (A4) ↗».",
         "Вернуться и нажать «A6 для термопринтера ↗».",
-        "Посмотреть вес на этикетке: это коробка магазина, а не число товаров.",
+        "Посмотреть вес на этикетке: 0,9 кг при любом числе товаров, даже с «Другой коробкой».",
         "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой.",
         "До создания этикетки открыть оплаченный заказ в пакомат SmartPosti или Unisend, потом в Omniva или Польшу, и посмотреть блок над кнопкой. Коробку можно поменять у любого оплаченного заказа — так задумано."
       ],
@@ -3833,7 +3835,7 @@
           "Press «Создать этикетку» (create label) and wait a couple of seconds.",
           "Press «Открыть PDF (A4) ↗».",
           "Go back and press «A6 для термопринтера ↗».",
-          "Look at the weight on the label: it is the shop's box, not the item count.",
+          "Look at the weight on the label: 0.9 kg whatever the item count, even with «Другая коробка».",
           "Open the A4 PDF and check the band under the label is not empty.",
           "Before creating a label, open a paid order to a SmartPosti or Unisend locker, then one to Omniva or Poland, and look above the button. The box can be changed on any paid order — that is by design."
         ],
@@ -3848,7 +3850,7 @@
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T15:49:00.000Z"
+      "markedAt": "2026-09-24T16:37:14.361Z"
     },
     {
       "id": "order-shipped",

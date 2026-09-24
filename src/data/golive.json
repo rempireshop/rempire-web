@@ -309,10 +309,10 @@
       "status": "done",
       "blocking": false,
       "title": "Взвесить товар — отменено 18.09",
-      "detail": "Решение владельца, и рассуждение стоит сохранить. Montonio берёт max(вес, объёмный), объёмный — это габариты ÷ 5000, поэтому коробка 30×30×30 весит 5,4 кг чем её ни набей. На здешних размерах посылки платят за заявленную коробку, а не за содержимое. Маленькая коробка по умолчанию забирает почти всю экономию без всякой работы, а редкий тяжёлый заказ — принятый убыток в обмен на одну устойчивую цену.",
+      "detail": "Решение владельца, и рассуждение стоит сохранить. Тогда считали, что Montonio берёт max(вес, объёмный), и маленькая коробка по умолчанию должна была снять плату за картон. Montonio ответил 24.09.2026: цена сейчас считается по настоящему весу, объёмный вес на цену не влияет. Решение от этого не меняется: на этикетке один вес, 0,9 кг, обычная посылка укладывается в первую ступень до 1 кг, а редкий тяжёлый заказ — принятый убыток в обмен на одну устойчивую цену. Размер коробки важен только для пакомата DPD за границей (категория XS).",
       "en": {
         "title": "Weigh the products — cancelled 18.09",
-        "detail": "The owner's decision, and the reasoning is worth keeping. Montonio bills max(actual, volumetric) and volumetric is dimensions ÷ 5000, so a 30×30×30 carton is 5.4 kg whatever is inside it. At this shop's parcel sizes the declared box is what gets paid for, not the contents. A small default carton captures nearly all of the saving with none of the work, and the rare heavy order is an accepted loss taken deliberately in exchange for one stable price."
+        "detail": "The owner's decision, and the reasoning is worth keeping. At the time Montonio was believed to bill max(actual, volumetric), and a small default carton was meant to stop paying for cardboard. Montonio answered on 24.09.2026: the price is based on the real weight for now; volumetric weight does not move it. The decision stands: every label declares one weight, 0.9 kg, an ordinary parcel sits in the first tier up to 1 kg, and the rare heavy order is an accepted loss in exchange for one stable price. The box size matters only for a DPD locker abroad (category XS)."
       }
     },
     {

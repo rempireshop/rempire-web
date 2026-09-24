@@ -31,12 +31,14 @@
  *    jars go in a typical order is a thing Renat knows and 1.4 kg is not.
  *
  *    It is a weight to *study tariffs with*, not the weight the shop declares.
- *    Since 19.09.2026 `POST /shipments` carries `declaredWeightKg()` — the
- *    volumetric weight of the carton in `settings.shipping_parcel`, the same
+ *    Since 19.09.2026 `POST /shipments` carries `declaredWeightKg()` — one
  *    number on every parcel (Ренат, 18.09.2026: «no weight modelling»; audit
- *    18.09.2026, F24). So a band here answers «what would a real parcel of N
- *    jars cost», which is exactly the question this tool exists for, and it is
- *    no longer also a description of what goes out on the wire.
+ *    18.09.2026, F24): the carton's volumetric weight until 24.09.2026, and
+ *    since then `ORDINARY_PARCEL_KG`, a real weight, because Montonio prices
+ *    the real weight (support, 24.09.2026). So a band here answers «what would
+ *    a real parcel of N jars cost», which is exactly the question this tool
+ *    exists for, and it is no longer also a description of what goes out on
+ *    the wire.
  * 2. **A hole is a hole.** `/shipping-methods/rates` — reference, Note —
  *    *"only returns rates for carriers with Montonio contracts. Carriers that
  *    only support Direct contracts will not be included in the response."* An
@@ -225,12 +227,13 @@ export function parseRatesResponse(body, { country = "" } = {}) {
   }
 
   /**
-   * What Montonio will bill the box as, which is not what we declared.
-   * `chargeableWeight` is the greater of `actualWeight` and `volumetricWeight`
-   * — so a light parcel in a big carton is charged by its size, and on a
-   * 30×30×30 box (the mirror's REFERENCE_PARCEL) that is 5.4 kg no matter what
-   * goes in it. Printing this is how Renat sees that the box, not the contents,
-   * set the price.
+   * What Montonio's helper computes for the box: `chargeableWeight` is the
+   * greater of `actualWeight` and `volumetricWeight`. Read and printed as
+   * Montonio sends it — but **it is not what the tariff uses today**:
+   * Montonio support, 24.09.2026, «our pricing for time being takes into
+   * account real weight» (MONTONIO_PRICES_VOLUMETRIC in
+   * src/lib/shipping/parcel.ts). The column stays so that the day they switch,
+   * this is where it shows.
    */
   let chargeable = null;
   const est = b.calculationDetails?.estimatedParcels;
@@ -363,14 +366,13 @@ export function basisFor(country, kind, rows) {
  * production estimator; the carton is the one thing here that is invented, and
  * it is invented out loud.
  *
- * **The box matters as much as the weight and nobody has measured it either.**
- * Montonio charges `chargeableWeight` = max(actual, volumetric), so a 0.6 kg
- * order posted in the mirror's 30×30×30 reference carton is billed at 5.4 kg
- * of volumetric weight and the band is meaningless. The ladder below grows the
- * carton with the order so that each band is a plausible parcel rather than
- * one box with different numbers written on it — and the run prints Montonio's
- * own `chargeableWeight` next to every band, so the moment the carton is the
- * thing being paid for, it says so.
+ * **The box.** Written when the shop believed Montonio charges
+ * `chargeableWeight` = max(actual, volumetric). Montonio, 24.09.2026: the
+ * tariff takes the REAL weight; the box matters only where a route is priced
+ * by size category (DPD's lockers abroad, XS/S/M/L). The ladder below still
+ * grows the carton with the order so that each band is a plausible parcel —
+ * which is what a size category needs — and the run still prints Montonio's
+ * own `chargeableWeight` beside every band, for the day that changes.
  */
 export const DEFAULT_BANDS = [
   { units: 1, box: [20, 15, 10] },

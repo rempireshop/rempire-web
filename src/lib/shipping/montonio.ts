@@ -157,9 +157,10 @@ export interface CreateShipmentOptions {
   /**
    * Parcel weight in kg.
    *
-   * Default: the declared carton's own volumetric weight
-   * (`declaredWeightKg()`), the same number whatever the order holds. It is
-   * **not** derived from the basket — see that function and F24.
+   * Default: `declaredWeightKg()` — the ordinary parcel's real weight, 0.9 kg,
+   * the same number whatever the order holds and whatever box is on the
+   * card (Montonio prices the real weight, 24.09.2026). It is **not**
+   * derived from the basket — see that function and F24.
    */
   weight?: number;
   /**
@@ -1298,22 +1299,22 @@ export async function createMontonioShipment(
     }
   }
 
-  /* The weight is the DECLARED BOX, not the basket.
+  /* The weight is ONE number, not the basket.
      Ренат, 18.09.2026: «one small default carton, no weight modelling». Until
      19.09.2026 this line sent `estimateWeightKg(order)` — 0.4 kg a unit plus
      0.2 — on every booking, so the shop's cost per parcel climbed with the
      line count while the customer paid one flat price (audit 18.09.2026,
-     F24). And since dimensions go out only where
-     `constraints.parcelDimensionsRequired` is true, on most routes Montonio
-     has nothing of its own to compare against and this number IS the bill —
-     which is exactly why the estimate was expensive.
-     Which box: the one the owner typed for THIS parcel («эта посылка другая»)
-     if he typed all three sides, otherwise the shop's carton. Declaring a
-     weight that disagrees with the dimensions beside it buys nothing —
-     Montonio bills max(actual, volumetric) and would compute the volumetric
-     from those very sides. `opts` is metres, the settings are centimetres
-     (parcel.ts § Units), so the override is converted back before the weight
-     is taken off it.
+     F24).
+     Montonio prices the REAL weight (support, 24.09.2026: «our pricing for
+     time being takes into account real weight»), so this number is the tier
+     the parcel is billed in. Until that answer it was the volumetric weight
+     of the box on the card — 0.9 kg for the default carton, and 6 kg for a
+     40 × 30 × 20 «Другая коробка», i.e. the 6 kg tier for a parcel weighing
+     one. `declaredWeightKg()` now answers `ORDINARY_PARCEL_KG` whatever the
+     box; the box is still passed so that MONTONIO_PRICES_VOLUMETRIC, if it
+     is ever switched on, can make the weight agree with the sides again.
+     `opts` is metres, the settings are centimetres (parcel.ts § Units), so
+     the override is converted back first.
      A weight typed into the label form still wins over both: a parcel he has
      actually put on a scale beats any default. */
   const declaredBox =
@@ -1337,11 +1338,12 @@ export async function createMontonioShipment(
      when the question could not be answered. Dimensions are a size tier and a
      size tier is money: a route that books today without them has to keep
      booking without them, or a network blip could quietly reprice it.
-     Sending nothing is also the CHEAPER default, which is worth knowing:
-     Montonio bills `max(actualWeight, volumetricWeight)`, so a declared box is
-     a floor under the bill. The default carton is 25 × 18 × 8 cm — 0.9 kg,
-     Renat's own box as he measured it on 22.09.2026 — for exactly that reason;
-     see src/lib/shipping/parcel.ts. */
+     Sides matter to the price only where a route is priced by box category —
+     DPD's lockers abroad, XS/S/M/L (Montonio, 24.09.2026; the 25 × 18 × 8
+     carton is XS, docs/montonio-evidence-2026-09-24.txt). Weight-priced
+     routes look up the REAL weight whatever the sides say, so the old
+     reasoning here — «a declared box is a floor under the bill» — holds only
+     if MONTONIO_PRICES_VOLUMETRIC is ever switched on. */
   if (!measured) {
     const needed = await parcelDimensionsRequired(carrier, country, shippingMethod.type);
     if (needed) {
