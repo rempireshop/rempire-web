@@ -888,9 +888,18 @@ test.describe("admin — what the acceptance run found", () => {
     await openAdmin(page);
     await tab(page, "goods");
     await page.locator("[data-goodsq]").fill("");
-    const more = page.locator("[data-admgoodsmore]");
-    if (await more.count()) await more.click();
     const rows = page.locator("#goodslist [data-admgoods]");
+    await expect(rows.first()).toBeVisible();
+    /* «Показать ещё» pressed in the page, not by the mouse. A mouse click
+       scrolls the button into view first, and since 19.09.2026 bringing it
+       into view IS the next page (goodsScrollMore): the list grows under the
+       pointer and the click lands on a product row. On 24.09.2026 that opened
+       «Proraso White» and this test counted the rows of an editor — 0. */
+    const before = await rows.count();
+    if (await page.locator("[data-admgoodsmore]").count()) {
+      await page.evaluate(() => document.querySelector<HTMLElement>("[data-admgoodsmore]")?.click());
+      await expect.poll(() => rows.count(), { message: "«Показать ещё» did not lengthen the list" }).toBeGreaterThan(before);
+    }
     const n = await rows.count();
     expect(n, "the list is too short for this to mean anything").toBeGreaterThan(12);
     const target = rows.nth(Math.min(25, n - 1));

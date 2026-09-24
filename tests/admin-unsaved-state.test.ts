@@ -69,6 +69,20 @@ describe("the notice over the form", () => {
     expect(html).not.toMatch(/\bhidden\b/);
   });
 
+  /* The e2e run of 24.09.2026: with `role="status"` on the note, every check
+     that reads the toast by its role (sweep-helpers toastText/clearToast, the
+     blog's «Статья готова…») read the note instead while a draft was unsaved —
+     «Черновик сохранён» came back as «Есть несохранённые изменения». The role
+     is the toast's alone (paintToast); the note is still announced. */
+  it("is announced, but leaves `role=\"status\"` to the toast", () => {
+    const html = note("data-newsdirty", true);
+    expect(html).toContain('aria-live="polite"');
+    expect(html).not.toMatch(/role="status"/);
+    const roles = src.match(/<[a-z]+ [^>]*role="status"/g) ?? [];
+    expect(roles.length, "something other than the two toasts took role=\"status\"").toBe(2);
+    for (const tag of roles) expect(tag).toMatch(/class="(adm-toast|toast)"/);
+  });
+
   it("…and hidden, not removed, once saved — the paints only flip `hidden`", () => {
     expect(note("data-blogdirty", false)).toMatch(/\shidden>/);
   });

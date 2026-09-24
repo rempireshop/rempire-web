@@ -21322,17 +21322,29 @@
      because the value it compares against was always null. The admin's own
      uncached copy of that same map (GET /api/admin/overrides) carries it.
      Fetched once per session, on the way into «Каталог» — before any editor
-     is open, so no form is ever rebuilt under the owner's hands. */
+     is open, so no form is ever rebuilt under the owner's hands.
+     …and never over a salon price the panel itself wrote while the answer was
+     on its way (proOvWrote): the server read that answer BEFORE the save, so
+     its «none» is the old value, not a newer one. It used to win — the box
+     reopened empty, and «Сохранить» with an empty box erases the saved price
+     (e2e run of 24.09.2026, the owner saving a product the moment «Каталог»
+     opened). */
   var PRO_OV = { asked: false };
+  function proOvWrote(id) {
+    if (PRO_OV.wrote) PRO_OV.wrote[id] = true;
+  }
   function loadProOverrides(force) {
     if (SRV.admin !== true) return;
     if (PRO_OV.asked && !force) return;
     PRO_OV.asked = true;
+    var wrote = PRO_OV.wrote = {};
     apiJson("/api/admin/overrides/").then(function (r) {
+      if (PRO_OV.wrote === wrote) PRO_OV.wrote = null;
       if (r.status === 401) { SRV.admin = false; return; }
       if (r.status !== 200 || !r.body.ok || !r.body.overrides) return;
       var ov = r.body.overrides, moved = false;
       Object.keys(ov).forEach(function (id) {
+        if (wrote[id]) return;
         var v = ov[id] ? ov[id].proPrice : null;
         var had = DEMO.proPrice[id] != null ? DEMO.proPrice[id] : null;
         if (v === had) return;
@@ -26427,9 +26439,13 @@
          «Публикация» card) — the same ring.
      The render writes the class into the markup (admDirtyCls) and the paints
      that run under a caret toggle it in place (admDirtyMark), from the same
-     dirty flag in both cases, so the two can never disagree. */
+     dirty flag in both cases, so the two can never disagree.
+     `aria-live`, not `role="status"`: that role is the toast's, and the one
+     hook everything listening for a toast reads (paintToast). With it on this
+     note too, a notice standing over an unsaved form answered for the toast
+     under it — «Черновик сохранён» read back as «Есть несохранённые…». */
   function admDirtyNoteHTML(attr, dirty) {
-    return '<p class="adm-dirty" ' + attr + ' role="status"' + (dirty ? "" : " hidden") + ">" +
+    return '<p class="adm-dirty" ' + attr + ' aria-live="polite"' + (dirty ? "" : " hidden") + ">" +
       "Есть несохранённые изменения — нажмите «Сохранить».</p>";
   }
   function admDirtyCls(dirty) { return dirty ? " is-dirty" : ""; }
@@ -38000,7 +38016,7 @@
     if (a.type === "set_price") { entry.prev = { type: "set_price", id: a.id, value: DEMO.price[a.id] != null ? DEMO.price[a.id] : p.price }; DEMO.price[a.id] = a.value; }
     // wholesale/loyalty: a.value null clears the override back to "computed
     // from the global discount" — same null-clears convention as set_seo/set_varimg
-    else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
+    else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; proOvWrote(a.id); }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
     /* migration 147: the size ladder travels whole, so undo is the previous
        whole ladder — null when the owner had none and the catalogue file's
@@ -38257,7 +38273,7 @@
     if (!entry || !entry.prev) return;
     var a = entry.prev;
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
-    else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
+    else if (a.type === "set_pro_price") { DEMO.proPrice[a.id] = a.value; proOvWrote(a.id); }
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
     else if (a.type === "set_sizes") setSizesLocal(a);   // migration 147
     else if (a.type === "set_hidden") {

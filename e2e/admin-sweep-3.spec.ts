@@ -33,6 +33,16 @@ test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name === "tablet" || testInfo.project.name === "mobile-safari", "admin sweep — desktop and mobile projects only");
 });
 
+/** The line over the orders list that says what the search is doing («Ищем…»,
+ *  «Ищем по всем заказам — фильтр сейчас не действует.»). Not the pager's
+ *  «Показаны первые 40 из N» under a long list: the same `.adm-hint`, but it
+ *  is the list's length talking, and the e2e database passes 40 orders partway
+ *  through a full run (24.09.2026: 76 by the mobile project) — so a bare
+ *  `#orderlist .adm-hint` counted it, on whichever project got there first. */
+function searchLine(page: Page) {
+  return page.locator("#orderlist .adm-hint").filter({ hasNotText: /^Показаны первые \d+ из \d+$/ });
+}
+
 /** A quick, throwaway paid order (the same recipe admin-sweep-2.spec.ts uses). */
 async function placeOrder(page: Page, email: string): Promise<string> {
   await page.goto(shopUrl("", `/p/${PRODUCT_2.id}/`));
@@ -174,7 +184,7 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     // already left; the chips became three on 07.09.2026)
     await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
-    const hint = page.locator("#orderlist .adm-hint");
+    const hint = searchLine(page);
     await expect(hint).toHaveCount(0);
 
     // typing finds it anyway — and the list says why the chip stopped mattering
@@ -263,7 +273,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     const q = page.locator("[data-admorderq]");
     await q.fill("   ");
     // a query of nothing but spaces is no query: the chip's own list comes back
-    await expect(page.locator("#orderlist .adm-hint")).toHaveCount(0);
+    await expect(searchLine(page)).toHaveCount(0);
     await q.fill("нет-такого-заказа-🙃");
     /* A search that found nothing says what it looked at (17.09.2026,
        admOrderEmptyHTML in app.js); «Таких заказов нет» is what an empty chip
