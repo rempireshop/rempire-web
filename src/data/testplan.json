@@ -8745,7 +8745,8 @@
       "expect": [
         "Письма пришли сами, без единого нажатия.",
         "Счётчики «Ждут письма» сдвинулись.",
-        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж."
+        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж.",
+        "В логе утреннего запуска Vercel есть «shipments: checked …» — сверка посылок с Montonio."
       ],
       "why": "Расписание одно на все автоматические письма: не запустилось — не ушло ни одно.",
       "risk": "high",
@@ -8761,12 +8762,13 @@
         "expect": [
           "The letters arrived on their own, with nothing pressed.",
           "The «Ждут письма» counters have moved.",
-          "The order became paid by itself: the nightly check asked Montonio and found the payment."
+          "The order became paid by itself: the nightly check asked Montonio and found the payment.",
+          "The morning run's Vercel log has «shipments: checked …» — the parcel check with Montonio."
         ],
         "why": "One schedule carries every automatic letter: if it stops, none go."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-24T16:52:23.267Z"
     },
     {
       "id": "live-reconcile",

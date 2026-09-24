@@ -6,11 +6,18 @@
  * 24.09.2026): «15 attempts total. The first retry happens after about 10
  * seconds, and the interval grows exponentially … roughly 1.5–2 days». So a
  * notification can arrive two days late, after a newer one — which is why a
- * webhook never moves a parcel BACKWARDS here. A `source: "poll"` update is
- * one read from `GET /shipments/{id}` — the state now — and may move it in
- * either direction.
+ * webhook never moves a parcel BACKWARDS here.
  *
- * Whoever brings it, `applyShipmentUpdate()` does the same four things:
+ * …and by **the nightly poll** (`syncStaleShipments()` below, from the daily
+ * cron) — Montonio's own advice in the same answer: «Since you rely solely on
+ * the webhook for tracking, we'd still recommend occasionally polling
+ * shipment status via GET as a backup, in case an event ever ends up
+ * undelivered.» `GET /shipments/{id}` is the state now, so the poll may move a
+ * parcel in either direction.
+ *
+ * Whoever brings it, `applyShipmentUpdate()` does the same four things, so an
+ * event lost on the way and found by the poll does exactly what it would have
+ * done had it arrived:
  *
  *   1. the carrier's word goes onto `orders.shipping.montonio.status`;
  *   2. a tracking code the order does not have yet is filled in — the case
@@ -23,9 +30,16 @@
  * Nothing here is written twice: every step either checks what is stored or
  * is idempotent (setOrderStatus only moves `shipped` → `delivered` once).
  */
+import { query } from "@/lib/db";
 import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
-import { setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
-import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
+import { getOrder, setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
+import {
+  getMontonioShipment,
+  isMontonioShippingConfigured,
+  saveShipmentOnOrder,
+  shipmentOnOrder,
+  type MontonioShipment,
+} from "@/lib/shipping/montonio";
 import { statusMeaning, type ShipmentMeaning } from "@/lib/shipping/webhook";
 
 /** What one piece of news says about a shipment, in Montonio's own words. */
@@ -207,4 +221,152 @@ export async function applyShipmentUpdate(
   }
 
   return out;
+}
+
+/* ---------- the nightly poll --------------------------------------------- */
+
+/**
+ * How long a shipment may go without news before the poll asks for it.
+ *
+ * Montonio's retries run for 1.5–2 days, so a lost event is only certainly
+ * lost after two. Asking earlier costs one read-only GET and finds it a day
+ * sooner; asking every run for a parcel Montonio talked about this morning
+ * would be noise. Half a day, against a cron that runs once a day (Vercel
+ * Hobby allows no more), means: anything quiet since yesterday's run.
+ */
+export const SHIPMENT_QUIET_HOURS = 12;
+/** Shipments asked per run. The shop books a few parcels a week; twenty is weeks of them. */
+export const SHIPMENT_POLL_LIMIT = 20;
+/** The poll's share of the cron's one minute (maxDuration 60 in /api/cron/flows). */
+export const SHIPMENT_POLL_BUDGET_MS = 12_000;
+
+export interface ShipmentSyncRun {
+  /** Shipments asked about this run. */
+  checked: number;
+  /** …whose status on the order changed. */
+  changed: number;
+  /** …that got a tracking code they lacked. */
+  tracking: number;
+  /** …whose refusal reached the journal. */
+  refused: number;
+  /** …whose order was closed as delivered. */
+  closed: number;
+  /** GETs Montonio did not answer, or updates that could not be written. */
+  errors: number;
+  /** Quiet shipments left for the next run (limit or time budget). */
+  left: number;
+  reason?: string;
+}
+
+type Candidate = { id: string; status: string; shipping: unknown; created_at: string | Date };
+
+function when(v: unknown): number {
+  const t = typeof v === "string" ? Date.parse(v) : v instanceof Date ? v.getTime() : NaN;
+  return Number.isFinite(t) ? t : NaN;
+}
+
+/**
+ * Ask Montonio for every shipment that has gone quiet, and apply what it says
+ * exactly as the webhook would have (`applyShipmentUpdate`, source "poll").
+ *
+ * Which shipments: on an order that is still `paid` or `shipped`, not set
+ * aside (`dismissed`), not in a final state (`delivered`, `returned`), and
+ * with no news for SHIPMENT_QUIET_HOURS — «news» being the last webhook
+ * (`statusAt`), the last poll (`polledAt`) or, for one never heard of, its
+ * booking (`createdAt`). The least recently polled go first, so a long queue
+ * is worked through over several nights rather than the same twenty forever.
+ *
+ * Bounded by count and by time, idempotent (an unchanged status writes only
+ * `polledAt`; a refusal already on the order is not journalled again), and it
+ * never throws: the letters that share the cron must go out whatever
+ * Montonio does. `fetchShipment` and `configured` are the tests' doors.
+ */
+export async function syncStaleShipments(
+  opts: {
+    now?: number;
+    limit?: number;
+    budgetMs?: number;
+    quietHours?: number;
+    fetchShipment?: (shipmentId: string) => Promise<MontonioShipment>;
+    configured?: () => boolean;
+  } = {},
+): Promise<ShipmentSyncRun> {
+  const run: ShipmentSyncRun = { checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, errors: 0, left: 0 };
+  const configured = opts.configured ?? (() => isMontonioShippingConfigured());
+  if (!configured()) return { ...run, reason: "not_configured" };
+
+  const now = opts.now ?? Date.now();
+  const started = Date.now();
+  const limit = Math.max(1, Math.min(100, opts.limit ?? SHIPMENT_POLL_LIMIT));
+  const budget = Math.max(1_000, opts.budgetMs ?? SHIPMENT_POLL_BUDGET_MS);
+  const quietMs = Math.max(0, opts.quietHours ?? SHIPMENT_QUIET_HOURS) * 60 * 60 * 1000;
+  const fetchShipment = opts.fetchShipment ?? getMontonioShipment;
+
+  let rows: Candidate[];
+  try {
+    /* The coarse cut in SQL (the order's own status, a shipment id present);
+       the timestamps are read in code, where a malformed one is «unknown»
+       rather than a cast that fails the whole query. */
+    rows = await query<Candidate>(
+      `select id, status, shipping, created_at
+         from orders
+        where status in ('paid', 'shipped')
+          and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') <> ''
+        order by created_at desc
+        limit 500`,
+    );
+  } catch (err) {
+    console.error("[shipment sync] cannot read shipments:", err);
+    return { ...run, reason: "error" };
+  }
+
+  const quiet = rows
+    .map((row) => {
+      const s = (row.shipping && typeof row.shipping === "object" ? row.shipping : {}) as Record<string, unknown>;
+      const m = (s.montonio && typeof s.montonio === "object" ? s.montonio : {}) as Record<string, unknown>;
+      const heard = Math.max(
+        when(m.statusAt) || 0,
+        when(m.polledAt) || 0,
+        when(m.createdAt) || when(row.created_at) || 0,
+      );
+      return { id: row.id, m, heard, polled: when(m.polledAt) || 0 };
+    })
+    .filter(({ m, heard }) => m.dismissed !== true && !isFinalShipmentStatus(m.status) && now - heard >= quietMs)
+    .sort((a, b) => a.polled - b.polled || a.heard - b.heard);
+
+  for (let i = 0; i < quiet.length; i++) {
+    if (run.checked >= limit || Date.now() - started > budget) {
+      run.left = quiet.length - i;
+      break;
+    }
+    const { id } = quiet[i];
+    run.checked += 1;
+    try {
+      const order = await getOrder(id);
+      const stored = order ? shipmentOnOrder(order) : null;
+      if (!order || !stored) continue;
+      const fresh = await fetchShipment(stored.shipmentId);
+      const result = await applyShipmentUpdate(
+        order,
+        {
+          status: fresh.status,
+          shipmentId: fresh.shipmentId || stored.shipmentId,
+          trackingCode: fresh.trackingCode,
+          trackingUrl: fresh.trackingUrl,
+          dropOffPin: fresh.dropOffPin,
+        },
+        { source: "poll", now: new Date(now) },
+      );
+      if (result.written) run.changed += 1;
+      if (result.tracking) run.tracking += 1;
+      if (result.refused) run.refused += 1;
+      if (result.applied === "delivered") run.closed += 1;
+    } catch (err) {
+      /* not configured after all, a 404, a timeout, a close that failed —
+         this one waits for tomorrow, the next is still asked */
+      run.errors += 1;
+      console.error(`[shipment sync] ${id}:`, err);
+    }
+  }
+  return run;
 }
