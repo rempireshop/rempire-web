@@ -88,14 +88,25 @@ to send something back does not find it out for us.
 
 - **DPD, international** — the only carrier a **return label** can be created
   for. Montonio is **not sure it is available through the API**; that half is
-  still open, below.
+  still open — **24.09.2026: Montonio promised a separate answer on the DPD
+  return label and it has not come yet.** Nothing in the shop promises one:
+  the panel's return line says «этикетку возврата магазин выдать не может».
 - **Omniva, DPD, Unisend** — **SMS returns** can be activated. That is a switch
   in the Partner System, not code.
 - **SmartPosti** — returns are **automatic**, but the customer has to start
   them on **SmartPosti's own page**, not in our shop. So the shop's return text
   has to send them there.
 - **Nova Post** — **no returns at all**, and Montonio **advises against using
-  Nova Post in the Baltics**.
+  Nova Post in the Baltics**. **Confirmed again 24.09.2026**: «Returns are
+  currently not supported, we are waiting behind Nova Post's development» —
+  a *not yet*, not a *never*, but nothing to build on today. What the shop
+  says about it: the checkout card carries «без возврата» and a note, the
+  terms say the buyer posts a Nova Post return himself
+  (`public/shop/legal.*.js`), and since 24.09.2026 the order card's return
+  line says the same on a Nova Post order instead of «код на возврат
+  присылает перевозчик» (`admReturnCarrierNovaPost()` in
+  `public/shop2/app.js`, `tests/returns-novapost.test.ts`). When Montonio
+  announces Nova Post returns, those three places change together.
 
 **Asked on 22.09.2026 and still unanswered.** Montonio's reply left four
 questions open. They stay visible here until there is an answer to strike them

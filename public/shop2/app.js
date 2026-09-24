@@ -2014,6 +2014,9 @@
       "Покупатель просит вернуть заказ": "Ostja soovib tellimust tagastada",
       "Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.":
         "Kirjutage ostjale: pood ei saa tagastussilti väljastada — tagastuskoodi saadab vedaja.",
+      /* …and on a Nova Post order, which has no returns yet (Montonio, 24.09.2026) */
+      "Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.":
+        "Tellimus läks Nova Postiga — selle kaudu tagastusi praegu vastu ei võeta. Kirjutage ostjale: kauba saadab ta tagasi ise.",
       "Сводка не отвечает — цифры могут быть неполными.": "Kokkuvõte ei vasta — numbrid võivad olla puudulikud.",
       "Повторить": "Proovi uuesti",
       "Отправлены": "Saadetud",
@@ -5040,6 +5043,9 @@
       "Покупатель просит вернуть заказ": "The customer wants to return this order",
       "Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.":
         "Write to the customer: the shop cannot issue a return label — the return code comes from the carrier.",
+      /* …and on a Nova Post order, which has no returns yet (Montonio, 24.09.2026) */
+      "Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.":
+        "The order went with Nova Post — returns through it are not accepted yet. Write to the customer: they send the goods back themselves.",
       "Сводка не отвечает — цифры могут быть неполными.": "The summary is not answering — the figures may be incomplete.",
       "Повторить": "Try again",
       "Отправлены": "Shipped",
@@ -20878,6 +20884,16 @@
      and it does exactly one thing: it says he has dealt with this one. No
      money moves, no letter goes, the status does not change. See
      setReturnHandled() in src/lib/returns.ts. */
+  /** Did this order go out with Nova Post (Montonio International Shipping)?
+      Montonio, 24.09.2026: «Returns are currently not supported, we are
+      waiting behind Nova Post's development.» — so no return code is coming
+      and the return line must not promise one. Montonio spells it `novaPost`
+      in its own reply; the checkout stores `novapost`. */
+  function admReturnCarrierNovaPost(v) {
+    var sh = v && v.srv && v.srv.shipping;
+    var m = sh && sh.montonio;
+    return String((m && m.carrier) || (sh && sh.carrier) || "").toLowerCase() === "novapost";
+  }
   function admReturnStateHTML(v) {
     if (!v.returnAskedAt) return "";
     var busy = SRV.returnBusy === v.id;
@@ -20890,7 +20906,9 @@
           '<span>Просили вернуть заказ</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span>"
         : '<span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
           '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span><br>" +
-          "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span>") +
+          (admReturnCarrierNovaPost(v)
+            ? "<span>Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.</span>"
+            : "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span>")) +
       '<div class="adm-acts" style="margin-top:10px">' +
         '<button class="adm-btn adm-btn--row' + (done ? " adm-btn--ghost" : "") + '" ' +
           'data-admreturndone="' + esc(v.id) + '" data-admreturnval="' + (done ? "0" : "1") + '"' +
