@@ -37,7 +37,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_WEBHOOK = "https://rempireshop.diipsolutions.eu/api/shipping/notify/";
-/** src/lib/shipping/montonio.ts REQUIRED_SHIPMENT_EVENTS, plus the one that brings the tracking code. */
+/** src/lib/shipping/montonio.ts REQUIRED_SHIPMENT_EVENTS — the three the shop cannot do without.
+    `shipment.labelsCreated` (tools/montonio-webhook.mjs EVENTS) is wanted but not required. */
 const WANTED_EVENTS = ["shipment.registered", "shipment.registrationFailed", "shipment.statusUpdated"];
 
 /* ---------- the checkout's own offer, read out of app.js ------------------ */

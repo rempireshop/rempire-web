@@ -74,6 +74,25 @@ export interface ShipmentEvent {
   /** The status **exactly as it arrived**. This is the word we are here to learn. */
   status: string;
   trackingCode: string;
+  /** `data.parcels[0].trackingLink` — the carrier's page, for a parcel registered after the button press. */
+  trackingUrl: string;
+  /** `data.parcels[0].dropOffPin`, when the carrier issued one. */
+  dropOffPin: string;
+}
+
+/**
+ * `labelFile.ready` / `labelFile.creationFailed` — events about a PDF, not a
+ * shipment. Montonio's enum has six events (support, 24.09.2026); these two
+ * carry a label file in `data`, whose `id` and `status` («ready», «failed»)
+ * are not a shipment's. The shop makes label files synchronously and asks for
+ * a fresh one every time the owner opens the PDF (the URL lives five
+ * minutes), so neither event has a job here: the route acknowledges them and
+ * records nothing — a `failed` in the status vocabulary would read as a
+ * refused parcel. They are not in tools/montonio-webhook.mjs EVENTS; this is
+ * for the day someone ticks all six.
+ */
+export function isLabelFileEvent(event: string): boolean {
+  return /^labelfile\./i.test(String(event || "").trim());
 }
 
 /** What the white list makes of a status — "" when it recognises neither. */
@@ -131,6 +150,8 @@ function readEvent(claims: Record<string, unknown>): ShipmentEvent {
     orderRef: pick("merchantReference", "orderReference", "orderNumber", "orderId"),
     status: pick("status", "shipmentStatus", "state"),
     trackingCode: pick("trackingCode", "carrierParcelId") || str(parcel.carrierParcelId),
+    trackingUrl: pick("trackingLink", "trackingUrl") || str(parcel.trackingLink),
+    dropOffPin: pick("dropOffPin") || str(parcel.dropOffPin),
   };
 }
 
@@ -168,7 +189,12 @@ export function verifyShipmentWebhook(body: unknown, config: MontonioConfig): Sh
   }
 
   const event = readEvent(claims);
-  if (!event.shipmentId && !event.orderRef) throw new ShipmentWebhookError("token_no_reference");
+  /* A label-file event names a file, not a shipment or an order, and the route
+     acknowledges it without acting — refusing it here would be a 400 that
+     Montonio retries fifteen times over two days (support, 24.09.2026). */
+  if (!event.shipmentId && !event.orderRef && !isLabelFileEvent(event.event)) {
+    throw new ShipmentWebhookError("token_no_reference");
+  }
   return event;
 }
 

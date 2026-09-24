@@ -230,6 +230,24 @@
       }
     },
     {
+      "id": "shipping-webhook-events",
+      "area": "montonio",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "needs": [
+        "shipping-webhook"
+      ],
+      "title": "Перерегистрировать вебхук посылок: четыре события",
+      "detail": "Montonio 24.09.2026 назвал все шесть событий. Магазин теперь подписывается на четыре: shipment.registered, shipment.registrationFailed, shipment.statusUpdated и новое shipment.labelsCreated (EVENTS в tools/montonio-webhook.mjs). Два события labelFile.* — про PDF этикетки, магазин делает их сразу, поэтому их не просим. Обновить вебхук Montonio не умеет, поэтому: list (записать старый id) → register https://…/api/shipping/notify/ → delete <старый id> → list показывает один вебхук с четырьмя событиями. Не срочно: три уже подписанных события закрывают всё, что двигает заказ. Сделать не позже переезда домена — там register всё равно нужен. Нужны боевые ключи и решение Димы.",
+      "en": {
+        "title": "Re-register the parcel webhook: four events",
+        "detail": "On 24.09.2026 Montonio named all six events. The shop now subscribes four: shipment.registered, shipment.registrationFailed, shipment.statusUpdated and the new shipment.labelsCreated (EVENTS in tools/montonio-webhook.mjs). The two labelFile.* events are about the label PDF, which the shop makes on the spot, so they are not asked for. Montonio cannot update a webhook, so: list (note the old id) → register https://…/api/shipping/notify/ → delete <old id> → list shows one webhook with four events. Not urgent: the three events already subscribed cover everything that moves an order. Do it at the latest at the domain move, which needs a register anyway. Needs the live keys and Dim's go-ahead."
+      }
+    },
+    {
       "id": "dropoff-code",
       "area": "montonio",
       "who": [

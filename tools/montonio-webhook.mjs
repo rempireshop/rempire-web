@@ -14,12 +14,27 @@
  * At the domain move: `register` the rempireshop.com address, then `delete`
  * the diipsolutions one. The trailing slash is required — `trailingSlash` is on
  * in next.config.ts and a POST without it becomes a 308 that Montonio does not
- * follow. The events are the three src/app/api/shipping/notify/ reads.
+ * follow.
+ *
+ * The events: the four src/app/api/shipping/notify/ acts on. Montonio's full
+ * enum (support, 24.09.2026) is six — these plus `labelFile.ready` and
+ * `labelFile.creationFailed`, which are about a label PDF: the shop makes its
+ * labels synchronously and the route only acknowledges them, so they are not
+ * subscribed. `shipment.labelsCreated` joined on 24.09.2026 (it keeps the
+ * stored status current); a webhook registered before that has three events
+ * and must be registered again to get it — `register`, then `delete` the old
+ * id that `list` shows (Montonio has no update call; for the minutes both
+ * exist, an event arrives twice and the route is idempotent).
  */
 import { createHmac } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
-export const EVENTS = ["shipment.registered", "shipment.registrationFailed", "shipment.statusUpdated"];
+export const EVENTS = [
+  "shipment.registered",
+  "shipment.registrationFailed",
+  "shipment.statusUpdated",
+  "shipment.labelsCreated",
+];
 
 const b64url = (buf) => buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 

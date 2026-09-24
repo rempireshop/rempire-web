@@ -1728,17 +1728,22 @@ export const SHIPMENT_WEBHOOK_PATH = "/api/shipping/notify/";
  *     "delivered"`);
  *   · `shipment.registrationFailed` — the only event that puts a carrier's
  *     refusal in the journal. Without it a parcel refused after an
- *     asynchronous booking is one word in a settings blob and nothing else.
+ *     asynchronous booking is one word in a settings blob and nothing else;
+ *   · `shipment.registered` — required since 24.09.2026. A refused parcel is
+ *     now repaired in place with `PATCH /shipments/{id}` (Montonio's answer
+ *     of that day), and a re-registration that does not finish inside the
+ *     PATCH arrives only here, with its tracking code.
  *
- * `shipment.registered` and `shipment.labelsCreated` are *not* needed while
- * booking is synchronous — the status and the label come back in the answer to
- * the button press — so they are not required here. Ticking them is harmless
- * (the route answers 200 and records the word), which is why this checks for
- * missing events and never complains about extra ones.
+ * `shipment.labelsCreated` is subscribed by tools/montonio-webhook.mjs (it
+ * keeps the stored status current) but not required: nothing stops working
+ * without it. Ticking more is harmless — the route answers 200, and the
+ * `labelFile.*` pair is acknowledged and ignored — which is why this checks
+ * for missing events and never complains about extra ones.
  */
 export const REQUIRED_SHIPMENT_EVENTS: readonly string[] = [
   "shipment.statusUpdated",
   "shipment.registrationFailed",
+  "shipment.registered",
 ];
 
 /** Where Montonio has to send parcel events — «» when PUBLIC_BASE_URL is unset. */
