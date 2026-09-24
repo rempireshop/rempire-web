@@ -268,7 +268,10 @@ describe("the product editor: a button edit is an unsaved edit", () => {
   });
 
   it("every AI fill: «Написать», «Перевести», Google, the name, and «Отменить»", async () => {
-    for (const d of [{ admdescgen: "azur" }, { admtranslate: "azur" }, { admseogen: "" }, { ednamespark: "" }, { admdescundo: "" }]) {
+    const presses: Array<Record<string, string>> = [
+      { admdescgen: "azur" }, { admtranslate: "azur" }, { admseogen: "" }, { ednamespark: "" }, { admdescundo: "" },
+    ];
+    for (const d of presses) {
       const e = editor();
       e.els["[data-eddescru]"].value = "Русское описание";   // what «Перевести» translates
       if ("admseogen" in d) e.f.admSeoFill({ name: "Azur", brand: "Proraso", cat: "beard" }, ["RU"], { textContent: "", disabled: false });
