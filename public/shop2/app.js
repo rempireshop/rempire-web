@@ -16152,6 +16152,14 @@
     S.acctCode = ""; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false, ship: null };
     S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
+    /* …and what the account poured into this page's checkout: the e-mail, the
+       name, the phone, the courier address and the chosen parcel machine.
+       Before 24.09.2026 they stayed in the open tab after «Выйти», so on a
+       shared computer the next person's checkout opened on the last one's
+       details. The method and carrier are no one's data and stay. */
+    S.email = "";
+    S.ship.name = ""; S.ship.phone = ""; S.ship.addr = ""; S.ship.zip = ""; S.ship.city = ""; S.ship.point = null;
+    S.emailTouched = false; S.shipTouched = false; S.shipPicked = false;
     // …including the "somebody signs in here" flag, so the next visit from
     // this browser is an anonymous one again and asks nothing at boot
     acctHint(false);

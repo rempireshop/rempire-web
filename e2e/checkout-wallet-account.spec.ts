@@ -81,5 +81,7 @@ test.describe("checkout — wallet button from a filled-in account", () => {
     await page.locator(`.btn--express[data-buynow="${PRODUCT.id}"]`).click();
     await waitForScreen(page, "checkout");
     await expect(continueButton(page, 2)).toBeVisible();
+    // …and nothing of the signed-out account is left in it (24.09.2026)
+    await expect(page.locator("[data-email]")).toHaveValue("");
   });
 });
