@@ -1662,36 +1662,41 @@
         "«Ещё» → «Маркетинг» → «+ Промокод».",
         "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
         "Нажать «Создать».",
-        "Так же создать код TESTSHIP с типом «Бесплатная доставка»."
+        "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
+        "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
       ],
       "expect": [
         "TEST10 стоит в списке.",
         "TESTSHIP стоит в списке.",
         "У обоих переключатель стоит на «включён».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
-        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто."
+        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
+        "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Creating a promo code",
         "steps": [
           "«Ещё» → «Маркетинг» → «+ Промокод».",
           "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
           "Press «Создать» (create).",
-          "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery)."
+          "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
+          "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
         ],
         "expect": [
           "TEST10 is in the list.",
           "TESTSHIP is in the list.",
           "Both stand at «включён» (on).",
           "An unused code can be deleted; one already paid with can only be switched off.",
-          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered."
+          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
+          "A REM-CART-… code reads «на корзину из письма», with no long basket id."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
-      }
+      },
+      "markedAt": "2026-09-24T12:18:59.171Z"
     },
     {
       "id": "panel-gift-amounts",

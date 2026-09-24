@@ -1141,6 +1141,7 @@
       "Код": "Kood", "Скидка": "Soodustus", "Условия": "Tingimused",
       "Использован": "Kasutatud", "Статус": "Olek",
       "без условий": "tingimusteta",
+      "на корзину из письма": "ostukorvile kirjast",
       "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
         "Sooduskoodid ostjatele. Koodi kontrollib server tellimuse vormistamisel ja „kasutatud“ loetakse alles pärast tasumist — pooleli jäänud ostukorv koodi ei kuluta.",
       "Войдите как владелец, чтобы создавать промокоды.": "Koodide loomiseks logi omanikuna sisse.",
@@ -4177,6 +4178,7 @@
       "Код": "Code", "Скидка": "Discount", "Условия": "Conditions",
       "Использован": "Used", "Статус": "Status",
       "без условий": "no conditions",
+      "на корзину из письма": "on the cart from the e-mail",
       "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
         "Promo codes for customers. The server checks the code at checkout and counts it as used only once the order is paid — an abandoned basket spends nothing.",
       "Войдите как владелец, чтобы создавать промокоды.": "Sign in as the owner to create promo codes.",
@@ -6572,6 +6574,9 @@
       { ET: "ainult tootele «$1» · $2 / $3", EN: "on “$1” only · $2 of $3" }],
     [/^только на бренд (.+) · (.+) из (.+)$/,
       { ET: "ainult brändile $1 · $2 / $3", EN: "on $1 only · $2 of $3" }],
+    // the abandoned-cart letter's code (scope 'cart') — the basket, not a product
+    [/^только на корзину из письма · (.+) из (.+)$/,
+      { ET: "ainult ostukorvile kirjast · $1 / $2", EN: "on the cart from the e-mail only · $1 of $2" }],
     [/^Код действует от (.+) — добавьте ещё на (.+)\.$/,
       { ET: "Kood kehtib alates $1 — lisa veel $2 eest.", EN: "The code applies from $1 — add $2 more." }],
     [/^от (.+) · до (.+)$/, { ET: "alates $1 · kuni $2", EN: "from $1 · until $2" }],
@@ -20253,7 +20258,10 @@
     // one whole sentence per branch, never a shared tail — see promoScopeNote()
     var base = Number((sc || {}).base) || 0, sub = Number(o.subtotal) || 0;
     var note = "";
-    if (sc && name && sc.kind === "brand") note = "только на бренд " + name + " · " + eur(base) + " из " + eur(sub);
+    /* 'cart' — the abandoned-cart letter's code: its value is the basket's
+       uuid, never a name to print («только на товар «3f2a…»» until now). */
+    if (sc && sc.kind === "cart") note = "только на корзину из письма · " + eur(base) + " из " + eur(sub);
+    else if (sc && name && sc.kind === "brand") note = "только на бренд " + name + " · " + eur(base) + " из " + eur(sub);
     else if (sc && name) note = "только на товар «" + name + "» · " + eur(base) + " из " + eur(sub);
     return (off > 0.004
       ? '<div class="adm-row"><span class="adm-row__body">' +
@@ -28629,6 +28637,11 @@
   }
   /** «на бренд Davines» / «на товар «…»» — nothing at all for a whole-basket code. */
   function promoScopeLabel(p) {
+    /* 'cart' — the second abandoned-cart letter's code (REM-CART-…,
+       src/lib/promos.ts). Its value is the basket's uuid, which fell through
+       to «на товар «3f2a…»» below. Checked before the empty-value guard: a
+       cart code whose value was emptied by hand is still a cart code. */
+    if (p && p.scope === "cart") return "на корзину из письма";
     if (!p || !p.scope || p.scope === "order" || !p.scopeValue) return "";
     if (p.scope === "brand") return "на бренд " + p.scopeValue;
     var prod = byIdOrNull(String(p.scopeValue));
@@ -28789,8 +28802,10 @@
         ? '<div class="adm-list">' + list.map(function (p) {
             // …with «на бренд Davines» right after the size of the discount,
             // because that is the half of a scoped code the list cannot imply
-            var meta = [promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]
-              .filter(Boolean).join(" · ");
+            /* One <span> per piece (payPiecesHTML, escaped there): glued into
+               one text node the line matched no rule, and an ET or EN panel
+               read all of it in Russian although every piece has one. */
+            var meta = payPiecesHTML([promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]);
             /* The same three lines as «Письма» (admin.css, .adm-row--lines):
                the code, the grey line of conditions, and a third line with the
                switch on the left and «Удалить» on the right. The row itself
@@ -28798,7 +28813,8 @@
             return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
               '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
-                '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
+                // the note is the owner's own words — a node of its own now, so it says so
+                '<span class="adm-row__sub adm-row__sub--one">' + meta + (p.note ? ' · <span data-notr>' + esc(p.note) + "</span>" : "") + "</span></button>" +
               '<span class="adm-row__line adm-row__line--split">' +
                 admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
                 /* A used code has no «Удалить»: it is on somebody's order, and
