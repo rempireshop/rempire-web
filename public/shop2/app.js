@@ -22234,8 +22234,9 @@
       '<div><div class="adm-sec__t">Номиналы в магазине</div>' +
         '<div class="adm-amts" role="group" aria-label="Номиналы карты" style="margin-top:10px">' +
           GIFT_AMOUNTS.map(function (v) {
+            // eur(): «25 €» in RU and ET, «€25» in EN — like every other price in the panel
             return '<button class="adm-amt" data-admgiftamt="' + v + '" aria-pressed="' +
-              (on.indexOf(v) >= 0) + '">' + v + " €</button>";
+              (on.indexOf(v) >= 0) + '">' + eur(v) + "</button>";
           }).join("") + "</div>" +
         '<p class="adm-hint" style="margin:8px 0 0">Нажмите, чтобы включить или скрыть номинал. ' +
           "Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».</p></div>" +
@@ -36076,6 +36077,20 @@
     DEMO.log = DEMO.log.filter(function (e) { return e !== entry; });
     demoSave();
   }
+  /* A denomination the server refused goes back where it was, like the promo
+     switch and the partner switch beside it. It used to stay in its new state
+     — lit, or dark — over a shop that still sold the old list, with only the
+     toast to say otherwise, until the next reload (map-defects #18). Only
+     while the chips still show what was sent: a tap made since then is a
+     save of its own, with its own answer. The journal line goes too — it
+     described a change the server never took. */
+  function giftAmountsBack(sent, back, entry) {
+    if (!Array.isArray(back) || String(giftAmountsOn()) !== String(sent)) return;
+    DEMO.giftAmounts = back.slice();
+    journalDrop(entry);
+    demoSave();
+    render();
+  }
   /**
    * «Отменить» has to put back exactly what left the shelf, not what was
    * asked for.
@@ -36290,7 +36305,14 @@
       });
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
-    else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
+    else if (a.type === "set_gift_amounts") {
+      var giftSent = giftAmountsOn();
+      // the list before this push: the journal line's own undo, or — for an undo — what it replaced
+      var giftBack = entry && entry.prev ? entry.prev.value : a.was;
+      srvSaved(apiSend(st, "PUT", { gift_amounts: giftSent })).then(function (r) {
+        if (!(r && r.status === 200 && r.body && r.body.ok)) giftAmountsBack(giftSent, giftBack, entry);
+      });
+    }
     // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
     // proMinOrder) only ever travels through this admin-only route — never
     // the public /api/overrides one. adjust_points is a manual credit on one
@@ -37893,7 +37915,8 @@
        list travels, so undo re-sends the previous one — same reasoning as the
        banner and the content document. */
     else if (a.type === "set_gift_amounts") {
-      entry.prev = { type: "set_gift_amounts", value: giftAmountsOn() };
+      // `was`: where the chips go back to if the server refuses the undo itself (giftAmountsBack)
+      entry.prev = { type: "set_gift_amounts", value: giftAmountsOn(), was: a.value.slice() };
       DEMO.giftAmounts = a.value.slice();
     }
     /* content: the action carries a PATCH («поменяй телефон» touches one

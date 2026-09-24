@@ -1712,13 +1712,17 @@
         "Выключить номинал 25 €.",
         "Открыть страницу подарочной карты в магазине.",
         "Вернуться и включить 25 € обратно.",
-        "Открыть «Оформление» и нажать то, что там есть."
+        "Открыть «Оформление» и нажать то, что там есть.",
+        "Включить режим полёта, нажать 75 €, выключить режим полёта.",
+        "Переключить панель на EN и прочитать номиналы."
       ],
       "expect": [
         "Выключенная сумма пропадает с кнопок на странице карты.",
         "Она пропадает и из текста под кнопками.",
         "Включённая обратно — возвращается.",
-        "Оформление открывает настоящую карту PDF и письмо к ней."
+        "Оформление открывает настоящую карту PDF и письмо к ней.",
+        "Без сети 75 € возвращается как был, и видно «Сервер не отвечает».",
+        "На EN номиналы написаны «€25», как все цены в панели."
       ],
       "why": "Сумма, которой нет в продаже, — это заказ, который сорвётся на кассе.",
       "risk": "med",
@@ -1730,18 +1734,22 @@
           "Switch the 25 € amount off.",
           "Open the gift-card page in the shop.",
           "Come back and switch 25 € on again.",
-          "Open «Оформление» and press what is there."
+          "Open «Оформление» and press what is there.",
+          "Turn flight mode on, tap 75 €, turn flight mode off.",
+          "Switch the panel to EN and read the amounts."
         ],
         "expect": [
           "An amount switched off leaves the buttons on the card page.",
           "It leaves the line of text under them too.",
           "Switched back on, it comes back.",
-          "The design block opens a real card PDF and the letter it arrives with."
+          "The design block opens a real card PDF and the letter it arrives with.",
+          "Offline, 75 € goes back to how it was, and «Сервер не отвечает» shows.",
+          "In EN the amounts read «€25», like every price in the panel."
         ],
         "why": "An amount not on sale is an order that dies at the checkout."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T13:54:52.000Z"
+      "markedAt": "2026-09-24T17:44:28.205Z"
     },
     {
       "id": "panel-gift-issued",
