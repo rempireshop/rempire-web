@@ -80,6 +80,7 @@ function renderAll(lang: string): string {
     var POINT_KIND = { locker: "Пакомат", counter: "Пункт выдачи" };
     var PAYMETHODS = { banks: [{ code: "HABALV22", name: "Swedbank Latvia" }] };
     var BANK_CODES = ${sliceLiteral("var BANK_CODES = ", "};")};
+    var BANK_NAMES_ABROAD = ${sliceLiteral("var BANK_NAMES_ABROAD = ", "};")};
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
     function pl(n, a, b, c) { return n === 1 ? a : n < 5 ? b : c; }
     function admRefundedTotal(p) { return p.refunded || 0; }
@@ -89,6 +90,7 @@ function renderAll(lang: string): string {
     function shortDate() { return "22.09"; }
     function admOrderById() { return null; }
     function admInvoiceOverdue() { return 0; }
+    function admProdName(s) { return String(s); }
     ${slice("eur")}
     ${slice("payPiecesHTML")}
     ${slice("bankNameOf")}

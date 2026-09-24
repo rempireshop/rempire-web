@@ -1141,6 +1141,7 @@
       "Код": "Kood", "Скидка": "Soodustus", "Условия": "Tingimused",
       "Использован": "Kasutatud", "Статус": "Olek",
       "без условий": "tingimusteta",
+      "на корзину из письма": "ostukorvile kirjast",
       "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
         "Sooduskoodid ostjatele. Koodi kontrollib server tellimuse vormistamisel ja „kasutatud“ loetakse alles pärast tasumist — pooleli jäänud ostukorv koodi ei kuluta.",
       "Войдите как владелец, чтобы создавать промокоды.": "Koodide loomiseks logi omanikuna sisse.",
@@ -4177,6 +4178,7 @@
       "Код": "Code", "Скидка": "Discount", "Условия": "Conditions",
       "Использован": "Used", "Статус": "Status",
       "без условий": "no conditions",
+      "на корзину из письма": "on the cart from the e-mail",
       "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
         "Promo codes for customers. The server checks the code at checkout and counts it as used only once the order is paid — an abandoned basket spends nothing.",
       "Войдите как владелец, чтобы создавать промокоды.": "Sign in as the owner to create promo codes.",
@@ -6572,6 +6574,9 @@
       { ET: "ainult tootele «$1» · $2 / $3", EN: "on “$1” only · $2 of $3" }],
     [/^только на бренд (.+) · (.+) из (.+)$/,
       { ET: "ainult brändile $1 · $2 / $3", EN: "on $1 only · $2 of $3" }],
+    // the abandoned-cart letter's code (scope 'cart') — the basket, not a product
+    [/^только на корзину из письма · (.+) из (.+)$/,
+      { ET: "ainult ostukorvile kirjast · $1 / $2", EN: "on the cart from the e-mail only · $1 of $2" }],
     [/^Код действует от (.+) — добавьте ещё на (.+)\.$/,
       { ET: "Kood kehtib alates $1 — lisa veel $2 eest.", EN: "The code applies from $1 — add $2 more." }],
     [/^от (.+) · до (.+)$/, { ET: "alates $1 · kuni $2", EN: "from $1 · until $2" }],
@@ -19172,6 +19177,17 @@
 
   /* ---------- Обзор ------------------------------------------------------ */
 
+  /** A product's name in the panel's language — the shop's own trName(), the
+      one the catalogue cards get. translateTree() does the same to a whole
+      text node, but it anchors the Russian tail on the END of the node, so
+      four names glued with « · » kept three tails: «Repair.Me.Wash — шампунь
+      · Beard balm — бальзам для бороды · … — toner» on an English panel
+      (staging, 24.09.2026). Named one at a time, before any joining. RU gets
+      the catalogue's own words back. */
+  function admProdName(s) {
+    s = String(s == null ? "" : s);
+    return S.lang === "ET" || S.lang === "EN" ? trName(s, S.lang) : s;
+  }
   function admTaskRow(n, label, detail, attrs, warn) {
     return '<button class="adm-row adm-row--click" ' + attrs + '>' +
       '<span class="adm-row__big' + (warn ? " adm-row__big--warn" : "") + '">' + n + "</span>" +
@@ -19254,7 +19270,7 @@
       'data-admtab="orders" data-admfilter="held"', true);
     if (lowN) tasks += admTaskRow(lowN,
       pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
-      names(lowItems, function (p) { return p.name; }),
+      names(lowItems, function (p) { return admProdName(p.name); }),
       'data-admtab="stock"', true);
     /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
        number above is «закажите ещё», and a product taken off sale is not
@@ -19269,7 +19285,7 @@
        ones, so the list is a place to look rather than a place to search. */
     if (hidLow) tasks += admTaskRow(hidLow,
       pl(hidLow, "скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"),
-      hidItems.length ? names(hidItems, function (p) { return p.name; }) : "сняты с продажи — закажите, если вернёте в магазин",
+      hidItems.length ? names(hidItems, function (p) { return admProdName(p.name); }) :"сняты с продажи — закажите, если вернёте в магазин",
       'data-admtab="goods" data-admfilter="off"', true);
     if (revN) tasks += admTaskRow(revN,
       pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
@@ -20094,6 +20110,11 @@
     if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
       '<div class="adm-empty">Заказ не найден</div></div>';
     var o = v.srv;
+    /* «Оплата» names the bank from Montonio's list (bankNameOf), which the
+       panel otherwise asks for only on «Подключения» and «Доставка и оплата» —
+       so a card opened first printed the BIC. One-shot; its arrival repaints
+       the card, as the order list's own reload does. */
+    if (SRV.admin === true && o && o.payment && o.payment.method === "bank" && o.payment.bank) loadPayMethods();
     var closed = v.status === "cancelled" || v.status === "refunded";
     var showSteps = !v.pos && !v.digital && !closed;
 
@@ -20154,7 +20175,7 @@
 
     var lines = o ? (o.items || []).map(function (l) {
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
-        '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + admProdName(l.title || l.id)) + "</span>" +
         // the volume and the count are two text nodes, not one: glued, «75 мл ·
         // 1 товар» is a string no dictionary has and an English panel read it
         // in Russian (the same glue as admPaymentHTML's, found beside it)
@@ -20237,7 +20258,10 @@
     // one whole sentence per branch, never a shared tail — see promoScopeNote()
     var base = Number((sc || {}).base) || 0, sub = Number(o.subtotal) || 0;
     var note = "";
-    if (sc && name && sc.kind === "brand") note = "только на бренд " + name + " · " + eur(base) + " из " + eur(sub);
+    /* 'cart' — the abandoned-cart letter's code: its value is the basket's
+       uuid, never a name to print («только на товар «3f2a…»» until now). */
+    if (sc && sc.kind === "cart") note = "только на корзину из письма · " + eur(base) + " из " + eur(sub);
+    else if (sc && name && sc.kind === "brand") note = "только на бренд " + name + " · " + eur(base) + " из " + eur(sub);
     else if (sc && name) note = "только на товар «" + name + "» · " + eur(base) + " из " + eur(sub);
     return (off > 0.004
       ? '<div class="adm-row"><span class="adm-row__body">' +
@@ -20279,12 +20303,23 @@
     for (var i = 0; i < list.length; i++) if (list[i]) out.push("<span>" + esc(String(list[i])) + "</span>");
     return out.join(" · ");
   }
-  /** The bank behind a BIC: the live Montonio list when it loaded, else ours. */
+  /* The three banks outside the Baltics and Finland that Montonio offers, by
+     their BICs. The last word before a bare code: the order card printed
+     «Bank link · RVUALT2V» whenever Montonio's list had not been fetched yet
+     (staging, 24.09.2026). */
+  var BANK_NAMES_ABROAD = { RVUALT2V: "Revolut", NTSBDEB1: "N26", TRWIGB2L: "Wise" };
+  /** The bank behind a BIC: Montonio's own name for it — from the WHOLE list,
+      so a bank the owner has since switched off in «Доставка и оплата» keeps
+      its name on the orders it already paid — then the checkout's list, the
+      built-in five, the three international ones, and the code only when
+      nothing is known. */
   function bankNameOf(code) {
-    var real = PAYMETHODS.banks || [];
-    for (var i = 0; i < real.length; i++) if (real[i].code === code) return real[i].name || code;
+    var lists = [PAYMETHODS.all || [], PAYMETHODS.banks || []];
+    for (var l = 0; l < lists.length; l++) {
+      for (var i = 0; i < lists[l].length; i++) if (lists[l][i].code === code) return lists[l][i].name || code;
+    }
     for (var k in BANK_CODES) if (BANK_CODES[k] === code) return k;
-    return code;
+    return Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : code;
   }
   function admPaymentHTML(o) {
     var p = o && o.payment;
@@ -28602,6 +28637,11 @@
   }
   /** «на бренд Davines» / «на товар «…»» — nothing at all for a whole-basket code. */
   function promoScopeLabel(p) {
+    /* 'cart' — the second abandoned-cart letter's code (REM-CART-…,
+       src/lib/promos.ts). Its value is the basket's uuid, which fell through
+       to «на товар «3f2a…»» below. Checked before the empty-value guard: a
+       cart code whose value was emptied by hand is still a cart code. */
+    if (p && p.scope === "cart") return "на корзину из письма";
     if (!p || !p.scope || p.scope === "order" || !p.scopeValue) return "";
     if (p.scope === "brand") return "на бренд " + p.scopeValue;
     var prod = byIdOrNull(String(p.scopeValue));
@@ -28762,8 +28802,10 @@
         ? '<div class="adm-list">' + list.map(function (p) {
             // …with «на бренд Davines» right after the size of the discount,
             // because that is the half of a scoped code the list cannot imply
-            var meta = [promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]
-              .filter(Boolean).join(" · ");
+            /* One <span> per piece (payPiecesHTML, escaped there): glued into
+               one text node the line matched no rule, and an ET or EN panel
+               read all of it in Russian although every piece has one. */
+            var meta = payPiecesHTML([promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]);
             /* The same three lines as «Письма» (admin.css, .adm-row--lines):
                the code, the grey line of conditions, and a third line with the
                switch on the left and «Удалить» on the right. The row itself
@@ -28771,7 +28813,8 @@
             return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
               '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
-                '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
+                // the note is the owner's own words — a node of its own now, so it says so
+                '<span class="adm-row__sub adm-row__sub--one">' + meta + (p.note ? ' · <span data-notr>' + esc(p.note) + "</span>" : "") + "</span></button>" +
               '<span class="adm-row__line adm-row__line--split">' +
                 admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
                 /* A used code has no «Удалить»: it is on somebody's order, and
@@ -29858,7 +29901,7 @@
     };
     return '<button class="adm-row adm-row--click adm-row--lines" data-admorder="' + esc(o.id) + '">' +
       '<span class="adm-row__body"><span class="adm-row__nm"><span class="adm-mono">' + esc(o.number) + "</span> · " + esc(shortDate(o.createdAt)) + "</span>" +
-        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(o.firstItem) : "") + "</span></span>" +
+        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(admProdName(o.firstItem)) : "") + "</span></span>" +
       '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(o.total) + "</span></button>";
   }
@@ -32111,7 +32154,7 @@
        black at 4. */
     var low = r.tracked && r.state !== "in";
     return '<div class="adm-row adm-row--tall adm-row--stock adm-row--lines">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(admProdName(r.name)) +
         // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
         (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
         /* The grey line is the barcode's alone now. The volume used to open
@@ -32409,7 +32452,7 @@
         (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
           var sign = m.delta > 0 ? "+" : "";
           return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
-              esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") + "</span>" +
+              esc(m.brand || m.productId) + (m.brand ? " — " + esc(admProdName(m.name)) : "") + "</span>" +
               // the volume in a box of its own, as on «Склад» — a bare «150 мл ·»
               // under a cut-off product name read as the end of the name
               '<span class="adm-row__sub">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span> " : "") +

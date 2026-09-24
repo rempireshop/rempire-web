@@ -236,6 +236,7 @@ describe("the stock history is read on the shop's clock, not on UTC", () => {
       var STOCK_MOVE_WORD = { sale_pos: "Продажа в салоне" };
       function esc(s) { return String(s); }
       function loadStockMoves() {}
+      function admProdName(s) { return String(s); }
       ${slice("auditWhen")}
       ${slice("admStockMovesHTML")}
       return admStockMovesHTML();

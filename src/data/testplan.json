@@ -1574,11 +1574,12 @@
         "Открыть «Обзор».",
         "Прочитать блок «Сделать сегодня».",
         "Нажать на каждую строку в нём.",
-        "Нажать строку про скрытые товары и посмотреть, какой список открылся."
+        "Нажать строку про скрытые товары и посмотреть, какой список открылся.",
+        "Переключить панель на английский, потом на эстонский, и снова прочитать блок."
       ],
       "expect": [
         "Написано, сколько заказов ждут отправки.",
-        "Написано, какие товары заканчиваются.",
+        "Написано, какие товары заканчиваются; на английском и эстонском — без русских слов.",
         "Написано, сколько отзывов ждёт проверки.",
         "Числа совпадают с тем, что есть на самом деле.",
         "Каждая строка открывает свой раздел.",
@@ -1593,11 +1594,12 @@
           "Open «Обзор» (overview).",
           "Read the «Сделать сегодня» (to do today) block.",
           "Tap every line in it.",
-          "Press the row about hidden products and look at the list it opens."
+          "Press the row about hidden products and look at the list it opens.",
+          "Switch the panel to English, then to Estonian, and read the block again."
         ],
         "expect": [
           "It says how many orders wait to be sent.",
-          "It says which products are running out.",
+          "It says which products are running out; in English and Estonian with no Russian words.",
           "It says how many reviews wait for a check.",
           "The numbers match what is really there.",
           "Each line opens its own section.",
@@ -1606,7 +1608,7 @@
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T12:00:00.000Z"
+      "markedAt": "2026-09-24T12:09:33.930Z"
     },
     {
       "id": "panel-partners-switch",
@@ -1660,36 +1662,41 @@
         "«Ещё» → «Маркетинг» → «+ Промокод».",
         "Ввести код TEST10, выбрать «Процент», поставить 10 %.",
         "Нажать «Создать».",
-        "Так же создать код TESTSHIP с типом «Бесплатная доставка»."
+        "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
+        "Найти в списке код REM-CART-…, если он есть, и прочитать серую строку под ним."
       ],
       "expect": [
         "TEST10 стоит в списке.",
         "TESTSHIP стоит в списке.",
         "У обоих переключатель стоит на «включён».",
         "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
-        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто."
+        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
+        "У кода REM-CART-… написано «на корзину из письма», без длинного кода корзины."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Creating a promo code",
         "steps": [
           "«Ещё» → «Маркетинг» → «+ Промокод».",
           "Enter the code TEST10, choose «Процент» (percent) and set 10 %.",
           "Press «Создать» (create).",
-          "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery)."
+          "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
+          "Find a REM-CART-… code in the list, if there is one, and read the grey line under it."
         ],
         "expect": [
           "TEST10 is in the list.",
           "TESTSHIP is in the list.",
           "Both stand at «включён» (on).",
           "An unused code can be deleted; one already paid with can only be switched off.",
-          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered."
+          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
+          "A REM-CART-… code reads «на корзину из письма», with no long basket id."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
-      }
+      },
+      "markedAt": "2026-09-24T12:18:59.171Z"
     },
     {
       "id": "panel-gift-amounts",
@@ -3573,10 +3580,11 @@
       "steps": [
         "Открыть «Заказы» и нажать на оплаченный заказ.",
         "Найти «Оплата».",
-        "Пролистать карточку до «Состав», «Покупатель», «Доставка»."
+        "Пролистать карточку до «Состав», «Покупатель», «Доставка».",
+        "Открыть заказ, оплаченный через Revolut, N26, Wise или банк Латвии, Литвы, Финляндии, если такой есть."
       ],
       "expect": [
-        "В «Оплата» написано, чем платили: картой или банком.",
+        "В «Оплата» написано, чем платили: картой или банком — и название банка, не код.",
         "Там же видно, прошёл платёж или нет.",
         "Есть ссылка на этот платёж у банка.",
         "В «Состав» те же товары, что покупали.",
@@ -3591,10 +3599,11 @@
         "steps": [
           "Open «Заказы» and tap a paid order.",
           "Find «Оплата».",
-          "Scroll the card down to «Состав», «Покупатель» and «Доставка»."
+          "Scroll the card down to «Состав», «Покупатель» and «Доставка».",
+          "Open an order paid through Revolut, N26, Wise or a Latvian, Lithuanian or Finnish bank, if there is one."
         ],
         "expect": [
-          "«Оплата» says what was paid with: card or bank.",
+          "«Оплата» says what was paid with: card or bank — named, never a code.",
           "It also shows whether the payment went through.",
           "There is a link to that payment at the bank.",
           "«Состав» holds the same products that were bought.",
@@ -3604,7 +3613,7 @@
         "why": "When a buyer argues about money, this screen is your only answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-24T12:16:18.409Z"
     },
     {
       "id": "order-paid-short",
