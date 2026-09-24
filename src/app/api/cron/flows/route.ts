@@ -63,6 +63,7 @@ function authorized(req: Request): boolean {
 }
 
 export async function GET(req: Request) {
+  const started = Date.now();
   if (!(process.env.CRON_SECRET ?? "").trim()) {
     return Response.json({ ok: false, error: "not_configured" }, { status: 503, headers: NO_STORE });
   }
@@ -105,7 +106,11 @@ export async function GET(req: Request) {
        Its own failure is caught here for the same reason the sweep's is. */
     let newsletters;
     try {
-      newsletters = await resumeParkedNewsletters();
+      /* Whatever is left of this function's minute, less a margin for the
+         answer: a whole day's allowance fits (70 letters at Resend's two a
+         second is 35 s), where the library's own 20 s would leave a third of
+         it for the morning after. */
+      newsletters = await resumeParkedNewsletters({ budgetMs: Math.max(5_000, 50_000 - (Date.now() - started)) });
     } catch (err) {
       console.error("[api/cron/flows] the parked campaigns failed:", err);
       newsletters = { error: "failed" };

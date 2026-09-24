@@ -5582,21 +5582,22 @@
         "Проверить, что подписчиков больше двух; если нет — добавить.",
         "Открыть рассылку и нажать отправку.",
         "Оформить и оплатить заказ, пока лимит занят.",
-        "На следующий день открыть рассылку снова, потом вернуть 100 и 30."
+        "Вернуть 100 и 30; «Продолжить» у рассылки не нажимать.",
+        "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
         "После обновления в полях 4 и 2, без «Изменения не сохранены».",
         "Под кнопкой написано, сколько ушло сегодня и сколько доступно рассылке.",
-        "Рассылка останавливается на двух и говорит, что продолжится завтра.",
+        "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
-        "На телефон приходит одно оповещение о лимите, а не по одному на письмо.",
-        "Назавтра рассылка доходит до конца сама, и никто не получил письмо дважды."
+        "Одно оповещение о лимите: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
+        "Назавтра рассылка дошла до конца сама, без нажатий, и никто не получил письмо дважды."
       ],
       "why": "Рассылка может тихо съесть сутки, и тогда не уйдёт «Заказ принят». Это оплаченный заказ, о котором покупатель не получил ни слова.",
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T13:08:05.761Z",
+      "markedAt": "2026-09-24T15:12:48.378Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
@@ -5605,15 +5606,16 @@
           "Check there are more than two subscribers; add some if not.",
           "Open a campaign and press send.",
           "Place and pay for an order while the allowance is spent.",
-          "Open the campaign again the next day, then put back 100 and 30."
+          "Put back 100 and 30; do not press the campaign's «Продолжить».",
+          "The next day after 10:00, open the campaign again."
         ],
         "expect": [
           "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
           "Under the button: how many went today and how many the campaign may use.",
-          "The campaign stops at two and says it continues tomorrow.",
+          "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
           "The «Заказ принят» letter still reaches the buyer.",
-          "One phone notification about the limit, not one per letter.",
-          "Next day the campaign finishes by itself, and nobody got the letter twice."
+          "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
+          "Next day the campaign finished by itself, nothing pressed, and nobody got it twice."
         ],
         "why": "A campaign can quietly eat the day and then «Заказ принят» cannot send. That is a paid order whose buyer heard nothing."
       }

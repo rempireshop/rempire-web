@@ -2961,6 +2961,7 @@
       "Английского текста нет — эти подписчики получат русскую версию.": "Ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
       "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
       "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Saatmine katkes — vajuta «Jätka» ja kiri läheb ülejäänutele.",
+      "Можно не ждать — «Продолжить» отправит остальным сейчас.": "Ei pea ootama — «Jätka» saadab ülejäänutele kohe.",
       "Продолжить": "Jätka", "Ход отправки": "Saatmise käik",
       "О чём письмо": "Millest kiri", "новинки сентября, скидка 10 % до воскресенья": "septembri uudised, 10 % soodustus pühapäevani",
       "✨ Написать": "✨ Kirjuta",
@@ -5971,6 +5972,7 @@
       "Английского текста нет — эти подписчики получат русскую версию.": "There is no English text — these subscribers get the Russian version.",
       "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "There is no Estonian or English text — these subscribers get the Russian version.",
       "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Sending was interrupted — press «Continue» and the letter goes to the rest.",
+      "Можно не ждать — «Продолжить» отправит остальным сейчас.": "No need to wait — «Continue» sends it to the rest now.",
       "Продолжить": "Continue", "Ход отправки": "Sending progress",
       "О чём письмо": "What the letter is about", "новинки сентября, скидка 10 % до воскресенья": "September's new arrivals, 10% off until Sunday",
       "✨ Написать": "✨ Write",
@@ -6304,8 +6306,10 @@
     [/^· (\d+) дней$/, { ET: "· $1 päeva", EN: "· $1 days" }],
     [/^(\d+) дня$/, { ET: "$1 päeva", EN: "$1 days" }],
     [/^(\d+) дней$/, { ET: "$1 päeva", EN: "$1 days" }],
-    [/^Рассылка: отправлено (\d+) из (\d+), продолжится завтра$/,
-      { ET: "Uudiskiri: saadetud $1 / $2, jätkub homme", EN: "Campaign: $1 of $2 sent, continues tomorrow" }],
+    [/^Рассылка: отправлено (\d+) из (\d+) — остальные уйдут автоматически завтра$/,
+      { ET: "Uudiskiri: saadetud $1 / $2 — ülejäänud lähevad homme automaatselt", EN: "Campaign: $1 of $2 sent — the rest go out automatically tomorrow" }],
+    [/^Отправлено (\d+) из (\d+) — остальные уйдут автоматически завтра\.$/,
+      { ET: "Saadetud $1 / $2 — ülejäänud lähevad homme automaatselt.", EN: "Sent $1 of $2 — the rest go out automatically tomorrow." }],
     [/^Писем в сутки: (\d+), придержано (\d+)$/,
       { ET: "Kirju ööpäevas: $1, tagasi hoitud $2", EN: "Letters a day: $1, held back $2" }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
@@ -24120,6 +24124,17 @@
     var note = NEWS_FALLBACK_NOTE[miss.join(",")];
     return note ? '<div class="adm-hint adm-hint--warn" style="margin-top:8px">' + note + "</div>" : "";
   }
+  /** A letter left half-sent: how far it got, and that the rest needs nobody. One sentence for the translator (UI_RX). */
+  function newsWaitLine(done, total) {
+    return "Отправлено " + done + " из " + total + " — остальные уйдут автоматически завтра.";
+  }
+  /** Can «Продолжить» send anything today? Not known yet counts as yes — the server decides and parks again if not. */
+  function newsRoomNow() {
+    var b = S.newsBudget;
+    if (!b) return true;
+    if (b.known === false || b.blocked) return false;
+    return Number(b.marketingRoom) > 0;
+  }
   /** The right-hand «Отправка» card: the draft's advice, the climbing count, or what was sent. */
   function admNewsSendCardHTML(d) {
     var st = S.newsSend && S.newsSend.id === d.id ? S.newsSend : null;
@@ -24129,9 +24144,19 @@
       inner = newsProgressHTML(st.sent + st.failed, st.total || d.audienceCount) +
         '<div class="adm-hint" aria-live="polite">' + newsProgressLine(st) + "</div>";
     } else if (d.status === "sending") {
+      /* Dim, 24.09.2026, after the limit test: «Will the newsletters send
+         themselves automatically … I had to click "send"». They do — the
+         morning job sends the rest of any letter left half-sent (parked at
+         the limit or broken off), src/lib/newsletters.ts
+         resumeParkedNewsletters — but this card said «Отправка прервалась —
+         нажмите «Продолжить»». It says what will happen now; the button
+         stays only for a day that still has room, as a way not to wait. */
       inner = newsProgressHTML(d.sentCount + d.failedCount, d.audienceCount) +
-        (err || '<div class="adm-hint adm-hint--warn">Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.</div>') +
-        '<button class="adm-btn" data-newsresume>Продолжить</button>';
+        '<div class="adm-hint" aria-live="polite">' + newsWaitLine(d.sentCount + d.failedCount, d.audienceCount) + "</div>" + err +
+        (newsRoomNow()
+          ? '<div class="adm-hint">Можно не ждать — «Продолжить» отправит остальным сейчас.</div>' +
+            '<button class="adm-btn" data-newsresume>Продолжить</button>'
+          : newsBudgetLineHTML());
     } else if (d.status === "sent") {
       inner = '<div><span class="adm-badge adm-badge--ok">Отправлено</span></div>' +
         '<div class="adm-hint">' + "Отправлено " + d.sentCount + " из " + d.audienceCount + " · ошибок " + d.failedCount + "</div>" +
@@ -24459,7 +24484,8 @@
          правильный ответ тот, что ниже: остановиться и сказать словами. */
       if (r.body.parked) {
         st.busy = false; st.parked = true;
-        var pline = "Рассылка: отправлено " + st.sent + " из " + st.total + ", продолжится завтра";
+        // the card's own words (newsWaitLine) — the phone's notice says the same (limitNoticeBody)
+        var pline = "Рассылка: отправлено " + (st.sent + st.failed) + " из " + st.total + " — остальные уйдут автоматически завтра";
         journalNote(pline); toast(pline);
         render(); return;
       }
