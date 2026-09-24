@@ -27762,10 +27762,19 @@
     if (map && map[tpl]) o[tpl] = map[tpl];
     return o;
   }
-  function mailDirty() { var tpl = mailTpl(); return mailSig(mailOne(mailDraft(), tpl)) !== mailSig(mailOne(mailSaved(), tpl)); }
+  /* Both ask S.mailDraft itself, never mailDraft(): the exits call them
+     before the texts may have landed, and a draft made then would be made
+     from an empty «saved» — the owner's own texts would read as edits to
+     throw away, or be saved over. No draft yet is nothing typed yet. */
+  function mailDirty() {
+    if (!MAIL_TEXTS || !S.mailDraft) return false;
+    var tpl = mailTpl();
+    return mailSig(mailOne(S.mailDraft, tpl)) !== mailSig(mailOne(mailSaved(), tpl));
+  }
   /** One letter back to what is saved; the others keep whatever they hold. */
   function mailRevertOne(tpl) {
-    var d = mailDraft(), s = mailSaved();
+    if (!MAIL_TEXTS || !S.mailDraft) return;
+    var d = S.mailDraft, s = mailSaved();
     if (s[tpl]) d[tpl] = s[tpl]; else delete d[tpl];
   }
   /** Out of the letter editor — its unsaved words go with it, as the question says. */

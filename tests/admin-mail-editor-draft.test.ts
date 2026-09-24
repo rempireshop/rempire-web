@@ -68,7 +68,7 @@ type Env = {
 /** What the server already has: «Заказ принят» with its own subject. */
 const SAVED = { "order-confirmed": { ru: { subject: "Ваш заказ {order} принят" } } };
 
-function editor(): Env {
+function editor(loaded = true): Env {
   const S: Record<string, any> = {
     screen: "admin", adminTab: "mail", mailOpen: true, mailTpl: "order-confirmed", mailLang: "RU",
     mailDraft: null, mailTo: "dim@example.com", mailConfirmBack: false,
@@ -81,8 +81,8 @@ function editor(): Env {
     return Promise.resolve({ status: 200, json: () => Promise.resolve({ ok: true }) });
   };
   const made = new Function(
-    "S", "fetch", "document", "window", "SAVED",
-    `var MAIL_TEXTS = { texts: SAVED, defaults: {}, limits: {} };
+    "S", "fetch", "document", "window", "SAVED", "LOADED",
+    `var MAIL_TEXTS = LOADED ? { texts: SAVED, defaults: {}, limits: {} } : null;
      var ADM_TRAIL = [], ADM_SEEN = "", pendingAction = null, GAL = { id: "" }, AI_UNDO = null;
      ${arr("ADM_MAIL_ROWS")}
      ${arr("MAIL_LANGS")}
@@ -142,7 +142,7 @@ function editor(): Env {
        draft: mailDraft,
        sync: admTrailSync
      };`,
-  )(S, fetchStub, { querySelector: () => null }, { scrollTo() {} }, SAVED) as {
+  )(S, fetchStub, { querySelector: () => null }, { scrollTo() {} }, SAVED, loaded) as {
     press: (d: Record<string, string>) => void; back: () => boolean; draft: () => Record<string, any>;
     type: (tpl: string, lang: string, field: string, v: string) => void; sync: () => void;
   };
@@ -201,6 +201,20 @@ describe("«← Все письма» asks before unsaved words go", () => {
     e.press({ mailback: "" });
     expect(e.S.mailOpen).toBe(false);
     expect(e.S.mailConfirmBack).toBe(false);
+  });
+
+  /* The editor draws three grey bars until the texts land; leaving it then
+     must not make a draft out of the empty «saved» — the owner's own texts
+     would read as edits once they arrive, and «Сохранить» would write the
+     defaults over them. */
+  it("leaving before the texts have landed makes no draft of nothing", () => {
+    const e = editor(false);
+    e.press({ mailback: "" });
+    expect(e.S.mailOpen).toBe(false);
+    expect(e.S.mailDraft, "an empty draft was made before the texts came").toBeNull();
+    const b = editor(false);
+    b.back();
+    expect(b.S.mailDraft).toBeNull();
   });
 
   it("the phone's Back asks the same, and the second Back leaves", () => {
