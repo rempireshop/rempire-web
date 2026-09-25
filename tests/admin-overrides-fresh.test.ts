@@ -197,6 +197,30 @@ describe("the panel's products come from its own no-store read", () => {
     expect(r.DEMO.seo.touchable).toEqual(SAVED);
   });
 
+  it("signed in, the panel's read failing before any has landed: the edge copy beats a new phone's empty one", async () => {
+    const r = rig({ screen: "admin", admin: true });
+    const p = r.fn.loadServerOverrides();
+    await r.pending[0].answer({ status: 200, body: { ok: true, overrides: { touchable: { price: 21 } }, custom: [], settings: {} } });
+    await p;
+    expect(r.DEMO.price.touchable).toBeUndefined();   // not yet: the panel's own read is on its way
+    const read = r.pending.find((x) => x.url === "/api/admin/overrides/")!;
+    await read.answer({ status: 503, body: { ok: false } });
+    expect(r.DEMO.price.touchable).toBe(21);
+  });
+
+  it("…but once the panel has its own read, a stale edge copy is never taken — not even when a later read fails", async () => {
+    const r = rig({ screen: "admin", admin: true });
+    r.fn.loadAdminOverrides(false);
+    await r.pending[0].answer(FRESH);
+    // the owner opens the shop in this tab: the edge answers with its old copy…
+    const p = r.fn.loadServerOverrides();
+    await r.pending.find((x) => x.url === "/api/overrides/")!.answer(STALE);
+    await p;
+    // …and the panel's second read does not get through
+    await r.pending.filter((x) => x.url === "/api/admin/overrides/")[1].answer({ status: 503, body: { ok: false } });
+    expect(r.DEMO.seo.touchable).toEqual(SAVED);
+  });
+
   it("the shop's own screens still read the edge copy for a shopper", async () => {
     const r = rig({ screen: "catalog", admin: null, meDone: false });
     const p = r.fn.loadServerOverrides();

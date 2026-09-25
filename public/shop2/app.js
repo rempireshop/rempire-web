@@ -42424,8 +42424,9 @@
          all (its settings half still is, key by key: adoptServer's `fed`);
        · on the panel's screen, while it is not yet known whether this
          browser is the owner's, the public answer's product half waits in
-         OV_PUB: it is taken the moment the answer is «no» (or the admin
-         read fails — a copy ~150 s old beats none on a new phone);
+         OV_PUB: it is taken the moment the answer is «no», or when the
+         admin read fails before any has landed (a copy ~150 s old beats a
+         new phone's empty one — and never beats a read the panel has);
        · a product this page has written (any write to the product routes,
          stamped in apiJson) keeps its local values against an answer the
          server read before the write: the admin read that was in the air
@@ -42714,7 +42715,11 @@
       /* The product half is the shop's, not the panel's: signed in, the
          panel's own read takes its place (see OV_LOCAL). */
       var way = ovPublicWay();
-      OV_PUB = way === "hold" ? r.body : null;
+      /* …kept aside while the panel has no read of its own yet: if that read
+         fails, a copy ~150 s old still beats a new phone's empty one. Never
+         once it has one — the panel's read is newer than anything the edge
+         can hand back. */
+      OV_PUB = way !== "take" && !ADM_OV.at ? r.body : null;
       adoptServer(r.body, way !== "take");
       // (asked again only once it has answered: at boot the sign-in check has usually asked already)
       if (way === "admin") loadAdminOverrides(ADM_OV.at > 0);
