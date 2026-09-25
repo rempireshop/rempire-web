@@ -30,7 +30,7 @@ import { runInNewContext } from "node:vm";
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
-import { buildSeoPrompt } from "@/lib/ai-prompts";
+import { buildSeoPrompt, seoOffLanguage } from "@/lib/ai-prompts";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const ORIGIN = "https://rempireshop.com";
@@ -105,6 +105,25 @@ describe("the product snippet prompt asks each language in its own words", () =>
     expect(user).toContain("Product name: Face Scrub — скраб для лица");
     expect(system).not.toMatch(/What this product is, in Estonian/);
     expect(system).toMatch(/translate it, never copy it/);
+  });
+});
+
+describe("seoOffLanguage — what counts as Russian in an Estonian or English snippet", () => {
+  it("the owner's own name and brand may stay Russian; nothing else may", () => {
+    const own = { name: "Claude test товар — шампунь", brand: "Rempire" };
+    expect(seoOffLanguage("Rempire Claude test товар — šampoon\nÕrn šampoon igapäevaseks pesuks.", "ET", own)).toBe(false);
+    expect(seoOffLanguage("Rempire Claude test товар — šampoon\nШампунь для ухода за волосами.", "ET", own)).toBe(true);
+    expect(seoOffLanguage("Чёрное мыло 666\nHandmade soap.", "EN", { name: "Чёрное мыло 666" })).toBe(false);
+  });
+
+  it("the type word after « — » is not the owner's name: a tail left Russian is off, even one the shop cannot translate", () => {
+    const scrub = { name: "Face Scrub — скраб для лица", brand: "Rempire" };
+    expect(seoOffLanguage("Rempire Face Scrub — скраб для лица\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(true);
+    expect(seoOffLanguage("Rempire Face Scrub — näokoorija\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(false);
+  });
+
+  it("a Russian snippet is never off — the catalogue is Russian", () => {
+    expect(seoOffLanguage("Шампунь для ухода за волосами.", "RU", { name: "Bio Botanical Shampoo — шампунь" })).toBe(false);
   });
 });
 

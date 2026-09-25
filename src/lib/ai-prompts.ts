@@ -370,15 +370,16 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "descrip
 /**
  * Is a product snippet written for `lang` still Russian somewhere outside
  * the product's own name? The name is the owner's words and is copied as it
- * stands («Claude test товар»), so it — its head before « — », the whole of
- * it, and the brand — is taken out before the text is looked at. Russian
- * answers are never «off»: the catalogue is Russian.
+ * stands («Claude test товар»), so its head — what comes before « — » — and
+ * the brand are taken out before the text is looked at. The tail after « — »
+ * is not: it is the type of product, and it has to be in `lang` like every
+ * other word. Russian answers are never «off»: the catalogue is Russian.
  */
 export function seoOffLanguage(text: string, lang: Lang3, rawInput: unknown): boolean {
   if (lang === "RU") return false;
   const src = (rawInput && typeof rawInput === "object" ? rawInput : {}) as Record<string, unknown>;
   const name = line(src.name, 140);
-  const keep = [name, seoProductName(name, lang), name.split(" — ")[0], line(src.brand, 60)]
+  const keep = [name.split(" — ")[0], line(src.brand, 60)]
     .filter((s) => s && HAS_CYRILLIC.test(s))
     .sort((a, b) => b.length - a.length);
   let rest = String(text || "");
