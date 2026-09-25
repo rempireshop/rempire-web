@@ -2835,6 +2835,8 @@
       "Куда сдвинуть картинку": "Kuhu pilti nihutada",
       "Во всю ширину": "Üle kogu laiuse",
       "Слева": "Vasakul", "Справа": "Paremal", "Маленькая": "Väike",
+      /* …and the one button a product card in the text has (admCardBarHTML) */
+      "Карточка товара": "Tootekaart", "Убрать карточку": "Eemalda kaart",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "Foto telefonist või lõikelaualt, JPEG/PNG/WebP kuni 12 MB.",
       "вс": "P", "пн": "E", "вт": "T", "ср": "K", "чт": "N", "пт": "R", "сб": "L",
@@ -6324,6 +6326,8 @@
       "Куда сдвинуть картинку": "Where to move the picture",
       "Во всю ширину": "Full width",
       "Слева": "On the left", "Справа": "On the right", "Маленькая": "Small",
+      /* …and the one button a product card in the text has (admCardBarHTML) */
+      "Карточка товара": "Product card", "Убрать карточку": "Remove the card",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "A photo from your phone or the clipboard, JPEG/PNG/WebP up to 12 MB.",
       "вс": "Su", "пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa",
@@ -15966,7 +15970,7 @@
       var on = box.querySelectorAll(".is-figon");
       for (i = 0; i < on.length; i++) on[i].removeAttribute("class");
     }
-    FIGSEL = null;
+    FIGSEL = null; CARDSEL = null;
   }
   function admFigOpen(img) {
     var box = blogBox();
@@ -16044,6 +16048,57 @@
     if (dir === "up") box.insertBefore(node, sib);
     else box.insertBefore(sib, node);
     admFigAgain();
+  }
+  /* ---- a product card in the text: tapped, it gets a bar with a cross -------
+     The assistant puts two to four cards into an article by itself
+     (src/lib/blog-cards.ts), and a card in this box is an underlined name:
+     the one way out of the text it had was the caret and backspace. The ×
+     under «Товары в статье» takes the product off that list, not the card out
+     of the words (verification on staging, 25.09.2026: «no × on inline
+     cards»). So a card is tapped the way a picture is — ringed, with a bar
+     under it on the same layer (data-figui, .is-figon) that blogBoxHtml()
+     keeps out of everything that reads the box — and the bar's one button
+     takes the card out, with the line it stood on when that line held nothing
+     else. The article then saves itself like any edit (blogSync). */
+  var CARDSEL = null;
+  function admCardBarHTML() {
+    return '<div class="adm-fig adm-fig--card" data-figui contenteditable="false">' +
+      '<div class="adm-fig__row" role="group" aria-label="Карточка товара">' +
+      '<button type="button" class="adm-fig__b adm-fig__b--x" data-cardx>' +
+        '<svg class="adm-fig__ico adm-fig__ico--mv" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>' +
+        "<span>Убрать карточку</span></button>" +
+      "</div></div>";
+  }
+  function admCardOpen(a) {
+    var box = blogBox();
+    if (!box || !a || !box.contains(a)) return;
+    var rd = richDraft();
+    if (!rd || rd.kind !== "blog") return;
+    admFigClose();
+    CARDSEL = a;
+    a.setAttribute("class", "is-figon");
+    var holder = document.createElement("div");
+    holder.innerHTML = admCardBarHTML();
+    var bar = holder.firstChild;
+    box.appendChild(bar);
+    // the same one number the picture bar is placed by — .adm-canvas is position:relative
+    bar.style.top = (a.offsetTop + a.offsetHeight + 8) + "px";
+    translateTree(bar);
+    try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
+  }
+  function admCardRemove() {
+    var a = CARDSEL, box = blogBox();
+    admFigClose();
+    // a repaint since the tap rebuilt the box: that card is not in it any more
+    if (!a || !box || !box.contains(a) || !a.parentNode) return;
+    var host = a.parentNode;
+    host.removeChild(a);
+    if (host !== box && host.tagName === "P" && !host.querySelector("img") &&
+        !String(host.textContent || "").replace(/[\s ]/g, "")) {
+      host.parentNode.removeChild(host);
+    }
+    blogSync();
   }
   /** The «Товар» marker, written out for one language. blogBodyHTML() turns it
       into a real card in the shop; a crawler and a reader without JS follow it
@@ -50734,7 +50789,7 @@
      stays exactly where the owner left it. */
   document.addEventListener("mousedown", function (e) {
     var t = e.target;
-    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove]")) {
+    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove],[data-cardx]")) {
       e.preventDefault();
     }
   });
@@ -50759,7 +50814,11 @@
     var mv = t.closest("[data-figmove]");
     if (mv) { e.preventDefault(); if (!mv.disabled) admFigMove(mv.getAttribute("data-figmove")); return; }
     if (t.tagName === "IMG" && t.closest("[data-blogbody]")) { e.preventDefault(); admFigOpen(t); return; }
-    if (FIGSEL && !t.closest("[data-figui]")) admFigClose();
+    // a product card in the text: its bar has one button, the cross (admCardOpen)
+    if (t.closest("[data-cardx]")) { e.preventDefault(); admCardRemove(); return; }
+    var pcard = t.closest("a[data-product]");
+    if (pcard && pcard.closest("[data-blogbody]")) { e.preventDefault(); admCardOpen(pcard); return; }
+    if ((FIGSEL || CARDSEL) && !t.closest("[data-figui]")) admFigClose();
   });
 
   /* blog: a paste into the editor. Word and Google Docs put a whole styled

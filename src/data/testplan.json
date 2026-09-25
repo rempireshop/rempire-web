@@ -8101,15 +8101,15 @@
         "Вписать тему про уход за волосами и нажать «Написать статью целиком».",
         "Дождаться готового текста и пролистать его.",
         "Нажать на карточку товара внутри текста.",
-        "Удалить одну карточку крестиком."
+        "Под ней нажать «× Убрать карточку»."
       ],
       "expect": [
         "Внизу мелькает «Добавлены товары: …», та же строка остаётся под кнопкой.",
         "В тексте две–четыре карточки, каждая после подходящего абзаца; одна — ближе к концу.",
-        "Карточек нет в заголовках и списках, две подряд не стоят.",
-        "У карточки фотография, название и цена; она открывает страницу товара.",
+        "Карточек нет в заголовках, списках и сразу под заголовком; две подряд не стоят.",
+        "Нажатая карточка обведена рамкой, под ней кнопка «× Убрать карточку».",
         "Все товары в наличии и показаны в магазине.",
-        "Удалённая карточка исчезает, через секунду вверху «Сохранено ✓»."
+        "Карточка исчезает из текста вместе со своей строкой, через секунду вверху «Сохранено ✓»."
       ],
       "why": "Раньше каждую карточку приходилось искать и вставлять руками кнопкой «Товар».",
       "risk": "med",
@@ -8121,20 +8121,20 @@
           "Type a hair-care topic and press «Написать статью целиком».",
           "Wait for the text and scroll through it.",
           "Tap a product card inside the text.",
-          "Delete one card with its cross."
+          "Under it press «× Убрать карточку» (remove the card)."
         ],
         "expect": [
           "A toast «Добавлены товары: …» flashes; the same line stays under the button.",
           "The text holds two to four cards, each after a fitting paragraph; one near the end.",
-          "No card sits inside a heading or a list, never two in a row.",
-          "A card has a photo, the name and the price; it opens the product page.",
+          "No card in headings, lists or right under a heading; never two in a row.",
+          "A tapped card gets a ring, with «× Убрать карточку» under it.",
           "Every product is in stock and shown in the shop.",
-          "A deleted card disappears; a second later «Сохранено ✓» at the top."
+          "The card leaves the text with its line; a second later «Сохранено ✓» at the top."
         ],
         "why": "Every card used to be hunted down and inserted by hand with the «Товар» button."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T12:34:46.779Z"
+      "markedAt": "2026-09-25T22:28:07.655Z"
     },
     {
       "id": "ai-blog-translate",

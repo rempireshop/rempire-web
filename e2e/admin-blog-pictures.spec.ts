@@ -310,6 +310,51 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     expect(saved.slice(0, saved.indexOf("<figure")).match(/<p>/g)!.length, "the picture is not after two paragraphs").toBe(2);
   });
 
+  /* ---- 3b. a product card in the text has a cross (ai-blog-cards e6) ----- */
+  test("tapping a product card in the text opens a bar with «Убрать карточку», and the card leaves the saved article", async ({ page }) => {
+    test.setTimeout(120_000);
+    await openAdmin(page);
+    const ID = "proraso-wood-spice-beard-balm-100ml";
+    const cardTag = `<a data-product="${ID}" data-price="live" href="/shop2/p/${ID}/">Proraso Wood &amp; Spice — бальзам для бороды</a>`;
+    const r = await page.request.post("/api/admin/blog/", {
+      data: {
+        title: { RU: `Карточка ${Date.now().toString().slice(-6)}`, ET: "", EN: "" },
+        excerpt: { RU: "Проверка крестика на карточке." },
+        body: { RU: `<p>Абзац один про бороду зимой.</p><p>${cardTag}</p><p>Абзац два про бальзам.</p>` },
+      },
+    });
+    expect(r.status(), "the post was not created").toBe(200);
+    const post = (await r.json()).post as { id: string };
+    made.push(post.id);
+
+    await edit(page, post.id);
+    const box = page.locator("[data-blogbody]");
+    await expect(box.locator(`a[data-product="${ID}"]`)).toHaveCount(1);
+    await expect(page.locator(".adm-fig"), "a bar before anything was tapped").toHaveCount(0);
+
+    await box.locator(`a[data-product="${ID}"]`).click();
+    const x = page.locator(".adm-fig [data-cardx]");
+    await expect(x, "tapping the card did not open its bar").toBeVisible();
+    await expect(x).toContainText("Убрать карточку");
+    await x.click();
+
+    await expect(box.locator("a[data-product]"), "the card is still in the text").toHaveCount(0);
+    await expect(page.locator(".adm-fig"), "the bar outlived the card").toHaveCount(0);
+    const lines = await box.evaluate((el) => Array.from(el.children).map((c) => c.textContent || ""));
+    expect(lines, "the card's empty line stayed behind").toEqual(["Абзац один про бороду зимой.", "Абзац два про бальзам."]);
+
+    // …and it is what the article SAVES, by itself, with no editor control in it
+    let saved = "";
+    await expect.poll(async () => {
+      const back = await page.request.get(`/api/admin/blog/?id=${post.id}`);
+      saved = (await back.json()).post.body.RU as string;
+      return saved.includes("data-product");
+    }, { timeout: 15_000, message: "the removal never saved itself" }).toBe(false);
+    expect(saved).not.toContain("data-figui");
+    expect(saved).not.toContain("is-figon");
+    expect(saved).toContain("Абзац два про бальзам.");
+  });
+
   /* ---- 4. the shop renders every preset, and the bar never reaches it ---- */
   test("each preset reaches the article page, and no control of the editor's goes with it", async ({ page }, testInfo) => {
     test.setTimeout(180_000);
