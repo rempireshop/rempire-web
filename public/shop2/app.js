@@ -1726,7 +1726,6 @@
       "Статья на месте": "Artikkel on tagasi",
       "Статья не удалилась — она снова в списке.": "Artiklit ei kustutatud — see on jälle nimekirjas.",
       "Выберите статью слева": "Valige vasakult artikkel",
-      "Ещё действия": "Veel toiminguid",
       "Заголовок статьи": "Artikli pealkiri",
       "Пусто — покажем русский": "Tühi — näitame venekeelset",
       "Две строки — видно в списке статей и в поиске": "Kaks rida — näha artiklite loendis ja otsingus",
@@ -3154,7 +3153,7 @@
       "Сделать партнёром": "Tee partneriks", "Перевести в розницу": "Vii jaemüüki",
       /* «Клиенты» in direction 1a (README § 5): «⋯», the chips, the card's
          request, status, points and note, the held answers (q3, q9) */
-      "Заявки": "Taotlused", "Ещё действия": "Veel toiminguid",
+      "Заявки": "Taotlused",
       "Скачать список · Excel": "Laadi nimekiri alla · Excel", "Скачать список · CSV": "Laadi nimekiri alla · CSV",
       "Заявка на партнёрство": "Partnerlustaotlus",
       "Ответ уходит через 10 секунд — до этого можно «Вернуть».": "Vastus läheb teele 10 sekundi pärast — seni saab „Taasta“.",
@@ -5071,7 +5070,6 @@
       "Статья на месте": "The article is back",
       "Статья не удалилась — она снова в списке.": "The article was not deleted — it is back in the list.",
       "Выберите статью слева": "Pick an article on the left",
-      "Ещё действия": "More actions",
       "Заголовок статьи": "Article title",
       "Пусто — покажем русский": "Empty — the Russian one is shown",
       "Две строки — видно в списке статей и в поиске": "Two lines — seen in the article list and in search",
@@ -6489,7 +6487,7 @@
       "Сделать партнёром": "Make a partner", "Перевести в розницу": "Move to retail",
       /* «Клиенты» in direction 1a (README § 5): «⋯», the chips, the card's
          request, status, points and note, the held answers (q3, q9) */
-      "Заявки": "Requests", "Ещё действия": "More actions",
+      "Заявки": "Requests",
       "Скачать список · Excel": "Download the list · Excel", "Скачать список · CSV": "Download the list · CSV",
       "Заявка на партнёрство": "Partner request",
       "Ответ уходит через 10 секунд — до этого можно «Вернуть».": "The answer goes in 10 seconds — until then you can press «Restore».",
