@@ -101,10 +101,11 @@ test.describe("admin — a price change on the owner's own product is in the jou
 
       // ---- «Вернуть» really puts the price back --------------------------
       await top.locator("[data-admundo]").click();
+      // the toast first: it leaves after 2,6 s, and a slow server's write can take longer
+      expect(await toastText(page)).toMatch(/Отменено/);
       await expect.poll(() => rowPrice(page, id), {
         timeout: 20_000, message: "«Вернуть» did not put the price back",
       }).toBe(14.9);
-      expect(await toastText(page)).toMatch(/Отменено/);
       await clearToast(page);
 
       // ---- and a save that moves nothing leaves no line at all -----------

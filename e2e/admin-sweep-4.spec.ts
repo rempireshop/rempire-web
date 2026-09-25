@@ -464,39 +464,42 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
     await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-checked", "true");
 
     // ---- off ---------------------------------------------------------------
-    await sw.click();
-    // the form under it stops asking about a programme that is off
-    await expect(page.locator('[data-pricingf="proDiscountPct"]'),
-      "the salon discount field is shown while the programme is off").toHaveCount(0);
-    await expect(page.locator(".adm-page")).toContainText("Сейчас выключено");
-    // the switch saves itself — no «Сохранить», no question (q40)
-    await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
-    await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await clearToast(page);
-
-    // ---- off: the five screens Dim named ----------------------------------
-    await adminSection(page, "people");
-    /* Off, the row keeps the two chips that are not about tiers at all — «Все»
-           and «Подписаны», who agreed to hear from the shop. The three tier chips
-           («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
-        await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
-        await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
-        await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
-    await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
-
-    await adminSection(page, "goods");
-    const first = page.locator("[data-admgoods]").first();
-    await first.click();
-    await page.locator('[data-edtab="sizes"]').click();
-    await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
-    await page.locator("[data-admclose]").first().click();
-
+    /* From here on the shop is changed: the `finally` below puts the programme
+       back on even when a step of the «off» half fails (a server that drops a
+       connection mid-run left it off for the retry, 25.09.2026). */
     const feed = async () => (await (await page.request.get("/api/overrides/")).json()).settings.pricing;
-    await expect.poll(async () => (await feed()).partnersOn,
-      { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
-    expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
-
     try {
+      await sw.click();
+      // the form under it stops asking about a programme that is off
+      await expect(page.locator('[data-pricingf="proDiscountPct"]'),
+        "the salon discount field is shown while the programme is off").toHaveCount(0);
+      await expect(page.locator(".adm-page")).toContainText("Сейчас выключено");
+      // the switch saves itself — no «Сохранить», no question (q40)
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
+      await clearToast(page);
+
+      // ---- off: the five screens Dim named ----------------------------------
+      await adminSection(page, "people");
+      /* Off, the row keeps the two chips that are not about tiers at all — «Все»
+             and «Подписаны», who agreed to hear from the shop. The three tier chips
+             («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
+          await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
+          await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
+          await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
+      await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
+
+      await adminSection(page, "goods");
+      const first = page.locator("[data-admgoods]").first();
+      await first.click();
+      await page.locator('[data-edtab="sizes"]').click();
+      await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
+      await page.locator("[data-admclose]").first().click();
+
+      await expect.poll(async () => (await feed()).partnersOn,
+        { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
+      expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
+
       // ---- on: everything comes back --------------------------------------
       await settings(page, "prices");
       await page.locator("[data-partnerson]").click();
