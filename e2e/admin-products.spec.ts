@@ -443,7 +443,7 @@ test.describe("admin — product creation", () => {
 
     await openAdmin(page);
     try {
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill(`добавь новый товар Proraso ${NAME} за 12,50`);
       await page.locator("[data-admsend]").click();
       const answer = page.locator("[data-aians]");

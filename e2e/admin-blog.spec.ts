@@ -836,7 +836,7 @@ test.describe("blog — the whole article", () => {
     let slug = "";
     await openAdmin(page);
     try {
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст на тему уход за бородой зимой");
       await page.locator("[data-admsend]").click();
       const answer = page.locator("[data-aians]");

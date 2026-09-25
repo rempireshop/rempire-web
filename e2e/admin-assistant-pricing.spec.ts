@@ -62,7 +62,7 @@ test.describe("the assistant's «скидка для салонов», asked fro
       await page.reload();
       await expect(page.locator('[data-admtab="orders"][aria-current]:visible').first()).toBeVisible();
 
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill("подними скидку для салонов до 25 %");
       await page.locator("[data-admsend]").click();
       const answer = page.locator("[data-aians]");

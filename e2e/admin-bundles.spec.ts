@@ -364,7 +364,7 @@ test.describe("admin — наборы", () => {
          side pane and the owner may never have opened that tab in this
          sitting, so this is also the test that the panel fetches the list it
          needs to name the set. */
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill(`удали набор ${ASSIST_NAME}`);
       await page.locator("[data-admsend]").click();
 

@@ -100,7 +100,8 @@ test.describe("admin — speed", () => {
 
     // …and it is asked for the moment the assistant is on screen
     const opened = page.waitForResponse((r) => r.url().includes("/api/admin/analytics/?range=30d"));
-    await page.locator("[data-admai]").first().click();
+    // (the opener this viewport draws — 1a: the strip on a desktop, the top bar's icon on a phone)
+    await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     expect((await opened).status(), "the assistant did not warm its own context").toBe(200);
 

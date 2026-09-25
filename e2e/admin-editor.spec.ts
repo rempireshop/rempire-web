@@ -412,11 +412,13 @@ test.describe("admin — the product editor", () => {
       const r = await page.evaluate(() => {
         const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
         const q = (sel: string) => box(document.querySelector(sel)!);
-        const shown = (sel: string) => { const el = document.querySelector(sel); return !!el && getComputedStyle(el).display !== "none"; };
+        // on screen at all — its own box, or none because it or a parent is display:none
+        const shown = (sel: string) => { const el = document.querySelector(sel); return !!el && el.getClientRects().length > 0; };
         return {
           vw: window.innerWidth, vh: window.innerHeight,
           bar: q(".adm-savebar"), nav: q(".adm-bar"), del: q("[data-admgoodspull]"), form: q(".adm-screen"),
-          fabShown: shown(".adm-fab"), panelHeaderShown: shown(".cohdr--adm"),
+          // 1a: the panel's own top bar and the assistant's icon in it (the site bar and the floating button are gone)
+          fabShown: shown(".adm-top__ai"), panelHeaderShown: shown(".adm-top"),
           buttons: Array.from(document.querySelectorAll(".adm-savebar button")).map((el) => ({ name: (el.textContent || "").trim(), ...box(el) })),
         };
       });
@@ -435,7 +437,7 @@ test.describe("admin — the product editor", () => {
         expect(btn.t, `${label}: «${btn.name}» is under the notch inset`).toBeGreaterThanOrEqual(inset - 0.5);
         expect(btn.b, `${label}: «${btn.name}» sticks out of the bar`).toBeLessThanOrEqual(r.bar.b + 0.5);
       }
-      // the assistant's button is not on the screen while the bar is the header («Ещё» keeps the assistant)
+      // the assistant's icon is not on the screen while the bar is the header (it comes back with the top bar)
       expect(r.fabShown, `${label}: the assistant's button is on the form`).toBe(false);
       // the form starts under the bar, not behind it…
       if (where === "top") expect(r.form.t, `${label}: the form starts behind the bar`).toBeGreaterThanOrEqual(r.bar.b);

@@ -611,7 +611,7 @@ test.describe("admin — the small forms say when they are saved", () => {
        the owner is filling in. The draft is what is being tested, and it
        survives a blur as much as a render. */
     await box.blur();
-    await page.locator(".adm-fab").click();
+    await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     await page.locator(".adm-asst__fold").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);

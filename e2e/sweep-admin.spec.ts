@@ -171,18 +171,18 @@ test.describe("sweep — every tab", () => {
       await assertClean(page, w, `tab ${key} (${label})`);
     }
 
-    /* The assistant is a floating button now, not a permanent third column:
-       closed by default, a 380-px pane once opened, and folded away again by
+    /* The assistant is not a permanent third column: closed by default (a
+       52-px strip docked on the right since 1a), a 380-px pane once opened, and folded away again by
        the «›» in its own header. `aria-expanded` is what a screen reader (and
        this assertion) reads. */
-    await expect(page.locator(".adm-fab")).toHaveAttribute("aria-expanded", "false");
-    await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-aiopen:visible")).toHaveAttribute("aria-expanded", "false");
+    await page.locator(".adm-aiopen:visible").click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     await expect(page.locator(".adm-asst [data-admai]")).toHaveAttribute("aria-expanded", "true");
     await assertClean(page, w, "assistant open");
     await page.locator(".adm-asst [data-admai]").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    await expect(page.locator(".adm-fab")).toBeVisible();
+    await expect(page.locator(".adm-aiopen:visible")).toBeVisible();
 
     // The sidebar collapse has to survive the next render — every tab click
     // rebuilds the whole panel from S, so a state key that is not read back
@@ -563,8 +563,8 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     test.setTimeout(60_000);
     const w = watch(page);
     await openAdmin(page);
-    // the assistant is behind a floating button since the redesign — open it
-    await page.locator(".adm-fab").click();
+    // the assistant is folded by default (the strip on the right, 1a) — open it
+    await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
 
     // «{{7*7}}» deliberately not last: the pane keeps echoing whichever

@@ -16,8 +16,10 @@ import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, P
  * the keyboard's, which is the laptop too.
  */
 
-const PAPER = "rgb(255, 255, 255)";
-const TINT = "rgb(246, 244, 238)";
+/* The panel's paper and its soft panel — direction 1a's tokens (admin.css
+   --a-paper #fdfcf9, --a-panel #f4f2ec, which --a-tint now names). */
+const PAPER = "rgb(253, 252, 249)";
+const TINT = "rgb(244, 242, 236)";
 
 async function bg(row: Locator): Promise<string> {
   return row.evaluate((el) => getComputedStyle(el).backgroundColor);

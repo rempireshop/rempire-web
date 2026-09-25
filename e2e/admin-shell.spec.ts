@@ -12,8 +12,9 @@ test.beforeEach(async ({}, testInfo) => {
  *
  * What this file is for: the IA itself. Thirteen flat tabs became five places
  * (Обзор · Заказы · Товары · Салон · Ещё), the assistant left its permanent
- * third column for a floating button, and the confirm card and the toast grew
- * teeth (an overlay, and an «Отменить» that writes its own journal line). None
+ * third column (since 1a: a strip docked on the right, an icon in the phone's
+ * top bar), and the confirm card and the toast grew teeth (an overlay, and a
+ * «Вернуть» that writes its own journal line). None
  * of that is covered by the section specs, which test what each screen *does*;
  * this one tests that the owner can still get to every screen, from a phone as
  * well as a laptop, and that the two safety mechanisms behave.
@@ -167,15 +168,35 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
 test.describe("admin shell — the assistant", () => {
   test.use({ extraHTTPHeaders: ipHeaders(122) });
 
-  test("a floating button opens it, it answers a question, and it folds away", async ({ page }, testInfo) => {
+  test("its opener opens it, it answers a question, and it folds away", async ({ page }, testInfo) => {
     const mobile = testInfo.project.name === "mobile";
     await loginAsAdmin(page);
 
-    // closed by default — the third column is gone (README fix #8)
+    /* closed by default. 1a (README rule 6): no floating button — folded,
+       the assistant is a 52-px strip docked on the desktop's right edge and
+       an icon in the phone's top bar; `.adm-aiopen` is whichever of the two
+       this viewport draws. */
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    const fab = page.locator(".adm-fab");
-    await expect(fab).toBeVisible();
-    await fab.click();
+    const opener = page.locator(".adm-aiopen:visible");
+    await expect(opener).toHaveCount(1);
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+    if (!mobile) {
+      /* docked, not floating: the strip runs the full height of the page's
+         right edge (where the scrollbar's reserved gutter begins — styles.css
+         `scrollbar-gutter: stable`), and the work column keeps exactly its
+         width free, so nothing of the work is ever under it */
+      const strip = (await opener.boundingBox())!;
+      const vp = await page.evaluate(() => ({
+        right: document.body.getBoundingClientRect().right,
+        h: window.innerHeight,
+        pad: parseFloat(getComputedStyle(document.querySelector(".adm-main")!).paddingRight),
+      }));
+      expect(Math.round(strip.width)).toBe(52);
+      expect(Math.round(strip.x + strip.width)).toBe(Math.round(vp.right));
+      expect(Math.round(strip.height)).toBe(vp.h);
+      expect(vp.pad, "the work column runs under the strip").toBe(52);
+    }
+    await opener.click();
 
     // one markup, two shapes: a 380-px column beside the work on a desktop,
     // a 75 %-tall sheet over it on a phone
@@ -184,8 +205,9 @@ test.describe("admin shell — the assistant", () => {
     const box = (await panel.boundingBox())!;
     if (mobile) expect(Math.round(box.height / page.viewportSize()!.height * 100)).toBe(75);
     else expect(Math.round(box.width)).toBe(380);
-    // the FAB steps aside while the panel is up
-    await expect(page.locator(".adm-fab")).toHaveCount(0);
+    // the strip gives its place to the pane; the phone's icon says it is open
+    if (mobile) await expect(page.locator(".adm-top__ai")).toHaveAttribute("aria-expanded", "true");
+    else await expect(page.locator(".adm-strip")).toHaveCount(0);
 
     // a question, in plain words, gets a plain answer
     await panel.locator("[data-admq]").fill("Какие заказы ждут отправки?");
@@ -202,7 +224,7 @@ test.describe("admin shell — the assistant", () => {
 
     await panel.locator(".adm-asst__fold").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    await expect(page.locator(".adm-fab")).toBeVisible();
+    await expect(page.locator(".adm-aiopen:visible")).toHaveAttribute("aria-expanded", "false");
   });
 });
 
@@ -242,7 +264,7 @@ test.describe("admin shell — the assistant never shows JSON, and files a photo
     });
 
     await loginAsAdmin(page);
-    await page.locator(".adm-fab").click();
+    await page.locator(".adm-aiopen:visible").first().click();
     await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст");
     await page.locator("[data-admsend]").click();
     const answer = page.locator("[data-aians]");
@@ -295,7 +317,7 @@ test.describe("admin shell — the assistant never shows JSON, and files a photo
 
     await loginAsAdmin(page);
     try {
-      await page.locator(".adm-fab").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admfile]").setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
       const strip = page.locator("[data-admattlist]");
       await expect(strip.locator(".adm-att__i")).toHaveCount(1);
