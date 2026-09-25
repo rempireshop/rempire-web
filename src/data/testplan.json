@@ -6486,15 +6486,15 @@
         "Открыть «Салон».",
         "Вписать в поиск штрихкод товара и нажать кнопку с объёмом и ценой.",
         "Добавить второй товар сканером и поправить количество в корзине.",
-        "Вписать скидку в процентах и почту, у которой нет аккаунта в магазине.",
-        "Нажать «Терминал» и подтвердить «Оформить»."
+        "Нажать скидку «10 %», открыть «Клиент» и вписать почту без аккаунта в магазине.",
+        "Выбрать «Терминал», нажать «К оплате» и подтвердить «Оформить»."
       ],
       "expect": [
-        "Поиск кассы находит товар по вписанному штрихкоду.",
+        "Поиск в «Салоне» находит товар по вписанному штрихкоду.",
         "Кнопка под ним одна — того объёма, к которому привязан код.",
-        "Появился экран «Продажа оформлена».",
-        "На нём видно число товаров и способ оплаты.",
-        "Там же сказано, что остатки списаны и чек ушёл — на языке кассы.",
+        "На месте корзины карточка «Продажа оформлена ✓» с номером и суммой.",
+        "На ней видно число товаров и способ оплаты.",
+        "Там же сказано, что остатки списаны и чек ушёл — на языке панели.",
         "Заказ появился в «Заказы» → «Все», и у него есть ссылка на чек."
       ],
       "why": "Продажа с полки, не списавшая остаток, продаст ту же бутылку в интернете.",
@@ -6507,20 +6507,20 @@
           "Open «Салон».",
           "Type a product's barcode into the search and press the size-and-price button.",
           "Add a second product with the scanner and fix the quantity in the cart.",
-          "Enter a percentage discount and an e-mail that has no account in the shop.",
-          "Press «Терминал» (card terminal) and confirm with «Оформить»."
+          "Press the «10 %» discount, open «Клиент» (customer) and enter an e-mail with no shop account.",
+          "Pick «Терминал» (card terminal), press «К оплате» (charge) and confirm with «Оформить»."
         ],
         "expect": [
-          "The register's search finds the product by the barcode you typed.",
+          "The search in «Салон» finds the product by the barcode you typed.",
           "Under it there is one button — the size the code is bound to.",
-          "The «Продажа оформлена» (sale completed) screen appears.",
+          "The cart gives way to a «Продажа оформлена ✓» card with the number and the sum.",
           "It shows the number of items and the payment method.",
-          "It also says stock was written off and the receipt sent — in the till's language.",
+          "It also says stock was written off and the receipt sent — in the panel's language.",
           "The order is under «Заказы» → «Все» and has a link to the receipt."
         ],
         "why": "A shelf sale that leaves stock untouched sells the same bottle online."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-25T11:08:27.233Z"
     },
     {
       "id": "pos-double-tap",
@@ -6528,14 +6528,14 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Второе нажатие «Терминал»",
+      "title": "Второе нажатие «Оформить»",
       "steps": [
-        "Оформить продажу в «Салоне» до экрана «Продажа оформлена».",
-        "Не уходя с этого экрана, нажать «Терминал» ещё раз и подтвердить.",
+        "Собрать продажу в «Салоне», нажать «К оплате» и «Оформить».",
+        "Сразу, пока на кнопке «Оформляем…», нажать её ещё раз.",
         "Открыть «Заказы» → «Все», потом «Товары» → «Склад»."
       ],
       "expect": [
-        "Второй раз показан тот же чек, а не новый.",
+        "Второе нажатие ничего не делает — карточка «Продажа оформлена ✓» одна.",
         "В «Заказах» один заказ, а не два.",
         "Остаток списался один раз.",
         "Клиенту ушёл один чек, а не два."
@@ -6543,22 +6543,23 @@
       "why": "Второй заказ на ту же покупку — это дважды списанный остаток и второй чек клиенту.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
+      "mark": "redo",
       "en": {
-        "title": "A second press of «Терминал»",
+        "title": "A second press of «Оформить»",
         "steps": [
-          "Put a sale through «Салон» as far as the «Продажа оформлена» screen.",
-          "Without leaving that screen, press «Терминал» again and confirm.",
+          "Put a sale together in «Салон», press «К оплате» (charge) and «Оформить».",
+          "Straight away, while the button says «Оформляем…», press it again.",
           "Open «Заказы» → «Все», then «Товары» → «Склад»."
         ],
         "expect": [
-          "The second press shows the same receipt, not a new one.",
+          "The second press does nothing — there is one «Продажа оформлена ✓» card.",
           "«Заказы» holds one order, not two.",
           "The stock came down once.",
           "The customer got one receipt, not two."
         ],
         "why": "A second order for one purchase is stock taken twice and a second receipt to the customer."
-      }
+      },
+      "markedAt": "2026-09-25T11:08:27.233Z"
     },
     {
       "id": "pos-receipt",
@@ -6568,7 +6569,7 @@
       "lang": "RU",
       "title": "Чек салонной продажи",
       "steps": [
-        "Нажать «Чек для печати» на экране после продажи.",
+        "Нажать «Чек ↗» на карточке после продажи.",
         "Напечатать чек или посмотреть его на экране.",
         "Проверить почту, которую вписали клиенту.",
         "Повторить продажу на другую почту, переключив панель на английский."
@@ -6586,7 +6587,7 @@
       "en": {
         "title": "The receipt for a salon sale",
         "steps": [
-          "On the screen after the sale press «Чек для печати» (receipt to print).",
+          "On the card after the sale press «Чек ↗» (receipt).",
           "Print the receipt or look at it on screen.",
           "Check the mailbox you typed in for the customer.",
           "Do the sale again to another address with the panel switched to English."
@@ -6599,7 +6600,9 @@
           "With no address typed, there is no letter and none promised."
         ],
         "why": "A receipt promised and not sent is a customer who comes back demanding paper."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:08:27.233Z"
     },
     {
       "id": "pos-no-stock",
@@ -6678,6 +6681,51 @@
           "«Ничего не найдено» appears in neither case."
         ],
         "why": "A bottle in your hand the till cannot find is a sale outside the shop and a count that will not add up later. Finding it and still refusing it is the same thing, unless somebody says where that is fixed."
+      }
+    },
+    {
+      "id": "pos-three-taps",
+      "area": "stock",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Салон: продажа в три нажатия",
+      "steps": [
+        "Открыть «Салон» с пустой корзиной.",
+        "В «Часто продают» нажать кнопку с объёмом и ценой.",
+        "Нажать «К оплате» внизу, затем «Оформить» в окне.",
+        "На карточке после продажи нажать «Новая продажа»."
+      ],
+      "expect": [
+        "Под поиском «Часто продают» — товары, которые продаются больше всего.",
+        "Нажатая кнопка стала тёмной, и на ней «×1».",
+        "На «К оплате» та же сумма, что в «Итого».",
+        "В окне «Оформить продажу?» сумма и «наличные».",
+        "Карточка «Продажа оформлена ✓»: номер, сумма и ссылка «Чек ↗».",
+        "«Новая продажа» снова показывает пустую корзину."
+      ],
+      "why": "Покупатель ждёт у стойки: каждое лишнее нажатие — это пауза, а пропущенное подтверждение — деньги без чека.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-25T11:08:27.233Z",
+      "en": {
+        "title": "Салон: a sale in three taps",
+        "steps": [
+          "Open «Салон» with an empty cart.",
+          "Under «Часто продают» (best sellers) press a size-and-price button.",
+          "Press «К оплате» (charge) at the bottom, then «Оформить» in the sheet.",
+          "On the card after the sale press «Новая продажа» (new sale)."
+        ],
+        "expect": [
+          "Under the search «Часто продают» lists the products that sell best.",
+          "The button you pressed turned dark and shows «×1».",
+          "«К оплате» shows the same sum as «Итого».",
+          "The «Оформить продажу?» sheet shows the sum and «наличные» (cash).",
+          "The «Продажа оформлена ✓» card: the number, the sum and a «Чек ↗» link.",
+          "«Новая продажа» brings back an empty cart."
+        ],
+        "why": "The customer waits at the counter: every extra tap is a pause, and a skipped confirm is money without a receipt."
       }
     },
     {
