@@ -23663,6 +23663,7 @@
     if (!q) { admVoiceStop(); return; }   // the pane was folded away mid-sentence
     var text = (admVoiceBase ? admVoiceBase + " " : "") + String(heard || "").replace(/^\s+/, "");
     q.value = text; S.adminQ = text;
+    admHeld(q);   // the model holds the heard words, as it holds typed ones
   }
   /* Chrome: is the microphone barred by the page's own Permissions-Policy —
      the one refusal no browser setting of the owner's can lift? Until
@@ -46323,6 +46324,16 @@
     }
     return out.sort().join("\n");
   }
+  /** The model has just taken this box's text as it stands (S.promoForm.value
+      = the box). Said on the box itself, for the next render's morph to
+      compare its markup with — see admMorphNode. And that render is not
+      skipped as «nothing changed»: the markup string it would compare with
+      was drawn before the typing. */
+  function admHeld(el) {
+    if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
+    el.__admHeld = el.value;
+    admPaintedKey = "";
+  }
   function admMorphNode(from, to) {
     if (from.nodeType !== to.nodeType || (from.nodeType === 1 && from.tagName !== to.tagName)) {
       from.parentNode.replaceChild(to, from);
@@ -46336,6 +46347,23 @@
     // a value/checked/selected the app changed is applied; one the owner
     // changed by hand survives the render, which a rebuild never let it do
     var valWas = from.getAttribute("value"), chkWas = from.hasAttribute("checked");
+    /* «What the app last said» is the MODEL's value, not only the last
+       render's. A box that hands every keystroke to S as it stands (admHeld —
+       the promo form, the customer's points, the searches) is typed into with
+       no render, so its attribute still says what the render BEFORE the
+       typing drew. When the model then puts exactly that back — «Сумма» →
+       «Процент» empties the discount, a points add clears «+10» — the markup
+       went from "" to "", the box was left alone, and 150 typed as euros
+       stood in the percent box, in no draft, while «Создать» answered
+       «Проверьте размер скидки» under it (verification pass 25.09.2026,
+       panel-promo-create). So what the model took from the box stands in
+       for the attribute: a render carrying the typed text back still leaves
+       the box (and its caret) alone, one carrying anything else writes it. */
+    var held = from.__admHeld;
+    if (held !== undefined) {
+      from.__admHeld = undefined;
+      if (tag === "INPUT") valWas = held;
+    }
     /* …but only while the box is still the SAME field. The blog's title box
        is one <input> in RU and in EN, told apart by data-blogl alone; a new
        article's title is empty in both, so the markup said "" before the
@@ -46361,7 +46389,10 @@
       return;
     }
     if (tag === "TEXTAREA") {
-      if (otherField || from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
+      var txtWas = held !== undefined ? held : from.textContent;
+      if (otherField || to.textContent !== txtWas) { from.textContent = to.textContent; from.value = to.textContent; }
+      // the model holds what was typed: only the default text catches up
+      else if (from.textContent !== to.textContent) from.textContent = to.textContent;
       return;
     }
     if (tag === "SELECT") {
@@ -50664,6 +50695,22 @@
         translateTree(plist);
       }
     }
+  });
+  /* The panel's boxes whose keystroke goes into S as it stands and comes
+     back in the markup as that same string — so whatever the model later
+     puts in S reaches the box (admHeld, admMorphNode), a reset included.
+     Deliberately not every box: the product card keeps its typing in the
+     boxes (edKeepTyped); «Сообщение клиенту» draws the ready-made letter
+     into a box emptied by hand; the delivery table shows «нет» for an empty
+     cell (shipBoxShow). Marked there, a background render would write over
+     the typing. */
+  var ADM_HELD_SEL = "[data-promof],[data-promoq],[data-admcustq],[data-admcustpoints],[data-admcustnote]," +
+    "[data-admcustnotesf],[data-goodsq],[data-admorderq],[data-stockq],[data-posq],[data-posemail],[data-posphone]," +
+    "[data-posdiscount],[data-admq],[data-bundleq],[data-heroq],[data-heroimgq],[data-admblogtopic]," +
+    "[data-blogtoolurl],[data-blogtoolq],[data-admblogq]";
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (S.screen === "admin" && t && t.matches && t.matches(ADM_HELD_SEL)) admHeld(t);
   });
 
   /* blog (1a): the article's address, when its box is left. A draft's saves
