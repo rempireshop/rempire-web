@@ -1244,6 +1244,17 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   }
   .adm-top__ai[aria-expanded="true"] { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
 }
+/* One way back per screen: a card's own «← X» steps aside wherever the top
+   bar says «← X» for the same card (app.js admPageBackCls) — the design draws
+   the phone with the bar's only. Not while a save bar is the phone's header:
+   the top bar steps aside then (≤ 767, body.adm-saving), and the card's link
+   is the way back again. A desktop has no top bar and keeps it. */
+@media (min-width: 768px) and (max-width: 899px) {
+  .adm2 .adm-pageback { display: none; }
+}
+@media (max-width: 767px) {
+  body:not(.adm-saving) .adm2 .adm-pageback { display: none; }
+}
 
 /* ---------- the assistant folded: a strip (desktop, 1a rule 6) -------------- */
 .adm-strip { display: none; }

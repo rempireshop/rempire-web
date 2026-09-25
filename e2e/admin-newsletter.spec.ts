@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl } from "./fixtures";
+import { adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl } from "./fixtures";
 import { assertClean, clearToast, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -258,7 +258,7 @@ test.describe("admin — newsletter", () => {
     }
 
     /* ---- back to the list: the row says «Отправлено» ------------------- */
-    await page.locator("[data-newsback]").click();
+    await cardBack(page, "[data-newsback]", "Рассылка").click();
     const sentRow = page.locator("[data-newsedit]", { hasText: `E2E рассылка ${tag}` });
     await expect(sentRow).toBeVisible();
     await expect(sentRow.locator(".adm-badge--ok")).toHaveText("Отправлено");

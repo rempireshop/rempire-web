@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
 import { carrierPrice } from "@/lib/shipping/country-prices";
 
@@ -57,10 +57,10 @@ function ordersTab(page: Page) {
 /** Opens one page of «Настройки» on either viewport (the section sits behind «Ещё» on a phone). */
 async function openSettings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 }
 
 async function openCustomers(page: Page): Promise<void> {

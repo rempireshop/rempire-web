@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -158,7 +158,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await page.locator('.adm-more [data-admtab="setup"]').click();
     await expect(page.locator(".adm-more")).toHaveCount(0);
     await page.locator('[data-admsetpage="company"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
     await back(page);
     await expect(page.locator("[data-admsetback]"), "Back did not close the settings page on a phone").toHaveCount(0);
   });
@@ -213,7 +213,7 @@ test.describe("admin — «Назад» closes what is open", () => {
 
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="company"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 
     // the settings page first…
     await back(page);

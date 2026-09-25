@@ -23825,6 +23825,15 @@
     }
     return "";
   }
+  /** A card's own «← X» while the top bar says «← X» for the same card: one
+      way back per screen, as the design draws the phone (screens 02–16 show
+      only the bar's). The class lets admin.css hide the card's own link
+      wherever the top bar stands (≤ 899 px, and not while a save bar is the
+      phone's header); a desktop has no top bar and keeps it. A link whose
+      words differ from the bar's goes somewhere else and stays. */
+  function admPageBackCls(label) {
+    return label && label === admTopBackLabel() ? " adm-pageback" : "";
+  }
   function admTopHTML() {
     var back = admTopBackLabel();
     return '<div class="adm-top">' +
@@ -24130,7 +24139,7 @@
   function admBackHTML(attrs, label) {
     // the arrow outside the label's own node — «← Настройки» as one string
     // was the one word on every sub-page the Estonian panel never translated
-    return '<button class="adm-link" ' + attrs + ">← <span>" + label + "</span></button>";
+    return '<button class="adm-link' + admPageBackCls(label) + '" ' + attrs + ">← <span>" + label + "</span></button>";
   }
   /** Two columns with a right rail, the pattern of § «Design tokens». */
   function admColsHTML(main, side, wide) {
@@ -33941,7 +33950,7 @@
     var warn = bundleHintWarn();
     return '<div class="adm-seted" data-bundleform>' +
       // one control, two faces: «← Наборы» on a phone (the editor is its own view), × on a desktop
-      '<button type="button" class="adm-seted__close" data-bundlecancel><span class="adm-seted__back">← <span>Наборы</span></span>' +
+      '<button type="button" class="adm-seted__close' + admPageBackCls("Наборы") + '" data-bundlecancel><span class="adm-seted__back">← <span>Наборы</span></span>' +
         '<span class="adm-seted__x" aria-hidden="true">×</span><span class="vh adm-seted__xl">Закрыть</span></button>' +
       (f.editing ? "" :
         '<div class="adm-seted__draft"><span>Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.</span>' +
@@ -36743,7 +36752,7 @@
     var t = edTab();
     var isNew = !!p.isNew;   // product creation
     return '<div class="adm-screen adm-screen--tight">' +
-      '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
+      '<button class="adm-link adm-link--back' + admPageBackCls("Товары") + '" data-admclose>← Товары</button>' +
       /* This form keeps no draft in S: every field is read off the DOM when
          «Сохранить» is pressed. So «← Товары», «Отмена» and the phone's back
          gesture each threw away a price, three descriptions, six SEO boxes,

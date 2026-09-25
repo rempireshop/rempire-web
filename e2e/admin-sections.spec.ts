@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -98,8 +98,8 @@ test.describe("admin sections — every screen draws on both viewports", () => {
     // the settings index and one sub-page of it
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="journal"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
-    await page.locator("[data-admsetback]").click();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
+    await cardBack(page, "[data-admsetback]", "Настройки").click();
     await expect(page.locator('[data-admsetpage="delivery"]')).toBeVisible();
 
     expect(errors, `page errors while walking the sections: ${errors.join(" | ")}`).toEqual([]);

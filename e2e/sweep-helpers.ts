@@ -16,7 +16,7 @@
  */
 import { expect, type Browser, type Page } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import { shopUrl } from "./fixtures";
+import { cardBack, shopUrl } from "./fixtures";
 
 /* ---------- seeded randomness ------------------------------------------- */
 
@@ -282,10 +282,11 @@ export async function tab(page: Page, key: string): Promise<void> {
 export async function openSettings(page: Page, sub: string = "home"): Promise<void> {
   await tab(page, "setup");
   // already inside a sub-page (a previous call in the same test) → back out first
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  // (on a phone the way back is the top bar's «← Настройки» — fixtures.cardBack)
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 }
 
 /**

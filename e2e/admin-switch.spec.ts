@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, ipHeaders, loginAsAdmin } from "./fixtures";
+import { adminLang, adminSection, cardBack, ipHeaders, loginAsAdmin } from "./fixtures";
 
 /**
  * The admin's one switch — «Маркетинг → Промокоды» and everywhere else.
@@ -113,7 +113,7 @@ test.describe("admin — the switch says which way it is", () => {
       expect((await row.locator(".adm-row__sub").innerText()).trim().length,
         `${attr} has no sentence saying what off means`).toBeGreaterThan(10);
     }
-    await page.locator("[data-admsetback]").click();
+    await cardBack(page, "[data-admsetback]", "Настройки").click();
 
     // «Маркетинг → Письма» — a switch per letter, named after the letter
     await adminSection(page, "promos", "mail");

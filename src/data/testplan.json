@@ -1541,7 +1541,7 @@
       ],
       "expect": [
         "Вверху: REMPIRE и значок помощника справа; полоски «← В магазин» больше нет.",
-        "«← Заказы» вверху закрывает карточку, как «Назад» телефона.",
+        "«← Заказы» только вверху, второго на странице нет; закрывает карточку, как «Назад».",
         "«Ещё» — страница, не шторка; под разделами живые числа, красным — что ждёт вас.",
         "На компьютере свёрнутый помощник — узкая полоса справа, он ничего не закрывает.",
         "В вопросе действие слева, «Не надо» справа; «Не надо» ничего не меняет.",
@@ -1562,7 +1562,7 @@
         ],
         "expect": [
           "At the top: REMPIRE and the assistant's icon on the right; no «← В магазин» bar.",
-          "«← Заказы» at the top closes the card, like the phone's back button.",
+          "«← Заказы» only at the top, none on the page; it closes the card like Back.",
           "«Ещё» is a page, not a sheet; live numbers under sections, rust marks what waits.",
           "On a computer the folded assistant is a narrow strip on the right, covering nothing.",
           "The question has the action left and «Не надо» right; «Не надо» changes nothing.",
@@ -1571,7 +1571,7 @@
         "why": "The frame is shared by every screen in the new look: if something in it breaks, it shows everywhere."
       },
       "mark": "new",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T14:26:40.278Z"
     },
     {
       "id": "panel-back",

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -96,7 +96,7 @@ test.describe("admin — the customer card", () => {
       await expect(page.locator('.adm-cseg [data-admtab="reviews"]'), "the «Отзывы» tab is missing from the list").toBeVisible();
       await page.locator("[data-admcustq]").fill(email);
       await page.locator("[data-admcustopen]").first().click();
-      await expect(page.locator("[data-admcustclose]")).toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты")).toBeVisible();
 
       // ---- the card is its own page: no sub-tabs on it --------------------
       await expect(page.locator('.adm-cseg [data-admtab="reviews"]'), "the «Отзывы» sub-tab is still on the card").toHaveCount(0);
@@ -124,21 +124,22 @@ test.describe("admin — the customer card", () => {
       // ---- the order card opens over the customer's; Back returns to that
       // customer, not to «Заказы» -------------------------------------------
       await orderRow.click();
-      await expect(page.locator('[data-admorder=""]')).toBeVisible();
-      await expect(page.locator('[data-admorder=""]'), "the order card's way back does not name the customer").toContainText("К клиенту");
+      // (on a phone the card's way back is the top bar's — fixtures.cardBack)
+      await expect(cardBack(page, '[data-admorder=""]')).toBeVisible();
+      await expect(cardBack(page, '[data-admorder=""]'), "the order card's way back does not name the customer").toContainText("К клиенту");
       await expect(page.locator("[data-admcustclose]")).toHaveCount(0);
       await page.goBack();
       await expect(page.locator('body[data-screen="admin"]'), "Back left the admin altogether").toBeAttached();
       await expect(page.locator('[data-admorder=""]'), "Back did not close the order card").toHaveCount(0);
-      await expect(page.locator("[data-admcustclose]"), "Back did not return to the customer card").toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "Back did not return to the customer card").toBeVisible();
       await expect(page.locator(`[data-admorder]:has-text("${number}")`).first(), "the customer's orders are gone after Back").toBeVisible();
       await expect(page.locator("[data-admorderq]"), "Back landed on the orders list instead of the customer").toHaveCount(0);
 
       // …and the same through the card's own «← К клиенту»
       await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
-      await expect(page.locator('[data-admorder=""]')).toBeVisible();
-      await page.locator('[data-admorder=""]').click();
-      await expect(page.locator("[data-admcustclose]"), "«← К клиенту» did not return to the customer card").toBeVisible();
+      await expect(cardBack(page, '[data-admorder=""]', "К клиенту")).toBeVisible();
+      await cardBack(page, '[data-admorder=""]', "К клиенту").click();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "«← К клиенту» did not return to the customer card").toBeVisible();
 
       // ---- «Опубликовать» from the card: the queue's own reversible edit,
       // without leaving the card ---------------------------------------------
@@ -146,7 +147,7 @@ test.describe("admin — the customer card", () => {
       await row.locator('[data-admcustrev$=":approved"]').click();
       await expect(page.getByRole("status")).toContainText("Отзыв опубликован");
       await expect(page.locator(".adm-toast__undo"), "no «Отменить» on the toast").toBeVisible();
-      await expect(page.locator("[data-admcustclose]"), "publishing left the card").toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "publishing left the card").toBeVisible();
       await expect(row.locator(".adm-badge")).toHaveText("Опубликован");
       await expect.poll(async () => {
         const res = await page.request.get("/api/admin/reviews/?status=approved");
@@ -358,7 +359,7 @@ test.describe("admin — a customer's card opens at its top", () => {
     }, WANTED.id);
 
     // the whole card, not the skeleton: «at the top» is about the finished page
-    await expect(page.locator("[data-admcustclose]")).toBeVisible();
+    await expect(cardBack(page, "[data-admcustclose]", "Клиенты")).toBeVisible();
     await expect(page.locator(".adm-h2")).toHaveText(WANTED.name);
     await expect(page.locator('[data-admorder="e2e-top-order-0"]')).toBeVisible();
     await page.waitForTimeout(300);

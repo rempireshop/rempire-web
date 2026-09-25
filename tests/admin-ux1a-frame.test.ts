@@ -73,6 +73,8 @@ function frame(S: St, layers: string[], overview: unknown = null) {
     ${fn("admLogoutHTML")}
     ${fn("admSaveSlotHTML")}
     ${fn("admTopBackLabel")}
+    ${fn("admPageBackCls")}
+    ${fn("admBackHTML")}
     ${fn("admTopHTML")}
     ${fn("admStripHTML")}
     ${fn("admMoreLine")}
@@ -82,10 +84,10 @@ function frame(S: St, layers: string[], overview: unknown = null) {
     ${fn("admGateFootHTML")}
     ${fn("admWaitScreen")}
     ${fn("admLoginScreen")}
-    return { back: admTopBackLabel, top: admTopHTML, strip: admStripHTML, line: admMoreLine, more: admMorePageHTML,
+    return { back: admTopBackLabel, pageBack: admBackHTML, top: admTopHTML, strip: admStripHTML, line: admMoreLine, more: admMorePageHTML,
       bar: admBarHTML, login: admLoginScreen, wait: admWaitScreen };
   `)(S, esc, { data: overview }, () => layers, { admin: S.srvAdmin === undefined ? true : S.srvAdmin, err: S.err || "", busy: false }) as {
-    back: () => string; top: () => string; strip: () => string; line: (k: string) => [string, boolean, boolean];
+    back: () => string; pageBack: (attrs: string, label: string) => string; top: () => string; strip: () => string; line: (k: string) => [string, boolean, boolean];
     more: () => string; bar: (waiting?: number) => string; login: (title?: string) => string; wait: (title?: string) => string;
   };
 }
@@ -150,6 +152,49 @@ describe("the phone's top bar", () => {
 
   it("«←» is the phone's own Back: the same admCloseTop(), then a render", () => {
     expect(app).toContain("if (d.admtopback !== undefined) { if (admCloseTop()) render(); return; }");
+  });
+});
+
+/* 1a integration, 25.09.2026: on a phone the card's own «← Настройки»,
+   «← Клиенты»… stood under the top bar's «← Настройки» — two ways back for
+   one step. The design draws the bar's alone; a desktop has no bar and keeps
+   the card's. */
+describe("one way back per screen — the card's own «← X» steps aside for the bar's", () => {
+  it("a card link that says what the bar says is marked (.adm-pageback)", () => {
+    const cases: Array<[string[], St, string, string]> = [
+      [["section", "setpage"], {}, "data-admsetback", "Настройки"],
+      [["section", "customer"], {}, "data-admcustclose", "Клиенты"],
+      [["section", "order"], { admCustOpen: "c1" }, 'data-admorder=""', "К клиенту"],
+      [["section", "mail"], {}, "data-mailback", "Все письма"],
+      [["section", "blog"], {}, "data-admblogback", "Блог"],
+      [["section", "news"], {}, "data-newsback", "Рассылка"],
+      [["section", "moves"], {}, 'data-stockmovesopen=""', "Склад"],
+    ];
+    for (const [layers, S, attrs, label] of cases) {
+      expect(frame(S, layers).pageBack(attrs, label), layers.join(" → "))
+        .toBe(`<button class="adm-link adm-pageback" ${attrs}>← <span>${label}</span></button>`);
+    }
+  });
+
+  it("…and one that goes somewhere else, or stands under the wordmark, keeps its place", () => {
+    // the bar says «← Заказы»: a link to the customer is another step
+    expect(frame({}, ["section", "order"]).pageBack("data-admcustclose", "Клиенты")).toBe('<button class="adm-link" data-admcustclose>← <span>Клиенты</span></button>');
+    // a front door, and the «Ещё» page over a card: the bar shows the wordmark
+    expect(frame({}, ["section"]).pageBack("data-admsetback", "Настройки")).not.toContain("adm-pageback");
+    expect(frame({}, ["section", "setpage", "more"]).pageBack("data-admsetback", "Настройки")).not.toContain("adm-pageback");
+  });
+
+  it("hidden only where the top bar stands — and not while a save bar is the phone's header", () => {
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(rules).toContain("@media (min-width: 768px) and (max-width: 899px) {\n  .adm2 .adm-pageback { display: none; }\n}");
+    expect(rules).toContain("@media (max-width: 767px) {\n  body:not(.adm-saving) .adm2 .adm-pageback { display: none; }\n}");
+    expect(rules.match(/\.adm-pageback/g), "a desktop rule hides the card's way back").toHaveLength(2);
+  });
+
+  it("the set editor's «← Наборы» and the product card's «← Товары» are the same kind of link", () => {
+    expect(fn("bundleFormHTML")).toContain(`'<button type="button" class="adm-seted__close' + admPageBackCls("Наборы") + '" data-bundlecancel>`);
+    expect(app).toContain(`'<button class="adm-link adm-link--back' + admPageBackCls("Товары") + '" data-admclose>← Товары</button>'`);
+    expect(fn("admBackHTML")).toContain("admPageBackCls(label)");
   });
 });
 

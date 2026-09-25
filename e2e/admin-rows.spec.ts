@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 /**
  * «Which one am I pointing at?» — the admin's list rows.
@@ -444,8 +444,8 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     // dead centre of the split line: the switch is at its left end, «Изменить»
     // at its right, and what is between them belonged to nobody
     await line.click({ position: { x: box.width / 2, y: box.height / 2 } });
-    await expect(page.locator("[data-mailback]"), "the gap on the letter's row opened nothing").toBeVisible();
-    await page.locator("[data-mailback]").click();
+    await expect(cardBack(page, "[data-mailback]", "Все письма"), "the gap on the letter's row opened nothing").toBeVisible();
+    await cardBack(page, "[data-mailback]", "Все письма").click();
     // …and the letter itself was not switched on the way in
     await expect(sw).toBeVisible();
     await expect(sw, "the gap flipped the letter's switch").toHaveAttribute("aria-checked", was ?? "false");

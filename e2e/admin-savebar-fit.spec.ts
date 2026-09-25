@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, loginAsAdmin } from "./fixtures";
+import { adminLang, adminSection, cardBack, loginAsAdmin } from "./fixtures";
 
 /**
  * **Does every word fit on the phone's delivery page, in all three languages?**
@@ -37,8 +37,8 @@ test.beforeEach(async ({}, testInfo) => {
 
 async function openDelivery(page: Page): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator('[data-admsetpage="delivery"]').first().click();
   await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toBeVisible();
 }

@@ -49,6 +49,7 @@ function panel(S: Record<string, unknown>) {
     function admTagHTML(kind, text) { return '<span class="adm-tag">' + text + "</span>"; }
     var ADM_ROW_OPEN = "";
     var ADM_CUST_TIERS = [["", "Все"], ["news", "Подписаны"]];
+    function admPageBackCls() { return ""; }   // the phone top bar is not drawn here
     ${slice("admBackHTML")}
     ${slice("admCustInTier")}
     ${slice("admCustMatch")}

@@ -11,7 +11,7 @@
  * nth-child position, which is exactly what could move out from under this
  * suite while app.js is still being edited.
  */
-import { expect, type Page, type TestInfo } from "@playwright/test";
+import { expect, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 
 export type LangCode = "RU" | "ET" | "EN";
@@ -206,6 +206,19 @@ export async function adminSection(page: Page, key: string, sub?: string): Promi
     await page.locator(`.adm-more [data-admtab="${key}"]`).first().click();
   }
   if (sub) await page.locator(`[data-admtab="${sub}"][aria-current]:visible`).first().click();
+}
+
+/**
+ * A card's way back — «← Настройки», «← Клиенты», «← К клиенту»… On a
+ * desktop it is the card's own link (`sel`); on a phone the card's link
+ * steps aside for the top bar's «← X» (1a integration, 25.09.2026 — app.js
+ * admPageBackCls), except while a save bar is the phone's header. `label` is
+ * the words the bar uses for that card; without it, whatever back the bar
+ * shows (to read what it says).
+ */
+export function cardBack(page: Page, sel: string, label?: string): Locator {
+  const bar = label ? page.locator("[data-admtopback]:visible", { hasText: label }) : page.locator("[data-admtopback]:visible");
+  return page.locator(`${sel}:visible`).or(bar).first();
 }
 
 /**

@@ -63,13 +63,13 @@ describe("«+ Набор» opens the new set on its name", () => {
       "S", "LANGS", "BUNDLE_CATS", "esc", "BUNDLE_SAVE_ERRS",
       "bundleItemRowsHTML", "bundleSumLine", "bundlePickRows", "bundleOwnHint", "bundleFormPctText",
       "bundleHintHTML", "bundleImageRowHTML", "bundleProblem", "bundleHintWarn", "bundleDraftHas",
-      "admLangBarHTML", "admLangFallback", "admSecHeadHTML", "bundleAddrHTML", "admLabelledSwitch",
+      "admLangBarHTML", "admLangFallback", "admSecHeadHTML", "bundleAddrHTML", "admLabelledSwitch", "admPageBackCls",
       `${fn("bundleFormHTML")}\nreturn bundleFormHTML();`,
     )(
       { bundleForm: form, bundleFormErr: "" }, [["RU", "RU"], ["ET", "ET"], ["EN", "EN"]], [["beard", "Борода"]],
       (s: string) => String(s), { bad_name: "name", bad_desc: "desc", few_items: "few" },
       () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => false, () => false,
-      () => "", () => [], () => "", () => "", () => "",
+      () => "", () => [], () => "", () => "", () => "", () => "",
     ) as string;
     const inputs = html.match(/<input[^>]*>/g) ?? [];
     expect(inputs[0]).toContain('data-bundlef="title"');

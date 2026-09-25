@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test, type TestInfo } from "@playwright/test";
 import {
-  continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
+  cardBack, continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -271,8 +271,8 @@ test.describe("a11y admin", () => {
     await audit.check(page, "admin Заказы");
     // an order card — its «← Заказы» is the top bar's on a phone (1a) — and its «⋯»
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
-    const cardBack = page.locator('[data-admorder=""]:visible, [data-admtopback]:visible').first();
-    await expect(cardBack).toBeVisible();
+    const orderBack = page.locator('[data-admorder=""]:visible, [data-admtopback]:visible').first();
+    await expect(orderBack).toBeVisible();
     await audit.check(page, "admin order card");
     // the confirm card over it: «Отправлен без этикетки» asks first (1a: the card's alone, not the row's)
     await page.locator("[data-admshipnow]:visible").first().click();
@@ -284,7 +284,7 @@ test.describe("a11y admin", () => {
     await expect(page.locator('.adm-omenu__list[role="menu"]')).toBeVisible();
     await audit.check(page, "admin order card · «⋯»");
     await page.keyboard.press("Escape");
-    await cardBack.click();
+    await orderBack.click();
 
     await section("goods", /Товары/);
     await expect(page.locator("#goodslist")).toBeVisible();
@@ -335,18 +335,17 @@ test.describe("a11y admin", () => {
     await section("setup", /Настройки/);
     await audit.check(page, "admin Настройки");
     await page.locator('[data-admsetpage="home"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
     await page.waitForTimeout(600);
     await audit.check(page, "admin Настройки · Главная");
 
     /* the assistant panel — opened from where 1a puts it: the icon in the
        phone's top bar, the folded strip on a desktop (`.adm-aiopen`, the one
-       this viewport draws). On a phone this settings page has a save bar,
-       and while one stands the bar is the header and the top bar is not
-       drawn — so the page is closed first. (There is no «Помощник» row in
-       «Ещё» any more: Dim, 25.09.2026, q12.) */
+       this viewport draws). On a phone the page is closed first, through the
+       top bar's «← Настройки» — the page's own link steps aside for it (1a).
+       (There is no «Помощник» row in «Ещё» any more: Dim, 25.09.2026, q12.) */
     if (mobile) {
-      await page.locator("[data-admsetback]").first().click();
+      await cardBack(page, "[data-admsetback]", "Настройки").click();
       await expect(page.locator("[data-admsetpage]").first()).toBeVisible();
     }
     await page.locator(".adm-aiopen:visible").first().click();
