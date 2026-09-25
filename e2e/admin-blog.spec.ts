@@ -697,6 +697,8 @@ test.describe("blog — the whole article", () => {
     await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Habeme talvine hooldus ${marker}`);
     await expect(box.locator("h2")).toHaveText(`Õli igal õhtul ${marker}`);
     await expect(page.locator('[data-blogf="seoTitle"]')).toHaveValue(`ET Google ${marker}`);
+    // the tags box follows the tab: the Estonian set the translation came back with
+    await expect(page.locator("[data-blogtags]")).toHaveValue("habe, talv");
     await page.locator('[data-admbloglang="EN"]').click();
     await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Winter beard care ${marker}`);
     await expect(box.locator("h2")).toHaveText(`Oil every evening ${marker}`);
@@ -706,13 +708,15 @@ test.describe("blog — the whole article", () => {
     // saved by itself, as a draft — the owner has not pressed anything yet
     const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
     expect(saved.status(), "the article was not saved as a draft").toBe(200);
-    const post = (await saved.json()).post as { id: string; status: string; title: Record<string, string>; body: Record<string, string>; tags: string[]; products: string[]; seoTitle: Record<string, string> };
+    const post = (await saved.json()).post as { id: string; status: string; title: Record<string, string>; body: Record<string, string>; tags: string[]; tagsI18n: Record<string, string[]>; products: string[]; seoTitle: Record<string, string> };
     postId = post.id;
     try {
       expect(post.status).toBe("draft");
       expect(post.title).toEqual({ RU: `Уход за бородой зимой ${marker}`, ET: `Habeme talvine hooldus ${marker}`, EN: `Winter beard care ${marker}` });
       expect(post.body.ET).toContain(`<h2>Õli igal õhtul ${marker}</h2>`);
       expect(post.tags).toEqual(["борода", "зима", "уход"]);
+      // the translations' own tags are kept, each in its language (staging 25.09.2026: Russian chips on the ET page)
+      expect(post.tagsI18n).toEqual({ ET: ["habe", "talv"], EN: ["beard", "winter"] });
       expect(post.products).toEqual([PRODUCT.id]);
       expect(post.seoTitle.EN).toBe(`EN Google ${marker}`);
 
@@ -726,6 +730,7 @@ test.describe("blog — the whole article", () => {
       await expect(article.locator("ul li")).toHaveCount(2);
       await expect(shop.page.locator("h1")).toContainText(`Habeme talvine hooldus ${marker}`);
       await expect(shop.page).toHaveTitle(`ET Google ${marker} — REMPIRE`);
+      await expect(shop.page.locator("div.blog__tags .chip"), "the Estonian article's tag chips are not the Estonian set").toHaveText(["habe", "talv"]);
       await expect(shop.page.locator('meta[name="description"]')).toHaveAttribute("content", `ET kirjeldus ${marker}`);
       // «Товары из статьи»: the product the generator named is under the article
       await expect(shop.page.locator(`.card__go[data-go-product="${PRODUCT.id}"], [data-go-product="${PRODUCT.id}"]`).first()).toBeVisible();

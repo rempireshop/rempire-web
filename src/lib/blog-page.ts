@@ -57,6 +57,7 @@ import {
   noindexShell,
   overriddenPrice,
   patchShell,
+  pickTags,
   robotsFor,
   stripTags,
   T,
@@ -112,7 +113,7 @@ function listItem(p: PostSummary, code: string) {
   return {
     slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
     coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
-    tags: p.tags, publishedAt: p.publishedAt,
+    tags: pickTags(p.tags, p.tagsI18n, code), publishedAt: p.publishedAt,
   };
 }
 
@@ -234,6 +235,8 @@ export function renderBlogPostPage(
   // same ladder setHead() in app.js runs once the SPA takes the page over
   const desc = clip(pickLang(post.seoDesc, code) || excerpt || bodyText, 158);
   const seoTitleRaw = pickLang(post.seoTitle, code);
+  // this language's tags — never a Russian chip on the Estonian page (pickTags)
+  const tags = pickTags(post.tags, post.tagsI18n, code);
   const pageTitle = fitTitle(title, (seoTitleRaw || title) + " — REMPIRE");
   const crumbItems: Array<[string, string | null]> = [[t.home, langPath(seg, "/")], [t.blog, langPath(seg, "/blog/")], [title, null]];
   const others = list.posts.filter((p) => p.slug !== post.slug).slice(0, 3);
@@ -248,7 +251,7 @@ export function renderBlogPostPage(
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
-      (post.tags.length ? '<ul class="blog__tags">' + post.tags.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
+      (tags.length ? '<ul class="blog__tags">' + tags.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
       '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
     "</article>" +
     (opts.products.length
@@ -264,7 +267,7 @@ export function renderBlogPostPage(
     jsonScript("blogpost", { lang: code, stamp: stampOf(post), post: {
       slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
       coverFocus: post.coverFocus,
-      tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
+      tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
       author: post.author, publishedAt: post.publishedAt,
     } }) +
     dataScript(code, list.posts, list.total) +

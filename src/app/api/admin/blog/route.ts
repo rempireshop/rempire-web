@@ -113,6 +113,8 @@ function fieldsOf(body: Record<string, unknown>): PostInput {
        what a cover with nothing chosen already is. */
     coverFocus: body.coverFocus,
     tags: body.tags,
+    // the Estonian and English sets — absent keeps what is stored (@/lib/blog upsertPost)
+    tagsI18n: body.tagsI18n,
     products: body.products,
     seoTitle: body.seoTitle,
     seoDesc: body.seoDesc,

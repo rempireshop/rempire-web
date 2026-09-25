@@ -88,7 +88,7 @@ import {
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale
+  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
 } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -1595,7 +1595,7 @@ function blogListItem(p, code) {
   return {
     slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
     coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
-    tags: p.tags, publishedAt: p.publishedAt
+    tags: pickTags(p.tags, p.tagsI18n, code), publishedAt: p.publishedAt
   };
 }
 const blogStamp = post => Date.parse(post.updatedAt || post.publishedAt || "") || 0;
@@ -1718,8 +1718,10 @@ function blogPostPage(post, lang) {
     .map(id => blogShelfProduct(id))
     .filter(Boolean);
 
-  const tagsHtml = post.tags && post.tags.length
-    ? '<ul class="blog__tags">' + post.tags.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>"
+  // this language's tags — never a Russian chip on the Estonian page (pickTags)
+  const tags = pickTags(post.tags, post.tagsI18n, code);
+  const tagsHtml = tags.length
+    ? '<ul class="blog__tags">' + tags.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>"
     : "";
 
   const others = BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 3);
@@ -1748,7 +1750,7 @@ function blogPostPage(post, lang) {
     langNav(seg, rest, t) +
     blogJsonScript("blogpost", { lang: code, stamp: blogStamp(post), post: {
       slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
-      coverFocus: post.coverFocus, tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
+      coverFocus: post.coverFocus, tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
       author: post.author, publishedAt: post.publishedAt
     } }) +
     "</div>";

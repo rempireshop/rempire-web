@@ -85,6 +85,9 @@ function toPost(r) {
        it, and nobody would have seen the difference without publishing. */
     coverFocus: writeCoverFocus(r.cover_focus),
     tags: Array.isArray(r.tags) ? r.tags : [],
+    /* The Estonian and English sets (db/migrations/209_blog_tags_i18n.sql),
+       null on a database the migration has not reached yet — see the query. */
+    tagsI18n: r.tags_i18n && typeof r.tags_i18n === "object" ? r.tags_i18n : {},
     products: Array.isArray(r.products) ? r.products : [],
     seoTitle: { ...EMPTY3, ...(r.seo_title || {}) },
     seoDesc: { ...EMPTY3, ...(r.seo_desc || {}) },
@@ -116,7 +119,12 @@ export async function fetchPublishedPosts() {
   try {
     await client.connect();
     const res = await client.query(
+      /* tags_i18n through to_jsonb(): the build's prebuild prerender runs
+         BEFORE postbuild's migrate, so the first deploy that brings the
+         column reads a database without it — a plain column name would fail
+         the whole query and write no blog pages at all. */
       `select id, slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products,
+              to_jsonb(posts) -> 'tags_i18n' as tags_i18n,
               seo_title, seo_desc, author, published_at, updated_at
          from posts
         where status = 'published'

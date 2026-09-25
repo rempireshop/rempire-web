@@ -575,6 +575,23 @@ export const CAT_NAMES_I18N = {
   perfume: { RU: "Парфюмерия", ET: "Parfüümid", EN: "Fragrance" },
   merch: { RU: "Мерч", ET: "Merch", EN: "Merch" }
 };
+/* ---------- an article's tags, in the language of its page ------------------
+   The Russian set is the post's `tags`; the Estonian and English sets are
+   `tagsI18n.ET` / `tagsI18n.EN` (db/migrations/209_blog_tags_i18n.sql),
+   written by the article's translation or typed on that language's tab. A
+   language with no set of its own shows only the Russian set's words that
+   are not Russian — a brand, «proraso» — and never a Russian chip on an
+   Estonian page (verification pass on staging, 25.09.2026). One function for
+   the request-time page, the build, and both public routes. */
+const CYRILLIC_RX = /[Ѐ-ӿ]/;
+export function pickTags(tags, tagsI18n, code) {
+  const ru = Array.isArray(tags) ? tags.filter((t) => typeof t === "string" && t.trim()) : [];
+  if (code !== "ET" && code !== "EN") return ru;
+  const set = tagsI18n && typeof tagsI18n === "object" ? tagsI18n[code] : null;
+  const own = Array.isArray(set) ? set.filter((t) => typeof t === "string" && t.trim() && !CYRILLIC_RX.test(t)) : [];
+  return own.length ? own : ru.filter((t) => !CYRILLIC_RX.test(t));
+}
+
 export const catName = (cat, code) => (CAT_NAMES_I18N[cat] && (CAT_NAMES_I18N[cat][code] || CAT_NAMES_I18N[cat].RU)) || "";
 
 /* ---------- OG cards ----------------------------------------------------- */

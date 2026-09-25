@@ -15735,7 +15735,12 @@
     var slugEl = document.querySelector("[data-blogslug]");
     if (slugEl && !d.slugAuto) d.slug = slugEl.value;
     var tagsEl = document.querySelector("[data-blogtags]");
-    if (tagsEl) d.tagsText = tagsEl.value;
+    if (tagsEl) {
+      // the tags box is the language's tab too: RU is `tagsText`, ET/EN their own set
+      var tagL = blogFieldLang(tagsEl) || "RU";
+      if (tagL === "RU") d.tagsText = tagsEl.value;
+      else { if (!d.tagsI18n) d.tagsI18n = { ET: "", EN: "" }; d.tagsI18n[tagL] = tagsEl.value; }
+    }
     var box = blogBox(), bl = blogBoxLang(box);
     if (box && bl) d.body[bl] = blogBoxHtml(box);
   }
@@ -16455,7 +16460,12 @@
       id: "", slug: "", slugAuto: true, status: "draft",
       title: { RU: "", ET: "", EN: "" }, excerpt: { RU: "", ET: "", EN: "" }, body: { RU: "", ET: "", EN: "" },
       coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" }, coverFocus: "",
-      tagsText: "", products: [],
+      /* `tagsText` is the Russian set; `tagsI18n` the Estonian and English
+         ones, each as the box shows it — words and commas. The ET/EN shop
+         shows its own set, never the Russian one (pickTags in
+         src/lib/seo-head.mjs; staging 25.09.2026: Russian chips on the
+         Estonian article). */
+      tagsText: "", tagsI18n: { ET: "", EN: "" }, products: [],
       seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" },
       author: "Rempire", publishedAt: null
     };
@@ -16468,7 +16478,9 @@
       body: blogBody3ToHtml(Object.assign({}, BLOG_EMPTY3, p.body)),
       coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
       coverFocus: p.coverFocus || "",
-      tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
+      tagsText: (p.tags || []).join(", "),
+      tagsI18n: { ET: ((p.tagsI18n && p.tagsI18n.ET) || []).join(", "), EN: ((p.tagsI18n && p.tagsI18n.EN) || []).join(", ") },
+      products: (p.products || []).slice(),
       seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
       author: p.author || "Rempire", publishedAt: p.publishedAt || null
     };
@@ -16527,6 +16539,12 @@
          as null, which is what a cover nobody has dragged already is. */
       coverFocus: d.coverFocus || null,
       tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      /* the Estonian and English sets; a draft without them sends nothing,
+         and the row keeps its own (upsertPost in src/lib/blog.ts) */
+      tagsI18n: d.tagsI18n ? {
+        ET: String(d.tagsI18n.ET || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+        EN: String(d.tagsI18n.EN || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean)
+      } : undefined,
       products: d.products,
       seoTitle: d.seoTitle, seoDesc: d.seoDesc,
       author: d.author
@@ -16614,10 +16632,10 @@
   /** Everything a save sends — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
     return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt, d.coverFocus,
-      d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
+      d.tagsText, d.tagsI18n, d.products, d.seoTitle, d.seoDesc, d.author]);
   }
   var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt", "coverFocus",
-    "tagsText", "products", "seoTitle", "seoDesc", "author"];
+    "tagsText", "tagsI18n", "products", "seoTitle", "seoDesc", "author"];
   /** The same fields, detached from the draft — what a save compares against
       once the draft has moved on under it. See saveBlogFields(). */
   function blogDraftSnap(d) {
@@ -16777,7 +16795,8 @@
       title: pick(d.title),
       excerpt: pick(d.excerpt),
       body: stripTags(pick(d.body)).slice(0, 1500),
-      tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      // the language's own tags when it has them, like every other field here
+      tags: String((L !== "RU" && d.tagsI18n && d.tagsI18n[L]) || d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
       products: productsById(d.products).map(function (p) { return p.brand + " " + p.name; })
     };
   }
@@ -16934,6 +16953,13 @@
       if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(blogFigsIn(txt(tx.body), figs.figs), src.cards, L));
       if (tx.seo && txt(tx.seo.title)) d.seoTitle[L] = txt(tx.seo.title).slice(0, 70);
       if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
+      /* …and the tags, in that language (the route keeps only the ones written
+         in it — tagInLang). They used to be dropped here, and the Estonian
+         page printed the Russian set. */
+      if (Array.isArray(tx.tags) && tx.tags.length) {
+        if (!d.tagsI18n) d.tagsI18n = { ET: "", EN: "" };
+        d.tagsI18n[L] = tx.tags.map(String).join(", ");
+      }
     });
   }
   /* `ask` — the owner's own words when the chat assistant named the topic
@@ -25954,8 +25980,11 @@
       '<label class="adm-field">Адрес статьи' +
         '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
           esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '" autocapitalize="off" spellcheck="false"></label>' +
+      /* the language on the tab above, like the title: the Estonian page shows
+         the Estonian set and never the Russian one (pickTags) */
       '<label class="adm-field">Теги — через запятую' +
-        '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
+        '<input class="adm-input" data-blogtags data-blogl="' + L + '" value="' +
+          esc(L === "RU" || !L ? d.tagsText : ((d.tagsI18n && d.tagsI18n[L]) || "")) + '" placeholder="борода, зима"></label>' +
       '<label class="adm-field">Автор' +
         '<input class="adm-input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
       /* The pair below is the language the tab is on — so are the two
@@ -50192,6 +50221,8 @@
         { field: "title", text: bdTr.title[srcLang] },
         { field: "excerpt", text: bdTr.excerpt[srcLang] },
         { field: "body", text: blogHtmlToText(trFigs.html) },
+        // the tags too — each language shows its own set (pickTags), a comma list in, a comma list out
+        { field: "tags", text: srcLang === "RU" ? bdTr.tagsText : (bdTr.tagsI18n && bdTr.tagsI18n[srcLang]) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
       Promise.all(jobs.map(function (j) {
@@ -50216,6 +50247,12 @@
             targets.forEach(function (l) {
               var v = txt(res.r.body.texts[l]);
               if (!v) return;
+              if (res.field === "tags") {
+                if (l === "RU") bdTr.tagsText = v;
+                else { if (!bdTr.tagsI18n) bdTr.tagsI18n = { ET: "", EN: "" }; bdTr.tagsI18n[l] = v; }
+                got++;
+                return;
+              }
               bdTr[res.field][l] = res.field === "body"
                 ? blogCleanHtml(blogCardsIn(blogFigsIn(blogTextToHtml(v), trFigs.figs), trCards.cards, l))
                 : v;
@@ -50753,7 +50790,12 @@
       }
     }
     else if (t.matches("[data-blogtags]")) {
-      if (S.adminBlogEdit) { S.adminBlogEdit.tagsText = t.value; blogAutosave("input"); }
+      var tgd = S.adminBlogEdit, tgL = blogFieldLang(t) || "RU";
+      if (tgd) {
+        if (tgL === "RU") tgd.tagsText = t.value;
+        else { if (!tgd.tagsI18n) tgd.tagsI18n = { ET: "", EN: "" }; tgd.tagsI18n[tgL] = t.value; }
+        blogAutosave("input");
+      }
     }
     else if (t.matches("[data-admblogq]")) {
       S.adminBlogQ = t.value;

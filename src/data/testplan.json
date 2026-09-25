@@ -7558,6 +7558,51 @@
       "markedAt": "2026-09-25T23:13:20.113Z"
     },
     {
+      "id": "blog-lang-tags-title",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Статья на ET и EN: свои теги и одно «— REMPIRE»",
+      "steps": [
+        "«Ещё» → «Блог», открыть статью и развернуть «Адрес, автор, теги и Google».",
+        "Переключать «Язык статьи» RU → ET → EN и смотреть на поле «Теги».",
+        "На ET вписать эстонские теги и подождать «Сохранено ✓» вверху.",
+        "Опубликовать и открыть эстонскую статью в магазине.",
+        "Посмотреть название вкладки браузера у эстонской статьи."
+      ],
+      "expect": [
+        "У каждого языка свои теги; эстонские не затирают русские.",
+        "На эстонской странице теги эстонские, русских слов среди них нет.",
+        "Язык без своих тегов показывает статью без тегов, а не русские.",
+        "После «Написать статью целиком» у ET и EN уже есть свои теги.",
+        "В названии вкладки «— REMPIRE» ровно один раз."
+      ],
+      "why": "Русские теги на эстонской странице и двойное имя магазина в заголовке выглядят как недоделка.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "An article in ET and EN: its own tags and one «— REMPIRE»",
+        "steps": [
+          "«Ещё» → «Блог», open an article and unfold «Адрес, автор, теги и Google».",
+          "Switch «Язык статьи» RU → ET → EN and watch the «Теги» (tags) field.",
+          "On ET type Estonian tags and wait for «Сохранено ✓» at the top.",
+          "Publish and open the Estonian article in the shop.",
+          "Look at the browser tab's title of the Estonian article."
+        ],
+        "expect": [
+          "Each language has its own tags; the Estonian ones leave the Russian ones alone.",
+          "The Estonian page shows Estonian tags, no Russian word among them.",
+          "A language without tags of its own shows the article without tags, not Russian ones.",
+          "After «Написать статью целиком» ET and EN already have their own tags.",
+          "The tab title carries «— REMPIRE» exactly once."
+        ],
+        "why": "Russian tags on an Estonian page and the shop's name twice in the title look unfinished."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T23:23:02.337Z"
+    },
+    {
       "id": "people-list",
       "area": "people",
       "who": "renat",
