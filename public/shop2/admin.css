@@ -279,6 +279,33 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 }
 .adm-input--row { height: 40px; }
 .adm2 textarea.adm-input { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
+
+/* ---------- the search box: every list, «Салон» and each «найти товар» ------
+   app.js admSearchHTML(): one label holding the magnifier and the box. The
+   glass is centred on the box's height, whatever that height is — top 50 %
+   and half its own 16 px back up, ONE offset — 14 px in from the left edge,
+   and the words start at 40 px, clear of it. Dim, 25.09.2026, on his phone:
+   «the magnifying glass seems a bit off». Two screens' rules both applied to
+   it (a translateY(-50%) AND a margin-top of −8 px), so it stood 8 px above
+   the words; and Склад, Салон and the pickers had no glass at all. */
+.adm-search { position: relative; display: block; min-width: 0; }
+.adm-search__i {
+  position: absolute; left: 14px; top: 50%; width: 16px; height: 16px; margin-top: -8px;
+  color: var(--a-muted); pointer-events: none;
+}
+.adm2 .adm-search > .adm-input, .adm-search > .scan__find { padding-left: 40px; }
+.adm-search > input::-webkit-search-cancel-button { cursor: pointer; }
+/* the four lists' own search — Заказы, Каталог, Склад, Клиенты — one height */
+.adm2 .adm-search--list > .adm-input { height: 46px; }
+@media (max-width: 899px) { .adm2 .adm-search--list > .adm-input { height: 48px; } }
+
+/* A phone's field is 16 px or larger: iOS zooms the whole page in on a
+   field whose text is smaller the moment it is tapped, and the owner is left
+   pinching the panel back to size (and the panel reads «wider than the
+   screen» while it is zoomed). The desktop keeps the tighter 15 px. */
+@media (max-width: 899px) {
+  .adm2 input, .adm2 select, .adm2 textarea { font-size: 16px; }
+}
 .adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 16px; color: var(--a-muted); min-width: 0; }
 .adm-hint { font-size: 13px; color: var(--a-muted); line-height: 18px; }
 .adm-hint--warn { color: var(--a-warn); }
@@ -745,15 +772,20 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 }
 .adm-orders__pin { display: contents; }
 .adm-orders__acts .adm-pin { margin-left: 0; }
-.adm-search { position: relative; display: block; flex: 0 1 300px; min-width: 200px; }
-.adm-search__i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--a-muted); pointer-events: none; }
-.adm2 .adm-search__in.adm-input { height: 46px; padding-left: 38px; }
-.adm-search__in::-webkit-search-cancel-button { cursor: pointer; }
+/* the box itself is the shared `.adm-search` (inputs, above); here only its
+   share of the header row. On a phone it is the row: `flex: 1 1 auto` — it
+   used to be sized by a later «Товары» rule to its own content, 228 px of a
+   358-px row, and the placeholder stopped at «телефон и» */
+.adm-orders__acts .adm-search { flex: 0 1 340px; min-width: 240px; }
+/* «Открыть первый: <имя>» — a name is as long as the customer typed it, and
+   a pin that would not shrink pushed the search over «Заказы» (1440) and
+   both of them over the sidebar (1024). It gives way now; the name ends
+   with «…» (.adm-pin__btn > span). */
+.adm-orders__acts .adm-pin { flex: 0 1 auto; min-width: 0; max-width: 460px; }
 @media (max-width: 899px) {
   .adm-orders .adm-head { flex-direction: column; align-items: stretch; gap: 14px; }
   .adm-orders__acts { flex: none; justify-content: stretch; }
-  .adm-search { flex: 1 1 auto; min-width: 0; }
-  .adm2 .adm-search__in.adm-input { height: 48px; }
+  .adm-orders__acts .adm-search { flex: 1 1 auto; min-width: 0; }
 }
 /* the chips: one row that scrolls sideways on a phone, never wrapping; the
    count bold beside its word; «?» after them on «Возвраты» */
@@ -1820,9 +1852,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;
 }
 .adm-seg--tabs .adm-tab__warn--zero:not(:empty) { background: none; color: var(--a-muted); padding: 0; min-width: 0; }
-.adm-search { position: relative; flex: 0 1 340px; min-width: 200px; display: block; }
-.adm-search__i { position: absolute; left: 14px; top: 50%; margin-top: -8px; color: var(--a-muted); pointer-events: none; }
-.adm2 .adm-search .adm-input { height: 46px; padding-left: 40px; }
+/* the box is the shared `.adm-search` (inputs, above); here only its place */
+.adm-goodsbar .adm-search { flex: 0 1 340px; min-width: 200px; }
 
 /* ---------- Каталог rows (screen 10) ------------------------------------------
    Desktop: Товар · Объёмы · Наличие · Цена · Виден under one header. Phone:
@@ -1867,7 +1898,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-goodsbar { flex-direction: column; align-items: stretch; }
   .adm-seg.adm-seg--tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
   .adm-seg--tabs button { min-width: 0; padding: 0 8px; }
-  .adm-search { flex: none; min-width: 0; }
+  .adm-goodsbar .adm-search { flex: none; min-width: 0; }
   .adm-grow--head { display: none; }
   .adm-grow {
     column-gap: 12px; row-gap: 6px; padding: 12px 0; align-items: start;
@@ -2213,6 +2244,16 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* The search box IS the screen's main action, so it wears the ink border the
    README reserves for exactly that. */
 .adm-input--find { flex: 1 1 auto; min-width: 0; height: 52px; border-color: var(--a-ink); font-size: 16px; }
+/* the shared search label (app.js admSearchHTML) takes the row beside «Сканировать» */
+.adm-salon__q { flex: 1 1 auto; }
+/* Under 390 px — and on a narrow desktop, where the basket takes 300 px of
+   the row — the glass would push the end of «Название, бренд, штрихкод» out
+   of the box beside «Сканировать» (the one search here whose words must all
+   show: they say a barcode works too); the glass steps aside there. */
+@media (max-width: 389px), (min-width: 900px) and (max-width: 1180px) {
+  .adm-salon__q .adm-search__i { display: none; }
+  .adm2 .adm-salon__q > .adm-input { padding-left: 10px; }
+}
 .adm-posscan { flex: none; height: 52px; padding: 0 16px; font-weight: 600; }
 @media (max-width: 1180px) {
   .adm-salon__grid { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 24px; }
@@ -2714,11 +2755,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   min-width: 18px; height: 18px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center;
   background: var(--a-rust); color: var(--a-onink); font-size: 11px; font-weight: 600; line-height: 1;
 }
-.adm-csearch { position: relative; display: block; flex: 0 1 320px; min-width: 0; }
-.adm-csearch > svg { position: absolute; left: 14px; top: 50%; margin-top: -8px; color: var(--a-muted); pointer-events: none; }
-.adm-csearch .adm-input { height: 44px; padding-left: 40px; }
-.adm-cchips .adm-chip { display: inline-flex; align-items: center; gap: 6px; }
-.adm-chip__n { font-weight: 700; }
+/* the box is the shared `.adm-search` (inputs, above); here only its place */
+.adm-csearch { flex: 0 1 320px; }
 
 /* the list: one row per customer */
 .adm-crow__meta, .adm-crow__reqco { display: none; }
@@ -2865,7 +2903,6 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm-cseg { display: grid; grid-template-columns: 1fr 1fr; }
   .adm-cseg__b { height: 44px; padding: 0 10px; }
   .adm-csearch { flex: none; }
-  .adm-csearch .adm-input { height: 48px; font-size: 16px; }
   .adm-cchips .adm-chip { height: 44px; }
   .adm-ccols { display: flex; flex-direction: column; align-items: stretch; }
   .adm-ccol { display: contents; }
@@ -4106,7 +4143,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 
 /* ---------- «Склад»: search, chips, the count and «История →» ----------- */
 .adm-stkbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
-.adm-stkbar__q { height: 46px; }
+/* `.adm-stkbar__q` is the search label (app.js admSearchHTML, `--list` height) */
 @media (min-width: 900px) {
   .adm-stkbar { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); align-items: center; gap: 16px; }
   .adm-stkbar .adm-chips { grid-column: 1; grid-row: 1; }

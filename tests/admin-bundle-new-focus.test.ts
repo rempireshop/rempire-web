@@ -64,7 +64,7 @@ describe("«+ Набор» opens the new set on its name", () => {
       "bundleItemRowsHTML", "bundleSumLine", "bundlePickRows", "bundleOwnHint", "bundleFormPctText",
       "bundleHintHTML", "bundleImageRowHTML", "bundleProblem", "bundleHintWarn", "bundleDraftHas",
       "admLangBarHTML", "admLangFallback", "admSecHeadHTML", "bundleAddrHTML", "admLabelledSwitch", "admPageBackCls",
-      `${fn("bundleFormHTML")}\nreturn bundleFormHTML();`,
+      `${fn("admSearchHTML")}\n${fn("bundleFormHTML")}\nreturn bundleFormHTML();`,
     )(
       { bundleForm: form, bundleFormErr: "" }, [["RU", "RU"], ["ET", "ET"], ["EN", "EN"]], [["beard", "Борода"]],
       (s: string) => String(s), { bad_name: "name", bad_desc: "desc", few_items: "few" },

@@ -15793,8 +15793,8 @@
     }
     if (t === "product") {
       return '<div class="adm-toolrow">' +
-          '<input class="adm-input adm-input--row adm-toolrow__in" data-blogtoolq value="' + esc(S.adminBlogToolQ || "") +
-            '" placeholder="Найти товар по названию" aria-label="Найти товар">' +
+          admSearchHTML('<input class="adm-input adm-input--row" data-blogtoolq value="' + esc(S.adminBlogToolQ || "") +
+            '" placeholder="Найти товар по названию" aria-label="Найти товар">', "adm-toolrow__in") +
           '<button class="link" data-blogtoolcancel>Отмена</button></div>' +
         '<div data-blogtoollist>' + blogToolMatches() + "</div>";
     }
@@ -21303,9 +21303,21 @@
   }
   /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
   var ORDERS_PAGE = 40;
-  /* The magnifier in the search box (1a, screens 04) — drawn, not a glyph. */
-  var ADM_SEARCH_SVG = '<svg class="adm-search__i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>';
+  /* Every search box of the panel — the lists (Заказы, Каталог, Склад,
+     Клиенты), «Салон» and each «найти товар» picker — is this one label: the
+     magnifier drawn at its left (1a, screens 04, 05, 10, 11), the box after
+     it, and admin.css `.adm-search` centring the glass on whatever height the
+     box has. It used to be three drawings in three screens and two CSS rules
+     that BOTH lifted the glass, so it stood 8 px above the words (Dim on his
+     phone, 25.09.2026: «the magnifying glass seems a bit off»), and half the
+     boxes had no glass at all. `input` is the box's own markup, every data-*
+     hook as it was; `cls` is the screen's class for where the label sits. */
+  function admSearchHTML(input, cls) {
+    return '<label class="adm-search' + (cls ? " " + cls : "") + '">' +
+      '<svg class="adm-search__i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>' +
+      input + "</label>";
+  }
   /** Which chip is lit on screen. While a search is typed it is «Все»: the
       search looks through every order the shop has (r22, Dim 17.09.2026), so
       the chip says so rather than a line under it (gap L3, recommended). The
@@ -21369,9 +21381,8 @@
     return '<div class="adm-screen adm-screen--tight adm-orders">' +
       admHead("", "Заказы",
         '<div class="adm-orders__acts">' +
-          '<label class="adm-search">' + ADM_SEARCH_SVG +
-            '<input class="adm-input adm-search__in" type="search" data-admorderq value="' + esc(S.admOrderQ || "") +
-              '" placeholder="Имя, номер, телефон или почта" aria-label="Поиск по заказам" autocomplete="off"></label>' +
+          admSearchHTML('<input class="adm-input adm-search__in" type="search" data-admorderq value="' + esc(S.admOrderQ || "") +
+            '" placeholder="Имя, номер, телефон или почта" aria-label="Поиск по заказам" autocomplete="off">', "adm-search--list") +
           '<span class="adm-orders__pin" data-admorderpin>' + admOrdersPinHTML() + "</span>" +
         "</div>") +
       '<div data-admorderchips>' + admOrderChipsHTML() + "</div>" +
@@ -22986,11 +22997,9 @@
       It finds a product by its barcode too (1a): the codes are on the
       warehouse rows, which every «Товары» tab loads for the «Склад» badge. */
   function admCatalogSearchHTML() {
-    return '<label class="adm-search"><span class="vh">Поиск по товарам</span>' +
-      '<svg class="adm-search__i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
-        '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>' +
+    return admSearchHTML('<span class="vh">Поиск по товарам</span>' +
       '<input class="adm-input adm-input--row" data-goodsq value="' + esc(S.goodsQ || "") +
-        '" placeholder="Название, бренд или штрихкод" aria-label="Поиск по товарам"></label>';
+        '" placeholder="Название, бренд или штрихкод" aria-label="Поиск по товарам">', "adm-search--list");
   }
   function admCatalogHTML() {
     var f = goodsFilterNow();
@@ -25798,7 +25807,7 @@
       (full
         ? '<p class="adm-hint">В статье уже 12 товаров — больше не поместится.</p>'
         : S.adminBlogProdOpen || S.adminBlogQ
-          ? '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" aria-label="Найти товар по названию">' +
+          ? admSearchHTML('<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" aria-label="Найти товар по названию">') +
             '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div>"
           : '<div><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admblogprodadd>+ Товар</button></div>') +
       "</div>";
@@ -26702,8 +26711,8 @@
     var only = pk.only || "";
     var b = k === "add" ? null : newsBlockByKey(k);
     return '<div class="adm-nbpick" data-nbpick="' + esc(k) + '">' +
-      '<input class="adm-input" data-nbf="q" data-nbk="' + esc(k) + '" value="' + esc(pk.q || "") + '" autocomplete="off" ' +
-        'placeholder="' + (only === "product" ? "Найти товар: название, бренд…" : "Найти: товар, раздел, бренд, статья") + '" aria-label="Найти">' +
+      admSearchHTML('<input class="adm-input" data-nbf="q" data-nbk="' + esc(k) + '" value="' + esc(pk.q || "") + '" autocomplete="off" ' +
+        'placeholder="' + (only === "product" ? "Найти товар: название, бренд…" : "Найти: товар, раздел, бренд, статья") + '" aria-label="Найти">') +
       '<div class="adm-nbpick__list" data-nbpicklist>' + newsPickRows(pk.q, only) + "</div>" +
       (only === "product" ? "" :
         '<label class="adm-field">Или вставьте адрес страницы' +
@@ -31762,13 +31771,13 @@
          for what that did to the page. */
       '<div class="adm-form" data-herogopanel' + (isProduct ? "" : " hidden") + ">" +
         '<p class="adm-hint" style="margin:-8px 0 0" data-herogohint>Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
-        '<input class="adm-input" data-heroq value="' + esc(S.heroGoQ || "") +
-          '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
+        admSearchHTML('<input class="adm-input" data-heroq value="' + esc(S.heroGoQ || "") +
+          '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">') +
         '<div class="adm-picks" id="herogolist">' + heroGoRows() + "</div>" +
       "</div>" +
       '<div class="adm-field"><span>Картинка</span>' +
-        '<input class="adm-input" data-heroimgq value="' + esc(S.heroImgQ || "") +
-          '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
+        admSearchHTML('<input class="adm-input" data-heroimgq value="' + esc(S.heroImgQ || "") +
+          '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">') +
         '<div class="adm-picks" id="heroimglist">' + heroImgRows() + "</div>" +
         /* media: a picture of the owner's own — «+ своя» */
         galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
@@ -33591,8 +33600,8 @@
             '<span class="adm-row__body"><span class="adm-row__nm">' +
               esc(picked.brand ? picked.brand + " — " + picked.name : picked.name) + "</span></span>" +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoproddel>Убрать</button></div></div>'
-        : '<input class="adm-input" data-promoq value="' + esc(S.promoQ || "") + '" placeholder="Найти товар…" aria-label="Найдите товар — по названию или бренду"' +
-            badScope + ">" +
+        : admSearchHTML('<input class="adm-input" data-promoq value="' + esc(S.promoQ || "") + '" placeholder="Найти товар…" aria-label="Найдите товар — по названию или бренду"' +
+            badScope + ">") +
           '<div id="admpromopicks">' + promoPicksHTML(promoProductMatches()) + "</div>";
     }
     return '<div class="adm-pfield"><span class="adm-pfield__l">На что действует</span>' +
@@ -35092,7 +35101,7 @@
       bundleItemRowsHTML() +
       (f.items.length < 2 ? '<p class="adm-ashint adm-seted__few">' + BUNDLE_SAVE_ERRS.few_items + "</p>" : "") +
       '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
-      '<input class="adm-input adm-seted__q" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Добавить товар: название или бренд" aria-label="Добавить товар">' +
+      admSearchHTML('<input class="adm-input adm-seted__q" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Добавить товар: название или бренд" aria-label="Добавить товар">') +
       '<div class="adm-setpicks" id="bundlepicks">' + bundlePickRows() + "</div>" + bundleOwnHint() +
       admSecHeadHTML("Цена") +
       '<div class="adm-seted__money">' +
@@ -36025,10 +36034,8 @@
   }
   /** The search, with its glass, repainting the list in place as it is typed. */
   function admCustSearchHTML() {
-    return '<label class="adm-csearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
-        '<circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>' +
-      '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
-        '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам"></label>';
+    return admSearchHTML('<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
+        '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">', "adm-search--list adm-csearch");
   }
   /* The owner's question was «how and where do I manage requests, partners
      and retail?» — answered on the screen, in three sentences, each its own
@@ -39538,8 +39545,8 @@
     if (S.stockMovesOpen) return admStockMovesHTML();
     var f = S.stockFilter || "all";
     return '<div class="adm-stkbar">' +
-        '<input class="adm-input adm-input--row adm-stkbar__q" data-stockq value="' + esc(S.stockQ || "") +
-          '" placeholder="Товар, бренд или штрихкод" aria-label="Поиск по складу">' +
+        admSearchHTML('<input class="adm-input adm-input--row" data-stockq value="' + esc(S.stockQ || "") +
+          '" placeholder="Товар, бренд или штрихкод" aria-label="Поиск по складу">', "adm-search--list adm-stkbar__q") +
         '<div class="adm-chips" role="group" aria-label="Фильтр">' +
           /* Each chip says how many rows are behind it, a zero included —
              «Нет 0» is the answer to the question (Dim, 19.09.2026). */
@@ -39918,8 +39925,8 @@
     return err + '<div class="scan__card">' +
       '<div class="scan__warn">Новый код · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
       '<div class="scan__nm">К какому товару привязать?</div>' +
-      '<input class="scan__find" data-scanassignq value="' + esc(S.scanAssignQ || "") +
-        '" placeholder="Начните вводить название" aria-label="Найти товар для привязки">' +
+      admSearchHTML('<input class="scan__find" data-scanassignq value="' + esc(S.scanAssignQ || "") +
+        '" placeholder="Начните вводить название" aria-label="Найти товар для привязки">') +
       '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>" +
       '<button class="scan__more" type="button" data-scanreset>Отмена</button>' +
     "</div>";
@@ -41547,9 +41554,12 @@
     return '<div class="adm-screen adm-screen--tight adm-salon">' +
       admHead("", "Салон", admHelpBtnHTML("salon")) + admHelpHTML("salon", POS_HELP) +
       '<div class="adm-salon__grid">' +
+        /* the glass like every other search box (1a, screen 05); the three
+           things it finds by, listed like «Клиенты»' «Имя, почта, телефон,
+           компания», so the whole line still fits beside «Сканировать» */
         '<div class="adm-salon__find">' +
-          '<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
-            '" placeholder="Название, бренд или штрихкод" aria-label="Поиск товара" autocomplete="off">' + scan +
+          admSearchHTML('<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
+            '" placeholder="Название, бренд, штрихкод" aria-label="Поиск товара" autocomplete="off">', "adm-salon__q") + scan +
         "</div>" +
         '<div class="adm-salon__list" id="poslist"' + (searching ? "" : " hidden") + ">" + posSearchResultsHTML() + "</div>" +
         '<div class="adm-salon__cart">' + (S.posDone ? admPosReceiptHTML() : posCartHTML()) + "</div>" +

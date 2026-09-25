@@ -285,6 +285,7 @@ describe("the block editor draws", () => {
     ${sliceFn("newsLinkLabelHTML")}
     ${sliceFn("newsPickRowHTML")}
     ${sliceFn("newsPickRows")}
+    ${sliceFn("admSearchHTML")}
     ${sliceFn("newsPickerHTML")}
     ${sliceFn("newsLinkRowHTML")}
     ${sliceFn("newsUpInnerHTML")}

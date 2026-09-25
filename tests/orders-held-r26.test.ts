@@ -108,7 +108,8 @@ const BODY = `
   function admOrders() { return SRV.orders; }
   /* 1a: the chrome around the chips — the search box's icon, the dark
      button, the «?» of «Возвраты», the skeleton — stubbed down to nothing */
-  var ADM_SEARCH_SVG = "";
+  // the search box is one shared label since the polish pass (25.09.2026)
+  ${slice("admSearchHTML")}
   function admPinnedHTML() { return ""; }
   function admHelpBtnHTML() { return ""; }
   function admHelpHTML() { return ""; }

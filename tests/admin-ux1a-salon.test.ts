@@ -110,6 +110,7 @@ function salon(opts: { S?: Partial<State>; analytics?: Analytics; admin?: boolea
     ${fn("admPosDoneMeta")}
     ${fn("admPosReceiptHTML")}
     ${decl("POS_HELP")}
+    ${fn("admSearchHTML")}
     ${fn("admSalonHTML")}
     return { screen: admSalonHTML, pin: posPinHTML, confirm: posConfirmDetail, top: posTopRows, totals: posTotalsHTML };
   `)(S, CAT, opts.analytics || {}, { admin: opts.admin !== false }, loads) as {
