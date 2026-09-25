@@ -546,6 +546,15 @@ test.describe("admin — product creation", () => {
       await expect(waiting.page.getByRole("status")).toContainText("Записали");
       await assertClean(waiting.page, waiting.w, "stock alert on a custom product");
       await waiting.close();
+      /* q41 (Dim 25.09.2026): the card says who waits, under «Наличие». A fresh
+         panel, so the count is read now; the letter is promised only while
+         «Товар снова в наличии» is on in «Письма», and says so when it is off. */
+      await page.goto(shopUrl("", "/admin/"));   // still signed in: the session cookie
+      await expect(page.locator('[data-admtab="orders"][aria-current]:visible').first()).toBeVisible({ timeout: 30_000 });
+      await openCard(page, id);
+      await expect(page.locator(`[data-edwaiting="${id}"]`), "the card does not say anybody waits")
+        .toHaveText(/^1 человек ждёт — (получит письмо|но письмо «Товар снова в наличии» выключено)$/);
+      await assertClean(page, w, "the card says who waits");
       // the panel's «Маркетинг» counter sees the address waiting
       const flows = await page.request.get("/api/admin/flows/");
       expect((await flows.json()).counters.alerts).toBeGreaterThanOrEqual(1);

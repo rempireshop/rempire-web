@@ -37,6 +37,21 @@ async function feedFor(page: Page, id: string): Promise<Record<string, unknown>>
   return ((body.overrides || {})[id] || {}) as Record<string, unknown>;
 }
 
+/** The catalogue file's own ladder again — no sizes, no price override. The
+    card's own cleanup leaves one nameless rung behind (a ladder of one), which
+    the next run (the phone project after the desktop one) must not start from. */
+async function resetLadder(page: Page, id: string): Promise<void> {
+  const r = await page.request.put("/api/admin/overrides/", { data: { id, sizes: null, price: null } });
+  expect(r.status(), "the ladder reset was refused").toBe(200);
+}
+
+/** A tap on a phone first closes the keyboard: the bars that hide while a box
+    is focused (body.adm-typing) come back, and in an emulated phone — no
+    keyboard to make room — they land on the button being tapped. */
+async function leaveBox(page: Page): Promise<void> {
+  await page.evaluate(() => { const a = document.activeElement as HTMLElement | null; if (a && a !== document.body) a.blur(); });
+}
+
 /** «×» on a size that is in the shop: the sheet, then «Убрать». */
 async function removeSize(page: Page, i: number): Promise<void> {
   await page.locator(`[data-edsizedel="${i}"]`).click();
@@ -54,6 +69,7 @@ test.describe("admin — «+ Объём», «×» and «Показывать в 
     const id = azur.id;
 
     await openAdmin(page);
+    await resetLadder(page, id);
     await openCard(page, id);
     await toSection(page, "sizes");
 
@@ -122,6 +138,7 @@ test.describe("admin — «+ Объём», «×» and «Показывать в 
       if (await page.locator('[data-edsz="0"]').count()) await typeAndLeave(page, page.locator('[data-edsz="0"]'), "");
       await typeAndLeave(page, page.locator('[data-edpx="0"]'), String(azur.price));
       await clearToast(page);
+      await resetLadder(page, id);
     }
   });
 
@@ -161,6 +178,7 @@ test.describe("admin — «+ Объём», «×» and «Показывать в 
       const hasSalon = (await salon.count()) > 0;
       if (hasSalon) await salon.fill("11.50");
 
+      await leaveBox(page);
       await page.locator("[data-edsizeadd]").click();
       await expect(page.locator('[data-edsz="1"]'), "«+ Объём» added no row").toBeVisible();
       await settled(page, "the boxes left for «+ Объём»");

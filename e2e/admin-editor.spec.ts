@@ -238,6 +238,21 @@ test.describe("admin — the product editor", () => {
       await clearToast(page);
       await assertClean(page, w, "Google AI fill");
 
+      // …and one language on its own, as before 1a (Dim: «nothing gets lost»):
+      // the link inside the English pair asks for English and nothing else
+      asked.length = 0;
+      await page.locator('[data-edseolang="en"]').click();
+      await typeAndLeave(page, page.locator("[data-edseoten]"), "");
+      const enFill = page.locator('[data-edseopair="en"] [data-edseofill="en"]');
+      await expect(enFill).toBeVisible();
+      await expect(enFill).toHaveText("✨ Заполнить только по-английски");
+      await expect(page.locator('[data-edseopair="ru"] [data-edseofill="ru"]'), "a hidden pair's link is on screen").toBeHidden();
+      await enFill.click();
+      await expect(page.locator("[data-edseoten]")).toHaveValue("Title EN");
+      expect(asked, "one language's link asked for more than its own").toEqual(["seo:EN"]);
+      await settled(page, "one language's Google texts");
+      await clearToast(page);
+
       // the owner's own words: Russian and Estonian, English left empty
       await page.locator('[data-edseolang="ru"]').click();
       await typeAndLeave(page, page.locator("[data-edseot]"), "Русский заголовок для Google");
@@ -430,7 +445,7 @@ test.describe("admin — the product editor", () => {
    * row when nothing matches. 1a: on «Новый товар», one page — and its draft
    * is cleared at the end («Начать заново»), so no other spec meets it.
    */
-  test("«+ Товар»: the brand box is the panel's own list — filtered, keyboard-driven, a new brand when nothing matches", async ({ page }) => {
+  test("«+ Товар»: the brand box is the panel's own list — filtered, keyboard-driven, a new brand when nothing matches", async ({ page }, testInfo) => {
     const w = watch(page);
     await openAdmin(page);
     await tab(page, "goods");
@@ -443,8 +458,10 @@ test.describe("admin — the product editor", () => {
     await expect(box).toHaveAttribute("role", "combobox");
     await expect(list).toHaveAttribute("role", "listbox");
 
-    // opens on focus — «+ Товар» puts the caret there — and survives the
-    // background render the media probe's answer causes
+    // opens on focus — «+ Товар» puts the caret there on a desktop; a phone
+    // does not raise its keyboard by itself, so there the owner taps the box —
+    // and it survives the background render the media probe's answer causes
+    if (testInfo.project.name === "mobile") await box.click();
     await expect(list, "the list did not open with the focus").toBeVisible();
     await page.waitForTimeout(700);
     await expect(list, "a background render closed the list").toBeVisible();
