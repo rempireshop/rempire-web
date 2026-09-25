@@ -335,6 +335,10 @@ describe("«Журнал»: one list, «Вернуть» from any device (q7)", 
     expect(j.paths({ slides: [] }, [{ path: [], before: null }])).toBeNull();
   });
 
+  it("a line that knows only its minute sorts at that minute's end, above the shop's rows of it", () => {
+    expect(fn("admSetJournalHTML")).toContain('return { at: jentryAt(e) + (e && typeof e.at === "number" ? 0 : 59999), i: i, e: e };');
+  });
+
   it("the journal draws both kinds of «Вернуть», the logins folded", () => {
     const page = fn("admSetJournalHTML");
     expect(page).toContain("data-admundo=");
@@ -470,5 +474,31 @@ describe("a price under Montonio's tariff is held in its box (q4)", () => {
     expect(src).toContain('delete ADM_AS["ship:" + d.shipaccept];');
     expect(src).toContain('delete ADM_AS["ship:" + d.shipclear];');
     expect(css).toContain(".adm-rates__c:has(.adm-rt__keep) .adm-ashint { display: none; }");
+  });
+});
+
+describe("«Оповещения на телефон» carries the scanner (q17)", () => {
+  /* The stock screen's admScanAppHTML() (branch ux1a-stock) is the block once
+     merged; until then the page draws the same two pieces itself. */
+  function page(withStockBlock: boolean) {
+    return new Function("WITH", `
+      function admSetHeadHTML() { return "[head]"; }
+      function admSetPushHTML() { return "[devices]"; }
+      function admSecHeadHTML(t) { return "[" + t + "]"; }
+      function pwaHintHTML() { return "[pwa]"; }
+      ${withStockBlock ? 'function admScanAppHTML() { return "[stock block]"; }' : ""}
+      ${fn("admSetPushPageHTML")}
+      return admSetPushPageHTML();`)(withStockBlock) as string;
+  }
+  it("uses the stock screen's block when it is there", () => {
+    const html = page(true);
+    expect(html).toContain("[stock block]");
+    expect(html).not.toContain("[pwa]");
+  });
+  it("draws the install hint and the door itself before that merge", () => {
+    const html = page(false);
+    expect(html).toContain("[pwa]");
+    expect(html).toContain("data-scanapp");
+    expect(html).toContain("Сканер отдельным приложением ↗");
   });
 });

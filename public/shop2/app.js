@@ -27095,7 +27095,9 @@
   /* «Оповещения на телефон» as a settings page (design): this phone, the
      devices, the test; then where an order's news goes when no phone takes
      it; then the scanner as an app of its own — the install hint and the
-     «Сканер отдельным приложением ↗» door moved here from «Склад» (1a). */
+     «Сканер отдельным приложением ↗» door moved here from «Склад» (1a, q17).
+     The block is the stock screen's own admScanAppHTML() (branch ux1a-stock)
+     once that is merged; until then the same two pieces are drawn here. */
   function admSetPushPageHTML() {
     return admSetHeadHTML("push", "Приходит, когда заказ оплачен: номер, сумма и покупатель. Нажатие открывает этот заказ.") +
       '<div class="adm-narrow--form adm-form">' + admSetPushHTML() +
@@ -27103,9 +27105,9 @@
         '<p class="adm-hint" style="margin:0">Если оповещение не дошло ни до одного телефона, магазин отправляет письмо на свою почту. ' +
           "Telegram, если его подключал Дим, приходит всегда.</p>" +
         '<div class="adm-acts"><button class="adm-link" type="button" data-admtab="apps">Проверить письмо в «Подключения»</button></div>' +
-        admSecHeadHTML("Сканер", "", "") +
-        pwaHintHTML() +
-        '<div class="adm-acts"><button class="adm-link" type="button" data-scanapp>Сканер отдельным приложением ↗</button></div>' +
+        (typeof admScanAppHTML === "function" ? admScanAppHTML()
+          : admSecHeadHTML("Сканер", "", "") + pwaHintHTML() +
+            '<div class="adm-acts"><button class="adm-link" type="button" data-scanapp>Сканер отдельным приложением ↗</button></div>') +
       "</div>";
   }
   /* «Убрать» with «Вернуть» (design): the device leaves the list at once and
@@ -27802,8 +27804,7 @@
         },
         send: function (v) {
           var n = Math.round(Number(String(v).replace(",", ".")) * 10) / 10;
-          admParcelSave(f, n);
-          return true;
+          return admSetWhenReady(function () { admParcelSave(f, n); }) || true;
         }
       });
     }
@@ -27812,7 +27813,7 @@
   /** One field of settings.shipping_parcel, saved whole — `recent` included,
       so the size history the suggestion learns from survives a save. */
   function admParcelSave(field, value) {
-    if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
+    if (!adminSettingsReady()) { admSetWhenReady(function () { admParcelSave(field, value); }); return; }
     var cur = parcelConf();
     if (cur[field] === value) return;
     var next = { length: cur.length, width: cur.width, height: cur.height, lockerSize: cur.lockerSize, recent: cur.recent.slice() };
@@ -28155,9 +28156,10 @@
         },
         send: function (v) {
           setShipDraftField(rule, v);
-          admShipCommit();
+          var w = admShipCommit();
           render();
-          return true;
+          // still waiting for the shop's settings to be read: «Сохраняем…» until it goes
+          return w && typeof w.then === "function" ? w : true;
         }
       });
     }
@@ -28943,7 +28945,13 @@
     loadAudit(false);
     var head = admSetHeadHTML("journal",
       "Здесь всё, что меняли вы и магазин — с любого устройства. «Вернуть» отменяет изменение, даже если вы делали его на другом телефоне.");
-    var items = DEMO.log.map(function (e, i) { return { at: jentryAt(e), i: i, e: e }; });
+    /* A line written without `at` (the goods editor's, the stock's) knows only
+       its minute: it sorts at the minute's end, above the shop's rows of that
+       minute — e2e, 25.09.2026: a price changed after a settings write stood
+       below it. */
+    var items = DEMO.log.map(function (e, i) {
+      return { at: jentryAt(e) + (e && typeof e.at === "number" ? 0 : 59999), i: i, e: e };
+    });
     var logins = [];
     if (AUDIT.rows) {
       AUDIT.rows.forEach(function (r) {
@@ -30389,6 +30397,7 @@
       if (r.status === 200 && r.body.ok) {
         admSetTake(r.body.settings || {}, askedAt);
         S.pricingLoadErr = false;
+        admSetWaitFlush();   // what the owner did while the read was out goes now
         render();
       }
       else if (!S.pricingLoaded) { S.pricingLoadErr = true; render(); }
@@ -30476,6 +30485,27 @@
       every write this screen makes (prices and points, «Доставлен» без кнопки,
       the bank list). Writing before it has landed writes the defaults. */
   function adminSettingsReady() { return !!S.pricingLoaded; }
+  /* A change made before that read has answered — a pick the moment the page
+     opened — is not refused any more: the owner's tap wins. It waits for the
+     read and goes the moment it lands (loadAdminPricing → admSetWaitFlush),
+     computed then, over the shop's real values. Returns null when it ran at
+     once; while it waits, a promise that settles when it has run — a box's
+     autosave returns it, so the header says «Сохраняем…» until then rather
+     than «Сохранено ✓». (Found by two agents' e2e and by hand, 25.09.2026:
+     «Доставлен» days picked at once were refused, after 3 s saved.) */
+  var ADM_SET_WAIT = [];
+  function admSetWhenReady(fn) {
+    if (adminSettingsReady()) { fn(); return null; }
+    var p = new Promise(function (resolve) { ADM_SET_WAIT.push(function () { fn(); resolve(true); }); });
+    loadAdminPricing(!!S.pricingLoadErr);
+    return p;
+  }
+  function admSetWaitFlush() {
+    if (!adminSettingsReady() || !ADM_SET_WAIT.length) return;
+    var q = ADM_SET_WAIT;
+    ADM_SET_WAIT = [];
+    q.forEach(function (f) { try { f(); } catch (e) { /* one change's fault is not the next one's */ } });
+  }
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
     return S.pricingDraft;
@@ -30539,8 +30569,8 @@
      journal, and the one master switch still decides everything (kept —
      Dim, 07.09.2026). `patch` is set_pricing's own partial shape. */
   function admPricingSave(patch) {
-    // never over the defaults: the PUT sends the whole `pricing` document
-    if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return null; }
+    // never over the defaults: the PUT sends the whole `pricing` document — it waits for the read
+    if (!adminSettingsReady()) { admSetWhenReady(function () { admPricingSave(patch); }); return null; }
     var next = mergePricing(S.pricingLoaded, patch);
     if (JSON.stringify(next) === JSON.stringify(normalisePricing(S.pricingLoaded))) return null;
     return admSetApply({ type: "set_pricing", value: patch }, "Цены и баллы сохранены");
@@ -30560,8 +30590,7 @@
           var n = Math.round(Number(String(v).trim().replace(",", ".")) * 100) / 100, p = {};
           if (key === "proDiscountPct" || key === "proMinOrder") p[key] = n;
           else { p.loyalty = {}; p.loyalty[key] = n; }
-          admPricingSave(p);
-          return true;
+          return admSetWhenReady(function () { admPricingSave(p); }) || true;
         }
       });
     }
@@ -31055,7 +31084,7 @@
    * keep what they show: a price held for «Оставить так» stays in its box.
    */
   function admShipCommit(toastText, opts) {
-    if (SRV.admin === true && !adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return null; }
+    if (SRV.admin === true && !adminSettingsReady()) return admSetWhenReady(function () { admShipCommit(toastText, opts); render(); });
     var draft = cloneRules(shipDraft());
     if (shipSig(draft) === shipSig(SHIP_STORED)) return null;
     // only a price held for «Оставить так» moved: nothing to send, no journal line
@@ -44330,27 +44359,32 @@
     if (d.delivcarrier !== undefined) {
       // the PUT carries the whole settings.delivery object, so never before
       // the read that says what is in it has landed (loadAdminPricing)
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var dc = deliveryConf();
-      admSetApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } }, "Когда «Доставлен»: сохранено");
-      render(); return;
+      admSetWhenReady(function () {
+        var dc = deliveryConf();
+        admSetApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } }, "Когда «Доставлен»: сохранено");
+        render();
+      });
+      return;
     }
     // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks
     if (d.admbank !== undefined) {
-      // same gate as the delivery switch above: the whole array travels
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      /* The last bank of a country stays on — the server would hand that
-         country's whole list back anyway (filterBanks), and a switch that
-         says «off» while the checkout shows the bank is worse than a switch
-         that refuses. render() puts the checkbox back where it was. */
-      if (admBankLastOn(d.admbank)) {
+      // same wait as the delivery switch above: the whole array travels
+      var bank = d.admbank;
+      admSetWhenReady(function () {
+        /* The last bank of a country stays on — the server would hand that
+           country's whole list back anyway (filterBanks), and a switch that
+           says «off» while the checkout shows the bank is worse than a switch
+           that refuses. render() puts the checkbox back where it was. */
+        if (admBankLastOn(bank)) {
+          render();
+          toast("Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все");
+          return;
+        }
+        // the checkout is asked for the fresh list once the PUT lands (admSetSend)
+        admSetApply({ type: "set_banks", value: admBankToggle(bank) }, "Банки в кассе: сохранено");
         render();
-        toast("Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все");
-        return;
-      }
-      // the checkout is asked for the fresh list once the PUT lands (admSetSend)
-      admSetApply({ type: "set_banks", value: admBankToggle(d.admbank) }, "Банки в кассе: сохранено");
-      render(); return;
+      });
+      return;
     }
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.
@@ -44659,7 +44693,6 @@
     }
     // «Коробка» → «Размер ячейки по умолчанию», XS–XL (gap analysis Q5 = A)
     if (d.parcelsize) {
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
       if (LOCKER_SIZES.indexOf(d.parcelsize) >= 0) admParcelSave("lockerSize", d.parcelsize);
       refocus('[data-parcelsize="' + d.parcelsize + '"]'); return;
     }
@@ -44723,16 +44756,20 @@
     /* «Начислять баллы» and «Партнёры и баллы»: switches, so saved at once
        (q40) — «Вернуть» on the toast takes a mis-tap back. */
     if (d.pricingtoggle !== undefined) {
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled;
-      admPricingSave({ loyalty: { enabled: lty.enabled } });
-      render(); return;
+      admSetWhenReady(function () {
+        var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled;
+        admPricingSave({ loyalty: { enabled: lty.enabled } });
+        render();
+      });
+      return;
     }
     if (d.partnerson !== undefined) {
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn;
-      admPricingSave({ partnersOn: pd.partnersOn });
-      render(); return;
+      admSetWhenReady(function () {
+        var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn;
+        admPricingSave({ partnersOn: pd.partnersOn });
+        render();
+      });
+      return;
     }
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
@@ -45985,11 +46022,13 @@
        when it is tapped (data-parcelsize, the click listener). */
     /* «Доставлен» без кнопки — «закрывать заказ через N дней»: a pick, saved at once */
     else if (t.matches("[data-delivdays]")) {
-      // same gate as the switch beside it — the whole object travels
-      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var dvc = deliveryConf();
-      admSetApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } }, "Когда «Доставлен»: сохранено");
-      render();
+      // same wait as the switch beside it — the whole object travels; the pick is the one made now
+      var dDays = Number(t.value) || 0;
+      admSetWhenReady(function () {
+        var dvc = deliveryConf();
+        admSetApply({ type: "set_delivery", value: { autoDays: dDays, useCarrier: dvc.useCarrier } }, "Когда «Доставлен»: сохранено");
+        render();
+      });
     }
     // «Вернуть деньги»: the split under the amount follows what is typed
     else if (t.matches("[data-admrefundamt]")) admRefundRepaint(t.value);

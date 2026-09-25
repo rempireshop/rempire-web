@@ -280,10 +280,43 @@ describe("nothing is saved over the shop's own settings before they have been re
 
   it("every write on that screen is gated on a real read having landed", () => {
     expect(slice("admPricingSave")).toContain("adminSettingsReady()");
-    // «Спрашивать перевозчика», «Закрывать заказ через» and the bank switches
-    // all PUT a whole object assembled from the same failed read
-    const gate = /if \(!adminSettingsReady\(\)\)/g;
-    expect(src.match(gate)?.length ?? 0).toBeGreaterThanOrEqual(4);
+    /* «Спрашивать перевозчика», «Закрывать заказ через» and the bank switches
+       all PUT a whole object assembled from the same read. Since 1a
+       (25.09.2026) a change made before it lands is not refused — the owner's
+       tap waits for the read and goes the moment it lands (admSetWhenReady),
+       computed over the shop's real values; never before. */
+    expect(slice("admSetWhenReady")).toContain("if (adminSettingsReady()) { fn(); return null; }");
+    expect(slice("loadAdminPricing")).toContain("admSetWaitFlush();");
+    const waits = src.match(/admSetWhenReady\(function \(\) \{/g)?.length ?? 0;
+    expect(waits, "the switches, the pick and the boxes all wait for the read").toBeGreaterThanOrEqual(8);
+    expect(src).not.toContain('if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают');
+  });
+
+  it("a change made before the read waits for it and then goes, over the shop's values", () => {
+    const S: Record<string, unknown> = { pricingLoaded: null, pricingLoadErr: false };
+    const loads: boolean[] = [];
+    const fns = new Function("S", "LOADS", `
+      function loadAdminPricing(force) { LOADS.push(!!force); }
+      ${slice("adminSettingsReady")}
+      var ADM_SET_WAIT = [];
+      ${slice("admSetWhenReady")}
+      ${slice("admSetWaitFlush")}
+      return { when: admSetWhenReady, flush: admSetWaitFlush };`)(S, loads) as {
+      when: (fn: () => void) => Promise<unknown> | null; flush: () => void;
+    };
+    const ran: string[] = [];
+    const w = fns.when(() => ran.push("days 7 over " + JSON.stringify(S.pricingLoaded)));
+    expect(w, "a change before the read did not wait").toBeInstanceOf(Promise);
+    expect(ran).toEqual([]);
+    expect(loads, "nobody asked for the read").toEqual([false]);
+    fns.flush();                        // the read has not landed: still waiting
+    expect(ran).toEqual([]);
+    S.pricingLoaded = { partnersOn: true };
+    fns.flush();                        // …and now it has
+    expect(ran).toEqual(['days 7 over {"partnersOn":true}']);
+    // after the read, a change goes at once
+    expect(fns.when(() => ran.push("now"))).toBeNull();
+    expect(ran).toHaveLength(2);
   });
 
   it("«О компании» refuses to save until the document has really been read", () => {
