@@ -8018,8 +8018,8 @@
         "Посмотреть вверх: там «Сохранено ✓» — «Сохранить» больше нет."
       ],
       "expect": [
-        "Заголовок помещается в одну строчку.",
-        "В заголовке есть название товара.",
+        "Заголовок помещается в одну строчку, в нём есть название товара.",
+        "На ET и EN обе строчки на своём языке, без русских слов — «šampoon», «shampoo».",
         "Описание — одно-два предложения, не оборванных на середине.",
         "Цены в этих двух строчках нет.",
         "Обещаний доставки в них тоже нет.",
@@ -8038,8 +8038,8 @@
           "Look at the top: it says «Сохранено ✓» — there is no «Сохранить» any more."
         ],
         "expect": [
-          "The title fits on one line.",
-          "The title carries the product name.",
+          "The title fits on one line and carries the product name.",
+          "In ET and EN both lines are in that language, no Russian word — «šampoon», «shampoo».",
           "The description is one or two sentences, not cut off.",
           "Neither line names a price.",
           "Neither line promises a delivery.",
@@ -8048,7 +8048,7 @@
         "why": "These are the lines a person in Google decides by."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T13:51:49.084Z"
+      "markedAt": "2026-09-25T22:21:39.202Z"
     },
     {
       "id": "ai-blog-outline",

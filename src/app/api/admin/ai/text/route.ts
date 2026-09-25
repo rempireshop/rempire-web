@@ -14,6 +14,8 @@
  * products}` from the blog editor (the article's own text, see SeoInput in
  * src/lib/ai-prompts.ts) — and answers the same `{title, description}` for
  * both, in `lang`, capped here at what the two editors store (70/170).
+ * A product's Estonian or English pair that is still Russian outside the
+ * product's own name is refused as `wrong_language` (502), never returned.
  *
  * "post_full" writes a whole article for a topic — title, excerpt, 600–900
  * words of HTML, tags, the Google pair, the products it mentions — offered
@@ -59,7 +61,9 @@ import { after, NextRequest, NextResponse } from "next/server";
 import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
-import { AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, type AiTask, type Lang3 } from "@/lib/ai-prompts";
+import {
+  AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, seoOffLanguage, seoProductName, type AiTask, type Lang3,
+} from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
 import { catalogueRow, relevantProducts } from "@/lib/catalogue-slice";
 import { sanitizeHtml } from "@/lib/blog";
@@ -155,7 +159,12 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
     return { text: { description: str(p.description, 1400), bullets } };
   }
   if (task === "seo") {
-    return { text: { title: str(p.title, 70), description: str(p.description, 170) } };
+    /* An Estonian or English title that still ends in the catalogue's Russian
+       type word («Nook Bio Botanical Shampoo — шампунь», staging 25.09.2026)
+       gets the word the storefront itself uses for it — the same table the
+       prompt was built from (seoProductName in src/lib/ai-prompts.ts). */
+    const title = str(p.title, 70);
+    return { text: { title: seoProductName(title, lang).slice(0, 70), description: str(p.description, 170) } };
   }
   if (task === "blog_outline") {
     const h2 = Array.isArray(p.h2) ? p.h2.map((h) => str(h, 80)).filter(Boolean).slice(0, 8) : [];
@@ -424,6 +433,20 @@ export async function POST(req: NextRequest) {
     result = { text: signature ? `${replyText}\n\n${signature}` : replyText };
   } else {
     result = shapeNonReply(task, lang, parsed);
+    /* A product's Estonian or English snippet that came back Russian outside
+       the product's own name is not that language's snippet: the goods editor
+       writes whatever this returns straight into the ET/EN pair, and a
+       Russian description sat there as the Estonian one (staging,
+       25.09.2026). Refused with its own code — the panel says «не
+       получилось, попробуйте ещё раз» and leaves the pair as it was. */
+    const seoIn = (body.input && typeof body.input === "object" ? body.input : {}) as Record<string, unknown>;
+    if (task === "seo" && seoIn.kind !== "post" && seoIn.kind !== "blog" && result.text && typeof result.text === "object") {
+      const t = result.text as { title?: string; description?: string };
+      if (seoOffLanguage(`${t.title ?? ""}\n${t.description ?? ""}`, lang, body.input)) {
+        console.error("[admin/ai/text] product snippet came back in the wrong language", lang);
+        return NextResponse.json({ ok: false, error: "wrong_language" }, { status: 502 });
+      }
+    }
     if (post && result.text && typeof result.text === "object") {
       const t = result.text as Record<string, unknown>;
       /* The cards: the model's own kept (known ids only), the products it
