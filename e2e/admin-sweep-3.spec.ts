@@ -248,12 +248,16 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
        a customer who gives an address really is written to and really does
        earn points (Dim: salon sales must count as purchases). The printable
        receipt is still a link on the order, which is the part that never
-       changed. */
+       changed. 1a: the sentence lives behind the screen's «?» (README rule 5). */
     await adminSection(page, "pos");
-    const salonHint = page.locator(".adm-hint", { hasText: "Покупатель не обязателен" }).first();
+    await page.locator('[data-admhelp="salon"]').click();
+    const salonHint = page.locator("#admhelp-salon");
+    await expect(salonHint).toBeVisible();
     await expect(salonHint).toContainText("уйдёт письмо");
     await expect(salonHint).toContainText("Чек ↗");
-    await expect(page.locator(".adm-hint", { hasText: "письмом он не уходит" })).toHaveCount(0);
+    await expect(page.locator(".adm-hint, .adm-helpp", { hasText: "письмом он не уходит" })).toHaveCount(0);
+    // put the paragraph away again: open or shut is remembered for the session
+    await page.locator('[data-admhelp="salon"]').click();
     await assertClean(page, w, "the salon register");
   });
 });

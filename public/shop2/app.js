@@ -1873,6 +1873,15 @@
         "See toode on müügilt eemaldatud — taastage see jaotises «Tooted».",
       "Продажа оформлена ✓": "Müük vormistatud ✓",
       "Чек для печати": "Kviitung printimiseks", "Новая продажа": "Uus müük",
+      // 1a «Салон» (admSalonHTML, 25.09.2026): the help, «Часто продают», the basket
+      "Продажа тому, кто стоит перед вами: найдите товар или отсканируйте код, нажмите на объём, выберите оплату и нажмите «К оплате». Остатки спишутся сами, заказ появится в «Заказах», а чек для печати откроется по ссылке «Чек ↗». Укажете почту клиента — уйдёт письмо с чеком, а баллы лягут на его карточку. Сканер штрихкодов с USB работает прямо в поле поиска. Партнёрам-салонам здесь продавать не нужно: они заказывают сами по своим ценам.":
+        "Müük sellele, kes seisab teie ees: leidke toode või skaneerige kood, vajutage mahule, valige makseviis ja vajutage «Maksma». Jäägid kantakse maha iseenesest, tellimus ilmub «Tellimustesse» ja prinditav tšekk avaneb lingist «Tšekk ↗». Kui sisestate kliendi e-posti, läheb talle kiri tšekiga ja punktid lähevad tema kaardile. USB-triipkoodilugeja töötab otse otsinguväljal. Partnersalongidele pole siin vaja müüa: nad tellivad ise oma hindadega.",
+      "Часто продают": "Enimmüüdud",
+      "Найдите товар по названию или штрихкоду и нажмите на объём — он попадёт в корзину. Дальше «К оплате»: остатки спишутся, чек появится в «Заказах».":
+        "Leidke toode nime või triipkoodi järgi ja vajutage mahule — see läheb ostukorvi. Edasi «Maksma»: jäägid kantakse maha, tšekk ilmub «Tellimustesse».",
+      "Нажмите на объём или отсканируйте код": "Vajutage mahule või skaneerige kood",
+      "К оплате": "Maksma", "другая…": "muu…", "необязательно": "valikuline",
+      "придёт чек и баллы": "saab tšeki ja punktid",
       "Добавить": "Lisa",
       // integration: scanner size-pick when binding an EAN to a multi-size product
       "Какой объём?": "Milline maht?",
@@ -4951,6 +4960,15 @@
         "This product is off sale — put it back in «Products».",
       "Продажа оформлена ✓": "Sale complete ✓",
       "Чек для печати": "Printable receipt", "Новая продажа": "New sale",
+      // 1a «Салон» (admSalonHTML, 25.09.2026): the help, «Часто продают», the basket
+      "Продажа тому, кто стоит перед вами: найдите товар или отсканируйте код, нажмите на объём, выберите оплату и нажмите «К оплате». Остатки спишутся сами, заказ появится в «Заказах», а чек для печати откроется по ссылке «Чек ↗». Укажете почту клиента — уйдёт письмо с чеком, а баллы лягут на его карточку. Сканер штрихкодов с USB работает прямо в поле поиска. Партнёрам-салонам здесь продавать не нужно: они заказывают сами по своим ценам.":
+        "A sale to the person in front of you: find the product or scan its code, tap a size, pick the payment and press «Charge». Stock is written off by itself, the order appears in «Orders», and the printable receipt opens from «Receipt ↗». Type the customer's e-mail and a letter with the receipt goes out, and the points land on their card. A USB barcode scanner works right in the search box. Partner salons need nothing sold to them here: they order themselves at their own prices.",
+      "Часто продают": "Best sellers",
+      "Найдите товар по названию или штрихкоду и нажмите на объём — он попадёт в корзину. Дальше «К оплате»: остатки спишутся, чек появится в «Заказах».":
+        "Find a product by name or barcode and tap a size — it goes into the cart. Then «Charge»: stock is written off and the receipt appears in «Orders».",
+      "Нажмите на объём или отсканируйте код": "Tap a size or scan a code",
+      "К оплате": "Charge", "другая…": "other…", "необязательно": "optional",
+      "придёт чек и баллы": "gets the receipt and points",
       "Добавить": "Add",
       // integration: scanner size-pick when binding an EAN to a multi-size product
       "Какой объём?": "Which size?",
@@ -6860,6 +6878,9 @@
     // product creation: the undo of the line above, and the confirm card
     // before the owner's own product leaves the shelf (one pre-line block)
     [/^Снова в продаже · (.+)$/, { ET: "Jälle müügil · $1", EN: "Back on sale · $1" }],
+    // 1a «Салон»: how many bottles the basket holds (posCartHTML)
+    [/^(1) шт$/, { ET: "$1 tk", EN: "$1 pc" }],
+    [/^(\d+) шт$/, { ET: "$1 tk", EN: "$1 pcs" }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
     // the same line when the sale carried an e-mail and the letter really went
@@ -9586,6 +9607,7 @@
     posPhone: "",
     posPayment: "cash",    // "cash" | "terminal"
     posDiscount: "",
+    posDiscOther: false,   // 1a: «другая…» is open — the typed-percent box under the 0/5/10/20 chips
     posBusy: false,
     posErr: "",
     posDone: null,         // {orderId, number, total} once a sale is completed — the receipt/"new sale" screen
@@ -36018,59 +36040,116 @@
           return true;
         }).map(function (p) { return { p: p, only: -1 }; })
       : [];
-    if (!q) {
-      if (S.posCart.length) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
-      // an empty register: the three steps of a sale, where the results will be
-      return '<div class="adm-empty"><div class="adm-empty__t">Новая продажа</div>' +
-        '<div class="adm-empty__s">Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. ' +
-        'Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».</div></div>';
-    }
+    /* An empty box answers nothing here: «Часто продают» (posTopHTML) stands
+       in its place under the search while nothing is typed (1a, screen 05). */
+    if (!q) return "";
     /* The code is bound, but to a bottle the shop is not offering — «Показывать
        в магазине» off, or an own product set inactive. The same sentence the
        scanner's own door into this basket gives it (scanToCart), because from
        the till's side it is exactly the same refusal. */
     if (coded && !coded.p) return '<div class="adm-empty">' + POS_GONE + "</div>";
     if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
-    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (row) {
-      var p = row.p;
-      var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
-      return '<div class="adm-row adm-row--chips">' +
-        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
-        '<span class="adm-poschips">' + sizes.map(function (sz, i) {
-          // a barcode names one volume: the others are not on offer for it
-          if (row.only >= 0 && i !== row.only) return "";
-          var lv = edStockFor(p, sz);
-          var none = !!(lv && lv.tracked && lv.qty <= 0) || p.stock === "out";
-          return '<button class="adm-poschip' + (none ? " is-none" : "") + '" data-posadd="' + esc(p.id) + ":" + i + '">' +
-            (sz ? esc(sz) + " · " : "") + eur(posVariantPrice(p, sz)) + "</button>";
-        }).join("") + "</span></div>";
-    }).join("") + "</div>";
+    return '<div class="adm-poslist">' + list.slice(0, 8).map(posRowHTML).join("") + "</div>";
   }
-  /** Сумма / Скидка / Итого — its own block so typing a discount can repaint
-      just these three rows instead of the whole register (see the
-      [data-posdiscount] input handler). */
-  function posTotalsHTML() {
+  /** One product, one row (1a, screen 05): its photo, the brand over the
+      name, and one chip per size. The search and «Часто продают» both draw
+      it. `row.only` ≥ 0 is the one size a barcode names — the others are not
+      on offer for it. */
+  function posRowHTML(row) {
+    var p = row.p;
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    return '<div class="adm-posrow">' +
+      '<span class="adm-posrow__who"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "") + "</span>" +
+        '<span class="adm-posrow__nm"><span class="adm-posrow__br">' + esc(p.brand) + "</span>" +
+        '<span class="adm-row__nm">' + esc(p.name) + "</span></span></span>" +
+      '<span class="adm-poschips">' + sizes.map(function (sz, i) {
+        return row.only >= 0 && i !== row.only ? "" : posChipHTML(p, sz, i);
+      }).join("") + "</span></div>";
+  }
+  /** «150 мл · 21,60 €» — the chip is the whole «add». Muted when the shelf
+      or the shop says «нет» (a tap then says «Нет на складе», posAddProduct);
+      ink, with «×2» on it, once that bottle is in the basket, so the list
+      itself shows what has been rung up. */
+  function posChipHTML(p, sz, i) {
+    var lv = edStockFor(p, sz);
+    var none = !!(lv && lv.tracked && lv.qty <= 0) || p.stock === "out";
+    var n = posInCart(p.id, sz);
+    return '<button class="adm-poschip' + (none ? " is-none" : "") + (n ? " is-in" : "") + '" type="button" data-posadd="' +
+      esc(p.id) + ":" + i + '">' +
+      (sz ? "<span>" + esc(sz) + '</span><span class="adm-poschip__dot" aria-hidden="true">·</span>' : "") +
+      "<b>" + eur(posVariantPrice(p, sz)) + "</b>" +
+      (n ? '<span class="adm-poschip__n">×' + n + "</span>" : "") + "</button>";
+  }
+  /** How many of one bottle the basket holds. */
+  function posInCart(id, variant) {
+    for (var k = 0; k < S.posCart.length; k++) {
+      if (S.posCart[k].id === id && (S.posCart[k].variant || "") === (variant || "")) return S.posCart[k].qty;
+    }
+    return 0;
+  }
+  /* «Часто продают» (Dim, 25.09.2026, q31): the products that sell best in
+     the shop as a whole — the top ones by revenue over 90 days, every
+     channel — out of the very answer «Аналитика» reads (GET
+     /api/admin/analytics/, topProductsByRevenue). Nothing new on the server;
+     a salon-only list would need one. Asked for once per visit: a list a few
+     minutes old is as good at the counter, and that answer is the panel's
+     heaviest. What the shop is not selling is left out, as the name search
+     leaves it out. Grey bars while it travels; with no sales yet — or no
+     answer — the steps of a sale stand there instead. */
+  var POS_TOP_RANGE = "90d", POS_TOP_N = 6;
+  function posTopLoad() {
+    var rec = ANALYTICS[POS_TOP_RANGE];
+    if (!rec || !rec.data) loadAnalytics(POS_TOP_RANGE);
+  }
+  function posTopRows() {
+    var rec = ANALYTICS[POS_TOP_RANGE], a = rec && rec.data;
+    if (!a || !a.topProductsByRevenue) return null;
+    var out = [];
+    for (var i = 0; i < a.topProductsByRevenue.length && out.length < POS_TOP_N; i++) {
+      var p = byIdOrNull(a.topProductsByRevenue[i].id);
+      if (p && p.stock !== "out") out.push({ p: p, only: -1 });
+    }
+    return out;
+  }
+  function posTopHTML() {
+    var rows = posTopRows(), rec = ANALYTICS[POS_TOP_RANGE];
+    if (rows && rows.length) {
+      return admSecHeadHTML("Часто продают") + '<div class="adm-poslist">' + rows.map(posRowHTML).join("") + "</div>";
+    }
+    if (!rows && !(rec && rec.err)) return admSecHeadHTML("Часто продают") + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    return '<div class="adm-empty"><div class="adm-empty__t">Новая продажа</div>' +
+      '<div class="adm-empty__s">Найдите товар по названию или штрихкоду и нажмите на объём — он попадёт в корзину. ' +
+      "Дальше «К оплате»: остатки спишутся, чек появится в «Заказах».</div></div>";
+  }
+  /** The basket's money, one way for the screen, the pinned button and the
+      confirm: a flat percentage (0–90) off the sum of the lines. The server
+      prices the sale again on its own (POST /api/admin/pos-orders/). */
+  function posTotals() {
     var subtotal = posSubtotal();
     var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
     var discount = pct ? Math.round(subtotal * pct) / 100 : 0;
-    var total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
-    return (discount
-      ? '<div class="adm-poskv"><span>Сумма</span><span class="adm-row__amt">' + eur(subtotal) + "</span></div>" +
-        '<div class="adm-poskv"><span>Скидка</span><span class="adm-row__amt">−' + eur(discount) + "</span></div>"
-      : "") +
-      '<div class="adm-total"><span>Итого</span><span class="adm-total__v adm-total__v--big">' + eur(total) + "</span></div>";
+    return { subtotal: subtotal, pct: pct, discount: discount, total: Math.max(0, Math.round((subtotal - discount) * 100) / 100) };
   }
-  /** What the confirm card lists before the money is taken — the same lines
-      the receipt will carry, so «Оформить» is never a leap of faith. */
+  /** «Итого», with the sum before the discount struck through beside it
+      (1a) — its own block so typing a discount into «другая…» can repaint
+      just this row instead of the whole register (see the [data-posdiscount]
+      input handler). */
+  function posTotalsHTML() {
+    var t = posTotals();
+    return '<div class="adm-total adm-postotal"><span>Итого</span><span class="adm-postotal__v">' +
+      (t.discount ? '<span class="adm-postotal__was"><s>' + eur(t.subtotal) + "</s> −" + t.pct + " %</span>" : "") +
+      '<span class="adm-total__v adm-total__v--big">' + eur(t.total) + "</span></span></div>";
+  }
+  /** The confirm sheet before the money is taken (Dim, 25.09.2026, q29:
+      «Оформить продажу? 42 € · наличные» — it is money, README rule 4). The
+      sum and the method first, then the lines the receipt will carry, so
+      «Оформить» is never a leap of faith. */
   function posConfirmDetail(how) {
     var lines = S.posCart.map(function (l) {
       var p = byId(l.id);
       return (p ? p.name : l.id) + (l.variant ? " " + l.variant : "") + " × " + l.qty;
     });
-    var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
-    var subtotal = posSubtotal();
-    var total = Math.max(0, Math.round((subtotal - (pct ? Math.round(subtotal * pct) / 100 : 0)) * 100) / 100);
-    return lines.join("\n") + "\n\n" + "Итого " + eur(total) + " · " + POS_HOW[how];
+    return eur(posTotals().total) + " · " + POS_HOW[how] + "\n\n" + lines.join("\n");
   }
   var POS_HOW = { cash: "наличные", terminal: "терминал" };
   /** A bottle the register cannot sell because the shop is not offering it —
@@ -36100,6 +36179,11 @@
   function posSendErr(code) {
     return POS_SEND_ERRS[code] || "Не удалось оформить продажу — попробуйте ещё раз.";
   }
+  /** After the sale, in the basket's place (Dim, 25.09.2026, q27): a compact
+      card — «Продажа оформлена ✓», the order number, the total, what
+      happened, «Чек ↗» for the printable receipt — and «Новая продажа» as
+      the one dark button. The search and «Часто продают» stay beside it: a
+      chip tapped now is simply the next sale (admSalonHTML). */
   function admPosReceiptHTML() {
     var d = S.posDone;
     return '<div class="adm-receipt">' +
@@ -36107,11 +36191,138 @@
       '<div class="adm-mono adm-receipt__id">' + esc(d.number) + "</div>" +
       '<div class="adm-receipt__sum">' + eur(d.total) + "</div>" +
       '<div class="adm-hint">' + admPosDoneMeta(d) + "</div>" +
-      '<div class="adm-acts adm-acts--mid">' +
-        '<a class="adm-btn adm-btn--ghost" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) +
-          '/receipt/" target="_blank" rel="noopener">Чек для печати</a>' +
-        '<button class="adm-btn" data-posnew>Новая продажа</button></div></div>';
+      '<a class="adm-link adm-receipt__print" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) +
+        '/receipt/" target="_blank" rel="noopener">Чек ↗</a>' +
+      '<div class="adm-receipt__next" id="pospin">' + posPinHTML() + "</div></div>";
   }
+  /** The ONE dark button (1a rule 2): «К оплате · 42 €» while there is a
+      basket, «Корзина пуста» (dead) while there is not, «Новая продажа» on
+      the receipt. Pinned above the tab bar on a phone, at the basket's foot
+      on a desktop (.adm-salon .adm-pin). It carries `data-possend` with the
+      method picked above it, so the send is still the one it always was:
+      the method, then the confirm sheet, then posSend(). */
+  function posPinHTML() {
+    if (S.posDone) return admPinnedHTML("data-posnew", "Новая продажа");
+    var has = S.posCart.length > 0, how = S.posPayment === "terminal" ? "terminal" : "cash";
+    return admPinnedHTML('data-possend="' + how + '"' + (S.posBusy || !has ? " disabled" : ""),
+      S.posBusy ? "Оформляем…" : has ? "<span>К оплате</span> · <span>" + eur(posTotals().total) + "</span>" : "Корзина пуста");
+  }
+  /* The discount: 0 / 5 / 10 / 20 % in one segmented control and «другая…»,
+     which opens the typed box the register always had (Dim, 25.09.2026,
+     q30). «0 %» and not «нет»: the dictionary's «нет» is the shelf's word
+     (EN «out», ET «otsas»), and a discount chip reading «out» would lie. */
+  var POS_DISCS = [["0", "0 %"], ["5", "5 %"], ["10", "10 %"], ["20", "20 %"], ["other", "другая…"]];
+  function posDiscHTML() {
+    var pct = String(Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0))));
+    var other = !!S.posDiscOther || (pct !== "0" && pct !== "5" && pct !== "10" && pct !== "20");
+    return '<div class="adm-posopt"><span class="adm-posopt__l">Скидка</span>' +
+      admSegHTML("data-posdisc", POS_DISCS, other ? "other" : pct, "Скидка") + "</div>" +
+      (other
+        ? '<label class="adm-field adm-posopt__other">Скидка, %<input class="adm-input adm-input--row" data-posdiscount value="' +
+            esc(S.posDiscount || "") + '" inputmode="numeric" autocomplete="off"></label>'
+        : "");
+  }
+  /** «Наличные» / «Терминал»: a pick, not a send — the send is the one dark
+      button under it. Cash unless changed, so a normal sale is a chip,
+      «К оплате» and «Оформить». */
+  function posWayHTML() {
+    return '<div class="adm-posopt"><span class="adm-posopt__l">Оплата</span>' +
+      admSegHTML("data-pospay", [["cash", "Наличные"], ["terminal", "Терминал"]],
+        S.posPayment === "terminal" ? "terminal" : "cash", "Оплата") + "</div>";
+  }
+  /** «Клиент»: the e-mail that turns a walk-in into a customer (the letter
+      with the receipt, the points on the card) and the phone. Optional, so
+      on a phone it is a fold with a one-line summary (README § 1); a desktop
+      shows both boxes open, the phone number included (Dim, 25.09.2026,
+      q30). The fold's open state is admFoldToggle's, like every other fold;
+      the markup is its own because the desktop keeps the body open. */
+  function posBuyerHTML() {
+    var key = "pos:buyer", open = !!ADM_FOLD[key], id = admDomId("admfold-", key);
+    var sum = S.posEmail || S.posPhone ? esc(S.posEmail || S.posPhone) : "необязательно";
+    return '<div class="adm-foldrow adm-posbuyer' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-foldrow__h" type="button" data-admfold="' + key + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
+        '<span class="adm-foldrow__t">Клиент</span><span class="adm-foldrow__s">' + sum + "</span>" +
+        '<svg class="adm-foldrow__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="1.8" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+      "</button>" +
+      '<div class="adm-foldrow__b" id="' + id + '">' +
+        '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' +
+          esc(S.posEmail || "") + '" placeholder="придёт чек и баллы" autocomplete="off"></label>' +
+        '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' +
+          esc(S.posPhone || "") + '" autocomplete="off"></label>' +
+      "</div></div>";
+  }
+  /** The basket: its lines with − / + / ×, then the discount, the method,
+      the client, «Итого» and the one dark button. An empty basket says what
+      to do; on a phone only its pinned «Корзина пуста» shows (admin.css). */
+  function posCartHTML() {
+    var n = 0;
+    S.posCart.forEach(function (l) { n += l.qty; });
+    var lines = S.posCart.map(function (l, i) {
+      var p = byId(l.id), price = posVariantPrice(p, l.variant);
+      return '<div class="adm-posline">' +
+        '<span class="adm-posline__body"><span class="adm-row__nm">' + (p ? esc(p.brand + " — " + p.name) : esc(l.id)) + "</span>" +
+          // the size a text node of its own, so «250 мл» reads «250 ml» on an EN panel
+          '<span class="adm-row__sub">' + (l.variant ? "<span>" + esc(l.variant) + "</span> · " : "") +
+            "<span>" + eur(Math.round(price * l.qty * 100) / 100) + "</span></span></span>" +
+        '<span class="adm-step-qty">' +
+          '<button type="button" data-posqty="' + i + ':-1" aria-label="Меньше">−</button>' +
+          '<span class="adm-step-qty__v">' + l.qty + "</span>" +
+          '<button type="button" data-posqty="' + i + ':1" aria-label="Больше">+</button></span>' +
+        '<button class="adm-posline__x" type="button" data-posremove="' + i + '" aria-label="Убрать">×</button></div>';
+    }).join("");
+    return '<div class="adm-poscart' + (S.posCart.length ? "" : " is-empty") + '">' +
+      '<div class="adm-poscart__head"><h2 class="adm-poscart__t">Корзина</h2>' +
+        '<span class="adm-poscart__n">' + (n ? n + " шт" : "пусто") + "</span></div>" +
+      (S.posCart.length
+        ? '<div class="adm-poscart__lines">' + lines + "</div>" + posDiscHTML() + posWayHTML() + posBuyerHTML()
+        : '<p class="adm-poscart__empty">Нажмите на объём или отсканируйте код</p>') +
+      (S.posErr ? '<p class="adm-err" role="alert">' + esc(S.posErr) + "</p>" : "") +
+      '<div id="postotals">' + posTotalsHTML() + "</div>" +
+      '<div id="pospin">' + posPinHTML() + "</div></div>";
+  }
+  /** The search box shows what S.posQ holds. A chip clears the query, and the
+      morph leaves a typed-in box alone when its markup did not change (the
+      last render drew it empty too) — so the box is told directly. */
+  function posBoxSync() {
+    var box = document.querySelector("[data-posq]");
+    if (box && box.value !== (S.posQ || "")) box.value = S.posQ || "";
+  }
+  /** The receipt card under the sticky top bar or above the glass: back to
+      the top of the screen, where it sits under the search. */
+  function posReceiptIntoView() {
+    var rc = document.querySelector(".adm-receipt");
+    if (rc && rc.getBoundingClientRect().top < 60) window.scrollTo(0, 0);
+  }
+  /* The search box answers Enter the way a handheld scanner ends a code
+     (1a, the design's «USB-сканер работает прямо в поле поиска»): when what
+     is on screen under the box is exactly ONE chip — a bound barcode names
+     one bottle — that chip is tapped, and the box empties for the next code
+     whatever the answer was. Anything else leaves the list to the finger and
+     selects the text, so the next scan replaces it rather than appending. */
+  if (typeof document !== "undefined") {
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing || S.screen !== "admin") return;
+      var box = e.target;
+      if (!box || !box.matches || !box.matches("[data-posq]")) return;
+      e.preventDefault();
+      var chips = document.querySelectorAll("#poslist [data-posadd]");
+      if (chips.length !== 1) { if (box.value) box.select(); return; }
+      posAddProduct(chips[0].getAttribute("data-posadd"));
+      if (S.posQ) { S.posQ = ""; render(); }
+      posBoxSync();
+    });
+  }
+  /* «Салон» (1a, README § 5, screens 05-salon-*): the title and «?», the
+     search with «Сканировать», the results — or «Часто продают» while the box
+     is empty — and the basket: a column on the right of a desktop, under the
+     search on a phone (between it and «Часто продают»), with ONE dark «К
+     оплате» at its foot, pinned above the tab bar on a phone. Then the
+     confirm sheet, then the receipt card in the basket's place. */
+  var POS_HELP = "Продажа тому, кто стоит перед вами: найдите товар или отсканируйте код, нажмите на объём, выберите оплату и нажмите «К оплате». " +
+    "Остатки спишутся сами, заказ появится в «Заказах», а чек для печати откроется по ссылке «Чек ↗». " +
+    "Укажете почту клиента — уйдёт письмо с чеком, а баллы лягут на его карточку. Сканер штрихкодов с USB работает прямо в поле поиска. " +
+    "Партнёрам-салонам здесь продавать не нужно: они заказывают сами по своим ценам.";
   /** «3 поз. · терминал · остатки списаны» — its own function so the i18n
       checker sees one sentence with two holes rather than three fragments.
       With an e-mail on the sale the letter is the fourth fact: the server
@@ -36127,64 +36338,39 @@
       goes in through journalNote(), like the record of an undo itself. */
   function admPosJournalLine(number, total) { return "Продажа " + number + " · " + eur(total); }
   function admSalonHTML() {
+    // «Салон», as the nav says (1a, screen 05) — it was «Продажа в салоне»
     if (SRV.admin !== true) {
-      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Продажа в салоне", "") +
+      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Салон", "") +
         '<div class="adm-empty">Войдите в панель, чтобы оформлять продажи</div></div>';
     }
     loadStockLevels(false);   // the chips need the shelf to know what is out
     stockRefreshOnEntry();    // …and a stale copy would grey out a size that is back, or offer one that is gone
-    var scan = '<button class="adm-btn adm-btn--head" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>";
-    var head = admHead("", "Продажа в салоне", scan);
-    if (S.posDone) return '<div class="adm-screen adm-screen--tight">' + head + admPosReceiptHTML() + "</div>";
-    /* What this screen is for, in two sentences — the owner asked. The second
-       one draws the line the name «Салон» blurs: the partner salons that buy
-       at pro prices are customers, not sales rung up here. */
-    var lead = '<p class="adm-lead">Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — ' +
-      'остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: ' +
-      'они заказывают сами по своим ценам — это «Клиенты → Партнёры».</p>';
-    var cart = S.posCart.map(function (l, i) {
-      var p = byId(l.id), price = posVariantPrice(p, l.variant);
-      return '<div class="adm-posline">' +
-        '<span class="adm-posline__body"><span class="adm-row__nm">' + (p ? esc(p.brand + " — " + p.name) : esc(l.id)) + "</span>" +
-          '<span class="adm-row__sub">' + (l.variant ? esc(l.variant) + " · " : "") + eur(price) + "</span></span>" +
-        '<span class="adm-step-qty">' +
-          '<button data-posqty="' + i + ':-1" aria-label="Меньше">−</button>' +
-          '<span class="adm-step-qty__v">' + l.qty + "</span>" +
-          '<button data-posqty="' + i + ':1" aria-label="Больше">+</button></span>' +
-        '<button class="adm-link adm-link--muted" data-posremove="' + i + '">Убрать</button></div>';
-    }).join("");
-    return '<div class="adm-screen adm-screen--tight">' + head + lead +
-      '<div class="adm-cols adm-cols--wide">' +
-        '<div class="adm-stack adm-stack--tight">' +
+    posTopLoad();             // «Часто продают»
+    /* A chip tapped — or a bottle scanned — while the receipt is up is the
+       next sale starting: the basket takes the receipt's place again. */
+    if (S.posDone && S.posCart.length) S.posDone = null;
+    var searching = !!scanFold(S.posQ);
+    /* «Сканировать», as on «Склад» (Dim, 25.09.2026, q30): outlined — the
+       dark button of this screen is «К оплате». On a phone the word sits
+       under the icon so the search box keeps its whole placeholder. */
+    var scan = '<button class="adm-btn adm-btn--ghost adm-posscan" type="button" data-scanopen>' +
+      admIcon("scan", false, 20) + "<span>Сканировать</span></button>";
+    /* What this screen is for — the owner asked for it on 07.09.2026, and the
+       last sentence draws the line the name «Салон» blurs: the partner salons
+       that buy at pro prices are customers, not sales rung up here. Behind
+       «?» now (README rule 5), with the e-mail sentence that used to stand
+       under the boxes: a typed address gets the letter with the receipt and
+       the points (POST /api/admin/pos-orders/ → settlePayment). */
+    return '<div class="adm-screen adm-screen--tight adm-salon">' +
+      admHead("", "Салон", admHelpBtnHTML("salon")) + admHelpHTML("salon", POS_HELP) +
+      '<div class="adm-salon__grid">' +
+        '<div class="adm-salon__find">' +
           '<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
-            '" placeholder="Название, бренд или штрихкод" aria-label="Поиск товара">' +
-          '<div id="poslist">' + posSearchResultsHTML() + "</div>" +
-          '<p class="adm-hint">Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.</p>' +
+            '" placeholder="Название, бренд или штрихкод" aria-label="Поиск товара" autocomplete="off">' + scan +
         "</div>" +
-        '<div class="adm-card">' +
-          '<div class="adm-sec"><span class="adm-sec__t">Корзина</span></div>' +
-          (S.posCart.length ? cart : '<p class="adm-hint">Пока пусто — найдите товар слева или отсканируйте штрихкод.</p>') +
-          '<div id="postotals">' + (S.posCart.length ? posTotalsHTML() : "") + "</div>" +
-          '<label class="adm-field">Скидка, %<input class="adm-input adm-input--row" data-posdiscount value="' +
-            esc(S.posDiscount || "") + '" inputmode="numeric"></label>' +
-          '<div class="adm-edpair">' +
-            '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
-            '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
-          "</div>" +
-          /* The e-mail box is what turns a walk-in into a customer: since
-             07.09.2026 the sale goes through the same settlement a card
-             payment does (POST /api/admin/pos-orders/ → settlePayment), so a
-             typed address gets the «Заказ принят» letter and the customer
-             card gets its points. Blank is still fine — it is a walk-in. */
-          '<p class="adm-hint">Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.</p>' +
-          (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
-          '<div class="adm-pospay">' +
-            '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
-              (S.posBusy || !S.posCart.length ? " disabled" : "") + ">Наличные</button>" +
-            '<button class="adm-btn adm-btn--pay" data-possend="terminal"' +
-              (S.posBusy || !S.posCart.length ? " disabled" : "") + ">" + (S.posBusy ? "Оформляем…" : "Терминал") + "</button>" +
-          "</div>" +
-        "</div>" +
+        '<div class="adm-salon__list" id="poslist"' + (searching ? "" : " hidden") + ">" + posSearchResultsHTML() + "</div>" +
+        '<div class="adm-salon__cart">' + (S.posDone ? admPosReceiptHTML() : posCartHTML()) + "</div>" +
+        '<div class="adm-salon__top" id="postop"' + (searching ? " hidden" : "") + ">" + posTopHTML() + "</div>" +
       "</div></div>";
   }
   /* ---- one sale, one order, however many taps -----------------------------
@@ -36274,7 +36460,7 @@
       }
       if (r.status === 201 && r.body.ok) {
         S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how, mailed: !!r.body.mailed };
-        S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
+        S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posDiscOther = false; S.posPayment = "cash";
         POS_SALE = { key: "", ref: "" };   // the next basket is a different sale
         journalNote(admPosJournalLine(r.body.number, r.body.total));
         admOrdersChanged();
@@ -36282,6 +36468,9 @@
         S.posErr = posSendErr(r.body && r.body.error);
       }
       render();
+      /* On a phone «Оформить» was pressed at the foot of a long basket, and the
+         receipt card lands where the basket began — above the glass. */
+      if (S.posDone && typeof document !== "undefined") setTimeout(posReceiptIntoView, 60);
     }).catch(function () { S.posBusy = false; S.posErr = "Сервер не отвечает."; render(); });
   }
 
@@ -42385,7 +42574,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -44310,7 +44499,7 @@
     }
 
     /* ---------- inventory: «Продажа в салоне» ---------- */
-    if (d.posadd) { posAddProduct(d.posadd); return; }
+    if (d.posadd) { posAddProduct(d.posadd); posBoxSync(); return; }
     if (d.posqty) {
       var pq = d.posqty.split(":"), pqi = Number(pq[0]), pqd = Number(pq[1]);
       var pqLine = S.posCart[pqi];
@@ -44318,9 +44507,17 @@
       return;
     }
     if (d.posremove !== undefined) { S.posCart.splice(Number(d.posremove), 1); render(); return; }
-    /* «Наличные» / «Терминал» ARE the two ways to finish a sale — the method
-       and the send are one tap, and the confirm card in between is the rule
-       for anything that touches money (README § State). */
+    /* 1a: the discount chips (0 / 5 / 10 / 20 %) and «другая…», which opens
+       the typed box with the caret in it; and the payment method, a pick. */
+    if (d.posdisc !== undefined) {
+      if (d.posdisc === "other") { S.posDiscOther = true; render(); refocus("[data-posdiscount]"); return; }
+      S.posDiscOther = false; S.posDiscount = d.posdisc === "0" ? "" : d.posdisc; render(); return;
+    }
+    if (d.pospay !== undefined) { S.posPayment = d.pospay === "terminal" ? "terminal" : "cash"; render(); return; }
+    /* «К оплате» carries the method picked above it (posPinHTML) — the
+       method and the send are still one `data-possend`, and the confirm sheet
+       in between is the rule for anything that touches money (README rule 4;
+       Dim, 25.09.2026, q29: «Оформить продажу? 42 € · наличные»). */
     if (d.possend !== undefined) {
       if (S.posBusy || !S.posCart.length) return;
       S.posPayment = d.possend === "terminal" ? "terminal" : "cash";
@@ -45041,8 +45238,11 @@
     }
     else if (t.matches("[data-posq]")) {
       S.posQ = t.value;
-      var posList = document.getElementById("poslist");
-      if (posList) { posList.innerHTML = posSearchResultsHTML(); translateTree(posList); }
+      // the results take «Часто продают»'s place while something is typed
+      var posList = document.getElementById("poslist"), posTop = document.getElementById("postop");
+      var posOn = !!scanFold(S.posQ);
+      if (posList) { posList.innerHTML = posSearchResultsHTML(); translateTree(posList); posList.hidden = !posOn; }
+      if (posTop) posTop.hidden = posOn;
     }
     else if (t.matches("[data-posemail]")) { S.posEmail = t.value; }
     else if (t.matches("[data-posphone]")) { S.posPhone = t.value; }
@@ -45059,6 +45259,9 @@
       if (t.value !== pd) t.value = pd;
       var posTot = document.getElementById("postotals");
       if (posTot) { posTot.innerHTML = posTotalsHTML(); translateTree(posTot); }
+      // …and the sum on «К оплате», which is the same number
+      var posPin = document.getElementById("pospin");
+      if (posPin) { posPin.innerHTML = posPinHTML(); translateTree(posPin); }
     }
     /* scanner app: the stepper's field. Remembered, never repainted — the
        panel rebuild would take the caret out of it mid-number, and

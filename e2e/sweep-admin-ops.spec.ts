@@ -206,10 +206,9 @@ test.describe("sweep — the in-salon register", () => {
     await openAdmin(page);
 
     await tab(page, "pos");
-    // «Наличные» / «Терминал» are the two ways to finish a sale since the
-    // redesign — an empty cart must leave both of them dead.
-    await expect(page.locator('[data-possend="cash"]'), "an empty sale could be submitted").toBeDisabled();
-    await expect(page.locator('[data-possend="terminal"]'), "an empty sale could be submitted").toBeDisabled();
+    // 1a: «К оплате» is the one way to finish a sale («Наличные» / «Терминал»
+    // are a pick above it) — an empty cart must leave it dead.
+    await expect(page.locator("[data-possend]"), "an empty sale could be submitted").toBeDisabled();
     await assertClean(page, w, "register, empty cart");
 
     // One 44-h chip per size — the chip IS the «add», and it carries the size
@@ -243,7 +242,8 @@ test.describe("sweep — the in-salon register", () => {
     await assertClean(page, w, "register quantity clamps");
 
     // Discount: letters are not a percentage, and the total on screen has to
-    // be the total that is charged.
+    // be the total that is charged. 1a: the typed box is behind «другая…».
+    await page.locator('[data-posdisc="other"]').click();
     await page.locator("[data-posdiscount]").fill("abc");
     expect(await page.locator("[data-posdiscount]").inputValue(), "letters got into the discount box").toBe("");
     await page.locator("[data-posdiscount]").fill("999");
@@ -254,7 +254,7 @@ test.describe("sweep — the in-salon register", () => {
 
     // Remove a line, then rebuild the sale.
     await page.locator("[data-posremove]").first().click();
-    await expect(page.locator('[data-possend="terminal"]')).toBeDisabled();
+    await expect(page.locator("[data-possend]")).toBeDisabled();
     await page.locator("[data-posq]").fill(PRODUCT_2.id);
     await page.locator(`[data-posadd^="${PRODUCT_2.id}:"]`).first().click();
     await page.locator("[data-posemail]").fill(freshEmail("sweep-pos"));
@@ -264,6 +264,7 @@ test.describe("sweep — the in-salon register", () => {
     const shownTotal = ((await page.locator(".adm-total__v").first().textContent()) || "").trim();
     // money goes through the confirm card, and the card lists what is about
     // to be charged before anything is charged
+    await page.locator('[data-pospay="terminal"]').click();
     await page.locator('[data-possend="terminal"]').click();
     await expect(page.locator(".adm-confirm__d")).toContainText(shownTotal);
     await page.locator("[data-admapply]").click();

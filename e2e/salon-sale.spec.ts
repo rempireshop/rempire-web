@@ -36,14 +36,18 @@ test.describe("the salon till", () => {
     await page.locator(`[data-posadd^="${PRODUCT.id}:"]`).first().click();
     await expect(page.locator(".adm-posline")).toHaveCount(1);
 
-    /* The hint under the e-mail box is the promise being tested: type an
-       address and the purchase letter goes to it. */
-    await expect(page.locator(".adm-card")).toContainText("Укажете почту");
+    /* The promise being tested is the one the e-mail box makes (1a: its
+       placeholder; the sentence itself is behind «?»): type an address and
+       the letter with the receipt goes to it. */
+    await expect(page.locator("[data-posemail]")).toHaveAttribute("placeholder", "придёт чек и баллы");
     await page.locator("[data-posemail]").fill(email);
 
-    // money goes through the confirm card, here as everywhere in the panel
+    /* money goes through the confirm sheet, here as everywhere in the panel —
+       «К оплате» is the one dark button and carries the method picked above
+       it, cash unless changed: chip, «К оплате», «Оформить» */
     await page.locator('[data-possend="cash"]').click();
-    await expect(page.locator(".adm-confirm__t")).toBeVisible();
+    await expect(page.locator(".adm-confirm__t")).toHaveText("Оформить продажу?");
+    await expect(page.locator(".adm-confirm__d")).toContainText("наличные");
     await page.locator("[data-admapply]").click();
 
     await expect(page.locator("[data-posnew]"), "the sale never reached a receipt").toBeVisible();
@@ -104,6 +108,8 @@ test.describe("the salon till", () => {
     await tab(page, "pos");
     await page.locator("[data-posq]").fill(PRODUCT.id);
     await page.locator(`[data-posadd^="${PRODUCT.id}:"]`).first().click();
+    // «Терминал» is a pick now; the one «К оплате» then sends a terminal sale
+    await page.locator('[data-pospay="terminal"]').click();
     await page.locator('[data-possend="terminal"]').click();
     await page.locator("[data-admapply]").click();
 
@@ -115,5 +121,39 @@ test.describe("the salon till", () => {
 
     await page.locator("[data-posnew]").click();
     await clearToast(page);
+  });
+
+  /* 1a (the design's «USB-сканер работает прямо в поле поиска»): a handheld
+     scanner types the code into the box and ends it with Enter. A bound code
+     names one bottle, so Enter rings that bottle up — and the box empties, so
+     the next code is not typed onto the end of this one. */
+  test("a handheld scanner: a code and Enter in the search box ring up that bottle", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `29${Date.now().toString().slice(-10)}`;
+    const variant = PRODUCT.sizes[1];
+
+    await openAdmin(page);
+    const bound = await page.request.put("/api/admin/inventory/", { data: { productId: PRODUCT.id, variant, ean } });
+    expect(bound.ok(), "could not bind the test code").toBe(true);
+    // the register reads the shelf copy for its codes: the owner's next visit
+    await page.reload();
+    await tab(page, "pos");
+
+    const box = page.locator("[data-posq]");
+    await box.fill(ean);
+    await expect(page.locator(`#poslist [data-posadd]`)).toHaveCount(1);
+    await box.press("Enter");
+    await expect(page.locator(".adm-posline")).toHaveCount(1);
+    await expect(page.locator(".adm-posline").first()).toContainText(variant);
+    await expect(box, "the box kept the code, so the next scan would be glued onto it").toHaveValue("");
+    // the same bottle again is the same line, one more
+    await box.fill(ean);
+    await box.press("Enter");
+    await expect(page.locator(".adm-posline .adm-step-qty__v").first()).toHaveText("2");
+    await assertClean(page, w, "salon Enter from a handheld scanner");
+
+    await page.locator("[data-posremove]").first().click();
+    await expect(page.locator(".adm-posline")).toHaveCount(0);
   });
 });

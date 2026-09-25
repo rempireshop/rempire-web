@@ -309,7 +309,7 @@ test.describe("a11y admin", () => {
     await audit.check(page, "admin новый товар · фото");
     await page.locator("[data-admclose]").first().click();
 
-    await section("pos", /Продажа в салоне/);
+    await section("pos", /Салон/);
     await expect(page.locator("[data-posq]")).toBeVisible();
     await audit.check(page, "admin Салон");
 

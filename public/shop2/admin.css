@@ -93,6 +93,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm2__frame { display: flex; align-items: flex-start; min-height: 100vh; }
 
 @keyframes adm-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes adm-fadein { from { opacity: 0; } to { opacity: 1; } }
 .adm2 button { font-family: inherit; cursor: pointer; }
 .adm2 input, .adm2 select, .adm2 textarea { font-family: inherit; font-size: 15px; color: var(--a-ink); }
 .adm2 input:focus, .adm2 select:focus, .adm2 textarea:focus, .adm2 button:focus-visible, .adm2 a:focus-visible {
@@ -1292,6 +1293,12 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
     padding: 10px 16px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
   }
   .adm-pin__btn { width: 100%; height: 50px; }
+  /* A transform makes its box the containing block of anything `fixed`
+     inside it, so the entrance fade (adm-up, translateY) carried the pinned
+     button with the screen: it stood mid-page for a quarter of a second and
+     then dropped to the bar («Салон», 25.09.2026). A screen that pins one
+     fades without moving. */
+  .adm-page--enter > .adm-screen:has(.adm-pin) { animation-name: adm-fadein; }
   body.adm-typing .adm-pin { display: none; }
   body.adm-pinned .adm-page { padding-bottom: calc(var(--a-barh) + var(--a-pinh) + 32px); }
   body.adm-pinned .adm-toast { bottom: calc(var(--a-barh) + var(--a-pinh) + 12px); }
@@ -1933,33 +1940,153 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-savebar.is-dirty .adm-savebar__main:not([disabled]) { border-color: transparent; box-shadow: 0 0 0 2px var(--a-warn); }
 }
 
-/* ---------- Салон (POS) ---------------------------------------------------- */
+/* ---------- Салон (POS), direction 1a ----------------------------------------
+   README § 5 «Салон (POS) + сканер», screens 05-salon-*. The search with
+   «Сканировать» beside it; the results under it, or «Часто продают» while the
+   box is empty; the basket — a column on the right of a desktop, under the
+   search on a phone — with ONE dark «К оплате» at its foot, which a phone
+   pins above the tab bar (.adm-pin). app.js admSalonHTML. */
+/* the basket is a column of its own, so the screen takes the width it needs */
+.adm-page:has(> .adm-salon) { max-width: 1180px; }
+.adm-salon__grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: auto auto 1fr;
+  column-gap: 32px; row-gap: 16px; align-items: start;
+}
+.adm-salon__find { grid-column: 1; grid-row: 1; display: flex; gap: 8px; min-width: 0; }
+/* the results and «Часто продают» take turns in one place (only one is drawn) */
+.adm-salon__list, .adm-salon__top { grid-column: 1; grid-row: 2; min-width: 0; }
+.adm-salon__top { display: flex; flex-direction: column; }
+.adm-salon__cart { grid-column: 2; grid-row: 1 / -1; position: sticky; top: 24px; min-width: 0; }
 
 /* The search box IS the screen's main action, so it wears the ink border the
    README reserves for exactly that. */
-.adm-input--find { height: 52px; border-color: var(--a-ink); font-size: 16px; }
-.adm-row--chips { align-items: center; }
-.adm-poschips { display: flex; gap: 6px; flex-wrap: wrap; }
-.adm-poschip {
-  height: 44px; padding: 0 12px; font-size: 14px; white-space: nowrap;
-  border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+.adm-input--find { flex: 1 1 auto; min-width: 0; height: 52px; border-color: var(--a-ink); font-size: 16px; }
+.adm-posscan { flex: none; height: 52px; padding: 0 16px; font-weight: 600; }
+@media (max-width: 1180px) {
+  .adm-salon__grid { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 24px; }
+  /* «Сканировать» keeps its word, under the icon, so the box keeps its whole
+     placeholder («Название, бренд или штрихкод» at 375 px and up, and beside
+     the basket column of a small desktop) */
+  .adm-salon__find { gap: 6px; }
+  .adm-input--find { padding: 0 10px; }
+  .adm-posscan {
+    width: 78px; padding: 0 2px; flex-direction: column; gap: 2px;
+    font-size: 11px; line-height: 13px; font-weight: 500;
+  }
 }
-.adm-poschip.is-none { border-color: var(--a-rule); color: var(--a-muted); }
-.adm-posline { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--a-rule); padding-bottom: 10px; }
-.adm-posline__body { flex: 1; min-width: 0; }
-.adm-poskv { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--a-muted); }
-.adm-total__v--big { font-size: 28px; }
-.adm-pospay { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.adm-btn--pay { height: 52px; }
+@media (min-width: 900px) and (max-width: 1180px) {
+  .adm-input--find { font-size: 15px; }
+}
 
-.adm-receipt {
-  border: 1px solid var(--a-ink); padding: 32px 20px; text-align: center;
-  display: flex; flex-direction: column; gap: 12px; align-items: center;
+/* a product: the photo, the brand over the name, and a chip per size — the
+   chips stand at the right while there is room and drop under the name when
+   there is not */
+.adm-poslist { display: flex; flex-direction: column; }
+.adm-posrow {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--a-rule);
 }
-.adm-receipt__ok { font-size: 14px; color: var(--a-ok); }
+.adm-posrow__who { flex: 1 1 200px; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.adm-posrow__nm { min-width: 0; display: flex; flex-direction: column; }
+.adm-posrow__br { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-posrow .adm-row__nm { white-space: normal; overflow: visible; overflow-wrap: anywhere; font-size: 15px; }
+.adm-poschips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; }
+.adm-poschip {
+  height: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; flex: none;
+  font-size: 14px; white-space: nowrap; border: 1px solid var(--a-edge); background: var(--a-paper); color: var(--a-ink);
+}
+.adm-poschip:hover { border-color: var(--a-ink); }
+.adm-poschip b { font-weight: 600; }
+.adm-poschip__dot { color: var(--a-muted); }
+/* in the basket: ink, with «×2» — the list itself shows what is rung up */
+.adm-poschip.is-in { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+.adm-poschip.is-in .adm-poschip__dot { color: inherit; }
+.adm-poschip__n { font-size: 11px; line-height: 18px; font-weight: 600; padding: 0 5px; background: var(--a-paper); color: var(--a-ink); }
+/* nothing on the shelf: the words go grey (still AA), the frame dashed */
+.adm-poschip.is-none { border-style: dashed; border-color: var(--a-edge); color: var(--a-muted); }
+.adm-poschip.is-none b { font-weight: 400; }
+.adm-salon__top .adm-sech { margin-top: 8px; }
+
+/* the basket */
+.adm-poscart {
+  border: 1px solid var(--a-rule); background: var(--a-paper); padding: 16px 20px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.adm-poscart__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.adm-poscart__t { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; }
+.adm-poscart__n { font-size: 13px; color: var(--a-muted); }
+.adm-poscart__empty { margin: 0; padding: 20px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--a-muted); }
+.adm-poscart__lines { border-top: 1px solid var(--a-rule); }
+/* a line: the name across the whole width, then the size and the line's sum
+   with − n + and × on their right — the name is never squeezed into a
+   corner by the controls */
+.adm-posline {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 8px; row-gap: 2px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--a-rule);
+}
+.adm-posline__body { display: contents; }
+.adm-posline .adm-row__nm {
+  grid-column: 1 / -1; white-space: normal; overflow: visible; overflow-wrap: anywhere; font-size: 14px; line-height: 19px;
+}
+.adm-posline .adm-row__sub { grid-column: 1; margin: 0; }
+.adm-posline .adm-step-qty button { width: 36px; height: 36px; }
+.adm-posline .adm-step-qty__v { min-width: 30px; font-size: 18px; }
+.adm-posline__x {
+  width: 36px; height: 36px; flex: none; padding: 0; border: 0; background: none;
+  font-size: 20px; line-height: 1; color: var(--a-muted);
+}
+.adm-posline__x:hover { color: var(--a-rust); }
+/* «Скидка» and «Оплата»: a caption over a segmented control that fills the
+   row, one cell per choice, a hairline between the cells */
+.adm-posopt { display: flex; flex-direction: column; gap: 6px; }
+.adm-posopt__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-posopt .adm-seg { width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); }
+.adm-posopt .adm-seg button { padding: 0 6px; }
+.adm-posopt .adm-seg button + button { border-left: 1px solid var(--a-ink); }
+.adm-posopt__other { margin-top: -4px; }
+/* «Клиент»: a fold on a phone; a desktop shows both boxes open */
+.adm-posbuyer { border-top: 0; }
+@media (min-width: 900px) {
+  .adm-posbuyer .adm-foldrow__h { display: none; }
+  .adm-posbuyer .adm-foldrow__b { padding: 0; border: 0; gap: 10px; }
+}
+.adm-postotal { align-items: baseline; gap: 12px; padding: 12px 0 0; border-top: 1px solid var(--a-ink); }
+.adm-postotal__v { display: flex; align-items: baseline; gap: 10px; }
+.adm-postotal__was { font-size: 13px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
+.adm-total__v--big { font-size: 30px; line-height: 34px; }
+/* the one dark button stands at the basket's foot on a desktop */
+.adm-salon .adm-pin { margin: 0; }
+.adm-salon .adm-pin__btn { width: 100%; height: 52px; font-size: 16px; }
+
+/* after the sale, in the basket's place */
+.adm-receipt {
+  border: 1px solid var(--a-ink); padding: 24px 20px 20px; text-align: center;
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+}
+.adm-receipt__ok { font-size: 14px; font-weight: 600; color: var(--a-ok); }
 .adm-receipt__id { font-size: 13px; }
 .adm-receipt__sum { font-family: Oswald, sans-serif; font-size: 40px; line-height: 1; }
-.adm-acts--mid { justify-content: center; margin-top: 8px; }
+.adm-receipt__print { min-height: 44px; display: inline-flex; align-items: center; }
+.adm-receipt__next { align-self: stretch; }
+
+@media (max-width: 899px) {
+  /* one column: the search, the results, the basket, «Часто продают» */
+  .adm-salon__grid { display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
+  .adm-salon__cart { position: static; }
+  .adm-posrow__who { flex-basis: 100%; }
+  /* the sizes are one row that scrolls sideways, never wrapped (README § 1) */
+  .adm-poschips {
+    flex: 1 1 100%; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto;
+    margin: 0 -16px; padding: 0 16px; scrollbar-width: none;
+  }
+  .adm-poschips::-webkit-scrollbar { display: none; }
+  .adm-poscart { padding: 14px 16px 16px; }
+  .adm-posline .adm-step-qty button, .adm-posline__x { width: 44px; height: 44px; }
+  /* an empty basket is only its pinned «Корзина пуста» */
+  .adm-poscart.is-empty { border: 0; padding: 0; }
+  .adm-poscart.is-empty > :not(#pospin) { display: none; }
+  .adm-posbuyer:not(.is-open) .adm-foldrow__b { display: none; }
+}
 
 /* The phase-2 controls' 44-px phone size — after their own rules, so it
    wins on equal specificity (the shell's phone block above sits before
