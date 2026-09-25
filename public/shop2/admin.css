@@ -2764,21 +2764,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 @media (max-width: 899px) { .adm-help { width: 44px; height: 44px; margin: -9px -9px -9px auto; } }
 
 /* a fold: title · one-line summary · chevron; the body under it while open */
-.adm-fold { border-top: 1px solid var(--a-rule); }
-.adm-fold__h {
+.adm-foldrow { border-top: 1px solid var(--a-rule); }
+.adm-foldrow__h {
   width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 14px 0;
   border: 0; border-bottom: 1px solid var(--a-rule); background: none; color: var(--a-ink); font: inherit; text-align: left;
 }
-.adm-fold__t { flex: none; font-size: 15px; font-weight: 600; }
-.adm-fold__s {
+.adm-foldrow__t { flex: none; font-size: 15px; font-weight: 600; }
+.adm-foldrow__s {
   flex: 1 1 auto; min-width: 0; text-align: right; font-size: 13px; color: var(--a-muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.adm-fold__chev { flex: none; margin-left: auto; transition: transform .2s; }
-.adm-fold__s + .adm-fold__chev { margin-left: 0; }
-.adm-fold.is-open .adm-fold__chev { transform: rotate(180deg); }
-.adm-fold__b { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 16px; border-bottom: 1px solid var(--a-rule); }
-@media (prefers-reduced-motion: reduce) { .adm-fold__chev { transition: none; } }
+.adm-foldrow__chev { flex: none; margin-left: auto; transition: transform .2s; }
+.adm-foldrow__s + .adm-foldrow__chev { margin-left: 0; }
+.adm-foldrow.is-open .adm-foldrow__chev { transform: rotate(180deg); }
+.adm-foldrow__b { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 16px; border-bottom: 1px solid var(--a-rule); }
+@media (prefers-reduced-motion: reduce) { .adm-foldrow__chev { transition: none; } }
 
 /* a status tag: the badge's colours, drawn small and firm (11 px, 600) */
 .adm-tag { height: 20px; padding: 0 6px; font-size: 11px; font-weight: 600; }

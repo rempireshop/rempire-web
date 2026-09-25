@@ -22393,14 +22393,14 @@
      never folded — that is the screen's choice, not this helper's. */
   function admFoldHTML(key, title, summary, body) {
     var open = !!ADM_FOLD[key], id = admDomId("admfold-", key);
-    return '<div class="adm-fold' + (open ? " is-open" : "") + '">' +
-      '<button class="adm-fold__h" type="button" data-admfold="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
-        '<span class="adm-fold__t">' + title + "</span>" +
-        (summary ? '<span class="adm-fold__s">' + summary + "</span>" : "") +
-        '<svg class="adm-fold__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    return '<div class="adm-foldrow' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-foldrow__h" type="button" data-admfold="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
+        '<span class="adm-foldrow__t">' + title + "</span>" +
+        (summary ? '<span class="adm-foldrow__s">' + summary + "</span>" : "") +
+        '<svg class="adm-foldrow__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
           'stroke-width="1.8" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
       "</button>" +
-      '<div class="adm-fold__b" id="' + id + '"' + (open ? "" : " hidden") + ">" + body + "</div></div>";
+      '<div class="adm-foldrow__b" id="' + id + '"' + (open ? "" : " hidden") + ">" + body + "</div></div>";
   }
   function admFoldToggle(key) {
     if (ADM_FOLD[key]) delete ADM_FOLD[key]; else ADM_FOLD[key] = 1;

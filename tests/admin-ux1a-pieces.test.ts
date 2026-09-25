@@ -116,9 +116,9 @@ describe("admFoldHTML — an optional part, folded", () => {
   it("a button with the title, the one-line summary and a chevron; the body hidden until opened", () => {
     const p = pieces();
     const html = p.fold("setup:delivery:eu", "Страны Европы", "12 включено", "<p>…</p>");
-    expect(html).toContain('<button class="adm-fold__h" type="button" data-admfold="setup:delivery:eu" aria-expanded="false" aria-controls="admfold-setup_delivery_eu">');
-    expect(html).toContain('<span class="adm-fold__t">Страны Европы</span><span class="adm-fold__s">12 включено</span>');
-    expect(html).toContain('<div class="adm-fold__b" id="admfold-setup_delivery_eu" hidden><p>…</p></div>');
+    expect(html).toContain('<button class="adm-foldrow__h" type="button" data-admfold="setup:delivery:eu" aria-expanded="false" aria-controls="admfold-setup_delivery_eu">');
+    expect(html).toContain('<span class="adm-foldrow__t">Страны Европы</span><span class="adm-foldrow__s">12 включено</span>');
+    expect(html).toContain('<div class="adm-foldrow__b" id="admfold-setup_delivery_eu" hidden><p>…</p></div>');
   });
 
   it("opening it is remembered for the session, per key", () => {
@@ -126,7 +126,7 @@ describe("admFoldHTML — an optional part, folded", () => {
     const p = pieces(ss);
     expect(p.foldToggle("a")).toBe(true);
     const html = p.fold("a", "A", "", "body");
-    expect(html).toContain('class="adm-fold is-open"');
+    expect(html).toContain('class="adm-foldrow is-open"');
     expect(html).toContain('aria-expanded="true"');
     expect(html).not.toContain(" hidden>");
     expect(p.fold("b", "B", "", "body"), "one key opened another").toContain('aria-expanded="false"');
@@ -134,7 +134,17 @@ describe("admFoldHTML — an optional part, folded", () => {
   });
 
   it("no summary, no empty span", () => {
-    expect(pieces().fold("a", "A", "", "b")).not.toContain("adm-fold__s");
+    expect(pieces().fold("a", "A", "", "b")).not.toContain("adm-foldrow__s");
+  });
+
+  it("leaves the panel's existing <details class=\"adm-fold\"> folds exactly as they were", () => {
+    /* The first cut named this row `.adm-fold` and drew a rule over the
+       blog's «Адрес, автор и текст для Google», «Только часть», the delivery
+       preview and the promo extras — every <details> the panel already had. */
+    const css = readFileSync(fileURLToPath(new URL("../public/shop2/admin.css", import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "").match(/^\.adm-fold[ .{[>:]/gm) ?? [];
+    expect(rules, "a new rule for .adm-fold").toHaveLength(5);
+    expect(fn("admFoldHTML")).not.toMatch(/class="adm-fold[" ]/);
   });
 });
 
