@@ -27220,7 +27220,13 @@
       send: function () { return admSetSend(key); }
     });
   }
-  function admSetSend(key) {
+  function admSetSend(key, asked) {
+    /* The session not known yet — the page has just loaded and
+       /api/admin/me has not answered (SRV.admin null). Ask first: a save is
+       never «done» on the say-so of a panel that has not heard from the
+       server. Found by e2e: a phone typed right after a reload toasted
+       «сохранены» down the demo's path and never left the browser. */
+    if (SRV.admin === null && !asked) return checkAdmin().then(function () { return admSetSend(key, true); });
     var note = ADM_SET_NOTE[key] || {};
     delete ADM_SET_NOTE[key];
     // the demo, with no server behind it: the apply was the whole save
@@ -28882,6 +28888,25 @@
     }
     return true;
   }
+  /* A line taken back here leaves the list, as it always has — an «Отмена:
+     …» line takes its place. Its server row stays in the shop's log, and the
+     one list (1a) would show it again the moment the line that hid it was
+     gone. So what the line was is kept, small: enough for auditTwin() to
+     know that row, and the journal hides it with the line. */
+  function jentryGone(e) {
+    if (!e || !e.a) return;
+    var g = { at: jentryAt(e), ref: e.ref || "",
+      a: { type: e.a.type, id: e.a.id, product_id: e.a.product_id, number: e.a.number } };
+    DEMO.jgone = [g].concat(DEMO.jgone || []).slice(0, 40);
+  }
+  /** Is this server row one of this browser's own — shown, or taken back? */
+  function auditMine(r) {
+    var k;
+    for (k = 0; k < DEMO.log.length; k++) if (auditTwin(r, DEMO.log[k])) return true;
+    var gone = DEMO.jgone || [];
+    for (k = 0; k < gone.length; k++) if (auditTwin(r, gone[k])) return true;
+    return false;
+  }
   /** The server's twin of a line of this browser, once the server list is here. */
   function jentryTwin(e) {
     var rows = AUDIT.rows || [];
@@ -28911,7 +28936,7 @@
     if (AUDIT.rows) {
       AUDIT.rows.forEach(function (r) {
         if (AUDIT_LOGIN[r.action]) { logins.push(r); return; }
-        for (var k = 0; k < DEMO.log.length; k++) if (auditTwin(r, DEMO.log[k])) return;
+        if (auditMine(r)) return;
         items.push({ at: Date.parse(r.at) || 0, r: r });
       });
     }
@@ -37208,6 +37233,8 @@
       if (Array.isArray(_dj.giftAmounts)) DEMO.giftAmounts = _dj.giftAmounts;
       if (Array.isArray(_dj.custom)) DEMO.custom = _dj.custom;   // product creation
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
+      // the lines taken back here, whose server rows the journal hides (1a)
+      DEMO.jgone = Array.isArray(_dj.jgone) ? _dj.jgone.slice(0, 40) : [];
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
@@ -37698,11 +37725,20 @@
       return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
     var s = j.settings || {};
-    if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
-    if (typeof s.bundles === "boolean") DEMO.bundles = s.bundles;
+    /* A key this page has written since it loaded is the owner's, not the
+       feed's: /api/overrides/ is edge-cached for up to 30 s, and since 1a a
+       setting is applied here and sent at once — a feed landing in between
+       put the old document back, and the next whole-key PUT sent it to the
+       server (found by e2e, 25.09.2026: a phone saved as the old one). The
+       admin's own no-store read (admSetTake → admSetAdopt) keeps those keys
+       in step instead. (`typeof`: harnesses that run this on its own.) */
+    var fed = function (key) { return typeof ADM_SET_AT === "undefined" || !ADM_SET_AT[key]; };
+    if (typeof s.chatbot === "boolean" && fed("chatbot")) DEMO.chatbot = s.chatbot;
+    if (typeof s.bundles === "boolean" && fed("bundles")) DEMO.bundles = s.bundles;
     // the banner: null on the server means «стандартный», and it wins over the
     // local copy exactly like every other setting
-    if (s.hero === null) DEMO.hero = null;
+    if (!fed("hero")) { /* this page's own banner stands */ }
+    else if (s.hero === null) DEMO.hero = null;
     else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
@@ -37715,7 +37751,7 @@
        dunning intervals, so the settings card opens on what is really saved
        rather than on the defaults (settings.invoice, «Настройки → О компании
        → Счета для компаний»). */
-    if (s.invoice && typeof s.invoice === "object") {
+    if (s.invoice && typeof s.invoice === "object" && fed("invoice")) {
       DEMO.invoice = {
         dueDays: Number(s.invoice.dueDays) || 7,
         prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix),
@@ -37738,7 +37774,7 @@
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
        the panel's draft is dropped — the same rule as the banner. */
-    if (s.content && typeof s.content === "object" && !Array.isArray(s.content)) {
+    if (s.content && typeof s.content === "object" && !Array.isArray(s.content) && fed("content")) {
       DEMO.content = s.content;
       S.contentDraft = null;
     }
@@ -39961,6 +39997,11 @@
     else if (a.type === "set_tier") { admTierLocal(a.id, a.email, a.value); }
     // product creation: the row comes back on (or goes off) the shelf
     else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
+    /* The line leaves the list; its server row must not come back in its
+       place (jentryGone). The undo's own write stays a row of the shop's log
+       — the record that it was taken back. (`typeof`: the test harnesses that
+       run demoUndo on its own have no journal to keep.) */
+    if (typeof jentryGone === "function") jentryGone(entry);
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -44509,9 +44550,9 @@
     }
     // «⋯» of a block: its rare actions shown or folded
     if (d.setmore) { ADM_SET_MORE[d.setmore] = !ADM_SET_MORE[d.setmore]; render(); refocus('[data-setmore="' + d.setmore + '"]'); return; }
-    /* «Вернуть» on a line of this browser's own journal — the same undo as the
-       toast's (admUndoToast): the change goes back, a «Отмена: …» line stays.
-       A line of a key saved whole that is not its newest goes back through
+    /* «Вернуть» on a line of this browser's own journal: the change goes back
+       and the line leaves the list, as it always has (the server's row of the
+       undo is the record). A line of a key saved whole that is not its newest goes back through
        its server row instead, which puts back only what that line changed
        (jentryUndo). The server row it had reads «вернули» too (undoOf). */
     if (d.admundo !== undefined) {
@@ -44521,8 +44562,7 @@
       if (way === "server") { admJournalUndoServer(twin, ue); return; }
       var ukey = ue.a && ADM_SET_OF[ue.a.type];
       if (ukey && twin) ADM_SET_NOTE[ukey] = { undoOf: twin.id };
-      var utxt = ue.txt;
-      demoUndo(ui); journalNote(admCancelLine(utxt)); toast("Отменено ✓");
+      demoUndo(ui); toast("Отменено ✓");
       AUDIT.asked = false;
       render(); return;
     }

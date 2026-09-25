@@ -51,11 +51,13 @@ const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g,
 /* ------------------------------------------------------------------------ */
 
 describe("one settings key, one write — the whole value, the toast after the 2xx", () => {
-  function rig(answer: { status: number; body: unknown }) {
+  function rig(answer: { status: number; body: unknown }, admin: boolean | null = true) {
     const puts: any[] = [];
     const toasts: Array<[string, unknown]> = [];
     const body = `
-      var SRV = { admin: true };
+      var SRV = { admin: ADMIN }, CHECKS = [];
+      // /api/admin/me: the session is the owner's
+      function checkAdmin() { CHECKS.push(1); SRV.admin = true; return Promise.resolve(true); }
       var DEMO = { chatbot: true, bundles: false, hero: null, content: { company: {} }, log: [] };
       var S = { pricingLoaded: { partnersOn: true } };
       ${decl("ADM_SET_OF")}
@@ -85,7 +87,7 @@ describe("one settings key, one write — the whole value, the toast after the 2
       ${fn("admAutosaveOk")}
       ${fn("admSetApply")}
       return { apply: admSetApply, sent: function () { return Promise.all(SENT); } };`;
-    const r = new Function("ANSWER", "PUTS", "TOASTS", body)(answer, puts, toasts) as {
+    const r = new Function("ANSWER", "PUTS", "TOASTS", "ADMIN", body)(answer, puts, toasts, admin) as {
       apply: (a: unknown, t: string) => { ref?: string }; sent: () => Promise<unknown>;
     };
     return { ...r, puts, toasts };
@@ -103,11 +105,37 @@ describe("one settings key, one write — the whole value, the toast after the 2
     expect(r.toasts).toEqual([["Чат выключен ✓", entry]]);
   });
 
+  /* Found by e2e, 25.09.2026: right after a reload the panel has not heard
+     /api/admin/me yet (SRV.admin null), and a phone typed then went down the
+     demo's path — «сохранены» on the toast, nothing sent. */
+  it("a save made before the panel knows its session asks first, then really sends", async () => {
+    const r = rig({ status: 200, body: { ok: true } }, null);
+    r.apply({ type: "toggle_chatbot", value: false }, "Чат выключен ✓");
+    await r.sent();
+    expect(r.puts, "the save never left the browser").toHaveLength(1);
+    expect(r.puts[0].settings).toEqual({ chatbot: false });
+    expect(r.toasts.map((t) => t[0])).toEqual(["Чат выключен ✓"]);
+  });
+
   it("a refusal says nothing of the kind — the header's «Не сохранилось» is the slot's", async () => {
     const r = rig({ status: 503, body: { ok: false } });
     r.apply({ type: "toggle_chatbot", value: false }, "Чат выключен ✓");
     await r.sent();
     expect(r.toasts).toEqual([]);
+  });
+
+  /* Found by e2e, 25.09.2026: the public feed (/api/overrides/, edge-cached)
+     landed between a change applied here and its PUT, put the old document
+     back, and the PUT sent the old phone. A key this page has written is not
+     the feed's to replace any more. */
+  it("the public feed never replaces a key this page has written", () => {
+    const adopt = fn("adoptServer");
+    expect(adopt).toContain('var fed = function (key) { return typeof ADM_SET_AT === "undefined" || !ADM_SET_AT[key]; };');
+    for (const key of ["chatbot", "bundles", "hero", "invoice", "content"]) {
+      expect(adopt, `the feed still overwrites «${key}»`).toContain(`fed("${key}")`);
+    }
+    // …and the stamp it reads is set the moment a key is queued, before any send
+    expect(fn("admSetPut")).toContain("ADM_SET_AT[key] = Date.now();");
   });
 
   it("srvPush hands every settings key to its slot — the assistant's applies and «Вернуть» too", () => {
@@ -259,6 +287,34 @@ describe("«Журнал»: one list, «Вернуть» from any device (q7)", 
       rows: [{ id: 7, action: "setting.set", at: new Date(T).toISOString(), payload: { key: "hero", ref: "j1" }, undo: { kind: "setting", key: "hero", changes: [] } }],
     }) as any;
     expect(withRow.undo(1)).toBe("server");
+  });
+
+  /* Found by e2e (admin.spec, 25.09.2026): «Вернуть» here takes the line out
+     of the list, as it always has — and its server row, hidden until then as
+     the line's twin, came back in its place. */
+  it("a line taken back here takes its server row with it", () => {
+    const G = new Function("DEMO", `
+      var AUDIT_TWIN_MS = 120000;
+      ${fn("jentryAt")}
+      ${fn("auditTwin")}
+      ${fn("jentryGone")}
+      ${fn("auditMine")}
+      return { gone: jentryGone, mine: auditMine };`);
+    const demo = { log: [] as unknown[], jgone: [] as unknown[] };
+    const g = G(demo) as { gone: (e: unknown) => void; mine: (r: unknown) => boolean };
+    const row = (action: string, at: number, payload: Record<string, unknown>) =>
+      ({ action, at: new Date(at).toISOString(), payload });
+    expect(g.mine(row("shipment.create", T, { number: "R-100010" }))).toBe(false);
+    g.gone({ at: T, a: { type: "create_label", id: "u10", number: "R-100010" } });
+    expect(g.mine(row("shipment.create", T + 1000, { number: "R-100010" })), "the label's row came back").toBe(true);
+    expect(g.mine(row("order.status", T + 1000, { number: "R-100011" })), "another order's row was hidden").toBe(false);
+    // a settings line is known by its ref, not by the clock
+    g.gone({ at: T, ref: "jq1", a: { type: "set_hero" } });
+    expect(g.mine(row("setting.set", T + 500000, { key: "hero", ref: "jq1" }))).toBe(true);
+    expect(g.mine(row("setting.set", T, { key: "hero" })), "a ref-less settings row is someone else's").toBe(false);
+    // demoUndo keeps what the line was; the undo's own write stays the shop's record
+    expect(fn("demoUndo")).toContain('if (typeof jentryGone === "function") jentryGone(entry);');
+    expect(fn("admSetJournalHTML")).toContain("if (auditMine(r)) return;");
   });
 
   it("a line taken back reads «вернули» and offers nothing", () => {

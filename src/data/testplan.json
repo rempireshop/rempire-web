@@ -8392,7 +8392,7 @@
         "Раскрыть «Входы в админку» внизу."
       ],
       "expect": [
-        "Цена вернулась к прежней, строка осталась с пометкой «вернули».",
+        "Цена вернулась к прежней, а строка ушла из списка.",
         "Один список: ваши строки помечены «вы · здесь».",
         "У изменения с другого устройства тоже есть «Вернуть» — и оно срабатывает.",
         "После этого «вернули» у той строки видно и на другом устройстве.",
@@ -8412,7 +8412,7 @@
           "Open «Входы в админку» at the bottom."
         ],
         "expect": [
-          "The price is back to the old one; the line stays, marked «вернули».",
+          "The price is back to the old one, and the line has left the list.",
           "One list: your own lines are marked «вы · здесь».",
           "The change from the other device has «Вернуть» too — and it works.",
           "After that, the other device also shows «вернули» on that line.",
@@ -8421,7 +8421,7 @@
         "why": "A wrong price must come back in one press, not a phone call."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-09-25T12:47:20.824Z"
     },
     {
       "id": "settings-hero",
