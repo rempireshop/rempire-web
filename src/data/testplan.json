@@ -1721,19 +1721,19 @@
       "title": "Создать промокод",
       "steps": [
         "«Ещё» → «Маркетинг» → «+ Промокод».",
-        "Ввести код TEST10, выбрать «Сумма в евро», вписать 150, потом выбрать «Процент».",
-        "Поставить 10 % и нажать «Создать».",
-        "Так же создать код TESTSHIP с типом «Бесплатная доставка».",
-        "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать».",
-        "Открыть код REM-CART-…, если он есть: прочитать серую строку, открыть и нажать «Сохранить»."
+        "Ввести код TEST10, выбрать «Сумма», вписать 150, потом выбрать «Процент».",
+        "Поставить 10 %, убрать клавиатуру и нажать «Создать промокод».",
+        "Ещё раз «+ Промокод», ввести TEST10 с любой скидкой и нажать «Создать промокод».",
+        "Нажать на строку TEST10, поменять скидку на 15 и выйти из поля; выключить его переключателем в списке и нажать «Вернуть».",
+        "В TEST10 нажать «Удалить промокод» → «Удалить», потом сразу «Вернуть»; открыть код REM-CART-…, если он есть."
       ],
       "expect": [
         "После «Процент» поле скидки пустое — 150 не превращается в 150 %.",
-        "TEST10 и TESTSHIP стоят в списке, у обоих переключатель на «включён».",
         "Второй TEST10 не создаётся: «Такой промокод уже есть.» и кнопка «Открыть его».",
-        "Неиспользованный код можно удалить; тот, которым уже платили, только выключается.",
-        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто.",
-        "У REM-CART-… «на корзину из письма», без кода корзины; «Сохранить» проходит без ошибки."
+        "Открытый код сохраняется сам: в строке списка сразу «−15%», кнопки «Сохранить» нет.",
+        "Код не переименовать: его название — заголовок, не поле; 95 % красным и не сохраняется.",
+        "«Вернуть» после выключения и после удаления возвращает код; удалённый пропадает через 5 секунд.",
+        "У REM-CART-… «на корзину из письма», без кода корзины; правка проходит без ошибки."
       ],
       "why": "Неработающий код в рассылке выглядит как обман. Код, лежащий в незавершённом заказе, тоже не удаляется — магазин так и пишет.",
       "risk": "med",
@@ -1742,24 +1742,24 @@
       "en": {
         "title": "Creating a promo code",
         "steps": [
-          "«Ещё» → «Маркетинг» → «+ Промокод».",
-          "Enter the code TEST10, choose «Сумма в евро» (amount), type 150, then choose «Процент» (percent).",
-          "Set 10 % and press «Создать» (create).",
-          "Create a second code, TESTSHIP, with the type «Бесплатная доставка» (free delivery).",
-          "«+ Промокод» once more, enter TEST10 with any discount and press «Создать».",
-          "Find a REM-CART-… code, if there is one: read its grey line, open it and press «Сохранить»."
+          "«More» → «Marketing» → «+ Promo code».",
+          "Type the code TEST10, choose «Amount», enter 150, then choose «Percent».",
+          "Set 10 %, put the keyboard away and tap «Create promo code».",
+          "«+ Promo code» again, type TEST10 with any discount and tap «Create promo code».",
+          "Tap the TEST10 row, change the discount to 15 and leave the box; switch it off in the list and tap «Undo».",
+          "In TEST10 tap «Delete promo code» → «Delete», then «Undo» at once; open a REM-CART-… code if there is one."
         ],
         "expect": [
-          "After «Процент» the discount box is empty — 150 does not turn into 150 %.",
-          "TEST10 and TESTSHIP are in the list, both switched to «включён» (on).",
-          "The second TEST10 is not created: «Такой промокод уже есть.» and an «Открыть его» button.",
-          "An unused code can be deleted; one already paid with can only be switched off.",
-          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered.",
-          "REM-CART-… reads «на корзину из письма», no basket id; «Сохранить» goes through without an error."
+          "After «Percent» the discount box is empty — 150 does not become 150 %.",
+          "The second TEST10 is not made: «This promo code already exists.» and «Open it».",
+          "An open code saves itself: the list row says «−15%» at once, no «Save» button.",
+          "No renaming: the name is a title, not a box; 95 % turns red.",
+          "«Undo» after switching off or deleting brings the code back; a delete lands after 5 s.",
+          "REM-CART-… reads «on the cart from the e-mail», no cart id; an edit saves cleanly."
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-24T17:38:26.560Z"
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "panel-gift-amounts",
@@ -1770,18 +1770,18 @@
       "title": "Номиналы подарочных карт",
       "steps": [
         "«Ещё» → «Маркетинг» → «Подарочные карты».",
-        "Выключить номинал 25 €.",
+        "Нажать номинал 25 €, чтобы скрыть его.",
         "Открыть страницу подарочной карты в магазине.",
-        "Вернуться и включить 25 € обратно.",
-        "Открыть «Оформление» и нажать то, что там есть.",
+        "Вернуться и нажать «Вернуть» на всплывающей строке — или нажать 25 € ещё раз.",
+        "В «Оформление» нажать то, что там есть; нажать «?» у заголовков.",
         "Включить режим полёта, нажать 75 €, выключить режим полёта.",
         "Переключить панель на EN и прочитать номиналы."
       ],
       "expect": [
-        "Выключенная сумма пропадает с кнопок на странице карты.",
+        "Скрытая сумма пропадает с кнопок на странице карты.",
         "Она пропадает и из текста под кнопками.",
-        "Включённая обратно — возвращается.",
-        "Оформление открывает настоящую карту PDF и письмо к ней.",
+        "«Вернуть» или второе нажатие возвращают её в магазин.",
+        "Оформление открывает настоящую карту PDF и письмо к ней; нарисованной карты нет.",
         "Без сети 75 € возвращается как был, и видно «Сервер не отвечает».",
         "На EN номиналы написаны «€25», как все цены в панели."
       ],
@@ -1791,26 +1791,26 @@
       "en": {
         "title": "Gift-card amounts",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Подарочные карты».",
-          "Switch the 25 € amount off.",
-          "Open the gift-card page in the shop.",
-          "Come back and switch 25 € on again.",
-          "Open «Оформление» and press what is there.",
-          "Turn flight mode on, tap 75 €, turn flight mode off.",
+          "«More» → «Marketing» → «Gift cards».",
+          "Tap the 25 € amount to hide it.",
+          "Open the gift card page in the shop.",
+          "Go back and tap «Undo» on the pop-up line — or tap 25 € again.",
+          "Under «Design» tap what is there; tap «?» next to the headings.",
+          "Turn on airplane mode, tap 75 €, turn airplane mode off.",
           "Switch the panel to EN and read the amounts."
         ],
         "expect": [
-          "An amount switched off leaves the buttons on the card page.",
-          "It leaves the line of text under them too.",
-          "Switched back on, it comes back.",
-          "The design block opens a real card PDF and the letter it arrives with.",
-          "Offline, 75 € goes back to how it was, and «Сервер не отвечает» shows.",
-          "In EN the amounts read «€25», like every price in the panel."
+          "The hidden amount disappears from the buttons on the card page.",
+          "It also disappears from the text under the buttons.",
+          "«Undo» or a second tap brings it back to the shop.",
+          "«Design» opens the real card PDF and its letter; no drawn card.",
+          "Offline, 75 € goes back as it was and «The server is not answering» shows.",
+          "On EN the amounts read «€25», like every price in the panel."
         ],
         "why": "An amount not on sale is an order that dies at the checkout."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:44:28.205Z"
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "panel-gift-issued",
@@ -4987,18 +4987,18 @@
       "steps": [
         "Открыть «Ещё» → «Маркетинг» → «Письма».",
         "Открыть «Заказ принят».",
-        "Внизу вписать свой адрес и нажать «Отправить мне тест».",
+        "В «Куда присылать примеры» вписать свой адрес и нажать «Прислать мне пример».",
         "Проверить почту.",
-        "Поменять тему, не сохраняя, и снова нажать «Отправить мне тест».",
-        "Нажать «← Все письма», не сохраняя."
+        "Поменять тему и сразу, не дожидаясь, снова нажать «Прислать мне пример».",
+        "Открыть «Рассылка» → любое письмо и посмотреть «Куда присылать примеры»."
       ],
       "expect": [
         "В ваш ящик пришло письмо от shop@rempireshop.com.",
         "В начале темы стоит [test].",
         "Письмо выглядит так же, как предпросмотр на экране.",
         "Ответ на это письмо уходит на info@rempireshop.com.",
-        "В тесте — новая тема с экрана, хотя она ещё не сохранена.",
-        "Панель спросит, выходить ли без сохранения; «Выйти» убирает правки только этого письма."
+        "Во втором примере — новая тема с экрана.",
+        "В рассылке тот же адрес — вписывать второй раз не нужно."
       ],
       "why": "Это единственная кнопка, которая доказывает, что почта вообще работает.",
       "risk": "med",
@@ -5006,25 +5006,25 @@
       "en": {
         "title": "Sending yourself a test letter",
         "steps": [
-          "Open «Ещё» → «Маркетинг» → «Письма».",
-          "Open «Заказ принят» (order received).",
-          "At the bottom type your address and press «Отправить мне тест» (send test).",
-          "Check your mail.",
-          "Change the subject without saving and press «Отправить мне тест» again.",
-          "Press «← Все письма» without saving."
+          "Open «More» → «Marketing» → «Letters».",
+          "Open «Order received».",
+          "Under «Where to send samples» type your address and tap «Send me a sample».",
+          "Check the mailbox.",
+          "Change the subject and at once, without waiting, tap «Send me a sample» again.",
+          "Open «Newsletter» → any letter and look at «Where to send samples»."
         ],
         "expect": [
-          "A letter from shop@rempireshop.com is in your own mailbox.",
+          "A letter from shop@rempireshop.com arrived in your mailbox.",
           "The subject starts with [test].",
           "The letter looks the same as the preview on screen.",
-          "Press reply and it goes to info@rempireshop.com.",
-          "The test carries the new subject from the screen, though it is not saved.",
-          "The panel asks whether to leave unsaved; «Выйти» drops this letter's edits only."
+          "A reply to it goes to info@rempireshop.com.",
+          "The second sample carries the new subject from the screen.",
+          "The newsletter has the same address — no need to type it again."
         ],
         "why": "This is the one button that proves mail works at all."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T18:01:04.338Z"
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "mail-edit-text",
@@ -5035,17 +5035,17 @@
       "title": "Поменять текст письма",
       "steps": [
         "Открыть «Письма» → «Заказ принят».",
-        "Поменять «Тема письма» и «Вступление», вставив кнопкой имя покупателя.",
-        "Посмотреть предпросмотр и нажать «Сохранить».",
-        "Отправить себе тест.",
-        "Нажать «Вернуть стандартный текст»."
+        "Поменять «Тема» и «Первый абзац»; поставить курсор в абзац и вставить имя кнопкой {name}.",
+        "Вписать в абзац «{na» и подождать пару секунд, потом дописать «{name}».",
+        "Дождаться «Сохранено ✓» вверху и отправить себе пример.",
+        "Нажать «Вернуть стандартный текст», потом «Вернуть» на всплывающей строке."
       ],
       "expect": [
-        "«Сохранить» сохраняет сразу — окна с подтверждением больше нет.",
-        "В пришедшем тесте стоит ваш текст, а не старый.",
-        "Вместо вставленного поля — настоящее имя покупателя.",
-        "«Вернуть стандартный текст» возвращает письмо к исходному.",
-        "На телефоне «Сохранить» — в шапке экрана; на компьютере — в полосе внизу."
+        "Текст сохраняется сам через секунду — кнопки «Сохранить» нет.",
+        "Кнопки вставок — только те, что это письмо умеет подставить.",
+        "Недописанная вставка подсвечена красным и не сохраняется, пока её не закончить.",
+        "В пришедшем примере ваш текст и настоящее имя покупателя.",
+        "«Вернуть стандартный текст» возвращает этот язык целиком; «Вернуть» — ваш текст."
       ],
       "why": "Если правки не сохраняются, письма так и остаются чужими.",
       "risk": "low",
@@ -5053,21 +5053,23 @@
       "en": {
         "title": "Changing the text of a letter",
         "steps": [
-          "Open «Письма» → «Заказ принят».",
-          "Change «Тема письма» and «Вступление», inserting the buyer's name with the button.",
-          "Look at the preview and press «Сохранить».",
-          "Send yourself a test.",
-          "Press «Вернуть стандартный текст» (restore the standard text)."
+          "Open «Letters» → «Order received».",
+          "Change «Subject» and «First paragraph»; put the cursor in the paragraph and insert the name with {name}.",
+          "Type «{na» into the paragraph and wait a couple of seconds, then finish it as «{name}».",
+          "Wait for «Saved ✓» at the top and send yourself a sample.",
+          "Tap «Restore the standard text», then «Undo» on the pop-up line."
         ],
         "expect": [
-          "«Сохранить» saves at once — there is no confirmation box any more.",
-          "The test that arrives carries your text, not the old one.",
-          "The inserted field has turned into a real name.",
-          "«Вернуть стандартный текст» brings the original letter back.",
-          "On the phone «Сохранить» is in the screen's header; on a computer, the bottom bar."
+          "The text saves itself a second later — there is no «Save» button.",
+          "The insert buttons are only the ones this letter can fill in.",
+          "The unfinished insert is marked red and not saved until it is finished.",
+          "The sample carries your text and a real customer name.",
+          "«Restore the standard text» restores this whole language; «Undo» brings yours back."
         ],
         "why": "If your edits do not save, the letters stay somebody else's."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "mail-langs",
@@ -5486,17 +5488,17 @@
       "lang": "RU",
       "title": "Письмо про брошенную корзину",
       "steps": [
-        "«Ещё» → «Маркетинг» → «Письма»: вверху вписать свой адрес в «Куда присылать примеры писем».",
-        "Под «Брошенная корзина» нажать «Прислать пример» и проверить почту.",
-        "Включить «Брошенная корзина», в «Напомнить через, часов» поставить 1 и нажать «Сохранить».",
+        "«Ещё» → «Маркетинг» → «Письма»: открыть «Брошенная корзина», в «Куда присылать примеры» вписать свой адрес.",
+        "Нажать «Прислать мне пример» и проверить почту.",
+        "Включить письмо переключателем, в «Когда уходит» поставить «Напомнить через, часов» 1 и выйти из поля.",
         "В магазине набрать корзину и на кассе ввести адрес, на который напоминание ещё не приходило (например, имя+cart1@gmail.com). Не платить.",
-        "Сразу нажать «Запустить сейчас» под письмом, через час — ещё два раза.",
+        "Сразу нажать «Запустить сейчас» в этом письме, через час — ещё два раза.",
         "Проверить почту, нажать кнопку возврата к корзине, потом «Отписаться» внизу письма."
       ],
       "expect": [
         "Пример приходит сразу, в теме [test], корзина в нём придуманная.",
         "Сразу: в «Последний запуск» — «отправлено 0» и «срок из настройки ещё не прошёл».",
-        "Через час — «Отправлено 1» или больше, под письмом «Последний запуск».",
+        "Через час — «Отправлено 1» или больше, в письме «Последний запуск».",
         "Следующее нажатие говорит, что письмо уже уходило.",
         "Письмо со списком товаров; его кнопка в окне инкогнито открывает кассу с этой корзиной.",
         "После «Отписаться» следующая брошенная корзина с этого адреса письма не получает."
@@ -5505,24 +5507,24 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T17:51:40.128Z",
+      "markedAt": "2026-09-25T11:50:31.414Z",
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Письма»: at the top type your address into «Куда присылать примеры писем».",
-          "Under «Брошенная корзина» press «Прислать пример» and check your mail.",
-          "Switch «Брошенная корзина» on, set «Напомнить через, часов» to 1 and press «Сохранить».",
-          "In the shop fill a basket and at the checkout enter an address that has never had a reminder (e.g. name+cart1@gmail.com). Do not pay.",
-          "Press «Запустить сейчас» under the letter at once, then twice more an hour later.",
-          "Check your mail, press the button back to the cart, then «Отписаться» at the bottom."
+          "«More» → «Marketing» → «Letters»: open «Abandoned cart», type your address under «Where to send samples».",
+          "Tap «Send me a sample» and check the mailbox.",
+          "Switch the letter on, under «When it goes out» set «Remind after, hours» to 1 and leave the box.",
+          "In the shop fill a cart and at the checkout enter an address no reminder has reached yet (e.g. name+cart1@gmail.com). Do not pay.",
+          "Tap «Run now» in that letter at once, and twice more after an hour.",
+          "Check the mailbox, tap the button back to the cart, then «Unsubscribe» at the bottom of the letter."
         ],
         "expect": [
-          "The sample arrives at once, [test] in the subject, with a made-up basket.",
-          "At once: «Последний запуск» shows «отправлено 0» and «срок из настройки ещё не прошёл».",
-          "An hour later — «Отправлено 1» or more, and «Последний запуск» below.",
-          "The next press says the letter has already gone.",
-          "The letter lists the cart; opened incognito, its button opens checkout with that cart.",
-          "After «Отписаться» the next abandoned cart from that address gets no letter."
+          "The sample arrives at once, [test] in the subject, the cart in it made up.",
+          "At once: «Last run» says «sent 0» and «the set wait has not passed yet».",
+          "After an hour — «Sent 1» or more, with «Last run» in the letter.",
+          "The next press says the letter has gone already.",
+          "A letter listing the products; its button in a private window opens that cart's checkout.",
+          "After «Unsubscribe» the next abandoned cart from that address gets no letter."
         ],
         "why": "The real letter goes once a day, in the morning, so on a test day it can only be seen through «Прислать пример» and «Запустить сейчас». An address gets one reminder until an order comes from it — testing needs a fresh address. A second letter about the same cart annoys people into unsubscribing."
       }
@@ -5535,15 +5537,15 @@
       "lang": "RU",
       "title": "Второе письмо про корзину — со скидкой",
       "steps": [
-        "«Ещё» → «Маркетинг» → «Письма»: под «Брошенная корзина — письмо со скидкой» — четыре поля.",
-        "Включить «Брошенная корзина» и поставить: через 1 ч, скидка через 1 день, 5 %, от 100 €. Нажать «Сохранить».",
-        "Нажать «Прислать пример» под письмом со скидкой и проверить почту.",
-        "Набрать корзину дороже 100 € на новый адрес и не платить; через час нажать «Запустить сейчас» под «Брошенная корзина».",
-        "Через сутки нажать «Запустить сейчас» под письмом со скидкой; открыть скидку из письма и дойти до оплаты.",
+        "«Ещё» → «Маркетинг» → «Письма»: открыть «Брошенная корзина — письмо со скидкой» — в «Когда уходит» четыре поля.",
+        "Включить «Брошенная корзина» и поставить: через 1 ч, скидка через 1 день, 5 %, от 100 €. Выйти из поля.",
+        "Нажать «Прислать мне пример» в письме со скидкой и проверить почту.",
+        "Набрать корзину дороже 100 € на новый адрес и не платить; через час нажать «Запустить сейчас» в «Брошенная корзина».",
+        "Через сутки нажать «Запустить сейчас» в письме со скидкой; открыть скидку из письма и дойти до оплаты.",
         "Повторить всё с корзиной дешевле 100 €."
       ],
       "expect": [
-        "В полях сохранённые числа, после сохранения кнопка говорит «Сохранено ✓».",
+        "У письма со скидкой своего переключателя нет: «вместе с первым»; числа сохраняются сами.",
         "Пример пришёл сразу: [test] в теме, ваши 5 %, код в нём ненастоящий.",
         "До первого письма «Запустить сейчас» говорит: первое письмо ещё не уходило.",
         "Настоящее письмо: код на 5 %; кнопка в окне инкогнито возвращает корзину уже со скидкой.",
@@ -5554,24 +5556,24 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-23T17:51:40.128Z",
+      "markedAt": "2026-09-25T11:50:31.414Z",
       "en": {
         "title": "The second cart letter — the one with the discount",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Письма»: under «Брошенная корзина — письмо со скидкой» there are four fields.",
-          "Switch «Брошенная корзина» on and set: after 1 h, discount after 1 day, 5 %, from 100 €. Press «Сохранить».",
-          "Press «Прислать пример» under the discount letter and check your mail.",
-          "Fill a basket over 100 € on a fresh address and do not pay; an hour later press «Запустить сейчас» under «Брошенная корзина».",
-          "A day later press «Запустить сейчас» under the discount letter; open the discount from it and go through to payment.",
-          "Do it all again with a basket under 100 €."
+          "«More» → «Marketing» → «Letters»: open «Abandoned cart — the discount letter» — four boxes under «When it goes out».",
+          "Switch «Abandoned cart» on and set: after 1 h, discount after 1 day, 5 %, from 100 €. Leave the box.",
+          "Tap «Send me a sample» in the discount letter and check the mailbox.",
+          "Fill a cart over 100 € with a new address and do not pay; after an hour tap «Run now» in «Abandoned cart».",
+          "A day later tap «Run now» in the discount letter; open the discount from the letter and go on to payment.",
+          "Repeat everything with a cart under 100 €."
         ],
         "expect": [
-          "The fields hold the saved numbers; after saving the button says «Сохранено ✓».",
-          "The sample arrives at once: [test] in the subject, your 5 %, a fake code.",
-          "Before the first letter «Запустить сейчас» says: the first letter has not gone yet.",
-          "The real letter: a 5 % code; opened incognito, its button restores the cart discounted.",
-          "The discount counts only this basket's products; the same code is refused twice.",
-          "A basket under 100 € gets the first letter only."
+          "The discount letter has no switch: «with the first one»; the numbers save themselves.",
+          "The sample came at once: [test] in the subject, your 5 %, a fake code.",
+          "Before the first letter «Run now» says the first letter has not gone yet.",
+          "The real letter: a 5 % code; its button (private window) brings the cart back discounted.",
+          "The discount is on this cart's products only, and the code is refused a second time.",
+          "A cart under 100 € gets the first letter only."
         ],
         "why": "The discount goes to people who might have bought anyway. A wrong threshold, or a code that pays for the whole order, is money given away. The code in the sample is made up and will not work at the checkout — that is intended."
       }
@@ -5584,10 +5586,10 @@
       "lang": "RU",
       "title": "Письмо ко дню рождения",
       "steps": [
-        "В «Письмах» включить «Скидка ко дню рождения» и выбрать «за 3 дня».",
+        "В «Письмах» открыть «Скидка ко дню рождения», включить и в «Когда уходит» выбрать «за 3 дня».",
         "Там же поставить «Скидка в поздравлении» 15 %.",
         "В кабинете вписать дату рождения послезавтра, галочку про письма не ставить.",
-        "Нажать «Запустить сейчас», потом поставить галочку и нажать ещё дважды.",
+        "Нажать «Запустить сейчас» в этом письме, потом поставить галочку и нажать ещё дважды.",
         "Проверить почту и применить промокод на кассе.",
         "Нажать «Отписаться» внизу письма и открыть карточку клиента."
       ],
@@ -5603,24 +5605,24 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-17T12:38:35.000Z",
+      "markedAt": "2026-09-25T11:50:31.414Z",
       "en": {
         "title": "The birthday letter",
         "steps": [
-          "In «Письма» switch on «Скидка ко дню рождения» and choose «за 3 дня».",
-          "Right there set «Скидка в поздравлении» to 15 %.",
-          "In the account enter a birthday two days ahead, leaving the letters box unticked.",
-          "Press «Запустить сейчас», then tick the box and press it twice more.",
-          "Check your mail and apply the promo code at the checkout.",
-          "Press «Отписаться» at the bottom of the letter and open the customer card."
+          "In «Letters» open «Birthday discount», switch it on and under «When it goes out» choose «3 days before».",
+          "In the same place set «Discount in the greeting» to 15 %.",
+          "In the account enter a birthday the day after tomorrow, and leave the e-mail box unticked.",
+          "Tap «Run now» in that letter, then tick the box and tap it twice more.",
+          "Check the mailbox and apply the promo code at the checkout.",
+          "Tap «Unsubscribe» at the bottom of the letter and open the customer's card."
         ],
         "expect": [
           "Without the tick the toast says: no consent to letters.",
-          "With it — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
-          "The letter arrives with a personal 15 % promo code.",
-          "The third press says the letter has already gone.",
-          "The code works at the checkout and lives two weeks past the birthday.",
-          "After «Отписаться» the page confirms it, and the card says «Отписался по ссылке в письме»."
+          "With the tick — «Sent 1 · skipped 0» and «Last run».",
+          "The letter came, with a personal 15 % promo code in it.",
+          "The third press says the letter has gone already.",
+          "The code works at the checkout and lives two weeks after the birthday.",
+          "After «Unsubscribe» the page confirms it; the card says «Unsubscribed from the link in a letter»."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
       }
@@ -5636,17 +5638,17 @@
         "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», вписать название и тему.",
         "«+ Картинка» — снять фото или выбрать из галереи; «Куда ведёт картинка» — найти и выбрать товар.",
         "Под фото нажать «Убрать», потом большую кнопку «Добавить фото» и снять или выбрать другое.",
-        "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную.",
-        "Стрелками ↑↓ поменять два блока местами и посмотреть «Как увидит покупатель» ниже.",
-        "Переключить на Eesti: тема, тексты и надпись кнопки; «Сохранить», свой адрес, «Отправить мне тест».",
-        "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
+        "Ещё «+ Картинка» на раздел, «+ Текст» с парой строк, «+ Кнопка» «В магазин» на главную; один блок удалить ✕ и «Вернуть».",
+        "Переключить на Eesti: тема, тексты и надпись кнопки; свой адрес и «Прислать мне тест».",
+        "Нажать «Отправить N подписчикам», в карточке «Отправить», и за 10 секунд нажать «Вернуть».",
+        "Снова «Отправить N подписчикам» → «Отправить» и дождаться конца."
       ],
       "expect": [
         "Фото встаёт в письмо с процентами загрузки; фразы «не настроена» нигде нет.",
-        "Под фото «Заменить» и «Убрать»; «Убрать» оставляет большую «Добавить фото», ссылку — мелко под ней.",
-        "«Как увидит покупатель» меняется сразу после правки, ещё до «Сохранить».",
+        "Черновик сохраняется сам — кнопки «Сохранить» нет; «Как увидит покупатель» меняется сразу.",
         "Тест пришёл с [test] в теме; каждая картинка и кнопка ведут куда выбрано.",
-        "Карточка назвала число подписчиков по языкам; счётчик дошёл до «Отправлено N из N».",
+        "«Вернуть» в первые 10 секунд: письмо не ушло никому и осталось черновиком.",
+        "Карточка спросила «Отправить N подписчикам?»; счётчик дошёл до «Отправлено N из N».",
         "Эстонец получил эстонскую версию с рабочим «Отписаться»; журнал: «отправлено N, ошибок 0»."
       ],
       "why": "Письмо собирается на телефоне из фото, как у Aromatic 89, — адреса картинок Ренат искать не будет. Одно письмо уходит всем подписчикам — ошибка уйдёт сотням.",
@@ -5655,26 +5657,26 @@
       "en": {
         "title": "A newsletter of pictures reaches subscribers in their language",
         "steps": [
-          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо», write a name and a subject.",
-          "«+ Картинка» — take a photo or pick one from the gallery; «Куда ведёт картинка» — find and pick a product.",
-          "Under the photo press «Убрать», then the big «Добавить фото» button and take or pick another.",
-          "Another «+ Картинка» leading to a section, «+ Текст» with a couple of lines, «+ Кнопка» «В магазин» to the home page.",
-          "Swap two blocks with the ↑↓ arrows and look at «Как увидит покупатель» below.",
-          "Switch to Eesti: the subject, the texts and the button label; «Сохранить», your address, «Отправить мне тест».",
-          "Press «Отправить N подписчикам», read the card, «Отправить»."
+          "«More» → «Marketing» → «Newsletter» → «+ Letter», type a name and a subject.",
+          "«+ Picture» — take a photo or pick one from the gallery; «Where the picture leads» — find and pick a product.",
+          "Under the photo tap «Remove», then the big «Add photo» button and take or pick another.",
+          "Another «+ Picture» to a section, «+ Text» with a couple of lines, «+ Button» «To the shop» to the home page; delete one block with ✕ and «Undo».",
+          "Switch to Eesti: subject, texts and the button's label; your address and «Send me a test».",
+          "Tap «Send to N subscribers», «Send» on the card, and within 10 seconds tap «Undo».",
+          "«Send to N subscribers» → «Send» again and wait for the end."
         ],
         "expect": [
-          "The photo lands in the letter with an upload percentage; «не настроена» appears nowhere.",
-          "«Заменить» and «Убрать» under the photo; «Убрать» leaves a big «Добавить фото», link below.",
-          "«Как увидит покупатель» changes right after each edit, before «Сохранить».",
-          "The test arrived with [test] in the subject; every picture and button goes where chosen.",
-          "The card named the subscribers per language; the counter reached «Отправлено N из N».",
-          "The Estonian reader got Estonian with a working «Отписаться»; journal: «отправлено N, ошибок 0»."
+          "The photo goes into the letter with an upload percentage; no «not set up» anywhere.",
+          "The draft saves itself — no «Save» button; «How the customer sees it» changes at once.",
+          "The test came with [test] in the subject; every picture and button leads where chosen.",
+          "«Undo» within 10 seconds: the letter went to nobody and stayed a draft.",
+          "The card asked «Send to N subscribers?»; the counter reached «Sent N of N».",
+          "An Estonian got the Estonian version with a working «Unsubscribe»; journal: «sent N, errors 0»."
         ],
         "why": "The letter is built on a phone out of photos, like Aromatic 89's — Renat will not go hunting for picture addresses. One letter goes to every subscriber — a mistake goes to hundreds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T15:00:29.690Z"
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "mail-daily-limit",
@@ -5684,8 +5686,8 @@
       "lang": "RU",
       "title": "Дневной лимит писем",
       "steps": [
-        "«Ещё» → «Настройки» → «Письма» (это «Маркетинг» → «Письма»): блок «Сколько писем в сутки» под списком писем.",
-        "Поставить всего 4, придержать 2, сохранить и обновить страницу.",
+        "«Ещё» → «Маркетинг» → «Письма»: внизу раскрыть «Сколько писем в сутки».",
+        "Поставить всего 4, придержать 2, выйти из поля и обновить страницу.",
         "Проверить, что подписчиков больше двух; если нет — добавить.",
         "Открыть рассылку, прочитать кнопку отправки на EN, вернуть RU и нажать её.",
         "Оформить и оплатить заказ, пока лимит занят.",
@@ -5693,7 +5695,7 @@
         "На следующий день после 10:00 открыть рассылку снова."
       ],
       "expect": [
-        "После обновления в полях 4 и 2, без «Изменения не сохранены».",
+        "После обновления в строке «до 4 · сегодня …» и в полях 4 и 2.",
         "Под кнопкой — сколько ушло сегодня и доступно; на EN вся кнопка по-английски.",
         "Рассылка останавливается на двух: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
         "Письмо «Заказ принят» приходит покупателю всё равно.",
@@ -5704,25 +5706,25 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T17:47:00.480Z",
+      "markedAt": "2026-09-25T11:50:31.414Z",
       "en": {
         "title": "The daily letter limit",
         "steps": [
-          "«Ещё» → «Настройки» → «Письма» (that is «Маркетинг» → «Письма»): the «Сколько писем в сутки» block below the letters.",
-          "Set the total to 4, hold back 2, save and reload the page.",
-          "Check there are more than two subscribers; add some if not.",
-          "Open a campaign, read its send button in EN, switch back to RU and press it.",
-          "Place and pay for an order while the allowance is spent.",
-          "Put back 100 and 30; do not press the campaign's «Продолжить».",
-          "The next day after 10:00, open the campaign again."
+          "«More» → «Marketing» → «Letters»: at the bottom open «How many letters a day».",
+          "Set 4 in all, hold back 2, leave the box and reload the page.",
+          "Check there are more than two subscribers; if not, add some.",
+          "Open the newsletter, read the send button in EN, switch back to RU and press it.",
+          "Place and pay for an order while the limit is taken.",
+          "Put back 100 and 30; do not press «Continue» on the newsletter.",
+          "The next day after 10:00 open the newsletter again."
         ],
         "expect": [
-          "After the reload the fields say 4 and 2, with no «Изменения не сохранены».",
-          "Under the button: sent today and still available; in EN the whole button is English.",
-          "The campaign stops at two: «Отправлено 2 из N — остальные уйдут автоматически завтра».",
-          "The «Заказ принят» letter still reaches the buyer.",
-          "One limit notification: «…остальные уйдут автоматически завтра, нажимать ничего не нужно».",
-          "Next day the campaign finished by itself, nothing pressed, and nobody got it twice."
+          "After the reload: «up to 4 · today …» and the boxes hold 4 and 2.",
+          "Under the button — today's count and what is left; in EN the button is English.",
+          "The newsletter stops at two: «Sent 2 of N — the rest will go automatically tomorrow».",
+          "The «Order received» letter still reaches the customer.",
+          "One notice about the limit: «…the rest will go automatically tomorrow, nothing to press».",
+          "The next day the newsletter finished by itself, no presses, and nobody got it twice."
         ],
         "why": "A campaign can quietly eat the day and then «Заказ принят» cannot send. That is a paid order whose buyer heard nothing."
       }
@@ -8106,12 +8108,14 @@
         "Написать помощнику «сделай промокод на 10 %».",
         "Нажать «Применить».",
         "Открыть «Маркетинг» → «Промокоды» и найти новый код.",
-        "Проверить этот код на кассе."
+        "Проверить этот код на кассе.",
+        "Попросить помощника сделать код с тем же названием ещё раз и нажать «Применить»."
       ],
       "expect": [
         "Код появился в списке промокодов.",
         "Условия у него те, которые вы назвали.",
-        "На кассе он срабатывает и даёт скидку."
+        "На кассе он срабатывает и даёт скидку.",
+        "Второй раз: «Такой промокод уже есть.» — старый код остался прежним и включённым."
       ],
       "why": "Промокод не с теми условиями стоит ровно столько, сколько по нему купят.",
       "risk": "high",
@@ -8119,18 +8123,22 @@
       "en": {
         "title": "The assistant makes a promo code",
         "steps": [
-          "Write to the assistant «сделай промокод на 10 %» — a 10 % code.",
-          "Press «Применить».",
-          "Open «Маркетинг» → «Промокоды» and find the new code.",
-          "Try that code at the checkout."
+          "Write to the assistant «make a 10 % promo code».",
+          "Tap «Apply».",
+          "Open «Marketing» → «Promo codes» and find the new code.",
+          "Try the code at the checkout.",
+          "Ask the assistant to make a code with the same name again and tap «Apply»."
         ],
         "expect": [
-          "The code shows up in the promo code list.",
-          "Its terms are the ones you named.",
-          "At the checkout it works and gives the discount."
+          "The code appeared in the list of promo codes.",
+          "Its conditions are the ones you named.",
+          "At the checkout it works and gives the discount.",
+          "The second time: «This promo code already exists.» — the old code stays unchanged, on."
         ],
         "why": "A promo code on the wrong terms costs whatever gets bought with it."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:50:31.414Z"
     },
     {
       "id": "ai-assistant-confusion",
