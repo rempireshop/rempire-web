@@ -24390,11 +24390,32 @@
     if (key !== admShownKey) { admShownKey = key; admShownAt = now; return true; }
     return now - admShownAt < 400;
   }
+  /** What the panel's door shows: the panel, the sign-in card, or the wait
+      card («Проверяем…»).
+
+      The panel's screens fall back to the demo shop — fourteen invented
+      orders, «М. Тамм» #1042, a demo «Обзор» — whenever the owner is not
+      confirmed (admOrders, fakeCustomers…). That is meant for ONE case: a
+      build with no server behind it at all, where both boot questions have
+      come back and neither found an API. It used to be drawn in a second
+      case as well — the first moments of every visit, before either answer
+      had landed (SRV starts `on: false`), so the owner saw somebody else's
+      orders flash up inside his own panel, for as long as the server took
+      to answer (the polish pass, 25.09.2026, at 1024 px under load). Until
+      the question is settled the door is the wait card, as it already was
+      while /api/admin/me/ alone was out. */
+  function admGateView() {
+    if (SRV.admin === true) return "panel";
+    if (SRV.admin === false) return "login";
+    if (SRV.ovDone && SRV.meDone && !SRV.on) return "panel";   // no server at all: the demo shop
+    return "wait";
+  }
   function screenAdmin() {
     probeAdmAI();
     probeAdmin(true);   // …and the two reads «Обзор» is about to need
-    if (SRV.on && SRV.admin === null) return admWaitScreen();
-    if (SRV.on && SRV.admin === false) return admLoginScreen();
+    var gate = admGateView();
+    if (gate === "wait") return admWaitScreen();
+    if (gate === "login") return admLoginScreen();
     var tab = S.adminTab;
     // account-flows: the queue sizes under the three switches, once
     if (tab === "mail" && SRV.admin === true) loadFlowCounts();
@@ -42251,7 +42272,11 @@
      (demoApply). Set when the step is taken, cleared by the reload that
      brings the new status back (loadSrvOrders). */
   // `returnBusy`: the order whose «Обработано» is in flight (r22)
-  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false, stepBusy: "", returnBusy: "" };
+  /* `ovDone` / `meDone`: /api/overrides/ and /api/admin/me/ have each come
+     back (or failed) — until both have, the panel does not know whether it
+     has a server behind it at all (admGateView). */
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false, stepBusy: "", returnBusy: "",
+    ovDone: false, meDone: false };
   function noop() {}
   /* product creation: true while the very first paint waits for
      /api/overrides/ — a direct visit to a product only the server knows
@@ -42502,7 +42527,8 @@
   function loadServerOverrides() {
     return apiJson("/api/overrides/", FEED_FETCH).then(function (r) {
       SRV.on = r.status !== 404;
-      if (r.status !== 200 || r.body.ok !== true) return;
+      SRV.ovDone = true;
+      if (r.status !== 200 || r.body.ok !== true) { admGateSettled(); return; }
       // …counted here and not before the fetch: the shopper goes on shopping
       // while it is in flight, and only adoptServer's own filters count
       var cartWas = S.cart.length;
@@ -42539,15 +42565,21 @@
          finger. Redraw the list — rebuildCart() does it without replaying the
          drawer's slide-in, the same as «Убрать» itself. */
       if (S.cartOpen && S.cart.length !== cartWas) rebuildCart();
-    }).catch(noop);
+    }).catch(function () { SRV.ovDone = true; admGateSettled(); });
   }
 
   function checkAdmin() {
     return apiJson("/api/admin/me/").then(function (r) {
       SRV.on = true;
+      SRV.meDone = true;
       SRV.admin = r.status === 200 && r.body.ok === true;
       return SRV.admin;
-    }).catch(function () { SRV.admin = null; return null; });
+    }).catch(function () { SRV.meDone = true; SRV.admin = null; return null; });
+  }
+  /** One of the two boot questions came back without a render of its own:
+      the panel's door may have to change from «Проверяем…» (admGateView). */
+  function admGateSettled() {
+    if (S.screen === "admin" && !bootHeld) render();
   }
 
   /* One place where an applied change becomes a server write. Undo passes the

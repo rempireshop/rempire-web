@@ -51,7 +51,8 @@ function rules(): Rule[] {
       const h = head.trim();
       if (h.startsWith("@")) { stack.push(h); head = ""; i++; continue; }
       const end = text.indexOf("}", i);
-      out.push({ media: stack.filter((s) => s.startsWith("@media")).join(" "), selectors: h.split(",").map((s) => s.trim()), body: text.slice(i + 1, end) });
+      // the at-rules around the rule — @media and @container both
+      out.push({ media: stack.filter((s) => s.startsWith("@media") || s.startsWith("@container")).join(" "), selectors: h.split(",").map((s) => s.trim()), body: text.slice(i + 1, end) });
       head = ""; i = end + 1; continue;
     }
     if (c === "}") { stack.pop(); head = ""; i++; continue; }
@@ -143,15 +144,32 @@ describe("«Настройки» on a phone is the phone's width", () => {
   });
 });
 
-describe("a narrow desktop (900–1239 px) — a 1024 laptop, an iPad on its side", () => {
-  const narrow = (r: Rule) => /min-width:\s*900px/.test(r.media) && /max-width:\s*12(09|39)px/.test(r.media);
+describe("a narrow page on a desktop — a 1024 laptop, or 1440 with the assistant open", () => {
+  /* By the page's width, not the window's: the assistant open takes 328 px
+     more than its strip, and the window-based breakpoints drew a 1440 layout
+     in what was a 1110 window's page. */
+  const narrow = (r: Rule) => /@container admpage \(max-width:\s*8[25]9px\)/.test(r.media);
+  it("the page is the size container — on a desktop only; a phone's layout stays the window's", () => {
+    const page = RULES.find((x) => x.selectors.includes(".adm-page") && /container-type:\s*inline-size/.test(x.body));
+    expect(page?.media).toMatch(/^@media \(min-width: 900px\)$/);
+    expect(page?.body).toMatch(/container-name:\s*admpage/);
+  });
+  it("no desktop layout is left keyed to the window's width alone", () => {
+    const left = RULES.filter((x) => /@media[^@]*(min-width:\s*(1000|1200)px|max-width:\s*(1199|1209|1239)px)/.test(x.media) && !/@container/.test(x.media))
+      .map((x) => `${x.media} ${x.selectors.join(",")}`);
+    // the stacked customer row keeps a phone rule, the partner form its old one beside its twin
+    expect(left.filter((l) => !/adm-pform/.test(l))).toEqual([]);
+    for (const sel of [".adm-olist__head", ".adm-ctable", ".adm2 .adm-olist--table .adm-orow", ".adm2 .adm-crow", ".adm-rt__head", ".adm-salon__grid", ".adm-ov__grid", ".adm-cols"]) {
+      expect(RULES.some((x) => x.selectors.includes(sel) && /@container admpage/.test(x.media)), `${sel} has no container twin`).toBe(true);
+    }
+  });
   it("«Настройки» shows one pane at a time: the index, or the open page", () => {
     const set = RULES.find((x) => narrow(x) && x.selectors.includes(".adm-set"));
     expect(set?.body).toMatch(/flex-direction:\s*column/);
     expect(RULES.some((x) => narrow(x) && x.selectors.includes(".adm-set--open .adm-set__col") && /display:\s*none/.test(x.body))).toBe(true);
     expect(RULES.some((x) => narrow(x) && x.selectors.includes(".adm-set:not(.adm-set--open) .adm-set__main") && /display:\s*none/.test(x.body))).toBe(true);
     // the price table waits for a page wide enough for its seven columns
-    expect(css).toMatch(/@media \(min-width: 1000px\) \{\n {2}\.adm-rt__head, \.adm-rt__row \{/);
+    expect(css).toMatch(/@container admpage \(min-width: 620px\) \{\n {2}\.adm-rt__head, \.adm-rt__row \{/);
   });
   it("«Каталог» puts the sizes under the name, «Наборы» shows the list or the set", () => {
     const grow = RULES.find((x) => narrow(x) && x.selectors.includes(".adm-grow"));
@@ -164,6 +182,13 @@ describe("a narrow desktop (900–1239 px) — a 1024 laptop, an iPad on its sid
     expect(pin?.body).toMatch(/min-width:\s*0/);
     const span = RULES.find((x) => x.selectors.includes(".adm-pin__btn > span"));
     expect(span?.body).toMatch(/text-overflow:\s*ellipsis/);
+    // …and the search keeps room for its whole «Имя, номер, телефон или почта»
+    const box = RULES.find((x) => x.media === "" && x.selectors.includes(".adm-orders__acts .adm-search"));
+    expect(box?.body).toMatch(/min-width:\s*320px/);
+    // a narrow page stacks them under the title — one line, as wide as the page
+    const head = RULES.find((x) => /@container admpage \(max-width:\s*819px\)/.test(x.media) && x.selectors.includes(".adm-orders .adm-head"));
+    expect(head?.body).toMatch(/flex-direction:\s*column/);
+    expect(head?.body, "a wrapping column sizes its line to its widest item").toMatch(/flex-wrap:\s*nowrap/);
   });
 });
 
@@ -225,6 +250,69 @@ describe("«Доставка и оплата»'s price boxes are named in the pa
     expect(tr("Бесплатно от — Литва", "ET")).toBe("Tasuta alates — Leedu");
     // …and the labels really are built that way
     expect(src).toContain('admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name');
+  });
+});
+
+describe("the panel's door never shows the demo shop to an owner who is still being checked", () => {
+  type Srv = { on: boolean; admin: boolean | null; ovDone?: boolean; meDone?: boolean };
+  const gate = (srv: Srv) => new Function("SRV", `${slice("admGateView")}; return admGateView();`)({ ovDone: false, meDone: false, ...srv }) as string;
+
+  it("the first moments of a visit — nothing has answered yet — are the wait card, not the demo orders", () => {
+    // SRV as app.js starts it: `on: false, admin: null`
+    expect(gate({ on: false, admin: null })).toBe("wait");
+    // /api/overrides/ has answered, /api/admin/me/ has not
+    expect(gate({ on: true, admin: null, ovDone: true })).toBe("wait");
+    // /api/admin/me/ failed, /api/overrides/ is still out — the server may yet turn up
+    expect(gate({ on: false, admin: null, meDone: true })).toBe("wait");
+  });
+  it("a confirmed owner gets the panel, a refused one the sign-in card", () => {
+    expect(gate({ on: true, admin: true, ovDone: true, meDone: true })).toBe("panel");
+    // the owner's answer may land before the feed's
+    expect(gate({ on: true, admin: true, meDone: true })).toBe("panel");
+    expect(gate({ on: true, admin: false, meDone: true })).toBe("login");
+  });
+  it("the demo shop is drawn only when both questions came back and there is no server", () => {
+    expect(gate({ on: false, admin: null, ovDone: true, meDone: true })).toBe("panel");
+  });
+  it("screenAdmin asks the door before it draws anything, and both boot questions mark themselves answered", () => {
+    const screen = slice("screenAdmin");
+    const at = screen.indexOf("admGateView()");
+    expect(at).toBeGreaterThan(0);
+    expect(at, "the door is asked before any screen is drawn").toBeLessThan(screen.indexOf("admOverviewHTML()"));
+    expect(screen).toContain('if (gate === "wait") return admWaitScreen();');
+    // the old door let a server nobody had heard from yet through to the demo orders
+    expect(screen).not.toContain("if (SRV.on && SRV.admin === null) return admWaitScreen();");
+    const me = slice("checkAdmin");
+    expect(me.match(/SRV\.meDone = true/g) || []).toHaveLength(2);   // the answer and the failure
+    const ov = slice("loadServerOverrides");
+    expect(ov.match(/SRV\.ovDone = true/g) || []).toHaveLength(2);
+    expect(ov.match(/admGateSettled\(\)/g) || [], "an answer that renders nothing of its own still opens the door").toHaveLength(2);
+  });
+});
+
+describe("placeholders a 360-px phone shows whole at 16 px", () => {
+  /* Measured in the panel's fonts (Golos Text 16 px; the set's name Oswald
+     18 px) against each box at 360 px — the longest language of the three. */
+  const NOW: Array<[string, string]> = [
+    ["Добавить: название или бренд", "Добавить товар: название или бренд"],
+    ["пересчёт полки", "например: пересчёт на полке"],
+    ["за что — извинение", "за что — например, извинение за задержку"],
+    ["о чём: новинки, скидка 10 %…", "о чём письмо — новинки, скидка 10 %…"],
+    ["Начните вводить, например Proraso", "Начните вводить — например, Proraso"],
+    ["Например: Борода — стартовый набор", "Название — например, Борода — стартовый набор"],
+    ["Ваш вопрос", "Спросите обычными словами"],
+  ];
+  for (const [now, was] of NOW) {
+    it(`«${now}» instead of «${was}» — in the markup and both dictionaries`, () => {
+      expect(src).toContain(`"${now}"`);
+      expect((src.match(new RegExp(`"${now.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}": "`, "g")) || []).length, "an ET and an EN entry").toBe(2);
+      expect(src).not.toContain(`"${was}"`);
+    });
+  }
+  it("the Google title's example drops « | Rempire», the video box its schemes", () => {
+    expect(src).toContain("placeholder=\"' + esc(p.brand) + ' … купить в Таллинне\"");
+    expect(src).toContain('[/^(.+) … купить в Таллинне$/, { ET: "$1 … osta Tallinnas", EN: "$1 … buy in Tallinn" }]');
+    expect(src).toContain('(vk === "ig" ? "instagram.com/reel/…" : "youtu.be/… · vimeo.com/…")');
   });
 });
 
