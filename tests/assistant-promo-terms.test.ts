@@ -151,6 +151,14 @@ describe("POST /api/assistant — a promo code from a plain request carries no d
     expect(example, "the example still carries a cap").not.toMatch(/maxUses|100/);
     expect(system).toMatch(/ONLY when the owner himself named a date or a period/);
     expect(system).toMatch(/ONLY when he named a number of uses or a limit/);
+    /* …and it says what the action is: create_promo only ever MAKES a code —
+       the panel posts it with `create: true` and the promo route answers 409
+       «exists» for a name the shop has. «make or edit» invited the model to
+       promise a change it could not make (staging: «уже создаётся с 20 %
+       скидкой. Подтвердите…» over a code that stayed at 10 %). */
+    expect(example, "the example still offers to edit a code").not.toMatch(/\bedit\b/i);
+    expect(example).toMatch(/make a NEW promo code/);
+    expect(example).toMatch(/«Маркетинг → Промокоды»/);
   });
 
   it("the model copies the old example anyway: the proposal the owner is shown has neither, and the reply says so", async () => {
