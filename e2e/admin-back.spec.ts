@@ -94,8 +94,8 @@ test.describe("admin — «Назад» closes what is open", () => {
       await page.locator('[data-partnerf="email"]').fill(freshEmail("back-partner"));
       await page.locator('[data-partnerf="company"]').fill("Salon Back OÜ");
       await page.locator("[data-admpartnersave]").click();
-      await page.locator("[data-admapply]").click();
-      await expect(page.locator("[data-admcustopen]").first()).toBeVisible();
+      // 1a (q3): no question — the POST waits ten seconds for «Вернуть», then the row is there
+      await expect(page.locator("[data-admcustopen]").first()).toBeVisible({ timeout: 25_000 });
     }
     await page.locator("[data-admcustopen]").first().click();
     await expect(page.locator("[data-admcustclose]")).toBeVisible();

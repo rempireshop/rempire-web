@@ -641,7 +641,7 @@ test.describe("admin — the small forms say when they are saved", () => {
     }
   });
 
-  test("the customer's note: Enter is the button, «Сохранено ✓» stays until the next keystroke", async ({ page }) => {
+  test("the customer's note saves itself, and «Сохранено ✓» comes only after the server", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     // a guest checkout makes no customer row — the owner's own «+ Партнёр» does
@@ -658,24 +658,22 @@ test.describe("admin — the small forms say when they are saved", () => {
     const open = page.locator("[data-admcustopen]").first();
     await expect(open).toBeVisible();
     await open.click();
+    /* 1a (Dim, 25.09.2026, q1): the note saves itself — running text, a
+       second after the typing stops — and says so in the page's one status,
+       «Сохраняем… → Сохранено ✓», never before the server answered. There is
+       no button left to press. */
     const box = page.locator("[data-admcustnotesf]");
-    const btn = page.locator("[data-admcustsavenotes]");
     await expect(box).toBeVisible({ timeout: 15_000 });
-    await expect(btn, "nothing typed, yet the button is live").toBeDisabled();
+    await expect(page.locator("[data-admcustsavenotes]"), "the note still has a save button").toHaveCount(0);
     await box.fill("постоянный клиент, оптовик");
-    await expect(btn).toBeEnabled();
-    await expect(page.locator("[data-admcustnoteacts]")).toContainText("Не сохранено");
-    await box.press("Enter");
-    await expect(page.getByRole("status")).toContainText("Заметка сохранена");
-    await expect(btn).toHaveText("Сохранено ✓");
-    await expect(btn).toBeDisabled();
-    await clearToast(page);
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено ✓", { timeout: 10_000 });
+    const noteOnServer = async () =>
+      (await (await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).json()).customer.notes;
+    expect(await noteOnServer()).toBe("постоянный клиент, оптовик");
+    // …and the next change the same way, the box keeping what is typed in it
     await box.fill("постоянный клиент");
-    await expect(btn).toHaveText("Сохранить заметку");
-    await expect(btn).toBeEnabled();
-    // the value reached the server
-    const detail = await (await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).json();
-    expect(detail.customer.notes).toBe("постоянный клиент, оптовик");
+    await expect.poll(noteOnServer, { timeout: 10_000 }).toBe("постоянный клиент");
+    await expect(box).toHaveValue("постоянный клиент");
   });
 });
 

@@ -361,13 +361,19 @@ test.describe("sweep — customers", () => {
     await assertClean(page, w, "customer card");
 
     /* Reject, then let them ask again, then approve — both halves of the
-       queue. Both ask first, in the same card the tier switch below them uses:
-       an approval posts the partner letter and cannot be taken back. */
+       queue. 1a (Dim, 25.09.2026, q3): neither asks any more. Neither can be
+       taken back on the server, so each is on screen at once and SENT ten
+       seconds later, with «Вернуть» on the toast until then. */
+    const requested = async () => {
+      const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
+      return (await res.json()).customer.proRequestedAt as string | null;
+    };
     await page.locator("[data-admcustreject]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Отказать в заявке?");
-    await page.locator("[data-admapply]").click();
+    await expect(page.locator(".adm-confirm")).toHaveCount(0);
     expect(await toastText(page)).toMatch(/[Оо]тклон/);
     await clearToast(page);
+    // the refusal reaches the server once its ten seconds are up — not before the next request is filed
+    await expect.poll(requested, { timeout: 25_000, message: "«Отказать» never reached the server" }).toBeNull();
     await assertClean(page, w, "partner request rejected");
 
     expect((await shopper.request.post("/api/account/pro-request/", {
@@ -378,17 +384,18 @@ test.describe("sweep — customers", () => {
     await tab(page, "people");
     await page.locator("[data-admcustq]").fill(email);
     await page.locator("[data-admcustopen]").first().click();
+    // «Вернуть» first: the approval has to be answerable with "no" — and then nothing is sent
     await page.locator("[data-admcustapprove]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
-    // «Отмена» first: a card that asks has to be answerable with "no"
-    await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
+    await page.locator(".adm-toast__undo").click();
+    await expect(page.locator("[data-admcustapprove]"), "«Вернуть» did not bring the request back").toBeVisible();
     await page.locator("[data-admcustapprove]").click();
-    await page.locator("[data-admapply]").click();
-    expect(await toastText(page)).toMatch(/[Оо]добрен/);
+    // the answer about the letter comes when the held call has gone
+    await expect(page.locator(".adm-toast__t")).toContainText(/[Оо]добрен/, { timeout: 25_000 });
     await clearToast(page);
-    // the card's tier badge is the panel's own since phase 4 — «Pro», like the row's
-    await expect(page.locator(".adm-badge", { hasText: "Pro" }).first()).toBeVisible();
+    // the card's tag reads «Партнёр» since 1a — one name for the tier everywhere
+    await expect(page.locator(".adm-chd .adm-tag", { hasText: "Партнёр" }).first()).toBeVisible();
+    expect(await requested(), "the approval left the request standing").toBeNull();
     await assertClean(page, w, "partner approved");
 
     // ---- points ------------------------------------------------------------
@@ -397,45 +404,50 @@ test.describe("sweep — customers", () => {
       return Number((await res.json()).customer.pointsBalance);
     };
 
+    /* 1a (README § 2): a number that is not one is not sent — the box turns
+       rust and one line under it says why, in Russian, instead of a toast. */
+    const ptsHint = page.locator("[data-admcustptshint]");
     await page.locator("[data-admcustpoints]").fill("abc");
     await page.locator("[data-admcustadjust]").click();
-    const badMsg = await toastText(page);
+    await expect(ptsHint).toBeVisible();
+    const badMsg = ((await ptsHint.textContent()) || "").trim();
     expect(isRussian(badMsg), `points "abc": message is not Russian — "${badMsg}"`).toBe(true);
-    await clearToast(page);
+    await expect(page.locator("[data-admcustpoints]")).toHaveAttribute("aria-invalid", "true");
     expect(await balance(), "«abc» moved the balance").toBe(0);
     await assertClean(page, w, "points abc");
 
-    // ±1e9 is meant to be refused; the route answers 400 and Chromium logs
-    // it. What has to hold is the balance and the message, both below.
-    w.allow.push(/\/api\/admin\/customers\//);
+    // ±1e9 is refused the same way, before it could travel: the route's own
+    // ceiling (a million) is checked in the panel too.
     for (const huge of ["1000000000", "-1000000000"]) {
       await page.locator("[data-admcustpoints]").fill(huge);
       await page.locator("[data-admcustnote]").fill("fuzz");
       await page.locator("[data-admcustadjust]").click();
-      const msg = await toastText(page);
-      expect(msg, `points "${huge}" happened with no message`).not.toBe("");
+      await expect(ptsHint, `points "${huge}" happened with no message`).toBeVisible();
+      const msg = ((await ptsHint.textContent()) || "").trim();
       expect(isRussian(msg), `points "${huge}": message is not Russian — "${msg}"`).toBe(true);
-      await clearToast(page);
       // A billion loyalty points is a billion euros of liability on a shop
       // that does three orders a month — a typo, not an intention.
       expect(Math.abs(await balance()), `a balance of ±1e9 was written for "${huge}"`).toBeLessThan(1e6);
       await assertClean(page, w, `points "${huge}"`);
     }
 
-    // A real, small adjustment still has to work.
+    // A real, small adjustment still has to work — the button says what it
+    // does, and the correction goes five seconds later (q9).
     await page.locator("[data-admcustpoints]").fill("15");
     await page.locator("[data-admcustnote]").fill("извинение за задержку");
+    await expect(page.locator("[data-admcustadjust]")).toHaveText("Начислить +15");
     await page.locator("[data-admcustadjust]").click();
-    expect(await toastText(page)).toMatch(/[Бб]аллы/);
+    expect(await toastText(page)).toMatch(/[Бб]алл/);
     await clearToast(page);
-    await expect.poll(balance, { timeout: 8000 }).toBe(15);
+    await expect.poll(balance, { timeout: 15_000 }).toBe(15);
     await assertClean(page, w, "points adjusted");
 
-    // ---- notes -------------------------------------------------------------
+    // ---- notes: the box saves itself (1a, q1) -------------------------------
     await page.locator("[data-admcustnotesf]").fill(`Заметка ${HTML_BOMB} ${EMOJI}`);
-    await page.locator("[data-admcustsavenotes]").click();
-    expect(await toastText(page)).toMatch(/[Зз]аметка/);
-    await clearToast(page);
+    await expect.poll(async () => {
+      const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
+      return String((await res.json()).customer.notes || "");
+    }, { timeout: 10_000, message: "the note never saved itself" }).toContain("Заметка <script>");
     await page.reload();
     await waitForScreen(page, "admin");
     await tab(page, "people");

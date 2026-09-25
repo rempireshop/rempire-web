@@ -41,7 +41,8 @@ test.describe("admin sections — every screen draws on both viewports", () => {
        none), and a phrase that only that screen prints — «renders» has to mean
        the section's own content, not merely that the shell survived. */
     const screens: Array<[string, string | undefined, string]> = [
-      ["people", undefined, "Все клиенты"],
+      // the chip only «Клиенты» draws (1a: «Все клиенты» became the «Клиенты · Отзывы» switch)
+      ["people", undefined, "Подписаны"],
       ["people", "reviews", "Отзывы"],
       ["promos", undefined, "Промокоды"],
       ["promos", "gift", "Номиналы в магазине"],
@@ -108,24 +109,22 @@ test.describe("admin sections — Клиенты", () => {
     await waitForScreen(page, "admin");
     await adminSection(page, "people");
     await page.locator("[data-admcustq]").fill(email);
-    /* «Одобрить Pro» sits on the row itself now — the whole point of the
+    /* «Сделать партнёром» sits on the row itself — the whole point of the
        redesign is that a waiting request is answered without opening a card.
-       It still asks first: the approval turns salon prices on for that company
-       and posts «Цены для салонов включены», and there is no un-sending a
-       letter — the same confirm card the tier switch on the customer's own
-       card has always shown. */
+       1a (Dim, 25.09.2026, q3): it no longer asks. The approval posts «Цены
+       для салонов включены» and cannot be taken back on the server, so the
+       call itself waits ten seconds with «Вернуть» on the toast; the row
+       shows the partner at once. */
     const approve = page.locator(`[data-admcustapprove]`).first();
-    await expect(approve, "the pending request has no «Одобрить Pro» on its row").toBeVisible();
+    await expect(approve, "the pending request has no «Сделать партнёром» on its row").toBeVisible();
     await approve.click();
-    const proCard = page.locator(".adm-confirm");
-    await expect(proCard.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
-    await expect(proCard.locator(".adm-confirm__d")).toContainText(email);
-    await page.locator("[data-admapply]").click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.locator(".adm-confirm"), "the approval asked first — 1a holds it instead").toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("письмо уйдёт через 10 с");
+    await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await expect.poll(async () => {
       const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
       return (await res.json()).customer.tier;
-    }, { timeout: 10_000, message: "«Одобрить Pro» never reached the server" }).toBe("pro");
+    }, { timeout: 25_000, message: "«Сделать партнёром» never reached the server" }).toBe("pro");
     // leave the shop as it was found
     await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
 
@@ -528,22 +527,22 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
     await loginAsAdmin(page);
     await adminSection(page, "people");
 
-    // the lead answers the question, and links to where the discount lives
-    const lead = page.locator(".adm-page .adm-lead");
+    // the lead answers the question, and links to where the discount lives — behind «?» since 1a
+    await page.locator('[data-admhelp="people"]').click();
+    const lead = page.locator(".adm-page .adm-helpp .adm-lead");
     await expect(lead).toContainText("Заявка на партнёрство");
     await expect(lead.locator('[data-admgoset="prices"]')).toBeVisible();
 
-    /* ---- «+ Партнёр»: the form, the confirm card, the POST ---------------- */
+    /* ---- «+ Партнёр»: the form, the POST ten seconds later (1a, q3) ------- */
     const email = freshEmail("sections-partner");
     await page.locator("[data-admpartnernew]").click();
     await page.locator('[data-partnerf="email"]').fill(email);
     await page.locator('[data-partnerf="company"]').fill("Salon E2E OÜ");
-    await page.locator("[data-admpartnersave]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Добавить партнёра?");
-    await expect(page.locator(".adm-confirm__d")).toContainText(email);
     const post = page.waitForResponse(
-      (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST");
-    await page.locator("[data-admapply]").click();
+      (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST", { timeout: 25_000 });
+    await page.locator("[data-admpartnersave]").click();
+    await expect(page.locator(".adm-confirm"), "«+ Партнёр» asked first — 1a holds the letter instead").toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("Партнёр добавлен · письмо уйдёт через 10 с");
     const answer = await (await post).json();
     expect(answer.ok, "POST /api/admin/customers/ refused the partner").toBe(true);
     expect(answer.created).toBe(true);
@@ -553,11 +552,11 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
 
     try {
-      // the list jumped to «Партнёры», and the new row is there, badged Pro
-      await expect(page.locator('[data-admcusttier="pro"]')).toHaveAttribute("aria-current", "true");
+      // the list is back on «Все» (gap B8), and the new row is there, tagged «Партнёр»
+      await expect(page.locator('[data-admcusttier=""]')).toHaveAttribute("aria-current", "true");
       const row = page.locator(".adm-row", { hasText: email }).first();
-      await expect(row, "the new partner is not under «Партнёры»").toBeVisible();
-      await expect(row.locator(".adm-badge")).toHaveText("Pro");
+      await expect(row, "the new partner is not in the list").toBeVisible();
+      await expect(row.locator(".adm-crow__tags .adm-tag").first()).toHaveText("Партнёр");
       const listed = await (await page.request.get("/api/admin/customers/?tier=pro")).json();
       expect((listed.customers as Array<{ email: string; company: string | null }>).find((c) => c.email === email)?.company).toBe("Salon E2E OÜ");
 

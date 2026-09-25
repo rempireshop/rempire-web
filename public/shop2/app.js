@@ -37660,6 +37660,8 @@
   }
 
   function admLogout() {
+    // «Клиенты»: an answer or a correction still held for «Вернуть» goes now, while the session is still his
+    custHoldsFire();
     apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
       SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
       ORDER_ONE.rows = []; ORDER_ONE.gone = ""; ORDER_ONE.err = "";
