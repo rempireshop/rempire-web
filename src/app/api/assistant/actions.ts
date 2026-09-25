@@ -336,6 +336,70 @@ export function sanitizePromo(raw: unknown): object | null {
   };
 }
 
+/* ---- a promo code's date and cap are the owner's to name ----------------
+   «сделай промокод CLAUDETEST10 на 10 %» came back as «скидка 10% · до
+   30.09.2026 · 100 использований» (verification pass on staging,
+   25.09.2026): the literal values of the create_promo example in the
+   prompt, copied as if they were defaults. The example carries neither now
+   and the prompt says when they belong; and since a prompt is only a
+   request, the route holds the proposal to the owner's own recent words as
+   well. An end or a start stays only when he spoke of time — a date, a
+   period, a day, a month —, a cap only when he spoke of a number of uses or
+   a limit. Generous on purpose, in all three of his languages: a word that
+   merely MIGHT be about time keeps what the model wrote, and the confirm
+   card shows every term before anything is made. */
+const RU_EDGE = "(?:^|[^а-яё])";
+const RU_END = "(?:[^а-яё]|$)";
+const PROMO_TIME_RX = new RegExp([
+  "\\d{1,2}[./]\\d{1,2}",                                            // 30.09, 1/10
+  `${RU_EDGE}(?:до|по|с|со)\\s+\\d{1,2}(?![\\d\\s]*%)`,             // до 30-го, с 1 октября — not «до 30 %»
+  `${RU_EDGE}(?:до|по)\\s+(?:конц|начал)`,
+  "срок", "конц[аеу]", "недел", "месяц", `${RU_EDGE}год(?:а|у)?${RU_END}`,
+  `${RU_EDGE}(?:день|дня|дней|сутки|суток)${RU_END}`,
+  "сегодн", "завтр", "выходн", "праздн", "понедельн", "вторник", `${RU_EDGE}сред[аыу]${RU_END}`, "четверг", "пятниц", "суббот", "воскрес",
+  "январ", "феврал", `${RU_EDGE}март`, "апрел", `${RU_EDGE}ма[йяе]${RU_END}`, "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр",
+  "действ", "истека", `${RU_EDGE}врем`, "бессрочн",
+  // Estonian
+  "kuni", "kehti", "päev", "nädal", "(?:^|[^a-zäöüõšž])kuu(?:[^a-zäöüõšž]|$)", "aasta", "homme", "täna", "tähtaeg", "lõpuni", "aegu",
+  "jaanuar", "veebruar", "märts", "aprill", "(?:^|[^a-z])mai(?:[^a-z]|$)", "juuni", "juuli", "septemb", "oktoob", "novemb", "detsemb",
+  // English
+  "until", "(?:^|[^a-z])till(?:[^a-z]|$)", "through", "expir", "valid", "deadline", "end of", "black ?friday",
+  "(?:^|[^a-z])(?:days?|weeks?|months?|years?|weekend|today|tonight|tomorrow)(?:[^a-z]|$)",
+  "monday|tuesday|wednesday|thursday|friday|saturday|sunday",
+  "january|february|march|april|june|july|august|september|october|november|december",
+].join("|"), "i");
+const PROMO_LIMIT_RX = new RegExp([
+  `\\d+\\s*(?:раз(?:а)?${RU_END}|использ|человек|покупател|клиент|заказ|штук|шт${RU_END}|активац)`,
+  "перв(?:ых|ым)", "лимит", "огранич", "одноразов", "единоразов", "однократн", "один раз", "не более", "не больше", "максимум",
+  // Estonian
+  "\\d+\\s*(?:korda|kasutus|inimes|klient|ostja|tellimus)", "esimes", "piira", "ühekordn", "ühe korra",
+  // English
+  "\\d+\\s*(?:uses|times|people|customers|buyers|orders|redemptions)", "first\\s+\\d", "(?:^|[^a-z])once(?:[^a-z]|$)", "limit",
+  "single[- ]use", "one[- ]time", "(?:^|[^a-z])(?:max|maximum|cap)(?:[^a-z]|$)",
+].join("|"), "i");
+
+/**
+ * A create_promo with the date and the cap the owner did not ask for taken
+ * off (set to null — the promo route reads null as «none»). `ownerWords` is
+ * his last few messages: a date named before he answered «SALE10» to «как
+ * назвать код?» is still his. Anything else, and a promo with nothing to
+ * drop, is handed back as it came — the same object.
+ */
+export function promoAsAsked<T>(action: T, ownerWords: string): T {
+  if (!action || typeof action !== "object" || (action as { type?: unknown }).type !== "create_promo") return action;
+  const a = action as unknown as { promo?: Record<string, unknown> };
+  const p = a.promo;
+  if (!p || typeof p !== "object") return action;
+  const words = String(ownerWords || "");
+  const dropDate = (p.endsAt != null || p.startsAt != null) && !PROMO_TIME_RX.test(words);
+  const dropCap = p.maxUses != null && !PROMO_LIMIT_RX.test(words);
+  if (!dropDate && !dropCap) return action;
+  return {
+    ...a,
+    promo: { ...p, ...(dropDate ? { endsAt: null, startsAt: null } : {}), ...(dropCap ? { maxUses: null } : {}) },
+  } as T;
+}
+
 /* ---- delivery prices (set_shipping_rules) ------------------------------- */
 
 /** The countries the checkout offers, plus "default" for everything else. */

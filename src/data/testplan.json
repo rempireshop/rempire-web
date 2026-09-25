@@ -8423,6 +8423,7 @@
       "expect": [
         "Код появился в списке промокодов.",
         "Условия у него те, которые вы назвали.",
+        "Срока и лимита использований нет — вы их не называли.",
         "На кассе он срабатывает и даёт скидку.",
         "Второй раз: «Такой промокод уже есть.» — старый код остался прежним и включённым."
       ],
@@ -8441,13 +8442,14 @@
         "expect": [
           "The code appeared in the list of promo codes.",
           "Its conditions are the ones you named.",
+          "No end date and no usage limit — you did not name them.",
           "At the checkout it works and gives the discount.",
           "The second time: «This promo code already exists.» — the old code stays unchanged, on."
         ],
         "why": "A promo code on the wrong terms costs whatever gets bought with it."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T11:50:31.414Z"
+      "markedAt": "2026-09-25T22:36:42.124Z"
     },
     {
       "id": "ai-assistant-confusion",

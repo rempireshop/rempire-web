@@ -11,6 +11,7 @@ import {
   briefHero,
   briefOpenPost,
   draftPostWithAsk,
+  promoAsAsked,
   sanitizeAction,
   type AttachmentBrief,
   type OpenPostBrief,
@@ -41,7 +42,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 27; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 28; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -77,6 +78,27 @@ const PHOTO_MISSED: Record<string, string> = {
   RU: "Фото я не поставил: не понял, к какой статье. Откройте её в «Блоге» и попросите ещё раз — прямо оттуда.",
   ET: "Fotot ma ei lisanud: ei saanud aru, millise artikli juurde. Ava see «Blogi» all ja palu uuesti — otse sealt.",
   EN: "I did not add the photo: I could not tell which article. Open it under “Blog” and ask again from there.",
+};
+/* A promo code proposed with a date or a cap the owner never named has them
+   taken off (promoAsAsked in ./actions) — and the model's own sentence may
+   still speak of them («до 30.09.2026, на 100 использований»). The confirm
+   card shows the terms the code really has; this says why they differ. */
+const PROMO_TERMS_DROPPED: Record<"both" | "date" | "cap", Record<string, string>> = {
+  both: {
+    RU: "Срок и лимит использований не ставлю — вы их не называли.",
+    ET: "Kehtivusaega ja kasutuskordade piiri ei pane — sa neid ei nimetanud.",
+    EN: "No end date or usage limit — you did not name one.",
+  },
+  date: {
+    RU: "Срок действия не ставлю — вы его не называли.",
+    ET: "Kehtivusaega ei pane — sa seda ei nimetanud.",
+    EN: "No end date — you did not name one.",
+  },
+  cap: {
+    RU: "Лимит использований не ставлю — вы его не называли.",
+    ET: "Kasutuskordade piiri ei pane — sa seda ei nimetanud.",
+    EN: "No usage limit — you did not name one.",
+  },
 };
 
 const ALLOWED_HOSTS = new Set([
@@ -484,7 +506,7 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"set_bundle","id":"<id from SETS above>","items":[{"id":"<catalogue id>","variant":0,"qty":1},…],"price":39.90} — change a set that EXISTS («добавь масло в набор для бороды», «сделай набор Борода за 39,90»). Send the WHOLE list of products the set keeps — a product left out is removed. price (or discountPct 1–90) only when the owner named one; a set must stay cheaper than its parts or the shop refuses it, and the reply should say so if it is close.
   {"type":"delete_bundle","id":"<id from SETS above>"} — REMOVE a set the shop has («удали набор для бороды», «убери набор Борода совсем»). Only an id from the SETS list — never one you invented. This cannot be undone: the set's page stops answering and nothing in the change journal brings it back, so the panel asks the owner to confirm by name first. Say in the reply which set it is and that orders already placed do not change. When he only wants it off the shelf for a while, that is set_bundle with the same items and "active":false — a hidden set keeps its address, a deleted one does not.
   {"type":"set_hero","value":{"slides":[…],"interval":6000}} — rewrite the home-page banner («поменяй баннер на скидку 20 % на бороду», «сделай баннер про наборы»). {"type":"set_hero","value":null} puts the built-in banner back.
-  {"type":"create_promo","promo":{"code":"SUVI10","kind":"percent|fixed|free_shipping","value":10,"minSubtotal":0,"endsAt":"2026-09-30T23:59:59Z","maxUses":100,"note":"…"}} — make or edit a promo code («сделай промокод на 10 %», «код на бесплатную доставку до конца месяца»)
+  {"type":"create_promo","promo":{"code":"SUVI10","kind":"percent|fixed|free_shipping","value":10,"minSubtotal":0,"note":"…"}} — make or edit a promo code («сделай промокод на 10 %», «код на бесплатную доставку до конца месяца»). The terms are the owner's: a date or a usage limit only when he named one (see PROMO CODES below)
   {"type":"toggle_promo","code":"SUVI10","value":false} — switch an existing promo code off (or back on)
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
@@ -515,7 +537,7 @@ SETS («наборы», propose_bundle / set_bundle) in detail. A set is 2–8 r
   · desc — two or three plain sentences, all three languages. THE FIRST 155 CHARACTERS BECOME THE GOOGLE SNIPPET of the set's page, so open with what is in the set and who it is for, in words a customer would type; then why it is worth buying together. Only what the products really are — never an invented ingredient, result or claim, never a discount figure (the price moves and the text would lie).
   · delete_bundle is the one set action that cannot be taken back, so never reach for it when a plainer one does the job: «убери масло из набора» is set_bundle without that product, «скрой набор» is set_bundle with "active":false, «скрой наборы» is toggle_bundles. delete_bundle is only for «удали набор» — the set itself, gone.
 
-PROMO CODES (create_promo) in detail. code — LATIN capitals, digits and «-» only, up to 24 characters; invent a short readable one if the owner did not name it. kind: "percent" (value 1–90, per cent off the goods), "fixed" (value 1–200, euro off the goods) or "free_shipping" (value ignored — delivery becomes free). minSubtotal — the basket the code needs, 0 when the owner did not say. endsAt / startsAt — full ISO dates, omit when open-ended. maxUses — how many times it may be used in total, omit for unlimited. A promo is quoted at checkout and counted only when the order is paid, so say that in the reply if the owner asks how it is spent.
+PROMO CODES (create_promo) in detail. code — LATIN capitals, digits and «-» only, up to 24 characters; invent a short readable one if the owner did not name it. kind: "percent" (value 1–90, per cent off the goods), "fixed" (value 1–200, euro off the goods) or "free_shipping" (value ignored — delivery becomes free). minSubtotal — the basket the code needs, 0 when the owner did not say. endsAt / startsAt — full ISO dates, ONLY when the owner himself named a date or a period («до конца месяца», «на неделю», «до 30.09»); otherwise leave both out — a code runs until he switches it off. maxUses — how many times it may be used in total, ONLY when he named a number of uses or a limit («на 100 использований», «для первых 50»); otherwise leave it out — no limit. Never invent a date or a limit he did not ask for, and never mention one in the reply that the code does not carry. A promo is quoted at checkout and counted only when the order is paid, so say that in the reply if the owner asks how it is spent.
 
 DELIVERY PRICES (set_shipping_rules) in detail. Send ONLY what changes — the panel merges it over the current prices, so «сделай доставку в Латвию 6,90» is {"methods":{"parcel":{"LV":6.90}}} and nothing else. methods: "parcel" (пакомат), "courier" (курьер), "pickup" (самовывоз, always 0). Countries: EE, LV, LT, FI, EU, plus "default" for everything unnamed. Prices 0–99 €, two decimals. freeFrom — the basket at which delivery is free (freeFromByCountry: {"FI":99} overrides one country, null there means never free). carriers: {"omniva":{"EE":3.29}} overrides a price for one carrier. In EE, LV, LT and FI the shopper picks the carrier, so a "parcel" price for one of those four is written into every carrier that country has a box for — say so in the reply («пакомат в Эстонию 6,90 у всех перевозчиков»), because that is what the confirm card will list. A carrier you name yourself keeps its own price, so «пакомат в Эстонию 6,90, но Omniva 5,90» is {"methods":{"parcel":{"EE":6.90}},"carriers":{"omniva":{"EE":5.90}}}.
 
@@ -822,6 +844,20 @@ export async function POST(req: NextRequest) {
     openPostSlug: openPost?.slug ?? "",
     postSlugs,
   }), lastUser);
+  /* …and a promo code leaves with the date and the cap the owner named, and
+     no others (promoAsAsked in ./actions): «на 10 %» came back «до 30.09.2026
+     · 100 использований», the prompt's own example copied in. His last three
+     messages, so a date given before he answered «как назвать код?» counts. */
+  const proposed = action;
+  action = promoAsAsked(action, history.filter((m) => m.role === "user").slice(-3).map((m) => m.content).join("\n"));
+  let promoDropped: "both" | "date" | "cap" | "" = "";
+  if (action !== proposed) {
+    const was = (proposed as { promo: Record<string, unknown> }).promo;
+    const now = (action as { promo: Record<string, unknown> }).promo;
+    const date = (was.endsAt != null || was.startsAt != null) && now.endsAt == null && now.startsAt == null;
+    const cap = was.maxUses != null && now.maxUses == null;
+    promoDropped = date && cap ? "both" : date ? "date" : cap ? "cap" : "";
+  }
 
   let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
   let retry = false;
@@ -866,6 +902,11 @@ export async function POST(req: NextRequest) {
   } else if (intent === "ask" && !action) {
     // the model obeyed and asked by itself — the chips still help
     ask = ASK_WHICH;
+  }
+  // the date or cap taken off the promo above, said — the model's sentence may still promise them
+  if (promoDropped && (action as { type?: unknown } | null)?.type === "create_promo") {
+    const note = PROMO_TERMS_DROPPED[promoDropped][lang] ?? PROMO_TERMS_DROPPED[promoDropped].RU;
+    reply += (/[.!?…»)]$/.test(reply) ? " " : ". ") + note;
   }
 
   return NextResponse.json({
