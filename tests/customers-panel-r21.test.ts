@@ -60,8 +60,9 @@ interface PatchAnswer {
 
 function approver(answer: PatchAnswer): { approve: (id: string) => void; toasts: string[] } {
   const toasts: string[] = [];
-  const approve = build<(id: string) => void>(["approveCustomer", "admCustPatch"], {
+  const approve = build<(id: string) => void>(["approveCustomer", "admCustPatch", "custSend", "admCustAdopt", "mergeInto"], {
     apiSend: () => Promise.resolve(answer),
+    apiJson: () => Promise.resolve(answer),
     S: { admCustDetail: null, admCustBusy: false },
     SRV: { admin: true },
     render: () => {},
@@ -93,8 +94,9 @@ describe("«Одобрить Pro» reports the letter the route actually sent", 
     /* «Отклонить» and a notes save come through the same door and carry no
        `mail` at all — no letter was due, so nothing to correct. */
     const toasts: string[] = [];
-    const patch = build<(id: string, body: unknown, ok: string, noMail?: string) => void>(["admCustPatch"], {
+    const patch = build<(id: string, body: unknown, ok: string, noMail?: string) => void>(["admCustPatch", "custSend", "admCustAdopt", "mergeInto"], {
       apiSend: () => Promise.resolve({ status: 200, body: { ok: true, customer: APPROVED } }),
+      apiJson: () => Promise.resolve({ status: 200, body: { ok: true, customer: APPROVED } }),
       S: { admCustDetail: null, admCustBusy: false },
       SRV: { admin: true },
       render: () => {},
@@ -239,17 +241,39 @@ describe("the customer card says when it could not load", () => {
 
 /* ---------- the exports: the whole list, not the newest 200 ---------------- */
 
-describe("«Скачать XLSX» / «Скачать CSV»", () => {
+/* 1a: the pair moved into «⋯» as «Скачать список · Excel / CSV» (gap A5),
+   and the file now follows the screen — the chip's tier and the search go
+   along (the route takes both). The limit is still the whole list. */
+describe("«Скачать список · Excel / CSV»", () => {
+  function href(format: string, S: Record<string, unknown>, partners = true): URL {
+    const f = build<(fmt: string) => string>(["admCustExportHref"], { S, partnersOn: () => partners });
+    return new URL(f(format), "https://shop.example");
+  }
+
   it("ask for more rows than listCustomersAdmin's default of 200", () => {
-    const hrefs = [...src.matchAll(/href="(\/api\/admin\/customers\/\?format=[^"]+)"/g)].map((m) =>
-      m[1].replace(/&amp;/g, "&"),
-    );
-    expect(hrefs).toHaveLength(2);
-    for (const href of hrefs) {
-      const limit = Number(new URL(href, "https://shop.example").searchParams.get("limit"));
+    for (const format of ["xlsx", "csv"]) {
+      const u = href(format, { admCustTier: "", admCustQ: "" });
+      expect(u.pathname).toBe("/api/admin/customers/");
+      expect(u.searchParams.get("format")).toBe(format);
       // at least what the screen itself fetches (loadAdminCustomers: limit=500)
-      expect(limit).toBeGreaterThanOrEqual(500);
+      expect(Number(u.searchParams.get("limit"))).toBeGreaterThanOrEqual(500);
     }
+  });
+
+  it("carry the chip and the search the owner is looking at", () => {
+    const u = href("xlsx", { admCustTier: "pending", admCustQ: " Salon & Co " });
+    expect(u.searchParams.get("tier")).toBe("pending");
+    expect(u.searchParams.get("q")).toBe("Salon & Co");
+    // «Подписаны» is not a tier the route knows — the file has every row, consent column and all
+    expect(href("csv", { admCustTier: "news", admCustQ: "" }).searchParams.has("tier")).toBe(false);
+    // …and with the programme off there are no tiers to carry
+    expect(href("csv", { admCustTier: "pro", admCustQ: "" }, false).searchParams.has("tier")).toBe(false);
+  });
+
+  it("are both in «⋯», XLSX first", () => {
+    const more = src.slice(src.indexOf("function admCustMoreHTML("), src.indexOf("function admCustMoreHTML(") + 1600);
+    expect(more.indexOf('admCustExportHref("xlsx")')).toBeGreaterThan(0);
+    expect(more.indexOf('admCustExportHref("xlsx")')).toBeLessThan(more.indexOf('admCustExportHref("csv")'));
   });
 });
 

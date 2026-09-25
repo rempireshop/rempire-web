@@ -2943,6 +2943,40 @@
       "Партнёр одобрен · письмо уже отправляли": "Partner kinnitatud · kiri on juba saadetud",
       "Сделать партнёром?": "Teha partneriks?", "Перевести в розницу?": "Viia jaemüüki?",
       "Сделать партнёром": "Tee partneriks", "Перевести в розницу": "Vii jaemüüki",
+      /* «Клиенты» in direction 1a (README § 5): «⋯», the chips, the card's
+         request, status, points and note, the held answers (q3, q9) */
+      "Заявки": "Taotlused", "Ещё действия": "Veel toiminguid",
+      "Скачать список · Excel": "Laadi nimekiri alla · Excel", "Скачать список · CSV": "Laadi nimekiri alla · CSV",
+      "Заявка на партнёрство": "Partnerlustaotlus",
+      "Ответ уходит через 10 секунд — до этого можно «Вернуть».": "Vastus läheb teele 10 sekundi pärast — seni saab „Taasta“.",
+      "Письмо клиенту уходит только при «Сделать партнёром».": "Kliendile läheb kiri ainult „Tee partneriks“ puhul.",
+      "Видит цены для салонов.": "Näeb salongihindu.", "Обычные цены.": "Tavahinnad.",
+      "Ждёт решения по заявке — ответьте выше.": "Ootab taotlusele otsust — vastake ülal.",
+      "Партнёр видит цены для салонов на карточках, в товаре и в корзине.": "Partner näeb salongihindu kaartidel, tootelehel ja ostukorvis.",
+      "Первый переход на «Партнёр» отправляет письмо «Цены для салонов включены» — через 10 секунд, до этого можно «Вернуть».":
+        "Esimene üleminek „Partner“ peale saadab kirja „Salongihinnad on sisse lülitatud“ — 10 sekundi pärast, seni saab „Taasta“.",
+      "«Розница» выключает цены для салонов со следующего заказа, без письма.": "„Jaemüük“ lülitab salongihinnad välja järgmisest tellimusest, ilma kirjata.",
+      "Плюс — начислить, минус — списать; причина видна в истории.": "Pluss — lisa, miinus — võta maha; põhjus on ajaloos näha.",
+      "Баллы уходят через 5 секунд — до этого можно «Вернуть».": "Punktid lähevad teele 5 sekundi pärast — seni saab „Taasta“.",
+      "за что — например, извинение за задержку": "mille eest — näiteks vabandus viivituse pärast", "За что": "Mille eest",
+      "Видна только вам — например: постоянный клиент, оптовик": "Näete ainult teie — näiteks: püsiklient, hulgiostja",
+      "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — ответьте прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
+        "Partnerlustaotlus tuleb ostja kontolt (nupp „Hakka partneriks“) ja ilmub siia märkega „Pro taotlus“ — vastake otse real või lisage partner ise nupuga „+ Partner“.",
+      "Скидка для салонов действует с первого входа в кабинет по этой почте.": "Salongi allahindlus kehtib esimesest sisselogimisest selle e-postiga.",
+      "Письмо уходит через 10 секунд — до этого можно «Вернуть». Тому, кто уже был партнёром, второе письмо не уходит.":
+        "Kiri läheb teele 10 sekundi pärast — seni saab „Taasta“. Kes on juba partner olnud, teist kirja ei saa.",
+      "Почта салона": "Salongi e-post",
+      "Партнёру уйдёт письмо «Цены для салонов включены».": "Partnerile läheb kiri „Salongihinnad on sisse lülitatud“.",
+      "Цены для салонов включены · письмо ушло": "Salongihinnad sisse lülitatud · kiri läks välja",
+      "Цены для салонов включены · письмо не ушло": "Salongihinnad sisse lülitatud · kiri ei läinud välja",
+      "Цены для салонов включены · письмо уйдёт через 10 с": "Salongihinnad sisse lülitatud · kiri läheb 10 s pärast",
+      "Цены для салонов включены · письмо уже отправляли": "Salongihinnad sisse lülitatud · kiri on juba saadetud",
+      "Снова обычные цены": "Jälle tavahinnad",
+      "Впишите число баллов — можно с минусом": "Sisestage punktide arv — võib ka miinusega",
+      "Только целое число — например, +10 или −5": "Ainult täisarv — näiteks +10 või −5",
+      "Не больше 1 000 000 баллов за раз": "Korraga kuni 1 000 000 punkti",
+      "Начислить": "Lisa", "Списать": "Võta maha",
+      "Партнёр добавлен · письмо уйдёт через 10 с": "Partner lisatud · kiri läheb 10 s pärast",
       /* the cabinet's «Стать партнёром» form — what happens next */
       "Обычно это занимает один рабочий день. Как только включим цены для салонов, придёт письмо — а здесь появится пометка «партнёр».":
         "Tavaliselt võtab see ühe tööpäeva. Niipea kui salongihinnad on sisse lülitatud, tuleb kiri — ja siia ilmub märge „partner“.",
@@ -5983,6 +6017,40 @@
       "Партнёр одобрен · письмо уже отправляли": "Partner approved · the letter was sent before",
       "Сделать партнёром?": "Make a partner?", "Перевести в розницу?": "Move to retail?",
       "Сделать партнёром": "Make a partner", "Перевести в розницу": "Move to retail",
+      /* «Клиенты» in direction 1a (README § 5): «⋯», the chips, the card's
+         request, status, points and note, the held answers (q3, q9) */
+      "Заявки": "Requests", "Ещё действия": "More actions",
+      "Скачать список · Excel": "Download the list · Excel", "Скачать список · CSV": "Download the list · CSV",
+      "Заявка на партнёрство": "Partner request",
+      "Ответ уходит через 10 секунд — до этого можно «Вернуть».": "The answer goes in 10 seconds — until then you can press «Restore».",
+      "Письмо клиенту уходит только при «Сделать партнёром».": "The customer gets a letter only with «Make a partner».",
+      "Видит цены для салонов.": "Sees the salon prices.", "Обычные цены.": "Ordinary prices.",
+      "Ждёт решения по заявке — ответьте выше.": "Waiting for an answer to the request — answer above.",
+      "Партнёр видит цены для салонов на карточках, в товаре и в корзине.": "A partner sees salon prices on the cards, on the product page and in the cart.",
+      "Первый переход на «Партнёр» отправляет письмо «Цены для салонов включены» — через 10 секунд, до этого можно «Вернуть».":
+        "The first switch to «Partner» sends the «Salon prices are on» letter — in 10 seconds, until then you can press «Restore».",
+      "«Розница» выключает цены для салонов со следующего заказа, без письма.": "«Retail» turns salon prices off from the next order, with no letter.",
+      "Плюс — начислить, минус — списать; причина видна в истории.": "Plus adds, minus takes off; the reason shows in the history.",
+      "Баллы уходят через 5 секунд — до этого можно «Вернуть».": "Points go in 5 seconds — until then you can press «Restore».",
+      "за что — например, извинение за задержку": "what for — e.g. an apology for a delay", "За что": "What for",
+      "Видна только вам — например: постоянный клиент, оптовик": "Only you see it — e.g. regular customer, wholesale buyer",
+      "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — ответьте прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
+        "A partner request comes from the customer's account (the «Become a partner» button) and shows here marked «Pro request» — answer it right in the row, or add a partner yourself with «+ Partner».",
+      "Скидка для салонов действует с первого входа в кабинет по этой почте.": "The salon discount applies from the first sign-in with this e-mail.",
+      "Письмо уходит через 10 секунд — до этого можно «Вернуть». Тому, кто уже был партнёром, второе письмо не уходит.":
+        "The letter goes in 10 seconds — until then you can press «Restore». Someone who has been a partner before gets no second letter.",
+      "Почта салона": "Salon e-mail",
+      "Партнёру уйдёт письмо «Цены для салонов включены».": "The partner gets the «Salon prices are on» letter.",
+      "Цены для салонов включены · письмо ушло": "Salon prices on · the letter has gone",
+      "Цены для салонов включены · письмо не ушло": "Salon prices on · the letter did not go",
+      "Цены для салонов включены · письмо уйдёт через 10 с": "Salon prices on · the letter goes in 10 s",
+      "Цены для салонов включены · письмо уже отправляли": "Salon prices on · the letter was sent before",
+      "Снова обычные цены": "Ordinary prices again",
+      "Впишите число баллов — можно с минусом": "Type a number of points — minus is fine",
+      "Только целое число — например, +10 или −5": "Whole numbers only — e.g. +10 or −5",
+      "Не больше 1 000 000 баллов за раз": "No more than 1,000,000 points at a time",
+      "Начислить": "Add", "Списать": "Take off",
+      "Партнёр добавлен · письмо уйдёт через 10 с": "Partner added · the letter goes in 10 s",
       /* the cabinet's «Стать партнёром» form — what happens next */
       "Обычно это занимает один рабочий день. Как только включим цены для салонов, придёт письмо — а здесь появится пометка «партнёр».":
         "It usually takes one working day. As soon as salon prices are on you get a letter — and the “partner” mark appears here.",
@@ -6362,6 +6430,13 @@
     [/^Партнёр · (.+)$/, { ET: "Partner · $1", EN: "Partner · $1" }],
     [/^Розница · (.+)$/, { ET: "Jaemüük · $1", EN: "Retail · $1" }],
     [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
+    /* 1a «Клиенты»: the toasts of a held answer (q3) and a held points
+       correction (q9) — a customer's name or a count spliced in */
+    [/^(.+) — партнёр · письмо уйдёт через 10 с$/, { ET: "$1 — partner · kiri läheb 10 s pärast", EN: "$1 — partner · the letter goes in 10 s" }],
+    [/^Начислено 1 балл$/, { ET: "Lisatud 1 punkt", EN: "1 point added" }],
+    [/^Начислено (\d+) балл(?:а|ов)?$/, { ET: "Lisatud $1 punkti", EN: "$1 points added" }],
+    [/^Списано 1 балл$/, { ET: "Maha võetud 1 punkt", EN: "1 point taken off" }],
+    [/^Списано (\d+) балл(?:а|ов)?$/, { ET: "Maha võetud $1 punkti", EN: "$1 points taken off" }],
     // «Отказать» on a partner request — the other half of the same card
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
@@ -9463,6 +9538,8 @@
     admCustBusy: false,
     admCustPoints: "",   // the +/− points field on an open card
     admCustNote: "",     // the points adjustment note field
+    admCustPtsErr: "",   // the one line under «+10 / −5» when the number is not one (1a)
+    admCustMenu: false,  // «⋯» on «Клиенты» open (the two downloads)
     admCustNotesDraft: null, // working copy of the admin's own note about this customer; null = not editing
     partnerForm: null,   // «+ Партнёр»: {email, company, phone} while the inline form is open
     partnerErr: "",      // why the form was not sent (a bad address, a server refusal)
@@ -14303,13 +14380,17 @@
     toast(status === "approved" ? "Отзыв опубликован" : "Отзыв скрыт", entry);
     render();
   }
-  var REV_TABS = [["pending", "Новые"], ["approved", "Опубликованные"], ["rejected", "Отклонённые"]];
+  /* 1a (gap D1): one word for a review the shop does not show — «Скрыт» on
+     the tag, «Скрыть» on the button, «Скрытые» on the chip. It was
+     «Отклонённые» here and «Скрыт» everywhere else. */
+  var REV_TABS = [["pending", "Новые"], ["approved", "Опубликованные"], ["rejected", "Скрытые"]];
   function admReviewsHTML() {
     var data = S.admReviews;
     var counts = admReviewCounts();
-    var chips = '<div class="adm-chips" role="group" aria-label="Какие отзывы">' + REV_TABS.map(function (tt) {
+    // the count is its own node beside the word, so the word stays one dictionary key
+    var chips = '<div class="adm-chips adm-cchips" role="group" aria-label="Какие отзывы">' + REV_TABS.map(function (tt) {
       return '<button class="adm-chip" data-admrevfilter="' + tt[0] + '" aria-current="' + (S.admRevFilter === tt[0]) + '">' +
-        tt[1] + " " + (counts[tt[0]] || 0) + "</button>";
+        "<span>" + tt[1] + '</span> <span class="adm-chip__n">' + (counts[tt[0]] || 0) + "</span></button>";
     }).join("") + "</div>";
     if (!data || data.loading) return chips + '<div class="adm-skel"><i></i><i></i><i></i></div>';
     /* «…новые отзывы появятся здесь сами» is what this used to promise, and
@@ -14321,7 +14402,13 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="reviews">Повторить</button></div>';
     }
     if (!data.reviews.length) return chips + '<div class="adm-empty">Отзывов пока нет</div>';
-    return chips + '<div class="adm-list">' + data.reviews.map(admReviewRowHTML).join("") + "</div>";
+    return chips + '<div class="adm-list adm-revs">' + data.reviews.map(admReviewRowHTML).join("") + "</div>";
+  }
+  /** A review's state as a status tag (admTagHTML): the same three words on
+      the queue and on the customer's card. */
+  function admRevTagHTML(status) {
+    return status === "approved" ? admTagHTML("ok", "Опубликован")
+      : status === "rejected" ? admTagHTML("quiet", "Скрыт") : admTagHTML("low", "Новый");
   }
   /* Whose review this is, on the queue's own grey line — the address it was
      written from (reviews.email, carried here by GET /api/admin/reviews/),
@@ -14344,23 +14431,32 @@
       ? '<span class="adm-mono">' + esc(mail) + "</span>"
       : "<span>без аккаунта</span>";
   }
+  /* 1a (screen 07, «Отзывы»): who — a link to the customer's card when the
+     review was written from a cabinet (gap Q4: Renat, 14.09.2026, «reviews do
+     not seem to be connected to clients»; the card's route takes the address
+     as its id) — the stars and the product on the first line, the text, then
+     «dd.mm.yyyy · RU · address / без аккаунта». Both answers stay on every
+     review that can take them: «Скрыть» on a published one, «Опубликовать» on
+     a hidden one (gap Q4 a) — outlined, as every row button of a list is. */
   function admReviewRowHTML(r) {
     var p = byIdOrNull(r.productId);
-    var st = r.status === "approved" ? ["Опубликован", "adm-badge--ok"]
-      : r.status === "rejected" ? ["Скрыт", "adm-badge--quiet"] : ["Новый", ""];
-    return '<div class="adm-row adm-row--stack">' +
-      '<span class="adm-sec"><span><b>' + esc(r.name) + '</b> <span class="adm-stars">' +
-        "★★★★★".slice(0, Number(r.rating) || 0) + "</span> · " +
-        esc(p ? p.brand + " — " + p.name : r.productId) + "</span>" +
-        '<span class="adm-badge ' + st[1] + '">' + st[0] + "</span></span>" +
+    var mail = String((r && r.email) || "").trim();
+    return '<div class="adm-row adm-row--stack adm-rev">' +
+      '<span class="adm-rev__top">' +
+        (mail
+          ? '<button class="adm-link adm-rev__who" data-admcustopen="' + esc(mail) + '">' + esc(r.name) + "</button>"
+          : '<b class="adm-rev__who">' + esc(r.name) + "</b>") +
+        '<span class="adm-stars" aria-label="' + (Number(r.rating) || 0) + ' / 5">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span>" +
+        '<span class="adm-rev__prod">' + esc(p ? admProdName(p.brand + " — " + p.name) : r.productId) + "</span>" +
+        admRevTagHTML(r.status) + "</span>" +
       '<span class="adm-revtext">' + esc(r.text) + "</span>" +
-      '<span class="adm-row__sub">' + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) +
+      '<span class="adm-row__sub">' + esc(shortDate(r.createdAt) || String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) +
         " · " + admReviewWhoHTML(r) + "</span>" +
-      '<span class="adm-acts">' +
+      '<span class="adm-acts adm-rev__acts">' +
         (r.status === "approved" ? "" :
-          '<button class="adm-btn adm-btn--row" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row adm-rev__pub" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
         (r.status === "rejected" ? "" :
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row adm-rev__hide" data-admrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
       "</span></div>";
   }
 
@@ -22470,7 +22566,7 @@
   /** What the top bar's «←» goes back to — the card on top, in the words its
       own back link uses — or "" at a section's front door. */
   var ADM_TOP_BACK = {
-    edit: "Товары", customer: "Все клиенты", mail: "Все письма", setpage: "Настройки",
+    edit: "Товары", customer: "Клиенты", mail: "Все письма", setpage: "Настройки",
     blog: "Блог", news: "Рассылка", moves: "Склад"
   };
   function admTopBackLabel() {
@@ -22797,43 +22893,71 @@
       '<div class="adm-stack adm-stack--tight">' + main + "</div><div>" + side + "</div></div>";
   }
 
-  /* ---------- Клиенты: «Все клиенты» и «Отзывы» ---------------------------
-     Two tabs over one screen, on the two loaders that were already there
-     (GET /api/admin/customers/, /api/admin/reviews/). What changed is the row:
-     a name, one grey line of facts, a tier badge and — for a partner request
-     still waiting — the two buttons that answer it on the spot instead of
-     three clicks deeper into the card. The card itself is unchanged: points,
-     the history and the private note still live there. */
+  /* ---------- Клиенты: «Клиенты» и «Отзывы» ---------------------------------
+     Two views over one screen, on the two loaders that were already there
+     (GET /api/admin/customers/, /api/admin/reviews/). Direction 1a (README
+     § 5, screen 07): the title with its «?», «⋯» and the one dark «+ Партнёр»
+     at the top; under it the «Клиенты · Отзывы» switch with what waits under
+     each — requests, new reviews — beside the search; then a count on every
+     chip, and the list. The card is its own page (admCustomerCardHTML). */
   function admReviewCounts() {
     return (S.admReviews && S.admReviews.counts) || { pending: 0, approved: 0, rejected: 0 };
+  }
+  /** Partner requests waiting — from the list once it is here, from «Обзор»'s
+      summary before that (the phone's «Ещё» reads the same number). */
+  function admCustPendingN() {
+    if (!partnersOn()) return 0;
+    if (S.admCustomers) return S.admCustomers.filter(function (c) { return admCustInTier(c, "pending"); }).length;
+    var a = OVERVIEW.data && OVERVIEW.data.attention;
+    return (a && a.proRequests) || 0;
+  }
+  /** «Клиенты N · Отзывы N» — the two old section keys (data-admtab="people"
+      and "reviews", the assistant's and the suite's addresses), drawn as the
+      1a segmented control. The count is its own node: the word stays a key. */
+  function admCustTabsHTML(onReviews) {
+    var one = function (key, label, n, on) {
+      return '<button class="adm-cseg__b" data-admtab="' + key + '" aria-current="' + !!on + '" title="' + label + '">' +
+        "<span>" + label + "</span>" + (n ? ' <span class="adm-cseg__n">' + n + "</span>" : "") + "</button>";
+    };
+    return '<div class="adm-cseg" role="group" aria-label="Что показываем">' +
+      one("people", "Клиенты", admCustPendingN(), !onReviews) +
+      one("reviews", "Отзывы", admReviewCounts().pending || 0, onReviews) + "</div>";
+  }
+  /** The title, its «?» (the lead paragraph that used to stand under it —
+      admCustLeadHTML, link to «Цены и баллы» and all), «⋯» with the two
+      downloads and «+ Партнёр»: the screen's one dark button, in the header on
+      a desktop and pinned above the tab bar on a phone (admPinnedHTML). */
+  function admCustHeadHTML(onReviews) {
+    var signed = SRV.admin === true;
+    // «Партнёры и баллы» off: no partners to add (Dim, 07.09.2026)
+    var add = signed && partnersOn() && !onReviews && !S.partnerForm;
+    return '<div class="adm-head adm-chead"><div class="adm-chead__t"><h1 class="adm-h1 adm-h1--flat">Клиенты</h1>' +
+        admHelpBtnHTML("people") + "</div>" +
+        '<div class="adm-chead__r">' +
+          (signed && !onReviews ? admCustMoreHTML() : "") +
+          (add ? admPinnedHTML("data-admpartnernew", "+ Партнёр") : "") +
+        "</div>" +
+      "</div>" + admHelpHTML("people", admCustLeadHTML());
   }
   function admCustomersScreen() {
     var onReviews = S.adminTab === "reviews";
     if (onReviews) loadAdminReviews(false);
-    /* A card is its own page (Dim, 10.09.2026): on it, the «Все клиенты /
-       Отзывы» tabs — which sort the list — threw the owner out to the queue
-       when he expected this customer's reviews. They are not drawn while a
-       card is open; «← Все клиенты» is the way out, and the customer's own
-       reviews live on the card (admCustReviewsHTML). The queue stays one tap
-       away from the list. An order opened from the card is drawn over it. */
+    /* A card is its own page (Dim, 10.09.2026): on it, the «Клиенты / Отзывы»
+       switch — which sorts the list — threw the owner out to the queue when
+       he expected this customer's reviews. It is not drawn while a card is
+       open; «← Клиенты» is the way out, and the customer's own reviews live
+       on the card (admCustReviewsHTML). The queue stays one tap away from
+       the list. An order opened from the card is drawn over it. */
     var card = !!S.admCustOpen && SRV.admin === true;
     if (card && S.adminOrder) return admCustOrderCardHTML();
-    var pend = admReviewCounts().pending || 0;
-    /* «+ Партнёр» — the same head slot «+ Промокод» uses: a salon the owner
-       already knows is added by e-mail, without waiting for a request. */
-    // «Партнёры и баллы» off: no partners to add (Dim, 07.09.2026)
-    var add = partnersOn() && !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
-      ? '<button class="adm-btn adm-btn--head" data-admpartnernew>+ Партнёр</button>'
-      : "";
-    return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Клиенты", add) +
-      (card ? "" : admTabsHTML(
-        admTabBtn("people", "Все клиенты", 0, !onReviews) +
-        admTabBtn("reviews", "Отзывы", pend, onReviews))) +
+    if (card) return '<div class="adm-screen adm-screen--card adm-cscr">' + admCustomersHTML() + "</div>";
+    return '<div class="adm-screen adm-screen--tight adm-cscr">' +
+      admCustHeadHTML(onReviews) +
+      (!onReviews && partnersOn() && S.partnerForm && SRV.admin === true ? admPartnerFormHTML() : "") +
+      '<div class="adm-cbar">' + admCustTabsHTML(onReviews) + (onReviews ? "" : admCustSearchHTML()) + "</div>" +
       (onReviews ? admReviewsHTML() : admCustomersHTML()) +
       "</div>";
   }
-
   /* ---------- Маркетинг: «Промокоды» · «Подарочные карты» · «Письма» ------
      Three tabs over three old keys: `promos`, the new `gift`, and `mail`. Gift
      cards get a home of their own here (README fix #11) — until now the shop
@@ -31137,7 +31261,19 @@
      customers), the demo table otherwise — same "always something to look
      at" rule as orders/goods. Search and the tier filter both run client
      side over the one fetched page (this shop does three to five orders a
-     month — there is no list here worth paginating). */
+     month — there is no list here worth paginating).
+
+     Direction 1a (design_handoff_admin_ux README § 5 «Клиенты + карточка
+     клиента», screens 07 and 15; the gap analysis design-gap/3 A–D; Dim's
+     answers of 25.09.2026). Everything the screen did stays, placed the 1a
+     way: the lead paragraph behind «?», the two downloads in «⋯», «+ Партнёр»
+     the one dark button, a count on every chip, a table on a desktop. The
+     confirm cards are gone (rule 4 keeps them for money, mass e-mail and
+     deletes): an answer to a partner request, a tier flip that posts the
+     welcome letter and «+ Партнёр» are HELD for ten seconds with «Вернуть»
+     on the toast (q3), a points correction for five (q9), and the private
+     note saves itself (q1: running text, one second after the typing
+     stops). */
   function loadAdminCustomers(force) {
     if (SRV.admin !== true) return;
     if (S.admCustomers && !force) return;
@@ -31148,44 +31284,88 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       S.admCustomers = r.status === 200 && r.body.ok ? (r.body.customers || []) : [];
       S.admCustErr = r.status === 200 && r.body.ok ? "" : "Список клиентов не загрузился.";
+      /* a decision still held (custDecide) is on screen already: a list that
+         lands inside its ten seconds must not show the request again */
+      custHeldLocalAgain();
       render();
     }).catch(function () {
       loadAdminCustomers._busy = false;
       S.admCustomers = []; S.admCustErr = "Сервер не отвечает."; render();
     });
   }
-  /** The tier as a badge — the same words on the row and on the card. */
-  function admCustBadge(c) {
+  /** The tier as a status tag (admTagHTML) — the same words on the row and on
+      the card. «Pro» became «Партнёр» in 1a: one name for the tier everywhere
+      the owner reads it (gap A8). The request keeps «Заявка Pro», the word
+      the customer's own cabinet sends it under. */
+  function admCustTag(c) {
     // «Партнёры и баллы» off: every customer is simply a customer
-    if (!partnersOn()) return ["Клиент", "adm-badge--quiet"];
-    if (c.tier === "pro") return ["Pro", "adm-badge--ink"];
-    if (c.proRequestedAt) return ["Заявка Pro", "adm-badge--warn"];
-    return ["Розница", "adm-badge--quiet"];
+    if (!partnersOn()) return ["quiet", "Клиент"];
+    if (c.tier === "pro") return ["next", "Партнёр"];
+    if (c.proRequestedAt) return ["low", "Заявка Pro"];
+    return ["quiet", "Розница"];
   }
-  function filteredAdminCustomers() {
-    var list = S.admCustomers || [];
-    // «Партнёры и баллы» off: there are no tiers to filter by, and a chip the
-    // screen no longer draws must not go on quietly hiding half the list
-    if (!partnersOn()) S.admCustTier = "";
-    if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
-    else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
-    else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
+  /** Does `c` belong under chip `tier`? One rule for the list and the counts. */
+  function admCustInTier(c, tier) {
+    if (tier === "pro") return c.tier === "pro";
+    if (tier === "retail") return c.tier !== "pro";
+    if (tier === "pending") return c.tier !== "pro" && !!c.proRequestedAt;
     /* Who agreed to be written to. Not a tier, but it is the same question —
        «which customers am I looking at» — and this is the one place the owner
        can now see the consent the checkout collects (07.09.2026). «Скачать
-       CSV» carries the same column for anyone who wants the list in a file. */
-    else if (S.admCustTier === "news") list = list.filter(function (c) { return !!c.marketing; });
-    var q = (S.admCustQ || "").toLowerCase().trim();
-    if (q) {
-      list = list.filter(function (c) {
-        return ((c.email || "") + " " + (c.name || "") + " " + (c.phone || "") + " " + (c.company || "")).toLowerCase().indexOf(q) >= 0;
-      });
-    }
-    return list;
+       список» carries the same column for anyone who wants it in a file. */
+    if (tier === "news") return !!c.marketing;
+    return true;
   }
-  /** One row: the name, one grey line of facts, the tier badge and — while a
-      partner request is still waiting — the two buttons that answer it here
-      instead of three clicks deeper into the card. */
+  function admCustMatch(c, q) {
+    return !q || ((c.email || "") + " " + (c.name || "") + " " + (c.phone || "") + " " + (c.company || "")).toLowerCase().indexOf(q) >= 0;
+  }
+  function filteredAdminCustomers() {
+    var list = S.admCustomers || [];
+    /* «Партнёры и баллы» off: there are no tiers to filter by, and a chip the
+       screen no longer draws must not go on quietly hiding half the list.
+       «Подписаны» is not a tier and is still drawn — it used to be reset
+       here with the other three, so the one chip left on the screen with
+       the programme off did nothing at all. */
+    if (!partnersOn() && S.admCustTier !== "news") S.admCustTier = "";
+    var tier = S.admCustTier, q = (S.admCustQ || "").toLowerCase().trim();
+    return list.filter(function (c) { return admCustInTier(c, tier) && admCustMatch(c, q); });
+  }
+  /** One row. A desktop lays it out as the design's table (Клиент · Почта ·
+      телефон · Заказы · Потратил · Статус), a phone as a name with its tag and
+      one grey line of facts; while a partner request is waiting, the two
+      buttons that answer it are on the row — under it, beside the salon's
+      name, on a phone. Both outlined: «+ Партнёр» is the screen's one dark
+      button (rule 2; Dim, 25.09.2026). */
+  function admCustRowHTML(c) {
+    var pending = partnersOn() && c.tier !== "pro" && !!c.proRequestedAt;
+    var tag = admCustTag(c);
+    return '<div class="adm-row adm-row--open adm-crow' + (pending ? " adm-crow--req" : "") + '"' + ADM_ROW_OPEN + ">" +
+      '<button class="adm-row__body adm-crow__who" data-admcustopen="' + esc(c.id) + '">' +
+        '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
+        '<span class="adm-row__sub adm-row__sub--one adm-crow__co">' + esc(c.company || c.email) + "</span>" +
+        /* the phone's one grey line: each piece its own node, so «2 заказа»
+           reaches the dictionary as the whole text it is */
+        '<span class="adm-row__sub adm-row__sub--one adm-crow__meta"><span>' + admOrdersLabel(Number(c.ordersCount) || 0) +
+          "</span> · <span>" + eur(Number(c.revenue) || 0) + "</span> · <span>" + esc(c.email) + "</span></span>" +
+      "</button>" +
+      '<span class="adm-crow__ct">' + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</span>" +
+      '<span class="adm-crow__n">' + (Number(c.ordersCount) || 0) + "</span>" +
+      '<span class="adm-crow__sum">' + eur(Number(c.revenue) || 0) + "</span>" +
+      '<span class="adm-crow__tags">' + admTagHTML(tag[0], tag[1]) +
+        /* Who agreed to be written to — kept (gap Q1 a): its own tag, not a
+           word appended to the grey line, so the dictionary can rewrite it */
+        (c.marketing ? admTagHTML("quiet", "Подписан") : "") + "</span>" +
+      (pending
+        ? '<span class="adm-acts adm-crow__acts">' +
+            (c.company || c.regCode
+              ? '<span class="adm-crow__reqco">' + esc(c.company || "") +
+                  (c.regCode ? (c.company ? " · " : "") + "<span>рег. " + esc(c.regCode) + "</span>" : "") + "</span>"
+              : "") +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row adm-crow__yes" data-admcustapprove="' + esc(c.id) + '">Сделать партнёром</button>' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row adm-crow__no" data-admcustreject="' + esc(c.id) + '">Отказать</button></span>'
+        : '<span class="adm-crow__acts"></span>') +
+      "</div>";
+  }
   function admCustRowsHTML() {
     var list = filteredAdminCustomers();
     if (!list.length) {
@@ -31196,29 +31376,79 @@
         ? '<div class="adm-empty">Никого не нашлось</div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
-    return '<div class="adm-list">' + list.map(function (c) {
-      var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
-      var badge = admCustBadge(c);
-      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
-        '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '">' +
-          '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
-          '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
-            admOrdersLabel(c.ordersCount) + " · " + eur(c.revenue) + "</span></button>" +
-        '<span class="adm-row__line"><span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
-        /* Who agreed to be written to. Its own badge, not a word appended to
-           the grey line: a badge is one text node the dictionary can rewrite,
-           and the line beside it is already a run of e-mail, count and sum. */
-        (c.marketing ? '<span class="adm-badge adm-badge--quiet">Подписан</span>' : "") + "</span>" +
-        (pending
-          ? '<span class="adm-acts"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) +
-            '">Одобрить Pro</button>' +
-            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) +
-            '">Отказать</button></span>'
-          : "") +
-        "</div>";
+    // the table's heads are the desktop's; a phone reads the rows alone
+    return '<div class="adm-list adm-ctable"><div class="adm-ctable__h" aria-hidden="true">' +
+        "<span>Клиент</span><span>Почта · телефон</span><span>Заказы</span><span>Потратил</span><span>Статус</span><span></span></div>" +
+      list.map(admCustRowHTML).join("") + "</div>";
+  }
+  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки"], ["pro", "Партнёры"], ["retail", "Розница"], ["news", "Подписаны"]];
+  /** The chips, each with how many it holds under the search typed now (the
+      design's «Все 4 · Заявки 1 …»). The count is its own node, so the word
+      is still one dictionary key. «Партнёры и баллы» off: «Все · Подписаны»
+      — the three tier chips mean nothing then (Dim, 07.09.2026). */
+  function admCustChipsHTML() {
+    // a list that did not load has no counts to give — «Все 0» would read as «nobody»
+    var all = S.admCustErr ? null : S.admCustomers, q = (S.admCustQ || "").toLowerCase().trim();
+    var shown = ADM_CUST_TIERS.filter(function (f) { return partnersOn() || f[0] === "" || f[0] === "news"; });
+    return '<div class="adm-chips adm-cchips" role="group" aria-label="Какие клиенты">' + shown.map(function (f) {
+      var n = all ? all.filter(function (c) { return admCustInTier(c, f[0]) && admCustMatch(c, q); }).length : -1;
+      return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' + (S.admCustTier === f[0]) + '">' +
+        "<span>" + f[1] + "</span>" + (n >= 0 ? ' <span class="adm-chip__n">' + n + "</span>" : "") + "</button>";
     }).join("") + "</div>";
   }
-  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"], ["news", "Подписаны"]];
+  /** The two files, as «⋯» holds them (gap A5): the rows on screen — the
+      chip's tier and the search go along, the route takes both — with the
+      route's own ceiling as the limit. Without `limit` the export took
+      listCustomersAdmin's default of 200 newest rows while the screen was
+      fetched with 500, so the file would quietly lose the oldest customers
+      the day this shop passes two hundred. «Подписаны» is not a tier the
+      route knows: the file then has every row, consent column and all. */
+  function admCustExportHref(format) {
+    var p = "/api/admin/customers/?format=" + format + "&limit=1000";
+    var t = S.admCustTier;
+    if (partnersOn() && (t === "pro" || t === "retail" || t === "pending")) p += "&tier=" + t;
+    var q = String(S.admCustQ || "").trim();
+    if (q) p += "&q=" + encodeURIComponent(q);
+    return p;
+  }
+  /** «⋯» at the top right: the rare actions of the list — the two downloads
+      (XLSX first, the one that just opens: Dim, 13.09.2026). A dropdown on a
+      desktop, a sheet from the bottom on a phone (admin.css .adm-cmenu). */
+  function admCustMoreHTML() {
+    var open = !!S.admCustMenu;
+    return '<div class="adm-cmenu' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-btn adm-btn--ghost adm-cmenu__btn" type="button" data-admcustmore aria-haspopup="menu" aria-expanded="' + open +
+        '" aria-label="Ещё действия" title="Ещё действия"><span aria-hidden="true">⋯</span></button>' +
+      (open
+        ? '<button class="adm-cmenu__scrim" type="button" data-admcustmore tabindex="-1" aria-label="Закрыть"></button>' +
+          '<div class="adm-cmenu__list" role="menu" aria-label="Ещё действия">' +
+            '<a class="adm-cmenu__i" role="menuitem" href="' + esc(admCustExportHref("xlsx")) + '" target="_blank" rel="noopener">Скачать список · Excel</a>' +
+            '<a class="adm-cmenu__i" role="menuitem" href="' + esc(admCustExportHref("csv")) + '" target="_blank" rel="noopener">Скачать список · CSV</a>' +
+            '<button class="adm-cmenu__i adm-cmenu__i--close" type="button" data-admcustmore>Закрыть</button></div>'
+        : "") +
+      "</div>";
+  }
+  /* «⋯» answers here, beside the list it belongs to, rather than in the long
+     selector of the panel's one click delegate below — and so does the rule
+     that any other tap shuts it (a download link included: the browser
+     follows it, the list folds after). Registered before the delegate. */
+  if (typeof document !== "undefined") {
+    document.addEventListener("click", function (e) {
+      if (S.screen !== "admin") return;
+      var el = e.target && e.target.closest ? e.target.closest("[data-admcustmore]") : null;
+      if (el) {
+        var opening = !S.admCustMenu;
+        S.admCustMenu = opening;
+        render();
+        refocus(opening ? ".adm-cmenu__list [role=menuitem]" : "[data-admcustmore]");
+        return;
+      }
+      if (S.admCustMenu) {
+        S.admCustMenu = false;
+        setTimeout(function () { if (!S.admCustMenu) render(); }, 0);
+      }
+    });
+  }
   /* The card's own GET. admCustomerCardHTML() calls it on every render and
      draws the skeleton until the answer lands, so a refusal has to be said out
      loud: until 17.09.2026 a 503 (or an offline phone) fell through the two
@@ -31226,7 +31456,12 @@
      render fired the request again — with nothing to stop two being in flight
      at once. The list loader beside it has had both an error line and a busy
      flag all along; this is the same pair. `force` (after a PATCH) clears the
-     error so the card can try again. */
+     error so the card can try again.
+
+     `id` may be an e-mail: the review queue opens its author's card by the
+     address the review was written from (gap Q4 — the route takes either).
+     The answer names the real id, and the card is re-keyed to it before it
+     is drawn, so the next render finds the card it asked for. */
   function loadAdminCustomerDetail(id, force) {
     if (SRV.admin !== true) return;
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
@@ -31245,8 +31480,13 @@
     apiJson("/api/admin/customers/" + encodeURIComponent(id) + "/").then(function (r) {
       if (r.status === 401) { SRV.admin = false; loadAdminCustomerDetail._busy = ""; render(); return; }
       if (r.status === 200 && r.body.ok) {
+        if (S.admCustOpen !== id) { done(""); return; }
+        var real = r.body.customer && r.body.customer.id ? String(r.body.customer.id) : id;
         S.admCustDetail = { customer: r.body.customer, history: r.body.history || [],
           orders: r.body.orders || [], stats: r.body.stats || null, reviews: r.body.reviews || [] };
+        custHeldLocalAgain();
+        // opened by address: from here on the card is keyed by its id
+        if (real !== id) { S.admCustOpen = real; if (loadAdminCustomerDetail._busy === id) loadAdminCustomerDetail._busy = ""; render(); return; }
         done("");
         return;
       }
@@ -31258,7 +31498,7 @@
      draw the new side — so the owner pressed it, the whole card turned back
      into a skeleton, and a second or two later the answer arrived (Renat,
      13.09.2026). The tier is one field: it is moved here, on the copies
-     already on screen, the moment the owner confirms, and the PATCH either
+     already on screen, the moment the owner picks it, and the PATCH either
      confirms it (srvPush adopts the row the server sends back) or puts it
      back and says so. Returns false when neither copy knew this customer,
      which is only possible if the screen moved on in between. */
@@ -31298,10 +31538,231 @@
     for (k in b) if (Object.prototype.hasOwnProperty.call(b, k)) out[k] = b[k];
     return out;
   }
+  /* ---------- «Вернуть» for what the server cannot take back ---------------
+     An answer to a partner request cannot be walked back on the server:
+     «Отказать» clears pro_requested_at and «Сделать партнёром» stamps the
+     approval and posts «Цены для салонов включены» in the same call (gap
+     findings 5 and 6). So «Вернуть» is the call not made yet: the change is
+     on screen at once, the toast offers «Вернуть» for ten seconds (q3 — the
+     time every customer letter waits), and only then does the request go.
+     The same for the tier flip that posts the letter and for «+ Партнёр»;
+     points corrections wait five (q9), so «Вернуть» never has to send an
+     opposite correction the ledger's once-a-day key would swallow (finding
+     4). A page that is closed, reloaded or put in the background inside the
+     wait sends what it holds there and then — `keepalive`, for the phone
+     locked mid-toast — because the owner already said yes to it. */
+  var CUST_LETTER_MS = 10000;
+  var CUST_POINTS_MS = 5000;
+  var CUST_HOLDS = [];
+  var custHoldSeq = 0;
+  /** Hold one change. `o.fire(keepalive)` makes it; `o.cancel()` puts the
+      screen back when «Вернуть» is pressed in time. */
+  function custHold(o) {
+    var h = { key: o.key, done: false, timer: 0, local: o.local || null };
+    var drop = function () { CUST_HOLDS = CUST_HOLDS.filter(function (x) { return x !== h; }); };
+    h.fire = function (keepalive) {
+      if (h.done) return;
+      h.done = true; clearTimeout(h.timer); drop();
+      o.fire(!!keepalive);
+    };
+    h.cancel = function () {
+      if (h.done) return false;
+      h.done = true; clearTimeout(h.timer); drop();
+      o.cancel();
+      return true;
+    };
+    h.timer = setTimeout(function () { h.fire(false); }, o.ms);
+    CUST_HOLDS.push(h);
+    // the toast stays as long as the wait: an offer that fades first is no offer
+    toast(o.text, { prev: true, ms: o.ms, undo: function () { if (h.cancel()) { toast("Отменено"); render(); } } });
+    return h;
+  }
+  function custHeld(key) {
+    for (var i = 0; i < CUST_HOLDS.length; i++) if (CUST_HOLDS[i].key === key) return CUST_HOLDS[i];
+    return null;
+  }
+  /** The page is going away: everything held goes now. */
+  function custHoldsFire() {
+    CUST_HOLDS.slice().forEach(function (h) { h.fire(true); });
+  }
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("pagehide", custHoldsFire);
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") custHoldsFire();
+      });
+    }
+  }
+  /** One write of this screen: apiSend(), or the same request with
+      `keepalive` when the page is on its way out. */
+  function custSend(url, method, body, keepalive) {
+    if (!keepalive) return apiSend(url, method, body);
+    return apiJson(url, { method: method, headers: { "content-type": "application/json" }, body: JSON.stringify(body || {}), keepalive: true });
+  }
+  /** Every copy of one customer on screen — the card's and the list's row. */
+  function custCopies(id) {
+    var out = [];
+    var open = S.admCustDetail && S.admCustDetail.customer;
+    if (open && String(open.id) === String(id)) out.push(open);
+    (S.admCustomers || []).forEach(function (c) { if (c && String(c.id) === String(id)) out.push(c); });
+    return out;
+  }
+  /** Write `fields` onto every copy of the customer, and return what they held. */
+  function custLocal(id, fields) {
+    var was = null;
+    custCopies(id).forEach(function (c) {
+      if (!was) { was = {}; for (var k in fields) if (Object.prototype.hasOwnProperty.call(fields, k)) was[k] = c[k]; }
+      for (var j in fields) if (Object.prototype.hasOwnProperty.call(fields, j)) c[j] = fields[j];
+    });
+    return was;
+  }
+  /** A card or a list that arrived while a decision is held is drawn with the
+      decision on it, as the screen before it was. */
+  function custHeldLocalAgain() {
+    CUST_HOLDS.forEach(function (h) { if (h.local) custLocal(h.local.id, h.local.fields); });
+  }
+  /** One customer by id — the card's own, or the row the list is showing.
+      Both places carry «Сделать партнёром», so both have to be able to name who. */
+  function admCustById(id) {
+    var open = S.admCustDetail && S.admCustDetail.customer;
+    if (open && String(open.id) === String(id)) return open;
+    var list = S.admCustomers || [];
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i];
+    return null;
+  }
+  /** «Сделать партнёром» / «Отказать» — on the row and on the card. On screen
+      at once, sent after ten seconds (see above); a second tap on the same
+      request while one is held is the same decision. */
+  function custDecide(id, action) {
+    var c = admCustById(id);
+    if (!c || custHeld("decide:" + id) || c.tier === "pro" || !c.proRequestedAt) return;
+    var who = c.name || c.email;
+    var fields = action === "approve" ? { tier: "pro", proRequestedAt: null } : { proRequestedAt: null };
+    var was = custLocal(id, fields);
+    render();
+    custHold({
+      key: "decide:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields },
+      // one string per branch, so the dictionary rule sees the whole toast
+      text: action === "approve" ? who + " — партнёр · письмо уйдёт через 10 с" : "Заявка отклонена",
+      fire: function (keepalive) {
+        var back = function () { custLocal(id, was); };
+        if (action === "approve") approveCustomer(id, keepalive, back);
+        else rejectCustomer(id, keepalive, back);
+      },
+      cancel: function () { custLocal(id, was); }
+    });
+  }
+  /** `okMsg` is what the toast says when the write went through; `noMailMsg`,
+      where one is given, is what it says instead when the answer carries a
+      letter that did NOT leave. The route sends «Цены для салонов включены»
+      itself on a retail → pro flip and reports the outcome in `mail` — best
+      effort, `sent:false` when Resend refuses — so a fixed «письмо ушло» was
+      the panel telling the owner about a letter it had never looked at
+      (17.09.2026). applyAddPartner() has read `mail.sent` since «+ Партнёр»
+      was written; this is the same reading on the same letter.
+
+      `opts.keepalive`: the page is going away (custHoldsFire); `opts.onFail`
+      puts back what the screen already shows when the write is refused. An
+      empty okMsg says nothing on success: «Отказать» said «Заявка отклонена»
+      when it was pressed. */
+  function admCustPatch(id, body, okMsg, noMailMsg, skipMsg, opts) {
+    var busy = admCustPatch._busy || (admCustPatch._busy = {});
+    if (busy[id]) return;   // «Сделать партнёром» tapped twice is one approval
+    busy[id] = true;
+    var o = opts || {};
+    custSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body, o.keepalive).then(function (r) {
+      busy[id] = false;
+      S.admCustBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        /* The answer is the customer's row, nothing more. It used to become
+           the whole card — `{ customer, history }` — so the orders, the facts
+           and the reviews the card's GET had brought went back to grey bars
+           until the refetch below landed (map defect 17, 24.09.2026). The row
+           goes onto the card when it is this customer's, and onto the list's
+           row; a card of somebody else is left exactly as it is — a decision
+           held for ten seconds can land while the owner is on another card. */
+        var mine = S.admCustDetail && String(S.admCustDetail.customer.id) === String(id);
+        if (mine) S.admCustDetail = mergeInto(S.admCustDetail, { customer: r.body.customer });
+        admCustAdopt(r.body.customer);
+        if (mine) loadAdminCustomerDetail(id, true);
+        /* Three outcomes, not two. `skipped` is the route deciding the letter
+           must NOT go — this address has been welcomed before — and saying so
+           is not the same as reporting a failure, which is what «не ушло»
+           means. No `mail` at all means no letter was due on this path. */
+        var ml = r.body.mail;
+        var msg = ml && ml.skipped && skipMsg ? skipMsg
+          : ml && !ml.sent && noMailMsg ? noMailMsg
+          : okMsg;
+        if (msg) toast(msg);
+        render();
+        return;
+      }
+      if (o.onFail) o.onFail();
+      toast("Не получилось сохранить");
+      render();
+    }).catch(function () {
+      busy[id] = false; S.admCustBusy = false;
+      if (o.onFail) o.onFail();
+      toast("Сервер не отвечает"); render();
+    });
+  }
+  function approveCustomer(id, keepalive, onFail) {
+    admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло", "Партнёр одобрен · письмо не ушло",
+      "Партнёр одобрен · письмо уже отправляли", { keepalive: keepalive, onFail: onFail });
+  }
+  function rejectCustomer(id, keepalive, onFail) {
+    admCustPatch(id, { action: "reject" }, "", "", "", { keepalive: keepalive, onFail: onFail });
+  }
+  /** The card's «Розница / Партнёр» (a pick: at once, README § 2). To a
+      partner for the first time the route posts the welcome letter, so that
+      one flip is held ten seconds like the approval; a return to partner
+      (the letter went once already — Dim, 17.09.2026) and a move to retail
+      are made at once, journalled, with «Вернуть» on the toast. Picking a
+      side while a change of this customer is still held takes that change
+      back — the same as «Вернуть». */
+  function custSetTier(value) {
+    var c = S.admCustDetail && S.admCustDetail.customer;
+    if (!c) return;
+    var held = custHeld("tier:" + c.id) || custHeld("decide:" + c.id);
+    if (held) { if (held.cancel()) { toast("Отменено"); render(); } return; }
+    if (value === "pro" ? c.tier === "pro" : c.tier !== "pro") return;
+    var id = c.id, email = c.email;
+    var a = { type: "set_tier", id: id, email: email, value: value, prev: c.tier === "pro" ? "pro" : "retail" };
+    if (value === "pro" && !c.proApprovedAt) {
+      var fields = { tier: "pro" };
+      var was = custLocal(id, fields);
+      render();
+      custHold({
+        key: "tier:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields },
+        text: "Цены для салонов включены · письмо уйдёт через 10 с",
+        fire: function (keepalive) {
+          if (keepalive) {
+            custSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { tier: "pro" }, true).catch(noop);
+            journalNote(actionText(a));
+            return;
+          }
+          custLocal(id, was);
+          demoApply(a);   // the journal line, the switch, the PATCH — and srvPush says how the letter went
+          render();
+        },
+        cancel: function () { custLocal(id, was); }
+      });
+      return;
+    }
+    var entry = demoApply(a);
+    toast(value === "pro" ? "Цены для салонов включены · письмо уже отправляли" : "Снова обычные цены", entry);
+    render();
+  }
+  /* ---------- the card ----------------------------------------------------
+     Its own page, no tabs (Dim, 10.09.2026). A desktop reads it in two
+     columns — what he bought and what he wrote on the left, what the owner
+     decides about him on the right (screen 15); a phone reads the same
+     sections in one column, the decision first (file 6, #customer). */
   function admCustomerCardHTML() {
     loadAdminCustomerDetail(S.admCustOpen, false);
     var d = S.admCustDetail;
-    var back = admBackHTML("data-admcustclose", "Все клиенты");
+    var back = admBackHTML("data-admcustclose", "Клиенты");
     if (!d || d.customer.id !== S.admCustOpen) {
       // grey bars mean «loading»; a card that will never load says so instead,
       // with the «Повторить» every other screen of the panel has (map defect 7)
@@ -31312,79 +31773,73 @@
     }
     var c = d.customer;
     if (S.admCustNotesDraft === null) S.admCustNotesDraft = c.notes || "";
-    var badge = admCustBadge(c);
-    var consent = admConsentLine(c);
-    return back +
-      '<div class="adm-head" style="margin-top:12px"><div>' +
-        '<h2 class="adm-h2">' + esc(c.name || c.email) + "</h2>" +
-        '<div class="adm-hint">' + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") +
-          (c.company ? "<br>" + esc(c.company) + (c.regCode ? " · <span>рег. " + esc(c.regCode) + "</span>" : "") : "") +
-        "</div></div>" +
-        '<span class="adm-badge adm-badge--big ' + badge[1] + '">' + badge[0] + "</span></div>" +
-      (consent ? '<p class="adm-hint" style="margin:10px 0 0">' + consent + "</p>" : "") +
-      '<div class="adm-kpis" style="margin-top:16px">' +
+    var on = partnersOn();
+    var main = admCustOrdersHTML(d) + admCustFactsHTML(d) + (on ? admCustPointsHTML(d) : "") + admCustReviewsHTML(d);
+    var side = (on ? admCustRequestHTML(c) + admCustTierHTML(c) : "") + admCustNoteHTML(c) +
+      // «Написать клиенту» (q32): the owner's own mail app, with the address filled in
+      '<div class="adm-csec adm-csec--write"><a class="adm-btn adm-btn--ghost adm-cwrite" href="mailto:' + esc(c.email) + '">Написать клиенту</a></div>';
+    return back + '<div class="adm-ccard">' + admCustCardHeadHTML(c) +
+      '<div class="adm-kpis adm-ckpis">' +
         admPlainKpi("Заказов", String(c.ordersCount)) +
         admPlainKpi("Потратил", eur(c.revenue)) +
         // «Партнёры и баллы» off: a balance nobody can earn or spend is not a
         // number worth a tile of its own (Dim, 07.09.2026)
-        (partnersOn() ? admPlainKpi("Баллы", String(c.pointsBalance)) : "") +
+        (on ? admPlainKpi("Баллы", String(custBalance(c))) : "") +
       "</div>" +
-      /* the request, as the customer filed it — company, reg. code and phone
-         were only ever in the grey line under the name, easy to miss */
-      (partnersOn() && c.tier !== "pro" && c.proRequestedAt
-        ? '<div class="adm-sec__t" style="margin-top:28px">Заявка на статус партнёра</div>' +
-          '<div class="adm-list adm-list--flat" style="margin-top:8px">' +
-            admCustFactRow("Компания", c.company) +
-            admCustFactRow("Рег. номер", c.regCode) +
-            admCustFactRow("Телефон", c.phone) +
-            admCustFactRow("Подана", shortDate(c.proRequestedAt)) +
-          "</div>" +
-          '<div class="adm-acts" style="margin-top:12px"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) + '">Одобрить Pro</button>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) + '">Отказать</button></div>'
-        : "") +
-      /* what is behind the tiles (Dim, 10.09.2026): four facts, the orders
-         themselves, and the reviews this person wrote — the three functions
-         after this one */
-      admCustFactsHTML(d) +
-      admCustOrdersHTML(d) +
-      admCustReviewsHTML(d) +
-      /* the tier, as a switch the owner can read: which one is on now, and
-         what pressing the other does (askTierSwitch → confirm card) */
-      /* Everything from here to the private note belongs to «Партнёры и
-         баллы» (Dim, 07.09.2026): the tier switch, the points form and the
-         points history. Off — and the card is the customer's name, what he
-         bought and your own note about him. Nothing is deleted. */
-      (!partnersOn() ? "" :
-      '<div class="adm-sec__t" style="margin-top:28px">Статус клиента</div>' +
-      '<div class="adm-seg" role="group" aria-label="Статус клиента" style="margin-top:10px">' +
-        '<button data-admcusttierset="retail" aria-current="' + (c.tier !== "pro") + '">Розница</button>' +
-        '<button data-admcusttierset="pro" aria-current="' + (c.tier === "pro") + '">Партнёр</button>' +
-      "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">' + (c.tier === "pro"
-        ? "Партнёр видит цены для салонов на карточках, в товаре и в корзине. Переключите на «Розница», чтобы выключить их."
-        : "Обычные цены. Переключите на «Партнёр», чтобы включить цены для салонов и отправить письмо.") + "</p>" +
-      '<div class="adm-sec__t" style="margin-top:28px">Начислить или списать баллы</div>' +
-      '<div class="adm-form" style="margin-top:12px">' +
-        '<div class="adm-edpair">' +
-          '<label class="adm-field">Баллы — можно отрицательное число' +
-            '<input class="adm-input" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="numeric" placeholder="10"></label>' +
-          '<label class="adm-field">Заметка — за что' +
-            '<input class="adm-input" data-admcustnote value="' + esc(S.admCustNote) + '" placeholder="например, извинение за задержку"></label>' +
-        "</div>" +
-        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustadjust="' + esc(c.id) + '"' +
-          (S.admCustBusy ? " disabled" : "") + ">Применить</button></div>" +
-      "</div>" +
-      '<div class="adm-sec__t" style="margin-top:28px">История баллов</div>' +
-      (d.history.length
-        ? '<div class="adm-list">' + d.history.map(admLoyaltyRowHTML).join("") + "</div>"
-        : '<div class="adm-empty">Начислений ещё не было.</div>')) +
-      '<div class="adm-sec__t" style="margin-top:28px">Заметка о клиенте</div>' +
-      '<div class="adm-form" style="margin-top:12px">' +
-        '<label class="adm-field">Видна только вам' +
-          '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
-        // the button carries the state (custNoteActsHTML); Enter saves (ADM_ENTER_FORMS)
-        '<div class="adm-acts" data-admcustnoteacts>' + custNoteActsHTML(c) + "</div>" +
+      '<div class="adm-ccols"><div class="adm-ccol adm-ccol--main">' + main + '</div><div class="adm-ccol adm-ccol--side">' + side + "</div></div>" +
       "</div>";
+  }
+  /** Name and tag, the address and the phone as links (gap C2), the salon,
+      and the consent line — kept under the contacts (gap Q1 a). */
+  function admCustCardHeadHTML(c) {
+    var tag = admCustTag(c);
+    var consent = admConsentLine(c);
+    var tel = String(c.phone || "").replace(/[^\d+]/g, "");
+    return '<div class="adm-chd"><div class="adm-chd__nm"><h2 class="adm-h2">' + esc(c.name || c.email) + "</h2>" +
+        admTagHTML(tag[0], tag[1]) + (c.marketing ? admTagHTML("quiet", "Подписан") : "") + "</div>" +
+      '<div class="adm-chd__ct"><a href="mailto:' + esc(c.email) + '">' + esc(c.email) + "</a>" +
+        (c.phone ? " · " + (tel ? '<a href="tel:' + esc(tel) + '">' + esc(c.phone) + "</a>" : esc(c.phone)) : "") + "</div>" +
+      (c.company ? '<div class="adm-chd__co">' + esc(c.company) + (c.regCode ? " · <span>рег. " + esc(c.regCode) + "</span>" : "") + "</div>" : "") +
+      (consent ? '<div class="adm-chd__cs">' + consent + "</div>" : "") +
+      "</div>";
+  }
+  /** The request, as the customer filed it, on the card's right (screen 15):
+      when, the salon, its registration number and the phone — each «—» when
+      left blank, so the owner sees the field was empty rather than wondering
+      whether it loaded — and the two answers. «Сделать партнёром» is the
+      card's one dark button. */
+  function admCustRequestHTML(c) {
+    if (c.tier === "pro" || !c.proRequestedAt) return "";
+    var kv = function (label, value) {
+      return '<span class="adm-creq__k">' + label + '</span><span class="adm-creq__v">' + (value ? esc(value) : "—") + "</span>";
+    };
+    return '<section class="adm-csec adm-csec--req adm-creq" aria-labelledby="admcreq-t">' +
+      '<h3 class="adm-creq__t" id="admcreq-t"><span>Заявка на партнёрство</span> · <span>' + esc(shortDate(c.proRequestedAt)) + "</span></h3>" +
+      '<div class="adm-creq__kv">' + kv("Компания", c.company) + kv("Рег. номер", c.regCode) + kv("Телефон", c.phone) + "</div>" +
+      '<div class="adm-creq__acts"><button class="adm-btn" data-admcustapprove="' + esc(c.id) + '">Сделать партнёром</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-admcustreject="' + esc(c.id) + '">Отказать</button></div>' +
+      '<p class="adm-hint adm-creq__h"><span>Ответ уходит через 10 секунд — до этого можно «Вернуть».</span> ' +
+        "<span>Письмо клиенту уходит только при «Сделать партнёром».</span></p>" +
+      "</section>";
+  }
+  /** «Статус»: which side is on and one line on what it means; the longer
+      words behind «?». */
+  function admCustTierHTML(c) {
+    var pro = c.tier === "pro";
+    var pct = S.pricingLoaded && S.pricingLoaded.proDiscountPct != null ? Number(S.pricingLoaded.proDiscountPct) : null;
+    var hint = pro
+      ? "<span>Видит цены для салонов.</span>" + (pct ? " (−" + pct + " %)" : "")
+      : c.proRequestedAt ? "<span>Ждёт решения по заявке — ответьте выше.</span>" : "<span>Обычные цены.</span>";
+    return '<section class="adm-csec adm-csec--tier">' +
+      admSecHeadHTML("Статус", "custtier",
+        "<span>Партнёр видит цены для салонов на карточках, в товаре и в корзине.</span> " +
+        "<span>Первый переход на «Партнёр» отправляет письмо «Цены для салонов включены» — через 10 секунд, до этого можно «Вернуть».</span> " +
+        "<span>«Розница» выключает цены для салонов со следующего заказа, без письма.</span>") +
+      '<div class="adm-seg adm-ctier" role="group" aria-label="Статус клиента">' +
+        '<button data-admcusttierset="retail" aria-current="' + !pro + '">Розница</button>' +
+        '<button data-admcusttierset="pro" aria-current="' + pro + '">Партнёр</button>' +
+      "</div>" +
+      '<p class="adm-hint adm-csec__h">' + hint + "</p></section>";
   }
   /* ---------- the card: what he bought, what he wrote ----------------------
      Dim, 10.09.2026: «the card says two orders and a sum, and shows no
@@ -31392,21 +31847,29 @@
      carries the last twenty orders under that e-mail, four facts drawn from
      the whole history, and the reviews signed with one of this customer's
      names (src/lib/loyalty.ts customerOrdersAdmin, src/lib/reviews.ts
-     reviewsByAuthor). Three sections under the tiles, in that order. */
-  /** Four plain rows — no chart: one customer is not a trend. Drawn only
-      once there is a purchase to draw them from. */
+     reviewsByAuthor). */
+  /** The facts under the orders — no chart: one customer is not a trend —
+      plus the birthday the customer gave in the cabinet (q33), which is
+      shown whether or not there has been a purchase. */
   function admCustFactsHTML(d) {
     var s = d.stats;
-    if (!s || !s.firstOrderAt) return "";
-    var firstD = shortDate(s.firstOrderAt), lastD = shortDate(s.lastOrderAt);
-    var brands = (s.topBrands || []).map(function (b) { return b.brand; }).filter(Boolean).join(" · ");
-    return '<div class="adm-list">' +
-      admCustFactRow("Первый заказ", firstD) +
+    var cells = [];
+    if (s && s.firstOrderAt) {
+      var firstD = shortDate(s.firstOrderAt), lastD = shortDate(s.lastOrderAt);
+      var brands = (s.topBrands || []).map(function (b) { return b.brand; }).filter(Boolean).slice(0, 3).join(" · ");
+      cells.push(admCustFact("Первый заказ", firstD));
       // one purchase, or two on one day: a «last» that repeats the first says nothing
-      (lastD !== firstD ? admCustFactRow("Последний заказ", lastD) : "") +
-      admCustFactRow("Средний чек", eur(s.avgOrder)) +
-      (brands ? admCustFactRow("Любимые бренды", brands) : "") +
-      "</div>";
+      if (lastD && lastD !== firstD) cells.push(admCustFact("Последний заказ", lastD));
+      cells.push(admCustFact("Средний чек", eur(s.avgOrder)));
+      if (brands) cells.push(admCustFact("Любимые бренды", brands));
+    }
+    var bd = /^\d{4}-(\d{2})-(\d{2})$/.exec(String((d.customer && d.customer.birthday) || ""));
+    if (bd) cells.push(admCustFact("День рождения", bd[2] + "." + bd[1]));
+    return cells.length ? '<div class="adm-csec adm-csec--facts"><div class="adm-cfacts">' + cells.join("") + "</div></div>" : "";
+  }
+  /** One fact: its label a dictionary key of its own, its value data. */
+  function admCustFact(label, value) {
+    return '<div class="adm-cfact"><span class="adm-cfact__l">' + label + '</span><span class="adm-cfact__v">' + esc(value) + "</span></div>";
   }
   /** The customer's orders as rows — number, date, sum and the same status
       chip the orders list draws; a tap opens the order card over this one
@@ -31415,8 +31878,8 @@
     var list = d.orders;
     var body = !list ? '<div class="adm-skel"><i></i><i></i></div>'
       : !list.length ? '<div class="adm-empty">Заказов пока нет</div>'
-      : '<div class="adm-list">' + list.map(admCustOrderRowHTML).join("") + "</div>";
-    return '<div class="adm-sec__t" style="margin-top:28px">Заказы</div>' + body;
+      : '<div class="adm-list adm-list--flat adm-corders">' + list.map(admCustOrderRowHTML).join("") + "</div>";
+    return '<section class="adm-csec adm-csec--orders">' + admSecHeadHTML("Заказы") + body + "</section>";
   }
   /** The chip reads the loaded orders list when the order is in it — that
       copy moves the moment «Отправлен» is pressed on the card — and the
@@ -31435,25 +31898,164 @@
       '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(o.total) + "</span></button>";
   }
-  /** «Отзывы клиента»: stars, the product, the whole text and the chip —
+  /* ---------- the card's points: «Начислить +10» / «Списать −5» -------------
+     One box for the number («+10 / −5»: a plain text box, because a phone's
+     number pad has no minus key — gap C12), one for the reason, and a button
+     that says what it will do (README § 5). A number that is not one is not
+     sent: the rust edge and one line under the box (README § 2). A good one
+     is on the card at once — the tile, a line at the top of the history —
+     and goes to the server five seconds later (q9). */
+  var CUST_PTS_MAX = 1000000;   // the route's own ceiling (customers/[id] PATCH)
+  var CUST_PTS_PENDING = {};    // customer id → the corrections still held
+  function custPointsParse(raw) {
+    var s = String(raw == null ? "" : raw).replace(/\s+/g, "").replace(/[−–—]/g, "-");
+    if (!s) return { n: 0, err: "Впишите число баллов — можно с минусом" };
+    if (!/^[+-]?\d+$/.test(s)) return { n: 0, err: "Только целое число — например, +10 или −5" };
+    var n = parseInt(s, 10);
+    if (!n) return { n: 0, err: "Впишите число баллов — можно с минусом" };
+    if (Math.abs(n) > CUST_PTS_MAX) return { n: 0, err: "Не больше 1 000 000 баллов за раз" };
+    return { n: n, err: "" };
+  }
+  /** The button's words: the verb its own node, the number data beside it. */
+  function custPtsLabelHTML(raw) {
+    var n = custPointsParse(raw).n;
+    if (n > 0) return "<span>Начислить</span> +" + n;
+    if (n < 0) return "<span>Списать</span> −" + Math.abs(n);
+    return "<span>Начислить</span>";
+  }
+  function custBalance(c) {
+    var sum = Number(c.pointsBalance) || 0;
+    (CUST_PTS_PENDING[c.id] || []).forEach(function (p) { sum += p.delta; });
+    return sum;
+  }
+  function admCustPointsHTML(d) {
+    var c = d.customer;
+    var err = S.admCustPtsErr || "";
+    var ready = custPointsParse(S.admCustPoints).n !== 0;
+    var held = (CUST_PTS_PENDING[c.id] || []).slice().reverse();
+    var rows = held.concat(d.history || []);
+    return '<section class="adm-csec adm-csec--pts">' +
+      admSecHeadHTML("Баллы", "custpts",
+        "<span>Плюс — начислить, минус — списать; причина видна в истории.</span> " +
+        "<span>Баллы уходят через 5 секунд — до этого можно «Вернуть».</span>") +
+      '<div class="adm-cpts">' +
+        '<input class="adm-input adm-cpts__n" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="text" autocomplete="off" ' +
+          'placeholder="+10 / −5" aria-label="Баллы" aria-describedby="admcustpts-h"' + (err ? ' aria-invalid="true"' : "") + ">" +
+        '<input class="adm-input adm-cpts__r" data-admcustnote value="' + esc(S.admCustNote) + '" autocomplete="off" ' +
+          'placeholder="за что — например, извинение за задержку" aria-label="За что">' +
+      "</div>" +
+      '<span class="adm-ashint" id="admcustpts-h" data-admcustptshint' + (err ? "" : " hidden") + ">" + esc(err) + "</span>" +
+      '<button class="adm-btn adm-btn--ghost adm-cpts__go' + (ready ? " is-ready" : "") + '" data-admcustadjust="' + esc(c.id) + '">' +
+        custPtsLabelHTML(S.admCustPoints) + "</button>" +
+      (rows.length
+        ? '<div class="adm-list adm-list--flat adm-cpts__hist">' + rows.map(admLoyaltyRowHTML).join("") + "</div>"
+        : '<div class="adm-empty adm-cpts__none">Начислений ещё не было.</div>') +
+      "</section>";
+  }
+  /** The button and the line under the box, in place — the box keeps its caret. */
+  function paintCustPts() {
+    var btn = document.querySelector("[data-admcustadjust]");
+    if (btn) {
+      btn.innerHTML = custPtsLabelHTML(S.admCustPoints);
+      btn.classList.toggle("is-ready", custPointsParse(S.admCustPoints).n !== 0);
+      translateTree(btn);
+    }
+    if (S.admCustPtsErr) {
+      S.admCustPtsErr = "";
+      var box = document.querySelector("[data-admcustpoints]");
+      if (box) box.removeAttribute("aria-invalid");
+      var h = document.querySelector("[data-admcustptshint]");
+      if (h) { h.textContent = ""; h.hidden = true; }
+    }
+  }
+  function adjustCustomerPoints(id) {
+    var d = S.admCustDetail;
+    if (!d || String(d.customer.id) !== String(id)) return;
+    var p = custPointsParse(S.admCustPoints);
+    if (p.err) { S.admCustPtsErr = p.err; render(); refocus("[data-admcustpoints]"); return; }
+    var n = p.n, note = String(S.admCustNote || "").trim();
+    var cid = d.customer.id;
+    var pend = { delta: n, reason: "adjust", note: note, at: new Date().toISOString(), held: true };
+    CUST_PTS_PENDING[cid] = (CUST_PTS_PENDING[cid] || []).concat([pend]);
+    var drop = function () {
+      CUST_PTS_PENDING[cid] = (CUST_PTS_PENDING[cid] || []).filter(function (x) { return x !== pend; });
+      if (!CUST_PTS_PENDING[cid].length) delete CUST_PTS_PENDING[cid];
+    };
+    S.admCustPoints = ""; S.admCustNote = ""; S.admCustPtsErr = "";
+    render();
+    /* …and the two boxes themselves: the page is patched, not redrawn, and a
+       box whose drawn value did not change keeps what was typed into it —
+       the reason stood there, ready for the next correction */
+    if (typeof document !== "undefined") {
+      var boxes = document.querySelectorAll("[data-admcustpoints],[data-admcustnote]");
+      for (var bi = 0; bi < boxes.length; bi++) boxes[bi].value = "";
+    }
+    var k = Math.abs(n);
+    custHold({
+      key: "pts:" + cid + ":" + (++custHoldSeq), ms: CUST_POINTS_MS,
+      text: (n > 0 ? "Начислено " : "Списано ") + k + " " + pl(k, "балл", "балла", "баллов"),
+      fire: function (keepalive) {
+        custSend("/api/admin/customers/" + encodeURIComponent(cid) + "/", "PATCH", { pointsDelta: n, note: note }, keepalive).then(function (r) {
+          drop();
+          if (r.status === 401) { SRV.admin = false; render(); return; }
+          if (r.status === 200 && r.body.ok) {
+            if (r.body.customer) admCustAdopt(r.body.customer);
+            if (String(S.admCustOpen) === String(cid)) loadAdminCustomerDetail(cid, true);
+            render();
+            return;
+          }
+          toast("Не получилось изменить баллы"); render();
+        }).catch(function () { drop(); toast("Сервер не отвечает"); render(); });
+      },
+      cancel: function () { drop(); }
+    });
+  }
+  /** «Заметка»: the owner's own words about this customer — saves itself a
+      second after the typing stops and when the box is left (1a autosave,
+      q1: running text), «Сохраняем… → Сохранено ✓» in the header, never
+      before the server said yes. Keyed by the customer, so a word typed on
+      one card goes to that card even when the next one is already open. */
+  function admCustNoteHTML(c) {
+    var key = admAutosaveSpec("cust:" + c.id + ":notes", custNoteSpec(c.id));
+    return '<section class="adm-csec adm-csec--note">' + admSecHeadHTML("Заметка") +
+      '<textarea class="adm-input adm-cnote" data-admcustnotesf data-autosave="' + esc(key) + '" maxlength="2000" rows="3" ' +
+        'placeholder="Видна только вам — например: постоянный клиент, оптовик" aria-label="Заметка о клиенте"' + admAutosaveInvalidAttr(key) + ">" +
+        esc(S.admCustNotesDraft || "") + "</textarea>" + admAutosaveHintHTML(key) + "</section>";
+  }
+  function custNoteSpec(id) {
+    return {
+      kind: "text",
+      send: function (v, opts) {
+        var note = String(v == null ? "" : v);
+        return custSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { notes: note || null }, opts && opts.keepalive)
+          .then(function (r) {
+            // the copies on screen follow — the 500-row list is not asked again for one note
+            if (r && r.status === 200 && r.body && r.body.ok) custLocal(id, { notes: note || null });
+            return r;
+          });
+      }
+    };
+  }
+  /** «Отзывы клиента»: stars, the product, the whole text and the tag —
       with «Опубликовать» / «Скрыть» right here (moderateCustReview), the same
-      reversible edit the queue makes, so the card is never left for it. The
-      line under the title says how they were found: by the address the review
-      was written from (reviews.email), never by the name under it — two
-      customers called the same thing used to read each other's words here
-      (Dim, 13.09.2026). A review left signed out has no address and is on no
-      card at all; it waits in «Отзывы», the queue, like every other. */
+      reversible edit the queue makes, so the card is never left for it. How
+      they were found is behind «?»: by the address the review was written
+      from (reviews.email), never by the name under it — two customers called
+      the same thing used to read each other's words here (Dim, 13.09.2026).
+      A review left signed out has no address and is on no card at all; it
+      waits in «Отзывы», the queue, like every other. */
   function admCustReviewsHTML(d) {
     var list = d.reviews;
     var body = !list ? '<div class="adm-skel"><i></i><i></i></div>'
       : !list.length ? '<div class="adm-empty">Отзывов пока нет</div>'
-      : '<div class="adm-list">' + list.map(admCustReviewRowHTML).join("") + "</div>";
-    return '<div class="adm-sec__t" style="margin-top:28px">Отзывы клиента</div>' +
-      '<p class="adm-hint adm-hint--lead">Здесь только отзывы, оставленные из кабинета — по адресу почты. Остальные — во вкладке «Отзывы».</p>' + body;
+      : '<div class="adm-list adm-list--flat">' + list.map(admCustReviewRowHTML).join("") + "</div>";
+    return '<section class="adm-csec adm-csec--revs">' +
+      admSecHeadHTML("Отзывы клиента", "custrevs", "Здесь только отзывы, оставленные из кабинета — по адресу почты. Остальные — во вкладке «Отзывы».") +
+      body + "</section>";
   }
   /** The status a review shows here: the journal entry this card made for it
-      while that entry stands — «Отменить» on the toast takes the entry out of
-      the journal, and the chip goes back with it — the server's word
+      while that entry stands — «Вернуть» on the toast takes the entry out of
+      the journal, and the tag goes back with it — the server's word
       otherwise. */
   function admCustReviewStatus(d, r) {
     var e = d && d.revSet && d.revSet[r.id];
@@ -31461,24 +32063,22 @@
   }
   function admCustReviewRowHTML(r) {
     var status = admCustReviewStatus(S.admCustDetail, r);
-    var st = status === "approved" ? ["Опубликован", "adm-badge--ok"]
-      : status === "rejected" ? ["Скрыт", "adm-badge--quiet"] : ["Новый", ""];
     var p = r.product ? null : byIdOrNull(r.productId);
     var product = r.product || (p ? p.brand + " — " + p.name : r.productId);
-    return '<div class="adm-row adm-row--stack">' +
-      '<span class="adm-sec"><span><span class="adm-stars">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span> · " + esc(product) + "</span>" +
-        '<span class="adm-badge ' + st[1] + '">' + st[0] + "</span></span>" +
+    return '<div class="adm-row adm-row--stack adm-rev">' +
+      '<span class="adm-rev__top"><span class="adm-stars" aria-label="' + (Number(r.rating) || 0) + ' / 5">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span>" +
+        '<span class="adm-rev__prod">' + esc(admProdName(product)) + "</span>" + admRevTagHTML(status) + "</span>" +
       '<span class="adm-revtext">' + esc(r.text) + "</span>" +
       '<span class="adm-row__sub">' + esc(shortDate(r.createdAt)) + (r.name ? " · " + esc(r.name) : "") + "</span>" +
-      '<span class="adm-acts">' +
-        (status === "approved" ? "" : '<button class="adm-btn adm-btn--row" data-admcustrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
-        (status === "rejected" ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
+      '<span class="adm-acts adm-rev__acts">' +
+        (status === "approved" ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row adm-rev__pub" data-admcustrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
+        (status === "rejected" ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row adm-rev__hide" data-admcustrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
       "</span></div>";
   }
   /** «Опубликовать» / «Скрыть» from the card. The same journal entry the
       queue writes (demoApply → srvPush, PATCH /api/admin/reviews/), so the
-      toast's «Отменить» works from here too; the card keeps the entry beside
-      the review so the chip can follow it (admCustReviewStatus). */
+      toast's «Вернуть» works from here too; the card keeps the entry beside
+      the review so the tag can follow it (admCustReviewStatus). */
   function moderateCustReview(id, status) {
     var d = S.admCustDetail;
     var list = (d && d.reviews) || [];
@@ -31508,22 +32108,6 @@
     if (admCurOrder()) return admOrderCardHTML();
     return admOrderMissingHTML('<div class="adm-screen adm-screen--card">' + admBackHTML('data-admorder=""', "К клиенту"));
   }
-  /** Quiet while the box holds what the server holds; ink the moment it
-      differs; «Сохранено ✓» once it is back in step — the cabinet's
-      paintAcctBar idiom, on the one field of this card (r12). */
-  function custNoteDirty(c) { return (S.admCustNotesDraft || "") !== (c.notes || ""); }
-  function custNoteActsHTML(c) {
-    var dirty = custNoteDirty(c), saved = S.custNoteSaved && !dirty;
-    return '<button class="adm-btn adm-btn--row' + (dirty ? "" : " adm-btn--ghost") + '" data-admcustsavenotes="' + esc(c.id) + '"' +
-      (dirty ? "" : " disabled") + ">" + (saved ? "Сохранено ✓" : "Сохранить заметку") + "</button>" +
-      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Не сохранено</span>";
-  }
-  function paintCustNote() {
-    var acts = document.querySelector("[data-admcustnoteacts]");
-    var c = S.admCustDetail && S.admCustDetail.customer;
-    if (!acts || !c) return;
-    acts.innerHTML = custNoteActsHTML(c); translateTree(acts);
-  }
   /* «Хочу получать скидки и поздравление ко дню рождения» — when it was
      ticked and where (касса / кабинет / панель), or when it was taken back:
      the proof a consent needs, and the reason a birthday letter did or did
@@ -31533,7 +32117,7 @@
      the bare fact. */
   var CONSENT_SOURCE = { checkout: "на кассе", account: "в кабинете", admin: "в панели" };
   /* Each phrase is its own node, so the dictionary translates it whole and
-     the date between them stays a date (the same split admCustFactRow makes). */
+     the date between them stays a date (the same split admCustFact makes). */
   function admConsentLine(c) {
     var where = CONSENT_SOURCE[c.marketingSource] || "";
     var parts = [];
@@ -31546,125 +32130,103 @@
     else if (c.marketingOffAt) parts = ["Отказался от писем", shortDate(c.marketingOffAt)];
     return parts.filter(Boolean).map(function (t) { return "<span>" + esc(t) + "</span>"; }).join(" · ");
   }
-  /** One fact of a partner request — the label its own node, the value
-      data; an empty value draws «—» rather than nothing, so the owner sees
-      the field was left blank rather than wondering whether it loaded. */
-  function admCustFactRow(label, value) {
-    return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub">' + label + "</span>" +
-      '<span class="adm-row__nm">' + (value ? esc(value) : "—") + "</span></span></div>";
-  }
   /** A KPI cell with no comparison line — the customer card and the
       accountant's report have a number, not a trend. */
   function admPlainKpi(label, value) {
     return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + '</div><div class="adm-kpi__v">' + value + "</div></div>";
   }
   /** The points ledger as panel rows — the cabinet draws its own copy of the
-      same history in the storefront's voice (loyaltyRowHTML). */
+      same history in the storefront's voice (loyaltyRowHTML). A correction
+      still held (adjustCustomerPoints) is the top row until it goes. */
   function admLoyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
-    return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + (LOYALTY_REASON[e.reason] || e.reason) + "</span>" +
+    return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + (LOYALTY_REASON[e.reason] || e.reason) + "</span>" +
       '<span class="adm-row__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
       '<span class="adm-row__amt">' + sign + e.delta + "</span></div>";
   }
+  /* ---------- the list ---------------------------------------------------- */
   function admCustomersHTML() {
     if (SRV.admin !== true) {
       return '<div class="adm-note">Войдите как владелец, чтобы видеть настоящих клиентов.</div>' +
         '<div class="adm-list">' + fakeCustomers().map(function (c) {
           return '<div class="adm-row"><span class="adm-row__body">' +
             '<span class="adm-row__nm">' + c.who + "</span>" +
-            '<span class="adm-row__sub">' + admOrdersLabel(c.n) + " · " + eur(c.sum) + " · " + c.last + "</span></span>" +
-            '<span class="adm-badge adm-badge--quiet">Розница</span></div>';
+            '<span class="adm-row__sub"><span>' + admOrdersLabel(c.n) + "</span> · <span>" + eur(c.sum) + "</span> · <span>" + c.last + "</span></span></span>" +
+            admTagHTML("quiet", "Розница") + "</div>";
         }).join("") + "</div>";
     }
     loadAdminCustomers(false);
     if (S.admCustOpen) return admCustomerCardHTML();
-    var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
     return (S.admCustErr ? '<div class="adm-error"><span>' + esc(S.admCustErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="customers">Повторить</button></div>' : "") +
-      admCustLeadHTML() +
-      (partnersOn() && S.partnerForm ? admPartnerFormHTML() : "") +
-      '<div class="adm-acts">' +
-        /* «Партнёры и баллы» off: «Все клиенты» is the only answer there is,
-           so the four chips that sort them into tiers are not drawn — and the
-           filter itself falls back to «Все» (admCustRowsHTML). */
-        (function () {
-          /* Two kinds of chip live in one row. Three of them sort customers by
-             tier and mean nothing when «Партнёры и баллы» is off. «Подписаны»
-             is not a tier at all — it is who agreed to hear from the shop, and
-             that answer exists whether or not there is a partner programme, so
-             it stays. Off, the row is «Все · Подписаны»; on, all five. */
-          var shown = ADM_CUST_TIERS.filter(function (f) {
-            return partnersOn() || f[0] === "" || f[0] === "news";
-          });
-          return '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + shown.map(function (f) {
-            return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
-              (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
-          }).join("") + "</div>";
-        })() +
-        /* Two files, the same rows. XLSX first because it is the one that
-           just opens — Dim, 13.09.2026: «An excel would be better, CSV hard to
-           read»; the CSV stays for anything that reads a file rather than
-           opens it. «Отчёты» downloads the very same pair and now draws it the
-           very same way — filled XLSX, ghost CSV, in that order (r16: it had
-           the pair as two underlined words here and as two buttons in the
-           other order there). A download is an action, and `.adm-link` in this
-           panel means a word: a way back, or a quiet second thought. */
-        /* `limit` on both, and the route's own ceiling: without it the export
-           took listCustomersAdmin's default of 200 newest rows while the
-           screen above it was fetched with 500, so the file would quietly
-           lose the oldest customers the day this shop passes two hundred —
-           and nothing on the page would say a row was missing. */
-        '<a class="adm-btn adm-btn--row" href="/api/admin/customers/?format=xlsx&amp;limit=1000" target="_blank" rel="noopener">Скачать XLSX</a>' +
-        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="/api/admin/customers/?format=csv&amp;limit=1000" target="_blank" rel="noopener">Скачать CSV</a>' +
-      "</div>" +
-      '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
-        '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">' +
+      '<div id="admcustchips">' + admCustChipsHTML() + "</div>" +
       '<div id="admcustlist">' + admCustRowsHTML() + "</div>";
   }
+  /** The search, with its glass, repainting the list in place as it is typed. */
+  function admCustSearchHTML() {
+    return '<label class="adm-csearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+        '<circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>' +
+      '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
+        '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам"></label>';
+  }
   /* The owner's question was «how and where do I manage requests, partners
-     and retail?» — answered on the screen itself, in three sentences, each
-     its own node for the dictionary. The link jumps straight to the page
-     where the discount lives (data-admgoset, see the click handler). */
+     and retail?» — answered on the screen, in three sentences, each its own
+     node for the dictionary, and since 1a behind the title's «?» (rule 5).
+     The link jumps straight to the page where the discount lives
+     (data-admgoset, see the click handler). */
   function admCustLeadHTML() {
     // «Партнёры и баллы» off: the three sentences below describe a programme
     // the shop is not running, so it says the one true thing instead
     if (!partnersOn()) {
-      return '<p class="adm-lead" style="margin:0 0 14px">' +
+      return '<span class="adm-lead">' +
         "<span>Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.</span> " +
         "<span>Партнёрские цены и баллы сейчас выключены — включаются в</span> " +
-        '<button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</p>';
+        '<span class="adm-cnowrap"><button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</span></span>';
     }
-    return '<p class="adm-lead" style="margin:0 0 14px">' +
+    return '<span class="adm-lead">' +
       "<span>Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.</span> " +
-      "<span>Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».</span> " +
+      "<span>Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — ответьте прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».</span> " +
       "<span>Размер скидки для салонов задаётся в</span> " +
-      '<button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</p>';
+      '<span class="adm-cnowrap"><button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</span></span>';
   }
   /* «+ Партнёр»: an e-mail is enough — the row is created if this address has
      never signed in (they land on salon prices at their first sign-in) and
      promoted in place if it has. Company and phone are optional notes for
-     the card. The send goes through the confirm card, then POST
-     /api/admin/customers/ (applyAddPartner), and the toast offers «Отменить». */
+     the card. An inline panel under the title — on a phone as well: a sheet
+     from the bottom with three boxes in it goes under the keyboard. A wrong
+     address is refused in the box (rust edge, one line — gap B7); a good one
+     closes the form, and the POST waits ten seconds for «Вернуть» (q3), which
+     opens the form again with what was typed. */
   function admPartnerFormHTML() {
-    var f = S.partnerForm;
-    return '<div class="adm-form adm-form--inline adm-narrow--form" data-partnerform>' +
-      '<div class="adm-sec__t">Новый партнёр</div>' +
-      '<label class="adm-field">E-mail партнёра' +
-        '<input class="adm-input" type="email" inputmode="email" autocomplete="off" data-partnerf="email" value="' + esc(f.email) + '" placeholder="salon@example.com"></label>' +
-      '<div class="adm-edpair">' +
+    var f = S.partnerForm, err = S.partnerErr || "";
+    return '<section class="adm-pform" data-partnerform aria-labelledby="adm-pform-t">' +
+      // one way out, «Отмена» beside the button — the form's only data-admpartnercancel
+      '<div class="adm-pform__head"><h2 class="adm-pform__t" id="adm-pform-t">Новый партнёр</h2>' +
+        admHelpBtnHTML("partnerform") + "</div>" +
+      admHelpHTML("partnerform", "<span>Скидка для салонов действует с первого входа в кабинет по этой почте.</span> " +
+        "<span>Письмо уходит через 10 секунд — до этого можно «Вернуть». Тому, кто уже был партнёром, второе письмо не уходит.</span>") +
+      '<div class="adm-pform__f">' +
+        '<label class="adm-field">Почта салона' +
+          '<input class="adm-input" type="email" inputmode="email" autocomplete="off" data-partnerf="email" value="' + esc(f.email) +
+            '" placeholder="salon@example.com" aria-describedby="adm-pform-err"' + (err ? ' aria-invalid="true"' : "") + ">" +
+          '<span class="adm-ashint adm-err" id="adm-pform-err" role="alert"' + (err ? "" : " hidden") + ">" + esc(err) + "</span></label>" +
         '<label class="adm-field">Название салона — необязательно' +
           '<input class="adm-input" data-partnerf="company" value="' + esc(f.company) + '" placeholder="Salon Näidis OÜ"></label>' +
         '<label class="adm-field">Телефон — необязательно' +
           '<input class="adm-input" type="tel" data-partnerf="phone" value="' + esc(f.phone) + '" placeholder="+372…"></label>' +
+        '<div class="adm-pform__acts">' +
+          '<button class="adm-btn adm-pform__go" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
+          '<button class="adm-btn adm-btn--ghost" data-admpartnercancel>Отмена</button></div>' +
       "</div>" +
-      '<p class="adm-hint" style="margin:0">Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.</p>' +
-      // the product editor's sticky bar, the refusal in it — see promoFormHTML()
-      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        (S.partnerErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.partnerErr) + "</p>" : "") +
-        '<button class="adm-btn adm-savebar__main" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
-        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpartnercancel>Отмена</button>' +
-        admBarNoteHTML("touch") +
-      "</div></div>";
+      '<p class="adm-hint adm-pform__n">Партнёру уйдёт письмо «Цены для салонов включены».</p>' +
+      "</section>";
+  }
+  /** The address box, cleared of its refusal in place as it is typed in. */
+  function paintPartnerErr() {
+    var box = document.querySelector('[data-partnerf="email"]');
+    if (box) box.removeAttribute("aria-invalid");
+    var h = document.getElementById("adm-pform-err");
+    if (h) { h.textContent = ""; h.hidden = true; }
   }
   var PARTNER_ERRS = {
     bad_email: "Проверьте e-mail",
@@ -31672,158 +32234,66 @@
     db_unavailable: "Сервер не отвечает",
     error: "Не получилось добавить — попробуйте ещё раз"
   };
-  /** The confirmed «+ Партнёр»: one POST, then a journal line whose undo is
-      the tier switch back to retail (srvPush's set_tier), and a toast that
-      says whether the letter went out. */
-  function applyAddPartner(a) {
+  /** «Добавить партнёра»: checked here, then held (see admPartnerFormHTML).
+      An address the list already knows as a partner — or as one who was
+      welcomed before — gets no letter, so there is nothing to wait for: it
+      goes at once and the answer says «Уже партнёр» (9a9d267). The list
+      goes back to «Все», with nothing typed over it, so the new row is in
+      sight and the next visit does not open on «Партнёры» (gap B8). */
+  function custAddPartner() {
+    var pf = S.partnerForm || { email: "", company: "", phone: "" };
+    var email = String(pf.email || "").trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email)) {
+      S.partnerErr = PARTNER_ERRS.bad_email; render(); refocus('[data-partnerf="email"]'); return;
+    }
+    var a = { type: "add_partner", email: email, company: String(pf.company || "").trim(), phone: String(pf.phone || "").trim() };
+    var known = null;
+    (S.admCustomers || []).forEach(function (c) { if (String(c.email || "").toLowerCase() === email) known = c; });
+    S.partnerForm = null; S.partnerErr = "";
+    S.admCustTier = ""; S.admCustQ = "";
+    render();
+    if (known && (known.tier === "pro" || known.proApprovedAt)) { applyAddPartner(a); return; }
+    custHold({
+      key: "partner:" + email, ms: CUST_LETTER_MS,
+      text: "Партнёр добавлен · письмо уйдёт через 10 с",
+      fire: function (keepalive) { applyAddPartner(a, keepalive); },
+      cancel: function () {
+        S.partnerForm = { email: pf.email || "", company: pf.company || "", phone: pf.phone || "" };
+        S.partnerErr = "";
+        render(); refocus('[data-partnerf="email"]');
+      }
+    });
+  }
+  /** The «+ Партнёр» POST: then a journal line whose undo is the tier switch
+      back to retail (srvPush's set_tier), and a toast that says whether the
+      letter went out. A refusal opens the form again with what was typed
+      and the reason in the box. */
+  function applyAddPartner(a, keepalive) {
     if (S.partnerBusy) return;
-    S.partnerBusy = true; S.partnerErr = ""; render();
-    apiSend("/api/admin/customers/", "POST", { email: a.email, company: a.company || "", phone: a.phone || "", lang: S.lang }).then(function (r) {
+    S.partnerBusy = true; S.partnerErr = "";
+    custSend("/api/admin/customers/", "POST", { email: a.email, company: a.company || "", phone: a.phone || "", lang: S.lang }, keepalive).then(function (r) {
       S.partnerBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (!(r.status === 200 && r.body.ok)) {
+        S.partnerForm = { email: a.email, company: a.company || "", phone: a.phone || "" };
         S.partnerErr = PARTNER_ERRS[r.body && r.body.error] || PARTNER_ERRS.error;
         render(); refocus('[data-partnerf="email"]'); return;
       }
       var c = r.body.customer || {};
       var entry = demoApply({ type: "add_partner", id: c.id, email: c.email || a.email, created: !!r.body.created, promoted: !!r.body.promoted });
-      S.partnerForm = null; S.partnerErr = "";
-      // straight to the partners' chip, where the new row is
-      S.admCustTier = "pro"; S.admCustQ = "";
+      S.partnerErr = "";
       var mail = r.body.mail || {};
       var who = c.email || a.email;
       if (!r.body.promoted) toast("Уже партнёр · " + who, entry);
       else if (mail.sent) toast("Партнёр добавлен · письмо ушло", entry);
       else toast("Партнёр добавлен ✓", entry);
       render();
-    }).catch(function () { S.partnerBusy = false; S.partnerErr = PARTNER_ERRS.db_unavailable; render(); });
+    }).catch(function () {
+      S.partnerBusy = false;
+      S.partnerForm = { email: a.email, company: a.company || "", phone: a.phone || "" };
+      S.partnerErr = PARTNER_ERRS.db_unavailable; render();
+    });
   }
-  /** The customer card's switch: Розница ↔ Партнёр. Every flip asks first
-      (a price a stranger is charged changes with it), then goes through the
-      journal like a tariff change — with «Отменить» on the toast. */
-  function askTierSwitch(c, value) {
-    if (!c || c.tier === value) return;
-    // one string per branch, so the dictionary rule sees the whole card text
-    var who = (c.name ? c.name + " · " : "") + c.email;
-    pendingAction = {
-      type: "set_tier", id: c.id, email: c.email, value: value, prev: c.tier, overlay: true,
-      title: value === "pro" ? "Сделать партнёром?" : "Перевести в розницу?",
-      detail: value === "pro"
-        ? who + "\nВключим цены для салонов и отправим письмо «Цены для салонов включены»."
-        : who + "\nЦены для салонов выключатся со следующего заказа. Письмо не отправляется.",
-      ok: value === "pro" ? "Сделать партнёром" : "Перевести в розницу"
-    };
-    render(); refocus("[data-admapply]");
-  }
-  /** «Одобрить Pro» / «Отказать» on the customer card. The same weight as the
-      switch above it — an approval turns salon prices on for that company for
-      good and posts «Цены для салонов включены» — so it asks in the same card.
-      It used to be the one Pro decision on the screen that fired on the first
-      tap, next to a segmented control that asked about the very same thing. */
-  /** One customer by id — the card's own, or the row the list is showing.
-      Both places carry «Одобрить Pro», so both have to be able to name who. */
-  function admCustById(id) {
-    var open = S.admCustDetail && S.admCustDetail.customer;
-    if (open && String(open.id) === String(id)) return open;
-    var list = S.admCustomers || [];
-    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i];
-    return null;
-  }
-  function askCustDecision(c, action) {
-    if (!c) return;
-    // one string per branch, so the dictionary rule sees the whole card text
-    var who = (c.name ? c.name + " · " : "") + c.email;
-    if (action === "approve") {
-      pendingAction = { type: "cust_decide", overlay: true, id: c.id, action: "approve",
-        title: "Сделать партнёром?",
-        detail: who + "\nВключим цены для салонов и отправим письмо «Цены для салонов включены».",
-        ok: "Сделать партнёром" };
-    } else {
-      pendingAction = { type: "cust_decide", overlay: true, danger: true, id: c.id, action: "reject",
-        title: "Отказать в заявке?",
-        detail: who + "\nЗаявка закроется, цены для салонов не включатся. Письмо не отправляется.",
-        ok: "Отказать" };
-    }
-    render(); refocus("[data-admapply]");
-  }
-  /** `okMsg` is what the toast says when the write went through; `noMailMsg`,
-      where one is given, is what it says instead when the answer carries a
-      letter that did NOT leave. The route sends «Цены для салонов включены»
-      itself on a retail → pro flip and reports the outcome in `mail` — best
-      effort, `sent:false` when Resend refuses — so a fixed «письмо ушло» was
-      the panel telling the owner about a letter it had never looked at
-      (17.09.2026). applyAddPartner() has read `mail.sent` since «+ Партнёр»
-      was written; this is the same reading on the same letter. */
-  function admCustPatch(id, body, okMsg, noMailMsg, skipMsg) {
-    if (admCustPatch._busy) return;   // «Одобрить Pro» tapped twice is one approval
-    admCustPatch._busy = true;
-    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
-      admCustPatch._busy = false;
-      S.admCustBusy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        /* The answer is the customer's row, nothing more. It used to become
-           the whole card — `{ customer, history }` — so the orders, the facts
-           and the reviews the card's GET had brought went back to grey bars
-           until the refetch below landed (map defect 17, 24.09.2026). The row
-           goes onto the card that is there; a card of somebody else lends
-           this one nothing, not even its points history. */
-        var was = S.admCustDetail && String(S.admCustDetail.customer.id) === String(id) ? S.admCustDetail : null;
-        S.admCustDetail = was ? mergeInto(was, { customer: r.body.customer }) : { customer: r.body.customer, history: [] };
-        loadAdminCustomerDetail(id, true);
-        loadAdminCustomers(true);
-        /* Three outcomes, not two. `skipped` is the route deciding the letter
-           must NOT go — this address has been welcomed before — and saying so
-           is not the same as reporting a failure, which is what «не ушло»
-           means. No `mail` at all means no letter was due on this path. */
-        var ml = r.body.mail;
-        toast(ml && ml.skipped && skipMsg ? skipMsg
-          : ml && !ml.sent && noMailMsg ? noMailMsg
-          : okMsg);
-        render();
-        return;
-      }
-      toast("Не получилось сохранить");
-      render();
-    }).catch(function () { admCustPatch._busy = false; S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
-  }
-  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло", "Партнёр одобрен · письмо не ушло", "Партнёр одобрен · письмо уже отправляли"); }
-  function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
-  function adjustCustomerPoints(id) {
-    var delta = Math.trunc(Number(String(S.admCustPoints).replace(",", ".")));
-    if (!delta) { toast("Введите число баллов, не 0"); return; }
-    if (S.admCustBusy) return;
-    S.admCustBusy = true; render();
-    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { pointsDelta: delta, note: S.admCustNote }).then(function (r) {
-      S.admCustBusy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        S.admCustPoints = ""; S.admCustNote = "";
-        loadAdminCustomerDetail(id, true);
-        loadAdminCustomers(true);
-        toast("Баллы изменены ✓");
-        return;
-      }
-      toast("Не получилось изменить баллы"); render();
-    }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
-  }
-  function saveCustomerNotes(id) {
-    var note = S.admCustNotesDraft || "";
-    // the button says the round trip is on, in place (the card is not re-rendered until the answer)
-    var btn = document.querySelector("[data-admcustsavenotes]");
-    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
-    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { notes: note || null }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        // the card's own copy follows at once, so the button can say «Сохранено ✓» now
-        if (S.admCustDetail && String(S.admCustDetail.customer.id) === String(id)) S.admCustDetail.customer.notes = note || null;
-        S.custNoteSaved = true;
-        toast("Заметка сохранена ✓"); render(); loadAdminCustomers(true); return;
-      }
-      toast("Не получилось сохранить заметку"); render();
-    }).catch(function () { toast("Сервер не отвечает"); render(); });
-  }
-
   /* Every string in this table came from a stranger filling in a checkout form —
      the order does not even have to be paid to be listed here. One unescaped
      column (`ship`) was enough to turn an anonymous order into script running
@@ -37135,7 +37605,7 @@
     else if (a.type === "set_tier") {
       var tierId = a.id || a.email;
       /* Where the switch goes back to if the server refuses: what the card
-         said before (a.prev, set by askTierSwitch and by the journal's undo),
+         said before (a.prev, set by custSetTier and by the journal's undo),
          or simply the other side when an action arrived without it. */
       var tierBack = a.prev === "pro" || a.prev === "retail"
         ? a.prev : (a.value === "pro" ? "retail" : "pro");
@@ -37150,7 +37620,17 @@
              there is nothing to wait for here and no reason to throw the card
              and the 500-row list away and ask for both again. A refusal puts
              the switch back where it was and says so — the same toast as before. */
-          if (r.status === 200 && r.body.ok) { admCustAdopt(r.body.customer); render(); }
+          if (r.status === 200 && r.body.ok) {
+            admCustAdopt(r.body.customer);
+            /* A first flip to partner posts «Цены для салонов включены» with
+               it (the route reports it in `mail`); a letter skipped because
+               this address was welcomed before is not news to report. */
+            var tierMail = r.body.mail;
+            if (a.value === "pro" && tierMail && !tierMail.skipped) {
+              toast(tierMail.sent ? "Цены для салонов включены · письмо ушло" : "Цены для салонов включены · письмо не ушло", entry);
+            }
+            render();
+          }
           else tierFailed();
         }).catch(tierFailed);
     }
@@ -41599,7 +42079,10 @@
     S.toast = msg; S.toastUndo = undo && undo.prev ? undo : null;
     paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, S.toastUndo ? ADM_UNDO_MS : 2600);
+    /* …or as long as the change it can stop is held (`undo.ms`): a customer
+       letter waits ten seconds (q3), and «Вернуть» must be there for all ten */
+    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); },
+      S.toastUndo ? Math.max(ADM_UNDO_MS, Number(S.toastUndo.ms) || 0) : 2600);
   }
   /** Take the standing toast down now, before its timer is up. */
   function toastOff() {
@@ -41634,6 +42117,8 @@
     var entry = S.toastUndo;
     S.toast = null; S.toastUndo = null; clearTimeout(toast._t); paintToast();
     if (!entry) return;
+    // a change still held back (1a, q8: a confirmed delete waits 5 s) has its own way back
+    if (typeof entry.undo === "function") { entry.undo(); return; }
     var i = DEMO.log.indexOf(entry);
     if (i < 0) return;
     var txt = entry.txt;
@@ -43166,21 +43651,9 @@
            screen has never loaded them — see applySetPricing(). It writes the
            toast and the «Сохранено ✓» itself, so it returns. */
         else if (pa.type === "set_pricing") { applySetPricing(pa); return; }
-        /* «Клиенты»: the new partner is a POST of its own (applyAddPartner
-           writes the journal line once the server answered); the tier switch
-           is journalled like a tariff change, «Отменить» on the toast. */
-        else if (pa.type === "add_partner") { applyAddPartner(pa); return; }
-        /* «Одобрить Pro» / «Отказать» — a real PATCH, not a journal entry:
-           the approval posts the partner letter and there is no un-sending it,
-           so the card is the safety and there is no «Отменить» on the toast. */
-        else if (pa.type === "cust_decide") {
-          if (pa.action === "approve") approveCustomer(pa.id); else rejectCustomer(pa.id);
-        }
-        else if (pa.type === "set_tier") {
-          var tierEntry = demoApply(pa);
-          if (pa.value === "pro") toast("Партнёр · " + pa.email, tierEntry);
-          else toast("Розница · " + pa.email, tierEntry);
-        }
+        /* «Клиенты» asks nothing any more (1a rule 4): an answer to a request,
+           the tier switch and «+ Партнёр» are held with «Вернуть» instead —
+           custDecide(), custSetTier(), custAddPartner(). */
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         // the settings bar says «Сохранено ✓» for the page whose card just went through
         if (pa.type === "set_hero" || pa.type === "set_content" || pa.type === "set_pricing" ||
@@ -43578,48 +44051,38 @@
        render() leaving the page exactly where the finger left it. */
     if (d.admcustopen) {
       S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null;
-      /* …and the points form and the note's «Сохранено ✓» with it: they live
-         in S, shared by every card, and a number typed for one customer and
-         never applied stood ready on the next one's «Применить» (map defect 17) */
-      S.admCustPoints = ""; S.admCustNote = ""; S.custNoteSaved = false;
+      /* …and the points form with it: it lives in S, shared by every card,
+         and a number typed for one customer and never applied stood ready
+         on the next one's button (map defect 17). The note needs no reset of
+         its own: its draft is re-read from the card that opens, and what the
+         last card still owed goes with that card's own key (admAutosave). */
+      S.admCustPoints = ""; S.admCustNote = ""; S.admCustPtsErr = ""; S.admCustMenu = false;
       // opening a card is also how a card whose GET failed is asked for again
       S.admCustDetailErr = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; render(); return; }
-    if (d.admcustapprove) { askCustDecision(admCustById(d.admcustapprove), "approve"); return; }
-    if (d.admcustreject) { askCustDecision(admCustById(d.admcustreject), "reject"); return; }
+    if (d.admcustclose !== undefined) {
+      S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = "";
+      S.admCustPoints = ""; S.admCustNote = ""; S.admCustPtsErr = "";
+      render(); return;
+    }
+    // «Сделать партнёром» / «Отказать»: on screen at once, sent after ten seconds (q3)
+    if (d.admcustapprove) { custDecide(d.admcustapprove, "approve"); return; }
+    if (d.admcustreject) { custDecide(d.admcustreject, "reject"); return; }
     /* partners: «+ Партнёр», its form, the card's tier switch, and the lead's
        jump to «Настройки → Цены и баллы» */
     if (d.admpartnernew !== undefined) {
       S.partnerForm = { email: "", company: "", phone: "" }; S.partnerErr = "";
       render(); refocus('[data-partnerf="email"]'); return;
     }
-    if (d.admpartnercancel !== undefined) { S.partnerForm = null; S.partnerErr = ""; render(); return; }
-    if (d.admpartnersave !== undefined) {
-      var pf = S.partnerForm || { email: "", company: "", phone: "" };
-      var pEmail = String(pf.email || "").trim().toLowerCase();
-      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(pEmail)) {
-        S.partnerErr = PARTNER_ERRS.bad_email; render(); refocus('[data-partnerf="email"]'); return;
-      }
-      var pWho = pEmail + (pf.company.trim() ? " · " + pf.company.trim() : "");
-      pendingAction = {
-        type: "add_partner", email: pEmail, company: pf.company.trim(), phone: pf.phone.trim(), overlay: true,
-        title: "Добавить партнёра?",
-        detail: pWho + "\nВключим цены для салонов и отправим письмо на эту почту.",
-        ok: "Добавить"
-      };
-      render(); refocus("[data-admapply]"); return;
-    }
-    if (d.admcusttierset !== undefined) {
-      askTierSwitch(S.admCustDetail && S.admCustDetail.customer, d.admcusttierset); return;
-    }
+    if (d.admpartnercancel !== undefined) { S.partnerForm = null; S.partnerErr = ""; render(); refocus("[data-admpartnernew]"); return; }
+    if (d.admpartnersave !== undefined) { custAddPartner(); return; }
+    if (d.admcusttierset !== undefined) { custSetTier(d.admcusttierset); return; }
     if (d.admgoset !== undefined) {
       S.adminTab = "setup"; S.admSetPage = d.admgoset; S.admCustOpen = ""; S.admMore = false;
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
-    if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     // «Опубликовать» / «Скрыть» on the customer card's own review rows
     if (d.admcustrev) { var custRev = d.admcustrev.split(":"); moderateCustReview(custRev[0], custRev[1]); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
@@ -44374,7 +44837,11 @@
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
-    else if (t.matches("[data-partnerf]")) { if (S.partnerForm) S.partnerForm[t.dataset.partnerf] = t.value; S.partnerErr = ""; }
+    else if (t.matches("[data-partnerf]")) {
+      if (S.partnerForm) S.partnerForm[t.dataset.partnerf] = t.value;
+      // the refusal under the address goes as soon as it is typed in again
+      if (S.partnerErr) { S.partnerErr = ""; paintPartnerErr(); }
+    }
     // the checkbox drives totals shown in several places on screen — unlike
     // the plain text fields below, this one needs a real render()
     else if (t.matches("[data-loyaltyredeem]")) { S.loyaltyRedeem = t.checked; render(); }
@@ -44391,13 +44858,17 @@
     }
     else if (t.matches("[data-admcustq]")) {
       S.admCustQ = t.value;
+      // the rows and the counts on the chips, in place — the box keeps its caret
       var custList = document.getElementById("admcustlist");
       if (custList) { custList.innerHTML = admCustRowsHTML(); translateTree(custList); }
+      var custChips = document.getElementById("admcustchips");
+      if (custChips) { custChips.innerHTML = admCustChipsHTML(); translateTree(custChips); }
     }
-    else if (t.matches("[data-admcustpoints]")) { S.admCustPoints = t.value; }
+    // «+10 / −5»: the button says what it will do as the number is typed
+    else if (t.matches("[data-admcustpoints]")) { S.admCustPoints = t.value; paintCustPts(); }
     else if (t.matches("[data-admcustnote]")) { S.admCustNote = t.value; }
-    // the two notes: the draft, then the button lit in place (r12)
-    else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; S.custNoteSaved = false; paintCustNote(); }
+    // the customer's note: the draft here, the save is admAutosave's (data-autosave)
+    else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; }
     else if (t.matches("[data-admnote]")) {
       var noteOrd = admCurOrder();
       if (noteOrd && noteOrd.srv) { S.orderNote = { id: String(noteOrd.srv.id), text: t.value, saved: false }; paintOrderNote(); }
@@ -45829,7 +46300,6 @@
     ["[data-promof]", "[data-admpromosave]"],
     ["[data-stockeaninput],[data-stocklowinput],[data-stockqtyinput],[data-stockreasoninput]", "[data-stocksave]"],
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
-    ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
     ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
     ["[data-mailto]", "[data-mailtest]"],
     /* r12: the settings cards and the two small cards. Their «Сохранить» is

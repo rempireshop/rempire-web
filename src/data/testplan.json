@@ -4518,32 +4518,34 @@
         "В «Заказах» открыть заказ и вписать заметку.",
         "Нажать «Сохранить заметку».",
         "Закрыть карточку и открыть снова.",
-        "Открыть карточку клиента и так же поменять заметку о клиенте."
+        "Открыть карточку клиента и вписать заметку о клиенте."
       ],
       "expect": [
         "Пока текст не тронут, кнопка серая и выключена.",
         "При правке рядом написано «Не сохранено».",
         "После сохранения на кнопке «Сохранено ✓».",
         "Заметка на месте после повторного открытия.",
-        "У заметки о клиенте те же три состояния; Enter сохраняет."
+        "Заметка о клиенте сохраняется сама: вверху «Сохраняем…», затем «Сохранено ✓»."
       ],
       "why": "Раньше кнопка всегда была одинаковой, и было не понять, сохранилось ли.",
       "risk": "low",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Order note: you can see it is saved",
         "steps": [
           "In «Заказы» open an order and type a note.",
           "Press «Сохранить заметку».",
           "Close the card and open it again.",
-          "Open a customer card and change the customer note the same way."
+          "Open a customer card and type a customer note."
         ],
         "expect": [
           "Until you type, the button is grey and off.",
           "While editing, «Не сохранено» stands beside it.",
           "After saving the button reads «Сохранено ✓».",
           "The note is still there when the card is reopened.",
-          "The customer note has the same three states; Enter saves."
+          "The customer note saves itself: «Сохраняем…», then «Сохранено ✓» at the top."
         ],
         "why": "The button used to look the same always, so you could not tell whether it saved."
       }
@@ -4801,7 +4803,7 @@
       "steps": [
         "В кабинете нажать «Стать партнёром (салон/мастер)».",
         "Заполнить название салона и регистрационный номер и отправить.",
-        "Открыть в панели «Обзор», затем «Клиенты» → «Заявки Pro»."
+        "Открыть в панели «Обзор», затем «Клиенты» → «Заявки»."
       ],
       "expect": [
         "В кабинете написано, что заявка отправлена.",
@@ -4811,12 +4813,14 @@
       "why": "Потерянная заявка от салона — потерянный оптовый покупатель.",
       "risk": "med",
       "writes": true,
+      "mark": "reworded",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "A «Стать партнёром» application",
         "steps": [
           "In the account press «Стать партнёром (салон/мастер)» (become a partner).",
           "Fill in the salon name and the registration number, and send it.",
-          "In the panel open «Обзор», then «Клиенты» → «Заявки Pro»."
+          "In the panel open «Обзор», then «Клиенты» → «Заявки»."
         ],
         "expect": [
           "The account says the application has been sent.",
@@ -7311,28 +7315,42 @@
       "title": "Список клиентов",
       "steps": [
         "Открыть «Ещё» → «Клиенты».",
-        "Нажать по очереди «Все», «Заявки Pro», «Партнёры», «Розница», «Подписаны».",
-        "Открыть карточку клиента, у которого есть заказы."
+        "Нажать по очереди «Все», «Заявки», «Партнёры», «Розница», «Подписаны».",
+        "Вписать в поиск часть имени и посмотреть на числа на кнопках.",
+        "Нажать «?» рядом с «Клиенты».",
+        "Открыть карточку клиента, у которого есть заказы.",
+        "Открыть «Клиенты» на компьютере."
       ],
       "expect": [
         "Каждая кнопка оставляет в списке только своих людей.",
-        "В карточке видно, сколько человек купил и на какую сумму — с учётом гостевых заказов.",
-        "На открытой карточке вкладок «Все клиенты / Отзывы» нет — только «← Все клиенты»."
+        "Число на кнопке совпадает с числом строк под ней.",
+        "Под «?» — объяснение и ссылка «Настройки → Цены и баллы».",
+        "В карточке видно, сколько человек купил и на какую сумму — с гостевыми заказами.",
+        "На карточке нет вкладок «Клиенты / Отзывы» — только «← Клиенты».",
+        "На компьютере список — таблица: клиент, почта, заказы, сумма, статус."
       ],
       "why": "Это единственная база покупателей, которая у магазина есть.",
       "risk": "med",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "The customer list",
         "steps": [
           "«Ещё» → «Клиенты».",
-          "Press each of «Все», «Заявки Pro», «Партнёры», «Розница», «Подписаны» in turn.",
-          "Open the card of a customer who has orders."
+          "Press each of «Все», «Заявки», «Партнёры», «Розница», «Подписаны» in turn.",
+          "Type part of a name into the search and look at the numbers on the chips.",
+          "Press «?» next to «Клиенты».",
+          "Open the card of a customer who has orders.",
+          "Open «Клиенты» on a computer."
         ],
         "expect": [
           "Each button leaves only its own people in the list.",
+          "The number on a chip matches the rows under it.",
+          "Under «?»: the explanation and a «Настройки → Цены и баллы» link.",
           "The card shows how much the person bought and for how much — guest orders included.",
-          "An open card has no «Все клиенты / Отзывы» tabs — only «← Все клиенты»."
+          "An open card has no «Клиенты / Отзывы» tabs — only «← Клиенты».",
+          "On a computer the list is a table: customer, e-mail, orders, sum, status."
         ],
         "why": "This is the only list of buyers the shop has."
       }
@@ -7347,12 +7365,12 @@
       "steps": [
         "Оставить отзыв на товар, войдя в кабинет этой почтой.",
         "Открыть «Клиенты» и карточку этого покупателя.",
-        "Прочитать факты под плитками и раздел «Заказы».",
+        "Прочитать факты под заказами и раздел «Заказы».",
         "Нажать на заказ, затем «← К клиенту».",
         "В разделе «Отзывы клиента» нажать «Опубликовать» и открыть товар в магазине."
       ],
       "expect": [
-        "Под плитками — первый и последний заказ, средний чек и любимые бренды.",
+        "Под заказами — первый и последний заказ, средний чек и любимые бренды.",
         "В «Заказах» номер и дата, сумма и тот же чип состояния, что в списке.",
         "Заказ открывается поверх клиента; «← К клиенту» возвращает к этому клиенту.",
         "В «Отзывах клиента» только отзывы, оставленные из кабинета этой почтой.",
@@ -7362,17 +7380,19 @@
       "why": "Раньше карточка показывала отзывы однофамильца — чужие личные данные.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Customer card: orders, facts, reviews",
         "steps": [
           "Leave a review on a product while signed into the account with that e-mail.",
           "Open «Клиенты» and that buyer's card.",
-          "Read the facts under the tiles and the «Заказы» section.",
+          "Read the facts under the orders and the «Заказы» section.",
           "Tap an order, then «← К клиенту».",
           "In «Отзывы клиента» press «Опубликовать» and open the product in the shop."
         ],
         "expect": [
-          "Under the tiles: first and last order, the average order and favourite brands.",
+          "Under the orders: first and last order, the average order and favourite brands.",
           "«Заказы» shows number and date, the total and the same status chip as the list.",
           "The order opens over the customer; «← К клиенту» returns to that customer.",
           "«Отзывы клиента» holds only reviews left from the account with that address.",
@@ -7383,6 +7403,49 @@
       }
     },
     {
+      "id": "people-card-extras",
+      "area": "people",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Карточка клиента: заметка, день рождения, письмо",
+      "steps": [
+        "Открыть карточку клиента, который вписал день рождения в кабинете.",
+        "Вписать заметку и ничего не нажимать.",
+        "Закрыть карточку и открыть её снова.",
+        "Нажать «Написать клиенту»."
+      ],
+      "expect": [
+        "Среди фактов есть «День рождения» — день и месяц.",
+        "Под почтой строка о согласии на письма: когда и где дано.",
+        "Через секунду вверху «Сохранено ✓», кнопки «Сохранить» нет.",
+        "Заметка на месте после повторного открытия.",
+        "«Написать клиенту» открывает почту с адресом клиента."
+      ],
+      "why": "Поздравить и ответить клиенту можно, только видя его данные на одной странице.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-25T11:20:35.840Z",
+      "en": {
+        "title": "Customer card: note, birthday, letter",
+        "steps": [
+          "Open the card of a customer who entered a birthday in their account.",
+          "Type a note and press nothing.",
+          "Close the card and open it again.",
+          "Press «Написать клиенту»."
+        ],
+        "expect": [
+          "The facts include «День рождения» — day and month.",
+          "Under the e-mail, a line on consent to letters: when and where given.",
+          "A second later «Сохранено ✓» shows at the top; there is no save button.",
+          "The note is still there when the card is reopened.",
+          "«Написать клиенту» opens mail addressed to the customer."
+        ],
+        "why": "Greeting or answering a customer takes their details on one page."
+      }
+    },
+    {
       "id": "people-approve-pro",
       "area": "people",
       "who": "renat",
@@ -7390,16 +7453,16 @@
       "lang": "RU",
       "title": "Одобрить партнёра",
       "steps": [
-        "Открыть «Клиенты» и нажать «Заявки Pro».",
-        "Открыть карточку клиента с заявкой, нажать «Одобрить Pro» и прочитать окошко с вопросом.",
-        "Подтвердить.",
+        "Открыть «Клиенты» и нажать «Заявки».",
+        "В строке с заявкой нажать «Сделать партнёром» и сразу «Вернуть» на чёрной полоске.",
+        "Нажать «Сделать партнёром» ещё раз и подождать 10 секунд.",
         "Войти в кабинет этого покупателя и посмотреть цены товаров.",
         "Вернуть этого партнёра на обычные цены и одобрить его снова."
       ],
       "expect": [
-        "Перед одобрением выходит окошко с вопросом.",
-        "После одобрения заказы, факты и отзывы на карточке остаются, серых полос нет.",
-        "После одобрения партнёру ушло письмо.",
+        "Вопроса нет: строка сразу показывает «Партнёр», внизу полоска с «Вернуть».",
+        "После «Вернуть» заявка снова на месте, письмо не ушло.",
+        "Через 10 секунд полоска говорит, ушло ли письмо.",
         "В его кабинете стоят цены для салонов.",
         "Второе одобрение того же человека письма уже не шлёт."
       ],
@@ -7407,25 +7470,25 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Approving a partner",
         "steps": [
-          "Open «Клиенты» and press the «Заявки Pro» chip.",
-          "Open the card of a customer with a request, press «Одобрить Pro» (approve Pro) and read the box that asks you to confirm.",
-          "Confirm.",
+          "Open «Клиенты» and press the «Заявки» chip.",
+          "On the request's row press «Сделать партнёром», then at once «Вернуть» on the dark strip.",
+          "Press «Сделать партнёром» again and wait 10 seconds.",
           "Sign into that buyer's account and look at the product prices.",
           "Put that partner back on retail prices and approve them again."
         ],
         "expect": [
-          "A box asks you to confirm before approving.",
-          "After approval the card keeps its orders, facts and reviews, with no grey bars.",
-          "After approval a letter has gone to the partner.",
+          "No question: the row shows «Партнёр» at once, with «Вернуть» on the strip.",
+          "After «Вернуть» the request is back and no letter went.",
+          "After 10 seconds the strip says whether the letter went.",
           "In their account the salon prices are shown.",
           "Approving the same person a second time sends no letter."
         ],
         "why": "Approval turns on wholesale prices for good and sends a letter you cannot recall."
-      },
-      "markedAt": "2026-09-24T17:46:27.540Z"
+      }
     },
     {
       "id": "people-add-partner",
@@ -7436,37 +7499,41 @@
       "title": "Добавить партнёра самому",
       "steps": [
         "Открыть «Клиенты» и нажать «+ Партнёр».",
-        "Вписать почту, название салона и регистрационный номер.",
-        "Сохранить и проверить почту партнёра.",
-        "Снова нажать «+ Партнёр», вписать ту же почту и сохранить."
+        "Вписать неверную почту и нажать «Добавить партнёра».",
+        "Вписать почту, название салона и телефон и нажать «Добавить партнёра».",
+        "Подождать 10 секунд и проверить почту партнёра.",
+        "Снова нажать «+ Партнёр», вписать ту же почту и добавить."
       ],
       "expect": [
-        "Партнёр появился в списке с пометкой партнёра.",
-        "На его почту пришло письмо.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду.",
+        "Неверная почта: поле красное, под ним «Проверьте e-mail».",
+        "Форма закрылась, список на «Все», внизу полоска с «Вернуть».",
+        "«Вернуть» в эти 10 секунд открывает форму с вписанным.",
+        "Партнёр появился в списке с пометкой «Партнёр», на его почту пришло письмо.",
         "Второй раз выходит «Уже партнёр» — без кнопки «Вернуть»."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Adding a partner yourself",
         "steps": [
           "«Клиенты» → «+ Партнёр».",
-          "Type in the e-mail, the salon name and the registration number.",
-          "Save and check the partner's mail.",
-          "Press «+ Партнёр» again, type the same e-mail and save."
+          "Type a wrong e-mail and press «Добавить партнёра».",
+          "Type the e-mail, the salon name and the phone, and press «Добавить партнёра».",
+          "Wait 10 seconds and check the partner's mail.",
+          "Press «+ Партнёр» again, type the same e-mail and add."
         ],
         "expect": [
-          "The partner is in the list with a partner marker.",
-          "A letter has arrived in their mailbox.",
-          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view.",
+          "A wrong e-mail: the box turns red with «Проверьте e-mail» under it.",
+          "The form closed, the list is on «Все», a strip with «Вернуть» below.",
+          "«Вернуть» within those 10 seconds reopens the form with what was typed.",
+          "The partner is in the list marked «Партнёр»; a letter has arrived for them.",
           "The second time it says «Уже партнёр», with no «Вернуть» button."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
-      },
-      "mark": "redo",
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      }
     },
     {
       "id": "people-remove-partner",
@@ -7476,35 +7543,37 @@
       "lang": "RU",
       "title": "Снять с клиента статус партнёра",
       "steps": [
-        "В «Клиентах» открыть партнёра и выключить у него статус партнёра.",
+        "В «Клиентах» открыть партнёра и в «Статус» нажать «Розница».",
         "Не перезагружая магазин, открыть в нём любой товар этого партнёра.",
         "Положить товар в корзину и дойти до кассы.",
-        "Снова включить статус и посмотреть на цены ещё раз."
+        "Снова нажать «Партнёр» и посмотреть на цены ещё раз."
       ],
       "expect": [
-        "Переключатель встаёт сразу, без ожидания.",
+        "Вопроса нет: переключатель встаёт сразу, внизу полоска с «Вернуть».",
         "Салонных цен в магазине больше нет — ни на карточке, ни в корзине.",
         "Ничего перезагружать не нужно.",
         "На кассе считают обычную цену.",
-        "Включили обратно — салонные цены вернулись."
+        "Включили обратно — салонные цены вернулись, второе письмо не ушло."
       ],
       "why": "Бывший партнёр, которому магазин всё ещё показывает салонную цену, купит по ней, а счёт выставят по другой.",
       "risk": "high",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Taking partner status off a customer",
         "steps": [
-          "In «Клиенты» open a partner and switch their partner status off.",
+          "In «Клиенты» open a partner and press «Розница» under «Статус».",
           "Without reloading the shop, open any product as that partner.",
           "Put it in the cart and go through to the checkout.",
-          "Switch the status back on and look at the prices again."
+          "Press «Партнёр» again and look at the prices again."
         ],
         "expect": [
-          "The switch moves at once, with no wait.",
+          "No question: the switch moves at once, with «Вернуть» on a strip below.",
           "Salon prices are gone from the shop — the card and the cart both.",
           "Nothing needs reloading.",
           "The checkout charges the ordinary price.",
-          "Switched back on, the salon prices return."
+          "Switched back on, the salon prices return and no second letter goes."
         ],
         "why": "A former partner still shown a salon price will buy at it, and the invoice will say something else."
       }
@@ -7518,37 +7587,43 @@
       "title": "Начислить или списать баллы",
       "steps": [
         "Открыть карточку клиента.",
-        "Вписать в баллах плюс десять и применить.",
+        "В «Баллы» вписать «абв» и нажать кнопку под полем.",
+        "Вписать +10 и причину, нажать «Начислить +10».",
         "Открыть кабинет этого клиента и посмотреть баллы.",
-        "Списать те же десять обратно.",
-        "Вписать в баллах пять, не применять и открыть карточку другого клиента."
+        "Вписать −10, нажать «Списать −10» и сразу «Вернуть».",
+        "Вписать в баллах пять, не нажимать и открыть карточку другого клиента."
       ],
       "expect": [
-        "После начисления в кабинете стало на десять больше.",
-        "После списания число вернулось к прежнему.",
-        "У другого клиента поля баллов и заметки к ним пустые."
+        "«абв» не отправляется: поле красное, под ним подсказка.",
+        "Кнопка сама пишет, что сделает: «Начислить +10» или «Списать −10».",
+        "Число в плитке «Баллы» меняется сразу; через 5 секунд — и в кабинете.",
+        "После «Вернуть» баллы не списались.",
+        "У другого клиента поля баллов и причины пустые."
       ],
       "why": "Баллы, начисленные по ошибке, потом тратятся на кассе как ваши деньги.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Adding or removing points",
         "steps": [
           "Open a customer's card.",
-          "In the points block type plus ten and apply it.",
+          "In «Баллы» type «абв» and press the button under the box.",
+          "Type +10 and a reason, press «Начислить +10».",
           "Open that customer's account and look at the points.",
-          "Take the same ten back off.",
-          "Type five in the points block, do not apply it, and open another customer's card."
+          "Type −10, press «Списать −10» and at once «Вернуть».",
+          "Type five in the points box, do not press it, and open another customer's card."
         ],
         "expect": [
-          "After crediting, the account shows ten more points.",
-          "After taking them off, the number is back.",
-          "On the other customer's card the points field and its note are empty."
+          "«абв» is not sent: the box turns red with a hint under it.",
+          "The button says what it will do: «Начислить +10» or «Списать −10».",
+          "The «Баллы» tile changes at once; after 5 seconds the account does too.",
+          "After «Вернуть» no points were taken off.",
+          "On the other card the points and reason boxes are empty."
         ],
         "why": "Points credited by mistake are spent at the till as your money."
-      },
-      "mark": "redo",
-      "markedAt": "2026-09-24T17:46:27.540Z"
+      }
     },
     {
       "id": "people-csv",
@@ -7558,35 +7633,39 @@
       "lang": "RU",
       "title": "Выгрузка клиентов в таблицу",
       "steps": [
-        "Открыть «Клиенты» и нажать «Скачать XLSX».",
+        "Открыть «Клиенты», нажать «⋯» и «Скачать список · Excel».",
         "Открыть файл в Excel или другой таблице.",
-        "Нажать «Скачать CSV» и открыть этот файл тоже.",
+        "Нажать «⋯» → «Скачать список · CSV» и открыть этот файл тоже.",
+        "Нажать «Партнёры» и скачать список ещё раз.",
         "Найти столбец про подписку на новости."
       ],
       "expect": [
-        "Рядом со «Скачать CSV» есть «Скачать XLSX».",
+        "В «⋯» два пункта: Excel и CSV.",
         "XLSX открывается сразу, лист называется «Клиенты».",
         "CSV тоже раскладывается по столбцам, а не в одну ячейку.",
-        "В обоих есть почты и суммы покупок.",
-        "Виден столбец с согласием на письма."
+        "С кнопкой «Партнёры» в файле только партнёры.",
+        "В файлах есть почты, суммы покупок и столбец с согласием на письма."
       ],
       "why": "Письмо тому, кто согласия не давал, — это штраф.",
       "risk": "high",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Exporting the customers to a spreadsheet",
         "steps": [
-          "Open «Клиенты» and press «Скачать XLSX».",
+          "Open «Клиенты», press «⋯» and «Скачать список · Excel».",
           "Open the file in Excel or another spreadsheet.",
-          "Press «Скачать CSV» and open that file too.",
+          "Press «⋯» → «Скачать список · CSV» and open that file too.",
+          "Press «Партнёры» and download the list again.",
           "Find the column about the news subscription."
         ],
         "expect": [
-          "Next to «Скачать CSV» there is a «Скачать XLSX» button.",
+          "«⋯» holds two items: Excel and CSV.",
           "The XLSX opens straight away; its sheet is named «Клиенты».",
           "The CSV lands in columns too, not all in one cell.",
-          "Both hold the e-mails and the amounts bought.",
-          "A column shows who agreed to letters."
+          "With «Партнёры» pressed the file holds only partners.",
+          "The files hold e-mails, amounts bought and a column for consent to letters."
         ],
         "why": "A letter to somebody who never consented is a fine."
       }
@@ -7602,28 +7681,34 @@
         "Открыть «Клиенты» → «Отзывы» → «Новые».",
         "Найти отзыв, который вы оставили в магазине, и нажать «Опубликовать».",
         "Открыть товар в магазине.",
-        "Вернуться и нажать «Скрыть»."
+        "Вернуться, открыть «Опубликованные» и нажать «Скрыть».",
+        "Нажать на имя автора отзыва, оставленного из кабинета."
       ],
       "expect": [
         "Опубликованный отзыв виден на странице товара.",
-        "После «Скрыть» он со страницы пропадает.",
-        "Решение можно поменять обратно в любой момент."
+        "После «Скрыть» он со страницы пропадает и лежит в «Скрытые».",
+        "В «Скрытых» у отзыва есть «Опубликовать» — решение можно поменять.",
+        "Имя автора открывает карточку этого клиента."
       ],
       "why": "Непроверенный отзыв может оказаться рекламой конкурента на вашей же странице.",
       "risk": "med",
       "writes": true,
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:20:35.840Z",
       "en": {
         "title": "Moderating and publishing a review",
         "steps": [
           "«Клиенты» → «Отзывы» → the «Новые» tab.",
           "Find the review you left in the shop and press «Опубликовать».",
           "Open the product in the shop.",
-          "Go back and press «Скрыть»."
+          "Go back, open «Опубликованные» and press «Скрыть».",
+          "Tap the author's name on a review left from an account."
         ],
         "expect": [
           "The published review shows on the product page.",
-          "After «Скрыть» it disappears from the page.",
-          "The decision can be changed back at any time."
+          "After «Скрыть» it disappears from the page and sits under «Скрытые».",
+          "Under «Скрытые» the review has «Опубликовать» — the decision can change.",
+          "The author's name opens that customer's card."
         ],
         "why": "An unchecked review may be a competitor's advert on your page."
       }
