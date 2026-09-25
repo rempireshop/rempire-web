@@ -2919,7 +2919,7 @@
         "Подсказка у имени: «…ими подпишем подарочную карту» — ни слова о посылке.",
         "В письме нет «уже собираем» и «передадим посылку в доставку».",
         "Способ получения в письме — «Электронная доставка».",
-        "В письме сказано, что карта придёт отдельным письмом."
+        "В письме сказано, что карта уходит отдельным письмом."
       ],
       "why": "Покупатель карты, которому пишут про посылку, ждёт посылку.",
       "risk": "low",
@@ -2936,12 +2936,12 @@
           "The name hint says «…ими подпишем подарочную карту» — nothing about a parcel.",
           "The letter has no «уже собираем» and no «передадим посылку в доставку».",
           "The letter's delivery method reads «Электронная доставка».",
-          "The letter says the card arrives in a separate e-mail."
+          "The letter says the card goes out in a separate e-mail."
         ],
         "why": "A card buyer told about a parcel waits for a parcel."
       },
       "mark": "new",
-      "markedAt": "2026-09-25T22:50:03.653Z"
+      "markedAt": "2026-09-25T22:58:03.695Z"
     },
     {
       "id": "checkout-pay-with-giftcard",

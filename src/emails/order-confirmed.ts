@@ -59,7 +59,9 @@ interface Strings {
    * Staging, 25.09.2026 (R-100084): its letter said «мы его получили и уже
    * собираем», «Способ получения: digital» and «Мы напишем, когда передадим
    * посылку в доставку». The card itself goes out in its own letter
-   * (src/lib/mail-hooks.ts, issueOrderGiftCards) — that is what this says.
+   * (src/lib/mail-hooks.ts, issueOrderGiftCards) — to the recipient's address
+   * when one was typed, else the buyer's — so this says «уходит … на почту,
+   * указанную для неё», never «придёт вам».
    */
   digital: { preheader: string; intro: string; method: string; wait: string };
 }
@@ -87,10 +89,10 @@ const T: Record<Lang, Strings> = {
     textIntro: "Состав заказа:",
     points: (n) => `Вам начислено ${n} ${ruPluralPoints(n)} лояльности за этот заказ — уже доступны в личном кабинете.`,
     digital: {
-      preheader: "Спасибо за заказ! Подарочная карта приходит отдельным письмом.",
+      preheader: "Спасибо за заказ! Подарочная карта уходит отдельным письмом.",
       intro: "Спасибо за заказ № {order} — мы его получили.",
       method: "Электронная доставка",
-      wait: "Подарочная карта приходит отдельным письмом — собирать и отправлять посылку не нужно.",
+      wait: "Подарочная карта уходит отдельным письмом — на почту, указанную для неё при оформлении.",
     },
   },
   et: {
@@ -106,10 +108,10 @@ const T: Record<Lang, Strings> = {
     textIntro: "Tellimuse sisu:",
     points: (n) => `Selle ostuga kogusite ${n} boonuspunkti — need juba ootavad teie kontol.`,
     digital: {
-      preheader: "Aitäh tellimuse eest! Kinkekaart tuleb eraldi kirjaga.",
+      preheader: "Aitäh tellimuse eest! Kinkekaart läheb eraldi kirjaga.",
       intro: "Aitäh tellimuse nr {order} eest — see on meieni jõudnud.",
       method: "Elektrooniline tarne",
-      wait: "Kinkekaart tuleb eraldi kirjaga — pakki kokku panna ega saata pole vaja.",
+      wait: "Kinkekaart läheb eraldi kirjaga — tellimisel selle jaoks antud e-postile.",
     },
   },
   en: {
@@ -125,10 +127,10 @@ const T: Record<Lang, Strings> = {
     textIntro: "Order summary:",
     points: (n) => `You earned ${n} loyalty ${n === 1 ? "point" : "points"} on this order — already in your account.`,
     digital: {
-      preheader: "Thanks for your order! The gift card arrives in a separate e-mail.",
+      preheader: "Thanks for your order! The gift card goes out in a separate e-mail.",
       intro: "Thank you for order no. {order} — we have it.",
       method: "Electronic delivery",
-      wait: "The gift card arrives in a separate e-mail — there is no parcel to pack or send.",
+      wait: "The gift card goes out in a separate e-mail — to the address given for it at checkout.",
     },
   },
 };

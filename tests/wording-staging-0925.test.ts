@@ -124,17 +124,17 @@ describe("«Заказ принят» for an order of gift cards only", () => {
     }
     expect(ru.text).toContain("Спасибо за заказ № R-100084 — мы его получили.");
     expect(ru.text).toContain("Электронная доставка");
-    expect(ru.text).toContain("Подарочная карта приходит отдельным письмом");
-    expect(ru.html).toContain("Подарочная карта приходит отдельным письмом.");
+    expect(ru.text).toContain("Подарочная карта уходит отдельным письмом — на почту, указанную для неё при оформлении.");
+    expect(ru.html).toContain("Подарочная карта уходит отдельным письмом.");
 
     const en = renderOrderConfirmed(GIFT, "en");
     expect(en.text).not.toContain("packing");
     expect(en.text).toContain("Electronic delivery");
-    expect(en.text).toContain("The gift card arrives in a separate e-mail");
+    expect(en.text).toContain("The gift card goes out in a separate e-mail");
 
     const et = renderOrderConfirmed(GIFT, "et");
     expect(et.text).not.toContain("paneme selle kokku");
-    expect(et.text).toContain("Kinkekaart tuleb eraldi kirjaga");
+    expect(et.text).toContain("Kinkekaart läheb eraldi kirjaga");
   });
 
   it("a card-only basket is digital even when the order does not say so", () => {
