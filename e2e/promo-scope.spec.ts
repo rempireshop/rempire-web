@@ -94,7 +94,7 @@ test.describe("«На что действует» — the owner picks a brand or
     await page.locator('[data-promokind="free_shipping"]').click();
     await expect(page.locator('[data-promoscope="brand"]'),
       "a free-delivery code was offered a brand").toHaveCount(0);
-    await expect(page.locator(".adm-card--pad")).toContainText("посылка одна на всю корзину");
+    await expect(page.locator("[data-promopanel]")).toContainText("посылка одна на всю корзину");
     // …and the server refuses the pair even when it is posted directly
     const refused = await page.request.post("/api/admin/promos/", {
       data: { code: freshCode("SHIPB"), kind: "free_shipping", scope: "brand", scopeValue: PRODUCT_2.brand },
@@ -114,6 +114,9 @@ test.describe("«На что действует» — the owner picks a brand or
     await page.locator('[data-promof="value"]').fill("10");
     await page.locator('[data-promoscope="brand"]').click();
     await page.locator("[data-promobrand]").selectOption(PRODUCT_2.brand);
+    /* 1a: «Создать промокод» is the one dark button — pinned above a phone's
+       tab bar, and out of the way while the keyboard (or the select's wheel) is up */
+    await page.locator("[data-promobrand]").blur();
     await page.locator("[data-admpromosave]").click();
     await expect(page.getByRole("status")).toContainText("Промокод сохранён");
 

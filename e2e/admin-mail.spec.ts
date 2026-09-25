@@ -42,21 +42,23 @@ async function openMailTab(page: Page): Promise<void> {
 }
 
 /**
- * «Сохранить», and the write it triggers.
- *
- * One press — not «Сохранить» arming a card whose «Применить» did the saving
- * (Renat, 13.09.2026: «I have currently "save" on top and I have also, after
- * when I save an "apply" button. Needs to be better.»). The absence of the
- * second button is asserted here rather than in a test of its own: every save
- * in this file goes through this helper.
+ * The write a letter makes by itself (1a — Dim, q6): a second after the last
+ * keystroke, one PUT of the texts. Call it BEFORE the typing it waits for —
+ * `carrying` is a piece of the text the write must hold. No «Сохранить», and
+ * no «Применить» behind one (Renat, 13.09.2026: «I have currently "save" on
+ * top and I have also, after when I save an "apply" button.»): asserted here,
+ * because every save in this file goes through this helper.
  */
-async function save(page: Page): Promise<void> {
+function saved(page: Page, carrying: string): () => Promise<void> {
   const put = page.waitForResponse(
-    (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT",
+    (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+      (r.request().postData() || "").includes("mail_texts") && (r.request().postData() || "").includes(carrying),
   );
-  await page.locator("[data-mailsave]").click();
-  expect((await put).ok()).toBe(true);
-  await expect(page.locator("[data-admapply]"), "a second, apply-shaped button for one edit").toHaveCount(0);
+  return async () => {
+    expect((await put).ok()).toBe(true);
+    await expect(page.locator("[data-mailsave]"), "a «Сохранить» on a letter that saves itself").toHaveCount(0);
+    await expect(page.locator("[data-admapply]"), "a second, apply-shaped button for one edit").toHaveCount(0);
+  };
 }
 
 /** The rendered ET «Заказ принят», straight from the route the iframe reads. */
@@ -72,6 +74,8 @@ test.describe("admin — letter texts", () => {
   test.use({ extraHTTPHeaders: ipHeaders(170) });
 
   test("the subject and intro the owner types are what the customer's letter carries", async ({ page }) => {
+    // a paid order and a letter that saves itself a second after each field
+    test.setTimeout(120_000);
     await loginAsAdmin(page);
     try {
       await openMailTab(page);
@@ -81,9 +85,12 @@ test.describe("admin — letter texts", () => {
         "Tellimus {order} on vastu võetud — Rempire",
       );
 
+      const done = saved(page, "E2E sissejuhatus");
       await page.locator('[data-mailtxt="subject"]').fill(SUBJECT);
       await page.locator('[data-mailtxt="intro"]').fill(INTRO);
-      await save(page);
+      await done();
+      // the texts are live the moment they save — both of them
+      await expect.poll(async () => (await previewJson(page)).subject).toBe("E2E teema R-100042 — Rempire");
 
       // 1) The preview — both the iframe the owner is looking at and the
       //    route behind it — shows the new text with {order} filled in.
@@ -119,12 +126,16 @@ test.describe("admin — letter texts", () => {
       // 3) «Вернуть стандартный текст» puts the letter's own copy back.
       await page.goto(shopUrl("", "/admin/"));
       await openMailTab(page);
-      await page.locator('[data-mailreset="subject"]').click();
-      await page.locator('[data-mailreset="intro"]').click();
+      // one link for the whole language (Dim, q36), saved at once, «Вернуть» on its toast
+      const back1 = page.waitForResponse(
+        (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+          !(r.request().postData() || "").includes("E2E sissejuhatus"));
+      await page.locator('[data-mailreset="ET"]').click();
       await expect(page.locator('[data-mailtxt="subject"]')).toHaveValue(
         "Tellimus {order} on vastu võetud — Rempire",
       );
-      await save(page);
+      await expect(page.getByRole("status").locator("[data-admtoastundo]")).toBeVisible();
+      expect((await back1).ok()).toBe(true);
 
       const back = await previewJson(page);
       expect(back.subject).toBe("Tellimus R-100042 on vastu võetud — Rempire");
@@ -183,8 +194,9 @@ test.describe("admin — letter texts", () => {
     await loginAsAdmin(page);
     try {
       await openMailTab(page);
+      const done = saved(page, "paks");
       await page.locator('[data-mailtxt="intro"]').fill('<b>paks</b> & "jutumärgid"');
-      await save(page);
+      await done();
 
       const preview = await previewJson(page);
       expect(preview.html).not.toContain("<b>paks</b>");

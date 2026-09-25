@@ -128,6 +128,8 @@ function editor(): Env {
      function admBarPaintNote() {}
      function mailDirty() { return false; }
      function newsDirty() { return false; }
+     // 1a: a chip on an OPEN code saves it (promoAutosave); a new code keeps its draft — neither is this test's
+     function promoChanged() {}
      function admEditProduct(id) { return id === product.id ? product : null; }
      function gal() { return ["https://cdn/a.jpg", "https://cdn/b.jpg"]; }
      function txt(s) { return String(s == null ? "" : s); }

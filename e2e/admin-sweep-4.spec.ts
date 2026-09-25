@@ -5,6 +5,26 @@ import {
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
+ * 1a (ADM_SAVE_POLICY): a letter's switch and its two birthday selects save
+ * through the autosave, and their «Сохранено ✓» comes once the server has
+ * settings.flows — never before. Register BEFORE the change and await it
+ * before clearToast: on a slow server the helper could otherwise see no toast
+ * yet, return, and leave this one to land on the next step.
+ */
+function flowsSaved(page: Page): Promise<unknown> {
+  return page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+    (r.request().postData() || "").includes('"flows"'), { timeout: 20_000 });
+}
+
+/** One flows change, its write, then its toast out of the way. */
+async function flowsChange(page: Page, change: () => Promise<unknown>): Promise<void> {
+  const saved = flowsSaved(page);
+  await change();
+  await saved;
+  await clearToast(page);
+}
+
+/**
  * The fourth admin sweep — Dim's answers of 07.09.2026
  * (docs/audit/2026-09-07-admin.md). One test per decision, each pinning the
  * behaviour he asked for rather than the markup around it:
@@ -565,17 +585,20 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
 
     // all three switchable letters start off, exactly as the sender reads them
     await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-checked", "false");
+    /* 1a: «Когда поздравлять» and the discount live INSIDE the letter —
+       open it; they still come only with its switch */
+    await page.locator('[data-mailtpl="birthday"]').first().click();
+    // the letter's own switch is in its head; on a desk the list's is beside it
+    const bday = page.locator('[data-admflow="birthday"]:visible').first();
     await expect(page.locator("[data-flowbdays]"), "the days setting shows while the letter is off").toHaveCount(0);
     await expect(page.locator("[data-flowbpct]"), "the discount setting shows while the letter is off").toHaveCount(0);
 
     try {
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      await flowsChange(page, () => bday.click());
       const days = page.locator("[data-flowbdays]");
       await expect(days, "switching the letter on did not offer «за N дней»").toBeVisible();
       await expect(days, "it does not default to the day itself").toHaveValue("0");
-      await days.selectOption("3");
-      await clearToast(page);
+      await flowsChange(page, () => days.selectOption("3"));
       /* A fresh URL each time: /api/overrides/ is served
          `s-maxage=30, stale-while-revalidate=120`, and the context's own HTTP
          cache handed back the answer from before the write — the shard read
@@ -593,8 +616,7 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       const pct = page.locator("[data-flowbpct]");
       await expect(pct, "switching the letter on did not offer the discount").toBeVisible();
       await expect(pct, "the discount does not default to the 10 % the letters have always said").toHaveValue("10");
-      await pct.selectOption("15");
-      await clearToast(page);
+      await flowsChange(page, () => pct.selectOption("15"));
       await expect.poll(async () => {
         const res = await page.request.get(`/api/overrides/?t=${Date.now()}`);
         return ((await res.json()).settings.flows || {}).birthdayPercent;
@@ -603,11 +625,10 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       await assertClean(page, w, "the birthday days setting");
     } finally {
       const pct2 = page.locator("[data-flowbpct]");
-      if (await pct2.count()) { await pct2.selectOption("10"); await clearToast(page); }
+      if (await pct2.count()) await flowsChange(page, () => pct2.selectOption("10"));
       const days2 = page.locator("[data-flowbdays]");
-      if (await days2.count()) { await days2.selectOption("0"); await clearToast(page); }
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      if (await days2.count()) await flowsChange(page, () => days2.selectOption("0"));
+      await flowsChange(page, () => page.locator('[data-admflow="birthday"]:visible').first().click());
     }
   });
 });
@@ -829,11 +850,12 @@ test.describe("admin — «Письма» can be run without waiting for the sch
 
     await openAdmin(page);
     await adminSection(page, "promos", "mail");
+    // 1a: «Запустить сейчас» and «Последний запуск» are inside the letter (Dim, 23.09.2026)
+    await page.locator('[data-mailtpl="birthday"]').first().click();
     // nothing to run while the letter is off — the button only comes with the switch
     await expect(page.locator('[data-admflowrun="birthday"]')).toHaveCount(0);
     try {
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      await flowsChange(page, () => page.locator('[data-admflow="birthday"]:visible').first().click());
       const run = page.locator('[data-admflowrun="birthday"]');
       await expect(run, "switching the letter on did not offer «Запустить сейчас»").toBeVisible();
       /* The count line says who the letter can reach at all. It read
@@ -863,9 +885,10 @@ test.describe("admin — «Письма» can be run without waiting for the sch
         .toBeGreaterThan(0);
       await clearToast(page);
 
-      // the abandoned-cart row has the same button and answers for itself
-      await page.locator('[data-admflow="abandoned"]').click();
-      await clearToast(page);
+      // the abandoned-cart letter has the same button and answers for itself
+      await page.locator("[data-mailback]:visible").first().click();
+      await page.locator('[data-mailtpl="abandoned-cart"]').first().click();
+      await flowsChange(page, () => page.locator('[data-admflow="abandoned"]:visible').first().click());
       await page.locator('[data-admflowrun="abandoned"]').click();
       /* Renat, 13.09.2026: «I filled out e-mail and left cart, tried to send
          now but nothing arrived.» It was a cart five minutes old — the sender
@@ -879,12 +902,11 @@ test.describe("admin — «Письма» can be run without waiting for the sch
       await clearToast(page);
       await assertClean(page, w, "run now");
     } finally {
+      // back on the list, where every switch is
+      if (await page.locator("[data-mailback]:visible").count()) await page.locator("[data-mailback]:visible").first().click();
       for (const flow of ["abandoned", "birthday"]) {
-        const sw = page.locator(`[data-admflow="${flow}"]`);
-        if ((await sw.getAttribute("aria-checked")) === "true") {
-          await sw.click();
-          await clearToast(page);
-        }
+        const sw = page.locator(`[data-admflow="${flow}"]`).first();
+        if ((await sw.getAttribute("aria-checked")) === "true") await flowsChange(page, () => sw.click());
       }
     }
   });

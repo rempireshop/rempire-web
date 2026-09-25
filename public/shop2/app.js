@@ -2987,6 +2987,73 @@
       "Скидка, % — от 1 до 90": "Soodustus, % — 1 kuni 90",
       "Минимальный заказ, €": "Minimaalne tellimus, €",
       "Срок, число использований и заметка": "Tähtaeg, kasutuskordade arv ja märkus",
+      /* 1a «Маркетинг» (ux1a-marketing) */
+      "Карту видно, когда куплена хотя бы одна — PDF открывается из списка выпущенных карт.": "Kaarti näeb, kui vähemalt üks on ostetud — PDF avaneb väljastatud kaartide loendist.",
+      "раз в сутки: корзинам старше срока из настройки, если заказа так и не было": "kord ööpäevas: ostukorvidele, mis on seadistatud ajast vanemad, kui tellimust ei tulnudki",
+      "Сюда приходят «Прислать мне пример» и тест рассылки. Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.": "Siia tulevad «Saada mulle näidis» ja uudiskirja test. Näidise ostukorv, tellimus ja sooduskood on välja mõeldud — klientidele ei lähe midagi.",
+      "Куда присылать примеры": "Kuhu näidised saata",
+      "Включаете вы": "Sina lülitad sisse",
+      "Уходят всегда": "Lähevad alati",
+      "Нажмите на письмо слева, чтобы изменить текст.": "Teksti muutmiseks vajuta vasakul kirjale.",
+      "Покупатель оформил заказ и не оплатил: сначала магазин напомнит письмом, потом отменит заказ сам и сообщит письмом «Заказ отменён». Проверка раз в сутки. Меньшее «Отменить через» отменит и старые неоплаченные заказы при ближайшей проверке.": "Ostja vormistas tellimuse, kuid ei maksnud: esmalt tuletab pood kirjaga meelde, siis tühistab tellimuse ise ja teatab sellest kirjaga «Tellimus tühistatud». Kontroll kord ööpäevas. Väiksem «Tühistada pärast» tühistab lähimal kontrollil ka vanemad maksmata tellimused.",
+      "Покупатель набрал корзину и ушёл: через столько часов магазин напомнит о ней. Проверка раз в сутки.": "Ostja pani ostukorvi kokku ja lahkus: nii mitme tunni pärast tuletab pood seda meelde. Kontroll kord ööpäevas.",
+      "Письмо уходит тем, кто оставил почту на странице товара, когда товар снова появится в наличии.": "Kiri läheb neile, kes jätsid toote lehele oma e-posti, kui toode on taas laos.",
+      "Промокод выписывается каждому свой, работает один раз и действует две недели от самого дня рождения, каким бы ни был запас.": "Iga saaja saab oma sooduskoodi, mis kehtib ühe korra ja kaks nädalat alates sünnipäevast, ükskõik kui vara kiri läheb.",
+      "Когда уходит": "Millal läheb",
+      "до": "kuni",
+      "сегодня": "täna",
+      "Столько магазин отправит за сутки и больше не будет. Придержанное — доля писем о заказах: ноль — и рассылка однажды займёт сутки целиком.": "Nii palju saadab pood ööpäevas ja rohkem mitte. Kõrvale pandud osa on tellimuste kirjade jaoks: null — ja uudiskiri võtab ühel päeval kogu ööpäeva.",
+      "Тема": "Teema",
+      "Первый абзац": "Esimene lõik",
+      "Последняя строка": "Viimane rida",
+      "Вставить в тему:": "Lisa teemasse:",
+      "Вставить в первый абзац:": "Lisa esimesse lõiku:",
+      "Вставить в последнюю строку:": "Lisa viimasesse ritta:",
+      "Текст начинает уходить покупателям со следующего письма — через секунду после того, как вы перестали печатать.": "Tekst läheb klientidele alates järgmisest kirjast — sekund pärast seda, kui lõpetasid trükkimise.",
+      "как его рисует сервер": "nagu server selle joonistab",
+      "Прислать мне пример": "Saada mulle näidis",
+      "Письма подписчикам": "Kirjad tellijatele",
+      "о чём письмо — новинки, скидка 10 %…": "millest kiri räägib — uudised, soodustus 10 %…",
+      "Помощник:": "Abiline:",
+      "Прислать мне тест": "Saada mulle test",
+      "Не сохранено: в тексте была незаконченная вставка «{…}»": "Ei salvestatud: tekstis oli lõpetamata sisestus «{…}»",
+      "Вставка не дописана — закройте её скобкой «}» или уберите «{»": "Sisestus on pooleli — sulge see märgiga «}» või eemalda «{»",
+      "Такой вставки в этом письме нет — возьмите её из кнопок ниже": "Sellist sisestust selles kirjas pole — vali see allolevatest nuppudest",
+      "Стандартный текст на месте": "Vaiketekst on tagasi",
+      "Ваш текст на месте": "Sinu tekst on tagasi",
+      "Нажмите на код, чтобы изменить": "Muutmiseks vajuta koodile",
+      "Нажмите на код, чтобы изменить, или создайте новый.": "Muutmiseks vajuta koodile või loo uus.",
+      "ещё не использован": "veel kasutamata",
+      "Промо": "Soodus",
+      "Подарки": "Kingid",
+      "Удалить письмо?": "Kustutada kiri?",
+      "Черновик исчезнет из списка рассылок. Покупатели его не видели.": "Mustand kaob uudiskirjade loendist. Kliendid pole seda näinud.",
+      "Письмо на месте": "Kiri on tagasi",
+      "Письмо удалено": "Kiri kustutatud",
+      "Рассылка: черновик удалён": "Uudiskiri: mustand kustutatud",
+      "Не получилось удалить письмо — оно осталось в списке": "Kirja ei õnnestunud kustutada — see jäi loendisse",
+      "Письмо не ушло — это всё ещё черновик": "Kiri ei läinud — see on endiselt mustand",
+      "Письмо уйдёт подписчикам через 10 секунд": "Kiri läheb tellijatele 10 sekundi pärast",
+      "Переведено — проверьте": "Tõlgitud — kontrolli",
+      "Перевести заново?": "Tõlkida uuesti?",
+      "Эстонский и английский текст письма заменится переводом с русского.": "Kirja eesti- ja ingliskeelne tekst asendatakse tõlkega vene keelest.",
+      "Блок удалён": "Plokk kustutatud",
+      "любой заказ": "iga tellimus",
+      "без срока": "tähtajatu",
+      "без лимита": "piiranguta",
+      "Код менять нельзя — его уже могли раздать. Правка кода меняет только будущие заказы, уже оформленные остаются как были.": "Koodi muuta ei saa — see võib olla juba jagatud. Muudatus mõjutab ainult tulevasi tellimusi, vormistatud jäävad nagu olid.",
+      "Скидка, €": "Allahindlus, €",
+      "0 — любой": "0 — mis tahes",
+      "Заказ от, €": "Tellimus alates, €",
+      "Срок, лимит и заметка": "Tähtaeg, piirang ja märkus",
+      "Кодом уже пользовались — его можно только выключить.": "Koodi on juba kasutatud — selle saab ainult välja lülitada.",
+      "Удалить промокод": "Kustuta sooduskood",
+      "Создать промокод": "Loo sooduskood",
+      "Письмо включено": "Kiri on sisse lülitatud",
+      "Письмо выключено": "Kiri on välja lülitatud",
+      "Промокод на месте": "Sooduskood on tagasi",
+      "Отправить подписчикам?": "Saada tellijatele?",
+      "Отправить 1 подписчику?": "Saada 1 tellijale?",
       "Сколько раз можно использовать": "Mitu korda tohib kasutada",
       "Создать": "Loo",
       "Изменить тарифы доставки?": "Kas muuta tarnetariife?",
@@ -6321,6 +6388,73 @@
       "Скидка, % — от 1 до 90": "Discount, % — 1 to 90",
       "Минимальный заказ, €": "Minimum order, €",
       "Срок, число использований и заметка": "Expiry, number of uses and a note",
+      /* 1a «Маркетинг» (ux1a-marketing) */
+      "Карту видно, когда куплена хотя бы одна — PDF открывается из списка выпущенных карт.": "The card shows once at least one has been bought — the PDF opens from the list of issued cards.",
+      "раз в сутки: корзинам старше срока из настройки, если заказа так и не было": "once a day: to carts older than the set wait, if no order ever came",
+      "Сюда приходят «Прислать мне пример» и тест рассылки. Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.": "«Send me a sample» and the newsletter test arrive here. The cart, order and promo code in a sample are made up — nothing goes to customers.",
+      "Куда присылать примеры": "Where to send samples",
+      "Включаете вы": "You switch on",
+      "Уходят всегда": "Always sent",
+      "Нажмите на письмо слева, чтобы изменить текст.": "Tap a letter on the left to change its text.",
+      "Покупатель оформил заказ и не оплатил: сначала магазин напомнит письмом, потом отменит заказ сам и сообщит письмом «Заказ отменён». Проверка раз в сутки. Меньшее «Отменить через» отменит и старые неоплаченные заказы при ближайшей проверке.": "The customer placed an order and did not pay: first the shop sends a reminder, then cancels the order itself and says so in the «Order cancelled» letter. Checked once a day. A smaller «Cancel after» also cancels older unpaid orders at the next check.",
+      "Покупатель набрал корзину и ушёл: через столько часов магазин напомнит о ней. Проверка раз в сутки.": "The customer filled a cart and left: after this many hours the shop sends a reminder. Checked once a day.",
+      "Письмо уходит тем, кто оставил почту на странице товара, когда товар снова появится в наличии.": "The letter goes to those who left their e-mail on the product page, once the product is back in stock.",
+      "Промокод выписывается каждому свой, работает один раз и действует две недели от самого дня рождения, каким бы ни был запас.": "Each person gets a code of their own; it works once and lasts two weeks from the birthday itself, however early the letter goes.",
+      "Когда уходит": "When it goes out",
+      "до": "up to",
+      "сегодня": "today",
+      "Столько магазин отправит за сутки и больше не будет. Придержанное — доля писем о заказах: ноль — и рассылка однажды займёт сутки целиком.": "The shop sends this many a day and no more. The held part is for order letters: at zero, one day a newsletter takes the whole day.",
+      "Тема": "Subject",
+      "Первый абзац": "First paragraph",
+      "Последняя строка": "Last line",
+      "Вставить в тему:": "Insert into the subject:",
+      "Вставить в первый абзац:": "Insert into the first paragraph:",
+      "Вставить в последнюю строку:": "Insert into the last line:",
+      "Текст начинает уходить покупателям со следующего письма — через секунду после того, как вы перестали печатать.": "The text goes to customers from the next letter on — a second after you stop typing.",
+      "как его рисует сервер": "as the server draws it",
+      "Прислать мне пример": "Send me a sample",
+      "Письма подписчикам": "Letters to subscribers",
+      "о чём письмо — новинки, скидка 10 %…": "what the letter is about — new arrivals, 10 % off…",
+      "Помощник:": "Assistant:",
+      "Прислать мне тест": "Send me a test",
+      "Не сохранено: в тексте была незаконченная вставка «{…}»": "Not saved: the text had an unfinished insert «{…}»",
+      "Вставка не дописана — закройте её скобкой «}» или уберите «{»": "The insert is unfinished — close it with «}» or remove the «{»",
+      "Такой вставки в этом письме нет — возьмите её из кнопок ниже": "This letter has no such insert — take one from the buttons below",
+      "Стандартный текст на месте": "The standard text is back",
+      "Ваш текст на месте": "Your text is back",
+      "Нажмите на код, чтобы изменить": "Tap a code to change it",
+      "Нажмите на код, чтобы изменить, или создайте новый.": "Tap a code to change it, or make a new one.",
+      "ещё не использован": "not used yet",
+      "Промо": "Promo",
+      "Подарки": "Gifts",
+      "Удалить письмо?": "Delete the letter?",
+      "Черновик исчезнет из списка рассылок. Покупатели его не видели.": "The draft disappears from the newsletter list. Customers never saw it.",
+      "Письмо на месте": "The letter is back",
+      "Письмо удалено": "Letter deleted",
+      "Рассылка: черновик удалён": "Newsletter: draft deleted",
+      "Не получилось удалить письмо — оно осталось в списке": "Could not delete the letter — it is still in the list",
+      "Письмо не ушло — это всё ещё черновик": "The letter did not go — it is still a draft",
+      "Письмо уйдёт подписчикам через 10 секунд": "The letter goes to subscribers in 10 seconds",
+      "Переведено — проверьте": "Translated — check it",
+      "Перевести заново?": "Translate again?",
+      "Эстонский и английский текст письма заменится переводом с русского.": "The letter's Estonian and English text will be replaced by a translation from Russian.",
+      "Блок удалён": "Block deleted",
+      "любой заказ": "any order",
+      "без срока": "no end date",
+      "без лимита": "no limit",
+      "Код менять нельзя — его уже могли раздать. Правка кода меняет только будущие заказы, уже оформленные остаются как были.": "A code cannot be renamed — it may already be handed out. An edit changes future orders only; placed ones stay as they were.",
+      "Скидка, €": "Discount, €",
+      "0 — любой": "0 — any",
+      "Заказ от, €": "Order from, €",
+      "Срок, лимит и заметка": "Expiry, limit and note",
+      "Кодом уже пользовались — его можно только выключить.": "The code has been used — it can only be switched off.",
+      "Удалить промокод": "Delete promo code",
+      "Создать промокод": "Create promo code",
+      "Письмо включено": "Letter switched on",
+      "Письмо выключено": "Letter switched off",
+      "Промокод на месте": "The promo code is back",
+      "Отправить подписчикам?": "Send to subscribers?",
+      "Отправить 1 подписчику?": "Send to 1 subscriber?",
       "Сколько раз можно использовать": "How many times it may be used",
       "Создать": "Create",
       "Изменить тарифы доставки?": "Change the delivery tariffs?",
@@ -7498,6 +7632,9 @@
        confirm card's one sentence, with and without the «…получат русскую
        версию» tail (NEWS_FALLBACK_NOTE), because the card is one text node. */
     [/^Отправить (\d+) подписчикам$/, { ET: "Saada $1 tellijale", EN: "Send to $1 subscribers" }],
+    // 1a: the confirm sheet asks it as a question, and the held send counts down
+    [/^Отправить (\d+) подписчикам\?$/, { ET: "Saada $1 tellijale?", EN: "Send to $1 subscribers?" }],
+    [/^Письмо уйдёт через (\d+) с$/, { ET: "Kiri läheb $1 s pärast", EN: "The letter goes in $1 s" }],
     // a picture on its way up in a letter's block (newsUpInnerHTML)
     [/^Загружаем… (\d+) %$/, { ET: "Laadime üles… $1 %", EN: "Uploading… $1 %" }],
     [/^Отправлено (\d+) из (\d+)…$/, { ET: "Saadetud $1 / $2…", EN: "Sent $1 of $2…" }],
@@ -23812,7 +23949,7 @@
       own back link uses — or "" at a section's front door. */
   var ADM_TOP_BACK = {
     edit: "Товары", customer: "Клиенты", mail: "Все письма", setpage: "Настройки",
-    blog: "Блог", news: "Рассылка", moves: "Склад", set: "Наборы"
+    blog: "Блог", news: "Рассылка", moves: "Склад", set: "Наборы", promo: "Промокоды"
   };
   function admTopBackLabel() {
     var l = admLayers();
@@ -24212,33 +24349,103 @@
       (onReviews ? admReviewsHTML() : admCustomersHTML()) +
       "</div>";
   }
-  /* ---------- Маркетинг: «Промокоды» · «Подарочные карты» · «Письма» ------
-     Three tabs over three old keys: `promos`, the new `gift`, and `mail`. Gift
-     cards get a home of their own here (README fix #11) — until now the shop
-     sold them from /gift/ and the panel could not see them at all. */
+  /* ---------- Маркетинг: «Промокоды» · «Подарочные карты» · «Письма» · «Рассылка»
+     Four tabs over four old keys: `promos`, `gift`, `mail` and `news`. Gift
+     cards got a home of their own here (README fix #11) — until then the
+     shop sold them from /gift/ and the panel could not see them at all.
+
+     Direction 1a (README § 5, screen 08): the four tabs are one segmented
+     control (short names on a phone: Промо · Подарки · Письма · Рассылка),
+     the ONE dark button is «+ Промокод» or «+ Письмо» (admPinnedHTML — the
+     page head on a desk, pinned above the tab bar on a phone), and whatever
+     is opened from a list — a code, a letter, a newsletter — is its own page
+     on a phone and the right-hand column on a wide desk (.adm-mk2). */
   function admMarketingTab() {
     if (S.adminTab === "gift") return "gift";
     if (S.adminTab === "mail") return "mail";
     if (S.adminTab === "news") return "news";
     return "promos";
   }
+  /** Is a code, a letter or a newsletter open over the list? On a phone that is a page of its own. */
+  function admMarketingSub(tab) {
+    if (tab === "promos") return !!S.promoForm;
+    if (tab === "mail") return !!S.mailOpen;
+    if (tab === "news") return !!(S.newsEdit || S.newsEditBusy);
+    return false;
+  }
+  /* [key, name, the phone's shorter word]. The segmented control of 1a, with
+     the full name in `title` as every section tab has it (admTabBtn) — the
+     phone shows «Промо» and «Подарки», the name is still there to read. */
+  var MK_TABS = [
+    ["promos", "Промокоды", "Промо"],
+    ["gift", "Подарочные карты", "Подарки"],
+    ["mail", "Письма"],
+    ["news", "Рассылка"]
+  ];
+  function admMkTabsHTML(tab) {
+    return '<div class="adm-seg" role="group" aria-label="Маркетинг">' + MK_TABS.map(function (x) {
+      var label = x[2] ? '<span class="adm-mktab__l">' + x[1] + '</span><span class="adm-mktab__s">' + x[2] + "</span>" : x[1];
+      return '<button data-admtab="' + x[0] + '" aria-current="' + (tab === x[0]) + '" title="' + x[1] + '">' + label + "</button>";
+    }).join("") + "</div>";
+  }
   function admMarketingScreen() {
     var tab = admMarketingTab();
-    var add = tab === "promos" && !S.promoForm
-      ? '<button class="adm-btn adm-btn--head" data-admpromonew>+ Промокод</button>'
-      // «Рассылка»: a new letter, from the list only — the editor has its own bar
-      : tab === "news" && !S.newsEdit && !S.newsEditBusy
-        ? '<button class="adm-btn adm-btn--head" data-newsnew>+ Письмо</button>'
-        : "";
-    return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Маркетинг", add) +
-      admTabsHTML(
-        admTabBtn("promos", "Промокоды", 0, tab === "promos") +
-        admTabBtn("gift", "Подарочные карты", 0, tab === "gift") +
-        admTabBtn("mail", "Письма", 0, tab === "mail") +
-        admTabBtn("news", "Рассылка", 0, tab === "news")) +
+    var sub = admMarketingSub(tab);
+    var pin = "";
+    if (SRV.admin === true) {
+      /* «+ Промокод» stays in the head while a code is open on a desk (it
+         opens the next one) and steps aside on a phone, where the code is a
+         page; the NEW code's own «Создать промокод» is then the dark one */
+      if (tab === "promos" && !(S.promoForm && !S.promoForm.editing)) pin = admPinnedHTML("data-admpromonew", "+ Промокод");
+      else if (tab === "news" && !S.newsEdit && !S.newsEditBusy) pin = admPinnedHTML("data-newsnew", "+ Письмо");
+    }
+    return '<div class="adm-screen adm-screen--tight adm-mk' + (sub ? " adm-mk--sub" : "") + '">' +
+      admHead("", "Маркетинг", pin ? '<span class="adm-mkpin">' + pin + "</span>" : "") +
+      '<div class="adm-mktabs">' + admMkTabsHTML(tab) + "</div>" +
       (tab === "gift" ? admGiftScreenHTML() : tab === "mail" ? admMailHTML() : tab === "news" ? admNewsHTML() : admPromosHTML()) +
       "</div>";
+  }
+
+  /* ---------- a confirmed step, held back (1a — Dim, q3 and q8) ------------
+     A delete after its confirm sheet (five seconds) and a newsletter after
+     «Отправить N подписчикам?» (ten) happen on screen at once and reach the
+     server only when the time is up: «Вернуть» on the toast until then means
+     the call is never made at all. A page that goes away first sends what it
+     holds at once — `fire(true)`, for a request that must outlive the page
+     (keepalive). The confirm itself was the owner's answer; what is held is
+     only the chance to take it back. */
+  var MK_DELETE_HOLD_MS = 5000;
+  var MK_SEND_HOLD_MS = 10000;
+  var MK_HOLDS = [];
+  function mkHold(ms, fire, undo, text) {
+    var h = { done: false, timer: 0, until: Date.now() + ms };
+    var drop = function () { MK_HOLDS = MK_HOLDS.filter(function (x) { return x !== h; }); };
+    h.fire = function (leaving) {
+      if (h.done) return;
+      h.done = true; clearTimeout(h.timer); drop();
+      fire(!!leaving);
+    };
+    h.cancel = function () {
+      if (h.done) return false;
+      h.done = true; clearTimeout(h.timer); drop();
+      undo();
+      return true;
+    };
+    h.timer = setTimeout(function () { h.fire(false); }, ms);
+    MK_HOLDS.push(h);
+    if (text) {
+      toast(text, { prev: true, undo: function () { h.cancel(); } });
+      // the offer stands exactly as long as the hold does
+      clearTimeout(toast._t);
+      toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, ms);
+    }
+    return h;
+  }
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("pagehide", function () { MK_HOLDS.slice().forEach(function (h) { h.fire(true); }); });
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") MK_HOLDS.slice().forEach(function (h) { h.fire(true); });
+    });
   }
 
   /* ---------- Маркетинг → «Подарочные карты» ------------------------------
@@ -24250,7 +24457,10 @@
 
      One design, not three: the printable card (src/lib/giftcard-pdf.ts) knows
      a single layout, and a thumbnail offering «светлое» or «своё» would be a
-     button that changes nothing. */
+     button that changes nothing. 1a draws a picture of the card here; Dim took
+     that picture out on 19.09.2026 («"showing the design" does not give
+     absolutely anything»), so this block stays what it became then — the real
+     PDF and the letter around it — only in the 1a frame. */
   /** The real card to look at: the newest issued one that is still alive.
       "" before the list has arrived and in a shop that has sold none — there
       is no sample PDF to invent, and a drawing of a card is not a card. */
@@ -24265,15 +24475,14 @@
     var on = giftAmountsOn();
     var g = S.admGiftCards;
     var left =
-      '<div><div class="adm-sec__t">Номиналы в магазине</div>' +
-        '<div class="adm-amts" role="group" aria-label="Номиналы карты" style="margin-top:10px">' +
+      admSecHeadHTML("Номиналы в магазине", "gift-amounts",
+        "Нажмите, чтобы включить или скрыть номинал. Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».") +
+        '<div class="adm-amts adm-amts--1a" role="group" aria-label="Номиналы карты">' +
           GIFT_AMOUNTS.map(function (v) {
             // eur(): «25 €» in RU and ET, «€25» in EN — like every other price in the panel
             return '<button class="adm-amt" data-admgiftamt="' + v + '" aria-pressed="' +
               (on.indexOf(v) >= 0) + '">' + eur(v) + "</button>";
           }).join("") + "</div>" +
-        '<p class="adm-hint" style="margin:8px 0 0">Нажмите, чтобы включить или скрыть номинал. ' +
-          "Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».</p></div>" +
       /* This block used to be a dark rectangle with the word REMPIRE in it —
          a drawing of the card, not the card, and nothing to press. «The
          "showing the design" does not give absolutely anything, if anything
@@ -24282,38 +24491,36 @@
          knows one layout — so the honest block says so, shows the real thing
          when there is one to show, and points at the letter around it, which
          IS his to write. */
-      '<div><div class="adm-sec__t">Оформление</div>' +
-        '<p class="adm-hint" style="margin:10px 0 0">Одно оформление на все номиналы — ' +
-          "тёмная карта с логотипом. Меняется только письмо, с которым она приходит.</p>" +
-        '<div class="adm-acts" style="margin-top:10px">' +
+      '<div class="adm-giftlook">' + admSecHeadHTML("Оформление", "gift-look",
+          "Одно оформление на все номиналы — тёмная карта с логотипом. Меняется только письмо, с которым она приходит.") +
+        '<div class="adm-giftlook__acts">' +
           (giftSamplePdf()
-            ? '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(giftSamplePdf()) +
+            ? '<a class="adm-btn adm-btn--ghost" href="' + esc(giftSamplePdf()) +
               '" target="_blank" rel="noopener">Посмотреть карту PDF ↗</a>'
-            : '<span class="adm-hint">Карту видно, когда куплена хотя бы одна — PDF открывается из списка справа.</span>') +
+            : '<span class="adm-hint">Карту видно, когда куплена хотя бы одна — PDF открывается из списка выпущенных карт.</span>') +
           /* `data-mailtpl` alone: it opens «Письма» on that letter by itself,
              and adding `data-admtab` would be caught by the earlier branch of
              the click delegate, which returns before this one is read. */
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="gift-card">Письмо к карте</button>' +
+          '<button class="adm-btn adm-btn--ghost" data-mailtpl="gift-card">Письмо к карте</button>' +
         "</div></div>";
     var rows = g && g.cards.length
-      ? '<div class="adm-list">' + g.cards.map(admGiftRowHTML).join("") + "</div>"
+      ? '<div class="adm-list adm-list--flat">' + g.cards.map(admGiftRowHTML).join("") + "</div>"
       : g
         ? '<div class="adm-empty">Пока не куплено ни одной карты</div>'
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
     var side =
-      '<div class="adm-sec"><div class="adm-sec__t">Выпущенные карты</div>' +
-        '<div class="adm-sec__x">' + (g ? eur(g.unspent) + " не потрачено" : "") + "</div></div>" +
+      admSecHeadHTML("Выпущенные карты", "", "", g ? '<span class="adm-sech__x">' + eur(g.unspent) + " не потрачено</span>" : "") +
       (S.admGiftErr
         ? '<div class="adm-error"><span>' + esc(S.admGiftErr) + "</span>" +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="giftcards">Повторить</button></div>'
         : rows);
-    return admColsHTML(left, side);
+    return '<div class="adm-gift"><div class="adm-gift__l">' + left + '</div><div class="adm-gift__r">' + side + "</div></div>";
   }
   /* One issued card. Three lines, not one: the code, then who and when, then
      the card itself as a button — the same shape the order card now uses, and
-     the same reason (Dim, 07.09.2026). «Действует до» is new here: a card is
-     money the shop owes, and the date it stops owing it is the second thing
-     the owner wants after the balance. */
+     the same reason (Dim, 07.09.2026). «Действует до» is here because a card
+     is money the shop owes, and the date it stops owing it is the second
+     thing the owner wants after the balance. */
   function admGiftRowHTML(c) {
     var to = (c.recipient && (c.recipient.name || c.recipient.email)) || "покупателю";
     var until = String(c.validUntil || "").split("-").reverse().join(".");
@@ -24326,15 +24533,14 @@
        since 10.09.2026; this is the same two lines, on the same field the
        payload already carries. */
     var dead = !!c.voidedAt;
-    return '<div class="adm-row adm-row--stack">' +
-      '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
-        '<span class="adm-row__nm adm-mono">' + esc(c.code) +
-          (dead ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>'
-            // the order's refund is pending — same badge the order card draws (admGiftCardsHTML)
-            : c.held ? '<span class="adm-badge adm-badge--quiet" data-giftheld="' + esc(c.code) + '">Заморожена</span>' : "") +
-        "</span>" +
+    return '<div class="adm-row adm-row--stack adm-giftrow">' +
+      '<span class="adm-giftrow__top">' +
+        '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
+        (dead ? '<span data-giftvoid="' + esc(c.code) + '">' + admTagHTML("quiet", "Аннулирована") + "</span>"
+          // the order's refund is pending — same tag the order card draws (admGiftCardsHTML)
+          : c.held ? '<span data-giftheld="' + esc(c.code) + '">' + admTagHTML("low", "Заморожена") + "</span>" : "") +
         '<span class="adm-row__amt">' + eur(c.balance) + "</span></span>" +
-      '<span class="adm-row__sub" style="width:100%">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +
+      '<span class="adm-row__sub">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +
         (until ? ' · <span>Действует до</span> <span>' + esc(until) + "</span>" : "") +
         (c.balance === c.amount ? "" : ' · <span>из ' + eur(c.amount) + "</span>") + "</span>" +
       (c.pdfUrl && !dead
@@ -24366,23 +24572,22 @@
   }
 
   /* ---------- Маркетинг → «Письма» ----------------------------------------
-     A list of the letters the shop sends by itself, then the editor for one of
-     them. The three switchable ones are the account flows (settings.flows,
-     `data-admflow`); the other three say «всегда» instead — a shop that could
-     switch off «Заказ принят» would be a shop that takes money silently.
-
-     The editor is the mail_texts flow that was already here: the same three
-     fields, the same placeholder chips, one set_mail_texts action. «Сохранить»
-     is now the whole of it — it used to arm a confirm card whose «Применить»
-     did the saving, which is two save-shaped buttons for one edit and no
-     draft anywhere to tell them apart (Renat, 13.09.2026). The layout is
-     fields left, the letter right, redrawn from the draft as it is typed. */
+     The letters the shop sends by itself, then one of them open. 1a (README
+     § 5, screen 08, prototype 3 «Письма»): two groups — «Включаете вы», the
+     account flows with a switch each (settings.flows, `data-admflow`), and
+     «Уходят всегда», the letters a shop may not silence — and each letter's
+     timing lives INSIDE that letter, with «Запустить сейчас», «Последний
+     запуск» and «Ждут письма: N» (Dim, 23.09.2026). The letter itself is the
+     mail_texts flow that was already here — the same three fields, the same
+     placeholder chips, the same live preview — only it saves itself now: a
+     second after the last keystroke, and never with a half-typed «{…}» in it
+     (Dim, q6), because a saved text is live on the very next order. */
   /* Each row says what the letter really does AND when it really fires (Dim,
      07.09.2026: «keep and make them work … need a switch and be manageble»).
-     The three switchable ones all start off — the same FLOW_DEFAULTS the
-     sender reads (src/lib/flows.ts) — and all three are sent by one job that
-     runs ONCE A DAY on the free plan, which is why every «когда» below is
-     written in days rather than in hours. */
+     The switchable ones all start off — the same FLOW_DEFAULTS the sender
+     reads (src/lib/flows.ts) — and are sent by one job that runs ONCE A DAY
+     on the free plan, which is why every «когда» below is written in days
+     rather than in hours. */
   var ADM_MAIL_ROWS = [
     ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
@@ -24409,28 +24614,31 @@
     /* The gift card's own letter. The server has had it all along
        (src/emails/index.ts), this list did not — so the one letter whose
        design the owner cannot change was also the one letter he could not
-       edit. «Маркетинг → Подарочные карты → Оформление» now points straight
-       at it, and until 19.09.2026 that pointer landed on «Заказ принят»,
-       because mailTpl() falls back to the first row for a key it does not
-       know (Dim: «Brings me to "Заказ принят" e-mail»). Always on: a bought
-       card that never arrives is money taken for nothing. */
+       edit. «Маркетинг → Подарочные карты → Оформление» points straight at
+       it; mailTpl() falls back to the first row for a key it does not know,
+       which is how that pointer once landed on «Заказ принят» (Dim,
+       19.09.2026). Always on: a bought card that never arrives is money
+       taken for nothing. */
     ["gift-card", "Подарочная карта", "сразу после оплаты, если в заказе есть карта", ""],
     ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
     /* The pair shares ONE switch — `abandoned`, the only one the server reads
-       for either letter (src/lib/flows.ts). Until 23.09.2026 the second row
-       carried a key of its own, «abandonedDiscount», that nothing on the
-       server knows: its switch always read «off», flipping it saved a word
-       nobody reads, and because it was «off» nothing opened under it — no
-       «Запустить сейчас», and the four numbers were a card at the bottom of
-       the page. Dim, on staging: «I cannot manually force … I cannot modify
-       what the discount is». The second row now shows whose switch it obeys,
-       and its group holds the numbers for both letters (admMailHTML). */
-    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше срока из настройки ниже, если заказа так и не было", "abandoned"],
+       for either letter (src/lib/flows.ts; Dim, q35). Until 23.09.2026 the
+       second row carried a key of its own, «abandonedDiscount», that nothing
+       on the server knows: its switch always read «off», flipping it saved a
+       word nobody reads, and nothing opened under it. The second row says
+       whose switch it obeys, and it holds the four numbers of the pair. */
+    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше срока из настройки, если заказа так и не было", "abandoned"],
     ["abandoned-cart-discount", "Брошенная корзина — письмо со скидкой", "через несколько дней после первого письма, если заказа так и нет", "abandoned"],
     ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
+  /** «Включаете вы», in the order the design lists them — the pair together. */
+  var MAIL_ON_ORDER = ["order-unpaid", "abandoned-cart", "abandoned-cart-discount", "back-in-stock", "birthday"];
+  function mailRow(tpl) {
+    for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i];
+    return ADM_MAIL_ROWS[0];
+  }
   /* «за N дней» (Dim: «the days before need to be a setting»). A select, not
      a number box: on a phone it is one tap, and the values are the ones a
      birthday promo is worth sending on. 0 is the day itself — what
@@ -24454,47 +24662,36 @@
   }
   function admBirthdayPercentHTML() {
     var p = birthdayPercent();
-    return '<div class="adm-swrow"><span>Скидка в поздравлении' +
-        '<span class="adm-row__sub">код выписывается каждому свой и работает один раз</span></span>' +
+    return '<label class="adm-field">Скидка в поздравлении' +
       '<select class="adm-input" data-flowbpct aria-label="Размер скидки ко дню рождения">' +
       BIRTHDAY_PERCENT_CHOICES.map(function (n) {
         return '<option value="' + n + '"' + (n === p ? " selected" : "") + ">" + n + " %</option>";
-      }).join("") + "</select></div>";
+      }).join("") + "</select></label>";
   }
   function admBirthdayDaysHTML() {
     var n = birthdayDays();
-    /* The sub-line used to say «запас в пару дней ему не мешает», which was
-       true of a couple of days and false of the fourteen this same select
-       offers: the code lived fourteen days from the day it was written, so
-       «за 14 дней» handed out a code that died on the birthday. The code's
-       life now grows with the head start (birthdayCodeDays, src/lib/flows.ts)
-       — so the line says what the owner can now count on whichever number he
-       picks. */
-    return '<div class="adm-swrow"><span>Когда поздравлять' +
-        '<span class="adm-row__sub">промокод действует две недели от самого дня рождения, каким бы ни был запас</span></span>' +
+    return '<label class="adm-field">Когда поздравлять' +
       '<select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
       BIRTHDAY_DAY_CHOICES.map(function (x) {
         return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
-      }).join("") + "</select></div>";
+      }).join("") + "</select></label>";
   }
   function admMailName(tpl) {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
     return tpl;
   }
-  /* «Запустить сейчас» (10.09.2026) under «Брошенная корзина» and «Скидка ко
-     дню рождения» — the two letters whose moment is a matter of time. The
-     test plan used to say «Попросить Дима запустить расписание вручную — из
-     панели это не делается»; this is the door from the panel. The button runs
-     the very function the daily job runs (POST /api/admin/flows/run/), so the
-     switch still decides and nothing goes out twice. Under it the last run,
-     the cron's or this button's alike — «Последний запуск: 10.09 07:00 —
-     отправлено 1» — which is also the one place that shows whether the
-     schedule reaches this deployment at all. */
+  /* «Запустить сейчас» (10.09.2026) inside «Брошенная корзина», its
+     discounted twin and «Скидка ко дню рождения» — the letters whose moment
+     is a matter of time. The button runs the very function the daily job
+     runs (POST /api/admin/flows/run/), so the switch still decides and
+     nothing goes out twice. Beside it the last run, the cron's or this
+     button's alike — «Последний запуск: 10.09 07:00 — отправлено 1» — which
+     is also the one place that shows whether the schedule reaches this
+     deployment at all. */
   var FLOW_RUNNABLE = { abandoned: true, abandonedDiscount: true, birthday: true };
-  /* Which run a letter's row starts — by letter, not by switch, because the
-     two cart letters share a switch and each has its own job (the server's
-     HandRunFlow, src/lib/flows.ts). The discounted one had no button at all
-     until 23.09.2026, though the route has always accepted it. */
+  /* Which run a letter starts — by letter, not by switch, because the two
+     cart letters share a switch and each has its own job (the server's
+     HandRunFlow, src/lib/flows.ts). */
   var MAIL_RUN_FLOW = { "abandoned-cart": "abandoned", "abandoned-cart-discount": "abandonedDiscount", "birthday": "birthday" };
   /** `10.09 07:00`, in this machine's own time — the owner reads his phone's clock, not UTC. */
   function flowRunWhen(iso) {
@@ -24561,8 +24758,8 @@
   }
   function admFlowRunHTML(flow) {
     var busy = SRV.flowRunBusy === flow;
-    return '<div class="adm-swrow" data-admflowlast="' + flow + '"><span>Не ждать расписания' +
-        '<span class="adm-row__sub">' + flowLastRunHTML(flow) + "</span></span>" +
+    return '<div class="adm-mwhen__run" data-admflowlast="' + flow + '">' +
+      '<span class="adm-hint">' + flowLastRunHTML(flow) + "</span>" +
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admflowrun="' + flow + '"' + (busy ? " disabled" : "") + ">" +
         (busy ? "Запускаем…" : "Запустить сейчас") + "</button></div>";
   }
@@ -24590,31 +24787,29 @@
       toast("Не удалось запустить — попробуйте ещё раз."); render();
     }).catch(function () { SRV.flowRunBusy = ""; toast("Сервер не отвечает"); render(); });
   }
-  /* «Прислать пример» (23.09.2026). Dim, testing on staging: «I do not seem to
-     have gotten the letter» — the automatic letters leave once a day at 07:00
-     UTC, so on a test day there was no way to SEE one. Every row with a switch
-     now sends a sample of its letter to the address typed at the top of the
-     page — the same route and the same demo letter as «Отправить мне тест» in
-     the editor (POST /api/admin/mail/test/), so nothing real moves: no cart is
-     stamped, no code is written, and the code in the sample cannot be spent.
-     Offered whether the switch is on or off: seeing the letter is how the
-     owner decides whether to switch it on. */
-  function admMailSampleToHTML() {
+  /* «Куда присылать примеры» (Dim, q8): ONE address for every sample and
+     test — this tab's «Прислать мне пример» and «Рассылка»'s «Прислать мне
+     тест» — remembered on this device (admPanesSave). Folded once there is
+     one, with the address as the fold's own line; open while there is none,
+     because the first sample needs it. Drawn once: in the open letter when a
+     letter is open, in the list's folds when none is. */
+  var MAIL_TO_RX = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
+  function admMailToFieldHTML(attr) {
+    return '<label class="adm-field">Адрес' +
+      '<input class="adm-input" type="email" ' + attr + ' value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com" autocomplete="email"></label>' +
+      '<span class="adm-hint">Сюда приходят «Прислать мне пример» и тест рассылки. Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.</span>';
+  }
+  function admMailToHTML(attr) {
     if (SRV.admin !== true) return "";
-    return '<label class="adm-field" style="margin-bottom:16px">Куда присылать примеры писем' +
-      '<input class="adm-input" type="email" data-mailto value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com">' +
-      '<span class="adm-hint">«Прислать пример» под письмом отправляет его сюда сразу, не дожидаясь расписания. ' +
-        "Корзина, заказ и промокод в примере придуманы — покупателям ничего не уходит.</span></label>";
+    var addr = String(S.mailTo || "").trim();
+    if (!MAIL_TO_RX.test(addr)) {
+      return '<div class="adm-mailto"><div class="adm-pfield__l">Куда присылать примеры</div>' + admMailToFieldHTML(attr) + "</div>";
+    }
+    return admFoldHTML("mail-to", "Куда присылать примеры", '<span data-notr data-mailtosum>' + esc(addr) + "</span>", admMailToFieldHTML(attr));
   }
-  function admMailSampleHTML(tpl) {
-    var busy = S.mailSampleBusy === tpl;
-    return '<div class="adm-swrow"><span>Посмотреть письмо сейчас' +
-        '<span class="adm-row__sub">пример придёт на адрес вверху страницы</span></span>' +
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailsample="' + tpl + '"' + (busy ? " disabled" : "") + ">" +
-        (busy ? "Отправляем…" : "Прислать пример") + "</button></div>";
-  }
-  /* What the mail route answered, in words — shared by «Отправить мне тест»
-     and «Прислать пример», which hit the same route with the same failures. */
+  /* What the mail route answered, in words — shared by «Прислать мне
+     пример» and the old «Прислать пример», which hit the same route with the
+     same failures. */
   function mailSendToast(res, okMsg) {
     var err = res.j && res.j.error;
     /* «Подключения» reads this: the only honest signal the panel has about
@@ -24629,10 +24824,14 @@
     else if (err === "bad_email") toast("Введите e-mail — на него придёт образец");
     else toast("Не получилось — попробуйте ещё раз");
   }
+  /* The saved letter to the address — the `data-mailsample` door the rows had
+     until 1a moved «Прислать мне пример» into each letter (it sends the text
+     on screen, see the `data-mailtest` handler). Kept for whatever still
+     knocks on it. */
   function srvMailSample(tpl) {
     keepMailTo();
     var addr = (S.mailTo || "").trim();
-    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(addr)) {
+    if (!MAIL_TO_RX.test(addr)) {
       toast("Введите e-mail — на него придёт образец"); refocus("[data-mailto]"); return;
     }
     if (S.mailSampleBusy) return;
@@ -24652,94 +24851,183 @@
       S.mailSampleBusy = ""; toast("Не получилось — попробуйте ещё раз"); render();
     });
   }
+  /** Has the owner written any of this letter himself, in any language? The row's «свой текст». */
+  function mailOwnAny(tpl) {
+    if (!MAIL_TEXTS) return false;
+    var t = (MAIL_TEXTS.texts || {})[tpl];
+    if (!t) return false;
+    return MAIL_LANGS.some(function (l) {
+      return MAIL_FIELDS.some(function (f) { return !!(t[l] && typeof t[l][f[0]] === "string" && t[l][f[0]].trim()); });
+    });
+  }
+  function admMailRowHTML(m) {
+    var flow = m[3], on = flow ? !!DEMO.flows[flow] : true;
+    // the pair's second letter: the first one's switch (q35), said in words
+    var follows = m[0] === "abandoned-cart-discount";
+    var cur = !!S.mailOpen && mailTpl() === m[0];
+    var right = !flow
+      ? '<span class="adm-mrow__chev" aria-hidden="true">›</span>'
+      : follows
+        ? admTagHTML(on ? "ok" : "quiet", on ? "включено вместе с первым" : "выключено вместе с первым")
+        : admSwitch('data-admflow="' + flow + '"', on, m[1]);
+    return '<div class="adm-row adm-row--open adm-mrow' + (cur ? " is-cur" : "") + '"' + ADM_ROW_OPEN + ">" +
+      '<button class="adm-row__body" data-mailtpl="' + m[0] + '"' + (cur ? ' aria-current="true"' : "") + ">" +
+        '<span class="adm-row__nm">' + m[1] + (mailOwnAny(m[0]) ? " " + admTagHTML("plain", "свой текст") : "") + "</span>" +
+        // the queue belongs to the first letter; the second would repeat its number
+        '<span class="adm-row__sub"><span>' + m[2] + "</span>" + (follows ? "" : flowCountLine(flow)) + "</span></button>" +
+      right + "</div>";
+  }
   function admMailHTML() {
     loadMailTexts(false);
     if (SRV.admin === true) loadFlowCounts();
-    if (S.mailOpen) return admMailEditorHTML();
-    // a switch the page has already drawn: the next row with it only follows
-    var drawn = {};
-    return admMailSampleToHTML() + '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
-      var flow = m[3];
-      var on = flow ? !!DEMO.flows[flow] : true;
-      /* The discounted cart letter obeys «Брошенная корзина»'s switch — the
-         server has one switch for the pair — so it says whose it follows
-         instead of drawing a second switch that would move the first. */
-      var follows = !!(flow && drawn[flow]);
-      if (flow) drawn[flow] = true;
-      var run = MAIL_RUN_FLOW[m[0]] || "";
-      /* What this letter's switch opens when it is on. Renat, 13.09.2026, on
-         his phone: «in e-mails when turning something on, a subsection opens -
-         it's really hard to understand for which section the subsection is.»
-         They were siblings of the row in one flat list, at the same weight and
-         the same left edge. They are a group now — indented behind the row's
-         own ink bar, with the list's hairline moved to the bottom of the group
-         instead of splitting it (.adm-sub, admin.css).
-
-         The cart letters' four numbers live here, under the pair, whatever the
-         switch says (23.09.2026). They were a card at the very bottom of the
-         page, below the daily limit, and the row pointed at «Настройки», where
-         they never were — Dim: «I cannot modify what the discount is. Also I
-         cannot modify when it goes out». */
-      var subs =
-        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
-        (m[0] === "abandoned-cart-discount" ? cartFlowSettingsCard() : "") +
-        (run && FLOW_RUNNABLE[run] && on && SRV.admin === true ? admFlowRunHTML(run) : "") +
-        (flow && SRV.admin === true ? admMailSampleHTML(m[0]) : "");
-      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines' +
-        (subs ? " adm-row--hassub" : "") + '"' + ADM_ROW_OPEN + ">" +
-        '<button class="adm-row__body" data-mailtpl="' + m[0] + '">' +
-          '<span class="adm-row__nm">' + m[1] + "</span>" +
-          // the queue belongs to the first letter; the second would repeat its number
-          '<span class="adm-row__sub"><span>' + m[2] + "</span>" + (follows ? "" : flowCountLine(flow)) + "</span></button>" +
-        // the third line of every row: the switch (or «всегда») on the left, «Изменить» on the right
-        '<span class="adm-row__line adm-row__line--split">' +
-        (!flow
-          ? '<span class="adm-badge adm-badge--ok">всегда</span>'
-          : follows
-            ? '<span class="adm-badge' + (on ? " adm-badge--ok" : " adm-badge--quiet") + '">' +
-                (on ? "включено вместе с первым" : "выключено вместе с первым") + "</span>"
-            : admSwitch('data-admflow="' + flow + '"', on, m[1])) +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button></span>' +
-        "</div>" +
-        // the letter's own settings, and the button that runs it now — one
-        // bracketed group under the switch that opened them
-        (subs ? '<div class="adm-sub">' + subs + "</div>" : "");
-    }).join("") + "</div>" +
-      /* What the switches above do — the one thing this page never said. The
-         rows carry their own «когда», but only two of the four spell out «раз
-         в сутки», and that an off switch means the letter reaches nobody was
-         said only by a toast, after «Запустить сейчас». The sentence itself is
-         older than its home: it was written for the three flows that had a
-         switch and then stranded, unrendered, at the end of
-         srvUnpaidSettingsSave() when «Заказ ждёт оплаты» made it four. It
-         counts none of them now, so the fifth switch cannot make it wrong. */
-      '<p class="adm-hint" style="margin-top:12px">Письма с переключателем магазин рассылает сам, ' +
-        "один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>" +
-      '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — ' +
-        "их править не нужно.</p>" +
-      mailBudgetCard() +
-      unpaidSettingsCard();
+    var onRows = MAIL_ON_ORDER.map(mailRow);
+    var always = ADM_MAIL_ROWS.filter(function (m) { return !m[3]; });
+    var list =
+      admSecHeadHTML("Включаете вы", "mail-on",
+        "Письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.") +
+      '<div class="adm-list adm-list--flat adm-mlist">' + onRows.map(admMailRowHTML).join("") + "</div>" +
+      admSecHeadHTML("Уходят всегда", "mail-always",
+        "Номер заказа, состав и трек-номер подставляются сами — их править не нужно.") +
+      '<div class="adm-list adm-list--flat adm-mlist">' + always.map(admMailRowHTML).join("") + "</div>" +
+      '<div class="adm-mfolds">' + (S.mailOpen ? "" : admMailToHTML("data-mailto")) + mailBudgetFoldHTML() + "</div>";
+    var side = S.mailOpen
+      ? admMailEditorHTML()
+      : '<div class="adm-mk2__ph">Нажмите на письмо слева, чтобы изменить текст.</div>';
+    return '<div class="adm-mk2 adm-mk2--mail"><div class="adm-mk2__list">' + list + '</div><div class="adm-mk2__side">' + side + "</div></div>";
   }
-  /* ---------- «Заказ ждёт оплаты»: the two numbers behind it -----------------
-     Dim, 07.09.2026: «нужны напоминания, а через семь дней отменяем и
-     сообщаем.» Seven days is his answer today, not a law — so both intervals
-     are settings (`settings.flows.unpaidRemindDays` / `unpaidCancelDays`)
-     rather than constants, and they live here, next to the letter they send.
-     The cron runs once a day on Vercel's free plan, so whole days are the
-     only unit that means anything. */
-  /* ---- «Брошенные корзины»: когда напомнить и когда дать скидку ----------
-     Ренат, 20.09.2026: «до 100 € — просто напоминание в течение суток, свыше
-     100 € — через три дня скидка 5 %», и отдельно: «add possibility to choose
-     time when the abandoned cart letter goes out».
 
-     Четыре числа, а не четыре переключателя. Второе письмо не включается
-     само по себе: порог суммы и есть его выключатель — поставьте сумму выше
-     любой корзины, и уходит только первое. Иначе пришлось бы объяснять, чем
-     «скидка выключена» отличается от «скидка от 100 000 €».
+  /* ---------- the flows row: one writer, always the latest map -------------
+     Every switch, every number and both birthday selects live in ONE
+     settings row (settings.flows) that travels whole. They go through one
+     autosave record, so ten quick changes are at most two PUTs and the second
+     carries all ten, and the header's «Сохраняем… / Сохранено ✓ / Не
+     сохранилось — Повторить» is this row's. `note.toast` (with its journal
+     entry, for «Вернуть») is said only once the server has the map. */
+  var MK_FLOWS_NOTE = null;
+  var mkFlowsSeq = 0;
+  function mkFlowsPut(note) {
+    if (note) MK_FLOWS_NOTE = note;
+    mkFlowsSeq += 1;
+    return admAutosave("mk:flows", mkFlowsSeq, "change", { kind: "pick", send: mkFlowsSend });
+  }
+  function mkFlowsSend(v, opts) {
+    var note = MK_FLOWS_NOTE;
+    MK_FLOWS_NOTE = null;
+    if (!SRV.admin) { if (note && note.toast) toast(note.toast, note.entry); return true; }
+    return mkFlowsWrite(opts).then(function (r) {
+      if (admAutosaveOk(r) && note && note.toast) toast(note.toast, note.entry);
+      return r;
+    });
+  }
+  /** The row itself, as the panel holds it now — a write that waited goes out with the latest map. */
+  function mkFlowsWrite(opts) {
+    var st = "/api/admin/settings/", body = { flows: DEMO.flows };
+    var req = opts && opts.keepalive ? mkKeepalive(st, "PUT", body) : apiSend(st, "PUT", body);
+    return req.then(function (r) {
+      if (admAutosaveOk(r)) demoSave();
+      else if (r && r.status === 401) { SRV.admin = false; render(); }
+      return r;
+    });
+  }
+  /** A number inside a letter: its box saves itself when it is left (ADM_SAVE_POLICY.count). */
+  var MK_FLOW_NUMS = {
+    abandonedHours: { min: 1, max: 168, def: 3, hint: "Напоминание — от 1 до 168 часов" },
+    abandonedDiscountDays: { min: 1, max: 60, def: 3, hint: "Скидка — от 1 до 60 дней" },
+    abandonedDiscountPercent: { min: 1, max: 90, def: 5, hint: "Скидка — от 1 до 90 %" },
+    abandonedDiscountMinTotal: { min: 0, max: 10000, def: 100, cents: true, hint: "Сумма — от 0 до 10 000 €" },
+    unpaidRemindDays: { min: 1, max: 60, def: 3, hint: "Напоминание должно быть раньше отмены" },
+    unpaidCancelDays: { min: 2, max: 60, def: 7, hint: "Отмена — от 2 до 60 дней" }
+  };
+  function mkFlowNum(key) {
+    var c = MK_FLOW_NUMS[key], v = DEMO.flows[key];
+    if (key === "abandonedDiscountMinTotal") return v == null ? c.def : Number(v);
+    return Number(v) || c.def;
+  }
+  function mkFlowParse(key, raw) {
+    var c = MK_FLOW_NUMS[key], s = String(raw == null ? "" : raw).trim().replace(",", ".");
+    if (!s || !isFinite(Number(s))) return null;
+    var n = c.cents ? Math.round(Number(s) * 100) / 100 : Math.round(Number(s));
+    return n >= c.min && n <= c.max ? n : null;
+  }
+  function mkFlowAs(key) {
+    var as = "mk:flow:" + key;
+    admAutosaveSpec(as, {
+      kind: "count",
+      validate: function (raw) {
+        var n = mkFlowParse(key, raw);
+        if (n === null) return MK_FLOW_NUMS[key].hint;
+        // «Напомнить» before «Отменить» — a reminder after the order is gone is no reminder
+        if (key === "unpaidRemindDays" && n >= mkFlowNum("unpaidCancelDays")) return MK_FLOW_NUMS.unpaidRemindDays.hint;
+        if (key === "unpaidCancelDays" && n <= mkFlowNum("unpaidRemindDays")) return MK_FLOW_NUMS.unpaidRemindDays.hint;
+        return "";
+      },
+      send: function (raw, opts) {
+        DEMO.flows[key] = mkFlowParse(key, raw);
+        if (!SRV.admin) return true;
+        return mkFlowsWrite(opts).then(function (r) {
+          // the journal's lines for these two groups, as they have always read
+          if (admAutosaveOk(r)) {
+            var remind = mkFlowNum("unpaidRemindDays"), cancel = mkFlowNum("unpaidCancelDays");
+            var hours = mkFlowNum("abandonedHours"), percent = mkFlowNum("abandonedDiscountPercent"), days = mkFlowNum("abandonedDiscountDays");
+            if (key.indexOf("unpaid") === 0) journalNote("Неоплаченные заказы: напоминание через " + remind + ", отмена через " + cancel);
+            else journalNote("Брошенные корзины: напоминание через " + hours + " ч, скидка " + percent + " % через " + days + " дн.");
+          }
+          return r;
+        });
+      }
+    });
+    return as;
+  }
+  function mkFlowBoxHTML(key, label, attr) {
+    var as = mkFlowAs(key);
+    var c = MK_FLOW_NUMS[key];
+    return '<label class="adm-field">' + label +
+      '<input class="adm-input" type="number" min="' + c.min + '" max="' + c.max + '"' +
+        (c.cents ? ' step="0.01" inputmode="decimal"' : ' inputmode="numeric"') + " " + attr +
+        ' data-autosave="' + as + '" value="' + esc(mkFlowNum(key)) + '"' + admAutosaveInvalidAttr(as) + ">" +
+        admAutosaveHintHTML(as) + "</label>";
+  }
+  /** «Когда уходит» — the letter's own timing, its queue, and the run button. */
+  function admMailWhenHTML(tpl, on) {
+    var m = mailRow(tpl), flow = m[3];
+    if (!flow) return "";
+    var help = "", fields = "";
+    if (tpl === "order-unpaid") {
+      help = "Покупатель оформил заказ и не оплатил: сначала магазин напомнит письмом, потом отменит заказ сам и сообщит письмом «Заказ отменён». Проверка раз в сутки. Меньшее «Отменить через» отменит и старые неоплаченные заказы при ближайшей проверке.";
+      fields = mkFlowBoxHTML("unpaidRemindDays", "Напомнить через, дней", 'data-unpaidf="remind"') +
+        mkFlowBoxHTML("unpaidCancelDays", "Отменить через, дней", 'data-unpaidf="cancel"');
+    } else if (tpl === "abandoned-cart") {
+      help = "Покупатель набрал корзину и ушёл: через столько часов магазин напомнит о ней. Проверка раз в сутки.";
+      fields = mkFlowBoxHTML("abandonedHours", "Напомнить через, часов", 'data-cartf="hours"');
+    } else if (tpl === "abandoned-cart-discount") {
+      /* the four numbers of the pair (23.09.2026: «I cannot modify what the
+         discount is. Also I cannot modify when it goes out») — the first
+         letter's wait too, because the second one's days count from it */
+      help = "<span>Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, а если заказа так и нет — пришлёт скидку на эту же корзину. Эти четыре числа — для обоих писем. Проверка раз в сутки.</span> " +
+        "<span>Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.</span>";
+      fields = mkFlowBoxHTML("abandonedHours", "Напомнить через, часов", 'data-cartf="hours"') +
+        mkFlowBoxHTML("abandonedDiscountDays", "Скидку через, дней", 'data-cartf="days"') +
+        mkFlowBoxHTML("abandonedDiscountPercent", "Размер скидки, %", 'data-cartf="percent"') +
+        mkFlowBoxHTML("abandonedDiscountMinTotal", "Скидку от суммы, €", 'data-cartf="min"');
+    } else if (tpl === "birthday") {
+      help = "Промокод выписывается каждому свой, работает один раз и действует две недели от самого дня рождения, каким бы ни был запас.";
+      // with the switch, as they always came (admin-sweep-4: «the days setting appears with the switch»)
+      fields = on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "";
+    } else if (tpl === "back-in-stock") {
+      help = "Письмо уходит тем, кто оставил почту на странице товара, когда товар снова появится в наличии.";
+    }
+    var run = MAIL_RUN_FLOW[tpl] || "";
+    var count = tpl === "abandoned-cart-discount" ? "" : flowCountLine(flow);
+    return '<div class="adm-mwhen">' +
+      '<div class="adm-mwhen__h"><span class="adm-mwhen__t">Когда уходит</span>' + admHelpBtnHTML("mail-when-" + tpl) + "</div>" +
+      admHelpHTML("mail-when-" + tpl, help) +
+      (fields ? '<div class="adm-mwhen__f">' + fields + "</div>" : "") +
+      (count ? '<p class="adm-hint adm-mwhen__n">' + count.replace(/^ · /, "") + "</p>" : "") +
+      (run && FLOW_RUNNABLE[run] && on && SRV.admin === true ? admFlowRunHTML(run) : "") +
+      "</div>";
+  }
 
-     Дни второго письма считаются от ПЕРВОГО письма, не от корзины: пока
-     первое не ушло, второго не бывает вовсе (skip `no_reminder`). */
-  /* ---- «Сколько писем в сутки» -------------------------------------------
+  /* ---------- «Сколько писем в сутки» (folded — README § 5) -----------------
      У бесплатного Resend сто в сутки. Предел здесь НАШ, а не вычитанный у
      провайдера: Дим, 21.09.2026, видел, как тот пропускает и полторы сотни,
      а строить расчёт на чужой мягкости нельзя.
@@ -24748,13 +25036,8 @@
      принят». Рассылка останавливается, не дойдя до предела; письма о заказах
      разрешения не спрашивают вообще и уходят всегда. Поставить резерв в ноль
      можно, и тогда кампания однажды съест сутки, а покупатель не получит ни
-     слова об оплаченном заказе — поэтому под полем это написано словами. */
-  /* What the shop runs on. The draft below is made on the first KEYSTROKE, not
-     on the first paint (23.09.2026): the card asks for these numbers on the
-     way in (loadNewsAudience), so the first paint always came before them, and
-     a draft taken then froze the factory 100 / 30 into the boxes — the owner
-     who had saved 4 / 2 opened the page to 100 / 30 and «Изменения не
-     сохранены», and «Сохранить» would have put the factory numbers back. */
+     слова об оплаченном заказе — поэтому в подсказке это написано словами.
+     Обе цифры сохраняются сами, когда поле оставлено (ADM_SAVE_POLICY.count). */
   function mailBudgetStored() {
     var b = S.newsBudget || {};
     return {
@@ -24762,218 +25045,64 @@
       reserve: b.reserve == null ? 30 : Number(b.reserve),
     };
   }
-  function mailBudgetDraft() {
-    if (!S.mailBudgetDraft) S.mailBudgetDraft = mailBudgetStored();
-    return S.mailBudgetDraft;
+  function mkBudgetParse(which, raw) {
+    var s = String(raw == null ? "" : raw).trim();
+    if (!s || !/^\d+$/.test(s)) return null;
+    var n = Number(s);
+    if (which === "cap") return n >= 1 && n <= 5000 ? n : null;
+    return n >= 0 && n <= 5000 ? n : null;
   }
-  function mailBudgetCard() {
+  /* the value each box would send now: what was typed when it passes, what the shop runs on when not */
+  function mkBudgetNow(which) {
+    var f = ADM_AS["mk:budget:" + which];
+    var typed = f && f.value !== undefined ? mkBudgetParse(which, f.value) : null;
+    return typed === null ? mailBudgetStored()[which] : typed;
+  }
+  function mkBudgetAs(which) {
+    var as = "mk:budget:" + which;
+    admAutosaveSpec(as, {
+      kind: "count",
+      validate: function (raw) {
+        var n = mkBudgetParse(which, raw);
+        if (n === null) return which === "cap" ? "Писем в сутки — от 1 до 5000" : "Придержать можно меньше, чем всего";
+        if (which === "reserve" && n >= mkBudgetNow("cap")) return "Придержать можно меньше, чем всего";
+        if (which === "cap" && n <= mkBudgetNow("reserve")) return "Придержать можно меньше, чем всего";
+        return "";
+      },
+      send: function (raw, opts) {
+        var cap = which === "cap" ? mkBudgetParse("cap", raw) : mkBudgetNow("cap");
+        var reserve = which === "reserve" ? mkBudgetParse("reserve", raw) : mkBudgetNow("reserve");
+        var st = "/api/admin/settings/", body = { mail_budget: { cap: cap, reserve: reserve } };
+        var req = opts && opts.keepalive ? mkKeepalive(st, "PUT", body) : apiSend(st, "PUT", body);
+        return req.then(function (r) {
+          if (admAutosaveOk(r)) {
+            S.newsBudget = Object.assign({}, S.newsBudget || {}, { cap: cap, reserve: reserve });
+            journalNote("Писем в сутки: " + cap + ", придержано " + reserve);
+            loadNewsAudience(true);   // «сегодня отправлено N из CAP» пересчитается по новым числам
+          }
+          return r;
+        });
+      }
+    });
+    return as;
+  }
+  function mailBudgetFoldHTML() {
     loadNewsAudience(false);   // тем же запросом приходят cap и reserve
-    var d = S.mailBudgetDraft || mailBudgetStored();
-    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Сколько писем в сутки</div></div>' +
-      '<div class="adm-form" style="margin-top:8px" data-admmailbudget>' +
-        '<p class="adm-hint" style="margin:0">У почтового сервиса есть суточный предел. ' +
-          "Магазин считает письма сам и придерживает часть для писем о заказах.</p>" +
-        newsBudgetLineHTML() +
-        '<div class="adm-edpair" style="margin-top:12px">' +
-          '<label class="adm-field">Писем в сутки, всего' +
-            '<input class="adm-input" type="number" min="1" max="5000" inputmode="numeric" data-mbf="cap" value="' + esc(d.cap) + '">' +
-            '<span class="adm-hint">Столько магазин отправит за сутки и больше не будет.</span></label>' +
-          '<label class="adm-field">Из них придержать' +
-            '<input class="adm-input" type="number" min="0" max="5000" inputmode="numeric" data-mbf="reserve" value="' + esc(d.reserve) + '">' +
-            '<span class="adm-hint">Это доля писем о заказах. Ноль — и рассылка однажды займёт сутки целиком.</span></label>' +
-        "</div>" +
-        '<div class="adm-acts" data-admmbacts>' + mailBudgetActsHTML() + "</div>" +
-      "</div>";
-  }
-  function mailBudgetDirty() {
-    if (!S.mailBudgetDraft) return false;
-    var s = mailBudgetStored(), d = S.mailBudgetDraft;
-    return String(d.cap) !== String(s.cap) || String(d.reserve) !== String(s.reserve);
-  }
-  function mailBudgetActsHTML() {
-    var dirty = mailBudgetDirty(), saved = S.mailBudgetSaved && !dirty;
-    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admmbsave' + (dirty ? "" : " disabled") + ">" +
-      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
-  }
-  function paintMailBudgetState() {
-    var acts = document.querySelector("[data-admmbacts]");
-    if (acts) { acts.innerHTML = mailBudgetActsHTML(); translateTree(acts); }
-  }
-  function srvMailBudgetSave() {
-    var d = mailBudgetDraft();
-    var cap = Math.round(Number(d.cap));
-    var reserve = Math.round(Number(d.reserve));
-    if (!isFinite(cap) || cap < 1 || cap > 5000) { toast("Писем в сутки — от 1 до 5000"); return; }
-    if (!isFinite(reserve) || reserve < 0 || reserve >= cap) { toast("Придержать можно меньше, чем всего"); return; }
-    apiSend("/api/admin/settings/", "PUT", { mail_budget: { cap: cap, reserve: reserve } }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        S.mailBudgetDraft = null; S.mailBudgetSaved = true;
-        journalNote("Писем в сутки: " + cap + ", придержано " + reserve);
-        toast("Сохранено ✓");
-        loadNewsAudience(true);   // строка выше пересчитается по новым числам
-        render();
-        return;
-      }
-      toast("Не сохранилось — попробуйте ещё раз");
-    }).catch(function () { toast("Нет связи с магазином"); });
-  }
-  /* The four numbers as the shop runs them; the draft is the owner's typing
-     and is made on his first keystroke — the same rule, and the same reason,
-     as mailBudgetStored() above: a draft taken on the first paint freezes
-     whatever this device last knew, and the settings the server sends a
-     moment later then read as «Изменения не сохранены». */
-  function cartFlowStored() {
-    return {
-      hours: Number(DEMO.flows.abandonedHours) || 3,
-      days: Number(DEMO.flows.abandonedDiscountDays) || 3,
-      percent: Number(DEMO.flows.abandonedDiscountPercent) || 5,
-      min: DEMO.flows.abandonedDiscountMinTotal == null ? 100 : Number(DEMO.flows.abandonedDiscountMinTotal),
+    if (SRV.admin !== true) return "";
+    var s = mailBudgetStored(), b = S.newsBudget || {};
+    var sent = (b.sent && b.sent.total) || 0;
+    var cap = mkBudgetAs("cap"), res = mkBudgetAs("reserve");
+    var box = function (as, label, which, max) {
+      return '<label class="adm-field">' + label +
+        '<input class="adm-input" type="number" min="' + (which === "cap" ? 1 : 0) + '" max="' + max + '" inputmode="numeric" data-mbf="' + which +
+        '" data-autosave="' + as + '" value="' + esc(s[which]) + '"' + admAutosaveInvalidAttr(as) + ">" + admAutosaveHintHTML(as) + "</label>";
     };
-  }
-  function cartFlowDraft() {
-    if (!S.cartFlowDraft) S.cartFlowDraft = cartFlowStored();
-    return S.cartFlowDraft;
-  }
-  /* Drawn inside the group under «Брошенная корзина — письмо со скидкой»
-     (admMailHTML), right below the two letters it times — not as a card of its
-     own at the bottom of the page, where it used to be (23.09.2026). */
-  function cartFlowSettingsCard() {
-    var d = S.cartFlowDraft || cartFlowStored();
-    return '<div class="adm-form" style="padding:12px 0 16px" data-admcartsettings>' +
-        '<p class="adm-hint" style="margin:0">Покупатель набрал корзину и ушёл. Сначала магазин напомнит о ней, ' +
-          "а если заказа так и нет — пришлёт скидку на эту же корзину. Эти четыре числа — для обоих писем. Проверка раз в сутки.</p>" +
-        '<div class="adm-edpair">' +
-          '<label class="adm-field">Напомнить через, часов' +
-            '<input class="adm-input" type="number" min="1" max="168" inputmode="numeric" data-cartf="hours" value="' + esc(d.hours) + '">' +
-            '<span class="adm-hint">Столько корзина должна простоять, чтобы уйти первому письму.</span></label>' +
-          '<label class="adm-field">Скидку через, дней' +
-            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-cartf="days" value="' + esc(d.days) + '">' +
-            '<span class="adm-hint">Считается от первого письма, а не от корзины.</span></label>' +
-          '<label class="adm-field">Размер скидки, %' +
-            '<input class="adm-input" type="number" min="1" max="90" inputmode="numeric" data-cartf="percent" value="' + esc(d.percent) + '">' +
-            '<span class="adm-hint">Промокод на один раз и только на товары из этой корзины.</span></label>' +
-          '<label class="adm-field">Скидку от суммы, €' +
-            '<input class="adm-input" type="number" min="0" max="10000" step="0.01" inputmode="decimal" data-cartf="min" value="' + esc(d.min) + '">' +
-            '<span class="adm-hint">Корзины дешевле получат только напоминание. Больше любой корзины — второго письма не будет.</span></label>' +
-        "</div>" +
-        '<div class="adm-acts" data-admcartacts>' + cartFlowActsHTML() + "</div>" +
-      "</div>";
-  }
-  function cartFlowDirty() {
-    if (!S.cartFlowDraft) return false;
-    var d = S.cartFlowDraft, s = cartFlowStored();
-    return String(d.hours) !== String(s.hours) || String(d.days) !== String(s.days) ||
-      String(d.percent) !== String(s.percent) || String(d.min) !== String(s.min);
-  }
-  function cartFlowActsHTML() {
-    var dirty = cartFlowDirty(), saved = S.cartFlowSaved && !dirty;
-    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admcartsave' + (dirty ? "" : " disabled") + ">" +
-      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
-  }
-  function paintCartFlowState() {
-    var acts = document.querySelector("[data-admcartacts]");
-    if (acts) { acts.innerHTML = cartFlowActsHTML(); translateTree(acts); }
-  }
-  function srvCartFlowSave() {
-    var d = cartFlowDraft();
-    var hours = Math.round(Number(d.hours));
-    var days = Math.round(Number(d.days));
-    var percent = Math.round(Number(d.percent));
-    var min = Math.round(Number(String(d.min).replace(",", ".")) * 100) / 100;
-    if (!isFinite(hours) || hours < 1 || hours > 168) { toast("Напоминание — от 1 до 168 часов"); return; }
-    if (!isFinite(days) || days < 1 || days > 60) { toast("Скидка — от 1 до 60 дней"); return; }
-    if (!isFinite(percent) || percent < 1 || percent > 90) { toast("Скидка — от 1 до 90 %"); return; }
-    if (!isFinite(min) || min < 0 || min > 10000) { toast("Сумма — от 0 до 10 000 €"); return; }
-    var flows = {};
-    for (var k in DEMO.flows) flows[k] = DEMO.flows[k];
-    flows.abandonedHours = hours;
-    flows.abandonedDiscountDays = days;
-    flows.abandonedDiscountPercent = percent;
-    flows.abandonedDiscountMinTotal = min;
-    apiSend("/api/admin/settings/", "PUT", { flows: flows }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        DEMO.flows = flows; demoSave(); S.cartFlowDraft = null; S.cartFlowSaved = true;
-        journalNote("Брошенные корзины: напоминание через " + hours + " ч, скидка " + percent + " % через " + days + " дн.");
-        toast("Брошенные корзины: сохранено ✓"); render();
-        return;
-      }
-      toast("Не сохранилось — попробуйте ещё раз");
-    }).catch(function () { toast("Нет связи с магазином"); });
-  }
-  // the same first-keystroke draft as cartFlowStored() / cartFlowDraft() above
-  function unpaidStored() {
-    return {
-      remind: Number(DEMO.flows.unpaidRemindDays) || 3,
-      cancel: Number(DEMO.flows.unpaidCancelDays) || 7
-    };
-  }
-  function unpaidDraft() {
-    if (!S.unpaidDraft) S.unpaidDraft = unpaidStored();
-    return S.unpaidDraft;
-  }
-  function unpaidSettingsCard() {
-    var d = S.unpaidDraft || unpaidStored();
-    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Неоплаченные заказы</div></div>' +
-      '<div class="adm-form" style="margin-top:8px" data-admunpaidsettings>' +
-        '<p class="adm-hint" style="margin:0">Покупатель оформил заказ и не оплатил. Сначала магазин напомнит письмом, ' +
-          "потом отменит заказ сам и сообщит об этом — оба письма выше. Проверка раз в сутки.</p>" +
-        '<div class="adm-edpair" style="margin-top:12px">' +
-          '<label class="adm-field">Напомнить через, дней' +
-            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-unpaidf="remind" value="' + esc(d.remind) + '">' +
-            '<span class="adm-hint">Через столько дней после заказа уйдёт письмо «Заказ ждёт оплаты».</span></label>' +
-          '<label class="adm-field">Отменить через, дней' +
-            '<input class="adm-input" type="number" min="2" max="60" inputmode="numeric" data-unpaidf="cancel" value="' + esc(d.cancel) + '">' +
-            '<span class="adm-hint">Через столько дней заказ отменится сам, товары останутся в магазине.</span></label>' +
-        "</div>" +
-        // the button carries the state (unpaidActsHTML): quiet, then ink, then «Сохранено ✓»
-        '<div class="adm-acts" data-admunpaidacts>' + unpaidActsHTML() + "</div>" +
-      "</div>";
-  }
-  /** Does the card show something other than what the shop runs on? */
-  function unpaidDirty() {
-    if (!S.unpaidDraft) return false;
-    var d = S.unpaidDraft, s = unpaidStored();
-    return String(d.remind) !== String(s.remind) || String(d.cancel) !== String(s.cancel);
-  }
-  /* The same three states every small form in the panel has since r12 (the
-     cabinet's paintAcctBar idiom): nothing to save — a quiet, disabled
-     button; something typed — the ink button and a line that says so;
-     just saved — «Сохранено ✓» on the button until the next keystroke. */
-  function unpaidActsHTML() {
-    var dirty = unpaidDirty(), saved = S.unpaidSaved && !dirty;
-    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admunpaidsave' + (dirty ? "" : " disabled") + ">" +
-      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
-  }
-  /** In place, while the owner types — a render() would take the caret. */
-  function paintUnpaidState() {
-    var acts = document.querySelector("[data-admunpaidacts]");
-    if (acts) { acts.innerHTML = unpaidActsHTML(); translateTree(acts); }
-  }
-  function srvUnpaidSettingsSave() {
-    var d = unpaidDraft();
-    var remind = Math.round(Number(d.remind));
-    var cancel = Math.round(Number(d.cancel));
-    if (!isFinite(cancel) || cancel < 2 || cancel > 60) { toast("Отмена — от 2 до 60 дней"); return; }
-    if (!isFinite(remind) || remind < 1 || remind >= cancel) { toast("Напоминание должно быть раньше отмены"); return; }
-    var flows = {};
-    for (var k in DEMO.flows) flows[k] = DEMO.flows[k];
-    flows.unpaidRemindDays = remind;
-    flows.unpaidCancelDays = cancel;
-    apiSend("/api/admin/settings/", "PUT", { flows: flows }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        DEMO.flows = flows; demoSave(); S.unpaidDraft = null; S.unpaidSaved = true;
-        journalNote("Неоплаченные заказы: напоминание через " + remind + ", отмена через " + cancel);
-        toast("Неоплаченные заказы: сохранено ✓"); render();
-        return;
-      }
-      toast("Не удалось сохранить");
-    }).catch(function () { toast("Сервер не отвечает"); });
+    return admFoldHTML("mail-budget", "Сколько писем в сутки",
+      "<span>до</span> " + s.cap + " · <span>сегодня</span> " + sent,
+      '<div data-admmailbudget>' + newsBudgetLineHTML() +
+        '<div class="adm-edpair">' + box(cap, "Писем в сутки, всего", "cap", 5000) + box(res, "Из них придержать", "reserve", 5000) + "</div>" +
+        '<p class="adm-hint">Столько магазин отправит за сутки и больше не будет. Придержанное — доля писем о заказах: ноль — и рассылка однажды займёт сутки целиком.</p>' +
+      "</div>");
   }
   /** « · Ждут письма: 3» — only when the server actually counted, never a zero
       the panel cannot stand behind. Its own function so the i18n check sees
@@ -24988,78 +25117,96 @@
     if (key === "birthdays") line += " <span>подписчиков с датой</span>";
     return line;
   }
+
+  /* ---------- one letter, open ----------------------------------------------
+     Its name and when it goes, its switch (the pair's second letter says
+     whose switch it follows), «Когда уходит», then the text: RU · ET · EN
+     opening on the language it was last left in (Dim, 08.09.2026), «Тема» /
+     «Первый абзац» / «Последняя строка», the chips that insert a token into
+     whichever of the three was last in focus, «Вернуть стандартный текст»
+     for this language with «Вернуть» after it (Dim, q36), the letter as the
+     customer sees it, «Прислать мне пример» — the text ON SCREEN, saved or
+     not (map #14) — and the real letter from the server, folded. */
+  var MAIL_FIELD_LABEL = { subject: "Тема", intro: "Первый абзац", signature: "Последняя строка" };
+  var MAIL_CHIPS_IN = { subject: "Вставить в тему:", intro: "Вставить в первый абзац:", signature: "Вставить в последнюю строку:" };
   function admMailEditorHTML() {
+    var tpl = mailTpl(), lang = mailLang(), m = mailRow(tpl);
+    var flow = m[3], on = flow ? !!DEMO.flows[flow] : true;
+    var follows = tpl === "abandoned-cart-discount";
+    var head = '<div class="adm-mled__h"><div class="adm-mled__t"><h2 class="adm-mled__nm">' + m[1] + "</h2>" +
+        '<span class="adm-row__sub">' + m[2] + "</span></div>" +
+        (!flow ? "" : follows
+          ? admTagHTML(on ? "ok" : "quiet", on ? "включено вместе с первым" : "выключено вместе с первым")
+          : admSwitch('data-admflow="' + flow + '"', on, m[1])) +
+        '<button class="adm-iconbtn adm-ppanel__x" type="button" data-mailback title="Все письма"><span aria-hidden="true">×</span><span class="vh">Все письма</span></button></div>';
     /* Nothing until the texts land. Drawn early the fields are empty, «Вернуть
        стандартный текст» is missing (the owner has no own text yet, as far as
        this render can tell) and the preview shows a letter with no words in
        it — three lies for the sake of a hundred milliseconds. */
-    if (!MAIL_TEXTS) {
-      return admBackHTML("data-mailback", "Все письма") +
-        '<div class="adm-skel"><i></i><i></i><i></i></div>';
-    }
-    var tpl = mailTpl(), lang = mailLang();
-    var left =
-      '<div class="adm-sec__t">' + admMailName(tpl) + "</div>" +
+    // the letter's timing needs no texts — only the fields wait for them
+    if (!MAIL_TEXTS) return '<div class="adm-mled">' + head + admMailWhenHTML(tpl, on) + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    var own = mailLangWords(tpl, lang)[0] === "свой текст";
+    return '<div class="adm-mled" data-mailed>' + head +
+      admMailWhenHTML(tpl, on) +
+      admSecHeadHTML("Текст письма", "mail-text", "<span>" + LANG_BAR_NOTE + "</span> " +
+        "<span>Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</span> " +
+        "<span>Текст начинает уходить покупателям со следующего письма — через секунду после того, как вы перестали печатать.</span>") +
       admLangBarHTML("data-maillang", LANGS, lang, "Язык письма", function (code) {
         return mailLangWords(tpl, code);
-      }, LANG_BAR_NOTE) +
+      }, "") +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
-      admDirtyNoteHTML("data-maildirty", mailDirty()) +
       MAIL_FIELDS.map(function (f) { return admMailFieldHTML(tpl, lang, f); }).join("") +
-      '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</p>' +
-      '<label class="adm-field">Адрес для теста' +
-        '<input class="adm-input" type="email" data-mailto value="' + esc(S.mailTo || "") +
-        '" placeholder="renat@rempireshop.com"></label>' +
-      /* the test send stays with the address it sends to (Enter in that box
-         presses it — ADM_ENTER_FORMS); the bar below is the product editor's
-         sticky one, so «Сохранить» is above the nav on a phone wherever the
-         owner is in a long letter, with the same width the other forms have */
-      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
-      '<div class="adm-savebar' + admDirtyCls(mailDirty()) + '" id="mailacts">' + admMailActsHTML() + "</div>";
-    return admBackHTML("data-mailback", "Все письма") +
-      // the same card «← Товары» and «← Блог» show (map of the panel, 23.09.2026, #14)
-      (S.mailConfirmBack
-        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailbackyes>Выйти без сохранения</button>' +
-          '<button class="adm-link adm-link--muted" data-mailbackno>Остаться</button></div>'
+      '<div class="adm-mchips" data-mailchips>' + admMailChipsHTML(tpl) + "</div>" +
+      (own
+        ? '<div><button class="adm-link adm-link--muted" type="button" data-mailreset="' + lang + '">Вернуть стандартный текст</button></div>'
         : "") +
-      admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
-      '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
+      admMailPreviewHTML(tpl, lang) +
+      admMailToHTML("data-mailto") +
+      admFoldHTML("mail-whole", "Письмо целиком", "<span>как его рисует сервер</span>",
         /* not loading="lazy": the morph keeps this element and only changes
            its src after a save, and a lazy iframe below the fold shows the OLD
            letter until scrolled to — the owner read a preview that had not
            taken the text just saved (admin-mail.spec, 10.09.2026) */
-        '<iframe class="adm-frame" title="Предпросмотр письма" style="margin-top:10px" ' +
+        '<iframe class="adm-frame" title="Предпросмотр письма" ' +
           'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" +
-          encodeURIComponent(lang) + "&amp;v=" + mailPreviewV + '"></iframe></div>';
-  }
-  function admMailFieldHTML(tpl, lang, f) {
-    var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
-    var own = val !== mailDefault(tpl, lang, field);
-    var box = field === "intro"
-      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '">' + esc(val) + "</textarea>"
-      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" data-maill="' + lang + '" value="' + esc(val) + '">';
-    return '<label class="adm-field">' + f[1] + box + "</label>" +
-      '<div class="adm-acts" style="gap:6px;margin-top:-6px">' + MAIL_PH.map(function (p) {
-        return '<button class="adm-chip adm-chip--tok" data-mailph="' + field + ":" + p[0] +
-          '" title="' + p[1] + '">{' + p[0] + "}</button>";
-      }).join("") +
-      (own ? '<button class="adm-link adm-link--muted" data-mailreset="' + field + '">Вернуть стандартный текст</button>' : "") +
+          encodeURIComponent(lang) + "&amp;v=" + mailPreviewV + '"></iframe>') +
       "</div>";
   }
-  function admMailActsHTML() {
-    // the phone header reads the classes: the primary (quiet while nothing
-    // differs), the cancel, the status word — admBarNoteHTML
-    return '<button class="adm-btn adm-savebar__main' + (mailDirty() ? "" : " adm-savebar__main--quiet") + '" data-mailsave>Сохранить</button>' +
-      (mailDirty() ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-mailrevert>' + SAVEBAR_CANCEL + '</button>' : "") +
-      admBarNoteHTML("mail");
+  /** Which of the three boxes the chips insert into: the last one in focus. */
+  function mailChipField() { return MAIL_FIELD_LABEL[S.mailFocus] ? S.mailFocus : "intro"; }
+  function admMailChipsHTML(tpl) {
+    var field = mailChipField();
+    var names = {};
+    MAIL_PH.forEach(function (p) { names[p[0]] = p[1]; });
+    return '<span class="adm-mchips__l">' + MAIL_CHIPS_IN[field] + "</span>" +
+      mailTokensOf(tpl).filter(function (k) { return k !== "percent" && names[k]; }).map(function (k) {
+        return '<button class="adm-chip adm-chip--tok" type="button" data-mailph="' + field + ":" + k +
+          '" title="' + names[k] + '">{' + k + "}</button>";
+      }).join("");
+  }
+  function paintMailChips() {
+    var el = typeof document !== "undefined" ? document.querySelector("[data-mailchips]") : null;
+    if (el) { el.innerHTML = admMailChipsHTML(mailTpl()); translateTree(el); }
+  }
+  /** One of the three: its box saves itself a second after the last key (ADM_SAVE_POLICY.text). */
+  function admMailFieldHTML(tpl, lang, f) {
+    var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
+    var as = mailFieldAs(tpl, lang, field);
+    var attrs = ' data-mailtxt="' + field + '" data-maill="' + lang + '" data-autosave="' + as + '" maxlength="' + lim + '"' + admAutosaveInvalidAttr(as);
+    var box = field === "intro"
+      ? '<textarea class="adm-input" rows="4"' + attrs + ">" + esc(val) + "</textarea>"
+      : '<input class="adm-input"' + attrs + ' value="' + esc(val) + '">';
+    return '<label class="adm-field">' + MAIL_FIELD_LABEL[field] + box + admAutosaveHintHTML(as) + "</label>";
   }
   /** The letter as the customer will see it, drawn from the draft — so the
-      owner watches it change while typing. The iframe below it is the real
-      render; this is the shape, and it is the one that answers instantly. */
+      owner watches it change while typing. The frame in «Письмо целиком» is
+      the real render; this is the shape, and it is the one that answers
+      instantly. «Прислать мне пример» is the tab's one dark button — pinned
+      above the tab bar on a phone. */
   function admMailPreviewHTML(tpl, lang) {
     var langName = LANG_WORDS[lang] || lang;
-    return '<div class="adm-prev"><div class="adm-prev__l">Так увидит клиент · ' + langName + "</div>" +
+    return '<div class="adm-prev"><div class="adm-prev__h"><span class="adm-prev__l">Так увидит клиент · ' + langName + "</span>" +
+        (SRV.admin === true ? admPinnedHTML("data-mailtest", "Прислать мне пример") : "") + "</div>" +
       '<div class="adm-prev__card"><div class="adm-prev__mark">REMPIRE</div>' +
         '<div class="adm-prev__s" data-mailprev="subject">' + esc(admMailPreviewText(tpl, lang, "subject")) + "</div>" +
         '<div class="adm-prev__body" data-mailprev="intro">' + esc(admMailPreviewText(tpl, lang, "intro")) + "</div>" +
@@ -25096,9 +25243,27 @@
     var total = s.total || MAIL_SAMPLE_FALLBACK.total;
     return "Kevin.Murphy Fresh.Hair · 250 ml × 2<br><span>Итого</span> " + esc(total);
   }
-  /* Typing must not cost the caret, so the preview and the save button repaint
-     on their own instead of through render() — the same idiom the old card
-     used for `#mailacts` (paintMailState below is what calls this). */
+  /* The chips insert into whichever of the three boxes was last in focus —
+     one row, its label saying which (README § 5). And the address for
+     samples is remembered on this device the moment its box is left (q8),
+     not only after a sample went out. */
+  if (typeof document !== "undefined") {
+    document.addEventListener("focusin", function (e) {
+      var t = e.target;
+      if (!t || !t.matches || !t.matches("[data-mailtxt]")) return;
+      var f = t.getAttribute("data-mailtxt");
+      if (S.mailFocus !== f) { S.mailFocus = f; paintMailChips(); }
+    });
+    document.addEventListener("focusout", function (e) {
+      var t = e.target;
+      if (!t || !t.matches || !t.matches("[data-mailto]")) return;
+      admPanesSave();
+      var sum = document.querySelector("[data-mailtosum]");
+      if (sum && MAIL_TO_RX.test(String(S.mailTo || "").trim())) sum.textContent = String(S.mailTo).trim();
+    });
+  }
+  /* Typing must not cost the caret, so the preview repaints on its own
+     instead of through render() (paintMailState below is what calls this). */
   function paintMailPreview() {
     var tpl = mailTpl(), lang = mailLang();
     ["subject", "intro", "signature"].forEach(function (f) {
@@ -25899,19 +26064,26 @@
       }
     }).catch(function () { loadNewsAudience._busy = false; });
   }
+  /* 1a (README § 5, prototype 3 «Рассылка»): the letters on the left, the
+     subscribers on the right, «+ Письмо» the dark button. A letter whose
+     delete is still being held (newsDeleteHeld) stays off the list until its
+     five seconds are up — the server has it until then. */
+  var NEWS_GOING = {};
   function admNewsHTML() {
     loadNewsletters(false); loadNewsAudience(false);
     if (S.newsEdit) return S.newsEdit.status === "draft" ? admNewsEditorHTML(S.newsEdit) : admNewsSentHTML(S.newsEdit);
     if (S.newsEditBusy) return '<div class="adm-skel"><i></i><i></i><i></i></div>';
-    var list = S.news, rows;
+    var list = S.news ? S.news.filter(function (n) { return !NEWS_GOING[n.id]; }) : null, rows;
     if (!list) rows = '<div class="adm-skel"><i></i><i></i><i></i></div>';
     else if (S.newsListErr) {
       rows = '<div class="adm-error"><span>' + esc(S.newsListErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsreload>Повторить</button></div>';
     }
     else if (!list.length) rows = '<div class="adm-empty">Пока ни одного письма — нажмите «+ Письмо».</div>';
-    else rows = '<div class="adm-list">' + list.map(admNewsRowHTML).join("") + "</div>";
-    return admNewsAudienceHTML() + rows;
+    else rows = '<div class="adm-list adm-list--flat">' + list.map(admNewsRowHTML).join("") + "</div>";
+    return '<div class="adm-news">' +
+      '<div class="adm-news__l">' + admSecHeadHTML("Письма подписчикам", "", "") + rows + "</div>" +
+      '<div class="adm-news__r">' + admNewsAudienceHTML() + "</div></div>";
   }
   /** «по-русски 80 · по-эстонски 30 · по-английски 10» — each label its own node. */
   function newsCountsHTML(a) {
@@ -25919,29 +26091,30 @@
   }
   function admNewsAudienceHTML() {
     var a = S.newsAudience;
-    return '<div class="adm-card adm-card--soft adm-news__aud"><div class="adm-sec__t">Подписчики</div>' +
+    return '<div class="adm-news__aud">' +
+      '<div class="adm-news__audh"><span class="adm-sech__t">Подписчики</span>' + admHelpBtnHTML("news-aud") + "</div>" +
       (a
-        ? '<div class="adm-news__n">' + (a.total || 0) + "</div><div class=\"adm-hint\">" + newsCountsHTML(a) + "</div>"
+        ? '<div class="adm-news__n">' + (a.total || 0) + '</div><div class="adm-hint">' + newsCountsHTML(a) + "</div>"
         : '<div class="adm-skel"><i></i></div>') +
-      '<p class="adm-hint">Это те, кто поставил галочку «Хочу получать скидки и поздравление ко дню рождения» — на кассе или в кабинете — и не нажал «Отписаться». Каждый получит письмо на своём языке.</p>' +
+      admHelpHTML("news-aud", "Это те, кто поставил галочку «Хочу получать скидки и поздравление ко дню рождения» — на кассе или в кабинете — и не нажал «Отписаться». Каждый получит письмо на своём языке.") +
       "</div>";
   }
   function admNewsRowHTML(n) {
-    var st = n.status, sub, badge;
+    var st = n.status, sub, tag;
     if (st === "sent") {
       sub = '<span>отправлено</span> ' + esc(shortDate(n.sentAt)) + ' · <span>' + n.sentCount + " из " + n.audienceCount + "</span>" +
         (n.failedCount ? ' · <span>ошибок</span> ' + n.failedCount : "");
-      badge = '<span class="adm-badge adm-badge--sm adm-badge--ok">Отправлено</span>';
+      tag = admTagHTML("ok", "Отправлено");
     } else if (st === "sending") {
       sub = "<span>" + (n.sentCount + n.failedCount) + " из " + n.audienceCount + "</span>";
-      badge = '<span class="adm-badge adm-badge--sm adm-badge--warn">Отправляется</span>';
+      tag = admTagHTML("low", "Отправляется");
     } else {
       sub = '<span>изменено</span> ' + esc(shortDate(n.updatedAt));
-      badge = '<span class="adm-badge adm-badge--sm adm-badge--quiet">Черновик</span>';
+      tag = admTagHTML("quiet", "Черновик");
     }
-    return '<button class="adm-row adm-row--tall adm-row--click" data-newsedit="' + esc(n.id) + '">' +
+    return '<button class="adm-row adm-row--tall adm-row--click adm-newsrow" data-newsedit="' + esc(n.id) + '">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(n.title || "Без названия") + "</span>" +
-        '<span class="adm-row__sub adm-row__sub--one">' + sub + "</span></span>" + badge + "</button>";
+        '<span class="adm-row__sub adm-row__sub--one">' + sub + "</span></span>" + tag + "</button>";
   }
   /* ---- the draft: what each language holds, and «не сохранено» ---------- */
   function newsBodyHas(html) { return blogTextLen(html) > 0 || /<img\b|data-product=/i.test(String(html || "")); }
@@ -25972,9 +26145,12 @@
     var d = S.newsEdit;
     return !!(d && d.status === "draft" && S.newsSaved !== undefined && newsDraftSig(d) !== S.newsSaved);
   }
-  /* Typing must not cost the caret: the strip and the «не сохранено» line
-     repaint on their own — blogPaintState()'s idiom. */
-  function newsPaintState() {
+  /* Typing must not cost the caret: the strip repaints on its own —
+     blogPaintState()'s idiom. And every change to the draft ends here, so
+     here it is handed to the autosave (1a): a keystroke waits a second
+     (`typing`), a block moved, added, deleted, a link picked or a picture
+     landed goes at once. */
+  function newsPaintState(typing) {
     var d = S.newsEdit;
     if (!d) return;
     LANGS.forEach(function (l) {
@@ -25983,12 +26159,55 @@
       slot.innerHTML = admLangStateHTML(newsLangWords(d, l[0]));
       translateTree(slot);
     });
-    var dirty = document.querySelector("[data-newsdirty]");
-    if (dirty) dirty.hidden = !newsDirty();
-    // the bar follows the draft too: ink «Сохранить», «Отменить правки», the status word
-    var acts = document.getElementById("newsacts");
-    if (acts) { acts.innerHTML = admNewsActsHTML(); translateTree(acts); }
-    admDirtyMark(acts, newsDirty());
+    newsAutosave(typing ? "input" : "change");
+  }
+  /* ---- the draft saves itself --------------------------------------------
+     One autosave record per letter (the text policy: a second after the last
+     keystroke, at once for a structural change). Customers never see a
+     draft, so the risk is low; what matters is never making two drafts of one
+     letter — the first save of a new letter is a POST with an
+     Idempotency-Key and the SAME body until it lands (saveNewsFields), and
+     never a draft made of nothing at all. A letter that went out is history
+     (the route answers 409 `not_draft`): nothing is sent for it. */
+  var newsSeq = 0, newsLocalN = 0;
+  function newsAsKey(d) {
+    if (!d._k) { newsLocalN += 1; d._k = "l" + newsLocalN; }
+    return "news:" + d._k;
+  }
+  function newsHasAny(d) {
+    if (String(d.title || "").trim()) return true;
+    if (NEWS_LANG3.some(function (L) { return !!String(d.subject[L] || "").trim(); })) return true;
+    return newsBlocksOut(d.blocks).length > 0;
+  }
+  function newsAutosave(ev) {
+    var d = S.newsEdit;
+    if (!d || d.status !== "draft" || SRV.admin !== true) return false;
+    if (ev === "input" || ev === "change") newsSeq += 1;
+    return admAutosave(newsAsKey(d), ev === "input" || ev === "change" ? newsSeq : undefined, ev, {
+      kind: "text",
+      send: function (v, opts) {
+        if (d.status !== "draft") return true;
+        if (!d.id && !newsHasAny(d)) return true;   // nothing typed yet: no draft is made of nothing
+        return saveNewsFields(d, opts);
+      }
+    });
+  }
+  /** Everything owed goes now, and `then` runs once the server holds the letter as it is on screen. */
+  function newsSettle(then, fail) {
+    var d = S.newsEdit;
+    if (!d) return;
+    var key = newsAsKey(d), tries = 0;
+    if (newsDirty() || !d.id) newsAutosave("change"); else admAutosave(key, undefined, "flush");
+    (function wait() {
+      if (S.newsEdit !== d) return;
+      var f = ADM_AS[key];
+      var busy = !!(f && (f.busy || f.timer));
+      if (!busy && f && f.failed) { S.newsErr = BLOG_SAVE_ERR; toast(BLOG_SAVE_ERR); render(); if (fail) fail(); return; }
+      if (!busy && d.id && !newsDirty()) { then(); return; }
+      if (!busy) newsAutosave("change");
+      if (++tries > 200) { toast(BLOG_SAVE_ERR); if (fail) fail(); return; }
+      setTimeout(wait, 100);
+    })();
   }
   /* ---- the editor ---------------------------------------------------------- */
   /* ---- «Письма за сегодня»: сколько ещё можно отправить ------------------
@@ -26578,12 +26797,18 @@
     if (b.known === false || b.blocked) return false;
     return Number(b.marketingRoom) > 0;
   }
-  /** The right-hand «Отправка» card: the draft's advice, the climbing count, or what was sent. */
+  /** The «Отправка» card: the draft's advice, the held seconds, the climbing count, or what was sent. */
   function admNewsSendCardHTML(d) {
     var st = S.newsSend && S.newsSend.id === d.id ? S.newsSend : null;
     var aud = S.newsAudience, inner;
     var err = st && st.err ? '<div class="adm-hint adm-hint--warn" role="alert">' + esc(st.err) + "</div>" : "";
-    if (st && st.busy) {
+    var hold = S.newsHold && S.newsHold.id === d.id ? S.newsHold : null;
+    if (hold) {
+      /* the ten seconds after «Отправить» (Dim, q3): nothing has left yet,
+         and «Вернуть» here — or on the toast — means nothing ever will */
+      inner = '<div class="adm-newshold" aria-live="polite"><span data-newsholdleft>' + newsHoldLine(hold) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-newsholdundo>' + ADM_UNDO_WORD + "</button></div>";
+    } else if (st && st.busy) {
       inner = newsProgressHTML(st.sent + st.failed, st.total || d.audienceCount) +
         '<div class="adm-hint" aria-live="polite">' + newsProgressLine(st) + "</div>";
     } else if (d.status === "sending") {
@@ -26591,9 +26816,9 @@
          themselves automatically … I had to click "send"». They do — the
          morning job sends the rest of any letter left half-sent (parked at
          the limit or broken off), src/lib/newsletters.ts
-         resumeParkedNewsletters — but this card said «Отправка прервалась —
-         нажмите «Продолжить»». It says what will happen now; the button
-         stays only for a day that still has room, as a way not to wait. */
+         resumeParkedNewsletters — so the card says what will happen now; the
+         button stays only for a day that still has room, as a way not to
+         wait. */
       inner = newsProgressHTML(d.sentCount + d.failedCount, d.audienceCount) +
         '<div class="adm-hint" aria-live="polite">' + newsWaitLine(d.sentCount + d.failedCount, d.audienceCount) + "</div>" + err +
         (newsRoomNow()
@@ -26605,16 +26830,14 @@
         '<div class="adm-hint">' + "Отправлено " + d.sentCount + " из " + d.audienceCount + " · ошибок " + d.failedCount + "</div>" +
         (d.sentAt ? '<div class="adm-hint"><span>отправлено</span> ' + esc(shortDate(d.sentAt)) + "</div>" : "");
     } else {
-      inner = '<div class="adm-hint">Черновик — покупатели его не видят. Сохраните, отправьте себе тест, потом — подписчикам.</div>' +
-        (aud ? '<div class="adm-hint" style="margin-top:8px"><span>Получат письмо</span>: ' + (aud.total || 0) + " · " + newsCountsHTML(aud) + "</div>" : "") +
+      inner = (aud ? '<div class="adm-hint"><span>Получат письмо</span>: ' + (aud.total || 0) + " · " + newsCountsHTML(aud) + "</div>" : "") +
         newsFallbackHTML(d, aud) + err +
-        /* the send itself — this card's own verb since the save bar became
-           the phone's header (11.09.2026): the count above it, the confirm
-           card behind it as before (newsSendAsk) */
-        '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" +
-          newsSendHTML(aud) + "</button>" + newsBudgetLineHTML();
+        /* the send — the editor's ONE dark button (pinned above the tab bar
+           on a phone), the confirm sheet behind it (newsSendAsk) and ten
+           seconds of «Вернуть» after that (newsSendHeld) */
+        admPinnedHTML("data-newssend" + (S.newsBusy ? " disabled" : ""), newsSendHTML(aud)) + newsBudgetLineHTML();
     }
-    return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
+    return '<div class="adm-newssend">' + inner + "</div>";
   }
   function newsGenText() {
     var g = S.newsGen;
@@ -26622,37 +26845,35 @@
     // one request translates the letter into both languages (newsTranslateBlocks)
     return g.err || (g.step === "tr" ? "Перевожу на эстонский и английский…" : BLOGGEN_STEPS[g.step]) || "";
   }
+  /* «Помощник: о чём письмо — Написать» — one line under the blocks (the
+     design's), with its progress under it. «Перевести» lives on the ET and EN
+     tabs as «Перевести с русского» (README § 1). */
   function admNewsAssistantHTML(d) {
     var gen = S.newsGen, genBusy = !!(gen && !gen.err);
     var brief = S.newsBrief || "";
-    return '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
-      '<label class="adm-field">О чём письмо' +
-        '<input class="adm-input" data-newsbrief value="' + esc(brief) +
-        '" placeholder="новинки сентября, скидка 10 % до воскресенья"' + (genBusy ? " disabled" : "") + "></label>" +
-      '<button class="adm-btn" data-newswrite' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "✨ Написать") + "</button>" +
+    return '<div class="adm-newsai">' +
+      '<div class="adm-newsai__row"><label class="adm-newsai__l" for="newsbrief">Помощник:</label>' +
+        '<input class="adm-input" id="newsbrief" data-newsbrief value="' + esc(brief) +
+        '" placeholder="о чём письмо — новинки, скидка 10 %…"' + (genBusy ? " disabled" : "") + ">" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newswrite' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать") + "</button>" +
+        admHelpBtnHTML("news-ai") + "</div>" +
+      admHelpHTML("news-ai", "Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.") +
       '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-newsprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(newsGenText()) + "</div>" +
-      '<div class="adm-hint">Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.</div>' +
-      '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
-        '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
-        '<button class="adm-link" data-newstranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
-      "</div></details>" +
       "</div>";
   }
-  /** «Удалить письмо» ends the page (.adm-danger), not the assistant's card:
-      the row every form's destructive verb has had since the save bar became
-      the phone's header (11.09.2026) — with its own in-place confirm. */
-  function admNewsDangerHTML(d) {
+  /** «⋯» — the rare action of a draft (README rule 2): «Удалить письмо», asked first. */
+  function admNewsMoreHTML(d) {
     if (!d.id) return "";
-    return '<div class="adm-danger">' + (S.newsConfirmDelete
-      ? '<span class="adm-hint adm-hint--warn">Точно удалить письмо? Вернуть его будет нельзя.</span>' +
-        '<button class="adm-btn adm-btn--warn adm-btn--row" data-newsdelyes' + (S.newsBusy ? " disabled" : "") + ">Да, удалить</button>" +
-        '<button class="adm-link adm-link--muted" data-newsdelno>Отмена</button>'
-      : '<button class="adm-link adm-link--warn" data-newsdel>Удалить письмо</button>') + "</div>";
+    var open = !!S.newsMenu;
+    return '<div class="adm-mkmore"><button class="adm-iconbtn adm-mkmore__b" type="button" data-newsmenu aria-expanded="' + open +
+        '" title="Ещё"><span aria-hidden="true">⋯</span><span class="vh">Ещё</span></button>' +
+      (open ? '<div class="adm-mkmore__m"><button class="adm-link adm-link--warn" type="button" data-newsdel>Удалить письмо</button></div>' : "") +
+      "</div>";
   }
   function admNewsPreviewHTML(d, L) {
     // a draft is drawn live, saved or not; a letter that went out is what was saved
     if (d.status === "draft") return admNewsLiveHTML(d, L);
-    return '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
+    return '<div><div class="adm-sec__t">Письмо целиком</div>' +
       '<iframe class="adm-frame" title="Предпросмотр письма" loading="lazy" style="margin-top:10px" ' +
         'src="/api/admin/newsletters/' + encodeURIComponent(d.id) + "/preview/?lang=" + encodeURIComponent(L) +
         "&amp;v=" + (S.newsPreviewV || 0) + '"></iframe></div>';
@@ -26661,50 +26882,42 @@
     var L = S.newsLang || "RU";
     var busy = !!S.newsBusy;
     var left =
-      admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
-        return newsLangWords(d, code);
-      }, NEWS_LANG_NOTE[L] || NEWS_LANG_NOTE.RU) +
-      admDirtyNoteHTML("data-newsdirty", newsDirty()) +
       /* The word in the box, the sentence under it. `.adm-title-in` is 24 px
-         Oswald on a phone, so «Название — для вас, покупатель его не увидит»
-         fitted as far as «покупатель е» and stopped — and a placeholder is
-         gone the moment the first letter is typed, which is exactly when the
-         owner still wants to know whose name this is. The blog's editor has
-         carried the short word and the same shape all along; this is the
-         sentence moved to where every other explanation in the panel lives. */
+         Oswald on a phone, so a long placeholder was cut mid-word — and a
+         placeholder is gone the moment the first letter is typed, which is
+         exactly when the owner still wants to know whose name this is. */
       '<input class="adm-title-in" data-newsf="title" maxlength="120" placeholder="Название" ' +
         'aria-label="Название" value="' + esc(d.title) + '">' +
       '<p class="adm-hint">Название — для вас, покупатель его не увидит</p>' +
-      '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
-        '<input class="adm-input" data-newsf="subject" data-newsl="' + L + '" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
+      '<div class="adm-newslang">' +
+        admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
+          return newsLangWords(d, code);
+        }, "", L === "RU" ? null : {
+          translate: '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-newstranslate' +
+            (S.newsGen && !S.newsGen.err ? " disabled" : "") + ">Перевести с русского</button>"
+        }) +
+        '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
+          '<input class="adm-input" data-newsf="subject" data-newsl="' + L + '" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
+      "</div>" +
       // the letter itself: blocks, redrawn in this slot alone (newsBlocksDraw)
       '<div class="adm-nbwrap" id="newsblocks">' + admNewsBlocksHTML(d, L) + "</div>" +
-      '<label class="adm-field">Адрес для теста' +
-        '<input class="adm-input" type="email" data-newsto value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com"></label>' +
-      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-newstest' + (busy ? " disabled" : "") + ">Отправить мне тест</button></div>" +
-      '<p class="adm-hint">Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.</p>' +
-      (S.newsErr ? '<div class="adm-err" role="alert">' + esc(S.newsErr) + "</div>" : "") +
-      /* the product editor's sticky bar — the phone's header (admin.css):
-         «Сохранить» is its primary, ink while the draft differs; the send is
-         the «Отправка» card's own button (admNewsSendCardHTML). Repainted in
-         place while typing (newsPaintState), hence the id. */
-      '<div class="adm-savebar' + admDirtyCls(newsDirty()) + '" id="newsacts">' + admNewsActsHTML() + "</div>";
-    return admBackHTML("data-newsback", "Рассылка") +
-      (S.newsConfirmBack
-        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsbackyes>Выйти без сохранения</button>' +
-          '<button class="adm-link adm-link--muted" data-newsbackno>Остаться</button></div>'
-        : "") +
-      admColsHTML(left, admNewsSendCardHTML(d) + admNewsAssistantHTML(d)) +
+      admNewsAssistantHTML(d) +
+      (S.newsErr ? '<div class="adm-err" role="alert">' + esc(S.newsErr) + "</div>" : "");
+    var right =
       admNewsPreviewHTML(d, L) +
-      admNewsDangerHTML(d);
+      '<div class="adm-newstest"><button class="adm-btn adm-btn--ghost" data-newstest' + (busy ? " disabled" : "") + ">Прислать мне тест</button>" +
+        '<p class="adm-hint">Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.</p>' +
+        admMailToHTML("data-newsto") + "</div>" +
+      admNewsSendCardHTML(d);
+    return '<div class="adm-newsed__h" data-newshead>' + newsHeadInnerHTML(d) + "</div>" +
+      admColsHTML(left, right, true);
   }
-  function admNewsActsHTML() {
-    var dirty = newsDirty();
-    return '<button class="adm-btn adm-savebar__main' + (dirty ? "" : " adm-btn--ghost adm-savebar__main--quiet") +
-        '" data-newssave' + (S.newsBusy ? " disabled" : "") + ">Сохранить</button>" +
-      (dirty ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-newsrevert>' + SAVEBAR_CANCEL + '</button>' : "") +
-      admBarNoteHTML("news");
+  function newsHeadInnerHTML(d) { return admBackHTML("data-newsback", "Рассылка") + admNewsMoreHTML(d); }
+  function newsHeadPaint() {
+    var el = typeof document !== "undefined" ? document.querySelector("[data-newshead]") : null;
+    if (!el || !S.newsEdit) return;
+    el.innerHTML = newsHeadInnerHTML(S.newsEdit);
+    translateTree(el);
   }
   /** A letter that has gone out, or is going out: read-only — the counts, the subject per language, the letter itself. */
   function admNewsSentHTML(d) {
@@ -26725,7 +26938,7 @@
   /* ---- opening, saving, closing ------------------------------------------ */
   function newsOpen(d) {
     S.newsEdit = d; newsMarkSaved(d);
-    S.newsLang = "RU"; S.newsErr = ""; S.newsConfirmDelete = false; S.newsConfirmBack = false;
+    S.newsLang = "RU"; S.newsErr = ""; S.newsConfirmDelete = false; S.newsConfirmBack = false; S.newsMenu = false;
     S.newsBrief = ""; if (S.newsGen && S.newsGen.err) S.newsGen = null;
     S.newsPick = null; S.newsUndo = null; S.newsPrev = null; S.newsPrevH = 0; newsUpReset();
     S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
@@ -26741,6 +26954,7 @@
   }
   function openNewsEditor(id) {
     if (S.newsEditBusy) return;
+    admAutosaveFlush();
     S.newsEditBusy = true; render();
     apiJson("/api/admin/newsletters/?id=" + encodeURIComponent(id)).then(function (r) {
       S.newsEditBusy = false;
@@ -26750,11 +26964,14 @@
       render();
     }).catch(function () { S.newsEditBusy = false; toast("Сервер не отвечает."); render(); });
   }
+  /** «← Рассылка»: whatever the letter still owes goes first (1a) — it saves itself, so there is nothing to ask. */
   function newsCloseEditor() {
-    S.newsEdit = null; S.newsConfirmBack = false; S.newsConfirmDelete = false;
+    admAutosaveFlush();
+    S.newsEdit = null; S.newsConfirmBack = false; S.newsConfirmDelete = false; S.newsMenu = false;
     S.newsPick = null; S.newsUndo = null; S.newsPrev = null; S.newsPrevH = 0; newsUpReset();
     clearTimeout(newsPreviewSoon._t);
     S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
+    S.news = null;   // the list asks again: a title or a date may have moved
     window.scrollTo({ top: 0 }); render();
   }
   function newsPayload(d) {
@@ -26762,36 +26979,60 @@
        and cleans every field again (src/lib/newsletter-blocks.ts). */
     return { title: d.title, subject: d.subject, blocks: newsBlocksOut(d.blocks) };
   }
-  function saveNewsFields(d) {
-    var body = newsPayload(d);
-    var req = d.id
-      ? apiSend("/api/admin/newsletters/", "PATCH", Object.assign({ id: d.id }, body))
-      : apiSend("/api/admin/newsletters/", "POST", body);
+  /** The fingerprint newsDirty() compares — of a body as it was SENT, not of the draft by the time it answered. */
+  function newsBodySig(body) { return JSON.stringify([body.title, body.subject, body.blocks]); }
+  /* One save of the letter: a PATCH for a letter the server has, a POST for
+     a new one. The POST carries an Idempotency-Key and, until it has an
+     answer, the very body it first went with (src/lib/idempotency.ts
+     compares the body): a lost answer and the retry that follows it make
+     ONE draft, where an autosave used to be able to make twins. When the
+     letter has moved on since that body, a PATCH follows at once. Answers
+     what apiSend() answers — {status, body} — so the autosave can tell a
+     save from a refusal. */
+  function saveNewsFields(d, opts) {
+    var url = "/api/admin/newsletters/", keep = !!(opts && opts.keepalive);
+    var body, req;
+    if (d.id) {
+      body = newsPayload(d);
+      var pb = Object.assign({ id: d.id }, body);
+      req = keep ? mkKeepalive(url, "PATCH", pb) : apiSend(url, "PATCH", pb);
+    } else {
+      // a copy, frozen: the draft goes on changing while this body waits for its answer
+      if (!d._create) d._create = { key: idemNewKey(), body: JSON.parse(JSON.stringify(newsPayload(d))) };
+      body = d._create.body;
+      req = keep ? mkKeepaliveIdem(url, "POST", body, d._create.key) : apiSend(url, "POST", body, d._create.key);
+    }
+    // what THIS write carries, fingerprinted now: the draft goes on changing under a request in flight
+    var sentSig = newsBodySig(body);
     return req.then(function (r) {
-      if (r.status === 401) { SRV.admin = false; throw new Error("auth"); }
-      if (!(r.status === 200 && r.body.ok && r.body.newsletter)) throw new Error((r.body && r.body.error) || "save_failed");
+      if (r.status === 401) { SRV.admin = false; render(); return r; }
+      if (!(r.status === 200 && r.body && r.body.ok && r.body.newsletter)) return r;
       var n = r.body.newsletter;
-      d.id = n.id; d.status = n.status; d.updatedAt = n.updatedAt;
-      if (d === S.newsEdit) newsMarkSaved(d);
-      S.news = null;                                    // the list is stale now
-      S.newsPreviewV = (S.newsPreviewV || 0) + 1;       // …and so is the iframe
-      return n;
+      var wasNew = !d.id;
+      d.id = n.id; d.status = n.status; d.updatedAt = n.updatedAt; d._create = null;
+      // a letter the server has now has a «⋯» (its delete) — painted in place, the fields untouched
+      if (wasNew && d === S.newsEdit) newsHeadPaint();
+      if (d === S.newsEdit) { S.newsSaved = sentSig; S.newsConfirmBack = false; }
+      S.newsPreviewV = (S.newsPreviewV || 0) + 1;       // the iframe of a sent letter reads what is saved
+      NEWS_SAVED_AT = Date.now();
+      // the letter moved on while this body was on its way: the rest follows now
+      if (d === S.newsEdit && newsDirty() && !keep) newsAutosave("change");
+      return r;
     });
   }
-  function saveNewsDraft(then) {
-    var d = S.newsEdit;
-    if (!d || S.newsBusy) return;
-    // a picture still on its way is not in the draft yet — saving now would save the letter without it
-    if (newsUploading()) { toast("Подождите — картинка ещё загружается"); return; }
-    S.newsBusy = true; S.newsErr = ""; render();
-    saveNewsFields(d).then(function () {
-      S.newsBusy = false;
-      if (then) then(); else { admBarFlash("news"); toast("Черновик сохранён ✓"); render(); }
-    }).catch(function (e) {
-      S.newsBusy = false;
-      if (!(e && e.message === "auth")) { S.newsErr = BLOG_SAVE_ERR; toast(BLOG_SAVE_ERR); }
-      render();
+  var NEWS_SAVED_AT = 0;
+  /** A keepalive request with an Idempotency-Key — a page closing mid-first-save still makes one letter. */
+  function mkKeepaliveIdem(url, method, body, key) {
+    return fetch(url, {
+      method: method, headers: { "content-type": "application/json", "idempotency-key": key },
+      body: JSON.stringify(body), keepalive: true
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (b) { return { status: res.status, body: b || {} }; });
     });
+  }
+  /** A save that has to have happened — the assistant's letter; rejects on a refusal. */
+  function saveNewsDraft(then) {
+    newsSettle(function () { if (then) then(); else toast("Черновик сохранён ✓"); });
   }
   /** «Отменить правки»: the saved letter again — from the server for a saved one, a blank for a new one. */
   function newsRevert() {
@@ -26800,16 +27041,39 @@
     if (d.id) openNewsEditor(d.id);
     else { newsOpen(newsNewDraft()); render(); }
   }
-  function deleteNews() {
+  /* «Удалить письмо» — «⋯», the confirm sheet, then five seconds of «Вернуть»
+     (Dim, q8): the letter leaves the list at once and the DELETE goes when
+     the time is up (keepalive if the page closes first). */
+  function newsDeleteAsk() {
     var d = S.newsEdit;
-    if (!d || !d.id || S.newsBusy) return;
-    S.newsBusy = true; render();
-    apiJson("/api/admin/newsletters/?id=" + encodeURIComponent(d.id), { method: "DELETE" }).then(function (r) {
-      S.newsBusy = false; S.newsConfirmDelete = false;
-      if (r.status === 200 && r.body.ok) { toast("Письмо удалено ✓"); S.news = null; S.newsEdit = null; }
-      else toast("Не получилось — попробуйте ещё раз");
-      render();
-    }).catch(function () { S.newsBusy = false; S.newsConfirmDelete = false; toast("Сервер не отвечает."); render(); });
+    if (!d || !d.id) return;
+    S.newsMenu = false;
+    pendingAction = {
+      type: "news_delete", overlay: true, danger: true, id: d.id,
+      title: "Удалить письмо?",
+      detail: "Черновик исчезнет из списка рассылок. Покупатели его не видели.",
+      ok: "Удалить"
+    };
+    render(); refocus("[data-admapply]");
+  }
+  function newsDeleteHeld(id) {
+    var d = S.newsEdit;
+    if (!d || d.id !== id) return;
+    NEWS_GOING[id] = true;
+    newsCloseEditor();
+    mkHold(MK_DELETE_HOLD_MS, function (leaving) { deleteNews(id, leaving); }, function () {
+      delete NEWS_GOING[id];
+      S.news = null; loadNewsletters(true); render();
+      toast("Письмо на месте");
+    }, "Письмо удалено");
+  }
+  function deleteNews(id, keep) {
+    var url = "/api/admin/newsletters/?id=" + encodeURIComponent(id);
+    (keep ? mkKeepalive(url, "DELETE") : apiJson(url, { method: "DELETE" })).then(function (r) {
+      delete NEWS_GOING[id];
+      if (r.status === 200 && r.body.ok) { journalNote("Рассылка: черновик удалён"); S.news = null; render(); return; }
+      toast("Не получилось удалить письмо — оно осталось в списке"); S.news = null; render();
+    }).catch(function () { delete NEWS_GOING[id]; toast("Сервер не отвечает."); S.news = null; render(); });
   }
   /* ---- the test letter --------------------------------------------------- */
   function keepNewsTo() {
@@ -26821,16 +27085,17 @@
     if (!d) return;
     keepNewsTo();
     var addr = (S.mailTo || "").trim();
-    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(addr)) { toast("Введите e-mail — на него придёт образец"); refocus("[data-newsto]"); return; }
+    if (!MAIL_TO_RX.test(addr)) { toast("Введите e-mail — на него придёт образец"); refocus("[data-newsto]"); return; }
     if (!newsReady(d, S.newsLang || "RU") && !newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) {
       toast("Сначала заполните тему и текст письма"); return;
     }
     var pr = newsProblem(d);
     if (pr) { newsShowProblem(pr); return; }
-    // the test is the saved letter — save first, then send the same thing again
-    if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsTest(document.querySelector("[data-newstest]")); }); return; }
+    // the test is the saved letter — the save still owed goes first, then the same thing again
+    if (!d.id || newsDirty() || newsOwes(d)) { newsSettle(function () { newsTest(document.querySelector("[data-newstest]")); }); return; }
     if (btn && btn.disabled) return;
     if (btn) btn.disabled = true;
+    admPanesSave();   // the address that is typed is the one remembered (q8)
     apiSend("/api/admin/newsletters/" + encodeURIComponent(d.id) + "/test/", "POST", { to: addr, lang: S.newsLang || "RU" }).then(function (r) {
       if (btn) btn.disabled = false;
       var err = r.body && r.body.error;
@@ -26844,7 +27109,12 @@
       else toast("Не получилось — попробуйте ещё раз");
     }).catch(function () { if (btn) btn.disabled = false; toast("Не получилось — попробуйте ещё раз"); });
   }
-  /* ---- the send: confirm, loop, resume ------------------------------------- */
+  /** Does this letter's autosave still owe the server something (typed, waiting, or on its way)? */
+  function newsOwes(d) {
+    var f = ADM_AS[newsAsKey(d)];
+    return !!(f && (f.busy || f.dirty || f.timer));
+  }
+  /* ---- the send: confirm, ten seconds, loop, resume ------------------------ */
   function newsConfirmDetail(d, aud) {
     var line = "Письмо «" + (d.title || d.subject.RU || d.subject.ET || d.subject.EN) + "» уйдёт подписчикам: " + (aud.total || 0) +
       " — по-русски " + (aud.RU || 0) + ", по-эстонски " + (aud.ET || 0) + ", по-английски " + (aud.EN || 0) + ".";
@@ -26854,20 +27124,57 @@
   }
   function newsSendAsk() {
     var d = S.newsEdit;
-    if (!d || S.newsBusy) return;
+    if (!d || S.newsBusy || S.newsHold) return;
     if (!newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) { toast("Сначала заполните тему и текст письма"); return; }
     var pr = newsProblem(d);
     if (pr) { newsShowProblem(pr); return; }
-    // the letter that goes out is the saved one — save first, then ask
-    if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsSendAsk(); }); return; }
+    // the letter that goes out is the saved one — the save still owed goes first (the first /send/ fixes the content)
+    if (!d.id || newsDirty() || newsOwes(d)) { newsSettle(newsSendAsk); return; }
     var aud = S.newsAudience;
     if (!aud) { loadNewsAudience(true, newsSendAsk); return; }
     if (!aud.total) { toast("Некому отправлять — подписчиков пока нет."); return; }
+    /* the question names the count (README rule 4: a mass letter is one of
+       the three things that are asked) */
     pendingAction = {
       type: "newsletter_send", overlay: true, id: d.id,
-      title: "Отправить письмо?", ok: "Отправить", detail: newsConfirmDetail(d, aud)
+      title: newsSendLabel(aud) + "?", ok: "Отправить", detail: newsConfirmDetail(d, aud)
     };
     render(); refocus("[data-admapply]");
+  }
+  /** «Письмо уйдёт через 8 с» — one whole string per second for the dictionary rule. */
+  function newsHoldLine(hold) {
+    var s = Math.max(0, Math.ceil((hold.until - Date.now()) / 1000));
+    return "Письмо уйдёт через " + s + " с";
+  }
+  function newsHoldTick() {
+    var hold = S.newsHold;
+    if (!hold) return;
+    var el = typeof document !== "undefined" ? document.querySelector("[data-newsholdleft]") : null;
+    if (el) { el.textContent = trText(newsHoldLine(hold), S.lang); }
+    clearTimeout(newsHoldTick._t);
+    newsHoldTick._t = setTimeout(newsHoldTick, 250);
+  }
+  /* After «Отправить»: ten seconds in the panel with «Вернуть» (Dim, q3) —
+     the loop of /send/ POSTs is started by the browser (docs/mail.md), so
+     holding its first POST back is the whole of it. A page that closes in
+     those seconds sends the first batch at once, with keepalive; the
+     morning job sends whatever is left of it (resumeParkedNewsletters). */
+  function newsSendHeld(pa) {
+    var h = mkHold(MK_SEND_HOLD_MS, function (leaving) {
+      S.newsHold = null; clearTimeout(newsHoldTick._t);
+      if (leaving) {
+        mkKeepalive("/api/admin/newsletters/" + encodeURIComponent(pa.id) + "/send/", "POST", {}).catch(noop);
+        return;
+      }
+      newsSendStart(pa);
+    }, function () {
+      S.newsHold = null; clearTimeout(newsHoldTick._t);
+      render();
+      toast("Письмо не ушло — это всё ещё черновик");
+    }, "Письмо уйдёт подписчикам через 10 секунд");
+    S.newsHold = { id: pa.id, until: h.until, h: h };
+    render();
+    newsHoldTick();
   }
   function newsSendErrText(r) {
     if (r.status === 401) { SRV.admin = false; return "Нужен вход в админку"; }
@@ -27108,7 +27415,11 @@
       return newsTranslateBlocks(d);
     }).then(function () {
       step("save");
-      return saveNewsFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
+      /* through the letter's own autosave, never beside it: two writers of
+         one draft could land a stale PATCH over a newer one */
+      return new Promise(function (resolve, reject) {
+        newsSettle(resolve, function () { reject(new Error(BLOG_SAVE_ERR)); });
+      });
     }).then(function () {
       S.newsGen = null;
       toast("Письмо готово на трёх языках — проверьте и отправьте себе тест");
@@ -27128,7 +27439,9 @@
     step("tr");
     newsTranslateBlocks(d).then(function () {
       S.newsGen = null;
-      toast("Переведено — проверьте и сохраните");
+      // the translation is an edit like any other: it saves itself (1a)
+      if (S.newsEdit === d) newsAutosave("change");
+      toast("Переведено — проверьте");
       paint();
     }).catch(function (e) {
       var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
@@ -27140,21 +27453,16 @@
   function newsClick(t, d) {
     if (d.newsnew !== undefined) { newsOpen(newsNewDraft()); render(); return true; }
     if (d.newsedit) { openNewsEditor(d.newsedit); return true; }
-    if (d.newsback !== undefined) {
-      // unsaved work dies with the draft — ask once (newsDirty), like the blog
-      if (newsDirty() && !S.newsConfirmBack) { S.newsConfirmBack = true; render(); return true; }
-      newsCloseEditor(); return true;
-    }
+    // «← Рассылка»: the letter saves itself (1a), so there is nothing to ask — what it owes goes first
+    if (d.newsback !== undefined) { newsCloseEditor(); return true; }
     if (d.newsbackyes !== undefined) { newsCloseEditor(); return true; }
     if (d.newsbackno !== undefined) { S.newsConfirmBack = false; render(); return true; }
     if (d.newslang) {
       // another language is another box: the remembered caret belongs to the old one
       S.newsLang = d.newslang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return true;
     }
-    if (d.newssave !== undefined) {
-      if (S.newsEdit && S.newsEdit.id && !newsDirty()) { toast("Изменений нет"); return true; }
-      saveNewsDraft(); return true;
-    }
+    // no button says «Сохранить» any more (1a); whatever still asks for it gets the save now
+    if (d.newssave !== undefined) { saveNewsDraft(); return true; }
     if (d.newsrevert !== undefined) { newsRevert(); return true; }
     if (d.newstest !== undefined) { newsTest(t); return true; }
     if (d.newssend !== undefined) { newsSendAsk(); return true; }
@@ -27165,9 +27473,21 @@
       S.newsBrief = ((bEl && bEl.value) || S.newsBrief || "").trim();
       newsWrite(S.newsEdit, S.newsBrief); return true;
     }
-    if (d.newstranslate !== undefined) { if (!t.disabled) newsTranslate(S.newsEdit); return true; }
-    if (d.newsdel !== undefined) { S.newsConfirmDelete = true; render(); return true; }
-    if (d.newsdelyes !== undefined) { deleteNews(); return true; }
+    /* «Перевести с русского» on the ET and EN tabs — asked first when those
+       languages already hold words of their own, which it would replace */
+    if (d.newstranslate !== undefined) {
+      if (t.disabled || !S.newsEdit) return true;
+      if (newsHasOwnTranslation(S.newsEdit)) {
+        pendingAction = {
+          type: "news_translate", overlay: true, title: "Перевести заново?",
+          detail: "Эстонский и английский текст письма заменится переводом с русского.", ok: "Перевести"
+        };
+        render(); refocus("[data-admapply]"); return true;
+      }
+      newsTranslate(S.newsEdit); return true;
+    }
+    // «⋯ → Удалить письмо»: the confirm sheet, then five seconds of «Вернуть» (newsDeleteHeld)
+    if (d.newsdel !== undefined || d.newsdelyes !== undefined) { newsDeleteAsk(); return true; }
     if (d.newsdelno !== undefined) { S.newsConfirmDelete = false; render(); return true; }
     if (d.newsreload !== undefined) { S.newsListErr = ""; S.news = null; loadNewsletters(true); render(); return true; }
     return false;
@@ -27185,7 +27505,7 @@
       /* the language the BOX holds (data-newsl), not the one S has moved on
          to — the blog's rule (blogSync), for the same tap-then-keystroke gap */
       else if (nf === "subject") { nd.subject[t.dataset.newsl || S.newsLang || "RU"] = t.value; newsPreviewSoon(); }
-      newsPaintState();
+      newsPaintState(true);
     } else if (t.matches("[data-nbf]")) {
       var f = t.dataset.nbf, k = t.dataset.nbk || "";
       if (f === "q") {
@@ -27200,10 +27520,35 @@
       var b = newsBlockByKey(k);
       if (!b || !b.text) return;
       b.text[t.dataset.nbl || S.newsLang || "RU"] = t.value;   // «text» and «label» alike: the language the box holds
-      newsPaintState(); newsPreviewSoon();
+      newsPaintState(true); newsPreviewSoon();
     } else if (t.matches("[data-newsto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-newsbrief]")) { S.newsBrief = t.value; }
   });
+  // …and a box that is left sends what it owes at once (the text policy's «on blur»)
+  document.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !S.newsEdit || S.adminTab !== "news") return;
+    if (t.matches('[data-newsf],[data-nbf="text"],[data-nbf="label"]')) newsAutosave("blur");
+    // the address typed for the test is remembered on this device (q8)
+    if (t.matches("[data-newsto]")) admPanesSave();
+  });
+  /* The two buttons 1a added to «Рассылка» — «⋯» and the send card's own
+     «Вернуть» — answer here, beside the block editor's own listener, rather
+     than as more names in the delegate's selector. */
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-newsmenu],[data-newsholdundo]") : null;
+    if (!t || S.screen !== "admin") return;
+    e.preventDefault();
+    if (t.hasAttribute("data-newsmenu")) { S.newsMenu = !S.newsMenu; render(); refocus("[data-newsmenu]"); return; }
+    if (S.newsHold && S.newsHold.h) S.newsHold.h.cancel();
+    if (S.toastUndo && typeof S.toastUndo.undo === "function") toastOff();
+  });
+  /** Do ET or EN already hold words the translation would replace? */
+  function newsHasOwnTranslation(d) {
+    return ["ET", "EN"].some(function (L) {
+      return !!String(d.subject[L] || "").trim() || (d.blocks || []).some(function (b) { return newsBlockWords(b, L); });
+    });
+  }
   /* The block editor's buttons — every [data-nb], addressed by the block's
      key. A listener of its own rather than more names in the delegate's
      selector: nothing else in the panel answers to these. */
@@ -27287,13 +27632,21 @@
       newsFocus('[data-nbcard="' + k + '"] [data-nb="' + act + '"]:not([disabled])');
       return;
     }
+    /* ✕: the block goes at once, and the toast's «Вернуть» (1a rule 3) puts
+       it back where it stood — the letter saves itself either way */
     if (act === "del") {
       if (i < 0) return;
-      S.newsUndo = { b: d.blocks[i], i: i };
+      var gone = { b: d.blocks[i], i: i };
       d.blocks.splice(i, 1);
       delete NEWS_UP[k];   // an upload still on its way finds no block and lands nowhere
       if (S.newsPick && S.newsPick.k === k) S.newsPick = null;
+      S.newsUndo = null;
       newsBlocksChanged();
+      toast("Блок удалён", { prev: true, undo: function () {
+        if (S.newsEdit !== d || d.blocks.length >= NEWS_BLOCKS_MAX) return;
+        d.blocks.splice(Math.min(gone.i, d.blocks.length), 0, gone.b);
+        newsBlocksChanged();
+      } });
       return;
     }
     if (act === "undo") {
@@ -30575,9 +30928,11 @@
      reads — so the field the owner edits and the letter he is looking at can
      never be two different texts.
 
-     Everything is edited on a copy (S.mailDraft); nothing reaches a customer
-     until «Сохранить», which is one set_mail_texts action carrying the whole
-     map. Same door, same undo as the banner. */
+     Everything is edited on a copy (S.mailDraft), and since 1a the copy saves
+     itself (mailFieldAs → mailTextsSend: one PUT of the whole map, a second
+     after the last keystroke), never with a refused «{…}» in it — see
+     «the letter saves itself» below. An older journal line's «Вернуть» is
+     still the set_mail_texts action. */
   var MAIL_TEXTS = null;          // { templates, placeholders, limits, defaults, texts, samples }
   var mailTextsAsked = false;
   var mailPreviewV = 0;           // bumped on apply so the iframe refetches
@@ -30699,10 +31054,15 @@
     var d = S.mailDraft, s = mailSaved();
     if (s[tpl]) d[tpl] = s[tpl]; else delete d[tpl];
   }
-  /** Out of the letter editor — its unsaved words go with it, as the question says. */
+  /** Out of the letter editor. Everything it still owes goes first; a text the
+      letter refused (an unfinished «{…}», q6) never went out, so it goes back
+      to what the letter says — and the toast says so rather than dropping it
+      in silence (README § 2). */
   function mailCloseEditor() {
-    mailRevertOne(mailTpl());
+    admAutosaveFlush();
+    var dropped = mailDropRefused(mailTpl());
     S.mailOpen = false; S.mailConfirmBack = false;
+    if (dropped) toast("Не сохранено: в тексте была незаконченная вставка «{…}»");
   }
   /** What actually gets saved: trimmed, clamped, empties dropped. The server
       sanitises again (cleanMailTexts) — this only keeps the blob tidy. */
@@ -30726,16 +31086,147 @@
     var sig = mailSig(map);
     return sig ? sig.split("\n").length : 0;
   }
+
+  /* ---------- the letter saves itself, and never a half-typed «{…}» --------
+     Dim, q6: a text saves a second after the last keystroke (and when its box
+     is left), and it is LIVE the moment it is saved — mail-hooks reads
+     settings.mail_texts at send time, and the server checks no placeholder
+     (cleanField only trims). So the browser refuses two things before
+     anything leaves: a brace that is not closed («{na», «{name» — the owner
+     is still typing it) and a token this letter does not fill («{track}» in a
+     birthday letter comes out as nothing, «{foo}» comes out as «{foo}»). The
+     box keeps its rust edge and one line under it, and saves the moment it is
+     right. The tokens a letter fills are the ones its sample fills
+     (?format=texts `samples`, the server's demoValues()). */
+  var MAIL_PH_UNFINISHED = "Вставка не дописана — закройте её скобкой «}» или уберите «{»";
+  var MAIL_PH_UNKNOWN = "Такой вставки в этом письме нет — возьмите её из кнопок ниже";
+  function mailTokensOf(tpl) {
+    var all = MAIL_PH.map(function (p) { return p[0]; }).concat("percent");
+    var s = MAIL_TEXTS && MAIL_TEXTS.samples && MAIL_TEXTS.samples[tpl];
+    if (!s || typeof s !== "object") return all;
+    return all.filter(function (k) { return typeof s[k] === "string" && s[k] !== ""; });
+  }
+  function mailTextProblem(tpl, text) {
+    var t = String(text == null ? "" : text), ok = mailTokensOf(tpl), bad = false;
+    var rest = t.replace(/\{([^{}]*)\}/g, function (whole, k) {
+      if (!/^[a-z]+$/.test(k) || ok.indexOf(k) < 0) bad = true;
+      return "";
+    });
+    if (/[{}]/.test(rest)) return MAIL_PH_UNFINISHED;
+    return bad ? MAIL_PH_UNKNOWN : "";
+  }
+  /** The map that may go out now: the draft, with a refused text replaced by what is saved. */
+  function mailOutMap() {
+    var d = mailDraft(), saved = mailSaved(), out = mailClean(d);
+    ADM_MAIL_ROWS.forEach(function (m) {
+      MAIL_LANGS.forEach(function (l) {
+        MAIL_FIELDS.forEach(function (f) {
+          var v = d[m[0]] && d[m[0]][l] && d[m[0]][l][f[0]];
+          if (typeof v !== "string" || !v.trim() || !mailTextProblem(m[0], v)) return;
+          var sv = saved[m[0]] && saved[m[0]][l] && saved[m[0]][l][f[0]];
+          if (typeof sv === "string" && sv.trim()) out[m[0]][l][f[0]] = sv.trim();
+          else {
+            delete out[m[0]][l][f[0]];
+            if (!objKeys(out[m[0]][l]).length) delete out[m[0]][l];
+            if (!objKeys(out[m[0]]).length) delete out[m[0]];
+          }
+        });
+      });
+    });
+    return out;
+  }
+  /** One PUT of the whole map (the route keeps one row). What the server took becomes «saved». */
+  function mailTextsSend(opts) {
+    var map = mailOutMap();
+    var st = "/api/admin/settings/", body = { mail_texts: map };
+    var req = opts && opts.keepalive ? mkKeepalive(st, "PUT", body) : apiSend(st, "PUT", body);
+    return req.then(function (r) {
+      if (admAutosaveOk(r)) {
+        if (MAIL_TEXTS) MAIL_TEXTS.texts = JSON.parse(JSON.stringify(map));
+        mailPreviewRefresh();
+        paintMailLangStates();
+        /* the list's «свой текст» follows — by a render only while no box of
+           the letter is being typed in (the morph would keep the text, but
+           not always the caret) */
+        var typing = typeof document !== "undefined" && document.activeElement && document.activeElement.hasAttribute &&
+          document.activeElement.hasAttribute("data-mailtxt");
+        if (!typing) render();
+      } else if (r && r.status === 401) { SRV.admin = false; render(); }
+      return r;
+    });
+  }
+  /** The autosave record of one box — the letter, the language, the field. */
+  function mailFieldAs(tpl, lang, field) {
+    var as = "mail:" + tpl + ":" + String(lang).toUpperCase() + ":" + field;
+    admAutosaveSpec(as, {
+      kind: "text",
+      validate: function (v) { return mailTextProblem(tpl, v); },
+      send: function (v, opts) { return mailTextsSend(opts); }
+    });
+    return as;
+  }
+  /** The refused texts of one letter back to what is saved — how many there were. */
+  function mailDropRefused(tpl) {
+    if (!MAIL_TEXTS || !S.mailDraft) return 0;
+    var n = 0, d = S.mailDraft, saved = mailSaved();
+    MAIL_LANGS.forEach(function (l) {
+      MAIL_FIELDS.forEach(function (f) {
+        var v = d[tpl] && d[tpl][l] && d[tpl][l][f[0]];
+        if (typeof v !== "string" || !v.trim() || !mailTextProblem(tpl, v)) return;
+        n += 1;
+        var sv = saved[tpl] && saved[tpl][l] && saved[tpl][l][f[0]];
+        setMailDraftField(tpl, l, f[0], typeof sv === "string" ? sv : "");
+        delete ADM_AS[mailFieldAs(tpl, l, f[0])];
+      });
+    });
+    return n;
+  }
+  /* «Вернуть стандартный текст» — for the language on screen, all three
+     fields at once (Dim, q36), saved at once, with «Вернуть» on the toast
+     that puts the owner's own words back and saves them again. */
+  var mailResetSeq = 0;
+  function mailSaveNow() {
+    mailResetSeq += 1;
+    return admAutosave("mail:texts", mailResetSeq, "change", { kind: "pick", send: function (v, opts) { return mailTextsSend(opts); } });
+  }
+  function mailResetLang(tpl, lang) {
+    var l = mailLangCode(lang), d = mailDraft();
+    var mine = d[tpl] && d[tpl][l] ? JSON.parse(JSON.stringify(d[tpl][l])) : null;
+    if (!mine) return;
+    delete d[tpl][l];
+    if (!objKeys(d[tpl]).length) delete d[tpl];
+    // the boxes' own records would take a text typed back to the owner's for «already saved»
+    MAIL_FIELDS.forEach(function (f) { delete ADM_AS[mailFieldAs(tpl, lang, f[0])]; });
+    mailSaveNow();
+    render();
+    toast("Стандартный текст на месте", {
+      prev: true,
+      undo: function () {
+        var dd = mailDraft();
+        if (!dd[tpl]) dd[tpl] = {};
+        dd[tpl][l] = mine;
+        MAIL_FIELDS.forEach(function (f) { delete ADM_AS[mailFieldAs(tpl, lang, f[0])]; });
+        mailSaveNow();
+        render();
+        toast("Ваш текст на месте");
+      }
+    });
+  }
+  /** The three language tabs' own words («свой текст» / «стандартный текст»), in place. */
+  function paintMailLangStates() {
+    if (typeof document === "undefined" || !S.mailOpen) return;
+    var tpl = mailTpl();
+    LANGS.forEach(function (l) {
+      var slot = document.querySelector('[data-mailed] [data-langst="' + l[0] + '"]');
+      if (!slot) return;
+      slot.innerHTML = admLangStateHTML(mailLangWords(tpl, l[0]));
+      translateTree(slot);
+    });
+  }
   /* Typing must not cost the caret, so the moving parts repaint on their own
-     instead of through render() — the same idiom as paintPricingState(). Since
-     phase 3 that includes the preview card beside the fields: it is the whole
-     point of the layout that the letter changes as the words are typed. */
+     instead of through render() — the same idiom as paintPricingState(): the
+     preview card beside the fields, which is the whole point of the layout. */
   function paintMailState() {
-    var acts = document.getElementById("mailacts");
-    if (acts) { acts.innerHTML = admMailActsHTML(); translateTree(acts); }
-    admDirtyMark(acts, mailDirty());
-    var dirty = document.querySelector("[data-maildirty]");
-    if (dirty) dirty.hidden = !mailDirty();
     paintMailPreview();
   }
 
@@ -32610,8 +33101,17 @@
   /* ---------- admin: promo codes (tab «Промокоды») -------------------------
      Codes live in the promo_codes table and are priced by the server; nothing
      here is a demo. The tab is the only place a code is made, so «REMPIRE10»
-     baked into app.js is gone for good. */
-  var PROMO_KIND_ROWS = [["percent", "Процент"], ["fixed", "Сумма в евро"], ["free_shipping", "Бесплатная доставка"]];
+     baked into app.js is gone for good.
+
+     Direction 1a (README § 5 «Маркетинг», screen 08): the list on the left —
+     code, what it gives, how often it was used, the switch — and a tap on a
+     row opens that code on the right (its own page on a phone, «← Промокоды»).
+     An open code saves itself (ADM_SAVE_POLICY: a number when its box is
+     left, a chip or a pick at once); a NEW code is the one form with an
+     explicit «Создать промокод», because it needs a code and a discount
+     before it can exist, and what is typed into it is kept on this device
+     until then. A code is never renamed once it exists (Dim, q34). */
+  var PROMO_KIND_ROWS = [["percent", "Процент"], ["fixed", "Сумма"], ["free_shipping", "Доставка"]];
   function loadAdminPromos(force) {
     if (SRV.admin !== true) return;
     if (S.admPromos && !force) return;
@@ -32621,7 +33121,12 @@
       loadAdminPromos._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       // a refresh that failed keeps the codes on screen (loadOverview's rule)
-      if (r.status === 200 && r.body.ok) { S.admPromos = r.body.promos || []; S.admPromoErr = ""; }
+      if (r.status === 200 && r.body.ok) {
+        /* …and a code whose delete is still being held (promoDeleteHeld) stays
+           off the list until its five seconds are up — the server has it until then */
+        S.admPromos = (r.body.promos || []).filter(function (p) { return !PROMO_GOING[p.code]; });
+        S.admPromoErr = "";
+      }
       else { if (!S.admPromos) S.admPromos = []; S.admPromoErr = "Список промокодов не загрузился."; }
       render();
     }).catch(function () {
@@ -32702,8 +33207,8 @@
     return out.join(" · ") || "без условий";
   }
   /* ---- «На что действует»: the whole order, one brand, one product --------
-     db/migrations/170_promo_scope.sql. Three chips and then ONE control, never
-     two at once, because Renat fills this in on a phone.
+     db/migrations/170_promo_scope.sql. Three segments and then ONE control,
+     never two at once, because Renat fills this in on a phone.
 
      A brand is a native <select>: twenty-six names, and the phone's own wheel
      is the best list there is for that — one tap, no scrolling inside a
@@ -32715,10 +33220,11 @@
      use for picking a product (newsPickRows). Once one is picked the
      search disappears and the chosen product stands there with «Убрать».
 
-     Free delivery has no chips at all, only a sentence saying why: the parcel
-     is one line for the whole basket, so there is no «Davines half» of it to
-     make free. The server refuses the combination too (validatePromo), and the
-     table refuses it under that — this is the explanation, not the guard. */
+     Free delivery has no segments at all, only a sentence saying why: the
+     parcel is one line for the whole basket, so there is no «Davines half» of
+     it to make free. The server refuses the combination too (validatePromo),
+     and the table refuses it under that — this is the explanation, not the
+     guard. */
   var PROMO_SCOPE_ROWS = [["order", "Весь заказ"], ["brand", "Бренд"], ["product", "Товар"]];
   var PROMO_PICKS = 6;
   function promoBrandList() {
@@ -32731,9 +33237,18 @@
       return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
     }).slice(0, PROMO_PICKS);
   }
+  /** The rust edge and the one line under a box the form refused (promoProblem). */
+  function promoBad(k) {
+    var pr = S.promoProblem;
+    return pr && pr.f === k ? ' aria-invalid="true"' : "";
+  }
+  function promoHintHTML(k) {
+    var pr = S.promoProblem, on = !!(pr && pr.f === k);
+    return '<span class="adm-ashint" data-promohint="' + k + '"' + (on ? "" : " hidden") + ">" + (on ? esc(pr.hint) : "") + "</span>";
+  }
   function promoScopeFormHTML(f) {
     if (f.kind === "free_shipping") {
-      return '<div class="adm-hint" style="margin-top:12px">Бесплатная доставка действует на весь заказ. ' +
+      return '<div class="adm-hint">Бесплатная доставка действует на весь заказ. ' +
         "Выбрать для неё бренд или товар нельзя: посылка одна на всю корзину.</div>";
     }
     /* …and the same for a product id the catalogue no longer has: the row is
@@ -32745,46 +33260,43 @@
       picked = byIdOrNull(String(f.scopeValue)) ||
         { id: String(f.scopeValue), brand: "", name: String(f.scopeValue) };
     }
-    var body = "";
-    /* A REM-CART code lights none of the three chips — nobody types one, the
-       abandoned-cart letter mints it — so the form says what it is instead of
-       looking like a code with nothing chosen. */
+    var body = "", badScope = promoBad("scope");
+    /* A REM-CART code lights none of the three segments — nobody types one,
+       the abandoned-cart letter mints it — so the form says what it is
+       instead of looking like a code with nothing chosen. */
     if (f.scope === "cart") {
-      body = '<p class="adm-hint" style="margin-top:10px">Код из письма о брошенной корзине: скидка только на товары этой корзины.</p>';
+      body = '<p class="adm-hint">Код из письма о брошенной корзине: скидка только на товары этой корзины.</p>';
     } else if (f.scope === "brand") {
       var chosen = String(f.scopeValue || "");
       var list = promoBrandList();
       /* A code saved for a brand the catalogue no longer carries keeps that
          brand as an option of its own. Without this the select would open on
-         «Выберите бренд» and the next «Сохранить» would quietly widen the code
-         to the whole shop — an edit the owner never made, to a code he opened
+         «Выберите бренд» and the next save would quietly widen the code to
+         the whole shop — an edit the owner never made, to a code he opened
          only to change its dates. */
       if (chosen && list.indexOf(chosen) < 0) list = [chosen].concat(list);
-      body = '<label class="adm-field" style="margin-top:10px">Бренд' +
-        '<select class="adm-input" data-promobrand>' +
+      body = '<select class="adm-input" data-promobrand aria-label="Бренд"' + badScope + ">" +
         '<option value=""' + (chosen ? "" : " selected") + ">Выберите бренд</option>" +
         list.map(function (b) {
           return '<option value="' + esc(b) + '"' + (b === chosen ? " selected" : "") + ">" + esc(b) + "</option>";
-        }).join("") + "</select></label>";
+        }).join("") + "</select>";
     } else if (f.scope === "product") {
       body = picked
-        ? '<div class="adm-list adm-list--flat" style="margin-top:10px"><div class="adm-row">' +
+        ? '<div class="adm-list adm-list--flat"><div class="adm-row">' +
             // no brand = a product this build's catalogue no longer has, so
             // there is no picture to draw either — the id is all there is
             (picked.brand ? '<span class="adm-thumb adm-thumb--sm">' + media(picked, 0, "ph") + "</span>" : "") +
             '<span class="adm-row__body"><span class="adm-row__nm">' +
               esc(picked.brand ? picked.brand + " — " + picked.name : picked.name) + "</span></span>" +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoproddel>Убрать</button></div></div>'
-        : '<label class="adm-field" style="margin-top:10px">Найдите товар — по названию или бренду' +
-            '<input class="adm-input" data-promoq value="' + esc(S.promoQ || "") + '" placeholder="Например: Davines шампунь"></label>' +
+        : '<input class="adm-input" data-promoq value="' + esc(S.promoQ || "") + '" placeholder="Найти товар…" aria-label="Найдите товар — по названию или бренду"' +
+            badScope + ">" +
           '<div id="admpromopicks">' + promoPicksHTML(promoProductMatches()) + "</div>";
     }
-    return '<div style="margin-top:14px"><div class="adm-sec__t">На что действует</div>' +
-      '<div class="adm-chips" role="group" aria-label="На что действует промокод">' + PROMO_SCOPE_ROWS.map(function (s) {
-        return '<button class="adm-chip" data-promoscope="' + s[0] + '" aria-current="' + (f.scope === s[0]) + '">' +
-          s[1] + "</button>";
-      }).join("") + "</div>" + body +
-      '<p class="adm-hint" style="margin-top:8px">' + (f.scope === "order"
+    return '<div class="adm-pfield"><span class="adm-pfield__l">На что действует</span>' +
+      admSegHTML("data-promoscope", PROMO_SCOPE_ROWS, f.scope, "На что действует промокод") + body +
+      promoHintHTML("scope") +
+      '<p class="adm-hint">' + (f.scope === "order"
         ? "Скидка снимется со всего заказа, кроме подарочных карт."
         : "Скидка снимется только с подходящих строк заказа — остальное покупатель оплатит полностью.") +
       "</p></div>";
@@ -32798,110 +33310,350 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoprodpick="' + esc(p.id) + '">Выбрать</button></div>';
     }).join("") + "</div>";
   }
-  /* The inline form of the spec: a mono uppercase code, three kind chips, the
-     value and the minimum order — with the three rarer conditions (until when,
-     how many times, a note to self) folded away, because a code Renat makes in
-     a hurry needs four fields and not seven. */
+
+  /* ---- what the form will not send ----------------------------------------
+     The server's own bounds (validatePromo, src/lib/promos.ts), asked in the
+     browser first: an open code saves itself, and a value the server would
+     refuse must never leave — the box keeps its rust edge and one line under
+     it, and it goes the moment it is right (README § 2). The lines are the
+     sentences the server's refusals already had (PROMO_SAVE_ERRS). */
+  function promoNum(v) {
+    var s = String(v == null ? "" : v).trim().replace(",", ".");
+    if (!s) return null;
+    return isFinite(Number(s)) ? Number(s) : NaN;
+  }
+  function promoProblem(f) {
+    if (!f) return null;
+    if (f.kind === "percent") {
+      var pv = promoNum(f.value);
+      if (pv === null || pv !== pv || Math.round(pv) < 1 || Math.round(pv) > 90) return { f: "value", hint: PROMO_SAVE_ERRS.bad_value };
+    } else if (f.kind === "fixed") {
+      var fv = promoNum(f.value);
+      if (fv === null || fv !== fv || !(fv > 0) || fv > 200) return { f: "value", hint: PROMO_SAVE_ERRS.bad_value };
+    }
+    var mv = promoNum(f.minSubtotal);
+    if (mv !== null && (mv !== mv || mv < 0 || mv > 10000)) return { f: "minSubtotal", hint: PROMO_SAVE_ERRS.bad_min };
+    if (f.kind !== "free_shipping" && (f.scope === "brand" || f.scope === "product") && !String(f.scopeValue || "").trim()) {
+      return { f: "scope", hint: PROMO_SAVE_ERRS.bad_scope_value };
+    }
+    if (f.kind !== "free_shipping" && f.scope === "cart" && !(f.scopeLines && f.scopeLines.length)) {
+      return { f: "scope", hint: PROMO_SAVE_ERRS.bad_scope_lines };
+    }
+    if (f.endsAt && isNaN(new Date(String(f.endsAt).slice(0, 10) + "T23:59:59Z").getTime())) return { f: "endsAt", hint: PROMO_SAVE_ERRS.bad_date };
+    var uv = promoNum(f.maxUses);
+    if (uv !== null && (uv !== uv || Math.trunc(uv) < 1 || Math.trunc(uv) > 1000000)) return { f: "maxUses", hint: PROMO_SAVE_ERRS.bad_uses };
+    return null;
+  }
+  /** The refusal, in place: a render would take the caret out of the box being typed in. */
+  function promoPaintProblem() {
+    if (typeof document === "undefined") return;
+    var pr = S.promoProblem;
+    var boxes = document.querySelectorAll("[data-promopanel] [aria-invalid]");
+    for (var i = 0; i < boxes.length; i++) boxes[i].removeAttribute("aria-invalid");
+    var hints = document.querySelectorAll("[data-promohint]");
+    for (var j = 0; j < hints.length; j++) {
+      var on = !!(pr && hints[j].getAttribute("data-promohint") === pr.f);
+      hints[j].textContent = on ? trText(pr.hint, S.lang) : "";
+      hints[j].hidden = !on;
+    }
+    if (!pr) return;
+    var sel = pr.f === "scope" ? "[data-promobrand],[data-promoq]" : '[data-promof="' + pr.f + '"]';
+    var box = document.querySelector(sel);
+    if (box) box.setAttribute("aria-invalid", "true");
+  }
+  /** «−10% · любой заказ · на бренд Davines» — the head of the open code, as it stands. */
+  function promoSumHTML(f) {
+    var hasValue = f.kind === "free_shipping" || String(f.value == null ? "" : f.value).trim() !== "";
+    var min = promoNum(f.minSubtotal);
+    return payPiecesHTML([
+      hasValue ? promoKindLabel(f) : "",
+      min ? "от " + eur(min) : "любой заказ",
+      f.kind === "free_shipping" ? "" : promoScopeLabel(f)
+    ]);
+  }
+  function promoPaintSum() {
+    var el = typeof document !== "undefined" ? document.querySelector("[data-promosum]") : null;
+    if (el && S.promoForm) { el.innerHTML = promoSumHTML(S.promoForm); translateTree(el); }
+  }
+  /** «до 31.10.2026 · без лимита» — the fold's own line, so folded is not hidden. */
+  function promoFoldSum(f) {
+    var until = f.endsAt ? "до " + String(f.endsAt).slice(0, 10).split("-").reverse().join(".") : "без срока";
+    var n = promoNum(f.maxUses);
+    return payPiecesHTML([until, n && n === n ? Math.trunc(n) + " " + pl(Math.trunc(n), "использование", "использования", "использований") : "без лимита"]);
+  }
+
+  /* ---- a new code: a draft on this device until «Создать промокод» -------- */
+  var PROMO_DRAFT_LS = "rempire-admin-promo-draft";
+  function promoDraftSave() {
+    var f = S.promoForm;
+    if (!f || f.editing) return;
+    try {
+      localStorage.setItem(PROMO_DRAFT_LS, JSON.stringify({
+        code: f.code, kind: f.kind, value: f.value, minSubtotal: f.minSubtotal, endsAt: f.endsAt,
+        maxUses: f.maxUses, note: f.note, scope: f.scope, scopeValue: f.scopeValue
+      }));
+    } catch (e) {}
+  }
+  function promoDraftClear() { try { localStorage.removeItem(PROMO_DRAFT_LS); } catch (e) {} }
+  /** «+ Промокод»: a blank form, or the one typed here before and not yet created. */
+  function promoDraftLoad() {
+    var f = blankPromo();
+    try {
+      var d = JSON.parse(localStorage.getItem(PROMO_DRAFT_LS) || "null");
+      if (d && typeof d === "object") {
+        ["code", "kind", "value", "minSubtotal", "endsAt", "maxUses", "note", "scope", "scopeValue"].forEach(function (k) {
+          if (d[k] !== undefined && d[k] !== null) f[k] = d[k];
+        });
+        if (["percent", "fixed", "free_shipping"].indexOf(f.kind) < 0) f.kind = "percent";
+        if (["order", "brand", "product"].indexOf(f.scope) < 0) { f.scope = "order"; f.scopeValue = ""; }
+      }
+    } catch (e) {}
+    return f;
+  }
+
+  /* ---- an open code saves itself ------------------------------------------
+     One autosave record per code («promo:CODE»): the POST is the whole code
+     (validatePromo reads a body as the whole row), so every field of it
+     rides in the same write, and the newest state always follows the one in
+     flight. PROMO_PENDING holds that state per code, so a write still owed
+     when the owner opens another code — or closes this one — sends THIS
+     code, not whatever the form holds by then. */
+  var PROMO_PENDING = {};
+  var promoSeq = 0;
+  function promoAsKey(code) { return "promo:" + String(code || "").toUpperCase(); }
+  function promoAutosave(ev) {
+    var f = S.promoForm;
+    if (!f || !f.editing || SRV.admin !== true) return false;
+    var code = String(f.code || "").toUpperCase();
+    if (ev === "input" || ev === "change") {
+      promoSeq += 1;
+      PROMO_PENDING[code] = JSON.parse(JSON.stringify(f));
+    }
+    return admAutosave(promoAsKey(code), ev === "input" || ev === "change" ? promoSeq : undefined, ev, {
+      kind: "money",
+      validate: function () {
+        var pr = promoProblem(PROMO_PENDING[code]);
+        if (S.promoForm && String(S.promoForm.code).toUpperCase() === code) { S.promoProblem = pr; promoPaintProblem(); }
+        return pr ? pr.hint : "";
+      },
+      send: function (v, opts) { return promoAutosaveSend(code, opts); }
+    });
+  }
+  /** A keepalive write for a page on its way out — apiSend's shape, {status, body}. */
+  function mkKeepalive(url, method, body) {
+    return fetch(url, {
+      method: method, headers: { "content-type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body), keepalive: true
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (b) { return { status: res.status, body: b || {} }; });
+    });
+  }
+  function promoAutosaveSend(code, opts) {
+    var f = PROMO_PENDING[code];
+    if (!f) return true;
+    var body = promoFormPayload(f);
+    var req = opts && opts.keepalive ? mkKeepalive("/api/admin/promos/", "POST", body) : apiSend("/api/admin/promos/", "POST", body);
+    return req.then(function (r) {
+      var open = S.promoForm && String(S.promoForm.code).toUpperCase() === code;
+      if (r.status === 200 && r.body && r.body.ok && r.body.promo) {
+        // the row takes the server's own copy — no reload of the whole list (1a)
+        var list = S.admPromos || [];
+        for (var i = 0; i < list.length; i++) if (list[i].code === r.body.promo.code) list[i] = r.body.promo;
+        promoRowPaint(code);
+        if (open) { S.promoFormErr = ""; promoPaintErr(); }
+      } else if (open && r.status !== 401) {
+        S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
+        promoPaintErr();
+      }
+      return r;
+    });
+  }
+  function promoPaintErr() {
+    var el = typeof document !== "undefined" ? document.querySelector("[data-promoerr]") : null;
+    if (!el) return;
+    el.innerHTML = promoErrLineHTML();
+    el.hidden = !S.promoFormErr;
+    translateTree(el);
+  }
+  function promoErrLineHTML() {
+    var f = S.promoForm;
+    if (!S.promoFormErr) return "";
+    return "<span>" + esc(S.promoFormErr) + "</span>" +
+      /* «Создать» with a code that is already there: the way to the code
+         itself, rather than a dead end (savePromo, `exists`) */
+      (f && f.dup ? ' <button class="adm-link" data-admpromoedit="' + esc(f.dup) + '">Открыть его</button>' : "");
+  }
+  /** Something on the form moved: the head's line follows, an open code
+      saves (a box when it is left — «input» waits; a chip or a pick at once),
+      a new one is kept on this device. A refusal already on screen is asked
+      again, so it goes the moment the box is right. */
+  function promoChanged(ev) {
+    var f = S.promoForm;
+    if (!f) return;
+    promoPaintSum();
+    var fold = typeof document !== "undefined" ? document.querySelector("[data-promofold]") : null;
+    if (fold) { fold.innerHTML = promoFoldSum(f); translateTree(fold); }
+    if (f.editing) { promoAutosave(ev); return; }
+    promoDraftSave();
+    if (S.promoProblem) {
+      var pr = promoProblem(f);
+      if (S.promoProblem.f === "code") pr = String(f.code || "").trim() ? pr : S.promoProblem;
+      S.promoProblem = pr;
+      promoPaintProblem();
+    }
+  }
+  // a box of an open code that is left — or Enter in it — sends what it owes (ADM_SAVE_POLICY «leave»)
+  if (typeof document !== "undefined") {
+    document.addEventListener("focusout", function (e) {
+      var t = e.target;
+      if (t && t.matches && t.matches("[data-promof]") && S.promoForm && S.promoForm.editing) promoAutosave("blur");
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing) return;
+      var t = e.target;
+      if (t && t.matches && t.matches("input[data-promof]") && S.promoForm && S.promoForm.editing) promoAutosave("enter");
+    });
+  }
+  /** Open a code (or a new one), sending whatever the one before still owes. */
+  function promoOpen(form) {
+    admAutosaveFlush();
+    S.promoForm = form; S.promoQ = ""; S.promoFormErr = ""; S.promoProblem = null;
+  }
+  function promoClose() {
+    admAutosaveFlush();
+    S.promoForm = null; S.promoFormErr = ""; S.promoProblem = null; S.promoQ = "";
+  }
+
+  /* The panel of one code: its head (the code — never a box: q34 — and what
+     it gives, as it stands), the kind, the numbers, what it applies to, and
+     the rarer three folded with their values in the fold's own line. */
   function promoFormHTML() {
     var f = S.promoForm;
-    return '<div class="adm-card adm-card--pad" style="max-width:560px">' +
-      '<div class="adm-sec__t">' + (f.editing ? "Изменить промокод" : "Новый промокод") + "</div>" +
-      '<label class="adm-field">Код — латиница, цифры и дефис' +
-        '<input class="adm-input adm-mono" data-promof="code" maxlength="24" value="' + esc(f.code) +
-        '" placeholder="SUVI10" style="text-transform:uppercase"' + (f.editing ? " readonly" : "") + "></label>" +
-      '<div class="adm-chips" role="group" aria-label="Что даёт промокод">' + PROMO_KIND_ROWS.map(function (k) {
-        return '<button class="adm-chip" data-promokind="' + k[0] + '" aria-current="' + (f.kind === k[0]) + '">' +
-          k[1] + "</button>";
-      }).join("") + "</div>" +
-      // one pair of fields, side by side on a desk and stacked on a phone —
-      // see .adm-formpair in admin.css for the 140-px columns it replaces
+    var edit = !!f.editing;
+    var row = edit ? admPromoByCode(f.code) : null;
+    var used = !!(row && admPromoUsed(row));
+    return '<div class="adm-ppanel" data-promopanel>' +
+      '<div class="adm-ppanel__h"><div class="adm-ppanel__t">' +
+          (edit ? '<h2 class="adm-ppanel__code adm-mono">' + esc(f.code) + "</h2>" : '<h2 class="adm-ppanel__new">Новый промокод</h2>') +
+          '<span class="adm-ppanel__s" data-promosum>' + promoSumHTML(f) + "</span></div>" +
+        admHelpBtnHTML("promo-form") +
+        '<button class="adm-iconbtn adm-ppanel__x" type="button" data-admpromocancel title="Закрыть"><span aria-hidden="true">×</span><span class="vh">Закрыть</span></button></div>' +
+      admHelpHTML("promo-form", "Код менять нельзя — его уже могли раздать. Правка кода меняет только будущие заказы, уже оформленные остаются как были.") +
+      (edit ? "" :
+        '<label class="adm-field">Код — латиница, цифры и дефис' +
+          '<input class="adm-input adm-mono" data-promof="code" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" value="' + esc(f.code) +
+          '" placeholder="SUVI10" style="text-transform:uppercase"' + promoBad("code") + ">" + promoHintHTML("code") + "</label>") +
+      '<div class="adm-pfield"><span class="adm-pfield__l">Скидка</span>' +
+        admSegHTML("data-promokind", PROMO_KIND_ROWS, f.kind, "Что даёт промокод") + "</div>" +
+      // one pair of fields, side by side on a desk and stacked on a phone
       '<div class="adm-formpair">' +
         (f.kind === "free_shipping"
           ? '<div class="adm-hint">Скидка не нужна — код просто делает доставку бесплатной.</div>'
-          : '<label class="adm-field">' + (f.kind === "fixed" ? "Скидка, € — до 200" : "Скидка, % — от 1 до 90") +
-            '<input class="adm-input" data-promof="value" inputmode="decimal" value="' + esc(String(f.value)) + '"></label>') +
-        '<label class="adm-field">Минимальный заказ, €' +
-          '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" value="' +
-          esc(String(f.minSubtotal)) + '"></label>' +
+          : '<label class="adm-field">' + (f.kind === "fixed" ? "Скидка, €" : "Скидка, %") +
+            '<input class="adm-input" data-promof="value" inputmode="decimal" value="' + esc(String(f.value)) + '"' + promoBad("value") + ">" +
+            promoHintHTML("value") + "</label>") +
+        '<label class="adm-field">Заказ от, €' +
+          '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" placeholder="0 — любой" value="' +
+          esc(String(f.minSubtotal || "")) + '"' + promoBad("minSubtotal") + ">" + promoHintHTML("minSubtotal") + "</label>" +
       "</div>" +
       promoScopeFormHTML(f) +
-      '<details class="adm-fold"><summary class="adm-link" data-promomore>Срок, число использований и заметка</summary>' +
-        '<div style="padding-top:12px">' +
-          '<label class="adm-field">Действует до — пусто, если бессрочно' +
-            '<input class="adm-input" type="date" data-promof="endsAt" value="' +
-            esc(String(f.endsAt || "").slice(0, 10)) + '"></label>' +
-          '<label class="adm-field" style="margin-top:10px">Сколько раз можно использовать' +
-            '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
-          '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
-            '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
-        "</div></details>" +
-      /* the product editor's sticky bar — one shape for every form that
-         saves (Renat, 10.09.2026), with the refusal riding in it so it is on
-         screen on a phone wherever the owner is in the form */
-      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) +
-          /* «Создать» with a code that is already there: the way to the code
-             itself, rather than a dead end (savePromo, `exists`) */
-          (f.dup ? ' <button class="adm-link" data-admpromoedit="' + esc(f.dup) + '">Открыть его</button>' : "") +
-          "</p>" : "") +
-        '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
-        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
-        admBarNoteHTML("touch") + "</div></div>";
+      admFoldHTML("promo-more", "Срок, лимит и заметка", '<span data-promofold>' + promoFoldSum(f) + "</span>",
+        '<label class="adm-field">Действует до — пусто, если бессрочно' +
+          '<input class="adm-input" type="date" data-promof="endsAt" value="' + esc(String(f.endsAt || "").slice(0, 10)) + '"' + promoBad("endsAt") + ">" +
+          promoHintHTML("endsAt") + "</label>" +
+        '<label class="adm-field">Сколько раз можно использовать' +
+          '<input class="adm-input" data-promof="maxUses" inputmode="numeric" placeholder="без лимита" value="' + esc(String(f.maxUses)) + '"' + promoBad("maxUses") + ">" +
+          promoHintHTML("maxUses") + "</label>" +
+        '<label class="adm-field">Заметка для себя' +
+          '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>') +
+      '<p class="adm-err" role="alert" data-promoerr' + (S.promoFormErr ? "" : " hidden") + ">" + promoErrLineHTML() + "</p>" +
+      (edit
+        ? (used
+          ? '<p class="adm-hint adm-ppanel__foot">Кодом уже пользовались — его можно только выключить.</p>'
+          : '<div class="adm-ppanel__foot"><button class="adm-link adm-link--warn" type="button" data-admpromodel="' + esc(f.code) + '">Удалить промокод</button></div>')
+        // the one dark button of a new code — pinned above the tab bar on a phone
+        : admPinnedHTML("data-admpromosave", "Создать промокод")) +
+      "</div>";
+  }
+  /** One code's row: the code, what it gives, how often — and its switch. */
+  function admPromoRowHTML(p) {
+    var cur = !!(S.promoForm && S.promoForm.editing && S.promoForm.code === p.code);
+    /* One <span> per piece (payPiecesHTML, escaped there): glued into one
+       text node the line matched no rule, and an ET or EN panel read all of
+       it in Russian although every piece has one. The owner's own note is a
+       node of its own and says so (data-notr). */
+    var what = payPiecesHTML([promoKindLabel(p), promoScopeLabel(p), promoWhen(p)]) +
+      (p.note ? ' · <span data-notr>' + esc(p.note) + "</span>" : "");
+    return '<div class="adm-row adm-row--open adm-prow' + (p.active ? "" : " is-off") + (cur ? " is-cur" : "") + '" data-promorow="' + esc(p.code) + '">' +
+      '<button class="adm-prow__b" type="button" data-admpromoedit="' + esc(p.code) + '"' + (cur ? ' aria-current="true"' : "") + ">" +
+        '<span class="adm-row__nm adm-prow__code adm-mono">' + esc(p.code) + "</span>" +
+        '<span class="adm-prow__what">' + what + "</span>" +
+        '<span class="adm-prow__used">' + admPromoUsedLine(p) + "</span></button>" +
+      admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
+      "</div>";
+  }
+  /** One row redrawn where it stands — a save landing must not rebuild the form beside it. */
+  function promoRowPaint(code) {
+    if (typeof document === "undefined") return;
+    var el = document.querySelector('[data-promorow="' + String(code).replace(/["\\]/g, "\\$&") + '"]');
+    var p = admPromoByCode(code);
+    if (!el || !p || !el.parentNode) return;
+    var holder = document.createElement("div");
+    holder.innerHTML = admPromoRowHTML(p);
+    var fresh = holder.firstChild;
+    el.parentNode.replaceChild(fresh, el);
+    translateTree(fresh);
   }
   function admPromosHTML() {
     loadAdminPromos(false);
     var list = S.admPromos || [];
-    return (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы создавать промокоды.</div>') +
+    var f = S.promoForm;
+    var help = admHelpHTML("promos", "<span>«Использован» считается только после оплаты — брошенная корзина код не тратит.</span> " +
+      "<span>Удалить можно только код, которым ещё не пользовались: использованный остаётся в истории заказов, его можно выключить.</span>");
+    var rows = list.length
+      ? '<div class="adm-plist">' + list.map(admPromoRowHTML).join("") + "</div>"
+      : S.admPromos
+        ? '<div class="adm-empty">Промокодов пока нет</div>'
+        : '<div class="adm-skel"><i></i><i></i></div>';
+    var main =
+      (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы создавать промокоды.</div>') +
       (S.admPromoErr ? '<div class="adm-error"><span>' + esc(S.admPromoErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="promos">Повторить</button></div>' : "") +
-      (S.promoForm ? promoFormHTML() : "") +
-      (list.length
-        ? '<div class="adm-list">' + list.map(function (p) {
-            // …with «на бренд Davines» right after the size of the discount,
-            // because that is the half of a scoped code the list cannot imply
-            /* One <span> per piece (payPiecesHTML, escaped there): glued into
-               one text node the line matched no rule, and an ET or EN panel
-               read all of it in Russian although every piece has one. */
-            var meta = payPiecesHTML([promoKindLabel(p), promoScopeLabel(p), promoWhen(p), admPromoUsedLine(p)]);
-            /* The same three lines as «Письма» (admin.css, .adm-row--lines):
-               the code, the grey line of conditions, and a third line with the
-               switch on the left and «Удалить» on the right. The row itself
-               opens the form, edge to edge (ADM_ROW_OPEN). */
-            return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
-              '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '">' +
-                '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
-                // the note is the owner's own words — a node of its own now, so it says so
-                '<span class="adm-row__sub adm-row__sub--one">' + meta + (p.note ? ' · <span data-notr>' + esc(p.note) + "</span>" : "") + "</span></button>" +
-              '<span class="adm-row__line adm-row__line--split">' +
-                admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
-                /* A used code has no «Удалить»: it is on somebody's order, and
-                   the line under the list says so. The server holds the same
-                   rule whatever this row believes (deletePromo). */
-                (admPromoUsed(p)
-                  ? ""
-                  : '<button class="adm-link adm-link--muted" data-admpromodel="' + esc(p.code) + '">Удалить</button>') +
-              "</span></div>";
-          }).join("") + "</div>"
-        : (S.admPromos ? '<div class="adm-empty">Промокодов пока нет</div>' : '<div class="adm-skel"><i></i><i></i></div>')) +
-      '<p class="adm-hint" style="margin-top:12px">«Использован» считается только после оплаты — ' +
-        "брошенная корзина код не тратит.</p>" +
-      '<p class="adm-hint">Удалить можно только код, которым ещё не пользовались: использованный ' +
-        "остаётся в истории заказов, его можно выключить.</p>";
+      // desktop: the columns' names; phone: what a tap does — the «?» on both
+      '<div class="adm-plist__h"><span class="adm-plist__cols" aria-hidden="true"><span>Код</span><span>Скидка</span><span>Использован</span></span>' +
+        '<span class="adm-plist__tap">Нажмите на код, чтобы изменить</span>' + admHelpBtnHTML("promos") + "</div>" +
+      help + rows;
+    var side = f
+      ? promoFormHTML()
+      : '<div class="adm-mk2__ph">Нажмите на код, чтобы изменить, или создайте новый.</div>';
+    return '<div class="adm-mk2"><div class="adm-mk2__list">' + main + '</div><div class="adm-mk2__side">' + side + "</div></div>";
   }
   /** Has anybody paid with this code? The one question «Удалить» turns on. */
   function admPromoUsed(p) { return Number(p.used) > 0; }
-  /** «использован 14» / «использован 14 из 50» — one string for the i18n check. */
+  /** «ещё не использован» / «использован 14» / «использован 14 из 50» — one string each for the i18n check. */
   function admPromoUsedLine(p) {
-    return "использован " + p.used + (p.maxUses ? " из " + p.maxUses : "");
+    if (!(Number(p.used) > 0) && !p.maxUses) return "ещё не использован";
+    return "использован " + (Number(p.used) || 0) + (p.maxUses ? " из " + p.maxUses : "");
+  }
+  /** Is the code on right now? The LIST's row decides, not the form — the
+      switch beside the row may have moved since the form was opened, and the
+      server reads a body without `active` as «on» (validatePromo): an open
+      form that sent its own stale copy switched a code the owner had just
+      switched off straight back on. */
+  function promoActiveNow(f) {
+    var row = f && f.editing ? admPromoByCode(String(f.code || "").toUpperCase()) : null;
+    if (row) return row.active !== false;
+    return !f || f.active !== false;
   }
   /* Every number here is a free-text box on a phone. What the owner typed
      travels verbatim so validatePromo() is the one thing that decides what it
      means: «сто» in «Сколько раз» used to become NaN, then JSON null, then
      «без ограничений» — a code with no limit at all, saved silently, and the
      list underneath said «использован 0» with nothing to say it was infinite.
-     The same `|| 0` turned an unreadable «Минимальный заказ» into «no floor». */
-  function promoFormPayload() {
-    var f = S.promoForm;
+     The same `|| 0` turned an unreadable «Минимальный заказ» into «no floor».
+     `form` is the code to send — the open form when none is named. */
+  function promoFormPayload(form) {
+    var f = form || S.promoForm;
     var text = function (v) { return String(v == null ? "" : v).trim(); };
     /* «На что действует» travels as a pair, and free delivery never carries
        one: the server refuses kind+scope together (validatePromo), so sending
@@ -32918,10 +33670,12 @@
          a missing key as «нет даты начала» — so leaving it out was an edit
          that quietly made a future code live today. */
       startsAt: f.startsAt || null,
-      endsAt: f.endsAt ? new Date(f.endsAt + "T23:59:59Z").toISOString() : null,
+      /* the end of that day; a date the browser cannot read travels as typed,
+         for the server to refuse with its own sentence rather than a throw here */
+      endsAt: promoEndIso(f.endsAt),
       maxUses: text(f.maxUses),
       note: f.note || "",
-      active: f.active !== false,
+      active: promoActiveNow(f),
       scope: scope,
       scopeValue: scope === "order" ? null : text(f.scopeValue)
     };
@@ -32932,6 +33686,11 @@
        form's values (insertPromo in src/lib/promos.ts). */
     if (!f.editing) body.create = true;
     return body;
+  }
+  function promoEndIso(v) {
+    if (!v) return null;
+    var d = new Date(String(v).slice(0, 10) + "T23:59:59Z");
+    return isNaN(d.getTime()) ? String(v) : d.toISOString();
   }
   var PROMO_SAVE_ERRS = {
     bad_code: "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.",
@@ -32954,23 +33713,41 @@
     exists: "Такой промокод уже есть.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
+  /** Where the focus goes for a refused field. */
+  var PROMO_FOCUS = { scope: "[data-promobrand],[data-promoq]" };
+  /* «Создать промокод» — a NEW code only; an open one saves itself. */
   function savePromo() {
-    if (!S.promoForm || savePromo._busy) return;   // a second tap while the first is on its way
-    savePromo._busy = true;
+    if (!S.promoForm || S.promoForm.editing || savePromo._busy) return;   // a second tap while the first is on its way
     S.promoFormErr = "";
     S.promoForm.dup = "";
+    /* the same bounds an open code is held to, before anything leaves — the
+       refused box gets the rust edge and its line, and the focus */
+    var pr = promoProblem(S.promoForm);
+    if (!String(S.promoForm.code || "").trim()) pr = { f: "code", hint: PROMO_SAVE_ERRS.bad_code };
+    S.promoProblem = pr;
+    if (pr) {
+      if (pr.f === "endsAt" || pr.f === "maxUses") { if (!ADM_FOLD["promo-more"]) admFoldToggle("promo-more"); }
+      render(); refocus(PROMO_FOCUS[pr.f] || '[data-promof="' + pr.f + '"]'); return;
+    }
+    savePromo._busy = true;
     var sent = promoFormPayload();
     apiSend("/api/admin/promos/", "POST", sent).then(function (r) {
       savePromo._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.promoForm = null; toast("Промокод сохранён ✓"); loadAdminPromos(true); return;
+        S.promoForm = null; S.promoProblem = null; promoDraftClear();
+        // «Вернуть» a code nobody has used yet is its delete (README § 2: for creates, undo = delete)
+        toast("Промокод сохранён ✓", { prev: true, undo: function () { deletePromoByCode(sent.code); } });
+        loadAdminPromos(true); return;
       }
       S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
       /* The code is taken: the form keeps what was typed and offers the one
          that exists («Открыть его» → data-admpromoedit), and the list is asked
          again so that row is there to open even if it was made elsewhere. */
       if (r.body && r.body.error === "exists" && S.promoForm) { S.promoForm.dup = sent.code; loadAdminPromos(true); }
+      if (r.body && (r.body.error === "bad_code" || r.body.error === "gift_shape" || r.body.error === "exists")) {
+        S.promoProblem = { f: "code", hint: S.promoFormErr };
+      }
       render();
     }).catch(function () { savePromo._busy = false; S.promoFormErr = "Сервер не отвечает."; render(); });
   }
@@ -32984,8 +33761,9 @@
      round trips — the PATCH, and then a full reload of the list before
      anything moved. The row is flipped here and now, the PATCH follows it, and
      a refusal puts the switch back where it was and says so with the toast
-     that was always there. */
-  function togglePromoActive(code, active) {
+     that was always there. 1a: the toast carries «Вернуть» — the opposite
+     PATCH — except on the toast of a «Вернуть» itself. */
+  function togglePromoActive(code, active, isUndo) {
     var row = admPromoByCode(code);
     var was = row ? row.active : !active;
     if (row) { row.active = !!active; render(); }
@@ -33001,27 +33779,65 @@
         if (srv && r.body.promo && srv.active !== (r.body.promo.active !== false)) {
           srv.active = r.body.promo.active !== false; render();
         }
-        toast(active ? "Промокод включён ✓" : "Промокод выключен ✓");
+        toast(active ? "Промокод включён ✓" : "Промокод выключен ✓",
+          isUndo ? null : { prev: true, undo: function () { togglePromoActive(code, !active, true); } });
         return;
       }
       undo(); toast("Не получилось изменить промокод");
     }).catch(function () { undo(); toast("Сервер не отвечает"); });
   }
-  /* «Удалить» — for a code nobody has used. The rule itself lives on the
-     server (src/lib/promos.ts deletePromo): a used code is part of an order's
-     history, so 409 comes back instead, and the row keeps its switch. */
-  function deletePromoByCode(code) {
-    if (deletePromoByCode._busy) return;   // «Да, удалить» twice is one deletion
+  /* «Удалить промокод» — for a code nobody has used, asked first (the one
+     confirm sheet) and then HELD for five seconds (Dim, q8): the row leaves
+     the list at once, the toast offers «Вернуть», and the DELETE goes when
+     the time is up — or at once, with keepalive, if the page closes first. */
+  var PROMO_GOING = {};
+  function promoDeleteHeld(code) {
+    var list = S.admPromos || [], at = -1, row = null;
+    for (var i = 0; i < list.length; i++) if (list[i].code === code) { at = i; row = list[i]; }
+    if (!row || admPromoUsed(row)) return;
+    list.splice(at, 1);
+    PROMO_GOING[code] = true;
+    if (S.promoForm && S.promoForm.code === code) promoClose();
+    render();
+    mkHold(MK_DELETE_HOLD_MS, function (leaving) {
+      deletePromoByCode(code, { back: row, at: at, keepalive: leaving, held: true });
+    }, function () {
+      delete PROMO_GOING[code];
+      var l = S.admPromos || (S.admPromos = []);
+      if (!admPromoByCode(code)) l.splice(Math.min(at, l.length), 0, row);
+      render();
+      toast("Промокод на месте");
+    }, "Промокод удалён");
+  }
+  /* The DELETE itself. The rule lives on the server (src/lib/promos.ts
+     deletePromo): a used code is part of an order's history, so 409 comes
+     back instead, and the row comes back with its switch. `opts.held`: the
+     toast has been said already (promoDeleteHeld). */
+  function deletePromoByCode(code, opts) {
+    opts = opts || {};
+    if (deletePromoByCode._busy && !opts.held) return;   // «Удалить» twice is one deletion
     deletePromoByCode._busy = true;
-    apiJson("/api/admin/promos/?code=" + encodeURIComponent(code), { method: "DELETE" }).then(function (r) {
+    var url = "/api/admin/promos/?code=" + encodeURIComponent(code);
+    var req = opts.keepalive ? mkKeepalive(url, "DELETE") : apiJson(url, { method: "DELETE" });
+    var putBack = function () {
+      delete PROMO_GOING[code];
+      if (opts.back && !admPromoByCode(code)) {
+        var l = S.admPromos || (S.admPromos = []);
+        l.splice(Math.min(opts.at || 0, l.length), 0, opts.back);
+      }
+    };
+    req.then(function (r) {
       deletePromoByCode._busy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 401) { putBack(); SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
+        delete PROMO_GOING[code];
         S.admPromos = (S.admPromos || []).filter(function (x) { return x.code !== code; });
         if (S.promoForm && S.promoForm.code === code) { S.promoForm = null; S.promoFormErr = ""; }
         journalNote("Промокод удалён: " + code);
-        toast("Промокод удалён ✓"); render(); return;
+        if (!opts.held) toast("Промокод удалён ✓");
+        render(); return;
       }
+      putBack();
       if (r.status === 409) {
         /* Two different facts, and this used to tell only the first. `in_use`
            is a code somebody has PAID with, which is what the row's own
@@ -33032,12 +33848,12 @@
            line above. Each branch is one whole sentence for the dictionary. */
         loadAdminPromos(true);
         if (r.body && r.body.error === "on_order") {
-          toast("Код есть в незавершённом заказе — его можно только выключить"); return;
+          toast("Код есть в незавершённом заказе — его можно только выключить"); render(); return;
         }
-        toast("Код уже использован — его можно только выключить"); return;
+        toast("Код уже использован — его можно только выключить"); render(); return;
       }
       toast("Не получилось удалить промокод"); render();
-    }).catch(function () { deletePromoByCode._busy = false; toast("Сервер не отвечает"); render(); });
+    }).catch(function () { deletePromoByCode._busy = false; putBack(); toast("Сервер не отвечает"); render(); });
   }
 
   /* ---------- admin: «Товары → Наборы» ------------------------------------
@@ -40806,7 +41622,12 @@
     }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
-    else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    /* settings.flows — the switches, the birthday selects and the letters'
+       numbers share one row and one writer (mkFlowsPut, 1a): the latest map,
+       the header's save status, and the toast with «Вернуть» after the 2xx */
+    else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") {
+      mkFlowsPut(entry && a.toast ? { toast: a.toast, entry: entry } : null);
+    }
     /* «Доставлен» без кнопки, «Коробка магазина», «Какие банки показывать»,
        the two switches, the banner: settings keys, written by their slot
        above (admSetPut / admSetSend — the banks' checkout list is asked for
@@ -40820,11 +41641,22 @@
        whole document / the whole STORED row travels, because a merge cannot
        express a field the owner emptied. Promo codes have their own routes —
        they are rows in promo_codes, not a settings blob. */
+    /* The assistant's «Создай промокод SUVI10» may only make a code that is
+       not there yet — `create: true`, as the panel's own «Создать» (Dim, q17).
+       Without it the POST was an upsert: it silently rewrote a live SUVI10,
+       and the journal's «Вернуть» then switched that code off. A refusal
+       takes the journal line back out (journalDrop) — nothing was made. */
     else if (a.type === "create_promo") {
-      apiSend("/api/admin/promos/", "POST", a.promo).then(function (r) {
-        if (!(r.status === 200 && r.body.ok)) toast("Промокод не сохранился — проверьте условия");
+      var cpBody = {};
+      for (var cpk in (a.promo || {})) if (Object.prototype.hasOwnProperty.call(a.promo, cpk)) cpBody[cpk] = a.promo[cpk];
+      cpBody.create = true;
+      apiSend("/api/admin/promos/", "POST", cpBody).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) {
+          journalDrop(entry);
+          toast(r.body && r.body.error === "exists" ? PROMO_SAVE_ERRS.exists : "Промокод не сохранился — проверьте условия");
+        }
         loadAdminPromos(true);
-      }).catch(noop);
+      }).catch(function () { journalDrop(entry); toast("Сервер не отвечает"); });
     }
     else if (a.type === "toggle_promo") {
       apiSend("/api/admin/promos/", "PATCH", { code: a.code, active: a.value }).then(function () {
@@ -45168,6 +46000,8 @@
        so Back closes it before it leaves «Товары» — only on its own tab. */
     if (S.bundleForm && S.adminTab === "goods" && S.goodsTab === "bundles") l.push("set");
     if (S.newsEdit && S.adminTab === "news") l.push("news");
+    // a promo code open on the right — on a phone, a page of its own (1a)
+    if (S.promoForm && S.adminTab === "promos") l.push("promo");
     /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
        question 6 was about cards, not about which section they belong to. */
     if (S.adminBlogEdit) l.push("blog");
@@ -45264,24 +46098,18 @@
     } else if (top === "reply") S.orderReplyOpen = false;
     else if (top === "ordermore") S.admOrderMore = "";
     else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
-    /* the letter: the question «← Все письма» asks — the first Back asks,
-       the next one leaves and its unsaved words go (map #14) */
-    else if (top === "mail") {
-      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; return true; }
-      mailCloseEditor();
-    }
+    /* the letter saves itself (1a): Back closes it — whatever it owed has
+       just gone (the flush above), a refused «{…}» with a word (mailCloseEditor) */
+    else if (top === "mail") mailCloseEditor();
+    // an open promo code: the same — it saves itself; a new one waits on this device
+    else if (top === "promo") promoClose();
     else if (top === "setpage") S.admSetPage = "";
     // «← Склад»: the list the history was opened from
     else if (top === "moves") S.stockMovesOpen = false;
     // «← Наборы»: the list the set was opened from (what it owed went with the flush above)
     else if (top === "set") { S.bundleForm = null; S.bundleFormErr = ""; }
-    /* «← Рассылка», and the same question it asks about unsaved work: the
-       first Back asks, the layer stays open and the next one closes — as
-       the blog and the product editor above do. */
-    else if (top === "news") {
-      if (newsDirty() && !S.newsConfirmBack) { S.newsConfirmBack = true; return true; }
-      newsCloseEditor();
-    }
+    // «← Рассылка»: a letter saves itself (1a), so Back closes it without a question
+    else if (top === "news") newsCloseEditor();
     return true;
   }
   /* ---------- …and out through the nav ------------------------------------
@@ -45306,10 +46134,6 @@
          section change (admGoTab flushes) — and is not asked about */
       if (!blogDirty() || blogSavesItself(S.adminBlogEdit) || S.adminBlogConfirmBack) { blogAutosave("change"); return false; }
       S.adminBlogConfirmBack = go;
-    } else if (S.mailOpen && S.adminTab === "mail") {
-      // a letter's own words — the tab strip of «Маркетинг» stands above it (map #14)
-      if (!mailDirty() || S.mailConfirmBack) return false;
-      S.mailConfirmBack = go;
     } else return false;
     /* The question stands above the editor, so it has to be in sight: the
        «Ещё» page a row was tapped in, and the phone's assistant sheet an
@@ -45334,8 +46158,8 @@
       S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
     }
-    // a letter left through the nav after its question: its unsaved words go, as the question said
-    if (S.mailOpen && S.mailConfirmBack) mailRevertOne(mailTpl());
+    // a letter left through the nav: it saved itself; a refused «{…}» goes, with a word (mailCloseEditor)
+    if (S.mailOpen) mailCloseEditor();
     S.goodsConfirmBack = false; S.adminBlogConfirmBack = false; S.mailConfirmBack = false;
     S.adminTab = tab; S.adminOrder = 0; S.adminEdit = "";
     S.adminBlogEdit = null; S.adminBlogMenu = false; S.adminBlogProdOpen = false;   // blog
@@ -46263,7 +47087,7 @@
       render(); refocus("[data-admrefundamt]"); return;
     }
     if (d.adminvresend) { srvInvoiceResend(d.adminvresend); return; }
-    if (d.admunpaidsave !== undefined) { srvUnpaidSettingsSave(); return; }
+    if (d.admunpaidsave !== undefined) { admAutosaveFlush(); return; }
     if (d.admordercancel) {
       var canRow = admOrderById(d.admordercancel);
       if (!canRow) return;
@@ -47020,7 +47844,12 @@
         // …and a change to one of those rows: a PUT, journalled with the row as it was
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
         // «Рассылка»: the send is a loop of POSTs with its own progress card — nothing to undo
-        if (pa.type === "newsletter_send") { newsSendStart(pa); return; }
+        /* «Рассылка»: the send is a loop of POSTs with its own progress card —
+           held ten seconds in the panel first, with «Вернуть» (Dim, q3) */
+        if (pa.type === "newsletter_send") { newsSendHeld(pa); return; }
+        // …a draft thrown away (held five seconds, q8), and a translation over words already there
+        if (pa.type === "news_delete") { newsDeleteHeld(pa.id); return; }
+        if (pa.type === "news_translate") { newsTranslate(S.newsEdit); return; }
         if (pa.type === "set_product_active") {
           var actEntry = demoApply(pa);
           S.adminEdit = ""; S.goodsSizes = null;
@@ -47052,7 +47881,8 @@
           toast("Черновик удалён"); render(); return;
         }
         // a promo code nobody has used: the server keeps the rule, not this card
-        if (pa.type === "delete_promo") { deletePromoByCode(pa.code); return; }
+        // a promo code: gone from the list at once, the DELETE held five seconds (q8)
+        if (pa.type === "delete_promo") { promoDeleteHeld(pa.code); return; }
         /* «Блог» (1a): the questions the article editor asks on this sheet —
            publish with a language still empty, delete (then held, with
            «Вернуть»), a published article's new address, and the assistant
@@ -47146,9 +47976,14 @@
       return;
     }
     if (d.admcancel !== undefined) { pendingAction = null; render(); return; }
+    /* a letter's switch: at once, and the toast with «Вернуть» once the
+       server has the map (mkFlowsPut — never «сохранено» before its 2xx) */
     if (d.admflow !== undefined) {
-      demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
-      toast("Сохранено ✓"); render(); return;
+      var flowOn = !DEMO.flows[d.admflow];
+      var flowEntry = demoApply({ type: "toggle_flow", id: d.admflow, value: flowOn, toast: flowOn ? "Письмо включено" : "Письмо выключено" });
+      // the demo, with no server behind it: the apply was the whole save
+      if (SRV.admin !== true) toast(flowOn ? "Письмо включено" : "Письмо выключено", flowEntry);
+      render(); return;
     }
     // «Запустить сейчас»: the daily job's own function, from the panel
     if (d.admflowrun !== undefined) { srvFlowRun(d.admflowrun); return; }
@@ -47194,21 +48029,19 @@
     /* A letter's row opens its editor; «← Все письма» closes it. Both keep the
        half-typed test address — the panel rebuilds on every click. */
     if (d.mailtpl !== undefined) {
-      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail"; S.mailConfirmBack = false;
+      keepMailTo();
+      // another letter: what this one owes goes first, and a refused «{…}» of it with a word (mailCloseEditor)
+      if (S.mailOpen && S.adminTab === "mail" && mailTpl() !== d.mailtpl) mailCloseEditor();
+      S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail"; S.mailConfirmBack = false;
       window.scrollTo({ top: 0 }); render(); return;
     }
-    /* …and unsaved words in the letter are asked about first — the question
-       «← Товары» and «← Блог» ask (map of the panel, 23.09.2026, #14). They
-       used to stay behind in the draft, unseen, and went out with the next
-       «Сохранить» of another letter. */
-    if (d.mailback !== undefined) {
+    /* «← Все письма» / ×: a letter saves itself (1a), so there is nothing to
+       ask — what it still owes goes on the way out (mailCloseEditor). The
+       two answers of the old question stay as doors for whatever still has
+       them. */
+    if (d.mailback !== undefined || d.mailbackyes !== undefined) {
       keepMailTo();
-      if (mailDirty() && !S.mailConfirmBack) { S.mailConfirmBack = true; window.scrollTo({ top: 0 }); render(); return; }
-      mailCloseEditor(); render(); return;
-    }
-    if (d.mailbackyes !== undefined) {
-      keepMailTo();
-      var mailGo = S.mailConfirmBack;   // the nav's destination, when the nav asked (admLeaveAsks)
+      var mailGo = S.mailConfirmBack;
       mailCloseEditor(); render(); admLeaveGo(mailGo); return;
     }
     if (d.mailbackno !== undefined) { S.mailConfirmBack = false; render(); return; }
@@ -47219,8 +48052,14 @@
     if (d.mailtest !== undefined) {
       keepMailTo();
       var mailAddr = (S.mailTo || "").trim();
-      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mailAddr)) {
-        toast("Введите e-mail — на него придёт образец"); refocus("[data-mailto]"); return;
+      if (!MAIL_TO_RX.test(mailAddr)) {
+        toast("Введите e-mail — на него придёт образец");
+        // the box is folded once there is an address; a wrong one opens it
+        if (!document.querySelector("[data-mailto]") || document.querySelector("[data-mailto]").closest("[hidden]")) {
+          if (!ADM_FOLD["mail-to"]) admFoldToggle("mail-to");
+          render();
+        }
+        refocus("[data-mailto]"); return;
       }
       if (t.disabled) return;
       t.disabled = true;
@@ -47263,28 +48102,25 @@
         phEl.focus();
         try { phEl.setSelectionRange(phFrom + phTok.length, phFrom + phTok.length); } catch (e2) {}
         paintMailState();
+        // a value set from here fires no «input»: the box's autosave is told by hand
+        if (phEl.getAttribute("data-autosave")) admAutosave(phEl.getAttribute("data-autosave"), phEl.value, "input");
       }
       return;
     }
+    /* «Вернуть стандартный текст» — the language on screen, all three fields
+       (Dim, q36), saved at once, «Вернуть» on the toast. A field name (the
+       per-field link of before 1a) still resets that one field. */
     if (d.mailreset) {
-      // "" means «нет своего текста» — the letter follows the default again
-      setMailDraftField(mailTpl(), mailLang(), d.mailreset, "");
-      render(); return;
+      if (MAIL_FIELD_LABEL[d.mailreset]) {
+        setMailDraftField(mailTpl(), mailLang(), d.mailreset, "");
+        delete ADM_AS[mailFieldAs(mailTpl(), mailLang(), d.mailreset)];
+        mailSaveNow(); render(); return;
+      }
+      mailResetLang(mailTpl(), d.mailreset); return;
     }
-    // «Отменить правки»: this letter's — not every letter's (map of the panel, 23.09.2026, #14)
+    // «Отменить правки» and «Сохранить» have no button any more (1a: the letter saves itself)
     if (d.mailrevert !== undefined) { mailRevertOne(mailTpl()); render(); return; }
-    /* «Сохранить» saves. Renat, 13.09.2026: «I have currently "save" on top
-       and I have also, after when I save an "apply" button. Needs to be
-       better.» It was two save-shaped actions for one edit: the button armed
-       a confirm card and the card did the saving, so nothing was saved until
-       the second press — and neither half was a draft, so there was no
-       difference to name. One press now, journalled like every other settings
-       change, with «Отменить» on the toast for the way back. */
-    if (d.mailsave !== undefined) {
-      if (!mailDirty()) { toast("Изменений нет"); return; }
-      var mailEntry = demoApply({ type: "set_mail_texts", value: mailClean(mailDraft()) });
-      render(); toast("Текст письма сохранён ✓", mailEntry); return;
-    }
+    if (d.mailsave !== undefined) { admAutosaveFlush(); mailSaveNow(); return; }
     if (d.admchatbot !== undefined) {
       var chatOn = !DEMO.chatbot;
       admSetApply({ type: "toggle_chatbot", value: chatOn }, chatOn ? "Чат включён ✓" : "Чат выключен ✓");
@@ -47568,8 +48404,8 @@
     // «Настройки»: the index of six and the way back out of a sub-page
     // …the bar's «Сохранено ✓» belongs to the page it was earned on, and so
     // does the delivery page's refusal (S.shipErr) — a page opens quiet
-    if (d.admmbsave !== undefined) { srvMailBudgetSave(); return; }
-    if (d.admcartsave !== undefined) { srvCartFlowSave(); return; }
+    // the daily limit and the cart numbers save themselves when their box is left (1a)
+    if (d.admmbsave !== undefined || d.admcartsave !== undefined) { admAutosaveFlush(); return; }
     if (d.pushon !== undefined) { pushOn(); return; }
     if (d.pushoff !== undefined) { pushOff(); return; }
     if (d.pushtest !== undefined) { pushTest(); return; }
@@ -47590,7 +48426,11 @@
     }
     // the promo form's kind chips — the same three kinds the radio row had
     if (d.promokind) {
-      if (S.promoForm) { promoSetKind(S.promoForm, d.promokind); render(); refocus('[data-promokind="' + d.promokind + '"]'); }
+      if (S.promoForm) {
+        promoSetKind(S.promoForm, d.promokind);
+        promoChanged("change");
+        render(); refocus('[data-promokind="' + d.promokind + '"]');
+      }
       return;
     }
     /* «На что действует» — the same chip idiom one row below. Switching away
@@ -47602,16 +48442,17 @@
         S.promoForm.scope = d.promoscope;
         S.promoForm.scopeValue = "";
         S.promoQ = "";
+        promoChanged("change");
         render(); refocus('[data-promoscope="' + d.promoscope + '"]');
       }
       return;
     }
     if (d.promoprodpick) {
-      if (S.promoForm) { S.promoForm.scopeValue = d.promoprodpick; S.promoQ = ""; render(); }
+      if (S.promoForm) { S.promoForm.scopeValue = d.promoprodpick; S.promoQ = ""; promoChanged("change"); render(); }
       return;
     }
     if (d.promoproddel !== undefined) {
-      if (S.promoForm) { S.promoForm.scopeValue = ""; S.promoQ = ""; render(); refocus("[data-promoq]"); }
+      if (S.promoForm) { S.promoForm.scopeValue = ""; S.promoQ = ""; promoChanged("change"); render(); refocus("[data-promoq]"); }
       return;
     }
     /* «Как разрешить» on «Подключения»: since 1a a «?» panel under the row
@@ -47738,23 +48579,24 @@
       render(); return;
     }
     if (d.posnew !== undefined) { S.posDone = null; render(); return; }
+    /* «+ Промокод»: a new code — blank, or the one typed on this device before
+       and never created (promoDraftLoad) */
     if (d.admpromonew !== undefined) {
-      S.promoForm = blankPromo(); S.promoFormErr = ""; render(); refocus('[data-promof="code"]'); return;
+      promoOpen(promoDraftLoad()); S.adminTab = "promos"; window.scrollTo({ top: 0 }); render(); refocus('[data-promof="code"]'); return;
     }
     if (d.admpromoedit) {
       var found = (S.admPromos || []).filter(function (x) { return x.code === d.admpromoedit; })[0];
       if (found) {
-        S.promoForm = promoFormFrom(found);
-        S.promoQ = "";
-        S.promoFormErr = ""; render();
+        promoOpen(promoFormFrom(found));
+        window.scrollTo({ top: 0 }); render();
       }
       return;
     }
     if (d.admpromosave !== undefined) { savePromo(); return; }
-    if (d.admpromocancel !== undefined) { S.promoForm = null; S.promoFormErr = ""; render(); return; }
-    /* «Удалить» — the one thing on this screen that cannot be taken back, so
-       it asks first, like every other irreversible action in the panel. The
-       card names the code, because a list of codes all look alike. */
+    if (d.admpromocancel !== undefined) { promoClose(); render(); return; }
+    /* «Удалить промокод» — one of the three things that are asked (README
+       rule 4): the sheet names the code, because a list of codes all look
+       alike; then five seconds of «Вернуть» (promoDeleteHeld). */
     if (d.admpromodel) {
       var delP = admPromoByCode(d.admpromodel);
       if (!delP || admPromoUsed(delP)) return;
@@ -47762,7 +48604,7 @@
         type: "delete_promo", overlay: true, danger: true, code: delP.code,
         title: "Удалить промокод?",
         detail: delP.code + "\nИм ещё никто не пользовался — код просто исчезнет.",
-        ok: "Да, удалить"
+        ok: "Удалить"
       };
       render(); refocus("[data-admapply]"); return;
     }
@@ -48605,6 +49447,8 @@
       if (pf === "code") S.promoForm.code = t.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 24);
       else S.promoForm[pf] = t.value;
       if (pf === "code" && t.value !== S.promoForm.code) t.value = S.promoForm.code;
+      // an open code saves when the box is left, a new one is kept on this device (promoChanged)
+      promoChanged(pf === "endsAt" ? "change" : "input");
     }
     /* The promo form's product search. Same rule as «Рассылка» next door: the
        list of answers is repainted in place, the form is not re-rendered, so
@@ -48652,11 +49496,9 @@
     // settings cards, the card's own button for «Неоплаченные заказы»
     // saved by the box's own autosave (cAs) — the draft follows the keystroke
     else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
-    else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
-    else if (t.matches("[data-cartf]")) { cartFlowDraft()[t.dataset.cartf] = t.value; S.cartFlowSaved = false; paintCartFlowState(); }
-    else if (t.matches("[data-mbf]")) { mailBudgetDraft()[t.dataset.mbf] = t.value; S.mailBudgetSaved = false; paintMailBudgetState(); }
-    /* «Куда присылать примеры писем» / «Адрес для теста»: kept as it is typed,
-       so a switch flipped on the same page (a render) does not take it away */
+    /* «Куда присылать примеры»: kept as it is typed, so a switch flipped on
+       the same page (a render) does not take it away. (The letters' numbers
+       and the daily limit are data-autosave boxes — the shared listener.) */
     else if (t.matches("[data-mailto]")) { S.mailTo = t.value; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
@@ -48990,13 +49832,14 @@
     else if (t.matches("[data-admrefundamt]")) admRefundRepaint(t.value);
     /* «за N дней до дня рождения» — settings.flows, the same row the switch writes */
     else if (t.matches("[data-flowbdays]")) {
-      var bdEntry = demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0 });
-      render(); toast("Сохранено ✓", bdEntry);
+      // «Сохранено ✓» with «Вернуть» once the server has it (mkFlowsPut)
+      demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0, toast: "Сохранено ✓" });
+      render();
     }
     /* «Скидка в поздравлении» — the same settings.flows row, saved the same way */
     else if (t.matches("[data-flowbpct]")) {
-      var bpEntry = demoApply({ type: "set_flow_pct", id: "birthday", value: Number(t.value) || 10 });
-      render(); toast("Сохранено ✓", bpEntry);
+      demoApply({ type: "set_flow_pct", id: "birthday", value: Number(t.value) || 10, toast: "Сохранено ✓" });
+      render();
     }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // product creation: the subsection list follows the section — a DOM
@@ -49010,7 +49853,7 @@
        wheel does the scrolling. Only the hint under it depends on the choice,
        and it says the same thing either way, so nothing is re-rendered. */
     else if (t.matches("[data-promobrand]")) {
-      if (S.promoForm) S.promoForm.scopeValue = t.value;
+      if (S.promoForm) { S.promoForm.scopeValue = t.value; promoChanged("change"); }
     }
     /* The set editor's two <select>s. The size decides the price of that
        part, so both redraw — the «сумма по отдельности» hint has to follow. */
@@ -49842,8 +50685,27 @@
   function admTypingSync() {
     document.body.classList.toggle("adm-typing", admTyping(document.activeElement));
   }
-  document.addEventListener("focusin", admTypingSync);
-  document.addEventListener("focusout", function () { setTimeout(admTypingSync, 0); });
+  /* …and a press that took the focus out of a field brings them back only
+     once it is released. A mouse's press and release are two events a moment
+     apart, and the press moves the focus — to the button pressed, which is a
+     focusin of its own; the pinned button coming back in between sat under
+     the pointer, took the release, and the click went nowhere (1a,
+     «Маркетинг»: a row of the newsletter's link picker, «+ Текст», right
+     after typing). A press INTO a field still hides them at once. */
+  var admPressing = false;
+  function admPressEnd() {
+    if (!admPressing) return;
+    admPressing = false;
+    setTimeout(admTypingSync, 0);
+  }
+  document.addEventListener("pointerdown", function () { admPressing = true; }, true);
+  document.addEventListener("pointerup", admPressEnd, true);
+  document.addEventListener("pointercancel", admPressEnd, true);
+  document.addEventListener("focusin", function () {
+    if (admPressing && !admTyping(document.activeElement)) return;   // the release decides
+    admTypingSync();
+  });
+  document.addEventListener("focusout", function () { setTimeout(function () { if (!admPressing) admTypingSync(); }, 0); });
 
   /* ---------- a strip that scrolls sideways says which way -----------------
      One place for every chip row and every tab row in the panel. Two jobs:

@@ -180,15 +180,29 @@ test.describe("admin — «Удалить» a promo code", () => {
     expect(refused.status(), "the route deleted a code that is on an order").toBe(409);
     expect((await refused.json()).error).toBe("in_use");
 
-    // ---- the untouched one: one tap, one question, and it is gone ----------
+    // …and a used code, opened, says it can only be switched off (1a: «Удалить» lives in the open code)
+    await page.locator(`[data-admpromoedit="${spent}"]`).first().click();
+    await expect(page.locator("[data-promopanel]")).toContainText("Кодом уже пользовались");
+    await expect(page.locator(`[data-admpromodel="${spent}"]`)).toHaveCount(0);
+    await page.locator("[data-admpromocancel]").click();
+
+    // ---- the untouched one: open it, one question, and it is gone ------------
+    await page.locator(`[data-admpromoedit="${spare}"]`).first().click();
     const del = page.locator(`[data-admpromodel="${spare}"]`);
     await expect(del, "an unused code was not offered for deletion").toBeVisible();
     await del.click();
     await expect(page.locator(".adm-confirm"), "«Удалить» did not ask first").toBeVisible();
     await expect(page.locator(".adm-confirm__d")).toContainText(spare);
+    /* held five seconds with «Вернуть» (Dim, q8): the row goes at once, the
+       DELETE when the time is up */
+    const gone = page.waitForResponse((r) => r.url().includes("/api/admin/promos/") && r.request().method() === "DELETE", { timeout: 20_000 });
+    const asked = Date.now();
     await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toContainText("Промокод удалён");
+    await expect(page.getByRole("status").locator("[data-admtoastundo]"), "the held delete offers no «Вернуть»").toBeVisible();
     await expect(page.locator(`[data-admpromotoggle="${spare}"]`), "the row stayed after the delete").toHaveCount(0);
+    expect((await gone).ok()).toBe(true);
+    expect(Date.now() - asked, "the DELETE was not held").toBeGreaterThan(4_000);
 
     const left = await (await page.request.get("/api/admin/promos/")).json();
     const codes = (left.promos as Array<{ code: string }>).map((p) => p.code);
@@ -199,12 +213,12 @@ test.describe("admin — «Удалить» a promo code", () => {
     await page.request.patch("/api/admin/promos/", { data: { code: spent, active: false } });
   });
 
-  test("the row opens the form edge to edge, and the switch on it still switches", async ({ page }, testInfo) => {
-    /* The blank this is about is the phone's: there the switch and «Удалить»
-       are the two ends of a full-width line (`.adm-row__line--split`), and a
-       desktop lays the same row out as one tight line with nothing between
-       them to tap. */
-    test.skip(testInfo.project.name !== "mobile", "the row's blank is the phone's own third line");
+  test("a tap on the row opens the code, and the switch on it still switches", async ({ page }, testInfo) => {
+    /* 1a: the row is the code, what it gives and how often — one button —
+       and its switch; the code opens on the right on a desk and as a page of
+       its own on a phone («← Промокоды»). Its name is text, never a box
+       (Dim, q34: a code is never renamed). */
+    test.skip(testInfo.project.name !== "mobile", "the phone is where the row is a page away from its code");
     test.setTimeout(180_000);
     await loginAsAdmin(page);
     await adminSection(page, "promos");
@@ -217,18 +231,56 @@ test.describe("admin — «Удалить» a promo code", () => {
     const row = page.locator(".adm-row--open").filter({ has: sw });
     await expect(row).toBeVisible();
 
-    // the blank between the switch and «Удалить» opens the form…
-    const line = row.locator(".adm-row__line--split");
-    const box = (await line.boundingBox())!;
-    await line.click({ position: { x: box.width / 2, y: box.height / 2 } });
-    await expect(page.locator("[data-admpromosave]"), "the row's blank opened nothing").toBeVisible();
-    await expect(page.locator('[data-promof="code"]')).toHaveValue(code);
+    // the row's own words open the code…
+    await row.locator(`[data-admpromoedit="${code}"]`).click();
+    const panel = page.locator("[data-promopanel]");
+    await expect(panel, "the row opened nothing").toBeVisible();
+    await expect(panel.locator(".adm-ppanel__code")).toHaveText(code);
+    await expect(panel.locator('[data-promof="code"]'), "an open code offers its name as a box").toHaveCount(0);
+    await expect(page.locator(".adm-top__back"), "the phone's top bar has no way back to the list").toContainText("Промокоды");
     await page.locator("[data-admpromocancel]").click();
-    await expect(page.locator("[data-admpromosave]")).toHaveCount(0);
+    await expect(panel).toHaveCount(0);
 
-    // …and the switch is still the switch, not a way into the form
+    // …and the switch is still the switch, not a way into the code
     await sw.click();
     await expect(sw).toHaveAttribute("aria-checked", "false");
-    await expect(page.locator("[data-admpromosave]"), "the switch opened the form too").toHaveCount(0);
+    await expect(page.locator("[data-promopanel]"), "the switch opened the code too").toHaveCount(0);
+    // with «Вернуть» on its toast, which puts it back on
+    await page.getByRole("status").locator("[data-admtoastundo]").click();
+    await expect(sw).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("an open code saves itself — and a refused number is never sent", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one viewport is enough for the save itself");
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    const code = freshCode("AUTO");
+    await makePromo(page, code);
+    await page.reload();
+    await adminSection(page, "promos");
+    await page.locator(`[data-admpromoedit="${code}"]`).first().click();
+
+    // a refused value: the rust edge, its line, and no request
+    let posts = 0;
+    page.on("request", (r) => { if (r.url().includes("/api/admin/promos/") && r.method() === "POST") posts += 1; });
+    const value = page.locator('[data-promof="value"]');
+    await value.fill("95");
+    await value.press("Tab");
+    await expect(value).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator('[data-promohint="value"]')).toBeVisible();
+    await page.waitForTimeout(800);
+    expect(posts, "a refused value left for the server").toBe(0);
+
+    // the right one goes when the box is left, and the row says it
+    const saved = page.waitForResponse((r) => r.url().includes("/api/admin/promos/") && r.request().method() === "POST");
+    await value.fill("15");
+    await value.press("Tab");
+    expect((await saved).ok()).toBe(true);
+    await expect(value).not.toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator(".adm-row--open", { has: page.locator(`[data-admpromotoggle="${code}"]`) })).toContainText("−15%");
+    const list = await (await page.request.get("/api/admin/promos/")).json();
+    expect((list.promos as Array<{ code: string; value: number; active: boolean }>).find((p) => p.code === code))
+      .toMatchObject({ value: 15, active: true });
+    await page.request.patch("/api/admin/promos/", { data: { code, active: false } });
   });
 });

@@ -2683,6 +2683,195 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm2 .adm-rev__who.adm-link { min-height: 44px; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Маркетинг, direction 1a (design_handoff_admin_ux README § 5, screen 08):
+   Промокоды · Подарочные карты · Письма · Рассылка. app.js admMarketingScreen
+   and the four screens under it. Two columns (the list, and what is open
+   from it) where the SCREEN is wide enough — a container query, because the
+   assistant's pane takes 380 px off the same viewport — and one column
+   otherwise, where whatever is open is a page of its own: «← Промокоды» in
+   the phone's top bar, the list and the section's head out of the way.
+   ═══════════════════════════════════════════════════════════════════════ */
+.adm-mk { container-type: inline-size; container-name: admmk; }
+/* a two-column screen gets the design's width (≈ 1080 px of content) */
+.adm-page:has(> .adm-mk) { max-width: 1240px; }
+.adm-mkpin { display: contents; }
+
+/* the four tabs: one segmented control; the short names on a phone */
+.adm-mktabs { display: flex; min-width: 0; }
+.adm-mktabs .adm-seg button { height: 44px; padding: 0 20px; }
+.adm-mktab__s { display: none; }
+@media (max-width: 899px) {
+  .adm-mktabs .adm-seg { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .adm-mktabs .adm-seg button { padding: 0 4px; font-size: 13.5px; }
+  .adm-mktab__l { display: none; }
+  .adm-mktab__s { display: inline; }
+  /* something open from a list is a page: the section's title and tabs step aside */
+  .adm-mk--sub > .adm-head, .adm-mk--sub > .adm-mktabs { display: none; }
+}
+
+/* a list and what is open from it */
+.adm-mk2 { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.adm-mk2__list, .adm-mk2__side { min-width: 0; }
+.adm-mk2__list { container-type: inline-size; container-name: admlist; }
+.adm-mk2__ph { display: none; }
+.adm-mk--sub .adm-mk2__list { display: none; }
+@container admmk (min-width: 900px) {
+  .adm-mk2 { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 32px; align-items: start; }
+  .adm-mk2--mail { grid-template-columns: minmax(0, 1fr) 480px; }
+  .adm-mk--sub .adm-mk2__list { display: block; }
+  .adm-mk2__ph {
+    display: flex; align-items: center; justify-content: center; min-height: 100px; padding: 20px;
+    border: 1px dashed var(--a-edge); color: var(--a-muted); font-size: 14px; text-align: center;
+  }
+  .adm-mk2__side > .adm-ppanel, .adm-mk2__side > .adm-mled { border: 1px solid var(--a-ink); padding: 20px; }
+}
+/* a section header right over a list: one ink rule, not two */
+.adm-mk .adm-sech + .adm-list, .adm-mk .adm-helpp + .adm-list { border-top: 0; }
+.adm-mk .adm-list + .adm-sech { margin-top: 32px; }
+.adm-mk .adm-helpp { margin-bottom: 4px; }
+
+/* ---- Промокоды: the list ---- */
+.adm-plist__h {
+  display: flex; align-items: center; gap: 12px; min-height: 30px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--a-ink);
+}
+.adm-plist__cols { display: none; }
+.adm-plist__tap { flex: 1; min-width: 0; font-size: 13px; color: var(--a-muted); }
+.adm-prow { flex-wrap: nowrap; padding: 12px 0; }
+.adm-prow__b {
+  flex: 1 1 auto; min-width: 0; min-height: 44px; display: flex; flex-direction: column; gap: 2px;
+  padding: 0; border: 0; background: none; color: var(--a-ink); font: inherit; text-align: left;
+}
+.adm-prow__code { font-size: 16px; line-height: 22px; letter-spacing: .02em; }
+.adm-prow__what { font-size: 13.5px; line-height: 19px; overflow-wrap: anywhere; }
+.adm-prow__used { font-size: 12.5px; line-height: 17px; color: var(--a-muted); }
+.adm-prow.is-off .adm-prow__code { color: var(--a-muted); }
+/* the code open on the right is lit, as a finger has no hover */
+.adm-prow.is-cur { background: var(--a-tint); box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint); }
+.adm-prow.is-cur::before { opacity: 1; }
+@container admlist (min-width: 560px) {
+  .adm-plist__cols {
+    flex: 1; min-width: 0; display: grid; grid-template-columns: 130px minmax(0, 1fr) 140px; gap: 14px; margin-right: 110px;
+    font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
+  }
+  .adm-plist__tap { display: none; }
+  .adm-prow__b { display: grid; grid-template-columns: 130px minmax(0, 1fr) 140px; gap: 14px; align-items: center; }
+  .adm-prow__what { font-size: 14px; }
+}
+
+/* ---- the panel of one code ---- */
+.adm-ppanel, .adm-mled { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.adm-ppanel__h, .adm-mled__h { display: flex; align-items: flex-start; gap: 10px; }
+.adm-ppanel__t, .adm-mled__t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.adm-ppanel__code { margin: 0; font-size: 20px; line-height: 26px; font-weight: 600; overflow-wrap: anywhere; }
+.adm-ppanel__new, .adm-mled__nm { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; }
+.adm-ppanel__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-ppanel__x { border-color: transparent; font-size: 22px; margin: -8px -8px 0 0; }
+.adm-pfield { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.adm-pfield__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-ppanel .adm-seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adm-ppanel .adm-seg button { height: 44px; padding: 0 6px; }
+.adm-ppanel .adm-foldrow__b { gap: 14px; }
+.adm-ppanel__foot { margin: 0; }
+.adm-ppanel .adm-err[hidden] { display: none; }
+@media (min-width: 900px) {
+  .adm-ppanel .adm-pin { margin: 4px 0 0; }
+  .adm-ppanel .adm-pin__btn, .adm-newssend .adm-pin__btn { width: 100%; }
+  .adm-newssend .adm-pin { margin: 0; }
+}
+
+/* ---- Подарочные карты ---- */
+.adm-gift { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.adm-gift__l, .adm-gift__r { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@container admmk (min-width: 760px) {
+  .adm-gift { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+}
+.adm-amts.adm-amts--1a { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.adm-amts--1a .adm-amt { width: 100%; min-width: 0; height: 56px; font-size: 20px; font-weight: 600; }
+.adm-giftlook { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.adm-giftlook__acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-giftlook__acts .adm-btn { height: 44px; }
+.adm-giftrow__top { display: flex; align-items: baseline; gap: 10px; width: 100%; min-width: 0; }
+.adm-giftrow__top .adm-row__amt { margin-left: auto; }
+.adm-sech__x { margin-left: auto; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+
+/* ---- Письма ---- */
+.adm-mrow { flex-wrap: nowrap; }
+.adm-mrow .adm-row__nm { white-space: normal; }
+.adm-mrow__chev { flex: none; color: var(--a-muted); font-size: 20px; line-height: 1; padding: 0 4px; }
+.adm-mrow.is-cur { background: var(--a-tint); box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint); }
+.adm-mrow.is-cur::before { opacity: 1; }
+.adm-mfolds { margin-top: 24px; }
+.adm-mailto { display: flex; flex-direction: column; gap: 8px; }
+.adm-mwhen { background: var(--a-panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.adm-mwhen__h { display: flex; align-items: center; gap: 10px; min-height: 26px; }
+.adm-mwhen__t { flex: 1; font-size: 13px; font-weight: 600; }
+.adm-mwhen .adm-helpp { margin: 0; background: var(--a-paper); }
+.adm-mwhen__f { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.adm-mwhen__in { display: flex; align-items: center; gap: 8px; }
+.adm-mwhen__in .adm-input { width: 110px; flex: none; }
+.adm-mwhen__u { font-size: 13px; color: var(--a-muted); }
+.adm-mwhen__n { margin: 0; }
+.adm-mwhen__run { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.adm-mwhen__run .adm-hint { flex: 1 1 220px; }
+/* the chips: one row that scrolls, never two (README § 1) */
+.adm-mchips { display: flex; align-items: center; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin-top: -4px; }
+.adm-mchips::-webkit-scrollbar { display: none; }
+.adm-mchips__l { flex: none; font-size: 12px; color: var(--a-muted); white-space: nowrap; }
+.adm-mchips .adm-chip { flex: none; }
+.adm-prev__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.adm-prev__h .adm-prev__l { margin: 0; }
+@media (min-width: 900px) {
+  .adm-prev__h .adm-pin__btn { height: 40px; padding: 0 16px; font-weight: 500; }
+}
+
+/* ---- Рассылка ---- */
+.adm-news { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+@container admmk (min-width: 760px) {
+  .adm-news { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
+}
+.adm-news__aud { background: var(--a-panel); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.adm-news__audh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.adm-news__aud .adm-helpp { background: var(--a-paper); }
+.adm-newsrow .adm-tag { flex: none; }
+.adm-newsed__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@media (max-width: 899px) {
+  /* the phone's top bar already says «← Рассылка» */
+  .adm-newsed__h > .adm-link { display: none; }
+  .adm-newsed__h { justify-content: flex-end; }
+  /* a letter's name gets the width; its switch goes under it */
+  .adm-mled__h { flex-wrap: wrap; }
+  .adm-mled__t { flex: 1 1 calc(100% - 64px); }
+  .adm-mled__h > .adm-ppanel__x { order: 2; }
+  .adm-mled__h > .adm-sw, .adm-mled__h > .adm-tag { order: 3; }
+}
+.adm-mkmore { position: relative; flex: none; }
+.adm-mkmore__b { font-size: 20px; }
+.adm-mkmore__m {
+  position: absolute; right: 0; top: 50px; z-index: 20; min-width: 200px; padding: 6px 14px;
+  background: var(--a-paper); border: 1px solid var(--a-ink);
+}
+.adm-newslang { display: flex; flex-direction: column; gap: 12px; }
+.adm-newsai { background: var(--a-panel); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.adm-newsai__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.adm-newsai__l { flex: none; font-size: 13px; font-weight: 600; }
+.adm-newsai__row .adm-input { flex: 1 1 auto; min-width: 0; }
+.adm-newsai__row .adm-btn { flex: none; }
+@media (max-width: 599px) {
+  .adm-newsai__row { flex-wrap: wrap; }
+  .adm-newsai__l { flex-basis: calc(100% - 56px); }
+  .adm-newsai__row .adm-input { flex-basis: 100%; }
+}
+.adm-newsai .adm-helpp { margin: 0; background: var(--a-paper); }
+.adm-newstest { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.adm-newstest > .adm-btn { width: 100%; }
+.adm-newssend { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.adm-newshold {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; background: var(--a-panel); font-weight: 600;
+}
+
 /* ---------- Маркетинг: подарочные карты ----------------------------------- */
 
 .adm-amts { display: flex; gap: 6px; flex-wrap: wrap; }

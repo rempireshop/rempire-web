@@ -86,16 +86,21 @@ function nodes(html: string, lang: "RU" | "ET" | "EN"): string[] {
 
 const esc = (s: unknown) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-/** The promo form as the panel draws it, with its neighbours stubbed. */
+/** The body of a code as the form posts it — with the two pieces it reads the list through. */
+const PAYLOAD = ["promoFormPayload", "promoActiveNow", "admPromoByCode", "promoEndIso"];
+
+/** The promo form as the panel draws it (1a: the panel of one code), with its neighbours stubbed. */
 function formHTML(S: Record<string, unknown>): string {
-  return build<() => string>(["promoFormHTML"], {
+  return build<() => string>(["promoFormHTML", "promoErrLineHTML", "promoBad", "promoHintHTML", "admSegHTML", "admPinnedHTML", "admPromoByCode", "admPromoUsed"], {
     S,
     esc,
-    PROMO_KIND_ROWS: [["percent", "Процент"], ["fixed", "Сумма в евро"], ["free_shipping", "Бесплатная доставка"]],
+    PROMO_KIND_ROWS: [["percent", "Процент"], ["fixed", "Сумма"], ["free_shipping", "Доставка"]],
     promoScopeFormHTML: () => "",
-    admDirtyCls: () => "",
-    admBarNoteState: () => "",
-    admBarNoteHTML: () => "",
+    promoSumHTML: () => "",
+    promoFoldSum: () => "",
+    admHelpBtnHTML: () => "",
+    admHelpHTML: () => "",
+    admFoldHTML: (_k: string, title: string, _s: string, body: string) => title + body,
   })();
 }
 
@@ -172,13 +177,13 @@ describe("the form: «Создать» says so, and a taken code gets a sentence
 
   it("a new code's body carries `create: true`; an open code's does not", () => {
     const S: Record<string, unknown> = { promoForm: { ...blank(), code: "suvi10" } };
-    expect(build<() => Record<string, unknown>>(["promoFormPayload"], { S })().create).toBe(true);
+    expect(build<() => Record<string, unknown>>(PAYLOAD, { S })().create).toBe(true);
 
     S.promoForm = build<(p: unknown) => Record<string, unknown>>(["promoFormFrom"], { S })({
       code: "SUVI10", kind: "percent", value: 10, minSubtotal: 0, endsAt: null, maxUses: null, note: null, active: true,
       scope: "order", scopeValue: null,
     });
-    expect(build<() => Record<string, unknown>>(["promoFormPayload"], { S })().create).toBeUndefined();
+    expect(build<() => Record<string, unknown>>(PAYLOAD, { S })().create).toBeUndefined();
   });
 
   it("on 409 `exists`: the sentence, «Открыть его» on the code that is there, and the list asked again", async () => {
@@ -197,7 +202,9 @@ describe("the form: «Создать» says so, and a taken code gets a sentence
       toast: () => {},
       PROMO_SAVE_ERRS: new Function(`${decl("PROMO_SAVE_ERRS")} return PROMO_SAVE_ERRS;`)(),
     };
-    const savePromo = build<() => void>(["savePromo", "promoFormPayload"], scope);
+    const savePromo = build<() => void>(["savePromo", ...PAYLOAD, "promoProblem", "promoNum", "promoDraftClear"], {
+      ...scope, ADM_FOLD: {}, admFoldToggle: () => {}, refocus: () => {}, PROMO_FOCUS: {},
+    });
     savePromo();
     await new Promise((r) => setTimeout(r, 0));
 
@@ -209,8 +216,8 @@ describe("the form: «Создать» says so, and a taken code gets a sentence
     const html = formHTML(S);
     expect(html).toContain('data-admpromoedit="SUVI10"');
     expect(nodes(html, "RU")).toEqual(expect.arrayContaining(["Такой промокод уже есть.", "Открыть его"]));
-    // the button that saves still says «Создать» — the form was not turned into an edit behind his back
-    expect(html).toContain("data-admpromosave>Создать<");
+    // the button that saves still says «Создать промокод» — the form was not turned into an edit behind his back
+    expect(html).toContain("data-admpromosave>Создать промокод<");
   });
 
   for (const [lang, want] of [["EN", ["This promo code already exists.", "Open it"]], ["ET", ["Selline sooduskood on juba olemas.", "Ava see"]]] as const) {
@@ -245,7 +252,7 @@ describe("a REM-CART code opens in the form and saves (map-defects #11)", () => 
     });
     const S: Record<string, unknown> = {};
     S.promoForm = build<(p: unknown) => Record<string, unknown>>(["promoFormFrom"], { S })(made);
-    const body = build<() => Record<string, unknown>>(["promoFormPayload"], { S })();
+    const body = build<() => Record<string, unknown>>(PAYLOAD, { S })();
 
     expect(body.scope).toBe("cart");
     expect(body.scopeLines).toEqual(LINES);
@@ -261,11 +268,11 @@ describe("a REM-CART code opens in the form and saves (map-defects #11)", () => 
 
   it("a code of any other scope sends no basket lines", () => {
     const S: Record<string, unknown> = { promoForm: { ...build<() => Record<string, unknown>>(["blankPromo"], {})(), code: "X1", scope: "brand", scopeValue: "Davines" } };
-    expect("scopeLines" in build<() => Record<string, unknown>>(["promoFormPayload"], { S })()).toBe(false);
+    expect("scopeLines" in build<() => Record<string, unknown>>(PAYLOAD, { S })()).toBe(false);
   });
 
   it("the form says what a cart code is, in the panel's language", () => {
-    const html = build<(f: unknown) => string>(["promoScopeFormHTML"], {
+    const html = build<(f: unknown) => string>(["promoScopeFormHTML", "admSegHTML", "promoBad", "promoHintHTML"], {
       S: { promoQ: "" },
       esc,
       PROMO_SCOPE_ROWS: [["order", "Весь заказ"], ["brand", "Бренд"], ["product", "Товар"]],
@@ -295,7 +302,7 @@ describe("switching the kind empties the discount (map-defects #11)", () => {
     expect(f).toMatchObject({ kind: "percent", value: "" });
     // …so «Создать» answers with the sentence about the size, never a quiet 150 %
     const S = { promoForm: { ...build<() => Record<string, unknown>>(["blankPromo"], {})(), ...f, code: "X150" } };
-    expect(validatePromo(build<() => Record<string, unknown>>(["promoFormPayload"], { S })())).toEqual({ ok: false, error: "bad_value" });
+    expect(validatePromo(build<() => Record<string, unknown>>(PAYLOAD, { S })())).toEqual({ ok: false, error: "bad_value" });
   });
 
   it("10 % does not quietly become 10 €, and tapping the chip that is on changes nothing", () => {

@@ -6,6 +6,12 @@
  * GET    /api/admin/newsletters/?id=<uuid>  → { ok, newsletter: Newsletter }            (whole, for the editor)
  * POST   /api/admin/newsletters/  { title?, subject?, blocks? | body?, products? }
  *                                            → { ok, newsletter }                        (a new draft)
+ *        takes an `Idempotency-Key` (src/lib/idempotency.ts): the panel saves
+ *        a letter by itself since 1a (25.09.2026), and a first save whose
+ *        answer was lost is retried — with the same key and the same body, so
+ *        the retry is answered with the draft the first one made instead of
+ *        making a twin. 409 `in_progress` while the first is still running,
+ *        409 `key_reused` for the same key with a different body.
  * PATCH  /api/admin/newsletters/  { id, title?, subject?, blocks? | body?, products? }
  *                                            → { ok, newsletter }                        (the whole draft, replaced)
  *
@@ -22,6 +28,7 @@
  * NB trailing slash on every path — next.config has trailingSlash: true.
  */
 import { requireAdmin } from "@/lib/auth";
+import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import {
   createNewsletter,
   deleteNewsletter,
@@ -39,12 +46,20 @@ export const dynamic = "force-dynamic";
 const NO_STORE = { "cache-control": "no-store" } as const;
 /* Three bodies of allowlisted HTML plus the subjects — well under this. */
 const MAX_BYTES = 400_000;
+/** What an Idempotency-Key is stored against — see src/lib/idempotency.ts `mismatch`. */
+const ROUTE = "POST /api/admin/newsletters";
 
 function bad(error: string, status = 400) {
   return Response.json({ ok: false, error }, { status, headers: NO_STORE });
 }
 
 async function readJson(req: Request): Promise<Record<string, unknown> | null> {
+  const read = await readRaw(req);
+  return read ? read.body : null;
+}
+
+/** The body and the bytes it came as — the POST's fingerprint wants what was actually sent. */
+async function readRaw(req: Request): Promise<{ raw: string; body: Record<string, unknown> } | null> {
   let raw: string;
   try {
     raw = (await req.text()) || "{}";
@@ -60,7 +75,7 @@ async function readJson(req: Request): Promise<Record<string, unknown> | null> {
   }
   // `null`, a number, a string, an array — valid JSON, not a draft
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-  return parsed as Record<string, unknown>;
+  return { raw, body: parsed as Record<string, unknown> };
 }
 
 export async function GET(req: Request) {
@@ -84,15 +99,28 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
-  const body = await readJson(req);
-  if (!body) return bad("bad_request");
-  try {
-    const newsletter = await createNewsletter(body);
-    return Response.json({ ok: true, newsletter }, { headers: NO_STORE });
-  } catch (err) {
-    console.error("[api/admin/newsletters] POST failed:", err);
-    return bad("db_unavailable", 503);
-  }
+  const read = await readRaw(req);
+  if (!read) return bad("bad_request");
+  const { raw, body } = read;
+  /* At most one draft per key. An unkeyed call runs straight through, as it
+     always did (runOnce). A refusal releases the key. */
+  const done = await runOnce(
+    { key: readIdempotencyKey(req), route: ROUTE, fingerprint: fingerprintOf(raw) },
+    async (): Promise<IdempotentAnswer> => {
+      try {
+        const newsletter = await createNewsletter(body);
+        return { status: 200, body: { ok: true, newsletter } };
+      } catch (err) {
+        console.error("[api/admin/newsletters] POST failed:", err);
+        return { status: 503, body: { ok: false, error: "db_unavailable" } };
+      }
+    },
+  );
+  // the first save of this letter is still going through — the panel asks again in a moment
+  if (done.outcome === "in_flight") return bad("in_progress", 409);
+  // this key already carries a different draft
+  if (done.outcome === "mismatch") return bad("key_reused", 409);
+  return Response.json(done.body, { status: done.status, headers: NO_STORE });
 }
 
 export async function PATCH(req: Request) {

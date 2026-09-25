@@ -72,6 +72,8 @@ test.describe("admin — the switch says which way it is", () => {
     await page.locator('[data-promof="code"]').fill(code);
     await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("10");
+    // «Создать промокод» is pinned above a phone's tab bar, out of the way while the keyboard is up (1a)
+    await page.locator('[data-promof="value"]').blur();
     await page.locator("[data-admpromosave]").click();
 
     const sw = page.locator(`[data-admpromotoggle="${code}"]`);
