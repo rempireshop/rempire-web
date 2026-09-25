@@ -106,26 +106,14 @@ describe("the notice over the form", () => {
 });
 
 describe("the save bar takes the state", () => {
-  it("the settings bar: in its markup, and in place while typing", () => {
-    let dirty: string[][] = [["hero", "Главный баннер"]];
-    const bar = new El();
-    const fns = new Function(
-      "ADM_SET_CARDS", "S", "document", "translateTree", "admSetDirtyCards", "admSetBarInnerHTML",
-      `${shared}\n${slice("admSetBarHTML")}\n${slice("paintSetBar")}\nreturn { html: admSetBarHTML, paint: paintSetBar };`,
-    )(
-      { home: [["hero", "Главный баннер"]] }, { admSetPage: "home" },
-      { querySelector: (s: string) => (s === "[data-setbar]" ? bar : null) }, () => {},
-      () => dirty, () => "",
-    ) as { html: (p: string) => string; paint: () => void };
-
-    expect(fns.html("home")).toMatch(/class="adm-savebar adm-savebar--set is-dirty"/);
-    fns.paint();
-    expect(bar.classList.contains("is-dirty")).toBe(true);
-
-    dirty = [];                                   // saved
-    expect(fns.html("home")).not.toContain("is-dirty");
-    fns.paint();
-    expect(bar.classList.contains("is-dirty"), "the bar still says «not saved» after the save").toBe(false);
+  /* 1a (25.09.2026): the settings pages save themselves, so their bar — and
+     its «not saved» state — is gone; what is not saved yet is a box's own
+     rust edge and line (admAutosave), and the header says «Сохраняем…». */
+  it("the settings pages: no save bar left to say it", () => {
+    expect(src).not.toContain("data-setbar");
+    expect(src).not.toContain("adm-savebar--set");
+    expect(src).not.toContain("function paintSetBar(");
+    expect(slice("admSetupHTML")).not.toContain("savebar");
   });
 
   it("the forms that keep no draft (product, promo, set, partner): the touch listener marks the bar", () => {

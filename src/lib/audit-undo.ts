@@ -16,7 +16,7 @@
  *                  fields as they were; PUT /api/admin/overrides takes it as is.
  *
  * `undone` marks a row a later row names in its `undoOf` — the journal draws it
- * struck through with «возвращено» on every device, not only on the one that
+ * struck through with «вернули» on every device, not only on the one that
  * pressed the button.
  *
  * The listing also drops the heavy half of a setting.set payload (`value` —

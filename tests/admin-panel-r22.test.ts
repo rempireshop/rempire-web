@@ -692,12 +692,15 @@ describe("«Настройки → Доставка»: an empty box stays empty"
   });
 
   it("saves the stored row, never the merged table", () => {
-    // the PUT and the journal both travel the row, holes included
-    expect(src).toContain("var shipSent = cloneRules(SHIP_STORED);");
-    expect(src).toContain('apiSend(st, "PUT", shipBody(shipSent, a.belowCost))');
+    // the PUT and the journal both travel the row, holes included — since 1a
+    // through the settings slot (shipPut), gated for prices under the tariff
+    const put = slice("shipPut");
+    expect(put).toContain("var boxes = cloneRules(SHIP_STORED);");
+    expect(put).toContain("var body = { settings: { shipping_rules: row } };");
     expect(src).toContain('entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_STORED), full: true }');
     // «Вернуть значения по умолчанию» is the EMPTY row, not today's price list
-    expect(src).toContain("rules: cloneRules(SHIP_STORED_DEFAULT), full: true, reset: true");
+    expect(src).toContain("S.shipDraft = cloneRules(SHIP_STORED_DEFAULT);");
+    expect(src).toContain('admShipCommit("Тарифы снова стандартные", { reset: true })');
   });
 });
 

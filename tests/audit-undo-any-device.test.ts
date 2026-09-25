@@ -6,7 +6,7 @@
  * been, so only the browser that made a change could take it back. Now every
  * settings PUT and every product override keeps the value it replaced, the
  * journal listing turns that into the paths that changed, and a PUT through
- * the same route with `undoOf` marks the old row «возвращено» for everybody.
+ * the same route with `undoOf` marks the old row «вернули» for everybody.
  *
  * Run for real against PGlite.
  */

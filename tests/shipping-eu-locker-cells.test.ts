@@ -116,7 +116,13 @@ function panel(stored: Row = {}): Panel {
     function admShipPickupHTML() { return ""; }
     function admShipUnservedHTML() { return ""; }
     function admSwitch(attrs, on, name) { return "<button " + attrs + ">" + name + "</button>"; }
+    // 1a: every box saves itself — the autosave's registry and marks, stubbed
+    var ADM_AS = {}, ADM_AS_SPEC = {}, SHIP_ACCEPT = {}, shipServerRow = null;
+    function admAutosaveSpec(k, s) { ADM_AS_SPEC[k] = s; return k; }
+    function admAutosaveInvalidAttr() { return ""; }
+    function admAutosaveHintHTML() { return ""; }
     ${fns(
+      "admMoney2", "shipBoxShow", "admShipFreeFoot", "admShipAs", "shipCellHint", "shipAccepted", "shipRowCell",
       "eur", "esc", "shipDraft", "shipShow", "shipNum", "shipCell", "shipFreeCell", "shipCarrierCell",
       "shipCountryOff", "setShipDraftField", "montonioCarrierTag", "admRateCellHTML", "admRateFootHTML",
       "admRateNoneHTML", "admShipCourierFoot", "shipLockerMontonio", "admShipRowHTML", "admShipEuropeHTML",
@@ -213,7 +219,7 @@ describe("a typed Polish DPD price is the owner's, everywhere", () => {
     p.setField("c:dpd:PL", "9,99");
     expect(p.S.shipDraft?.carriers?.dpd).toEqual({ PL: 9.99 });
     const row = p.row("PL");
-    expect(row).toContain('value="9.99"');
+    expect(row).toContain('value="9,99"');   // a decimal comma in the box (1a)
     expect(row).toContain('data-shipclear="c:dpd:PL"');
     expect(row).toContain("Montonio: 7,49 € · вернуть");
   });
@@ -225,7 +231,9 @@ describe("a typed Polish DPD price is the owner's, everywhere", () => {
       parentNode: { className: "adm-rates__c" }, nextElementSibling: { outerHTML: "" },
     };
     p.paintFoot(input);
-    expect(input.nextElementSibling?.outerHTML).toContain("Ниже Montonio: 7,49 €");
+    // under the tariff: rust, and «Оставить так» before it is saved (q4)
+    expect(input.nextElementSibling?.outerHTML).toContain("Ниже тарифа Montonio: 7,49 €");
+    expect(input.nextElementSibling?.outerHTML).toContain('data-shipaccept="c:dpd:PL"');
   });
 
   it("the checkout's card bills it; Nova Post's card and an empty box stay Montonio's", () => {
