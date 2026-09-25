@@ -1,8 +1,29 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
+import { closeCard, openCard, toSection } from "./goods-helpers";
+
+/**
+ * 1a (ADM_SAVE_POLICY): a letter's switch and its two birthday selects save
+ * through the autosave, and their «Сохранено ✓» comes once the server has
+ * settings.flows — never before. Register BEFORE the change and await it
+ * before clearToast: on a slow server the helper could otherwise see no toast
+ * yet, return, and leave this one to land on the next step.
+ */
+function flowsSaved(page: Page): Promise<unknown> {
+  return page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+    (r.request().postData() || "").includes('"flows"'), { timeout: 20_000 });
+}
+
+/** One flows change, its write, then its toast out of the way. */
+async function flowsChange(page: Page, change: () => Promise<unknown>): Promise<void> {
+  const saved = flowsSaved(page);
+  await change();
+  await saved;
+  await clearToast(page);
+}
 
 /**
  * The fourth admin sweep — Dim's answers of 07.09.2026
@@ -33,46 +54,66 @@ test.beforeEach(async ({}, testInfo) => {
     "admin sweep — desktop and mobile projects only");
 });
 
+/** A fold of a 1a screen, opened — never toggled shut (it remembers its state). */
+async function openFold(page: Page, key: string): Promise<void> {
+  const head = page.locator(`[data-admfold="${key}"]`).first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
+}
+
 /** «Настройки» → one of its six pages. */
 async function settings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 }
 
 test.describe("admin — «Журнал изменений» shows the shop's own log", () => {
   test.use({ extraHTTPHeaders: ipHeaders(177) });
 
-  test("two lists: this browser with «Вернуть», the server read-only", async ({ page }) => {
+  /* 1a (25.09.2026, q7): ONE list — this browser's lines and the shop's —
+     and «Вернуть» from any device, because the server keeps what each change
+     replaced (db/migrations/207_audit_prev.sql). Sign-ins are folded away. */
+  test("one list: the shop's rows with who did it and a «Вернуть» of their own, sign-ins folded", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
 
-    // something that only the server records — a sign-in, which just happened
-    await settings(page, "journal");
+    /* A change this browser never saw — made straight through the route, and
+       a real one: a write of the same value has nothing to take back, and its
+       row rightly offers no «Вернуть». The suite's shop always has its pricing
+       stored (e2e bootstrap); it goes back as it was below. */
+    const pricing = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing;
+    expect(pricing, "the suite's shop has no stored pricing to change").toBeTruthy();
+    const moved = { ...pricing, proMinOrder: Number(pricing.proMinOrder || 0) + 1 };
+    expect((await page.request.put("/api/admin/settings/", { data: { pricing: moved } })).ok()).toBe(true);
+    try {
+      await settings(page, "journal");
+      await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" }),
+        "the second list is still there").toHaveCount(0);
 
-    // the two headings, and the sentence that explains the difference
-    await expect(page.locator(".adm-sec__t").filter({ hasText: "Ваши изменения в этом браузере" })).toBeVisible();
-    await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" })).toBeVisible();
-    await expect(page.locator(".adm-narrow"), "the journal does not say why «Вернуть» is local")
-      .toContainText("«Вернуть» работает только здесь");
-    await expect(page.locator(".adm-narrow"), "the server list is not labelled as shop-wide")
-      .toContainText("с любого устройства");
+      // the server's own rows really arrive, and carry who did it
+      const serverRows = page.locator(".adm-jrow__who");
+      await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
+      await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
+      const row = page.locator(".adm-jrow", { hasText: "Настройка изменена: Цены и баллы" }).first();
+      await expect(row, "the route's own change is not in the list").toBeVisible();
+      await expect(row.locator("[data-admundosrv]"), "a row the server can take back has no «Вернуть»").toBeVisible();
 
-    // the server's own rows really arrive, and carry who did it
-    const serverRows = page.locator(".adm-jrow__who");
-    await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
-    await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
+      // the sign-ins: one folded block with today's count, the rows inside it
+      const logins = page.locator('[data-admfold="set:logins"]');
+      await expect(logins).toHaveAttribute("aria-expanded", "false");
+      await expect(logins).toContainText("за сегодня");
+      await expect(page.locator(".adm-jrow--login").first()).toBeHidden();
+      await logins.click();
+      await expect(page.locator(".adm-jrow--login").first(), "the sign-in never reached the log").toBeVisible();
 
-    // the shop-wide rows are read-only — «Вернуть» belongs to the local list only
-    const undoCount = await page.locator("[data-admundo]").count();
-    const whoCount = await serverRows.count();
-    expect(whoCount, "no server rows at all").toBeGreaterThan(0);
-    expect(undoCount, "«Вернуть» leaked onto the server rows").toBeLessThan(whoCount + 1);
-
-    await assertClean(page, w, "journal with the server log");
+      await assertClean(page, w, "journal with the server log");
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { pricing } });
+    }
   });
 
   test("a change made here appears in both lists, and «Вернуть» is on the local one", async ({ page }) => {
@@ -130,26 +171,27 @@ test.describe("admin — the browser's Back closes an open card", () => {
     await expect(page.locator('[data-admsetpage="journal"]'), "Back left the panel altogether").toBeVisible();
     await assertClean(page, w, "Back on a settings page");
 
-    // a product editor: two layers deep — the editor, then a confirm card over it
-    await tab(page, "goods");
-    const first = page.locator("[data-admgoods]").first();
-    await first.click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator("[data-admgoodspull]").click();
+    /* a product card: two layers deep — the card, then a confirm sheet over it
+       (1a: removing a size is one of the few things that asks — README rule 4) */
+    await openCard(page, PRODUCT.id);
+    await toSection(page, "sizes");
+    await page.locator('[data-edsizedel="2"]').click();
     await expect(page.locator(".adm-confirm")).toBeVisible();
     await parked(page);
 
     // one Back closes the confirm and leaves the editor open…
     await page.goBack();
     await expect(page.locator(".adm-confirm"), "Back did not close the confirm card").toHaveCount(0);
-    await expect(page.locator("[data-admsavegoods]"), "Back closed the editor too").toBeVisible();
+    await expect(page.locator("[data-edfor]"), "Back closed the card too").toBeVisible();
+    await expect(page.locator("[data-edsizedel]"), "Back removed the size it was asking about").toHaveCount(3);
     // the editor is still open, so the panel parks the entry again
     await parked(page);
 
     // …the next one closes the editor and still keeps the panel
     await page.goBack();
-    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "Back did not close the card").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel").toBeVisible();
+    const first = page.locator("[data-admgoods]").first();
     await assertClean(page, w, "Back through the editor");
 
     /* Closing with the button leaves no press that does nothing: the next
@@ -158,9 +200,9 @@ test.describe("admin — the browser's Back closes an open card", () => {
        than out of the panel (app.js ADM_TRAIL); either way the goods list is
        gone, which is what a press that did something means here. */
     await first.click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator("[data-admclose]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await expect(page.locator("[data-edfor]")).toBeVisible();
+    await closeCard(page);
+    await expect(page.locator("[data-edfor]")).toHaveCount(0);
     await page.goBack();
     await expect(page.locator("[data-admgoods]"), "Back after a button-close did nothing").toHaveCount(0);
   });
@@ -182,7 +224,12 @@ test.describe("admin — «Подключения» tells the truth about the mo
 
     await adminSection(page, "apps");
 
-    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    /* 1a (screen 18; Dim, q19): no model is not a problem — the row stands
+       under «Работает · N», folded, grey — and is never one of the problem
+       cards the count above them is made of. */
+    await expect(page.locator(".adm-appcard", { hasText: "ИИ-помощник" }), "the assistant with no model was counted as a problem").toHaveCount(0);
+    await page.locator('[data-admfold="apps-ok"]').click();
+    const row = page.locator(".adm-approw", { hasText: "ИИ-помощник" }).first();
     await expect(row).toBeVisible();
     await expect(row, "the row no longer says the model is off").toContainText("Модель не подключена");
     // the square is grey, not the green every working row wears
@@ -199,25 +246,39 @@ test.describe("admin — «Подключения» tells the truth about the mo
     });
     await openAdmin(page);
     await adminSection(page, "apps");
-    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    await page.locator('[data-admfold="apps-ok"]').click();
+    const row = page.locator(".adm-approw", { hasText: "ИИ-помощник" }).first();
     await expect(row).toContainText("Модель подключена");
     await expect(row.locator(".adm-dot--off"), "a working model still shows the grey square").toHaveCount(0);
   });
 });
 
-test.describe("admin — «Написать клиенту» asks before it sends", () => {
+/* «Написать клиенту» asked first (audit q9, Dim: «yes, ask first») because a
+   letter could not be recalled. Since 25.09.2026 the server holds every such
+   letter ten seconds (src/lib/letter-hold.ts, q3), so it goes at once like
+   every other step and the toast's «Вернуть» stops it — what this holds now
+   is that «Вернуть» really does: the letter is cancelled on the server and
+   its words come back into the box. */
+test.describe("admin — «Написать клиенту»: the letter waits, «Вернуть» stops it", () => {
   test.use({ extraHTTPHeaders: ipHeaders(182) });
 
-  test("«Отправить» goes through the confirm card, and «Отмена» sends nothing", async ({ page }) => {
+  test("«Отправить» sends with no confirm card; «Вернуть» cancels it and gives the words back", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     const sent: string[] = [];
+    const cancels: string[] = [];
     await page.route("**/api/admin/mail/send/", async (route) => {
       sent.push(String(route.request().postData() || ""));
       await route.fulfill({
         status: 200, contentType: "application/json",
-        body: JSON.stringify({ ok: true, messages: [] }),
+        body: JSON.stringify({ ok: true, held: true, kind: "reply", token: "e2e-hold-token", ms: 10000, messages: [] }),
       });
+    });
+    await page.route((url) => /^\/api\/admin\/orders\/[^/]+\/$/.test(url.pathname), async (route) => {
+      const body = route.request().method() === "PATCH" ? (route.request().postDataJSON() as { letterCancel?: string }) : null;
+      if (!body || !body.letterCancel) return route.continue();
+      cancels.push(body.letterCancel);
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, cancelled: true, order: {} }) });
     });
 
     /* An order of this spec's own, straight through the public route — the
@@ -239,37 +300,35 @@ test.describe("admin — «Написать клиенту» asks before it send
     const first = page.locator("[data-admorder]").first();
     await expect(first, "no orders to write about").toBeVisible({ timeout: 15_000 });
     await first.click();
-    await expect(page.locator("[data-admorderreply]")).toBeVisible();
-    await page.locator("[data-admorderreply]").click();
+    // 1a: outlined in the header on a desktop; on a phone it is in «⋯»
+    await expect(page.locator(".adm-ordacts [data-admordermore]:visible")).toBeVisible();
+    if (!(await page.locator(".adm-ordacts > [data-admorderreply]:visible").count())) {
+      await page.locator("[data-admordermore]:visible").first().click();
+    }
+    await page.locator("[data-admorderreply]:visible").first().click();
 
     const draft = page.locator("[data-orderreplydraft]");
     await expect(draft).toBeVisible();
     await draft.fill("Здравствуйте! Посылка уйдёт завтра утром.");
     await page.locator("[data-admordersend]").click();
 
-    // the card, with the address and the letter in it
-    const card = page.locator(".adm-confirm");
-    await expect(card, "«Отправить» still sends with no confirm").toBeVisible();
-    await expect(card).toContainText("Отправить письмо клиенту?");
-    await expect(card).toContainText("отозвать его нельзя");
-    await expect(card, "the card does not show the letter it is about to send")
-      .toContainText("Посылка уйдёт завтра утром");
-    expect(sent, "the letter left before the card was answered").toEqual([]);
-
-    // «Отмена» sends nothing and keeps the draft
-    await page.locator("[data-admcancel]").click();
-    await expect(card).toHaveCount(0);
-    expect(sent, "«Отмена» sent the letter anyway").toEqual([]);
-    await expect(page.locator("[data-orderreplydraft]"), "«Отмена» threw the draft away")
-      .toHaveValue(/Посылка уйдёт завтра утром/);
-
-    // …and «Отправить» on the card really sends
-    await page.locator("[data-admordersend]").click();
-    await page.locator("[data-admapply]").click();
-    await expect.poll(() => sent.length, { timeout: 15_000, message: "the confirmed letter never left" }).toBe(1);
+    // no card: the letter goes to the server at once, which holds it ten seconds
+    await expect.poll(() => sent.length, { timeout: 15_000, message: "«Отправить» never sent the letter" }).toBe(1);
     expect(sent[0]).toContain("завтра утром");
+    await expect(page.locator(".adm-confirm"), "«Отправить» still asks first").toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("Письмо уйдёт через 10 секунд");
+    await expect(page.locator("[data-orderreplydraft]"), "the sent words stayed in the box")
+      .not.toHaveValue(/завтра утром/);
+
+    // «Вернуть» stops it on the server and puts the words back
+    await page.locator("[data-admtoastundo]").click();
+    await expect.poll(() => cancels, { timeout: 15_000, message: "«Вернуть» did not reach the server" }).toEqual(["e2e-hold-token"]);
+    await expect(page.getByRole("status")).toContainText("Письмо не отправлено — текст снова в поле");
+    await expect(page.locator("[data-orderreplydraft]"), "«Вернуть» threw the letter away")
+      .toHaveValue(/Посылка уйдёт завтра утром/);
+    expect(sent, "«Вернуть» sent a second letter").toHaveLength(1);
     await clearToast(page);
-    await assertClean(page, w, "«Написать клиенту» behind the confirm card");
+    await assertClean(page, w, "«Написать клиенту» and its «Вернуть»");
   });
 });
 
@@ -288,7 +347,8 @@ test.describe("admin — the order chips, and the steps behind them", () => {
        «Возвраты» is the request a customer made, which had no home before. */
     const chips = page.locator("[data-admfilter]");
     await expect(chips, "the chip strip is not the five of r16").toHaveCount(5);
-    await expect(chips.nth(0)).toHaveText("Все");
+    // 1a (screen 04): «Все» carries the number of orders the list holds, like its neighbours
+    await expect(chips.nth(0)).toHaveText(/^Все( \d+)?$/);
     await expect(chips.nth(1)).toContainText("Отправить");
     /* toContainText since 18.09.2026: «В пути» carries a count now, like the
        three queue chips beside it, so its text is «В пути» or «В пути N»
@@ -309,7 +369,8 @@ test.describe("admin — the order chips, and the steps behind them", () => {
     const countOn = async (f: string) => {
       await page.locator(`[data-admfilter="${f}"]`).click();
       await expect(page.locator(`[data-admfilter="${f}"][aria-current="true"]`)).toBeVisible();
-      return page.locator("[data-admorder]").count();
+      // the rows only — on «Отправить» the dark button «Открыть первый: …» opens an order too
+      return page.locator("#orderlist [data-admorder]").count();
     };
     const ship = await countOn("new");
     const transit = await countOn("shipped");
@@ -318,12 +379,14 @@ test.describe("admin — the order chips, and the steps behind them", () => {
     expect(all, "«Все» shows fewer orders than the chips beside it").toBeGreaterThanOrEqual(
       Math.max(ship, transit, invoice));
 
-    // the search really does look past the chip, and says so
+    /* the search really does look past the chip, and says so — since 1a (gap
+       L3) by lighting «Все» while text is in the box */
     await page.locator(`[data-admfilter="new"]`).click();
     await page.locator("[data-admorderq]").fill("R-");
-    await expect(page.locator("#orderlist"), "the search no longer explains the disabled chip")
-      .toContainText("фильтр сейчас не действует");
+    await expect(page.locator('[data-admfilter="all"]'), "the search no longer shows it looks past the chip")
+      .toHaveAttribute("aria-current", "true");
     await page.locator("[data-admorderq]").fill("");
+    await expect(page.locator('[data-admfilter="new"]')).toHaveAttribute("aria-current", "true");
     await assertClean(page, w, "orders search over a chip");
   });
 
@@ -392,6 +455,8 @@ test.describe("admin — «Доставлен» can close itself", () => {
     const w = watch(page);
     await openAdmin(page);
     await settings(page, "delivery");
+    // «Когда «Доставлен»» is a fold of the page since 1a
+    await openFold(page, "set:deliv");
 
     const days = page.locator("[data-delivdays]");
     await expect(days, "there is no «закрывать заказ через» setting").toBeVisible();
@@ -414,8 +479,11 @@ test.describe("admin — «Доставлен» can close itself", () => {
       expect(anyShipped >= 0).toBe(true);
     } finally {
       await settings(page, "delivery");
+      await openFold(page, "set:deliv");
       await page.locator("[data-delivdays]").selectOption("0");
       await clearToast(page);
+      await expect.poll(async () =>
+        ((await (await page.request.get("/api/admin/settings/")).json()).settings.delivery || {}).autoDays ?? 0).toBe(0);
     }
   });
 });
@@ -439,45 +507,46 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
     await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-checked", "true");
 
     // ---- off ---------------------------------------------------------------
-    await sw.click();
-    // the form under it stops asking about a programme that is off
-    await expect(page.locator('[data-pricingf="proDiscountPct"]'),
-      "the salon discount field is shown while the programme is off").toHaveCount(0);
-    await expect(page.locator(".adm-form")).toContainText("Сейчас выключено");
-    await page.locator("[data-admpricingsave]").click();
-    await page.locator("[data-admapply]").click();
-    await clearToast(page);
-
-    // ---- off: the five screens Dim named ----------------------------------
-    await adminSection(page, "people");
-    /* Off, the row keeps the two chips that are not about tiers at all — «Все»
-           and «Подписаны», who agreed to hear from the shop. The three tier chips
-           («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
-        await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
-        await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
-        await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
-    await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
-
-    await adminSection(page, "goods");
-    const first = page.locator("[data-admgoods]").first();
-    await first.click();
-    await page.locator('[data-edtab="sizes"]').click();
-    await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
-    await page.locator("[data-admclose]").first().click();
-
+    /* From here on the shop is changed: the `finally` below puts the programme
+       back on even when a step of the «off» half fails (a server that drops a
+       connection mid-run left it off for the retry, 25.09.2026). */
     const feed = async () => (await (await page.request.get("/api/overrides/")).json()).settings.pricing;
-    await expect.poll(async () => (await feed()).partnersOn,
-      { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
-    expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
-
     try {
+      await sw.click();
+      // the form under it stops asking about a programme that is off
+      await expect(page.locator('[data-pricingf="proDiscountPct"]'),
+        "the salon discount field is shown while the programme is off").toHaveCount(0);
+      await expect(page.locator(".adm-page")).toContainText("Сейчас выключено");
+      // the switch saves itself — no «Сохранить», no question (q40)
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
+      await clearToast(page);
+
+      // ---- off: the five screens Dim named ----------------------------------
+      await adminSection(page, "people");
+      /* Off, the row keeps the two chips that are not about tiers at all — «Все»
+             and «Подписаны», who agreed to hear from the shop. The three tier chips
+             («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
+          await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
+          await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
+          await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
+      await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
+
+      await adminSection(page, "goods");
+      await page.locator("[data-admgoods]").first().click();
+      await toSection(page, "sizes");
+      await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
+      await closeCard(page);
+
+      await expect.poll(async () => (await feed()).partnersOn,
+        { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
+      expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
+
       // ---- on: everything comes back --------------------------------------
       await settings(page, "prices");
       await page.locator("[data-partnerson]").click();
       await expect(page.locator('[data-pricingf="proDiscountPct"]'),
         "switching it on did not open the settings under it").toBeVisible();
-      await page.locator("[data-admpricingsave]").click();
-      await page.locator("[data-admapply]").click();
       await clearToast(page);
       await expect.poll(async () => (await feed()).partnersOn,
         { timeout: 15_000, message: "the switch never reached the storefront" }).toBe(true);
@@ -488,9 +557,9 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
 
       await adminSection(page, "goods");
       await page.locator("[data-admgoods]").first().click();
-      await page.locator('[data-edtab="sizes"]').click();
+      await toSection(page, "sizes");
       await expect(page.locator("[data-edproprice]"), "the «Салон, €» column did not come back").toBeVisible();
-      await page.locator("[data-admclose]").first().click();
+      await closeCard(page);
       await assertClean(page, w, "«Партнёры и баллы» on");
     } finally {
       // the suite's shop has the programme on — leave it exactly as found
@@ -498,8 +567,6 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       const back = page.locator("[data-partnerson]");
       if ((await back.getAttribute("aria-checked")) !== "true") {
         await back.click();
-        await page.locator("[data-admpricingsave]").click();
-        await page.locator("[data-admapply]").click();
         await clearToast(page);
       }
       await expect.poll(async () => (await feed()).partnersOn, { timeout: 15_000 }).toBe(true);
@@ -519,17 +586,20 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
 
     // all three switchable letters start off, exactly as the sender reads them
     await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-checked", "false");
+    /* 1a: «Когда поздравлять» and the discount live INSIDE the letter —
+       open it; they still come only with its switch */
+    await page.locator('[data-mailtpl="birthday"]').first().click();
+    // the letter's own switch is in its head; on a desk the list's is beside it
+    const bday = page.locator('[data-admflow="birthday"]:visible').first();
     await expect(page.locator("[data-flowbdays]"), "the days setting shows while the letter is off").toHaveCount(0);
     await expect(page.locator("[data-flowbpct]"), "the discount setting shows while the letter is off").toHaveCount(0);
 
     try {
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      await flowsChange(page, () => bday.click());
       const days = page.locator("[data-flowbdays]");
       await expect(days, "switching the letter on did not offer «за N дней»").toBeVisible();
       await expect(days, "it does not default to the day itself").toHaveValue("0");
-      await days.selectOption("3");
-      await clearToast(page);
+      await flowsChange(page, () => days.selectOption("3"));
       /* A fresh URL each time: /api/overrides/ is served
          `s-maxage=30, stale-while-revalidate=120`, and the context's own HTTP
          cache handed back the answer from before the write — the shard read
@@ -547,8 +617,7 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       const pct = page.locator("[data-flowbpct]");
       await expect(pct, "switching the letter on did not offer the discount").toBeVisible();
       await expect(pct, "the discount does not default to the 10 % the letters have always said").toHaveValue("10");
-      await pct.selectOption("15");
-      await clearToast(page);
+      await flowsChange(page, () => pct.selectOption("15"));
       await expect.poll(async () => {
         const res = await page.request.get(`/api/overrides/?t=${Date.now()}`);
         return ((await res.json()).settings.flows || {}).birthdayPercent;
@@ -557,11 +626,10 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       await assertClean(page, w, "the birthday days setting");
     } finally {
       const pct2 = page.locator("[data-flowbpct]");
-      if (await pct2.count()) { await pct2.selectOption("10"); await clearToast(page); }
+      if (await pct2.count()) await flowsChange(page, () => pct2.selectOption("10"));
       const days2 = page.locator("[data-flowbdays]");
-      if (await days2.count()) { await days2.selectOption("0"); await clearToast(page); }
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      if (await days2.count()) await flowsChange(page, () => days2.selectOption("0"));
+      await flowsChange(page, () => page.locator('[data-admflow="birthday"]:visible').first().click());
     }
   });
 });
@@ -578,7 +646,11 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
 test.describe("admin — the small forms say when they are saved", () => {
   test.use({ extraHTTPHeaders: ipHeaders(221) });
 
-  test("the order card's note: quiet, lit, «Сохранено ✓» — and the draft survives a render", async ({ page }, testInfo) => {
+  /* 1a (README § 2, Dim's q1): the order's note saves itself — a second after
+     the last key, and on leaving the box — through the PATCH { note } it has
+     always used; «Сохранить заметку» and «Не сохранено» are gone, and the
+     panel's one status says «Сохранено ✓» only once the server took it. */
+  test("the order card's note saves itself — and the draft survives a render", async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     // an order to write on
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
@@ -598,11 +670,17 @@ test.describe("admin — the small forms say when they are saved", () => {
     await loginAsAdmin(page);
     await openCard();
     const box = page.locator("[data-admnote]");
-    const btn = page.locator("[data-admnotesave]");
-    await expect(btn, "nothing typed, yet the button is live").toBeDisabled();
+    await expect(page.locator("[data-admnotesave]"), "«Сохранить заметку» is back on the card").toHaveCount(0);
+    await expect(page.locator(".adm-onote__st")).toHaveText("Сохраняется само");
+    const notePatch = (text: string) => page.waitForRequest((r) =>
+      r.method() === "PATCH" && /\/api\/admin\/orders\/[^/]+\/$/.test(new URL(r.url()).pathname) &&
+      (r.postDataJSON() as { note?: string }).note === text, { timeout: 15_000 });
+
+    // a second after the last key the note goes, and the status says so after the 2xx
+    const first = notePatch("Позвонить перед отправкой");
     await box.fill("Позвонить перед отправкой");
-    await expect(btn).toBeEnabled();
-    await expect(page.locator("[data-admnoteacts]")).toContainText("Не сохранено");
+    await first;
+    await expect(page.locator("[data-admsavest]:visible").first()).toHaveAttribute("data-st", /saving|saved/);
 
     /* A background render must not wipe the draft — force one through the
        assistant pane. The note box has to give up focus first: since the
@@ -611,37 +689,31 @@ test.describe("admin — the small forms say when they are saved", () => {
        the owner is filling in. The draft is what is being tested, and it
        survives a blur as much as a render. */
     await box.blur();
-    await page.locator(".adm-fab").click();
+    await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     await page.locator(".adm-asst__fold").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);
     await expect(box, "a render wiped the note being typed").toHaveValue("Позвонить перед отправкой");
-    await expect(btn).toBeEnabled();
-
-    await btn.click();
-    await expect(page.getByRole("status")).toContainText("Заметка сохранена");
-    await expect(btn).toHaveText("Сохранено ✓");
-    await expect(btn).toBeDisabled();
-    await clearToast(page);
 
     // …and it is really there: reload, reopen
+    await expect.poll(async () => (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.notes,
+      { timeout: 15_000, message: "the note never reached the server" }).toBe("Позвонить перед отправкой");
     await page.reload();
     await waitForScreen(page, "admin");
     await openCard();
     await expect(page.locator("[data-admnote]")).toHaveValue("Позвонить перед отправкой");
-    await expect(page.locator("[data-admnotesave]")).toBeDisabled();
 
     if (testInfo.project.name === "desktop") {
-      // Ctrl+Enter is the button; plain Enter stays a new line in a textarea
+      // Ctrl+Enter sends it now, without the pause; plain Enter stays a new line in a textarea
       const box2 = page.locator("[data-admnote]");
+      const now = notePatch("Позвонить перед отправкой — после 18:00");
       await box2.fill("Позвонить перед отправкой — после 18:00");
       await box2.press("Control+Enter");
-      await expect(page.getByRole("status")).toContainText("Заметка сохранена");
-      await expect(page.locator("[data-admnotesave]")).toHaveText("Сохранено ✓");
+      await now;
     }
   });
 
-  test("the customer's note: Enter is the button, «Сохранено ✓» stays until the next keystroke", async ({ page }) => {
+  test("the customer's note saves itself, and «Сохранено ✓» comes only after the server", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     // a guest checkout makes no customer row — the owner's own «+ Партнёр» does
@@ -658,31 +730,29 @@ test.describe("admin — the small forms say when they are saved", () => {
     const open = page.locator("[data-admcustopen]").first();
     await expect(open).toBeVisible();
     await open.click();
+    /* 1a (Dim, 25.09.2026, q1): the note saves itself — running text, a
+       second after the typing stops — and says so in the page's one status,
+       «Сохраняем… → Сохранено ✓», never before the server answered. There is
+       no button left to press. */
     const box = page.locator("[data-admcustnotesf]");
-    const btn = page.locator("[data-admcustsavenotes]");
     await expect(box).toBeVisible({ timeout: 15_000 });
-    await expect(btn, "nothing typed, yet the button is live").toBeDisabled();
+    await expect(page.locator("[data-admcustsavenotes]"), "the note still has a save button").toHaveCount(0);
     await box.fill("постоянный клиент, оптовик");
-    await expect(btn).toBeEnabled();
-    await expect(page.locator("[data-admcustnoteacts]")).toContainText("Не сохранено");
-    await box.press("Enter");
-    await expect(page.getByRole("status")).toContainText("Заметка сохранена");
-    await expect(btn).toHaveText("Сохранено ✓");
-    await expect(btn).toBeDisabled();
-    await clearToast(page);
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено ✓", { timeout: 10_000 });
+    const noteOnServer = async () =>
+      (await (await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).json()).customer.notes;
+    expect(await noteOnServer()).toBe("постоянный клиент, оптовик");
+    // …and the next change the same way, the box keeping what is typed in it
     await box.fill("постоянный клиент");
-    await expect(btn).toHaveText("Сохранить заметку");
-    await expect(btn).toBeEnabled();
-    // the value reached the server
-    const detail = await (await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).json();
-    expect(detail.customer.notes).toBe("постоянный клиент, оптовик");
+    await expect.poll(noteOnServer, { timeout: 10_000 }).toBe("постоянный клиент");
+    await expect(box).toHaveValue("постоянный клиент");
   });
 });
 
-test.describe("admin — a warehouse row and the blog card say when they are saved", () => {
+test.describe("admin — a warehouse row saves itself, and the blog card says when it is saved", () => {
   test.use({ extraHTTPHeaders: ipHeaders(222) });
 
-  test("«Править»: «Изменений нет» for an untouched form, «Сохранено ✓» on the row it wrote", async ({ page }) => {
+  test("an open row saves itself: «мало ≤» on Enter, «Сохранено ✓» after the route answered; an untouched row writes nothing", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "goods", "stock");
@@ -690,63 +760,58 @@ test.describe("admin — a warehouse row and the blog card say when they are sav
     const edit = page.locator('[data-stockedit]:not([data-stockedit=""])').first();
     await expect(edit).toBeVisible();
     const key = (await edit.getAttribute("data-stockedit")) as string;
+    const puts: string[] = [];
+    page.on("request", (r) => {
+      if (r.url().includes("/api/admin/inventory/") && r.method() === "PUT") puts.push(r.url());
+    });
+    /* 1a: no «Править» form and no «Сохранить». A row opened and closed with
+       nothing typed writes nothing at all — the old «Изменений нет». */
     await edit.click();
-    const save = page.locator(`[data-stocksave="${key}"]`);
-    await expect(save).toBeVisible();
-    // nothing typed → said out loud, and the form folds away
-    await save.click();
-    await expect(page.getByRole("status")).toContainText("Изменений нет");
-    await expect(page.locator(`[data-stocksave="${key}"]`)).toHaveCount(0);
-    await clearToast(page);
+    await expect(page.locator(`[data-stocklowinput="${key}"]`)).toBeVisible();
+    await page.locator('[data-stockedit=""]').click();
+    await expect(page.locator("[data-stocklowinput]")).toHaveCount(0);
+    expect(puts, "an untouched row wrote to the shelf").toEqual([]);
 
     /* The threshold only — never the count: PRODUCT_2's stock belongs to the
        register sweep (fixtures.ts), and a threshold is not a stock move. The
-       write is awaited by its response, not by a toast snapshot: the route
-       compiles on its first hit under `next dev`, and a toast read in a fixed
-       window can still be the previous one. */
+       write is awaited by its response: «Сохранено ✓» may only follow a 2xx. */
     const inventoryPut = () =>
       page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && r.request().method() === "PUT");
     await page.locator(`[data-stockedit="${key}"]`).click();
-    const low = page.locator("[data-stocklowinput]");
+    const low = page.locator(`[data-stocklowinput="${key}"]`);
     const was = (await low.inputValue()) || "2";
     await low.fill(String(Number(was) + 1));
     const put = inventoryPut();
-    await low.press("Enter");   // Enter is «Сохранить» (ADM_ENTER_FORMS)
+    await low.press("Enter");   // a number leaves on Enter or blur (ADM_SAVE_POLICY.count)
     expect((await put).ok()).toBe(true);
-    await expect(page.getByRole("status")).toContainText("Сохранено");
-    const badge = page.locator("#stocklist .adm-badge--ok", { hasText: "Сохранено" });
-    await expect(badge, "the row it saved does not say so").toHaveCount(1);
-    await clearToast(page);
-    // opening the form again takes the badge away: «Сохранено ✓» beside an open form would be a lie
-    await page.locator(`[data-stockedit="${key}"]`).click();
-    await expect(badge).toHaveCount(0);
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено");
     // …and back to what it was
-    await page.locator("[data-stocklowinput]").fill(was);
+    await low.fill(was);
     const put2 = inventoryPut();
-    await page.locator(`[data-stocksave="${key}"]`).click();
+    await low.press("Enter");
     expect((await put2).ok()).toBe(true);
-    await expect(page.getByRole("status")).toContainText("Сохранено");
-    await clearToast(page);
   });
 
-  test("the blog's «Публикация» card says whether the article is saved", async ({ page }) => {
+  /* 1a: the article saves itself, so the line at its foot says where it
+     stands in the shop, and «Сохраняем… / Сохранено ✓» is the header's —
+     shown only after the server said yes (README § 2). */
+  test("the blog's line says where the article stands, and the header says when it is saved", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "blog");
     await page.locator("[data-admblognew]").click();
     const state = page.locator("[data-blogpubstate]");
-    await expect(state).toHaveText("Ещё не сохранено");
+    await expect(state).toHaveText("○ Новая статья — сохранится, как только будет заголовок");
     await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации");
-    await expect(state, "a new post has nothing on the server yet").toHaveText("Ещё не сохранено");
-    await page.locator("[data-admblogsave]").click();
-    await expect(page.getByRole("status")).toContainText("Черновик сохранён");
-    await expect(state).toHaveText("Сохранено ✓");
-    await clearToast(page);
-    await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации, правка");
-    await expect(state).toHaveText("Есть несохранённые изменения");
-    // tidy up through the same card
+    await expect(page.locator("[data-admsavest]:visible").first(), "the header never said it saved").toContainText("Сохранено ✓", { timeout: 15_000 });
+    await expect(state, "a saved draft is still called new").toHaveText("○ Черновик — в магазине не видно");
+    /* tidy up: «⋯» → «Удалить статью» → the sheet → held, with «Вернуть».
+       The title box is let go first — on a phone «⋯» stands with the pinned
+       button, which steps aside while the keyboard is up (body.adm-typing) */
+    await page.locator('[data-blogf="title"]').blur();
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await page.locator("[data-admblogdelyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
     await expect(page.getByRole("status")).toContainText("Статья удалена");
   });
 });
@@ -789,11 +854,12 @@ test.describe("admin — «Письма» can be run without waiting for the sch
 
     await openAdmin(page);
     await adminSection(page, "promos", "mail");
+    // 1a: «Запустить сейчас» and «Последний запуск» are inside the letter (Dim, 23.09.2026)
+    await page.locator('[data-mailtpl="birthday"]').first().click();
     // nothing to run while the letter is off — the button only comes with the switch
     await expect(page.locator('[data-admflowrun="birthday"]')).toHaveCount(0);
     try {
-      await page.locator('[data-admflow="birthday"]').click();
-      await clearToast(page);
+      await flowsChange(page, () => page.locator('[data-admflow="birthday"]:visible').first().click());
       const run = page.locator('[data-admflowrun="birthday"]');
       await expect(run, "switching the letter on did not offer «Запустить сейчас»").toBeVisible();
       /* The count line says who the letter can reach at all. It read
@@ -823,9 +889,10 @@ test.describe("admin — «Письма» can be run without waiting for the sch
         .toBeGreaterThan(0);
       await clearToast(page);
 
-      // the abandoned-cart row has the same button and answers for itself
-      await page.locator('[data-admflow="abandoned"]').click();
-      await clearToast(page);
+      // the abandoned-cart letter has the same button and answers for itself
+      await page.locator("[data-mailback]:visible").first().click();
+      await page.locator('[data-mailtpl="abandoned-cart"]').first().click();
+      await flowsChange(page, () => page.locator('[data-admflow="abandoned"]:visible').first().click());
       await page.locator('[data-admflowrun="abandoned"]').click();
       /* Renat, 13.09.2026: «I filled out e-mail and left cart, tried to send
          now but nothing arrived.» It was a cart five minutes old — the sender
@@ -839,12 +906,11 @@ test.describe("admin — «Письма» can be run without waiting for the sch
       await clearToast(page);
       await assertClean(page, w, "run now");
     } finally {
+      // back on the list, where every switch is
+      if (await page.locator("[data-mailback]:visible").count()) await page.locator("[data-mailback]:visible").first().click();
       for (const flow of ["abandoned", "birthday"]) {
-        const sw = page.locator(`[data-admflow="${flow}"]`);
-        if ((await sw.getAttribute("aria-checked")) === "true") {
-          await sw.click();
-          await clearToast(page);
-        }
+        const sw = page.locator(`[data-admflow="${flow}"]`).first();
+        if ((await sw.getAttribute("aria-checked")) === "true") await flowsChange(page, () => sw.click());
       }
     }
   });

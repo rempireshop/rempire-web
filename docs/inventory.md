@@ -194,7 +194,8 @@ stock_levels(product_id text, variant text default '', qty int not null default 
              low_threshold int default 2, ean text, updated_at,
              primary key(product_id, variant))
 stock_moves(id bigserial, at, product_id, variant, delta int,
-            reason text check in ('sale_web','sale_pos','goods_in','adjust','return'),
+            reason text check in ('sale_web','sale_pos','goods_in','adjust','return',
+                                  'edit' /* 092 */, 'writeoff' /* 206 */),
             ref text, actor text)
 orders.channel text not null default 'web' check (channel in ('web','pos'))
 ```
@@ -209,7 +210,8 @@ A `stock_levels` row existing is **not** the same as a product being publicly
 trusted. A variant only counts for the public in/low/out badge once it has at
 least one *counting* `stock_moves` row — `goods_in`, `adjust` or `return`
 (`TRACKING_REASONS` in `src/lib/inventory.ts`). A sale never makes a variant
-tracked: `move()` skips a `sale_web`/`sale_pos` on a variant nobody has counted
+tracked: `move()` skips a `sale_web`/`sale_pos` (and a `writeoff` — «Списание»,
+206_stock_move_writeoff.sql, always negative) on a variant nobody has counted
 yet (`MoveResult.skipped`, logged as `[inventory] sale on untracked …`), so the
 first paid web order can never flip an uncounted product to «нет в наличии» —
 which is also what keeps the e2e suite's fixed products (`e2e/fixtures.ts`)
@@ -648,7 +650,8 @@ its own icon, and opens straight into the camera.
 - **The result card.** «Найдено · EAN» in ok green, the name at 600/17, «объём ·
   на складе N» (or «не учтено»), a giant stepper (64-px buttons, the number in
   Oswald 48) defaulting to 1, and two 56-h buttons carrying the number they
-  promise: «Принять +N» (`goods_in`) and «Списать −N» (`sale_pos`). The ±
+  promise: «Принять +N» (`goods_in`) and «Списать −N» (`writeoff` since 25.09.2026,
+  `sale_pos` before). The ±
   patches those two labels in place (`scanPaintLabels()`) rather than
   repainting the card, for the same reason the field itself is patched — a
   repaint would fight the finger holding «+». One tap is the confirm —

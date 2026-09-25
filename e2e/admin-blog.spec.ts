@@ -28,6 +28,57 @@ test.beforeEach(async ({}, testInfo) => {
    http:// one are covered in tests/blog.test.ts.) */
 const IMAGE_URL = "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp";
 
+/* ---- 1a (README § 2 and § 5; Dim 25.09.2026, q5/q8) -------------------------
+   The article saves itself: «Сохранить» is gone, so what used to follow a press
+   of it now waits for the SERVER to hold the text. «Опубликовать» is the one
+   dark button and asks about an empty ET/EN on the confirm sheet; «Снять с
+   публикации» is in «⋯»; the address, tags and Google lines, the assistant
+   and the cover's frames are folds. */
+type Post = { id: string; slug: string; status: string; author: string; title: Record<string, string>; body: Record<string, string>; coverUrl: string | null };
+async function serverPost(page: Page, id: string): Promise<Post> {
+  const r = await page.request.get(`/api/admin/blog/?id=${id}`);
+  return (await r.json()).post as Post;
+}
+/** The article the autosave created, found by its Russian title. */
+async function postByTitle(page: Page, title: string): Promise<Post> {
+  let found: Post | null = null;
+  await expect.poll(async () => {
+    const r = await page.request.get("/api/admin/blog/");
+    found = ((await r.json()).posts as Post[]).find((p) => p.title && p.title.RU === title) || null;
+    return !!found;
+  }, { timeout: 15_000, message: `«${title}» never saved itself` }).toBe(true);
+  return found!;
+}
+/** Waits until the server's copy of the article passes `ok`. */
+async function savedAs(page: Page, id: string, ok: (p: Post) => boolean, message: string): Promise<Post> {
+  let last: Post | null = null;
+  await expect.poll(async () => ok((last = await serverPost(page, id))), { timeout: 15_000, message }).toBe(true);
+  return last!;
+}
+/** «Опубликовать»; `asks` — ET/EN still empty, so the sheet asks and «Опубликовать всё равно» answers. */
+async function publish(page: Page, asks = false): Promise<void> {
+  await page.locator("[data-admblogpublish]").click();
+  if (asks) {
+    await expect(page.locator(".adm-confirm"), "the empty-language question was not asked").toBeVisible();
+    await page.locator(".adm-confirm [data-admapply]").click();
+  }
+  await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
+  await clearToast(page);
+}
+/** «⋯» → «Снять с публикации». */
+async function unpublish(page: Page): Promise<void> {
+  await page.locator("[data-admblogmenu]").click();
+  await page.locator("[data-admblogunpublish]").click();
+  await expect(page.locator("[data-blogpubstate]")).toContainText("Черновик — в магазине не видно");
+  await clearToast(page);
+}
+/** Opens a fold (admFoldHTML) — a toggle, so only when it is shut. */
+async function openFold(page: Page, key: string): Promise<void> {
+  const b = page.locator(`[data-admfold="${key}"]`);
+  if ((await b.getAttribute("aria-expanded")) !== "true") await b.click();
+  await expect(b).toHaveAttribute("aria-expanded", "true");
+}
+
 test.describe("blog — the visual editor", () => {
   test.use({ extraHTTPHeaders: ipHeaders(171) });
 
@@ -126,10 +177,7 @@ test.describe("blog — the visual editor", () => {
     /* Russian only, so «Опубликовать» asks which reader gets what before it
        does anything — see «blog — publishing with a language still empty»
        below for that question's own test. */
-    await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
-    await clearToast(page);
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    await publish(page, true);
 
     /* ---- what the shopper gets ------------------------------------------ */
     const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);
@@ -160,8 +208,7 @@ test.describe("blog — the visual editor", () => {
     await shop.close();
 
     // put it back in the drafts: this suite leaves the blog as it found it
-    await page.locator("[data-admblogunpublish]").click();
-    await clearToast(page);
+    await unpublish(page);
     await assertClean(page, w, "blog editor test cleaned up");
   });
 
@@ -202,6 +249,8 @@ test.describe("blog — the visual editor", () => {
     const box = page.locator("[data-blogbody]");
     await box.click();
     await page.keyboard.type("Зимой борода сохнет — масло вечером, бальзам утром.");
+    // 1a: the tags live in the «Адрес, автор, теги и Google» fold (its old hook, data-blogmore, opens it)
+    await page.locator("[data-blogmore]").click();
     await page.locator("[data-blogtags]").fill("борода, зима");
 
     /* Estonian on the pill and an Estonian title; the rest of the article
@@ -209,7 +258,6 @@ test.describe("blog — the visual editor", () => {
        and fall back to the Russian excerpt and text. */
     await page.locator('[data-admbloglang="ET"]').click();
     await page.locator('[data-blogf="title"]').fill(`Habe ${marker}`);
-    await page.locator("[data-blogmore]").click();
     const seoTitle = page.locator('[data-blogf="seoTitle"]');
     const seoDesc = page.locator('[data-blogf="seoDesc"]');
     await expect(seoTitle).toBeVisible();
@@ -264,10 +312,7 @@ test.describe("blog — the visual editor", () => {
        into the editor under their pills. A Google pair is not an article, so
        the Estonian and English texts are still empty here and «Опубликовать»
        asks about them first. */
-    await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
-    await clearToast(page);
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    await publish(page, true);
     const slug = await page.locator("[data-blogslug]").inputValue();
     const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
     expect(saved.status()).toBe(200);
@@ -293,8 +338,7 @@ test.describe("blog — the visual editor", () => {
     await shop.close();
 
     // back to the drafts: this suite leaves the blog as it found it
-    await page.locator("[data-admblogunpublish]").click();
-    await clearToast(page);
+    await unpublish(page);
     await assertClean(page, w, "Google pair test cleaned up");
   });
 
@@ -329,34 +373,45 @@ test.describe("blog — the visual editor", () => {
     try {
       await tab(page, "blog");
       await page.locator(`[data-admblogedit="${post.id}"]`).click();
-      const cover = page.locator('.adm-cover[data-galdrop="blog"]');
+      /* 1a (screen 16): the cover is a tile beside «Анонс» — the picture whole,
+         «Заменить обложку» over its foot — and everything else that can be
+         done to it sits in the fold under it: the three frames, the caption,
+         «Удалить обложку» (Dim, 18–23.09.2026). */
+      const cover = page.locator('.adm-bcover[data-galdrop="blog"]');
       await expect(cover).toBeVisible();
-      const see = cover.locator(".adm-see");
-      await expect(see, "the cover is not shown at all").toBeVisible();
-      const frame = see.locator(".blog__cover");
-      await expect(frame).toHaveAttribute("style", new RegExp(IMAGE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-      await expect(frame).toHaveAttribute("aria-label", "Бальзам Proraso на полке");
-      // large: the picture takes the block, it is not a thumbnail beside the buttons
-      const pic = await frame.boundingBox();
+      const pic = cover.locator(".adm-bcover__img");
+      await expect(pic, "the cover is not shown at all").toHaveAttribute("style", new RegExp(IMAGE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      await expect(pic).toHaveAttribute("aria-label", "Бальзам Proraso на полке");
+      // large: the picture takes the tile, it is not a thumbnail beside the button
+      const box = await pic.boundingBox();
       const zone = await cover.boundingBox();
-      expect(pic!.width).toBeGreaterThan(zone!.width / 2 - 4);
-      expect(pic!.height).toBeGreaterThanOrEqual(100);
-      await expect(cover.locator(".adm-cover__alt")).toHaveText("Бальзам Proraso на полке");
+      expect(box!.width).toBeGreaterThan(zone!.width - 4);
+      expect(box!.height).toBeGreaterThanOrEqual(100);
       await expect(cover.locator('[data-galup="blog"]')).toHaveText("Заменить обложку");
-      await expect(cover.locator("[data-admblogcoverdel]")).toHaveText("Удалить");
       await expect(cover.locator('[data-galfile="blog"]'), "the upload lost its picker").toHaveCount(1);
-      await expect(cover, "the file-type hint is back under the buttons").not.toContainText("JPEG/PNG/WebP");
+      await expect(cover, "the file-type hint is back over the picture").not.toContainText("JPEG/PNG/WebP");
       await expect(page.locator('.adm-drop[data-galdrop="blog"]'), "the dashed zone is on screen with a cover set").toHaveCount(0);
 
-      // «Удалить»: the picture goes, and the dashed zone with «+ Обложка» and the hint is what stands there
-      await cover.locator("[data-admblogcoverdel]").click();
-      await expect(page.locator(".adm-cover")).toHaveCount(0);
+      // the fold: the frames the shop really puts it in, the caption, «Удалить обложку»
+      await openFold(page, "blog-cover");
+      const see = page.locator(".adm-cover .adm-see");
+      await expect(see.locator(".blog__cover")).toHaveAttribute("aria-label", "Бальзам Proraso на полке");
+      await expect(page.locator('[data-blogf="coverAlt"]')).toHaveValue("Бальзам Proraso на полке");
+      await expect(page.locator("[data-admblogcoverdel]")).toHaveText("Удалить обложку");
+
+      // «Удалить обложку»: the picture goes, the dashed zone stands there, and it saved itself — with «Вернуть»
+      await page.locator("[data-admblogcoverdel]").click();
+      await expect(page.locator(".adm-bcover__img")).toHaveCount(0);
       const drop = page.locator('.adm-drop[data-galdrop="blog"]');
       await expect(drop).toBeVisible();
       await expect(drop.locator('[data-galup="blog"]')).toHaveText("+ Обложка");
       await expect(drop.locator('[data-galfile="blog"]')).toHaveCount(1);
       await expect(drop.locator(".adm-hint")).toBeVisible();
-      await expect(page.locator("[data-blogdirty]"), "deleting the cover was not noticed as an unsaved change").toBeVisible();
+      await savedAs(page, post.id, (p) => !p.coverUrl, "deleting the cover did not save itself");
+      expect(await toastText(page)).toContain("Обложка убрана");
+      await page.locator("[data-admtoastundo]").click();
+      await expect(page.locator(".adm-bcover__img"), "«Вернуть» did not bring the cover back").toHaveCount(1);
+      await savedAs(page, post.id, (p) => p.coverUrl === IMAGE_URL, "the cover «Вернуть» brought back was not saved");
       await assertClean(page, w, "the cover block");
     } finally {
       await page.request.delete(`/api/admin/blog/?id=${post.id}`);
@@ -592,6 +647,8 @@ test.describe("blog — the whole article", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    // 1a: the assistant is the «✨ Помощник напишет статью» fold
+    await openFold(page, "blog-ai");
     const full = page.locator("[data-admblogfull]");
     await expect(full).toHaveText("Написать статью целиком");
     await page.locator("[data-admblogtopic]").fill("уход за бородой зимой");
@@ -660,9 +717,7 @@ test.describe("blog — the whole article", () => {
       expect(post.seoTitle.EN).toBe(`EN Google ${marker}`);
 
       /* ---- the owner reads and publishes; the Estonian page is the Estonian article ---- */
-      await page.locator("[data-admblogpublish]").click();
-      await clearToast(page);
-      await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+      await publish(page);
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("/et", `/blog/${slug}/`));
       await waitForScreen(shop.page, "blogpost");
@@ -703,6 +758,7 @@ test.describe("blog — the whole article", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await openFold(page, "blog-ai");
     await page.locator("[data-admblogtopic]").fill("уход за бородой зимой");
     await page.locator("[data-admblogfull]").click();
     /* The products the article came with, named the moment the Russian text
@@ -783,9 +839,7 @@ test.describe("blog — the whole article", () => {
       expect(post.body.EN).not.toContain(GHOST_ID);
       expect(post.products).toEqual([PRODUCT.id, PRODUCT_2.id]);
 
-      await page.locator("[data-admblogpublish]").click();
-      await clearToast(page);
-      await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+      await publish(page);
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("/et", `/blog/${slug}/`));
       await waitForScreen(shop.page, "blogpost");
@@ -798,13 +852,14 @@ test.describe("blog — the whole article", () => {
       await shop.close();
 
       /* ---- and it is still the owner's to take out ---------------------- */
-      await expect(page.locator("[data-blogdirty]"), "the article was left unsaved by the generator").toBeHidden();
       await cards.first().click({ clickCount: 3 });   // the card's line, selected as any other line
       await page.keyboard.press("Delete");
       await expect(box, "the click followed the card's link instead of editing it").toContainText("Второй раздел");
       await expect(cards, "the owner cannot delete a card the assistant placed").toHaveCount(1);
       await expect(cards.first(), "the wrong card went").toHaveAttribute("data-product", PRODUCT_2.id);
-      await expect(page.locator("[data-blogdirty]"), "deleting the card was not noticed as an unsaved change").toBeVisible();
+      // …and that saved itself — into the published article (q5)
+      await savedAs(page, postId, (p) => !p.body.RU.includes(`data-product="${PRODUCT.id}"`) && p.body.RU.includes(`data-product="${PRODUCT_2.id}"`),
+        "deleting the card did not save itself");
       await assertClean(page, w, "a placed card taken out by hand");
     } finally {
       // this suite leaves the blog as it found it
@@ -836,7 +891,7 @@ test.describe("blog — the whole article", () => {
     let slug = "";
     await openAdmin(page);
     try {
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст на тему уход за бородой зимой");
       await page.locator("[data-admsend]").click();
       const answer = page.locator("[data-aians]");
@@ -1032,7 +1087,10 @@ test.describe("blog — which language am I writing", () => {
     await assertClean(page, w, "the blog editor's language strip");
   });
 
-  test("switching language keeps every unsaved word, and leaving without saving asks first", async ({ page }) => {
+  /* 1a: the article saves itself (q5), so leaving has nothing to ask about —
+     except while it CANNOT be saved: no Russian title yet. That one is still
+     asked about, and «Остаться» keeps every word. */
+  test("switching language keeps every word; leaving asks only while the article cannot be saved", async ({ page }) => {
     test.setTimeout(150_000);
     const w = watch(page);
     await openAdmin(page);
@@ -1040,36 +1098,40 @@ test.describe("blog — which language am I writing", () => {
     await page.locator("[data-admblognew]").click();
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
-    const dirty = page.locator("[data-blogdirty]");
-    await expect(dirty, "a post nobody has touched says it has unsaved changes").toBeHidden();
+    const hint = page.locator("#blogtitlehint .adm-ashint");
+    await expect(hint, "a post nobody has touched says it cannot be saved").toBeHidden();
 
-    await page.locator('[data-blogf="title"]').fill("Черновик о бороде");
+    // text, no title: it cannot save, and the line under the title says why
     await box.click();
     await page.keyboard.type("Первый абзац по-русски.");
-    await expect(dirty, "typing into the body never says it is unsaved").toBeVisible();
+    await expect(hint, "the article that cannot save never says so").toHaveText("Заполните заголовок хотя бы на русском.");
 
-    // ET and back — nothing typed is lost, and it still says so
+    // ET and back — nothing typed is lost
     await page.locator('[data-admbloglang="ET"]').click();
     await expect(box).toHaveText("");
     await page.locator('[data-admbloglang="RU"]').click();
-    await expect(box, "switching language lost the unsaved Russian text").toContainText("Первый абзац по-русски.");
-    await expect(page.locator('[data-blogf="title"]')).toHaveValue("Черновик о бороде");
-    await expect(dirty).toBeVisible();
+    await expect(box, "switching language lost the Russian text").toContainText("Первый абзац по-русски.");
 
-    /* ---- leaving, which really does drop it ------------------------------ */
+    /* ---- leaving, which really would drop it ------------------------------ */
     await page.locator("[data-admblogback]").click();
-    await expect(page.locator("[data-admblogbackyes]"), "the editor let unsaved work go without a word").toBeVisible();
+    await expect(page.locator("[data-admblogbackyes]"), "the editor let unsaveable work go without a word").toBeVisible();
     await page.locator("[data-admblogbackno]").click();
     await expect(box, "«Остаться» threw the text away anyway").toContainText("Первый абзац по-русски.");
 
-    await page.locator("[data-admblogsave]").click();
-    await expect(dirty, "a saved post still says it has unsaved changes").toBeHidden();
-    await clearToast(page);
-    // …and now the door is open again, no question asked
-    await page.locator("[data-admblogback]").click();
-    await expect(page.locator("[data-admblognew]")).toBeVisible();
-
-    await assertClean(page, w, "unsaved blog work");
+    // a title: it saves itself — the line goes — and the door is open, no question asked
+    const title = `Черновик о бороде ${Date.now().toString().slice(-6)}`;
+    await page.locator('[data-blogf="title"]').fill(title);
+    const post = await postByTitle(page, title);
+    try {
+      await expect(hint).toBeHidden();
+      await savedAs(page, post.id, (p) => p.body.RU.includes("Первый абзац по-русски."), "the text did not save with the title");
+      await page.locator("[data-admblogback]").click();
+      await expect(page.locator("[data-admblogbackyes]"), "a saved article asked on the way out").toHaveCount(0);
+      await expect(page.locator(`[data-admblogedit="${post.id}"]`)).toBeVisible();
+      await assertClean(page, w, "blog work that cannot save yet");
+    } finally {
+      await page.request.delete(`/api/admin/blog/?id=${post.id}`);
+    }
   });
 
   test("the panel's own language changes the panel, never which body is being edited", async ({ page }) => {
@@ -1149,19 +1211,24 @@ test.describe("blog — publishing with a language still empty", () => {
     await box.click();
     await page.keyboard.type(RU_TEXT);
 
-    /* ---- both other languages empty: one question, naming both ---------- */
+    /* ---- both other languages empty: one question, naming both ----------
+       1a: on the panel's one confirm sheet (README rule 4) — a question for a
+       title, the sentence under it, «Опубликовать всё равно» and «Не надо». */
     await page.locator("[data-admblogpublish]").click();
-    const ask = page.getByText("Эстонский и английский тексты статьи пустые");
-    await expect(ask, "a Russian-only post was published without a word").toBeVisible();
+    const sheet = page.locator('.adm-confirm[role="dialog"][aria-modal="true"]');
+    await expect(sheet, "a Russian-only post was published without a word").toBeVisible();
+    await expect(sheet.locator(".adm-confirm__t")).toHaveText("Опубликовать без перевода?");
+    const ask = sheet.getByText("Эстонский и английский тексты статьи пустые");
+    await expect(ask).toBeVisible();
     await expect(ask, "the question never says what the reader gets instead").toContainText("покупатель увидит русский текст");
-    expect(await page.locator("[data-admblogpublish]").count(), "the question and the button it answers are both on screen").toBe(0);
     // asked, not done: the post is still a draft while the question stands
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+    await expect(page.locator("[data-blogpubstate]")).not.toContainText("Опубликована");
 
-    // «Отмена» puts the ordinary button back, and nothing was published
-    await page.locator("[data-admblogpublishno]").click();
+    // «Не надо» puts the sheet away, and nothing was published
+    await sheet.locator("[data-admcancel]").click();
+    await expect(sheet).toHaveCount(0);
     await expect(page.locator("[data-admblogpublish]")).toBeVisible();
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+    await expect(page.locator("[data-blogpubstate]")).not.toContainText("Опубликована");
     await assertClean(page, w, "the publish question");
 
     /* ---- the Estonian text written, the English one still not ----------- */
@@ -1171,13 +1238,13 @@ test.describe("blog — publishing with a language still empty", () => {
     await page.keyboard.type(ET_TEXT);
     await page.locator('[data-admbloglang="RU"]').click();
     await page.locator("[data-admblogpublish]").click();
-    await expect(page.getByText("Английский текст статьи пустой"), "the question did not notice the Estonian text was written").toBeVisible();
+    await expect(sheet.getByText("Английский текст статьи пустой"), "the question did not notice the Estonian text was written").toBeVisible();
     expect(await page.getByText("Эстонский и английский тексты статьи пустые").count()).toBe(0);
 
-    // …and it does not block him: the second press publishes what he wrote
-    await page.locator("[data-admblogpublishyes]").click();
+    // …and it does not block him: «Опубликовать всё равно» publishes what he wrote
+    await sheet.locator("[data-admapply]").click();
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
     await clearToast(page);
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
     const slug = await page.locator("[data-blogslug]").inputValue();
     const row = await page.request.get(`/api/admin/blog/?slug=${slug}`);
     expect(row.status()).toBe(200);
@@ -1192,16 +1259,16 @@ test.describe("blog — publishing with a language still empty", () => {
       expect((await et.json()).post.bodyHtml).toContain(ET_TEXT);
 
       /* ---- and no question at all once all three are written ------------ */
-      await page.locator("[data-admblogunpublish]").click();
-      await clearToast(page);
+      await unpublish(page);
       await page.locator('[data-admbloglang="EN"]').click();
       await page.locator('[data-blogf="title"]').fill(`Russian only ${marker}`);
       await box.click();
       await page.keyboard.type(`The English body of the article ${marker}.`);
       await page.locator("[data-admblogpublish]").click();
+      await expect(page.locator("[data-blogpubstate]"), "a post written in all three languages was asked about anyway")
+        .toContainText("Опубликована — правки видны сразу");
+      expect(await page.locator(".adm-confirm").count()).toBe(0);
       await clearToast(page);
-      await expect(page.getByText("Опубликована. Изменения появятся"), "a post written in all three languages was asked about anyway").toBeVisible();
-      expect(await page.locator("[data-admblogpublishyes]").count()).toBe(0);
       await assertClean(page, w, "publishing a post written in three languages");
     } finally {
       // this suite leaves the blog as it found it
@@ -1243,18 +1310,15 @@ test.describe("blog — the product cards survive a translation", () => {
     await expect(page.locator(`[data-blogbody] a[data-product="${id}"]`)).toBeVisible();
   }
 
-  /** «Перевести на ET и EN» lives inside the «Только часть» disclosure, and
-      that is a plain <details>: clicking its summary is a toggle, so opening
-      it blind closes it whenever a render has left it open. Press until the
-      button is on screen, then press the button. */
+  /** «Перевести на ET и EN» lives in the assistant's fold (1a) — a toggle,
+      so it is opened only when shut — and the answer saves itself, which is
+      what the toast now says: «Готово — проверьте текст.» */
   async function translate(page: Page): Promise<void> {
-    const btn = page.locator("[data-admblogtranslate]");
-    await expect(async () => {
-      if (!(await btn.isVisible())) await page.locator("summary", { hasText: "Только часть" }).click();
-      await expect(btn).toBeVisible({ timeout: 2000 });
-    }).toPass({ timeout: 20_000 });
+    await openFold(page, "blog-ai");
+    const btn = page.locator('[data-admblogtranslate=""]');
+    await expect(btn).toBeVisible();
     await btn.click();
-    await expect(page.getByRole("status").first()).toContainText("Черновик готов", { timeout: 30_000 });
+    await expect(page.getByRole("status").first()).toContainText("Готово — проверьте текст.", { timeout: 30_000 });
     await clearToast(page);
   }
 
@@ -1360,13 +1424,12 @@ test.describe("blog — the product cards survive a translation", () => {
    *      autocorrection without one — was on screen, in the box, and not in
    *      what «Сохранить» sent (blogReadForm).
    */
-  test("two languages written in one sitting both survive the save, and saving leaves the page where it stands", async ({ page }) => {
+  test("two languages written in one sitting both reach the server, and saving leaves the page where it stands", async ({ page }) => {
     test.setTimeout(150_000);
     const w = watch(page);
     await openAdmin(page);
     await tab(page, "blog");
     const box = page.locator("[data-blogbody]");
-    const dirty = page.locator("[data-blogdirty]");
 
     /* ---- an article that already has both texts, saved and reopened ------ */
     await page.locator("[data-admblognew]").click();
@@ -1379,28 +1442,19 @@ test.describe("blog — the product cards survive a translation", () => {
     await box.click();
     await page.keyboard.type("English original text.");
     await page.locator('[data-admbloglang="RU"]').click();
-    await page.locator("[data-admblogsave]").click();
-    await expect(dirty).toBeHidden();
-    await clearToast(page);
-    const id = await page.evaluate(async () => {
-      const r = await fetch("/api/admin/blog/");
-      return (await r.json()).posts[0].id;
-    });
-    const stored = () =>
-      page.evaluate(async (pid) => {
-        const r = await fetch("/api/admin/blog/?id=" + pid);
-        return (await r.json()).post;
-      }, id);
+    // 1a: no «Сохранить» — the article saves itself; the server is what is asked
+    const id = (await postByTitle(page, marker)).id;
+    await savedAs(page, id, (p) => p.body.EN.includes("English original text.") && p.body.RU.includes("Русский исходный текст."),
+      "the two texts never reached the server");
     await page.locator("[data-admblogback]").click();
     await page.locator(`[data-admblogedit="${id}"]`).click();
     await expect(box).toBeVisible();
 
     /* ---- 0. the form is read at the door, and reading it changes nothing --
-       «Сохранить» now reads the screen rather than only the draft behind it
-       (blogReadForm), and so does the way out. A post fetched from the server
-       and put straight back therefore has to come out byte for byte, or every
-       article would ask «Правки не сохранены» on the way out of a visit in
-       which nothing at all was typed. */
+       The way out reads the screen rather than only the draft behind it
+       (blogReadForm). A post fetched from the server and put straight back
+       therefore has to come out byte for byte, or every visit in which
+       nothing at all was typed would write the article again. */
     await page.locator("[data-admblogback]").click();
     await expect(page.locator("[data-admblogbackyes]"),
       "opening an article and leaving it asks about edits nobody made").toHaveCount(0);
@@ -1433,17 +1487,11 @@ test.describe("blog — the product cards survive a translation", () => {
       return window.scrollY;
     });
     expect(before, "the editor does not scroll — this step measures nothing").toBeGreaterThan(0);
-    // clicked from the page, not through Playwright, which scrolls first
-    await page.evaluate(() => (document.querySelector("[data-admblogsave]") as HTMLElement).click());
-    await expect(dirty).toBeHidden();
+    /* both languages reached the server — by themselves, a second after the typing stopped */
+    await savedAs(page, id, (p) => p.body.RU.includes("привет") && p.body.EN.includes("goodbye"),
+      "one sitting, two languages: an edit was lost");
     const after = await page.evaluate(() => window.scrollY);
-    expect(Math.abs(after - before), "«Сохранить» threw the page at the text box").toBeLessThanOrEqual(4);
-    await clearToast(page);
-
-    /* ---- both languages reached the server ------------------------------ */
-    let post = await stored();
-    expect(post.body.RU, "the Russian edit was lost").toContain("привет");
-    expect(post.body.EN, "the English edit was lost — one sitting, two languages").toContain("goodbye");
+    expect(Math.abs(after - before), "the autosave threw the page at the text box").toBeLessThanOrEqual(4);
 
     /* ---- 3. S a frame ahead of the markup -------------------------------
        Two taps on the language bar inside one frame is how this is reached
@@ -1459,30 +1507,26 @@ test.describe("blog — the product cards survive a translation", () => {
     });
     await expect(box, "the Estonian box was copied over the English article")
       .toContainText("goodbye");
-    await page.locator("[data-admblogsave]").click();
-    await expect(dirty).toBeHidden();
-    post = await stored();
+    await page.waitForTimeout(1500);
+    let post = await serverPost(page, id);
     expect(post.body.EN, "a repaint one frame behind wiped the English article").toContain("goodbye");
-    await clearToast(page);
 
     /* ---- 4. an edit app.js was never handed an `input` for --------------- */
     await page.evaluate(() => {
       const b = document.querySelector("[data-blogbody]") as HTMLElement;
       b.insertBefore(document.createElement("p"), b.firstChild).textContent = "надиктовано";
     });
-    await page.locator("[data-admblogsave]").click();
-    await expect(dirty).toBeHidden();
-    post = await stored();
-    expect(post.body.EN, "«Сохранить» sent the draft and not what was on screen").toContain("надиктовано");
+    // the next decision point reads the screen — the language bar here — and the autosave takes it from there
+    await page.locator('[data-admbloglang="RU"]').click();
+    post = await savedAs(page, id, (p) => p.body.EN.includes("надиктовано"), "what was on screen never reached the server");
 
     /* ---- and the author field, which is one name and not three ---------- */
     await page.locator("[data-blogmore]").click();
     await page.locator('[data-blogf="author"]').fill("Ренат");
-    await page.locator("[data-admblogsave]").click();
-    await expect(dirty).toBeHidden();
-    post = await stored();
+    post = await savedAs(page, id, (p) => p.author === "Ренат", "«Автор» did not save itself");
     expect(post.author, "«Автор» is a single name, not one of the three texts").toBe("Ренат");
 
     await assertClean(page, w, "two languages in one sitting");
+    await page.request.delete(`/api/admin/blog/?id=${id}`);
   });
 });

@@ -36,32 +36,43 @@ const branch = (head: string) => block(src.indexOf(head), head);
 describe("«+ Набор» opens the new set on its name", () => {
   const S: Record<string, unknown> = {};
   let focused = "";
+  let flushed = 0;
   const press = new Function(
-    "S", "render", "refocus", "BUNDLE_AI_UNDO",
-    `${fn("blankBundle")}
+    "S", "render", "refocus", "admAutosaveFlush", "bundleDraftLoad",
+    `${fn("bundleUid")}
+     var BUNDLE_UIDN = 0;
+     ${fn("blankBundle")}
      return function (d) { ${branch("if (d.bundlenew !== undefined)")} };`,
-  )(S, () => {}, (sel: string) => { focused = sel; }, null) as (d: Record<string, string>) => void;
+  )(S, () => {}, (sel: string) => { focused = sel; }, () => { flushed++; }, () => null) as (d: Record<string, string>) => void;
 
   it("focuses the name box, not the address", () => {
     press({ bundlenew: "" });
     expect(S.bundleForm, "the form did not open").toBeTruthy();
     expect(focused, "the caret went to the address box").toBe('[data-bundlef="title"]');
+    // 1a: whatever the set open before still owed went first
+    expect(flushed).toBe(1);
   });
 
-  it("…and that selector names the first box of the form the owner sees", () => {
+  it("…and that selector names the first box of the form the owner sees — and there is no address box at all", () => {
     /* The form, drawn by its own function: the name is the first input and
-       the refocus target, the address comes later and is written for him. */
+       the refocus target. Since 1a the address is not a box: it is written
+       from the name when the set is first saved, and shown behind «?» (q23). */
+    const form = { uid: "d1", id: "", cat: "beard", editing: false, title: { RU: "", ET: "", EN: "" },
+      desc: { RU: "", ET: "", EN: "" }, items: [], price: "", image: "", active: false, sort: 0, lang: "RU", rev: 0 };
     const html = new Function(
-      "S", "LANGS", "BUNDLE_CATS", "BUNDLE_AI_UNDO", "esc",
+      "S", "LANGS", "BUNDLE_CATS", "esc", "BUNDLE_SAVE_ERRS",
       "bundleItemRowsHTML", "bundleSumLine", "bundlePickRows", "bundleOwnHint", "bundleFormPctText",
-      "bundleHintHTML", "bundleImageRowHTML", "admDirtyCls", "admBarNoteState", "admBarNoteHTML",
+      "bundleHintHTML", "bundleImageRowHTML", "bundleProblem", "bundleHintWarn", "bundleDraftHas",
+      "admLangBarHTML", "admLangFallback", "admSecHeadHTML", "bundleAddrHTML", "admLabelledSwitch", "admPageBackCls",
       `${fn("bundleFormHTML")}\nreturn bundleFormHTML();`,
     )(
-      S, [["RU", "RU"], ["ET", "ET"], ["EN", "EN"]], [["beard", "Борода"]], null, (s: string) => String(s),
-      () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => "",
+      { bundleForm: form, bundleFormErr: "" }, [["RU", "RU"], ["ET", "ET"], ["EN", "EN"]], [["beard", "Борода"]],
+      (s: string) => String(s), { bad_name: "name", bad_desc: "desc", few_items: "few" },
+      () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => "", () => false, () => false,
+      () => "", () => [], () => "", () => "", () => "", () => "",
     ) as string;
     const inputs = html.match(/<input[^>]*>/g) ?? [];
     expect(inputs[0]).toContain('data-bundlef="title"');
-    expect(html.indexOf('data-bundlef="title"')).toBeLessThan(html.indexOf('data-bundlef="id"'));
+    expect(html).not.toContain('data-bundlef="id"');
   });
 });

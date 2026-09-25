@@ -53,6 +53,11 @@ function tap(d: Record<string, string>) {
   };
   const body = `
     ${block("var ADM_SECTION_OF = {")};
+    // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+    function admAutosaveFlush() {}
+    // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+    function edAsForget() {}
+    function goodsNewSave() {}
     ${block("function admLeaveAsks(")}
     ${block("function admGoTab(")}
     (function () { ${block("if (d.admtab) {")} })();

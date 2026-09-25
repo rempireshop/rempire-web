@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, ipHeaders, loginAsAdmin } from "./fixtures";
+import { adminLang, adminSection, cardBack, ipHeaders, loginAsAdmin } from "./fixtures";
 
 /**
  * The admin's one switch — «Маркетинг → Промокоды» and everywhere else.
@@ -72,6 +72,8 @@ test.describe("admin — the switch says which way it is", () => {
     await page.locator('[data-promof="code"]').fill(code);
     await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("10");
+    // «Создать промокод» is pinned above a phone's tab bar, out of the way while the keyboard is up (1a)
+    await page.locator('[data-promof="value"]').blur();
     await page.locator("[data-admpromosave]").click();
 
     const sw = page.locator(`[data-admpromotoggle="${code}"]`);
@@ -113,7 +115,7 @@ test.describe("admin — the switch says which way it is", () => {
       expect((await row.locator(".adm-row__sub").innerText()).trim().length,
         `${attr} has no sentence saying what off means`).toBeGreaterThan(10);
     }
-    await page.locator("[data-admsetback]").click();
+    await cardBack(page, "[data-admsetback]", "Настройки").click();
 
     // «Маркетинг → Письма» — a switch per letter, named after the letter
     await adminSection(page, "promos", "mail");

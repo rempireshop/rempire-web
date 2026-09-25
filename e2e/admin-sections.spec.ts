@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -22,6 +22,32 @@ import {
  * gets its own fake address, exactly as admin.spec.ts does.
  */
 
+/** A fold of a 1a screen (admFoldHTML) — opened, never toggled shut: it
+ *  remembers its state for the session, so a second click would close it. */
+async function openFold(page: Page, key: string): Promise<void> {
+  const head = page.locator(`[data-admfold="${key}"]`).first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
+}
+
+/** Every box left, and nothing still on its way: a test that puts settings
+ *  back through the API must not have a queued autosave land after it. */
+async function settled(page: Page): Promise<void> {
+  await page.keyboard.press("Tab");
+  const busy = () => page.evaluate(() =>
+    Array.from(document.querySelectorAll("[data-admsavest]")).some((el) => el.getAttribute("data-st") === "saving"));
+  await expect.poll(busy, { timeout: 20_000 }).toBe(false);
+  await page.waitForTimeout(600);
+  await expect.poll(busy, { timeout: 20_000 }).toBe(false);
+}
+
+/** «⋯» of a settings block (admSetMoreHTML) — the rare actions, opened. */
+async function openMore(page: Page, key: string): Promise<void> {
+  const btn = page.locator(`[data-setmore="${key}"]`).first();
+  if ((await btn.getAttribute("aria-expanded")) !== "true") await btn.click();
+  await expect(btn).toHaveAttribute("aria-expanded", "true");
+}
+
 /** No uncaught error and no failed request while the section was on screen. */
 function watchErrors(page: Page): string[] {
   const seen: string[] = [];
@@ -41,9 +67,11 @@ test.describe("admin sections — every screen draws on both viewports", () => {
        none), and a phrase that only that screen prints — «renders» has to mean
        the section's own content, not merely that the shell survived. */
     const screens: Array<[string, string | undefined, string]> = [
-      ["people", undefined, "Все клиенты"],
+      // the chip only «Клиенты» draws (1a: «Все клиенты» became the «Клиенты · Отзывы» switch)
+      ["people", undefined, "Подписаны"],
       ["people", "reviews", "Отзывы"],
-      ["promos", undefined, "Промокоды"],
+      // 1a: the tab says «Промо» on a phone; the screen's one dark button is on both
+      ["promos", undefined, "+ Промокод"],
       ["promos", "gift", "Номиналы в магазине"],
       ["promos", "mail", "Заказ принят"],
       ["blog", undefined, "Блог"],
@@ -71,8 +99,8 @@ test.describe("admin sections — every screen draws on both viewports", () => {
     // the settings index and one sub-page of it
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="journal"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
-    await page.locator("[data-admsetback]").click();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
+    await cardBack(page, "[data-admsetback]", "Настройки").click();
     await expect(page.locator('[data-admsetpage="delivery"]')).toBeVisible();
 
     expect(errors, `page errors while walking the sections: ${errors.join(" | ")}`).toEqual([]);
@@ -108,24 +136,22 @@ test.describe("admin sections — Клиенты", () => {
     await waitForScreen(page, "admin");
     await adminSection(page, "people");
     await page.locator("[data-admcustq]").fill(email);
-    /* «Одобрить Pro» sits on the row itself now — the whole point of the
+    /* «Сделать партнёром» sits on the row itself — the whole point of the
        redesign is that a waiting request is answered without opening a card.
-       It still asks first: the approval turns salon prices on for that company
-       and posts «Цены для салонов включены», and there is no un-sending a
-       letter — the same confirm card the tier switch on the customer's own
-       card has always shown. */
+       1a (Dim, 25.09.2026, q3): it no longer asks. The approval posts «Цены
+       для салонов включены» and cannot be taken back on the server, so the
+       call itself waits ten seconds with «Вернуть» on the toast; the row
+       shows the partner at once. */
     const approve = page.locator(`[data-admcustapprove]`).first();
-    await expect(approve, "the pending request has no «Одобрить Pro» on its row").toBeVisible();
+    await expect(approve, "the pending request has no «Сделать партнёром» on its row").toBeVisible();
     await approve.click();
-    const proCard = page.locator(".adm-confirm");
-    await expect(proCard.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
-    await expect(proCard.locator(".adm-confirm__d")).toContainText(email);
-    await page.locator("[data-admapply]").click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.locator(".adm-confirm"), "the approval asked first — 1a holds it instead").toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("письмо уйдёт через 10 с");
+    await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await expect.poll(async () => {
       const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
       return (await res.json()).customer.tier;
-    }, { timeout: 10_000, message: "«Одобрить Pro» never reached the server" }).toBe("pro");
+    }, { timeout: 25_000, message: "«Сделать партнёром» never reached the server" }).toBe("pro");
     // leave the shop as it was found
     await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
 
@@ -286,15 +312,17 @@ test.describe("admin sections — Маркетинг", () => {
     await page.locator('[data-mailtpl="order-shipped"]').first().click();
     await expect(page.locator('[data-mailtxt="subject"]')).toBeVisible();
     const subject = `E2E тема ${Date.now().toString().slice(-6)} {order}`;
+    /* 1a: the letter saves itself a second after the last keystroke (Dim,
+       q6) — no «Сохранить», and no «Применить» behind one (Renat, 13.09.2026) */
+    const write = page.waitForResponse(
+      (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+        (r.request().postData() || "").includes("mail_texts"));
     await page.locator('[data-mailtxt="subject"]').fill(subject);
     // the preview beside the fields is live — it shows the letter, not the template
     await expect(page.locator('[data-mailprev="subject"]')).toContainText("R-100042");
     try {
-      // one press, not «Сохранить» arming an «Применить» (Renat, 13.09.2026)
-      const write = page.waitForResponse(
-        (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-mailsave]").click();
       expect((await write).ok()).toBe(true);
+      await expect(page.locator("[data-mailsave]"), "a «Сохранить» is back on a letter that saves itself").toHaveCount(0);
       await expect(page.locator("[data-admapply]")).toHaveCount(0);
 
       const saved = await (await page.request.get("/api/admin/settings/")).json();
@@ -323,25 +351,29 @@ test.describe("admin sections — Блог", () => {
     await page.keyboard.type("Проверка редактора после редизайна.");
     await page.locator('[data-blogf="excerpt"]').fill("Короткий анонс.");
 
-    // the right column: «Публикация» says what the state is, and publishes
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+    // 1a: the line at the foot says where the article stands; «Опубликовать» is the dark button
+    await expect(page.locator("[data-blogpubstate]")).not.toContainText("Опубликована");
     const slug = await page.locator("[data-blogslug]").inputValue();
     /* Written in Russian only, so «Опубликовать» first asks what the Estonian
-       and English readers will get — its own test is in admin-blog.spec.ts. */
+       and English readers will get — on the confirm sheet; its own test is in
+       admin-blog.spec.ts. */
     await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
     await expect(page.getByRole("status")).toBeVisible();
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
 
     const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);
     expect(api.status(), "the published post is not on the public API").toBe(200);
 
-    // …and the list shows it with its badge
+    // …and the list shows it with its tag
     await page.locator("[data-admblogback]").click();
-    await expect(page.locator(".adm-row", { hasText: title }).first()).toBeVisible();
+    const row = page.locator(".adm-brow", { hasText: title }).first();
+    await expect(row).toBeVisible();
+    await expect(row).toContainText("Опубликована");
 
-    // leave the blog as it was found
-    await page.locator(`[data-admblogedit]`).first().click();
+    // leave the blog as it was found — «Снять с публикации» is in «⋯» (1a)
+    await row.click();
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogunpublish]").click();
     await expect(page.getByRole("status")).toBeVisible();
   });
@@ -350,7 +382,7 @@ test.describe("admin sections — Блог", () => {
 test.describe("admin sections — Настройки", () => {
   test.use({ extraHTTPHeaders: ipHeaders(184) });
 
-  test("a tariff is changed through the confirm card and taken back from the journal", async ({ page }) => {
+  test("a tariff saves itself when its box is left and is taken back from the journal", async ({ page }) => {
     test.setTimeout(150_000);
     test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
     await loginAsAdmin(page);
@@ -365,15 +397,15 @@ test.describe("admin sections — Настройки", () => {
       await expect(courierEE, "the tariff grid did not draw").toBeVisible();
       await courierEE.fill("7,77");
 
-      /* A delivery price is money a stranger is charged, so it asks first —
-         the same confirm card as shipping an order (README § State). */
-      await page.locator("[data-admshipsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
+      /* 1a (25.09.2026, README § 2): a price saves when its box is left — no
+         «Сохранить», no confirm card; «Вернуть» on the toast and in the
+         journal is the way back. The toast only after the server's 2xx. */
       const put = page.waitForResponse(
         (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
+      await courierEE.press("Tab");
       expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await expect(page.locator(".adm-confirm"), "a price above the tariff asked a question").toHaveCount(0);
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены", { timeout: 15_000 });
 
       const now = await (await page.request.get("/api/admin/settings/")).json();
       expect(Number(now.settings.shipping_rules.methods.courier.EE),
@@ -402,46 +434,38 @@ test.describe("admin sections — Настройки", () => {
 /**
  * The four cards the phase-4 sweep rebuilt in the panel's own markup — the
  * banner editor, the shop's details, prices & points, the accountant's report.
- * Each save is a shop-wide (or money) change, so it goes through the overlay
- * confirm card and lands on the server; the report is a link, and the link is
- * the one the API serves.
+ * Since 1a (25.09.2026, README § 2) each one saves itself — a text a second
+ * after the last keystroke, a number when its box is left — with no confirm
+ * card, and lands on the server; the report is a link, and the link is the
+ * one the API serves.
  */
 test.describe("admin sections — Настройки: the rebuilt cards", () => {
   test.use({ extraHTTPHeaders: ipHeaders(185) });
 
-  test("banner, shop details and prices save through the confirm card; the report link points at the export", async ({ page }) => {
+  test("banner, shop details and prices save themselves; the report link points at the export", async ({ page }) => {
     test.setTimeout(180_000);
     test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
     await loginAsAdmin(page);
-    const settingsPut = () =>
-      page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-    const before = await (await page.request.get("/api/admin/settings/")).json();
+    const stored = async () => (await (await page.request.get("/api/admin/settings/")).json()).settings;
+    const before = await stored();
 
     /* ---- Главная страница: the banner ------------------------------------ */
     const title = `E2E баннер ${Date.now().toString().slice(-6)}`;
     try {
       await adminSection(page, "setup");
       await page.locator('[data-admsetpage="home"]').click();
-      // a slide is a row with its own switch, order buttons and «Изменить»
+      // a slide is a row with its own switch, order buttons, and its title opens it
       await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
       await page.locator('[data-heroedit="0"]').click();
       await page.locator('[data-herof="title"]').fill(title);
+      // a long text saves a second after the last keystroke, no card asks
+      await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 10_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
+      await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU,
+        { timeout: 20_000, message: "the title never reached settings.hero" }).toBe(title);
       await page.locator("[data-heroclose]").first().click();
-      // since r12 the page's save bar says what is unsaved and names the card
-      await expect(page.locator("[data-setnote]")).toContainText("Изменения не сохранены");
-      await expect(page.locator("[data-setnote]")).toContainText("Главный баннер");
-
-      await page.locator("[data-herosave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
-      await expect(page.locator(".adm-confirm__d")).toContainText("Слайдов на сайте");
-      const put = settingsPut();
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Баннер сохранён");
-      const saved = await (await page.request.get("/api/admin/settings/")).json();
-      expect(saved.settings.hero.slides[0].title.RU, "the title never reached settings.hero").toBe(title);
     } finally {
-      await page.request.put("/api/admin/settings/", { data: { hero: before.settings.hero ?? null } });
+      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
     }
 
     /* ---- О компании: the shop's own details ----------------------------- */
@@ -450,58 +474,52 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await waitForScreen(page, "admin");
       await adminSection(page, "setup");
       await page.locator('[data-admsetpage="company"]').click();
-      await page.locator('[data-contentblock="company"]').click();
-      await page.locator('[data-contentf="company.phone"]').fill("+372 5000001");
-      await page.locator("[data-contentsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить данные магазина?");
-      await expect(page.locator(".adm-confirm__d")).toContainText("+372 5000001");
-      const put = settingsPut();
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены");
-      const saved = await (await page.request.get("/api/admin/settings/")).json();
-      expect(saved.settings.content.company.phone, "the phone never reached settings.content").toBe("+372 5000001");
+      await openFold(page, "content:company");
+      const phone = page.locator('[data-contentf="company.phone"]');
+      await phone.fill("+372 5000001");
+      await phone.press("Tab");
+      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 15_000 });
+      await expect.poll(async () => (await stored()).content?.company?.phone,
+        { timeout: 20_000, message: "the phone never reached settings.content" }).toBe("+372 5000001");
     } finally {
-      // back to the standard details through the panel's own reset
+      // back to the standard details through the panel's own reset, under «⋯»
       await adminSection(page, "setup");
       const back = page.locator("[data-admsetback]");
       if (await back.count()) await back.first().click();
       await page.locator('[data-admsetpage="company"]').click();
-      await page.locator("[data-contentreset]").click();
-      if (await page.locator("[data-admapply]").count()) {
-        const put = settingsPut();
-        await page.locator("[data-admapply]").click();
-        await put;
-      }
+      await openMore(page, "company");
+      await page.locator('[data-contentreset="company"]').click();
+      await expect.poll(async () => (await stored()).content?.company?.phone ?? "").not.toBe("+372 5000001");
     }
 
     /* ---- Цены и баллы ---------------------------------------------------- */
-    const originalPricing = JSON.parse(JSON.stringify(before.settings.pricing || {}));
+    const originalPricing = JSON.parse(JSON.stringify(before.pricing || {}));
     try {
       // the nav item always lands on the index of the six pages
       await adminSection(page, "setup");
       await page.locator('[data-admsetpage="prices"]').click();
-      await page.locator('[data-pricingf="proDiscountPct"]').fill("22");
-      await page.locator("[data-admpricingsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить цены и баллы?");
-      await expect(page.locator(".adm-confirm__d")).toContainText("22%");
-      const put = settingsPut();
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены");
-      const saved = await (await page.request.get("/api/admin/settings/")).json();
-      expect(saved.settings.pricing.proDiscountPct, "the discount never reached settings.pricing").toBe(22);
+      const pct = page.locator('[data-pricingf="proDiscountPct"]');
+      await pct.fill("22");
+      await pct.press("Tab");
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm"), "q40: the prices ask no question").toHaveCount(0);
+      await expect.poll(async () => (await stored()).pricing?.proDiscountPct,
+        { timeout: 20_000, message: "the discount never reached settings.pricing" }).toBe(22);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { pricing: originalPricing } });
     }
 
     /* ---- Отчёт для бухгалтера: the download link ------------------------- */
+    await page.reload();
+    await waitForScreen(page, "admin");
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="company"]').click();
     const month = await page.locator("[data-admreportsmonth]").inputValue();
     expect(month).toMatch(/^\d{4}-\d{2}$/);
+    /* the card's own tiles read the same route as JSON when the page opens —
+       that request is not the button's */
     const opened = page.context().waitForEvent("request",
-      (r) => r.url().includes("/api/admin/reports/orders/"));
+      (r) => r.url().includes("/api/admin/reports/orders/") && !r.url().includes("format=json"));
     const popup = page.waitForEvent("popup");
     await page.locator('[data-admreportdl="xlsx"]').click();
     expect((await opened).url(), "the button opened something other than this month's export")
@@ -528,22 +546,22 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
     await loginAsAdmin(page);
     await adminSection(page, "people");
 
-    // the lead answers the question, and links to where the discount lives
-    const lead = page.locator(".adm-page .adm-lead");
+    // the lead answers the question, and links to where the discount lives — behind «?» since 1a
+    await page.locator('[data-admhelp="people"]').click();
+    const lead = page.locator(".adm-page .adm-helpp .adm-lead");
     await expect(lead).toContainText("Заявка на партнёрство");
     await expect(lead.locator('[data-admgoset="prices"]')).toBeVisible();
 
-    /* ---- «+ Партнёр»: the form, the confirm card, the POST ---------------- */
+    /* ---- «+ Партнёр»: the form, the POST ten seconds later (1a, q3) ------- */
     const email = freshEmail("sections-partner");
     await page.locator("[data-admpartnernew]").click();
     await page.locator('[data-partnerf="email"]').fill(email);
     await page.locator('[data-partnerf="company"]').fill("Salon E2E OÜ");
-    await page.locator("[data-admpartnersave]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Добавить партнёра?");
-    await expect(page.locator(".adm-confirm__d")).toContainText(email);
     const post = page.waitForResponse(
-      (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST");
-    await page.locator("[data-admapply]").click();
+      (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST", { timeout: 25_000 });
+    await page.locator("[data-admpartnersave]").click();
+    await expect(page.locator(".adm-confirm"), "«+ Партнёр» asked first — 1a holds the letter instead").toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("Партнёр добавлен · письмо уйдёт через 10 с");
     const answer = await (await post).json();
     expect(answer.ok, "POST /api/admin/customers/ refused the partner").toBe(true);
     expect(answer.created).toBe(true);
@@ -553,11 +571,11 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
 
     try {
-      // the list jumped to «Партнёры», and the new row is there, badged Pro
-      await expect(page.locator('[data-admcusttier="pro"]')).toHaveAttribute("aria-current", "true");
+      // the list is back on «Все» (gap B8), and the new row is there, tagged «Партнёр»
+      await expect(page.locator('[data-admcusttier=""]')).toHaveAttribute("aria-current", "true");
       const row = page.locator(".adm-row", { hasText: email }).first();
-      await expect(row, "the new partner is not under «Партнёры»").toBeVisible();
-      await expect(row.locator(".adm-badge")).toHaveText("Pro");
+      await expect(row, "the new partner is not in the list").toBeVisible();
+      await expect(row.locator(".adm-crow__tags .adm-tag").first()).toHaveText("Партнёр");
       const listed = await (await page.request.get("/api/admin/customers/?tier=pro")).json();
       expect((listed.customers as Array<{ email: string; company: string | null }>).find((c) => c.email === email)?.company).toBe("Salon E2E OÜ");
 
@@ -642,12 +660,21 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
 test.describe("admin sections — the numbers explain themselves", () => {
   test.use({ extraHTTPHeaders: ipHeaders(189) });
 
-  /* Nothing here is ever saved: «Партнёры и баллы» and the five fields move
-     the local draft only (pricingDraft() in app.js), and the confirm card is
-     never opened — so this test needs no cleanup and cannot leak settings
-     into the specs that run after it. */
+  /* Since 1a every box here saves itself when it is left (q40), so the test
+     puts the shop's pricing back as it found it — it would otherwise leak a
+     25 % salon discount into the specs that run after it. */
   test("«Цены и баллы» works the example out in euros while the owner types", async ({ page }) => {
     await loginAsAdmin(page);
+    const was = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing ?? {};
+    try {
+      await pricingExample(page);
+    } finally {
+      await settled(page);
+      await page.request.put("/api/admin/settings/", { data: { pricing: was } });
+    }
+  });
+
+  async function pricingExample(page: Page): Promise<void> {
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="prices"]').click();
     /* «Партнёры и баллы» is off by default (Renat said «later»), and with it
@@ -683,7 +710,7 @@ test.describe("admin sections — the numbers explain themselves", () => {
     await page.locator('[data-pricingf="redeemMaxPct"]').fill("50");
     await expect(hint("redeemMaxPct")).toHaveText(
       "Из корзины на 40 € баллами можно закрыть не больше 20 €, остальное — деньгами.");
-  });
+  }
 
   test("the Google block says where 13th place puts the shop, not «средняя позиция»", async ({ page }) => {
     /* Search Console is not wired up in an e2e run (no service-account key),
@@ -761,82 +788,48 @@ test.describe("admin sections — the numbers explain themselves", () => {
 });
 
 /**
- * r12 (Dim, 10.09.2026: «all saving flows … the least clicks, comfortable on
- * the phone and on the desktop»). A settings page has ONE «Сохранить» — the
- * product editor's sticky bar at the bottom — and the bar says what is
- * unsaved and where before anything is pressed (app.js admSetBarHTML):
- * «Изменений нет» and a disabled button while nothing differs, the card's
- * name and the ink button the moment something does, «Сохранено ✓» on the
- * button once it went through. Both viewports: the bar exists for the phone.
+ * 1a (25.09.2026, README § 2 and ADM_SAVE_POLICY in app.js) took r12's save
+ * bar away from «Настройки»: every page saves itself — a long text a second
+ * after the last keystroke, a number when its box is left or on Enter, a
+ * switch at once — and the way back is «Вернуть», on the toast and in the
+ * journal. The toast (and «Сохранено ✓» in the header) only after the
+ * server's 2xx. Both viewports: the phone is where the bar used to be.
  */
-test.describe("admin sections — Настройки: one save bar per page", () => {
+test.describe("admin sections — Настройки: pages that save themselves", () => {
   test.use({ extraHTTPHeaders: ipHeaders(219) });
 
-  test("the bar names the unsaved card, stays in view, and «Отменить правки» takes it back", async ({ page }, testInfo) => {
+  test("no «Сохранить» on «Главная страница»; a slide's title saves itself and «Вернуть» takes it back", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
-    await adminSection(page, "setup");
-    await page.locator('[data-admsetpage="home"]').click();
-    const bar = page.locator("[data-setbar]");
-    const note = page.locator("[data-setnote]");
-    await expect(bar, "the home page has no save bar").toBeVisible();
-    await expect(note).toHaveText("Изменений нет");
-    await expect(page.locator("[data-herosave]"), "nothing typed, yet «Сохранить» is live").toBeDisabled();
-    // one «Сохранить» on the page — the bar's; no card keeps one of its own
-    expect(await page.locator(".adm-page").getByRole("button", { name: "Сохранить", exact: true }).count(),
-      "a card kept a «Сохранить» of its own").toBe(1);
+    const stored = async () => (await (await page.request.get("/api/admin/settings/")).json()).settings;
+    const before = await stored();
+    try {
+      await adminSection(page, "setup");
+      await page.locator('[data-admsetpage="home"]').click();
+      await expect(page.locator("[data-setbar]"), "the page still draws a save bar").toHaveCount(0);
+      expect(await page.locator(".adm-page").getByRole("button", { name: "Сохранить", exact: true }).count(),
+        "a card kept a «Сохранить» of its own").toBe(0);
 
-    await page.locator('[data-heroedit="0"]').click();
-    const title = page.locator('[data-herof="title"]');
-    const was = await title.inputValue();
-    await title.fill("E2E — полоса сохранения");
-    await expect(note).toContainText("Изменения не сохранены");
-    await expect(note).toContainText("Главный баннер");
-    await expect(page.locator("[data-herosave]")).toBeEnabled();
-    await expect(page.locator("[data-setrevert]")).toBeVisible();
+      await page.locator('[data-heroedit="0"]').click();
+      const title = page.locator('[data-herof="title"]');
+      const was = await title.inputValue();
+      await title.fill("E2E — сохраняется само");
+      const toast = page.getByRole("status");
+      await expect(toast).toContainText("Баннер сохранён", { timeout: 10_000 });
+      await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU).toBe("E2E — сохраняется само");
 
-    // …and it is on screen without scrolling, wherever the owner is in the form
-    await page.locator("#heroimglist").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    const geo = await page.evaluate(() => {
-      const box = (el: Element | null) => {
-        const r = el ? el.getBoundingClientRect() : null;
-        return r ? { top: r.top, bottom: r.bottom, h: r.height } : null;
-      };
-      return {
-        vh: window.innerHeight,
-        bar: box(document.querySelector("[data-setbar]")),
-        nav: box(document.querySelector(".adm-bar")),
-        save: box(document.querySelector("[data-herosave]")),
-      };
-    });
-    expect(geo.bar, "no bar").not.toBeNull();
-    expect(geo.bar!.top, "the bar is above the fold").toBeGreaterThanOrEqual(0);
-    expect(geo.bar!.bottom, "the bar is below the fold").toBeLessThanOrEqual(geo.vh + 1);
-    if (testProjectIsMobile(testInfo)) {
-      expect(geo.nav, "no bottom nav on the phone").not.toBeNull();
-      expect(geo.bar!.bottom, "the bar runs under the phone's nav").toBeLessThanOrEqual(geo.nav!.top + 1);
-      expect(geo.save!.h, "«Сохранить» is under 44 px on the phone").toBeGreaterThanOrEqual(44);
+      // «Вернуть» on that toast: the banner as it was, on the server too
+      await page.locator(".adm-toast__undo").click();
+      await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU ?? "",
+        { timeout: 20_000, message: "«Вернуть» did not take the title back" }).not.toBe("E2E — сохраняется само");
+      if (!(await page.locator("#heroform").count())) await page.locator('[data-heroedit="0"]').click();
+      await expect(page.locator('[data-herof="title"]')).toHaveValue(was);
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
     }
-
-    // the strip card on the same page lights the same bar, under its own name
-    await page.locator('[data-contentblock="announcement"]').click();
-    await page.locator('[data-contentf="announcement.link"]').fill("https://example.com/e2e");
-    await expect(note).toContainText("Верхняя полоска");
-    await expect(note).toContainText("Главный баннер");
-
-    // «Отменить правки»: both drafts go back, the bar goes quiet, nothing was written
-    await page.locator("[data-setrevert]").click();
-    await expect(note).toHaveText("Изменений нет");
-    await expect(page.locator("[data-herosave]")).toBeDisabled();
-    /* The slide's form is still open — «Изменить» has been a toggle since r16
-       (its own row's «Свернуть»), so clicking it here would fold the pane away
-       rather than reopen it. Open it only if the revert closed it. */
-    if (!(await page.locator("#heroform").count())) await page.locator('[data-heroedit="0"]').click();
-    await expect(page.locator('[data-herof="title"]')).toHaveValue(was);
   });
 
-  test("«О компании»: the bar names the invoice card, Enter saves through it, «Сохранено ✓» follows", async ({ page }, testInfo) => {
+  test("«О компании»: Enter saves the invoice term, the toast follows the server's answer", async ({ page }, testInfo) => {
     test.skip(testProjectIsMobile(testInfo), "one write per action is enough — desktop runs it");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
@@ -844,29 +837,29 @@ test.describe("admin sections — Настройки: one save bar per page", ()
     try {
       await adminSection(page, "setup");
       await page.locator('[data-admsetpage="company"]').click();
-      const note = page.locator("[data-setnote]");
-      const save = page.locator("[data-adminvsave]");
-      await expect(note).toHaveText("Изменений нет");
+      await openFold(page, "content:invoice");
+      await expect(page.locator("[data-adminvsave]"), "the invoice card kept its «Сохранить»").toHaveCount(0);
       const due = page.locator('[data-invsetf="dueDays"]');
       const was = await due.inputValue();
       await due.fill(String(Number(was) + 2));
-      await expect(note).toContainText("Изменения не сохранены");
-      await expect(note).toContainText("Счета для компаний");
-      await expect(save).toBeEnabled();
-      // Enter in the box is the bar's «Сохранить»: the box is in the card, the button is not
       const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
       await due.press("Enter");
       expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
-      // quiet again, the button itself says so — one bar button, whichever card it was
-      const barBtn = page.locator("[data-setbar] .adm-btn");
-      await expect(barBtn).toHaveText("Сохранено ✓");
-      await expect(barBtn).toBeDisabled();
-      await expect(note, "the bar said «saved» twice").toHaveCount(0);
-      // the next keystroke takes the tick away again
-      await due.fill(was);
-      await expect(page.locator("[data-setnote]")).toContainText("Изменения не сохранены");
-      await expect(page.locator("[data-adminvsave]")).toHaveText("Сохранить");
+      await expect(page.getByRole("status")).toContainText("Счета для компаний: сохранено ✓", { timeout: 15_000 });
+      await expect(page.locator(".adm-toast__undo"), "the saved term has no way back").toBeVisible();
+      const saved = await (await page.request.get("/api/admin/settings/")).json();
+      expect(saved.settings.invoice.dueDays).toBe(Number(was) + 2);
+
+      /* A value the server would refuse is not sent at all: the box turns
+         rust with one line under it, and nothing leaves (README § 2). */
+      let sent = 0;
+      page.on("request", (r) => { if (r.url().includes("/api/admin/settings/") && r.method() === "PUT") sent++; });
+      await due.fill("500");
+      await due.press("Enter");
+      await expect(due).toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator('[data-ashint]:visible').first()).not.toBeEmpty();
+      await page.waitForTimeout(800);
+      expect(sent, "an out-of-range term was sent").toBe(0);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { invoice: before.settings.invoice ?? null } });
     }
@@ -886,6 +879,17 @@ test.describe("admin sections — the banner editor keeps its place", () => {
   test("picking a picture keeps the page where it is, and the tile keeps its focus", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
+    const stored = async () => (await (await page.request.get("/api/admin/settings/")).json()).settings;
+    const before = await stored();
+    try {
+      await pickTwice(page, stored);
+    } finally {
+      // a pick saves itself since 1a — the banner goes back as it was found
+      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
+    }
+  });
+
+  async function pickTwice(page: Page, stored: () => Promise<{ hero?: { slides?: Array<{ image?: string }> } }>): Promise<void> {
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
     await page.locator('[data-heroedit="0"]').click();
@@ -907,21 +911,37 @@ test.describe("admin sections — the banner editor keeps its place", () => {
       expect(await page.evaluate(() => !!document.activeElement && document.activeElement.hasAttribute("data-heroimg")),
         `picking ${id} lost the focus`).toBe(true);
     }
-    // back where it started: the bar knows
-    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
-  });
+    // back where it started — and saved so, each pick on its own (1a)
+    await expect.poll(async () => (await stored()).hero?.slides?.[0]?.image).toBe(saved);
+  }
 
   test("the sixth slide is refused out loud, next to the button", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
+    const before = (await (await page.request.get("/api/admin/settings/")).json()).settings;
+    try {
+      await sixthSlide(page);
+    } finally {
+      // «+ Слайд» and «Удалить слайд» save themselves since 1a
+      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
+    }
+  });
+
+  async function sixthSlide(page: Page): Promise<void> {
     await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
     const add = page.locator("[data-heroadd]");
     const why = page.locator("[data-heromax]");
     const rows = page.locator("[data-heroedit]");
-    const had = await rows.count();
-    // the standard banner IS five slides — step below the ceiling first
-    if (await add.isDisabled()) await page.locator("[data-herodel]").last().click();
+    /* The standard banner IS five slides — step below the ceiling first.
+       «Удалить слайд» is in the open slide's form and asks (q8). */
+    if (await add.isDisabled()) {
+      await rows.last().click();
+      await page.locator("[data-herodel]").click();
+      await expect(page.locator(".adm-confirm__t")).toBeVisible();
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("Слайд удалён");
+    }
     await expect(add).toBeEnabled();
     await expect(why, "the reason shows below the ceiling").toBeHidden();
     let guard = 0;
@@ -937,11 +957,7 @@ test.describe("admin sections — the banner editor keeps its place", () => {
     const [b, w] = await Promise.all([add.boundingBox(), why.boundingBox()]);
     expect(b && w, "no boxes to compare").toBeTruthy();
     expect(w!.y, "the reason is nowhere near the button").toBeLessThan(b!.y + b!.height + 24);
-    // the draft only: «Отменить правки» puts the list back, nothing was written
-    await page.locator("[data-setrevert]").click();
-    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
-    expect(await rows.count()).toBe(had);
-  });
+  }
 });
 
 /**

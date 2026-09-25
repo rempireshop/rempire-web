@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, ipHeaders } from "./fixtures";
+import { adminLang, adminSection, cardBack, ipHeaders } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
+import { openCard, settled, typeAndLeave } from "./goods-helpers";
 
 /**
  * Renat's acceptance run, 13.09.2026 — the two findings about the change log
@@ -27,10 +28,11 @@ import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./swe
 /** «Настройки» → one of its pages. */
 async function settings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  // (on a phone the way back is the top bar's «← Настройки» — fixtures.cardBack)
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 }
 
 /** The row of this browser's own list, by its position. */
@@ -61,23 +63,17 @@ test.describe("admin — a price change on the owner's own product is in the jou
     await page.locator("[data-edbrand]").fill(BRAND);
     await page.locator("[data-edname]").fill("Cheap price");
     await page.locator("[data-edcat]").selectOption("beard");
-    await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").fill("14,90");
     await page.locator('[data-admsavegoods="new"]').click();
-    expect(await toastText(page)).toMatch(/Товар создан/);
+    expect(await toastText(page)).toMatch(/Товар добавлен/);
     await clearToast(page);
-    id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
-    expect(id, "the editor did not reopen on the created product").toMatch(/^c-davines-/);
+    id = (await page.locator("[data-edfor]:not([data-edfor='new'])").getAttribute("data-edfor")) || "";
+    expect(id, "the card did not open on the created product").toMatch(/^c-davines-/);
 
     try {
-      // ---- the price change the owner made ------------------------------
-      await page.locator('[data-edtab="sizes"]').click();
-      await page.locator("[data-edprice]").fill("9,90");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      // ---- the price change the owner made — saved when the box is left (1a) ----
+      await typeAndLeave(page, page.locator("[data-edprice]"), "9,90");
       await expect.poll(() => rowPrice(page, id), { timeout: 20_000 }).toBe(9.9);
-      // the save's own bar offers the same undo, without a trip to the journal
-      await expect(page.locator("[data-admtoastundo]"),
-        "the save toast carries no «Отменить»").toBeVisible();
       await clearToast(page);
 
       await settings(page, "journal");
@@ -101,20 +97,22 @@ test.describe("admin — a price change on the owner's own product is in the jou
 
       // ---- «Вернуть» really puts the price back --------------------------
       await top.locator("[data-admundo]").click();
+      // the toast first: it leaves after 2,6 s, and a slow server's write can take longer
+      expect(await toastText(page)).toMatch(/Отменено/);
       await expect.poll(() => rowPrice(page, id), {
         timeout: 20_000, message: "«Вернуть» did not put the price back",
       }).toBe(14.9);
-      expect(await toastText(page)).toMatch(/Отменено/);
       await clearToast(page);
 
-      // ---- and a save that moves nothing leaves no line at all -----------
-      await tab(page, "goods");
-      await page.locator("[data-goodsq]").fill(id);
-      await page.locator(`[data-admgoods="${id}"]`).click();
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page), "a save that changed nothing still wrote a journal line")
-        .toMatch(/Изменений нет/);
-      await clearToast(page);
+      // ---- and a box left as it was leaves no line at all ------------------
+      await settings(page, "journal");
+      const topWas = (await jrow(page, 0).textContent()) || "";
+      await openCard(page, id);
+      await page.locator("[data-edprice]").focus();
+      await page.locator("[data-edprice]").blur();
+      await settled(page);
+      await settings(page, "journal");
+      expect((await jrow(page, 0).textContent()) || "", "a box left as it was still wrote a journal line").toBe(topWas);
     } finally {
       // off the shelf, so the specs that count the catalogue never see it
       await page.request.delete(`/api/admin/products/${encodeURIComponent(id)}/`);
@@ -134,16 +132,23 @@ test.describe("admin — a price change on the owner's own product is in the jou
     await page.locator("[data-edbrand]").fill(BRAND);
     await page.locator("[data-edname]").fill("Cheap price");
     await page.locator("[data-edcat]").selectOption("beard");
-    await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").fill("14,90");
     await page.locator('[data-admsavegoods="new"]').click();
     await clearToast(page);
-    id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+    id = (await page.locator("[data-edfor]:not([data-edfor='new'])").getAttribute("data-edfor")) || "";
 
     try {
-      await page.locator('[data-edtab="sizes"]').click();
-      await page.locator("[data-edprice]").fill("9,90");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      /* One list since 1a (q7): a server row that is this browser's own line
+         is shown once, as that line — so the shop's-log half is checked on a
+         change this browser never saw, made straight through the route
+         (before the price change, so the price stays the newest line). */
+      // the suite's shop always has its pricing stored (e2e bootstrap) — written back as it is
+      const pricing = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing;
+      expect(pricing, "the suite's shop has no stored pricing to write back").toBeTruthy();
+      expect((await page.request.put("/api/admin/settings/", { data: { pricing } })).ok()).toBe(true);
+
+      // the price change the owner made — saved when the box is left (1a)
+      await typeAndLeave(page, page.locator("[data-edprice]"), "9,90");
       await expect.poll(() => rowPrice(page, id), { timeout: 20_000 }).toBe(9.9);
       await clearToast(page);
 
@@ -156,13 +161,14 @@ test.describe("admin — a price change on the owner's own product is in the jou
       await expect(top).toContainText(`Product “${BRAND} — Cheap price”`);
       await expect(top.locator("[data-admundo]")).toHaveText("Restore");
 
-      /* …and the shop's own log beside it: its words ARE dictionary keys, but
-         the row glued the word to the product's id, and translateTree only
+      /* …and the shop's own rows among them: their words ARE dictionary keys,
+         but a row once glued the word to what it named, and translateTree only
          rewrites a text node whose whole value it knows. */
       const server = page.locator(".adm-narrow .adm-jrow", { has: page.locator(".adm-jrow__who") });
       await expect(server.first(), "the server log did not arrive").toBeVisible({ timeout: 15_000 });
       await expect(page.locator(".adm-narrow"), "the shop's log is still Russian on an English panel")
-        .toContainText("Your own product changed");
+        .toContainText("A setting changed");
+      await expect(page.locator(".adm-narrow")).not.toContainText("Настройка изменена");
       await expect(page.locator(".adm-narrow")).not.toContainText("Свой товар изменён");
       await assertClean(page, w, "the journal in English");
 
@@ -180,84 +186,81 @@ test.describe("admin — the banner editor opens where the owner can see it", ()
       "banner editor — desktop and mobile projects only");
   });
 
-  test("«Изменить» brings the pane into view, says which slide is open, and closes from its own top", async ({ page }) => {
+  test("a slide's title opens its form right under it, in view, and folds it away again", async ({ page }) => {
     test.setTimeout(180_000);
     const w = watch(page);
     await openAdmin(page);
-    await settings(page, "home");
+    const before = (await (await page.request.get("/api/admin/settings/")).json()).settings;
+    try {
+      await settings(page, "home");
 
-    const row = page.locator('[data-herorow="0"]');
-    const button = page.locator('[data-heroedit="0"]');
-    await expect(button).toHaveText("Изменить");
-    await expect(button).toHaveAttribute("aria-expanded", "false");
+      /* 1a (README § 5): a slide is a row — picture, its title (the button
+         that opens it), ↑ ↓ and its switch — and its form opens INLINE, under
+         that row, not under the whole list. */
+      const row = page.locator('[data-herorow="0"]');
+      const button = page.locator('[data-heroedit="0"]');
+      await expect(button).toHaveAttribute("aria-expanded", "false");
+      await expect(button).toHaveAttribute("aria-controls", "heroform");
 
-    // open it from the top of the page, the way a phone meets this screen
-    await page.evaluate(() => window.scrollTo({ top: 0 }));
-    await button.click();
+      // open it from the top of the page, the way a phone meets this screen
+      await page.evaluate(() => window.scrollTo({ top: 0 }));
+      await button.click();
 
-    const form = page.locator("#heroform");
-    await expect(form, "the slide's form was not drawn").toBeVisible();
-    /* In view, not «somewhere below»: the pane's top edge has to be inside the
-       window after the render that opened it — that is the whole finding. */
-    const view = page.viewportSize()!;
-    const top = await page.evaluate(() => document.getElementById("heroform")!.getBoundingClientRect().top);
-    expect(top, "the form opened below the fold — the tap looks like it did nothing").toBeLessThan(view.height);
-    expect(top, "the form opened above the top of the screen").toBeGreaterThan(-1);
+      const form = page.locator("#heroform");
+      await expect(form, "the slide's form was not drawn").toBeVisible();
+      await expect(row.locator("#heroform"), "the form opened away from its slide").toHaveCount(1);
+      /* In view, not «somewhere below»: the pane's top edge has to be inside the
+         window after the render that opened it — that is the whole finding. */
+      const view = page.viewportSize()!;
+      const top = await page.evaluate(() => document.getElementById("heroform")!.getBoundingClientRect().top);
+      expect(top, "the form opened below the fold — the tap looks like it did nothing").toBeLessThan(view.height);
+      expect(top, "the form opened above the top of the screen").toBeGreaterThan(-1);
 
-    // which slide is open, and how to close it
-    await expect(row, "the open slide's row is not marked").toHaveClass(/adm-row--open/);
-    await expect(row).toContainText("открыт");
-    await expect(button).toHaveText("Свернуть");
-    await expect(button).toHaveAttribute("aria-expanded", "true");
-    await expect(form.locator("[data-heroclose]").first(), "no way out from the top of the pane").toBeVisible();
-    expect(await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth),
-    "the open banner editor scrolls sideways").toBeLessThanOrEqual(1);
-    await assertClean(page, w, "the banner editor with a slide open");
+      // which slide is open, and how to close it
+      await expect(row, "the open slide's row is not marked").toHaveClass(/is-open/);
+      await expect(button).toHaveAttribute("aria-expanded", "true");
+      await expect(form.locator("[data-heroclose]").first(), "no way to fold the form").toBeVisible();
+      expect(await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+      "the open banner editor scrolls sideways").toBeLessThanOrEqual(1);
+      await assertClean(page, w, "the banner editor with a slide open");
 
-    /* Nothing INSIDE the pane may move the page — a previous round made
-       picking a picture deliberately still (paintHeroPick), and that must
-       survive this one.
+      /* Nothing INSIDE the pane may move the page — a previous round made
+         picking a picture deliberately still (paintHeroPick), and that must
+         survive this one. The tile is brought into view before the page's
+         position is read (Playwright's pre-click scroll honours the root's
+         scroll-padding; measured 23.09.2026). */
+      const list = page.locator("#heroimglist");
+      const other = await list.locator('[data-heroimg]:not([aria-current="true"])').first().getAttribute("data-heroimg");
+      await list.locator(`[data-heroimg="${other}"]`).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      const y0 = await page.evaluate(() => window.scrollY);
+      await list.locator(`[data-heroimg="${other}"]`).click();
+      await expect(list.locator(`[data-heroimg="${other}"]`)).toHaveAttribute("aria-current", "true");
+      await page.waitForTimeout(300);
+      expect(Math.abs((await page.evaluate(() => window.scrollY)) - y0),
+        "picking a picture moved the page again").toBeLessThan(4);
 
-       The TILE is brought into view before the page's position is read, not
-       just the list. Playwright scrolls whatever it clicks into view first,
-       and it honours the root's scroll-padding — which on a phone is the
-       save-bar header plus 12 px (admin.css, html.adm-saving). Scrolled by the
-       list, the first tile sat flush under the header, inside that band, so
-       the click itself moved the page those 12 px and this line blamed the
-       app for it. Measured 23.09.2026: a plain mouse tap on the same tile
-       moves nothing, `locator.click()` moved 12 px, and after the tile's own
-       scroll the click moves nothing either. */
-    const list = page.locator("#heroimglist");
-    const other = await list.locator('[data-heroimg]:not([aria-current="true"])').first().getAttribute("data-heroimg");
-    await list.locator(`[data-heroimg="${other}"]`).scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    const y0 = await page.evaluate(() => window.scrollY);
-    await list.locator(`[data-heroimg="${other}"]`).click();
-    await expect(list.locator(`[data-heroimg="${other}"]`)).toHaveAttribute("aria-current", "true");
-    await page.waitForTimeout(300);
-    expect(Math.abs((await page.evaluate(() => window.scrollY)) - y0),
-      "picking a picture moved the page again").toBeLessThan(4);
+      // «Свернуть» folds it away and leaves the phone near the slide it was editing
+      await form.locator("[data-heroclose]").first().click();
+      await expect(page.locator("#heroform")).toHaveCount(0);
+      await expect(page.locator('[data-heroedit="0"]')).toHaveAttribute("aria-expanded", "false");
+      await expect(page.locator('[data-herorow="0"]')).not.toHaveClass(/is-open/);
+      const rowTop = await page.evaluate(() => {
+        const el = document.querySelector('[data-herorow="0"]');
+        return el ? el.getBoundingClientRect().top : 1e6;
+      });
+      expect(rowTop, "closing left the phone nowhere near the slide it was editing").toBeLessThan(view.height);
 
-    // the ✕ at the top of the pane folds it away and brings the row back
-    await form.locator("[data-heroclose]").first().click();
-    await expect(page.locator("#heroform")).toHaveCount(0);
-    await expect(page.locator('[data-heroedit="0"]')).toHaveText("Изменить");
-    await expect(page.locator('[data-herorow="0"]')).not.toHaveClass(/adm-row--open/);
-    const rowTop = await page.evaluate(() => {
-      const el = document.querySelector('[data-herorow="0"]');
-      return el ? el.getBoundingClientRect().top : 1e6;
-    });
-    expect(rowTop, "closing left the phone nowhere near the slide it was editing").toBeLessThan(view.height);
-
-    // …and the slide's own button toggles, so a second tap is «Свернуть» too
-    await page.locator('[data-heroedit="0"]').click();
-    await expect(page.locator("#heroform")).toBeVisible();
-    await page.locator('[data-heroedit="0"]').click();
-    await expect(page.locator("#heroform")).toHaveCount(0);
-
-    // put the picture back, so no other spec inherits a changed banner
-    await page.locator("[data-setrevert]").click();
-    await assertClean(page, w, "the banner editor after closing");
+      // …and the slide's own button toggles, so a second tap folds it too
+      await page.locator('[data-heroedit="0"]').click();
+      await expect(page.locator("#heroform")).toBeVisible();
+      await page.locator('[data-heroedit="0"]').click();
+      await expect(page.locator("#heroform")).toHaveCount(0);
+      await assertClean(page, w, "the banner editor after closing");
+    } finally {
+      // the picked picture saved itself (1a) — put the banner back as found
+      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
+    }
   });
 });

@@ -135,8 +135,13 @@ test.describe("pwa manifests", () => {
     await loginAsAdmin(page);
     expect(await manifestHref(page)).toBe("/shop2/admin.webmanifest");
 
-    // back in the shop (same SPA, no reload): the shop manifest again
-    await page.getByRole("button", { name: "← В магазин" }).click();
+    /* back in the shop (same SPA, no reload): the shop manifest again. Since
+       1a the panel has no site bar with «← В магазин»; the way out is
+       «Открыть магазин ↗» — the sidebar's foot on a desktop, «Ещё» on a
+       phone. */
+    const toShop = page.locator('[data-go="home"]:visible');
+    if (!(await toShop.count())) await page.locator("[data-admmore]:visible").click();
+    await toShop.first().click();
     await waitForScreen(page, "home");
     expect(await manifestHref(page)).toBe("/shop2/manifest.webmanifest");
     expect(await iosTitle(page)).toBe("Rempire");

@@ -395,6 +395,28 @@ describe("POST /api/admin/inventory/moves: a retry is not a second bottle", () =
     expect((await getLevel(product.id, ""))?.qty).toBe(3);
   });
 
+  /* The scanner's «Списать» (206_stock_move_writeoff.sql): its own reason on
+     the wire, its own line in the ledger, and the GET filter «Списание» asks
+     with finds it — while a «Списание +2» is refused and moves nothing. */
+  it("takes «Списание» as a reason of its own, and refuses one that would add bottles", async () => {
+    const { POST, GET } = await import("@/app/api/admin/inventory/moves/route");
+    await move({ productId: product.id, delta: 5, reason: "goods_in" });
+    const off = { productId: product.id, variant: "", delta: -2, reason: "writeoff", ref: "сканер" };
+
+    const res = await POST(post("/api/admin/inventory/moves/", off, { key: KEY_A, cookie: admin }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).result).toMatchObject({ appliedDelta: -2, qtyAfter: 3 });
+
+    const bad = await POST(post("/api/admin/inventory/moves/", { ...off, delta: 2 }, { key: KEY_B, cookie: admin }));
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error).toBe("bad_delta");
+    expect((await getLevel(product.id, ""))?.qty).toBe(3);
+
+    const list = await GET(new Request(`${ORIGIN}/api/admin/inventory/moves/?reason=writeoff`, { headers: { cookie: admin } }));
+    const body = await list.json();
+    expect(body.moves.map((m: { reason: string; delta: number }) => [m.reason, m.delta])).toEqual([["writeoff", -2]]);
+  });
+
   it("the admin cookie is still checked before the key is looked at", async () => {
     const { POST } = await import("@/app/api/admin/inventory/moves/route");
     const res = await POST(post("/api/admin/inventory/moves/", goodsIn, { key: KEY_A }));

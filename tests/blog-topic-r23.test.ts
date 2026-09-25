@@ -82,8 +82,9 @@ describe("«Написать статью целиком» sends the topic the o
   function press(typed: string) {
     const S: Record<string, unknown> = { adminBlogEdit: draft(), adminBlogTopic: typed };
     const sent: { topic: string; hint: string }[] = [];
+    // 1a: a draft is written straight away — blogAiAsks() asks only over a published article
     const run = new Function(
-      "S", "document", "admBlogWriteFull", "t",
+      "S", "document", "admBlogWriteFull", "t", "blogAiAsks",
       `${slice("blogTopicValue")}\nvar d = { admblogfull: "" };\n${block("if (d.admblogfull !== undefined) {")}`,
     );
     run(
@@ -91,6 +92,7 @@ describe("«Написать статью целиком» sends the topic the o
       { querySelector: (s: string) => (s === "[data-admblogtopic]" ? { value: typed } : null) },
       (_d: unknown, topic: string, hint: string) => sent.push({ topic, hint }),
       { disabled: false },
+      () => false,
     );
     return { S, sent };
   }
@@ -109,13 +111,14 @@ describe("«Написать статью целиком» sends the topic the o
   it("the request carries the topic as it was given", () => {
     const calls: { url: string; body: { task: string; input: { topic: string; ask?: string } } }[] = [];
     const S: Record<string, unknown> = { adminBlogGen: null };
+    // 1a: the progress line is in the assistant's fold, opened as the writing starts
     const write = new Function(
-      "S", "toast", "refocus", "render", "apiSend", "productsById", "CAT_NAMES",
+      "S", "toast", "refocus", "render", "apiSend", "productsById", "CAT_NAMES", "ADM_FOLD", "admFoldToggle",
       `${slice("admBlogWriteFull")}\nreturn admBlogWriteFull;`,
     )(
       S, () => {}, () => {}, () => {},
       (url: string, _m: string, body: never) => { calls.push({ url, body }); return new Promise(() => {}); },
-      () => [], {},
+      () => [], {}, {}, () => true,
     ) as (d: unknown, topic: string, hint: string, ask?: string) => void;
     write(draft(), "cool vibes", "", "");
     expect(calls[0].body.task).toBe("post_full");

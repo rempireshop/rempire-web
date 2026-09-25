@@ -245,6 +245,14 @@ export const PLAN = [
     why: "A per-address, per-day counter that rate-limits unproven cart writes (181_cart_writes.sql). Yesterday's counters mean nothing.",
   },
   {
+    table: "cart_returns",
+    verdict: "clear",
+    why:
+      "«Вернулись по письму» in «Аналитика» — one bare timestamp per order that came after the abandoned-cart " +
+      "letter (213_cart_returned_by_letter.sql). Test orders after test letters; left in place, the first real " +
+      "month's count starts with them.",
+  },
+  {
     table: "login_codes",
     verdict: "clear",
     why: "Live one-time sign-in codes for test mailboxes. They expire on their own; there is no reason to carry a valid code into production.",
@@ -377,6 +385,7 @@ export const DELETE_ORDER = [
   "newsletter_sends",
   "carts",
   "cart_writes",
+  "cart_returns",
   "login_codes",
   "stock_alerts",
   "reviews",

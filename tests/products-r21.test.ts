@@ -284,9 +284,13 @@ function qtyCell(stockLevels: unknown, lv: unknown): string {
     "key",
     "lv",
     "low",
-    `${slice("edCell")}
+    // 1a: the box saves itself (edAsAttr) — its spec is not what this test is about
+    `function edAsAttr() { return ""; }
+     function edAsKey() { return "k"; }
+     function admAutosaveHintHTML() { return ""; }
+     ${slice("edCell")}
      ${slice("edQtyCell")}
-     return edQtyCell(key, lv, low);`,
+     return edQtyCell({ id: "azur" }, key, "100 мл", lv, low);`,
   ) as (...a: unknown[]) => string;
   return run({ stockLevels }, esc, "azur 100 мл", lv, false);
 }
@@ -312,10 +316,13 @@ describe("the «Остаток» box of the sizes grid", () => {
     expect(cell).toContain('value="7"');
   });
 
-  it("is what both size grids actually render", () => {
+  it("is what the size grid actually renders — with − and + beside it (1a)", () => {
     for (const pane of ["edPaneSizesOwn", "edPaneSizes"]) {
-      expect(slice(pane), pane).toContain("edQtyCell(");
+      expect(slice(pane), pane).toContain("edSecSizes(p)");
     }
+    expect(slice("edSecSizes")).toContain("edQtyCell(");
+    expect(slice("edQtyCell")).toContain("data-edqtystep=\"-1\"");
+    expect(slice("edQtyCell")).toContain("data-edqtystep=\"1\"");
   });
 });
 
@@ -324,16 +331,16 @@ describe("the «Остаток» box of the sizes grid", () => {
 describe("«Товары» — the search box over the catalogue list", () => {
   it("promises only the fields admCatalogRows() reads", () => {
     const filter = slice("admCatalogRows");
-    // the haystack, verbatim: brand + name + id, and nothing from the warehouse
+    // the haystack, verbatim: brand + name + id …
     expect(filter).toContain('p.brand + " " + p.name + " " + p.id');
-    expect(filter, "barcodes live on S.stockLevels, which this screen never loads")
-      .not.toContain("ean");
+    /* … and, since 1a, the barcodes: «Товары» loads the warehouse list on
+       every tab (the «Склад» badge), so a code typed here is looked up there */
+    expect(filter).toContain("r.ean");
+    expect(slice("admProductsHTML")).toContain("loadStockLevels(false)");
 
     const box = src.slice(src.indexOf("data-goodsq"), src.indexOf("data-goodsq") + 400);
     const placeholder = /placeholder="([^"]*)"/.exec(box)?.[1] ?? "";
-    expect(placeholder, "the box said «штрихкод» and the filter never looked at one")
-      .not.toMatch(/штрихкод/i);
-    expect(placeholder).toBe("Название или бренд");
+    expect(placeholder).toBe("Название, бренд или штрихкод");
   });
 });
 
@@ -446,11 +453,16 @@ describe("«Наборы» — the product picker inside the set editor", () => 
       "S",
       "heroFind",
       "admPickTile",
+      // 1a: the picker lists only once something is typed, a size chip per size
       `var HERO_NOHIT = "<p>none</p>";
+       var scanFold = function (s) { return String(s || "").trim().toLowerCase(); };
+       var esc = function (s) { return String(s); };
+       var eur = function (n) { return String(n); };
+       var sizePrice = function () { return 10; };
        ${slice("bundlePickRows")}
        return bundlePickRows();`,
     ) as (...a: unknown[]) => string;
-    return run({ bundleQ: "" }, () => found, (_attr: string, id: string) => `<b>${id}</b>`);
+    return run({ bundleQ: "a" }, () => found, (_attr: string, id: string) => `<b>${id}</b>`);
   }
 
   it("offers only what src/lib/bundles.ts can resolve", () => {

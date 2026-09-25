@@ -14,9 +14,11 @@
  *   · the refusal was a three-line toast, cut after six cells and «и ещё 12»;
  *   · a feed landing later dropped the unsaved draft from the boxes.
  *
- * Now: «Сохранить» lists every cell under the tariff on the confirm card, and
- * «Сохранить всё равно» saves them (acceptBelowCost). Nothing below the
- * tariff is stored without it.
+ * Then (23.09.2026): «Сохранить» listed every such cell on a confirm card with
+ * «Сохранить всё равно» (acceptBelowCost). Since 1a (Dim, 25.09.2026, q4) the
+ * table saves itself: each such box turns rust with «Оставить так», is held
+ * out of the save until that tap, and the tap sends acceptBelowCost. Nothing
+ * below the tariff is stored without it.
  *
  * The server half is called for real against PGlite; the panel's functions
  * are sliced out of public/shop2/app.js by source text and run on stubs
@@ -203,21 +205,32 @@ describe("belowCostMessage — nothing cut off", () => {
 });
 
 /* ------------------------------------------------------------------------ *
- * 3. The panel asks before it sends — and asks about the same cells
+ * 3. The panel holds such a price at its box — and names the same cells
+ *
+ * 1a (Dim, 25.09.2026, q4): the table saves itself, so there is no
+ * «Сохранить» to ask on and no sheet. A box under Montonio's price turns
+ * rust with «Ниже тарифа Montonio» and «Оставить так»; it is NOT sent until
+ * that tap (shipGate) — the rest of the table saves around it — and the tap
+ * sends the server's own accept flag. The server still refuses a save that
+ * never asked; the refused cells are held at their boxes the same way.
  * ------------------------------------------------------------------------ */
 
+type Gate = { send: Row; held: Cell[] };
 type Panel = {
   shipLowCells: (r: Row) => Cell[];
-  shipSaveAction: (r: Row) => { title: string; detail: string; ok?: string; belowCost?: boolean; rules: Row };
-  srvPush: (a: unknown, entry?: unknown) => void;
-  pending: () => { title: string; detail: string; ok?: string; belowCost?: boolean; rules: Row } | null;
-  setRollback: (b: unknown) => void;
+  gate: (r: Row) => Gate;
+  accept: (key: string, v: number) => void;
+  put: (note: Record<string, unknown>) => Promise<unknown>;
+  setStored: (r: Row) => void;
+  setServer: (r: Row | null) => void;
+  stored: () => Row;
+  S: Record<string, unknown>;
 };
 
 function panel(scope: {
-  S: Record<string, unknown>;
-  stored: Row;
-  answer?: { status: number; body?: unknown };
+  stored?: Row;
+  server?: Row | null;
+  answers?: Array<{ status: number; body?: unknown }>;
   puts?: unknown[];
   toasts?: Array<[string, unknown]>;
 }): Panel {
@@ -225,51 +238,37 @@ function panel(scope: {
     var MONTONIO_PRICE = ${literalSrc("MONTONIO_PRICE")};
     var SHIP_ROWS = ${literalSrc("SHIP_ROWS")};
     var CARRIER_NAMES = ${literalSrc("CARRIER_NAMES")};
-    var pendingAction = null, shipRollback = null;
+    var S = { lang: "RU", shipDraft: null, shipLow: null, shipErr: "" };
+    var SHIP_STORED_DEFAULT = { freeFrom: 59, methods: { parcel: {}, courier: {}, pickup: {} }, carriers: {} };
+    var SHIP_STORED = STORED, shipServerRow = SERVER, SHIP_ACCEPT = {};
     // a save the server took is remembered over a stale feed (shipping-save-sticks.test.ts)
     var shipFresh = null, SHIP_FRESH_LS = "rempire-ship-fresh";
     var localStorage = { getItem: function () { return null; }, setItem: function () {}, removeItem: function () {} };
-    var SHIP_STORED = STORED;
-    var DEMO = { log: [] };
     function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
     function countryName(c) { return c; }
-    function refocus() {}
     function render() {}
-    function noop() {}
-    function demoSave() {}
-    function setShipRules(r) { SHIP_STORED = r; }
-    function apiSend(url, method, b) { PUTS.push({ url: url, method: method, body: b }); return Promise.resolve(ANSWER); }
+    function setShipRules(r) { SHIP_STORED = cloneRules(r); }
+    function apiSend(url, method, b) { PUTS.push({ url: url, method: method, body: JSON.parse(JSON.stringify(b)) }); return Promise.resolve(ANSWERS.shift() || { status: 200, body: { ok: true } }); }
     function toast(t, u) { TOASTS.push([t, u || null]); }
-    ${slice("eur")}
-    ${slice("shipLowCells")}
-    ${slice("shipPlaceName")}
-    ${slice("shipLowLine")}
-    ${slice("shipLowAction")}
-    ${slice("shipSaveAction")}
-    ${slice("shipLowAsk")}
-    ${slice("shipBody")}
-    ${slice("shipSavedText")}
-    ${slice("shipSavedOk")}
-    ${slice("shipFreshNote")}
-    ${slice("shipRulesRefused")}
-    ${slice("srvSaved")}
-    ${slice("srvPush")}
+    ${["eur", "shipLowCells", "shipPlaceName", "shipLowLine", "shipCellKey", "shipRowCell", "shipRowSet",
+      "shipAccepted", "shipLowAll", "shipHeldCells", "shipGate", "shipAcceptRow", "jsonCanon", "shipSig",
+      "admAutosaveOk", "shipFreshNote", "shipPut"].map(slice).join("\n")}
     return {
-      shipLowCells: shipLowCells, shipSaveAction: shipSaveAction, srvPush: srvPush,
-      pending: function () { return pendingAction; },
-      setRollback: function (b) { shipRollback = b; }
+      S: S, shipLowCells: shipLowCells, gate: shipGate, put: shipPut,
+      accept: function (k, v) { SHIP_ACCEPT[k] = v; },
+      setStored: function (r) { SHIP_STORED = r; },
+      setServer: function (r) { shipServerRow = r; },
+      stored: function () { return SHIP_STORED; }
     };
   `;
-  return new Function("S", "SRV", "STORED", "ANSWER", "PUTS", "TOASTS", body)(
-    scope.S, { admin: true }, scope.stored, scope.answer ?? { status: 200, body: { ok: true } },
+  return new Function("STORED", "SERVER", "ANSWERS", "PUTS", "TOASTS", body)(
+    scope.stored ?? {}, scope.server === undefined ? null : scope.server, (scope.answers ?? []).slice(),
     scope.puts ?? [], scope.toasts ?? [],
   ) as Panel;
 }
 
-const tick = () => new Promise((r) => setTimeout(r, 0));
-
 describe("the panel's own list agrees with the server's refusal", () => {
-  const p = panel({ S: { lang: "RU" }, stored: {} });
+  const p = panel({});
   const key = (c: Cell) => `${c.method}:${c.carrier}:${c.country}:${c.charged}:${c.cost}`;
   const server = (row: Row) => belowCostCells(cleanShippingRules(row) as ShippingRules).map(key).sort();
   const client = (row: Row) => p.shipLowCells(row).map(key).sort();
@@ -291,111 +290,119 @@ describe("the panel's own list agrees with the server's refusal", () => {
   });
 });
 
-describe("«Сохранить» on «Доставка и оплата»", () => {
-  const p = panel({ S: { lang: "RU" }, stored: {} });
+describe("a price under the tariff waits for «Оставить так» (q4)", () => {
+  const empty: Row = { carriers: {}, methods: { parcel: {}, courier: {}, pickup: {} } };
 
-  it("asks the ordinary question when every price is at or above Montonio's", () => {
-    const a = p.shipSaveAction({ carriers: { dpd: { LV: 6.49 } }, methods: { parcel: {}, courier: {}, pickup: {} } });
-    expect(a.title).toBe("Изменить тарифы доставки?");
-    expect(a.belowCost).toBeFalsy();
-    expect(a.ok).toBeUndefined();
+  it("holds EVERY cell under the tariff, and sends the rest of the table", () => {
+    const p = panel({ server: empty });
+    const row = renatsRow();
+    row.carriers!.dpd.LV = 6.49;   // one price at or above Montonio's among Renat's fourteen
+    const g = p.gate(row);
+    expect(g.held).toHaveLength(13);
+    expect(g.send.carriers).toEqual({ dpd: { LV: 6.49 } });
   });
 
-  it("lists EVERY cell under the tariff, one per line, and offers «Сохранить всё равно»", () => {
-    const a = p.shipSaveAction(renatsRow());
-    expect(a.title).toBe("Цена ниже тарифа Montonio");
-    expect(a.ok).toBe("Сохранить всё равно");
-    expect(a.belowCost).toBe(true);
-    const lines = a.detail.split("\n");
-    expect(lines).toHaveLength(14 + 2);
-    expect(a.detail).not.toContain("и ещё");
-    expect(lines).toContain("Omniva · Эстония · 1 € (Montonio 3,19 €)");
-    expect(lines).toContain("Unisend · Латвия · 2 € (Montonio 3,79 €)");
-    expect(lines).toContain("DPD · Финляндия · 5 € (Montonio 12,39 €)");
+  it("«Оставить так» lets that one cell through — and only that one", () => {
+    const p = panel({ server: empty });
+    p.accept("c:omniva:EE", 1);
+    const g = p.gate(renatsRow());
+    expect(g.held).toHaveLength(13);
+    expect(g.send.carriers?.omniva).toEqual({ EE: 1 });
   });
 
-  it("names a courier cell by its column", () => {
-    const a = p.shipSaveAction({ methods: { parcel: {}, courier: { DE: 9.9 }, pickup: {} } });
-    expect(a.detail.split("\n")).toContain("Курьер · DE · 9,90 € (Montonio 17,59 €)");
+  it("a price the server already holds was accepted when it was stored", () => {
+    const p = panel({ server: { carriers: { omniva: { EE: 1 } }, methods: { parcel: {}, courier: {}, pickup: {} } } });
+    const g = p.gate({ carriers: { omniva: { EE: 1 }, dpd: { LV: 6.49 } }, methods: { parcel: {}, courier: {}, pickup: {} } });
+    expect(g.held).toEqual([]);
+  });
+
+  it("…but not a lower number typed over it", () => {
+    const p = panel({ server: { carriers: { omniva: { EE: 1 } }, methods: { parcel: {}, courier: {}, pickup: {} } } });
+    const g = p.gate({ carriers: { omniva: { EE: 0.5 } }, methods: { parcel: {}, courier: {}, pickup: {} } });
+    expect(g.held.map((c) => c.charged)).toEqual([0.5]);
+    expect(g.send.carriers?.omniva, "the held cell goes back to what the server holds").toEqual({ EE: 1 });
+  });
+
+  it("the cell's line says it and offers the tap — «Оставить так» beside «вернуть»", () => {
+    const foot = new Function(`
+      var CARRIER_NAMES = ${literalSrc("CARRIER_NAMES")};
+      var S = { lang: "RU" }, SHIP_ACCEPT = {}, shipServerRow = null, SHIP_STORED = {};
+      ${["eur", "esc", "montonioCarrierTag", "shipRowCell", "shipAccepted", "admRateFootHTML"].map(slice).join("\n")}
+      return admRateFootHTML;
+    `)() as (k: string, v: string, price: number, carrier: string) => string;
+    const held = foot("c:omniva:EE", "1", 3.19, "");
+    expect(held).toContain("Ниже тарифа Montonio: 3,19 €");
+    expect(held).toContain('data-shipaccept="c:omniva:EE">Оставить так');
+    expect(held).toContain('data-shipclear="c:omniva:EE"');
+    // at or above the price: the ordinary line, no question
+    expect(foot("c:omniva:EE", "3,50", 3.19, "")).not.toContain("data-shipaccept");
   });
 });
 
 describe("what the save sends, and what the screen says afterwards", () => {
-  it("«Сохранить всё равно» sends acceptBelowCost beside the settings, not inside them", async () => {
-    const puts: Array<{ body: unknown }> = [];
-    const S: Record<string, unknown> = { lang: "RU", admSetPage: "delivery" };
-    const p = panel({ S, stored: renatsRow(), puts: puts as unknown[] });
-    const a = p.shipSaveAction(renatsRow());
-    p.srvPush(a, { txt: "x" });
-    await tick();
+  it("an accepted price goes with acceptBelowCost beside the settings, not inside them", async () => {
+    const puts: Array<{ body: any }> = [];
+    const p = panel({ stored: { carriers: { omniva: { EE: 1 } } }, server: null, puts: puts as unknown[] });
+    p.accept("c:omniva:EE", 1);
+    await p.put({ toast: "x" });
     expect(puts).toHaveLength(1);
-    expect(puts[0].body).toEqual({ settings: { shipping_rules: renatsRow() }, acceptBelowCost: true });
+    expect(puts[0].body).toEqual({ settings: { shipping_rules: { carriers: { omniva: { EE: 1 } } } }, acceptBelowCost: true });
   });
 
   it("an ordinary save sends no flag — the server's guard still stands", async () => {
-    const puts: Array<{ body: unknown }> = [];
-    const p = panel({ S: { lang: "RU" }, stored: { carriers: { dpd: { LV: 6.49 } } }, puts: puts as unknown[] });
-    p.srvPush({ type: "set_shipping_rules", rules: {}, full: true }, { txt: "x" });
-    await tick();
-    expect(puts[0].body).toEqual({ shipping_rules: { carriers: { dpd: { LV: 6.49 } } } });
+    const puts: Array<{ body: any }> = [];
+    const p = panel({ stored: { carriers: { dpd: { LV: 6.49 } } }, puts: puts as unknown[] });
+    await p.put({});
+    expect(puts[0].body).toEqual({ settings: { shipping_rules: { carriers: { dpd: { LV: 6.49 } } } } });
   });
 
-  it("says «Тарифы доставки сохранены» only once the server said 200 — «Сохраняем…» until then", async () => {
+  it("says «Тарифы доставки сохранены» only once the server said 200", async () => {
     const toasts: Array<[string, unknown]> = [];
-    const S: Record<string, unknown> = { lang: "RU", admSetPage: "delivery", admSetSaved: "" };
     const entry = { txt: "Тарифы" };
-    const p = panel({ S, stored: {}, toasts });
-    p.srvPush({ type: "set_shipping_rules", rules: {}, full: true }, entry);
-    expect(S.shipSaving).toBe(true);
-    expect(S.admSetSaved).toBe("");
+    const p = panel({ stored: { carriers: { dpd: { LV: 6.49 } } }, toasts });
+    const done = p.put({ toast: "Тарифы доставки сохранены", entry });
     expect(toasts).toEqual([]);
-    await tick();
-    expect(S.shipSaving).toBe(false);
+    await done;
     expect(toasts).toEqual([["Тарифы доставки сохранены", entry]]);
-    expect(S.admSetSaved).toBe("delivery");
   });
 
-  it("a refusal it did not ask about: his numbers back in the boxes, «Не сохранено», and the card that asks", async () => {
-    const tried = renatsRow();
-    const was = { carriers: {}, methods: { parcel: {}, courier: {}, pickup: {} } };
-    const cells = belowCostCells(cleanShippingRules(tried) as ShippingRules);
+  it("only a held price moved: nothing is sent, the box keeps it, and no «сохранены»", async () => {
+    const empty: Row = { carriers: {}, methods: { parcel: {}, courier: {}, pickup: {} } };
+    const puts: unknown[] = [];
     const toasts: Array<[string, unknown]> = [];
-    const S: Record<string, unknown> = { lang: "RU", admSetPage: "delivery", admSetSaved: "", shipDraft: null };
-    const p = panel({
-      S, stored: tried, toasts,
-      answer: { status: 400, body: { ok: false, error: "below_cost", detail: belowCostMessage(cells), cells } },
-    });
-    // the assistant's card, or an older tab: a table sent without the flag
-    p.setRollback({ was, tried, entry: null });
-    p.srvPush({ type: "set_shipping_rules", rules: tried, full: true }, { txt: "x" });
-    await tick();
-
-    expect(S.shipSaving).toBe(false);
-    expect(S.shipDraft).toEqual(tried);           // the boxes hold what he typed → the bar says «Не сохранено»
-    expect(S.admSetSaved).toBe("");              // never «Сохранено ✓»
-    expect(toasts.map((t) => t[0])).toEqual(["Не сохранено: цена ниже тарифа Montonio"]);
-    expect(S.shipLow).toHaveLength(14);          // the page's box lists every cell
-    const card = p.pending();
-    expect(card?.belowCost).toBe(true);
-    expect(card?.ok).toBe("Сохранить всё равно");
-    expect(card?.rules).toEqual(tried);
-    expect(card?.detail.split("\n")).toHaveLength(16);
+    const p = panel({ stored: { carriers: { omniva: { EE: 1 } }, methods: { parcel: {}, courier: {}, pickup: {} } }, server: empty, puts, toasts });
+    expect(await p.put({ toast: "Тарифы доставки сохранены" })).toBe(true);
+    expect(puts).toEqual([]);
+    expect(toasts).toEqual([]);
+    expect((p.S.shipDraft as Row).carriers?.omniva).toEqual({ EE: 1 });
+    expect(p.stored().carriers).toEqual({});
   });
 
-  it("any other failure puts the draft back and asks nothing", async () => {
-    const tried = { carriers: { dpd: { LV: 6.49 } } };
-    const S: Record<string, unknown> = { lang: "RU", admSetPage: "delivery", admSetSaved: "", shipDraft: null };
-    const p = panel({ S, stored: tried, answer: { status: 503, body: { ok: false, error: "db_unavailable" } } });
-    p.setRollback({ was: {}, tried, entry: null });
-    p.srvPush({ type: "set_shipping_rules", rules: tried, full: true }, { txt: "x" });
-    await tick();
-    expect(S.shipDraft).toEqual(tried);
-    expect(p.pending()).toBeNull();
+  it("a refusal it did not ask about: the cell the server names is held at its box", async () => {
+    /* the server's mirror prices a cell higher than this panel's does (or an
+       older tab sent it): the refusal names it, and it is held like any other */
+    const cell = { carrier: "dpd", country: "LV", method: "parcel" as const, charged: 6.49, cost: 7 };
+    const tried: Row = { carriers: { dpd: { LV: 6.49 } }, methods: { parcel: {}, courier: {}, pickup: {} } };
+    const puts: Array<{ body: any }> = [];
+    const p = panel({
+      stored: tried, server: { carriers: {}, methods: { parcel: {}, courier: {}, pickup: {} } }, puts: puts as unknown[],
+      answers: [{ status: 400, body: { ok: false, error: "below_cost", detail: belowCostMessage([cell]), cells: [cell] } }],
+    });
+    expect(await p.put({ toast: "x" })).toBe(true);
+    expect(puts).toHaveLength(1);                     // nothing else was left to send
+    expect(p.S.shipLow).toEqual([cell]);
+    expect(p.S.shipDraft).toEqual(tried);             // his number stays in its box, rust
+    expect(p.stored().carriers).toEqual({});          // the till runs on what the server holds
+  });
+
+  it("any other failure is the slot's to show and retry — the answer goes back", async () => {
+    const p = panel({ stored: { carriers: { dpd: { LV: 6.49 } } }, answers: [{ status: 503, body: { ok: false } }] });
+    expect(await p.put({ toast: "x" })).toEqual({ status: 503, body: { ok: false } });
   });
 });
 
 describe("the screen around it", () => {
-  it("the confirm card never outgrows the screen: the list scrolls, the buttons stay", () => {
+  it("the confirm sheet never outgrows the screen: the list scrolls, the buttons stay", () => {
     const card = css.slice(css.indexOf(".adm-confirm__card {"), css.indexOf("}", css.indexOf(".adm-confirm__card {")));
     expect(card).toMatch(/max-height:\s*100%/);
     const d = css.slice(css.indexOf(".adm-confirm__d {"), css.indexOf("}", css.indexOf(".adm-confirm__d {")));
@@ -410,9 +417,9 @@ describe("the screen around it", () => {
     expect(adopt).toContain("if (!keepShipDraft) S.shipDraft = null;");
   });
 
-  it("the page's refusal box sits above the table, not under the preview", () => {
+  it("the page's «не сохранено» line sits above the table, not under the preview", () => {
     const page = slice("admSetDeliveryHTML");
-    expect(page.indexOf("admShipErrHTML()")).toBeGreaterThan(0);
-    expect(page.indexOf("admShipErrHTML()")).toBeLessThan(page.indexOf("SHIP_ROWS.map"));
+    expect(page.indexOf("admShipHeldHTML()")).toBeGreaterThan(0);
+    expect(page.indexOf("admShipHeldHTML()")).toBeLessThan(page.indexOf("SHIP_ROWS.map"));
   });
 });

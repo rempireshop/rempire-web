@@ -1,8 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test, type TestInfo } from "@playwright/test";
 import {
-  continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
+  cardBack, continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
+import { closeCard } from "./goods-helpers";
 
 /**
  * Accessibility sweep — axe-core (WCAG 2.x A/AA + axe's best-practice rules,
@@ -269,51 +270,57 @@ test.describe("a11y admin", () => {
     await expect(page.locator("#orderlist")).toBeVisible();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
     await audit.check(page, "admin Заказы");
-    // the confirm card over the list
-    await page.locator("[data-admshipnow]").first().click();
+    // an order card — its «← Заказы» is the top bar's on a phone (1a) — and its «⋯»
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    const orderBack = page.locator('[data-admorder=""]:visible, [data-admtopback]:visible').first();
+    await expect(orderBack).toBeVisible();
+    await audit.check(page, "admin order card");
+    // the confirm card over it: «Отправлен без этикетки» asks first (1a: the card's alone, not the row's)
+    await page.locator("[data-admshipnow]:visible").first().click();
     await expect(page.locator(".adm-confirm")).toBeVisible();
     await audit.check(page, "admin confirm card");
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    // an order card
-    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
-    await expect(page.locator('[data-admorder=""]')).toBeVisible();
-    await audit.check(page, "admin order card");
-    await page.locator('[data-admorder=""]').click();
+    await page.locator("[data-admordermore]:visible").first().click();
+    await expect(page.locator('.adm-omenu__list[role="menu"]')).toBeVisible();
+    await audit.check(page, "admin order card · «⋯»");
+    await page.keyboard.press("Escape");
+    await orderBack.click();
 
     await section("goods", /Товары/);
     await expect(page.locator("#goodslist")).toBeVisible();
     await audit.check(page, "admin Товары");
     await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    for (const tab of ["main", "sizes", "media", "desc", "seo"]) {
-      await page.locator(`[data-edtab="${tab}"]`).click();
-      await expect(page.locator(`[data-edpane="${tab}"]`)).toBeVisible();
-      await audit.check(page, `admin editor · ${tab}`);
-    }
-    await page.locator("[data-admclose]").first().click();
-    // «+ Товар»: the three-step editor with the brand list open, and its photo step (round 12)
+    // 1a: the card is one page — every section, then the Google fold opened
+    await expect(page.locator(`[data-edfor="${PRODUCT_2.id}"]`)).toBeVisible();
+    await audit.check(page, "admin card");
+    await page.locator('[data-admfold="ed-seo"]').click();
+    await expect(page.locator("[data-edseot]")).toBeVisible();
+    await audit.check(page, "admin card · Для Google");
+    await closeCard(page);
+    // «+ Товар»: «Новый товар», one page, with the brand list open, then its folds (1a, screen 13)
     await page.locator("[data-admgoodsnew]").click();
     await expect(page.locator("[data-edbrand]")).toBeVisible();
     await page.locator("[data-edbrand]").focus();
     await expect(page.locator("#edbrandlist")).toBeVisible();
     await audit.check(page, "admin новый товар");
-    await page.locator('[data-edtab="media"]').click();
-    await expect(page.locator('[data-edpane="media"]')).toBeVisible();
-    await audit.check(page, "admin новый товар · фото");
-    await page.locator("[data-admclose]").first().click();
+    await page.locator('[data-admfold="gn-desc"]').click();
+    await expect(page.locator("[data-eddescru]")).toBeVisible();
+    await audit.check(page, "admin новый товар · описание");
+    await closeCard(page);
 
-    await section("pos", /Продажа в салоне/);
+    await section("pos", /Салон/);
     await expect(page.locator("[data-posq]")).toBeVisible();
     await audit.check(page, "admin Салон");
 
     if (mobile) {
+      // «Ещё» is a page (1a, screen 14): Back puts it away, as it closes any page
       await page.locator("[data-admmore]").click();
-      await expect(page.locator(".adm-sheet")).toBeVisible();
-      await audit.check(page, "admin «Ещё» sheet");
-      await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-      await expect(page.locator(".adm-sheet")).toHaveCount(0);
+      await expect(page.locator(".adm-more")).toBeVisible();
+      await audit.check(page, "admin «Ещё» page");
+      await page.goBack();
+      await expect(page.locator(".adm-more")).toHaveCount(0);
     }
 
     await section("people", /Клиенты/);
@@ -329,21 +336,20 @@ test.describe("a11y admin", () => {
     await section("setup", /Настройки/);
     await audit.check(page, "admin Настройки");
     await page.locator('[data-admsetpage="home"]').click();
-    await expect(page.locator("[data-admsetback]")).toBeVisible();
+    await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
     await page.waitForTimeout(600);
     await audit.check(page, "admin Настройки · Главная");
 
-    // the assistant panel — on a phone this settings page has a save bar, and
-    // while one stands the bar is the header and the floating button is off
-    // the screen: the assistant is a row of «Ещё» there (r13)
+    /* the assistant panel — opened from where 1a puts it: the icon in the
+       phone's top bar, the folded strip on a desktop (`.adm-aiopen`, the one
+       this viewport draws). On a phone the page is closed first, through the
+       top bar's «← Настройки» — the page's own link steps aside for it (1a).
+       (There is no «Помощник» row in «Ещё» any more: Dim, 25.09.2026, q12.) */
     if (mobile) {
-      await page.locator("[data-admmore]").click();
-      await expect(page.locator(".adm-sheet")).toBeVisible();
-      await audit.check(page, "admin «Ещё» sheet with the assistant row");
-      await page.locator(".adm-sheet [data-admai]").click();
-    } else {
-      await page.locator(".adm-fab").click();
+      await cardBack(page, "[data-admsetback]", "Настройки").click();
+      await expect(page.locator("[data-admsetpage]").first()).toBeVisible();
     }
+    await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     await audit.check(page, "admin assistant");
     await page.locator(".adm-asst__fold").click();

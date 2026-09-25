@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { continueButton, eur, freshEmail, ipHeaders, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { openCard, settled, toSection, typeAndLeave } from "./goods-helpers";
 import {
   assertClean, clearToast, EMOJI, freshShop, GOOD_VIDEO, HTML_BOMB, isRussian, LONG,
   openAdmin, openSettings, pick, prng, tab, toastText, watch, type Watch,
@@ -20,52 +21,55 @@ test.beforeEach(async ({}, testInfo) => {
 });
 
 /**
- * The redesigned editor is five tabs over ONE form (docs/features.md § «Товар»):
- * every pane is in the DOM at once and the inactive ones carry `hidden`, so a
- * spec that types into a field has to open that field's tab first.
+ * The product card of direction 1a is one page with no «Сохранить»: a box
+ * saves itself when it is left, and a value it cannot send stays in the box
+ * with a rust edge and ONE line under it (README § 2) — the line is the
+ * card's `[data-ashint]` for that field's autosave key («ed:<id>:<field>»).
  */
-type EdTab = "main" | "sizes" | "media" | "desc" | "seo";
-async function edTab(page: Page, key: EdTab): Promise<void> {
-  await page.locator(`[data-edtab="${key}"]`).click();
-  await expect(page.locator(`[data-edtab="${key}"][aria-current="true"]`)).toBeVisible();
-}
-
-/** Opens one product's editor from the «Товары» tab, the way the owner does,
- *  and lands on «Размеры и цены» — where the money is. */
 async function openGoods(page: Page, id: string): Promise<void> {
-  // Clicking the tab is also how the editor is closed (the handler clears
-  // S.adminEdit), so this works whether or not one is already open.
-  await tab(page, "goods");
-  await page.locator("[data-goodsq]").fill(id);
-  await page.locator(`[data-admgoods="${id}"]`).click();
-  await edTab(page, "sizes");
+  await openCard(page, id);
+  await toSection(page, "sizes");
   await expect(page.locator("[data-edprice]")).toBeVisible();
 }
 
-/** The editor's own error line — a refusal the owner can read. */
-function goodsErr(page: Page) {
-  return page.locator("[data-goodserr]");
+/** The one line under a refused box. */
+function hint(page: Page, id: string, field: string) {
+  return page.locator(`[data-ashint="ed:${id}:${field}"]`);
 }
-
-async function saveGoods(page: Page, id: string): Promise<void> {
-  await page.locator(`[data-admsavegoods="${id}"]`).click();
+/** What the shop's feed holds for this product. */
+async function feed(page: Page, id: string): Promise<Record<string, any>> {
+  const body = await (await page.request.get("/api/overrides/")).json();
+  return (body.overrides || {})[id] || {};
 }
 
 /**
- * Types `value` into the price box, saves, and demands a readable refusal:
- * the editor still open, a Russian sentence, and the price untouched.
+ * Types `value` into the price box, leaves it, and demands a readable
+ * refusal: the box still holds what was typed, a Russian line under the
+ * grid, the box marked, and the shop's price untouched.
  */
 async function expectPriceRefused(page: Page, w: Watch, id: string, value: string, was: string): Promise<void> {
-  await page.locator("[data-edprice]").fill(value);
-  await saveGoods(page, id);
-  await expect(goodsErr(page), `price "${value}" was accepted or dropped without a word`).toBeVisible();
-  const msg = (await goodsErr(page).textContent() || "").trim();
+  const before = (await feed(page, id)).price ?? null;
+  const box = page.locator("[data-edprice]");
+  await box.fill(value);
+  await box.blur();
+  await expect(hint(page, id, "ladder"), `price "${value}" was accepted or dropped without a word`).toBeVisible();
+  const msg = ((await hint(page, id, "ladder").textContent()) || "").trim();
   expect(isRussian(msg), `price "${value}": message is not Russian — "${msg}"`).toBe(true);
-  // Still in the editor — a refusal that also throws away the form is a
-  // second bug on top of the first.
-  await expect(page.locator("[data-edprice]"), `price "${value}": the editor closed on a refusal`).toBeVisible();
+  await expect(box, `price "${value}": the box is not marked`).toHaveAttribute("aria-invalid", "true");
+  expect((await feed(page, id)).price ?? null, `price "${value}" reached the shop`).toBe(before);
   await assertClean(page, w, `goods price "${value}"`);
-  await page.locator("[data-edprice]").fill(was);
+  await typeAndLeave(page, box, was);
+  await expect(hint(page, id, "ladder")).toBeHidden();
+}
+
+/** «Наличие» of a product nobody counts: the three words, as a segmented control. */
+async function stockWord(page: Page): Promise<string | null> {
+  const seg = page.locator('[data-edstock="in"]');
+  if (!(await seg.count()) || !(await seg.first().isVisible())) return null;   // counted: «Не продавать» instead
+  for (const v of ["in", "low", "out"]) {
+    if ((await page.locator(`[data-edstock="${v}"]`).getAttribute("aria-current")) === "true") return v;
+  }
+  return null;
 }
 
 test.describe("sweep — goods editor", () => {
@@ -84,54 +88,51 @@ test.describe("sweep — goods editor", () => {
     expect(ids.length, "the goods list showed nothing to edit").toBeGreaterThan(6);
     const sample = pick(ids, 5, prng(20260904));
 
-    const restore: Array<{ id: string; price: string; stock: string }> = [];
+    const restore: Array<{ id: string; price: string; stock: string | null }> = [];
     try {
       for (const [i, id] of sample.entries()) {
         const deep = i === 0;   // the whole matrix once; the money fields on all five
         await openGoods(page, id);
         const price = await page.locator("[data-edprice]").inputValue();
-        await edTab(page, "main");
-        const stock = await page.locator("[data-edstock]").inputValue();
-        await edTab(page, "sizes");
+        await toSection(page, "shop");
+        const stock = await stockWord(page);
+        await toSection(page, "sizes");
         restore.push({ id, price, stock });
 
         // ---- retail price -------------------------------------------------
         for (const bad of ["abc", "-5", "0", "1e9", ""]) await expectPriceRefused(page, w, id, bad, price);
 
         // ---- salon price ---------------------------------------------------
-        await page.locator("[data-edproprice]").fill("abc");
-        await saveGoods(page, id);
-        await expect(goodsErr(page), "a salon price of «abc» was swallowed").toBeVisible();
-        expect(isRussian((await goodsErr(page).textContent()) || "")).toBe(true);
-        // Above retail — a salon paying more than the shelf price is a typo,
-        // and a silent one is money lost on every wholesale order.
-        await page.locator("[data-edproprice]").fill("400");
-        await saveGoods(page, id);
-        await expect(goodsErr(page), "a salon price above retail was accepted in silence").toBeVisible();
-        expect(await page.locator("[data-edprice]").inputValue(),
-          "a refused save still rewrote the price box").toBe(price);
-        await assertClean(page, w, `goods "${id}" salon price refused`);
+        const salon = page.locator("[data-edproprice]");
+        if (await salon.count()) {
+          await salon.fill("abc");
+          await salon.blur();
+          await expect(hint(page, id, "pro"), "a salon price of «abc» was swallowed").toBeVisible();
+          expect(isRussian((await hint(page, id, "pro").textContent()) || "")).toBe(true);
+          // Above retail — a salon paying more than the shelf price is a typo,
+          // and a silent one is money lost on every wholesale order.
+          await salon.fill("400");
+          await salon.blur();
+          await expect(hint(page, id, "pro"), "a salon price above retail was accepted in silence").toContainText("выше розничной");
+          expect(await page.locator("[data-edprice]").inputValue(), "a refused salon price rewrote the price box").toBe(price);
+          await assertClean(page, w, `goods "${id}" salon price refused`);
+        }
 
         // ---- what must go through ------------------------------------------
         // «12,50» is how a Russian- or Estonian-speaking owner writes money;
         // 5 € for a salon is below retail, which is the real case.
-        await page.locator("[data-edprice]").fill("12,50");
-        await page.locator("[data-edproprice]").fill("5");
-        await saveGoods(page, id);
-        expect(await toastText(page)).toMatch(/Сохранено/);
-        await clearToast(page);
+        await typeAndLeave(page, page.locator("[data-edprice]"), "12,50");
+        if (await salon.count()) await typeAndLeave(page, salon, "5");
         await assertClean(page, w, `goods "${id}" saved 12,50`);
         await openGoods(page, id);
         expect(Number((await page.locator("[data-edprice]").inputValue()).replace(",", ".")),
           "«12,50» did not become 12.50").toBeCloseTo(12.5, 2);
-        expect(Number(await page.locator("[data-edproprice]").inputValue()), "the salon price did not stick").toBe(5);
+        if (await salon.count()) expect(Number(await salon.inputValue()), "the salon price did not stick").toBe(5);
 
         if (!deep) continue;
 
         // Three decimals: rounded to cents, never stored as typed.
-        await page.locator("[data-edprice]").fill("12.505");
-        await saveGoods(page, id);
-        await clearToast(page);
+        await typeAndLeave(page, page.locator("[data-edprice]"), "12.505");
         await openGoods(page, id);
         const cents = Number((await page.locator("[data-edprice]").inputValue()).replace(",", "."));
         expect(cents, "12.505 landed nowhere near 12.50/12.51").toBeCloseTo(12.505, 1);
@@ -139,22 +140,22 @@ test.describe("sweep — goods editor", () => {
           .toBeLessThanOrEqual(2);
 
         // Padding is not a value.
-        await page.locator("[data-edprice]").fill("  7  ");
-        await saveGoods(page, id);
-        await clearToast(page);
+        await typeAndLeave(page, page.locator("[data-edprice]"), "  7  ");
         await openGoods(page, id);
         expect(Number((await page.locator("[data-edprice]").inputValue()).replace(",", ".")),
           "«  7  » was not read as 7").toBe(7);
 
-        // ---- stock ---------------------------------------------------------
-        for (const value of ["out", "low", "in"]) {
-          await edTab(page, "main");
-          await page.locator("[data-edstock]").selectOption(value);
-          await saveGoods(page, id);
-          await clearToast(page);
-          await openGoods(page, id);
-          await edTab(page, "main");
-          expect(await page.locator("[data-edstock]").inputValue(), `stock "${value}" did not stick`).toBe(value);
+        // ---- stock: the three words, at once, for a product nobody counts ----
+        if (stock !== null) {
+          for (const value of ["out", "low", "in"]) {
+            await toSection(page, "shop");
+            await page.locator(`[data-edstock="${value}"]`).click();
+            await settled(page, `stock "${value}"`);
+            await clearToast(page);
+            await openGoods(page, id);
+            await toSection(page, "shop");
+            await expect(page.locator(`[data-edstock="${value}"]`), `stock "${value}" did not stick`).toHaveAttribute("aria-current", "true");
+          }
         }
         await assertClean(page, w, `goods "${id}" stock`);
       }
@@ -163,72 +164,64 @@ test.describe("sweep — goods editor", () => {
       const subject = sample[0];
       await openGoods(page, subject);
 
-      await edTab(page, "main");
+      await toSection(page, "shop");
       const sub = page.locator("[data-edsubcat]");
-      if (await sub.count()) {
+      if (await sub.count() && await sub.isEnabled()) {
         const values = await sub.locator("option").evaluateAll((o) => o.map((x) => (x as HTMLOptionElement).value));
         const nonEmpty = values.filter(Boolean);
         if (nonEmpty.length) {
           await sub.selectOption(nonEmpty[0]);
-          await saveGoods(page, subject);
-          await clearToast(page);
+          await settled(page, "the subsection");
           await openGoods(page, subject);
-          await edTab(page, "main");
+          await toSection(page, "shop");
           expect(await sub.inputValue()).toBe(nonEmpty[0]);
           await sub.selectOption("");
+          await settled(page, "the subsection back");
         }
       }
 
       // SEO: a thousand characters, a script tag, an emoji — maxlength is the
       // only guard the form has, so check it actually holds.
-      await edTab(page, "seo");
+      await toSection(page, "seo");
       await page.locator("[data-edseot]").fill(LONG);
       expect((await page.locator("[data-edseot]").inputValue()).length).toBeLessThanOrEqual(70);
       await page.locator("[data-edseod]").fill(LONG);
       expect((await page.locator("[data-edseod]").inputValue()).length).toBeLessThanOrEqual(170);
-      await page.locator("[data-edseot]").fill(`SEO ${HTML_BOMB}`.slice(0, 70));
-      await page.locator("[data-edseod]").fill(`${EMOJI} описание`);
+      await typeAndLeave(page, page.locator("[data-edseot]"), `SEO ${HTML_BOMB}`.slice(0, 70));
+      await typeAndLeave(page, page.locator("[data-edseod]"), `${EMOJI} описание`);
 
       // Descriptions: whatever is pasted here is printed on the product page.
-      // One language at a time — the segmented control is the only thing that
-      // decides which of the three boxes is on screen.
-      await edTab(page, "desc");
-      await page.locator("[data-eddescru]").fill(`Описание ${HTML_BOMB}`);
+      // One language at a time — the tabs decide which box is on screen.
+      await toSection(page, "desc");
+      await typeAndLeave(page, page.locator("[data-eddescru]"), `Описание ${HTML_BOMB}`);
       await page.locator('[data-eddesclang="et"]').click();
-      await page.locator("[data-eddescet]").fill(EMOJI);
+      await typeAndLeave(page, page.locator("[data-eddescet]"), EMOJI);
       await page.locator('[data-eddesclang="en"]').click();
-      await page.locator("[data-eddescen]").fill(LONG);
+      await typeAndLeave(page, page.locator("[data-eddescen]"), LONG);
       await page.locator('[data-eddesclang="ru"]').click();
-      // the AI buttons the owner writes with are on this tab and reachable
+      // the AI buttons the owner writes with are here and reachable
       await expect(page.locator(`[data-admdescgen="${subject}"]`)).toBeVisible();
       await expect(page.locator(`[data-admtranslate="${subject}"]`)).toBeVisible();
 
       // A link that is not a video must be refused — the shop silently drops
       // anything it cannot turn into an embed, so «saved» would be a lie.
-      await edTab(page, "media");
+      await toSection(page, "video");
       for (const badUrl of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "not a url"]) {
         await page.locator("[data-edvideo]").fill(badUrl);
-        await saveGoods(page, subject);
-        await expect(goodsErr(page), `video "${badUrl}" was accepted`).toBeVisible();
-        const msg = (await goodsErr(page).textContent() || "").trim();
+        await page.locator("[data-edvideo]").blur();
+        await expect(hint(page, subject, "video"), `video "${badUrl}" was accepted`).toBeVisible();
+        const msg = ((await hint(page, subject, "video").textContent()) || "").trim();
         expect(isRussian(msg), `video "${badUrl}": message is not Russian — "${msg}"`).toBe(true);
         await assertClean(page, w, `goods video "${badUrl}"`);
       }
-      await page.locator("[data-edvideo]").fill(GOOD_VIDEO);
-      await saveGoods(page, subject);
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
+      await typeAndLeave(page, page.locator("[data-edvideo]"), GOOD_VIDEO);
+      await expect(hint(page, subject, "video")).toBeHidden();
       await assertClean(page, w, "goods text matrix saved");
 
-      // The editor fires one PUT per changed field and does not wait for any
-      // of them (srvPush → .catch(noop)); the storefront reads /api/overrides/
-      // exactly once, on load. Wait for the public feed to actually carry the
-      // new text before opening the page that reads it — otherwise this is a
-      // race, not a test.
-      await expect.poll(async () => {
-        const body = await (await page.request.get("/api/overrides/")).json();
-        return JSON.stringify((body.overrides || {})[subject] || {});
-      }, { timeout: 15_000, message: "the overrides feed never carried the saved description" })
+      // The storefront reads /api/overrides/ once, on load: wait for the feed
+      // to carry the new text before opening the page that reads it.
+      await expect.poll(async () => JSON.stringify(await feed(page, subject)),
+        { timeout: 15_000, message: "the overrides feed never carried the saved description" })
         .toContain("Описание");
 
       // ---- what a shopper actually gets ------------------------------------
@@ -250,37 +243,37 @@ test.describe("sweep — goods editor", () => {
 
       // ---- put the text back through the same UI ---------------------------
       await openGoods(page, subject);
-      await edTab(page, "seo");
-      await page.locator("[data-edseot]").fill("");
-      await page.locator("[data-edseod]").fill("");
-      await edTab(page, "desc");
-      await page.locator("[data-eddescru]").fill("");
+      await toSection(page, "seo");
+      await typeAndLeave(page, page.locator("[data-edseot]"), "");
+      await typeAndLeave(page, page.locator("[data-edseod]"), "");
+      await toSection(page, "desc");
+      await typeAndLeave(page, page.locator("[data-eddescru]"), "");
       await page.locator('[data-eddesclang="et"]').click();
-      await page.locator("[data-eddescet]").fill("");
+      await typeAndLeave(page, page.locator("[data-eddescet]"), "");
       await page.locator('[data-eddesclang="en"]').click();
-      await page.locator("[data-eddescen]").fill("");
-      await edTab(page, "media");
-      await page.locator("[data-edvideo]").fill("");
-      await saveGoods(page, subject);
-      await clearToast(page);
+      await typeAndLeave(page, page.locator("[data-eddescen]"), "");
+      await toSection(page, "video");
+      await typeAndLeave(page, page.locator("[data-edvideo]"), "");
       await openGoods(page, subject);
-      await edTab(page, "seo");
-      expect(await page.locator("[data-edseot]").inputValue(), "an SEO override cannot be cleared from the editor").toBe("");
-      await edTab(page, "desc");
+      await toSection(page, "seo");
+      expect(await page.locator("[data-edseot]").inputValue(), "an SEO override cannot be cleared from the card").toBe("");
+      await toSection(page, "desc");
       expect(await page.locator("[data-eddescru]").inputValue()).toBe("");
-      await edTab(page, "media");
+      await toSection(page, "video");
       expect(await page.locator("[data-edvideo]").inputValue()).toBe("");
       await assertClean(page, w, "goods overrides cleared");
     } finally {
       // Prices and stock back to the catalogue's own values, through the
-      // editor rather than a side-door API call — same rule as admin.spec.ts.
+      // card rather than a side-door API call — same rule as admin.spec.ts.
       for (const r of restore) {
         await openGoods(page, r.id);
-        await page.locator("[data-edprice]").fill(r.price);
-        await page.locator("[data-edproprice]").fill("");
-        await edTab(page, "main");
-        await page.locator("[data-edstock]").selectOption(r.stock);
-        await saveGoods(page, r.id);
+        await typeAndLeave(page, page.locator("[data-edprice]"), r.price);
+        if (await page.locator("[data-edproprice]").count()) await typeAndLeave(page, page.locator("[data-edproprice]"), "");
+        if (r.stock && (await stockWord(page)) !== r.stock) {
+          await toSection(page, "shop");
+          await page.locator(`[data-edstock="${r.stock}"]`).click();
+          await settled(page, "stock back");
+        }
         await clearToast(page);
       }
     }
@@ -288,19 +281,15 @@ test.describe("sweep — goods editor", () => {
 });
 
 /**
- * «Сохранить» on the tariff grid. A delivery price is money a stranger is
- * charged, so since the phase-3 redesign it goes through the confirm card like
- * shipping an order does (README § State) — two clicks, not one.
+ * Leaving the box IS the save since 1a (25.09.2026, README § 2): a price goes
+ * to the shop when the box it was typed in is left, with «Вернуть» on the
+ * toast. Garbage is not sent at all — the box turns rust with one line under
+ * it, and that IS the refusal. A price under Montonio's tariff would wait for
+ * «Оставить так» (q4); nothing here types one.
  */
 async function saveTariffs(page: Page): Promise<void> {
-  /* r12: the page's save bar is quiet while the table equals what the shop
-     charges — garbage never enters the draft, so there is nothing to save
-     and the button is off; that IS the refusal (the cell goes red). */
-  const save = page.locator("[data-admshipsave]");
-  if (await save.isDisabled()) return;
-  await save.click();
-  await expect(page.locator("[data-admapply]")).toBeVisible();
-  await page.locator("[data-admapply]").click();
+  await page.keyboard.press("Tab");
+  await page.waitForTimeout(300);
 }
 
 test.describe("sweep — delivery prices", () => {
@@ -445,9 +434,11 @@ test.describe("sweep — promo codes", () => {
     for (const bad of ["0", "100", "150", "-10", "abc"]) {
       await page.locator('[data-promof="value"]').fill(bad);
       await page.locator("[data-admpromosave]").click();
-      // the form is adm- markup since the phase-3 redesign
-      const err = page.locator(".adm-err[role=alert]");
+      /* 1a: the refused box's own one-line rust hint under it (the shared
+         autosave hint), not a line at the foot of the form — nothing is sent */
+      const err = page.locator('[data-promohint="value"]');
       await expect(err, `percent "${bad}" was accepted`).toBeVisible();
+      await expect(page.locator('[data-promof="value"]')).toHaveAttribute("aria-invalid", "true");
       expect(isRussian((await err.textContent()) || ""), `percent "${bad}" message is not Russian`).toBe(true);
       await assertClean(page, w, `promo percent "${bad}"`);
     }
@@ -468,7 +459,7 @@ test.describe("sweep — promo codes", () => {
     await page.locator('[data-promof="minSubtotal"]').fill("abc");
     await page.locator('[data-promof="code"]').fill(good);
     await page.locator("[data-admpromosave]").click();
-    const minErr = page.locator(".adm-err[role=alert]");
+    const minErr = page.locator('[data-promohint="minSubtotal"]');
     await expect(minErr, "an unreadable minimum order was accepted").toHaveText(/[Мм]инимальн/);
     expect(isRussian((await minErr.textContent()) || ""), "the minimum-order message is not Russian").toBe(true);
     await expect(page.locator(`[data-admpromoedit="${good}"]`),
@@ -494,7 +485,9 @@ test.describe("sweep — promo codes", () => {
     await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("50");
     // the rarer conditions sit in a fold-out under the four fields the spec asks for
-    await page.locator("[data-promomore]").click();
+    // (1a: the shared fold «Срок, лимит и заметка»; it remembers being open, so open it only if shut)
+    const more = page.locator('[data-admfold="promo-more"]');
+    if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
     await page.locator('[data-promof="endsAt"]').fill("2020-01-01");
     await page.locator("[data-admpromosave]").click();
     await clearToast(page);
@@ -574,7 +567,7 @@ test.describe("sweep — goods editor: Instagram video", () => {
   const REEL_ID = "C8xYzAbCdEf";
   const REEL = `https://www.instagram.com/reel/${REEL_ID}/`;
 
-  test("an Instagram reel saved in the editor becomes a real embed on the product page", async ({ page, browser }) => {
+  test("an Instagram reel saved in the card becomes a real embed on the product page", async ({ page, browser }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
@@ -582,8 +575,8 @@ test.describe("sweep — goods editor: Instagram video", () => {
 
     try {
       await openGoods(page, id);
-      await edTab(page, "media");
-      // the source chips are the design's door to the same one field: pick
+      await toSection(page, "video");
+      // the source tabs are the design's door to the same one field: pick
       // Instagram and the field's placeholder changes, the value does not
       await page.locator('[data-edvidkind="ig"]').click();
       await expect(page.locator('[data-edvidkind="ig"][aria-current="true"]')).toBeVisible();
@@ -591,24 +584,17 @@ test.describe("sweep — goods editor: Instagram video", () => {
       // An Instagram address that is not a reel or a post is still not a
       // video, and the refusal has to be readable.
       await page.locator("[data-edvideo]").fill("https://www.instagram.com/rempire.tallinn/");
-      await saveGoods(page, id);
-      await expect(goodsErr(page), "an Instagram profile link was accepted as a video").toBeVisible();
-      expect(isRussian((await goodsErr(page).textContent()) || "")).toBe(true);
+      await page.locator("[data-edvideo]").blur();
+      await expect(hint(page, id, "video"), "an Instagram profile link was accepted as a video").toBeVisible();
+      expect(isRussian((await hint(page, id, "video").textContent()) || "")).toBe(true);
       await assertClean(page, w, "instagram profile link refused");
 
-      await page.locator("[data-edvideo]").fill(REEL);
-      await saveGoods(page, id);
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
+      await typeAndLeave(page, page.locator("[data-edvideo]"), REEL);
       await assertClean(page, w, "instagram reel saved");
 
-      // The editor writes through without waiting and the storefront reads
-      // /api/overrides/ once, on load — so wait for the feed to carry it
-      // rather than racing it.
-      await expect.poll(async () => {
-        const body = await (await page.request.get("/api/overrides/")).json();
-        return ((body.overrides || {})[id] || {}).videoUrl || "";
-      }, { timeout: 15_000, message: "the overrides feed never carried the video link" }).toBe(REEL);
+      // the storefront reads /api/overrides/ once, on load — wait for the feed
+      await expect.poll(async () => (await feed(page, id)).videoUrl || "",
+        { timeout: 15_000, message: "the overrides feed never carried the video link" }).toBe(REEL);
 
       const shop = await freshShop(browser);
       // instagram.com is unreachable from a test machine, and Chromium logs
@@ -630,17 +616,15 @@ test.describe("sweep — goods editor: Instagram video", () => {
       expect(hrefs.filter((h) => /^\s*(javascript|data|vbscript):/i.test(h))).toEqual([]);
       /* Instagram's own embed script throws inside its own frame on a machine
          with no Instagram session («requireLazy is not defined»). That is
-         their code in their document, reported on our page object because a
-         frame's uncaught errors surface there — drop exactly those and hold
-         everything else on the page to the sweep's usual standard. */
+         their code in their document — drop exactly those and hold everything
+         else on the page to the sweep's usual standard. */
       shop.w.pageErrors = shop.w.pageErrors.filter((e) => !/instagram\.com/i.test(e));
       await assertClean(shop.page, shop.w, "product page with an Instagram embed");
       await shop.close();
     } finally {
       await openGoods(page, id);
-      await edTab(page, "media");
-      await page.locator("[data-edvideo]").fill("");
-      await saveGoods(page, id);
+      await toSection(page, "video");
+      await typeAndLeave(page, page.locator("[data-edvideo]"), "");
       await clearToast(page);
     }
   });

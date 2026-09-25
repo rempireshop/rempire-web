@@ -10,7 +10,7 @@
  * copy lives at /api/overrides).
  */
 import { requireAdmin } from "@/lib/auth";
-import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
+import { getSettingRaw, getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
 import { belowCostCells, belowCostMessage, cleanShippingRules, type ShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
@@ -77,6 +77,16 @@ export async function PUT(req: Request) {
      called «acceptBelowCost». */
   const acceptBelowCost = body.acceptBelowCost === true;
   delete body.acceptBelowCost;
+  /* The journal's two notes, beside the settings the same way (1a, Dim
+     25.09.2026, q7): `undoOf` — this PUT is «Вернуть» on audit row N, so that
+     row reads «возвращено» on every device — and `ref`, the panel's own name
+     for the change, so the browser that made it can tell its row from
+     another device's. Neither is a setting; both only ever land in the audit
+     line, and anything that is not the expected shape is dropped. */
+  const undoOf = Number.isInteger(body.undoOf) && (body.undoOf as number) > 0 ? (body.undoOf as number) : 0;
+  const ref = typeof body.ref === "string" && /^[A-Za-z0-9_-]{1,40}$/.test(body.ref) ? body.ref : "";
+  delete body.undoOf;
+  delete body.ref;
 
   // {key, value} · {settings:{…}} · a flat map — all mean the same thing here.
   let entries: Array<[string, unknown]>;
@@ -181,8 +191,23 @@ export async function PUT(req: Request) {
          (src/lib/flows.ts stampUnpaidFloor, and the `unpaidFrom` note on the
          Flows type). Same first door as everything above it. */
       if (key === "flows") value = await stampUnpaidFloor(value);
+      /* What this PUT replaces, read just before it does: the audit row keeps
+         it (`prev`, db/migrations/207_audit_prev.sql) so «Вернуть» works from
+         any device. A key never written before is recorded as null. A read
+         that fails costs the row its way back, never the save. */
+      let before: { before: unknown } | undefined;
+      try {
+        const old = await getSettingRaw(key);
+        before = { before: old.found ? old.value : null };
+      } catch {
+        before = undefined;
+      }
       await setSetting(key, value);
-      await writeAuditSafe("admin", "setting.set", belowCost.length ? { key, value, belowCost } : { key, value });
+      const line: Record<string, unknown> = { key, value };
+      if (belowCost.length) line.belowCost = belowCost;
+      if (undoOf) line.undoOf = undoOf;
+      if (ref) line.ref = ref;
+      await writeAuditSafe("admin", "setting.set", line, before);
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this
          the owner saves a price in «Настройки → Доставка» and the very next
          checkout still bills the old one — which is exactly the "the panel

@@ -84,9 +84,12 @@ const FUNCS = [
   "cloneRules", "jsonCanon", "shipSig", "shipDirty", "shipDraft", "shipNum", "setShipDraftField",
   "shipStoredMerge", "shipRulesBase", "shipRulesFrom", "setShipRules", "applyShipRules", "feedShipRules",
   "shipFreshNote", "shipFreshRow", "adoptServer", "loadShipRules", "loadAdminPricing",
-  "shipLowCells", "shipLowAction", "shipSaveAction", "shipLowAsk", "shipPlaceName", "shipLowLine", "eur",
-  "shipBody", "shipSavedText", "shipSavedOk", "shipRulesRefused", "srvSaved", "srvPush", "demoApply",
+  "shipLowCells", "shipPlaceName", "shipLowLine", "eur",
+  "shipSavedText", "srvSaved", "srvPush", "demoApply",
   "orderCountry", "shipZoneOf", "shipRulePrice",
+  // 1a: the table saves through its settings slot — shipPut() is the slot's send
+  "shipCellKey", "shipRowCell", "shipRowSet", "shipAccepted", "shipLowAll", "shipHeldCells", "shipGate",
+  "shipAcceptRow", "shipPut", "admAutosaveOk", "admSetTake", "admSetFresh", "admSetBusy", "admSetTyping",
 ];
 
 type Row = Record<string, unknown> & { carriers?: Record<string, Record<string, number>> };
@@ -152,6 +155,7 @@ function page(opts: {
     SHIP_ROWS: literal("SHIP_ROWS"),
     FEED_FETCH: { cache: "no-store" },
     pendingAction: null, shipRollback: null, shipRulesAsked: false,
+    shipServerRow: null, SHIP_ACCEPT: {}, ADM_AS: {}, ADM_SET_AT: {}, ADM_SET_OF: literal("ADM_SET_OF"),
     shipFresh: null,
     SHIP_FRESH_MS: scalar("SHIP_FRESH_MS", 180000),
     SHIP_FRESH_LS: scalar("SHIP_FRESH_LS", "rempire-ship-fresh"),
@@ -189,13 +193,16 @@ const tick = async () => { for (let i = 0; i < 5; i++) await new Promise((r) => 
 /** The till's price for an Estonian / Latvian Omniva locker, as this page would bill it. */
 const omniva = (p: { fn: Fns }, cc = "EE") => p.fn.shipRulePrice("parcel", "omniva", cc) as number;
 
-/** «1» and «2» in the Omniva boxes, «Сохранить», «Сохранить всё равно». */
+/** «1» and «2» in the Omniva boxes, «Оставить так» on both (1a, q4) — the
+    change applied, and the settings slot's write (admSetPut → shipPut). */
 async function saveBelowCost(p: { scope: Scope; fn: Fns }) {
   p.fn.setShipDraftField("c:omniva:EE", "1");
   p.fn.setShipDraftField("c:omniva:LV", "2");
-  const card = p.fn.shipSaveAction(p.fn.cloneRules(p.fn.shipDraft())) as { belowCost?: boolean; ok?: string };
-  expect(card.belowCost, "the card did not ask").toBe(true);
-  p.fn.demoApply(card);
+  const accept = p.scope.SHIP_ACCEPT as Record<string, number>;
+  accept["c:omniva:EE"] = 1;
+  accept["c:omniva:LV"] = 2;
+  p.fn.demoApply({ type: "set_shipping_rules", rules: p.fn.cloneRules(p.fn.shipDraft()), full: true });
+  await p.fn.shipPut({});
   await tick();
 }
 
@@ -215,8 +222,6 @@ describe("the row just saved outlives the edge's copy of the old one", () => {
     expect(p.puts).toEqual([
       { settings: { shipping_rules: expect.objectContaining({ carriers: { omniva: { EE: 1, LV: 2 } } }) }, acceptBelowCost: true },
     ]);
-    expect(p.scope.S.shipSaving).toBe(false);
-    expect(p.scope.S.admSetSaved).toBe("delivery");
     expect(omniva(p)).toBe(1);
   });
 

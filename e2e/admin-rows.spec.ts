@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 /**
  * «Which one am I pointing at?» — the admin's list rows.
@@ -16,8 +16,10 @@ import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, P
  * the keyboard's, which is the laptop too.
  */
 
-const PAPER = "rgb(255, 255, 255)";
-const TINT = "rgb(246, 244, 238)";
+/* The panel's paper and its soft panel — direction 1a's tokens (admin.css
+   --a-paper #fdfcf9, --a-panel #f4f2ec, which --a-tint now names). */
+const PAPER = "rgb(253, 252, 249)";
+const TINT = "rgb(244, 242, 236)";
 
 async function bg(row: Locator): Promise<string> {
   return row.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -86,7 +88,8 @@ test.describe("admin — the row under the pointer", () => {
 
     // «Товары» — the row IS the button here, so the same rules have to reach it
     await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
-    const goods = page.locator("#goodslist .adm-row--click");
+    // 1a (screen 10): a catalogue row is a wrapper — the name is its button, the «Виден» switch sits beside it
+    const goods = page.locator("#goodslist .adm-row--open");
     await expect(goods.nth(1)).toBeVisible();
     await expectHoverLights(page, goods.nth(0), goods.nth(1), "products");
 
@@ -100,6 +103,7 @@ test.describe("admin — the row under the pointer", () => {
       await page.locator('[data-promof="code"]').fill(code + suffix);
       await page.locator('[data-promokind="percent"]').click();
       await page.locator('[data-promof="value"]').fill("5");
+      await page.locator('[data-promof="value"]').blur();
       await page.locator("[data-admpromosave]").click();
       await expect(page.locator(`[data-admpromotoggle="${code}${suffix}"]`)).toBeVisible();
     }
@@ -131,7 +135,8 @@ test.describe("admin — the row under the pointer", () => {
  * under both and starting at the same x on every row, the actions under the
  * chips at the row's left edge, the sum on the first line at the right edge.
  *
- * This measures exactly that on the six lists that have the shape, with the
+ * This measures exactly that on the five lists that have the shape (the
+ * letters have their own since 1a — mailShape below), with the
  * longest name the panel should ever meet on one row of each (60 characters),
  * and at 360 px as well as 375 — the phone Renat actually holds. Phone only:
  * a desktop lays the same rows out in one line, and that is its own layout.
@@ -172,6 +177,56 @@ async function rowShapes(page: Page, sel: string): Promise<RowShape[]> {
   }, sel);
 }
 
+/* 1a (README § 5): «Склад» and «Наборы» are not the three-line row of the
+   other lists any more but the design's own — a product's sizes as short rows
+   with − / + (11-stock-phone-v2), a set with its price and its switch under
+   the name (12-sets). The promise is the same one: every row of a list has the
+   same shape, nothing runs past the screen, nothing wraps, and every control
+   is a thumb's size. */
+async function listShape(page: Page, rowSel: string, alignSel: string, nameSel: string, smallSel: string, label: string): Promise<void> {
+  const r = await page.evaluate(({ rowSel, alignSel, nameSel, smallSel }) => {
+    const vw = document.documentElement.clientWidth;
+    const rows = Array.from(document.querySelectorAll(rowSel));
+    return {
+      vw,
+      n: rows.length,
+      right: rows.map((row) => { const el = row.querySelector(alignSel); return el ? Math.round(el.getBoundingClientRect().right) : -1; }),
+      over: rows.filter((row) => row.getBoundingClientRect().right > vw + 0.5).length,
+      wraps: Array.from(document.querySelectorAll(nameSel)).filter((el) => el.getBoundingClientRect().height > 24).length,
+      small: rows.flatMap((row) => Array.from(row.querySelectorAll<HTMLElement>(smallSel))
+        .map((el) => ({ t: (el.textContent || el.getAttribute("aria-label") || "").trim(), b: el.getBoundingClientRect() }))
+        .filter(({ b }) => b.width && b.height && (b.width < 43.5 || b.height < 43.5))
+        .map(({ t, b }) => `«${t}» ${Math.round(b.width)}×${Math.round(b.height)}`)),
+    };
+  }, { rowSel, alignSel, nameSel, smallSel });
+  expect(r.n, `${label} @${r.vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  expect(r.right.filter((x) => x < 0), `${label} @${r.vw}: a row without its control`).toEqual([]);
+  expect(new Set(r.right).size, `${label} @${r.vw}: the controls do not line up`).toBe(1);
+  expect(r.over, `${label} @${r.vw}: a row runs past the screen`).toBe(0);
+  expect(r.wraps, `${label} @${r.vw}: a name wraps onto a second line`).toBe(0);
+  expect(r.small, `${label} @${r.vw}: controls under 44 px`).toEqual([]);
+}
+
+/** «Каталог» on the phone (1a, screen 10): its own two-line row — brand and name on top,
+ *  the stock tag and the volumes under them from one x, the price at the right edge. */
+async function catalogueShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll("#goodslist .adm-grow[data-goodsrow]")).map((row) => {
+    const b = (sel: string) => { const e = row.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; };
+    return { id: row.getAttribute("data-goodsrow") || "", row: (() => { const r = row.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; })(), open: b(".adm-grow__open"), line: b(".adm-grow__line"), pr: b(".adm-grow__pr") };
+  }));
+  expect(rows.length, `Каталог @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].line ? rows[0].line.left : NaN;
+  for (const r of rows) {
+    const who = `Каталог @${vw} · ${r.id}`;
+    expect(r.open && r.line && r.pr, `${who}: a part of the row is missing`).toBeTruthy();
+    expect(r.line!.top, `${who}: the tag line sits beside the name instead of under it`).toBeGreaterThanOrEqual(r.open!.bottom - 1);
+    expect(Math.round(r.line!.left - x), `${who}: the tag line starts at another x than the first row's`).toBe(0);
+    expect(r.pr!.right, `${who}: the price runs past the row`).toBeLessThanOrEqual(r.row.right + 0.5);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+  }
+}
+
 /** Every row of `sel` has the shape, and the same shape as the first row. */
 async function oneShape(page: Page, sel: string, label: string): Promise<void> {
   const rows = await rowShapes(page, sel);
@@ -196,6 +251,129 @@ async function oneShape(page: Page, sel: string, label: string): Promise<void> {
     }
     expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
     expect(r.small, `${who}: controls under 44 px`).toEqual([]);
+  }
+}
+
+/**
+ * «Блог» since 1a (screen 16): a card row — the cover, then the title over its
+ * date · languages and the status tag, all from one x. The same promise as
+ * the other lists, measured on that shape: the words start at one x on every
+ * row, a long title wraps instead of being cut sideways, nothing runs past
+ * the screen, and the row is a thumb's size.
+ */
+async function blogShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll("[data-bloglist] .adm-brow")).map((row) => {
+    const b = (el: Element | null) => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height };
+    };
+    const t = row.querySelector(".adm-brow__t") as HTMLElement | null;
+    return { text: (t?.textContent || "").trim(), row: b(row)!, body: b(row.querySelector(".adm-brow__body")), cut: !!t && t.scrollWidth > t.clientWidth + 1 };
+  }));
+  expect(rows.length, `Блог @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].body ? rows[0].body.left : NaN;
+  for (const r of rows) {
+    const who = `Блог @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.body, `${who}: the row has no text body`).not.toBeNull();
+    expect(Math.round(r.body!.left - x), `${who}: the words start at another x than the first row's`).toBe(0);
+    expect(r.cut, `${who}: the title is cut off sideways`).toBe(false);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    expect(r.row.height, `${who}: the row is under 44 px`).toBeGreaterThanOrEqual(43.5);
+  }
+}
+
+/**
+ * «Заказы» has the 1a shape (design_handoff_admin_ux, screen 04), still one
+ * shape on every row: the customer and the sum on the first line; the
+ * number · day · what · where and the status tag on the second, the tag at
+ * the row's right edge on every row; the step, when there is one — never
+ * more than one — under both, the row's full width; nothing under 44 px,
+ * nothing past the screen.
+ */
+async function orderShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => {
+    const box = (el: Element | null) => {
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, height: b.height };
+    };
+    return Array.from(document.querySelectorAll("#orderlist .adm-orow")).map((row) => ({
+      text: (row.querySelector(".adm-orow__who")?.textContent || "").trim(),
+      row: box(row)!,
+      who: box(row.querySelector(".adm-orow__who")),
+      what: box(row.querySelector(".adm-orow__what")),
+      tag: box(row.querySelector(":scope > .adm-orow__tag")),
+      amt: box(row.querySelector(":scope > .adm-row__amt")),
+      acts: box(row.querySelector(":scope > .adm-acts")),
+      steps: row.querySelectorAll(":scope > .adm-acts button, :scope > .adm-acts a").length,
+      small: Array.from(row.querySelectorAll<HTMLElement>(":scope > .adm-acts button, :scope > .adm-acts a"))
+        .map((el) => ({ el, b: el.getBoundingClientRect() }))
+        .filter(({ b }) => b.width && b.height && (b.width < 43.5 || b.height < 43.5))
+        .map(({ el, b }) => `«${(el.textContent || "").trim()}» ${Math.round(b.width)}×${Math.round(b.height)}`),
+    }));
+  });
+  expect(rows.length, `Заказы @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  for (const r of rows) {
+    const who = `Заказы @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.who!.height, `${who}: the name wraps onto a second line`).toBeLessThanOrEqual(24);
+    expect(Math.abs(r.amt!.top - r.who!.top), `${who}: the sum is not on the first line`).toBeLessThanOrEqual(4);
+    expect(Math.round(r.row.right - r.amt!.right), `${who}: the sum is not at the right edge`).toBe(0);
+    expect(r.what!.top, `${who}: number · day · what is not the second line`).toBeGreaterThanOrEqual(r.who!.bottom - 1);
+    expect(r.tag!.top, `${who}: the status tag is not on the second line`).toBeGreaterThanOrEqual(r.who!.bottom - 1);
+    expect(Math.round(r.row.right - r.tag!.right), `${who}: the status tag is not at the right edge`).toBe(0);
+    if (r.acts) {
+      expect(r.acts.top, `${who}: the steps sit beside the lines instead of under them`)
+        .toBeGreaterThanOrEqual(Math.max(r.tag!.bottom, r.what!.bottom) - 1);
+      expect(Math.round(r.acts.left - r.row.left), `${who}: the steps do not start at the row's left edge`).toBe(0);
+    }
+    expect(r.steps, `${who}: more than one action on the row`).toBeLessThanOrEqual(1);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    expect(r.small, `${who}: controls under 44 px`).toEqual([]);
+  }
+}
+
+/**
+ * «Письма» since 1a (README § 5): not the three-line row any more but the
+ * design's own — the letter's name and what it does on the left, its switch
+ * (or «›», or the pair's «вместе с первым») at the right edge. The same
+ * promise as the other lists, measured on that shape: every row starts its
+ * words at one x and ends its control at one x, nothing runs past the screen,
+ * nothing is cut sideways, and every switch is a thumb's size.
+ */
+async function mailShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll(".adm-mrow")).map((row) => {
+    const box = (el: Element | null) => {
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, width: b.width, height: b.height };
+    };
+    const nm = row.querySelector(".adm-row__nm") as HTMLElement | null;
+    const sw = row.querySelector(":scope > .adm-sw");
+    return {
+      text: (nm?.textContent || "").trim(),
+      row: box(row)!,
+      body: box(row.querySelector(":scope > .adm-row__body")),
+      end: box(row.lastElementChild),
+      sw: box(sw),
+      cut: !!nm && nm.scrollWidth > nm.clientWidth + 1,
+    };
+  }));
+  expect(rows.length, `Письма @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].body ? rows[0].body.left : NaN;
+  const endX = rows[0].end ? rows[0].end.right : NaN;
+  for (const r of rows) {
+    const who = `Письма @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.body, `${who}: the row has no text body`).not.toBeNull();
+    expect(Math.round(r.body!.left - x), `${who}: the words start at another x than the first row's`).toBe(0);
+    expect(Math.round(r.end!.right - endX), `${who}: the switch does not end where the first row's does`).toBe(0);
+    expect(r.end!.left, `${who}: the switch sits under the words instead of beside them`).toBeGreaterThanOrEqual(r.body!.right - 1);
+    expect(r.cut, `${who}: the name is cut off sideways`).toBe(false);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    if (r.sw) expect(Math.min(r.sw.width, r.sw.height), `${who}: the switch is under 44 px`).toBeGreaterThanOrEqual(43.5);
   }
 }
 
@@ -242,28 +420,30 @@ test.describe("admin — one shape per list on the phone", () => {
         await adminSection(page, "orders");
         await page.locator('[data-admfilter="all"]').click();
         await expect(page.locator("#orderlist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#orderlist .adm-row--lines", "Заказы");
+        await orderShape(page);
 
         await adminSection(page, "goods");
         await page.locator('[data-admgoodstab="bundles"]').click();
         await expect(page.locator(`[data-bundleedit="${setId}"]`)).toBeVisible();
-        await oneShape(page, ".adm-row--lines:has([data-bundleedit])", "Наборы");
+        await listShape(page, ".adm-setrow", ".adm-sw", ".adm-setrow .adm-row__nm", ".adm-link--move, .adm-sw", "Наборы");
 
         await page.locator('.adm-tab[data-admtab="goods"]').click();
-        await expect(page.locator("#goodslist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#goodslist .adm-row--lines", "Каталог");
+        await expect(page.locator("#goodslist .adm-grow[data-goodsrow]").nth(1)).toBeVisible();
+        await catalogueShape(page);
 
         await page.locator('.adm-tab[data-admtab="stock"]').click();
-        await expect(page.locator("#stocklist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#stocklist .adm-row--lines", "Склад");
+        await expect(page.locator("#stocklist .adm-stk__r").nth(1)).toBeVisible();
+        await listShape(page, "#stocklist .adm-stk__r", ".adm-stk__q", "#stocklist .adm-stk__n", ".adm-stk__q button, .adm-stk__sz", "Склад");
 
         await adminSection(page, "blog");
         await expect(page.locator(`[data-admblogedit="${postId}"]`)).toBeVisible();
-        await oneShape(page, "[data-admblogedit].adm-row--lines", "Блог");
+        // 1a: an article is a card row of its own shape (screen 16)
+        await blogShape(page);
 
         await adminSection(page, "promos", "mail");
         await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
-        await oneShape(page, ".adm-row--lines:has(> [data-mailtpl])", "Письма");
+        // 1a: a letter is one row of its own shape — words left, switch right
+        await mailShape(page);
       }
     } finally {
       await page.request.delete(`/api/admin/bundles/?id=${encodeURIComponent(setId)}`);
@@ -276,7 +456,7 @@ test.describe("admin — one shape per list on the phone", () => {
  * The whole row opens, except the controls on it.
  *
  * Renat, 12.09.2026, on «Заказы»: only the words of a row opened the order.
- * The row also carries a «Доставлен» (or «Создать этикетку · Отправлен»), and
+ * The row also carries a «Доставлен» (or «Создать этикетку»), and
  * everything from that button to the right edge answered nothing at all — on a
  * phone that is half of what a thumb lands on. Since round 15 the opener sits
  * on the row itself (`data-admrowopen`, app.js admRowOpenAttr) and the click
@@ -291,7 +471,7 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     test.skip(testInfo.project.name !== "mobile", "the dead patch is under the actions line, which only a phone draws");
   });
 
-  test("«Заказы»: the chip, the sum and the blank beside «Отправлен» all open the order", async ({ page }) => {
+  test("«Заказы»: the chip and the sum open the order; the one step fills its line", async ({ page }) => {
     test.setTimeout(180_000);
 
     // one paid order, so the row has both its actions and something to open
@@ -308,7 +488,8 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     await page.locator('[data-admfilter="all"]').click();
     const row = page.locator("#orderlist .adm-row--lines").filter({ hasText: number }).first();
     await expect(row).toBeVisible();
-    const card = page.locator('[data-admorder=""]');
+    // 1a: on a phone the card's «← Заказы» is the top bar's, drawn only while a card is open
+    const card = page.locator("[data-admtopback]");
 
     /** Opens the card from `where`, then shuts it again with its own «←». */
     async function opensFrom(where: Locator, what: string, position?: { x: number; y: number }) {
@@ -322,36 +503,47 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     await opensFrom(row.locator(".adm-row__line"), "the chip line");
     await opensFrom(row.locator(".adm-row__amt"), "the sum");
 
-    // the blank after the last action — the patch the owner reported
+    /* the blank after the last action — the patch the owner reported. 1a has
+       ONE action per row, and a lone action takes the whole line (admin.css
+       .adm-row--lines > .adm-acts > .adm-btn:only-child), so there is no
+       blank left beside it to land in by mistake. */
     const acts = row.locator(".adm-acts");
     await expect(acts).toBeVisible();
+    await expect(acts.locator("button, a"), "a row carries more than one action").toHaveCount(1);
+    const step = row.locator("[data-admlabel]");
     const box = (await acts.boundingBox())!;
-    await opensFrom(acts, "the blank beside the actions", { x: box.width - 6, y: box.height / 2 });
+    const btn = (await step.boundingBox())!;
+    expect(Math.round(box.width - btn.width), "the lone step leaves a dead patch beside it").toBeLessThanOrEqual(1);
 
-    // …and the action itself is still the action, not a way into the card
-    await row.locator("[data-admshipnow]").click();
-    await expect(page.locator(".adm-confirm"), "«Отправлен» stopped asking").toBeVisible();
-    await expect(card, "«Отправлен» opened the order card as well").toHaveCount(0);
-    await page.locator("[data-admcancel]").click();
-    await expect(page.locator(".adm-confirm")).toHaveCount(0);
+    /* …and the action itself is still the action: the tap asks for the label.
+       (It then shows the card on purpose — the label, the box and the PDF are
+       there; the click handler sets S.adminOrder. The request is stopped at
+       the network, so no label is made.) */
+    const labelUrl = (u: URL) => u.pathname.startsWith("/api/admin/shipments");
+    await page.route(labelUrl, (r) => r.abort());
+    const asked = page.waitForRequest((r) => r.url().includes("/api/admin/shipments") && r.method() === "POST");
+    await step.click();
+    await asked;
+    await page.unroute(labelUrl);
   });
 
-  test("«Письма»: the gap between the switch and «Изменить» opens the letter", async ({ page }) => {
+  test("«Письма»: the blank beside the switch opens the letter", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "promos", "mail");
 
     const sw = page.locator('[data-admflow="backstock"]');
-    const row = page.locator(".adm-row--lines").filter({ has: sw }).first();
+    const row = page.locator(".adm-row--open").filter({ has: sw }).first();
     await expect(row).toBeVisible();
     const was = await sw.getAttribute("aria-checked");
-    const line = row.locator(".adm-row__line--split");
-    const box = (await line.boundingBox())!;
-    // dead centre of the split line: the switch is at its left end, «Изменить»
-    // at its right, and what is between them belonged to nobody
-    await line.click({ position: { x: box.width / 2, y: box.height / 2 } });
-    await expect(page.locator("[data-mailback]"), "the gap on the letter's row opened nothing").toBeVisible();
-    await page.locator("[data-mailback]").click();
+    /* 1a: the letter's words and its switch on one row. The row's own
+       padding above the switch belonged to nobody — it opens the letter */
+    const box = (await row.boundingBox())!;
+    const swBox = (await sw.boundingBox())!;
+    await row.click({ position: { x: swBox.x - box.x - 8, y: 4 } });
+    // (on a phone the letter's way back is the top bar's «← Все письма» — fixtures.cardBack)
+    await expect(cardBack(page, "[data-mailback]", "Все письма"), "the gap on the letter's row opened nothing").toBeVisible();
+    await cardBack(page, "[data-mailback]", "Все письма").click();
     // …and the letter itself was not switched on the way in
     await expect(sw).toBeVisible();
     await expect(sw, "the gap flipped the letter's switch").toHaveAttribute("aria-checked", was ?? "false");

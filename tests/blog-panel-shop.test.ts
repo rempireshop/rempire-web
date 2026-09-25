@@ -98,10 +98,14 @@ async function loadList(answer: Answer, S: Partial<BlogState> = {}): Promise<Blo
   return Object.assign(state, { srv: SRV });
 }
 
+/* 1a: the screen is the header, the list pane and the editor pane side by
+   side (admBlogScreen); the list itself is admBlogListHTML, which draws the
+   states this file is about. An article whose delete is being held
+   (BLOG_HELD) is already gone from it. */
 function blogScreen(S: Partial<BlogState>): string {
   const run = new Function(
-    "S", "admHead", "admBlogRowHTML", "esc", "admBlogEditorScreen",
-    `${slice("admBlogScreen")} return admBlogScreen();`,
+    "S", "admBlogHeadHTML", "admBlogRowHTML", "esc", "admBlogEditorScreen",
+    `var BLOG_HELD = {}; ${slice("admBlogListHTML")} ${slice("admBlogScreen")} return admBlogScreen();`,
   ) as (...a: unknown[]) => string;
   return run(
     { adminBlog: null, adminBlogListErr: false, adminBlogEdit: null, adminBlogEditBusy: false, ...S },
@@ -215,11 +219,19 @@ function panel(opts: { dirty: boolean; confirmBack?: boolean }): Layers {
     var ADM_TRAIL = [], pendingAction = null, BLOGSEL = {}, BLOGCARET = {}, AI_UNDO = null;
     var GAL = { id: "" };
     function admTrailBack() {}
+    // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+    function admAutosaveFlush() {}
+    // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+    function edAsForget() {}
+    function goodsNewSave() {}
     function closeScannerState() {}
     function goodsBackToRow() {}
     function vidReset() {}
     function blogReadForm() { onRead(); }
     function blogDirty() { return DIRTY; }
+    // 1a: an article that can be saved saves itself and closes; these are the ones that cannot (no Russian title)
+    function blogSavesItself() { return false; }
+    function blogAutosave() {}
     ${slice("admLayers")}
     ${slice("admCloseTop")}
     return admCloseTop;

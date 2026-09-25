@@ -349,6 +349,10 @@ export async function GET(req: Request) {
       webhookMissingEvents: webhook?.missingEvents ?? null,
       pendingRefunds: stuck.length,
       overdueRefunds: stuck.filter((r) => r.overdue).length,
+      /* How many of the rows above are red — the one derived number kept,
+         because «Обзор» reads it for the phone's «Ещё» line of «Подключения»
+         (src/lib/overview-extras.ts) and must not call Montonio to get it. */
+      problems: rows.filter((r) => !r.ok).length,
     });
   } catch (err) {
     console.error("[api/admin/montonio] could not record the readiness snapshot:", err);

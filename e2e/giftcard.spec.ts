@@ -248,7 +248,7 @@ test.describe("the gift card as a banner slide", () => {
   async function openBannerCard(page: Page): Promise<void> {
     await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
     await page.locator('[data-admsetpage="home"]').click();
-    await expect(page.getByText("Главный баннер")).toBeVisible();
+    await expect(page.locator(".adm-sech__t", { hasText: "Баннер" })).toBeVisible();
   }
 
   test("the owner points slide 1 at it, picks its picture, and the shop's banner opens /gift/", async ({ page, browser }) => {
@@ -265,7 +265,7 @@ test.describe("the gift card as a banner slide", () => {
       await expect(go.locator('option[value="gift"]')).toHaveCount(1);
       await go.selectOption("gift");
       // the slide's own row in the list now says where its button goes
-      await expect(page.locator(".adm-row--tall").first().locator(".adm-row__sub"))
+      await expect(page.locator('[data-herorow="0"] .adm-row__sub').first())
         .toHaveText("Подарочная карта");
 
       // 2) …and as a picture, because it has no product photo of its own.
@@ -280,18 +280,15 @@ test.describe("the gift card as a banner slide", () => {
 
       await page.locator('[data-herof="title"]').fill("Подарочная карта Rempire");
       await page.locator('[data-herof="cta"]').fill("Выбрать сумму");
+      /* 1a: every change of the slide saved itself; «Свернуть» sends a text
+         still waiting out its second at once (heroCloseEdit → the flush) */
       await page.locator("[data-heroclose]").first().click();
 
-      const put = page.waitForResponse(
-        (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-herosave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-
-      const saved = await (await page.request.get("/api/admin/settings/")).json();
-      expect(saved.settings.hero.slides[0].go, "the slide's link never reached settings.hero").toBe("gift");
-      expect(saved.settings.hero.slides[0].image, "the slide's picture never reached settings.hero").toBe("gift");
+      const slide0 = async () => ((await (await page.request.get("/api/admin/settings/")).json())
+        .settings.hero?.slides?.[0] ?? {}) as { go?: string; image?: string; cta?: { RU?: string } };
+      await expect.poll(async () => (await slide0()).go, { timeout: 20_000, message: "the slide's link never reached settings.hero" }).toBe("gift");
+      await expect.poll(async () => (await slide0()).image, { timeout: 20_000, message: "the slide's picture never reached settings.hero" }).toBe("gift");
+      await expect.poll(async () => (await slide0()).cta?.RU, { timeout: 20_000, message: "the button's text never reached settings.hero" }).toBe("Выбрать сумму");
 
       // 3) the shopper's side: a clean context, the home page, the button
       const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(64) });
@@ -474,6 +471,8 @@ test.describe("gift card — refunds, both ways", () => {
             is spent from — the confirm card says so first, the server after. */
       await openOrder(page, giftOrder);
       await expect(page.locator("[data-giftused]")).toContainText(`${spent} €`);
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
       await expect(page.locator(".adm-propose__prev")).toContainText("уже потрачена");
@@ -486,6 +485,8 @@ test.describe("gift card — refunds, both ways", () => {
             and the money goes back onto the card, not to any bank. */
       await openOrder(page, shopOrder);
       await expect(page.locator(".adm-kv", { hasText: "Подарочная карта" })).toBeVisible();
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       const confirm = page.locator(".adm-confirm");
       await expect(confirm.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
@@ -504,6 +505,8 @@ test.describe("gift card — refunds, both ways", () => {
             card is cancelled with it and buys nothing any more. */
       await openOrder(page, giftOrder);
       await expect(page.locator("[data-giftused]")).toHaveCount(0);
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       await expect(page.locator(".adm-propose__prev")).toContainText("будет аннулирована");
       await expect(page.locator(".adm-propose__prev")).toContainText(card.code);

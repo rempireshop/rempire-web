@@ -33,6 +33,19 @@ function slice(name: string): string {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 const has = (name: string) => src.includes(`function ${name}(`);
+/** A `var NAME = { … };` object literal of app.js, evaluated (1a: srvPush()
+    hands the settings keys named in ADM_SET_OF to their autosave slot). */
+function literal(name: string): unknown {
+  const at = src.indexOf(`var ${name} = {`);
+  if (at < 0) return {};
+  const open = src.indexOf("{", at);
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return new Function(`return ${src.slice(open, i + 1)};`)();
+  }
+  return {};
+}
 
 /** Anything the sandbox does not provide: callable, returns nothing, any property is itself. */
 const STUB: unknown = new Proxy(function () { return undefined; }, {
@@ -56,6 +69,7 @@ function panel(on: number[], answer: Answer, lang = "RU") {
     GIFT_AMOUNTS: [25, 50, 75, 100],
     GIFT_AMOUNTS_DEFAULT: [25, 50, 100],
     shipRollback: null,
+    ADM_SET_OF: literal("ADM_SET_OF"),
     apiSend: (_url: string, _method: string, body: unknown) => {
       puts.push(body);
       return answer === "offline" ? Promise.reject(new Error("offline")) : Promise.resolve(answer);

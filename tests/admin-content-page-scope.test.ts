@@ -1,22 +1,23 @@
 /**
- * «Сохранить» and «Сбросить к стандартному» touch only the page they are on.
+ * The shop's details save field by field, reset page by page — and
+ * «Вернуть» puts back only what its change touched.
  *
- * The shop's own details are ONE document (DEMO.content → settings.content),
- * edited on ONE shared draft, but shown on two settings pages since the
- * settings redesign: the black strip above the header on «Главная страница»,
- * everything else — company, IBAN, hours, socials, the «Контакты» paragraph,
- * the e-mail footer — on «О компании». Each page's save bar already names only
- * its own card (contentDirtyFor) and «Отменить правки» already reverts only
- * its own part (contentRevert). The two buttons that WRITE did not (map of the
- * panel, 23.09.2026, #15):
- *   · «Главная страница» → «Верхняя полоска» → «Сбросить к стандартному»
- *     diffed the whole document against CONTENT_DEFAULT — so resetting the
- *     strip also put back the default company name, an empty IBAN, the
- *     default phone and socials, and wiped the e-mail footer;
- *   · one «Сохранить» on either page saved whatever the other page's form
- *     held too, and then threw the shared draft away.
- * Now both are scoped to the page, and a save or reset on one page leaves
- * what is still being typed on the other exactly where it was.
+ * The shop's own details are ONE document (DEMO.content → settings.content)
+ * shown on two settings pages: the black strip above the header on «Главная
+ * страница», everything else — company, IBAN, hours, socials, the «Контакты»
+ * paragraph, the e-mail footer — on «О компании».
+ *
+ *   · «Вернуть стандартный текст полоски» / «Вернуть стандартные данные»
+ *     (map of the panel, 23.09.2026, #15): each resets its own page's part —
+ *     the strip's reset used to put back the default company name, an empty
+ *     IBAN, the default phone and socials, and wipe the e-mail footer.
+ *   · Since 1a (25.09.2026) every box saves itself — ONE field per save
+ *     (admContentCommit), so what is typed on the other page is never carried
+ *     along, and stays typed.
+ *   · «Вернуть» on a change of the strip used to restore the WHOLE document
+ *     as it was before it (`prev.whole`), so every later «О компании» edit —
+ *     the phone typed after the strip — went back with it. The journal line
+ *     keeps only what the change's own fields held now (contentPrevPatch).
  *
  * The real functions are sliced out of public/shop2/app.js and run over a
  * stub of the rest.
@@ -54,19 +55,30 @@ function applyArm(): string {
   const start = src.lastIndexOf(head, at);
   return block(start + "else ".length, "demoApply's set_content arm");
 }
+/** …and demoUndo()'s, which puts a line's `prev` back. */
+function undoArm(): string {
+  const at = src.indexOf("DEMO.content = a.whole || null");
+  const head = 'else if (a.type === "set_content")';
+  const start = src.lastIndexOf(head, at);
+  return block(start + "else ".length, "demoUndo's set_content arm");
+}
 
 type Panel = {
   S: Record<string, any>;
   DEMO: Record<string, any>;
   press: (d: Record<string, string>) => void;
-  apply: (a: Record<string, any>) => void;
-  pending: () => any;
+  apply: (a: Record<string, any>) => any;
+  undo: (prev: Record<string, any>) => void;
+  commit: (paths: string[]) => void;
+  draftSet: (path: string, v: unknown) => void;
+  applied: any[];
   toasts: string[];
 };
 
 function panel(page: string): Panel {
   const S: Record<string, any> = { admSetPage: page, lang: "RU" };
   const toasts: string[] = [];
+  const applied: any[] = [];
   /* What the shop really has stored: real company details, a real IBAN,
      a footer, a custom strip — nothing like the built-in defaults. */
   const DEMO: Record<string, any> = {
@@ -82,8 +94,8 @@ function panel(page: string): Panel {
     },
   };
   const made = new Function(
-    "S", "DEMO", "toast", "render", "refocus", "contentConfirmDetail",
-    `var pendingAction = null, entry = {};
+    "S", "DEMO", "toast", "render", "refocus", "applied",
+    `var entry = {};
      ${decl("CONTENT_DEFAULT")}
      ${decl("CONTENT_DAYS")}
      ${decl("CONTENT_SOCIALS")}
@@ -91,39 +103,46 @@ function panel(page: string): Panel {
      ${fn("contentLoaded")}
      ${fn("contentConf")}
      ${fn("contentDraft")}
+     ${fn("cPathGet")}
+     ${fn("cPathSet")}
+     ${fn("cDraftGet")}
+     ${fn("cDraftSet")}
      ${fn("cHoursNorm")}
      ${fn("cTriDiff")}
      ${fn("contentDiff")}
-     ${fn("contentDirtyFor")}
      ${fn("contentApply")}
-     ${src.includes("function contentPart(") ? fn("contentPart") : ""}
-     ${src.includes("function contentKeepOther(") ? fn("contentKeepOther") : ""}
-     ${src.includes("function contentOnPage(") ? fn("contentOnPage") : ""}
+     ${fn("contentPart")}
+     ${fn("contentKeepOther")}
+     ${fn("contentOnPage")}
+     ${fn("contentPrevPatch")}
+     ${fn("admContentCommit")}
+     function apply(a) { entry = {}; ${applyArm()} return entry; }
+     /* the page's own door: the journal line and the local state (demoApply's arm) */
+     function admSetApply(a, text) { applied.push(a); toast(text); return apply(a); }
      return {
        press: function (d) {
-         ${branch("if (d.contentsave !== undefined)")}
          ${branch("if (d.contentreset !== undefined)")}
        },
-       apply: function (a) { ${applyArm()} },
-       pending: function () { return pendingAction; }
+       apply: apply,
+       undo: function (a) { ${undoArm()} },
+       commit: function (paths) { admContentCommit(paths); },
+       draftSet: cDraftSet
      };`,
-  )(S, DEMO, (s: string) => { toasts.push(s); }, () => {}, () => {}, () => "") as Omit<Panel, "S" | "DEMO" | "toasts">;
-  return { S, DEMO, toasts, ...made };
+  )(S, DEMO, (s: string) => { toasts.push(s); }, () => {}, () => {}, applied) as Omit<Panel, "S" | "DEMO" | "toasts" | "applied">;
+  return { S, DEMO, toasts, applied, ...made };
 }
 
-describe("«Сбросить к стандартному» on «Главная страница» resets the strip only", () => {
-  it("asks about the announcement and nothing else", () => {
+describe("«Вернуть стандартный текст полоски» on «Главная страница» resets the strip only", () => {
+  it("saves the announcement and nothing else", () => {
     const p = panel("home");
-    p.press({ contentreset: "" });
-    const act = p.pending();
-    expect(act, "no confirm card").toBeTruthy();
-    expect(Object.keys(act.value), "the reset reaches past the strip").toEqual(["announcement"]);
+    p.press({ contentreset: "home" });
+    expect(p.applied, "the reset did not save").toHaveLength(1);
+    expect(Object.keys(p.applied[0].value), "the reset reaches past the strip").toEqual(["announcement"]);
   });
 
-  it("…and applying it leaves the company, the IBAN, the hours, the socials and the footer as they were", () => {
+  it("…and leaves the company, the IBAN, the hours, the socials and the footer as they were", () => {
     const p = panel("home");
-    p.press({ contentreset: "" });
-    p.apply(p.pending());
+    p.press({ contentreset: "home" });
     expect(p.DEMO.content.company.iban).toBe("EE382200221020145685");
     expect(p.DEMO.content.company.legalName).toBe("Renat OÜ");
     expect(p.DEMO.content.hours.mon).toBe("10:00–18:00");
@@ -134,61 +153,76 @@ describe("«Сбросить к стандартному» on «Главная �
 
   it("on «О компании» it resets that page's details and leaves the strip alone", () => {
     const p = panel("company");
-    p.press({ contentreset: "" });
-    const keys = Object.keys(p.pending().value);
+    p.press({ contentreset: "company" });
+    const keys = Object.keys(p.applied[0].value);
     expect(keys).not.toContain("announcement");
     expect(keys).toContain("company");
+    expect(p.DEMO.content.announcement.text.RU).toBe("Скидки всю неделю");
+  });
+
+  it("nothing to reset — nothing saved, and it says so", () => {
+    const p = panel("home");
+    p.press({ contentreset: "home" });
+    p.press({ contentreset: "home" });
+    expect(p.applied).toHaveLength(1);
+    expect(p.toasts.at(-1)).toBe("Уже стандартные значения");
   });
 });
 
-describe("«Сохранить» on one page saves that page's edits only", () => {
-  it("a save on «Главная страница» does not carry the details half-typed on «О компании»", () => {
-    const p = panel("company");
-    // «О компании»: a new phone, typed and not saved
-    p.S.contentDraft = null;
-    const draft = (p as any).S;
-    p.press({ contentsave: "" });          // nothing changed yet
-    expect(p.pending()).toBeNull();
-
-    const d = JSON.parse(JSON.stringify(p.DEMO.content));
-    d.company.phone = "+372 5111 1111";   // typed on «О компании»
-    d.announcement.text.RU = "Новая полоска"; // typed on «Главная страница»
-    draft.contentDraft = d;
-    draft.admSetPage = "home";
-    p.press({ contentsave: "" });
-    const act = p.pending();
-    expect(Object.keys(act.value), "the strip's save carried the phone").toEqual(["announcement"]);
-
-    p.apply(act);
+describe("a box saves its own field — and only its own", () => {
+  it("the strip's text saves without the phone half-typed on «О компании», which stays typed", () => {
+    const p = panel("home");
+    p.draftSet("company.phone", "+372 5111 1111");      // typed on «О компании», box not left yet
+    p.draftSet("announcement.text.RU", "Новая полоска");  // the strip's box, left
+    p.commit(["announcement.text.RU"]);
+    expect(p.applied).toHaveLength(1);
+    expect(p.applied[0].value, "the strip's save carried more than the strip").toEqual({ announcement: { text: { RU: "Новая полоска" } } });
     expect(p.DEMO.content.announcement.text.RU).toBe("Новая полоска");
-    expect(p.DEMO.content.company.phone, "the phone was saved from the other page").toBe("+372 5000 0000");
-    // …and it is still typed where it was: the other page's draft survived the save
-    expect(p.S.contentDraft && p.S.contentDraft.company.phone, "the typing on «О компании» was thrown away")
-      .toBe("+372 5111 1111");
+    expect(p.DEMO.content.company.phone, "the phone was saved from the other box").toBe("+372 5000 0000");
+    expect(p.S.contentDraft.company.phone, "the typing on «О компании» was thrown away").toBe("+372 5111 1111");
   });
 
-  it("a save on «О компании» leaves a strip being typed on «Главная страница» unsaved and kept", () => {
+  it("a box left unchanged saves nothing", () => {
     const p = panel("company");
-    const d = JSON.parse(JSON.stringify(p.DEMO.content));
-    d.company.phone = "+372 5111 1111";
-    d.announcement.text.RU = "Новая полоска";
-    p.S.contentDraft = d;
-    p.press({ contentsave: "" });
-    const act = p.pending();
-    expect(Object.keys(act.value)).toEqual(["company"]);
-    p.apply(act);
-    expect(p.DEMO.content.company.phone).toBe("+372 5111 1111");
-    expect(p.DEMO.content.announcement.text.RU).toBe("Скидки всю неделю");
-    expect(p.S.contentDraft && p.S.contentDraft.announcement.text.RU).toBe("Новая полоска");
+    p.commit(["company.phone"]);
+    expect(p.applied).toHaveLength(0);
   });
 
-  it("an assistant's set_content (no page) still replaces the draft as before", () => {
+  it("an assistant's set_content (no `keep`) still replaces the draft as before", () => {
     const p = panel("company");
-    const d = JSON.parse(JSON.stringify(p.DEMO.content));
-    d.company.phone = "+372 5111 1111";
-    p.S.contentDraft = d;
+    p.draftSet("company.phone", "+372 5111 1111");
     p.apply({ type: "set_content", value: { company: { phone: "+372 5222 2222" } } });
     expect(p.DEMO.content.company.phone).toBe("+372 5222 2222");
     expect(p.S.contentDraft).toBeNull();
+  });
+});
+
+describe("«Вернуть» puts back only what its change touched (the whole-document bug)", () => {
+  it("undoing the strip leaves the phone saved after it", () => {
+    const p = panel("home");
+    // «Главная страница»: the strip's text, saved — the line it writes
+    const strip = p.apply({ type: "set_content", value: { announcement: { text: { RU: "Новая полоска" } } }, keep: true });
+    // …then «О компании»: a new phone, saved
+    p.draftSet("company.phone", "+372 5333 3333");
+    p.commit(["company.phone"]);
+    expect(p.DEMO.content.company.phone).toBe("+372 5333 3333");
+    // «Вернуть» on the strip's line
+    p.undo(strip.prev);
+    expect(p.DEMO.content.announcement.text.RU, "the strip did not come back").toBe("Скидки всю неделю");
+    expect(p.DEMO.content.company.phone, "undoing the strip took the later phone with it").toBe("+372 5333 3333");
+  });
+
+  it("the line keeps what the fields held, not the document", () => {
+    const p = panel("company");
+    const entry = p.apply({ type: "set_content", value: { company: { phone: "+372 5444 4444" } }, keep: true });
+    expect(entry.prev).toEqual({ type: "set_content", value: { company: { phone: "+372 5000 0000" } } });
+  });
+
+  it("a line written before 25.09.2026 (the whole document) still goes back as it was", () => {
+    const p = panel("company");
+    const was = JSON.parse(JSON.stringify(p.DEMO.content));
+    p.apply({ type: "set_content", value: { company: { phone: "+372 5444 4444" } } });
+    p.undo({ type: "set_content", whole: was });
+    expect(p.DEMO.content.company.phone).toBe("+372 5000 0000");
   });
 });

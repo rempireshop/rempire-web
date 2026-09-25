@@ -122,10 +122,30 @@ describe("«О компании»: what the server will keep, said before the sa
     }
   });
 
-  it("warns under the field rather than refusing the save", () => {
-    // the value is the owner's; a refusal is a new way to lose an afternoon
-    expect(src).toContain('<span class="adm-hint--warn">');
-    expect(slice("cFieldHint")).toContain("adm-hint--warn");
+  /* 1a (25.09.2026, README § 2): the page saves itself, and «don't autosave
+     invalid values» — a value the server would quietly blank is not sent at
+     all; the box turns rust with one line under it, and saves the moment it
+     is right. Nothing typed is lost: it stays in the box. */
+  it("a value the server would blank is not sent — the box says why instead", () => {
+    const gate = new Function(`
+      var IBAN_RE = /^[A-Z]{2}[0-9A-Z ]{10,40}$/;
+      var C_FIELD_RE = ${literalSrc("C_FIELD_RE")};
+      var C_FIELD_GATE = ${literalSrc("C_FIELD_GATE")};
+      ${slice("ibanOk")}
+      ${slice("cFieldNorm")}
+      ${slice("cFieldOk")}
+      ${slice("cGateHint")}
+      return cGateHint;
+    `)() as (kind: string, v: string) => string;
+    expect(gate("phone", "tel 5623")).toMatch(/^Телефон/);
+    expect(gate("phone", "+372 5623 7237")).toBe("");
+    expect(gate("url", "javascript:alert(1)")).toMatch(/https:\/\//);
+    expect(gate("iban", "EE38 22")).toMatch(/^IBAN/);
+    expect(gate("iban", "EE38 2200 2210 2014 5685")).toBe("");
+    // an empty field is an answer, and always goes
+    for (const kind of ["regCode", "vatNumber", "email", "phone", "url", "iban"]) expect(gate(kind, "")).toBe("");
+    // …and the box that asks it is the one that sends it
+    expect(slice("cAs")).toContain("validate: function (v) { return cGateHint(gate, v); }");
   });
 });
 
@@ -244,7 +264,9 @@ describe("srvSaved: «Доставка» keeps the server's refusal in sight", (
 
   it("opening any settings page starts the box quiet again", () => {
     // …so a refusal cannot follow the owner to another screen
-    expect(src).toContain('if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; S.shipErr = "";');
+    // 1a: every door to a page goes through admSetOpen(), which clears it
+    expect(src).toContain("if (d.admsetpage !== undefined) { admSetOpen(d.admsetpage);");
+    expect(src.slice(src.indexOf("function admSetOpen("), src.indexOf("function admSetOpen(") + 400)).toContain('S.shipErr = "";');
   });
 });
 

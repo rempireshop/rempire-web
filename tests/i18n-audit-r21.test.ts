@@ -382,6 +382,11 @@ function blogTranslate(answer: (text: string) => Answer): BlogOut {
     function blogCardsIn(h) { return h; }
     function blogCleanHtml(h) { return h; }
     function apiSend(url, method, payload) { return Promise.resolve(ANSWER(payload.input.text)); }
+    /* 1a: a draft asks nothing before the assistant writes (blogAiAsks is
+       for a published article), and a translation saves itself */
+    function blogTextLen(h) { return String(h || "").length; }
+    function blogAiAsks() { return false; }
+    function blogAutosave() { return true; }
     function run() {
       ${block(app, "if (d.admblogtranslate !== undefined) {", "public/shop2/app.js no longer has the admblogtranslate handler")}
     }
@@ -393,7 +398,7 @@ function blogTranslate(answer: (text: string) => Answer): BlogOut {
 
 const OK = (et: string, en: string): Answer => ({ status: 200, body: { ok: true, texts: { ET: et, EN: en } } });
 
-describe("«Перевести статью» says «Черновик готов» only when it is", () => {
+describe("«Перевести статью» says it is done only when it is", () => {
   /* Title, excerpt and body are three separate requests to the model and any
      one of them can come back 502 or rate-limited on its own. The flag used to
      be set by the first target string of the first field that landed, so a body
@@ -422,10 +427,12 @@ describe("«Перевести статью» says «Черновик готов
     expect(out.draft.body.EN).toBe("");
   });
 
-  it("says «Черновик готов» when every field landed in every language", async () => {
+  /* 1a: the article saves itself, so the whole answer no longer says
+     «…и сохраните» — «Готово — проверьте текст.» (screen 16) */
+  it("says «Готово» when every field landed in every language", async () => {
     const out = blogTranslate(() => OK("eesti", "english"));
     await flush();
-    expect(out.toasts).toEqual(["Черновик готов — проверьте и сохраните"]);
+    expect(out.toasts).toEqual(["Готово — проверьте текст."]);
     expect(out.draft.body.EN).toBe("english");
   });
 

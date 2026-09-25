@@ -108,6 +108,12 @@ function overview(lang: Lang): string {
     function admDateLine() { return ""; }
     function admOrdersLabel(n) { return String(n); }
     function admRecentRow() { return ""; }
+    // 1a: the section headers, the one dark button and the first-open bars
+    function admSecHeadHTML(t, k, h, extra) { return "<h2>" + t + "</h2>" + (extra || ""); }
+    function admPinnedHTML(a, l) { return "<button " + a + ">" + l + "</button>"; }
+    function admShipAllLabel(n) { return "Отправить " + n; }
+    function admSkelHTML() { return ""; }
+    function admReviewWho(r) { return r.name; }
     ${slice("admProdName")}
     ${slice("admTaskRow")}
     ${slice("admOverviewHTML")}
@@ -140,17 +146,22 @@ describe("«Обзор → Сделать сегодня»: the products running
 
 describe("the other panel lists that print a product name", () => {
   const row = { productId: "a", variant: "250 мл", brand: "Kevin.Murphy", name: "Repair.Me.Wash — шампунь", tracked: true, qty: 2, state: "low", ean: "" };
+  /* 1a (q24): «Склад» names a product once, in the head of its group, and
+     lists its sizes under it — so the name to check is the group's. The size
+     rows carry no name at all and are stubbed out. */
   function stockRow(lang: Lang): string {
     return runInNewContext(`
-      var S = { lang: ${JSON.stringify(lang)}, stockEdit: "", stockSaved: "" };
+      var S = { lang: ${JSON.stringify(lang)}, stockEdit: "" };
       ${I18N}
       ${STUBS}
-      function shopHidden() { return false; }
-      function stockEditFormHTML() { return ""; }
-      ${slice("stockKey")}
+      function byIdOrNull() { return null; }
+      function media() { return ""; }
+      function admTagHTML(kind, text) { return "<span>" + esc(text) + "</span>"; }
+      function stockRowHTML() { return ""; }
       ${slice("admProdName")}
-      ${slice("stockRowHTML")}
-      stockRowHTML(${JSON.stringify(row)});
+      ${slice("stockGroupHTML")}
+      var r = ${JSON.stringify(row)};
+      stockGroupHTML({ id: r.productId, brand: r.brand, name: r.name, rows: [r], off: false });
     `, {}) as string;
   }
   function custOrderRow(lang: Lang): string {
@@ -179,6 +190,8 @@ describe("the other panel lists that print a product name", () => {
   }
 
   it("RU: the stock row keeps the Russian name", () => {
-    expect(translated(stockRow("RU"), "RU").join("\n")).toContain("Kevin.Murphy — Repair.Me.Wash — шампунь");
+    const nodes = translated(stockRow("RU"), "RU");
+    expect(nodes).toContain("Kevin.Murphy");
+    expect(nodes).toContain("Repair.Me.Wash — шампунь");
   });
 });

@@ -37,14 +37,6 @@ async function placeOrder(page: Page, email: string): Promise<string> {
   return payOrder(page, email, "paid");
 }
 
-/** «Применить» writes through to PUT /api/admin/settings only after the
- *  optimistic toast — the storefront visit below must not race that write. */
-async function applyAndWaitForSettingsWrite(page: Page): Promise<void> {
-  const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-  await page.locator("[data-admapply]").click();
-  expect((await put).ok()).toBe(true);
-}
-
 /** A switch in Настройки applies locally and PUTs in the background. A test
  *  that only waits for the toast then opens the storefront can read
  *  `/api/overrides/` *before* that write lands and see the old value — and a
@@ -72,6 +64,14 @@ async function openSettings(page: Page, sub: "home" | "company" = "home"): Promi
   if (await back.count()) await back.first().click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
   await expect(page.locator("[data-admsetback]")).toBeVisible();
+}
+
+/** «О компании» → «Реквизиты», opened (a 1a fold remembers its state, so a
+ *  second click would shut it). */
+async function openCompanyFold(page: Page): Promise<void> {
+  const head = page.locator('[data-admfold="content:company"]').first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
 }
 
 /** A switch is a <button role="switch" aria-checked>, not a link whose label
@@ -135,9 +135,9 @@ test.describe("admin", () => {
       // the redesigned card: mono `id · time` kicker, the customer as the title
       await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
       await expect(page.locator("h1.adm-h1")).toContainText("E2E Buyer");
-      // the 4-step fulfilment strip: «Оплачен» done, «Этикетка» is the step to do
-      await expect(page.locator(".adm-step--done")).toHaveCount(1);
-      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      // the 4-dot progress line (1a): «Оплачен» done, «Этикетка» is the step to do
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(1);
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Этикетка");
       const status = async () =>
         (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.status as string;
 
@@ -153,8 +153,8 @@ test.describe("admin", () => {
       await page.locator("[data-closetoast]").click();
 
       await expect(page.locator(".adm-badge--big")).toHaveText("Этикетка готова");
-      await expect(page.locator(".adm-step--done")).toHaveCount(2);
-      await expect(page.locator(".adm-step--now")).toContainText("Отправлен");
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(2);
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Отправлен");
       expect(await status()).toBe("paid");
       // the shipment box: a copyable tracking code, both label sizes — and the A4 one really is a PDF
       const code = ((await page.locator("[data-trackingcode]").textContent()) || "").trim();
@@ -183,7 +183,9 @@ test.describe("admin", () => {
       const sink = async () =>
         (await (await page.request.get(`/api/e2e/mail/?template=order-shipped&to=${encodeURIComponent(email)}`)).json())
           .mails as Array<{ links: string[] }>;
-      await expect.poll(async () => (await sink()).length).toBe(1);
+      /* 1a (q3): the letter waits ten seconds on the server, so «Вернуть» can
+         still stop it — it arrives after the hold, not with the PATCH */
+      await expect.poll(async () => (await sink()).length, { timeout: 25_000 }).toBe(1);
       expect((await sink())[0].links.some((l) => l.endsWith(code))).toBe(true);
 
       /* «Доставлен» — the owner's last step: applied at once, no letter, an
@@ -192,7 +194,7 @@ test.describe("admin", () => {
       await expect(page.getByRole("status")).toContainText(`${number} доставлен`);
       await page.locator("[data-closetoast]").click();
       await expect(page.locator(".adm-badge--big")).toHaveText("Доставлен");
-      await expect(page.locator(".adm-step--done")).toHaveCount(4);
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(4);
       await expect.poll(status).toBe("delivered");
       expect((await sink()).length).toBe(1);
 
@@ -218,7 +220,7 @@ test.describe("admin", () => {
       await page.locator('[data-admfilter="new"]').click();
       await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
       await expect(page.locator(".adm-badge--big")).toHaveText("Оплачен");
-      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Этикетка");
       await expect(page.locator(".adm-ship--off")).toContainText("Отправление у Montonio остаётся");
       await expect(page.locator(".adm-ordacts [data-admlabel]")).toHaveText("Создать этикетку");
     });
@@ -234,15 +236,13 @@ test.describe("admin", () => {
       await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
 
       try {
-        // The price lives on the editor's «Размеры и цены» tab (ED_TABS in app.js).
-        await page.locator('[data-edtab="sizes"]').click();
+        // 1a: the card saves the price when the box is left — wait for that write,
+        // the storefront visit below reads the server
         await page.locator("[data-edprice]").fill(newPrice);
-        // The toast is optimistic; the PUT to /api/admin/overrides/ lands after
-        // it. The storefront visit below reads the server, so wait for the write.
         const put = page.waitForResponse((r) => r.url().includes("/api/admin/overrides/") && r.request().method() === "PUT");
-        await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-        await expect(page.getByRole("status")).toBeVisible();
+        await page.locator("[data-edprice]").blur();
         expect((await put).ok()).toBe(true);
+        await expect(page.locator("[data-admsavest]").first()).not.toHaveAttribute("data-st", "saving");
 
         // A separate, logged-out storefront visit in its own browser context
         // — not just a new page — see freshStorefrontPage()'s own comment.
@@ -260,12 +260,11 @@ test.describe("admin", () => {
         await goodsTab(page).click();
         await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
         await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-        await page.locator('[data-edtab="sizes"]').click();
         await page.locator("[data-edprice]").fill(String(PRODUCT_2.price));
         // …and wait for this write too, or the context is torn down with the
         // request in flight and the next spec file sees the changed price.
         const back = page.waitForResponse((r) => r.url().includes("/api/admin/overrides/") && r.request().method() === "PUT");
-        await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
+        await page.locator("[data-edprice]").blur();
         await back;
       }
     });
@@ -279,14 +278,12 @@ test.describe("admin", () => {
 
       try {
         await page.locator('[data-heroedit="0"]').click();
+        /* 1a (25.09.2026): the title saves itself a second after the last
+           keystroke — no «Сохранить», no card; «Вернуть» on the toast */
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await page.locator('[data-herof="title"]').fill("E2E hero title");
-        // the banner is shop-wide, so «Сохранить» asks first — the overlay
-        // card, same as a tariff (README § State)
-        await page.locator("[data-herosave]").click();
-        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await applyAndWaitForSettingsWrite(page);
-        await expect(page.getByRole("status")).toBeVisible();
+        expect((await put).ok()).toBe(true);
+        await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));
@@ -294,10 +291,13 @@ test.describe("admin", () => {
         await expect(home.page.getByText("E2E hero title")).toBeVisible();
         await home.close();
       } finally {
+        // «Вернуть стандартный баннер» is under the banner's «⋯», and acts at once
         await openSettings(page);
+        const more = page.locator('[data-setmore="banner"]');
+        if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await page.locator("[data-heroreset]").click();
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        await put;
       }
     });
   });
@@ -313,15 +313,15 @@ test.describe("admin", () => {
         // separate "open" step, just expand its "Реквизиты" sub-block (see
         // fixtures/docs/testing.md on why nothing here waits on a "Контент"
         // heading click).
-        await page.locator('[data-contentblock="company"]').click();
-        await page.locator('[data-contentf="company.phone"]').fill("+372 5000000");
-        // the details reach every page of the shop, so the save asks first
-        await page.locator("[data-contentsave]").click();
-        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить данные магазина?");
-        await expect(page.locator(".adm-confirm__d")).toContainText("+372 5000000");
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await applyAndWaitForSettingsWrite(page);
-        await expect(page.getByRole("status")).toBeVisible();
+        // «Реквизиты» is a fold since 1a — opened, never toggled shut
+        await openCompanyFold(page);
+        const phone = page.locator('[data-contentf="company.phone"]');
+        await phone.fill("+372 5000000");
+        // a number-like field saves when it is left (1a), no card
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await phone.press("Tab");
+        expect((await put).ok()).toBe(true);
+        await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));
@@ -330,11 +330,13 @@ test.describe("admin", () => {
         await expect(home.page.getByText("+372 5000000")).toBeVisible();
         await home.close();
       } finally {
+        // «Вернуть стандартные данные» is under the page's «⋯», and acts at once
         await openSettings(page, "company");
-        await page.locator('[data-contentblock="company"]').click();
-        await page.locator("[data-contentreset]").click();
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        const more = page.locator('[data-setmore="company"]');
+        if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await page.locator('[data-contentreset="company"]').click();
+        await put;
       }
     });
   });

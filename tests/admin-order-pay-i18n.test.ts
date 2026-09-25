@@ -91,6 +91,12 @@ function renderAll(lang: string): string {
     function admOrderById() { return null; }
     function admInvoiceOverdue() { return 0; }
     function admProdName(s) { return String(s); }
+    // 1a: the «?» beside the payment number — its paragraph is a text node too
+    var ADM_HELP = {};
+    ${slice("admDomId")}
+    ${slice("admHelpBtnHTML")}
+    ${slice("admHelpHTML")}
+    ${slice("admOrderShortDate")}
     ${slice("eur")}
     ${slice("payPiecesHTML")}
     ${slice("bankNameOf")}
@@ -146,7 +152,8 @@ describe("the order card and lists: every word about the money in the panel's la
     it(`${lang}: nothing Russian is left after translation`, () => {
       const nodes = [...new Set(textNodes(renderAll(lang)).filter((t) => CYR.test(t)))];
       // the sweep reached the words the report was about
-      expect(nodes).toEqual(expect.arrayContaining(["Банковская ссылка", "оплачен", "Оплачен", "Оплата"]));
+      // (1a: «Оплата» is no title of its own any more — it is «Доставка и оплата» on the card)
+      expect(nodes).toEqual(expect.arrayContaining(["Банковская ссылка", "оплачен", "Оплачен", "Номер платежа в Montonio"]));
       const left = nodes.filter((t) => CYR.test(trText(t, lang)));
       expect(left).toEqual([]);
     });

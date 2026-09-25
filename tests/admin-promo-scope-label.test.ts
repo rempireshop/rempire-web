@@ -89,6 +89,10 @@ function promoList(lang: Lang): string {
     function loadAdminPromos() {}
     function promoFormHTML() { return ""; }
     function admSwitch() { return "<i></i>"; }
+    // 1a: the list's «?» and its paragraph are the shared pieces — nothing of the line under test
+    function admHelpHTML() { return ""; }
+    function admHelpBtnHTML() { return ""; }
+    ${slice("admPromoRowHTML")}
     ${slice("payPiecesHTML")}
     ${slice("promoKindLabel")}
     ${slice("promoScopeLabel")}

@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl } from "./fixtures";
+import { adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl } from "./fixtures";
 import { assertClean, clearToast, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -92,6 +92,19 @@ async function captured(page: Page, to: string): Promise<Captured[]> {
   return (await res.json()).mails as Captured[];
 }
 
+/**
+ * The draft saves itself (1a): a second after the last keystroke, at once for
+ * a block moved or added. Resolves on the write that carries `carrying` —
+ * register it BEFORE the edit it waits for.
+ */
+function draftSaved(page: Page, carrying: string): Promise<unknown> {
+  return page.waitForResponse((r) => {
+    const m = r.request().method();
+    return r.url().includes("/api/admin/newsletters/") && !r.url().includes("/preview/") && (m === "POST" || m === "PATCH") &&
+      (r.request().postData() || "").includes(carrying) && r.ok();
+  }, { timeout: 20_000 });
+}
+
 /** The blocks on screen, top to bottom, by kind. */
 function blockKinds(page: Page): Promise<string[]> {
   return page.locator("[data-nbcard]").evaluateAll((els) =>
@@ -104,6 +117,9 @@ async function pickLink(card: Locator, query: string, to: string): Promise<void>
   const picker = card.locator("[data-nbpick]");
   await expect(picker).toBeVisible();
   if (query) await picker.locator('[data-nbf="q"]').fill(query);
+  /* Straight from the search box, the keyboard still up: on a phone the
+     pinned «Отправить» used to come back between the press and the release
+     and take the release (app.js, admPressing) */
   await picker.locator(`[data-nb="to"][data-v="${to}"]`).click();
   await expect(card.locator("[data-nbpick]"), "the picker stayed open after a pick").toHaveCount(0);
 }
@@ -174,10 +190,14 @@ test.describe("admin — newsletter", () => {
     await addPicker.locator(`[data-nb="to"][data-v="product:${PRODUCT.id}"]`).click();
     expect(await blockKinds(page)).toEqual(["img", "text", "btn", "product"]);
 
-    // the text goes above the picture: one tap on its ↑
+    // the text goes above the picture: one tap on its ↑ — saved at once, text first
+    const moved = draftSaved(page, '"blocks":[{"t":"text"');
     await text.locator('[data-nb="up"]').click();
     expect(await blockKinds(page)).toEqual(["text", "img", "btn", "product"]);
-    await expect(page.locator("[data-newsdirty]")).toBeVisible();
+    await moved;
+    // no «not saved» line and no «Сохранить» — the draft saves itself (1a)
+    await expect(page.locator("[data-newsdirty]")).toHaveCount(0);
+    await expect(page.locator("[data-newssave]")).toHaveCount(0);
 
     /* ---- the live preview is the letter, before anything is saved -------- */
     const frameEl = page.locator("[data-nbframe]");
@@ -190,20 +210,16 @@ test.describe("admin — newsletter", () => {
     // the banner is a link to the product it was pointed at
     await expect(letter.locator(`a[href$="/shop2/p/${PRODUCT.id}/"] img`).first()).toBeAttached();
 
-    await page.locator("[data-newssave]").click();
-    expect(await toastText(page)).toContain("Черновик сохранён");
-    await clearToast(page);
-    await expect(page.locator("[data-newsdirty]")).toBeHidden();
-
     /* ---- Estonian: the same blocks, the reader's own words ---------------- */
     await page.locator('[data-newslang="ET"]').click();
     await expect(page.locator('[data-newslang="ET"]')).toHaveAttribute("aria-current", "true");
+    // «Перевести с русского» sits on the ET and EN tabs (README § 1)
+    await expect(page.locator("[data-newstranslate]")).toBeVisible();
+    const etSaved = draftSaved(page, "Poodi");
     await page.locator('[data-newsf="subject"]').fill(`E2E teema ${tag}`);
     await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Tere! See on poe testkiri.");
     await page.locator('[data-nbcard].adm-nb--btn [data-nbf="label"]').fill("Poodi");
-    await page.locator("[data-newssave]").click();
-    expect(await toastText(page)).toContain("Черновик сохранён");
-    await clearToast(page);
+    await etSaved;
     await expect(page.frameLocator("[data-nbframe]").locator("body")).toContainText("Tere! See on poe testkiri", { timeout: 20_000 });
     await assertClean(page, w, "newsletter editor");
     await page.screenshot({ path: testInfo.outputPath("news-editor.png"), fullPage: true });
@@ -211,10 +227,13 @@ test.describe("admin — newsletter", () => {
     /* ---- «Отправить мне тест»: the Estonian one, [test] on the subject -- */
     const me = freshEmail("news-me");
     await page.locator("[data-newsto]").fill(me);
+    // the answer first: toastText waits three seconds, a loaded dev server takes longer to send
+    const tested = page.waitForResponse((r) => r.url().includes("/test/") && r.request().method() === "POST", { timeout: 30_000 });
     await page.locator("[data-newstest]").click();
+    await tested;
     expect(await toastText(page)).toContain("Тест отправлен");
     await clearToast(page);
-    await expect.poll(async () => (await captured(page, me)).length, { timeout: 10_000 }).toBe(1);
+    await expect.poll(async () => (await captured(page, me)).length, { timeout: 30_000 }).toBe(1);
     const mine = (await captured(page, me))[0];
     expect(mine.subject).toBe(`[test] E2E teema ${tag}`);
     expect(mine.links.some((l) => l.includes("/api/mail/unsubscribe/")), "the test letter has no unsubscribe link").toBe(true);
@@ -226,10 +245,20 @@ test.describe("admin — newsletter", () => {
     await sendButton.click();
     const apply = page.locator("[data-admapply]");
     await expect(apply).toBeVisible();
+    // the question names the count (README rule 4)
+    await expect(page.locator(".adm-confirm__t")).toContainText("подписчик");
     await expect(page.locator(".adm-confirm__d")).toContainText("уйдёт подписчикам");
     // the card fades in — finished first, or the picture shows it half-drawn
     await page.screenshot({ path: testInfo.outputPath("news-confirm.png"), animations: "disabled" });
+    /* …then ten seconds in the panel with «Вернуть» (Dim, q3): nothing is
+       sent until they are up */
+    let sends = 0;
+    page.on("request", (r) => { if (r.url().includes("/send/") && r.method() === "POST") sends += 1; });
     await apply.click();
+    await expect(page.locator("[data-newsholdleft]")).toBeVisible();
+    await expect(page.locator("[data-newsholdundo]")).toBeVisible();
+    await page.waitForTimeout(3_000);
+    expect(sends, "the send did not wait for its ten seconds").toBe(0);
 
     // done: the letter is read-only and says what happened
     await expect(page.locator(".adm-badge--ok", { hasText: "Отправлено" }).first()).toBeVisible({ timeout: 60_000 });
@@ -258,7 +287,7 @@ test.describe("admin — newsletter", () => {
     }
 
     /* ---- back to the list: the row says «Отправлено» ------------------- */
-    await page.locator("[data-newsback]").click();
+    await cardBack(page, "[data-newsback]", "Рассылка").click();
     const sentRow = page.locator("[data-newsedit]", { hasText: `E2E рассылка ${tag}` });
     await expect(sentRow).toBeVisible();
     await expect(sentRow.locator(".adm-badge--ok")).toHaveText("Отправлено");
@@ -278,12 +307,12 @@ test.describe("admin — newsletter", () => {
     await page.locator("[data-newsnew]").click();
     await page.locator('[data-newsf="title"]').fill("E2E пустое письмо");
 
-    // ✕ takes a block away, «Вернуть» puts it back where it stood
+    // ✕ takes a block away, the toast's «Вернуть» puts it back where it stood (1a rule 3)
     await page.locator('[data-nb="add"][data-v="text"]').click();
     await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Удалю и верну");
     await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
     await expect(page.locator("[data-nbcard]")).toHaveCount(0);
-    await page.locator('[data-nb="undo"]').click();
+    await page.getByRole("status").locator("[data-admtoastundo]").click();
     await expect(page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]')).toHaveValue("Удалю и верну");
     await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
 
@@ -293,6 +322,8 @@ test.describe("admin — newsletter", () => {
     await page.locator('[data-nbcard].adm-nb--btn [data-nbf="label"]').fill("Смотреть");
     await page.locator('[data-nb="add"][data-v="text"]').click();
     await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').fill("Текст есть");
+    // the send is the one dark button — out of the way on a phone while the keyboard is up
+    await page.locator('[data-nbcard].adm-nb--text [data-nbf="text"]').blur();
     await page.locator("[data-newssend]").click();
     expect(await toastText(page)).toContain("У кнопки не выбрано, куда она ведёт");
     await expect(page.locator("[data-admapply]"), "a letter with a dead button reached the confirm card").toHaveCount(0);
@@ -300,22 +331,30 @@ test.describe("admin — newsletter", () => {
     await page.locator('[data-nbcard].adm-nb--btn [data-nb="del"]').click();
     await page.locator('[data-nbcard].adm-nb--text [data-nb="del"]').click();
     await page.locator('[data-newsf="subject"]').fill("");
+    await page.locator('[data-newsf="subject"]').blur();
 
     await page.locator("[data-newssend]").click();
     expect(await toastText(page)).toContain("Сначала заполните тему и текст");
     await expect(page.locator("[data-admapply]"), "an empty letter reached the confirm card").toHaveCount(0);
     await clearToast(page);
 
-    await page.locator("[data-newssave]").click();
-    expect(await toastText(page)).toContain("Черновик сохранён");
-    await clearToast(page);
+    // the draft saved itself — the server has it, title and all
+    await expect.poll(async () => {
+      const l = await (await page.request.get("/api/admin/newsletters/")).json();
+      return (l.newsletters as Array<{ title: string }>).some((n) => n.title === "E2E пустое письмо");
+    }, { timeout: 20_000 }).toBe(true);
     if (testInfo.project.name === "mobile") {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, "the block editor spills sideways at 375 px").toBeLessThanOrEqual(1);
     }
+    // «⋯ → Удалить письмо», the confirm sheet, then five seconds of «Вернуть» (q8)
+    await page.locator("[data-newsmenu]").click();
     await page.locator("[data-newsdel]").click();
-    await page.locator("[data-newsdelyes]").click();
+    await expect(page.locator(".adm-confirm")).toBeVisible();
+    const gone = page.waitForResponse((r) => r.url().includes("/api/admin/newsletters/") && r.request().method() === "DELETE", { timeout: 20_000 });
+    await page.locator("[data-admapply]").click();
     expect(await toastText(page)).toContain("Письмо удалено");
+    expect((await gone).ok()).toBe(true);
     await expect(page.locator("[data-newsnew]")).toBeVisible();
     await expect(page.locator("[data-newsedit]", { hasText: "E2E пустое письмо" })).toHaveCount(0);
     await assertClean(page, w, "empty letter refused, draft deleted");

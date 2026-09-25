@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 test.beforeEach(async ({}, testInfo) => {
   // phone + desktop are the two designed layouts (docs/design/admin-handoff-README.md);
@@ -12,8 +12,9 @@ test.beforeEach(async ({}, testInfo) => {
  *
  * What this file is for: the IA itself. Thirteen flat tabs became five places
  * (Обзор · Заказы · Товары · Салон · Ещё), the assistant left its permanent
- * third column for a floating button, and the confirm card and the toast grew
- * teeth (an overlay, and an «Отменить» that writes its own journal line). None
+ * third column (since 1a: a strip docked on the right, an icon in the phone's
+ * top bar), and the confirm card and the toast grew teeth (an overlay, and a
+ * «Вернуть» that writes its own journal line). None
  * of that is covered by the section specs, which test what each screen *does*;
  * this one tests that the owner can still get to every screen, from a phone as
  * well as a laptop, and that the two safety mechanisms behave.
@@ -21,7 +22,7 @@ test.beforeEach(async ({}, testInfo) => {
  * Both projects on purpose — unlike every other admin spec (docs/testing.md
  * "Why most specs run on desktop only"). The whole point of the redesign is
  * that Renat works from an iPhone, so the phone half is the half that matters:
- * the sticky bottom bar, the «Ещё» sheet, the assistant as a sheet.
+ * the sticky bottom bar, the «Ещё» page, the assistant as a sheet.
  *
  * Every test has its own fake IP: admin login is rate-limited 5/min.
  */
@@ -50,10 +51,19 @@ test.describe("admin shell — the five places", () => {
     expect(box, "the bottom bar has no box at all").not.toBeNull();
     expect(Math.abs((box!.y + box!.height) - vh), "the bottom bar is not at the bottom").toBeLessThan(2);
 
-    // «Ещё» → the sheet with the six sections that are not on the bar
+    /* «Ещё» → a PAGE with the six sections that are not on the bar (1a,
+       screen 14): the bar stays under it with «Ещё» alone lit, the top bar
+       shows the wordmark, and the screen it was opened over is hidden. */
     await page.locator("[data-admmore]").click();
-    const sheet = page.locator(".adm-sheet");
+    const sheet = page.locator(".adm-more");
     await expect(sheet).toBeVisible();
+    await expect(sheet.locator("h1.adm-more__t")).toHaveText("Ещё");
+    await expect(bar).toBeVisible();
+    await expect(bar.locator('[aria-current="true"]')).toHaveCount(1);
+    await expect(bar.locator('[data-admmore][aria-current="true"]')).toBeVisible();
+    await expect(page.locator(".adm-top__mark")).toHaveText("REMPIRE");
+    await expect(page.locator(".adm-page"), "the screen under «Ещё» still shows").toBeHidden();
+    await expect(page.locator(".adm-scrim--more, .adm-sheet"), "«Ещё» is a sheet again").toHaveCount(0);
     for (const label of ["Клиенты", "Маркетинг", "Блог", "Аналитика", "Подключения", "Настройки"]) {
       await expect(sheet.getByText(label, { exact: true })).toBeVisible();
     }
@@ -71,16 +81,16 @@ test.describe("admin shell — the five places", () => {
     await expect(out, "«Выйти» went back to being a text link").toHaveClass(/adm-btn/);
     expect((await out.boundingBox())!.height, "«Выйти» is under a thumb's size").toBeGreaterThanOrEqual(44);
 
-    // a row opens its section and closes the sheet behind it
-    await page.locator('.adm-sheet [data-admtab="blog"]').click();
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    // a row opens its section and closes the page behind it
+    await page.locator('.adm-more [data-admtab="blog"]').click();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
     await expect(page.locator("h1.adm-h1")).toHaveText("Блог");
 
-    // the scrim closes it without going anywhere
+    // Back closes it without going anywhere: the section it was opened from
     await page.locator("[data-admmore]").click();
-    await expect(page.locator(".adm-sheet")).toBeVisible();
-    await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    await expect(page.locator(".adm-more")).toBeVisible();
+    await page.goBack();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
     await expect(page.locator("h1.adm-h1")).toHaveText("Блог");
   });
 
@@ -121,8 +131,8 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
     ["orders", "orders", "Заказы"],
     ["goods", "goods", "Товары"],
     ["stock", "goods", "Товары"],
-    // the nav item is «Салон»; the screen it opens is titled «Продажа в салоне»
-    ["pos", "pos", "Продажа в салоне"],
+    // the nav item is «Салон», and since 1a so is the screen's own title
+    ["pos", "pos", "Салон"],
     ["people", "people", "Клиенты"],
     ["reviews", "people", "Клиенты"],
     ["promos", "promos", "Маркетинг"],
@@ -150,7 +160,12 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
         if (mobile && MORE.indexOf(section) >= 0) await page.locator("[data-admmore]").click();
         await page.locator(`[data-admtab="${section}"][aria-current]:visible`).first().click();
       }
-      if (key !== section) await page.locator(`.adm-tabs [data-admtab="${key}"]`).click();
+      /* 1a: a section's sub-tabs are a segmented control — «Товары» (screen
+         10, .adm-seg--tabs), «Клиенты · Отзывы» (.adm-cseg), «Маркетинг»
+         (.adm-seg); a section still on the old strip keeps .adm-tabs */
+      if (key !== section) {
+        await page.locator(`:is(.adm-tabs, .adm-seg, .adm-cseg) [data-admtab="${key}"]:visible`).first().click();
+      }
 
       /* What is marked current: the section's own control where the viewport
          has one — on a phone the six «Ещё» sections have no bar item of their
@@ -167,15 +182,35 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
 test.describe("admin shell — the assistant", () => {
   test.use({ extraHTTPHeaders: ipHeaders(122) });
 
-  test("a floating button opens it, it answers a question, and it folds away", async ({ page }, testInfo) => {
+  test("its opener opens it, it answers a question, and it folds away", async ({ page }, testInfo) => {
     const mobile = testInfo.project.name === "mobile";
     await loginAsAdmin(page);
 
-    // closed by default — the third column is gone (README fix #8)
+    /* closed by default. 1a (README rule 6): no floating button — folded,
+       the assistant is a 52-px strip docked on the desktop's right edge and
+       an icon in the phone's top bar; `.adm-aiopen` is whichever of the two
+       this viewport draws. */
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    const fab = page.locator(".adm-fab");
-    await expect(fab).toBeVisible();
-    await fab.click();
+    const opener = page.locator(".adm-aiopen:visible");
+    await expect(opener).toHaveCount(1);
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+    if (!mobile) {
+      /* docked, not floating: the strip runs the full height of the page's
+         right edge (where the scrollbar's reserved gutter begins — styles.css
+         `scrollbar-gutter: stable`), and the work column keeps exactly its
+         width free, so nothing of the work is ever under it */
+      const strip = (await opener.boundingBox())!;
+      const vp = await page.evaluate(() => ({
+        right: document.body.getBoundingClientRect().right,
+        h: window.innerHeight,
+        pad: parseFloat(getComputedStyle(document.querySelector(".adm-main")!).paddingRight),
+      }));
+      expect(Math.round(strip.width)).toBe(52);
+      expect(Math.round(strip.x + strip.width)).toBe(Math.round(vp.right));
+      expect(Math.round(strip.height)).toBe(vp.h);
+      expect(vp.pad, "the work column runs under the strip").toBe(52);
+    }
+    await opener.click();
 
     // one markup, two shapes: a 380-px column beside the work on a desktop,
     // a 75 %-tall sheet over it on a phone
@@ -184,8 +219,9 @@ test.describe("admin shell — the assistant", () => {
     const box = (await panel.boundingBox())!;
     if (mobile) expect(Math.round(box.height / page.viewportSize()!.height * 100)).toBe(75);
     else expect(Math.round(box.width)).toBe(380);
-    // the FAB steps aside while the panel is up
-    await expect(page.locator(".adm-fab")).toHaveCount(0);
+    // the strip gives its place to the pane; the phone's icon says it is open
+    if (mobile) await expect(page.locator(".adm-top__ai")).toHaveAttribute("aria-expanded", "true");
+    else await expect(page.locator(".adm-strip")).toHaveCount(0);
 
     // a question, in plain words, gets a plain answer
     await panel.locator("[data-admq]").fill("Какие заказы ждут отправки?");
@@ -202,7 +238,7 @@ test.describe("admin shell — the assistant", () => {
 
     await panel.locator(".adm-asst__fold").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    await expect(page.locator(".adm-fab")).toBeVisible();
+    await expect(page.locator(".adm-aiopen:visible")).toHaveAttribute("aria-expanded", "false");
   });
 });
 
@@ -242,7 +278,7 @@ test.describe("admin shell — the assistant never shows JSON, and files a photo
     });
 
     await loginAsAdmin(page);
-    await page.locator(".adm-fab").click();
+    await page.locator(".adm-aiopen:visible").first().click();
     await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст");
     await page.locator("[data-admsend]").click();
     const answer = page.locator("[data-aians]");
@@ -295,7 +331,7 @@ test.describe("admin shell — the assistant never shows JSON, and files a photo
 
     await loginAsAdmin(page);
     try {
-      await page.locator(".adm-fab").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admfile]").setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
       const strip = page.locator("[data-admattlist]");
       await expect(strip.locator(".adm-att__i")).toHaveCount(1);
@@ -353,7 +389,8 @@ test.describe("admin shell — Обзор counts a paid order", () => {
     await expect(row.locator(".adm-row__nm"))
       .toHaveText(n === 1 ? "заказ ждёт отправки" : /заказ(а|ов) ждут отправки/);
     // …and the header's own «Отправить N» agrees with it
-    await expect(page.locator('.adm-head [data-admtab="orders"]')).toHaveText(`Отправить ${n}`);
+    // (1a: the one dark button says what it sends — «Отправить 1 заказ», «Отправить 3 заказа»)
+    await expect(page.locator('.adm-head [data-admtab="orders"]')).toHaveText(new RegExp(`^Отправить ${n} заказ(а|ов)?$`));
 
     // the row is the way in: Заказы, already filtered to «Новые»
     await row.click();
@@ -411,22 +448,31 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await page.locator("[data-admorderq]").fill(number);
     await expect(page.locator("[data-admorder]")).toHaveCount(1);
 
-    /* «Отправлен» from the row: the confirm card first (it moves the money's
+    /* «Отправлен» with no label: the confirm card first (it moves the money's
        status and sends the customer a letter), then a toast that offers to
-       take it back, and a journal line either way. */
+       take it back, and a journal line either way. 1a: a row carries one
+       action — «Создать этикетку» here — so «Отправлен без этикетки» is the
+       card's, under its «Следующий шаг». */
+    await expect(page.locator("#orderlist [data-admshipnow]"), "a row still offers «Отправлен» beside its label").toHaveCount(0);
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    const back = page.locator('[data-admorder=""]');
+    await expect(back).toBeVisible();
     await page.locator("[data-admshipnow]").click();
     const card = page.locator(".adm-confirm");
-    await expect(card.locator(".adm-confirm__t")).toHaveText("Отметить отправленным?");
+    // (1a: in the Glossary's words — «Отметить отправленным» is struck out there)
+    await expect(card.locator(".adm-confirm__t")).toHaveText("Отправлен без этикетки?");
     await expect(card.locator(".adm-confirm__d")).toContainText(number);
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
+    await expect(back, "«Отмена» took the order card away too").toBeVisible();
 
     await page.locator("[data-admshipnow]").click();
     await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toContainText(`${number} отправлен`);
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await page.locator("[data-closetoast]").click();
+    await back.click();                                   // «← Заказы»
+    await expect(page.locator("#orderlist")).toBeVisible();
 
     // …and the chip and the badge follow the shipped order down at once
     const left = waiting - 1;
@@ -577,44 +623,48 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await nav(page, "orders").click();
     await expect(page.locator("#orderlist")).toBeVisible();
     await fitsThePhone(page, "Заказы");
-    await page.locator("[data-admorder]").first().click();
-    await expect(page.locator('[data-admorder=""]')).toBeVisible();
-    // the card with its four-step strip, the primary button and the hint
-    await expect(page.locator(".adm-steps--4")).toBeVisible();
+    await page.locator("#orderlist [data-admorder]").first().click();
+    // 1a: on a phone the way back is the top bar's «← Заказы»
+    await expect(page.locator("[data-admtopback]")).toBeVisible();
+    // the card with its four-dot progress line, the pinned step and «⋯»
+    await expect(page.locator(".adm-prog--4")).toBeVisible();
     await fitsThePhone(page, "Заказ");
-    await page.locator('[data-admorder=""]').click();
+    await page.locator("[data-admtopback]").click();
 
     await nav(page, "goods").click();
     await expect(page.locator("#goodslist")).toBeVisible();
     await fitsThePhone(page, "Товары");
     await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    for (const tab of ["main", "sizes", "media", "desc", "seo"]) {
-      await page.locator(`[data-edtab="${tab}"]`).click();
-      await expect(page.locator(`[data-edpane="${tab}"]`)).toBeVisible();
-      await fitsThePhone(page, `Товар · ${tab}`);
-    }
-    await page.locator("[data-admclose]").first().click();
+    // 1a: the card is one page — it fits as a whole, and with the Google fold open
+    await expect(page.locator(`[data-edfor="${PRODUCT_2.id}"]`)).toBeVisible();
+    await fitsThePhone(page, "Товар");
+    await page.locator('[data-admfold="ed-seo"]').click();
+    await fitsThePhone(page, "Товар · Для Google");
+    await page.locator("[data-admtopback]:visible").first().click();
 
     await nav(page, "pos").click();
     await expect(page.locator("[data-posq]")).toBeVisible();
     await fitsThePhone(page, "Салон");
 
-    // the «Ещё» sheet, and the same footer inside it
+    // the «Ещё» page, and the same footer on it
     await page.locator("[data-admmore]").click();
-    await expect(page.locator(".adm-sheet")).toBeVisible();
+    await expect(page.locator(".adm-more")).toBeVisible();
     await fitsThePhone(page, "Ещё");
-    await centred(page, ".adm-sheet__foot", "sheet foot", false);
-    await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    await centred(page, ".adm-more__foot", "«Ещё» foot", false);
+    // no status line is cut: each one is as wide as its text needs, or wraps
+    const cut = await page.locator(".adm-more .adm-row__sub").evaluateAll((els) =>
+      els.filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.textContent));
+    expect(cut, "a line under a «Ещё» row is cut").toEqual([]);
+    await page.goBack();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
   });
 });
 
 test.describe("admin shell — the Склад stepper and its undo", () => {
   test.use({ extraHTTPHeaders: ipHeaders(125) });
 
-  test("one tap changes the shelf at once; «Отменить» puts it back and says so in the journal", async ({ page }, testInfo) => {
+  test("a burst of taps is one change of the shelf; «Вернуть» puts it back and says so in the journal", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "the stepper is the same on both; one run is enough");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
@@ -625,22 +675,27 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
     const stepper = page.locator("[data-stockstep]").first();
     await expect(stepper).toBeVisible();
-    const key = (await stepper.getAttribute("data-stockstep"))!.split(":")[0];
-    const qtyCell = page.locator(`[data-stockstep="${key}:1"]`).locator("xpath=preceding-sibling::span[1]");
-    // a variant nobody counts yet shows «—»; the first + starts counting at 1
-    const shown = ((await qtyCell.textContent()) || "").trim();
+    const step = (await stepper.getAttribute("data-stockstep"))!;
+    const key = step.slice(0, step.lastIndexOf(":"));
+    // 1a: the count between − and + is a box that can be typed into
+    const qtyCell = page.locator(`[data-stockqtyinput="${key}"]`);
+    // a variant nobody counts yet shows «—» (an empty box); the first + starts counting at 1
+    const shown = ((await qtyCell.inputValue()) || "").trim();
     const before = /^\d+$/.test(shown) ? Number(shown) : 0;
 
-    // no confirm card: a ± is the reversible half of the rule (README § State)
+    /* no confirm card: a ± is the reversible half of the rule (README rule 3).
+       Two taps are ONE move (q25): the row shows it at once, the shelf hears
+       about it once, after the pause, and there is one «Вернуть». */
     await page.locator(`[data-stockstep="${key}:1"]`).click();
-    await expect(qtyCell).toHaveText(String(before + 1));
-    await expect(page.getByRole("status")).toContainText(`${before + 1} шт`);
+    await page.locator(`[data-stockstep="${key}:1"]`).click();
+    await expect(qtyCell).toHaveValue(String(before + 2));
+    await expect(page.getByRole("status")).toContainText(`→ ${before + 2}`);
 
     // …and the undo really is the safety net: the shelf goes back
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await page.locator(".adm-toast__undo").click();
     await expect(page.getByRole("status")).toContainText("Отменено");
-    await expect(qtyCell).toHaveText(String(before));
+    await expect(qtyCell).toHaveValue(String(before));
 
     // both the change and its undo are in the journal, and only the change
     // was ever undoable
@@ -655,13 +710,56 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
        product (admin.spec.ts, checkout.spec.ts, …) decrements the same number —
        at zero the product page swaps its «В корзину» for «нет в наличии» and
        those specs stop being able to add anything at all. Same reasoning, and
-       the same 500, as sweep-admin-ops.spec.ts. */
+       the same 500, as sweep-admin-ops.spec.ts. The count is typed into the
+       row and leaves with Enter (1a: no «Править» form, no «Сохранить»). */
     await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
     await page.locator('[data-admtab="stock"]:visible').last().click();
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    await page.locator(`[data-stockedit="${key}"]`).click();
-    await page.locator("[data-stockqtyinput]").fill("500");
-    await page.locator("[data-stocksave]").click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await page.locator(`[data-stockqtyinput="${key}"]`).fill("500");
+    await page.locator(`[data-stockqtyinput="${key}"]`).press("Enter");
+    await expect(page.getByRole("status")).toContainText("→ 500");
+  });
+});
+
+/**
+ * The ONE dark button a phone pins above the tab bar (.adm-pin, fixed) must
+ * not ride in with the screen. A transform makes its box the containing block
+ * of anything `fixed` inside it, so the entrance slide (adm-up) stood the
+ * button mid-page for a quarter of a second («Салон», 25.09.2026). The screen
+ * of every section that pins one fades in without moving — keyed on
+ * body.adm-pinned as well as on :has(), so a phone browser without :has()
+ * gets it too (1a integration, 25.09.2026).
+ */
+test.describe("admin shell — the pinned button does not ride in with the screen", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(141) });
+
+  test("phone: Салон, Склад and Блог fade in without a slide while a button is pinned", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the button is pinned above the bar on a phone only");
+    await loginAsAdmin(page);
+    const places: Array<[string, string | undefined, string]> = [
+      ["pos", undefined, "Салон"],
+      ["goods", "stock", "Склад"],
+      ["blog", undefined, "Блог"],
+    ];
+    for (const [key, sub, label] of places) {
+      await adminSection(page, key);
+      if (sub) await page.locator(`.adm-tab[data-admtab="${sub}"]`).click();
+      await expect(page.locator(".adm-pin").first(), `${label}: no pinned button`).toBeVisible();
+      // the entrance class is up only for the render that changed the screen: put it back to read the cascade
+      const seen = await page.evaluate(() => {
+        const col = document.querySelector(".adm-page")!;
+        const had = col.classList.contains("adm-page--enter");
+        col.classList.add("adm-page--enter");
+        const screen = col.querySelector(":scope > .adm-screen")!;
+        const name = getComputedStyle(screen).animationName;
+        if (!had) col.classList.remove("adm-page--enter");
+        const pin = document.querySelector(".adm-pin")!.getBoundingClientRect();
+        const bar = document.querySelector(".adm-bar")!.getBoundingClientRect();
+        return { name, pinned: document.body.classList.contains("adm-pinned"), gap: Math.abs(pin.bottom - bar.top) };
+      });
+      expect(seen.pinned, `${label}: body.adm-pinned is not set`).toBe(true);
+      expect(seen.name, `${label}: the screen slides in and carries its pinned button`).toBe("adm-fadein");
+      expect(seen.gap, `${label}: the pinned button does not stand on the tab bar`).toBeLessThan(2);
+    }
   });
 });

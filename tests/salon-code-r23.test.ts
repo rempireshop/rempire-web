@@ -77,6 +77,7 @@ function ask(q: string, levels: CatalogueLevelRow[], cat: Shelf[]): Asked {
     function render() {}
     function esc(s) { return String(s == null ? "" : s); }
     function eur(n) { return String(n); }
+    function media() { return ""; }
     var POS_GONE = "POS_GONE";
     ${constant("POS_EAN")}
     ${slice("scanFold")}
@@ -86,6 +87,9 @@ function ask(q: string, levels: CatalogueLevelRow[], cat: Shelf[]): Asked {
     ${slice("posEanIndex")}
     ${slice("posCodeHit")}
     ${slice("posVariantPrice")}
+    ${slice("posInCart")}
+    ${slice("posChipHTML")}
+    ${slice("posRowHTML")}
     ${slice("posSearchResultsHTML")}
     ${slice("posAddProduct")}
     /* stockFiltered() hands the chip rule — «Мало», «Нет», «Не учтено» — to

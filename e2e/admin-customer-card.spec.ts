@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
-  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
+  adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
 
 /**
@@ -93,14 +93,14 @@ test.describe("admin — the customer card", () => {
     try {
       // ---- the list: the queue's tab is there, one tap away ----------------
       await adminSection(page, "people");
-      await expect(page.locator('.adm-tab[data-admtab="reviews"]'), "the «Отзывы» tab is missing from the list").toBeVisible();
+      await expect(page.locator('.adm-cseg [data-admtab="reviews"]'), "the «Отзывы» tab is missing from the list").toBeVisible();
       await page.locator("[data-admcustq]").fill(email);
       await page.locator("[data-admcustopen]").first().click();
-      await expect(page.locator("[data-admcustclose]")).toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты")).toBeVisible();
 
       // ---- the card is its own page: no sub-tabs on it --------------------
-      await expect(page.locator('.adm-tab[data-admtab="reviews"]'), "the «Отзывы» sub-tab is still on the card").toHaveCount(0);
-      await expect(page.locator('.adm-tab[data-admtab="people"]'), "the «Все клиенты» sub-tab is still on the card").toHaveCount(0);
+      await expect(page.locator('.adm-cseg [data-admtab="reviews"]'), "the «Отзывы» sub-tab is still on the card").toHaveCount(0);
+      await expect(page.locator('.adm-cseg [data-admtab="people"]'), "the «Клиенты» sub-tab is still on the card").toHaveCount(0);
 
       // ---- the order, with the same chip the orders list draws ------------
       const orderRow = page.locator(`[data-admorder]:has-text("${number}")`).first();
@@ -110,7 +110,8 @@ test.describe("admin — the customer card", () => {
       // ---- the facts: plain rows, no chart --------------------------------
       await expect(page.getByText("Первый заказ")).toBeVisible();
       await expect(page.getByText("Средний чек")).toBeVisible();
-      const brands = page.locator(".adm-row", { hasText: "Любимые бренды" });
+      // 1a: the facts are cells under the orders (screen 15), not list rows
+      const brands = page.locator(".adm-cfact", { hasText: "Любимые бренды" });
       await expect(brands).toBeVisible();
       await expect(brands).toContainText(PRODUCT.brand);
 
@@ -123,21 +124,22 @@ test.describe("admin — the customer card", () => {
       // ---- the order card opens over the customer's; Back returns to that
       // customer, not to «Заказы» -------------------------------------------
       await orderRow.click();
-      await expect(page.locator('[data-admorder=""]')).toBeVisible();
-      await expect(page.locator('[data-admorder=""]'), "the order card's way back does not name the customer").toContainText("К клиенту");
+      // (on a phone the card's way back is the top bar's — fixtures.cardBack)
+      await expect(cardBack(page, '[data-admorder=""]')).toBeVisible();
+      await expect(cardBack(page, '[data-admorder=""]'), "the order card's way back does not name the customer").toContainText("К клиенту");
       await expect(page.locator("[data-admcustclose]")).toHaveCount(0);
       await page.goBack();
       await expect(page.locator('body[data-screen="admin"]'), "Back left the admin altogether").toBeAttached();
       await expect(page.locator('[data-admorder=""]'), "Back did not close the order card").toHaveCount(0);
-      await expect(page.locator("[data-admcustclose]"), "Back did not return to the customer card").toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "Back did not return to the customer card").toBeVisible();
       await expect(page.locator(`[data-admorder]:has-text("${number}")`).first(), "the customer's orders are gone after Back").toBeVisible();
       await expect(page.locator("[data-admorderq]"), "Back landed on the orders list instead of the customer").toHaveCount(0);
 
       // …and the same through the card's own «← К клиенту»
       await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
-      await expect(page.locator('[data-admorder=""]')).toBeVisible();
-      await page.locator('[data-admorder=""]').click();
-      await expect(page.locator("[data-admcustclose]"), "«← К клиенту» did not return to the customer card").toBeVisible();
+      await expect(cardBack(page, '[data-admorder=""]', "К клиенту")).toBeVisible();
+      await cardBack(page, '[data-admorder=""]', "К клиенту").click();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "«← К клиенту» did not return to the customer card").toBeVisible();
 
       // ---- «Опубликовать» from the card: the queue's own reversible edit,
       // without leaving the card ---------------------------------------------
@@ -145,7 +147,7 @@ test.describe("admin — the customer card", () => {
       await row.locator('[data-admcustrev$=":approved"]').click();
       await expect(page.getByRole("status")).toContainText("Отзыв опубликован");
       await expect(page.locator(".adm-toast__undo"), "no «Отменить» on the toast").toBeVisible();
-      await expect(page.locator("[data-admcustclose]"), "publishing left the card").toBeVisible();
+      await expect(cardBack(page, "[data-admcustclose]", "Клиенты"), "publishing left the card").toBeVisible();
       await expect(row.locator(".adm-badge")).toHaveText("Опубликован");
       await expect.poll(async () => {
         const res = await page.request.get("/api/admin/reviews/?status=approved");
@@ -159,7 +161,7 @@ test.describe("admin — the customer card", () => {
       await expect(page.locator('body[data-screen="admin"]'), "Back left the admin altogether").toBeAttached();
       await expect(page.locator("[data-admcustclose]"), "Back did not close the customer card").toHaveCount(0);
       await expect(page.locator("[data-admcustq]"), "the customers list did not come back").toBeVisible();
-      await expect(page.locator('.adm-tab[data-admtab="reviews"]')).toBeVisible();
+      await expect(page.locator('.adm-cseg [data-admtab="reviews"]')).toBeVisible();
     } finally {
       /* A published review on PRODUCT changes what the storefront shows, and
          e2e/product.spec.ts expects that product's reviews block to start
@@ -180,6 +182,11 @@ test.describe("admin — the customer card", () => {
    *
    * Both halves are driven here with the answer deliberately held back, so the
    * "moved already" and the "put back" are each unambiguous.
+   *
+   * 1a (Dim, 25.09.2026, q3): no confirm card any more. The first flip to
+   * «Партнёр» posts the welcome letter, so the PATCH itself waits ten seconds
+   * for «Вернуть» — the switch still moves at once; the move back to
+   * «Розница» sends no letter and goes straight away.
    */
   test("the partner switch moves at once, and comes back if the server refuses", async ({ page }) => {
     test.setTimeout(120_000);
@@ -206,16 +213,22 @@ test.describe("admin — the customer card", () => {
       },
     );
     await pro.click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
-    await page.locator("[data-admapply]").click();
-    // the PATCH is still held; the switch, the badge and the card are already there
+    await expect(page.locator(".adm-confirm"), "the switch asked first — 1a holds the letter instead").toHaveCount(0);
+    // nothing has reached the server; the switch, the tag and the card are already there
     await expect(pro, "the switch waited for the server").toHaveAttribute("aria-current", "true");
     await expect(page.locator(".adm-skel"), "the card blanked instead of moving the switch").toHaveCount(0);
-    await expect(page.locator(".adm-badge--big")).toHaveText("Pro");
-    await expect.poll(() => !!release, { timeout: 10_000 }).toBe(true);
+    await expect(page.locator(".adm-chd .adm-tag").first()).toHaveText("Партнёр");
+    await expect(page.getByRole("status")).toContainText("письмо уйдёт через 10 с");
+    await expect(page.locator(".adm-toast__undo")).toBeVisible();
+    // …and the PATCH goes when the ten seconds are up
+    await expect.poll(() => !!release, { timeout: 20_000, message: "the held PATCH never left" }).toBe(true);
     release!();
     await expect(pro).toHaveAttribute("aria-current", "true");
     await page.unroute((u) => u.pathname.startsWith("/api/admin/customers/"));
+    await expect.poll(async () => {
+      const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
+      return (await res.json()).customer.tier;
+    }, { timeout: 10_000 }).toBe("pro");
 
     /* ---- and it comes back when the answer is «нет» ---------------------- */
     await page.route(
@@ -226,7 +239,6 @@ test.describe("admin — the customer card", () => {
       },
     );
     await retail.click();
-    await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toContainText("Не получилось изменить статус");
     await expect(pro, "a refused change left the switch on the wrong side").toHaveAttribute("aria-current", "true");
     await page.unroute((u) => u.pathname.startsWith("/api/admin/customers/"));
@@ -347,7 +359,7 @@ test.describe("admin — a customer's card opens at its top", () => {
     }, WANTED.id);
 
     // the whole card, not the skeleton: «at the top» is about the finished page
-    await expect(page.locator("[data-admcustclose]")).toBeVisible();
+    await expect(cardBack(page, "[data-admcustclose]", "Клиенты")).toBeVisible();
     await expect(page.locator(".adm-h2")).toHaveText(WANTED.name);
     await expect(page.locator('[data-admorder="e2e-top-order-0"]')).toBeVisible();
     await page.waitForTimeout(300);

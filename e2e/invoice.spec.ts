@@ -163,7 +163,8 @@ test.describe("invoice for companies", () => {
       await expect(company).toContainText("Testitänav 1");
       await expect(company).toContainText(invoiceEmail);
 
-      // «Скачать счёт» really is a PDF
+      // «Скачать счёт» really is a PDF — 1a: it is one of the rare actions in «⋯»
+      await admin.locator("[data-admordermore]:visible").first().click();
       const link = admin.locator("[data-adminvpdf]");
       await expect(link).toHaveAttribute("data-adminvpdf", invoiceNumber);
       const href = await link.getAttribute("href");
@@ -190,7 +191,11 @@ test.describe("invoice for companies", () => {
       // …and no «Заказ принят» yet: nothing is paid
       expect(await sink("order-confirmed", email)).toHaveLength(0);
 
-      // «Отправить счёт ещё раз» — a second letter, the toast honest about the missing mail key
+      /* «Отправить счёт ещё раз» — a second letter, the toast honest about the
+         missing mail key (with no key there is nothing to hold for ten
+         seconds: src/app/api/admin/orders/[id]/invoice/route.ts). The «⋯»
+         opened above is still open — nothing else has been pressed. */
+      await expect(admin.locator(".adm-ordacts [data-adminvresend]")).toBeVisible();
       await admin.locator(".adm-ordacts [data-adminvresend]").click();
       await expect(admin.getByRole("status")).toContainText("письмо не ушло");
       await expect.poll(async () => (await sink("invoice", invoiceEmail)).length).toBe(2);
@@ -211,7 +216,9 @@ test.describe("invoice for companies", () => {
       await expect.poll(async () => (await sink("order-confirmed", email)).length).toBe(1);
       // the card now reads as a paid order — the label step is next — and the invoice is still there to download
       await expect(admin.locator("[data-adminvstate]")).toContainText(`Оплачен по счёту №${invoiceNumber}`);
+      await admin.locator("[data-admordermore]:visible").first().click();
       await expect(admin.locator("[data-adminvpdf]")).toBeVisible();
+      await admin.keyboard.press("Escape");
       await expect(admin.locator(".adm-ordacts [data-adminvpaid]")).toHaveCount(0);
       await expect(admin.locator(".adm-ordacts [data-admlabel]")).toBeVisible();
 
@@ -223,6 +230,9 @@ test.describe("invoice for companies", () => {
         // …and «О компании» carries the invoice settings card, warning that the bank details are blank
         await admin.locator("[data-admsetback]").click();
         await admin.locator('[data-admsetpage="company"]').click();
+        // «Счета для компаний» is a fold of the page since 1a — opened, never toggled shut
+        const fold = admin.locator('[data-admfold="content:invoice"]');
+        if ((await fold.getAttribute("aria-expanded")) !== "true") await fold.click();
         const card = admin.locator("[data-adminvsettings]");
         await expect(card).toBeVisible();
         // the IBAN is filled in (above), the bank name is not — so the softer
@@ -240,10 +250,9 @@ test.describe("invoice for companies", () => {
            /api/overrides/, which is a cached public response, and this test is
            about the value being stored, not about when the cache expires. */
         await card.locator('[data-invsetf="remindBeforeDays"]').fill("3");
-        // «Сохранить» is the page's save bar since r12 — it names the card while it differs
-        await expect(admin.locator("[data-setnote]")).toContainText("Счета для компаний");
-        await admin.locator("[data-adminvsave]").click();
-        await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
+        // 1a: a number saves itself when its box is left — no «Сохранить»
+        await card.locator('[data-invsetf="remindBeforeDays"]').press("Tab");
+        await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓", { timeout: 15_000 });
         await admin.locator("[data-closetoast]").click();
         const saved = (await (await admin.request.get("/api/admin/settings/")).json()) as {
           settings: { invoice: { prefix: string; dueDays: number; remindBeforeDays: number; cancelAfterDays: number } };

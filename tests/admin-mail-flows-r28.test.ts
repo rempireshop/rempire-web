@@ -125,48 +125,35 @@ describe("«Письма»: every switch is one the server reads", () => {
   });
 });
 
-describe("«Письма»: the list the owner sees", () => {
-  function list(flows: Record<string, unknown>, admin = true): string {
+describe("«Письма»: the list the owner sees (1a — «Включаете вы» · «Уходят всегда»)", () => {
+  function list(flows: Record<string, unknown>, admin = true, open = false): string {
     return build<() => string>(
-      ["ADM_MAIL_ROWS", "FLOW_RUNNABLE", "MAIL_RUN_FLOW"],
-      ["admMailHTML", "admMailSampleToHTML", "admMailSampleHTML"],
+      ["ADM_MAIL_ROWS", "MAIL_ON_ORDER"],
+      ["admMailHTML", "admMailRowHTML", "mailRow", "admMailToHTML", "admMailToFieldHTML", "mailTpl"],
       {
         loadMailTexts: () => {},
         loadFlowCounts: () => {},
         SRV: { admin },
-        S: { mailOpen: false, mailTo: "", mailSampleBusy: "" },
+        S: { mailOpen: open, mailTpl: "birthday", mailTo: "", mailSampleBusy: "" },
         DEMO: { flows },
+        MAIL_TEXTS: null,
+        MAIL_TO_RX: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i,
         esc,
         admMailEditorHTML: () => "[EDITOR]",
-        admBirthdayDaysHTML: () => "[BDAYS]",
-        admBirthdayPercentHTML: () => "[BPCT]",
-        admFlowRunHTML: (f: string) => `[RUN:${f}]`,
         ADM_ROW_OPEN: "",
         flowCountLine: (f: string) => (f ? `[COUNT:${f}]` : ""),
         admSwitch: (attrs: string, on: boolean) => `[SWITCH ${attrs} ${on}]`,
-        mailBudgetCard: () => "[BUDGET]",
-        cartFlowSettingsCard: () => "[CART]",
-        unpaidSettingsCard: () => "[UNPAID]",
+        admTagHTML: (_k: string, t: string) => `[TAG ${t}]`,
+        admSecHeadHTML: (t: string) => `[HEAD ${t}]`,
+        admFoldHTML: (k: string, t: string, _s: string, b: string) => `[FOLD ${k} ${t}]${b}`,
+        mailBudgetFoldHTML: () => "[BUDGET]",
+        mailOwnAny: () => false,
       },
       "admMailHTML",
     )();
   }
 
-  it("the four cart numbers sit under the cart letters, switch off or on, above the daily limit", () => {
-    for (const on of [false, true]) {
-      const html = list({ abandoned: on });
-      const disc = html.indexOf('data-mailtpl="abandoned-cart-discount"');
-      const cart = html.indexOf("[CART]");
-      expect(cart, `switch ${on}: the numbers are not on the page`).toBeGreaterThan(-1);
-      expect(cart, "the numbers are above the letter they time").toBeGreaterThan(disc);
-      expect(cart, "the numbers are below the daily limit again").toBeLessThan(html.indexOf("[BUDGET]"));
-      // …and before the next letter's row, i.e. inside the pair's own group
-      expect(cart).toBeLessThan(html.indexOf('data-mailtpl="birthday"'));
-      expect(html.split("[CART]").length - 1, "drawn twice").toBe(1);
-    }
-  });
-
-  it("draws one switch for the pair, and the second row says whose it follows", () => {
+  it("draws one switch for the pair, and the second row says whose it follows (q35)", () => {
     const off = list({ abandoned: false });
     expect(off).not.toContain("abandonedDiscount]");
     expect(off).not.toContain('data-admflow="abandonedDiscount"');
@@ -178,31 +165,105 @@ describe("«Письма»: the list the owner sees", () => {
     expect(on.split("[COUNT:abandoned]").length - 1).toBe(1);
   });
 
-  it("offers «Запустить сейчас» for BOTH cart letters when the switch is on", () => {
-    const on = list({ abandoned: true });
-    expect(on).toContain("[RUN:abandoned]");
-    expect(on).toContain("[RUN:abandonedDiscount]");
-    const off = list({ abandoned: false });
-    expect(off).not.toContain("[RUN:");
-  });
-
-  it("offers «Прислать пример» for every automatic letter, whatever its switch says", () => {
+  it("puts the five switchable letters under «Включаете вы» and every other letter under «Уходят всегда»", () => {
     const html = list({});
-    for (const tpl of ["order-unpaid", "back-in-stock", "abandoned-cart", "abandoned-cart-discount", "birthday"]) {
-      expect(html, tpl).toContain(`data-mailsample="${tpl}"`);
+    const on = html.indexOf("[HEAD Включаете вы]"), always = html.indexOf("[HEAD Уходят всегда]");
+    expect(on).toBeGreaterThan(-1);
+    expect(always).toBeGreaterThan(on);
+    for (const tpl of ["order-unpaid", "abandoned-cart", "abandoned-cart-discount", "back-in-stock", "birthday"]) {
+      const at = html.indexOf(`data-mailtpl="${tpl}"`);
+      expect(at, tpl).toBeGreaterThan(on);
+      expect(at, tpl).toBeLessThan(always);
     }
-    // the order letters are samples in their editor already; the list stays short
-    expect(html).not.toContain('data-mailsample="order-confirmed"');
+    // «Возврат отправлен» was the one letter the design left out — it is always sent, so it is listed
+    for (const tpl of ["order-confirmed", "order-shipped", "order-cancelled", "order-refund-sent", "order-refunded", "pos-receipt", "gift-card", "login-code", "partner-welcome"]) {
+      expect(html.indexOf(`data-mailtpl="${tpl}"`), tpl).toBeGreaterThan(always);
+    }
+    // the timing and «Запустить сейчас» are inside each letter now, not on the list
+    expect(html).not.toContain("data-admflowrun");
+    expect(html).not.toContain("data-cartf");
+    // the daily limit is folded under the list
+    expect(html.indexOf("[BUDGET]")).toBeGreaterThan(always);
   });
 
-  it("asks where to send the samples above the list — and only the owner", () => {
+  it("asks where to send the samples — once, and only the owner (q8)", () => {
     const html = list({});
-    const field = html.indexOf("data-mailto");
-    expect(field).toBeGreaterThan(-1);
-    expect(field).toBeLessThan(html.indexOf('<div class="adm-list">'));
+    expect(html.split("data-mailto").length - 1).toBe(1);
     const guest = list({}, false);
     expect(guest).not.toContain("data-mailto");
-    expect(guest).not.toContain("data-mailsample");
+    // with a letter open, the one field is the letter's own (admMailEditorHTML), not a second one here
+    const open = list({}, true, true);
+    expect(open).not.toContain("data-mailto");
+    expect(open).toContain("[EDITOR]");
+    // …and the list stays beside it — a desk shows both (.adm-mk2)
+    expect(open).toContain('data-mailtpl="birthday"');
+  });
+});
+
+describe("«Когда уходит»: each letter's timing lives inside that letter", () => {
+  function when(tpl: string, flows: Record<string, unknown>, on: boolean): string {
+    const S: Record<string, unknown> = {};
+    return build<(tpl: string, on: boolean) => string>(
+      ["ADM_MAIL_ROWS", "FLOW_RUNNABLE", "MAIL_RUN_FLOW", "MK_FLOW_NUMS", "BIRTHDAY_DAY_CHOICES"],
+      ["admMailWhenHTML", "mailRow", "mkFlowBoxHTML", "mkFlowAs", "mkFlowNum", "mkFlowParse", "admBirthdayDaysHTML", "admBirthdayPercentHTML", "birthdayDays", "birthdayPercent"],
+      {
+        S,
+        SRV: { admin: true },
+        DEMO: { flows },
+        esc,
+        BIRTHDAY_PERCENT_CHOICES: [5, 7, 10, 15, 20, 25, 30],
+        flowCountLine: (f: string) => (f ? ` · [COUNT:${f}]` : ""),
+        admFlowRunHTML: (f: string) => `[RUN:${f}]`,
+        admHelpBtnHTML: () => "",
+        admHelpHTML: () => "",
+        admAutosaveSpec: () => {},
+        admAutosaveInvalidAttr: () => "",
+        admAutosaveHintHTML: () => "",
+      },
+      "admMailWhenHTML",
+    )(tpl, on);
+  }
+
+  it("the discounted cart letter holds the pair's four numbers and its own «Запустить сейчас»", () => {
+    const off = when("abandoned-cart-discount", {}, false);
+    for (const [k, v] of [["hours", "3"], ["days", "3"], ["percent", "5"], ["min", "100"]]) {
+      expect(off, k).toContain(`data-cartf="${k}" data-autosave="mk:flow:`);
+      expect(off, k).toMatch(new RegExp(`data-cartf="${k}"[^>]*value="${v}"`));
+    }
+    expect(off, "a run for a letter that is off").not.toContain("[RUN:");
+    const on = when("abandoned-cart-discount", {
+      abandoned: true, abandonedHours: 12, abandonedDiscountDays: 2, abandonedDiscountPercent: 7, abandonedDiscountMinTotal: 80,
+    }, true);
+    for (const [k, v] of [["hours", "12"], ["days", "2"], ["percent", "7"], ["min", "80"]]) {
+      expect(on, k).toMatch(new RegExp(`data-cartf="${k}"[^>]*value="${v}"`));
+    }
+    expect(on).toContain("[RUN:abandonedDiscount]");
+    // the queue belongs to the first letter
+    expect(on).not.toContain("[COUNT:");
+  });
+
+  it("the first cart letter has its wait, its queue and its run", () => {
+    const on = when("abandoned-cart", { abandoned: true, abandonedHours: 6 }, true);
+    expect(on).toMatch(/data-cartf="hours"[^>]*value="6"/);
+    expect(on).toContain("[COUNT:abandoned]");
+    expect(on).toContain("[RUN:abandoned]");
+  });
+
+  it("the birthday letter has «Когда поздравлять» and the discount, both as selects (q7)", () => {
+    const html = when("birthday", { birthday: true, birthdayDays: 3, birthdayPercent: 15 }, true);
+    expect(html).toContain("data-flowbdays");
+    expect(html).toContain("data-flowbpct");
+    expect(html).toMatch(/<option value="3" selected>/);
+    expect(html).toMatch(/<option value="15" selected>/);
+    expect(html).toContain("[RUN:birthday]");
+  });
+
+  it("«Заказ ждёт оплаты» has its two numbers; a letter that always goes has no box at all", () => {
+    const html = when("order-unpaid", { unpaidRemindDays: 2, unpaidCancelDays: 5 }, true);
+    expect(html).toMatch(/data-unpaidf="remind"[^>]*value="2"/);
+    expect(html).toMatch(/data-unpaidf="cancel"[^>]*value="5"/);
+    expect(html).toContain("[COUNT:unpaid]");
+    expect(when("order-confirmed", {}, true)).toBe("");
   });
 });
 
@@ -227,6 +288,7 @@ describe("«Прислать пример» sends the demo letter to the typed a
         render: () => {},
         mailLang: () => "RU",
         admPanesSave: () => {},
+        MAIL_TO_RX: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i,
       },
       "srvMailSample",
     );
@@ -252,65 +314,35 @@ describe("«Прислать пример» sends the demo letter to the typed a
   });
 });
 
-describe("the settings cards show what the shop runs on, not what the first paint guessed", () => {
-  it("«Сколько писем в сутки»: numbers that arrive after the first paint fill the boxes", () => {
+describe("«Сколько писем в сутки»: the boxes show what the shop runs on, not what the first paint guessed", () => {
+  it("numbers that arrive after the first paint fill the boxes, and they save themselves", () => {
     const S: Record<string, unknown> = { newsBudget: null };
-    const rig = build<{ card: () => string; dirty: () => boolean; draft: () => Record<string, unknown> }>(
+    const specs: Record<string, unknown> = {};
+    const fold = build<() => string>(
       [],
-      ["?mailBudgetStored", "mailBudgetDraft", "mailBudgetCard", "mailBudgetDirty", "mailBudgetActsHTML"],
-      { S, esc, loadNewsAudience: () => {}, newsBudgetLineHTML: () => "" },
-      "{ card: mailBudgetCard, dirty: mailBudgetDirty, draft: mailBudgetDraft }",
+      ["mailBudgetStored", "mailBudgetFoldHTML", "mkBudgetAs", "mkBudgetParse", "mkBudgetNow"],
+      {
+        S, esc, SRV: { admin: true }, ADM_AS: {},
+        loadNewsAudience: () => {}, newsBudgetLineHTML: () => "",
+        admAutosaveSpec: (k: string, spec: unknown) => { specs[k] = spec; },
+        admAutosaveInvalidAttr: () => "", admAutosaveHintHTML: () => "",
+        admFoldHTML: (_k: string, t: string, s: string, b: string) => `[FOLD ${t} | ${s}]${b}`,
+      },
+      "mailBudgetFoldHTML",
     );
-    expect(rig.card()).toContain('value="100"');   // before the server answered
-    S.newsBudget = { cap: 4, reserve: 2 };           // …and after
-    const html = rig.card();
-    expect(html).toContain('data-mbf="cap" value="4"');
-    expect(html).toContain('data-mbf="reserve" value="2"');
-    expect(rig.dirty(), "the owner's own saved numbers read as unsaved").toBe(false);
-    // the warning is in the markup either way; unsaved, it loses its `hidden`
-    expect(html).toContain(" hidden>Изменения не сохранены</span>");
-    // typing still makes a draft, and the draft is what the box shows
-    rig.draft().cap = "5";
-    expect(rig.dirty()).toBe(true);
-    expect(rig.card()).toContain('data-mbf="cap" value="5"');
-  });
-
-  it("«Брошенные корзины»: the same for the four cart numbers", () => {
-    const DEMO = { flows: {} as Record<string, unknown> };
-    const S: Record<string, unknown> = {};
-    const rig = build<{ card: () => string; dirty: () => boolean }>(
-      [],
-      ["?cartFlowStored", "cartFlowDraft", "cartFlowSettingsCard", "cartFlowDirty", "cartFlowActsHTML"],
-      { S, DEMO, esc },
-      "{ card: cartFlowSettingsCard, dirty: cartFlowDirty }",
-    );
-    expect(rig.card()).toContain('data-cartf="hours" value="3"');
-    DEMO.flows = { abandonedHours: 12, abandonedDiscountDays: 2, abandonedDiscountPercent: 7, abandonedDiscountMinTotal: 80 };
-    const html = rig.card();
-    for (const [k, v] of [["hours", "12"], ["days", "2"], ["percent", "7"], ["min", "80"]]) {
-      expect(html).toContain(`data-cartf="${k}" value="${v}"`);
-    }
-    expect(rig.dirty()).toBe(false);
-    // one line of explanation under every box, and the button that saves them
-    expect(html.split('<span class="adm-hint">').length - 1).toBe(4);
-    expect(html).toContain("data-admcartsave");
-  });
-
-  it("«Неоплаченные заказы»: the card beside them follows the same rule", () => {
-    const DEMO = { flows: {} as Record<string, unknown> };
-    const S: Record<string, unknown> = {};
-    const rig = build<{ card: () => string; dirty: () => boolean }>(
-      [],
-      ["?unpaidStored", "unpaidDraft", "unpaidSettingsCard", "unpaidDirty", "unpaidActsHTML"],
-      { S, DEMO, esc },
-      "{ card: unpaidSettingsCard, dirty: unpaidDirty }",
-    );
-    expect(rig.card()).toContain('data-unpaidf="remind" value="3"');
-    DEMO.flows = { unpaidRemindDays: 2, unpaidCancelDays: 5 };
-    const html = rig.card();
-    expect(html).toContain('data-unpaidf="remind" value="2"');
-    expect(html).toContain('data-unpaidf="cancel" value="5"');
-    expect(rig.dirty()).toBe(false);
+    expect(fold()).toContain('data-mbf="cap" data-autosave="mk:budget:cap" value="100"');   // before the server answered
+    S.newsBudget = { cap: 4, reserve: 2, sent: { total: 1 } };                               // …and after
+    const html = fold();
+    expect(html).toContain('data-mbf="cap" data-autosave="mk:budget:cap" value="4"');
+    expect(html).toContain('data-mbf="reserve" data-autosave="mk:budget:reserve" value="2"');
+    // the fold's own line says the numbers, so folded is not hidden
+    expect(html).toContain("<span>до</span> 4 · <span>сегодня</span> 1");
+    // no «Сохранить» any more — each box is an autosave record with its bounds
+    expect(html).not.toContain("data-admmbsave");
+    const cap = specs["mk:budget:cap"] as { validate: (v: string) => string };
+    expect(cap.validate("0")).toBe("Писем в сутки — от 1 до 5000");
+    expect(cap.validate("2")).toBe("Придержать можно меньше, чем всего");   // not above the reserve
+    expect(cap.validate("50")).toBe("");
   });
 });
 
@@ -369,10 +401,16 @@ describe("«Подключения»: the shop's own order letter", () => {
 
 describe("«Настройки» has a door to «Письма»", () => {
   it("between «Оповещения на телефон» and the journal, opening Маркетинг → Письма", () => {
+    // the phone's index (1a): the whole screen is the list of pages
     const html = build<() => string>(
       ["ADM_SET_PAGES"],
-      ["admSetupHTML", "admSetMailLinkHTML"],
-      { S: { admSetPage: "" }, admHead: () => "" },
+      ["admSetupHTML", "admSetMailLinkHTML", "?admSetIndexHTML", "?admSetSub", "?admSetTitle"],
+      {
+        S: { admSetPage: "" }, admHead: () => "", ADM_PHONE_MQ: { matches: true },
+        PUSH: { loaded: false, devices: [] }, pushCan: () => false, pushLoad: () => {},
+        admSetForget: () => {}, admSetRead: () => {}, admTagHTML: (_k: string, t: string) => t,
+        ibanOk: () => true, contentConf: () => ({ company: { iban: "EE1" } }),
+      },
       "admSetupHTML",
     )();
     const door = html.indexOf('data-admtab="mail"');

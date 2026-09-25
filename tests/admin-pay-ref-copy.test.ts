@@ -39,6 +39,9 @@ function slice(name: string): string {
 // The body is this repository's own source plus fixed stub text.
 const admPayRefHTML = new Function(`
   ${slice("esc")}
+  // 1a: where to paste the number is behind the «?» beside it
+  function admHelpBtnHTML() { return '<button class="adm-help">?</button>'; }
+  function admHelpHTML(k, t) { return "<div>" + t + "</div>"; }
   ${slice("admPayRefHTML")}
   return admPayRefHTML;
 `)() as (p: unknown) => string;

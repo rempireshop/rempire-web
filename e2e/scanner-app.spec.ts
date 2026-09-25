@@ -14,7 +14,7 @@ import { assertClean, clearToast, isRussian, openAdmin, tab, toastText, watch } 
  * runs through (`handleScanCode()`).
  *
  * Both jobs the icon exists for, end to end:
- *   1. an unknown code → «К какому товару?» → search → one tap on product+size;
+ *   1. an unknown code → «К какому товару привязать?» → search → one tap on product+size;
  *   2. that same code again → the product card → +3 приход → the warehouse
  *      holds three more than it did.
  *
@@ -131,15 +131,19 @@ async function doubleTap(page: Page): Promise<void> {
   });
 }
 
-/** «Товары» → the product → «Размеры и цены» (admin-editor.spec.ts's own two
- *  helpers, kept local so the two specs do not share a fixture). */
+/** «Товары» → the product's card → «Объёмы и цены» (1a: one page, no tabs). */
 async function openSizes(page: Page, id: string): Promise<void> {
   await tab(page, "goods");
   await page.locator("[data-goodsq]").fill(id);
   await page.locator(`[data-admgoods="${id}"]`).click();
-  await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-  await page.locator('[data-edtab="sizes"]').click();
-  await expect(page.locator('[data-edtab="sizes"][aria-current="true"]')).toBeVisible();
+  await expect(page.locator(`[data-edfor="${id}"]`)).toBeVisible();
+  await page.locator('[data-edsec="sizes"]').scrollIntoViewIfNeeded();
+}
+/** The card's one save status has settled: nothing in the air, nothing failed. */
+async function cardSettled(page: Page): Promise<void> {
+  const st = page.locator("[data-admsavest]").first();
+  await expect.poll(async () => st.getAttribute("data-st"), { timeout: 20_000 }).not.toBe("saving");
+  expect(await st.getAttribute("data-st")).not.toBe("error");
 }
 
 test.describe("scanner app", () => {
@@ -167,8 +171,9 @@ test.describe("scanner app", () => {
     // ---- job 2: an unknown code, bound to a product and a size -------------
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("Код не привязан");
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    // 1a: «Новый код · …» / «К какому товару привязать?»
+    await expect(page.locator("#scanpanel")).toContainText("Новый код");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await assertClean(page, w, "unknown code");
 
     // two or three letters is all it should take
@@ -201,27 +206,35 @@ test.describe("scanner app", () => {
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
     await expect(page.locator("#scanpanel")).toContainText("Un.Tangled");
+    /* 1a: «Приход / Списание» is one switch, and ONE dark button carries the
+       number (06-scanner-phone). */
+    await expect(page.locator('[data-scanmode="in"][aria-current="true"]')).toBeVisible();
     await expect(page.locator('[data-scanmove="in"]')).toBeVisible();
-    await expect(page.locator('[data-scanmove="out"]')).toBeVisible();
 
     // the stepper starts at 1, so «+3» is two taps and one confirm
     await expect(page.locator("[data-scanqtyinput]")).toHaveValue("1");
     await page.locator('[data-scanqty="1"]').click();
     await page.locator('[data-scanqty="1"]').click();
     await expect(page.locator("[data-scanqtyinput]")).toHaveValue("3");
-    // the two buttons carry the number they promise, so the stepper and the
-    // promise can never disagree
+    // the button carries the number it promises, so the stepper and the
+    // promise can never disagree — on either side of the switch
     await expect(page.locator('[data-scanmove="in"]')).toHaveText("Принять +3");
+    await page.locator('[data-scanmode="out"]').click();
     await expect(page.locator('[data-scanmove="out"]')).toHaveText("Списать −3");
+    await expect(page.locator("[data-scanqtyinput]"), "the switch reset the number").toHaveValue("3");
+    await page.locator('[data-scanmode="in"]').click();
     await page.locator('[data-scanmove="in"]').click();
-    expect(await toastText(page), "the goods-in confirm said nothing").toMatch(/Приход \+3/);
+    // the toast says what is on the shelf now, and offers «Вернуть» (an opposite move, q21)
+    const said = await toastText(page);
+    expect(said, "the goods-in confirm said nothing").toMatch(/Принято \+3/);
+    expect(said).toContain(`теперь ${before + 3}`);
+    await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await clearToast(page);
 
-    // auto-resume: the card comes back with the new remainder, the stepper is
-    // back at 1 and the scanner is ready for the next code with nothing to tap
-    await expect(page.locator("#scanpanel")).toContainText(`на складе ${before + 3}`);
+    // back to the camera by itself: the card goes, «Готово» says so, and the
+    // scanner is ready for the next code with nothing to tap
     await expect(page.locator("#scanpanel")).toContainText("сканируйте следующий код");
-    await expect(page.locator("[data-scanqtyinput]")).toHaveValue("1");
+    await expect(page.locator("[data-scanqtyinput]")).toHaveCount(0);
     expect(await stockQty(page, PRODUCT_2.id, VARIANT), "the move did not reach the warehouse").toBe(before + 3);
     await assertClean(page, w, "+3 приход");
 
@@ -235,7 +248,8 @@ test.describe("scanner app", () => {
     await page.locator("[data-stockq]").fill(ean);
     const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${VARIANT}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
     await expect(row).toContainText(ean);
-    await expect(row).toContainText(String(before + 3));
+    // 1a: the count is the box between − and +
+    await expect(row.locator("[data-stockqtyinput]")).toHaveValue(String(before + 3));
     await assertClean(page, w, "«Склад» shows what the scanner wrote");
   });
 
@@ -257,14 +271,16 @@ test.describe("scanner app", () => {
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
     const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
     await expect(row).toBeVisible();
-    await expect(row).toContainText("штрихкод не привязан");
+    await expect(row).toContainText("не привязан");
     const before = (await stockQty(page, PRODUCT_2.id, variant)) ?? 0;
 
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanassignq]").fill("tangled");
     await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
     expect(await toastText(page)).toMatch(/привязан/i);
@@ -273,19 +289,22 @@ test.describe("scanner app", () => {
     await page.locator('[data-scanqty="1"]').click();
     await expect(page.locator('[data-scanmove="in"]')).toHaveText("Принять +2");
     await page.locator('[data-scanmove="in"]').click();
-    expect(await toastText(page)).toMatch(/Приход \+2/);
+    const said = await toastText(page);
+    expect(said).toMatch(/Принято \+2/);
+    expect(said).toContain(`теперь ${before + 2}`);
     await clearToast(page);
-    await expect(page.locator("#scanpanel")).toContainText(`на складе ${before + 2}`);
 
     // back to the list: what the scanner just wrote is on the row already
     await page.locator("[data-scanclose]").click();
     await expect(page.locator(".scanoverlay")).toHaveCount(0);
     await expect(row, "the list behind the overlay still shows the row as unbound").toContainText(ean);
-    await expect(row, "the list behind the overlay still shows the old count").toContainText(String(before + 2));
+    await expect(row.locator("[data-stockqtyinput]"), "the list behind the overlay still shows the old count").toHaveValue(String(before + 2));
     await assertClean(page, w, "«Склад» list after the overlay");
 
     // ---- a wrong binding is undone on the card itself -----------------------
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
     await expect(page.locator('[data-scanmove="in"]')).toBeVisible();
@@ -293,11 +312,11 @@ test.describe("scanner app", () => {
     expect(await toastText(page), "unlinking said nothing").toMatch(/отвязан/i);
     await clearToast(page);
     // the code is free again, and the search card follows so it can be re-bound at once
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanclose]").click();
     await expect(page.locator(".scanoverlay")).toHaveCount(0);
-    await expect(row).toContainText("штрихкод не привязан");
-    await expect(row, "unlinking touched the count").toContainText(String(before + 2));
+    await expect(row).toContainText("не привязан");
+    await expect(row.locator("[data-stockqtyinput]"), "unlinking touched the count").toHaveValue(String(before + 2));
     await assertClean(page, w, "code unlinked from the card");
   });
 
@@ -329,11 +348,13 @@ test.describe("scanner app", () => {
       await route.continue();
     });
 
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     const search = page.locator("[data-scanassignq]");
     await search.fill("tangled");
     await search.evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
@@ -385,7 +406,7 @@ test.describe("scanner app", () => {
     // the very same code, straight away: the failure must not be cached
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     w.serverErrors.length = 0;   // the mocked 503 above, forgiven
     await assertClean(page, w, "lookup after a failure");
   });
@@ -411,7 +432,7 @@ test.describe("scanner app", () => {
     await waitForScreen(page, "scan");
     await page.locator("[data-scanmanual]").fill(codeB);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     const search = page.locator("[data-scanassignq]");
     const cands = page.locator(".scan__cand");
 
@@ -436,7 +457,7 @@ test.describe("scanner app", () => {
     const row = page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`);
     await row.click();
     await expect(row).toContainText("Заменить код?");
-    await expect(page.locator("#scanpanel"), "one tap replaced a bound code").toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel"), "one tap replaced a bound code").toContainText("К какому товару привязать?");
     await row.click();
     expect(await toastText(page)).toMatch(/привязан/i);
     await clearToast(page);
@@ -577,7 +598,7 @@ test.describe("scanner app", () => {
     const ean = `21${Date.now().toString().slice(-10)}`;
     await page.evaluate((code) => { (window as unknown as FakeWin).__scanFake.next = code; }, ean);
     await expect(page.locator("#scanpanel")).toContainText(ean, { timeout: 10_000 });
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     expect((await fake()).vibrated, "no vibration on the hit").toBeGreaterThan(0);
     await page.evaluate(() => { (window as unknown as FakeWin).__scanFake.next = ""; });
     await assertClean(page, w, "camera hit");
@@ -623,19 +644,25 @@ test.describe("scanner app", () => {
     await expect(unbindBtn, "a bound size has no «Отвязать»").toBeVisible();
     await assertClean(page, w, "editor: a size with a code");
 
-    // «Отвязать» only empties the box — nothing is freed until «Сохранить»
+    /* «Отвязать код» frees the code at once — and «Вернуть» on the toast
+       binds it back (Dim 25.09.2026, q20: it used to wait for «Сохранить»,
+       so a mis-tap cost nothing; the undo is what makes it cost nothing now) */
     await unbindBtn.click();
     await expect(cell).toHaveValue("");
-    expect(await toastText(page), "«Отвязать» said nothing about saving").toMatch(/Сохранить/);
-    await clearToast(page);
-    expect(await stockEan(page, PRODUCT_2.id, VARIANT),
-      "«Отвязать» freed the code before «Сохранить» was pressed").toBe(ean);
-
-    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    await cardSettled(page);
+    expect(await toastText(page), "«Отвязать код» said nothing").toMatch(/Код отвязан/);
     await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
-      { timeout: 15_000, message: "«Сохранить» after «Отвязать» left the code on the size" }).toBe("");
+      { timeout: 15_000, message: "«Отвязать код» left the code on the size" }).toBe("");
+    await page.locator(".adm-toast__undo").click();
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
+      { timeout: 15_000, message: "«Вернуть» did not bind the code back" }).toBe(ean);
+    await clearToast(page);
+    // …and freed for good this time
+    await openSizes(page, PRODUCT_2.id);
+    await unbindBtn.click();
+    await cardSettled(page);
+    await clearToast(page);
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT), { timeout: 15_000 }).toBe("");
 
     // …and now it says so, instead of sitting empty and mute
     await openSizes(page, PRODUCT_2.id);
@@ -644,9 +671,10 @@ test.describe("scanner app", () => {
     await expect(unbindBtn, "a size with no code still offers «Отвязать»").toHaveCount(0);
     /* The hint changed with the «Сканер» button beside the box (Dim's phone
        test, 09.09.2026): a code is read into this very field now, not only
-       bound on «Склад». */
-    await expect(page.locator('[data-edpane="sizes"]'),
-      "the grid never says where a barcode comes from").toContainText("Штрихкод можно считать прямо здесь");
+       bound on «Склад». 1a: the line is behind the section's «?». */
+    await page.locator('[data-admhelp="ed-sizes"]').click();
+    await expect(page.locator("#admhelp-ed-sizes"),
+      "the grid never says where a barcode comes from").toContainText("Штрихкод считывает кнопка сканера");
     await assertClean(page, w, "editor: a size with no code");
 
     /* Dim was asked whether this cell should go read-only now that the
@@ -655,9 +683,8 @@ test.describe("scanner app", () => {
        given up, is the last way in — so it has to actually save. */
     const typed = `28${Date.now().toString().slice(-10)}`;
     await cell.fill(typed);
-    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    await cell.blur();
+    await cardSettled(page);
     await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
       { timeout: 15_000, message: "a barcode typed into the editor by hand never reached the warehouse" }).toBe(typed);
     // …and the scanner finds the bottle by it, which is the whole point
@@ -681,9 +708,12 @@ test.describe("scanner app", () => {
       .then(async (r) => ((await r.json()).levels as unknown[]).length);
     expect(all, "the e2e catalogue is too small to page — this test would prove nothing").toBeGreaterThan(60);
 
-    const rows = page.locator("#stocklist .adm-row--stock");
-    await expect(rows).toHaveCount(60);
-    await expect(page.locator("[data-stockcount]")).toHaveText(new RegExp(`Показаны первые 60 из ${all}`));
+    /* 1a: the rows are grouped by product and a page holds WHOLE products, so
+       the first page is at least 60 sizes — never a name cut from its sizes. */
+    const rows = page.locator("#stocklist .adm-stk__r");
+    await expect.poll(() => rows.count()).toBeGreaterThanOrEqual(60);
+    const first = await rows.count();
+    await expect(page.locator("[data-stockcount]")).toHaveText(new RegExp(`Показаны первые ${first} из ${all}`));
     const more = page.locator("[data-stockmore]");
     await expect(more, "the list stops at 60 with no way to see the rest").toBeVisible();
 
@@ -692,8 +722,11 @@ test.describe("scanner app", () => {
        — as this test caught the first time round — pull the very button out
        of the DOM in the middle of the press that asked for more. */
     await rows.first().evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
-    await more.click();
-    await expect.poll(() => rows.count(), { timeout: 15_000, message: "«Показать ещё» added nothing" }).toBeGreaterThan(60);
+    /* The press itself, sent to the button: scrolling it into view is the
+       other way the list grows (stockScrollMore), so a pointer click lands on
+       the rows that just arrived where the button was a frame ago. */
+    await more.dispatchEvent("click");
+    await expect.poll(() => rows.count(), { timeout: 15_000, message: "«Показать ещё» added nothing" }).toBeGreaterThan(first);
     await expect(rows.first(), "the list was rebuilt from the top instead of grown").toHaveAttribute("data-mark", "kept");
     expect(await page.locator("[data-stockcount]").textContent(),
       "the count line does not agree with the rows on screen").toContain(`Показаны первые ${await rows.count()} из ${all}`);
@@ -753,7 +786,9 @@ test.describe("scanner app", () => {
 
     // the same count is on the scanner itself, which is the screen he is
     // holding while he does it
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await expect(page.locator("#scanpanel"), "the scanner does not say how far the binding has got")
       .toContainText(`привязано ${boundWas} из ${totalWas}`);
@@ -761,7 +796,7 @@ test.describe("scanner app", () => {
     // bind one code: one more bottle done
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanassignq]").fill("tangled");
     await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
     expect(await toastText(page)).toMatch(/привязан/i);
@@ -814,24 +849,25 @@ test.describe("scanner app", () => {
     const lowWas = await page.request.get(`/api/admin/inventory/?filter=all&q=${encodeURIComponent(PRODUCT_2.id)}`)
       .then(async (r) => ((await r.json()).levels as Array<{ productId: string; variant: string; lowThreshold: number }>)
         .find((l) => l.productId === PRODUCT_2.id && (l.variant || "") === VARIANT)?.lowThreshold);
+    // 1a: the box saves itself on Enter — and refuses «abc» under itself, in rust
     await page.locator(`[data-stockedit="${key}"]`).click();
-    await page.locator("[data-stocklowinput]").fill("abc");
-    await page.locator(`[data-stocksave="${key}"]`).click();
-    expect(await toastText(page), "«abc» was taken as a threshold").toMatch(/Порог/);
-    await clearToast(page);
-    await expect(page.locator("[data-stocklowinput]"), "the form closed on a refusal").toBeVisible();
+    await page.locator(`[data-stocklowinput="${key}"]`).fill("abc");
+    await page.locator(`[data-stocklowinput="${key}"]`).press("Enter");
+    await expect(page.locator(`[data-ashint="stocklow:${key}"]`), "«abc» was taken as a threshold").toContainText("Порог");
+    await expect(page.locator(`[data-stocklowinput="${key}"]`)).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("[data-stocklowinput]"), "the row closed on a refusal").toBeVisible();
     const lowNow = await page.request.get(`/api/admin/inventory/?filter=all&q=${encodeURIComponent(PRODUCT_2.id)}`)
       .then(async (r) => ((await r.json()).levels as Array<{ productId: string; variant: string; lowThreshold: number }>)
         .find((l) => l.productId === PRODUCT_2.id && (l.variant || "") === VARIANT)?.lowThreshold);
     expect(lowNow, "«abc» reached the warehouse as a threshold").toBe(lowWas);
-    await page.locator('[data-stockedit=""]').first().click();   // Отмена
+    await page.locator('[data-stockedit=""]').first().click();   // «Свернуть» — the refused value is not sent
     await assertClean(page, w, "«Склад» refused a bad threshold");
 
     // the history: a route that fails says so and offers another go
     w.allow.push(/\/api\/admin\/inventory\/moves\//);
     await page.route("**/api/admin/inventory/moves/**", (route) =>
       route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "db_unavailable" }) }));
-    await page.locator('[data-stockmovesopen="1"]').click();
+    await page.locator('[data-stockmovesopen="1"]:visible').first().click();
     await expect(page.locator(".adm-error"), "a history that failed said nothing").toBeVisible();
     await expect(page.locator('[data-admreload="moves"]')).toBeVisible();
     await expect(page.locator(".adm-empty"), "a failed history still claims to be empty").toHaveCount(0);
@@ -875,7 +911,9 @@ test.describe("scanner app", () => {
 
     // …and the same code through the camera door: the card, then the basket
     await page.locator("[data-posq]").fill("");
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
@@ -913,21 +951,24 @@ test.describe("scanner app", () => {
     // a name the row cuts off — «the sizes seem to be at the end of the
     // product name, so it's hard to understand»
     await expect(row.locator(".adm-row__sz"), "the volume has no place of its own on the row").toHaveText(variant);
-    await expect(row.locator(".adm-row__sub"), "the volume is still trailing the product name").not.toContainText(variant);
+    // 1a: the name is said once, over its sizes — never with a size glued to it
+    await expect(page.locator(`[data-stockgroup="${PRODUCT_2.id}"] .adm-stk__n`), "the volume is still trailing the product name").not.toContainText(variant);
 
     await page.locator(`[data-stockedit="${key}"]`).click();
-    /* A number this size does not already hold — the desktop and mobile
-       projects share one database, and «Сохранить» on a form that changes
-       nothing says «Изменений нет» and writes nothing, rightly. */
-    const low = await page.locator("[data-stocklowinput]").inputValue();
-    await page.locator("[data-stocklowinput]").fill(low === "6" ? "5" : "6");
-    await page.locator("[data-stockreasoninput]").fill(why);
-    await page.locator(`[data-stocksave="${key}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    /* «Причина» first: it rides as the reason of the row's next change. A
+       number this size does not already hold — the desktop and mobile
+       projects share one database, and a threshold typed back to what it was
+       sends nothing, rightly. */
+    await page.locator(`[data-stockreasoninput="${key}"]`).fill(why);
+    const low = await page.locator(`[data-stocklowinput="${key}"]`).inputValue();
+    const put = page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && r.request().method() === "PUT");
+    await page.locator(`[data-stocklowinput="${key}"]`).fill(low === "6" ? "5" : "6");
+    await page.locator(`[data-stocklowinput="${key}"]`).press("Enter");
+    expect((await put).ok()).toBe(true);
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено");
 
-    await page.locator('[data-stockmovesopen="1"]').click();
-    await expect(page.locator(".adm-sec__t")).toContainText("История");
+    await page.locator('[data-stockmovesopen="1"]:visible').first().click();
+    await expect(page.locator(".adm-stkhist__t")).toContainText("История");
     const line = page.locator(".adm-row", { hasText: why });
     await expect(line, "the reason typed beside the threshold was lost").toBeVisible();
     // the panel runs in Russian in this suite (playwright.config.ts pins the locale)

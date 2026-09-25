@@ -4,6 +4,7 @@ import {
   payOrder, shopUrl, waitForScreen,
 } from "./fixtures";
 import { assertClean, watch } from "./sweep-helpers";
+import { toSection } from "./goods-helpers";
 
 /**
  * The third admin sweep (docs/audit/2026-09-06-admin-qa.md): the screens that
@@ -17,7 +18,7 @@ import { assertClean, watch } from "./sweep-helpers";
  *     card has none either — one tap used to mail «Заказ отправлен», with a
  *     tracking number it does not have, about nothing;
  *   - the orders search says out loud that the chip filter is off while it
- *     searches every order;
+ *     searches every order — since 1a by lighting «Все» while text is typed;
  *   - «Письма»: «Товар снова в наличии» starts off, like the sender reads it,
  *     and the birthday row says the day it actually sends on;
  *   - «Салон» points at the receipt link instead of a receipt letter nothing
@@ -109,6 +110,8 @@ test.describe("admin sweep 3 — «Отменить заказ» says what reall
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
     await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
 
+    // 1a: «Отменить заказ» is one of the rare actions in «⋯»
+    await page.locator("[data-admordermore]:visible").first().click();
     await page.locator("[data-admordercancel]").click();
     const card = page.locator(".adm-confirm");
     await expect(card.locator(".adm-confirm__t")).toHaveText("Отменить заказ?");
@@ -124,12 +127,15 @@ test.describe("admin sweep 3 — «Отменить заказ» says what reall
     await expect(detail).not.toContainText("Письмо не уходит");
     await expect(detail).not.toContainText("Деньги вернутся клиенту");
 
-    // and that button is really there, on a paid order with money left to send back
-    await expect(page.locator("[data-admrefund]")).toBeVisible();
-
-    // «Отмена» leaves the order where it was
+    // «Не надо» leaves the order where it was
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
+
+    // and that button is really there, in «⋯», on a paid order with money left to send back
+    await page.locator("[data-admordermore]:visible").first().click();
+    await expect(page.locator("[data-admrefund]")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-admrefund]")).toHaveCount(0);
     const status = async () =>
       (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.status as string;
     expect(await status()).toBe("paid");
@@ -173,7 +179,7 @@ test.describe("admin sweep 3 — a gift-card order has no parcel step", () => {
 test.describe("admin sweep 3 — the orders search says the filter is off", () => {
   test.use({ extraHTTPHeaders: ipHeaders(198) });
 
-  test("a typed search admits it looks past the chip, and stops saying so when cleared", async ({ page }, testInfo) => {
+  test("a typed search looks past the chip, and the lit chip says so until the box is cleared", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one viewport is enough for a filter");
     test.setTimeout(120_000);
     const number = await placeOrder(page, freshEmail("sweep3-filter"));
@@ -187,22 +193,19 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     const hint = searchLine(page);
     await expect(hint).toHaveCount(0);
 
-    // typing finds it anyway — and the list says why the chip stopped mattering
+    /* typing finds it anyway — and since 1a (gap L3, Dim 25.09.2026) the chip
+       says why the filter stopped mattering: «Все» is lit while text is in the
+       box, rather than a line explaining a chip that did not apply */
     await page.locator("[data-admorderq]").fill(number);
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
-    await expect(hint).toHaveText("Ищем по всем заказам — фильтр сейчас не действует.");
-    // the chip is still the one the owner will come back to
-    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="all"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "false");
+    await expect(hint).toHaveCount(0);
 
-    // clearing the box puts the filter back, and takes the line away with it
+    // clearing the box gives the chosen chip back, and its list with it
     await page.locator("[data-admorderq]").fill("");
-    await expect(hint).toHaveCount(0);
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
-
-    // «Все» + a search needs no line: nothing is being overridden
-    await page.locator('[data-admfilter="all"]').click();
-    await page.locator("[data-admorderq]").fill(number);
-    await expect(hint).toHaveCount(0);
   });
 });
 
@@ -246,12 +249,16 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
        a customer who gives an address really is written to and really does
        earn points (Dim: salon sales must count as purchases). The printable
        receipt is still a link on the order, which is the part that never
-       changed. */
+       changed. 1a: the sentence lives behind the screen's «?» (README rule 5). */
     await adminSection(page, "pos");
-    const salonHint = page.locator(".adm-hint", { hasText: "Покупатель не обязателен" }).first();
+    await page.locator('[data-admhelp="salon"]').click();
+    const salonHint = page.locator("#admhelp-salon");
+    await expect(salonHint).toBeVisible();
     await expect(salonHint).toContainText("уйдёт письмо");
     await expect(salonHint).toContainText("Чек ↗");
-    await expect(page.locator(".adm-hint", { hasText: "письмом он не уходит" })).toHaveCount(0);
+    await expect(page.locator(".adm-hint, .adm-helpp", { hasText: "письмом он не уходит" })).toHaveCount(0);
+    // put the paragraph away again: open or shut is remembered for the session
+    await page.locator('[data-admhelp="salon"]').click();
     await assertClean(page, w, "the salon register");
   });
 });
@@ -311,23 +318,23 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
        last of them leaves. What has to hold either way is that nothing breaks
        and that the half-typed price never reached the shop.
 
-       A price typed and not saved is exactly what Back must not throw away
-       in silence: since 19.09.2026 (edec888) the first Back over a touched
-       form asks — the same «Выйти без сохранения» card «← Товары» and
-       «Отмена» show — and the editor stays open under the question. The
-       second Back is the answer, like the second press of «← Товары». */
+       A price that could not be saved is exactly what Back must not throw
+       away in silence. Since 1a the card saves itself, so Back first sends
+       what the boxes owe — and a price over 500 € is not one it can send:
+       the first Back asks — the same «Выйти без сохранения» card «← Товары»
+       shows — and the card stays open under the question. The second Back is
+       the answer, like the second press of «← Товары». */
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
-    // «Сохранить» carries the open product's id — it is on both editors, the
-    // catalogue one and the owner's own (edPaneMain / edPaneMainOwn)
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator('[data-edtab="sizes"]').click();
+    // the card carries the open product's id (data-edfor) — the catalogue's and the owner's own alike
+    await expect(page.locator("[data-edfor]")).toBeVisible();
+    await toSection(page, "sizes");
     await page.locator("[data-edprice]").first().fill("999999999");
     await page.goBack();
     await expect(page.locator("[data-admbackyes]"), "Back threw a typed price away without asking").toBeVisible();
-    await expect(page.locator("[data-admsavegoods]"), "the question closed the editor under itself").toHaveCount(1);
+    await expect(page.locator("[data-edfor]"), "the question closed the card under itself").toHaveCount(1);
     await page.goBack();
-    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "Back did not close the card").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel too").toBeVisible();
     await assertClean(page, w, "goods: Back closes an open editor");
     /* …and the next ones hand «Товары» back to «Заказы», «Заказы» back to
@@ -352,7 +359,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await waitForScreen(page, "admin");
     await expect(page.locator("[data-admpw]")).toHaveCount(0, { timeout: 30_000 });
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await expect(page.locator("[data-edfor]")).toHaveCount(0);
     await assertClean(page, w, "the panel after coming back");
   });
 });

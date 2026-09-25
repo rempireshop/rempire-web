@@ -131,6 +131,9 @@ function shipmentBox(mont: Mont): string {
     ${slice("esc")}
     function carrierWord(c) { return c ? String(c) : ""; }
     function srvAddrLine(s) { return (s && s.pointName) || ""; }
+    // 1a: the box is a «Посылка» section with a status tag in its header
+    function admSecHeadHTML(t, k, h, extra) { return "<h2>" + t + "</h2>" + (extra || ""); }
+    function admTagHTML(kind, text) { return '<span class="adm-tag">' + text + "</span>"; }
     ${slice("shipRegFailed")}
     ${slice("admShipmentBoxHTML")}
     return admShipmentBoxHTML({ id: "o1", srv: { shipping: { montonio: MONT, pointName: "Kristiine" } } });

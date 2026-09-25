@@ -70,6 +70,8 @@ function card(total: number, days: number): string {
     ${slice("newsPlanWord")}
     ${slice("newsSendLabel")}
     ${src.includes("function newsSendHTML(") ? slice("newsSendHTML") : ""}
+    var ADM_UNDO_WORD = "Вернуть";
+    ${slice("admPinnedHTML")}
     ${slice("admNewsSendCardHTML")}
     return admNewsSendCardHTML({ id: "n1", status: "draft", title: "Осень", subject: { RU: "Осень" } });
   `;
@@ -78,7 +80,8 @@ function card(total: number, days: number): string {
 
 /** The send button's text nodes, as translateTree() leaves them in `lang`. */
 function button(html: string, lang: "RU" | "ET" | "EN"): string[] {
-  const m = /<button class="adm-btn" data-newssend[^>]*>([\s\S]*?)<\/button>/.exec(html);
+  // 1a: the send is the editor's one dark button (admPinnedHTML)
+  const m = /<button [^>]*data-newssend[^>]*>([\s\S]*?)<\/button>/.exec(html);
   if (!m) throw new Error("no send button on the card");
   const nodes = m[1].split(/<[^>]*>/).map((t) => t.trim()).filter(Boolean);
   return lang === "RU" ? nodes : nodes.map((t) => (CYR.test(t) ? trText(t, lang, false) : t));

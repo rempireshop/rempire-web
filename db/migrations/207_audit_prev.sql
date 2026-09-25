@@ -1,0 +1,40 @@
+-- 207_audit_prev.sql — «Вернуть» from any device (migration range 200–209)
+--
+-- Dim, 25.09.2026 (1a decisions, q7): the change journal's «Вернуть» has to
+-- work from any device, not only from the browser that made the change. Until
+-- now it could not: the undo lived in that browser's localStorage (DEMO.log in
+-- public/shop2/app.js), and the server's own journal, admin_audit, wrote down
+-- what a setting BECAME and never what it had been. A laptop looking at a
+-- price the phone changed knew the new number and had no way to know the old
+-- one.
+--
+-- So the row keeps the value it replaced, beside the payload:
+--
+--   setting.set    `prev` = the whole settings row before the PUT
+--                  (src/app/api/admin/settings/route.ts); JSON null when
+--                  the key did not exist yet
+--   override.set   `prev` = the product's fields named in the patch, as
+--                  they were (src/app/api/admin/overrides/route.ts)
+--
+-- A column of its own rather than a field inside `payload`, because every
+-- other reader of `payload` (the login ladder in src/lib/auth.ts, the
+-- journal's own row text, the tests that read the below-cost cells) keeps
+-- reading exactly the shape it reads today — and so the journal can tell
+-- «nothing recorded» (SQL NULL: every row written before this migration,
+-- and every action that has no way back) from «recorded, and it was
+-- nothing» (a jsonb null).
+--
+-- «Вернуть» sends the old value back through the SAME route that wrote the
+-- new one — no new endpoint. The journal listing (src/lib/audit-undo.ts)
+-- turns prev + value into the fields that changed, so undoing an old row
+-- puts back only what that row changed and leaves later edits of other
+-- fields alone.
+--
+-- Nullable, no default, no backfill, no index: the journal reads the newest
+-- hundred rows by `at`, which admin_audit_at_idx already serves.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never
+-- runs twice and must never be edited once it has run anywhere. Runs on
+-- Postgres 13+ and on PGlite (the test suite).
+
+alter table admin_audit add column if not exists prev jsonb;

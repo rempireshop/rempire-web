@@ -87,7 +87,7 @@ async function stubSpeech(page: Page, fail: string): Promise<void> {
 }
 
 async function openAssistant(page: Page) {
-  await page.locator(".adm-fab").click();
+  await page.locator(".adm-aiopen:visible").first().click();
   const panel = page.locator(".adm-asst");
   await expect(panel).toBeVisible();
   // the sheet slides in (admin.css adm-up, .2s of translateY): geometry read
@@ -305,8 +305,8 @@ test.describe("admin assistant — the microphone listens in the language he cho
     // the moment the page has loaded could hear «no» from a panel about to draw
     // it open, and then wait for a button that is never drawn beside an open
     // pane. Ask once the shell has drawn one of the two.
-    await expect(page.locator(".adm-asst, .adm-fab").first()).toBeVisible();
-    if (!(await page.locator(".adm-asst").isVisible())) await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-asst, .adm-aiopen:visible").first()).toBeVisible();
+    if (!(await page.locator(".adm-asst").isVisible())) await page.locator(".adm-aiopen:visible").first().click();
     await expect(page.locator(".adm-asst")).toBeVisible();
     const again = page.locator("[data-admvoicelang]");
     await expect(again).toHaveText("RU");

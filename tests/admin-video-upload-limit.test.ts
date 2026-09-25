@@ -81,9 +81,11 @@ describe("a video over the platform's cap is refused in the panel", () => {
 
 describe("the words say the real limit", () => {
   it("the button no longer promises 60 MB", () => {
-    const pane = fn("edPaneMedia");
+    // 1a: the card's «Видео» section (edPaneMedia hands over to it)
+    expect(fn("edPaneMedia")).toContain("edSecVideo(p)");
+    const pane = fn("edSecVideo");
     expect(pane).not.toMatch(/60 МБ/);
-    expect(pane).toContain("Выбрать видео на телефоне · MP4 или MOV до 4 МБ");
+    expect(pane).toContain("Выбрать видео · MP4 или MOV до 4 МБ");   // q21: «до 4 МБ», not the design's 100
   });
 
   it("the refusal names the same number", () => {

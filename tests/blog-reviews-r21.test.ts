@@ -98,22 +98,28 @@ type SaveRig = {
   dirty: () => boolean;
   mark: (d: Any) => void;
   answer: (post: Any) => void;
+  /** Resolves once the request has actually left (apiSend was called). */
+  sent: () => Promise<void>;
 };
 
 function saveRig(): SaveRig {
-  const S: Any = { adminBlogEdit: null, adminBlogSaved: undefined, adminBlog: [], adminBlogConfirmBack: false, adminBlogConfirmPublish: "" };
+  const S: Any = { adminBlogEdit: null, adminBlogSaved: undefined, adminBlog: [], adminBlogConfirmBack: false };
   let settle: ((r: unknown) => void) | null = null;
   const apiSend = () => new Promise((r) => { settle = r; });
+  /* 1a: saves of one article queue behind each other (saveBlogFields) and the
+     request is built when its turn comes (blogSaveOnce) — a microtask after
+     the call. «In the air» therefore starts when apiSend has been called. */
   const run = new Function(
-    "S", "apiSend", "blogBody3ToHtml", "blogForget",
+    "S", "apiSend", "blogBody3ToHtml", "blogForget", "noop", "blogListUpsert", "idemNewKey", "blogSendKeepalive", "blogHttpErr",
     `${slice("blogFieldsPayload")} ${slice("blogDraftSig")} ${sliceVar("BLOG_SIG_FIELDS")} ${slice("blogDraftSnap")}
-     ${slice("blogMarkSaved")} ${slice("saveBlogFields")} ${slice("blogDirty")}
+     ${slice("blogMarkSaved")} ${slice("saveBlogFields")} ${slice("blogSaveOnce")} ${slice("blogDirty")}
      return { save: saveBlogFields, dirty: blogDirty, mark: blogMarkSaved };`,
   ) as (...a: unknown[]) => { save: (d?: Any) => Promise<Any>; dirty: () => boolean; mark: (d: Any) => void };
-  const api = run(S, apiSend, (b: Any) => b, () => {});
+  const api = run(S, apiSend, (b: Any) => b, () => {}, () => {}, () => {}, () => "key", apiSend, () => new Error("save_failed"));
   return {
     S, ...api,
     answer: (post: Any) => settle!({ status: 200, body: { ok: true, post } }),
+    sent: async () => { for (let i = 0; i < 20 && !settle; i++) await Promise.resolve(); },
   };
 }
 
@@ -128,6 +134,7 @@ describe("«Сохранено ✓» is about what was sent, not about the draft
     expect(rig.dirty()).toBe(false);
 
     const saving = rig.save();
+    await rig.sent();
     // blogSync() writes every keystroke into the same draft, with no busy check
     (d.body as Any).RU = "<p>Первый абзац.</p><p>И второй, дописанный пока шло сохранение.</p>";
     rig.answer(SAVED);
@@ -142,6 +149,7 @@ describe("«Сохранено ✓» is about what was sent, not about the draft
     rig.S.adminBlogEdit = d;
     rig.mark(d);
     const saving = rig.save();
+    await rig.sent();
     rig.answer(SAVED);
     await saving;
 
@@ -156,6 +164,7 @@ describe("«Сохранено ✓» is about what was sent, not about the draft
     rig.mark(d);
     const was = rig.S.adminBlogSaved;
     const saving = rig.save(d);
+    await rig.sent();
     rig.S.adminBlogEdit = null;   // «← Блог» while the request is in the air
     rig.answer(SAVED);
     await saving;
@@ -494,8 +503,9 @@ describe("the moderation queue never lists one status' rows under another's chip
     const html = rig.html();
     expect(html).toContain("adm-skel");
     expect(html).not.toContain("<row:r1:pending>");
-    expect(html).toContain("Новые 2");
-    expect(html).toContain("Отклонённые 1");
+    // the word and its count, each its own node (1a: «Скрытые», one word for a hidden review)
+    expect(html).toContain('<span>Новые</span> <span class="adm-chip__n">2</span>');
+    expect(html).toContain('<span>Скрытые</span> <span class="adm-chip__n">1</span>');
   });
 
   it("a refetch that fails under the new chip shows the error, not the old status' rows", async () => {

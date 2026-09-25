@@ -62,11 +62,14 @@ function panel() {
     function esc(s) { return String(s == null ? "" : s); }
     function shortDate(iso) { return String(iso).slice(0, 10); }
     function eur(n) { return n + " €"; }
-    function admCustFactRow(label, value) { return "<row>" + label + ": " + value + "</row>"; }
+    function admSecHeadHTML(t) { return "<h>" + t + "</h>"; }
     function admCustOrderRowHTML(o) { return "<order>" + o.number + "</order>"; }
     function admCustReviewRowHTML(r) { return "<review>" + r.text + "</review>"; }
     ${slice("mergeInto")}
+    ${slice("admCustAdopt")}
+    ${slice("custSend")}
     ${slice("admCustPatch")}
+    ${slice("admCustFact")}
     ${slice("admCustFactsHTML")}
     ${slice("admCustOrdersHTML")}
     ${slice("admCustReviewsHTML")}
@@ -106,28 +109,38 @@ describe("«Одобрить Pro» on the customer card", () => {
     expect(p.calls).toContainEqual(["loadAdminCustomerDetail", "c1", true]);
   });
 
+  /* 1a: an answer is sent ten seconds after it is pressed (q3), so it can
+     land while the owner is on ANOTHER card — approved from the list, then
+     c1 opened. That card stays c1's, whole; the answer goes to c9's row. */
   it("does not hand one customer's card to another", async () => {
     const p = panel();
+    p.S.admCustomers = [{ id: "c9", email: "c9@example.com", tier: "retail", proRequestedAt: "2026-09-20T10:00:00.000Z", ordersCount: 3 }];
     p.approve("c9");   // approved from the list, while c1's card is what S holds
     await flush();
     const d = p.S.admCustDetail as Record<string, unknown>;
-    expect(d.orders, "c1's orders were drawn under c9").toBeUndefined();
-    expect(d.history).toEqual([]);
+    expect((d.customer as { id: string }).id, "c9's row was put on c1's card").toBe("c1");
+    expect(d.orders, "c1's card lost its orders to c9's answer").toEqual([ORDER]);
+    expect(d.history).toHaveLength(1);
+    expect(p.calls, "c1's card was asked again for c9's answer").not.toContainEqual(["loadAdminCustomerDetail", "c9", true]);
+    // …and the list's row took the answer, its order count kept
+    const row = (p.S.admCustomers as Array<Record<string, unknown>>)[0];
+    expect(row).toMatchObject({ id: "c9", tier: "pro", ordersCount: 3 });
   });
 });
 
 describe("Opening another customer's card", () => {
-  it("starts the points form and the note's «Сохранено ✓» empty", () => {
+  it("starts the points form empty, with no refusal left under it", () => {
     const p = panel();
     p.S.admCustPoints = "50";
     p.S.admCustNote = "извинение за задержку";
-    p.S.custNoteSaved = true;
+    p.S.admCustPtsErr = "Впишите число баллов — можно с минусом";
     p.S.admCustNotesDraft = "постоянный клиент";
     p.open("c2");
     expect(p.S.admCustOpen).toBe("c2");
-    expect(p.S.admCustPoints, "the number typed on the last card is on this one's «Применить»").toBe("");
+    expect(p.S.admCustPoints, "the number typed on the last card is on this one's button").toBe("");
     expect(p.S.admCustNote).toBe("");
-    expect(p.S.custNoteSaved, "«Сохранено ✓» of the last card's note shows on this one").toBe(false);
+    expect(p.S.admCustPtsErr, "the last card's «Впишите число…» stands under this one's box").toBe("");
+    // the note is re-read from the card that opens; what the last one owed goes under its own key
     expect(p.S.admCustNotesDraft).toBeNull();
   });
 });

@@ -39,7 +39,9 @@ test.beforeEach(async ({}, testInfo) => {
 });
 
 const SET_ID = "e2e-set";
-const SET_NAME = "Набор для проверки";
+/** 1a: the address is written from the Russian name (bundleSuggestId) — a latin
+ *  word stays as it is and «набор» becomes «set», so this name is «e2e-set». */
+const SET_NAME = "E2E набор для проверки";
 /** A second set, made through the API and deleted by the assistant — so the
  *  walk above is never the thing the delete test is aiming at. */
 const ASSIST_ID = "e2e-set-assist";
@@ -67,16 +69,22 @@ async function openSets(page: Page): Promise<void> {
   await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
   await page.locator('[data-admgoodstab="bundles"]').click();
   await expect(page.locator('[data-admgoodstab="bundles"][aria-current="true"]')).toBeVisible();
-  // «Новый набор» renders only once GET /api/admin/bundles/ has answered and
+  // «+ Набор» renders only once GET /api/admin/bundles/ has answered and
   // the panel knows it is signed in — the honest "this tab is ready" signal
-  await expect(page.locator("[data-bundlenew]")).toBeVisible();
+  await expect(page.locator("[data-bundlenew]:visible").first()).toBeVisible();
 }
 
-/** Adds one product to the set open in the editor, through the search box. */
+/** Adds one product to the set open in the editor, through the search box —
+ *  1a: each result carries its volumes as chips; the first is the first volume. */
 async function addProduct(page: Page, id: string, name: string): Promise<void> {
   await page.locator("[data-bundleq]").fill(name);
-  await page.locator(`[data-bundleadd="${id}"]`).click();
+  await page.locator(`[data-bundleadd="${id}"]`).first().click();
   await expect(page.locator("[data-bundledel]").first()).toBeVisible();
+}
+
+/** The one whole-row write a set saves itself through. */
+function bundlePost(page: Page) {
+  return page.waitForResponse((r) => r.url().includes("/api/admin/bundles/") && r.request().method() === "POST");
 }
 
 /** «12,90 €» → 12.9 */
@@ -89,43 +97,42 @@ test.describe("admin — наборы", () => {
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(186) });
-    test("the address of a new set is an English word, and one the owner typed stays his", async ({ page }) => {
+    test("the address of a new set is an English word, shown behind «?», and a draft with no products is never saved", async ({ page }) => {
       await loginAsAdmin(page);
       await openSets(page);
+      const posts: string[] = [];
+      page.on("request", (r) => { if (r.url().includes("/api/admin/bundles/") && r.method() === "POST") posts.push(r.url()); });
 
       /* Dim, 08.09.2026: this address is a URL. The shopper reads it, Google
          indexes it and the shop sells across Europe, so «Набор для бороды»
          becomes `beard-set` and not `nabor-dlya-borody` — the same English
          the sets the shop shipped with already use (`beard-start`,
-         `shave-smooth`, db/migrations/120_bundles.sql). */
-      await page.locator("[data-bundlenew]").click();
-      const addr = page.locator('[data-bundlef="id"]');
-      await expect(addr).toHaveValue("");
+         `shave-smooth`, db/migrations/120_bundles.sql). 1a (q23): it is not a
+         box any more — it is written from the name and shown behind «?». */
+      await page.locator("[data-bundlenew]:visible").first().click();
+      await expect(page.locator('[data-bundlef="id"]'), "the address is still a box to fill").toHaveCount(0);
       await page.locator('[data-bundlef="title"]').fill("Набор для бороды");
-      await expect(addr).toHaveValue("beard-set");
-      // …and it keeps following the name while the name is still being typed
+      await page.locator('[data-admhelp="set-addr"]').click();
+      const addr = page.locator("#admhelp-set-addr");
+      await expect(addr).toContainText("/set/beard-set/");
+      // …and it keeps following the name while the set is still a draft
       await page.locator('[data-bundlef="title"]').fill("Набор для бритья");
-      await expect(addr).toHaveValue("shave-set");
+      await expect(addr).toContainText("/set/shave-set/");
 
-      /* An address the owner wrote himself is his: the name may go on
-         changing above it and the box must not move under his hands. */
-      await addr.fill("renat-classic");
-      await page.locator('[data-bundlef="title"]').fill("Уход за бородой");
-      await expect(addr).toHaveValue("renat-classic");
-      // …and emptying the box is a request for a suggestion, not a decision
-      await addr.fill("");
-      await page.locator('[data-bundlef="title"]').fill("Набор для волос");
-      await expect(addr).toHaveValue("hair-set");
-
-      // nothing here was saved: this test leaves the shelf exactly as it was
+      // a name alone is not a set: nothing went to the server, the draft waits in this browser
+      await page.locator('[data-bundlef="title"]').press("Enter");
+      await expect(page.locator(".adm-seted__draft")).toBeVisible();
       await page.locator("[data-bundlecancel]").click();
-      await expect(page.locator("[data-bundlesave]")).toHaveCount(0);
+      await expect(page.locator("[data-bundleform]")).toHaveCount(0);
+      expect(posts, "a draft with no products was sent to the shop").toEqual([]);
+      const list = await (await page.request.get("/api/admin/bundles/")).json();
+      expect(list.bundles.map((b: { id: string }) => b.id)).not.toContain("shave-set");
     });
   });
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(180) });
-    test("builds a set from two products and the shop sells it at that price", async ({ page, browser }) => {
+    test("builds a set from two products — it saves itself hidden, shown with its switch, and the shop sells it at that price", async ({ page, browser }) => {
       /* The panel, then a second browser through the whole checkout: 13 s
          alone, but in a full run `next dev` compiles routes on first hit and
          the checkout shell alone took 6 s — the default 30 s ran out in the
@@ -135,8 +142,7 @@ test.describe("admin — наборы", () => {
       await loginAsAdmin(page);
       await openSets(page);
 
-      await page.locator("[data-bundlenew]").click();
-      await page.locator('[data-bundlef="id"]').fill(SET_ID);
+      await page.locator("[data-bundlenew]:visible").first().click();
       await page.locator('[data-bundlef="title"]').fill(SET_NAME);
       await page.locator('[data-bundlef="desc"]').fill("Два товара, которые обычно берут вместе.");
 
@@ -170,10 +176,27 @@ test.describe("admin — наборы", () => {
         String(Math.round(((sum - SET_PRICE) / sum) * 1000) / 10).replace(".", ","),
       );
 
-      await page.locator("[data-bundlesave]").click();
-      // the row in the list is the proof, not the 2.6-second toast
+      /* 1a (q27): no «Сохранить». The price leaves the box on Enter, and with
+         a name, two products and a price below the parts the draft is a real
+         set now — hidden, on the address its name gave it — and the price is
+         what is stored (q28). The per-cent box was LEFT for the euro one a
+         moment ago, and money saves on leave (q1): that already made the set,
+         at 13,60 €, and its answer can land after this line — so the POST
+         that counts is the one carrying the price typed last. */
+      const created = page.waitForResponse((r) => r.url().includes("/api/admin/bundles/") && r.request().method() === "POST" &&
+        (r.request().postDataJSON() as { price?: number } | null)?.price === SET_PRICE);
+      await page.locator('[data-bundlef="price"]').press("Enter");
+      const res = await created;
+      expect(res.ok()).toBe(true);
+      expect(res.request().postDataJSON()).toMatchObject({ id: SET_ID, active: false, price: SET_PRICE });
       await expect(page.locator(`[data-bundleedit="${SET_ID}"]`)).toBeVisible();
-      await expect(page.locator("[data-bundlesave]")).toHaveCount(0);
+      await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено");
+
+      // …and «Показывать в магазине» puts it on the shelf
+      const shown = page.waitForResponse((r) => r.url().includes("/api/admin/bundles/") && r.request().method() === "PATCH");
+      await page.locator(`[data-bundleshow="${SET_ID}"]`).click();
+      expect((await shown).ok()).toBe(true);
+      await expect(page.locator(`[data-bundletoggle="${SET_ID}"]`)).toHaveAttribute("aria-checked", "true");
 
       // …and now the shop, in its own context
       const shop = await freshShop(browser);
@@ -222,14 +245,15 @@ test.describe("admin — наборы", () => {
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(181) });
-    test("changing the price in the panel changes it in the shop", async ({ page, browser }) => {
+    test("changing the price in the panel changes it in the shop — the box saves itself when it is left", async ({ page, browser }) => {
       await loginAsAdmin(page);
       await openSets(page);
 
       await page.locator(`[data-bundleedit="${SET_ID}"]`).click();
       await page.locator('[data-bundlef="price"]').fill(String(NEW_PRICE));
-      await page.locator("[data-bundlesave]").click();
-      await expect(page.locator("[data-bundlesave]")).toHaveCount(0);
+      const saved = bundlePost(page);
+      await page.locator('[data-bundlef="price"]').press("Enter");
+      expect((await saved).ok()).toBe(true);
 
       const shop = await freshShop(browser);
       try {
@@ -244,29 +268,34 @@ test.describe("admin — наборы", () => {
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(182) });
-    test("refuses a set that is not cheaper than its parts", async ({ page }) => {
+    test("refuses a set that is not cheaper than its parts, and a new one never takes an address that is taken", async ({ page }) => {
       await loginAsAdmin(page);
       await openSets(page);
+      const posts: string[] = [];
+      page.on("request", (r) => { if (r.url().includes("/api/admin/bundles/") && r.method() === "POST") posts.push(r.url()); });
 
       await page.locator(`[data-bundleedit="${SET_ID}"]`).click();
       await page.locator('[data-bundlef="price"]').fill("999");
-      await page.locator("[data-bundlesave]").click();
-      await expect(page.locator('.err[role="alert"]')).toContainText("дешевле");
-      // the form stays open on the refused value — nothing was saved
-      await expect(page.locator("[data-bundlesave]")).toBeVisible();
+      await page.locator('[data-bundlef="price"]').press("Enter");
+      // refused before the trip, in rust, and the box says it is the one
+      await expect(page.locator("[data-bundlehint]")).toContainText("дороже");
+      await expect(page.locator('[data-bundlef="price"]')).toHaveAttribute("aria-invalid", "true");
+      await page.waitForTimeout(500);
+      expect(posts, "a price above the parts was sent").toEqual([]);
       await page.locator("[data-bundlecancel]").click();
 
-      /* …and a NEW set typed onto an address that already belongs to one:
-         POST /api/admin/bundles/ is an upsert, so this used to replace that
-         set — its name, its products and its price — without a word. */
-      await page.locator("[data-bundlenew]").click();
-      await page.locator('[data-bundlef="id"]').fill(SET_ID);
-      await page.locator('[data-bundlef="title"]').fill("Другой набор");
-      await page.locator("[data-bundlesave]").click();
-      await expect(page.locator('.err[role="alert"]')).toContainText("уже есть");
+      /* …and a NEW set named like one that exists. POST /api/admin/bundles/ is
+         an upsert, so a new set on an address that already belongs to one
+         would replace it — its name, its products and its price. 1a writes the
+         address itself, and never one the list already has. */
+      await page.locator("[data-bundlenew]:visible").first().click();
+      await page.locator('[data-bundlef="title"]').fill(SET_NAME);
+      await page.locator('[data-admhelp="set-addr"]').click();
+      await expect(page.locator("#admhelp-set-addr")).toContainText(`/set/${SET_ID}-2/`);
       await page.locator("[data-bundlecancel]").click();
       // the set that was there is untouched
       await expect(page.locator(`[data-bundleedit="${SET_ID}"]`)).toBeVisible();
+      expect(posts).toEqual([]);
     });
   });
 
@@ -276,9 +305,12 @@ test.describe("admin — наборы", () => {
       await loginAsAdmin(page);
       await openSets(page);
 
+      const hidden = page.waitForResponse((r) => r.url().includes("/api/admin/bundles/") && r.request().method() === "PATCH");
       await page.locator(`[data-bundletoggle="${SET_ID}"]`).click();
-      // the row label flips to «Показать» once the server has confirmed
-      await expect(page.locator(`[data-bundletoggle="${SET_ID}"]`)).toHaveText("Показать");
+      expect((await hidden).ok()).toBe(true);
+      // the switch says so, and the toast offers «Вернуть»
+      await expect(page.locator(`[data-bundletoggle="${SET_ID}"]`)).toHaveAttribute("aria-checked", "false");
+      await expect(page.locator(".adm-toast__undo")).toBeVisible();
 
       const shop = await freshShop(browser);
       try {
@@ -298,20 +330,27 @@ test.describe("admin — наборы", () => {
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(184) });
-    test("deleting asks first, then removes the set for good", async ({ page, browser }) => {
+    test("deleting asks first, is held with «Вернуть», then removes the set for good", async ({ page, browser }) => {
       await loginAsAdmin(page);
       await openSets(page);
 
       await page.locator(`[data-bundleedit="${SET_ID}"]`).click();
       await page.locator(`[data-bundledelete="${SET_ID}"]`).click();
-      // the confirm strip, not a browser dialog — the panel's own pattern
-      await expect(page.getByText("Удалить набор?")).toBeVisible();
-      await page.locator("[data-bundledelno]").click();
-      await expect(page.getByText("Удалить набор?")).toHaveCount(0);
+      // the one confirm sheet (README rule 4): a question, one sentence, «Не надо»
+      const sheet = page.locator(".adm-confirm");
+      await expect(sheet).toContainText("Удалить набор");
+      await page.locator("[data-admcancel]").click();
+      await expect(sheet).toHaveCount(0);
 
       await page.locator(`[data-bundledelete="${SET_ID}"]`).click();
-      await page.locator(`[data-bundledelyes="${SET_ID}"]`).click();
+      await page.locator("[data-admapply]").click();
+      // off the list at once; the DELETE itself waits while «Вернуть» stands (q8)
       await expect(page.locator(`[data-bundleedit="${SET_ID}"]`)).toHaveCount(0);
+      await expect(page.locator(".adm-toast__undo")).toBeVisible();
+      await expect.poll(async () => {
+        const list = await (await page.request.get("/api/admin/bundles/")).json();
+        return list.bundles.map((b: { id: string }) => b.id);
+      }, { timeout: 20_000, message: "the held delete never went" }).not.toContain(SET_ID);
 
       const shop = await freshShop(browser);
       try {
@@ -364,7 +403,7 @@ test.describe("admin — наборы", () => {
          side pane and the owner may never have opened that tab in this
          sitting, so this is also the test that the panel fetches the list it
          needs to name the set. */
-      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator(".adm-aiopen:visible").first().click();
       await page.locator("[data-admq]").fill(`удали набор ${ASSIST_NAME}`);
       await page.locator("[data-admsend]").click();
 

@@ -27,6 +27,17 @@
  *                       letter, no status; it takes the order out of the
  *                       «Возвраты» counter and nothing else. `false` is its
  *                       undo. 409 on an order nobody asked to return.
+ *   letterCancel: token «Вернуть» on a held letter that has no status of its
+ *                       own — the invoice sent again, a reply from «Написать
+ *                       клиенту». Answers `cancelled: false` when the letter
+ *                       has already left.
+ *
+ * Since 25.09.2026 (admin redesign 1a, Dim's q3) the two letters a status
+ * change sends — «Заказ отправлен» and «Заказ отменён» — leave TEN SECONDS
+ * after the change, not inside this request (src/lib/letter-hold.ts). The
+ * status itself moves at once; the answer carries `letter: { held, token, ms }`
+ * so the toast can say so, and the toast's «Вернуть» — a PATCH back to the
+ * previous status — voids the letter before it goes.
  */
 import { requireAdmin } from "@/lib/auth";
 import { attachGiftCards } from "@/lib/giftcard-links";
@@ -41,6 +52,7 @@ import {
   type Order,
   type OrderStatus,
 } from "@/lib/orders";
+import { cancelLetter, dropStatusLetters, holdAndSend, type LetterHeld } from "@/lib/letter-hold";
 import { applyPaymentResult } from "@/lib/payments/apply";
 import { notifyOrderClosed, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { refundedTotal } from "@/lib/payments/refund";
@@ -49,6 +61,9 @@ import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* A held letter (src/lib/letter-hold.ts) is sent from after() ten seconds
+   after the answer, and after() lives inside the function's own budget. */
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -126,7 +141,14 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (denied) return denied;
   const { id } = await ctx.params;
 
-  let body: { status?: unknown; note?: unknown; notes?: unknown; labelStep?: unknown; returnHandled?: unknown };
+  let body: {
+    status?: unknown;
+    note?: unknown;
+    notes?: unknown;
+    labelStep?: unknown;
+    returnHandled?: unknown;
+    letterCancel?: unknown;
+  };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -147,7 +169,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
      no money, sends no letter and changes no status — see setReturnHandled()
      in src/lib/returns.ts for why answering a return is none of those three. */
   const returnHandled = typeof body.returnHandled === "boolean" ? body.returnHandled : null;
-  if (!status && note == null && labelStep == null && returnHandled == null) {
+  // «Вернуть» on a held invoice letter or a held reply (src/lib/letter-hold.ts)
+  const letterCancel = typeof body.letterCancel === "string" && body.letterCancel ? body.letterCancel.slice(0, 64) : null;
+  if (!status && note == null && labelStep == null && returnHandled == null && letterCancel == null) {
     return Response.json({ ok: false, error: "nothing_to_do" }, { status: 400 });
   }
   if (status && !ORDER_STATUSES.includes(status as OrderStatus)) {
@@ -181,6 +205,18 @@ export async function PATCH(req: Request, ctx: Ctx) {
       });
       order = (await getOrder(found.id)) ?? order;
     }
+
+    /* «Вернуть» on a held letter that is not a status: the invoice sent
+       again, a reply. Nothing else about the order moves. */
+    let cancelled: boolean | undefined;
+    if (letterCancel != null) {
+      cancelled = await cancelLetter(found.id, letterCancel);
+      if (cancelled) await writeAuditSafe("admin", "letter.cancelled", { orderId: found.id, number: found.number });
+      order = (await getOrder(found.id)) ?? order;
+    }
+
+    /* The held letter this change sends, if it sends one (src/lib/letter-hold.ts). */
+    let letter: LetterHeld | { held: false } | undefined;
 
     if (status === "paid" && !handedOver(found.status) && !settled(found)) {
       /* Marking an order paid by hand (a bank transfer that arrived, a cash
@@ -216,6 +252,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
       if (outcome.status === "paid" && !outcome.alreadyPaid) {
         await notifyOrderPaid({ ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned });
       }
+      /* …the status moved, so the held status letters follow it the same way
+         they do below (a cancel of an unpaid order taken back is this door) */
+      await dropStatusLetters(found.id, "paid");
       order = (await getOrder(found.id)) ?? order;
     } else if (status && status !== found.status) {
       /* A step forward or back on the card: shipped, delivered, back to paid
@@ -224,25 +263,40 @@ export async function PATCH(req: Request, ctx: Ctx) {
          would in any case refuse to move an already-paid order, which is
          exactly why the undo of «Отправлен» must not go through it. */
       order = (await setOrderStatus(found.id, status as OrderStatus, "admin")) ?? order;
+      /* Any move voids the held letters the new status no longer justifies:
+         «Вернуть» after «Отправлен» (back to paid) or after a cancel (back to
+         what it was) stops the letter that was waiting. A move forward —
+         «Доставлен» right after «Отправлен» — keeps «Заказ отправлен». */
+      await dropStatusLetters(found.id, status);
       // the letter goes with the first hand-over only — not when «Доставлен» is undone back to shipped
-      if (status === "shipped" && !handedOver(found.status)) await sendShippedLetter(order);
-      /* «Отменить заказ» and «Изменить статус вручную → возврат» say something
-         to the customer now (Dim, 07.09.2026 — before this the card had to
-         admit «Письмо не уходит»). The refund letter names what has actually
-         gone back through the provider when a refund was recorded, and the
-         order's total when the money moved outside this shop, which is what a
-         hand-set «возврат» means. Never fatal: a status that already moved
-         must not fail because Resend had a bad day. */
-      if (status === "cancelled" || status === "refunded") {
+      if (status === "shipped" && !handedOver(found.status)) {
+        letter = await holdAndSend(found.id, "shipped", sendShippedLetter);
+      }
+      /* «Отменить заказ» says something to the customer now (Dim, 07.09.2026 —
+         before this the card had to admit «Письмо не уходит») — ten seconds
+         later, so the toast's «Вернуть» can still stop it. Never fatal: a
+         status that already moved must not fail because Resend had a bad day. */
+      if (status === "cancelled") {
+        letter = await holdAndSend(found.id, "cancelled", (now) => notifyOrderClosed(now, { kind: "cancelled" }));
+      }
+      /* «Изменить статус вручную → возврат» is money: it went through its own
+         confirm and has no «Вернуть», so its letter goes now. It names what has
+         actually gone back through the provider when a refund was recorded,
+         and the order's total when the money moved outside this shop, which
+         is what a hand-set «возврат» means. */
+      if (status === "refunded") {
         const already = refundedTotal(order.payment);
         await notifyOrderClosed(order, {
-          kind: status === "refunded" ? "refunded" : "cancelled",
-          amount: status === "refunded" ? (already > 0 ? already : Number(order.total) || 0) : undefined,
+          kind: "refunded",
+          amount: already > 0 ? already : Number(order.total) || 0,
         });
       }
     }
 
-    return Response.json({ ok: true, order }, { headers: { "cache-control": "no-store" } });
+    return Response.json(
+      { ok: true, order, ...(letter ? { letter } : {}), ...(cancelled !== undefined ? { cancelled } : {}) },
+      { headers: { "cache-control": "no-store" } },
+    );
   } catch (err) {
     console.error("[api/admin/orders/:id] write failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

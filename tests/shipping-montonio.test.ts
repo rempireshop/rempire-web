@@ -6,8 +6,9 @@
  * (https://docs.montonio.com/api/shipping-v2/, read 03.09.2026), so a change on
  * their side shows up here as a failing test rather than as a silent 400.
  */
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
+import { letterClock, lettersSettled } from "@/lib/letter-hold";
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createOrder, getOrder, listAudit, setOrderStatus, type Order } from "@/lib/orders";
@@ -1231,10 +1232,29 @@ describe("the shipping routes", () => {
       });
     const mailsBefore = capturedMail().filter((m) => m.template === "order-shipped").length;
 
+    /* Since 25.09.2026 the letter is held ten seconds (src/lib/letter-hold.ts,
+       tests/letter-hold.test.ts): a fake clock stands in for them here, and
+       `letterDue()` is the moment they are up. */
+    let wakers: Array<() => void> = [];
+    const realSleep = letterClock.sleep;
+    letterClock.sleep = () => new Promise<void>((wake) => wakers.push(wake));
+    const letterDue = async () => {
+      const w = wakers;
+      wakers = [];
+      w.forEach((f) => f());
+      await lettersSettled();
+    };
+    onTestFinished(async () => {
+      await letterDue();
+      letterClock.sleep = realSleep;
+    });
+
     // shipped: the status moves, the customer's letter carries the carrier's link
     const shipped = await patch({ status: "shipped" });
     expect(shipped.status).toBe(200);
     expect((await shipped.json()).order.status).toBe("shipped");
+    expect(capturedMail().filter((m) => m.template === "order-shipped").length, "held, not sent yet").toBe(mailsBefore);
+    await letterDue();
     const letters = capturedMail().filter((m) => m.template === "order-shipped");
     expect(letters.length).toBe(mailsBefore + 1);
     expect(letters[letters.length - 1].to).toEqual(["test@example.com"]);
@@ -1268,6 +1288,7 @@ describe("the shipping routes", () => {
       { params: Promise.resolve({ id: plain.id }) },
     );
     expect((await res.json()).order.status).toBe("shipped");
+    await letterDue();
     const last = capturedMail().filter((m) => m.template === "order-shipped").pop()!;
     expect(last.links.some((l) => /omniva|dpd|itella|venipak|tracking\.example/.test(l))).toBe(false);
   });

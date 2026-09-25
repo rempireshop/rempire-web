@@ -88,13 +88,22 @@ describe("the notice over the form", () => {
   });
 
   it("every editor that had its own line uses it now", () => {
-    for (const attr of ["data-blogdirty", "data-maildirty", "data-newsdirty"]) {
-      expect(src, `${attr} is still drawn by hand`).toContain(`admDirtyNoteHTML("${attr}"`);
+    /* The blog is not on this list since 1a (screen 16; Dim 25.09.2026, q5):
+       the article saves itself a second after the typing stops, so there is
+       no unsaved state to warn about — the header's «Сохраняем… / Сохранено ✓»
+       says where it stands (see «the blog saves itself» below). */
+    expect(src, "the blog still draws an unsaved notice").not.toContain('admDirtyNoteHTML("data-blogdirty"');
+    /* 1a (25.09.2026): a letter and a newsletter save themselves (Dim, q6),
+       so they have no «not saved» line and no save bar any more */
+    for (const attr of ["data-maildirty", "data-newsdirty"]) {
+      expect(src, `${attr} is still drawn — the letter saves itself now`).not.toContain(`admDirtyNoteHTML("${attr}"`);
     }
     // the component's own copy is the only one left
     expect(src.match(/Есть несохранённые изменения — нажмите «Сохранить»\.<\/p>/g) ?? [], "a hand-drawn copy is left").toHaveLength(1);
     expect(slice("admDirtyNoteHTML")).toContain("Есть несохранённые изменения — нажмите «Сохранить».</p>");
-    expect(src, "the photo strip's notice is drawn by hand").toContain('admDirtyNoteHTML("data-galdirty"');
+    /* 1a: the product card's photos save at once (edGallerySave), so its strip
+       has nothing unsaved to announce — and no hand-drawn notice either */
+    expect(src, "the photo strip still announces an unsaved draft").not.toContain("data-galdirty");
   });
 
   /* display:flex on a class beats the UA's [hidden] rule — a notice that is
@@ -106,26 +115,14 @@ describe("the notice over the form", () => {
 });
 
 describe("the save bar takes the state", () => {
-  it("the settings bar: in its markup, and in place while typing", () => {
-    let dirty: string[][] = [["hero", "Главный баннер"]];
-    const bar = new El();
-    const fns = new Function(
-      "ADM_SET_CARDS", "S", "document", "translateTree", "admSetDirtyCards", "admSetBarInnerHTML",
-      `${shared}\n${slice("admSetBarHTML")}\n${slice("paintSetBar")}\nreturn { html: admSetBarHTML, paint: paintSetBar };`,
-    )(
-      { home: [["hero", "Главный баннер"]] }, { admSetPage: "home" },
-      { querySelector: (s: string) => (s === "[data-setbar]" ? bar : null) }, () => {},
-      () => dirty, () => "",
-    ) as { html: (p: string) => string; paint: () => void };
-
-    expect(fns.html("home")).toMatch(/class="adm-savebar adm-savebar--set is-dirty"/);
-    fns.paint();
-    expect(bar.classList.contains("is-dirty")).toBe(true);
-
-    dirty = [];                                   // saved
-    expect(fns.html("home")).not.toContain("is-dirty");
-    fns.paint();
-    expect(bar.classList.contains("is-dirty"), "the bar still says «not saved» after the save").toBe(false);
+  /* 1a (25.09.2026): the settings pages save themselves, so their bar — and
+     its «not saved» state — is gone; what is not saved yet is a box's own
+     rust edge and line (admAutosave), and the header says «Сохраняем…». */
+  it("the settings pages: no save bar left to say it", () => {
+    expect(src).not.toContain("data-setbar");
+    expect(src).not.toContain("adm-savebar--set");
+    expect(src).not.toContain("function paintSetBar(");
+    expect(slice("admSetupHTML")).not.toContain("savebar");
   });
 
   it("the forms that keep no draft (product, promo, set, partner): the touch listener marks the bar", () => {
@@ -146,28 +143,12 @@ describe("the save bar takes the state", () => {
     expect(bar.classList.contains("is-dirty")).toBe(false);
   });
 
-  it("the letters and the newsletter repaint their bar with the state", () => {
-    let dirty = true;
-    const acts = new El();
-    const noteEl = new El();
-    const paint = new Function(
-      "document", "translateTree", "admMailActsHTML", "mailDirty", "paintMailPreview",
-      `${shared}\n${slice("paintMailState")}\nreturn paintMailState;`,
-    )(
-      { getElementById: (id: string) => (id === "mailacts" ? acts : null), querySelector: () => noteEl },
-      () => {}, () => "", () => dirty, () => {},
-    ) as () => void;
-    paint();
-    expect(acts.classList.contains("is-dirty")).toBe(true);
-    dirty = false;
-    paint();
-    expect(acts.classList.contains("is-dirty")).toBe(false);
-    expect(noteEl.hidden).toBe(true);
-
-    // the newsletter's bar is drawn by the same two helpers
-    expect(slice("newsPaintState")).toContain("admDirtyMark(acts, newsDirty())");
-    expect(src).toMatch(/'<div class="adm-savebar' \+ admDirtyCls\(newsDirty\(\)\) \+ '" id="newsacts">'/);
-    expect(src).toMatch(/'<div class="adm-savebar' \+ admDirtyCls\(mailDirty\(\)\) \+ '" id="mailacts">'/);
+  it("the letters and the newsletter have no save bar — they save themselves (1a)", () => {
+    expect(src).not.toContain('id="mailacts"');
+    expect(src).not.toContain('id="newsacts"');
+    // typing repaints the letter's preview and hands the change to the autosave, nothing else
+    expect(slice("paintMailState")).toContain("paintMailPreview()");
+    expect(slice("newsPaintState")).toContain('newsAutosave(typing ? "input" : "change")');
   });
 
   it("the bar's look: warm ground, a solid status chip, «Сохранить» ringed — phone and desktop", () => {
@@ -179,29 +160,29 @@ describe("the save bar takes the state", () => {
   });
 });
 
-describe("the blog's own Save buttons", () => {
-  it("are ringed while the article differs and let go after the save", () => {
-    let dirty = true;
-    const btns = [new El(), new El()];
-    const flag = new El();
+/* 1a (screen 16; Dim 25.09.2026, q5): the blog has no Save button and no
+   unsaved notice any more — every in-place paint hands the draft to the
+   shared autosave, which says «Сохраняем… / Сохранено ✓» in the header only
+   after the server's 2xx (README § 2). */
+describe("the blog saves itself", () => {
+  it("every in-place paint redraws the article's line and hands the draft to autosave", () => {
+    const pub = new El();
+    const err = new El();
+    const asked: string[] = [];
     const paint = new Function(
-      "S", "LANGS", "document", "translateTree", "admLangStateHTML", "blogLangWords", "blogDirty", "blogPubStateHTML",
-      `${shared}\n${slice("blogPaintState")}\nreturn blogPaintState;`,
+      "S", "LANGS", "document", "translateTree", "admLangStateHTML", "blogLangWords", "blogPubStateHTML", "blogAutosave", "trText",
+      `${slice("blogPaintState")}\n${slice("blogPaintErr")}\nreturn blogPaintState;`,
     )(
-      { adminBlogEdit: {}, adminBlogBusy: false }, [],
-      {
-        querySelector: (s: string) => (s === "[data-blogdirty]" ? flag : null),
-        querySelectorAll: (s: string) => (s === "[data-admblogsave]" ? btns : []),
-      },
-      () => {}, () => "", () => ({}), () => dirty, () => "",
+      { adminBlogEdit: {}, adminBlogErr: "" }, [],
+      { querySelector: (s: string) => (s === "[data-blogpubstate]" ? pub : s === "[data-blogerr]" ? err : null) },
+      () => {}, () => "", () => ({}), () => "○ Черновик — в магазине не видно",
+      (ev: string) => { asked.push(ev); return true; }, (t: string) => t,
     ) as () => void;
     paint();
-    expect(btns.every((b) => b.classList.contains("is-dirty"))).toBe(true);
-    expect(flag.hidden).toBe(false);
-    dirty = false;
-    paint();
-    expect(btns.some((b) => b.classList.contains("is-dirty"))).toBe(false);
-    expect(flag.hidden).toBe(true);
-    expect(css).toMatch(/\.adm-btn\.is-dirty:not\(\[disabled\]\)/);
+    expect(pub.innerHTML).toBe("○ Черновик — в магазине не видно");
+    expect(err.hidden, "an empty error line is on screen").toBe(true);
+    expect(asked, "a paint did not hand the draft to autosave").toEqual(["input"]);
+    // …and the old ringed «Сохранить» is gone from the markup
+    expect(src).not.toMatch(/<button[^>]*data-admblogsave/);
   });
 });

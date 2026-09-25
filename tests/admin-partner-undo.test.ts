@@ -32,6 +32,11 @@ function slice(name: string): string {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 
+/* How long an undoable toast stays — ADM_UNDO_MS, the one place it is set
+   (direction 1a; Dim, 25.09.2026: six seconds). */
+const UNDO_DECL = (/^  var ADM_UNDO_MS = .*;$/m.exec(src) || [""])[0].trim();
+const UNDO_MS = Number(/= (\d+);/.exec(UNDO_DECL)?.[1]);
+
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 type Entry = { txt: string; prev: unknown };
@@ -53,6 +58,7 @@ function panel(answer: Record<string, unknown>) {
     function patchNav() {}
     function refocus() {}
     function demoUndo(i) { var e = DEMO.log[i]; if (!e || !e.prev) return; onUndo(e.prev); DEMO.log.splice(i, 1); }
+    ${UNDO_DECL}
     ${slice("toast")}
     ${slice("admCancelLine")}
     ${slice("journalNote")}
@@ -62,9 +68,10 @@ function panel(answer: Record<string, unknown>) {
     return { add: applyAddPartner, undo: admUndoToast };
   `;
   const fns = new Function(
-    "S", "DEMO", "SRV", "PARTNER_ERRS", "apiSend", "render", "onShown", "onUndo", "setTimeout", "clearTimeout", body,
+    "S", "DEMO", "SRV", "PARTNER_ERRS", "custSend", "render", "onShown", "onUndo", "setTimeout", "clearTimeout", body,
   )(
     S, DEMO, { admin: true }, { error: "Не получилось добавить — попробуйте ещё раз" },
+    // the POST itself — held ten seconds before it goes since 1a (q3); this is the answer when it does
     () => Promise.resolve({ status: 200, body: answer }), () => {},
     (t: string) => shown.push(t), (p: unknown) => undone.push(p),
     (_f: () => void, ms: number) => { timers.push(ms); return 0; }, () => {},
@@ -106,7 +113,8 @@ describe("«+ Партнёр» that really promoted somebody", () => {
     p.add({ ...ADD, email: "new@example.com" });
     await flush();
     expect(p.shown.at(-1)).toBe("Партнёр добавлен · письмо ушло [Отменить]");
-    expect(p.timers.at(-1)).toBe(6000);
+    expect(UNDO_MS).toBe(6000);
+    expect(p.timers.at(-1)).toBe(UNDO_MS);
     p.undo();
     expect(p.undone).toEqual([{ type: "set_tier", id: "c2", email: "new@example.com", value: "retail", prev: "pro" }]);
     expect(p.shown.at(-1)).toBe("Отменено");

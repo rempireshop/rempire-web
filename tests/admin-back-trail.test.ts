@@ -67,6 +67,12 @@ const page = new Function(
    ${maybeDecl("ADM_ASKS")}
    function render() { admSyncHistory(); }
    function refocus() {}
+   // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+   function admAutosaveFlush() {}
+   // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+   function edAsForget() {}
+   function goodsNewSave() {}
+   function loadWaiting() {}   // q41: the card asks how many wait — not this test's business
    function vidReset() {}
    function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
    function blogReadForm() {}
@@ -293,7 +299,7 @@ describe("Dim's report: Back through the sections on a phone", () => {
   it.each([true, false])("«Ещё» → «Клиенты» → «Заказы»: Back hands back «Клиенты», then «Обзор», then leaves (home screen: %s)", (standalone) => {
     const p = phone({ standalone });
     p.tap({ admmore: "" });
-    p.tap({ admtab: "people" });          // the row in the «Ещё» sheet
+    p.tap({ admtab: "people" });          // the row on the «Ещё» page
     p.tap({ admtab: "orders" });          // the bottom bar
     expect(walk(p, 3), "Back threw the owner out of the panel on the way").toEqual(["people", "over", "out"]);
   });
@@ -322,6 +328,76 @@ describe("Dim's report: Back through the sections on a phone", () => {
     walk(p, 2);
     p.back();
     expect(p.where(), "Back from «Обзор» did not return to the shop").toBe("home");
+  });
+});
+
+/* «Ещё» became a PAGE (1a, screen 14) rather than a sheet over the screen.
+   It is the same Back layer «more» it was, parked by the tap on «Ещё» and
+   never from popstate — so Back from the page is the section it was opened
+   from, and a row tapped on it goes on with no page left behind to walk
+   through again. */
+describe("the «Ещё» page", () => {
+  it.each([true, false])("Back from the page returns to the section it was opened from, then the walk goes on (home screen: %s)", (standalone) => {
+    const p = phone({ standalone });
+    p.tap({ admtab: "orders" });
+    p.tap({ admtab: "goods" });
+    p.tap({ admmore: "" });
+    expect(p.layers(), "the page is not a layer Back knows about").toContain("more");
+    expect(walk(p, 4)).toEqual(["goods", "orders", "over", "out"]);
+  });
+
+  it("opened over a card: Back gives the card back, then its section", () => {
+    const p = phone({ standalone: true });
+    p.tap({ admtab: "orders" });
+    p.tap({ admorder: "o-1" });
+    p.tap({ admmore: "" });
+    expect(walk(p, 4)).toEqual(["orders+order", "orders", "over", "out"]);
+  });
+
+  it("a row opens its section and the page is gone for good: Back never lands on «Ещё» again", () => {
+    const p = phone({ standalone: true });
+    p.tap({ admtab: "pos" });
+    p.tap({ admmore: "" });
+    p.tap({ admtab: "stats" });
+    expect(p.S.admMore).toBe(false);
+    const seen = walk(p, 3);
+    expect(seen).toEqual(["pos", "over", "out"]);
+    expect(seen.join(" "), "Back reopened the «Ещё» page").not.toContain("more");
+  });
+
+  it("taps on the page that go nowhere — the language, «Ещё» again — do not cost a press", () => {
+    const p = phone({ standalone: true });
+    p.tap({ admtab: "orders" });
+    p.tap({ admmore: "" });
+    p.tap({ render: "" });                // «RU · ET · EN»: a redraw, nothing opens
+    p.tap({ admmore: "" });               // the lit «Ещё» tab once more
+    expect(walk(p, 3), "a spare entry was parked: a press did nothing").toEqual(["orders", "over", "out"]);
+  });
+
+  it("the page from «Обзор» itself: one press puts it away, the next leaves", () => {
+    const p = phone({ standalone: false });
+    p.tap({ admmore: "" });
+    expect(back(p)).toBe("over");
+    p.back();
+    expect(p.where()).toBe("home");
+  });
+
+  it("Back, then «Ещё» again without touching anything else: the new page gets its own press", () => {
+    const p = phone({ standalone: true });
+    p.tap({ admtab: "orders" });
+    p.tap({ admmore: "" });
+    expect(back(p)).toBe("orders");       // the hold is on: nothing may be parked now…
+    p.tap({ admmore: "" });               // …until this tap, which parks the page's entry
+    p.tap({ admtab: "people" });
+    expect(walk(p, 3)).toEqual(["orders", "over", "out"]);
+  });
+
+  it("the assistant opened over the page: its sheet first, then the page, then the section", () => {
+    const p = phone({ standalone: true });
+    p.tap({ admtab: "goods" });
+    p.tap({ admmore: "" });
+    p.tap({ admai: "" });                 // the top bar's icon: a sheet over the page
+    expect(walk(p, 4)).toEqual(["goods+more", "goods", "over", "out"]);
   });
 });
 
@@ -361,7 +437,7 @@ describe("every other door into a section", () => {
     const p = phone({ standalone: true });
     // pushOpenWanted(): the orders came and the number was found — no tap yet
     p.later((S) => { S.adminTab = "orders"; S.adminOrder = "o-1"; });
-    p.tap({ admmore: "" });               // any tap: the «Ещё» sheet, say…
+    p.tap({ admmore: "" });               // any tap: the «Ещё» page, say…
     expect(back(p)).toBe("orders+order"); // …which Back puts away
     expect(walk(p, 3)).toEqual(["orders", "over", "out"]);
   });

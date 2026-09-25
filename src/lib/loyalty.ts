@@ -723,6 +723,11 @@ export interface AdminCustomerRow {
    *  when the letter's link is pressed today, and the card was dating the
    *  click with the untick. */
   optedOutAt: string | null;
+  /** «День рождения» on the card (Dim, 25.09.2026, q33): the date the customer
+   *  gave in their own account (customers.birthday), `YYYY-MM-DD` or null. A
+   *  calendar date, so it is formatted in SQL — never a Date that a
+   *  machine's timezone could move to the day before. */
+  birthday: string | null;
   company: string | null;
   regCode: string | null;
   notes: string | null;
@@ -747,6 +752,7 @@ interface AdminCustomerDbRow {
   marketing_source: string | null;
   marketing_off_at: string | Date | null;
   opted_out_at: string | Date | null;
+  birthday: string | null;
   company: string | null;
   reg_code: string | null;
   notes: string | null;
@@ -781,6 +787,7 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
     // so a date IS the row and the two answers cannot drift apart
     optedOut: r.opted_out_at != null,
     optedOutAt: isoOrNull(r.opted_out_at),
+    birthday: typeof r.birthday === "string" && /^\d{4}-\d{2}-\d{2}$/.test(r.birthday) ? r.birthday : null,
     company: r.company,
     regCode: r.reg_code,
     notes: r.notes,
@@ -821,6 +828,7 @@ const CUSTOMER_COLS = `
   c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
   c.marketing_at, c.marketing_source, c.marketing_off_at,
   (select mo.at from mail_optouts mo where mo.email = c.email) as opted_out_at,
+  to_char(c.birthday, 'YYYY-MM-DD') as birthday,
   c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
   coalesce(agg.orders_count, 0) as orders_count,
   coalesce(agg.revenue, 0) as revenue,

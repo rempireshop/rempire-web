@@ -37,7 +37,7 @@ const branch = (head: string) => block(src.indexOf(head), head);
 type Panel = {
   S: Record<string, any>;
   click: (d: Record<string, string>) => void;
-  dirty: { goods: boolean; blog: boolean };
+  dirty: { goods: boolean; blog: boolean; blogSaves: boolean; autosaved: number };
   rows: string[];
 };
 
@@ -48,17 +48,29 @@ function panel(): Panel {
     admMore: false, goodsConfirmBack: false, goodsTab: "goods", goodsNew: null, goodsSizes: null,
     goodsErr: "", goodsEditTab: "main", goodsVidKind: "", admOrderFilter: "all",
   };
-  const dirty = { goods: false, blog: false };
+  /* `blogSaves`: the article on screen could be saved as it is (it has a
+     Russian title) — since 1a it then saves itself and the nav just goes;
+     only an article that cannot be saved yet is asked about. */
+  const dirty = { goods: false, blog: false, blogSaves: false, autosaved: 0 };
   const rows: string[] = [];
   const click = new Function(
     "S", "DIRTY", "ROWS", "window", "PHONE",
     `var GAL = { id: "" }, AI_UNDO = null, BLOGSEL = null, BLOGCARET = null;
      function render() {}
      function refocus() {}
+     // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+     function admAutosaveFlush() {}
+     // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+     function edAsForget() {}
+     function goodsNewSave() {}
      function vidReset() {}
      function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
      function blogReadForm() {}
      function blogDirty() { return !!S.adminBlogEdit && DIRTY.blog; }
+     function blogSavesItself() { return DIRTY.blogSaves; }
+     function blogAutosave() { DIRTY.autosaved++; }
+     function blogStartNew() {}
+     function openBlogEditor() {}
      function blogCloseEditor() {
        S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
        S.adminBlogConfirmPublish = ""; S.adminBlogPlaced = null; render();
@@ -150,6 +162,8 @@ describe("the nav over an unsaved product", () => {
 });
 
 describe("the nav over an unsaved article", () => {
+  /* An article that cannot be saved yet (no Russian title) — the one kind
+     the 1a autosave cannot carry away with it. */
   it("asks, and «Выйти без сохранения» goes to the section tapped", () => {
     const p = panel(); writing(p); p.dirty.blog = true;
     p.click({ admtab: "stats" });
@@ -171,6 +185,15 @@ describe("the nav over an unsaved article", () => {
   it("a saved article closes at once", () => {
     const p = panel(); writing(p);
     p.click({ admtab: "stats" });
+    expect(p.S.adminBlogEdit).toBeNull();
+    expect(p.S.adminTab).toBe("stats");
+  });
+
+  it("1a: an unsaved article that CAN be saved saves itself and goes — no question", () => {
+    const p = panel(); writing(p); p.dirty.blog = true; p.dirty.blogSaves = true;
+    p.click({ admtab: "stats" });
+    expect(p.S.adminBlogConfirmBack, "a question over an article that saves itself").toBeFalsy();
+    expect(p.dirty.autosaved, "what it owed was not sent").toBeGreaterThan(0);
     expect(p.S.adminBlogEdit).toBeNull();
     expect(p.S.adminTab).toBe("stats");
   });

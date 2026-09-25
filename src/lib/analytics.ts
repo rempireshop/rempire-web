@@ -158,6 +158,9 @@ export type AnalyticsSummary = {
   promoUsage: Array<{ code: string; kind: string | null; value: number | null; uses: number; amount: number }>;
   giftCards: { sold: { count: number; amount: number }; redeemed: { count: number; amount: number } };
   abandonedCarts: number;
+  /** Orders placed after the abandoned-cart letter — «Вернулись по письму».
+      `null` when the count could not be read (the table not migrated yet). */
+  cartsReturned: number | null;
   lowStock: Array<{ id: string; name: string; brand: string; stock: string }>;
   traffic: {
     device: { mobile: number; desktop: number };
@@ -407,6 +410,27 @@ async function qAbandonedCarts(from: Date, to: Date) {
   return int(rows[0]?.n);
 }
 
+/**
+ * «Вернулись по письму»: orders that came from an address whose cart had been
+ * sent the reminder — one row each in `cart_returns`, written by
+ * markCartRecovered() at the moment it clears the reminder's stamp
+ * (db/migrations/213_cart_returned_by_letter.sql). One index range read.
+ * Fails soft to null: a figure the database cannot give must not take the
+ * whole screen down with it.
+ */
+async function qCartsReturned(from: Date, to: Date): Promise<number | null> {
+  try {
+    const rows = await query<{ n: string }>(
+      "select count(*) as n from cart_returns where at >= $1 and at < $2",
+      [from, to],
+    );
+    return int(rows[0]?.n);
+  } catch (err) {
+    console.warn("[analytics] cart returns not counted:", (err as Error)?.message);
+    return null;
+  }
+}
+
 async function qLowStock() {
   const rows = await query<{ product_id: string; stock: string }>(
     `select product_id, stock from product_overrides where stock in ('low', 'out')
@@ -466,7 +490,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
   const [
     ordersSummary, revenueByDay, topProductsByRevenue, brandRevenue, funnel, topProductsByViews,
     viewedNotBought, search, promoUsage, giftCards, abandonedCarts, lowStock,
-    device, countries, referrers, chatOpens,
+    device, countries, referrers, chatOpens, cartsReturned,
   ] = await Promise.all([
     qOrdersSummary(from, to, prevFrom),
     qRevenueByDay(from, to),
@@ -484,6 +508,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
     qTrafficCountry(from, to),
     qTopReferrers(from, to),
     qChatOpens(from, to),
+    qCartsReturned(from, to),
   ]);
 
   // the owner's own products: a name and a brand instead of a bare `c-…` id
@@ -545,6 +570,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
     promoUsage,
     giftCards,
     abandonedCarts,
+    cartsReturned,
     lowStock,
     traffic: { device, countries, referrers },
     chatOpens,

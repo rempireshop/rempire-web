@@ -987,13 +987,29 @@ export async function markCartRecovered(email: string): Promise<void> {
      together: a row that kept `discount_at` would let the first letter fire
      again on the next basket and silently withhold the second one for ever,
      and a `discount_code` left behind would name a code written for a basket
-     this person has already bought. */
-  await query(
-    `update carts set recovered_at = now(), reminded_at = null,
+     this person has already bought.
+     …and before `reminded_at` goes, what it said is kept: an order after the
+     letter is a shopper who came back by it — «Вернулись по письму» in
+     «Аналитика» (db/migrations/213_cart_returned_by_letter.sql). The row is
+     joined to itself as it was, so RETURNING can hand back the old stamp. */
+  const rows = await query<{ was: unknown }>(
+    `update carts c set recovered_at = now(), reminded_at = null,
             discount_at = null, discount_code = null
-      where email = $1`,
+       from (select id, reminded_at from carts where email = $1) o
+      where c.id = o.id
+      returning o.reminded_at as was`,
     [addr],
   );
+  if (rows.some((r) => r.was != null)) {
+    /* one row, a timestamp and nothing else — see the migration. A count
+       that could not be written is a figure one short, never a failed order
+       or a cart left unrecovered: the update above has already happened. */
+    try {
+      await query("insert into cart_returns default values");
+    } catch (err) {
+      console.warn("[carts] «вернулись по письму» not counted:", (err as Error)?.message);
+    }
+  }
 }
 
 export async function getCart(email: string): Promise<CartRow | null> {
@@ -1042,6 +1058,21 @@ export async function pendingStockAlerts(productId?: string): Promise<StockAlert
     );
   }
   return query<StockAlertRow>("select * from stock_alerts where sent_at is null order by created_at limit 500");
+}
+
+/**
+ * How many people wait for each product — the unsent «Сообщить о наличии»
+ * rows, by product (Dim 25.09.2026, q41: «N человек ждут — получат письмо»
+ * beside «Наличие» in the panel's product card). One grouped read over the
+ * pending index; a product nobody waits for is simply absent.
+ */
+export async function pendingStockAlertCounts(): Promise<Record<string, number>> {
+  const rows = await query<{ product_id: string; n: number }>(
+    "select product_id, count(*)::int as n from stock_alerts where sent_at is null group by product_id",
+  );
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.product_id] = Number(r.n) || 0;
+  return out;
 }
 
 /**

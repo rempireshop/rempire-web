@@ -11,8 +11,9 @@
  * «Склад» was never a layer, so the top of the stack was the trail itself and
  * one press walked from the history straight back to «Обзор». The letter
  * editor under «Рассылка» had the same hole. Both are layers now, each only on
- * its own tab, and the letter asks about unsaved work before it closes — the
- * question «← Рассылка» asks.
+ * its own tab. Since 1a the letter saves itself (Dim, q3), so Back closes it
+ * at once — what the draft still owes is sent on the way out
+ * (newsCloseEditor → admAutosaveFlush), not asked about.
  *
  * The functions are sliced out of public/shop2/app.js by source text and run
  * over stubs, as tests/blog-panel-shop.test.ts does for the article editor.
@@ -67,6 +68,11 @@ function panel(opts: { dirtyNews?: boolean } = {}): Panel {
     var ADM_TRAIL = [], ADM_SEEN = "", pendingAction = null;
     ${decl("ADM_SECTION_OF")}
     function closeScannerState() {}
+    // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+    function admAutosaveFlush() {}
+    // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+    function edAsForget() {}
+    function goodsNewSave() {}
     function goodsBackToRow() {}
     function newsDirty() { return DIRTY; }
     function newsCloseEditor() { S.newsEdit = null; S.newsConfirmBack = false; onClose(); }
@@ -110,6 +116,26 @@ describe("Back from «История приёмок и продаж» returns to
   });
 });
 
+describe("Back from an open set returns to «Наборы» (1a: the editor is its own view on a phone)", () => {
+  it("one Back closes the set and stays on «Товары → Наборы»", () => {
+    const p = panel();
+    p.S.adminTab = "goods"; p.S.goodsTab = "bundles"; p.paint();
+    p.S.bundleForm = { uid: "beard-start", id: "beard-start", editing: true }; p.paint();
+
+    expect(p.layers()).toContain("set");
+    expect(p.back()).toBe(true);
+    expect(p.S.bundleForm, "Back walked past the open set").toBeNull();
+    expect(p.S.adminTab).toBe("goods");
+  });
+
+  it("is a layer only on «Наборы» — a set left open behind «Каталог» does not eat Back", () => {
+    const p = panel();
+    p.S.adminTab = "goods"; p.S.goodsTab = "catalog"; p.paint();
+    p.S.bundleForm = { uid: "d1", id: "", editing: false };
+    expect(p.layers()).not.toContain("set");
+  });
+});
+
 describe("Back from a letter under «Рассылка» returns to the list", () => {
   it("closes a saved letter at once and stays on «Рассылка»", () => {
     const p = panel();
@@ -122,17 +148,15 @@ describe("Back from a letter under «Рассылка» returns to the list", ()
     expect(p.closedNews()).toBe(1);
   });
 
-  it("asks once before it throws an unsaved letter away, like «← Рассылка»", () => {
+  it("1a: a letter with a word still owed closes at once too — no question, the draft saves itself on the way out", () => {
     const p = panel({ dirtyNews: true });
     p.S.adminTab = "news"; p.paint();
     p.S.newsEdit = { id: "n1", status: "draft" }; p.paint();
 
     expect(p.back()).toBe(true);
-    expect(p.S.newsEdit, "the unsaved letter was closed without asking").not.toBeNull();
-    expect(p.S.newsConfirmBack).toBe(true);
-
-    expect(p.back()).toBe(true);
-    expect(p.S.newsEdit).toBeNull();
+    expect(p.S.newsEdit, "Back asked about a letter that saves itself").toBeNull();
+    expect(p.S.newsConfirmBack).toBe(false);
+    expect(p.closedNews(), "Back closed the letter without newsCloseEditor, which sends what it owes").toBe(1);
     expect(p.S.adminTab).toBe("news");
   });
 });
@@ -149,7 +173,11 @@ describe("every «← …» sub-screen of the panel is a Back layer", () => {
     ["data-admblogback", "S.adminBlogEdit"],
     ["data-admclose", "S.adminEdit"],
     ["data-newsback", "S.newsEdit"],
+    // 1a: an open promo code is a page of its own on a phone
+    ["data-admpromocancel", "S.promoForm"],
     ["data-stockmovesopen=\"\"", "S.stockMovesOpen"],
+    // 1a: an open set is its own view on a phone, «← Наборы»
+    ["data-bundlecancel", "S.bundleForm"],
   ])("%s → %s", (link, state) => {
     expect(src, `the panel no longer draws ${link}`).toContain(link);
     expect(layers, `${state} is not a Back layer`).toContain(state);

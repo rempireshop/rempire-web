@@ -70,6 +70,8 @@ function panel(opts: { rows: Order[]; search?: string }) {
   const names = [
     "SRV", "FOUND", "ORDER_ONE", "S", "apiJson", "apiSend", "render", "toast", "journalDrop", "pushBoot", "pushOpenWanted",
     "srvRow", "loadOverview", "scanStockChanged", "shipRollback", "flowCountsAt", "reportSummaryAt",
+    // srvPush hands settings keys to their own slot since 1a — none here
+    "ADM_SET_OF",
   ];
   const own = [
     "admOrderQClean", "loadOrderSearch", "loadSrvOrders", "loadOrderOne", "admOrderListsReload",
@@ -82,7 +84,7 @@ function panel(opts: { rows: Order[]; search?: string }) {
     SRV, FOUND, ORDER_ONE, { admGiftCards: null }, (url: string) => ask(url, "GET"),
     (url: string, method: string, body: unknown) => ask(url, method, body),
     () => {}, (m: string) => toasts.push(m), () => {}, () => {}, () => {},
-    srvRow, () => {}, () => {}, null, 0, 0,
+    srvRow, () => {}, () => {}, null, 0, 0, {},
   ) as { loadSrvOrders: (force?: boolean) => void; srvPush: (a: unknown, entry: unknown) => void };
 
   /** The status the row on screen is drawn from — the search's copy while a search is on. */

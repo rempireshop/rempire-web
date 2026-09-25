@@ -13,14 +13,33 @@
    see is an invalid `calc()` — which drops the whole declaration and throws
    the bar off screen. Every name is `--a-*`, so nothing here can collide with
    the storefront's own tokens in styles.css. */
+/* ---------- direction 1a (design_handoff_admin_ux README § 3) ----------------
+   «Keep today's ink/paper look, calmer.» The named colours of the handoff are
+   the first block; the names every screen already uses are mapped onto them
+   below it, so a screen that has not been migrated yet takes the new palette
+   without an edit of its own.
+     · muted stays #6f6b57 — ink at ≈ 63 % over paper. The handoff says 60 %
+       (#767464), which falls to 4.2 : 1 on the soft panel and fails the AA
+       line the axe sweep holds every admin screen to; 63 % keeps 4.8 : 1.
+     · hairlines are ink at ≈ 12 % written out as a solid colour, because the
+       same token also fills (chart bars, a disabled glyph) and an rgba one
+       would change shade on every ground it lands on. */
 :root {
-  --a-paper: #ffffff;
-  --a-tint: #f6f4ee;
-  --a-rule: #e5e1d6;
   --a-ink: #1c1a00;
+  --a-paper: #fdfcf9;        /* the page */
+  --a-panel: #f4f2ec;        /* soft panel: the «?» help, a lit row, a quiet fill */
+  --a-canvas: #e6e3da;       /* bars, skeletons, the grab handle */
+  --a-rust: #8b4a2b;         /* danger and attention */
+  --a-green: #2f5b45;        /* ok and «Сохранено ✓» */
+  --a-onink: #fdfcf9;        /* words on an ink or a rust ground */
+  --a-field: #ffffff;        /* the inside of a box that is typed into */
+  --a-edge: #c5c3b9;         /* a box's border: ink at 25 % */
+  /* the names the screens use */
+  --a-tint: var(--a-panel);
+  --a-rule: #e2e0d8;         /* hairline: ink at ≈ 12 % */
   --a-muted: #6f6b57;
-  --a-ok: #2e5b45;
-  --a-warn: #8a4b2d;
+  --a-ok: var(--a-green);
+  --a-warn: var(--a-rust);
   --a-dim: #bdb9a8;          /* de-emphasised step numbers on ink */
   --a-scrim: rgba(28, 26, 0, .35);
   --a-bar: 64px;             /* phone bottom bar */
@@ -39,10 +58,18 @@
      here, a refusal row and all, so the page's top padding and the scroll
      padding always clear exactly what is on screen. */
   --a-hdrh: calc(52px + env(safe-area-inset-top, 0px));
+  /* the phone's own top bar (app.js admTopHTML): one 52-px row under the notch */
+  --a-toph: calc(52px + env(safe-area-inset-top, 0px));
   --a-side: 232px;           /* desktop sidebar */
   --a-side-min: 68px;
   --a-asst: 380px;
+  --a-strip: 52px;           /* the assistant folded to a strip (desktop) */
+  --a-pinh: 70px;            /* the pinned dark button's row above the tab bar */
 }
+/* The page behind the panel wears the panel's paper: the storefront shell
+   under `.adm2` (main.screen--co keeps a tall bottom padding for the shop's
+   own bars) would otherwise show a white band below a paper one. */
+body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper); }
 
 .adm2 {
   position: relative;
@@ -59,13 +86,14 @@
   line-height: 22px;
 }
 
-/* The panel owns the viewport below the admin header: the sidebar is a sticky
-   rail with its own scroll, the assistant is fixed to the right edge, and the
-   middle column scrolls with the document — so a long product list scrolls
-   without taking the navigation away with it. */
-.adm2__frame { display: flex; align-items: flex-start; min-height: calc(100vh - var(--cohdrh, 62px)); }
+/* The panel owns the whole viewport (1a: no site bar above it any more): the
+   sidebar is a sticky rail with its own scroll, the assistant is fixed to the
+   right edge, and the middle column scrolls with the document — so a long
+   product list scrolls without taking the navigation away with it. */
+.adm2__frame { display: flex; align-items: flex-start; min-height: 100vh; }
 
 @keyframes adm-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes adm-fadein { from { opacity: 0; } to { opacity: 1; } }
 .adm2 button { font-family: inherit; cursor: pointer; }
 .adm2 input, .adm2 select, .adm2 textarea { font-family: inherit; font-size: 15px; color: var(--a-ink); }
 .adm2 input:focus, .adm2 select:focus, .adm2 textarea:focus, .adm2 button:focus-visible, .adm2 a:focus-visible {
@@ -73,75 +101,81 @@
 }
 .adm2 a { color: var(--a-ink); text-underline-offset: 3px; }
 
-/* ---------- sidebar (desktop) -------------------------------------------- */
+/* ---------- sidebar (desktop) --------------------------------------------
+   1a (screens 01/03 desktop): the wordmark and the fold chevron, the four
+   places, a hairline, the six more; at its foot the panel's language, «Открыть
+   магазин ↗» and «Выйти». Folds to icons (68 px), remembered per device. */
 
 .adm-side {
-  width: var(--a-side); flex: none; border-right: 1px solid var(--a-rule);
-  display: flex; flex-direction: column; overflow: hidden;
-  position: sticky; top: var(--cohdrh, 62px); height: calc(100vh - var(--cohdrh, 62px));
+  width: var(--a-side); flex: none; border-right: 1px solid var(--a-rule); box-sizing: border-box;
+  display: flex; flex-direction: column; overflow: hidden; padding: 16px 10px;
+  position: sticky; top: 0; height: 100vh;
   transition: width .2s;
 }
 .adm2--navmin .adm-side { width: var(--a-side-min); }
 .adm-side__top {
-  height: 64px; flex: none; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 14px 0 20px; border-bottom: 1px solid var(--a-rule);
+  min-height: 36px; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 0 2px 14px 6px;
 }
-.adm2--navmin .adm-side__top { padding: 0 16px; justify-content: center; }
+.adm2--navmin .adm-side__top { padding: 0 0 14px; justify-content: center; }
 .adm-side__mark {
-  font-family: Oswald, sans-serif; font-size: 15px; letter-spacing: .18em; white-space: nowrap;
-}
-.adm-side__mark span {
-  color: var(--a-muted); letter-spacing: 0; font-family: inherit; font-size: 12px; margin-left: 6px;
-  font-family: "Golos Text", sans-serif;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .3em; white-space: nowrap;
 }
 .adm2--navmin .adm-side__mark { display: none; }
 .adm-side__fold {
-  width: 36px; height: 36px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
-  display: flex; align-items: center; justify-content: center; padding: 0;
+  width: 34px; height: 34px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); display: flex; align-items: center; justify-content: center; padding: 0;
 }
+.adm-side__fold:hover { background: var(--a-panel); }
 .adm-side__fold svg { transition: transform .2s; }
 .adm2--navmin .adm-side__fold svg { transform: rotate(180deg); }
-.adm-side__nav { flex: 1; overflow: auto; padding: 12px 0; display: flex; flex-direction: column; }
-.adm-side__rule { height: 1px; background: var(--a-rule); margin: 12px 20px; flex: none; }
+.adm-side__nav { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.adm-side__rule { height: 1px; background: var(--a-rule); margin: 10px 6px; flex: none; }
 /* everything in the foot is centred on one axis — the language switch used to
    sit flush left under two centred links */
 .adm-side__foot {
-  padding: 16px 20px; border-top: 1px solid var(--a-rule);
-  display: flex; flex-direction: column; align-items: center; gap: 12px; white-space: nowrap; flex: none;
+  margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--a-rule);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; white-space: nowrap; flex: none;
 }
 .adm2--navmin .adm-side__foot { display: none; }
+.adm-side__foot .adm-btn--row { height: 36px; padding: 0 16px; font-size: 13px; }
 
 .adm-nav {
-  height: 44px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 20px;
-  border: 0; border-right: 2px solid transparent; background: var(--a-paper);
-  font-weight: 400; font-size: 15px; color: var(--a-ink); text-align: left; white-space: nowrap; width: 100%;
+  height: 40px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 10px;
+  border: 0; border-right: 2px solid transparent; background: transparent;
+  font-weight: 400; font-size: 14px; color: var(--a-ink); text-align: left; white-space: nowrap; width: 100%;
 }
-.adm-nav svg { flex: none; width: 22px; height: 22px; }
+.adm-nav svg { flex: none; width: 20px; height: 20px; }
 .adm-nav__lbl { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-.adm2--navmin .adm-nav { padding: 0 22px; }
+.adm2--navmin .adm-nav { padding: 0; justify-content: center; }
 .adm2--navmin .adm-nav__lbl, .adm2--navmin .adm-nav__badge { display: none; }
-.adm-nav:hover { background: var(--a-tint); }
-.adm-nav[aria-current="true"] { background: var(--a-tint); border-right-color: var(--a-ink); font-weight: 600; }
+.adm-nav:hover { background: var(--a-panel); }
+.adm-nav[aria-current="true"] { background: var(--a-panel); border-right-color: var(--a-ink); font-weight: 600; }
 .adm-nav__badge {
-  min-width: 20px; height: 20px; padding: 0 6px; background: var(--a-ink); color: #fff;
+  min-width: 20px; height: 20px; padding: 0 6px; background: var(--a-ink); color: var(--a-onink);
   font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;
 }
 
-/* language switch, «Открыть магазин ↗», «Выйти» */
-.adm-langs { display: flex; border: 1px solid var(--a-rule); width: fit-content; }
+/* the panel's language — the sidebar's foot, the phone's «Ещё», under the
+   sign-in card: RU · ET · EN, a segmented control (1 px frame, ink when on) */
+.adm-langs { display: flex; border: 1px solid var(--a-edge); width: fit-content; }
 .adm-langs button {
-  height: 32px; padding: 0 10px; display: inline-flex; align-items: center;
-  font-size: 13px; border: 0; background: var(--a-paper); color: var(--a-ink);
+  height: 30px; min-width: 38px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; border: 0; background: var(--a-paper); color: var(--a-ink);
 }
-.adm-langs button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-langs button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); }
 .adm-side__foot .adm-link, .adm-sheet__foot .adm-link { font-size: 13px; }
 
 /* ---------- main column --------------------------------------------------- */
 
 .adm-main { flex: 1; min-width: 0; }
-/* the assistant pane is fixed to the right edge — give the work column its
-   width back so nothing hides behind it */
-@media (min-width: 900px) { .adm2--asst .adm-main { padding-right: var(--a-asst); } }
+/* The assistant is docked on the right, open or shut — a 380-px pane, or a
+   52-px strip when folded (1a rule 6: it never floats over the work) — so the
+   work column gives it its width back either way. */
+@media (min-width: 900px) {
+  .adm-main { padding-right: var(--a-strip); }
+  .adm2--asst .adm-main { padding-right: var(--a-asst); }
+}
 .adm-page { max-width: 1000px; margin: 0 auto; padding: 32px 48px 140px; }
 .adm-screen { display: flex; flex-direction: column; gap: 28px; }
 /* The fade-in plays ONCE, when the owner moves to another section: app.js
@@ -160,7 +194,7 @@
 .adm-head__kicker { font-size: 13px; color: var(--a-muted); }
 .adm-head__kicker--code { font-family: "PT Mono", ui-monospace, monospace; }
 .adm-h1 {
-  font-family: Oswald, sans-serif; font-weight: 500; font-size: 30px; line-height: 34px; margin: 2px 0 0;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 34px; line-height: 38px; margin: 2px 0 0;
 }
 .adm-h1--flat { margin: 0; }
 .adm-h1 small { font-size: 16px; color: var(--a-muted); font-weight: 400; font-family: "Golos Text", sans-serif; }
@@ -188,7 +222,7 @@
 /* ---------- buttons ------------------------------------------------------- */
 
 .adm-btn {
-  height: 48px; padding: 0 20px; border: 1px solid var(--a-ink); background: var(--a-ink); color: #fff;
+  height: 48px; padding: 0 20px; border: 1px solid var(--a-ink); background: var(--a-ink); color: var(--a-onink);
   font-weight: 500; font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
   gap: 10px; white-space: nowrap;
 }
@@ -197,10 +231,10 @@
 .adm-btn--row { height: 40px; padding: 0 14px; font-size: 14px; }
 .adm-btn--wide { flex: 1; }
 .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
-.adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+.adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: var(--a-onink); }
 /* A button that is really a link — «Написать Диму» is a mailto. `.adm2 a`
    above paints every link ink, and ink on ink is a black rectangle. */
-.adm2 a.adm-btn { color: #fff; text-decoration: none; }
+.adm2 a.adm-btn { color: var(--a-onink); text-decoration: none; }
 .adm2 a.adm-btn--ghost { color: var(--a-ink); }
 .adm-link {
   border: 0; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--a-ink);
@@ -240,12 +274,12 @@
 /* ---------- inputs -------------------------------------------------------- */
 
 .adm-input, .adm2 select.adm-input {
-  height: 48px; border: 1px solid var(--a-rule); padding: 0 14px; width: 100%;
-  background: var(--a-paper); border-radius: 0; -webkit-appearance: none; appearance: none;
+  height: 48px; border: 1px solid var(--a-edge); padding: 0 14px; width: 100%;
+  background: var(--a-field); border-radius: 0; -webkit-appearance: none; appearance: none;
 }
 .adm-input--row { height: 40px; }
 .adm2 textarea.adm-input { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
-.adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--a-muted); min-width: 0; }
+.adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 16px; color: var(--a-muted); min-width: 0; }
 .adm-hint { font-size: 13px; color: var(--a-muted); line-height: 18px; }
 .adm-hint--warn { color: var(--a-warn); }
 /* one or two sentences under a screen title that say what the screen is for —
@@ -274,7 +308,7 @@
   height: 40px; padding: 0 14px; font-size: 14px; font-weight: 500; white-space: nowrap;
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule);
 }
-.adm-chip[aria-current="true"] { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+.adm-chip[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); border-color: var(--a-ink); }
 /* The placeholder chips under a letter's field: seven of them, three times
    over, so they get the narrower padding and the mono of the token they
    insert. Still 40 px tall — they are tapped on a phone like anything else. */
@@ -344,7 +378,7 @@
    specificity, later in the file, which is what makes it win. */
 @media (max-width: 899px) {
   html.adm2-on {
-    scroll-padding-top: calc(var(--cohdrh, 62px) + 12px);
+    scroll-padding-top: calc(var(--a-toph) + 12px);
     scroll-padding-bottom: calc(var(--a-barh) + 16px);
   }
 }
@@ -353,14 +387,14 @@
 
 .adm-badge {
   height: 24px; padding: 0 8px; display: inline-flex; align-items: center; white-space: nowrap;
-  font-size: 12px; font-weight: 500; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+  font-size: 12px; font-weight: 600; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
 }
 .adm-badge--big { height: 28px; padding: 0 10px; font-size: 13px; }
 .adm-badge--sm { height: 20px; padding: 0 6px; font-size: 11px; }
-.adm-badge--ink { background: var(--a-ink); color: #fff; }
+.adm-badge--ink { background: var(--a-ink); color: var(--a-onink); }
 .adm-badge--ok { border-color: var(--a-ok); color: var(--a-ok); }
 .adm-badge--warn { border-color: var(--a-warn); color: var(--a-warn); }
-.adm-badge--warnfill { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+.adm-badge--warnfill { background: var(--a-warn); border-color: var(--a-warn); color: var(--a-onink); }
 .adm-badge--quiet { border-color: var(--a-rule); color: var(--a-muted); }
 .adm-badge--tint { background: var(--a-tint); border-color: var(--a-tint); color: var(--a-muted); }
 
@@ -427,9 +461,9 @@
 .adm-row__sub--warn { color: var(--a-warn); }
 /* one line, cut with an ellipsis — for a sub-line that is a list of names */
 .adm-row__sub--one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.adm-row__amt { font-family: Oswald, sans-serif; font-size: 17px; text-align: right; white-space: nowrap; }
+.adm-row__amt { font-family: Oswald, sans-serif; font-weight: 600; font-size: 17px; text-align: right; white-space: nowrap; }
 .adm-row__chev { color: var(--a-muted); font-size: 20px; line-height: 1; }
-.adm-row__big { font-family: Oswald, sans-serif; font-size: 28px; line-height: 1; width: 34px; flex: none; }
+.adm-row__big { font-family: Oswald, sans-serif; font-weight: 600; font-size: 28px; line-height: 1; width: 34px; flex: none; }
 .adm-row__big--warn { color: var(--a-warn); }
 
 /* ---------- one shape for every list --------------------------------------
@@ -543,9 +577,9 @@
 .adm-sales { border-top: 1px solid var(--a-ink); margin-top: 10px; display: grid; grid-template-columns: 1fr; }
 .adm-sales__cell { padding: 14px 0; border-bottom: 1px solid var(--a-rule); }
 .adm-sales__l { font-size: 13px; color: var(--a-muted); }
-.adm-sales__v { font-family: Oswald, sans-serif; font-size: 32px; line-height: 1.1; margin-top: 4px; }
+.adm-sales__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; margin-top: 4px; }
 .adm-bars { display: flex; align-items: flex-end; gap: 4px; height: 36px; margin-top: 12px; }
-.adm-bars i { flex: 1; background: var(--a-rule); min-height: 2px; }
+.adm-bars i { flex: 1; background: var(--a-canvas); min-height: 2px; }
 .adm-bars i.is-today { background: var(--a-ink); }
 @media (max-width: 1180px) {
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -561,7 +595,7 @@
 .adm-step:last-child { border-right: 0; }
 .adm-step__n { font-size: 11px; color: var(--a-muted); }
 .adm-step__l { font-size: 14px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adm-step--done { background: var(--a-ink); color: #fff; }
+.adm-step--done { background: var(--a-ink); color: var(--a-onink); }
 .adm-step--done .adm-step__n { color: var(--a-dim); }
 .adm-step--now { background: var(--a-tint); color: var(--a-ink); }
 .adm-step--now .adm-step__l { font-weight: 600; }
@@ -653,6 +687,340 @@
 .adm-kv { border-top: 1px solid var(--a-ink); margin-top: 10px; padding-top: 12px; line-height: 22px; }
 .adm-kv span { color: var(--a-muted); }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction 1a — «Обзор», «Заказы», «Заказ» (design_handoff_admin_ux README
+   § 5, screens 01, 03, 04). The shared pieces (section header «?», tag, the
+   pinned dark button, the confirm sheet) are at the end of this file; this
+   block is only what these three screens draw with them.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* a list under a section header: the header already carries the ink rule */
+.adm-list--sech { border-top: 0; margin-top: 0; }
+/* «Все заказы» at the right of the «Последние заказы» header */
+.adm-sech__link { margin-left: auto; font-size: 13px; font-weight: 500; }
+/* grey bars where the numbers will be, on the first open */
+.adm-skel--rows { margin-top: 16px; gap: 16px; }
+.adm-skel--rows i { height: 20px; }
+
+/* ---------- Обзор ---------------------------------------------------------- */
+
+/* «Сделать сегодня» and «Последние заказы» on the left, «Продажи» on the
+   right; one column on a phone, the sales between the two (screen 03) */
+.adm-ov__grid {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-template-areas: "todo sales" "recent sales"; gap: 32px 44px; align-items: start;
+}
+.adm-ov__todo { grid-area: todo; min-width: 0; }
+.adm-ov__sales { grid-area: sales; min-width: 0; }
+.adm-ov__recent { grid-area: recent; min-width: 0; }
+@media (max-width: 1180px) {
+  .adm-ov__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "sales" "recent"; gap: 28px; }
+}
+/* a row of «Сделать сегодня»: the big number, the words and whose, the chevron */
+.adm2 .adm-todo {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 14px; gap: 12px; align-items: center;
+  padding: 14px 0; min-height: 0; flex-wrap: nowrap;
+}
+.adm-todo .adm-row__big { width: auto; font-size: 30px; }
+.adm-todo__t { display: block; font-size: 15px; line-height: 20px; }
+.adm-todo .adm-row__sub { margin-top: 1px; }
+.adm-ov .adm-sales { border-top: 0; margin-top: 0; grid-template-columns: 1fr; }
+.adm-ov .adm-sales__cell:last-child { border-bottom: 0; }
+@media (max-width: 1180px) {
+  .adm-ov .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .adm-ov .adm-sales__cell { border-bottom: 0; padding-top: 12px; }
+}
+@media (max-width: 899px) {
+  .adm2 .adm-todo { grid-template-columns: 40px minmax(0, 1fr) 14px; gap: 10px; padding: 13px 0; }
+  .adm-todo .adm-row__big { font-size: 28px; }
+  .adm-ov .adm-sales__v { font-size: 28px; }
+}
+
+/* ---------- Заказы --------------------------------------------------------- */
+
+/* the search and the dark button on the header's right (desktop); under the
+   title, full width, on a phone — where the button is pinned instead */
+.adm-orders__acts {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 320px; justify-content: flex-end; min-width: 0;
+}
+.adm-orders__pin { display: contents; }
+.adm-orders__acts .adm-pin { margin-left: 0; }
+.adm-search { position: relative; display: block; flex: 0 1 300px; min-width: 200px; }
+.adm-search__i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--a-muted); pointer-events: none; }
+.adm2 .adm-search__in.adm-input { height: 46px; padding-left: 38px; }
+.adm-search__in::-webkit-search-cancel-button { cursor: pointer; }
+@media (max-width: 899px) {
+  .adm-orders .adm-head { flex-direction: column; align-items: stretch; gap: 14px; }
+  .adm-orders__acts { flex: none; justify-content: stretch; }
+  .adm-search { flex: 1 1 auto; min-width: 0; }
+  .adm2 .adm-search__in.adm-input { height: 48px; }
+}
+/* the chips: one row that scrolls sideways on a phone, never wrapping; the
+   count bold beside its word; «?» after them on «Возвраты» */
+.adm-ochips__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.adm-ochips { flex: 0 1 auto; min-width: 0; }
+.adm-ochips .adm-chip { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.adm-chip__n { font-weight: 600; }
+.adm-ochips__row .adm-help { margin: 0; }
+.adm-olist__note { margin: 8px 0; }
+.adm-olist__more { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 12px; }
+.adm-olist__more .adm-hint { margin: 0; }
+.adm-olist__head { display: none; }
+
+/* an order in a list — «Заказы» and «Последние заказы» on «Обзор»: the
+   customer and the sum on the first line, number · day · what · where and
+   the status tag on the second, the step (a secondary button) under both */
+.adm2 .adm-orow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "body amt" "body tag" "acts acts";
+  column-gap: 12px; row-gap: 4px; align-items: center; padding: 12px 0; min-height: 0;
+}
+.adm2 .adm-orow > .adm-orow__body {
+  grid-area: body; display: grid; grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-areas: "who who who" "num date what"; align-items: baseline; row-gap: 3px; min-width: 0;
+}
+.adm-orow__who { grid-area: who; font-size: 15px; font-weight: 600; }
+.adm-orow__num { grid-area: num; font-size: 12px; line-height: 18px; color: var(--a-muted); white-space: nowrap; }
+.adm-orow__date { grid-area: date; font-size: 13px; line-height: 18px; color: var(--a-muted); white-space: nowrap; }
+.adm2 .adm-orow__what { grid-area: what; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.adm-orow__date::before, .adm-orow__what::before { content: "\00a0·\00a0"; }
+.adm2 .adm-orow > .adm-row__amt { grid-area: amt; min-width: 0; font-size: 17px; }
+.adm2 .adm-orow > .adm-orow__tag { grid-area: tag; justify-self: end; flex-wrap: nowrap; gap: 6px; }
+.adm2 .adm-orow > .adm-orow__acts { grid-area: acts; margin-top: 6px; }
+/* …and on a wide screen «Заказы» is a table, one line per order: Номер ·
+   Дата · Покупатель · Что и куда · Статус · Сумма · the step (when there is
+   one — never more than one) in a column of its own, centred on the line.
+   The header row has the same seven columns as the rows; the step's has no
+   word. The step's column is the widest step label (EN «Handed to the
+   customer», 181 px at 13 px) — so the table needs 1200 px: below that the
+   buyer and «Что и куда» would be squeezed to nothing. */
+@media (min-width: 1200px) {
+  .adm-olist__head {
+    display: grid; grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr) 136px 96px 184px; column-gap: 12px;
+    padding: 12px 0 8px; border-bottom: 1px solid var(--a-ink);
+    font-size: 12px; line-height: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+  }
+  .adm-olist__head span:nth-child(6) { text-align: right; }
+  .adm2 .adm-olist--table { border-top: 0; }
+  .adm2 .adm-olist--table .adm-orow {
+    grid-template-columns: minmax(0, 1fr) 136px 96px 184px; grid-template-areas: "body tag amt acts";
+    column-gap: 12px; row-gap: 0; padding: 10px 0; min-height: 57px;
+  }
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__body {
+    grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "num date who what";
+    column-gap: 12px; align-items: center;
+  }
+  .adm-olist--table .adm-orow__date::before, .adm-olist--table .adm-orow__what::before { content: none; }
+  .adm-olist--table .adm-orow__num { font-size: 12.5px; }
+  .adm2 .adm-olist--table .adm-orow__what { font-size: 13.5px; }
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__tag { justify-self: start; flex-wrap: wrap; }
+  .adm2 .adm-olist--table .adm-orow > .adm-row__amt { text-align: right; }
+}
+/* …a narrower desktop keeps the two lines of the phone, and the step stands
+   beside them in a column of its own (one width for every row, so the sums
+   still line up), centred — no third line under the row */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .adm2 .adm-olist--table .adm-orow {
+    grid-template-columns: minmax(0, 1fr) auto 184px; grid-template-areas: "body amt acts" "body tag acts";
+  }
+}
+@media (min-width: 900px) {
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__acts {
+    align-self: center; justify-content: flex-end; flex-wrap: nowrap; margin-top: 0; min-width: 0;
+  }
+  /* the row's step is the secondary one — smaller than the page's dark button */
+  .adm2 .adm-olist--table .adm-orow__acts .adm-btn--row { height: 36px; font-size: 13px; }
+}
+
+/* ---------- Заказ ---------------------------------------------------------- */
+
+.adm-ocard { gap: 24px; }
+/* the two columns breathe like the design's: 28 px between the blocks */
+.adm-ocols > .adm-stack { gap: 28px; }
+.adm-ocols > .adm-oside { gap: 26px; }
+/* «← Заказы» / «← К клиенту» — a phone has it in its top bar */
+.adm-ohead__back { margin-bottom: -10px; }
+@media (max-width: 899px) { .adm-ohead__back { display: none; } }
+.adm-ohead { align-items: flex-end; }
+.adm-ohead__who { min-width: 0; }
+.adm-ohead__name { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+.adm-ohead__name .adm-h1 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 899px) {
+  .adm-ohead__name { justify-content: space-between; flex-wrap: nowrap; }
+  .adm-ohead__name .adm-badge { flex: none; }
+}
+
+/* the actions: the dark step, «Написать клиенту», «⋯» — on the header's
+   right on a desktop; the pinned bar above the tab bar on a phone, where
+   «Написать клиенту» goes into «⋯» unless there is no step to take */
+/* The group also carries `.adm-ordacts` (the class e2e and the assistant have
+   always found the card's actions by), whose old ≤ 480 rule stacked every
+   button full width — one row here, always. */
+.adm-pin.adm-opin { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; }
+.adm2 .adm-opin .adm-btn { height: 46px; width: auto; min-height: 0; }
+.adm2 .adm-opin .adm-pin__btn { padding: 0 24px; }
+.adm2 .adm-opin .adm-opin__write { padding: 0 18px; }
+.adm-omenu { position: relative; flex: none; }
+.adm2 .adm-omenu__btn { width: 46px; padding: 0; font-size: 20px; line-height: 1; }
+.adm-omenu__scrim { position: fixed; inset: 0; z-index: 64; border: 0; padding: 0; margin: 0; background: transparent; cursor: default; }
+.adm-omenu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 65; min-width: 240px;
+  display: flex; flex-direction: column; background: var(--a-paper); border: 1px solid var(--a-ink); animation: adm-up .15s;
+}
+.adm2 .adm-omenu__i {
+  display: block; width: 100%; min-height: 44px; padding: 12px 14px; margin: 0; text-align: left;
+  border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  font: inherit; font-size: 14px; line-height: 20px; color: var(--a-ink); text-decoration: none; white-space: nowrap;
+}
+.adm2 .adm-omenu__i:last-child { border-bottom: 0; }
+.adm2 .adm-omenu__i:hover, .adm2 .adm-omenu__i:focus-visible { background: var(--a-panel); }
+.adm2 .adm-omenu__i[disabled] { color: var(--a-muted); cursor: default; }
+.adm2 .adm-omenu__i--warn { color: var(--a-rust); }
+.adm2 .adm-omenu__i--phone, .adm2 .adm-omenu__i--close { display: none; }
+@media (max-width: 899px) {
+  .adm2 .adm-opin .adm-pin__btn { flex: 1 1 auto; height: 50px; min-width: 0; }
+  .adm2 .adm-opin .adm-opin__write { display: none; }
+  .adm2 .adm-opin .adm-opin__write--all, .adm2 .adm-opin > a.adm-btn { display: inline-flex; flex: 1 1 auto; height: 50px; min-width: 0; }
+  .adm2 .adm-opin .adm-omenu__btn { width: 50px; height: 50px; }
+  /* open: above the tab bar, so its scrim covers the whole screen */
+  .adm-pin.adm-opin.is-menu { z-index: 72; }
+  .adm-omenu__scrim { z-index: 1; background: var(--a-scrim); }
+  .adm-omenu__list {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 2; min-width: 0;
+    border: 0; border-top: 1px solid var(--a-rule); padding: 6px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    animation: adm-up .2s;
+  }
+  .adm2 .adm-omenu__i { min-height: 54px; padding: 16px; font-size: 16px; white-space: normal; }
+  .adm2 .adm-omenu__i--phone { display: block; }
+  .adm2 .adm-omenu__i--close { display: block; text-align: center; color: var(--a-muted); font-size: 15px; }
+}
+
+/* the progress line: four square marks (two for a pickup) on a rule that is
+   ink as far as the order has come — square, as every corner in 1a is; the
+   «?» stays the one round thing */
+.adm-prog {
+  position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none; margin: 0; padding: 0; max-width: 620px;
+}
+.adm-prog--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 320px; }
+.adm-prog__s { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; text-align: center; }
+.adm-prog__dot { width: 12px; height: 12px; box-sizing: border-box; border: 2px solid var(--a-edge); background: var(--a-paper); }
+.adm-prog__s--done .adm-prog__dot { background: var(--a-ink); border-color: var(--a-ink); }
+.adm-prog__s--now .adm-prog__dot { border-color: var(--a-ink); }
+.adm-prog__s--skip .adm-prog__dot { border-style: dashed; border-color: var(--a-muted); }
+.adm-prog__l { max-width: 100%; font-size: 13px; line-height: 16px; color: var(--a-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-prog__s--done .adm-prog__l { color: var(--a-ink); }
+.adm-prog__s--now .adm-prog__l { color: var(--a-ink); font-weight: 600; }
+.adm-prog__c { margin-top: -5px; font-size: 11px; line-height: 14px; color: var(--a-muted); }
+.adm-prog__rule { position: absolute; z-index: 0; top: 5px; left: 12.5%; right: 12.5%; height: 2px; background: var(--a-rule); list-style: none; }
+.adm-prog--2 .adm-prog__rule { left: 25%; right: 25%; }
+.adm-prog__rule i { display: block; height: 100%; background: var(--a-ink); }
+@media (max-width: 899px) { .adm-prog__l { font-size: 12px; } }
+
+/* «Следующий шаг»: one bordered card — what to do, one line, «?»; the box
+   and the locker door of this parcel; «Отправлен без этикетки» */
+.adm-next { border: 1px solid var(--a-ink); padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adm-next__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 26px; }
+.adm-next__k { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--a-muted); }
+.adm-next__t { margin-top: 2px; font-size: 19px; line-height: 25px; font-weight: 600; }
+.adm-next__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-next .adm-helpp { margin-top: 8px; }
+.adm-next--done .adm-next__t { margin: 0; font-size: 16px; line-height: 22px; }
+.adm2 .adm-next__prep { border: 0; padding: 0; margin-top: 2px; gap: 10px; }
+.adm-next__box { justify-content: flex-start; gap: 2px 10px; font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-next__boxk { color: var(--a-muted); }
+.adm-next__box .adm-link { font-size: 13px; }
+.adm-next__door { justify-content: flex-start; gap: 2px 10px; font-size: 13px; margin-top: 6px; }
+.adm-next__alt { align-self: flex-start; margin-top: 8px; font-size: 13px; font-weight: 400; }
+.adm-next [data-adminvstate] { margin-top: 4px; font-size: 13px; line-height: 19px; }
+.adm-opend { margin: -8px 0 0; }
+@media (max-width: 899px) {
+  .adm-next { padding: 16px; }
+  .adm-next__t { font-size: 18px; line-height: 24px; }
+}
+
+/* the sections of the card: «Посылка», «Состав», «Покупатель», «Доставка и
+   оплата», «Заметка» — a 12-px header over an ink rule, quiet lines under it */
+.adm-osec { display: flex; flex-direction: column; min-width: 0; }
+.adm-okv { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; font-size: 14px; line-height: 20px; }
+.adm-okv > br { display: none; }
+.adm2 .adm-okv a { color: var(--a-ink); text-decoration: none; align-self: flex-start; }
+.adm2 .adm-okv a:hover { text-decoration: underline; }
+/* the phone and the e-mail are links (tel: / mailto:) — a thumb's size on a phone */
+@media (max-width: 899px) { .adm2 .adm-okv a { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; } }
+.adm-okv__muted { font-size: 13px; color: var(--a-muted); }
+.adm-okv--company { display: block; padding-top: 12px; }
+.adm-okv--company span { color: var(--a-muted); font-size: 13px; }
+.adm-okv--pay { padding-top: 12px; }
+.adm-okv--pay > span:not(.adm-okv__pay):not(.adm-err) { font-size: 13px; color: var(--a-muted); }
+/* the blocks keep `.adm-kv` (the suite and the assistant find them by it)
+   without its old top rule and its all-grey spans */
+.adm2 .adm-ocard .adm-kv { border-top: 0; margin-top: 0; line-height: 20px; }
+.adm2 .adm-ocard .adm-kv span { color: inherit; }
+.adm2 .adm-ocard .adm-okv .adm-okv__muted,
+.adm2 .adm-ocard .adm-okv--company span,
+.adm2 .adm-ocard .adm-okv--pay > span:not(.adm-okv__pay):not(.adm-err) { color: var(--a-muted); }
+.adm2 .adm-ocard .adm-opay .adm-err { color: var(--a-rust); }
+/* every payment warning is a rust block of its own (gap C9) */
+.adm-opay .adm-err:not(.adm-err--block) {
+  display: block; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--a-warn); border-left-width: 4px;
+  background: color-mix(in srgb, var(--a-warn) 6%, var(--a-paper)); line-height: 19px;
+}
+.adm-payref { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+.adm-payref__k { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-payref__row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.adm2 .adm-payref__code { font-size: 13px; line-height: 18px; letter-spacing: 0; color: var(--a-muted); cursor: copy; overflow-wrap: anywhere; min-width: 0; }
+.adm2 .adm-payref .adm-copy { width: 32px; height: 32px; padding: 0; border: 0; background: none; display: inline-flex; align-items: center; justify-content: center; }
+.adm2 .adm-payref .adm-copy:hover { background: var(--a-panel); }
+.adm-payref .adm-help { margin: 0; }
+@media (max-width: 899px) { .adm2 .adm-payref .adm-copy { width: 44px; height: 44px; } }
+.adm-ocard .adm-gifts { margin-top: 12px; }
+/* «Посылка» — the parcel, once there is a label */
+.adm2 .adm-ocard .adm-ship { border: 0; padding: 0; gap: 10px; }
+.adm-ship__where { padding-top: 10px; font-size: 14px; line-height: 20px; }
+/* «Состав»: the lines, the delivery, the discount and points, «Итого» */
+.adm2 .adm-oline { padding: 10px 0; min-height: 0; flex-wrap: nowrap; }
+.adm2 .adm-ominor { padding: 10px 0; min-height: 0; }
+.adm-ominor .adm-row__sub { margin: 0; }
+.adm-ocard .adm-total { align-items: baseline; padding: 12px 0 0; }
+.adm-ocard .adm-total__v { font-size: 26px; }
+/* «Заметка» — saves itself; the line under it says so */
+.adm2 .adm-onote__in { margin-top: 10px; min-height: 80px; }
+.adm-onote__st { margin-top: 4px; font-size: 12px; }
+
+/* a customer's return request — a rust notice at the top of the card, quiet
+   once it is answered (gap C8) */
+.adm-onotice {
+  border: 1px solid var(--a-rust); border-left-width: 4px; padding: 14px 16px;
+  background: color-mix(in srgb, var(--a-rust) 6%, var(--a-paper));
+  display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px; color: var(--a-ink);
+}
+.adm-onotice--done { border-color: var(--a-rule); background: var(--a-panel); }
+.adm-onotice .adm-hint--warn { color: var(--a-rust); font-weight: 600; }
+.adm-onotice__acts .adm-help { margin: 0; }
+
+/* «Сообщение клиенту»: a panel under the header on a desktop, a full-height
+   sheet on a phone (gap C13) */
+.adm-reply { border: 1px solid var(--a-ink); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; background: var(--a-paper); }
+.adm-reply__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.adm-reply__who { min-width: 0; overflow-wrap: anywhere; }
+.adm2 .adm-reply__x {
+  flex: none; width: 36px; height: 36px; padding: 0; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-reply__body { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.adm-reply__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.adm-reply__note { flex-basis: 100%; font-size: 12px; }
+@media (max-width: 899px) {
+  .adm-reply {
+    position: fixed; inset: 0; z-index: 75; border: 0; overflow: hidden;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .adm-reply__body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
+  .adm2 .adm-reply__x { width: 44px; height: 44px; }
+  .adm-reply__acts .adm-btn { flex: 1 1 auto; height: 50px; }
+}
+
 /* ---------- Склад stepper -------------------------------------------------- */
 
 /* «Склад» and its history: the volume in a box of its own. It used to open
@@ -689,7 +1057,7 @@
 }
 .adm-pick__box {
   width: 22px; height: 22px; flex: none; border: 1px solid var(--a-ink); background: var(--a-paper);
-  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; color: var(--a-onink); font-size: 13px;
 }
 .adm-pick[aria-pressed="true"] .adm-pick__box { background: var(--a-ink); }
 .adm-pick__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -706,11 +1074,11 @@
 .adm-bar__i[aria-current="true"] { color: var(--a-ink); font-weight: 600; }
 .adm-bar__b {
   position: absolute; top: 8px; left: 50%; margin-left: 8px; min-width: 16px; height: 16px; padding: 0 4px;
-  background: var(--a-ink); color: #fff; font-size: 10px; font-weight: 600;
+  background: var(--a-ink); color: var(--a-onink); font-size: 10px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ---------- overlays: scrim, sheet, confirm, toast, FAB -------------------- */
+/* ---------- overlays: scrim, sheet, confirm, toast ------------------------- */
 
 .adm-scrim { position: fixed; inset: 0; background: var(--a-scrim); z-index: 60; border: 0; padding: 0; width: 100%; }
 .adm-sheet {
@@ -719,7 +1087,7 @@
   max-height: 90vh; display: flex; flex-direction: column;
 }
 .adm-sheet__grab { display: flex; justify-content: center; padding: 10px 0 2px; flex: none; }
-.adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-rule); }
+.adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-canvas); }
 .adm-sheet__body { overflow: auto; padding: 8px 20px 0; }
 /* The sheet stands on the bottom edge of the screen, so its last row clears
    the iPhone's home indicator the way the bar does (--a-barh) — 24 px on a
@@ -736,13 +1104,61 @@
 }
 .adm-sheet__row .adm-row__sub { margin-top: 0; }
 
-/* «Ещё» and the assistant are bottom sheets only where there is a bottom bar;
-   on a desktop the same sections live in the sidebar and the assistant is a
-   380-px pane, so both sheets stay out of the way entirely. */
+/* «Ещё» on a phone (1a, screen 14) is a page: the tab bar stays under it with
+   «Ещё» lit, the top bar shows the wordmark, and the screen it was opened
+   over is hidden rather than thrown away (.adm2--more — app.js
+   admMorePageHTML). The title carries the 1-px ink rule; the rows are the
+   design's — the section's icon, its name, one line of what is waiting (rust
+   when it wants him, and the words say so too), a chevron — and nothing in a
+   row is ever cut: a line too long for the width wraps. Then «Язык панели»
+   with RU · ET · EN, and «Открыть магазин ↗» and «Выйти» side by side. */
+.adm-more { display: none; }
+.adm-more__t {
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 30px; line-height: 33px; margin: 0;
+}
+.adm-more__t:focus { outline: none; }
+.adm-more__list { border-top: 1px solid var(--a-ink); margin-top: 16px; }
+.adm-more__row {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr) 14px; gap: 14px; align-items: center;
+  width: 100%; min-height: 64px; padding: 14px 0; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: var(--a-paper); color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-more__row > svg { width: 22px; height: 22px; }
+.adm-more__row > .adm-more__chev { width: 14px; height: 14px; color: var(--a-muted); }
+.adm-more__txt { min-width: 0; display: flex; flex-direction: column; }
+.adm-more .adm-row__nm { font-size: 16px; line-height: 22px; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.adm-more .adm-row__sub { font-size: 13px; line-height: 18px; margin-top: 0; overflow-wrap: anywhere; }
+.adm-more__row[aria-current="true"] .adm-row__nm { font-weight: 600; }
+.adm-more__foot { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+.adm-more__lang { display: flex; align-items: center; gap: 12px; }
+.adm-more__lang > span { flex: 1; font-size: 14px; }
+.adm-more__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adm-more__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; font-size: 14.5px; }
+.adm-more__acts [data-admlogout] { border-color: var(--a-edge); color: var(--a-muted); }
+
+/* Only where there is a tab bar to open it from. On a desktop the same six
+   sections live in the sidebar, so a page left open by a phone-width window
+   that grew stays out of the way and the screen shows as usual. */
+@media (max-width: 899px) {
+  .adm-more { display: block; padding: 20px 16px calc(var(--a-barh) + 28px); animation: adm-up .25s; }
+  .adm2--more .adm-page { display: none; }
+  /* the page has the panel's own top bar, even over a form whose save bar is
+     the phone's header — that bar belongs to the screen hidden under it */
+  body.adm-saving .adm2--more .adm-top { display: flex; }
+}
+
+/* The assistant is a bottom sheet only where there is a bottom bar; on a
+   desktop it is a 380-px pane, so a phone sheet stays out of the way. */
 @media (min-width: 900px) {
   .adm-sheet--phone, .adm-scrim--phone { display: none; }
 }
 
+/* ---------- the confirm sheet (1a rule 4) ----------------------------------
+   Money, mass e-mail, deletes — and every confirm the panel already had: the
+   title is the question, one sentence of what follows, the verb LEFT (rust
+   when it cannot be walked back, ink otherwise — app.js admConfirmHTML) and
+   «Не надо» outlined on the right. A centred dialog on a desktop, a bottom
+   sheet on a phone (the media block below). */
 .adm-confirm {
   position: fixed; inset: 0; background: var(--a-scrim); z-index: 70;
   display: flex; align-items: center; justify-content: center; padding: 24px;
@@ -754,39 +1170,44 @@
    buttons below the bottom, with nothing to scroll. The title and the
    buttons keep their size; the detail between them gives way. */
 .adm-confirm__card {
-  width: 100%; max-width: 440px; background: var(--a-paper); border: 1px solid var(--a-ink); padding: 20px;
-  display: flex; flex-direction: column; gap: 14px; animation: adm-up .2s;
+  width: 100%; max-width: 440px; background: var(--a-paper); border: 1px solid var(--a-ink); padding: 24px;
+  display: flex; flex-direction: column; gap: 10px; animation: adm-up .2s;
   max-height: 100%;
 }
-.adm-confirm__t { font-weight: 600; font-size: 17px; flex: none; }
+.adm-confirm__t { font-weight: 600; font-size: 19px; line-height: 25px; flex: none; }
 .adm-confirm__d {
-  line-height: 22px; white-space: pre-line; overflow-wrap: anywhere;
+  font-size: 14px; line-height: 21px; white-space: pre-line; overflow-wrap: anywhere;
   min-height: 0; overflow-y: auto; overscroll-behavior: contain;
 }
 .adm-confirm__acts { flex: none; }
 /* a refused tariff save lists its cells one per line (admShipErrHTML) */
 .adm-err__list { margin: 6px 0; padding-left: 18px; font-weight: 400; }
 .adm-err__list li { margin: 2px 0; overflow-wrap: anywhere; }
-.adm-confirm__acts { display: flex; gap: 8px; }
-.adm-confirm__acts .adm-btn { flex: 1; }
+.adm-confirm__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.adm-confirm__acts .adm-btn { width: 100%; height: 46px; padding: 0 12px; font-weight: 600; white-space: normal; line-height: 18px; }
+.adm-confirm__acts .adm-btn--ghost { font-weight: 400; }
 
+/* ---------- the toast (1a rule 3) -------------------------------------------
+   Dark, short, with «Вернуть» (ADM_UNDO_WORD) for ADM_UNDO_MS when the change
+   can be walked back, and ✕ always. On a phone it rides above the tab bar —
+   and above the pinned dark button when a screen has one. */
 .adm-toast {
-  position: fixed; left: 20px; right: 20px; bottom: 28px; max-width: 520px; margin: 0 auto;
-  min-height: 56px; background: var(--a-ink); color: #fff; display: flex; align-items: center;
+  position: fixed; left: 20px; right: 20px; bottom: 24px; max-width: 520px; margin: 0 auto;
+  min-height: 52px; background: var(--a-ink); color: var(--a-onink); display: flex; align-items: center;
   justify-content: space-between; padding: 0 6px 0 16px; z-index: 80; animation: adm-up .2s; gap: 12px;
 }
 /* Up to three lines, then an ellipsis (12.09.2026). It was one line cut with
    an ellipsis, and a phone shows about thirty characters of that: «Микрофон
    не разрешён — разрешите его в…» lost the half that mattered, so the
    assistant's microphone said «Нет доступа» and nothing about where to fix
-   it. A one-line toast is drawn exactly as before (min-height 56, centred). */
+   it. A one-line toast is drawn exactly as before (centred). */
 .adm-toast__t {
-  flex: 1; min-width: 0; font-size: 15px; line-height: 20px; padding: 8px 0;
+  flex: 1; min-width: 0; font-size: 14px; line-height: 20px; padding: 8px 0;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
 .adm-toast__undo {
-  border: 0; background: none; color: #fff; font-weight: 600; text-decoration: underline;
-  text-underline-offset: 3px; font-size: 15px; height: 44px; padding: 0 8px; flex: none;
+  border: 0; background: none; color: var(--a-onink); font-weight: 600; text-decoration: underline;
+  text-underline-offset: 3px; font-size: 14px; height: 44px; padding: 0 8px; flex: none;
 }
 .adm-toast__x {
   border: 0; background: none; color: var(--a-dim); font-size: 16px; width: 44px; height: 44px; flex: none; padding: 0;
@@ -795,10 +1216,110 @@
    bar has to clear it, exactly as the storefront toast does (styles.css) */
 body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
-.adm-fab {
-  position: fixed; right: 20px; bottom: 28px; height: 52px; padding: 0 18px 0 14px;
-  background: var(--a-ink); color: #fff; border: 0; display: flex; align-items: center; gap: 10px;
-  font-weight: 500; font-size: 15px; z-index: 55;
+/* ---------- the phone's top bar (1a § 4) ------------------------------------
+   «← back» inside a card, or the wordmark — the save status — the
+   assistant's icon. Sticky at the top, one 52-px row under the notch. It
+   gives way to a save bar while one is the phone's header (≤ 767, below):
+   the screens still on a save bar keep working exactly as before. */
+.adm-top { display: none; }
+@media (max-width: 899px) {
+  .adm-top {
+    display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 45;
+    height: var(--a-toph); box-sizing: border-box; padding: env(safe-area-inset-top, 0px) 12px 0 16px;
+    background: var(--a-paper); border-bottom: 1px solid var(--a-rule);
+  }
+  .adm-top__mark {
+    flex: none; font-family: Oswald, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .32em; white-space: nowrap;
+  }
+  .adm-top__back {
+    flex: 0 1 auto; max-width: 48%; min-width: 44px; min-height: 44px; margin-left: -4px; padding: 0 4px;
+    border: 0; background: none; color: var(--a-ink); font: inherit; font-size: 15px; text-align: left;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .adm-top .adm-savest { flex: 1 1 auto; justify-content: center; text-align: center; font-size: 12px; line-height: 14px; }
+  .adm-top__ai {
+    flex: none; margin-left: auto; width: 44px; height: 44px; padding: 0;
+    border: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .adm-top__ai[aria-expanded="true"] { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+}
+/* One way back per screen: a card's own «← X» steps aside wherever the top
+   bar says «← X» for the same card (app.js admPageBackCls) — the design draws
+   the phone with the bar's only. Not while a save bar is the phone's header:
+   the top bar steps aside then (≤ 767, body.adm-saving), and the card's link
+   is the way back again. A desktop has no top bar and keeps it. */
+@media (min-width: 768px) and (max-width: 899px) {
+  .adm2 .adm-pageback { display: none; }
+}
+@media (max-width: 767px) {
+  body:not(.adm-saving) .adm2 .adm-pageback { display: none; }
+}
+
+/* ---------- the assistant folded: a strip (desktop, 1a rule 6) -------------- */
+.adm-strip { display: none; }
+@media (min-width: 900px) {
+  .adm-strip {
+    position: fixed; right: 0; top: 0; bottom: 0; width: var(--a-strip); z-index: 40;
+    display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0 0; margin: 0;
+    border: 0; border-left: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink); font: inherit;
+  }
+  .adm-strip__i {
+    width: 36px; height: 36px; border: 1px solid var(--a-edge); display: flex; align-items: center; justify-content: center;
+  }
+  .adm-strip:hover .adm-strip__i { background: var(--a-panel); }
+  .adm-strip__l { writing-mode: vertical-rl; font-size: 12px; color: var(--a-muted); }
+}
+
+/* ---------- «Сохраняем… / Сохранено ✓ / Не сохранилось» (1a § 2) ------------
+   One status for the panel (app.js ADM_SAVE), painted in place into the
+   phone's top bar and at the top right of the desktop's page column. */
+.adm-savest { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; line-height: 16px; color: var(--a-muted); }
+.adm-savest__t--ok { color: var(--a-green); animation: adm-savefade .4s ease-in 2s forwards; }
+.adm-savest__t--err { color: var(--a-rust); font-weight: 500; }
+.adm-savest__retry {
+  flex: none; min-height: 32px; padding: 0 4px; border: 0; background: none; font: inherit; font-weight: 600;
+  color: var(--a-rust); text-decoration: underline; text-underline-offset: 3px;
+}
+@keyframes adm-savefade { to { opacity: 0; } }
+.adm-pagest { position: relative; height: 0; }
+.adm-savest--page { position: absolute; right: 0; top: -26px; }
+@media (max-width: 899px) {
+  .adm-pagest { display: none; }
+  .adm-savest__retry { min-height: 44px; min-width: 44px; }
+}
+/* a box whose value was not sent: the rust edge is aria-invalid's, and this
+   is its one line */
+.adm-ashint { display: block; font-size: 12px; line-height: 16px; color: var(--a-rust); }
+
+/* ---------- the ONE dark button (1a rule 2, app.js admPinnedHTML) -----------
+   Desktop: in the page header, on the right. Phone: pinned above the tab
+   bar, full width; renderImpl sets body.adm-pinned so the page's end and the
+   toast clear it, and it steps aside while the keyboard is up. */
+.adm-pin { margin-left: auto; flex: none; }
+.adm-pin__btn { height: 46px; padding: 0 24px; font-weight: 600; }
+@media (max-width: 899px) {
+  .adm-pin {
+    position: fixed; left: 0; right: 0; bottom: var(--a-barh); z-index: 49; margin: 0;
+    padding: 10px 16px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
+  }
+  .adm-pin__btn { width: 100%; height: 50px; }
+  /* A transform makes its box the containing block of anything `fixed`
+     inside it, so the entrance fade (adm-up, translateY) carried the pinned
+     button with the screen: it stood mid-page for a quarter of a second and
+     then dropped to the bar («Салон», 25.09.2026). A screen that pins one
+     fades without moving. */
+  .adm-page--enter > .adm-screen:has(.adm-pin) { animation-name: adm-fadein; }
+  /* …and the same without :has(), which a phone browser before it (Safari
+     15.3, Firefox 120) drops whole: renderImpl marks the body whenever a pin
+     is on the page, whichever screen drew it — the order card's step, «+
+     Партнёр», «Сканировать», «+ Набор», the blog's «Опубликовать» (1a
+     integration, 25.09.2026). A separate rule, so neither can take the
+     other down with it. */
+  body.adm-pinned .adm-page--enter > .adm-screen { animation-name: adm-fadein; }
+  body.adm-typing .adm-pin { display: none; }
+  body.adm-pinned .adm-page { padding-bottom: calc(var(--a-barh) + var(--a-pinh) + 32px); }
+  body.adm-pinned .adm-toast { bottom: calc(var(--a-barh) + var(--a-pinh) + 12px); }
 }
 
 /* ---------- assistant ------------------------------------------------------ */
@@ -809,7 +1330,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-asst {
   width: var(--a-asst); background: var(--a-paper); border-left: 1px solid var(--a-rule);
   display: flex; flex-direction: column;
-  position: fixed; right: 0; top: var(--cohdrh, 62px); bottom: 0; z-index: 61;
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 61;
 }
 .adm-asst__x { display: none; }
 .adm-asst__head {
@@ -883,7 +1404,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   color: var(--a-ink); padding: 0; display: inline-flex; align-items: center; justify-content: center;
   position: relative;
 }
-.adm-asst__mic.is-on { background: var(--a-ink); border-color: var(--a-ink); color: #fff; }
+.adm-asst__mic.is-on { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
 .adm-asst__mic.is-on::after {
   content: ""; position: absolute; inset: -4px; border: 2px solid var(--a-ink); opacity: 0;
   animation: adm-listen 1.6s ease-out infinite; pointer-events: none;
@@ -922,8 +1443,44 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- login / waiting card ------------------------------------------- */
 
-.adm-gate { max-width: 420px; margin: 48px auto; display: flex; flex-direction: column; gap: 14px; }
+/* 1a (screen 19): the wordmark over the card, the password in a 52-px box,
+   one dark «Войти» the width of the card; under it the panel's language and
+   the way back to the shop — the jobs of the site bar that is gone. The
+   sign-in itself is today's: one password, no e-mail code. */
+.adm-gate { max-width: 400px; margin: 10vh auto 48px; display: flex; flex-direction: column; gap: 14px; }
 .adm-gate .adm-h1 { margin: 0; }
+.adm-gate__mark { font-family: Oswald, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .3em; }
+.adm-gate__mark span {
+  font-family: "Golos Text", sans-serif; font-weight: 400; font-size: 13px; letter-spacing: 0; color: var(--a-muted); margin-left: 6px;
+}
+.adm-gate .adm-input { height: 52px; }
+.adm-gate [data-admlogin] { width: 100%; height: 52px; font-weight: 600; }
+.adm-gate__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 10px; }
+.adm-gate__foot .adm-link { font-size: 13px; }
+/* The sign-in page (app.js admLoginScreen, screen 19): the card centred on
+   the paper, and on a desktop the dark half beside it with what the panel is
+   for. The 30-day line names the device the owner is holding — «телефон»
+   under 600 px, «устройство» anywhere wider. */
+.adm-login { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); }
+.adm-login__main { display: flex; align-items: center; justify-content: center; padding: 40px 24px; min-width: 0; }
+.adm-login .adm-gate { margin: 0; width: 100%; max-width: 380px; }
+.adm-login__brand { display: none; }
+.adm-gate__keep { margin: 0; font-size: 12px; line-height: 17px; color: var(--a-muted); }
+.adm-gate__keep--desk { display: none; }
+@media (min-width: 600px) {
+  .adm-gate__keep--phone { display: none; }
+  .adm-gate__keep--desk { display: inline; }
+}
+@media (min-width: 900px) {
+  .adm-login { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .adm-login__main { padding: 48px; }
+  .adm-login__brand {
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; padding: 48px;
+    background: var(--a-ink); color: var(--a-onink);
+  }
+  .adm-login__claim { font-family: Oswald, sans-serif; font-weight: 600; font-size: 34px; line-height: 40px; max-width: 380px; }
+  .adm-login__addr { font-size: 13px; color: var(--a-dim); }
+}
 
 /* ---------- phone --------------------------------------------------------- */
 
@@ -957,8 +1514,8 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-asst__chev { display: none; }
   .adm-asst__x { display: inline; font-size: 22px; line-height: 1; color: var(--a-muted); }
   .adm-asst__fold { width: 44px; height: 44px; border: 0; }
-  .adm-page { padding: 16px 20px calc(var(--a-barh) + 96px); }
-  .adm-h1 { font-size: 28px; line-height: 32px; }
+  .adm-page { padding: 20px 16px calc(var(--a-barh) + 96px); }
+  .adm-h1 { font-size: 30px; line-height: 33px; }
   .adm-bar {
     display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
     height: var(--a-barh);
@@ -966,39 +1523,15 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
     border-top: 1px solid var(--a-rule); background: var(--a-paper); z-index: 50;
   }
   .adm-confirm { align-items: flex-end; padding: 0; }
-  /* a bottom sheet here: «Отмена» and the verb clear the home indicator,
+  /* a bottom sheet here: «Не надо» and the verb clear the home indicator,
      and a field in the card (the refund's sum) sits on the keys without it */
   .adm-confirm__card {
-    max-width: none; border-left: 0; border-right: 0; border-bottom: 0;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    max-width: none; border: 0;
+    padding: 22px 16px calc(24px + env(safe-area-inset-bottom, 0px));
   }
   body.adm-typing .adm-confirm__card { padding-bottom: 20px; }
-  .adm-toast { bottom: calc(var(--a-barh) + 20px); }
-  .adm-fab { bottom: calc(var(--a-barh) + 20px); }
-  /* the toast owns the strip above the bar while it is up */
-  body.adm-toasting .adm-fab { bottom: calc(var(--a-barh) + 88px); }
-  .adm-fab__lbl { display: none; }
-  /* ---- the assistant's button gets out of the keyboard's way ---------------
-     It is the one fixed thing in the panel that floats OVER a form rather
-     than under it: `.adm-page` reserves the bar's height at its foot, so the
-     bar can never cover a field, while the button is pinned to the bottom
-     right of the screen with whatever is scrolled beneath it. And index.html
-     asks the browser for `interactive-widget=resizes-content`, so on Chrome
-     for Android the layout viewport shrinks when the keys come up and the
-     button lands squarely on the form.
-
-     Nobody opens the assistant in the middle of typing a price, so while a
-     field of the panel has the keyboard it is not drawn, and it is back on
-     blur. `display`, exactly as `body.adm-saving` already takes it away while
-     a save bar is the phone's header — a button that is merely transparent is
-     still a button a thumb can land on. app.js sets the class from
-     focusin/focusout.
-
-     The bar stays. On iOS it is under the keyboard and out of the way
-     already, and taking it away as well would make «the nav is at the bottom
-     of the screen» (e2e/admin-editor.spec.ts) false for as long as a field is
-     focused — that is a layout promise this panel means to keep. */
-  body.adm-typing .adm-fab { display: none; }
+  .adm-confirm__acts .adm-btn { height: 50px; }
+  .adm-toast { left: 12px; right: 12px; bottom: calc(var(--a-barh) + 12px); }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
   /* A thumb, not a pointer: every control the phone shows is at least 44 px
@@ -1097,77 +1630,98 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left; }
 .adm-switch__st { display: inline-flex; align-items: center; gap: 8px; flex: none; }
 
-/* Размер · Цена · Салон · Остаток · Штрихкод · × — the grid of the design. */
-.adm-grid { display: flex; flex-direction: column; gap: 8px; }
+/* Объём · Цена · Салон · Остаток − / + · Штрихкод + сканер · × — the grid of
+   screen 02 (1a). The prices and the salon price are narrow boxes, the count
+   is a stepper, the barcode takes what is left. */
+.adm-grid { display: flex; flex-direction: column; }
 .adm-grid__head, .adm-grid__row {
-  display: grid; grid-template-columns: 1.2fr 1fr 1fr .8fr 1.4fr 44px; gap: 8px; align-items: center;
+  display: grid; gap: 8px; align-items: start;
+  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .85fr) minmax(72px, .85fr) 148px minmax(160px, 2fr) 36px;
 }
-.adm-grid__head { font-size: 12px; color: var(--a-muted); padding-bottom: 6px; border-bottom: 1px solid var(--a-ink); }
+.adm-grid__head { font-size: 12px; color: var(--a-muted); padding: 4px 0 8px; }
+.adm-grid__row { padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-grid__row:first-of-type { border-top: 0; }
 /* «Партнёры и баллы» off: the «Салон, €» column is not drawn at all, so the
    remaining five share the width instead of leaving a gap where it was */
-.adm-grid__head--nosalon, .adm-grid__row--nosalon { grid-template-columns: 1.2fr 1fr .8fr 1.4fr 44px; }
-.adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-grid__head--nosalon, .adm-grid__row--nosalon {
+  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .9fr) 148px minmax(160px, 2fr) 36px;
+}
+.adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 44px; font-weight: 600; }
+.adm-grid__szin { font-weight: 600; }
 .adm-input--cell { height: 44px; padding: 0 10px; }
 .adm-input--warn { color: var(--a-warn); }
+/* the salon price below the first size is calculated (q19): grey, not a box to type in */
+.adm-input--calc { background: var(--a-panel); color: var(--a-muted); border-color: var(--a-panel); }
 .adm-grid__x {
-  width: 44px; height: 44px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  width: 36px; height: 44px; border: 0; background: none; padding: 0;
   color: var(--a-muted); font-size: 18px; line-height: 1;
 }
-.adm-grid__x[disabled] { border-color: var(--a-rule); color: var(--a-rule); cursor: default; }
-/* the phone cannot hold six columns: the row becomes two lines of labels-in-
-   placeholders, which is why every cell carries an aria-label of its own */
+.adm-grid__x:hover:not([disabled]) { color: var(--a-rust); }
+.adm-grid__x[disabled] { color: var(--a-rule); cursor: default; }
 /* each cell is a span around its box; the column's name inside it (edCell)
    is drawn only where the header row is not */
-.adm-grid__c { min-width: 0; }
-.adm-grid__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
-/* the barcode cell carries «Отвязать» beside the code when a size has one;
-   the button drops to its own line where the column is too narrow for both */
-.adm-grid__c--ean { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.adm-grid__c--ean .adm-grid__l { flex: 1 0 100%; margin-bottom: 0; }
-.adm-grid__c--ean .adm-input { flex: 1 1 96px; }
+.adm-grid__c { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.adm-grid__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); }
+/* «Остаток»: − · the count · + in one ink-edged box, 44 px tall */
+.adm-step3 { display: flex; align-items: stretch; height: 44px; border: 1px solid var(--a-edge); background: var(--a-field); }
+.adm-step3__b {
+  flex: none; width: 36px; border: 0; background: none; color: var(--a-ink); font-size: 18px; line-height: 1; padding: 0;
+}
+.adm-step3__b:hover:not([disabled]) { background: var(--a-panel); }
+.adm-step3__b[disabled] { color: var(--a-rule); cursor: default; }
+.adm2 .adm-step3__v { flex: 1 1 auto; min-width: 0; height: 42px; border: 0; padding: 0 4px; text-align: center; font-weight: 600; background: none; }
+.adm-step3__v::placeholder { font-weight: 400; font-size: 13px; }
+.adm-step3:focus-within { outline: 2px solid var(--a-ink); outline-offset: -1px; }
+.adm2 .adm-step3__v:focus { outline: 0; }
+.adm-step3:has(.adm-step3__v[aria-invalid="true"]) { border-color: var(--a-rust); }
+/* «Штрихкод»: the box and the scanner's square on one line, «Отвязать код» under it */
+.adm-grid__eanrow { display: flex; gap: 6px; min-width: 0; }
+.adm-grid__eanrow .adm-input { flex: 1 1 auto; min-width: 0; }
 .adm-grid__unbind {
-  flex: none; height: 44px; padding: 0 10px; border: 1px solid var(--a-rule); background: var(--a-paper);
-  color: var(--a-muted); font-size: 13px; line-height: 1; white-space: nowrap;
+  align-self: flex-start; min-height: 24px; padding: 0; border: 0; background: none;
+  color: var(--a-ink); font-size: 13px; text-decoration: underline; text-underline-offset: 3px;
 }
 /* the scanner, for THIS size (data-edscan): a 44-px square on a desktop,
    where a word would only crowd the cell and a webcam is rare; on a phone —
    the one place a camera is — it says what it is */
 .adm-grid__scan {
-  flex: none; height: 44px; min-width: 44px; padding: 0; border: 1px solid var(--a-rule); background: var(--a-paper);
+  flex: none; height: 44px; min-width: 44px; padding: 0; border: 1px solid var(--a-ink); background: var(--a-paper);
   color: var(--a-ink); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  font-size: 13px; line-height: 1; white-space: nowrap;
+  font-size: 14px; line-height: 1; white-space: nowrap;
 }
 .adm-grid__scan__lbl { display: none; }
+.adm-grid__add { align-self: flex-start; margin-top: 12px; }
 @media (max-width: 899px) {
   .adm-grid__scan { padding: 0 12px; }
   .adm-grid__scan__lbl { display: inline; }
+  /* «Отвязать код» is a thumb's target on a phone too (44 px, README
+     § Constraints) — the e2e phone check met it once a size carried a code
+     (1a integration, 25.09.2026) */
+  .adm-grid__unbind { min-height: 44px; }
 }
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }
-  /* the size with its «×», three equal boxes — price · salon · stock — then
-     the barcode line across all three; the 44-px column used to squeeze
-     the stock */
+  /* one card per size: the name and its ×, then price · salon, the count,
+     the barcode — each across the width it needs (screen 02, phone) */
   .adm-grid__row {
-    grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; align-items: end;
-    padding-bottom: 12px; border-bottom: 1px solid var(--a-rule);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; gap: 10px 8px;
+    grid-template-areas: "sz sz x" "px salon salon" "qty qty qty" "ean ean ean";
+    padding: 14px 0 16px;
   }
-  /* The size's name and its «×» share the first line — «убрать размер»
-     belongs beside the name — and that frees the last line for the barcode
-     alone: a 13-digit EAN, the «Сканер» button and «Отвязать» need the
-     whole width. Sharing two thirds of it with «×», the box showed
-     «271234567890·» with the last digit cut off — a code the owner cannot
-     check against the bottle. The box asks for 140 px first, so «Отвязать»
-     drops to its own line rather than the code losing a digit. */
-  .adm-grid__sz, .adm-grid__c--sz { grid-column: 1 / 3; font-weight: 600; }
-  .adm-grid__x { grid-column: 3; grid-row: 1; justify-self: end; }
-  .adm-grid__c--ean { grid-column: 1 / -1; }
-  .adm-grid__c--ean .adm-input { flex-basis: 140px; }
+  .adm-grid__row--nosalon { grid-template-areas: "sz sz x" "px px px" "qty qty qty" "ean ean ean"; }
+  .adm-grid__sz, .adm-grid__c--sz { grid-area: sz; }
+  .adm-grid__c--px { grid-area: px; }
+  .adm-grid__c--salon { grid-area: salon; }
+  .adm-grid__c--qty { grid-area: qty; }
+  .adm-grid__c--ean { grid-area: ean; }
+  .adm-grid__x { grid-area: x; width: 44px; border: 1px solid var(--a-rule); background: var(--a-paper); }
+  .adm-grid__c--sz .adm-grid__l { display: none; }
   .adm-grid__l { display: block; }
-  .adm-grid--new .adm-grid__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* 46 = two 1-px borders round a 44-px thumb target */
+  .adm-step3 { height: 46px; }
+  .adm2 .adm-step3__v { height: 44px; }
+  .adm-step3__b { width: 52px; }
 }
-/* product creation: a product that has no id yet has no salon, stock or
-   barcode column — three columns, the same rhythm */
-.adm-grid--new .adm-grid__head, .adm-grid--new .adm-grid__row { grid-template-columns: 1.2fr 1fr 44px; }
 /* the two boxes a new product cannot do without */
 .adm-req { color: var(--a-warn); font-weight: 600; }
 .adm-btn--dash { background: var(--a-paper); color: var(--a-ink); border: 1px dashed var(--a-ink); width: fit-content; }
@@ -1197,7 +1751,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule); max-width: calc(100% - 16px);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.adm-photo__tag--ink { background: var(--a-ink); color: #fff; border-color: var(--a-ink); font-weight: 600; }
+.adm-photo__tag--ink { background: var(--a-ink); color: var(--a-onink); border-color: var(--a-ink); font-weight: 600; }
 /* flex-wrap, and min-width:0 so this strip can never be wider than the tile
    that owns it: the buttons are a fixed 36 px (44 on a phone) and flex:none,
    so without a wrap they simply run out of the square — which is what they
@@ -1241,17 +1795,206 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-vthumb[aria-current="true"] { border: 2px solid var(--a-ink); }
 
 .adm-vidrow { display: flex; align-items: center; gap: 12px; border: 1px solid var(--a-rule); padding: 10px 14px; font-size: 14px; }
-.adm-vidrow__play { width: 56px; height: 36px; background: var(--a-ink); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.adm-vidrow__play { width: 56px; height: 36px; background: var(--a-ink); color: var(--a-onink); display: flex; align-items: center; justify-content: center; flex: none; }
 .adm-vidrow__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--a-muted); }
 .adm-vidrow__x { width: 36px; height: 36px; border: 0; background: none; color: var(--a-muted); font-size: 18px; }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction 1a — «Товары» → Каталог, the product card, «Новый товар»
+   (design_handoff_admin_ux README § 5, screens 02, 10, 13).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- «Товары»: the three shelves and the search ----------------------
+   One segmented control (1 px ink frame, the shelf on screen filled), the
+   search box beside it on a desktop and under it on a phone. */
+.adm-goodsbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
+.adm-seg--tabs { flex: 0 1 auto; }
+.adm-seg--tabs button {
+  height: 46px; min-width: 96px; padding: 0 20px; margin: 0; border: 0; background: var(--a-paper); color: var(--a-ink);
+  font-size: 14px; font-weight: 500; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.adm-seg--tabs button + button { border-left: 1px solid var(--a-ink); }
+.adm-seg--tabs button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
+.adm-seg--tabs .adm-tab__warn:not(:empty) {
+  min-width: 20px; height: 18px; padding: 0 5px; background: var(--a-rust); color: var(--a-onink);
+  font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-seg--tabs .adm-tab__warn--zero:not(:empty) { background: none; color: var(--a-muted); padding: 0; min-width: 0; }
+.adm-search { position: relative; flex: 0 1 340px; min-width: 200px; display: block; }
+.adm-search__i { position: absolute; left: 14px; top: 50%; margin-top: -8px; color: var(--a-muted); pointer-events: none; }
+.adm2 .adm-search .adm-input { height: 46px; padding-left: 40px; }
+
+/* ---------- Каталог rows (screen 10) ------------------------------------------
+   Desktop: Товар · Объёмы · Наличие · Цена · Виден under one header. Phone:
+   the photo, brand over name, then tag · sizes … price on a third line. The
+   name is the button; its ::after stretches over the whole row, so the row
+   opens the card wherever it is tapped — except on the «Виден» switch, which
+   stands above it. */
+.adm-glist { display: flex; flex-direction: column; border-top: 1px solid var(--a-ink); }
+.adm-grow {
+  position: relative; display: grid; align-items: center; column-gap: 16px; min-height: 72px; padding: 8px 0;
+  border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  /* every row is its own grid, so the columns are fixed: the price column
+     holds «7,90–19,90 €», the last one the switch with its «Вкл» word */
+  grid-template-columns: 52px minmax(0, 1fr) minmax(110px, 170px) 96px 124px 92px;
+  grid-template-areas: "img open sz st pr vis";
+}
+/* hover and keyboard: the panel's own band — .adm-row--open on the row (tint, bleed, ink bar) */
+.adm-grow--head {
+  min-height: 0; padding: 10px 0 8px; border-bottom: 0; font-size: 12px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--a-muted);
+}
+.adm-grow--head > span:first-child { grid-column: 1 / 3; }
+.adm-grow__img { grid-area: img; width: 52px; height: 52px; }
+.adm-grow__open {
+  grid-area: open; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0;
+  padding: 0; border: 0; background: none; color: var(--a-ink); font: inherit; text-align: left;
+}
+.adm-grow__open::after { content: ""; position: absolute; inset: 0; }
+.adm-grow__open:focus-visible { outline: 0; }
+.adm-grow:has(.adm-grow__open:focus-visible) { outline: 2px solid var(--a-ink); outline-offset: -2px; }
+.adm-grow__br { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-grow__t { font-size: 15px; line-height: 20px; min-width: 0; }
+.adm-grow__t .adm-badge { vertical-align: 2px; }
+.adm-grow__line { display: contents; }
+.adm-grow__st { grid-area: st; }
+.adm-grow__sz { grid-area: sz; font-size: 13px; color: var(--a-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-grow__pr { grid-area: pr; font-family: Oswald, sans-serif; font-weight: 600; font-size: 18px; white-space: nowrap; }
+.adm-grow__vis { grid-area: vis; position: relative; z-index: 1; justify-self: end; }
+.adm-glist__more { align-self: flex-start; margin-top: 12px; }
+.adm-glist .adm-empty { border: 0; }
+@media (max-width: 899px) {
+  .adm-goodsbar { flex-direction: column; align-items: stretch; }
+  .adm-seg.adm-seg--tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+  .adm-seg--tabs button { min-width: 0; padding: 0 8px; }
+  .adm-search { flex: none; min-width: 0; }
+  .adm-grow--head { display: none; }
+  .adm-grow {
+    column-gap: 12px; row-gap: 6px; padding: 12px 0; align-items: start;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    grid-template-areas: "img open open" "img line pr";
+  }
+  /* the row is the target (the button's ::after), and the button itself is a thumb's height too */
+  .adm-grow__open { min-height: 44px; justify-content: center; }
+  .adm-grow__line { display: flex; align-items: center; gap: 8px; min-width: 0; grid-area: line; }
+  .adm-grow__st { flex: none; }
+  .adm-grow__pr { align-self: center; font-size: 17px; }
+  .adm-grow__vis { display: none; }
+}
+
+/* ---------- the product card (screen 02) -------------------------------------
+   One page: the head, then each section under its 12-px capitals and ink
+   rule. «← Товары» is the phone top bar's there (admTopHTML). */
+.adm-ed { max-width: 820px; gap: 28px; }
+.adm-ed__back { align-self: flex-start; }
+.adm-edhead { display: flex; align-items: center; gap: 16px; }
+.adm-edhead__img { width: 64px; height: 64px; flex: none; }
+.adm-edhead__t { flex: 1 1 auto; min-width: 0; }
+.adm-edhead__k { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+.adm-edhead__k .adm-help { margin: -4px 0; }
+.adm-edhead .adm-h1 { font-size: 32px; line-height: 36px; }
+.adm-edhead .adm-pin { align-self: center; }
+.adm-ed > .adm-helpp { margin-top: -16px; }
+.adm-edsec { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.adm-edsec__b { display: flex; flex-direction: column; gap: 14px; }
+.adm-edsec__link { align-self: flex-start; font-size: 13px; }
+.adm-edsec .adm-helpp { margin: -4px 0 0; }
+.adm-edsec--fold { gap: 0; }
+/* «В магазине»: the switch, «Наличие», «Подраздел» side by side on the soft panel */
+.adm-edshop {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 20px; align-items: end;
+  padding: 16px 18px; background: var(--a-panel);
+}
+.adm-edshop .adm-field { gap: 6px; }
+.adm-edshop .adm-seg { background: var(--a-paper); width: 100%; }
+.adm-edshop .adm-seg button { flex: 1 1 0; height: 46px; border: 0; background: var(--a-paper); color: var(--a-ink); font-size: 14px; padding: 0 8px; }
+.adm-edshop .adm-seg button + button { border-left: 1px solid var(--a-ink); }
+.adm-edshop .adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
+.adm-edshop .adm-switch { background: var(--a-paper); min-height: 46px; }
+/* q41: «N человек ждут — получат письмо» under «Наличие» — ink, not grey: it is news */
+.adm-edwait { display: block; margin-top: 6px; font-size: 13px; line-height: 18px; color: var(--a-ink); }
+.adm-edwait[hidden] { display: none; }
+/* «✨ Заполнить только по-…» — the one language of this pair, right above its two boxes */
+.adm-edseofill { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+/* the name, its hint and «✨» on one line where they fit */
+.adm-edname { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 16px; flex-wrap: wrap; }
+.adm-edname__spark { flex: none; font-size: 13px; min-height: 32px; }
+/* «Фото по объёмам» and «Видео» share a row where there is room (screen 02) */
+.adm-edpair2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 32px; align-items: start; }
+.adm-edpair2 > :only-child { grid-column: 1 / -1; }
+.adm-edpair2:empty { display: none; }
+.adm-seg--3 { width: fit-content; max-width: 100%; }
+.adm-seg--3 button { height: 40px; padding: 0 16px; border: 0; background: var(--a-paper); color: var(--a-ink); font-size: 14px; }
+.adm-seg--3 button + button { border-left: 1px solid var(--a-ink); }
+.adm-seg--3 button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
+.adm-ed__err:empty { display: none; }
+/* the «+» tile: one word on a phone, two lines on a desktop (screen 02) */
+.adm-photo__addp { display: none; }
+.adm-photo__adds { font-size: 12px; font-weight: 400; color: var(--a-muted); }
+.adm-photos .adm-photo--add { border-color: var(--a-edge); }
+/* beside photos the row sets its height, and a square would take its width
+   from that height — 240 px in a 196-px column, over the page's edge */
+.adm-photo + .adm-photo--add { aspect-ratio: auto; }
+/* up to four tiles to a row on a desktop (screen 02): a tile is at least
+   196 px, which is exactly what its five buttons need at 34 px each — ← → ★
+   ✂ × on one line under the picture, never wrapped */
+@media (min-width: 900px) {
+  .adm-photos { grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); }
+  .adm-photo__ops { gap: 3px; }
+  .adm-photo__op { width: 34px; height: 34px; }
+}
+@media (max-width: 899px) {
+  .adm-ed__back { display: none; }
+  .adm-ed { gap: 24px; }
+  .adm-edhead { align-items: flex-start; }
+  .adm-edhead__img { width: 56px; height: 56px; }
+  .adm-edhead .adm-h1 { font-size: 26px; line-height: 30px; }
+  .adm-edshop { grid-template-columns: minmax(0, 1fr); padding: 0; background: none; }
+  .adm-edshop .adm-switch { background: var(--a-paper); }
+  .adm-edpair2 { grid-template-columns: minmax(0, 1fr); }
+  .adm-photo__addp { display: inline; }
+  .adm-photo__addd, .adm-photo__adds { display: none; }
+  .adm-seg--3 { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .adm-seg--3 button { height: 44px; padding: 0 6px; }
+}
+
+/* ---------- «Новый товар» (screen 13) ------------------------------------------
+   Three numbered steps in one column, the folds «можно потом», the line of
+   what is still missing and «Добавить товар» at the end (pinned on a phone). */
+.adm-ed--new { max-width: 640px; }
+.adm-ed__draft { margin: -12px 0 0; font-size: 13px; line-height: 18px; color: var(--a-green); }
+.adm-ed__draft .adm-link { font-size: 13px; }
+.adm-gnsec { display: flex; flex-direction: column; gap: 14px; }
+.adm-gnstep { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--a-ink); }
+.adm-gnstep__n {
+  width: 24px; height: 24px; flex: none; border-radius: 50%; background: var(--a-ink); color: var(--a-onink);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;
+}
+.adm-gnstep__t { margin: 0; font-size: 15px; line-height: 20px; font-weight: 600; }
+.adm-gnstep__o, .adm-foldrow__t .adm-gnstep__o { font-weight: 400; color: var(--a-muted); }
+.adm-gnsizes { display: flex; flex-direction: column; gap: 8px; }
+.adm-gnsizes__head, .adm-gnsizes__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; gap: 8px; align-items: start; }
+.adm-gnsizes__head { font-size: 12px; color: var(--a-muted); }
+.adm-gnsizes__l { display: none; }
+.adm-gnsizes__salon { min-height: 18px; font-size: 12px; }
+.adm-gnsizes .adm-grid__x { width: 44px; height: 48px; border: 1px solid var(--a-rule); background: var(--a-paper); }
+.adm-gnfolds { border-bottom: 0; }
+.adm-gnfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
+.adm-ed__missing { margin: 0; font-size: 13px; color: var(--a-muted); }
+/* dim until everything required is there — still a button: pressing it
+   names what is missing (the design's dim state, never a dead control) */
+.adm-pin__btn[aria-disabled="true"] { background: var(--a-canvas); border-color: var(--a-canvas); color: var(--a-muted); }
+@media (max-width: 899px) {
+  .adm-ed--new .adm-ed__back { display: none; }
+  .adm-gnfoot .adm-pin { margin: 0; }
+}
 /* Описание and Google: the language segmented control, and the pair of
    fields one language shows on the Google tab */
 .adm-edbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .adm-edlang { display: flex; flex-direction: column; gap: 16px; }
-.adm-seg { display: flex; border: 1px solid var(--a-rule); }
+.adm-seg { display: flex; border: 1px solid var(--a-ink); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
-.adm-seg__b[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-seg__b[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 
 /* The save bar follows the page to the bottom of every tab. */
 .adm-savebar {
@@ -1284,11 +2027,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    here before — `.adm2:has(.adm-savebar) .adm-fab { bottom: bar + 88px }` —
    did hold wherever :has() exists (every phone the owner has); it was the
    idea that was wrong: it lifted the assistant's button clear of the bar and
-   straight onto the form's last rows («+ Размер», the size boxes). The
-   button now lives in the bar's own row, in its right-hand corner, and the
-   bar keeps that corner free for it: nothing floats over the form, nothing
-   over the nav. The toast rule above loses to this on purpose — while the
-   bar is up the button stays put and the toast passes over it.
+   straight onto the form's last rows («+ Размер», the size boxes). Since
+   1a there is no floating button at all (the assistant is an icon in the
+   phone's top bar): nothing floats over the form, nothing over the nav. The
+   toast rule above loses to this on purpose — while the bar is up the toast
+   passes over it.
 
    The bottom padding goes to exactly the nav's height while a bar is on
    screen. With the usual 96 px of breathing room (plus the 150 px
@@ -1302,16 +2045,13 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    140 px clears the bar at its tallest (two rows of buttons and the rule);
    over a one-row bar the toast simply floats a little higher. */
 @media (max-width: 899px) {
-  .adm-savebar { bottom: var(--a-barh); padding-right: 56px; }
-  /* the status line takes the row above the buttons — the assistant's
-     button sits in the buttons' row, so the words never run under it */
+  /* 1a: the assistant has no floating button any more, so the bar keeps no
+     corner free for one */
+  .adm-savebar { bottom: var(--a-barh); }
+  /* the status line takes the row above the buttons */
   .adm-savebar__note { flex-basis: 100%; order: -1; margin-left: 0; text-align: left; }
   body.adm-saving .screen--co { padding-bottom: 0; }
   body.adm-saving .adm-page { padding-bottom: var(--a-barh); }
-  body.adm-saving .adm-fab {
-    width: 48px; height: 48px; padding: 0; justify-content: center; right: 20px;
-    bottom: calc(var(--a-barh) + 12px);
-  }
   body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 140px); }
 }
 
@@ -1344,9 +2084,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    (.adm-danger). The refusal («Цена — число от 1 до 500 €…») is a second row
    under the header, full width, only while it stands. */
 @media (max-width: 767px) {
-  body.adm-saving .cohdr--adm { display: none; }
-  /* the assistant's button would sit on the form — «Ещё» keeps the assistant */
-  body.adm-saving .adm-fab { display: none; }
+  /* the panel's own top bar (1a) steps aside while the save bar is the header */
+  body.adm-saving .adm-top { display: none; }
   body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 20px); }
   body.adm-saving .adm-page { padding-top: calc(var(--a-hdrh) + 16px); padding-bottom: calc(var(--a-barh) + 24px); }
   html.adm-saving { scroll-padding-top: calc(var(--a-hdrh) + 12px); }
@@ -1388,7 +2127,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-savebar__main {
     order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 auto; font-size: 15px;
     border: 2px solid transparent; background-clip: padding-box;
-    background-color: var(--a-ink); color: #fff;
+    background-color: var(--a-ink); color: var(--a-onink);
   }
   .adm-savebar__main--quiet { background-color: var(--a-paper); color: var(--a-ink); box-shadow: inset 0 0 0 1px var(--a-ink); }
   .adm-savebar__main[disabled] { border-color: transparent; background-color: var(--a-tint); color: var(--a-muted); box-shadow: inset 0 0 0 1px var(--a-rule); }
@@ -1431,7 +2170,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* display:flex above beats the browser's own [hidden] rule — a saved form
    must not go on saying it is not saved */
 .adm-dirty[hidden] { display: none; }
-.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: #fff; font-weight: 600; padding: 2px 8px; }
+.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: var(--a-onink); font-weight: 600; padding: 2px 8px; }
 .adm-dirtyword { display: inline-block; font-size: 13px; line-height: 18px; }
 /* the ground bleeds past the column's edges, like a lit row, and the rule is
    the existing hairline recoloured and doubled inside — nothing in the bar
@@ -1441,7 +2180,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   box-shadow: inset 0 1px 0 var(--a-warn), -12px 0 0 var(--a-warmbg), 12px 0 0 var(--a-warmbg);
 }
 .adm-savebar.is-dirty .adm-savebar__main:not([disabled]), .adm-btn.is-dirty:not([disabled]) {
-  background-color: var(--a-ink); border-color: var(--a-ink); color: #fff;
+  background-color: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink);
   box-shadow: 0 0 0 3px var(--a-warn);
 }
 @media (max-width: 767px) {
@@ -1453,33 +2192,153 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-savebar.is-dirty .adm-savebar__main:not([disabled]) { border-color: transparent; box-shadow: 0 0 0 2px var(--a-warn); }
 }
 
-/* ---------- Салон (POS) ---------------------------------------------------- */
+/* ---------- Салон (POS), direction 1a ----------------------------------------
+   README § 5 «Салон (POS) + сканер», screens 05-salon-*. The search with
+   «Сканировать» beside it; the results under it, or «Часто продают» while the
+   box is empty; the basket — a column on the right of a desktop, under the
+   search on a phone — with ONE dark «К оплате» at its foot, which a phone
+   pins above the tab bar (.adm-pin). app.js admSalonHTML. */
+/* the basket is a column of its own, so the screen takes the width it needs */
+.adm-page:has(> .adm-salon) { max-width: 1180px; }
+.adm-salon__grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: auto auto 1fr;
+  column-gap: 32px; row-gap: 16px; align-items: start;
+}
+.adm-salon__find { grid-column: 1; grid-row: 1; display: flex; gap: 8px; min-width: 0; }
+/* the results and «Часто продают» take turns in one place (only one is drawn) */
+.adm-salon__list, .adm-salon__top { grid-column: 1; grid-row: 2; min-width: 0; }
+.adm-salon__top { display: flex; flex-direction: column; }
+.adm-salon__cart { grid-column: 2; grid-row: 1 / -1; position: sticky; top: 24px; min-width: 0; }
 
 /* The search box IS the screen's main action, so it wears the ink border the
    README reserves for exactly that. */
-.adm-input--find { height: 52px; border-color: var(--a-ink); font-size: 16px; }
-.adm-row--chips { align-items: center; }
-.adm-poschips { display: flex; gap: 6px; flex-wrap: wrap; }
-.adm-poschip {
-  height: 44px; padding: 0 12px; font-size: 14px; white-space: nowrap;
-  border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+.adm-input--find { flex: 1 1 auto; min-width: 0; height: 52px; border-color: var(--a-ink); font-size: 16px; }
+.adm-posscan { flex: none; height: 52px; padding: 0 16px; font-weight: 600; }
+@media (max-width: 1180px) {
+  .adm-salon__grid { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 24px; }
+  /* «Сканировать» keeps its word, under the icon, so the box keeps its whole
+     placeholder («Название, бренд или штрихкод» at 375 px and up, and beside
+     the basket column of a small desktop) */
+  .adm-salon__find { gap: 6px; }
+  .adm-input--find { padding: 0 10px; }
+  .adm-posscan {
+    width: 78px; padding: 0 2px; flex-direction: column; gap: 2px;
+    font-size: 11px; line-height: 13px; font-weight: 500;
+  }
 }
-.adm-poschip.is-none { border-color: var(--a-rule); color: var(--a-muted); }
-.adm-posline { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--a-rule); padding-bottom: 10px; }
-.adm-posline__body { flex: 1; min-width: 0; }
-.adm-poskv { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--a-muted); }
-.adm-total__v--big { font-size: 28px; }
-.adm-pospay { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.adm-btn--pay { height: 52px; }
+@media (min-width: 900px) and (max-width: 1180px) {
+  .adm-input--find { font-size: 15px; }
+}
 
-.adm-receipt {
-  border: 1px solid var(--a-ink); padding: 32px 20px; text-align: center;
-  display: flex; flex-direction: column; gap: 12px; align-items: center;
+/* a product: the photo, the brand over the name, and a chip per size — the
+   chips stand at the right while there is room and drop under the name when
+   there is not */
+.adm-poslist { display: flex; flex-direction: column; }
+.adm-posrow {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--a-rule);
 }
-.adm-receipt__ok { font-size: 14px; color: var(--a-ok); }
+.adm-posrow__who { flex: 1 1 200px; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.adm-posrow__nm { min-width: 0; display: flex; flex-direction: column; }
+.adm-posrow__br { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-posrow .adm-row__nm { white-space: normal; overflow: visible; overflow-wrap: anywhere; font-size: 15px; }
+.adm-poschips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; }
+.adm-poschip {
+  height: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; flex: none;
+  font-size: 14px; white-space: nowrap; border: 1px solid var(--a-edge); background: var(--a-paper); color: var(--a-ink);
+}
+.adm-poschip:hover { border-color: var(--a-ink); }
+.adm-poschip b { font-weight: 600; }
+.adm-poschip__dot { color: var(--a-muted); }
+/* in the basket: ink, with «×2» — the list itself shows what is rung up */
+.adm-poschip.is-in { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+.adm-poschip.is-in .adm-poschip__dot { color: inherit; }
+.adm-poschip__n { font-size: 11px; line-height: 18px; font-weight: 600; padding: 0 5px; background: var(--a-paper); color: var(--a-ink); }
+/* nothing on the shelf: the words go grey (still AA), the frame dashed */
+.adm-poschip.is-none { border-style: dashed; border-color: var(--a-edge); color: var(--a-muted); }
+.adm-poschip.is-none b { font-weight: 400; }
+.adm-salon__top .adm-sech { margin-top: 8px; }
+
+/* the basket */
+.adm-poscart {
+  border: 1px solid var(--a-rule); background: var(--a-paper); padding: 16px 20px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.adm-poscart__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.adm-poscart__t { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; }
+.adm-poscart__n { font-size: 13px; color: var(--a-muted); }
+.adm-poscart__empty { margin: 0; padding: 20px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--a-muted); }
+.adm-poscart__lines { border-top: 1px solid var(--a-rule); }
+/* a line: the name across the whole width, then the size and the line's sum
+   with − n + and × on their right — the name is never squeezed into a
+   corner by the controls */
+.adm-posline {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 8px; row-gap: 2px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--a-rule);
+}
+.adm-posline__body { display: contents; }
+.adm-posline .adm-row__nm {
+  grid-column: 1 / -1; white-space: normal; overflow: visible; overflow-wrap: anywhere; font-size: 14px; line-height: 19px;
+}
+.adm-posline .adm-row__sub { grid-column: 1; margin: 0; }
+.adm-posline .adm-step-qty button { width: 36px; height: 36px; }
+.adm-posline .adm-step-qty__v { min-width: 30px; font-size: 18px; }
+.adm-posline__x {
+  width: 36px; height: 36px; flex: none; padding: 0; border: 0; background: none;
+  font-size: 20px; line-height: 1; color: var(--a-muted);
+}
+.adm-posline__x:hover { color: var(--a-rust); }
+/* «Скидка» and «Оплата»: a caption over a segmented control that fills the
+   row, one cell per choice, a hairline between the cells */
+.adm-posopt { display: flex; flex-direction: column; gap: 6px; }
+.adm-posopt__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-posopt .adm-seg { width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); }
+.adm-posopt .adm-seg button { padding: 0 6px; }
+.adm-posopt .adm-seg button + button { border-left: 1px solid var(--a-ink); }
+.adm-posopt__other { margin-top: -4px; }
+/* «Клиент»: a fold on a phone; a desktop shows both boxes open */
+.adm-posbuyer { border-top: 0; }
+@media (min-width: 900px) {
+  .adm-posbuyer .adm-foldrow__h { display: none; }
+  .adm-posbuyer .adm-foldrow__b { padding: 0; border: 0; gap: 10px; }
+}
+.adm-postotal { align-items: baseline; gap: 12px; padding: 12px 0 0; border-top: 1px solid var(--a-ink); }
+.adm-postotal__v { display: flex; align-items: baseline; gap: 10px; }
+.adm-postotal__was { font-size: 13px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
+.adm-total__v--big { font-size: 30px; line-height: 34px; }
+/* the one dark button stands at the basket's foot on a desktop */
+.adm-salon .adm-pin { margin: 0; }
+.adm-salon .adm-pin__btn { width: 100%; height: 52px; font-size: 16px; }
+
+/* after the sale, in the basket's place */
+.adm-receipt {
+  border: 1px solid var(--a-ink); padding: 24px 20px 20px; text-align: center;
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+}
+.adm-receipt__ok { font-size: 14px; font-weight: 600; color: var(--a-ok); }
 .adm-receipt__id { font-size: 13px; }
 .adm-receipt__sum { font-family: Oswald, sans-serif; font-size: 40px; line-height: 1; }
-.adm-acts--mid { justify-content: center; margin-top: 8px; }
+.adm-receipt__print { min-height: 44px; display: inline-flex; align-items: center; }
+.adm-receipt__next { align-self: stretch; }
+
+@media (max-width: 899px) {
+  /* one column: the search, the results, the basket, «Часто продают» */
+  .adm-salon__grid { display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
+  .adm-salon__cart { position: static; }
+  .adm-posrow__who { flex-basis: 100%; }
+  /* the sizes are one row that scrolls sideways, never wrapped (README § 1) */
+  .adm-poschips {
+    flex: 1 1 100%; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto;
+    margin: 0 -16px; padding: 0 16px; scrollbar-width: none;
+  }
+  .adm-poschips::-webkit-scrollbar { display: none; }
+  .adm-poscart { padding: 14px 16px 16px; }
+  .adm-posline .adm-step-qty button, .adm-posline__x { width: 44px; height: 44px; }
+  /* an empty basket is only its pinned «Корзина пуста» */
+  .adm-poscart.is-empty { border: 0; padding: 0; }
+  .adm-poscart.is-empty > :not(#pospin) { display: none; }
+  .adm-posbuyer:not(.is-open) .adm-foldrow__b { display: none; }
+}
 
 /* The phase-2 controls' 44-px phone size — after their own rules, so it
    wins on equal specificity (the shell's phone block above sits before
@@ -1669,12 +2528,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 
 /* ---------- segmented control (RU · ET · EN) ------------------------------ */
 
-.adm-seg { display: flex; border: 1px solid var(--a-rule); width: fit-content; max-width: 100%; }
+.adm-seg { display: flex; border: 1px solid var(--a-ink); width: fit-content; max-width: 100%; }
 .adm-seg button {
   height: 40px; padding: 0 16px; font-size: 14px; font-weight: 400; border: 0;
   background: var(--a-paper); color: var(--a-ink); white-space: nowrap;
 }
-.adm-seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 /* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
 @media (max-width: 899px) { .adm-seg button { height: 44px; } }
 
@@ -1690,16 +2549,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-langbar { display: flex; flex-direction: column; gap: 8px; }
 .adm-langbar__l { font-size: 13px; font-weight: 600; color: var(--a-muted); }
 .adm-langbar__n { max-width: 62ch; margin: 0; }
+/* 1a (README § 1): three equal tabs in the ink frame of every segmented
+   control, the state word under each name — «есть текст» / «как русский» /
+   «пусто» — and the «Перевести с русского» slot under them (.adm-langbar__tr) */
+.adm-seg--lang { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; max-width: 480px; }
+.adm-langbar__tr { display: flex; flex-wrap: wrap; gap: 8px; }
 .adm-seg--lang button {
-  height: auto; min-height: 48px; padding: 7px 16px;
+  height: auto; min-height: 48px; padding: 7px 12px;
   display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
   text-align: left; line-height: 16px;
 }
-.adm-seg--lang .adm-seg__nm { font-size: 14px; }
+.adm-seg--lang .adm-seg__nm { font-size: 14px; font-weight: 600; }
 /* colour is never the only carrier: the filled tab and this word agree */
-.adm-seg--lang .adm-seg__st { font-size: 11px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
+.adm-seg--lang .adm-seg__st { font-size: 11.5px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
 .adm-seg--lang .adm-seg__st span + span::before { content: " · "; }
-.adm-seg--lang button[aria-current="true"] .adm-seg__st { color: rgba(255, 255, 255, .8); }
+.adm-seg--lang button[aria-current="true"] .adm-seg__st { color: rgba(253, 252, 249, .8); }
 /* an empty slot must not collapse the tab to one line while typing fills it */
 .adm-seg--lang .adm-seg__slot { min-height: 14px; display: block; }
 /* inside an editor's top bar (goods «Описание»/«Google», the banner slide) the
@@ -1707,8 +2571,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    note are a sentence, not a chip that can share a line with two buttons */
 .adm-edbar .adm-langbar { flex: 1 1 100%; }
 @media (max-width: 899px) {
-  .adm-seg--lang { width: 100%; }
-  .adm-seg--lang button { flex: 1 1 0; min-height: 52px; padding: 7px 10px; }
+  .adm-seg--lang { max-width: none; }
+  .adm-seg--lang button { min-height: 52px; padding: 7px 10px; }
   .adm-seg--lang .adm-seg__st { white-space: normal; }
 }
 
@@ -1747,19 +2611,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* off is quieter than on — but it is still a word, at 5.4:1 on paper */
 [role="switch"][aria-checked="false"] .adm-sw__w { color: var(--a-muted); }
 [role="switch"][aria-checked="true"] .adm-sw__w { font-weight: 600; }
+/* 1a (README § 3): square, 52 × 30, ink when on, a 1.5-px ink frame. The word
+   and the tick stay — the four cues above are Dim's decision, not a style. */
 .adm-sw__t {
-  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink);
+  width: 52px; height: 30px; flex: none; border: 1.5px solid var(--a-ink); box-sizing: border-box;
   background: var(--a-paper); position: relative; display: block;
 }
 .adm-sw__t i {
-  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  position: absolute; top: 3px; left: 3px; width: 21px; height: 21px;
   background: var(--a-ink); color: var(--a-ink);
   display: flex; align-items: center; justify-content: center;
   transition: left .18s ease-out, background .18s ease-out;
 }
 .adm-sw__t i svg { width: 13px; height: 13px; display: block; }
 [role="switch"][aria-checked="true"] .adm-sw__t { background: var(--a-ink); }
-[role="switch"][aria-checked="true"] .adm-sw__t i { left: 20px; background: #fff; }
+[role="switch"][aria-checked="true"] .adm-sw__t i { left: 25px; background: var(--a-onink); }
 .adm-sw:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 /* the knob slides only for people who asked for motion */
 @media (prefers-reduced-motion: reduce) { .adm-sw__t i { transition: none; } }
@@ -1809,12 +2675,419 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    row sideways. */
 .adm-row__sub .adm-mono { overflow-wrap: anywhere; }
 
+/* 1a (README § 5 «Клиенты + карточка клиента», screens 07 and 15) ----------
+   The title with «?», «⋯» and the one dark «+ Партнёр» (pinned on a phone);
+   «Клиенты · Отзывы» as a segmented control beside the search; a count on
+   every chip; a table on a wide desktop, a name-and-tag row on a phone. */
+.adm-chead { align-items: center; flex-wrap: nowrap; gap: 12px; }
+.adm-chead__t { display: flex; align-items: center; gap: 10px; min-width: 0; margin-right: auto; }
+.adm-chead .adm-help { margin: 0; }
+.adm-chead__r { display: flex; align-items: center; gap: 10px; flex: none; }
+.adm-chead__r .adm-pin { margin-left: 0; }
+.adm-chead + .adm-helpp { margin-top: -8px; }
+.adm-helpp .adm-lead { display: inline; margin: 0; max-width: none; font-size: inherit; line-height: inherit; color: inherit; }
+.adm-cnowrap { white-space: nowrap; }
+.adm-cmenu { position: relative; flex: none; }
+.adm2 .adm-cmenu__btn { width: 46px; height: 46px; padding: 0; font-size: 20px; line-height: 1; }
+.adm-cmenu__scrim { position: fixed; inset: 0; z-index: 64; border: 0; padding: 0; margin: 0; background: transparent; cursor: default; }
+.adm-cmenu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 65; min-width: 250px;
+  background: var(--a-paper); border: 1px solid var(--a-ink); display: flex; flex-direction: column;
+}
+.adm2 .adm-cmenu__i {
+  display: flex; align-items: center; min-height: 46px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: var(--a-paper); color: var(--a-ink); font: inherit; font-size: 14.5px; text-align: left; text-decoration: none; white-space: nowrap;
+}
+.adm2 .adm-cmenu__i:last-child { border-bottom: 0; }
+.adm2 .adm-cmenu__i:hover, .adm2 .adm-cmenu__i:focus-visible { background: var(--a-panel); }
+.adm2 .adm-cmenu__i--close { display: none; }
+
+.adm-cbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; }
+.adm-cseg { display: flex; border: 1px solid var(--a-ink); flex: none; }
+.adm-cseg__b {
+  height: 42px; padding: 0 18px; border: 0; background: var(--a-paper); color: var(--a-ink);
+  font: inherit; font-size: 14.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+}
+.adm-cseg__b + .adm-cseg__b { border-left: 1px solid var(--a-ink); }
+.adm-cseg__b[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
+.adm-cseg__n {
+  min-width: 18px; height: 18px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--a-rust); color: var(--a-onink); font-size: 11px; font-weight: 600; line-height: 1;
+}
+.adm-csearch { position: relative; display: block; flex: 0 1 320px; min-width: 0; }
+.adm-csearch > svg { position: absolute; left: 14px; top: 50%; margin-top: -8px; color: var(--a-muted); pointer-events: none; }
+.adm-csearch .adm-input { height: 44px; padding-left: 40px; }
+.adm-cchips .adm-chip { display: inline-flex; align-items: center; gap: 6px; }
+.adm-chip__n { font-weight: 700; }
+
+/* the list: one row per customer */
+.adm-crow__meta, .adm-crow__reqco { display: none; }
+.adm-crow__who .adm-row__nm { font-weight: 600; }
+.adm-crow__ct { display: none; }
+.adm-crow__n, .adm-crow__sum { display: none; }
+.adm-crow__tags { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; flex: none; }
+.adm-crow__acts:empty { display: none; }
+.adm-crow__acts { flex: none; }
+.adm2 .adm-crow__yes { font-weight: 600; }
+.adm-ctable__h { display: none; }
+@media (min-width: 1200px) {
+  .adm-ctable { border-top: 0; margin-top: 0; }
+  .adm-ctable__h, .adm2 .adm-crow {
+    display: grid; align-items: center; column-gap: 12px;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 80px 96px 118px 196px;
+  }
+  .adm-ctable__h > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-ctable__h {
+    padding: 8px 0; border-bottom: 1px solid var(--a-ink);
+    font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
+  }
+  .adm2 .adm-crow { min-height: 58px; padding: 10px 0; }
+  .adm-crow__ct { display: block; font-size: 13.5px; color: var(--a-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-crow__n { display: block; font-size: 14px; }
+  .adm-crow__sum { display: block; font-family: Oswald, sans-serif; font-weight: 600; font-size: 17px; white-space: nowrap; }
+  .adm-crow__tags { justify-content: flex-start; }
+  .adm-crow__acts:empty { display: block; }
+  .adm-crow__acts { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: nowrap; }
+  /* «Сделать партнёром» takes two lines here, as drawn (screen 07) */
+  .adm2 .adm-crow__acts .adm-btn { height: auto; min-height: 44px; padding: 4px 12px; white-space: normal; line-height: 17px; text-align: center; }
+  .adm2 .adm-crow__acts .adm-crow__yes { flex: 1 1 auto; max-width: 118px; }
+}
+@media (max-width: 1199px) {
+  .adm2 .adm-crow {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 10px; align-items: start;
+    padding: 12px 0;
+  }
+  .adm-crow__co { display: none; }
+  .adm-crow__meta { display: block; }
+  .adm-crow__tags { grid-column: 2; grid-row: 1; padding-top: 1px; }
+  .adm-crow__acts {
+    grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 12px; background: var(--a-panel);
+  }
+  .adm-crow__reqco { display: block; grid-column: 1 / -1; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+  .adm2 .adm-crow__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; font-size: 14.5px; white-space: normal; line-height: 18px; }
+}
+
+/* «+ Партнёр»: an inline panel under the title — on a phone too (app.js
+   admPartnerFormHTML: a sheet from the bottom goes under the keyboard) */
+.adm-pform { background: var(--a-panel); padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 10px; }
+.adm-pform__head { display: flex; align-items: center; gap: 10px; }
+.adm-pform__t { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; margin-right: auto; }
+.adm-pform .adm-helpp { margin: 0; background: var(--a-paper); }
+.adm-pform__f { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+.adm-pform__acts { display: flex; gap: 8px; padding-top: 22px; }
+.adm-pform__acts .adm-btn { height: 48px; padding: 0 18px; }
+.adm-pform__go { font-weight: 600; }
+.adm-pform .adm-err.adm-ashint { font-size: 12.5px; line-height: 16px; }
+.adm-pform__n { margin: 0; }
+@media (max-width: 1199px) {
+  .adm-pform__f { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .adm-pform__f > .adm-field:first-child { grid-column: 1 / -1; }
+  .adm-pform__acts { grid-column: 1 / -1; padding-top: 0; }
+}
+@media (max-width: 899px) {
+  .adm-pform { margin: 0 -16px; padding: 16px; }
+  .adm-pform__f { grid-template-columns: minmax(0, 1fr); }
+  .adm-pform__acts { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-pform__acts .adm-btn { height: 50px; }
+}
+
+/* the card: head, three tiles, two columns — one on a phone, the decision first */
+.adm-ccard { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+.adm-chd__nm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adm-chd .adm-h2 { font-family: Oswald, sans-serif; font-weight: 600; font-size: 28px; line-height: 1.15; overflow-wrap: anywhere; }
+.adm-chd__ct, .adm-chd__co { font-size: 13.5px; line-height: 20px; color: var(--a-muted); margin-top: 4px; overflow-wrap: anywhere; }
+.adm-chd__co { margin-top: 0; }
+.adm2 .adm-chd__ct a { color: inherit; text-decoration: underline; text-decoration-color: var(--a-edge); text-underline-offset: 3px; }
+.adm-chd__cs { font-size: 12.5px; line-height: 18px; color: var(--a-muted); margin-top: 6px; }
+/* two classes: `.adm-kpis` below this block sets its own auto-fit columns */
+.adm-kpis.adm-ckpis {
+  max-width: 520px; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  border: 1px solid var(--a-rule); border-right: 0; border-bottom: 0;
+}
+.adm-ckpis .adm-kpi { padding: 10px 12px; }
+.adm-ckpis .adm-kpi__l { font-size: 12px; }
+.adm-ckpis .adm-kpi__v { font-size: 24px; white-space: nowrap; }
+.adm-ccols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 0 40px; align-items: start; }
+.adm-ccol { display: flex; flex-direction: column; min-width: 0; }
+.adm-csec { margin-top: 26px; min-width: 0; }
+.adm-csec .adm-sech + .adm-helpp { margin-bottom: 4px; }
+.adm-csec__h { margin: 6px 0 0; }
+.adm-ccol--side > .adm-csec--req { margin-top: 18px; }
+.adm-creq { border: 1px solid var(--a-rust); padding: 16px; }
+.adm-creq__t { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--a-rust); }
+.adm-creq__kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px; font-size: 14px; line-height: 20px; margin-top: 10px; }
+.adm-creq__k { color: var(--a-muted); }
+.adm-creq__v { overflow-wrap: anywhere; }
+.adm-creq__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.adm-creq__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; white-space: normal; line-height: 18px; }
+.adm-creq__acts .adm-btn:first-child { font-weight: 600; }
+.adm-creq__h { margin: 8px 0 0; font-size: 12.5px; }
+.adm-ctier { display: grid; grid-template-columns: 1fr 1fr; width: 100%; max-width: 360px; margin-top: 12px; }
+.adm-ctier button { height: 42px; }
+.adm-cfacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; font-size: 13.5px; line-height: 19px; }
+.adm-csec--facts { margin-top: 12px; }
+.adm-cfact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.adm-cfact__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-cfact__v { overflow-wrap: anywhere; }
+.adm-corders { margin-top: 0; }
+.adm-cpts { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; margin-top: 12px; }
+.adm-cpts .adm-input { height: 46px; }
+.adm-cpts + .adm-ashint { margin-top: 6px; }
+.adm2 .adm-cpts__go { margin-top: 8px; height: 44px; padding: 0 18px; color: var(--a-muted); border-color: var(--a-edge); }
+.adm2 .adm-cpts__go.is-ready { color: var(--a-ink); border-color: var(--a-ink); font-weight: 600; }
+.adm-cpts__hist { margin-top: 12px; }
+.adm-cpts__none { margin-top: 12px; padding: 14px 16px; }
+.adm-row--held { color: var(--a-muted); }
+.adm2 .adm-cnote { display: block; min-height: 84px; margin-top: 12px; }
+.adm-csec--write { margin-top: 22px; }
+.adm2 .adm-cwrite { height: 44px; padding: 0 18px; }
+
+/* the reviews: the queue's row and the card's, one shape */
+.adm-rev__top { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; min-width: 0; }
+.adm-rev__who { font-weight: 600; font-size: 15px; }
+.adm2 .adm-rev__who.adm-link { min-height: 32px; font-size: 15px; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.adm-rev__prod { font-size: 13px; line-height: 18px; color: var(--a-muted); flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.adm-rev__top .adm-tag { margin-left: auto; }
+.adm2 .adm-rev__pub { font-weight: 600; }
+
+@media (max-width: 899px) {
+  .adm-chead .adm-h1 { font-size: 30px; line-height: 33px; }
+  .adm2 .adm-cmenu__btn { width: 44px; height: 44px; }
+  .adm-cmenu__scrim { z-index: 69; background: var(--a-scrim); }
+  .adm-cmenu__list {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 70; min-width: 0;
+    border: 0; border-top: 1px solid var(--a-ink); padding-bottom: env(safe-area-inset-bottom, 0px); animation: adm-up .2s;
+  }
+  .adm2 .adm-cmenu__i { min-height: 54px; padding: 0 16px; font-size: 16px; white-space: normal; }
+  .adm2 .adm-cmenu__i--close { display: flex; justify-content: center; color: var(--a-muted); font-size: 15px; }
+  .adm-cbar { flex-direction: column; align-items: stretch; }
+  .adm-cseg { display: grid; grid-template-columns: 1fr 1fr; }
+  .adm-cseg__b { height: 44px; padding: 0 10px; }
+  .adm-csearch { flex: none; }
+  .adm-csearch .adm-input { height: 48px; font-size: 16px; }
+  .adm-cchips .adm-chip { height: 44px; }
+  .adm-ccols { display: flex; flex-direction: column; align-items: stretch; }
+  .adm-ccol { display: contents; }
+  .adm-csec--req { order: 1; }
+  .adm-csec--tier { order: 2; }
+  .adm-csec--orders { order: 3; }
+  .adm-csec--facts { order: 4; }
+  .adm-csec--pts { order: 5; }
+  .adm-csec--note { order: 6; }
+  .adm-csec--revs { order: 7; }
+  .adm-csec--write { order: 8; }
+  .adm-ccol--side > .adm-csec--req { margin-top: 18px; }
+  .adm-chd .adm-h2 { font-size: 26px; }
+  .adm-kpis.adm-ckpis { max-width: none; }
+  .adm-ckpis .adm-kpi__v { font-size: 22px; }
+  .adm-cfacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-cpts { grid-template-columns: 96px minmax(0, 1fr); }
+  .adm-cpts .adm-input { height: 48px; font-size: 16px; }
+  .adm2 .adm-cpts__go, .adm2 .adm-cwrite { height: 46px; }
+  .adm-ctier button { height: 44px; }
+  .adm2 .adm-rev__acts .adm-btn { height: 44px; }
+  /* who, the stars and the tag on the first line; the product under them */
+  .adm-rev__top .adm-tag { order: 2; }
+  .adm-rev__prod { order: 3; flex-basis: 100%; }
+  .adm2 .adm-rev__who.adm-link { min-height: 44px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Маркетинг, direction 1a (design_handoff_admin_ux README § 5, screen 08):
+   Промокоды · Подарочные карты · Письма · Рассылка. app.js admMarketingScreen
+   and the four screens under it. Two columns (the list, and what is open
+   from it) where the SCREEN is wide enough — a container query, because the
+   assistant's pane takes 380 px off the same viewport — and one column
+   otherwise, where whatever is open is a page of its own: «← Промокоды» in
+   the phone's top bar, the list and the section's head out of the way.
+   ═══════════════════════════════════════════════════════════════════════ */
+.adm-mk { container-type: inline-size; container-name: admmk; }
+/* a two-column screen gets the design's width (≈ 1080 px of content) */
+.adm-page:has(> .adm-mk) { max-width: 1240px; }
+.adm-mkpin { display: contents; }
+
+/* the four tabs: one segmented control; the short names on a phone */
+.adm-mktabs { display: flex; min-width: 0; }
+.adm-mktabs .adm-seg button { height: 44px; padding: 0 20px; }
+.adm-mktab__s { display: none; }
+@media (max-width: 899px) {
+  .adm-mktabs .adm-seg { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .adm-mktabs .adm-seg button { padding: 0 4px; font-size: 13.5px; }
+  .adm-mktab__l { display: none; }
+  .adm-mktab__s { display: inline; }
+  /* something open from a list is a page: the section's title and tabs step aside */
+  .adm-mk--sub > .adm-head, .adm-mk--sub > .adm-mktabs { display: none; }
+}
+
+/* a list and what is open from it */
+.adm-mk2 { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.adm-mk2__list, .adm-mk2__side { min-width: 0; }
+.adm-mk2__list { container-type: inline-size; container-name: admlist; }
+.adm-mk2__ph { display: none; }
+.adm-mk--sub .adm-mk2__list { display: none; }
+@container admmk (min-width: 900px) {
+  .adm-mk2 { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 32px; align-items: start; }
+  .adm-mk2--mail { grid-template-columns: minmax(0, 1fr) 480px; }
+  .adm-mk--sub .adm-mk2__list { display: block; }
+  .adm-mk2__ph {
+    display: flex; align-items: center; justify-content: center; min-height: 100px; padding: 20px;
+    border: 1px dashed var(--a-edge); color: var(--a-muted); font-size: 14px; text-align: center;
+  }
+  .adm-mk2__side > .adm-ppanel, .adm-mk2__side > .adm-mled { border: 1px solid var(--a-ink); padding: 20px; }
+}
+/* a section header right over a list: one ink rule, not two */
+.adm-mk .adm-sech + .adm-list, .adm-mk .adm-helpp + .adm-list { border-top: 0; }
+.adm-mk .adm-list + .adm-sech { margin-top: 32px; }
+.adm-mk .adm-helpp { margin-bottom: 4px; }
+
+/* ---- Промокоды: the list ---- */
+.adm-plist__h {
+  display: flex; align-items: center; gap: 12px; min-height: 30px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--a-ink);
+}
+.adm-plist__cols { display: none; }
+.adm-plist__tap { flex: 1; min-width: 0; font-size: 13px; color: var(--a-muted); }
+.adm-prow { flex-wrap: nowrap; padding: 12px 0; }
+.adm-prow__b {
+  flex: 1 1 auto; min-width: 0; min-height: 44px; display: flex; flex-direction: column; gap: 2px;
+  padding: 0; border: 0; background: none; color: var(--a-ink); font: inherit; text-align: left;
+}
+.adm-prow__code { font-size: 16px; line-height: 22px; letter-spacing: .02em; }
+.adm-prow__what { font-size: 13.5px; line-height: 19px; overflow-wrap: anywhere; }
+.adm-prow__used { font-size: 12.5px; line-height: 17px; color: var(--a-muted); }
+.adm-prow.is-off .adm-prow__code { color: var(--a-muted); }
+/* the code open on the right is lit, as a finger has no hover */
+.adm-prow.is-cur { background: var(--a-tint); box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint); }
+.adm-prow.is-cur::before { opacity: 1; }
+@container admlist (min-width: 560px) {
+  .adm-plist__cols {
+    flex: 1; min-width: 0; display: grid; grid-template-columns: 130px minmax(0, 1fr) 140px; gap: 14px; margin-right: 110px;
+    font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--a-muted);
+  }
+  .adm-plist__tap { display: none; }
+  .adm-prow__b { display: grid; grid-template-columns: 130px minmax(0, 1fr) 140px; gap: 14px; align-items: center; }
+  .adm-prow__what { font-size: 14px; }
+}
+
+/* ---- the panel of one code ---- */
+.adm-ppanel, .adm-mled { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.adm-ppanel__h, .adm-mled__h { display: flex; align-items: flex-start; gap: 10px; }
+.adm-ppanel__t, .adm-mled__t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.adm-ppanel__code { margin: 0; font-size: 20px; line-height: 26px; font-weight: 600; overflow-wrap: anywhere; }
+.adm-ppanel__new, .adm-mled__nm { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; }
+.adm-ppanel__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-ppanel__x { border-color: transparent; font-size: 22px; margin: -8px -8px 0 0; }
+.adm-pfield { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.adm-pfield__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-ppanel .adm-seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adm-ppanel .adm-seg button { height: 44px; padding: 0 6px; }
+.adm-ppanel .adm-foldrow__b { gap: 14px; }
+.adm-ppanel__foot { margin: 0; }
+.adm-ppanel .adm-err[hidden] { display: none; }
+@media (min-width: 900px) {
+  .adm-ppanel .adm-pin { margin: 4px 0 0; }
+  .adm-ppanel .adm-pin__btn, .adm-newssend .adm-pin__btn { width: 100%; }
+  .adm-newssend .adm-pin { margin: 0; }
+}
+
+/* ---- Подарочные карты ---- */
+.adm-gift { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.adm-gift__l, .adm-gift__r { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@container admmk (min-width: 760px) {
+  .adm-gift { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+}
+.adm-amts.adm-amts--1a { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.adm-amts--1a .adm-amt { width: 100%; min-width: 0; height: 56px; font-size: 20px; font-weight: 600; }
+.adm-giftlook { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.adm-giftlook__acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-giftlook__acts .adm-btn { height: 44px; }
+.adm-giftrow__top { display: flex; align-items: baseline; gap: 10px; width: 100%; min-width: 0; }
+.adm-giftrow__top .adm-row__amt { margin-left: auto; }
+.adm-sech__x { margin-left: auto; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+
+/* ---- Письма ---- */
+.adm-mrow { flex-wrap: nowrap; }
+.adm-mrow .adm-row__nm { white-space: normal; }
+.adm-mrow__chev { flex: none; color: var(--a-muted); font-size: 20px; line-height: 1; padding: 0 4px; }
+.adm-mrow.is-cur { background: var(--a-tint); box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint); }
+.adm-mrow.is-cur::before { opacity: 1; }
+.adm-mfolds { margin-top: 24px; }
+.adm-mailto { display: flex; flex-direction: column; gap: 8px; }
+.adm-mwhen { background: var(--a-panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.adm-mwhen__h { display: flex; align-items: center; gap: 10px; min-height: 26px; }
+.adm-mwhen__t { flex: 1; font-size: 13px; font-weight: 600; }
+.adm-mwhen .adm-helpp { margin: 0; background: var(--a-paper); }
+.adm-mwhen__f { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.adm-mwhen__in { display: flex; align-items: center; gap: 8px; }
+.adm-mwhen__in .adm-input { width: 110px; flex: none; }
+.adm-mwhen__u { font-size: 13px; color: var(--a-muted); }
+.adm-mwhen__n { margin: 0; }
+.adm-mwhen__run { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.adm-mwhen__run .adm-hint { flex: 1 1 220px; }
+/* the chips: one row that scrolls, never two (README § 1) */
+.adm-mchips { display: flex; align-items: center; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; margin-top: -4px; }
+.adm-mchips::-webkit-scrollbar { display: none; }
+.adm-mchips__l { flex: none; font-size: 12px; color: var(--a-muted); white-space: nowrap; }
+.adm-mchips .adm-chip { flex: none; }
+.adm-prev__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.adm-prev__h .adm-prev__l { margin: 0; }
+@media (min-width: 900px) {
+  .adm-prev__h .adm-pin__btn { height: 40px; padding: 0 16px; font-weight: 500; }
+}
+
+/* ---- Рассылка ---- */
+.adm-news { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+@container admmk (min-width: 760px) {
+  .adm-news { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
+}
+.adm-news__aud { background: var(--a-panel); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.adm-news__audh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.adm-news__aud .adm-helpp { background: var(--a-paper); }
+.adm-newsrow .adm-tag { flex: none; }
+.adm-newsed__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@media (max-width: 899px) {
+  /* the phone's top bar already says «← Рассылка» */
+  .adm-newsed__h > .adm-link { display: none; }
+  .adm-newsed__h { justify-content: flex-end; }
+  /* a letter's name gets the width; its switch goes under it */
+  .adm-mled__h { flex-wrap: wrap; }
+  .adm-mled__t { flex: 1 1 calc(100% - 64px); }
+  .adm-mled__h > .adm-ppanel__x { order: 2; }
+  .adm-mled__h > .adm-sw, .adm-mled__h > .adm-tag { order: 3; }
+}
+.adm-mkmore { position: relative; flex: none; }
+.adm-mkmore__b { font-size: 20px; }
+.adm-mkmore__m {
+  position: absolute; right: 0; top: 50px; z-index: 20; min-width: 200px; padding: 6px 14px;
+  background: var(--a-paper); border: 1px solid var(--a-ink);
+}
+.adm-newslang { display: flex; flex-direction: column; gap: 12px; }
+.adm-newsai { background: var(--a-panel); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.adm-newsai__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.adm-newsai__l { flex: none; font-size: 13px; font-weight: 600; }
+.adm-newsai__row .adm-input { flex: 1 1 auto; min-width: 0; }
+.adm-newsai__row .adm-btn { flex: none; }
+@media (max-width: 599px) {
+  .adm-newsai__row { flex-wrap: wrap; }
+  .adm-newsai__l { flex-basis: calc(100% - 56px); }
+  .adm-newsai__row .adm-input { flex-basis: 100%; }
+}
+.adm-newsai .adm-helpp { margin: 0; background: var(--a-paper); }
+.adm-newstest { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.adm-newstest > .adm-btn { width: 100%; }
+.adm-newssend { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.adm-newshold {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; background: var(--a-panel); font-weight: 600;
+}
+
 /* ---------- Маркетинг: подарочные карты ----------------------------------- */
 
 .adm-amts { display: flex; gap: 6px; flex-wrap: wrap; }
 .adm-amt {
   height: 48px; min-width: 72px; padding: 0 14px; font-family: Oswald, sans-serif; font-size: 18px;
-  background: var(--a-ink); color: #fff; border: 1px solid var(--a-ink);
+  background: var(--a-ink); color: var(--a-onink); border: 1px solid var(--a-ink);
 }
 .adm-amt[aria-pressed="false"] { background: var(--a-paper); color: var(--a-muted); border-color: var(--a-rule); }
 /* .adm-gift was a drawing of the gift card — a dark rectangle with the word
@@ -2054,6 +3327,120 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-card--soft { border-color: var(--a-rule); }
 .adm-card--soft .adm-btn { width: 100%; }
 
+/* ---- Блог, 1a (screen 16; app.js admBlogScreen) ----------------------------
+   The list and the open article side by side wherever the screen's own
+   column is wide enough for both — a container query, because what decides
+   it is the column, and the column narrows by 330 px whenever the assistant
+   is open — and one or the other where it is not: a phone, a small laptop
+   with the assistant up. The page column is wider than the panel's usual
+   1000 px here: two panes need it. */
+.adm-page:has(> .adm-blog2) { max-width: 1240px; }
+.adm-blog2 { container-type: inline-size; container-name: blog2; }
+.adm-blog2 .adm-head { align-items: center; }
+/* «не дописано · без товаров» under a 160-px tab: two lines, never cut */
+.adm-blog2 .adm-seg--lang .adm-seg__st { white-space: normal; }
+.adm-blog2__acts { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.adm-blog2__acts .adm-pin { margin-left: 0; }
+.adm-blog2__cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+.adm-blog2__ed { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.adm-blog2--ed .adm-blog2__list, .adm-blog2:not(.adm-blog2--ed) .adm-blog2__ed { display: none; }
+.adm-blog2__none { padding: 64px 16px; text-align: center; color: var(--a-muted); border: 1px dashed var(--a-edge); }
+@container blog2 (min-width: 960px) {
+  .adm-blog2__cols { grid-template-columns: 330px minmax(0, 1fr); gap: 32px; }
+  .adm-blog2--ed .adm-blog2__list { display: block; }
+  .adm-blog2:not(.adm-blog2--ed) .adm-blog2__ed { display: flex; }
+  .adm-blog2__back { display: none; }
+}
+/* the rows: a picture, the title, «date · RU · ET · EN» and the status tag */
+.adm-blist { border-top: 1px solid var(--a-ink); }
+.adm-brow {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; width: 100%; min-height: 76px;
+  padding: 12px 8px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-brow:hover { background: var(--a-panel); }
+.adm-brow.is-on { background: var(--a-panel); box-shadow: inset 3px 0 0 var(--a-ink); }
+.adm-brow__img { width: 72px; height: 54px; border: 1px solid var(--a-rule); background: var(--a-panel) center / cover no-repeat; }
+.adm-brow__body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.adm-brow__t { font-size: 14px; line-height: 19px; font-weight: 600; overflow-wrap: anywhere; }
+.adm-brow__m { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+/* the editor: «← Блог» only in one column on a desktop (a phone has it in the top bar) */
+@media (max-width: 899px) {
+  .adm-blog2__back { display: none; }
+  .adm-blog2--ed .adm-head .adm-h1, .adm-blog2__new { display: none; }
+  .adm-blog2--ed .adm-head { min-height: 0; }
+}
+/* an article that cannot be saved yet: the title's underline turns rust with its one line under it */
+.adm2 input.adm-title-in:has(+ #blogtitlehint > .adm-ashint:not([hidden])) { border-bottom-color: var(--a-rust); }
+#blogtitlehint .adm-ashint { margin-top: -10px; }
+/* the cover tile beside «Анонс»: the picture whole, «Заменить обложку» over its foot */
+.adm-blog2__top { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.adm-bcover {
+  position: relative; min-height: 140px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; padding: 10px;
+}
+.adm-bcover__img { position: absolute; inset: 0; background: var(--a-paper) center / contain no-repeat; }
+.adm-bcover__swap { position: relative; z-index: 1; background: rgba(253, 252, 249, .94); }
+.adm-bcoverw { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.adm-bcoverw > .adm-bcover { flex: 1; }
+.adm-bcover__note { margin: 0; }
+.adm-bcover.is-over { outline: 1px dashed var(--a-ink); outline-offset: -1px; background: var(--a-tint); }
+.adm-bcover--none { justify-content: center; height: auto; }
+.adm-blog2__lead { gap: 6px; }
+.adm-blog2__lead textarea.adm-input { flex: 1; min-height: 116px; }
+@container blog2 (max-width: 559px) {
+  .adm-blog2__top { grid-template-columns: minmax(0, 1fr); }
+  .adm-bcover { min-height: 180px; }
+}
+/* the text: the toolbar and the box are one bordered block. On a phone the
+   toolbar still WRAPS rather than scrolls: every button in sight at 375 px
+   (Renat writes on his phone — e2e/admin-blog.spec.ts holds it), 44 px each. */
+.adm-bedit { border: 1px solid var(--a-rule); background: var(--a-paper); }
+.adm-bedit .adm-tools { border: 0; border-bottom: 1px solid var(--a-rule); }
+.adm-bedit .adm-canvas { border: 0; }
+.adm-bedit .adm-tool:empty { display: none; }
+.adm-bedit .adm-tool { padding: 0 8px; }
+@media (max-width: 899px) {
+  .adm-bedit .adm-tools button { height: 44px; }
+}
+/* «Товары в статье — покажем карточками внизу» */
+.adm-bprods { display: flex; flex-direction: column; gap: 8px; }
+.adm-bprods__h { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-bprod {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px;
+  border-bottom: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-bprod__n { min-width: 0; overflow-wrap: anywhere; }
+.adm-bprod__x {
+  flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0;
+}
+.adm-bprod__x:hover { color: var(--a-ink); }
+.adm-acts--links { gap: 8px 20px; }
+/* the article's line at the foot: ● in the shop / ○ a draft */
+.adm-blog2__st { margin: 0; padding-top: 12px; border-top: 1px solid var(--a-rule); font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-blog2__on { color: var(--a-green); }
+/* «⋯» — its list under the button on a desktop, over it where the button is
+   pinned at the bottom (a phone). Square, a 1-px ink frame, like every menu here. */
+.adm-pin--blog { display: flex; align-items: center; gap: 8px; }
+.adm-bmenu { position: relative; flex: none; }
+.adm-bmenu__btn { width: 46px; height: 46px; padding: 0; font-size: 20px; line-height: 1; }
+.adm-bmenu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 48; min-width: 240px;
+  display: flex; flex-direction: column; background: var(--a-paper); border: 1px solid var(--a-ink);
+}
+.adm-bmenu__i {
+  min-height: 48px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); text-align: left; font: inherit; font-size: 14px; white-space: nowrap;
+}
+.adm-bmenu__i:last-child { border-bottom: 0; }
+.adm-bmenu__i:hover, .adm-bmenu__i:focus-visible { background: var(--a-panel); }
+.adm-bmenu__i--warn { color: var(--a-rust); }
+@media (max-width: 899px) {
+  .adm-pin--blog .adm-pin__btn { flex: 1; width: auto; }
+  .adm-bmenu__btn { width: 50px; height: 50px; }
+  .adm-bmenu__list { top: auto; bottom: calc(100% + 8px); left: 0; right: auto; }
+}
+
 /* ---------- Аналитика ----------------------------------------------------- */
 
 .adm-kpis {
@@ -2062,7 +3449,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-kpi { padding: 16px; border-right: 1px solid var(--a-rule); border-bottom: 1px solid var(--a-rule); }
 .adm-kpi__l { font-size: 13px; color: var(--a-muted); }
-.adm-kpi__v { font-family: Oswald, sans-serif; font-size: 32px; line-height: 1.1; margin-top: 4px; }
+.adm-kpi__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; margin-top: 4px; }
 .adm-kpi__d { font-size: 13px; margin-top: 4px; color: var(--a-muted); }
 .adm-kpi__d--up { color: var(--a-ok); }
 .adm-kpi__d--down { color: var(--a-warn); }
@@ -2071,7 +3458,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: flex; align-items: flex-end; gap: 6px; height: 160px;
   border-top: 1px solid var(--a-ink); margin-top: 10px; padding: 12px 0 24px;
 }
-.adm-wbar { flex: 1; background: var(--a-rule); position: relative; min-height: 2px; }
+.adm-wbar { flex: 1; background: var(--a-canvas); position: relative; min-height: 2px; }
 .adm-wbar--now { background: var(--a-ink); }
 .adm-wbar span {
   position: absolute; bottom: -20px; left: 0; right: 0; text-align: center;
@@ -2139,6 +3526,44 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    is what says it. */
 .adm-q__x { display: block; color: var(--a-warn); }
 
+/* ---- Аналитика, 1a (screen 17; app.js admStatsScreen) ----------------------
+   The period as a segmented control with the screen's one «?» beside it, the
+   four numbers in one row (two by two on a phone), then two columns — the
+   days and what sells; the path to a purchase and «Ещё цифры» — that stack
+   when the screen's own column is narrow. */
+.adm-stats { container-type: inline-size; container-name: stats; }
+.adm-stats__per { display: flex; align-items: center; gap: 8px; }
+/* the «?» beside the period, not pushed to the far end of the row */
+.adm-stats__per .adm-help { margin-left: 0; }
+.adm-stats + .adm-helpp, .adm-stats .adm-helpp { max-width: 640px; }
+.adm-kpis--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.adm-kpi__d span + span { color: var(--a-muted); }
+.adm-stats__cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+@container stats (max-width: 760px) {
+  .adm-stats__cols { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}
+@media (max-width: 767px) {
+  .adm-kpis--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-stats__per .adm-seg { flex: 1 1 auto; }
+  .adm-stats__per .adm-seg button { flex: 1 1 0; padding: 0 8px; }
+}
+/* under a section's own ink rule the chart needs no second one */
+.adm-stats .adm-wbars { border-top: 0; margin-top: 4px; }
+/* a name, its figure, and a bar as long as its share — «Что покупают», the path to a purchase */
+.adm-shares { margin-top: 4px; }
+.adm-share { padding: 10px 0 12px; border-bottom: 1px solid var(--a-rule); }
+.adm-share__r { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; line-height: 19px; }
+.adm-share__n { min-width: 0; overflow-wrap: anywhere; }
+.adm-share__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 16px; white-space: nowrap; }
+.adm-share__p { font-family: "Golos Text", sans-serif; font-weight: 400; font-size: 12px; color: var(--a-muted); }
+.adm-share__bar { height: 6px; margin-top: 6px; background: var(--a-panel); }
+.adm-share__bar i { display: block; height: 100%; background: var(--a-ink); }
+.adm-shares--green .adm-share__bar i { background: var(--a-green); }
+.adm-stats__more .adm-foldrow__b > .adm-hint { margin: 0; max-width: 620px; }
+.adm-stats__more .adm-foldrow__b > .adm-list { margin-top: 0; }
+.adm-stats__foot { border-top: 1px solid var(--a-rule); padding-top: 12px; }
+.adm-stats__foot .adm-link { font-size: 13px; text-align: left; }
+
 /* ---------- «Цены и баллы»: one basket, both price lists ------------------
    The card's six numbers only mean something together, so the foot of the
    form works a real 40 € order through twice — once as an ordinary shopper,
@@ -2164,7 +3589,32 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
 .adm-dot--warn { background: var(--a-warn); }
 /* known to be off, and not a fault — the assistant with no model behind it */
-.adm-dot--off { background: var(--a-rule); }
+.adm-dot--off { background: var(--a-canvas); }
+/* 1a (screen 18; app.js admAppsHTML): the count under the title, a card per
+   problem with its one action, the rows still being asked about on a line of
+   their own, and «Работает · N» folded. This screen has no dark button:
+   every action on it is outlined, «Написать Диму» included (README rule 2). */
+.adm-apps .adm-head { align-items: center; }
+.adm-apps__sum { margin: -12px 0 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--a-muted); }
+.adm-apps__sum--warn { color: var(--a-rust); }
+.adm-apps__sum--ok { color: var(--a-green); }
+.adm-appcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+.adm-appcard { border: 1px solid var(--a-edge); padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.adm-appcard__h { display: flex; align-items: flex-start; gap: 10px; }
+.adm-appcard__h .adm-dot { margin-top: 5px; }
+.adm-appcard__n { font-weight: 600; font-size: 15px; line-height: 20px; overflow-wrap: anywhere; }
+.adm-appcard__t, .adm-approw__t { font-size: 13px; line-height: 19px; color: var(--a-muted); overflow-wrap: anywhere; }
+.adm-appcard__a, .adm-approw__a { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.adm-apps .adm-btn { background: var(--a-paper); color: var(--a-ink); border-color: var(--a-ink); }
+.adm2 .adm-apps a.adm-btn { color: var(--a-ink); }
+.adm-apps .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); }
+.adm-apps__wait { margin: 0; }
+.adm-approw { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-approw:last-child { border-bottom: 0; }
+.adm-approw__b { min-width: 0; flex: 1; }
+.adm-approw__n { font-weight: 600; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.adm-apps__foot { margin: 0; font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-apps__foot .adm-link { font-size: 13px; overflow-wrap: anywhere; }
 
 /* ---------- Настройки ----------------------------------------------------- */
 
@@ -2588,3 +4038,529 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-nbprev { margin-top: 24px; display: flex; flex-direction: column; gap: 8px; scroll-margin-top: calc(var(--a-hdrh) + 12px); }
 .adm-nbprev:focus { outline: none; }
 .adm-frame--news { height: 560px; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction 1a — the shared pieces (design_handoff_admin_ux README § 1–3).
+   app.js builds each of them (admSecHeadHTML, admHelp*HTML, admFoldHTML,
+   admTagHTML); the frame's own pieces — top bar, strip, «Ещё», save status,
+   pinned button, confirm sheet, toast — are with the overlays above.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* a section header: 12-px capitals, +0.1em, over a 1-px ink rule; the «?»
+   at its right when the section has something to explain */
+.adm-sech {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 26px; padding-bottom: 8px; border-bottom: 1px solid var(--a-ink);
+}
+.adm-sech__t {
+  margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--a-muted);
+}
+
+/* «?» — round, 26 px, the one round thing besides the status dots. A 32-px
+   target on a desktop, 44 on a phone (the negative margins keep the header
+   row the height of its words). Open: ink. */
+.adm-help {
+  flex: none; width: 32px; height: 32px; margin: -3px -3px -3px auto; padding: 0; border: 0; background: none;
+  color: var(--a-ink); display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-help__c {
+  width: 26px; height: 26px; box-sizing: border-box; border-radius: 50%; border: 1px solid var(--a-edge);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; line-height: 1;
+}
+.adm-help:hover .adm-help__c { background: var(--a-panel); }
+.adm-help[aria-expanded="true"] .adm-help__c { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+.adm-helpp { margin: 10px 0 0; padding: 10px 12px; background: var(--a-panel); font-size: 13px; line-height: 19px; color: var(--a-ink); }
+@media (max-width: 899px) { .adm-help { width: 44px; height: 44px; margin: -9px -9px -9px auto; } }
+
+/* a fold: title · one-line summary · chevron; the body under it while open */
+.adm-foldrow { border-top: 1px solid var(--a-rule); }
+.adm-foldrow__h {
+  width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 14px 0;
+  border: 0; border-bottom: 1px solid var(--a-rule); background: none; color: var(--a-ink); font: inherit; text-align: left;
+}
+.adm-foldrow__t { flex: none; font-size: 15px; font-weight: 600; }
+.adm-foldrow__s {
+  flex: 1 1 auto; min-width: 0; text-align: right; font-size: 13px; color: var(--a-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-foldrow__chev { flex: none; margin-left: auto; transition: transform .2s; }
+.adm-foldrow__s + .adm-foldrow__chev { margin-left: 0; }
+.adm-foldrow.is-open .adm-foldrow__chev { transform: rotate(180deg); }
+.adm-foldrow__b { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 16px; border-bottom: 1px solid var(--a-rule); }
+@media (prefers-reduced-motion: reduce) { .adm-foldrow__chev { transition: none; } }
+
+/* a status tag: the badge's colours, drawn small and firm (11 px, 600) */
+.adm-tag { height: 20px; padding: 0 6px; font-size: 11px; font-weight: 600; }
+/* ═══════════════════════════════════════════════════════════════════════
+   Direction 1a — «Склад», its history, the scanner and «Наборы»
+   (design_handoff_admin_ux: 11-stock-desktop, 11-stock-phone-v2,
+   06-scanner-phone, 12-sets-desktop). Appended here so the shared pieces
+   above stay as they are.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* the page header's right: «История» (outlined, desktop) beside the ONE dark
+   button, which a phone pins above the tab bar */
+.adm-headacts { display: flex; align-items: center; gap: 10px; }
+.adm-headacts__desk { height: 46px; padding: 0 18px; }
+@media (max-width: 899px) { .adm-headacts__desk { display: none; } }
+
+/* ---------- «Склад»: search, chips, the count and «История →» ----------- */
+.adm-stkbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.adm-stkbar__q { height: 46px; }
+@media (min-width: 900px) {
+  .adm-stkbar { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); align-items: center; gap: 16px; }
+  .adm-stkbar .adm-chips { grid-column: 1; grid-row: 1; }
+  .adm-stkbar__q { grid-column: 2; grid-row: 1; }
+}
+.adm-stkmeta { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 24px; margin-top: -8px; }
+.adm-stkmeta .adm-hint { font-size: 12.5px; }
+.adm-stkmeta__hist { font-size: 13.5px; white-space: nowrap; min-height: 44px; }
+@media (min-width: 900px) {
+  /* the header carries «История» on a desktop */
+  .adm-stkmeta__hist { display: none; }
+  .adm-stkmeta { justify-content: flex-end; margin-top: -12px; }
+}
+
+/* the desktop table: Товар | Объём · Статус · Остаток · «Мало» ≤ · Штрихкод */
+.adm-stkhead { display: none; }
+@media (min-width: 900px) {
+  .adm-stkhead, .adm-stk { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 5fr); column-gap: 14px; }
+  .adm-stkhead {
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+    padding: 8px 0; border-bottom: 1px solid var(--a-ink); margin-bottom: -20px;
+  }
+  .adm-stkhead__r { display: grid; grid-template-columns: 90px 110px 140px 100px minmax(0, 1fr); column-gap: 14px; align-items: center; }
+  .adm-stklist { border-top: 0; }
+}
+
+/* one product: the photo and the name once, its sizes under it (phone) —
+   the name in the first column of its first row (desktop) */
+.adm-stk { border-bottom: 1px solid var(--a-rule); padding: 14px 0 8px; }
+.adm-stk__h { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 4px; }
+.adm-stk__img {
+  position: relative; width: 40px; height: 40px; flex: none; overflow: hidden;
+  background: var(--a-field); border: 1px solid var(--a-rule);
+}
+.adm-stk__img .ph { position: absolute; inset: 2px; background-size: contain; background-position: center; background-repeat: no-repeat; }
+.adm-stk__t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.adm-stk__b { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-stk__n { font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-stk__h .adm-tag { flex: none; }
+.adm-stk__rows { min-width: 0; }
+@media (min-width: 900px) {
+  .adm-stk { padding: 0; }
+  .adm-stk__h { align-self: start; padding: 17px 0 0; margin: 0; }
+  .adm-stk__img { display: none; }
+  .adm-stk__t { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; font-weight: 600; }
+  .adm-stk__b, .adm-stk__n { display: inline; font-size: inherit; color: var(--a-ink); font-weight: 600; }
+  .adm-stk__b::after { content: " — "; }
+}
+
+/* one size: the size and its tag (the tap that opens the row), − count +,
+   and on a desktop «мало ≤» and the barcode as columns */
+.adm-row.adm-stk__r {
+  display: grid; grid-template-columns: minmax(0, 1fr) 136px; column-gap: 10px; row-gap: 4px; align-items: center;
+  flex-wrap: nowrap; min-height: 0; padding: 6px 0 6px 50px; border-bottom: 0; background: transparent;
+}
+.adm-row.adm-stk__r.is-open { background: var(--a-panel); box-shadow: -8px 0 0 var(--a-panel), 8px 0 0 var(--a-panel); }
+.adm-stk__sz {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; min-height: 44px;
+  border: 0; background: none; padding: 0; text-align: left; color: var(--a-ink); font: inherit;
+}
+.adm-stk__sz .adm-row__sz { border: 0; padding: 0; font-size: 15px; line-height: 20px; }
+.adm-stk__q { width: 136px; height: 46px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; border-color: var(--a-edge); background: var(--a-field); }
+.adm-stk__q button { width: 44px; height: 44px; font-size: 18px; background: none; }
+.adm-stk__q .adm-step-qty__v {
+  min-width: 0; width: 100%; height: 44px; border: 0; padding: 0; background: transparent; color: var(--a-ink);
+  font-family: "Golos Text", sans-serif; font-weight: 600; font-size: 16px;
+}
+.adm-stk__q .adm-step-qty__v--warn { color: var(--a-warn); }
+.adm-stk__q .adm-step-qty__v[aria-invalid="true"] { outline: 2px solid var(--a-warn); outline-offset: -2px; }
+.adm-stk__low, .adm-stk__ean { display: none; }
+.adm-stk__r > .adm-ashint, .adm-stk__x { grid-column: 1 / -1; }
+.adm-stk__scan {
+  width: 42px; height: 42px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--a-ink); background: transparent; color: var(--a-ink); padding: 0;
+}
+.adm-stk__scan:hover { background: var(--a-tint); }
+@media (min-width: 900px) {
+  /* the same five columns as the head (.adm-stkhead__r) — after the phone rule, which it overrides */
+  .adm-row.adm-stk__r { grid-template-columns: 90px 110px 140px 100px minmax(0, 1fr); column-gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--a-rule); }
+  .adm-stk__rows > .adm-stk__r:last-child { border-bottom: 0; }
+  .adm-stk__sz { grid-column: 1 / span 2; display: grid; grid-template-columns: 90px 110px; column-gap: 14px; min-height: 38px; }
+  .adm-stk__sz .adm-row__sz { font-size: 14px; }
+  .adm-stk__sz .adm-tag { justify-self: start; }
+  .adm-stk__q { width: 140px; height: 38px; grid-template-columns: 38px minmax(0, 1fr) 38px; }
+  .adm-stk__q button { width: 38px; height: 36px; }
+  .adm-stk__q .adm-step-qty__v { height: 36px; font-size: 15px; }
+  .adm-stk__low { display: block; font-size: 14.5px; padding-left: 10px; }
+  .adm-stk__ean { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
+  .adm-stk__ean .adm-mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-stk__none { color: var(--a-muted); }
+  .adm-stk__scan { width: 38px; height: 38px; margin-left: auto; }
+}
+/* the open row: the barcode with its scan button, «мало ≤», «Причина» */
+.adm-stk__x { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; padding: 6px 0 12px; }
+.adm-stk__xe, .adm-stk__xc { grid-column: 1 / -1; }
+.adm-stk__xl { font-size: 12px; color: var(--a-muted); }
+.adm-stk__eanrow { display: flex; gap: 6px; }
+.adm-stk__eanrow .adm-input { height: 44px; font-size: 14px; }
+.adm-stk__x .adm-input { height: 44px; }
+.adm-stk__xc { justify-self: end; min-height: 44px; font-size: 13.5px; }
+@media (min-width: 900px) {
+  .adm-stk__x { grid-template-columns: minmax(0, 1.2fr) 110px minmax(0, 1.4fr) auto; align-items: end; gap: 14px; padding: 4px 0 14px; }
+  .adm-stk__xe, .adm-stk__xc { grid-column: auto; }
+  .adm-stk__eanrow .adm-input, .adm-stk__x .adm-input { height: 40px; }
+  .adm-stk__x .adm-stk__scan { width: 40px; height: 40px; margin: 0; }
+  .adm-stk__xc { min-height: 40px; }
+}
+
+/* ---------- «История склада» ------------------------------------------- */
+.adm-stkhist__t { font-family: Oswald, sans-serif; font-weight: 600; font-size: 28px; line-height: 1.1; margin: 0; }
+@media (min-width: 900px) { .adm-stkhist__t { font-size: 34px; } }
+.adm-hhead { display: none; }
+.adm-row.adm-hrow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 11px 0; min-height: 0; border-bottom: 1px solid var(--a-rule); }
+.adm-hrow__nm { order: 1; flex: 1 1 calc(100% - 72px); min-width: 0; font-size: 14px; }
+.adm-hrow__d { order: 2; flex: none; width: 60px; font-size: 20px; }
+.adm-hrow__sz { order: 3; font-size: 12.5px; }
+.adm-hrow__sz .adm-row__sz { border: 0; padding: 0; color: var(--a-muted); font-size: 12.5px; }
+.adm-hrow__what { order: 4; font-size: 12.5px; color: var(--a-muted); }
+.adm-hrow__when { order: 5; font-size: 11.5px; color: var(--a-muted); }
+.adm-hrow__d.is-up { color: var(--a-green); }
+.adm-hrow__d.is-down { color: var(--a-rust); }
+@media (min-width: 900px) {
+  .adm-hhead, .adm-row.adm-hrow { display: grid; grid-template-columns: 130px minmax(0, 2fr) 90px minmax(0, 1fr) 70px; column-gap: 14px; align-items: center; }
+  .adm-hhead {
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+    padding: 16px 0 8px; border-bottom: 1px solid var(--a-ink);
+  }
+  .adm-hlist { border-top: 0; }
+  .adm-hrow__nm, .adm-hrow__d, .adm-hrow__sz, .adm-hrow__what, .adm-hrow__when { order: 0; width: auto; }
+  .adm-hrow__when { grid-column: 1; grid-row: 1; font-size: 12.5px; }
+  .adm-hrow__nm { font-size: 14.5px; }
+  .adm-hrow__sz .adm-row__sz { color: var(--a-ink); font-size: 14px; }
+  .adm-hrow__what { font-size: 13.5px; }
+  .adm-hrow__d { font-size: 19px; }
+}
+
+/* ---------- the scanner (1a: «Сканер · склад», one switch, one button) -- */
+.scan__title { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scan__title .scan__brand { font-size: 16px; }
+.scan__title .scan__mode { flex: none; font-size: inherit; line-height: inherit; color: inherit; text-align: left; }
+.scan__hbtn svg { display: block; }
+.scan__seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--a-ink); }
+.scan__seg button { height: 44px; border: 0; background: #fff; color: var(--a-ink); font-size: 14px; font-weight: 500; }
+.scan__seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.scan__for { margin: 0; text-align: center; font-size: 15px; font-weight: 600; line-height: 20px; }
+.scan__errbtns { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin-top: 10px; }
+.scan__btn--sm { height: 44px; padding: 0 16px; font-size: 14px; }
+.scan__card--err .scan__more { color: var(--a-muted); }
+/* «Готово» stands on the ink between codes now (1a: the card goes after a move),
+   so it takes a green that reads there; and the stepper's number is the big
+   Oswald it was meant to be — `.scanoverlay input` above outranked it */
+.scan__panel > .scan__ready { font-size: 14px; color: #a9d4b8; }
+.scanoverlay .scan__qty { font-family: Oswald, sans-serif; font-size: 48px; }
+/* «Сегодня», folded under the camera — the fold is a light-page piece, so it
+   is told it stands on ink here */
+.scan__today { border-top: 0; padding-top: 0; }
+.scan__today .adm-foldrow { border-top: 1px solid var(--a-muted); }
+.scan__today .adm-foldrow__h { color: #fff; border-bottom-color: var(--a-muted); min-height: 48px; padding: 10px 0; }
+.scan__today .adm-foldrow__t { font-size: 14px; }
+.scan__today .adm-foldrow__s { color: var(--a-dim); }
+.scan__today .adm-foldrow__b { border-bottom-color: var(--a-muted); padding: 6px 0 10px; gap: 0; }
+
+/* ---------- «Наборы» -------------------------------------------------- */
+@media (max-width: 899px) { .adm-sethead.is-ed .adm-pin { display: none; } }
+.adm-sets { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.adm-sets__pick { display: none; }
+@media (max-width: 899px) {
+  /* a set open on a phone is a view of its own («← Наборы» is its Back) */
+  .adm-sets--ed .adm-sets__list { display: none; }
+}
+@media (min-width: 900px) {
+  .adm-sets { grid-template-columns: minmax(0, 1fr) 440px; gap: 36px; align-items: start; }
+  .adm-sets__pick {
+    display: block; margin: 0; padding: 40px 20px; border: 1px dashed var(--a-rule);
+    text-align: center; font-size: 14px; color: var(--a-muted);
+  }
+}
+.adm-row.adm-setrow {
+  /* the name gets the row's whole width; the price and the controls share the line under it */
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "img main main" "img pr acts";
+  column-gap: 12px; row-gap: 2px; align-items: center; flex-wrap: nowrap; padding: 10px 0;
+}
+.adm-row.adm-setrow.is-sel { background: var(--a-panel); box-shadow: -8px 0 0 var(--a-panel), 8px 0 0 var(--a-panel); }
+.adm-setrow__img { grid-area: img; width: 52px; height: 52px; }
+.adm-setrow__open {
+  grid-area: main; min-width: 0; min-height: 40px; display: flex; flex-direction: column; justify-content: center;
+  border: 0; background: none; padding: 0; text-align: left; color: inherit; font: inherit;
+}
+.adm-setrow__open .adm-row__sub { margin-top: 1px; font-size: 12px; }
+.adm-setrow__pr { grid-area: pr; text-align: left; font-size: 16px; }
+.adm-setrow__acts { grid-area: acts; display: flex; align-items: center; gap: 2px; }
+@media (min-width: 900px) {
+  .adm-setrow__pr { font-size: 17px; }
+  .adm-setrow__acts .adm-link--move { min-width: 36px; min-height: 40px; }
+}
+
+/* the editor: a panel beside the list (desktop), its own view (phone) */
+.adm-seted { position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.adm-seted__close {
+  align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--a-ink);
+  font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px;
+}
+.adm-seted__x, .adm-seted__xl { display: none; }
+@media (min-width: 900px) {
+  .adm-seted { border: 1px solid var(--a-ink); padding: 20px 24px 24px; }
+  .adm-seted__close {
+    position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; text-decoration: none;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; line-height: 1;
+  }
+  .adm-seted__back { display: none; }
+  .adm-seted__x { display: inline; }
+  .adm-seted__xl { display: block; }
+  .adm-seted .adm-langbar { padding-right: 36px; }
+}
+.adm-seted__draft {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px 14px; flex-wrap: wrap;
+  padding: 10px 12px; background: var(--a-panel); font-size: 13px; line-height: 18px; color: var(--a-ink);
+}
+.adm-seted__err { margin: 0; }
+.adm2 .adm-seted__name {
+  height: 52px; padding: 0 2px; border: 0; border-bottom: 1px solid var(--a-ink); background: transparent;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 24px; line-height: 1.1;
+}
+.adm-seted__name[aria-invalid="true"] { border-bottom-color: var(--a-warn); }
+.adm-seted__name::placeholder { font-size: 18px; font-weight: 400; color: var(--a-muted); }
+.adm2 textarea.adm-seted__desc { min-height: 96px; }
+.adm-seted__ai { display: flex; gap: 8px 16px; flex-wrap: wrap; margin-top: -4px; }
+.adm-seted__few { margin: 0; }
+.adm-seted__q { height: 44px; }
+.adm-seted__money { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.adm-seted__warn { color: var(--a-warn); }
+.adm-seted__go { align-self: flex-start; min-height: 44px; }
+.adm-setitems { border-top: 0; }
+.adm-row.adm-setitem { flex-wrap: nowrap; gap: 10px; padding: 8px 0; min-height: 0; }
+.adm-setitem .adm-row__nm { font-size: 14px; }
+.adm-setitem .adm-row__sub { font-size: 12px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.adm2 select.adm-setitem__sz { width: auto; height: 32px; padding: 0 8px; font-size: 13px; }
+.adm-setitem .adm-step-qty button { width: 36px; height: 36px; font-size: 17px; }
+.adm-setitem .adm-step-qty__v { min-width: 30px; font-size: 16px; }
+.adm-setitem__x { width: 40px; height: 44px; flex: none; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0; }
+.adm-setitem__x:hover { color: var(--a-ink); }
+.adm-setpicks { display: flex; flex-direction: column; }
+.adm-setpicks:empty { display: none; }
+.adm-setpick { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-setpick__nm { font-size: 14px; line-height: 19px; }
+.adm-setpick__sz { display: flex; gap: 6px; flex-wrap: wrap; }
+.adm-chip.adm-setpick__add { height: 36px; padding: 0 10px; font-size: 13px; }
+@media (max-width: 899px) {
+  .adm-chip.adm-setpick__add { height: 44px; }
+  .adm-setitem .adm-step-qty button { width: 44px; height: 44px; }
+  .adm-setitem__x { width: 44px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Настройки», direction 1a — README § 5, Admin 1a Screens 4.dc.html,
+   screens 09-settings-*. The index is the whole screen on a phone and a
+   permanent column on a desktop, with the page beside it; every page saves
+   itself (no save bar), optional parts fold with a summary under the title.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* the two panes need more than the 1000 px the other sections live in */
+.adm-page:has(> .adm-set) { max-width: 1240px; }
+.adm-set { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0 40px; align-items: start; }
+.adm-set__col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 24px; }
+.adm-set__main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (max-width: 899px) {
+  .adm-set { display: flex; flex-direction: column; gap: 16px; }
+  .adm-set__col { position: static; }
+  /* a page open over the index: the page, and «← Настройки» in the top bar */
+  .adm-set--open .adm-set__col { display: none; }
+}
+
+/* the index: a row per page, its line under it; on a desktop the page shown is lit */
+.adm-setidx { display: flex; flex-direction: column; border-top: 1px solid var(--a-ink); }
+.adm-setidx__r {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto 14px; gap: 10px; align-items: center;
+  min-height: 60px; padding: 12px 0; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: none; color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-setidx__r:hover { background: var(--a-panel); }
+.adm-setidx__t { display: flex; flex-direction: column; min-width: 0; }
+.adm-setidx__nm { font-size: 15.5px; line-height: 21px; }
+.adm-setidx__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-setidx__chev { font-size: 18px; line-height: 1; color: var(--a-muted); }
+.adm-setidx__info { display: flex; flex-direction: column; padding: 14px 0; border-bottom: 1px solid var(--a-rule); }
+@media (min-width: 900px) {
+  .adm-setidx__r { padding: 10px 10px; margin: 0 -10px; width: calc(100% + 20px); grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-setidx__chev { display: none; }
+  .adm-setidx__r[aria-current="page"] { background: var(--a-panel); }
+  .adm-setidx__r[aria-current="page"] .adm-setidx__nm { font-weight: 600; }
+  .adm-setidx__info { border-bottom: 0; margin-top: 8px; border-top: 1px solid var(--a-rule); }
+  .adm-setidx__info .adm-setidx__nm { font-size: 14px; }
+}
+
+/* a page's title and its «?» */
+.adm-set__h { display: flex; align-items: center; gap: 12px; }
+.adm-set__h .adm-help { margin-left: 0; }
+.adm-set__main > .adm-link { align-self: flex-start; }
+.adm-set__main > .adm-narrow { display: flex; flex-direction: column; gap: 16px; }
+.adm-set__block { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.adm-set__sw { border-top: 1px solid var(--a-ink); }
+.adm-set__acts { margin-top: 8px; align-items: center; }
+.adm-set__grp {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--a-muted); padding: 14px 0 4px;
+}
+.adm-swrow > span { display: flex; flex-direction: column; min-width: 0; }
+.adm-swrow--main { border-bottom: 1px solid var(--a-ink); font-weight: 600; }
+.adm-swrow--main .adm-row__sub { font-weight: 400; }
+.adm-sech__x { margin-left: auto; font-size: 13px; color: var(--a-muted); }
+
+/* the folds on these pages: the summary UNDER the title (design), not beside it */
+.adm-set__folds { border-top: 1px solid var(--a-ink); margin-top: 8px; }
+.adm-set__folds > .adm-foldrow:first-child { border-top: 0; }
+.adm-set .adm-foldrow__h { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; }
+.adm-set .adm-foldrow__t { grid-column: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.adm-set .adm-foldrow__s { grid-column: 1; grid-row: 2; text-align: left; white-space: normal; font-size: 12.5px; line-height: 17px; }
+.adm-set .adm-foldrow__chev { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+.adm-foldrow__warn { color: var(--a-rust); font-weight: 500; }
+
+/* «⋯» — the rare actions of a block */
+.adm-setmore { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.adm-setmore__btn {
+  min-width: 44px; height: 36px; padding: 0 12px; border: 1px solid var(--a-edge); background: var(--a-paper);
+  color: var(--a-ink); font-size: 18px; line-height: 1; letter-spacing: .08em;
+}
+.adm-setmore.is-open .adm-setmore__btn { border-color: var(--a-ink); background: var(--a-panel); }
+.adm-setmore__b { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 12px; background: var(--a-panel); }
+@media (max-width: 899px) { .adm-setmore__btn { height: 44px; } }
+
+/* ---------- Доставка и оплата: the country × carrier table ---------------- */
+
+.adm-rt { border-top: 1px solid var(--a-ink); }
+.adm-rt__head { display: none; }
+.adm-rt__row { border-bottom: 1px solid var(--a-rule); }
+.adm-rt__nm { display: none; }
+.adm-rt__h {
+  width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 12px 0;
+  border: 0; background: none; color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-rt__ht { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.adm-rt__hn { font-size: 15.5px; font-weight: 600; line-height: 21px; }
+.adm-rt__hs { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-rt__chev { flex: none; transition: transform .2s; }
+.adm-rt__row.is-open .adm-rt__chev { transform: rotate(180deg); }
+.adm-rt__row:not(.is-open) .adm-rt__b { display: none; }
+.adm-rt__b { display: flex; flex-direction: column; padding: 0 0 12px; }
+/* a cell: its name, the box, what the box means beside it */
+.adm-rt .adm-rates__c {
+  display: grid; grid-template-columns: 100px 92px minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 6px 0;
+}
+.adm-rt .adm-tariffs__l { display: block; margin: 0; font-size: 14px; color: var(--a-ink); }
+.adm-rt .adm-rates__c .adm-input { height: 44px; padding: 0 10px; }
+.adm-rt .adm-rt__f { min-width: 0; }
+.adm-rt .adm-ashint { grid-column: 2 / -1; }
+.adm-rt .adm-rates__c--none .adm-rates__dash { display: none; }
+.adm-rt .adm-rates__c--none .adm-hint--cell { grid-column: 2 / -1; }
+.adm-rt .adm-rates__c:last-child { border-top: 1px solid var(--a-rule); margin-top: 4px; padding-top: 10px; }
+.adm-rt .adm-rates__c:last-child .adm-tariffs__l { font-weight: 600; }
+@media (min-width: 900px) {
+  .adm-rt__head, .adm-rt__row {
+    display: grid; grid-template-columns: minmax(120px, 1.3fr) repeat(6, minmax(0, 1fr)); gap: 8px 8px;
+  }
+  .adm-rt__head {
+    font-size: 12px; color: var(--a-muted); padding: 8px 0 6px; border-bottom: 1px solid var(--a-ink); align-items: end;
+  }
+  .adm-rt { border-top: 0; }
+  .adm-rt__row { padding: 10px 0; align-items: start; }
+  .adm-rt__h { display: none; }
+  .adm-rt__nm { display: block; font-weight: 600; line-height: 20px; padding-top: 12px; }
+  .adm-rt__b, .adm-rt__row:not(.is-open) .adm-rt__b { display: contents; }
+  .adm-rt .adm-rates__c { display: block; padding: 0; }
+  .adm-rt .adm-rates__c:last-child { border-top: 0; margin: 0; padding: 0; }
+  .adm-rt .adm-tariffs__l { display: none; }
+  .adm-rt .adm-rates__c--none .adm-rates__dash { display: block; }
+  .adm-rt .adm-rates__c--none .adm-hint--cell { display: none; }
+  /* an empty box's own line hides — the grey price is IN the box — until the
+     box is being typed in, when the placeholder has gone */
+  .adm-rt .adm-rates__c:not(.is-own):not(:focus-within) .adm-rt__f > .adm-hint--cell:not(.adm-hint--loss) { visibility: hidden; }
+  .adm-rt__unit { display: none; }
+}
+/* Montonio's price, grey IN an empty box; an own price bold */
+.adm-rates__c .adm-input::placeholder { color: var(--a-muted); opacity: .8; }
+.adm-rates__c.is-own .adm-input { font-weight: 600; border-color: var(--a-ink); }
+.adm-rates__c .adm-input[aria-invalid="true"] { border-color: var(--a-rust); }
+.adm-rt__legend { margin: 8px 0 0; }
+/* a price under the tariff, waiting for «Оставить так» */
+.adm-rt__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; }
+.adm-rt__keep {
+  min-height: 32px; padding: 0 10px; border: 1px solid var(--a-rust); background: var(--a-paper);
+  color: var(--a-rust); font-size: 12.5px; font-weight: 600;
+}
+.adm-rt__acts .adm-rates__undo { width: auto; margin: 0; padding: 4px 0; }
+@media (max-width: 899px) { .adm-rt__keep { min-height: 44px; } .adm-rt__acts .adm-rates__undo { min-width: 44px; } }
+.adm-rates__c:has(.adm-rt__keep) .adm-input { border-color: var(--a-rust); color: var(--a-rust); }
+/* a held box's own «why not sent» line says what the rust line with «Оставить так» already says */
+.adm-rates__c:has(.adm-rt__keep) .adm-ashint { display: none; }
+
+/* ---------- Главная страница: the banner's slides ------------------------- */
+
+.adm-slides { border-top: 1px solid var(--a-rule); }
+.adm-slide { border-bottom: 1px solid var(--a-rule); }
+.adm-slide__row { display: flex; align-items: center; gap: 10px; padding: 10px 0; min-height: 64px; }
+.adm-slide__t {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start;
+  border: 0; background: none; padding: 4px 0; color: var(--a-ink); text-align: left; font: inherit; min-height: 44px;
+}
+.adm-slide__t .adm-row__nm { max-width: 100%; }
+.adm-slide__t .adm-row__sub { display: flex; align-items: center; gap: 6px; }
+.adm-slide.is-off .adm-thumb, .adm-slide.is-off .adm-slide__t .adm-row__nm { opacity: .55; }
+.adm-slide.is-open { background: var(--a-panel); box-shadow: -12px 0 0 var(--a-panel), 12px 0 0 var(--a-panel); }
+.adm-slide.is-open .adm-slide__row { border-bottom: 1px solid var(--a-ink); }
+.adm-slide__ed { padding: 14px 0 18px; }
+.adm-slide__ed:focus { outline: none; }
+.adm-slide__acts { justify-content: space-between; }
+.adm-slides__add { width: 100%; }
+.adm-set__tick { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.adm-set__tick span:first-child { flex: 1; }
+.adm-set__tick .adm-input { width: 72px; text-align: center; height: 44px; padding: 0 8px; }
+@media (max-width: 899px) {
+  .adm-slide__row .adm-ops { gap: 2px; flex-wrap: nowrap; }
+  .adm-slide__row .adm-thumb { width: 44px; height: 44px; }
+}
+
+/* ---------- О компании: the hours ----------------------------------------- */
+
+.adm-hours__row {
+  grid-template-columns: 110px minmax(0, 1fr) auto; padding: 6px 0; border-bottom: 1px solid var(--a-rule);
+}
+.adm-hours__t { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.adm-hours__in { width: 84px; text-align: center; height: 44px; padding: 0 8px; font-variant-numeric: tabular-nums; }
+.adm-hours__off { font-size: 14px; color: var(--a-muted); }
+.adm-hours__d { font-size: 14px; color: var(--a-ink); }
+.adm-hours__hint { grid-column: 1 / -1; }
+@media (max-width: 899px) {
+  .adm-hours__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-hours__d { grid-column: 1 / -1; }
+  .adm-hours__in { width: 76px; }
+}
+
+/* ---------- Журнал --------------------------------------------------------- */
+
+.adm-jlist { border-top: 1px solid var(--a-ink); margin-top: 8px; }
+.adm-jlist .adm-jrow { align-items: flex-start; flex-wrap: nowrap; }
+.adm-jrow__m { display: block; font-size: 12px; color: var(--a-muted); margin-top: 2px; }
+.adm-jrow__m .adm-jrow__t { font-size: 12px; }
+.adm-jrow__me { font-size: 12px; color: var(--a-muted); }
+.adm-jrow__done { flex: none; font-size: 12px; color: var(--a-muted); padding-top: 3px; }
+.adm-jrow.is-undone .adm-jrow__l, .adm-jrow.is-undone .adm-jrow__x > span:not(.adm-jrow__m) { text-decoration: line-through; color: var(--a-muted); }
+.adm-jrow .adm-btn--row { flex: none; }
+.adm-jrow--login { min-height: 44px; }
+
+/* ---------- Оповещения на телефон ----------------------------------------- */
+
+.adm-push__state { display: flex; align-items: center; gap: 10px; }
+.adm-push__dot { width: 10px; height: 10px; flex: none; background: var(--a-canvas); border: 1px solid var(--a-edge); }
+.adm-push__dot.is-on { background: var(--a-green); border-color: var(--a-green); }

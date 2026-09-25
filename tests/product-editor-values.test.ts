@@ -85,10 +85,15 @@ describe("the editor's «Салон, €» column", () => {
     }
   });
 
-  it("is what both size grids actually render below their first row", () => {
+  it("is what the size grid actually renders below its first row", () => {
+    // 1a: one grid for a catalogue product and the owner's own (edSecSizes);
+    // the two old names hand over to it
     for (const pane of ["edPaneSizesOwn", "edPaneSizes"]) {
-      expect(slice(pane), pane).toContain("edSalonRung(");
+      expect(slice(pane), pane).toContain("edSecSizes(p)");
     }
+    expect(slice("edSecSizes")).toContain("edSalonRung(");
+    // q19: the rows below the first are calculated and grey, never typed
+    expect(slice("edSecSizes")).toContain('adm-input--calc" value="\' + salon + \'" readonly');
   });
 });
 
@@ -197,6 +202,7 @@ describe("the salon price the panel could not see", () => {
       "S",
       "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("loadProOverrides")}
        loadProOverrides(false);`,
     );
@@ -221,6 +227,7 @@ describe("the salon price the panel could not see", () => {
       "S",
       "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("loadProOverrides")}
        loadProOverrides(false);`,
     );
@@ -246,6 +253,7 @@ describe("the salon price the panel could not see", () => {
     const api = new Function(
       "SRV", "DEMO", "apiJson", "applyDemoOverrides", "render", "S", "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("proOvWrote")}
        ${slice("loadProOverrides")}
        return { load: loadProOverrides, wrote: proOvWrote };`,

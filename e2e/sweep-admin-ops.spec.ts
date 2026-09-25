@@ -35,18 +35,24 @@ async function firstStockKey(page: Page, query: string): Promise<string> {
 }
 
 /**
- * Opens the row edit form for one exact key — or leaves it open if it already
- * is. stockRowHTML() blanks the row's own `data-stockedit` while its form is
- * showing (the link turns into «Свернуть»), so "click the row" is only right
- * when the form is closed; `data-stocksave` is what carries the key either way.
+ * Opens one exact row — or leaves it open if it already is. 1a: a tap on the
+ * size opens the row (its «мало ≤», barcode and «Причина»); the same tap would
+ * close it, so the row's own threshold box is what says whether it is open.
  */
 async function openStockRow(page: Page, key: string): Promise<void> {
   await tab(page, "stock");
   await page.locator("[data-stockq]").fill(key.split(" ")[0]);
-  if (!(await page.locator(`[data-stocksave="${key}"]`).count())) {
+  if (!(await page.locator(`[data-stocklowinput="${key}"]`).count())) {
     await page.locator(`[data-stockedit="${key}"]`).click();
   }
-  await expect(page.locator(`[data-stocksave="${key}"]`)).toBeVisible();
+  await expect(page.locator(`[data-stocklowinput="${key}"]`)).toBeVisible();
+}
+
+/** Types a count into the row and sends it the way the owner does — Enter. */
+async function typeCount(page: Page, key: string, value: string): Promise<void> {
+  const box = page.locator(`[data-stockqtyinput="${key}"]`);
+  await box.fill(value);
+  await box.press("Enter");
 }
 
 /**
@@ -70,69 +76,76 @@ test.describe("sweep — warehouse", () => {
     test.setTimeout(180_000);
     const w = watch(page);
     await openAdmin(page);
+    const moved = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    const carded = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && !r.url().includes("/moves/") && r.request().method() === "PUT");
 
     // A real count to work against — everything below has to leave it alone.
+    // 1a: the count is typed into the row itself; «Причина» rides with it.
     const key = await firstStockKey(page, PRODUCT_2.id);
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("5");
-    await page.locator("[data-stockreasoninput]").fill("пересчёт на полке");
-    await page.locator("[data-stocksave]").click();
+    await page.locator(`[data-stockreasoninput="${key}"]`).fill("пересчёт на полке");
+    let move = moved();
+    await typeCount(page, key, "5");
+    expect((await move).ok()).toBe(true);
     await clearToast(page);
     expect(await stockQty(page, key), "setting the count to 5 did not take").toBe(5);
     // …and the grid shows the same number the route holds.
-    await tab(page, "stock");
-    await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    await expect(page.locator(`[data-stockedit="${key}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]")).toContainText("5");
+    await expect(page.locator(`[data-stockqtyinput="${key}"]`)).toHaveValue("5");
     await assertClean(page, w, "stock set to 5");
 
     // The dangerous ones. A count is money on a shelf: a value the panel
-    // cannot read must be refused out loud, never quietly turned into 0.
+    // cannot read must be refused out loud — the line under the box — never
+    // quietly turned into 0, and never sent at all.
     for (const bad of ["abc", "-1", "1e9"]) {
-      await openStockRow(page, key);
-      await page.locator("[data-stockqtyinput]").fill(bad);
-      await page.locator("[data-stocksave]").click();
-      const msg = await toastText(page);
-      expect(msg, `count "${bad}" was accepted with no message at all`).not.toBe("");
+      await typeCount(page, key, bad);
+      const hint = page.locator(`[data-ashint="stockqty:${key}"]`);
+      await expect(hint, `count "${bad}" was accepted with no message at all`).toBeVisible();
+      const msg = ((await hint.textContent()) || "").trim();
       expect(isRussian(msg), `count "${bad}": message is not Russian — "${msg}"`).toBe(true);
-      expect(msg, `count "${bad}" reported success`).not.toMatch(/Сохранено/);
-      await clearToast(page);
+      await expect(page.locator(`[data-stockqtyinput="${key}"]`)).toHaveAttribute("aria-invalid", "true");
       expect(await stockQty(page, key), `count "${bad}" changed the real quantity`).toBe(5);
       await assertClean(page, w, `stock qty "${bad}"`);
     }
 
     // 2.5 bottles is not a thing — whole units either way, never a crash.
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("2.5");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "2.5");
+    await move;
     await clearToast(page);
     const after = await stockQty(page, key);
     expect(Number.isInteger(after), `a fractional count was stored as ${after}`).toBe(true);
     await assertClean(page, w, "stock qty 2.5");
 
     // 0 is a legitimate count — sold out is a fact, not an error.
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("0");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "0");
+    await move;
     await clearToast(page);
     expect(await stockQty(page, key)).toBe(0);
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("8");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "8");
+    await move;
     await clearToast(page);
 
-    // ---- EAN --------------------------------------------------------------
+    // ---- EAN — saved when the box is left (Enter), a text keyboard ----------
     const ean = `47400${Date.now().toString().slice(-8)}`;
     await openStockRow(page, key);
-    await page.locator("[data-stockeaninput]").fill(ean);
-    await page.locator("[data-stocksave]").click();
+    let card = carded();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill(ean);
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    expect((await card).ok()).toBe(true);
     await clearToast(page);
+    // closed and opened again, the box shows what the shelf holds
+    await page.locator('[data-stockedit=""]').click();
     await openStockRow(page, key);
-    expect(await page.locator("[data-stockeaninput]").inputValue(), "the EAN did not round-trip").toBe(ean);
+    expect(await page.locator(`[data-stockeaninput="${key}"]`).inputValue(), "the EAN did not round-trip").toBe(ean);
     await assertClean(page, w, "EAN bound");
 
     // The same code on a different product must be refused — two products
     // sharing a barcode makes every future scan a coin toss — and the refusal
-    // has to say so, in Russian.
+    // has to say so, in Russian, under the box.
     // A different product — the sweep deliberately crosses the product
     // boundary, not just the variant one.
     const otherKey = await firstStockKey(page, PRODUCT.id);
@@ -141,36 +154,41 @@ test.describe("sweep — warehouse", () => {
     // assertion that counts is the sentence the owner sees, just below.
     w.allow.push(/\/api\/admin\/inventory\//);
     await openStockRow(page, otherKey);
-    await page.locator("[data-stockeaninput]").fill(ean);
-    await page.locator("[data-stocksave]").click();
-    const dupMsg = await toastText(page);
-    expect(dupMsg, "a duplicate EAN was accepted silently").not.toBe("");
+    card = carded();
+    await page.locator(`[data-stockeaninput="${otherKey}"]`).fill(ean);
+    await page.locator(`[data-stockeaninput="${otherKey}"]`).press("Enter");
+    await card;
+    const dup = page.locator(`[data-ashint="stockean:${otherKey}"]`);
+    await expect(dup, "a duplicate EAN was accepted silently").toBeVisible();
+    const dupMsg = ((await dup.textContent()) || "").trim();
     expect(isRussian(dupMsg), `duplicate EAN message is not Russian — "${dupMsg}"`).toBe(true);
-    expect(dupMsg, "a duplicate EAN reported success").not.toMatch(/^Сохранено/);
-    expect(dupMsg, "the refusal does not say the code belongs to another product")
-      .toMatch(/штрихкод|код/i);
-    await clearToast(page);
+    expect(dupMsg, "the refusal does not say the code belongs to another product").toMatch(/штрихкод|код/i);
+    // the header must not claim «Сохранено ✓» after a refusal: it says the box is not saved
+    await expect(page.locator("[data-admsavest]:visible", { hasText: /Сохранено ✓/ }), "a refusal claimed «Сохранено ✓»").toHaveCount(0);
+    await expect(page.locator("[data-admsavest]:visible", { hasText: "Не сохранено — проверьте поле" }).first(),
+      "the header did not say the refused box is not saved").toBeVisible();
     await assertClean(page, w, "duplicate EAN refused");
 
-    // Whatever the shop chooses to accept as a barcode, it must come back
-    // exactly as typed rather than half-stored.
+    // Whatever the shop accepts as a barcode goes out whole; what it does not
+    // is refused before the trip and the stored code stays as it was.
     await openStockRow(page, key);
-    await page.locator("[data-stockeaninput]").fill("abc");
-    await page.locator("[data-stocksave]").click();
-    await clearToast(page);
-    await openStockRow(page, key);
-    const round = await page.locator("[data-stockeaninput]").inputValue();
-    expect(["abc", ean, ""], `a barcode came back as "${round}"`).toContain(round);
-    await page.locator("[data-stockeaninput]").fill("");
-    await page.locator("[data-stocksave]").click();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill("abc");
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    await expect(page.locator(`[data-ashint="stockean:${key}"]`)).toBeVisible();
+    card = carded();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill("");
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    expect((await card).ok()).toBe(true);
     await clearToast(page);
     await assertClean(page, w, "EAN cleared");
 
     // ---- the ledger --------------------------------------------------------
     await tab(page, "stock");
-    await page.locator('[data-stockmovesopen="1"]').click();
-    await expect(page.getByText("История приёмок и продаж")).toBeVisible();
-    for (const reason of ["", "goods_in", "sale_pos", "adjust", "return"]) {
+    await page.locator('[data-stockmovesopen="1"]:visible').first().click();
+    await expect(page.getByText("История склада")).toBeVisible();
+    // «Вручную» carries the reason typed beside the first count
+    await expect(page.locator(".adm-hrow", { hasText: "пересчёт на полке" }).first()).toBeVisible();
+    for (const reason of ["", "goods_in", "sale", "adjust", "return", "edit"]) {
       await page.locator(`[data-stockmovesreason="${reason}"]`).click();
       await assertClean(page, w, `moves filtered by "${reason || "all"}"`);
     }
@@ -181,15 +199,14 @@ test.describe("sweep — warehouse", () => {
     // Headless Chromium has no camera. The overlay must still open, say so in
     // Russian, and leave the manual field usable — that is the keyboard-wedge
     // path a USB scanner uses anyway (docs/inventory.md).
-    /* Two controls open the scanner on «Склад» since the redesign — the
-       header's «Приёмка» and the screen's own «Сканировать» (README § Товары);
-       either does, so take the first. */
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator("[data-scanmanual]")).toBeVisible();
     await assertClean(page, w, "scanner opened without a camera");
     await page.locator("[data-scanmanual]").fill("нет-такого-кода");
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText(/не привязан|Найдите товар/);
+    await expect(page.locator("#scanpanel")).toContainText(/Новый код|К какому товару/);
     await assertClean(page, w, "scanner manual entry, unknown code");
     await page.locator("[data-scanclose]").click();
     await expect(page.locator("[data-scanmanual]")).toHaveCount(0);
@@ -206,10 +223,9 @@ test.describe("sweep — the in-salon register", () => {
     await openAdmin(page);
 
     await tab(page, "pos");
-    // «Наличные» / «Терминал» are the two ways to finish a sale since the
-    // redesign — an empty cart must leave both of them dead.
-    await expect(page.locator('[data-possend="cash"]'), "an empty sale could be submitted").toBeDisabled();
-    await expect(page.locator('[data-possend="terminal"]'), "an empty sale could be submitted").toBeDisabled();
+    // 1a: «К оплате» is the one way to finish a sale («Наличные» / «Терминал»
+    // are a pick above it) — an empty cart must leave it dead.
+    await expect(page.locator("[data-possend]"), "an empty sale could be submitted").toBeDisabled();
     await assertClean(page, w, "register, empty cart");
 
     // One 44-h chip per size — the chip IS the «add», and it carries the size
@@ -226,9 +242,11 @@ test.describe("sweep — the in-salon register", () => {
     const sub = ((await line.locator(".adm-row__sub").first().textContent()) || "").trim();
     const variant = sub.split("·")[0].trim();
     const key = `${PRODUCT_2.id} ${variant}`;
+    // 1a: the count is typed into the row and leaves with Enter
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("20");
-    await page.locator("[data-stocksave]").click();
+    const set20 = page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    await typeCount(page, key, "20");
+    await set20;
     await clearToast(page);
     expect(await stockQty(page, key), "the register's shelf was not set to 20").toBe(20);
     await tab(page, "pos");
@@ -243,7 +261,8 @@ test.describe("sweep — the in-salon register", () => {
     await assertClean(page, w, "register quantity clamps");
 
     // Discount: letters are not a percentage, and the total on screen has to
-    // be the total that is charged.
+    // be the total that is charged. 1a: the typed box is behind «другая…».
+    await page.locator('[data-posdisc="other"]').click();
     await page.locator("[data-posdiscount]").fill("abc");
     expect(await page.locator("[data-posdiscount]").inputValue(), "letters got into the discount box").toBe("");
     await page.locator("[data-posdiscount]").fill("999");
@@ -254,7 +273,7 @@ test.describe("sweep — the in-salon register", () => {
 
     // Remove a line, then rebuild the sale.
     await page.locator("[data-posremove]").first().click();
-    await expect(page.locator('[data-possend="terminal"]')).toBeDisabled();
+    await expect(page.locator("[data-possend]")).toBeDisabled();
     await page.locator("[data-posq]").fill(PRODUCT_2.id);
     await page.locator(`[data-posadd^="${PRODUCT_2.id}:"]`).first().click();
     await page.locator("[data-posemail]").fill(freshEmail("sweep-pos"));
@@ -264,6 +283,7 @@ test.describe("sweep — the in-salon register", () => {
     const shownTotal = ((await page.locator(".adm-total__v").first().textContent()) || "").trim();
     // money goes through the confirm card, and the card lists what is about
     // to be charged before anything is charged
+    await page.locator('[data-pospay="terminal"]').click();
     await page.locator('[data-possend="terminal"]').click();
     await expect(page.locator(".adm-confirm__d")).toContainText(shownTotal);
     await page.locator("[data-admapply]").click();
@@ -307,8 +327,9 @@ test.describe("sweep — the in-salon register", () => {
     // other spec that buys it (admin.spec.ts, checkout.spec.ts) decrements
     // the same count — at zero it would stop being addable at all.
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("500");
-    await page.locator("[data-stocksave]").click();
+    const set500 = page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    await typeCount(page, key, "500");
+    await set500;
     await clearToast(page);
   });
 });
@@ -361,13 +382,19 @@ test.describe("sweep — customers", () => {
     await assertClean(page, w, "customer card");
 
     /* Reject, then let them ask again, then approve — both halves of the
-       queue. Both ask first, in the same card the tier switch below them uses:
-       an approval posts the partner letter and cannot be taken back. */
+       queue. 1a (Dim, 25.09.2026, q3): neither asks any more. Neither can be
+       taken back on the server, so each is on screen at once and SENT ten
+       seconds later, with «Вернуть» on the toast until then. */
+    const requested = async () => {
+      const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
+      return (await res.json()).customer.proRequestedAt as string | null;
+    };
     await page.locator("[data-admcustreject]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Отказать в заявке?");
-    await page.locator("[data-admapply]").click();
+    await expect(page.locator(".adm-confirm")).toHaveCount(0);
     expect(await toastText(page)).toMatch(/[Оо]тклон/);
     await clearToast(page);
+    // the refusal reaches the server once its ten seconds are up — not before the next request is filed
+    await expect.poll(requested, { timeout: 25_000, message: "«Отказать» never reached the server" }).toBeNull();
     await assertClean(page, w, "partner request rejected");
 
     expect((await shopper.request.post("/api/account/pro-request/", {
@@ -378,17 +405,18 @@ test.describe("sweep — customers", () => {
     await tab(page, "people");
     await page.locator("[data-admcustq]").fill(email);
     await page.locator("[data-admcustopen]").first().click();
+    // «Вернуть» first: the approval has to be answerable with "no" — and then nothing is sent
     await page.locator("[data-admcustapprove]").click();
-    await expect(page.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
-    // «Отмена» first: a card that asks has to be answerable with "no"
-    await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
+    await page.locator(".adm-toast__undo").click();
+    await expect(page.locator("[data-admcustapprove]"), "«Вернуть» did not bring the request back").toBeVisible();
     await page.locator("[data-admcustapprove]").click();
-    await page.locator("[data-admapply]").click();
-    expect(await toastText(page)).toMatch(/[Оо]добрен/);
+    // the answer about the letter comes when the held call has gone
+    await expect(page.locator(".adm-toast__t")).toContainText(/[Оо]добрен/, { timeout: 25_000 });
     await clearToast(page);
-    // the card's tier badge is the panel's own since phase 4 — «Pro», like the row's
-    await expect(page.locator(".adm-badge", { hasText: "Pro" }).first()).toBeVisible();
+    // the card's tag reads «Партнёр» since 1a — one name for the tier everywhere
+    await expect(page.locator(".adm-chd .adm-tag", { hasText: "Партнёр" }).first()).toBeVisible();
+    expect(await requested(), "the approval left the request standing").toBeNull();
     await assertClean(page, w, "partner approved");
 
     // ---- points ------------------------------------------------------------
@@ -397,45 +425,50 @@ test.describe("sweep — customers", () => {
       return Number((await res.json()).customer.pointsBalance);
     };
 
+    /* 1a (README § 2): a number that is not one is not sent — the box turns
+       rust and one line under it says why, in Russian, instead of a toast. */
+    const ptsHint = page.locator("[data-admcustptshint]");
     await page.locator("[data-admcustpoints]").fill("abc");
     await page.locator("[data-admcustadjust]").click();
-    const badMsg = await toastText(page);
+    await expect(ptsHint).toBeVisible();
+    const badMsg = ((await ptsHint.textContent()) || "").trim();
     expect(isRussian(badMsg), `points "abc": message is not Russian — "${badMsg}"`).toBe(true);
-    await clearToast(page);
+    await expect(page.locator("[data-admcustpoints]")).toHaveAttribute("aria-invalid", "true");
     expect(await balance(), "«abc» moved the balance").toBe(0);
     await assertClean(page, w, "points abc");
 
-    // ±1e9 is meant to be refused; the route answers 400 and Chromium logs
-    // it. What has to hold is the balance and the message, both below.
-    w.allow.push(/\/api\/admin\/customers\//);
+    // ±1e9 is refused the same way, before it could travel: the route's own
+    // ceiling (a million) is checked in the panel too.
     for (const huge of ["1000000000", "-1000000000"]) {
       await page.locator("[data-admcustpoints]").fill(huge);
       await page.locator("[data-admcustnote]").fill("fuzz");
       await page.locator("[data-admcustadjust]").click();
-      const msg = await toastText(page);
-      expect(msg, `points "${huge}" happened with no message`).not.toBe("");
+      await expect(ptsHint, `points "${huge}" happened with no message`).toBeVisible();
+      const msg = ((await ptsHint.textContent()) || "").trim();
       expect(isRussian(msg), `points "${huge}": message is not Russian — "${msg}"`).toBe(true);
-      await clearToast(page);
       // A billion loyalty points is a billion euros of liability on a shop
       // that does three orders a month — a typo, not an intention.
       expect(Math.abs(await balance()), `a balance of ±1e9 was written for "${huge}"`).toBeLessThan(1e6);
       await assertClean(page, w, `points "${huge}"`);
     }
 
-    // A real, small adjustment still has to work.
+    // A real, small adjustment still has to work — the button says what it
+    // does, and the correction goes five seconds later (q9).
     await page.locator("[data-admcustpoints]").fill("15");
     await page.locator("[data-admcustnote]").fill("извинение за задержку");
+    await expect(page.locator("[data-admcustadjust]")).toHaveText("Начислить +15");
     await page.locator("[data-admcustadjust]").click();
-    expect(await toastText(page)).toMatch(/[Бб]аллы/);
+    expect(await toastText(page)).toMatch(/[Бб]алл/);
     await clearToast(page);
-    await expect.poll(balance, { timeout: 8000 }).toBe(15);
+    await expect.poll(balance, { timeout: 15_000 }).toBe(15);
     await assertClean(page, w, "points adjusted");
 
-    // ---- notes -------------------------------------------------------------
+    // ---- notes: the box saves itself (1a, q1) -------------------------------
     await page.locator("[data-admcustnotesf]").fill(`Заметка ${HTML_BOMB} ${EMOJI}`);
-    await page.locator("[data-admcustsavenotes]").click();
-    expect(await toastText(page)).toMatch(/[Зз]аметка/);
-    await clearToast(page);
+    await expect.poll(async () => {
+      const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
+      return String((await res.json()).customer.notes || "");
+    }, { timeout: 10_000, message: "the note never saved itself" }).toContain("Заметка <script>");
     await page.reload();
     await waitForScreen(page, "admin");
     await tab(page, "people");
@@ -467,13 +500,17 @@ test.describe("sweep — blog", () => {
     await page.locator("[data-admblognew]").click();
     await expect(page.locator('[data-blogf="title"]')).toBeVisible();
 
-    // No title at all is not a post — and the panel has to say why rather
-    // than posting a blank row into the shop's blog.
-    await page.locator("[data-admblogsave]").click();
-    // the editor is adm- markup since the phase-3 redesign
-    const err = page.locator(".adm-err[role=alert]");
+    /* No title at all is not a post — and the panel has to say why rather
+       than posting a blank row into the shop's blog. 1a: the article saves
+       itself, so the refusal is the line under the title, a second after the
+       typing stops, and nothing is sent. */
+    await page.locator("[data-blogbody]").click();
+    await page.keyboard.type("Текст без заголовка.");
+    const err = page.locator("#blogtitlehint .adm-ashint");
     await expect(err, "an untitled post saved without complaint").toBeVisible();
     expect(isRussian((await err.textContent()) || "")).toBe(true);
+    await page.keyboard.press("Control+A");
+    await page.keyboard.press("Delete");
     await assertClean(page, w, "blog, empty title");
 
     const marker = `Свип ${Date.now().toString().slice(-6)}`;
@@ -493,13 +530,14 @@ test.describe("sweep — blog", () => {
     expect(await page.locator("[data-blogbody] script").count(), "the editor ran the owner's paste").toBe(0);
     await page.locator('[data-blogf="seoTitle"]').fill(LONG);
     expect((await page.locator('[data-blogf="seoTitle"]').inputValue()).length).toBeLessThanOrEqual(70);
+    // «+ Товар» opens the search (1a)
+    await page.locator("[data-admblogprodadd]").click();
     await page.locator("[data-admblogq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admblogproductadd="${PRODUCT_2.id}"]`).click();
     await assertClean(page, w, "blog draft filled");
 
-    await page.locator("[data-admblogsave]").click();
-    expect(await toastText(page)).toMatch(/[Чч]ерновик|[Сс]охранен/);
-    await clearToast(page);
+    // it saved itself — the header says so only after the server did
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено ✓", { timeout: 15_000 });
     await assertClean(page, w, "blog draft saved");
 
     /* What the public feed itself carries. Asserting on the DOM alone is a
@@ -520,10 +558,10 @@ test.describe("sweep — blog", () => {
     /* Russian only, so the question about the two empty languages comes
        first — admin-blog.spec.ts holds it to naming them. */
     await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
+    // the state is the line at the foot of the editor
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
     await clearToast(page);
-    // the state is a sentence in the «Публикация» card now, not a chip
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
     await assertClean(page, w, "blog published");
     expect(await listed(), "a published post never reached the public blog").toBe(true);
 
@@ -540,19 +578,26 @@ test.describe("sweep — blog", () => {
     await assertClean(shop.page, shop.w, "public blog with the post");
     await shop.close();
 
+    // «Снять с публикации» is in «⋯» (1a)
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogunpublish]").click();
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Черновик — в магазине не видно");
     await clearToast(page);
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
     expect(await listed(), "an unpublished post stayed on the public blog").toBe(false);
 
-    // Delete asks first, and the answer is undoable only by re-publishing —
-    // docs/blog.md is explicit that posts skip the undo journal.
+    /* Delete asks first (README rule 4), and a confirmed delete is held for
+       as long as «Вернуть» is on the toast (Dim, q8) — posts skip the undo
+       journal (docs/blog.md), so the hold is the way back. */
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await expect(page.locator("[data-admblogdelno]")).toBeVisible();
-    await page.locator("[data-admblogdelno]").click();
-    await expect(page.locator("[data-admblogdelno]")).toHaveCount(0);
+    const sheet = page.locator(".adm-confirm");
+    await expect(sheet).toContainText("Удалить статью?");
+    await sheet.locator("[data-admcancel]").click();
+    await expect(sheet).toHaveCount(0);
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await page.locator("[data-admblogdelyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
+    await expect(page.getByRole("status")).toContainText("Статья удалена");
     await clearToast(page);
     await assertClean(page, w, "blog post deleted");
   });
