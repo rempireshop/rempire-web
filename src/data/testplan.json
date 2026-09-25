@@ -1335,6 +1335,7 @@
       "title": "Вход в панель",
       "steps": [
         "Открыть адрес панели на телефоне.",
+        "Посмотреть, что под карточкой входа.",
         "Ввести неверный пароль и нажать «Войти».",
         "Ввести верный пароль и нажать «Войти»."
       ],
@@ -1342,7 +1343,8 @@
         "На неверный пароль пишет «Неверный пароль».",
         "Внутрь при этом не пускает.",
         "С верным паролем панель открывается.",
-        "Внизу пять кнопок: «Обзор», «Заказы», «Товары», «Салон», «Ещё»."
+        "Внизу пять кнопок: «Обзор», «Заказы», «Товары», «Салон», «Ещё».",
+        "Под карточкой — RU · ET · EN и «Открыть магазин ↗»."
       ],
       "why": "Вход, пускающий без пароля, — это утечка адресов всех ваших покупателей.",
       "risk": "high",
@@ -1351,6 +1353,7 @@
         "title": "Signing into the panel",
         "steps": [
           "Open the panel address on a phone.",
+          "Look at what sits under the sign-in card.",
           "Enter a wrong password and press «Войти» (sign in).",
           "Enter the right password and press «Войти»."
         ],
@@ -1358,10 +1361,13 @@
           "A wrong password gets «Неверный пароль».",
           "It does not let you in.",
           "The right password opens the panel.",
-          "Five buttons along the bottom: «Обзор», «Заказы», «Товары», «Салон», «Ещё»."
+          "Five buttons along the bottom: «Обзор», «Заказы», «Товары», «Салон», «Ещё».",
+          "Under the card: RU · ET · EN and «Открыть магазин ↗» (open the shop)."
         ],
         "why": "A sign-in that lets you past without a password leaks every buyer's address."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "panel-settings-fast",
@@ -1513,6 +1519,55 @@
         "why": "A section that fails on the phone is work for the computer. An error line on «Обзор» or «Аналитика» means the server did not answer, not that the panel is broken."
       },
       "markedAt": "2026-09-23T12:00:25.282Z"
+    },
+    {
+      "id": "panel-frame-1a",
+      "area": "panel",
+      "who": "both",
+      "device": "any",
+      "lang": "RU",
+      "title": "Новая рамка панели",
+      "steps": [
+        "На телефоне открыть панель и посмотреть на верхнюю полосу.",
+        "Открыть заказ и нажать «← Заказы» в верхней полосе.",
+        "Нажать «Ещё» и прочитать строку под каждым разделом.",
+        "Нажать значок «Помощник» вверху справа, потом закрыть его.",
+        "На компьютере свернуть «Помощник» стрелкой «›» и развернуть полосой справа.",
+        "Открыть вопрос «Отменить заказ» в карточке заказа и нажать «Не надо»."
+      ],
+      "expect": [
+        "Вверху: REMPIRE и значок помощника справа; полоски «← В магазин» больше нет.",
+        "«← Заказы» вверху закрывает карточку, как «Назад» телефона.",
+        "Под разделами «Ещё» — живые числа: заявки, отзывы, статьи, продажи; красным — что ждёт вас.",
+        "На компьютере свёрнутый помощник — узкая полоса справа, он ничего не закрывает.",
+        "В вопросе действие слева, «Не надо» справа; «Не надо» ничего не меняет.",
+        "Язык панели и «Выйти» — в «Ещё» на телефоне, внизу меню на компьютере."
+      ],
+      "why": "Рамка одна для всех экранов в новом виде: если в ней что-то сломано, это видно везде.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The panel's new frame",
+        "steps": [
+          "On a phone open the panel and look at the bar at the top.",
+          "Open an order and press «← Заказы» in the top bar.",
+          "Press «Ещё» and read the line under each section.",
+          "Press the «Помощник» icon at the top right, then close it.",
+          "On a computer fold «Помощник» with «›» and open it again from the strip on the right.",
+          "Open the «Отменить заказ» question on an order card and press «Не надо» (don't)."
+        ],
+        "expect": [
+          "At the top: REMPIRE and the assistant's icon on the right; no «← В магазин» bar.",
+          "«← Заказы» at the top closes the card, like the phone's back button.",
+          "Under «Ещё» sections, live numbers: requests, reviews, articles, sales; rust marks what waits.",
+          "On a computer the folded assistant is a narrow strip on the right, covering nothing.",
+          "The question has the action left and «Не надо» right; «Не надо» changes nothing.",
+          "Panel language and «Выйти»: in «Ещё» on a phone, under the menu on a computer."
+        ],
+        "why": "The frame is shared by every screen in the new look: if something in it breaks, it shows everywhere."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "panel-back",
@@ -3555,7 +3610,7 @@
         "Взять номер заказа, которого в списке нет, — из старого письма покупателю.",
         "Ввести этот номер в поиск и подождать.",
         "Нажать на найденный заказ, потом «← Заказы».",
-        "Если в строке найденного заказа есть «Доставлен» или «Выдан клиенту» — нажать и сразу «Отменить».",
+        "Если в строке найденного заказа есть «Доставлен» или «Выдан клиенту» — нажать и сразу «Вернуть».",
         "Стереть пару знаков и дописать их обратно, быстро.",
         "Ввести номер, которого нет вообще."
       ],
@@ -3571,7 +3626,7 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T14:50:13.454Z",
+      "markedAt": "2026-09-25T07:31:40.050Z",
       "en": {
         "title": "The order search looks through the whole shop",
         "steps": [
@@ -3579,7 +3634,7 @@
           "Take an order number that is NOT in that list — from an old letter to a customer.",
           "Type that number into the search and wait.",
           "Tap the order that was found, then «← Заказы».",
-          "If its row has «Доставлен» or «Выдан клиенту», press it and then «Отменить» at once.",
+          "If its row has «Доставлен» or «Выдан клиенту», press it and then «Вернуть» at once.",
           "Delete a couple of characters and type them back, quickly.",
           "Type a number that does not exist at all."
         ],
@@ -3881,7 +3936,7 @@
         "В подсказке сказано отнести посылку в пакомат, курьер — из панели Montonio.",
         "Внизу появилась полоска с номером заказа.",
         "В ней написано, что письмо покупателю ушло.",
-        "Рядом кнопка «Отменить», она живёт шесть секунд.",
+        "Рядом кнопка «Вернуть», она живёт шесть секунд.",
         "Заказ переехал в список «В пути»."
       ],
       "why": "Молчание после отправки — самая частая причина вопросов о заказе.",
@@ -3899,13 +3954,13 @@
           "The hint says to take the parcel to a machine; couriers come from Montonio.",
           "A bar appears at the bottom with the order number.",
           "It says the letter to the buyer has gone.",
-          "An «Отменить» button sits there for six seconds.",
+          "An «Вернуть» button sits there for six seconds.",
           "The order has moved to the «В пути» list."
         ],
         "why": "Silence after dispatch is the commonest reason buyers ask where their order is."
       },
       "mark": "redo",
-      "markedAt": "2026-09-22T14:41:00.000Z"
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "order-shipped-nolabel",
@@ -3952,31 +4007,31 @@
       "steps": [
         "Открыть «Заказы» → «В пути» и нажать на отправленный заказ.",
         "Нажать «Доставлен».",
-        "Посмотреть нижнюю полоску и нажать «Отменить»."
+        "Посмотреть нижнюю полоску и нажать «Вернуть»."
       ],
       "expect": [
         "Заказ сразу закрылся.",
         "Он пропал из списка «В пути», а число у чипа стало меньше на один.",
         "Покупателю никакого письма не пришло.",
-        "«Отменить» возвращает заказ обратно в «В пути»."
+        "«Вернуть» возвращает заказ обратно в «В пути»."
       ],
       "why": "Пока заказ не закрыт, он висит в списке дел.",
       "risk": "low",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-18T17:10:00.000Z",
+      "markedAt": "2026-09-25T07:31:40.050Z",
       "en": {
         "title": "Marking an order delivered",
         "steps": [
           "Open «Заказы» → «В пути» and tap a dispatched order.",
           "Press «Доставлен» (delivered).",
-          "Look at the bar at the bottom and press «Отменить»."
+          "Look at the bar at the bottom and press «Вернуть»."
         ],
         "expect": [
           "The order closes at once.",
           "It leaves the «В пути» list, and the chip's number drops by one.",
           "No letter reaches the buyer.",
-          "«Отменить» puts the order back into «В пути»."
+          "«Вернуть» puts the order back into «В пути»."
         ],
         "why": "Until an order is closed it keeps sitting in your list of jobs."
       }
@@ -6169,7 +6224,7 @@
         "Открыть «Товары» → «Склад».",
         "Нажать по очереди «Все», «Мало», «Нет», «Не учтено».",
         "Пролистать список до конца, нажимая «Показать ещё».",
-        "Нажать у одного товара «−», потом сразу «Отменить» внизу экрана.",
+        "Нажать у одного товара «−», потом сразу «Вернуть» внизу экрана.",
         "Найти на «Складе» объём, который убрали из карточки товара.",
         "Посмотреть на кнопки «Все», «Мало», «Нет», «Не учтено», не нажимая их."
       ],
@@ -6177,7 +6232,7 @@
         "Каждая кнопка сверху оставляет в списке только свои товары.",
         "«Показать ещё» дописывает следующие строки в конец.",
         "Список не прыгает в начало.",
-        "«Отменить» возвращает остаток обратно.",
+        "«Вернуть» возвращает остаток обратно.",
         "Объём, убранный из карточки товара, остаётся на «Складе» своей строкой.",
         "На каждой кнопке число — сколько строк за ней, включая ноль."
       ],
@@ -6191,7 +6246,7 @@
           "Open «Товары» → «Склад».",
           "Press «Все», «Мало», «Нет» and «Не учтено» in turn.",
           "Scroll the list to the end, pressing «Показать ещё» (show more).",
-          "On one product press «−», then «Отменить» at the bottom straight away.",
+          "On one product press «−», then «Вернуть» at the bottom straight away.",
           "Find on «Склад» a size that was removed from the product card.",
           "Look at the «Все», «Мало», «Нет», «Не учтено» buttons without pressing them."
         ],
@@ -6199,13 +6254,13 @@
           "Each button at the top leaves only its own products.",
           "«Показать ещё» adds the next rows at the end.",
           "The list does not jump back to the top.",
-          "«Отменить» puts the stock back.",
+          "«Вернуть» puts the stock back.",
           "A size removed from the product card stays on «Склад» as its own row.",
           "Each button carries a number — how many rows are behind it, zero included."
         ],
         "why": "A list that jumps back to the top makes a phone stock-take impossible."
       },
-      "markedAt": "2026-09-19T13:21:13.000Z"
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "stock-edit",
@@ -7385,7 +7440,7 @@
         "Партнёр появился в списке с пометкой партнёра.",
         "На его почту пришло письмо.",
         "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду.",
-        "Второй раз выходит «Уже партнёр» — без кнопки «Отменить»."
+        "Второй раз выходит «Уже партнёр» — без кнопки «Вернуть»."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -7402,12 +7457,12 @@
           "The partner is in the list with a partner marker.",
           "A letter has arrived in their mailbox.",
           "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view.",
-          "The second time it says «Уже партнёр», with no «Отменить» button."
+          "The second time it says «Уже партнёр», with no «Вернуть» button."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:43:29.371Z"
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "people-remove-partner",
@@ -7874,7 +7929,7 @@
       "lang": "RU",
       "title": "Спросить помощника про дела магазина",
       "steps": [
-        "В панели нажать круглую кнопку «Помощник» внизу справа.",
+        "В панели нажать значок «Помощник» вверху справа (на компьютере — полоса справа).",
         "Спросить «Какие заказы ждут отправки?».",
         "Спросить «Что заканчивается и что дозаказать?».",
         "Не меняя язык панели, спросить то же самое по-английски."
@@ -7893,7 +7948,7 @@
       "en": {
         "title": "Asking the assistant about the shop's business",
         "steps": [
-          "In the panel press the round «Помощник» button, bottom right.",
+          "In the panel press the «Помощник» icon at the top right (on a computer, the strip on the right).",
           "Ask «Какие заказы ждут отправки?» — which orders are waiting?",
           "Ask «Что заканчивается и что дозаказать?» — what is running out?",
           "Without changing the panel's language, ask the same thing in English."
@@ -7909,7 +7964,7 @@
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T14:50:13.454Z"
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "ai-assistant-voice",
@@ -7967,7 +8022,7 @@
         "Написать помощнику «поставь 12,90 на» и название товара.",
         "Прочитать карточку, которую он покажет.",
         "Нажать «Применить» и проверить цену в магазине.",
-        "Нажать «Отменить» на полоске внизу или «Вернуть» в журнале."
+        "Нажать «Вернуть» на полоске внизу или в журнале."
       ],
       "expect": [
         "Сам по себе помощник цену не поменял.",
@@ -7984,7 +8039,7 @@
           "Write to the assistant «поставь 12,90 на» and a product name.",
           "Read the card it shows you.",
           "Press «Применить» — apply — and check the price in the shop.",
-          "Press «Отменить» on the bottom bar, or «Вернуть» in the log."
+          "Press «Вернуть» (undo) on the bottom bar, or in the log."
         ],
         "expect": [
           "The assistant did not change the price by itself.",
@@ -7993,7 +8048,9 @@
           "Undoing put the old price back."
         ],
         "why": "An assistant that changes prices unasked will one day show the wrong one."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T07:31:40.050Z"
     },
     {
       "id": "ai-assistant-bundle",
