@@ -1229,6 +1229,7 @@
       "Сумма от 0 до 10 000 €, пусто или «нет».": "Summa 0 kuni 10 000 €, tühi või «no».",
       "Цена — число от 0 до 99 €.": "Hind on number 0 kuni 99 €.",
       "Цена ниже тарифа Montonio сохранена — разницу доплатит магазин": "Montonio tariifist madalam hind salvestatud — vahe maksab pood",
+      "Ниже тарифа Montonio — «Оставить так» или другая цена": "Montonio tariifist madalam — «Jäta nii» või muu hind",
       "В таблице цены Montonio": "Tabelis on Montonio hinnad",
       "В таблице уже цены Montonio": "Tabelis on juba Montonio hinnad",
       "Когда «Доставлен»: сохранено": "Millal «Kohale toimetatud»: salvestatud",
@@ -4398,6 +4399,7 @@
       "Сумма от 0 до 10 000 €, пусто или «нет».": "An amount from 0 to 10 000 €, empty or «no».",
       "Цена — число от 0 до 99 €.": "The price is a number from 0 to 99 €.",
       "Цена ниже тарифа Montonio сохранена — разницу доплатит магазин": "Price below Montonio's tariff saved — the shop pays the difference",
+      "Ниже тарифа Montonio — «Оставить так» или другая цена": "Below Montonio's tariff — «Keep it» or another price",
       "В таблице цены Montonio": "The table now has Montonio's prices",
       "В таблице уже цены Montonio": "The table already has Montonio's prices",
       "Когда «Доставлен»: сохранено": "When «Delivered»: saved",
@@ -28140,7 +28142,17 @@
     if (!ADM_AS_SPEC[as]) {
       admAutosaveSpec(as, {
         kind: "money",
-        validate: function (v) { return shipCellHint(rule, v); },
+        validate: function (v) {
+          var bad = shipCellHint(rule, v);
+          if (bad) return bad;
+          /* A price under Montonio's tariff the owner has not said «Оставить
+             так» to (q4) is held in its box: never sent — so the header does
+             not say «Сохранено ✓» over it, and the journal writes no line —
+             the box rust, «Оставить так» under it, the line at the top. */
+          setShipDraftField(rule, v);
+          if (shipHeldKey(rule)) { render(); return "Ниже тарифа Montonio — «Оставить так» или другая цена"; }
+          return "";
+        },
         send: function (v) {
           setShipDraftField(rule, v);
           admShipCommit();
@@ -30968,6 +30980,10 @@
     });
     return low;
   }
+  /** Is the box `key` of the panel's table waiting for «Оставить так»? */
+  function shipHeldKey(key) {
+    return shipHeldCells(shipDraft()).some(function (c) { return shipCellKey(c) === key; });
+  }
   /** The cells of `row` waiting for «Оставить так». */
   function shipHeldCells(row) {
     return shipLowAll(row).filter(function (c) { return !shipAccepted(shipCellKey(c), c.charged); });
@@ -31042,6 +31058,8 @@
     if (SRV.admin === true && !adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return null; }
     var draft = cloneRules(shipDraft());
     if (shipSig(draft) === shipSig(SHIP_STORED)) return null;
+    // only a price held for «Оставить так» moved: nothing to send, no journal line
+    if (shipSig(shipGate(draft).send) === shipSig(shipServerRow || SHIP_STORED)) { S.shipDraft = draft; return null; }
     var entry = admSetApply({ type: "set_shipping_rules", rules: draft, full: true, reset: !!(opts && opts.reset) },
       toastText || "Тарифы доставки сохранены");
     S.shipDraft = draft;
@@ -44622,6 +44640,7 @@
        is a button, so «вернуть» never means guessing what the old number was.
        Saved at once; the caret goes back to the box it belongs to. */
     if (d.shipclear) {
+      delete ADM_AS["ship:" + d.shipclear];    // a held box's rust and line go with its number
       setShipDraftField(d.shipclear, "");
       admShipCommit();
       render(); syncShipInputs(); refocus('[data-shiprule="' + d.shipclear + '"]'); return;
@@ -44634,6 +44653,7 @@
       var accV = shipRowCell(shipDraft(), d.shipaccept);
       if (typeof accV === "number") SHIP_ACCEPT[d.shipaccept] = accV;
       S.shipLow = null;
+      delete ADM_AS["ship:" + d.shipaccept];   // the box's «held» line and rust go with the answer
       admShipCommit("Цена ниже тарифа Montonio сохранена — разницу доплатит магазин");
       render(); refocus('[data-shiprule="' + d.shipaccept + '"]'); return;
     }

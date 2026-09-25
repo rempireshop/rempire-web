@@ -419,3 +419,56 @@ describe("«Счета для компаний» saves itself, with a way back",
     expect(fn("demoUndo")).toContain('else if (a.type === "set_invoice")');
   });
 });
+
+/* ------------------------------------------------------------------------ */
+
+describe("a price under Montonio's tariff is held in its box (q4)", () => {
+  /* Found on the screenshots, 25.09.2026: leaving a box with a price under
+     the tariff made its box's autosave «send» nothing and call that a save —
+     «Сохранено ✓» in the header over a price that never left, and a journal
+     line for it. It is not sent at all now: the box's own check holds it. */
+  function spec(held: boolean) {
+    const log: string[] = [];
+    const r = new Function("LOG", "HELD", `
+      var ADM_AS_SPEC = {};
+      function admAutosaveSpec(k, s) { ADM_AS_SPEC[k] = s; return k; }
+      function setShipDraftField(rule, v) { LOG.push("draft " + rule + "=" + v); }
+      function shipHeldKey() { return HELD; }
+      function admShipCommit() { LOG.push("commit"); }
+      function render() { LOG.push("render"); }
+      ${fn("shipNum")}
+      ${fn("shipCellHint")}
+      ${fn("admShipAs")}
+      return ADM_AS_SPEC[admShipAs("c:omniva:EE")];`)(log, held) as {
+      validate: (v: string) => string; send: (v: string) => unknown;
+    };
+    return { s: r, log };
+  }
+
+  it("held: the check refuses it — nothing is sent, the box is drawn with «Оставить так»", () => {
+    const { s, log } = spec(true);
+    expect(s.validate("1")).toBe("Ниже тарифа Montonio — «Оставить так» или другая цена");
+    expect(log).toEqual(["draft c:omniva:EE=1", "render"]);
+  });
+
+  it("accepted or above the tariff: it goes like any other price", () => {
+    const { s, log } = spec(false);
+    expect(s.validate("4,20")).toBe("");
+    expect(log).toEqual(["draft c:omniva:EE=4,20"]);
+  });
+
+  it("garbage is still refused by its own words, before anything else", () => {
+    const { s, log } = spec(true);
+    expect(s.validate("-5")).toBe("Цена — число от 0 до 99 €.");
+    expect(log).toEqual([]);
+  });
+
+  it("a commit that would send nothing but a held price writes no journal line", () => {
+    expect(fn("admShipCommit")).toContain(
+      "if (shipSig(shipGate(draft).send) === shipSig(shipServerRow || SHIP_STORED)) { S.shipDraft = draft; return null; }");
+    // «Оставить так» and «вернуть» take the box's held line and rust with them
+    expect(src).toContain('delete ADM_AS["ship:" + d.shipaccept];');
+    expect(src).toContain('delete ADM_AS["ship:" + d.shipclear];');
+    expect(css).toContain(".adm-rates__c:has(.adm-rt__keep) .adm-ashint { display: none; }");
+  });
+});
