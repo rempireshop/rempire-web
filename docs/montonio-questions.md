@@ -266,9 +266,17 @@ We were told Nova Post supports no returns at all.
 behind Nova Post's development.» Still true, and a *not yet*. The shop already
 says so where a customer can see it (the «без возврата» card in checkout, the
 terms); since 24.09 the order card's return line says it too on a Nova Post
-order, instead of «код на возврат присылает перевозчик». **Still pending from
-Montonio**: the separate answer on the **DPD return label** (asked as 4.3 in the
-22.09 letter).
+order, instead of «код на возврат присылает перевозчик».
+
+**Answer, 25.09.2026 (DPD, asked as 4.3 in the 22.09 letter).** «Sain info, et
+paraku läbi API täna return labelit ikkagi luua ei saa ka DPD puhul» — a return
+label cannot be created through the API for DPD either. So today **no carrier**
+gives the shop a return label through Montonio's API. Nothing in the shop
+promises one: the order card's return line tells Renat to write to the customer
+(«этикетку возврата магазин выдать не может — код на возврат присылает
+перевозчик»), and the carriers' own return codes (Omniva / DPD SMS codes,
+switched on in Montonio's Partner System) are the only route — see
+docs/go-live.md.
 
 ### 12. Anything else that differs between sandbox and live
 
