@@ -32,49 +32,51 @@ async function settings(page: Page, sub: string): Promise<void> {
 
 const CYRILLIC = /[А-Яа-яЁё]/;
 
-test.describe("the panel's confirm cards answer in the panel's own language", () => {
+test.describe("the panel's composed lines answer in the panel's own language", () => {
   test.use({ extraHTTPHeaders: ipHeaders(178) });
 
+  /* 1a (25.09.2026, q40): «Цены и баллы» asks no question any more — a box
+     saves when it is left, with «Вернуть». The ASSEMBLED line the card used
+     to show lives on as the change's journal line, painted the same way (a
+     node per « · » fact, admPiecesHTML), so that is where the language is
+     checked now. */
   for (const lang of ["RU", "ET", "EN"] as const) {
-    test(`«Цены и баллы» — the card is ${lang} from its heading to its last fact`, async ({ page }) => {
+    test(`«Цены и баллы» — the journal line is ${lang} from its label to its last fact`, async ({ page }) => {
       test.setTimeout(120_000);
       await openAdmin(page);
-      await adminLang(page, lang);
-      await settings(page, "prices");
+      const was = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing ?? {};
+      try {
+        await adminLang(page, lang);
+        await settings(page, "prices");
 
-      /* Move one number. Every field of this card goes into the same composed
-         line, so one is enough to make the panel write all of them out. */
-      const pct = page.locator('[data-pricingf="proDiscountPct"]');
-      await expect(pct).toBeVisible();
-      await pct.fill("25");
-      await page.locator("[data-admpricingsave]:visible").first().click();
+        const pct = page.locator('[data-pricingf="proDiscountPct"]');
+        await expect(pct).toBeVisible();
+        await pct.fill("25");
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await pct.press("Tab");
+        expect((await put).ok()).toBe(true);
+        await expect(page.locator(".adm-confirm"), "q40: the prices ask no question").toHaveCount(0);
 
-      const card = page.locator(".adm-confirm");
-      await expect(card).toBeVisible();
-      const title = (await card.locator(".adm-confirm__t").innerText()).trim();
-      const detail = (await card.locator(".adm-confirm__d").innerText()).trim();
-      if (lang === "RU") {
-        // the source language: the card says the same thing it always did,
-        // with the label as the first fact of its own list rather than a
-        // «Цены и лояльность: …» head no rule could see past
-        expect(title).toBe("Изменить цены и баллы?");
-        expect(detail).toContain("Цены и лояльность · ");
-        expect(detail).toContain("скидка для салонов 25%");
-      } else {
-        expect(title, "the heading was already translated before this fix").not.toMatch(CYRILLIC);
-        expect(detail, `the card's own body stayed Russian under a ${lang} heading`).not.toMatch(CYRILLIC);
+        await settings(page, "journal");
+        const line = page.locator(".adm-narrow .adm-jrow").first().locator(".adm-jrow__l").first();
+        await expect(line).toBeVisible();
+        const text = (await line.innerText()).trim();
+        if (lang === "RU") {
+          expect(text).toContain("Цены и лояльность · ");
+          expect(text).toContain("скидка для салонов 25%");
+        } else {
+          expect(text, `the line stayed Russian on a ${lang} panel: ${text}`).not.toMatch(CYRILLIC);
+        }
+        // …and it really is the pricing line, not some other one
+        expect(text.toLowerCase()).toMatch(/25\s*%/);
+
+        /* One element per fact is what makes that possible — assert the shape,
+           not only the words, so a future glue-up fails here and not in the
+           owner's panel. */
+        expect(await line.locator("span").count(), "the line is painted in pieces (admPiecesHTML)").toBeGreaterThan(1);
+      } finally {
+        await page.request.put("/api/admin/settings/", { data: { pricing: was } });
       }
-      // …and it really is the composed line, not some other card
-      expect(detail.toLowerCase()).toMatch(/25\s*%/);
-
-      /* One element per fact is what makes that possible — assert the shape,
-         not only the words, so a future glue-up fails here and not in the
-         owner's panel. */
-      const pieces = await card.locator(".adm-confirm__d span").count();
-      expect(pieces, "the detail is painted in pieces (admDetailHTML)").toBeGreaterThan(3);
-
-      await page.locator("[data-admcancel]").first().click();
-      await expect(card).toHaveCount(0);
     });
   }
 });

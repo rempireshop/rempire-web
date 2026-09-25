@@ -223,6 +223,9 @@ test.describe("invoice for companies", () => {
         // …and «О компании» carries the invoice settings card, warning that the bank details are blank
         await admin.locator("[data-admsetback]").click();
         await admin.locator('[data-admsetpage="company"]').click();
+        // «Счета для компаний» is a fold of the page since 1a — opened, never toggled shut
+        const fold = admin.locator('[data-admfold="content:invoice"]');
+        if ((await fold.getAttribute("aria-expanded")) !== "true") await fold.click();
         const card = admin.locator("[data-adminvsettings]");
         await expect(card).toBeVisible();
         // the IBAN is filled in (above), the bank name is not — so the softer
@@ -240,9 +243,8 @@ test.describe("invoice for companies", () => {
            /api/overrides/, which is a cached public response, and this test is
            about the value being stored, not about when the cache expires. */
         await card.locator('[data-invsetf="remindBeforeDays"]').fill("3");
-        // «Сохранить» is the page's save bar since r12 — it names the card while it differs
-        await expect(admin.locator("[data-setnote]")).toContainText("Счета для компаний");
-        await admin.locator("[data-adminvsave]").click();
+        // 1a: a number saves itself when its box is left — no «Сохранить»
+        await card.locator('[data-invsetf="remindBeforeDays"]').press("Tab");
         await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
         await admin.locator("[data-closetoast]").click();
         const saved = (await (await admin.request.get("/api/admin/settings/")).json()) as {

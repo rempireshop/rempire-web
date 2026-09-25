@@ -211,11 +211,32 @@ test.describe("sweep — every tab", () => {
   });
 });
 
+/** A fold of a 1a screen (admFoldHTML), opened — never toggled shut: it
+ *  remembers its state for the session, so a second click would close it. */
+async function openFold(page: import("@playwright/test").Page, key: string): Promise<void> {
+  const head = page.locator(`[data-admfold="${key}"]`).first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
+}
+
+/** «⋯» of a settings block (admSetMoreHTML), opened. */
+async function openMore(page: import("@playwright/test").Page, key: string): Promise<void> {
+  const btn = page.locator(`[data-setmore="${key}"]`).first();
+  if ((await btn.getAttribute("aria-expanded")) !== "true") await btn.click();
+  await expect(btn).toHaveAttribute("aria-expanded", "true");
+}
+
+const settingsPut = (page: import("@playwright/test").Page) =>
+  page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+
 test.describe("sweep — the banner", () => {
   test.use({ extraHTTPHeaders: ipHeaders(154) });
 
-  test("garbage in every field, slides to the limit and past it, save, reset, cancel", async ({ page, browser }) => {
-    test.setTimeout(120_000);
+  /* 1a (25.09.2026): the banner saves itself — a text a second after the last
+     keystroke, a switch, an arrow or a picture at once — and «Удалить слайд»
+     asks, then holds the delete five seconds with «Вернуть» (q8). */
+  test("garbage in every field, slides to the limit and past it, delete, reset, «Вернуть»", async ({ page, browser }) => {
+    test.setTimeout(150_000);
     const w = watch(page);
     await openAdmin(page);
     await openSettings(page, "home");
@@ -241,11 +262,12 @@ test.describe("sweep — the banner", () => {
       const marked = `E2E ${HTML_BOMB}`.slice(0, 40);
       await page.locator('[data-herof="title"]').fill(marked);
       await page.locator('[data-herof="sub"]').fill(EMOJI);
+      // «Свернуть» sends what is still waiting out its second (the flush)
       await page.locator("[data-heroclose]").first().click();
 
       // Slides: five is the documented ceiling (heroClean slices to 5 and the
-      // «Добавить слайд» button disables itself) — the sixth must be refused
-      // with a sentence, never silently added and then dropped on save.
+      // «+ Слайд» button disables itself) — the sixth must be refused with a
+      // sentence, never silently added and then dropped on save.
       const add = page.locator("[data-heroadd]");
       let guard = 0;
       while (!(await add.isDisabled()) && guard++ < 8) {
@@ -254,7 +276,7 @@ test.describe("sweep — the banner", () => {
       }
       const rows = page.locator('[data-heroedit]');
       expect(await rows.count(), "more than five slides were accepted").toBeLessThanOrEqual(5);
-      await expect(add, "«Добавить слайд» stayed enabled at the ceiling").toBeDisabled();
+      await expect(add, "«+ Слайд» stayed enabled at the ceiling").toBeDisabled();
       await assertClean(page, w, "hero at the slide ceiling");
 
       // Move, hide, delete — every row control, on a full list.
@@ -263,7 +285,16 @@ test.describe("sweep — the banner", () => {
       const total = await rows.count();
       for (let i = 0; i < total; i++) await page.locator('[data-heroon]').nth(i).click();
       await assertClean(page, w, "every slide hidden");
-      for (let i = total - 1; i >= 1; i--) await page.locator("[data-herodel]").nth(i).click();
+      /* «Удалить слайд» is in the open slide's form, asks first (rust, «Не
+         надо»), and the slide leaves the list at once — the write follows
+         five seconds later, with «Вернуть» on the toast until then. */
+      for (let i = total - 1; i >= 1; i--) {
+        await page.locator(`[data-heroedit="${i}"]`).click();
+        await page.locator("[data-herodel]").click();
+        await expect(page.locator(".adm-confirm__t")).toBeVisible();
+        await page.locator("[data-admapply]").click();
+        await expect(page.locator(".adm-confirm")).toHaveCount(0);
+      }
       expect(await rows.count(), "delete left the wrong number of slides").toBe(1);
       // Bring the one survivor back on so the home page has something to draw
       // — the slide's on/off control is a switch since phase 4, so read its state.
@@ -271,13 +302,11 @@ test.describe("sweep — the banner", () => {
       if ((await onBtn.getAttribute("aria-checked")) === "false") await onBtn.click();
       await assertClean(page, w, "hero after delete");
 
-      // Save goes through the confirm card, never straight to the shop.
-      await page.locator("[data-herosave]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-      await assertClean(page, w, "hero applied");
+      // …and once the five seconds are up, the shop has one slide
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/admin/settings/")).json();
+        return (body.settings.hero?.slides ?? []).length;
+      }, { timeout: 20_000, message: "the held deletes never reached the shop" }).toBe(1);
 
       // The storefront shows the text as text — the <script> the owner pasted
       // is escaped, not executed, and no stray token reaches the page.
@@ -290,53 +319,55 @@ test.describe("sweep — the banner", () => {
       await assertClean(shop.page, shop.w, "home page with the fuzzed banner");
       await shop.close();
     } finally {
+      // «Вернуть стандартный баннер», under the banner's «⋯» — at once
       await openSettings(page, "home");
+      await openMore(page, "banner");
+      const back = settingsPut(page);
       await page.locator("[data-heroreset]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
       await back;
     }
 
-    // A pending change that is cancelled must leave nothing behind — not on
+    // A change taken back with «Вернуть» must leave nothing behind — not on
     // screen, and not in settings.hero on the server.
     await openSettings(page, "home");
     await page.locator('[data-heroedit="0"]').click();
     await page.locator('[data-herof="title"]').fill("НЕ ДОЛЖНО СОХРАНИТЬСЯ");
-    await page.locator("[data-heroclose]").first().click();
-    await page.locator("[data-herosave]").click();
-    await expect(page.locator("[data-admapply]")).toBeVisible();
-    await page.locator("[data-admcancel]").click();
-    await expect(page.locator("[data-admapply]")).toHaveCount(0);
-    await assertClean(page, w, "hero change cancelled");
+    await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 10_000 });
+    const undo = settingsPut(page);
+    await page.locator(".adm-toast__undo").click();
+    expect((await undo).ok()).toBe(true);
+    await assertClean(page, w, "hero change taken back");
 
-    const feed = await page.request.get("/api/overrides/");
-    expect(feed.ok()).toBe(true);
-    const body = await feed.json();
-    const hero = body.settings && body.settings.hero;
-    const heroText = JSON.stringify(hero || null);
-    expect(heroText, "a cancelled banner edit reached the server anyway").not.toContain("НЕ ДОЛЖНО");
-    expect(heroText, "the reset did not put the default banner back").not.toContain("E2E");
+    await expect.poll(async () => {
+      const body = await (await page.request.get("/api/overrides/")).json();
+      return JSON.stringify((body.settings && body.settings.hero) || null);
+    }, { message: "a banner edit taken back reached the server anyway" }).not.toContain("НЕ ДОЛЖНО");
+    const feed = await (await page.request.get("/api/overrides/")).json();
+    expect(JSON.stringify((feed.settings && feed.settings.hero) || null), "the reset did not put the default banner back")
+      .not.toContain("E2E");
 
     await page.reload();
     await waitForScreen(page, "admin");
     await openSettings(page, "home");
     await expect(page.getByText("НЕ ДОЛЖНО СОХРАНИТЬСЯ")).toHaveCount(0);
-    await assertClean(page, w, "admin reloaded after cancel");
+    await assertClean(page, w, "admin reloaded after «Вернуть»");
   });
 });
 
 test.describe("sweep — the content card", () => {
   test.use({ extraHTTPHeaders: ipHeaders(155) });
 
-  test("garbage in the shop's own details still leaves a sane footer, then resets", async ({ page, browser }) => {
+  test("garbage in the shop's own details: what the server would blank is not sent, the rest leaves a sane footer", async ({ page, browser }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
     await openSettings(page, "company");
+    const company = async () =>
+      ((await (await page.request.get("/api/admin/settings/")).json()).settings.content?.company ?? {}) as Record<string, string>;
+    const phoneWas = (await company()).phone ?? "";
 
     try {
-      await page.locator('[data-contentblock="company"]').click();
+      await openFold(page, "content:company");
       await expect(page.locator('[data-contentf="company.phone"]')).toBeVisible();
 
       await page.locator('[data-contentf="company.phone"]').fill("abc");
@@ -345,17 +376,22 @@ test.describe("sweep — the content card", () => {
       await page.locator('[data-contentf="company.legalName"]').fill(`Rempire ${HTML_BOMB}`);
       await page.locator('[data-contentf="company.regCode"]').fill(EMOJI);
       await page.locator('[data-contentf="company.iban"]').fill(LONG);
+      await page.locator('[data-contentf="company.iban"]').press("Tab");
       // maxlength is the only guard on these — check it actually held.
       expect((await page.locator('[data-contentf="company.address"]').inputValue()).length).toBeLessThanOrEqual(200);
       expect((await page.locator('[data-contentf="company.iban"]').inputValue()).length).toBeLessThanOrEqual(42);
+      /* 1a (README § 2): a value the server would quietly blank is not sent —
+         the box turns rust with one line under it, and keeps what was typed */
+      for (const f of ["company.phone", "company.email", "company.regCode"]) {
+        await expect(page.locator(`[data-contentf="${f}"]`), `${f} took garbage without a word`)
+          .toHaveAttribute("aria-invalid", "true");
+      }
       await assertClean(page, w, "content company fields fuzzed");
 
-      await page.locator("[data-contentsave]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
-      expect((await put).ok()).toBe(true);
-      await assertClean(page, w, "content applied");
+      // …and what is fine went on its own: the name, script tag and all
+      await expect.poll(async () => (await company()).legalName,
+        { message: "the legal name never saved itself" }).toContain("Rempire <script>");
+      expect((await company()).phone ?? "", "«abc» reached the server as a phone").toBe(phoneWas);
 
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("", "/"));
@@ -364,8 +400,7 @@ test.describe("sweep — the content card", () => {
       // The pasted script tag is text in the footer, not a tag in the DOM.
       await expect(shop.page.locator(".ftr")).toContainText("Rempire <script>");
       expect(await shop.page.locator(".ftr script").count(), "the footer executed what the owner pasted").toBe(0);
-      // «abc» is not a phone number — but whatever the shop decides to do with
-      // it, the footer must not print a broken tel: link with nothing in it.
+      // the footer must not print a broken tel: link with nothing in it.
       const tel = shop.page.locator('.ftr a[href^="tel:"]');
       if (await tel.count()) {
         const href = await tel.first().getAttribute("href");
@@ -374,12 +409,12 @@ test.describe("sweep — the content card", () => {
       await assertClean(shop.page, shop.w, "footer with fuzzed company details");
       await shop.close();
     } finally {
+      await page.reload();
+      await waitForScreen(page, "admin");
       await openSettings(page, "company");
-      await page.locator('[data-contentblock="company"]').click();
-      await page.locator("[data-contentreset]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
+      await openMore(page, "company");
+      const back = settingsPut(page);
+      await page.locator('[data-contentreset="company"]').click();
       await back;
       await assertClean(page, w, "content reset");
     }
@@ -392,29 +427,25 @@ test.describe("sweep — the content card", () => {
     await openSettings(page, "home");
 
     try {
-      /* The content card is split across two settings pages since the phase-3
-         redesign — the announcement bar belongs to «Главная страница» and the
-         socials to «О компании». The draft is one, but each page's «Сохранить»
-         writes only its own part (map of the panel, 23.09.2026, #15) and keeps
-         the other page's typing — so the socials are saved on «О компании»
-         and the strip, still typed, on «Главная страница». */
-      await page.locator('[data-contentblock="announcement"]').click();
-      await page.locator('[data-contentf="announcement.link"]').fill("javascript:alert(1)");
+      /* The strip belongs to «Главная страница» and the socials to «О
+         компании». Since 1a each box saves itself, a link under the url gate:
+         «javascript:» is not sent at all — the box turns rust — and the shop
+         must not print it either way. */
+      const ann = page.locator("[data-contentannon]");
+      if ((await ann.getAttribute("aria-checked")) !== "true") await ann.click();
+      await openMore(page, "strip");
+      const link = page.locator('[data-contentf="announcement.link"]');
+      await link.fill("javascript:alert(1)");
       await page.locator('[data-contentf="announcement.text.RU"]').fill("Тестовая полоска");
+      await expect(link).toHaveAttribute("aria-invalid", "true");
+      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 10_000 });
+
       await openSettings(page, "company");
-      await page.locator('[data-contentblock="social"]').click();
-      await page.locator('[data-contentf="social.instagram"]').fill("javascript:alert(2)");
-      await page.locator("[data-contentsave]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
-      await put;
-      await openSettings(page, "home");
-      await page.locator("[data-contentsave]").click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      const put2 = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-admapply]").click();
-      await put2;
+      await openFold(page, "content:social");
+      const insta = page.locator('[data-contentf="social.instagram"]');
+      await insta.fill("javascript:alert(2)");
+      await insta.press("Tab");
+      await expect(insta).toHaveAttribute("aria-invalid", "true");
 
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("", "/"));
@@ -429,15 +460,15 @@ test.describe("sweep — the content card", () => {
       await assertClean(shop.page, shop.w, "home with a script URL in settings");
       await shop.close();
     } finally {
-      // each page's «Сбросить к стандартному» resets that page's part only
-      for (const sub of ["company", "home"]) {
+      // each page's own reset, under its «⋯», puts back that page's part only
+      await page.reload();
+      await waitForScreen(page, "admin");
+      for (const [sub, more] of [["company", "company"], ["home", "strip"]] as const) {
         await openSettings(page, sub);
-        await page.locator("[data-contentreset]").click();
-        if (await page.locator("[data-admapply]").count()) {
-          const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-          await page.locator("[data-admapply]").click();
-          await back;
-        }
+        await openMore(page, more);
+        const back = settingsPut(page);
+        await page.locator(`[data-contentreset="${sub}"]`).click();
+        await Promise.race([back, page.waitForTimeout(3000)]);
       }
     }
   });
@@ -457,14 +488,11 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
 
     try {
       // A plain, in-range edit first: the owner has to be able to save at all.
+      /* 1a (q40): the box saves itself when it is left — no «Сохранить», no
+         question; «Вернуть» on the toast is the way back. */
       await page.locator('[data-pricingf="proDiscountPct"]').fill("25");
-      await expect(page.locator("[data-admpricingsave]"), "typing a valid value never offered a «Сохранить» button")
-        .toBeVisible();
-      /* A discount is money, so since phase 4 «Сохранить» proposes and the
-         confirm card applies — the same card as a tariff or a shipped order. */
-      await page.locator("[data-admpricingsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить цены и баллы?");
-      await page.locator("[data-admapply]").click();
+      await page.locator('[data-pricingf="proDiscountPct"]').press("Tab");
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
       expect(await toastText(page)).toMatch(/сохранен/i);
       await clearToast(page);
       await assertClean(page, w, "pricing saved");
@@ -484,20 +512,16 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
       ];
       for (const [field, typed, lo, hi] of cases) {
         await page.locator(`[data-pricingf="${field}"]`).fill(typed);
+        await page.locator(`[data-pricingf="${field}"]`).press("Tab");
         // A refused value has to say so. Silently dropping it looks exactly
         // like a save to the owner, who then believes the shop is running on
-        // a number it never stored.
-        const err = page.locator("[data-pricingerr]");
+        // a number it never stored. Since 1a the line is the box's own, and
+        // the value is not sent at all (README § 2).
+        const err = page.locator(`[data-pricingerr="${field}"]`);
         await expect(err, `${field}="${typed}" was dropped with no message`).toBeVisible();
         const errText = (await err.textContent() || "").trim();
         expect(isRussian(errText), `${field}="${typed}" message is not Russian — "${errText}"`).toBe(true);
-        /* Since r12 the page's bar always carries «Сохранить», disabled while
-           the draft equals what is saved — a refused value leaves it so. */
-        if (await page.locator("[data-admpricingsave]:enabled").count()) {
-          await page.locator("[data-admpricingsave]").click();
-          if (await page.locator("[data-admapply]").count()) await page.locator("[data-admapply]").click();
-          await clearToast(page);
-        }
+        await expect(page.locator(`[data-pricingf="${field}"]`)).toHaveAttribute("aria-invalid", "true");
         await assertClean(page, w, `pricing ${field}="${typed}"`);
         const now = await (await page.request.get("/api/admin/settings/")).json();
         const value = field === "proDiscountPct" || field === "proMinOrder"

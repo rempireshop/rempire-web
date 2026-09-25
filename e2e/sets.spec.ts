@@ -138,7 +138,7 @@ test.describe("sets switched off", () => {
     /* «Настройки» is an index of six sub-pages since the phase-3 redesign;
        the two shop-wide switches live on «Главная страница». */
     await openSetupHome(page);
-    await expect(page.getByText("Главный баннер")).toBeVisible();
+    await expect(page.locator(".adm-sech__t", { hasText: "Баннер" })).toBeVisible();
 
     const toggle = page.locator("[data-admbundles]");
     try {
