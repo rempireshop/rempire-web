@@ -476,7 +476,7 @@ describe("the storefront's own halves", () => {
   it("sends the owner's typing to the server verbatim", () => {
     // finding 2, browser side: Math.trunc(Number("сто")) was NaN → JSON null
     const body = run<Record<string, unknown>>(
-      `${slice("promoFormPayload")} return promoFormPayload();`,
+      `${slice("promoFormPayload")} ${slice("promoEndIso")} ${slice("promoActiveNow")} ${slice("admPromoByCode")} return promoFormPayload();`,
       { promoForm: { code: "suvi10", kind: "percent", value: "10", minSubtotal: "сорок", endsAt: "", maxUses: "сто", note: "", active: true } },
     );
     expect(body.maxUses).toBe("сто");

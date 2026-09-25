@@ -11,8 +11,9 @@
  * «Склад» was never a layer, so the top of the stack was the trail itself and
  * one press walked from the history straight back to «Обзор». The letter
  * editor under «Рассылка» had the same hole. Both are layers now, each only on
- * its own tab, and the letter asks about unsaved work before it closes — the
- * question «← Рассылка» asks.
+ * its own tab. Since 1a the letter saves itself (Dim, q3), so Back closes it
+ * at once — what the draft still owes is sent on the way out
+ * (newsCloseEditor → admAutosaveFlush), not asked about.
  *
  * The functions are sliced out of public/shop2/app.js by source text and run
  * over stubs, as tests/blog-panel-shop.test.ts does for the article editor.
@@ -124,17 +125,15 @@ describe("Back from a letter under «Рассылка» returns to the list", ()
     expect(p.closedNews()).toBe(1);
   });
 
-  it("asks once before it throws an unsaved letter away, like «← Рассылка»", () => {
+  it("1a: a letter with a word still owed closes at once too — no question, the draft saves itself on the way out", () => {
     const p = panel({ dirtyNews: true });
     p.S.adminTab = "news"; p.paint();
     p.S.newsEdit = { id: "n1", status: "draft" }; p.paint();
 
     expect(p.back()).toBe(true);
-    expect(p.S.newsEdit, "the unsaved letter was closed without asking").not.toBeNull();
-    expect(p.S.newsConfirmBack).toBe(true);
-
-    expect(p.back()).toBe(true);
-    expect(p.S.newsEdit).toBeNull();
+    expect(p.S.newsEdit, "Back asked about a letter that saves itself").toBeNull();
+    expect(p.S.newsConfirmBack).toBe(false);
+    expect(p.closedNews(), "Back closed the letter without newsCloseEditor, which sends what it owes").toBe(1);
     expect(p.S.adminTab).toBe("news");
   });
 });
@@ -151,6 +150,8 @@ describe("every «← …» sub-screen of the panel is a Back layer", () => {
     ["data-admblogback", "S.adminBlogEdit"],
     ["data-admclose", "S.adminEdit"],
     ["data-newsback", "S.newsEdit"],
+    // 1a: an open promo code is a page of its own on a phone
+    ["data-admpromocancel", "S.promoForm"],
     ["data-stockmovesopen=\"\"", "S.stockMovesOpen"],
   ])("%s → %s", (link, state) => {
     expect(src, `the panel no longer draws ${link}`).toContain(link);

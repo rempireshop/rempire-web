@@ -284,7 +284,7 @@ describe("the start date survives a save in the panel", () => {
     const S: Record<string, unknown> = {};
     const form = build<(p: unknown) => Record<string, unknown>>(["promoFormFrom"], { S })(made);
     S.promoForm = form;
-    const body = build<() => Record<string, unknown>>(["promoFormPayload"], { S })();
+    const body = build<() => Record<string, unknown>>(["promoFormPayload", "promoActiveNow", "admPromoByCode", "promoEndIso"], { S })();
 
     expect(body.startsAt).toBe("2026-12-01T00:00:00.000Z");
 
@@ -300,7 +300,7 @@ describe("the start date survives a save in the panel", () => {
     const S: Record<string, unknown> = {};
     const blank = build<() => Record<string, unknown>>(["blankPromo"], { S })();
     S.promoForm = { ...blank, code: "SUVI10" };
-    const body = build<() => Record<string, unknown>>(["promoFormPayload"], { S })();
+    const body = build<() => Record<string, unknown>>(["promoFormPayload", "promoActiveNow", "admPromoByCode", "promoEndIso"], { S })();
     expect(body.startsAt).toBe(null);
   });
 });
@@ -362,10 +362,11 @@ describe("«Выпущенные карты» and a cancelled card", () => {
     pdfUrl: "/api/giftcards/RMP-ACDE-4679/pdf/",
   };
   const row = (over: Record<string, unknown>) =>
-    build<(c: unknown) => string>(["admGiftRowHTML", "esc"], {
+    build<(c: unknown) => string>(["admGiftRowHTML", "esc", "admTagHTML"], {
       S: { lang: "RU" },
       eur: (n: number) => String(n) + " €",
       shortDate: () => "01.09.2026",
+      ADM_TAG_KIND: { ok: "adm-badge--ok", low: "adm-badge--warn", alert: "adm-badge--warnfill", next: "adm-badge--ink", quiet: "adm-badge--quiet", plain: "" },
     })({ ...card, ...over });
 
   it("badges a card the refund cancelled, and takes its PDF away", () => {

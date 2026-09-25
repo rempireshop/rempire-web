@@ -88,7 +88,12 @@ describe("the notice over the form", () => {
   });
 
   it("every editor that had its own line uses it now", () => {
-    for (const attr of ["data-blogdirty", "data-maildirty", "data-newsdirty"]) {
+    /* 1a (25.09.2026): a letter and a newsletter save themselves (Dim, q6),
+       so they have no «not saved» line and no save bar any more */
+    for (const attr of ["data-maildirty", "data-newsdirty"]) {
+      expect(src, `${attr} is still drawn — the letter saves itself now`).not.toContain(`admDirtyNoteHTML("${attr}"`);
+    }
+    for (const attr of ["data-blogdirty"]) {
       expect(src, `${attr} is still drawn by hand`).toContain(`admDirtyNoteHTML("${attr}"`);
     }
     // the component's own copy is the only one left
@@ -146,28 +151,12 @@ describe("the save bar takes the state", () => {
     expect(bar.classList.contains("is-dirty")).toBe(false);
   });
 
-  it("the letters and the newsletter repaint their bar with the state", () => {
-    let dirty = true;
-    const acts = new El();
-    const noteEl = new El();
-    const paint = new Function(
-      "document", "translateTree", "admMailActsHTML", "mailDirty", "paintMailPreview",
-      `${shared}\n${slice("paintMailState")}\nreturn paintMailState;`,
-    )(
-      { getElementById: (id: string) => (id === "mailacts" ? acts : null), querySelector: () => noteEl },
-      () => {}, () => "", () => dirty, () => {},
-    ) as () => void;
-    paint();
-    expect(acts.classList.contains("is-dirty")).toBe(true);
-    dirty = false;
-    paint();
-    expect(acts.classList.contains("is-dirty")).toBe(false);
-    expect(noteEl.hidden).toBe(true);
-
-    // the newsletter's bar is drawn by the same two helpers
-    expect(slice("newsPaintState")).toContain("admDirtyMark(acts, newsDirty())");
-    expect(src).toMatch(/'<div class="adm-savebar' \+ admDirtyCls\(newsDirty\(\)\) \+ '" id="newsacts">'/);
-    expect(src).toMatch(/'<div class="adm-savebar' \+ admDirtyCls\(mailDirty\(\)\) \+ '" id="mailacts">'/);
+  it("the letters and the newsletter have no save bar — they save themselves (1a)", () => {
+    expect(src).not.toContain('id="mailacts"');
+    expect(src).not.toContain('id="newsacts"');
+    // typing repaints the letter's preview and hands the change to the autosave, nothing else
+    expect(slice("paintMailState")).toContain("paintMailPreview()");
+    expect(slice("newsPaintState")).toContain('newsAutosave(typing ? "input" : "change")');
   });
 
   it("the bar's look: warm ground, a solid status chip, «Сохранить» ringed — phone and desktop", () => {
