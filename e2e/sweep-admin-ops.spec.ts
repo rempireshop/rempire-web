@@ -35,18 +35,24 @@ async function firstStockKey(page: Page, query: string): Promise<string> {
 }
 
 /**
- * Opens the row edit form for one exact key — or leaves it open if it already
- * is. stockRowHTML() blanks the row's own `data-stockedit` while its form is
- * showing (the link turns into «Свернуть»), so "click the row" is only right
- * when the form is closed; `data-stocksave` is what carries the key either way.
+ * Opens one exact row — or leaves it open if it already is. 1a: a tap on the
+ * size opens the row (its «мало ≤», barcode and «Причина»); the same tap would
+ * close it, so the row's own threshold box is what says whether it is open.
  */
 async function openStockRow(page: Page, key: string): Promise<void> {
   await tab(page, "stock");
   await page.locator("[data-stockq]").fill(key.split(" ")[0]);
-  if (!(await page.locator(`[data-stocksave="${key}"]`).count())) {
+  if (!(await page.locator(`[data-stocklowinput="${key}"]`).count())) {
     await page.locator(`[data-stockedit="${key}"]`).click();
   }
-  await expect(page.locator(`[data-stocksave="${key}"]`)).toBeVisible();
+  await expect(page.locator(`[data-stocklowinput="${key}"]`)).toBeVisible();
+}
+
+/** Types a count into the row and sends it the way the owner does — Enter. */
+async function typeCount(page: Page, key: string, value: string): Promise<void> {
+  const box = page.locator(`[data-stockqtyinput="${key}"]`);
+  await box.fill(value);
+  await box.press("Enter");
 }
 
 /**
@@ -70,69 +76,76 @@ test.describe("sweep — warehouse", () => {
     test.setTimeout(180_000);
     const w = watch(page);
     await openAdmin(page);
+    const moved = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    const carded = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && !r.url().includes("/moves/") && r.request().method() === "PUT");
 
     // A real count to work against — everything below has to leave it alone.
+    // 1a: the count is typed into the row itself; «Причина» rides with it.
     const key = await firstStockKey(page, PRODUCT_2.id);
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("5");
-    await page.locator("[data-stockreasoninput]").fill("пересчёт на полке");
-    await page.locator("[data-stocksave]").click();
+    await page.locator(`[data-stockreasoninput="${key}"]`).fill("пересчёт на полке");
+    let move = moved();
+    await typeCount(page, key, "5");
+    expect((await move).ok()).toBe(true);
     await clearToast(page);
     expect(await stockQty(page, key), "setting the count to 5 did not take").toBe(5);
     // …and the grid shows the same number the route holds.
-    await tab(page, "stock");
-    await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    await expect(page.locator(`[data-stockedit="${key}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]")).toContainText("5");
+    await expect(page.locator(`[data-stockqtyinput="${key}"]`)).toHaveValue("5");
     await assertClean(page, w, "stock set to 5");
 
     // The dangerous ones. A count is money on a shelf: a value the panel
-    // cannot read must be refused out loud, never quietly turned into 0.
+    // cannot read must be refused out loud — the line under the box — never
+    // quietly turned into 0, and never sent at all.
     for (const bad of ["abc", "-1", "1e9"]) {
-      await openStockRow(page, key);
-      await page.locator("[data-stockqtyinput]").fill(bad);
-      await page.locator("[data-stocksave]").click();
-      const msg = await toastText(page);
-      expect(msg, `count "${bad}" was accepted with no message at all`).not.toBe("");
+      await typeCount(page, key, bad);
+      const hint = page.locator(`[data-ashint="stockqty:${key}"]`);
+      await expect(hint, `count "${bad}" was accepted with no message at all`).toBeVisible();
+      const msg = ((await hint.textContent()) || "").trim();
       expect(isRussian(msg), `count "${bad}": message is not Russian — "${msg}"`).toBe(true);
-      expect(msg, `count "${bad}" reported success`).not.toMatch(/Сохранено/);
-      await clearToast(page);
+      await expect(page.locator(`[data-stockqtyinput="${key}"]`)).toHaveAttribute("aria-invalid", "true");
       expect(await stockQty(page, key), `count "${bad}" changed the real quantity`).toBe(5);
       await assertClean(page, w, `stock qty "${bad}"`);
     }
 
     // 2.5 bottles is not a thing — whole units either way, never a crash.
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("2.5");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "2.5");
+    await move;
     await clearToast(page);
     const after = await stockQty(page, key);
     expect(Number.isInteger(after), `a fractional count was stored as ${after}`).toBe(true);
     await assertClean(page, w, "stock qty 2.5");
 
     // 0 is a legitimate count — sold out is a fact, not an error.
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("0");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "0");
+    await move;
     await clearToast(page);
     expect(await stockQty(page, key)).toBe(0);
-    await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("8");
-    await page.locator("[data-stocksave]").click();
+    move = moved();
+    await typeCount(page, key, "8");
+    await move;
     await clearToast(page);
 
-    // ---- EAN --------------------------------------------------------------
+    // ---- EAN — saved when the box is left (Enter), a text keyboard ----------
     const ean = `47400${Date.now().toString().slice(-8)}`;
     await openStockRow(page, key);
-    await page.locator("[data-stockeaninput]").fill(ean);
-    await page.locator("[data-stocksave]").click();
+    let card = carded();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill(ean);
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    expect((await card).ok()).toBe(true);
     await clearToast(page);
+    // closed and opened again, the box shows what the shelf holds
+    await page.locator('[data-stockedit=""]').click();
     await openStockRow(page, key);
-    expect(await page.locator("[data-stockeaninput]").inputValue(), "the EAN did not round-trip").toBe(ean);
+    expect(await page.locator(`[data-stockeaninput="${key}"]`).inputValue(), "the EAN did not round-trip").toBe(ean);
     await assertClean(page, w, "EAN bound");
 
     // The same code on a different product must be refused — two products
     // sharing a barcode makes every future scan a coin toss — and the refusal
-    // has to say so, in Russian.
+    // has to say so, in Russian, under the box.
     // A different product — the sweep deliberately crosses the product
     // boundary, not just the variant one.
     const otherKey = await firstStockKey(page, PRODUCT.id);
@@ -141,36 +154,38 @@ test.describe("sweep — warehouse", () => {
     // assertion that counts is the sentence the owner sees, just below.
     w.allow.push(/\/api\/admin\/inventory\//);
     await openStockRow(page, otherKey);
-    await page.locator("[data-stockeaninput]").fill(ean);
-    await page.locator("[data-stocksave]").click();
-    const dupMsg = await toastText(page);
-    expect(dupMsg, "a duplicate EAN was accepted silently").not.toBe("");
+    card = carded();
+    await page.locator(`[data-stockeaninput="${otherKey}"]`).fill(ean);
+    await page.locator(`[data-stockeaninput="${otherKey}"]`).press("Enter");
+    await card;
+    const dup = page.locator(`[data-ashint="stockean:${otherKey}"]`);
+    await expect(dup, "a duplicate EAN was accepted silently").toBeVisible();
+    const dupMsg = ((await dup.textContent()) || "").trim();
     expect(isRussian(dupMsg), `duplicate EAN message is not Russian — "${dupMsg}"`).toBe(true);
-    expect(dupMsg, "a duplicate EAN reported success").not.toMatch(/^Сохранено/);
-    expect(dupMsg, "the refusal does not say the code belongs to another product")
-      .toMatch(/штрихкод|код/i);
-    await clearToast(page);
+    expect(dupMsg, "the refusal does not say the code belongs to another product").toMatch(/штрихкод|код/i);
+    await expect(page.locator("[data-admsavest]:visible").first(), "a refusal claimed «Сохранено ✓»").not.toContainText("Сохранено");
     await assertClean(page, w, "duplicate EAN refused");
 
-    // Whatever the shop chooses to accept as a barcode, it must come back
-    // exactly as typed rather than half-stored.
+    // Whatever the shop accepts as a barcode goes out whole; what it does not
+    // is refused before the trip and the stored code stays as it was.
     await openStockRow(page, key);
-    await page.locator("[data-stockeaninput]").fill("abc");
-    await page.locator("[data-stocksave]").click();
-    await clearToast(page);
-    await openStockRow(page, key);
-    const round = await page.locator("[data-stockeaninput]").inputValue();
-    expect(["abc", ean, ""], `a barcode came back as "${round}"`).toContain(round);
-    await page.locator("[data-stockeaninput]").fill("");
-    await page.locator("[data-stocksave]").click();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill("abc");
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    await expect(page.locator(`[data-ashint="stockean:${key}"]`)).toBeVisible();
+    card = carded();
+    await page.locator(`[data-stockeaninput="${key}"]`).fill("");
+    await page.locator(`[data-stockeaninput="${key}"]`).press("Enter");
+    expect((await card).ok()).toBe(true);
     await clearToast(page);
     await assertClean(page, w, "EAN cleared");
 
     // ---- the ledger --------------------------------------------------------
     await tab(page, "stock");
-    await page.locator('[data-stockmovesopen="1"]').click();
-    await expect(page.getByText("История приёмок и продаж")).toBeVisible();
-    for (const reason of ["", "goods_in", "sale_pos", "adjust", "return"]) {
+    await page.locator('[data-stockmovesopen="1"]:visible').first().click();
+    await expect(page.getByText("История склада")).toBeVisible();
+    // «Вручную» carries the reason typed beside the first count
+    await expect(page.locator(".adm-hrow", { hasText: "пересчёт на полке" }).first()).toBeVisible();
+    for (const reason of ["", "goods_in", "sale", "adjust", "return", "edit"]) {
       await page.locator(`[data-stockmovesreason="${reason}"]`).click();
       await assertClean(page, w, `moves filtered by "${reason || "all"}"`);
     }
@@ -181,15 +196,12 @@ test.describe("sweep — warehouse", () => {
     // Headless Chromium has no camera. The overlay must still open, say so in
     // Russian, and leave the manual field usable — that is the keyboard-wedge
     // path a USB scanner uses anyway (docs/inventory.md).
-    /* Two controls open the scanner on «Склад» since the redesign — the
-       header's «Приёмка» and the screen's own «Сканировать» (README § Товары);
-       either does, so take the first. */
     await page.locator("[data-scanopen]").first().click();
     await expect(page.locator("[data-scanmanual]")).toBeVisible();
     await assertClean(page, w, "scanner opened without a camera");
     await page.locator("[data-scanmanual]").fill("нет-такого-кода");
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText(/не привязан|Найдите товар/);
+    await expect(page.locator("#scanpanel")).toContainText(/Новый код|К какому товару/);
     await assertClean(page, w, "scanner manual entry, unknown code");
     await page.locator("[data-scanclose]").click();
     await expect(page.locator("[data-scanmanual]")).toHaveCount(0);
@@ -226,9 +238,11 @@ test.describe("sweep — the in-salon register", () => {
     const sub = ((await line.locator(".adm-row__sub").first().textContent()) || "").trim();
     const variant = sub.split("·")[0].trim();
     const key = `${PRODUCT_2.id} ${variant}`;
+    // 1a: the count is typed into the row and leaves with Enter
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("20");
-    await page.locator("[data-stocksave]").click();
+    const set20 = page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    await typeCount(page, key, "20");
+    await set20;
     await clearToast(page);
     expect(await stockQty(page, key), "the register's shelf was not set to 20").toBe(20);
     await tab(page, "pos");
@@ -307,8 +321,9 @@ test.describe("sweep — the in-salon register", () => {
     // other spec that buys it (admin.spec.ts, checkout.spec.ts) decrements
     // the same count — at zero it would stop being addable at all.
     await openStockRow(page, key);
-    await page.locator("[data-stockqtyinput]").fill("500");
-    await page.locator("[data-stocksave]").click();
+    const set500 = page.waitForResponse((r) => r.url().includes("/api/admin/inventory/moves/") && r.request().method() === "POST");
+    await typeCount(page, key, "500");
+    await set500;
     await clearToast(page);
   });
 });
