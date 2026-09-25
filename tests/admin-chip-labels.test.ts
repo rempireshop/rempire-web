@@ -75,17 +75,19 @@ const CHIPS: Array<[string, string[]]> = [
   ["ADM_GOODS_FILTERS", labels("ADM_GOODS_FILTERS")],
 ];
 
-/* «Склад»'s four live inside admStockHTML() as a local `var FILTERS = [...]`,
-   which `decl()` cannot reach — lifted by the same shape instead. */
-const stockAt = src.indexOf('var FILTERS = [["all"');
-const STOCK = stockAt < 0
-  ? []
-  : [...src.slice(stockAt, src.indexOf("];", stockAt)).matchAll(/\[\s*"[a-z-]+"\s*,\s*"([^"]+)"/g)].map((m) => m[1]);
+/* «Склад»'s four chips — a table of their own since the 1a redesign
+   (`STOCK_FILTERS`) — and its history's, whose first key is the empty «Все»
+   and whose keys carry underscores (`goods_in`), so they are lifted by a
+   wider shape. The history prints a count on every chip too. */
+const STOCK = labels("STOCK_FILTERS");
+const HIST = [...decl("STOCK_HIST_CHIPS").matchAll(/\[\s*"[a-z_]*"\s*,\s*"([^"]+)"/g)].map((m) => m[1]);
+CHIPS.push(["STOCK_HIST_CHIPS", HIST]);
 
 describe("a chip with a number on it is still translated", () => {
   it("finds the label tables at all — an empty sweep proves nothing", () => {
     for (const [name, list] of CHIPS) expect(list.length, name).toBeGreaterThan(2);
     expect(STOCK.length, "the «Склад» chips").toBe(4);
+    expect(HIST.length, "the «История склада» chips").toBe(7);
   });
 
   for (const [name, list] of [...CHIPS, ["«Склад» FILTERS", STOCK] as [string, string[]]]) {

@@ -696,10 +696,10 @@ test.describe("admin — the small forms say when they are saved", () => {
   });
 });
 
-test.describe("admin — a warehouse row and the blog card say when they are saved", () => {
+test.describe("admin — a warehouse row saves itself, and the blog card says when it is saved", () => {
   test.use({ extraHTTPHeaders: ipHeaders(222) });
 
-  test("«Править»: «Изменений нет» for an untouched form, «Сохранено ✓» on the row it wrote", async ({ page }) => {
+  test("an open row saves itself: «мало ≤» on Enter, «Сохранено ✓» after the route answered; an untouched row writes nothing", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "goods", "stock");
@@ -707,43 +707,36 @@ test.describe("admin — a warehouse row and the blog card say when they are sav
     const edit = page.locator('[data-stockedit]:not([data-stockedit=""])').first();
     await expect(edit).toBeVisible();
     const key = (await edit.getAttribute("data-stockedit")) as string;
+    const puts: string[] = [];
+    page.on("request", (r) => {
+      if (r.url().includes("/api/admin/inventory/") && r.method() === "PUT") puts.push(r.url());
+    });
+    /* 1a: no «Править» form and no «Сохранить». A row opened and closed with
+       nothing typed writes nothing at all — the old «Изменений нет». */
     await edit.click();
-    const save = page.locator(`[data-stocksave="${key}"]`);
-    await expect(save).toBeVisible();
-    // nothing typed → said out loud, and the form folds away
-    await save.click();
-    await expect(page.getByRole("status")).toContainText("Изменений нет");
-    await expect(page.locator(`[data-stocksave="${key}"]`)).toHaveCount(0);
-    await clearToast(page);
+    await expect(page.locator(`[data-stocklowinput="${key}"]`)).toBeVisible();
+    await page.locator('[data-stockedit=""]').click();
+    await expect(page.locator("[data-stocklowinput]")).toHaveCount(0);
+    expect(puts, "an untouched row wrote to the shelf").toEqual([]);
 
     /* The threshold only — never the count: PRODUCT_2's stock belongs to the
        register sweep (fixtures.ts), and a threshold is not a stock move. The
-       write is awaited by its response, not by a toast snapshot: the route
-       compiles on its first hit under `next dev`, and a toast read in a fixed
-       window can still be the previous one. */
+       write is awaited by its response: «Сохранено ✓» may only follow a 2xx. */
     const inventoryPut = () =>
       page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && r.request().method() === "PUT");
     await page.locator(`[data-stockedit="${key}"]`).click();
-    const low = page.locator("[data-stocklowinput]");
+    const low = page.locator(`[data-stocklowinput="${key}"]`);
     const was = (await low.inputValue()) || "2";
     await low.fill(String(Number(was) + 1));
     const put = inventoryPut();
-    await low.press("Enter");   // Enter is «Сохранить» (ADM_ENTER_FORMS)
+    await low.press("Enter");   // a number leaves on Enter or blur (ADM_SAVE_POLICY.count)
     expect((await put).ok()).toBe(true);
-    await expect(page.getByRole("status")).toContainText("Сохранено");
-    const badge = page.locator("#stocklist .adm-badge--ok", { hasText: "Сохранено" });
-    await expect(badge, "the row it saved does not say so").toHaveCount(1);
-    await clearToast(page);
-    // opening the form again takes the badge away: «Сохранено ✓» beside an open form would be a lie
-    await page.locator(`[data-stockedit="${key}"]`).click();
-    await expect(badge).toHaveCount(0);
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено");
     // …and back to what it was
-    await page.locator("[data-stocklowinput]").fill(was);
+    await low.fill(was);
     const put2 = inventoryPut();
-    await page.locator(`[data-stocksave="${key}"]`).click();
+    await low.press("Enter");
     expect((await put2).ok()).toBe(true);
-    await expect(page.getByRole("status")).toContainText("Сохранено");
-    await clearToast(page);
   });
 
   test("the blog's «Публикация» card says whether the article is saved", async ({ page }) => {

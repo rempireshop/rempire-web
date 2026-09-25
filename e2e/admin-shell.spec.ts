@@ -660,7 +660,7 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
 test.describe("admin shell — the Склад stepper and its undo", () => {
   test.use({ extraHTTPHeaders: ipHeaders(125) });
 
-  test("one tap changes the shelf at once; «Отменить» puts it back and says so in the journal", async ({ page }, testInfo) => {
+  test("a burst of taps is one change of the shelf; «Вернуть» puts it back and says so in the journal", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "the stepper is the same on both; one run is enough");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
@@ -671,22 +671,27 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
     const stepper = page.locator("[data-stockstep]").first();
     await expect(stepper).toBeVisible();
-    const key = (await stepper.getAttribute("data-stockstep"))!.split(":")[0];
-    const qtyCell = page.locator(`[data-stockstep="${key}:1"]`).locator("xpath=preceding-sibling::span[1]");
-    // a variant nobody counts yet shows «—»; the first + starts counting at 1
-    const shown = ((await qtyCell.textContent()) || "").trim();
+    const step = (await stepper.getAttribute("data-stockstep"))!;
+    const key = step.slice(0, step.lastIndexOf(":"));
+    // 1a: the count between − and + is a box that can be typed into
+    const qtyCell = page.locator(`[data-stockqtyinput="${key}"]`);
+    // a variant nobody counts yet shows «—» (an empty box); the first + starts counting at 1
+    const shown = ((await qtyCell.inputValue()) || "").trim();
     const before = /^\d+$/.test(shown) ? Number(shown) : 0;
 
-    // no confirm card: a ± is the reversible half of the rule (README § State)
+    /* no confirm card: a ± is the reversible half of the rule (README rule 3).
+       Two taps are ONE move (q25): the row shows it at once, the shelf hears
+       about it once, after the pause, and there is one «Вернуть». */
     await page.locator(`[data-stockstep="${key}:1"]`).click();
-    await expect(qtyCell).toHaveText(String(before + 1));
-    await expect(page.getByRole("status")).toContainText(`${before + 1} шт`);
+    await page.locator(`[data-stockstep="${key}:1"]`).click();
+    await expect(qtyCell).toHaveValue(String(before + 2));
+    await expect(page.getByRole("status")).toContainText(`→ ${before + 2}`);
 
     // …and the undo really is the safety net: the shelf goes back
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await page.locator(".adm-toast__undo").click();
     await expect(page.getByRole("status")).toContainText("Отменено");
-    await expect(qtyCell).toHaveText(String(before));
+    await expect(qtyCell).toHaveValue(String(before));
 
     // both the change and its undo are in the journal, and only the change
     // was ever undoable
@@ -701,13 +706,13 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
        product (admin.spec.ts, checkout.spec.ts, …) decrements the same number —
        at zero the product page swaps its «В корзину» for «нет в наличии» and
        those specs stop being able to add anything at all. Same reasoning, and
-       the same 500, as sweep-admin-ops.spec.ts. */
+       the same 500, as sweep-admin-ops.spec.ts. The count is typed into the
+       row and leaves with Enter (1a: no «Править» form, no «Сохранить»). */
     await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
     await page.locator('[data-admtab="stock"]:visible').last().click();
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    await page.locator(`[data-stockedit="${key}"]`).click();
-    await page.locator("[data-stockqtyinput]").fill("500");
-    await page.locator("[data-stocksave]").click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await page.locator(`[data-stockqtyinput="${key}"]`).fill("500");
+    await page.locator(`[data-stockqtyinput="${key}"]`).press("Enter");
+    await expect(page.getByRole("status")).toContainText("→ 500");
   });
 });

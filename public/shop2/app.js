@@ -3265,6 +3265,58 @@
       "статьи для покупателей": "artiklid ostjatele",
       "продажи и посетители": "müük ja külastajad",
       "оплата, доставка, почта, Google": "makse, tarne, e-post, Google",
+      /* 1a — «Склад», the scanner and «Наборы» (admStockHTML, scanPanelHTML, bundleFormHTML) */
+      "Товар, бренд или штрихкод": "Toode, bränd või triipkood",
+      "История": "Ajalugu",
+      "«Мало» ≤": "«Vähe» ≤",
+      "Причина — видна в истории": "Põhjus — näha ajaloos",
+      "Сканировать штрихкод": "Skaneeri triipkood",
+      "Штрихкод не сохранился — попробуйте ещё раз.": "Triipkood ei salvestunud — proovige uuesti.",
+      "Причина не сохранилась — попробуйте ещё раз.": "Põhjus ei salvestunud — proovige uuesti.",
+      "Код считан и привязан ✓": "Kood loetud ja seotud ✓",
+      "Сканер на телефоне": "Skanner telefonis",
+      "История склада": "Lao ajalugu",
+      "Когда": "Millal",
+      "Что было": "Mis juhtus",
+      "Вручную": "Käsitsi",
+      "Списание": "Mahakandmine",
+      "склад": "ladu",
+      "штрихкод": "triipkood",
+      "товар": "toode",
+      "или введите код": "või sisestage kood",
+      "Что делаем": "Mida teeme",
+      "Сканировать другой": "Skaneeri teine",
+      "Новый код ·": "Uus kood ·",
+      "К какому товару привязать?": "Millise tootega siduda?",
+      "Разрешить камеру": "Luba kaamera",
+      "Нет доступа к камере — разрешите её или введите код вручную.": "Kaamerale pole ligipääsu — lubage see või sisestage kood käsitsi.",
+      "Наведите на штрихкод — код привяжется к этому объёму, сканер закроется сам.": "Suunake triipkoodile — kood seotakse selle mahuga ja skanner sulgub ise.",
+      "Нажмите на набор слева, чтобы изменить": "Muutmiseks vajutage vasakul komplektile",
+      "Набор открыт — впишите цену, и он сохранится сам, скрытым": "Komplekt on avatud — sisestage hind ja see salvestub ise, peidetuna",
+      "Впишите цену набора или скидку — тогда набор сохранится.": "Sisestage komplekti hind või allahindlus — siis komplekt salvestub.",
+      "Список наборов не загрузился — нажмите «Повторить» над ним.": "Komplektide nimekiri ei laadinud — vajutage selle kohal «Proovi uuesti».",
+      "Набор сохранён — пока скрыт. Включите «Показывать в магазине», когда он готов.": "Komplekt on salvestatud — praegu peidetud. Lülitage «Näidata poes» sisse, kui see on valmis.",
+      "Не получилось вернуть набор.": "Komplekti ei õnnestunud taastada.",
+      "Черновик готов — проверьте текст": "Mustand on valmis — kontrollige teksti",
+      "Перевод готов — проверьте текст": "Tõlge on valmis — kontrollige teksti",
+      "Пока пусто. Найдите товар ниже и нажмите на объём.": "Veel tühi. Leidke allpool toode ja vajutage mahule.",
+      "Убрать из набора": "Eemalda komplektist",
+      "Раздел — где набор стоит в магазине. Адрес набора пишется сам из русского названия, латиницей, и после первой записи не меняется:": "Rubriik — kus komplekt poes asub. Komplekti aadress kirjutatakse ise venekeelsest nimest ladina tähtedega ega muutu pärast esimest salvestamist:",
+      "Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.": "Mustand — salvestub ise, peidetuna, kui on olemas nimi, kaks toodet ja hind.",
+      "Начать заново": "Alusta uuesti",
+      "Название — например, Борода — стартовый набор": "Nimi — näiteks Habe — algkomplekt",
+      "Название набора": "Komplekti nimi",
+      "Описание набора": "Komplekti kirjeldus",
+      "✨ Написать черновик": "✨ Kirjuta mustand",
+      "Добавить товар: название или бренд": "Lisa toode: nimi või bränd",
+      "Добавить товар": "Lisa toode",
+      "или скидка, %": "või allahindlus, %",
+      "Показать в магазине можно, когда набор сохранится.": "Poes saab näidata, kui komplekt on salvestatud.",
+      "Удалить черновик": "Kustuta mustand",
+      "Удалить черновик?": "Kustutada mustand?",
+      "Набор ещё не сохранён — черновик просто исчезнет.": "Komplekt pole veel salvestatud — mustand lihtsalt kaob.",
+      "Черновик удалён": "Mustand kustutatud",
+      "Товар убран из набора": "Toode eemaldati komplektist",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -6377,6 +6429,58 @@
       "статьи для покупателей": "articles for shoppers",
       "продажи и посетители": "sales and visitors",
       "оплата, доставка, почта, Google": "payments, delivery, e-mail, Google",
+      /* 1a — «Склад», the scanner and «Наборы» (admStockHTML, scanPanelHTML, bundleFormHTML) */
+      "Товар, бренд или штрихкод": "Product, brand or barcode",
+      "История": "History",
+      "«Мало» ≤": "«Low» ≤",
+      "Причина — видна в истории": "Reason — shown in the history",
+      "Сканировать штрихкод": "Scan the barcode",
+      "Штрихкод не сохранился — попробуйте ещё раз.": "The barcode wasn't saved — try again.",
+      "Причина не сохранилась — попробуйте ещё раз.": "The reason wasn't saved — try again.",
+      "Код считан и привязан ✓": "Code read and linked ✓",
+      "Сканер на телефоне": "Scanner on the phone",
+      "История склада": "Stock history",
+      "Когда": "When",
+      "Что было": "What happened",
+      "Вручную": "By hand",
+      "Списание": "Write-offs",
+      "склад": "stock",
+      "штрихкод": "barcode",
+      "товар": "product",
+      "или введите код": "or type the code",
+      "Что делаем": "What to do",
+      "Сканировать другой": "Scan another",
+      "Новый код ·": "New code ·",
+      "К какому товару привязать?": "Which product should it be linked to?",
+      "Разрешить камеру": "Allow the camera",
+      "Нет доступа к камере — разрешите её или введите код вручную.": "No camera access — allow it or type the code by hand.",
+      "Наведите на штрихкод — код привяжется к этому объёму, сканер закроется сам.": "Point at the barcode — the code is linked to this size and the scanner closes by itself.",
+      "Нажмите на набор слева, чтобы изменить": "Tap a set on the left to edit it",
+      "Набор открыт — впишите цену, и он сохранится сам, скрытым": "The set is open — enter a price and it saves itself, hidden",
+      "Впишите цену набора или скидку — тогда набор сохранится.": "Enter the set's price or a discount — then the set is saved.",
+      "Список наборов не загрузился — нажмите «Повторить» над ним.": "The list of sets did not load — press «Try again» above it.",
+      "Набор сохранён — пока скрыт. Включите «Показывать в магазине», когда он готов.": "The set is saved — hidden for now. Turn on «Show in the shop» when it is ready.",
+      "Не получилось вернуть набор.": "Couldn't bring the set back.",
+      "Черновик готов — проверьте текст": "The draft is ready — check the text",
+      "Перевод готов — проверьте текст": "The translation is ready — check the text",
+      "Пока пусто. Найдите товар ниже и нажмите на объём.": "Empty for now. Find a product below and tap a size.",
+      "Убрать из набора": "Remove from the set",
+      "Раздел — где набор стоит в магазине. Адрес набора пишется сам из русского названия, латиницей, и после первой записи не меняется:": "Section — where the set sits in the shop. The set's address is written by itself from the Russian name, in Latin letters, and never changes once it is first saved:",
+      "Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.": "Draft — it saves itself, hidden, once it has a name, two products and a price.",
+      "Начать заново": "Start over",
+      "Название — например, Борода — стартовый набор": "Name — e.g. Beard — starter set",
+      "Название набора": "Set name",
+      "Описание набора": "Set description",
+      "✨ Написать черновик": "✨ Write a draft",
+      "Добавить товар: название или бренд": "Add a product: name or brand",
+      "Добавить товар": "Add a product",
+      "или скидка, %": "or discount, %",
+      "Показать в магазине можно, когда набор сохранится.": "It can be shown in the shop once the set is saved.",
+      "Удалить черновик": "Delete the draft",
+      "Удалить черновик?": "Delete the draft?",
+      "Набор ещё не сохранён — черновик просто исчезнет.": "The set isn't saved yet — the draft simply goes.",
+      "Черновик удалён": "Draft deleted",
+      "Товар убран из набора": "Product taken out of the set",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -6572,6 +6676,17 @@
     [/^Нет в наличии (\d+)$/, { ET: "Pole laos $1", EN: "Out of stock $1" }],
     [/^Нет (\d+)$/, { ET: "Pole $1", EN: "None $1" }],
     [/^Не учтено (\d+)$/, { ET: "Loendamata $1", EN: "Not counted $1" }],
+    // 1a «История склада» chips, the scanner's toast, a set's switch and its delete sheet
+    [/^Приход (\d+)$/, { ET: "Vastuvõtt $1", EN: "Goods in $1" }],
+    [/^Продажи (\d+)$/, { ET: "Müük $1", EN: "Sales $1" }],
+    [/^Вручную (\d+)$/, { ET: "Käsitsi $1", EN: "By hand $1" }],
+    [/^Возврат (\d+)$/, { ET: "Tagastus $1", EN: "Returns $1" }],
+    [/^Правка карточки (\d+)$/, { ET: "Kaardi muudatus $1", EN: "Card changes $1" }],
+    [/^Списание (\d+)$/, { ET: "Mahakandmine $1", EN: "Write-offs $1" }],
+    [/^Принято \+(\d+) · теперь (\d+) шт$/, { ET: "Vastu võetud +$1 · nüüd $2 tk", EN: "Taken in +$1 · now $2 pcs" }],
+    [/^Списано −(\d+) · теперь (\d+) шт$/, { ET: "Maha kantud −$1 · nüüd $2 tk", EN: "Written off −$1 · now $2 pcs" }],
+    [/^Показывать набор «(.+)»$/, { ET: "Näidata komplekti «$1»", EN: "Show the set “$1”" }],
+    [/^Удалить набор «(.+)»\?$/, { ET: "Kustutada komplekt «$1»?", EN: "Delete the set “$1”?" }],
     [/^В продаже (\d+)$/, { ET: "Müügil $1", EN: "On sale $1" }],
     [/^Скрытые (\d+)$/, { ET: "Peidetud $1", EN: "Hidden $1" }],
     [/^В пути (\d+)$/, { ET: "Teel $1", EN: "On the way $1" }],
@@ -7066,6 +7181,14 @@
     [/^Наличие «(.+)»: (.+) → (.+)$/, { ET: "Saadavus «$1»: $2 → $3", EN: "Availability “$1”: $2 → $3" }],
     [/^Наличие «(.+)»: (.+)$/, { ET: "Saadavus «$1»: $2", EN: "Availability “$1”: $2" }],
     [/^Объёмы «(.+)»: (.+)$/, { ET: "Mahud «$1»: $2", EN: "Sizes “$1”: $2" }],
+    // 1a journal lines — ahead of the general «Склад «…»: …» / «Набор «…»: …» rules
+    [/^Склад «(.+)»: штрихкод отвязан$/, { ET: "Ladu «$1»: triipkood eemaldatud", EN: "Stock “$1”: barcode unlinked" }],
+    [/^Склад «(.+)»: штрихкод (.+)$/, { ET: "Ladu «$1»: triipkood $2", EN: "Stock “$1”: barcode $2" }],
+    [/^Набор «(.+)»: показан$/, { ET: "Komplekt «$1»: näidatud", EN: "Set “$1”: shown" }],
+    [/^Набор «(.+)»: скрыт$/, { ET: "Komplekt «$1»: peidetud", EN: "Set “$1”: hidden" }],
+    [/^Набор «(.+)»: удалён$/, { ET: "Komplekt «$1»: kustutatud", EN: "Set “$1”: deleted" }],
+    [/^Набор «(.+)»: без «(.+)»$/, { ET: "Komplekt «$1»: ilma «$2»", EN: "Set “$1”: without “$2”" }],
+    [/^Набор «(.+)»: описание от помощника$/, { ET: "Komplekt «$1»: kirjeldus assistendilt", EN: "Set “$1”: description by the assistant" }],
     [/^Склад «(.+)»: остаток → (.+)$/, { ET: "Ladu «$1»: jääk → $2", EN: "Stock “$1”: on hand → $2" }],
     [/^Склад «(.+)»: ([^()]+) \((.+)\)$/, { ET: "Ladu «$1»: $2 ($3)", EN: "Stock “$1”: $2 ($3)" }],
     [/^Этикетка (.+): (.+)$/, { ET: "Silt $1: $2", EN: "Label $1: $2" }],
@@ -21802,16 +21925,12 @@
       '<button class="adm-tab" data-admtab="stock" aria-current="' + (tab === "stock") + '" title="Склад">Склад ' +
         '<span class="adm-tab__warn">' + (S.stockLevels ? warn : "") + "</span></button>" +
       '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
+    // 1a: the ONE dark button of «Наборы» and «Склад» — pinned on a phone (admSetsHeadHTML, admStockHeadHTML)
     var add = tab === "sets"
-      ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
-      /* One action, one name. This header used to carry «Приёмка» over a
-         «Склад» whose own first button says «Сканировать» and whose «Салон»
-         neighbour says it a third time — three words for the one thing the
-         owner does with a phone and a bottle (Dim: "one name everywhere").
-         The word that won is «Сканировать», and it lives in the screen's
-         body, one line below where this button was. */
+      ? admSetsHeadHTML()
+      /* One action, one name: «Сканировать» (Dim: "one name everywhere"). */
       : tab === "stock"
-        ? ""
+        ? admStockHeadHTML()
         /* product creation: a blank product the editor really can save —
            custom_products on the server, CATALOGUE here (adoptCustom). */
         : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
@@ -22089,11 +22208,42 @@
         '<span class="adm-row__amt">' + price + "</span></span></button>";
   }
 
-  /* ---------- Товары → Наборы --------------------------------------------- */
-
+  /* ---------- Товары → Наборы ---------------------------------------------
+     1a (README § 5, `12-sets-desktop`): the list with the composite image,
+     the price, ↑ ↓ and the show switch; a tap on a set opens it — beside the
+     list on a desktop, as its own view «← Наборы» on a phone (a Back layer).
+     The editor saves itself (bundleFormHTML and the block around it). */
+  function admSetRowHTML(b, i, n) {
+    var sel = S.bundleForm && S.bundleForm.editing && S.bundleForm.id === b.id;
+    var title = (b.title && (b.title[S.lang] || b.title.RU)) || b.id;
+    return '<div class="adm-row adm-setrow' + (sel ? " is-sel" : "") + '">' +
+      '<span class="adm-thumb adm-setrow__img">' + bundleStack(b, "bstack--line") + "</span>" +
+      '<button type="button" class="adm-setrow__open" data-bundleedit="' + esc(b.id) + '">' +
+        '<span class="adm-row__nm">' + esc(title) + "</span>" +
+        // «3 товара · A + B + C» — each name its own node, so the Russian type tail is translated per product
+        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(b.items.length) + "</span> · " + b.items.map(function (it) {
+          var p = byIdOrNull(it.productId);
+          return "<span>" + esc(p ? p.name : it.productId) + "</span>";
+        }).join(" + ") + "</span></button>" +
+      '<span class="adm-row__amt adm-setrow__pr">' + eur(b.price) + "</span>" +
+      '<span class="adm-setrow__acts">' +
+        /* A 44x44 box around each arrow (adm-link--move): the screen a phone
+           reorders sets from. ↓ stays (q30). */
+        '<button type="button" class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':-1"' +
+          (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
+        '<button type="button" class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':1"' +
+          (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button>' +
+        admSwitch('data-bundletoggle="' + esc(b.id) + '"', b.active !== false, "Показывать набор «" + esc(title) + "»") +
+      "</span></div>";
+  }
+  /** «+ Набор» — the ONE dark button; on a phone it steps aside while a set is open. */
+  function admSetsHeadHTML() {
+    return '<div class="adm-sethead' + (S.bundleForm ? " is-ed" : "") + '">' + admPinnedHTML("data-bundlenew", "+ Набор") + "</div>";
+  }
   function admSetsHTML() {
     loadAdminBundles(false);
     var list = S.admBundles || [];
+    var f = S.bundleForm;
     return (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять наборы.</div>') +
       (DEMO.bundles === false
         ? '<div class="adm-note"><span>Наборы выключены — в магазине их не видно нигде.</span>' +
@@ -22101,50 +22251,17 @@
         : "") +
       (S.admBundleErr ? '<div class="adm-error"><span>' + esc(S.admBundleErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="bundles">Повторить</button></div>' : "") +
-      (S.bundleDel ? bundleDelConfirmHTML() : "") +
-      (S.bundleForm ? bundleFormHTML() : "") +
-      (list.length
-        ? '<div class="adm-list adm-list--flat">' + list.map(function (b, i) {
-            return '<div class="adm-row adm-row--tall adm-row--lines"><span class="adm-thumb">' + bundleStack(b, "bstack--line") + "</span>" +
-              '<span class="adm-row__body"><span class="adm-row__nm">' + esc((b.title && (b.title[S.lang] || b.title.RU)) || b.id) + "</span>" +
-              // each name its own node, so the Russian type tail is translated per product
-              '<span class="adm-row__sub adm-row__sub--one">' + b.items.map(function (it) {
-                var p = byIdOrNull(it.productId);
-                return "<span>" + esc(p ? p.name : it.productId) + "</span>";
-              }).join(" + ") + "</span></span>" +
-              // the state and the price: the third line on a phone, the row's right half on a desktop
-              '<span class="adm-row__line"><span class="adm-badge adm-badge--sm ' + (b.active ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
-                (b.active ? "Показан" : "Скрыт") + "</span>" +
-              '<span class="adm-row__amt">' + eur(b.price) + "</span></span>" +
-              // …and the four actions, in this order and this place on every row
-              '<span class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-bundleedit="' + esc(b.id) + '">Изменить</button>' +
-              '<button class="adm-link adm-link--muted" data-bundletoggle="' + esc(b.id) + '">' +
-                (b.active ? "Скрыть" : "Показать") + "</button>" +
-              /* A 44x44 box around each glyph (adm-link--move): these were two
-                 14 px characters with no padding, on the screen a phone
-                 reorders sets from. */
-              '<button class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':-1"' +
-                (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
-                '<button class="adm-link adm-link--muted adm-link--move" data-bundlemove="' + esc(b.id) + ':1"' +
-                (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
-            "</div>";
-          }).join("") + "</div>"
-        : (S.admBundles
-            ? '<div class="adm-empty"><span>Наборов пока нет</span>' +
-              '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bundlenew>+ Набор</button></div>'
-            : '<div class="adm-skel"><i></i><i></i><i></i></div>')) +
-      /* The line its two siblings both print and this tab never did: how many
-         there are, and how many of them the shop is not showing. «Наборы» was
-         the one tab with no count anywhere — the header's number was about
-         products. */
-      (list.length
-        ? '<p class="adm-hint" style="margin:10px 0 0">' + admItemsLabel(list.length) +
-          /* Its own node: translateTree() rewrites a whole text node, and a
-             tail glued onto the count would leave the pair untranslatable. */
-          (list.filter(function (b) { return !b.active; }).length
-            ? ' · <span>скрыто ' + list.filter(function (b) { return !b.active; }).length + "</span>"
-            : "") + "</p>"
-        : "");
+      '<div class="adm-sets' + (f ? " adm-sets--ed" : "") + '">' +
+        '<div class="adm-sets__list">' +
+          (list.length
+            ? '<div class="adm-list adm-list--flat">' + list.map(function (b, i) { return admSetRowHTML(b, i, list.length); }).join("") + "</div>"
+            : (S.admBundles
+                ? '<div class="adm-empty"><span>Наборов пока нет</span>' +
+                  '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bundlenew>+ Набор</button></div>'
+                : '<div class="adm-skel"><i></i><i></i><i></i></div>')) +
+        "</div>" +
+        '<div class="adm-sets__ed">' + (f ? bundleFormHTML() : '<p class="adm-sets__pick">Нажмите на набор слева, чтобы изменить</p>') + "</div>" +
+      "</div>";
   }
 
   /* ---------- the shell: sidebar, bottom bar, «Ещё», assistant ------------- */
@@ -22771,7 +22888,7 @@
      the page is going away. */
   var ADM_AS = {};        // key → the field's record
   var ADM_AS_SPEC = {};   // key → { kind, send, validate } for a [data-autosave] box
-  var ADM_SAVE = { state: "idle", busy: 0, fade: 0 };
+  var ADM_SAVE = { state: "idle", busy: 0, fade: 0, refused: false };
 
   function admAutosavePolicy(kind) { return ADM_SAVE_POLICY[kind] || "leave"; }
   /** A screen names a `data-autosave="key"` box while it draws it; the
@@ -22820,7 +22937,17 @@
   }
   function admAutosaveDone(f, v, r) {
     f.busy = false;
-    if (admAutosaveOk(r)) { f.saved = v; f.failed = false; }
+    /* A refusal the route EXPLAINED — `{ refused: "…" }` from the screen's own
+       send, e.g. «Этот штрихкод уже привязан к другому товару: …» — is not the
+       internet: the words go under the box (the same line a failed check
+       gets), nothing is owed until the box changes, and the header goes quiet
+       instead of claiming «Сохранено ✓» or «проверьте интернет». */
+    if (r && typeof r.refused === "string" && r.refused) {
+      f.failed = false;
+      f.err = r.refused; admAutosaveMark(f.key, f.err);
+      ADM_SAVE.refused = true;
+    }
+    else if (admAutosaveOk(r)) { f.saved = v; f.failed = false; }
     else {
       f.failed = true;
       if (f.value === v) f.dirty = true;   // the same value is still owed
@@ -22874,6 +23001,8 @@
     ADM_SAVE.busy = Math.max(0, ADM_SAVE.busy - 1);
     if (ADM_SAVE.busy) return;
     if (admSaveFailedN()) { admSaveSet("error"); return; }
+    // a refusal explained under its box (admAutosaveDone): nothing was saved, nothing is broken
+    if (ADM_SAVE.refused) { ADM_SAVE.refused = false; admSaveSet("idle"); return; }
     admSaveSet("saved");
     clearTimeout(ADM_SAVE.fade);
     ADM_SAVE.fade = setTimeout(function () { if (ADM_SAVE.state === "saved") admSaveSet("idle"); }, ADM_SAVE_SHOWN_MS);
@@ -22911,7 +23040,8 @@
   /** The rust edge and the one line under a box whose value was refused, in place. */
   function admAutosaveMark(key, hint) {
     if (typeof document === "undefined") return;
-    var el = document.querySelector(admAsSel("data-autosave", key));
+    // …or a box that hands the scheduler a token (data-asfield — «Склад», admTypedEvent)
+    var el = document.querySelector(admAsSel("data-autosave", key)) || document.querySelector(admAsSel("data-asfield", key));
     if (el) { if (hint) el.setAttribute("aria-invalid", "true"); else el.removeAttribute("aria-invalid"); }
     var h = document.querySelector(admAsSel("data-ashint", key));
     if (h) { h.textContent = hint ? trText(hint, S.lang) : ""; h.hidden = !hint; }
@@ -23049,7 +23179,7 @@
       own back link uses — or "" at a section's front door. */
   var ADM_TOP_BACK = {
     edit: "Товары", customer: "Клиенты", mail: "Все письма", setpage: "Настройки",
-    blog: "Блог", news: "Рассылка", moves: "Склад"
+    blog: "Блог", news: "Рассылка", moves: "Склад", set: "Наборы"
   };
   function admTopBackLabel() {
     var l = admLayers();
@@ -31123,14 +31253,22 @@
     loadAdminBundles._busy = true;
     apiJson("/api/admin/bundles/").then(function (r) {
       loadAdminBundles._busy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 401) { SRV.admin = false; render(); loadAdminBundlesThen(); return; }
       S.admBundles = r.status === 200 && r.body.ok ? hydrateBundles(r.body.bundles || []) : [];
       S.admBundleErr = r.status === 200 && r.body.ok ? "" : "Список наборов не загрузился.";
       render();
+      loadAdminBundlesThen();
     }).catch(function () {
       loadAdminBundles._busy = false;
       S.admBundles = []; S.admBundleErr = "Сервер не отвечает."; render();
+      loadAdminBundlesThen();
     });
+  }
+  /** 1a: a new set's first save waits for the list (bundleAsSend) — it goes on here. */
+  function loadAdminBundlesThen() {
+    var q = loadAdminBundles._then || [];
+    loadAdminBundles._then = [];
+    q.forEach(function (fn) { fn(); });
   }
 
   /* ---------- the address of a new set ------------------------------------
@@ -31261,14 +31399,17 @@
     form.items = (a.items || []).map(function (it) {
       return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
     });
-    // all three names, because the English one the assistant wrote is the
-    // second place bundleSuggestId() looks for a latin address
-    form.id = bundleSuggestId(form.title);
+    /* The address is taken when the set is first saved (bundleAsSend), from all
+       three names — the English one the assistant wrote is the second place
+       bundleSuggestId() looks for a latin address. 1a: the proposal is the
+       local draft; with a price it saves itself, hidden (q27). */
     // «Наборы» is the third tab of «Товары» (admProductTab), not a section
     S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
-    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
+    admAutosaveFlush();
+    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = "";
+    bundleDraftStore(form);
     window.scrollTo({ top: 0 }); render();
-    toast("Набор открыт — впишите цену и сохраните");
+    toast("Набор открыт — впишите цену, и он сохранится сам, скрытым");
   }
   /* …and a change to a set that exists: the same POST the editor's own
      «Сохранить» makes, so validateBundle() on the server has the last word
@@ -31351,43 +31492,88 @@
     // a journal row is one line of what happened, not the question before it
     deleteBundleById(a.id, actionText(a).split("\n")[0]);
   }
-  /* `idTyped` is the one thing the suggested address must respect: once the
-     owner has written an address of his own, the name he goes on typing must
-     never rewrite it under him. Clearing the box empties the flag again — an
-     empty address is a request for a new suggestion, not a decision. */
+  /* ======================================================================
+     1a «Наборы» — a set saves itself (README § 5; Dim, 25.09.2026, q27, q28)
+
+     No «Сохранить» and no «Отмена». The open set is the draft in S, and it
+     goes to the server through the one route it always did — POST
+     /api/admin/bundles/, the whole row — through admAutosave():
+       · a name or a price when the box is left (blur / Enter), a description
+         after a pause, an item, a quantity, a volume, a section or a photo at
+         once (ADM_SAVE_POLICY);
+       · only once the set would be accepted — a Russian name, two to eight
+         products, a price below the parts (bundleProblem). Until then the
+         change stays on screen and the part that is missing says so;
+       · «+ Набор» is a LOCAL draft (localStorage, so a reload keeps it) that
+         becomes a real set — hidden — the moment it is valid (q27);
+       · the price is what is stored; the percentage only computes it (q28);
+       · the address is written from the Russian name once, when the set is
+         first saved, and shown behind «?» — it is a URL, and it never
+         changes after that (q23; Dim, 08.09.2026: an English word).
+     «Вернуть» for what cannot be retyped: an item taken out, the assistant's
+     text, the show switch, a deleted set (held ADM_UNDO_MS before the DELETE
+     goes, q8). */
+  var BUNDLE_DRAFT_KEY = "rmp-bundle-draft";
+  var BUNDLE_UIDN = 0;
+  function bundleUid() { return "d" + Date.now().toString(36) + "-" + (++BUNDLE_UIDN); }
   function blankBundle() {
     return {
-      id: "", idTyped: false, cat: "beard", editing: false,
+      uid: bundleUid(), id: "", cat: "beard", editing: false,
       title: { RU: "", ET: "", EN: "" }, desc: { RU: "", ET: "", EN: "" },
-      items: [], price: "", image: "", active: true, sort: 0, lang: "RU"
+      items: [], price: "", image: "", active: false, sort: 0, lang: "RU", rev: 0
     };
   }
-  /** A saved set → the shape the form edits. */
+  /** A saved set → the shape the form edits. Its uid is its id: the autosave
+      of one set is one record, whichever door opened it. */
   function bundleToForm(b) {
     return {
-      id: b.id, cat: b.cat || "beard", editing: true,
+      uid: b.id, id: b.id, cat: b.cat || "beard", editing: true,
       title: { RU: (b.title && b.title.RU) || "", ET: (b.title && b.title.ET) || "", EN: (b.title && b.title.EN) || "" },
       desc: { RU: (b.desc && b.desc.RU) || "", ET: (b.desc && b.desc.ET) || "", EN: (b.desc && b.desc.EN) || "" },
       items: (b.items || []).map(function (it) {
         return { productId: it.productId || it.id, variant: it.variant || it.size || 0, qty: it.qty || 1 };
       }),
       price: b.price != null ? String(b.price) : "",
-      image: b.image || "", active: b.active !== false, sort: b.sort || 0, lang: "RU"
+      image: b.image || "", active: b.active !== false, sort: b.sort || 0, lang: "RU", rev: 0
     };
   }
-  /* «Написать черновик» / «Перевести с русского» over a set's description
-     (Dim, 07.09.2026: «Set descriptions should be possible to generate with
-     AI»). One snapshot per visit to the form, taken before the first AI
-     button is pressed, so «Отменить» always puts back what was on screen
-     before any of them — the same contract AI_UNDO gives the goods editor. */
-  var BUNDLE_AI_UNDO = null;
-  function bundleDescSnapshot() {
-    var f = S.bundleForm;
-    if (!f || BUNDLE_AI_UNDO) return;
-    BUNDLE_AI_UNDO = { desc: { RU: f.desc.RU || "", ET: f.desc.ET || "", EN: f.desc.EN || "" } };
-    var slot = document.querySelector("[data-bundleundoslot]");
-    if (slot) slot.innerHTML = '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>';
+  function bundleListEntry(id) {
+    var list = S.admBundles || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
   }
+  /* ---- the local draft of a new set ---------------------------------------- */
+  function bundleDraftHas(f) {
+    return !!(f && (String(f.title.RU || "").trim() || f.items.length || String(f.price || "").trim() ||
+      String(f.desc.RU || "").trim()));
+  }
+  function bundleDraftStore(f) {
+    if (!f || f.editing) return;
+    try {
+      if (!bundleDraftHas(f)) { localStorage.removeItem(BUNDLE_DRAFT_KEY); return; }
+      localStorage.setItem(BUNDLE_DRAFT_KEY, JSON.stringify({ uid: f.uid, cat: f.cat, title: f.title, desc: f.desc,
+        items: f.items, price: f.price, image: f.image, lang: f.lang, at: Date.now() }));
+    } catch (e) {}
+  }
+  function bundleDraftLoad() {
+    var d = null;
+    try { d = JSON.parse(localStorage.getItem(BUNDLE_DRAFT_KEY) || "null"); } catch (e) { d = null; }
+    if (!d || typeof d !== "object") return null;
+    var f = blankBundle();
+    if (d.uid) f.uid = String(d.uid);
+    ["RU", "ET", "EN"].forEach(function (L) {
+      f.title[L] = String((d.title && d.title[L]) || "");
+      f.desc[L] = String((d.desc && d.desc[L]) || "");
+    });
+    f.items = Array.isArray(d.items) ? d.items.filter(function (it) { return it && it.productId; }).map(function (it) {
+      return { productId: String(it.productId), variant: Number(it.variant) || 0, qty: Math.min(20, Math.max(1, Number(it.qty) || 1)) };
+    }) : [];
+    f.price = d.price == null ? "" : String(d.price);
+    f.cat = d.cat || f.cat; f.image = d.image || ""; f.lang = d.lang || "RU";
+    return bundleDraftHas(f) ? f : null;
+  }
+  function bundleDraftClear() { try { localStorage.removeItem(BUNDLE_DRAFT_KEY); } catch (e) {} }
+
   /** The facts the draft is written from: the set's name, its section and what is in it. */
   function bundleDescInput() {
     var f = S.bundleForm;
@@ -31409,8 +31595,8 @@
     });
   }
   /** What the parts cost separately, at today's shop prices. */
-  function bundleFormSum() {
-    var f = S.bundleForm;
+  function bundleFormSum(f) {
+    f = f || S.bundleForm;
     if (!f) return 0;
     var s = 0;
     f.items.forEach(function (it) {
@@ -31419,24 +31605,22 @@
     });
     return Math.round(s * 100) / 100;
   }
-  function bundleFormPrice() {
-    var n = Number(String(S.bundleForm.price || "").replace(",", "."));
+  function bundleFormPrice(f) {
+    f = f || S.bundleForm;
+    var n = Number(String((f && f.price) || "").replace(",", "."));
     return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
   }
-  /* Dim, 07.09.2026: «when creating sets and putting together items, we need
-     to see somewhere what the price total of the set is, so we can apply a
-     percentage as discount.» The two boxes are one number seen two ways: the
-     euro price is what is stored and sent, the percentage is that price read
-     against the running total of the items. Typing in either one fills the
-     other in place — no render, the caret stays where the owner is typing. */
-  /** The euro price as a percentage off the parts, one decimal, "" when there is no answer yet. */
+  /* Dim, 07.09.2026: «we need to see somewhere what the price total of the set
+     is, so we can apply a percentage as discount.» The two boxes are one
+     number seen two ways: the euro price is what is stored and sent (q28),
+     the percentage is that price read against the running total of the
+     items. Typing in either one fills the other in place — no render. */
   function bundleFormPctText() {
     var sum = bundleFormSum(), price = bundleFormPrice();
     if (!sum || !price || price >= sum) return "";
     var pct = Math.round(((sum - price) / sum) * 1000) / 10;
     return String(pct).replace(".", ",");
   }
-  /** …and a percentage typed in becomes the euro price it means, "" when it cannot. */
   function bundlePriceFromPct(raw) {
     var sum = bundleFormSum();
     var n = Number(String(raw == null ? "" : raw).replace(",", ".").replace("%", "").trim());
@@ -31446,15 +31630,6 @@
   /** The running total under the item list — the number the percentage is taken off. */
   function bundleSumLine() {
     return "Сумма товаров — " + eur(bundleFormSum());
-  }
-  /* The suggested address, patched where it stands — the name is being typed
-     in the box above and a render would take the caret out of it, the same
-     rule the money boxes below follow. */
-  function paintBundleId() {
-    var el = document.querySelector('[data-bundlef="id"]');
-    if (!el || !S.bundleForm) return;
-    S.bundleForm.id = bundleSuggestId(S.bundleForm.title);
-    el.value = S.bundleForm.id;
   }
   /** Both companions of the box being typed in, patched where they stand. */
   function paintBundleMoney(from) {
@@ -31467,7 +31642,9 @@
     paintBundleHint();
   }
   /* The one number the owner is really deciding. Patched in place on every
-     keystroke instead of rendered, so the caret stays in the price box. */
+     keystroke instead of rendered, so the caret stays in the price box; rust
+     when the set would not be cheaper — the one refusal he is most likely to
+     meet (design: «не дешевле» in rust). */
   function bundleHintHTML() {
     var sum = bundleFormSum(), price = bundleFormPrice();
     if (!sum) return "Добавьте хотя бы два товара — тогда посчитаем.";
@@ -31476,153 +31653,46 @@
     return "Сумма по отдельности — " + eur(sum) + ", скидка " +
       Math.round(((sum - price) / sum) * 100) + " % · выгода " + eur(Math.round((sum - price) * 100) / 100);
   }
+  function bundleHintWarn() {
+    var sum = bundleFormSum(), price = bundleFormPrice();
+    return !!(sum && price && price >= sum);
+  }
   function paintBundleHint() {
     var box = document.querySelector("[data-bundlehint]");
     if (!box) return;
     box.textContent = bundleHintHTML();
+    box.classList.toggle("adm-seted__warn", bundleHintWarn());
     translateTree(box);
-  }
-  /* Catalogue products only. src/lib/bundles.ts resolves every item of a set
-     against src/data/catalogue.min.json and nothing else (BY_ID), so a
-     product the owner made himself is refused on save with `unknown_product`
-     — «Одного из товаров больше нет в каталоге», said about a product he had
-     just picked out of the shop's own picker, with the whole form filled in.
-     Offering it and then refusing it is the lie; not offering it is a limit,
-     and the line under the picker says so in as many words. Sets holding the
-     owner's own products are a server change (custom_products in expand() and
-     validateBundle()), not a picker one. */
-  function bundlePickRows() {
-    var found = heroFind(S.bundleQ);
-    var list = found.filter(function (p) { return !p.custom; });
-    if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-bundleadd", p.id, p, false); }).join("") +
-      /* «показаны 8 из 41» — the eight are the first eight of the catalogue's
-         own order, and without this line a narrower word looks pointless. */
-      (found.total > list.length
-        ? '<p class="adm-hint adm-picks__more"><span>показаны ' + list.length +
-          " из " + found.total + "</span></p>"
-        : "");
-  }
-  /** …and why his own product is not in that list — only once he has one. */
-  function bundleOwnHint() {
-    for (var i = 0; i < CATALOGUE.length; i++) {
-      if (CATALOGUE[i].custom) return '<p class="hint adm-hint" style="margin:0">Свои товары в набор пока не добавить — только из каталога.</p>';
-    }
-    return "";
-  }
-  /** The photos the set can wear: one per product inside it, plus «сами». */
-  function bundleImageRowHTML() {
-    var f = S.bundleForm;
-    var picks = '<button class="adm-pick-tile adm-pick-tile--text" data-bundleimg="" aria-current="' + (!f.image) +
-      '" title="Три фото товаров стопкой">Автоматически<span class="adm-pick-tile__nm">три фото стопкой</span></button>';
-    f.items.forEach(function (it) {
-      var p = byIdOrNull(it.productId);
-      if (!p) return;
-      picks += admPickTile("data-bundleimg", p.id, p, f.image === p.id);
-    });
-    return picks;
-  }
-  function bundleItemRowsHTML() {
-    var f = S.bundleForm;
-    if (!f.items.length) return '<p class="adm-hint" style="margin:0">Пока пусто. Найдите товар ниже и нажмите на него.</p>';
-    return '<div class="adm-list adm-list--flat">' + f.items.map(function (it, i) {
-      var p = byIdOrNull(it.productId);
-      var sizes = p && p.sizes && p.sizes.length ? p.sizes : [];
-      return '<div class="adm-row">' + (p ? '<span class="adm-thumb adm-thumb--sm">' + media(p, it.variant || 0, "ph") + "</span>" : "") +
-        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p ? p.brand + " — " + p.name : it.productId) + "</span>" +
-          '<span class="adm-row__sub">' + eur(p ? sizePrice(p, it.variant || 0) : 0) + "</span></span>" +
-        (sizes.length > 1
-          ? '<select class="adm-input adm-input--row" style="width:auto" data-bundlesize="' + i + '" aria-label="Объём">' + sizes.map(function (sz, si) {
-              return '<option value="' + si + '"' + (si === (it.variant || 0) ? " selected" : "") + ">" + esc(sz) + "</option>";
-            }).join("") + "</select>"
-          : "") +
-        '<span class="adm-step-qty"><button data-bundleqty="' + i + ':-1" aria-label="Меньше">−</button>' +
-          '<span class="adm-step-qty__v">' + (it.qty || 1) + "</span>" +
-          '<button data-bundleqty="' + i + ':1" aria-label="Больше">+</button></span>' +
-        '<button class="adm-link adm-link--muted" data-bundledel="' + i + '">Убрать</button></div>';
-    }).join("") + "</div>";
-  }
-  function bundleFormHTML() {
-    var f = S.bundleForm;
-    var lang = f.lang || "RU";
-    return '<div class="adm-card adm-card--pad">' +
-      '<div class="adm-confirm__t">' + (f.editing ? "Изменить набор" : "Новый набор") + "</div>" +
-      /* The name comes first. The address used to — a latin slug nobody
-         thinks of before they have thought of the set, and a form that opens
-         with «менять нельзя после первой продажи» asks for a decision before
-         it has asked for anything at all (Dim, 19.09.2026). It writes itself
-         from the Russian name as that is typed (paintBundleId) and now sits
-         where a derived value belongs: below the text it is derived from. */
-      '<div class="adm-chips" role="group" aria-label="Язык текста">' + LANGS.map(function (l) {
-        return '<button class="adm-chip" data-bundlelang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
-      }).join("") + "</div>" +
-      '<label class="adm-field">' +
-        (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") +
-        '<input class="adm-input" data-bundlef="title" data-bundlel="' + lang + '" maxlength="120" value="' + esc(f.title[lang] || "") +
-        '" placeholder="' + (lang === "RU" ? "Борода — стартовый набор" : esc(f.title.RU || "")) + '"></label>' +
-      '<label class="adm-field">Описание — две-три простые фразы' +
-        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" data-bundlel="' + lang + '" placeholder="' +
-        (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
-        esc(f.desc[lang] || "") + "</textarea></label>" +
-      /* «Написать черновик» / «Перевести с русского» — the same pair the goods
-         editor has over a product's description, and the same promise: the
-         answer lands in the box, nothing is saved, «Отменить» puts back what
-         was there before the first of them was pressed. The draft is written
-         from the products the set already holds, so the button says so and
-         refuses until there are two — an empty set has nothing to describe. */
-      '<div class="adm-acts">' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundledescgen>Написать черновик</button>' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundletranslate>Перевести с русского</button>' +
-        '<span data-bundleundoslot>' +
-          (BUNDLE_AI_UNDO ? '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>' : "") +
-        "</span></div>" +
-      '<p class="hint adm-hint" style="margin:0">Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.</p>' +
-      '<label class="adm-field">Раздел магазина' +
-        '<select class="adm-input" data-bundlecat>' + BUNDLE_CATS.map(function (c) {
-          return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
-        }).join("") + "</select></label>" +
-      '<label class="adm-field">Адрес набора — латиницей, менять нельзя после первой продажи' +
-        '<input class="adm-input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
-        (f.editing ? " readonly" : "") + "></label>" +
-      (f.editing ? "" : '<p class="hint adm-hint" style="margin:0">Адрес подставляется из названия сам — менять его не обязательно.</p>') +
-      '<div class="adm-sec__t">Что внутри — минимум два товара</div>' +
-      bundleItemRowsHTML() +
-      '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
-      '<label class="adm-field">Найти товар' +
-        '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
-      '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" + bundleOwnHint() +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
-        '<label class="adm-field">Цена набора, €' +
-          '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
-        '<label class="adm-field">…или скидка от суммы, %' +
-          '<input class="adm-input" data-bundlepct inputmode="decimal" value="' + esc(bundleFormPctText()) + '" placeholder="20"></label></div>' +
-      '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
-      '<div class="adm-field">Фото набора</div>' +
-      '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
-      // «Удалить набор» ends the form on its own row (.adm-danger): the bar is
-      // the phone's header now and has no slot for it; the confirm card is unchanged
-      (f.editing ? '<div class="adm-danger"><button class="adm-link adm-link--warn" data-bundledelete="' + esc(f.id) + '">Удалить набор</button></div>' : "") +
-      // the product editor's sticky bar — see promoFormHTML()
-      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        (S.bundleFormErr ? '<p class="err adm-err adm-savebar__err" role="alert">' + esc(S.bundleFormErr) + "</p>" : "") +
-        '<button class="adm-btn adm-savebar__main" data-bundlesave>Сохранить</button>' +
-        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-bundlecancel>Отмена</button>' +
-        admBarNoteHTML("touch") +
-      "</div></div>";
+    var priceEl = document.querySelector('[data-bundlef="price"]');
+    if (priceEl) { if (bundleHintWarn()) priceEl.setAttribute("aria-invalid", "true"); else priceEl.removeAttribute("aria-invalid"); }
   }
 
-  /* «Удалить» is the one button here that cannot be undone, so it goes
-     through the panel's own confirm-before-apply strip rather than a browser
-     dialog — same shape as the blog's delete. */
-  function bundleDelConfirmHTML() {
-    return '<div class="adm-card"><div class="adm-confirm__t">Удалить набор?</div>' +
-      '<p class="adm-hint" style="margin:0">Страница набора исчезнет, уже оформленные заказы не изменятся.</p>' +
-      '<div class="adm-acts"><button class="adm-btn adm-btn--warn" data-bundledelyes="' + esc(S.bundleDel) + '">Да, удалить</button>' +
-        '<button class="adm-btn adm-btn--ghost" data-bundledelno>Отмена</button></div></div>';
+  /* ---- what would stop the set from being saved ---------------------------- */
+  /** The route's own refusals (validateBundle in src/lib/bundles.ts), asked
+      before the trip, in the words BUNDLE_SAVE_ERRS gives them; "" when none. */
+  function bundleProblem(f) {
+    if (!f) return "";
+    if (!String(f.title.RU || "").trim()) return BUNDLE_SAVE_ERRS.bad_name;
+    if (f.items.length < 2) return BUNDLE_SAVE_ERRS.few_items;
+    if (f.items.length > 8) return BUNDLE_SAVE_ERRS.too_many_items;
+    for (var i = 0; i < f.items.length; i++) {
+      var p = byIdOrNull(f.items[i].productId);
+      if (!p || p.custom) return BUNDLE_SAVE_ERRS.unknown_product;
+    }
+    if (!String(f.desc.RU || "").trim() && (String(f.desc.ET || "").trim() || String(f.desc.EN || "").trim())) return BUNDLE_SAVE_ERRS.bad_desc;
+    var sum = bundleFormSum(f), price = bundleFormPrice(f);
+    if (!price) return "Впишите цену набора или скидку — тогда набор сохранится.";
+    if (price >= sum) return BUNDLE_SAVE_ERRS.price_too_high;
+    if (!f.editing && !(f.id || bundleSuggestId(f.title))) return BUNDLE_SAVE_ERRS.bad_id;
+    return "";
   }
-  function bundleFormPayload() {
-    var f = S.bundleForm;
+  function bundleFormPayload(f) {
+    f = f || S.bundleForm;
     var price = String(f.price || "").trim().replace(",", ".");
+    /* The order is the list's, not the one the form opened with: ↑ ↓ are
+       PATCHed on their own, and a whole-row save that carried a stale `sort`
+       would put the set back where it was. */
+    var cur = f.id ? bundleListEntry(f.id) : null;
     return {
       id: String(f.id || "").trim().toLowerCase(),
       cat: f.cat,
@@ -31634,7 +31704,7 @@
       price: price ? Number(price) : null,
       image: f.image || null,
       active: f.active !== false,
-      sort: Number(f.sort) || 0
+      sort: Number(cur && cur.sort != null ? cur.sort : f.sort) || 0
     };
   }
   var BUNDLE_SAVE_ERRS = {
@@ -31656,46 +31726,203 @@
     bad_body: "Не получилось разобрать форму — обновите страницу.",
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
-  function saveBundleForm() {
-    if (!S.bundleForm || saveBundleForm._busy) return;   // a second tap while the first is on its way
-    /* POST /api/admin/bundles/ is an upsert, so a NEW set typed onto the
-       address of one that exists would quietly replace it — its name, its
-       products and its price, with no warning and no way back. The server
-       cannot tell the two apart (both are "save this set"), so the panel,
-       which knows the owner pressed «Новый набор», says so here. */
-    if (!S.bundleForm.editing) {
-      var wantId = String(S.bundleForm.id || "").trim().toLowerCase();
-      var clash = (S.admBundles || []).filter(function (b) { return b.id === wantId; })[0];
-      if (clash) {
-        S.bundleFormErr = "Набор с таким адресом уже есть — придумайте другой адрес.";
-        render(); return;
-      }
-    }
-    saveBundleForm._busy = true;
-    S.bundleFormErr = "";
-    apiSend("/api/admin/bundles/", "POST", bundleFormPayload()).then(function (r) {
-      saveBundleForm._busy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        S.bundleForm = null; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
-        toast("Набор сохранён ✓");
-        loadAdminBundles(true); loadBundles();   // the shop follows the panel
-        return;
-      }
-      S.bundleFormErr = BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.";
-      render();
-    }).catch(function () { saveBundleForm._busy = false; S.bundleFormErr = "Сервер не отвечает."; render(); });
+
+  /* ---- the autosave --------------------------------------------------------- */
+  function bundleAsKey(f) { return "bundle:" + f.uid; }
+  function bundleAsSpec(f, kind) {
+    return { kind: kind, validate: function () { return bundleProblem(f); }, send: function () { return bundleAsSend(f); } };
   }
-  function toggleBundleActive(id, active) {
-    apiSend("/api/admin/bundles/", "PATCH", { id: id, active: active }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        toast(active ? "Набор показан ✓" : "Набор скрыт ✓");
-        loadAdminBundles(true); loadBundles();
-        return;
+  /** Something in the open set changed. `kind` is ADM_SAVE_POLICY's word for
+      it — «text» after a pause, «name» and «money» when the box is left,
+      «pick» at once — and the set goes the moment it is valid. */
+  function bundleTouched(kind) {
+    var f = S.bundleForm;
+    if (!f) return;
+    f.rev = (f.rev || 0) + 1;
+    admAutosave(bundleAsKey(f), f.rev, kind === "pick" ? "change" : "input", bundleAsSpec(f, kind));
+    bundleDraftStore(f);
+    bundlePaintState();
+  }
+  /** Blur or Enter in one of the set's boxes. */
+  function bundleAsEvent(ev) {
+    var f = S.bundleForm;
+    if (f && ADM_AS[bundleAsKey(f)]) admAutosave(bundleAsKey(f), undefined, ev);
+  }
+  if (typeof document !== "undefined") {
+    var bundleBox = function (e) {
+      var el = e && e.target;
+      return el && el.matches && S.screen === "admin" && el.matches("[data-bundlef],[data-bundlepct]") ? el : null;
+    };
+    document.addEventListener("focusout", function (e) { if (bundleBox(e)) bundleAsEvent("blur"); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing) return;
+      var el = bundleBox(e);
+      if (el && el.tagName === "INPUT") bundleAsEvent("enter");
+    });
+  }
+  /** One whole-row POST. A new set goes out hidden, on the address its Russian
+      name gives it (bundleSuggestId — one no set in the list already owns),
+      and from then on it is a set like any other. */
+  function bundleAsSend(f) {
+    if (f.deleted) return Promise.resolve(true);   // deleted while a save was owed: nothing to bring back
+    var creating = !f.editing;
+    if (creating && !S.admBundles) {
+      /* An upsert on an address nobody checked could replace a set that
+         exists — so a new set waits for the list, then goes. A refusal here
+         would be owed nothing: the box has already been left, and a set typed
+         in the first second after opening «Наборы» would never save itself. */
+      if (SRV.admin !== true) return Promise.resolve({ refused: "Нужен вход в админку — изменение не сохранилось" });
+      return new Promise(function (resolve) {
+        (loadAdminBundles._then = loadAdminBundles._then || []).push(function () {
+          resolve(S.admBundles && !S.admBundleErr ? bundleAsSend(f)
+            : { refused: "Список наборов не загрузился — нажмите «Повторить» над ним." });
+        });
+        loadAdminBundles(false);
+      });
+    }
+    if (creating && !f.id) f.id = bundleSuggestId(f.title);
+    var body = bundleFormPayload(f);
+    if (creating) body.active = false;
+    return apiSend("/api/admin/bundles/", "POST", body).then(function (r) {
+      if (r.status === 200 && r.body && r.body.ok) {
+        S.bundleFormErr = ""; bundlePaintErr();
+        if (creating) {
+          f.editing = true; f.active = false;
+          bundleDraftClear();
+          toast("Набор сохранён — пока скрыт. Включите «Показывать в магазине», когда он готов.");
+          if (S.bundleForm === f) render();
+        }
+        loadAdminBundles(true); loadBundles();   // the shop follows the panel
+        return r;
       }
+      if (r.status === 401) return r;
+      if (creating) f.id = "";   // the next try picks its address afresh
+      var msg = BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.";
+      S.bundleFormErr = msg; bundlePaintErr();
+      return { refused: msg };
+    });
+  }
+  /** The server's refusal, where the eye is — patched, not rendered. */
+  function bundlePaintErr() {
+    if (typeof document === "undefined") return;
+    var el = document.querySelector("[data-bundleerr]");
+    if (!el) return;
+    el.textContent = S.bundleFormErr ? trText(S.bundleFormErr, S.lang) : "";
+    el.hidden = !S.bundleFormErr;
+  }
+  /** The name box and the item warning follow what is typed, in place. */
+  function bundlePaintState() {
+    var f = S.bundleForm;
+    if (!f || typeof document === "undefined") return;
+    var nameBad = f.rev > 0 && !String(f.title.RU || "").trim();
+    var nameEl = document.querySelector('[data-bundlef="title"]');
+    if (nameEl) { if (nameBad && (f.lang || "RU") === "RU") nameEl.setAttribute("aria-invalid", "true"); else nameEl.removeAttribute("aria-invalid"); }
+    var nameHint = document.querySelector("[data-bundlenamehint]");
+    if (nameHint) nameHint.hidden = !nameBad;
+    var descHint = document.querySelector("[data-bundledeschint]");
+    if (descHint) descHint.hidden = bundleProblem(f) !== BUNDLE_SAVE_ERRS.bad_desc;
+  }
+
+  /* ---- «Вернуть» ------------------------------------------------------------- */
+  /** A journal line whose «Вернуть» is `prev` (srvPush / demoUndo «bundle_*»). */
+  function bundleJournal(a, prev) {
+    var entry = { t: journalStamp(), txt: actionText(a), a: a, prev: prev };
+    DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+    return entry;
+  }
+  /** What the form holds, as «Вернуть» puts it back. */
+  function bundleSnap(f) {
+    return {
+      title: { RU: f.title.RU, ET: f.title.ET, EN: f.title.EN },
+      desc: { RU: f.desc.RU, ET: f.desc.ET, EN: f.desc.EN },
+      items: f.items.map(function (it) { return { productId: it.productId, variant: it.variant || 0, qty: it.qty || 1 }; }),
+      price: f.price, image: f.image, cat: f.cat
+    };
+  }
+  function bundleSnapApply(f, snap) {
+    f.title = { RU: snap.title.RU || "", ET: snap.title.ET || "", EN: snap.title.EN || "" };
+    f.desc = { RU: snap.desc.RU || "", ET: snap.desc.ET || "", EN: snap.desc.EN || "" };
+    f.items = (snap.items || []).map(function (it) { return { productId: it.productId, variant: it.variant || 0, qty: it.qty || 1 }; });
+    f.price = snap.price == null ? "" : String(snap.price);
+    f.image = snap.image || ""; f.cat = snap.cat || f.cat;
+  }
+  /** The screen half of an undo — demoUndo() calls it before srvPush(). */
+  function bundleUndoLocal(a) {
+    if (a.type === "bundle_restore") {
+      var h = BUNDLE_HELD[a.id];
+      if (h) { clearTimeout(h.timer); delete BUNDLE_HELD[a.id]; a.held = true; }
+      if (S.admBundles && !bundleListEntry(a.id)) {
+        var list = S.admBundles.slice();
+        // the stored row names its products `productId`; the list's photos read `id`
+        var back = Object.assign({}, a.row, { items: (a.row.items || []).map(function (it) { return Object.assign({ id: it.productId }, it); }) });
+        list.splice(Math.min(Number(a.at) || 0, list.length), 0, hydrateBundles([back])[0]);
+        S.admBundles = list;
+      }
+      loadAdminBundles(true);   // …and the server's own copy of it, price and stock included
+      return;
+    }
+    if (a.type === "bundle_row" && S.bundleForm && S.bundleForm.uid === a.uid) {
+      bundleSnapApply(S.bundleForm, a.form);
+      a.local = true;
+      bundleTouched("pick");
+    }
+  }
+  /** …and the server half. */
+  function bundleUndoPush(a) {
+    if (a.type === "bundle_active") { bundleSetActive(a.id, !!a.value, true); return; }
+    if (a.type === "bundle_restore") {
+      if (a.held) return;   // the DELETE never went: putting it back on screen was all of it
+      apiSend("/api/admin/bundles/", "POST", a.row).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast(BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось вернуть набор.");
+        loadAdminBundles(true); loadBundles();
+      }).catch(function () { toast("Сервер не отвечает"); });
+      return;
+    }
+    if (a.type === "bundle_row" && !a.local && a.id) {
+      var b = bundleListEntry(a.id);
+      if (!b) return;
+      var f = bundleToForm(b);
+      bundleSnapApply(f, a.form);
+      apiSend("/api/admin/bundles/", "POST", bundleFormPayload(f)).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast(BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось вернуть набор.");
+        loadAdminBundles(true); loadBundles();
+      }).catch(function () { toast("Сервер не отвечает"); });
+    }
+  }
+
+  /* ---- the show switch, the order, the delete -------------------------------- */
+  /** «Показывать в магазине» — on the row and in the editor. At once, with
+      «Вернуть»; the switch moves before the answer and goes back if refused.
+      Hiding a set also drops it from shoppers' baskets (DEF14 #5), and
+      «Вернуть» does not put it back there. */
+  function bundleSetActive(id, active, quiet) {
+    var b = bundleListEntry(id), was = b ? b.active !== false : !active;
+    var name = b ? bundleTitle(b) : id;
+    if (b) b.active = active;
+    if (S.bundleForm && S.bundleForm.id === id) S.bundleForm.active = active;
+    render();
+    return apiSend("/api/admin/bundles/", "PATCH", { id: id, active: active }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return false; }
+      if (r.status === 200 && r.body.ok) {
+        if (!quiet) {
+          var entry = bundleJournal({ type: "bundle_active", id: id, name: name, value: active },
+            { type: "bundle_active", id: id, name: name, value: was });
+          toast(active ? "Набор показан ✓" : "Набор скрыт ✓", entry);
+        }
+        loadAdminBundles(true); loadBundles();
+        return true;
+      }
+      if (b) b.active = was;
+      if (S.bundleForm && S.bundleForm.id === id) S.bundleForm.active = was;
       toast("Не получилось изменить набор");
-    }).catch(function () { toast("Сервер не отвечает"); });
+      render();
+      return false;
+    }).catch(function () {
+      if (b) b.active = was;
+      if (S.bundleForm && S.bundleForm.id === id) S.bundleForm.active = was;
+      toast("Сервер не отвечает"); render();
+      return false;
+    });
   }
   /* The arrows send the whole order they want, not a delta: two clicks in a
      row on a slow line can otherwise cross and swap a set back. */
@@ -31715,27 +31942,248 @@
       loadAdminBundles(true);
     }).catch(function () { toast("Сервер не отвечает"); loadAdminBundles(true); });
   }
+  /* «Удалить набор» → the confirm sheet → the set leaves the list at once and
+     the DELETE waits ADM_UNDO_MS, as long as the toast's «Вернуть» stands
+     (q8). A page closed inside that window still sends it (keepalive). */
+  var BUNDLE_HELD = {};
+  function bundleHoldDelete(id) {
+    var b = bundleListEntry(id);
+    if (!b) return;
+    var list = S.admBundles || [], at = list.indexOf(b);
+    var f = bundleToForm(b);
+    var row = bundleFormPayload(f);
+    if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm.deleted = true; S.bundleForm = null; S.bundleFormErr = ""; }
+    S.admBundles = list.filter(function (x) { return x.id !== id; });
+    var name = bundleTitle(b);
+    var entry = bundleJournal({ type: "bundle_delete", id: id, name: name },
+      { type: "bundle_restore", id: id, name: name, row: row, at: at });
+    BUNDLE_HELD[id] = { timer: setTimeout(function () { bundleHeldGo(id); }, ADM_UNDO_MS) };
+    toast("Набор удалён ✓", entry);
+    render();
+  }
+  function bundleHeldGo(id) {
+    if (!BUNDLE_HELD[id]) return;
+    delete BUNDLE_HELD[id];
+    deleteBundleById(id, "", true);
+  }
+  if (typeof window !== "undefined") {
+    window.addEventListener("pagehide", function () {
+      Object.keys(BUNDLE_HELD).forEach(function (id) {
+        clearTimeout(BUNDLE_HELD[id].timer);
+        delete BUNDLE_HELD[id];
+        try { fetch("/api/admin/bundles/?id=" + encodeURIComponent(id), { method: "DELETE", keepalive: true }); } catch (e) {}
+      });
+    });
+  }
   /* `note` is the line the change journal keeps when the assistant asked for
      this (applyDeleteBundle) — a note, not an entry: there is no `prev` to
-     put back, so no «Вернуть» appears beside it. The editor's own button
-     passes none: it is already standing in the list it just changed. */
-  function deleteBundleById(id, note) {
-    if (deleteBundleById._busy) return;   // «Да, удалить» twice is one deletion
+     put back, so no «Вернуть» appears beside it. `quiet`: the held delete of
+     the editor's own «Удалить набор», whose toast has already been shown. */
+  function deleteBundleById(id, note, quiet) {
+    if (deleteBundleById._busy) return;   // one deletion at a time
     deleteBundleById._busy = true;
     apiJson("/api/admin/bundles/?id=" + encodeURIComponent(id), { method: "DELETE" }).then(function (r) {
       deleteBundleById._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      S.bundleDel = "";
       if (r.status === 200 && r.body.ok) {
-        if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm = null; BUNDLE_AI_UNDO = null; }
+        if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm.deleted = true; S.bundleForm = null; }
         if (note) journalNote(note);
-        toast("Набор удалён ✓");
+        if (!quiet) toast("Набор удалён ✓");
         loadAdminBundles(true); loadBundles();
         return;
       }
       toast("Не получилось удалить набор");
+      loadAdminBundles(true);
+    }).catch(function () { deleteBundleById._busy = false; toast("Сервер не отвечает"); loadAdminBundles(true); });
+  }
+
+  /* ---- the assistant's ✨ and «Перевести с русского» --------------------------
+     The text lands in the box and saves itself like a typed one; the toast's
+     «Вернуть» puts back what was there before (bundle_row). The draft is
+     written from the products the set holds, so it waits for two. */
+  function bundleAiDone(f, snap, what) {
+    bundleTouched("pick");
+    var entry = bundleJournal({ type: "bundle_ai", id: f.id, name: f.title.RU },
+      { type: "bundle_row", uid: f.uid, id: f.editing ? f.id : "", name: f.title.RU, form: snap });
+    toast(what, entry);
+  }
+  function bundleAiFail(r) {
+    if (r && r.status === 401) { SRV.admin = false; render(); return; }
+    var err = r && r.body && r.body.error;
+    if (err === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+    else if (err === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+    else toast("Не получилось — попробуйте ещё раз");
+  }
+  function bundleDescDraft(btn) {
+    var f = S.bundleForm;
+    if (!f || !btn || btn.disabled) return;
+    if (f.items.length < 2) { toast("Сначала добавьте в набор хотя бы два товара"); return; }
+    var L = f.lang || "RU", snap = bundleSnap(f), label = btn.textContent;
+    btn.disabled = true; btn.textContent = "…";
+    var input = bundleDescInput(); input.kind = "bundle";
+    apiSend("/api/admin/ai/text/", "POST", { task: "copy", lang: L, input: input }).then(function (r) {
+      btn.disabled = false; btn.textContent = label;
+      var tx = r.status === 200 && r.body && r.body.ok ? r.body.text : null;
+      if (!tx || !tx.text) { bundleAiFail(r); return; }
+      f.desc[L] = txt(tx.text);
+      var el = document.querySelector('[data-bundlef="desc"]');
+      if (el && S.bundleForm === f && (f.lang || "RU") === L) el.value = f.desc[L];
+      bundleAiDone(f, snap, "Черновик готов — проверьте текст");
+    }).catch(function () { btn.disabled = false; btn.textContent = label; bundleAiFail(null); });
+  }
+  function bundleTranslate(btn) {
+    var f = S.bundleForm;
+    if (!f || !btn || btn.disabled) return;
+    var src = String(f.desc.RU || "").trim();
+    if (!src) { toast("Сначала напишите или сгенерируйте русское описание"); return; }
+    var snap = bundleSnap(f), label = btn.textContent;
+    btn.disabled = true; btn.textContent = "…";
+    apiSend("/api/admin/ai/text/", "POST", {
+      task: "translate", lang: "RU",
+      input: { text: src, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: bundleKeepNames(false) }
+    }).then(function (r) {
+      btn.disabled = false; btn.textContent = label;
+      if (!(r.status === 200 && r.body && r.body.ok && r.body.texts)) { bundleAiFail(r); return; }
+      if (r.body.texts.ET) f.desc.ET = r.body.texts.ET;
+      if (r.body.texts.EN) f.desc.EN = r.body.texts.EN;
+      var el = document.querySelector('[data-bundlef="desc"]');
+      var cur = f.lang || "RU";
+      if (el && S.bundleForm === f && cur !== "RU") el.value = f.desc[cur] || "";
+      bundleAiDone(f, snap, "Перевод готов — проверьте текст");
       render();
-    }).catch(function () { deleteBundleById._busy = false; S.bundleDel = ""; toast("Сервер не отвечает"); render(); });
+    }).catch(function () { btn.disabled = false; btn.textContent = label; bundleAiFail(null); });
+  }
+
+  /* ---- drawing ---------------------------------------------------------------- */
+  /* Catalogue products only. src/lib/bundles.ts resolves every item of a set
+     against src/data/catalogue.min.json and nothing else (BY_ID), so a
+     product the owner made himself is refused on save with `unknown_product`.
+     Offering it and then refusing it is the lie; not offering it is a limit,
+     and the line under the search says so. Each result carries its volumes
+     as chips — the volume is picked as the product is added, and the same
+     bottle added twice is one more of it (design). */
+  function bundlePickRows() {
+    if (!scanFold(S.bundleQ)) return "";
+    var found = heroFind(S.bundleQ);
+    var list = found.filter(function (p) { return !p.custom; });
+    if (!list.length) return HERO_NOHIT;
+    return list.map(function (p) {
+      var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+      return '<div class="adm-setpick"><span class="adm-setpick__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<span class="adm-setpick__sz">' + sizes.map(function (sz, i) {
+          return '<button type="button" class="adm-chip adm-setpick__add" data-bundleadd="' + esc(p.id) + '" data-bundleaddsz="' + i + '">' +
+            "+ <span>" + (sz ? esc(sz) : "один объём") + '</span> · <span class="num">' + eur(sizePrice(p, i)) + "</span></button>";
+        }).join("") + "</span></div>";
+    }).join("") +
+      /* «показаны 8 из 41» — the eight are the first eight of the catalogue's
+         own order, and without this line a narrower word looks pointless. */
+      (found.total > list.length
+        ? '<p class="adm-hint adm-picks__more"><span>показаны ' + list.length + " из " + found.total + "</span></p>"
+        : "");
+  }
+  /** …and why his own product is not in that list — only once he has one. */
+  function bundleOwnHint() {
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      if (CATALOGUE[i].custom) return '<p class="hint adm-hint" style="margin:0">Свои товары в набор пока не добавить — только из каталога.</p>';
+    }
+    return "";
+  }
+  /** The photos the set can wear: the automatic stack, or one product's own (q25 — kept). */
+  function bundleImageRowHTML() {
+    var f = S.bundleForm;
+    var picks = '<button class="adm-pick-tile adm-pick-tile--text" data-bundleimg="" aria-current="' + (!f.image) +
+      '" title="Три фото товаров стопкой">Автоматически<span class="adm-pick-tile__nm">три фото стопкой</span></button>';
+    f.items.forEach(function (it) {
+      var p = byIdOrNull(it.productId);
+      if (!p) return;
+      picks += admPickTile("data-bundleimg", p.id, p, f.image === p.id);
+    });
+    return picks;
+  }
+  function bundleItemRowsHTML() {
+    var f = S.bundleForm;
+    if (!f.items.length) return '<p class="adm-hint" style="margin:0">Пока пусто. Найдите товар ниже и нажмите на объём.</p>';
+    return '<div class="adm-list adm-list--flat adm-setitems">' + f.items.map(function (it, i) {
+      var p = byIdOrNull(it.productId);
+      var sizes = p && p.sizes && p.sizes.length ? p.sizes : [];
+      return '<div class="adm-row adm-setitem">' +
+        (p ? '<span class="adm-thumb adm-thumb--sm">' + media(p, it.variant || 0, "ph") + "</span>" : '<span class="adm-thumb adm-thumb--sm"></span>') +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p ? p.brand + " — " + p.name : it.productId) + "</span>" +
+          '<span class="adm-row__sub">' +
+            // the volume can still be changed after the item is in (q30)
+            (sizes.length > 1
+              ? '<select class="adm-input adm-input--row adm-setitem__sz" data-bundlesize="' + i + '" aria-label="Объём">' + sizes.map(function (sz, si) {
+                  return '<option value="' + si + '"' + (si === (it.variant || 0) ? " selected" : "") + ">" + esc(sz) + "</option>";
+                }).join("") + "</select> · "
+              : (sizes[0] ? "<span>" + esc(sizes[0]) + "</span> · " : "")) +
+            '<span class="num">' + eur(p ? sizePrice(p, it.variant || 0) : 0) + "</span></span></span>" +
+        '<span class="adm-step-qty"><button type="button" data-bundleqty="' + i + ':-1" aria-label="Меньше"' + ((it.qty || 1) <= 1 ? " disabled" : "") + ">−</button>" +
+          '<span class="adm-step-qty__v">' + (it.qty || 1) + "</span>" +
+          '<button type="button" data-bundleqty="' + i + ':1" aria-label="Больше"' + ((it.qty || 1) >= 20 ? " disabled" : "") + ">+</button></span>" +
+        '<button type="button" class="adm-setitem__x" data-bundledel="' + i + '" aria-label="Убрать из набора">×</button></div>';
+    }).join("") + "</div>";
+  }
+  /** Where the set lives in the shop — behind «?», read-only (q23). */
+  function bundleAddrHTML(f) {
+    var id = f.editing ? f.id : bundleSuggestId(f.title);
+    return '<span>Раздел — где набор стоит в магазине. Адрес набора пишется сам из русского названия, латиницей, и после первой записи не меняется:</span> ' +
+      '<span class="adm-mono">' + (id ? "/set/" + esc(id) + "/" : "—") + "</span>";
+  }
+  function bundleFormHTML() {
+    var f = S.bundleForm;
+    var lang = f.lang || "RU";
+    var nameBad = f.rev > 0 && !String(f.title.RU || "").trim();
+    var descBad = bundleProblem(f) === BUNDLE_SAVE_ERRS.bad_desc;
+    var warn = bundleHintWarn();
+    return '<div class="adm-seted" data-bundleform>' +
+      // one control, two faces: «← Наборы» on a phone (the editor is its own view), × on a desktop
+      '<button type="button" class="adm-seted__close" data-bundlecancel><span class="adm-seted__back">← <span>Наборы</span></span>' +
+        '<span class="adm-seted__x" aria-hidden="true">×</span><span class="vh adm-seted__xl">Закрыть</span></button>' +
+      (f.editing ? "" :
+        '<div class="adm-seted__draft"><span>Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.</span>' +
+          (bundleDraftHas(f) ? '<button type="button" class="adm-link adm-link--muted" data-bundledraftnew>Начать заново</button>' : "") + "</div>") +
+      '<p class="adm-err adm-seted__err" role="alert" data-bundleerr' + (S.bundleFormErr ? "" : " hidden") + ">" + esc(S.bundleFormErr || "") + "</p>" +
+      admLangBarHTML("data-bundlelang", LANGS.map(function (l) { return [l[0], l[1]]; }), lang, "Язык текста",
+        function (L) { return admLangFallback(L, (f.title[L] || "") + (f.desc[L] || ""), (f.title.RU || "") + (f.desc.RU || "")); }, "",
+        { translate: lang !== "RU" ? '<button type="button" class="adm-link" data-bundletranslate>Перевести с русского</button>' : "" }) +
+      /* The name comes first (Dim, 19.09.2026): the address is written from it. */
+      '<input class="adm-input adm-seted__name" data-bundlef="title" data-bundlel="' + lang + '" maxlength="120" aria-label="Название набора"' +
+        (nameBad && lang === "RU" ? ' aria-invalid="true"' : "") + ' value="' + esc(f.title[lang] || "") +
+        '" placeholder="' + (lang === "RU" ? "Название — например, Борода — стартовый набор" : esc(f.title.RU || "")) + '">' +
+      '<span class="adm-ashint" data-bundlenamehint' + (nameBad ? "" : " hidden") + ">" + BUNDLE_SAVE_ERRS.bad_name + "</span>" +
+      '<textarea class="adm-input adm-seted__desc" rows="3" maxlength="1000" data-bundlef="desc" data-bundlel="' + lang + '" placeholder="' +
+        (lang === "RU" ? "Описание — две-три простые фразы" : esc(f.desc.RU || "")) + '" aria-label="Описание набора">' +
+        esc(f.desc[lang] || "") + "</textarea>" +
+      '<span class="adm-ashint" data-bundledeschint' + (descBad ? "" : " hidden") + ">" + BUNDLE_SAVE_ERRS.bad_desc + "</span>" +
+      // Dim, 07.09.2026: a set's description can be written by the assistant — in the language on screen
+      '<div class="adm-seted__ai"><button type="button" class="adm-link" data-bundledescgen>✨ Написать черновик</button></div>' +
+      admSecHeadHTML("Что внутри") +
+      bundleItemRowsHTML() +
+      (f.items.length < 2 ? '<p class="adm-ashint adm-seted__few">' + BUNDLE_SAVE_ERRS.few_items + "</p>" : "") +
+      '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
+      '<input class="adm-input adm-seted__q" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Добавить товар: название или бренд" aria-label="Добавить товар">' +
+      '<div class="adm-setpicks" id="bundlepicks">' + bundlePickRows() + "</div>" + bundleOwnHint() +
+      admSecHeadHTML("Цена") +
+      '<div class="adm-seted__money">' +
+        '<label class="adm-field">Цена набора, €' +
+          '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"' +
+          (warn ? ' aria-invalid="true"' : "") + "></label>" +
+        '<label class="adm-field">или скидка, %' +
+          '<input class="adm-input" data-bundlepct inputmode="decimal" value="' + esc(bundleFormPctText()) + '" placeholder="20"></label></div>' +
+      '<p class="hint adm-hint' + (warn ? " adm-seted__warn" : "") + '" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
+      admSecHeadHTML("Раздел магазина", "set-addr", bundleAddrHTML(f)) +
+      '<select class="adm-input" data-bundlecat aria-label="Раздел магазина">' + BUNDLE_CATS.map(function (c) {
+        return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
+      }).join("") + "</select>" +
+      admSecHeadHTML("Фото набора") +
+      '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
+      admLabelledSwitch('data-bundleshow="' + esc(f.id || "") + '"' + (f.editing ? "" : " disabled"), "Показывать в магазине", !!(f.editing && f.active)) +
+      (f.editing
+        ? (f.active ? '<button type="button" class="adm-link adm-seted__go" data-go-bundle="' + esc(f.id) + '">Открыть в магазине ↗</button>' : "") +
+          '<div class="adm-danger"><button class="adm-link adm-link--warn" type="button" data-bundledelete="' + esc(f.id) + '">Удалить набор</button></div>'
+        : '<p class="adm-hint" style="margin:0">Показать в магазине можно, когда набор сохранится.</p>' +
+          (bundleDraftHas(f) ? '<div class="adm-danger"><button class="adm-link adm-link--warn" type="button" data-bundledraftdrop>Удалить черновик</button></div>' : "")) +
+    "</div>";
   }
 
   /* ---------- wholesale/loyalty: admin «Клиенты» -------------------------
@@ -34564,7 +35012,8 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0, movesAsked: false, movesSeq: 0, at: 0 };
+  // epoch / rank / rankFor: the list's order, frozen while the owner stays on it (stockGroups)
+  var STOCK = { asked: false, seq: 0, movesAsked: false, movesSeq: 0, at: 0, epoch: 0, rank: null, rankFor: "" };
   /** How many «Склад» rows one page of the list holds. The whole warehouse is
       ~320 rows and every one of them has to be reachable (Dim: «We need
       all»), but the list is re-drawn on every keystroke of the search box, so
@@ -34629,7 +35078,9 @@
     /* 092_stock_move_edit.sql: the card changed, not the shelf — a barcode
        bound, the «мало» threshold moved. Its own word because nothing came
        in or went out, which is also why the row shows no number. */
-    edit: "правка карточки"
+    edit: "правка карточки",
+    // 206_stock_move_writeoff.sql — the scanner's «Списать» (Dim, 25.09.2026, q41)
+    writeoff: "списание"
   };
   function stockKey(productId, variant) { return productId + " " + (variant || ""); }
   function stockFindRow(key) {
@@ -34637,83 +35088,437 @@
     for (var i = 0; i < rows.length; i++) if (stockKey(rows[i].productId, rows[i].variant) === key) return rows[i];
     return null;
   }
-  /* The row's own form, for what the ± stepper cannot say: the barcode, the
-     «мало» threshold, an exact recount and the reason that goes into the
-     history. The stepper above it is the everyday control; this is the one
-     that binds an EAN by hand when the scanner is not around. */
-  function stockEditFormHTML(r) {
-    return '<div class="adm-card" style="margin:0 0 12px">' +
-      '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
-        '<label class="adm-field" style="flex:1 1 180px">EAN / штрихкод' +
-          '<input class="adm-input" data-stockeaninput value="' + esc(S.stockEditEan || "") + '" placeholder="нет штрихкода" inputmode="numeric"></label>' +
-        '<label class="adm-field" style="flex:0 1 140px">Порог «мало»' +
-          '<input class="adm-input" data-stocklowinput value="' + esc(S.stockEditLow || "") + '" inputmode="numeric"></label>' +
-      "</div>" +
-      '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
-        '<label class="adm-field" style="flex:0 1 140px">Остаток сейчас' +
-          '<input class="adm-input" data-stockqtyinput value="' + esc(S.stockEditQty || "") + '" inputmode="numeric" placeholder="' + (r.tracked ? r.qty : "0") + '"></label>' +
-        '<label class="adm-field" style="flex:1 1 220px">Причина (видна в истории)' +
-          '<input class="adm-input" data-stockreasoninput value="' + esc(S.stockEditReason || "") + '" placeholder="например: пересчёт на полке"></label>' +
-      "</div>" +
-      '<div class="adm-acts"><button class="adm-btn adm-btn--row" data-stocksave="' + esc(stockKey(r.productId, r.variant)) + '">Сохранить</button>' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-stockedit="">Отмена</button></div>' +
+  /* ---- 1a: the row IS the control (README § 5 «Склад»; Dim, 25.09.2026) ----
+     There is no «Править» form and no «Сохранить» any more:
+       · − / + change the count right in the row. A burst of taps is ONE move,
+         sent STOCK_BURST_MS after the last tap — one ledger line, one
+         «Вернуть» (q25) — and a «+» taken back with «−» before it went sends
+         nothing at all, so nobody on the back-in-stock list is written to
+         for a slip of the thumb;
+       · the number between them can be typed: it leaves on blur or Enter as
+         an absolute count (ADM_SAVE_POLICY.count), exactly as «Остаток
+         сейчас» did — the first count of an uncounted size may be zero;
+       · a tap on the size opens the row: «мало ≤», the barcode with its scan
+         button (a text keyboard — own codes like RMP-0042, q18) and
+         «Причина», which rides as `ref` on the row's next change, or goes on
+         its own as a «правка карточки» line when the row closes with nothing
+         else changed. Desktop rows open the same way (q14).
+     Every write goes through the routes «Править» used: POST
+     /api/admin/inventory/moves/ (stockMoveSend — one at a time, with its
+     «сделать один раз» key) for the count, PUT /api/admin/inventory/ for the
+     card. «Сохранено ✓» in the header only after the route's 2xx
+     (admAutosave). */
+  var STOCK_BURST_MS = 800;
+  /** key → { pending, inflight, started, from, seq, timer } — the taps not yet on the shelf. */
+  var STOCK_BURST = {};
+  /** key → the «Причина» typed on that row / the one a change already carried. */
+  var STOCK_WHY = {}, STOCK_WHY_USED = {};
+
+  function stockBurstDelta(key) {
+    var b = STOCK_BURST[key];
+    return b ? b.pending + b.inflight : 0;
+  }
+  /** What the row shows: the count the server last reported plus the taps on their way. */
+  function stockShownQty(r) {
+    return (r.tracked ? Number(r.qty) || 0 : 0) + stockBurstDelta(stockKey(r.productId, r.variant));
+  }
+  function stockShownTracked(r) {
+    return !!r.tracked || stockBurstDelta(stockKey(r.productId, r.variant)) !== 0;
+  }
+  /** "none" | "out" | "low" | "in" — deriveState() of src/lib/inventory.ts, on the
+      count the row shows and against the row's OWN «мало ≤» (not a flat 3). */
+  function stockShownState(r) {
+    if (!stockShownTracked(r)) return "none";
+    var q = stockShownQty(r), t = Number(r.lowThreshold);
+    if (!isFinite(t) || t < 0) t = 2;
+    return q <= 0 ? "out" : q <= t ? "low" : "in";
+  }
+  /* The status tag the design gives every size: outlined green, rust outline,
+     rust fill, grey — and always the word, never the colour alone. */
+  var STOCK_TAG = { none: ["quiet", "не учтено"], out: ["alert", "нет"], low: ["low", "мало"], "in": ["ok", "в наличии"] };
+  function stockTagHTML(state) {
+    var t = STOCK_TAG[state] || STOCK_TAG.none;
+    return admTagHTML(t[0], t[1]);
+  }
+  /** «Bio Botanical Shampoo 250 мл: 3 → 6» — what a burst, a typed count or its undo says. */
+  function stockMoveToastText(r, from, to) {
+    return admProdName(r.name) + (r.variant ? " " + r.variant : "") + ": " +
+      (from === null || from === undefined ? "—" : from) + " → " + to;
+  }
+  /** The «Причина» that goes with this row's next change, marked as carried. */
+  function stockWhyFor(key) { return String(STOCK_WHY[key] || "").trim(); }
+  function stockWhyUse(key) {
+    var why = stockWhyFor(key);
+    if (why) STOCK_WHY_USED[key] = why;
+    return why;
+  }
+  function stockWhyDrop(key, why) {
+    if (why && STOCK_WHY_USED[key] === why) delete STOCK_WHY_USED[key];
+  }
+
+  /* ---- a field whose «value» for the scheduler is a token ------------------
+     admAutosave() skips a value equal to the one the server last took («typed
+     back to what the server holds»). On «Склад» a count or a code can move
+     under the box by other means — a ± burst, the scanner, «Вернуть» — and
+     the same number typed again then has to go out again. So these boxes hand
+     the scheduler a fresh token per keystroke and keep what was typed here;
+     `send` and `validate` read ADM_TYPED. `data-asfield` (not
+     `data-autosave`) keeps the panel-wide listeners off them; the rust edge
+     is painted here, the one line under the box by admAutosaveMark(). */
+  var ADM_TYPED = {}, ADM_TYPED_SPEC = {}, ADM_TYPED_SEQ = 0;
+  function admTypedSpec(k, spec) { ADM_TYPED_SPEC[k] = spec; return k; }
+  function admTypedEvent(el, ev) {
+    var k = el.getAttribute("data-asfield"), spec = ADM_TYPED_SPEC[k];
+    if (!spec) return;
+    if (ev === "input") { ADM_TYPED[k] = el.value; admAutosave(k, ++ADM_TYPED_SEQ, "input", spec); }
+    else admAutosave(k, undefined, ev, spec);
+    var f = ADM_AS[k];
+    if (f && f.err) el.setAttribute("aria-invalid", "true"); else el.removeAttribute("aria-invalid");
+  }
+  if (typeof document !== "undefined") {
+    var admTypedEl = function (e) {
+      var el = e && e.target;
+      return el && el.getAttribute && S.screen === "admin" && el.getAttribute("data-asfield") ? el : null;
+    };
+    document.addEventListener("input", function (e) { var el = admTypedEl(e); if (el) admTypedEvent(el, "input"); });
+    document.addEventListener("focusout", function (e) { var el = admTypedEl(e); if (el) admTypedEvent(el, "blur"); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing) return;
+      var el = admTypedEl(e);
+      if (el && el.tagName === "INPUT") admTypedEvent(el, "enter");
+    });
+  }
+
+  /* ---- ± : the burst -------------------------------------------------------- */
+  function stockBurstSpec(key) {
+    return { kind: "count", send: function () { return stockBurstSend(key); } };
+  }
+  /** One tap. The row repaints at once; the shelf hears about it after the burst. */
+  function stockBurstTap(key, delta) {
+    var r = stockFindRow(key);
+    if (!r) return false;
+    if (delta < 0 && stockShownQty(r) <= 0) return false;
+    var b = STOCK_BURST[key] || (STOCK_BURST[key] = { pending: 0, inflight: 0, started: false, from: null, seq: 0, timer: 0 });
+    if (!b.started) { b.started = true; b.from = stockShownTracked(r) ? stockShownQty(r) : null; }
+    b.pending += delta; b.seq++;
+    var k = "stock:" + key;
+    admAutosave(k, b.seq, "input", stockBurstSpec(key));   // owed from now on: Back and the nav send it
+    clearTimeout(b.timer);
+    b.timer = setTimeout(function () { b.timer = 0; admAutosave(k, undefined, "flush"); }, STOCK_BURST_MS);
+    return true;
+  }
+  /** The burst, as one move. `true` once the shelf took it, false when it did not
+      (the taps are put back on the row, and «Повторить» sends them again). */
+  function stockBurstSend(key) {
+    var b = STOCK_BURST[key], r = stockFindRow(key);
+    if (!b || !r || !b.pending) {
+      if (b && !b.pending) b.started = false;   // «+» then «−»: nothing to send
+      return Promise.resolve(true);
+    }
+    var delta = b.pending, from = b.from;
+    b.pending = 0; b.inflight = delta; b.started = false;
+    var why = stockWhyUse(key);
+    var back = function () {
+      b.inflight = 0; b.pending += delta; b.started = true; b.from = from;
+      stockWhyDrop(key, why);
+      render();
+      return false;
+    };
+    return stockMoveSend({ productId: r.productId, variant: r.variant || "", delta: delta, reason: "adjust", ref: why || "панель" })
+      .then(function (res) {
+        if (!res) { toast(stockMoveFailText("Склад не принял правку")); return back(); }
+        b.inflight = 0;
+        stockLanded(r, res, { type: "stock_adjust", delta: delta, from: from });
+        return true;
+      }, back);
+  }
+  /** A move the shelf took. The row follows at once (the list is re-read
+      behind it); the journal gets one line whose «Вернуть» is the opposite of
+      what REALLY moved — the stockUndoApplied() rule; the toast says
+      «from → to». */
+  function stockLanded(r, res, how) {
+    var before = r.tracked ? Number(r.qty) || 0 : 0, wasTracked = !!r.tracked;
+    var applied = res && typeof res.appliedDelta === "number" ? res.appliedDelta
+      : how.type === "stock_set" ? how.qty - before : how.delta;
+    r.qty = res && typeof res.qtyAfter === "number" ? res.qtyAfter : before + applied;
+    r.tracked = true;
+    var t = Number(r.lowThreshold);
+    r.state = r.qty <= 0 ? "out" : r.qty <= (isFinite(t) && t >= 0 ? t : 2) ? "low" : "in";
+    var v = r.variant || "";
+    var a = how.type === "stock_set"
+      ? { type: "stock_set", product_id: r.productId, variant: v, qty: r.qty }
+      : { type: "stock_adjust", product_id: r.productId, variant: v, delta: applied, reason: how.reason || "adjust" };
+    /* No way back from a first count: before it there was no number at all
+       («не учтено» is not a quantity to return to) — demoApply's own rule. */
+    var entry = { t: journalStamp(), txt: actionText(a), a: a,
+      prev: applied && (wasTracked || how.type !== "stock_set")
+        ? { type: "stock_adjust", product_id: r.productId, variant: v, delta: -applied, reason: "adjust" } : null };
+    DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+    S.stockMoves = null; STOCK.movesAsked = false;   // «История» reads it again
+    toast(how.toast || stockMoveToastText(r, how.from, r.qty), entry);
+    /* the list may have been re-read while the move was on its way: the row on
+       screen now is not the one the move started from */
+    var cur = stockFindRow(stockKey(r.productId, r.variant));
+    if (cur && cur !== r) { cur.qty = r.qty; cur.tracked = true; cur.state = r.state; }
+    reloadStock();
+    return entry;
+  }
+
+  /* ---- the number between − and +, typed -------------------------------- */
+  function stockQtySpec(key) {
+    var k = "stockqty:" + key;
+    return {
+      kind: "count",
+      validate: function () {
+        var raw = String(ADM_TYPED[k] == null ? "" : ADM_TYPED[k]).trim();
+        return raw && stockQtyValue(raw) === null ? "Остаток — целое число от 0 до 1 000 000." : "";
+      },
+      send: function () { return stockQtyCommit(key, ADM_TYPED[k]); }
+    };
+  }
+  /** A typed count, absolute. A row nobody has counted takes ANY number as its
+      first count, zero included; a counted row already showing that number
+      has nothing to send (stock-r21). Taps not yet sent are folded into it. */
+  function stockQtyCommit(key, raw) {
+    var r = stockFindRow(key), q = stockQtyValue(raw);
+    if (!r || q === null) return Promise.resolve(true);
+    var b = STOCK_BURST[key];
+    if (b && b.pending) { b.pending = 0; b.started = false; clearTimeout(b.timer); }
+    if (stockShownTracked(r) && q === stockShownQty(r)) return Promise.resolve(true);
+    var from = stockShownTracked(r) ? stockShownQty(r) : null;
+    var why = stockWhyUse(key);
+    return stockMoveSend({ productId: r.productId, variant: r.variant || "", qty: q, reason: "adjust", ref: why || "панель" })
+      .then(function (res) {
+        if (!res) { stockWhyDrop(key, why); toast(stockMoveFailText("Склад не принял правку")); return false; }
+        stockLanded(r, res, { type: "stock_set", qty: q, from: from });
+        return true;
+      }, function () { stockWhyDrop(key, why); return false; });
+  }
+
+  /* ---- the open row: the barcode, «мало ≤», «Причина» --------------------- */
+  function stockEanNorm(v) { return String(v == null ? "" : v).replace(/\s+/g, "").toUpperCase(); }
+  /** The route's own rule (normEan in src/lib/inventory.ts), said before the trip. */
+  function stockEanProblem(v) {
+    var s = stockEanNorm(v);
+    if (!s) return "";
+    var ok = /^[0-9]+$/.test(s) ? s.length >= 8 && s.length <= 14 : /^[A-Z0-9-]{4,32}$/.test(s);
+    return ok ? "" : STOCK_SAVE_ERRS.bad_ean;
+  }
+  function stockEanSpec(key) {
+    var k = "stockean:" + key;
+    return {
+      kind: "code",
+      validate: function () { return stockEanProblem(ADM_TYPED[k]); },
+      send: function () { return stockEanCommit(key, ADM_TYPED[k], "typed"); }
+    };
+  }
+  /** One code onto one size, or none (unbind). The box, the row's scan button and
+      the scanner's «Отвязать» all end here; «Вернуть» puts the old code back
+      (srvPush «stock_ean»). A code another bottle holds is refused in words
+      that name that bottle — under the box when it was typed, in the toast
+      when it came from the camera. `hint` is the size as the scanner knows it,
+      for a shelf list that has not arrived yet. */
+  function stockEanCommit(key, raw, how, hint) {
+    var r = stockFindRow(key) || hint;
+    if (!r) return Promise.resolve(true);
+    var want = stockEanNorm(raw) || null, had = r.ean || null;
+    if (want === had) return Promise.resolve(true);
+    var why = stockWhyUse(key);
+    var body = { productId: r.productId, variant: r.variant || "", ean: want };
+    if (why) body.ref = why;
+    return stockLevelSaveDetailed(body).then(function (res) {
+      if (!res.ok) {
+        stockWhyDrop(key, why);
+        if (res.error === "offline") return false;
+        var msg = stockSaveErrText(res) || "Штрихкод не сохранился — попробуйте ещё раз.";
+        if (how !== "typed") toast(msg);
+        return { refused: msg };
+      }
+      r.ean = want;
+      var v = r.variant || "";
+      var a = { type: "stock_ean", product_id: r.productId, variant: v, value: want };
+      var entry = { t: journalStamp(), txt: actionText(a), a: a,
+        prev: { type: "stock_ean", product_id: r.productId, variant: v, value: had } };
+      DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+      toast(!want ? "Код отвязан ✓" : how === "scan" ? "Код считан и привязан ✓" : "Код привязан ✓", entry);
+      scanStockChanged();
+      render();
+      return true;
+    });
+  }
+  function stockLowSpec(key) {
+    var k = "stocklow:" + key;
+    return {
+      kind: "count",
+      validate: function () {
+        var raw = String(ADM_TYPED[k] == null ? "" : ADM_TYPED[k]).trim(), n = stockQtyValue(raw);
+        return n === null || n > 100000 ? STOCK_SAVE_ERRS.bad_threshold : "";
+      },
+      send: function () {
+        var r = stockFindRow(key), n = stockQtyValue(ADM_TYPED[k]);
+        if (!r || n === null || n === Number(r.lowThreshold)) return Promise.resolve(true);
+        var why = stockWhyUse(key);
+        var body = { productId: r.productId, variant: r.variant || "", lowThreshold: n };
+        if (why) body.ref = why;
+        return stockLevelSaveDetailed(body).then(function (res) {
+          if (!res.ok) {
+            stockWhyDrop(key, why);
+            return res.error === "offline" ? false : { refused: stockSaveErrText(res) || STOCK_SAVE_ERRS.bad_threshold };
+          }
+          r.lowThreshold = n;
+          if (r.tracked) r.state = r.qty <= 0 ? "out" : r.qty <= n ? "low" : "in";
+          scanStockChanged();
+          render();
+          return true;
+        });
+      }
+    };
+  }
+  /** «Причина» with nothing else changed on the row: its own «правка карточки»
+      line (setLevel() writes one only when the card patch is not empty, so
+      the threshold the row already has rides with it). */
+  function stockWhySpec(key) {
+    return {
+      kind: "count",
+      send: function () {
+        var r = stockFindRow(key), why = stockWhyFor(key);
+        if (!r || !why || STOCK_WHY_USED[key] === why) return Promise.resolve(true);
+        STOCK_WHY_USED[key] = why;
+        var t = Number(r.lowThreshold);
+        return stockLevelSaveDetailed({ productId: r.productId, variant: r.variant || "",
+          lowThreshold: isFinite(t) && t >= 0 ? t : 2, ref: why }).then(function (res) {
+          if (res.ok) { S.stockMoves = null; STOCK.movesAsked = false; return true; }
+          stockWhyDrop(key, why);
+          return res.error === "offline" ? false : { refused: stockSaveErrText(res) || "Причина не сохранилась — попробуйте ещё раз." };
+        });
+      }
+    };
+  }
+  /** The row closes: whatever it still owes goes, and its «Причина» with it. */
+  function stockRowClose(key) {
+    if (!key) return;
+    // only the fields that exist: a flush of a name nothing was ever typed under would leave an empty record behind
+    ["stockqty:", "stockean:", "stocklow:", "stockwhy:"].forEach(function (p) { if (ADM_AS[p + key]) admAutosave(p + key, undefined, "flush"); });
+    delete STOCK_WHY[key];
+  }
+
+  /* ---- drawing ---------------------------------------------------------- */
+  function stockScanBtnHTML(key, cls) {
+    return '<button type="button" class="adm-stk__scan' + (cls ? " " + cls : "") + '" data-stockscan="' + esc(key) +
+      '" aria-label="Сканировать штрихкод" title="Сканировать штрихкод">' + admIcon("scan", false, 18) + "</button>";
+  }
+  function stockOpenHTML(r, key) {
+    var ke = admTypedSpec("stockean:" + key, stockEanSpec(key));
+    var kl = admTypedSpec("stocklow:" + key, stockLowSpec(key));
+    var eanNow = ADM_AS[ke] && ADM_AS[ke].dirty ? ADM_TYPED[ke] : (r.ean || "");
+    var lowNow = ADM_AS[kl] && ADM_AS[kl].dirty ? ADM_TYPED[kl] : String(r.lowThreshold);
+    return '<div class="adm-stk__x">' +
+      '<div class="adm-field adm-stk__xe"><span class="adm-stk__xl">Штрихкод</span>' +
+        '<span class="adm-stk__eanrow"><input class="adm-input adm-mono" data-stockeaninput="' + esc(key) + '" data-asfield="' + esc(ke) + '"' +
+          admAutosaveInvalidAttr(ke) + ' value="' + esc(eanNow) + '" placeholder="не привязан" autocomplete="off" autocapitalize="characters" ' +
+          'spellcheck="false" maxlength="32" aria-label="Штрихкод">' + stockScanBtnHTML(key) + "</span>" +
+        admAutosaveHintHTML(ke) + "</div>" +
+      '<label class="adm-field adm-stk__xm"><span class="adm-stk__xl">«Мало» ≤</span>' +
+        '<input class="adm-input" data-stocklowinput="' + esc(key) + '" data-asfield="' + esc(kl) + '"' + admAutosaveInvalidAttr(kl) +
+          ' value="' + esc(lowNow) + '" inputmode="numeric" maxlength="6">' + admAutosaveHintHTML(kl) + "</label>" +
+      '<label class="adm-field adm-stk__xw"><span class="adm-stk__xl">Причина — видна в истории</span>' +
+        '<input class="adm-input" data-stockreasoninput="' + esc(key) + '" value="' + esc(STOCK_WHY[key] || "") +
+          '" placeholder="например: пересчёт на полке" maxlength="200"></label>' +
+      '<button type="button" class="adm-link adm-link--muted adm-stk__xc" data-stockedit="">Свернуть</button>' +
     "</div>";
   }
+  /** One size: the size and its tag (a tap opens the row), − count +, and on a
+      desktop the «мало ≤» and the barcode as columns. */
   function stockRowHTML(r) {
     var key = stockKey(r.productId, r.variant);
     var open = S.stockEdit === key;
-    var qty = r.tracked ? r.qty : 0;
-    /* The row's OWN threshold — «Порог «мало»» in the form one tap below,
-       and the same answer the «Мало»/«Нет» chips filter on (deriveState,
-       src/lib/inventory.ts). A flat «3 или меньше» here meant a row the
-       «Мало» chip listed was not red, and a row set to warn at 5 stayed
-       black at 4. */
-    var low = r.tracked && r.state !== "in";
-    return '<div class="adm-row adm-row--tall adm-row--stock adm-row--lines">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(admProdName(r.name)) +
-        // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
-        (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
-        /* The grey line is the barcode's alone now. The volume used to open
-           it — «250 мл · штрихкод не привязан» — right under a product name
-           the row cuts off with an ellipsis, so on a phone the size read as
-           the tail of the name and three rows of one product looked like
-           three spellings of it («the sizes seem to be at the end of the
-           product name, so it's hard to understand», Renat). It has its own
-           place on the line below now, next to the count it belongs to. */
-        '<span class="adm-row__sub adm-row__sub--one' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
-          (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "<span>штрихкод не привязан</span>") + "</span></span>" +
-      // the third line of every row: the size and the stepper on the left, «Править» on the right
-      '<span class="adm-row__line adm-row__line--split"><span class="adm-row__stock">' +
-        /* migration 147 / custom_products.active: the shelf and the shop are
-           two different truths, and this row is the one place they used to
-           disagree in silence — a product switched off «Показывать в
-           магазине» keeps its count, its barcode and a working ± here while
-           the shop drops it from the catalogue, the search and the sets and
-           answers its page with 404. «Каталог» has always marked it; now so
-           does «Склад», with the same word and the same badge.
-
-           Both switches, and they come from two different places on purpose.
-           `r.offSale` is the server's answer (getLevels, src/lib/inventory.ts)
-           and is the only one that knows about custom_products.active —
-           shopHidden() reads DEMO.hidden, which is product_overrides and
-           nothing else. shopHidden() stays in front of it because it is the
-           LIVE one: flipping the switch in the editor repaints this badge at
-           once, while the shelf copy is whatever the last
-           /api/admin/inventory/ answer said. */
-        (r.offSale || shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
+    var st = stockShownState(r), q = stockShownQty(r), counted = stockShownTracked(r);
+    var kq = admTypedSpec("stockqty:" + key, stockQtySpec(key));
+    admAutosaveSpec("stockwhy:" + key, stockWhySpec(key));
+    var typing = ADM_AS[kq] && ADM_AS[kq].dirty;
+    return '<div class="adm-row adm-stk__r' + (open ? " is-open" : "") + '" data-stockrow="' + esc(key) + '">' +
+      '<button type="button" class="adm-stk__sz" data-stockedit="' + esc(key) + '" aria-expanded="' + open + '">' +
         // «один объём» is the editor's own word for a product with no sizes
         '<span class="adm-row__sz">' + (r.variant ? esc(r.variant) : "один объём") + "</span>" +
-        '<span class="adm-step-qty">' +
-          '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
-          '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
-          '<button data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span></span>' +
-      '<button class="adm-link adm-link--muted" data-stockedit="' + (open ? "" : esc(key)) + '">' +
-        (open ? "Свернуть" : "Править") + "</button></span>" +
-    "</div>" + (open ? stockEditFormHTML(r) : "");
+        stockTagHTML(st) + "</button>" +
+      '<span class="adm-step-qty adm-stk__q">' +
+        '<button type="button" data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (q <= 0 ? " disabled" : "") + ">−</button>" +
+        '<input class="adm-step-qty__v' + (st === "low" || st === "out" ? " adm-step-qty__v--warn" : "") + '" data-stockqtyinput="' + esc(key) +
+          '" data-asfield="' + esc(kq) + '"' + admAutosaveInvalidAttr(kq) + ' value="' + esc(typing ? ADM_TYPED[kq] : counted ? String(q) : "") +
+          '" placeholder="—" inputmode="numeric" maxlength="7" aria-label="Остаток">' +
+        '<button type="button" data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span>' +
+      '<span class="adm-stk__low">' + esc(String(r.lowThreshold)) + "</span>" +
+      '<span class="adm-stk__ean">' + (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : '<span class="adm-stk__none">не привязан</span>') +
+        (open ? "" : stockScanBtnHTML(key, "adm-stk__scan--col")) + "</span>" +
+      admAutosaveHintHTML(kq) +
+      (open ? stockOpenHTML(r, key) : "") +
+    "</div>";
   }
-  /** What one tap on ± says out loud, so the toast and the journal agree. */
-  function admStockToastText(r, qty) {
-    return r.name + (r.variant ? " " + r.variant : "") + ": " + qty + " шт";
+  /* ---- grouped by product, the most urgent first (q24) -------------------
+     The name and the photo once, the sizes under it as short rows. A product
+     ranks by its emptiest counted size; one taken off sale ranks last,
+     whatever its count, with «скрыт» on it (q15). The ranking is FROZEN for
+     as long as the owner stays on the list — a burst landing, a reload, the
+     scanner writing behind the overlay — and taken afresh when he arrives,
+     picks a chip or searches: a product whose count he has just raised must
+     not jump out from under his thumb. */
+  function stockGroupOff(r) { return !!(r.offSale || shopHidden(r.productId)); }
+  function stockGroups(rows) {
+    var by = {}, list = [];
+    rows.forEach(function (r) {
+      var g = by[r.productId];
+      if (!g) {
+        g = by[r.productId] = { id: r.productId, brand: r.brand, name: r.name, rows: [], off: false, urg: Infinity, at: list.length };
+        list.push(g);
+      }
+      g.rows.push(r);
+      if (stockGroupOff(r)) g.off = true;
+      var q = r.tracked ? Number(r.qty) || 0 : Infinity;
+      if (q < g.urg) g.urg = q;
+    });
+    /* …and inside a product its sizes in the ladder's own order (the order the
+       server lists them in), not the emptiest first — «75 · 250 · 500 мл». */
+    var pos = {}, all = S.stockLevels || [];
+    for (var pi = 0; pi < all.length; pi++) pos[stockKey(all[pi].productId, all[pi].variant)] = pi;
+    list.forEach(function (g) {
+      g.rows.sort(function (a, b) {
+        return (pos[stockKey(a.productId, a.variant)] || 0) - (pos[stockKey(b.productId, b.variant)] || 0);
+      });
+    });
+    var want = S.stockFilter + "|" + scanFold(S.stockQ) + "|" + STOCK.epoch;
+    if (STOCK.rankFor !== want || !STOCK.rank) {
+      var order = list.slice().sort(function (a, b) {
+        if (a.off !== b.off) return a.off ? 1 : -1;
+        if (a.urg !== b.urg) return a.urg < b.urg ? -1 : 1;
+        return a.at - b.at;
+      });
+      STOCK.rank = {};
+      order.forEach(function (g, i) { STOCK.rank[g.id] = i; });
+      STOCK.rankFor = want;
+    }
+    var rank = STOCK.rank;
+    return list.sort(function (a, b) {
+      var ra = rank[a.id], rb = rank[b.id];
+      if (ra === undefined && rb === undefined) return a.at - b.at;
+      if (ra === undefined) return 1;
+      if (rb === undefined) return -1;
+      return ra - rb;
+    });
+  }
+  function stockGroupHTML(g) {
+    var p = byIdOrNull(g.id);
+    return '<div class="adm-stk" data-stockgroup="' + esc(g.id) + '">' +
+      '<div class="adm-stk__h">' +
+        '<span class="adm-stk__img">' + (p ? media(p, 0, "ph") : "") + "</span>" +
+        '<span class="adm-stk__t"><span class="adm-stk__b">' + esc(g.brand) + "</span>" +
+          '<span class="adm-stk__n">' + esc(admProdName(g.name)) + "</span></span>" +
+        /* migration 147 / custom_products.active: the shelf and the shop are
+           two truths. `offSale` is the server's (the only one that knows about
+           custom_products.active), shopHidden() the live one — the editor's
+           switch repaints this at once. */
+        (g.off ? admTagHTML("quiet", "скрыт") : "") +
+      "</div>" +
+      '<div class="adm-stk__rows">' + g.rows.map(stockRowHTML).join("") + "</div></div>";
   }
   /**
    * Does this shelf row belong under that chip?
@@ -34802,14 +35607,21 @@
      survive — and 60 more rows cost 60 rows of work, not 320. */
   function stockRows() {
     var rows = stockFiltered();
-    var cap = S.stockShown || STOCK_PAGE;
-    var shown = rows.slice(0, cap);
-    return '<div data-stockrows>' + shown.map(stockRowHTML).join("") + "</div>" +
-      (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
-      '<p class="adm-hint" data-stockcount style="margin:10px 0 0">' + stockCountText(shown.length, rows.length) + "</p>" +
-      (rows.length > cap
+    var groups = stockGroups(rows);
+    var page = stockPage(groups, 0, S.stockShown || STOCK_PAGE);
+    return '<div data-stockrows>' + page.groups.map(stockGroupHTML).join("") + "</div>" +
+      (page.rows ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
+      '<p class="adm-hint" data-stockcount style="margin:10px 0 0">' + stockCountText(page.rows, rows.length) + "</p>" +
+      (page.next < groups.length
         ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-stockmore style="margin-top:10px">Показать ещё</button>'
         : "");
+  }
+  /** The products one page holds, from `from`: whole products — a name is never
+      split from its sizes across «Показать ещё» — until `cap` sizes are in. */
+  function stockPage(groups, from, cap) {
+    var out = [], n = 0, i = from;
+    for (; i < groups.length && n < cap; i++) { out.push(groups[i]); n += groups[i].rows.length; }
+    return { groups: out, rows: n, next: i };
   }
   /** One more page, appended. Returns false when there is nothing left to
       add — which is also when «Показать ещё» takes itself off the screen. */
@@ -34818,18 +35630,20 @@
     var box = list && list.querySelector("[data-stockrows]");
     var count = list && list.querySelector("[data-stockcount]");
     if (!box || !count) return false;
-    var rows = stockFiltered();
-    var from = Math.min(S.stockShown || STOCK_PAGE, rows.length);
-    if (from >= rows.length) return false;
-    S.stockShown = from + STOCK_PAGE;
+    var rows = stockFiltered(), groups = stockGroups(rows);
+    var from = box.querySelectorAll("[data-stockgroup]").length;
+    if (from >= groups.length) return false;
+    var page = stockPage(groups, from, STOCK_PAGE);
+    var shown = 0;
+    for (var i = 0; i < page.next; i++) shown += groups[i].rows.length;
+    S.stockShown = shown;
     var frag = document.createElement("div");
-    frag.innerHTML = rows.slice(from, S.stockShown).map(stockRowHTML).join("");
+    frag.innerHTML = page.groups.map(stockGroupHTML).join("");
     translateTree(frag);
     while (frag.firstChild) box.appendChild(frag.firstChild);
-    var shown = Math.min(S.stockShown, rows.length);
     count.textContent = stockCountText(shown, rows.length);
     translateTree(count);
-    if (shown >= rows.length) {
+    if (page.next >= groups.length) {
       var more = list.querySelector("[data-stockmore]");
       if (more && more.parentNode) more.parentNode.removeChild(more);
     }
@@ -34913,75 +35727,113 @@
     var c = stockBoundCount();
     return "Штрихкоды: привязано " + c.bound + " из " + c.total;
   }
+  /* ---- «Сканер на телефоне» — the install hint and the standalone app ------
+     Dim, 25.09.2026 (q17): both leave «Склад» for «Настройки → Оповещения на
+     телефон», the page about THIS phone. That page belongs to the settings
+     screen, so this is the whole block it shows, with the hooks it always had
+     (data-pwahint, data-pwahintclose, data-scanapp). */
+  function admScanAppHTML() {
+    return admSecHeadHTML("Сканер на телефоне") +
+      pwaHintHTML() +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-scanapp>' +
+        "Сканер отдельным приложением ↗</button></div>";
+  }
+  /** «История» (outlined, desktop) and «Сканировать» — the ONE dark button:
+      the page header's right on a desktop, pinned above the tab bar on a phone. */
+  function admStockHeadHTML() {
+    return '<div class="adm-headacts">' +
+      (S.stockMovesOpen ? "" : '<button class="adm-btn adm-btn--ghost adm-headacts__desk" type="button" data-stockmovesopen="1">История</button>') +
+      admPinnedHTML("data-scanopen", "Сканировать") + "</div>";
+  }
+  var STOCK_FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
   function admStockHTML() {
     if (SRV.admin !== true) return '<div class="adm-empty">Войдите в панель, чтобы видеть склад</div>';
     loadStockLevels(false);
     stockRefreshOnEntry();   // a sale on the website moved the shelf while the panel was elsewhere
+    /* Arriving on the list — from another tab, a card, the history — takes the
+       order afresh; staying on it keeps the order (stockGroups). admShownKey is
+       the view the LAST paint showed: it is set after this body is built. */
+    if (admShownKey !== admViewKey() || STOCK.wasMoves !== !!S.stockMovesOpen) STOCK.epoch++;
+    STOCK.wasMoves = !!S.stockMovesOpen;
     if (S.stockMovesOpen) return admStockMovesHTML();
-    var FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
-    return '<div class="adm-acts">' +
-        '<button class="adm-btn" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>" +
-        '<span class="adm-hint">Приёмка и привязка штрихкодов — через сканер. ' +
-          'Здесь можно поправить остаток вручную.</span>' +
-      "</div>" +
-      // the progress of the first bind pass, next to the button that does it
-      (S.stockLevels ? '<p class="adm-hint" data-stockbound style="margin:0 0 12px">' + esc(stockBoundLine()) + "</p>" : "") +
-      pwaHintHTML() +
-      '<div class="adm-acts">' +
+    var f = S.stockFilter || "all";
+    return '<div class="adm-stkbar">' +
+        '<input class="adm-input adm-input--row adm-stkbar__q" data-stockq value="' + esc(S.stockQ || "") +
+          '" placeholder="Товар, бренд или штрихкод" aria-label="Поиск по складу">' +
         '<div class="adm-chips" role="group" aria-label="Фильтр">' +
-          /* Each chip says how many rows are behind it. Without the numbers
-             the owner had to press «Мало» to find out whether anything is —
-             and «Не учтено», which is the one he is trying to empty, gave no
-             sign of progress at all (Dim, 19.09.2026: «No counts»). A zero is
-             printed too: «Нет 0» is the answer to the question, and a chip
-             that hides its zero makes him press it to learn the same thing. */
-          FILTERS.map(function (f) {
-            return '<button class="adm-chip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' +
-              f[1] + (S.stockLevels ? " " + stockFilterCount(f[0]) : "") + "</button>";
+          /* Each chip says how many rows are behind it, a zero included —
+             «Нет 0» is the answer to the question (Dim, 19.09.2026). */
+          STOCK_FILTERS.map(function (x) {
+            return '<button class="adm-chip" data-stockfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
+              x[1] + (S.stockLevels ? " " + stockFilterCount(x[0]) : "") + "</button>";
           }).join("") + "</div>" +
-        '<input class="adm-input adm-input--row" data-stockq value="' + esc(S.stockQ || "") +
-          '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="flex:1;min-width:180px">' +
       "</div>" +
-      '<div class="adm-acts"><button class="adm-link adm-link--muted" data-stockmovesopen="1">История приёмок и продаж →</button>' +
-        /* scanner app: the same scanner, standing on its own route so it can be
-           installed as a third icon — see screenScan() and docs/inventory.md. */
-        '<button class="adm-link adm-link--muted" data-scanapp>Сканер отдельным приложением ↗</button></div>' +
+      '<div class="adm-stkmeta">' +
+        // how far the first bind pass has got, counted over the whole warehouse
+        (S.stockLevels ? '<span class="adm-hint" data-stockbound>' + esc(stockBoundLine()) + "</span>" : "<span></span>") +
+        '<button class="adm-link adm-stkmeta__hist" type="button" data-stockmovesopen="1">История →</button>' +
+      "</div>" +
       (S.stockErr ? '<div class="adm-error"><span>' + esc(S.stockErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="stock">Повторить</button></div>' : "") +
       (S.stockBusy && !S.stockLevels ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
-        '<div class="adm-list adm-list--flat" id="stocklist">' + stockRows() + "</div>");
+        // the desktop's column heads; a phone reads the rows without them
+        '<div class="adm-stkhead" aria-hidden="true"><span>Товар</span><span class="adm-stkhead__r"><span>Объём</span><span>Статус</span>' +
+          "<span>Остаток</span><span>«Мало» ≤</span><span>Штрихкод</span></span></div>" +
+        '<div class="adm-list adm-list--flat adm-stklist" id="stocklist">' + stockRows() + "</div>");
+  }
+
+  /* ---- «История склада» (q26, q41) ------------------------------------------
+     Six chips — Все / Приход / Продажи / Вручную / Возврат / Правка карточки —
+     and «Списание» as a seventh once there is one. Counted and filtered over
+     the lines already loaded (the newest STOCK_HIST_LIMIT), so the numbers on
+     the chips and the list under them cannot disagree; «Продажи» is the web
+     and the salon together. The chip keys stay in data-stockmovesreason. */
+  var STOCK_HIST_LIMIT = 500;
+  var STOCK_HIST_CHIPS = [["", "Все"], ["goods_in", "Приход"], ["sale", "Продажи"], ["adjust", "Вручную"],
+    ["return", "Возврат"], ["edit", "Правка карточки"], ["writeoff", "Списание"]];
+  function stockHistMatch(m, k) {
+    if (!k) return true;
+    if (k === "sale") return m.reason === "sale_web" || m.reason === "sale_pos";
+    return m.reason === k;
+  }
+  function stockHistRowHTML(m) {
+    var sign = m.delta > 0 ? "+" : "";
+    return '<div class="adm-row adm-hrow">' +
+      /* The ledger's stamp is an ISO instant in UTC; read in the reader's own
+         browser, like the change journal beside it (22:40 was «19:40»). */
+      '<span class="adm-hrow__when adm-mono">' + esc(auditWhen(m.at)) + "</span>" +
+      '<span class="adm-row__nm adm-hrow__nm">' + esc(m.brand || m.productId) + (m.brand ? " — " + esc(admProdName(m.name)) : "") + "</span>" +
+      // the volume in a box of its own — a bare «150 мл ·» under a cut name read as the end of the name
+      '<span class="adm-hrow__sz">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span>" : "") + "</span>" +
+      '<span class="adm-hrow__what"><span>' + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + "</span>" +
+        (m.ref ? " · <span>" + esc(m.ref) + "</span>" : "") + "</span>" +
+      // a card change moved nothing, so it shows no number (migration 092)
+      '<span class="adm-row__amt adm-hrow__d' + (m.delta > 0 ? " is-up" : m.delta < 0 ? " is-down" : "") + '">' +
+        (m.reason === "edit" ? "" : sign + m.delta) + "</span>" +
+    "</div>";
   }
   function admStockMovesHTML() {
     loadStockMoves(false);
-    var moves = S.stockMoves || [];
-    var REASONS = [["", "Все"], ["goods_in", "Приход"], ["sale_web", "Продажа на сайте"], ["sale_pos", "Продажа в салоне"], ["adjust", "Ручная правка"], ["return", "Возврат"], ["edit", "Правка карточки"]];
-    return '<button class="adm-link" data-stockmovesopen="">← Склад</button>' +
-      '<div class="adm-sec__t" style="margin-top:12px">История приёмок и продаж</div>' +
-      '<div class="adm-chips" role="group" aria-label="Тип движения" style="margin:12px 0">' +
-        REASONS.map(function (r) {
-          return '<button class="adm-chip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
+    var all = S.stockMoves || [], k = S.stockMovesReason || "";
+    var hasOff = all.some(function (m) { return m.reason === "writeoff"; });
+    var chips = STOCK_HIST_CHIPS.filter(function (c) { return c[0] !== "writeoff" || hasOff || k === "writeoff"; });
+    var list = all.filter(function (m) { return stockHistMatch(m, k); });
+    return admBackHTML('data-stockmovesopen=""', "Склад") +
+      '<h2 class="adm-sec__t adm-stkhist__t">История склада</h2>' +
+      '<div class="adm-chips" role="group" aria-label="Тип движения">' +
+        chips.map(function (c) {
+          var n = all.filter(function (m) { return stockHistMatch(m, c[0]); }).length;
+          return '<button class="adm-chip" data-stockmovesreason="' + c[0] + '" aria-current="' + (k === c[0]) + '">' +
+            c[1] + (S.stockMoves ? " " + n : "") + "</button>";
         }).join("") +
       "</div>" +
       (S.stockMovesErr ? '<div class="adm-error"><span>' + esc(S.stockMovesErr) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="moves">Повторить</button></div>' : "") +
       (S.stockMovesBusy && !S.stockMoves ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
-        (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
-          var sign = m.delta > 0 ? "+" : "";
-          return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
-              esc(m.brand || m.productId) + (m.brand ? " — " + esc(admProdName(m.name)) : "") + "</span>" +
-              // the volume in a box of its own, as on «Склад» — a bare «150 мл ·»
-              // under a cut-off product name read as the end of the name
-              '<span class="adm-row__sub">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span> " : "") +
-                esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
-            /* The ledger's stamp is a full ISO instant in UTC, and printing
-               its first sixteen characters showed the owner a Tallinn evening
-               two or three hours early — 22:40 as «19:40», and a late scan
-               under the previous DAY. Read in the reader's own browser, like
-               the change journal and «Журнал магазина» beside it. */
-            '<span class="adm-row__sub" style="margin:0">' + esc(auditWhen(m.at)) + "</span>" +
-            // a card change moved nothing, so it shows no number (migration 092)
-            '<span class="adm-row__amt">' + (m.reason === "edit" ? "" : sign + m.delta) + "</span></div>";
-        }).join("") + "</div>" : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
+        (list.length
+          ? '<div class="adm-hhead" aria-hidden="true"><span>Когда</span><span>Товар</span><span>Объём</span><span>Что было</span><span></span></div>' +
+            '<div class="adm-list adm-list--flat adm-hlist">' + list.map(stockHistRowHTML).join("") + "</div>"
+          : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
   }
 
   /* ---------- inventory: the scanner --------------------------------------
@@ -35158,42 +36010,69 @@
     if (S.stockLevels || STOCK.asked) reloadStock();
   }
   /** inventory: binds the last scanned code to productId+variant, then
-      re-looks it up so the goods-in card takes over. */
+      re-looks it up so the goods-in card takes over. 1a: through the same
+      door as «Склад»'s own barcode box (stockEanCommit), so the toast carries
+      «Вернуть» — the size gets back the code it had, or none. */
   function scanBindEan(productId, variant) {
     var assignCode = S.scanHit ? S.scanHit.code : "";
     if (!assignCode) return;
-    stockLevelSaveDetailed({ productId: productId, variant: variant || "", ean: assignCode }).then(function (res) {
-      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); scanStockChanged(); }
-      // «возможно, код уже занят» was a guess; the route knows, and says which
-      else toast(stockSaveErrText(res) || "Не удалось привязать — возможно, код уже занят");
+    var lv = edStockFor({ id: productId }, variant);
+    var hint = { productId: productId, variant: variant || "", ean: (lv && lv.ean) || null };
+    stockEanCommit(stockKey(productId, variant), assignCode, "bind", hint).then(function (ok) {
+      if (ok === true) { S.scanAssignPick = ""; scanLookup(assignCode); }
+      // a refusal («уже привязан к другому товару: …») was said in the toast
     });
   }
   /* «Отвязать код» on the found card: the code stops finding this bottle and
-     the «К какому товару?» card follows straight away — a wrong binding is
-     fixed where it was noticed, and a mis-tap is one search from where it was. */
+     the «К какому товару привязать?» card follows straight away — a wrong
+     binding is fixed where it was noticed; «Вернуть» binds it back. */
   function scanUnbindEan() {
     var h = S.scanHit;
     if (!h || !h.product || S.scanBusy) return;
     S.scanBusy = true; scanRenderPanel();
-    stockLevelSaveDetailed({ productId: h.productId, variant: h.variant || "", ean: null }).then(function (res) {
+    var hint = { productId: h.productId, variant: h.variant || "", ean: h.code };
+    stockEanCommit(stockKey(h.productId, h.variant), "", "unbind", hint).then(function (ok) {
       S.scanBusy = false;
-      if (!res.ok) { toast(stockSaveErrText(res) || "Не удалось отвязать код"); scanRenderPanel(); return; }
-      toast("Код отвязан ✓");
+      if (ok !== true) { if (ok === false) toast("Не удалось отвязать код"); scanRenderPanel(); return; }
       scanLookup(h.code);
-      scanStockChanged();
     });
   }
-  /** «Принять +3» / «Списать −3» — the number is on the buttons, so the
+  /** «Принять +3» / «Списать −3» — the number is on the button, so the
       stepper and the promise can never disagree. Its own function because the
-      ± patches the labels in place rather than repainting the card. */
+      ± patches the label in place rather than repainting the card. */
   function scanTakeLabel(n) { return "Принять +" + n; }
   function scanDropLabel(n) { return "Списать −" + n; }
   function scanCartLabel(n) { return "Добавить в продажу · " + n; }
+  /* 1a (README § 5, `06-scanner-phone`): what the card does is chosen once —
+     «Приход» or «Списание», a two-cell switch — and there is ONE dark button
+     carrying the number. The choice stays for the session: counting in a
+     delivery is ten «Приход» in a row, and so is clearing a broken box. */
+  function scanDirNow() { return S.scanDir === "out" ? "out" : "in"; }
+  /** «Сегодня», folded under the camera (q20): what went in and out today. */
+  function scanTodayHTML() {
+    var list = S.scanToday || [];
+    if (!list.length) return "";
+    var rows = list.slice(0, 6).map(function (m) {
+      return '<div class="scan__today__r"><span>' + esc((m.brand ? m.brand + " — " : "") + admProdName(m.name)) +
+        (m.variant ? " " + esc(m.variant) : "") + "</span>" +
+        "<b>" + (m.reason === "edit" ? "" : (m.delta > 0 ? "+" : "") + m.delta) + "</b></div>";
+    }).join("");
+    return '<div class="scan__today">' + admFoldHTML("scan-today", "Сегодня", String(list.length), rows) + "</div>";
+  }
   function scanPanelHTML() {
     /* «Нет доступа к камере» is a LINE above whatever else is on screen, never
        instead of it: the manual field is the interface on a machine with no
-       camera, so a code typed into it must still bring its card up. */
-    var err = S.scanErr ? '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p></div>" : "";
+       camera, so a code typed into it must still bring its card up. 1a: one
+       short line, and — when the camera was refused rather than absent — the
+       button that asks for it again, with «Как разрешить» for a phone that
+       will not ask twice. */
+    var err = S.scanErr
+      ? '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p>" +
+        (S.scanCamDenied
+          ? '<div class="scan__errbtns"><button class="scan__btn scan__btn--sm" type="button" data-scancam>Разрешить камеру</button>' +
+            '<button class="scan__more" type="button" data-admcamerahelp>Как разрешить</button></div>'
+          : "") + "</div>"
+      : "";
     if (!S.scanHit) {
       // the editor's door (openScannerFor): one code and the overlay is gone,
       // so neither «Сегодня» nor the count of bound sizes has a place here —
@@ -35201,23 +36080,20 @@
       if (S.scanFrom === "editor") {
         return err + '<p class="scan__hint">Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.</p>';
       }
-      /* «Сегодня» belongs to the idle state and only there: while a card is up
-         the three taps are the whole job, but between codes this is the only
-         place that answers «что я уже принял сегодня». */
-      return err + '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
-        /* The first pass over the shelves is one scan and one tap per bottle,
-           and it takes more evenings than one — so between codes the scanner
-           says where it has got to, on the screen the owner is actually
-           holding while he does it. Between codes only: while a card is up
-           the three taps are the whole job. */
+      // …and «Склад»'s own row button: the code is bound to that size at once
+      if (S.scanFrom === "stockrow") {
+        var sr = stockFindRow(S.scanFor);
+        return err + (sr ? '<p class="scan__for">' + esc(admProdName(sr.name)) + (sr.variant ? " · " + esc(sr.variant) : "") + "</p>" : "") +
+          '<p class="scan__hint">Наведите на штрихкод — код привяжется к этому объёму, сканер закроется сам.</p>';
+      }
+      /* Between codes: the hint, «Готово» after a move, how far the first
+         bind pass has got (the evenings Renat spends on it), and «Сегодня»
+         folded under the camera. While a card is up the three taps are the
+         whole job and none of this is drawn. */
+      return err + (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
+        '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
         (S.stockLevels ? '<p class="scan__count">' + esc(stockBoundLine()) + "</p>" : "") +
-        (S.scanToday && S.scanToday.length
-          ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
-            S.scanToday.slice(0, 6).map(function (m) {
-              return '<div class="scan__today__r"><span>' + esc((m.brand ? m.brand + " — " : "") + m.name) + "</span>" +
-                "<b>" + (m.delta > 0 ? "+" : "") + m.delta + "</b></div>";
-            }).join("") + "</div>"
-          : "");
+        scanTodayHTML();
     }
     /* byId() answers with CATALOGUE[0] for an id the shop does not carry, so
        scanning a bottle the owner has switched off «Показывать в магазине»
@@ -35229,53 +36105,56 @@
     var n = S.scanQty || 1;
     if (p) {
       /* Three taps, at most: scan, set the number (it is already 1), press
-         one of the two. The stepper's value is read off the DOM at commit
-         time (scanQtyNow()), so a typed number counts exactly like a stepped
-         one and neither needs a re-render per keystroke. */
+         the button. The stepper's value is read off the DOM at commit time
+         (scanQtyNow()), so a typed number counts exactly like a stepped one
+         and neither needs a re-render per keystroke. */
+      var dir = scanDirNow();
       return err + '<div class="scan__card">' +
         '<div class="scan__found">Найдено · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
-        '<div class="scan__nm">' + esc(p.brand + " — " + p.name) + "</div>" +
+        '<div class="scan__nm">' + esc(p.brand + " — " + admProdName(p.name)) + "</div>" +
         '<div class="scan__sub">' + (h.variant ? esc(h.variant) + " · " : "") +
           (h.tracked === false ? "не учтено" : scanStockLine(h.qty)) + "</div>" +
-        '<div class="scan__step" role="group" aria-label="Количество">' +
-          '<button class="scan__stepbtn" type="button" data-scanqty="-1" aria-label="Меньше">−</button>' +
-          '<input class="scan__qty" id="scanqtyinput" data-scanqtyinput value="' + esc(String(n)) +
-            '" inputmode="numeric" aria-label="Количество">' +
-          '<button class="scan__stepbtn" type="button" data-scanqty="1" aria-label="Больше">+</button>' +
-        "</div>" +
         /* «Салон» opened this scanner to fill a basket, not to count a shelf:
            one button, and it takes the owner straight back to the register. */
         (S.scanFrom === "pos"
-          ? '<div class="scan__acts scan__acts--one">' +
+          ? '<div class="scan__step" role="group" aria-label="Количество">' + scanStepperHTML(n) + "</div>" +
+            '<div class="scan__acts scan__acts--one">' +
               '<button class="scan__btn scan__btn--pri" data-scanmove="cart"' + (S.scanBusy ? " disabled" : "") +
               ' data-scanlabel="cart">' + scanCartLabel(n) + "</button></div>"
-          : '<div class="scan__acts">' +
-              '<button class="scan__btn scan__btn--pri" data-scanmove="in"' + (S.scanBusy ? " disabled" : "") +
-                ' data-scanlabel="in">' + scanTakeLabel(n) + "</button>" +
-              '<button class="scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") +
-                ' data-scanlabel="out">' + scanDropLabel(n) + "</button></div>") +
+          : '<div class="scan__seg" role="group" aria-label="Что делаем">' +
+              '<button type="button" data-scanmode="in" aria-current="' + (dir === "in") + '">Приход</button>' +
+              '<button type="button" data-scanmode="out" aria-current="' + (dir === "out") + '">Списание</button></div>' +
+            '<div class="scan__step" role="group" aria-label="Количество">' + scanStepperHTML(n) + "</div>" +
+            '<div class="scan__acts scan__acts--one">' +
+              '<button class="scan__btn scan__btn--pri" data-scanmove="' + dir + '"' + (S.scanBusy ? " disabled" : "") +
+                ' data-scanlabel="' + dir + '">' + (dir === "out" ? scanDropLabel(n) : scanTakeLabel(n)) + "</button></div>") +
         '<div class="scan__links">' +
-          '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+          '<button class="scan__more" type="button" data-scanreset>Сканировать другой</button>' +
           // a wrong binding is undone right here, and the search card follows
           '<button class="scan__more" type="button" data-scanunbind' + (S.scanBusy ? " disabled" : "") + '>Отвязать код</button>' +
         "</div>" +
-        (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
       "</div>";
     }
     return err + '<div class="scan__card">' +
-      '<div class="scan__warn">Код не привязан · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
-      '<div class="scan__nm">К какому товару?</div>' +
+      '<div class="scan__warn">Новый код · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
+      '<div class="scan__nm">К какому товару привязать?</div>' +
       '<input class="scan__find" data-scanassignq value="' + esc(S.scanAssignQ || "") +
         '" placeholder="Начните вводить название" aria-label="Найти товар для привязки">' +
       '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>" +
       '<button class="scan__more" type="button" data-scanreset>Отмена</button>' +
     "</div>";
   }
+  function scanStepperHTML(n) {
+    return '<button class="scan__stepbtn" type="button" data-scanqty="-1" aria-label="Меньше">−</button>' +
+      '<input class="scan__qty" id="scanqtyinput" data-scanqtyinput value="' + esc(String(n)) +
+        '" inputmode="numeric" aria-label="Количество">' +
+      '<button class="scan__stepbtn" type="button" data-scanqty="1" aria-label="Больше">+</button>';
+  }
   /** «на складе 12» — one fragment with one hole, so the i18n check sees a
       sentence rather than a stray preposition. */
   function scanStockLine(qty) { return "на складе " + qty; }
-  /** The ± steps the field, not the card — so the two buttons that promise a
-      number have to be told about it. A patch, for the same reason the field
+  /** The ± steps the field, not the card — so the button that promises a
+      number has to be told about it. A patch, for the same reason the field
       itself is one: a repaint here would fight the finger holding «+». */
   function scanPaintLabels() {
     if (!SCANEL) return;
@@ -35321,21 +36200,31 @@
   }
   /* Same screen for both doors: the standalone /shop2/scan/ app and the
      overlay «Склад»/«Салон» raise. Only two things differ — the wordmark (the
-     app is its own icon on the home screen) and where the × leads. */
+     app is its own icon on the home screen) and where the × leads. 1a: the
+     title says what this scanner is doing — «Сканер · склад», «Сканер ·
+     продажа» — instead of a line of small print beside it. */
+  var SCAN_TORCH_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+    'stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l-1 6H9zM9 9h6v12H9zM12 13v3"/></svg>';
   function scanTopBarHTML() {
     return '<div class="scan__head">' +
-      (S.scanApp
-        ? '<span class="scan__brand">Rempire · Сканер</span>'
-        : '<span class="scan__brand scan__brand--plain">Сканер</span>') +
-      '<span class="scan__mode">' + scanModeLine() + "</span>" +
-      '<button class="scan__hbtn" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
+      '<span class="scan__title">' +
+        (S.scanApp ? '<span class="scan__brand">Rempire · Сканер</span>' : '<span class="scan__brand scan__brand--plain">Сканер</span>') +
+        ' · <span class="scan__mode">' + scanModeLine() + "</span></span>" +
+      '<button class="scan__hbtn" type="button" data-scantorch hidden aria-label="Фонарик">' + SCAN_TORCH_SVG + "</button>" +
       '<button class="scan__hbtn" type="button" ' + (S.scanApp ? "data-scanadmin" : "data-scanclose") +
         ' aria-label="Закрыть сканер">×</button>' +
     "</div>";
   }
+  /** The second half of the title — one word, so the dictionary reaches it whole. */
   function scanModeLine() {
-    if (S.scanFrom === "editor") return "Товар: код встанет в поле «Штрихкод»";
-    return S.scanFrom === "pos" ? "Продажа: товар добавится в корзину" : "Склад: приёмка и списание";
+    if (S.scanFrom === "editor") return "товар";
+    if (S.scanFrom === "stockrow") return "штрихкод";
+    return S.scanFrom === "pos" ? "продажа" : "склад";
+  }
+  /** The manual field's button: a lookup finds, the two «this box» doors write. */
+  function scanManualLabel() {
+    if (S.scanFrom === "editor") return "Вписать";
+    return S.scanFrom === "stockrow" ? "Привязать" : "Найти";
   }
   function scannerShellHTML() {
     return scanTopBarHTML() +
@@ -35358,18 +36247,14 @@
         // small, low-emphasis input serves both. It lives here, in the shell
         // that scanMount() builds once, specifically so the keydown listener
         // attached to it (also in scanMount()) survives every #scanpanel update.
-        '<div class="scan__manual"><input class="scan__mfield adm-mono" data-scanmanual inputmode="numeric" ' +
-          'autocomplete="off" placeholder="или введите код вручную" aria-label="Ввести код вручную">' +
-          // the editor's door looks nothing up: a typed code goes into the box, so the button says so
-          '<button class="scan__mbtn" data-scanmanualsubmit type="button">' + (S.scanFrom === "editor" ? "Вписать" : "Найти") + "</button></div>" +
-      "</div>" +
-      /* Two lines of small print at the bottom of the viewfinder — «too much
-         space» on the screen the owner actually works on (Renat). One line
-         now, and the half it lost («Вход только для админа») said nothing to
-         a reader who is already signed in and standing inside the panel;
-         «Сканер отдельным приложением ↗» on «Склад» is the button that
-         actually opens it. */
-      '<div class="scan__foot">Сканер есть и отдельной иконкой на телефоне.</div>';
+        // A text keyboard (q18): the shop's own codes are «RMP-0042».
+        '<div class="scan__manual"><input class="scan__mfield adm-mono" data-scanmanual inputmode="text" ' +
+          'autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="или введите код" aria-label="Ввести код вручную">' +
+          '<button class="scan__mbtn" data-scanmanualsubmit type="button">' + scanManualLabel() + "</button></div>" +
+      "</div>";
+    /* The foot («Сканер есть и отдельной иконкой на телефоне») is gone with
+       the 1a frame: the install hint and «Сканер отдельным приложением ↗»
+       live on «Настройки → Оповещения на телефон» now (admScanAppHTML, q17). */
   }
   /** Everything scanPanelHTML() draws from, as one string — the panel is
       redrawn only when this changes. What is patched in place (the stepper's
@@ -35378,10 +36263,12 @@
     var h = S.scanHit;
     return [
       h ? [h.code, h.productId || "", h.variant || "", h.qty, h.tracked, h.product ? h.product.id : ""].join("|") : "",
-      S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "",
+      S.scanErr || "", S.scanCamDenied ? 1 : 0, S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "", S.scanFor || "",
+      // the card's «Приход / Списание» switch changes the one button under it
+      h ? scanDirNow() : "-",
       // «Сегодня» is drawn between codes only — while a card is up the list
-      // landing must not count as a change
-      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-",
+      // landing must not count as a change; open or folded is part of it
+      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") + ":" + (ADM_FOLD["scan-today"] ? 1 : 0) : "-",
       // …and «привязано N из M» beside it, by the same rule: the warehouse
       // list landing behind a card must not rebuild the card
       !h && S.stockLevels ? stockBoundLine() : "-"
@@ -35504,11 +36391,28 @@
     // longer word cost it the «Сохранить» it is asking for on a 375-px phone
     toast("Код считан — нажмите «Сохранить»");
   }
+  /* 1a «Склад»: the scan button on a size (data-stockscan). The code read is
+     bound to THAT size at once — no card, no second tap — with «Вернуть» in
+     the toast (stockEanCommit), and the open row's box shows it. A code
+     another bottle holds is refused in the toast, naming that bottle. */
+  function scanToStockRow(code) {
+    var key = S.scanFor;
+    closeScannerState();
+    scanBeep();
+    render();
+    if (!key) return;
+    stockEanCommit(key, code, "scan").then(function (ok) {
+      var box = document.querySelector('[data-stockeaninput="' + String(key).replace(/"/g, "") + '"]');
+      if (box && ok === true) box.value = stockEanNorm(code);
+    });
+  }
   function handleScanCode(code) {
     var now = Date.now();
     if (!code) return;
     // the editor's door: no lookup, no debounce — the first read closes the overlay
     if (S.scanFrom === "editor") { scanToEditor(code); return; }
+    // …and «Склад»'s row button: the first read is bound to that size and the overlay goes
+    if (S.scanFrom === "stockrow") { scanToStockRow(code); return; }
     /* The bottle that is already on screen. The camera reads it again every
        frame for as long as it is in view, and each re-read used to rebuild the
        panel — wiping the product search, closing the keyboard and pulling the
@@ -35583,12 +36487,13 @@
   /**
    * What the confirm may claim, given what the shelf actually did.
    *
-   * A write-off is a 'sale_pos' move, and a sale on a size nobody has counted
-   * yet is skipped by the server on purpose (src/lib/inventory.ts move() — a
-   * sale must never flip an uncounted bottle to «нет в наличии»). Nothing was
-   * written, no ledger line appeared, and the old toast said «Списание −3 ✓»
-   * anyway. A write-off bigger than the shelf holds is clamped at zero and
-   * reported back the same way. Both now say what really happened.
+   * A write-off on a size nobody has counted yet is skipped by the server on
+   * purpose (src/lib/inventory.ts move() — like a sale, it must never flip an
+   * uncounted bottle to «нет в наличии»). Nothing was written, no ledger line
+   * appeared, and the old toast said «Списание −3 ✓» anyway. A write-off
+   * bigger than the shelf holds is clamped at zero and reported back the same
+   * way. Both now say what really happened — and, when the route says what is
+   * left, so does the toast (1a: «Принято +3 · теперь 12 шт»).
    */
   function scanMoveToast(sign, qty, res) {
     if (res && res.skipped) return "Этот объём ещё не считали — впишите остаток на «Складе».";
@@ -35604,40 +36509,54 @@
         : "Это уже записано. Если бутылка новая, отсканируйте ещё раз.";
     }
     if (!n) return "На складе уже 0 — списывать нечего.";
+    if (res && typeof res.qtyAfter === "number") {
+      return sign > 0
+        ? "Принято +" + n + " · теперь " + res.qtyAfter + " шт"
+        : "Списано −" + n + " · теперь " + res.qtyAfter + " шт";
+    }
     return sign > 0 ? "Приход +" + n + " ✓" : "Списание −" + n + " ✓";
   }
-  /* scanner app: ONE confirm per scan. The stepper's number, signed by which
-     of the two buttons was pressed, straight to the moves route — «приход» is
-     goods_in, «списание» is sale_pos, the same two reasons the old +1/−1 pair
-     wrote. The card is refreshed rather than dismissed (the new remainder is
-     the receipt), the stepper goes back to 1 and the same-code debounce is
-     cleared, so the next code — including this very one, scanned again — is
-     picked up immediately. That is the "auto-resume": nothing to tap to go
-     back to scanning. */
+  /** After a move the same bottle is still in front of the lens: it waits this
+      long (plus the usual 1.5 s) before it counts as the next scan. */
+  var SCAN_SAME_AFTER_MOVE_MS = 1500;
+  /* scanner app: ONE confirm per scan. The stepper's number, signed by the
+     card's «Приход / Списание» switch, straight to the moves route — «приход»
+     is goods_in, «списание» is its own reason since 25.09.2026 (writeoff,
+     206_stock_move_writeoff.sql; it was sale_pos). 1a: the scanner goes back
+     to the camera by itself for the next code, and the toast carries
+     «Вернуть» — the opposite move, so «История» shows both lines (q21). */
   function scanCommitMove(sign) {
     if (S.scanBusy || !S.scanHit || !S.scanHit.product) return;
-    var qty = scanQtyNow(), code = S.scanHit.code;
+    var qty = scanQtyNow(), h = S.scanHit, code = h.code;
+    var reason = sign > 0 ? "goods_in" : "writeoff";
     S.scanBusy = true; S.scanReady = false;
     scanRenderPanel();
     stockMoveSend({
-      productId: S.scanHit.productId, variant: S.scanHit.variant,
-      delta: sign * qty, reason: sign > 0 ? "goods_in" : "sale_pos", ref: "сканер"
+      productId: h.productId, variant: h.variant, delta: sign * qty, reason: reason, ref: "сканер"
     }).then(function (res) {
       S.scanBusy = false;
       if (!res) { toast(stockMoveFailText("Не удалось сохранить")); scanRenderPanel(); return; }
-      toast(scanMoveToast(sign, qty, res));
+      var said = scanMoveToast(sign, qty, res);
+      if (res && typeof res === "object" && !res.skipped && !res.replayed && res.appliedDelta) {
+        var row = stockFindRow(stockKey(h.productId, h.variant)) ||
+          { productId: h.productId, variant: h.variant || "", name: h.product.name, qty: h.qty,
+            tracked: h.tracked !== false, lowThreshold: h.lowThreshold };
+        stockLanded(row, res, { type: "stock_adjust", delta: sign * qty, reason: reason, toast: said });
+      } else {
+        toast(said);
+        scanStockChanged();
+      }
       S.scanQty = 1;
       S.scanReady = true;
-      SCAN.lastCode = "";
-      scanLookup(code);
-      scanStockChanged();
+      S.scanHit = null;
+      SCAN.lastCode = code; SCAN.lastAt = Date.now() + SCAN_SAME_AFTER_MOVE_MS;
+      scanRenderPanel();
     }, function () {
       /* apiJson() REJECTS on a dead connection and on an answer that is not
          JSON («no-api») — the phone in the stockroom with one bar, the shop
          that woke up as an error page. With no handler here S.scanBusy stayed
-         true for ever: «Приход» and «Списание» were greyed out and the only
-         way back was to close the scanner and reopen it (audit). The same
-         refusal the route's own «no» gets. */
+         true for ever and the button was greyed out until the scanner was
+         closed and reopened (audit). The same refusal the route's own «no» gets. */
       S.scanBusy = false;
       toast("Не удалось сохранить");
       scanRenderPanel();
@@ -36220,7 +37139,11 @@
       else scanNativeGaveUp(supp.native ? "error" : "absent");
       scanRenderPanel();
     }).catch(function (err) {
-      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
+      /* 1a (README § 5): one short line and a button that asks again, not the
+         browser's error name — that goes to the console for whoever reads it. */
+      if (typeof console !== "undefined") console.warn("[scanner] camera:", cameraErrName(err));
+      S.scanErr = "Нет доступа к камере — разрешите её или введите код вручную.";
+      S.scanCamDenied = true;
       scanRenderPanel();
     });
   }
@@ -36289,7 +37212,9 @@
   function scanResetState() {
     S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = "";
     S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null; S.scanHint = "";
-    S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
+    S.scanQty = 1; S.scanBusy = false; S.scanReady = false; S.scanCamDenied = false;
+    // «Приход» / «Списание» on the card starts at «Приход» for every session
+    S.scanDir = "in";
     // a fresh session asks the dark-room question again, and has read nothing
     SCAN.everRead = false; SCAN.autoTorched = false;
   }
@@ -36312,6 +37237,13 @@
     scanResetState();
     S.scanFor = key;
     S.scanFrom = "editor";
+    render();
+  }
+  /** «Склад»'s own door, one size: `key` is its «productId variant» (scanToStockRow). */
+  function openScannerForRow(key) {
+    scanResetState();
+    S.scanFor = key;
+    S.scanFrom = "stockrow";
     render();
   }
   /** The flag alone — «Назад» closes the scanner through admCloseTop(), whose
@@ -37041,7 +37973,10 @@
        the air at once — a chip pressed, the history closed and reopened —
        and only the newest may write, as in loadStockLevels(). */
     var mySeq = STOCK.movesSeq = (STOCK.movesSeq || 0) + 1;
-    var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
+    /* The whole ledger's newest lines, not one reason's: the chips are counted
+       and filtered here, over this one list (admStockMovesHTML; q26), and
+       «Продажи» is two reasons the route cannot ask for at once. */
+    var qs = "?limit=" + STOCK_HIST_LIMIT;
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
       if (mySeq !== STOCK.movesSeq) return;
       S.stockMovesBusy = false;
@@ -37086,85 +38021,10 @@
     if (!isFinite(n) || n < 0 || n > 1000000) return null;
     return Math.trunc(n);
   }
-  /** One row's edit form → up to two calls (the static fields, then a qty move), then a fresh list. */
-  function stockCommit(key) {
-    var r = stockFindRow(key);
-    if (!r) return;
-    S.stockSaved = "";
-    var jobs = [];
-    var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
-    /* «Порог «мало»» took the same road «Остаток сейчас» used to (see
-       stockQtyValue): «abc» became NaN, JSON.stringify wrote it as null and
-       the route read that as «no threshold» — the owner's own warning level
-       quietly gone, under a «Сохранено ✓». */
-    var rawLow = String(S.stockEditLow == null ? "" : S.stockEditLow).trim();
-    var lowWant = rawLow === "" ? null : stockQtyValue(rawLow);
-    // the route's own ceiling (setLevel, src/lib/inventory.ts), in the route's
-    // own words — one wording for the refusal, whichever side catches it
-    if (lowWant !== null && lowWant > 100000) lowWant = null;
-    if (rawLow !== "" && lowWant === null) {
-      toast(STOCK_SAVE_ERRS.bad_threshold); refocus("[data-stocklowinput]"); return;
-    }
-    var lowChanged = lowWant !== null && lowWant !== r.lowThreshold;
-    var rawQty = S.stockEditQty;
-    var qty = null;
-    if (rawQty !== "") {
-      qty = stockQtyValue(rawQty);
-      if (qty === null) { toast("Остаток — целое число от 0 до 1 000 000."); refocus("[data-stockqtyinput]"); return; }
-    }
-    /* A row nobody has counted yet has no quantity at all — «не учтено», not
-       «0». So ANY number typed against it is the first count, including zero:
-       comparing an untracked row against 0 made «шкаф пустой» the one answer
-       the panel refused to record («Изменений нет»), and the product went on
-       being advertised from the manual override because the size never became
-       tracked. A tracked row still only moves when the number moves. */
-    var qtyChanged = qty !== null && (!r.tracked || qty !== r.qty);
-    if (eanChanged || lowChanged) {
-      var patch = { productId: r.productId, variant: r.variant };
-      if (eanChanged) patch.ean = S.stockEditEan || null;
-      if (lowChanged) patch.lowThreshold = lowWant;
-      /* «Причина (видна в истории)» is what the box under it promises, and
-         until 13.09.2026 it was kept only when the COUNT changed: a reason
-         typed beside a corrected «мало» threshold (or a barcode written in
-         by hand) was read, sent nowhere and lost under a «Сохранено ✓» —
-         «Reason is not stored» (Renat). The route records it as an 'edit'
-         line in the same history (db/migrations/092_stock_move_edit.sql).
-         Only when no quantity move is carrying it already: one correction,
-         one sentence, one line — not the same sentence twice. */
-      if (!qtyChanged && S.stockEditReason) patch.ref = S.stockEditReason;
-      jobs.push(stockLevelSaveDetailed(patch));
-    }
-    if (qtyChanged) {
-      jobs.push(stockMoveSend({
-        productId: r.productId, variant: r.variant, qty: qty,
-        reason: "adjust", ref: S.stockEditReason || undefined
-      }).then(function (ok) { return { ok: ok, error: ok ? "" : "move_failed" }; }));
-    }
-    // nothing typed — the form folds away and says so, rather than a silent close
-    if (!jobs.length) { S.stockEdit = ""; toast("Изменений нет"); render(); return; }
-    // the button says the round trip is on; the list is redrawn when it lands
-    var btn = document.querySelector('[data-stocksave="' + key.replace(/"/g, "") + '"]');
-    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
-    Promise.all(jobs).then(function (results) {
-      var failed = results.filter(function (x) { return !x.ok; })[0];
-      if (!failed) toast("Сохранено ✓");
-      else toast(stockSaveErrText(failed) || stockMoveFailText("Часть изменений не сохранилась"));
-      S.stockEdit = failed ? key : "";
-      // «Сохранено ✓» on the row itself, where the eye is (stockRowHTML)
-      S.stockSaved = failed ? "" : key;
-      reloadStock();
-    }, function () {
-      /* stockLevelSaveDetailed() catches its own failures, stockMoveSend()
-         does not: it rejects whenever apiJson() does (a dead connection, an
-         answer that is not JSON). Without this Promise.all was left rejected,
-         the form stayed open and the button stayed disabled on «Сохраняем…»
-         until the panel was reloaded (audit). */
-      S.stockEdit = key;
-      S.stockSaved = "";
-      toast("Не удалось сохранить");
-      render();
-    });
-  }
+  /* «Сохранить» of the old «Править» form (stockCommit) is gone: each box of
+     the open row saves itself (1a) — stockQtyCommit(), the barcode's
+     stockEanCommit(), the threshold's and the reason's specs in stockRowHTML().
+     stockQtyValue() above is still the one reading of a typed count. */
 
   // the assistant's answers end with a button that OPENS the right tab —
   // «где это?» answered by taking the owner there, not by describing a path
@@ -38038,9 +38898,26 @@
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
     else if (a.type === "stock_adjust") {
       stockMoveSend({ productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "панель" })
-        .then(function (res) { if (!res) toast(stockMoveFailText("Склад не принял правку")); else stockUndoApplied(a, res); reloadStock(); })
+        .then(function (res) {
+          if (!res) toast(stockMoveFailText("Склад не принял правку"));
+          else stockUndoApplied(a, res);
+          // «История» shows the undo's own line next time it is opened
+          S.stockMoves = null; STOCK.movesAsked = false;
+          reloadStock();
+        })
         .catch(noop);
     }
+    /* 1a «Склад»: a barcode bound or unbound, and its «Вернуть» — the size gets
+       back the code it had (null = none). PUT /api/admin/inventory/. */
+    else if (a.type === "stock_ean") {
+      stockLevelSaveDetailed({ productId: a.product_id, variant: a.variant || "", ean: a.value || null }).then(function (res) {
+        if (!res.ok) toast(stockSaveErrText(res) || "Штрихкод не сохранился — попробуйте ещё раз.");
+        scanStockChanged();
+        if (S.scanOpen && S.scanHit && S.scanHit.productId === a.product_id) scanLookup(S.scanHit.code);
+      });
+    }
+    // 1a «Наборы»: the show switch, a held delete, a set's whole row put back (bundleUndoPush)
+    else if (a.type === "bundle_active" || a.type === "bundle_restore" || a.type === "bundle_row") bundleUndoPush(a);
     /* …and the first count of a size nobody has counted yet, which is an
        absolute number rather than a move (the editor's «Остаток» column —
        zero has to be sayable). Same route, its other body shape. */
@@ -39408,6 +40285,17 @@
         ? "Склад «" + spName + "»: " + (a.delta > 0 ? "+" : "") + a.delta + " (" + (STOCK_MOVE_WORD[a.reason] || a.reason || "ручная правка") + ")"
         : "Склад «" + spName + "»: остаток → " + a.qty;
     }
+    // 1a «Склад»: a barcode bound to a size, or taken off it (stockEanCommit)
+    if (a.type === "stock_ean") {
+      var ep = a.product_id && byIdOrNull(a.product_id);
+      var epName = (ep ? ep.brand + " " + ep.name : a.product_id) + (a.variant ? " (" + a.variant + ")" : "");
+      return a.value ? "Склад «" + epName + "»: штрихкод " + a.value : "Склад «" + epName + "»: штрихкод отвязан";
+    }
+    // 1a «Наборы»: the show switch and a set deleted from the editor (bundleJournal)
+    if (a.type === "bundle_active") return "Набор «" + (a.name || a.id) + "»: " + (a.value ? "показан" : "скрыт");
+    if (a.type === "bundle_delete") return "Набор «" + (a.name || a.id) + "»: удалён";
+    if (a.type === "bundle_item_del") return "Набор «" + (a.name || a.id) + "»: без «" + a.item + "»";
+    if (a.type === "bundle_ai") return "Набор «" + (a.name || a.id) + "»: описание от помощника";
     // «Заказы»: a step on the card — the status it moved, or the label it made
     if (a.type === "order_status") {
       return "Заказ " + (a.number || a.id) + ": " +
@@ -40039,6 +40927,9 @@
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
     else if (a.type === "stock_adjust" || a.type === "stock_set" || a.type === "order_status" || a.type === "order_label" || a.type === "order_letter_cancel") noop();
+    // 1a: the barcode goes back on the server only (srvPush); a set is put back on screen here, then there
+    else if (a.type === "stock_ean") noop();
+    else if (a.type === "bundle_active" || a.type === "bundle_restore" || a.type === "bundle_row") bundleUndoLocal(a);
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
@@ -41615,7 +42506,8 @@
   function admAsViewKey() {
     if (S.screen !== "admin") return S.screen;
     return [S.adminTab, S.adminOrder || "", S.adminEdit || "", S.admCustOpen || "", S.mailOpen ? 1 : 0,
-      S.admSetPage || "", S.adminBlogEdit ? 1 : 0, S.newsEdit ? 1 : 0, S.stockMovesOpen ? 1 : 0].join("|");
+      S.admSetPage || "", S.adminBlogEdit ? 1 : 0, S.newsEdit ? 1 : 0, S.stockMovesOpen ? 1 : 0,
+      S.bundleForm ? S.bundleForm.uid || "" : ""].join("|");
   }
   function renderImpl() {
     var body;
@@ -42446,6 +43338,9 @@
        own tab — neither is closed by a move to another section, and a layer
        nobody can see must not eat the Back meant for the section. */
     if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
+    /* 1a «Наборы»: an open set is a view of its own on a phone («← Наборы»),
+       so Back closes it before it leaves «Товары» — only on its own tab. */
+    if (S.bundleForm && S.adminTab === "goods" && S.goodsTab === "bundles") l.push("set");
     if (S.newsEdit && S.adminTab === "news") l.push("news");
     /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
        question 6 was about cards, not about which section they belong to. */
@@ -42547,6 +43442,8 @@
     else if (top === "setpage") S.admSetPage = "";
     // «← Склад»: the list the history was opened from
     else if (top === "moves") S.stockMovesOpen = false;
+    // «← Наборы»: the list the set was opened from (what it owed went with the flush above)
+    else if (top === "set") { S.bundleForm = null; S.bundleFormErr = ""; }
     /* «← Рассылка», and the same question it asks about unsaved work: the
        first Back asks, the layer stays open and the next one closes — as
        the blog and the product editor above do. */
@@ -43061,7 +43958,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -43544,24 +44441,12 @@
     }
     /* ---- «Товары → Склад»: ± one unit ------------------------------------
        No confirm card: this is the reversible half of the rule (README
-       § State) — it applies at once and the toast's «Отменить» is the safety
-       net, with a journal line behind it either way. */
+       rule 3). The row shows the new number at once; the shelf hears about
+       the whole burst STOCK_BURST_MS after the last tap, as ONE move with one
+       journal line and one «Вернуть» (q25) — stockBurstTap(). */
     if (d.stockstep) {
-      var stParts = d.stockstep.split(":");
-      var stDelta = Number(stParts[1]);
-      var stRow = stockFindRow(stParts[0]);
-      if (!stRow) return;
-      if (S.stockSaved === stParts[0]) S.stockSaved = "";   // the row moved on from what «Править» saved
-      var was = stRow.tracked ? stRow.qty : 0;
-      if (stDelta < 0 && was <= 0) return;
-      // paint the new number before the round trip; reloadStock() confirms it
-      stRow.qty = was + stDelta; stRow.tracked = true;
-      var stEntry = demoApply({
-        type: "stock_adjust", product_id: stRow.productId, variant: stRow.variant,
-        delta: stDelta, reason: "adjust"
-      });
-      render();
-      toast(admStockToastText(stRow, was + stDelta), stEntry);
+      var stAt = d.stockstep.lastIndexOf(":");
+      if (stockBurstTap(d.stockstep.slice(0, stAt), Number(d.stockstep.slice(stAt + 1)) < 0 ? -1 : 1)) render();
       return;
     }
     /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() -------- */
@@ -44317,8 +45202,16 @@
            owner), the change goes straight to POST /api/admin/bundles */
         if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }
         if (pa.type === "set_bundle") { applySetBundle(pa); return; }
-        // …and a set deleted: the same DELETE the editor's «Да, удалить» sends
+        // …and a set deleted: the same DELETE the editor's «Удалить набор» sends
         if (pa.type === "delete_bundle") { applyDeleteBundle(pa); return; }
+        // 1a: the editor's own «Удалить набор» — held ADM_UNDO_MS with «Вернуть» (q8)
+        if (pa.type === "bundle_delete_held") { bundleHoldDelete(pa.id); return; }
+        // …and a draft that was never saved: it only ever lived in this browser
+        if (pa.type === "bundle_draft_drop") {
+          bundleDraftClear();
+          if (S.bundleForm && !S.bundleForm.editing) { S.bundleForm.deleted = true; S.bundleForm = null; }
+          toast("Черновик удалён"); render(); return;
+        }
         // a promo code nobody has used: the server keeps the rule, not this card
         if (pa.type === "delete_promo") { deletePromoByCode(pa.code); return; }
         // the assistant named a topic: the article is written here, in the
@@ -44887,28 +45780,27 @@
     }
 
     /* ---------- inventory: «Склад» — row edit form, filters, ledger, the PWA hint ---------- */
+    /* A tap on a size opens its row (1a: «мало ≤», the barcode, «Причина»);
+       the same tap — or «Свернуть» (data-stockedit="") — closes it, and
+       whatever the row still owes goes as it closes (stockRowClose). */
     if (d.stockedit !== undefined) {
-      S.stockEdit = d.stockedit;
-      if (d.stockedit) {
-        S.stockSaved = "";   // a «Сохранено ✓» badge next to an open form would be a lie
-        var stRow = stockFindRow(d.stockedit);
-        if (stRow) {
-          S.stockEditEan = stRow.ean || "";
-          S.stockEditLow = String(stRow.lowThreshold);
-          S.stockEditQty = "";
-          S.stockEditReason = "";
-        }
-      }
+      var stWas = S.stockEdit || "";
+      var stWant = d.stockedit && d.stockedit !== stWas ? d.stockedit : "";
+      if (stWas && stWas !== stWant) stockRowClose(stWas);
+      S.stockEdit = stWant;
       render(); return;
     }
-    if (d.stocksave) { stockCommit(d.stocksave); return; }
+    /* The row's scan button: the next code read is bound to THIS size at once
+       — the scanner's «stockrow» door (scanToStockRow). */
+    if (d.stockscan) { openScannerForRow(d.stockscan); return; }
     /* «Показать ещё» — the next page of the warehouse, appended rather than
        render()ed so the page the owner just read does not jump out from under
        him. stockScrollMore() does exactly the same thing unasked. */
     if (d.stockmore !== undefined) { if (!stockGrow()) render(); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
     if (d.stockmovesopen !== undefined) { stockMovesOpen(d.stockmovesopen); return; }
-    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
+    // the chips filter the lines already loaded (q26) — no new request, no grey bars
+    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
       render(); return;
@@ -44936,6 +45828,14 @@
     if (d.scanmove) {
       if (d.scanmove === "cart") { scanToCart(); return; }
       scanCommitMove(d.scanmove === "out" ? -1 : 1); return;
+    }
+    // 1a: the card's «Приход / Списание» switch — the one dark button under it follows
+    if (d.scanmode) { S.scanDir = d.scanmode === "out" ? "out" : "in"; scanRenderPanel(); return; }
+    // «Разрешить камеру»: ask the browser again (a phone that will not ask twice has «Как разрешить»)
+    if (d.scancam !== undefined) {
+      S.scanErr = ""; S.scanCamDenied = false;
+      stopScanEngine(); startScanEngine(); scanRenderPanel();
+      return;
     }
     // «productId|variant» — one tap, one bottle (scanAssignResultsHTML)
     if (d.scanbind) {
@@ -45024,27 +45924,42 @@
       togglePromoActive(d.admpromotoggle, !(cur && cur.active));
       return;
     }
-    /* ---- admin «Товары → Наборы» ---- */
+    /* ---- admin «Товары → Наборы» (1a: the set saves itself) ---- */
     if (d.admgoodstab) {
+      // what the open set still owes goes before it closes; a draft waits in localStorage
+      admAutosaveFlush();
       S.goodsTab = d.admgoodstab;
       S.adminTab = "goods"; S.adminEdit = "";
-      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = ""; BUNDLE_AI_UNDO = null;
+      S.bundleForm = null; S.bundleFormErr = "";
       render(); return;
     }
+    /* «+ Набор»: the draft waiting from last time, or a new one — local until it
+       is valid (q27). The caret goes to the NAME: the address is written from
+       it (Dim, 19.09.2026). */
     if (d.bundlenew !== undefined) {
-      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
-      // the name, the first box of the form — the address writes itself from
-      // it (paintBundleId; Dim, 19.09.2026: ask for the name, not the address)
+      admAutosaveFlush();
+      S.bundleForm = bundleDraftLoad() || blankBundle(); S.bundleFormErr = ""; S.bundleQ = "";
       render(); refocus('[data-bundlef="title"]'); return;
     }
+    if (d.bundledraftnew !== undefined) {
+      bundleDraftClear();
+      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = "";
+      render(); refocus('[data-bundlef="title"]'); return;
+    }
+    if (d.bundledraftdrop !== undefined) {
+      pendingAction = { type: "bundle_draft_drop", overlay: true, danger: true,
+        title: "Удалить черновик?", detail: "Набор ещё не сохранён — черновик просто исчезнет.", ok: "Удалить" };
+      render(); refocus("[data-admapply]"); return;
+    }
     if (d.bundleedit) {
-      var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
-      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null; render(); }
+      var bEd = bundleListEntry(d.bundleedit);
+      if (bEd) { admAutosaveFlush(); S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; render(); }
       return;
     }
-    if (d.bundletoggle) {
-      var bTg = (S.admBundles || []).filter(function (x) { return x.id === d.bundletoggle; })[0];
-      toggleBundleActive(d.bundletoggle, !(bTg && bTg.active));
+    // the show switch — on the row (data-bundletoggle) and in the editor (data-bundleshow)
+    if (d.bundletoggle || d.bundleshow) {
+      var bTgId = d.bundletoggle || d.bundleshow, bTg = bundleListEntry(bTgId);
+      if (bTg) bundleSetActive(bTgId, bTg.active === false);
       return;
     }
     if (d.bundlemove) {
@@ -45052,37 +45967,60 @@
       moveBundle(mv[0], Number(mv[1]) || 0);
       return;
     }
-    if (d.bundlesave !== undefined) { saveBundleForm(); return; }
-    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; BUNDLE_AI_UNDO = null; render(); return; }
-    if (d.bundledelete) { S.bundleDel = d.bundledelete; render(); return; }
-    if (d.bundledelyes) { deleteBundleById(d.bundledelyes); return; }
-    if (d.bundledelno !== undefined) { S.bundleDel = ""; render(); return; }
+    // × on a desktop, «← Наборы» on a phone: the set closes, what it owes goes first
+    if (d.bundlecancel !== undefined) { admAutosaveFlush(); S.bundleForm = null; S.bundleFormErr = ""; render(); return; }
+    /* «Удалить набор» asks first (README rule 4) — the one sheet — and then the
+       set is held ADM_UNDO_MS with «Вернуть» before the DELETE goes (q8). */
+    if (d.bundledelete) {
+      var bDel = bundleListEntry(d.bundledelete);
+      if (!bDel) return;
+      pendingAction = { type: "bundle_delete_held", overlay: true, danger: true, id: bDel.id,
+        title: "Удалить набор «" + bundleTitle(bDel) + "»?",
+        detail: "Страница набора исчезнет, уже оформленные заказы не изменятся.", ok: "Удалить" };
+      render(); refocus("[data-admapply]"); return;
+    }
+    /* A product joins at the volume its chip names; the same bottle again is
+       one more of it (design), never a second line the route would refuse. */
     if (d.bundleadd) {
-      if (!S.bundleForm) return;
-      var already = S.bundleForm.items.filter(function (x) { return x.productId === d.bundleadd; })[0];
-      if (already) { toast("Этот товар уже в наборе"); return; }
-      S.bundleForm.items.push({ productId: d.bundleadd, variant: 0, qty: 1 });
+      var bf0 = S.bundleForm;
+      if (!bf0) return;
+      var addV = Number(t.getAttribute("data-bundleaddsz")) || 0;
+      var already = bf0.items.filter(function (x) { return x.productId === d.bundleadd && (x.variant || 0) === addV; })[0];
+      if (already) already.qty = Math.min(20, (already.qty || 1) + 1);
+      else if (bf0.items.length >= 8) { toast(BUNDLE_SAVE_ERRS.too_many_items); return; }
+      else bf0.items.push({ productId: d.bundleadd, variant: addV, qty: 1 });
+      bundleTouched("pick");
       render(); return;
     }
+    // × on an item: out at once, «Вернуть» puts the set back as it was
     if (d.bundledel !== undefined) {
-      if (!S.bundleForm) return;
-      S.bundleForm.items.splice(Number(d.bundledel), 1);
+      var bf1 = S.bundleForm;
+      if (!bf1) return;
+      var delSnap = bundleSnap(bf1), gone = bf1.items[Number(d.bundledel)];
+      if (!gone) return;
+      bf1.items.splice(Number(d.bundledel), 1);
       // the photo may have been the one we just removed
-      if (S.bundleForm.image && !S.bundleForm.items.filter(function (x) { return x.productId === S.bundleForm.image; })[0]) {
-        S.bundleForm.image = "";
-      }
-      render(); return;
+      if (bf1.image && !bf1.items.filter(function (x) { return x.productId === bf1.image; })[0]) bf1.image = "";
+      bundleTouched("pick");
+      var goneP = byIdOrNull(gone.productId);
+      var delEntry = bundleJournal({ type: "bundle_item_del", id: bf1.id, name: bf1.title.RU, item: goneP ? goneP.brand + " " + goneP.name : gone.productId },
+        { type: "bundle_row", uid: bf1.uid, id: bf1.editing ? bf1.id : "", name: bf1.title.RU, form: delSnap });
+      render();
+      toast("Товар убран из набора", delEntry);
+      return;
     }
     if (d.bundleqty) {
       if (!S.bundleForm) return;
       var qParts = String(d.bundleqty).split(":");
       var qIt = S.bundleForm.items[Number(qParts[0])];
       if (qIt) qIt.qty = Math.min(20, Math.max(1, (qIt.qty || 1) + (Number(qParts[1]) || 0)));
+      bundleTouched("pick");
       render(); return;
     }
     if (d.bundleimg !== undefined) {
       if (!S.bundleForm) return;
       S.bundleForm.image = d.bundleimg || "";
+      bundleTouched("pick");
       render(); return;
     }
     if (d.bundlelang) {
@@ -45090,66 +46028,11 @@
       S.bundleForm.lang = d.bundlelang;
       render(); return;
     }
-    /* The set's description, written and translated in place. Direct DOM
-       patches, never a render(): every box in this form is one the owner may
-       be mid-typing in, and a render would put the saved values back over it —
-       the same rule the goods editor's own AI buttons follow. */
-    if (d.bundledescgen !== undefined) {
-      if (!S.bundleForm) return;
-      if (S.bundleForm.items.length < 2) { toast("Сначала добавьте в набор хотя бы два товара"); return; }
-      bundleDescSnapshot();
-      admSpark(t, [S.bundleForm.lang || "RU"], "bundle", bundleDescInput, function (L, tx) {
-        if (!tx.text) return;
-        S.bundleForm.desc[L] = txt(tx.text);
-        if (L === (S.bundleForm.lang || "RU")) {
-          var dEl = document.querySelector('[data-bundlef="desc"]');
-          if (dEl) dEl.value = txt(tx.text);
-        }
-        admBarPaintNote();   // the draft moved: the bar asks admDraftDiffers()
-      });
-      return;
-    }
-    if (d.bundletranslate !== undefined) {
-      if (!S.bundleForm) return;
-      var bSrc = String(S.bundleForm.desc.RU || "").trim();
-      if (!bSrc) { toast("Сначала напишите или сгенерируйте русское описание"); refocus('[data-bundlef="desc"]'); return; }
-      bundleDescSnapshot();
-      var bTrB = t, bTrL = t.textContent; t.disabled = true; t.textContent = "…";
-      apiSend("/api/admin/ai/text/", "POST", {
-        task: "translate", lang: "RU",
-        input: { text: bSrc, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: bundleKeepNames(false) }
-      }).then(function (r) {
-        bTrB.disabled = false; bTrB.textContent = bTrL;
-        if (r.status === 200 && r.body.ok && r.body.texts) {
-          if (r.body.texts.ET) S.bundleForm.desc.ET = r.body.texts.ET;
-          if (r.body.texts.EN) S.bundleForm.desc.EN = r.body.texts.EN;
-          var bCur = S.bundleForm.lang || "RU";
-          if (bCur !== "RU" && r.body.texts[bCur]) {
-            var bEl = document.querySelector('[data-bundlef="desc"]');
-            if (bEl) bEl.value = r.body.texts[bCur];
-          }
-          admBarPaintNote();
-          toast("Черновик готов — проверьте и сохраните");
-        } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
-        else if (r.body && r.body.error === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
-        else toast("Не получилось — попробуйте ещё раз");
-      }).catch(function () { bTrB.disabled = false; bTrB.textContent = bTrL; toast("Не получилось — попробуйте ещё раз"); });
-      return;
-    }
-    if (d.bundledescundo !== undefined) {
-      if (!BUNDLE_AI_UNDO || !S.bundleForm) return;
-      S.bundleForm.desc = {
-        RU: BUNDLE_AI_UNDO.desc.RU, ET: BUNDLE_AI_UNDO.desc.ET, EN: BUNDLE_AI_UNDO.desc.EN
-      };
-      var undoEl = document.querySelector('[data-bundlef="desc"]');
-      if (undoEl) undoEl.value = S.bundleForm.desc[S.bundleForm.lang || "RU"] || "";
-      BUNDLE_AI_UNDO = null;
-      var undoSlot = document.querySelector("[data-bundleundoslot]");
-      if (undoSlot) undoSlot.textContent = "";
-      admBarPaintNote();
-      return;
-    }
+    /* The set's description, written and translated in place — the text lands
+       in the box and saves itself; the toast's «Вернуть» puts back what was
+       there (bundleAiDone). */
+    if (d.bundledescgen !== undefined) { bundleDescDraft(t); return; }
+    if (d.bundletranslate !== undefined) { bundleTranslate(t); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); admAsk(d.admask); return; }
     if (d.admsend !== undefined) {
       admVoiceDrop();
@@ -45684,10 +46567,15 @@
       var stockList = document.getElementById("stocklist");
       if (stockList) { stockList.innerHTML = stockRows(); translateTree(stockList); }
     }
-    else if (t.matches("[data-stockeaninput]")) { S.stockEditEan = t.value; }
-    else if (t.matches("[data-stocklowinput]")) { S.stockEditLow = t.value; }
-    else if (t.matches("[data-stockqtyinput]")) { S.stockEditQty = t.value; }
-    else if (t.matches("[data-stockreasoninput]")) { S.stockEditReason = t.value; }
+    /* The open row's «Причина»: kept for the row's next change (stockWhyUse),
+       and owed on its own from the first keystroke — Back, the nav or closing
+       the row sends it as a «правка карточки» line if nothing else carried it.
+       The count, the barcode and «мало ≤» save themselves (data-asfield). */
+    else if (t.matches("[data-stockreasoninput]")) {
+      var whyKey = t.getAttribute("data-stockreasoninput");
+      STOCK_WHY[whyKey] = t.value;
+      admAutosave("stockwhy:" + whyKey, ++ADM_TYPED_SEQ, "input", stockWhySpec(whyKey));
+    }
     /* «Размеры и цены»: the salon column follows the price — the design's
        «auto = price × 0.8», with the shop's own discount instead of the
        prototype's flat number. It stops following the moment the owner types
@@ -45807,28 +46695,24 @@
       if (!S.bundleForm) return;
       var bf = t.dataset.bundlef;
       var bl = S.bundleForm.lang || "RU";
-      if (bf === "id") {
-        S.bundleForm.id = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
-        if (t.value !== S.bundleForm.id) t.value = S.bundleForm.id;
-        // …and from now on it is his address, not ours — until he empties it
-        S.bundleForm.idTyped = S.bundleForm.id !== "";
-      } else if (bf === "title" || bf === "desc") {
+      /* 1a: each box saves itself — the name and the price when the box is
+         left, the description after a pause (ADM_SAVE_POLICY). There is no
+         address box any more: it is written from the Russian name when the
+         set is first saved, and shown behind «?» (bundleAddrHTML; q23). */
+      if (bf === "title" || bf === "desc") {
         S.bundleForm[bf][bl] = t.value;
-        /* The address follows the Russian name while it is being typed, so
-           Renat never has to think one up in latin (Dim, 08.09.2026 — see
-           bundleSuggestId). A saved set keeps the address it has: its box is
-           read-only, and a live URL that changes is a broken link and a lost
-           search result. */
-        if (bf === "title" && bl === "RU" && !S.bundleForm.editing && !S.bundleForm.idTyped) paintBundleId();
-      } else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); }
+        bundleTouched(bf === "title" ? "name" : "text");
+        if (bf === "title") { var addrEl = document.querySelector("#admhelp-set-addr"); if (addrEl) { addrEl.innerHTML = bundleAddrHTML(S.bundleForm); translateTree(addrEl); } }
+      } else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); bundleTouched("money"); }
     }
     /* …and the same price seen as a percentage off the running total: what is
        typed here becomes the euro price, which is the only number stored and
-       sent. An empty box clears the price rather than guessing at one. */
+       sent (q28). An empty box clears the price rather than guessing at one. */
     else if (t.matches("[data-bundlepct]")) {
       if (!S.bundleForm) return;
       S.bundleForm.price = String(t.value).trim() ? bundlePriceFromPct(t.value) : "";
       paintBundleMoney("pct");
+      bundleTouched("money");
     }
     else if (t.matches("[data-bundleq]")) { S.bundleQ = t.value; paintHeroPicks("bundlepicks", bundlePickRows()); }
     else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
@@ -46188,11 +47072,18 @@
     }
     /* The set editor's two <select>s. The size decides the price of that
        part, so both redraw — the «сумма по отдельности» hint has to follow. */
-    else if (t.matches("[data-bundlecat]")) { if (S.bundleForm) { S.bundleForm.cat = t.value; } }
+    else if (t.matches("[data-bundlecat]")) { if (S.bundleForm) { S.bundleForm.cat = t.value; bundleTouched("pick"); } }
     else if (t.matches("[data-bundlesize]")) {
       if (!S.bundleForm) return;
-      var bsIt = S.bundleForm.items[Number(t.dataset.bundlesize)];
-      if (bsIt) bsIt.variant = Number(t.value) || 0;
+      var bsI = Number(t.dataset.bundlesize), bsIt = S.bundleForm.items[bsI], bsV = Number(t.value) || 0;
+      if (bsIt) {
+        /* the same bottle at the same volume twice is one line with more of it —
+           two would be a set the route refuses (dup_item) */
+        var bsTwin = S.bundleForm.items.filter(function (x, i) { return i !== bsI && x.productId === bsIt.productId && (x.variant || 0) === bsV; })[0];
+        if (bsTwin) { bsTwin.qty = Math.min(20, (bsTwin.qty || 1) + (bsIt.qty || 1)); S.bundleForm.items.splice(bsI, 1); }
+        else bsIt.variant = bsV;
+        bundleTouched("pick");
+      }
       render();
     }
     // «Главный баннер»: the link target, the picture URL and the timing —
@@ -47075,9 +47966,8 @@
   var ADM_ENTER_FORMS = [
     ["[data-partnerf]", "[data-admpartnersave]"],
     ["[data-promof]", "[data-admpromosave]"],
-    ["[data-stockeaninput],[data-stocklowinput],[data-stockqtyinput],[data-stockreasoninput]", "[data-stocksave]"],
+    // «Склад» and the set editor save themselves (1a) — Enter is their «leave» (admTypedEvent, bundleAsEvent)
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
-    ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
     ["[data-mailto]", "[data-mailtest]"],
     /* r12: the settings cards and the two small cards. Their «Сохранить» is
        the page's bar (admSetBarHTML) — outside the card the box is in, so

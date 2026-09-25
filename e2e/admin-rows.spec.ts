@@ -174,6 +174,36 @@ async function rowShapes(page: Page, sel: string): Promise<RowShape[]> {
   }, sel);
 }
 
+/* 1a (README § 5): «Склад» and «Наборы» are not the three-line row of the
+   other lists any more but the design's own — a product's sizes as short rows
+   with − / + (11-stock-phone-v2), a set with its price and its switch under
+   the name (12-sets). The promise is the same one: every row of a list has the
+   same shape, nothing runs past the screen, nothing wraps, and every control
+   is a thumb's size. */
+async function listShape(page: Page, rowSel: string, alignSel: string, nameSel: string, smallSel: string, label: string): Promise<void> {
+  const r = await page.evaluate(({ rowSel, alignSel, nameSel, smallSel }) => {
+    const vw = document.documentElement.clientWidth;
+    const rows = Array.from(document.querySelectorAll(rowSel));
+    return {
+      vw,
+      n: rows.length,
+      right: rows.map((row) => { const el = row.querySelector(alignSel); return el ? Math.round(el.getBoundingClientRect().right) : -1; }),
+      over: rows.filter((row) => row.getBoundingClientRect().right > vw + 0.5).length,
+      wraps: Array.from(document.querySelectorAll(nameSel)).filter((el) => el.getBoundingClientRect().height > 24).length,
+      small: rows.flatMap((row) => Array.from(row.querySelectorAll<HTMLElement>(smallSel))
+        .map((el) => ({ t: (el.textContent || el.getAttribute("aria-label") || "").trim(), b: el.getBoundingClientRect() }))
+        .filter(({ b }) => b.width && b.height && (b.width < 43.5 || b.height < 43.5))
+        .map(({ t, b }) => `«${t}» ${Math.round(b.width)}×${Math.round(b.height)}`)),
+    };
+  }, { rowSel, alignSel, nameSel, smallSel });
+  expect(r.n, `${label} @${r.vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  expect(r.right.filter((x) => x < 0), `${label} @${r.vw}: a row without its control`).toEqual([]);
+  expect(new Set(r.right).size, `${label} @${r.vw}: the controls do not line up`).toBe(1);
+  expect(r.over, `${label} @${r.vw}: a row runs past the screen`).toBe(0);
+  expect(r.wraps, `${label} @${r.vw}: a name wraps onto a second line`).toBe(0);
+  expect(r.small, `${label} @${r.vw}: controls under 44 px`).toEqual([]);
+}
+
 /** Every row of `sel` has the shape, and the same shape as the first row. */
 async function oneShape(page: Page, sel: string, label: string): Promise<void> {
   const rows = await rowShapes(page, sel);
@@ -300,15 +330,15 @@ test.describe("admin — one shape per list on the phone", () => {
         await adminSection(page, "goods");
         await page.locator('[data-admgoodstab="bundles"]').click();
         await expect(page.locator(`[data-bundleedit="${setId}"]`)).toBeVisible();
-        await oneShape(page, ".adm-row--lines:has([data-bundleedit])", "Наборы");
+        await listShape(page, ".adm-setrow", ".adm-sw", ".adm-setrow .adm-row__nm", ".adm-link--move, .adm-sw", "Наборы");
 
         await page.locator('.adm-tab[data-admtab="goods"]').click();
         await expect(page.locator("#goodslist .adm-row--lines").nth(1)).toBeVisible();
         await oneShape(page, "#goodslist .adm-row--lines", "Каталог");
 
         await page.locator('.adm-tab[data-admtab="stock"]').click();
-        await expect(page.locator("#stocklist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#stocklist .adm-row--lines", "Склад");
+        await expect(page.locator("#stocklist .adm-stk__r").nth(1)).toBeVisible();
+        await listShape(page, "#stocklist .adm-stk__r", ".adm-stk__q", "#stocklist .adm-stk__n", ".adm-stk__q button, .adm-stk__sz", "Склад");
 
         await adminSection(page, "blog");
         await expect(page.locator(`[data-admblogedit="${postId}"]`)).toBeVisible();

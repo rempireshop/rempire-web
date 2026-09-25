@@ -58,9 +58,9 @@ const BRANCHES = [
   "if (d.admdescgen !== undefined)", "if (d.admtranslate !== undefined)", "if (d.ednamespark !== undefined)",
   "if (d.admdescundo !== undefined)", "if (d.herospark !== undefined)",
   "if (d.promokind)", "if (d.promoscope)", "if (d.promoprodpick)", "if (d.promoproddel !== undefined)",
-  "if (d.bundleadd)", "if (d.bundledel !== undefined)", "if (d.bundleqty)", "if (d.bundleimg !== undefined)",
-  "if (d.bundlelang)", "if (d.bundledescgen !== undefined)", "if (d.bundletranslate !== undefined)",
-  "if (d.bundledescundo !== undefined)",
+  /* The set form left this list with the 1a redesign: it saves itself now,
+     so its buttons schedule a save instead of lighting a bar — see
+     tests/admin-sets-1a.test.ts. */
 ];
 
 type Env = {
@@ -287,35 +287,6 @@ describe("the product editor: a button edit is an unsaved edit", () => {
     e.S.adminEdit = "new"; e.S.goodsNew = { brand: "", name: "", cat: "hair" };
     e.f.edBrandPick("Proraso");
     expect(e.dirty()).toBe(true);
-  });
-});
-
-describe("the set form: its draft is asked, not a keystroke flag", () => {
-  function set() {
-    const e = editor();
-    e.S.adminEdit = "";
-    e.S.bundleForm = { id: "", idTyped: false, cat: "beard", editing: false, title: { RU: "", ET: "", EN: "" },
-      desc: { RU: "", ET: "", EN: "" }, items: [{ productId: "a", variant: 0, qty: 1 }, { productId: "b", variant: 0, qty: 1 }],
-      price: "", image: "", active: true, sort: 0, lang: "RU" };
-    expect(e.bar(), "the form opened «dirty»").toBe("");   // the render that opens it
-    return e;
-  }
-  it.each([
-    [{ bundleadd: "c" }, "a product added"],
-    [{ bundledel: "0" }, "«Убрать»"],
-    [{ bundleqty: "0:1" }, "«+»"],
-    [{ bundleimg: "a" }, "the photo tile"],
-    [{ bundledescgen: "" }, "«Написать черновик»"],
-  ])("%j — %s", (d, what) => {
-    const e = set();
-    e.click(d);
-    expect(e.bar(), `${what} left the bar quiet`).toBe("dirty");
-  });
-
-  it("a language chip is not an edit", () => {
-    const e = set();
-    e.click({ bundlelang: "ET" });
-    expect(e.bar()).toBe("");
   });
 });
 

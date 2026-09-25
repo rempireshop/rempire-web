@@ -46,33 +46,33 @@ function objectConst(name: string): string {
 }
 
 /* ------------------------------------------------------------------------ *
- * «Склад» → «Править»: the first count may be zero
+ * «Склад»: the count typed into the row — the first count may be zero
+ * (1a: the number between − and + saves itself on blur / Enter; it was the
+ * «Остаток сейчас» box of «Править» → «Сохранить»)
  * ------------------------------------------------------------------------ */
 
-type CommitOut = { toasts: string[]; sent: unknown[] };
+type CommitOut = { landed: number; sent: unknown[]; answer: unknown };
 
-/** Runs the real stockCommit() against one shelf row and reports what it sent. */
+/** Runs the real stockQtyCommit() against one shelf row and reports what it sent. */
 async function commit(row: Record<string, unknown>, typed: string): Promise<CommitOut> {
   const body = `
-    var out = { toasts: [], sent: [] };
-    var S = { stockEdit: "k", stockEditEan: "", stockEditLow: "", stockEditQty: TYPED,
-              stockEditReason: "", stockSaved: "", lang: "RU" };
-    var STOCK_SAVE_ERRS = {};
-    var document = { querySelector: function () { return null; } };
+    var out = { landed: 0, sent: [], answer: null };
+    var STOCK_BURST = {}, STOCK_WHY = {}, STOCK_WHY_USED = {};
     function stockFindRow() { return ROW; }
-    function stockLevelSaveDetailed() { return Promise.resolve({ ok: true }); }
-    function stockMoveSend(b) { out.sent.push(b); return Promise.resolve(true); }
+    function stockMoveSend(b) { out.sent.push(b); return Promise.resolve({ appliedDelta: 0, qtyAfter: b.qty }); }
     function stockMoveFailText(f) { return f; }
-    function stockSaveErrText() { return ""; }
-    function toast(m) { out.toasts.push(m); }
-    function render() {}
-    function refocus() {}
-    function reloadStock() {}
-    function trText(s) { return s; }
+    function toast() {}
+    function stockLanded() { out.landed++; }
+    ${slice("stockKey")}
+    ${slice("stockBurstDelta")}
+    ${slice("stockShownQty")}
+    ${slice("stockShownTracked")}
     ${slice("stockQtyValue")}
-    ${slice("stockCommit")}
-    stockCommit("k");
-    return Promise.resolve().then(function () {}).then(function () {}).then(function () { return out; });
+    ${slice("stockWhyFor")}
+    ${slice("stockWhyUse")}
+    ${slice("stockWhyDrop")}
+    ${slice("stockQtyCommit")}
+    return stockQtyCommit("p ", TYPED).then(function (a) { out.answer = a; return out; });
   `;
   const fn = new Function("ROW", "TYPED", body) as (r: unknown, t: string) => Promise<CommitOut>;
   return fn(row, typed);
@@ -86,23 +86,30 @@ describe("a shelf counted as empty can be recorded as 0", () => {
      so comparing it against 0 made «шкаф пустой» the one count the panel
      refused to take. The size stayed untracked, and the shop went on
      advertising the product from the manual override. */
-  it("«Остаток сейчас» = 0 on an untracked row is the first count, not «Изменений нет»", async () => {
+  it("0 typed on an untracked row is the first count, not «nothing to save»", async () => {
     const out = await commit(untracked, "0");
-    expect(out.toasts).toEqual(["Сохранено ✓"]);
-    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 0, reason: "adjust", ref: undefined }]);
+    expect(out.answer).toBe(true);
+    expect(out.landed).toBe(1);
+    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 0, reason: "adjust", ref: "панель" }]);
   });
 
   it("…and a number still reaches the shelf as an absolute count", async () => {
     const out = await commit(untracked, "4");
-    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 4, reason: "adjust", ref: undefined }]);
+    expect(out.sent).toEqual([{ productId: "p", variant: "", qty: 4, reason: "adjust", ref: "панель" }]);
   });
 
   /* The other half of the same rule: a row that IS counted and already stands
      at the typed number has not changed, and must not cost a ledger line. */
-  it("a counted row already at 0 still says «Изменений нет»", async () => {
+  it("a counted row already at 0 sends nothing — and the autosave hears «done», not «failed»", async () => {
     const out = await commit(tracked, "0");
-    expect(out.toasts).toEqual(["Изменений нет"]);
     expect(out.sent).toEqual([]);
+    expect(out.landed).toBe(0);
+    expect(out.answer).toBe(true);
+  });
+
+  it("«abc» and «-1» are not counts: nothing is sent (the box is refused before the trip)", async () => {
+    expect((await commit(tracked, "abc")).sent).toEqual([]);
+    expect((await commit(tracked, "-1")).sent).toEqual([]);
   });
 });
 
@@ -167,12 +174,17 @@ async function scanCommit(sign: number, qty: number, result: MoveResult | null):
               scanHit: { product: { id: "p" }, productId: "p", variant: "", code: "123", tracked: true } };
     var SCAN = { lastCode: "123" };
     var SCANEL = null;
+    ${constant("SCAN_SAME_AFTER_MOVE_MS")}
     function stockMoveSend() { return Promise.resolve(RESULT); }
     function stockMoveFailText(f) { return f; }
     function scanRenderPanel() {}
     function toast(m) { out.push(m); }
     function scanLookup() {}
     function scanStockChanged() {}
+    function stockFindRow() { return null; }
+    function stockKey(p, v) { return p + " " + v; }
+    // 1a: a move that happened is journalled with «Вернуть» — its toast is the same sentence
+    function stockLanded(row, res, how) { out.push(how.toast); }
     ${slice("scanQtyNow")}
     ${slice("scanMoveToast")}
     ${slice("scanCommitMove")}
@@ -205,8 +217,8 @@ describe("the scanner's confirm never claims a move that did not happen", () => 
     ]);
   });
 
-  /* «Списать» writes a 'sale_pos' move, and a sale on a size nobody has
-     counted is skipped by the server on purpose — nothing is written and no
+  /* «Списать» writes a 'writeoff' move ('sale_pos' until 25.09.2026), and like
+     a sale it is skipped on a size nobody has counted — nothing is written and no
      ledger line appears. The route still answers ok, so the old toast said
      «Списание −2 ✓» over a shelf that had not moved. */
   it("a write-off on a size nobody has counted says it was not counted", async () => {
@@ -234,10 +246,14 @@ describe("the stock history is read on the shop's clock, not on UTC", () => {
       var S = { stockMoves: [{ at: AT, productId: "p", brand: "A", name: "B", variant: "", delta: -2, reason: "sale_pos", ref: "сканер" }],
                 stockMovesReason: "", stockMovesErr: "", stockMovesBusy: false };
       var STOCK_MOVE_WORD = { sale_pos: "Продажа в салоне" };
+      var STOCK_HIST_CHIPS = [["", "Все"]];
       function esc(s) { return String(s); }
       function loadStockMoves() {}
       function admProdName(s) { return String(s); }
+      function admBackHTML() { return ""; }
       ${slice("auditWhen")}
+      ${slice("stockHistMatch")}
+      ${slice("stockHistRowHTML")}
       ${slice("admStockMovesHTML")}
       return admStockMovesHTML();
     `;

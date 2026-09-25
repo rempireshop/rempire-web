@@ -152,7 +152,8 @@ test.describe("admin — the product editor", () => {
       await page.locator("[data-stockq]").fill(ean);
       const row = page.locator(`[data-stockedit="${id} ${VARIANT}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
       await expect(row, "«Склад» does not show the barcode the editor bound").toContainText(ean);
-      await expect(row, "«Склад» does not show the count the editor set").toContainText(String(stockWas + 7));
+      // 1a: «Склад» shows the count in the box between − and +
+      await expect(row.locator("[data-stockqtyinput]"), "«Склад» does not show the count the editor set").toHaveValue(String(stockWas + 7));
       await assertClean(page, w, "«Склад» agrees with the editor");
 
       // The storefront charges what the editor says.
@@ -510,7 +511,8 @@ test.describe("admin — the product editor", () => {
     const eanWas = await stockEan(page, id, VARIANT);
     await page.locator(`[data-edscan="${id} ${VARIANT}"]`).click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
-    await expect(page.locator(".scan__mode")).toHaveText("Товар: код встанет в поле «Штрихкод»");
+    // 1a: the title says which scanner this is — «Сканер · товар»
+    await expect(page.locator(".scan__mode")).toHaveText("товар");
     // Back while it is up: the scanner goes, the editor stays, the panel stays
     await page.goBack();
     await expect(page.locator(".scanoverlay"), "Back did not close the scanner").toHaveCount(0);
