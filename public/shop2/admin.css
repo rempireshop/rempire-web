@@ -1694,6 +1694,10 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 @media (max-width: 899px) {
   .adm-grid__scan { padding: 0 12px; }
   .adm-grid__scan__lbl { display: inline; }
+  /* «Отвязать код» is a thumb's target on a phone too (44 px, README
+     § Constraints) — the e2e phone check met it once a size carried a code
+     (1a integration, 25.09.2026) */
+  .adm-grid__unbind { min-height: 44px; }
 }
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }

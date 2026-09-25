@@ -103,7 +103,7 @@ function shelf(rows: Row[], answer: (m: Move) => unknown = (m) => ({ appliedDelt
     function stockLevelSaveDetailed(b) { onPut(b); return Promise.resolve(PUT()); }
     ${AUTOSAVE.map(fn).join("\n")}
     ${STOCK.map(fn).join("\n")}
-    return { tap: stockBurstTap, ean: stockEanCommit, why: STOCK_WHY, flush: admAutosaveFlush, SAVE: ADM_SAVE,
+    return { tap: stockBurstTap, ean: stockEanCommit, why: STOCK_WHY, flush: admAutosaveFlush, SAVE: ADM_SAVE, save: admAutosave,
       shown: stockShownQty, state: stockShownState, AS: ADM_AS };
   `;
   const api = new Function("S", "LOG", "onMove", "onPut", "onToast", "onMark", "ANSWER", "PUT", body)(
@@ -116,9 +116,10 @@ function shelf(rows: Row[], answer: (m: Move) => unknown = (m) => ({ appliedDelt
     why: Record<string, string>;
     flush: () => number;
     SAVE: { state: string; busy: number; refused: boolean };
+    save: (key: string, value: unknown, ev: string, spec?: unknown) => boolean;
     shown: (r: Row) => number;
     state: (r: Row) => string;
-    AS: Record<string, { err: string; failed: boolean }>;
+    AS: Record<string, { err: string; failed: boolean; dirty: boolean }>;
   };
   return { ...api, S, moves, puts, toasts, marks, log, setPut: (a: Record<string, unknown>) => { putAnswer = a; } };
 }
@@ -265,6 +266,39 @@ describe("«Склад»: the barcode box — a refusal is explained under the b
     expect(p.AS["stockean:k"].failed).toBe(false);
     expect(p.AS["stockean:k"].dirty).toBe(false);
     expect(marks.at(-1)).toEqual(["stockean:k", "Этот штрихкод уже привязан к другому товару."]);
+  });
+});
+
+/* Integration of the 1a screens, 25.09.2026 (e2e scanner-app): since the
+   header never says «Сохранено ✓» while a box still owes something
+   (admSaveEnd), a «Причина» already carried by the row's change must stop
+   owing — it kept the header quiet after a threshold or a barcode that had
+   landed with it. */
+describe("«Склад»: a «Причина» carried by the row's change owes nothing of its own", () => {
+  it("the change lands with the reason, and the header says «Сохранено ✓»", async () => {
+    const s = shelf([row()]);
+    s.why[KEY] = "новая партия";
+    // typed into «Причина»: owed from the first keystroke (stockWhySpec, kind count)
+    s.save("stockwhy:" + KEY, 1, "input", { kind: "count", send: () => Promise.resolve(true) });
+    expect(s.AS["stockwhy:" + KEY].dirty).toBe(true);
+    s.save("stockean:" + KEY, 1, "input", { kind: "code", send: () => s.ean(KEY, "4750323781389", "typed") });
+    s.save("stockean:" + KEY, undefined, "enter");
+    await flush();
+    expect(s.puts.at(-1)).toMatchObject({ ean: "4750323781389", ref: "новая партия" });
+    expect(s.AS["stockwhy:" + KEY].dirty, "the carried reason is still owed").toBe(false);
+    expect(s.SAVE.state).toBe("saved");
+  });
+
+  it("…and a change the shop refused leaves the reason owed again", async () => {
+    const s = shelf([row()]);
+    s.setPut({ ok: false, error: "ean_taken", takenBy: "X" });
+    s.why[KEY] = "новая партия";
+    s.save("stockwhy:" + KEY, 1, "input", { kind: "count", send: () => Promise.resolve(true) });
+    s.save("stockean:" + KEY, 1, "input", { kind: "code", send: () => s.ean(KEY, "4750323781389", "typed") });
+    s.save("stockean:" + KEY, undefined, "enter");
+    await flush();
+    expect(s.AS["stockwhy:" + KEY].dirty).toBe(true);
+    expect(s.SAVE.state).not.toBe("saved");
   });
 });
 

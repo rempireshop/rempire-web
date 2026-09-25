@@ -16968,13 +16968,32 @@
         if (!d.id && d.create && r.status !== 409) d.create.body = null;
         throw blogHttpErr(r);
       }
-      var p = r.body.post;
+      var p = r.body.post, created = !d.id;
       d.create = null;
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
       // …the one field the row decides and not the draft: an auto slug is the
       // server's word, so the yardstick carries the server's word too
       sent.slug = p.slug;
-      if (d === S.adminBlogEdit) blogMarkSaved(d, blogDraftSig(sent));   // «не сохранено» is answered
+      if (d === S.adminBlogEdit) {
+        blogMarkSaved(d, blogDraftSig(sent));   // «не сохранено» is answered
+        /* …and what the editor says about the article is repainted in place —
+           not render(), which reaches the box being typed in (blogListUpsert):
+           the line at its foot (a new article is «Черновик» from this answer
+           on) and, the moment it exists, the header's «⋯» with «Удалить
+           статью». Nothing else repainted them; a render that happened to land
+           later used to (1a integration, 25.09.2026). */
+        if (typeof document !== "undefined" && document) {
+          var pubEl = document.querySelector("[data-blogpubstate]");
+          if (pubEl) { pubEl.innerHTML = blogPubStateHTML(d); translateTree(pubEl); }
+          var actsEl = created ? document.querySelector(".adm-blog2__acts") : null;
+          if (actsEl && actsEl.parentNode) {
+            var actsTmp = document.createElement("div");
+            actsTmp.innerHTML = admBlogHeadHTML(d);
+            var actsNew = actsTmp.querySelector(".adm-blog2__acts");
+            if (actsNew) { actsEl.parentNode.replaceChild(actsNew, actsEl); translateTree(actsNew); }
+          }
+        }
+      }
       blogListUpsert(p);   // the list, in place — see there
       blogForget();        // …and this tab's copy of the shop's blog is stale
       // a create replayed from before: the article has moved on since, and that goes next
@@ -38900,11 +38919,21 @@
   function stockWhyFor(key) { return String(STOCK_WHY[key] || "").trim(); }
   function stockWhyUse(key) {
     var why = stockWhyFor(key);
-    if (why) STOCK_WHY_USED[key] = why;
+    if (why) {
+      STOCK_WHY_USED[key] = why;
+      /* carried by this change: the «Причина» box owes nothing of its own any
+         more — left «owed», it kept the header from saying «Сохранено ✓»
+         once this change landed (admSaveEnd; 1a integration, 25.09.2026) */
+      if (typeof ADM_AS !== "undefined" && ADM_AS["stockwhy:" + key]) ADM_AS["stockwhy:" + key].dirty = false;
+    }
     return why;
   }
   function stockWhyDrop(key, why) {
-    if (why && STOCK_WHY_USED[key] === why) delete STOCK_WHY_USED[key];
+    if (why && STOCK_WHY_USED[key] === why) {
+      delete STOCK_WHY_USED[key];
+      // the change did not land: the reason is owed again (Back or closing the row sends it)
+      if (typeof ADM_AS !== "undefined" && ADM_AS["stockwhy:" + key]) ADM_AS["stockwhy:" + key].dirty = true;
+    }
   }
 
   /* ---- a field whose «value» for the scheduler is a token ------------------

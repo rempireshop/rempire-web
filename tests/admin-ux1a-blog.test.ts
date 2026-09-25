@@ -122,7 +122,8 @@ describe("«Вернулись по письму» — counted on the server (q4
 type Any = Record<string, any>;
 type Call = { method: string; body: Any; key?: string };
 
-function saveRig(answers: Array<"lost" | { status: number; body: Any }>) {
+/** `doc`: a stand-in document for the lines the save paints in place (none by default) */
+function saveRig(answers: Array<"lost" | { status: number; body: Any }>, doc?: Any) {
   const S: Any = { adminBlogEdit: null, adminBlogSaved: undefined, adminBlog: [], adminBlogConfirmBack: false };
   const calls: Call[] = [];
   let keyN = 0;
@@ -134,10 +135,12 @@ function saveRig(answers: Array<"lost" | { status: number; body: Any }>) {
   };
   const api = new Function(
     "S", "SRV", "apiSend", "blogBody3ToHtml", "blogForget", "noop", "blogListUpsert", "idemNewKey", "blogSendKeepalive",
-    `${slice("blogFieldsPayload")} ${slice("blogDraftSig")} ${sliceVar("BLOG_SIG_FIELDS")} ${slice("blogDraftSnap")}
+    "document", "translateTree", "admBlogHeadHTML",
+    `${slice("blogPubStateHTML")} ${slice("blogFieldsPayload")} ${slice("blogDraftSig")} ${sliceVar("BLOG_SIG_FIELDS")} ${slice("blogDraftSnap")}
      ${slice("blogMarkSaved")} ${slice("blogHttpErr")} ${slice("saveBlogFields")} ${slice("blogSaveOnce")} ${slice("blogDirty")}
      return { save: saveBlogFields, mark: blogMarkSaved, dirty: blogDirty };`,
-  )(S, { admin: true }, apiSend, (b: Any) => b, () => {}, () => {}, () => {}, () => "key-" + ++keyN, apiSend) as {
+  )(S, { admin: true }, apiSend, (b: Any) => b, () => {}, () => {}, () => {}, () => "key-" + ++keyN, apiSend, doc, () => {},
+    (d: Any) => '<div class="adm-blog2__acts">' + (d.id ? "<button data-admblogdel>Удалить статью</button>" : "") + "</div>") as {
     save: (d: Any) => Promise<Any>; mark: (d: Any) => void; dirty: () => boolean;
   };
   return { S, calls, ...api };
@@ -152,6 +155,56 @@ function newDraft(title: string): Any {
   };
 }
 const POST = { id: "7a0e9f5e-3a51-4c7e-9a3b-111111111111", slug: "boroda", status: "draft", publishedAt: null };
+
+/* Integration of the 1a screens, 25.09.2026 (e2e admin-sweep-4): the header
+   said «Сохранено ✓» and the line at the editor's foot still said «Новая
+   статья — сохранится, как только будет заголовок» — nothing repainted it
+   when the create landed; a render arriving later by chance used to. */
+describe("the line at the editor's foot follows the save", () => {
+  it("a new article is «Черновик» the moment its create lands — painted in place, no render", async () => {
+    const line: Any = { innerHTML: "" };
+    const rig = saveRig([{ status: 200, body: { ok: true, post: POST } }], {
+      querySelector: (sel: string) => (sel === "[data-blogpubstate]" ? line : null),
+    });
+    const d = newDraft("Борода зимой");
+    rig.S.adminBlogEdit = d; rig.mark(d);
+    await rig.save(d);
+    expect(line.innerHTML).toContain("Черновик — в магазине не видно");
+    expect(line.innerHTML).not.toContain("Новая статья");
+  });
+
+  it("…and the header's «⋯» with «Удалить статью» appears once the article exists — in place", async () => {
+    const swapped: Any[] = [];
+    const oldActs: Any = { parentNode: { replaceChild: (n: Any, o: Any) => { swapped.push([n, o]); } } };
+    const doc = {
+      querySelector: (sel: string) => (sel === ".adm-blog2__acts" ? oldActs : null),
+      createElement: () => {
+        const box: Any = { html: "", set innerHTML(h: string) { box.html = h; }, querySelector: () => ({ fresh: box.html }) };
+        return box;
+      },
+    };
+    const rig = saveRig([{ status: 200, body: { ok: true, post: POST } }, { status: 200, body: { ok: true, post: POST } }], doc);
+    const d = newDraft("Борода зимой");
+    rig.S.adminBlogEdit = d; rig.mark(d);
+    await rig.save(d);
+    expect(swapped).toHaveLength(1);
+    expect(swapped[0][0].fresh).toContain("data-admblogdel");
+    expect(swapped[0][1]).toBe(oldActs);
+    // an edit of an article that already exists leaves the header alone
+    d.title.RU = "Борода зимой — 2";
+    await rig.save(d);
+    expect(swapped).toHaveLength(1);
+  });
+
+  it("…and an article no longer on screen is not painted over the one that is", async () => {
+    const line: Any = { innerHTML: "был" };
+    const rig = saveRig([{ status: 200, body: { ok: true, post: POST } }], { querySelector: () => line });
+    const d = newDraft("Борода зимой");
+    rig.S.adminBlogEdit = newDraft("Другая"); rig.mark(d);
+    await rig.save(d);
+    expect(line.innerHTML).toBe("был");
+  });
+});
 
 describe("one «Создать», one article — an autosave retry carries the same key and the same body", () => {
   it("a lost answer: the retry repeats the first request exactly, then the newer text follows as an edit", async () => {
