@@ -987,13 +987,29 @@ export async function markCartRecovered(email: string): Promise<void> {
      together: a row that kept `discount_at` would let the first letter fire
      again on the next basket and silently withhold the second one for ever,
      and a `discount_code` left behind would name a code written for a basket
-     this person has already bought. */
-  await query(
-    `update carts set recovered_at = now(), reminded_at = null,
+     this person has already bought.
+     …and before `reminded_at` goes, what it said is kept: an order after the
+     letter is a shopper who came back by it — «Вернулись по письму» in
+     «Аналитика» (db/migrations/213_cart_returned_by_letter.sql). The row is
+     joined to itself as it was, so RETURNING can hand back the old stamp. */
+  const rows = await query<{ was: unknown }>(
+    `update carts c set recovered_at = now(), reminded_at = null,
             discount_at = null, discount_code = null
-      where email = $1`,
+       from (select id, reminded_at from carts where email = $1) o
+      where c.id = o.id
+      returning o.reminded_at as was`,
     [addr],
   );
+  if (rows.some((r) => r.was != null)) {
+    /* one row, a timestamp and nothing else — see the migration. A count
+       that could not be written is a figure one short, never a failed order
+       or a cart left unrecovered: the update above has already happened. */
+    try {
+      await query("insert into cart_returns default values");
+    } catch (err) {
+      console.warn("[carts] «вернулись по письму» not counted:", (err as Error)?.message);
+    }
+  }
 }
 
 export async function getCart(email: string): Promise<CartRow | null> {

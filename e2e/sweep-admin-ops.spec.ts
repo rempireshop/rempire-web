@@ -498,13 +498,17 @@ test.describe("sweep — blog", () => {
     await page.locator("[data-admblognew]").click();
     await expect(page.locator('[data-blogf="title"]')).toBeVisible();
 
-    // No title at all is not a post — and the panel has to say why rather
-    // than posting a blank row into the shop's blog.
-    await page.locator("[data-admblogsave]").click();
-    // the editor is adm- markup since the phase-3 redesign
-    const err = page.locator(".adm-err[role=alert]");
+    /* No title at all is not a post — and the panel has to say why rather
+       than posting a blank row into the shop's blog. 1a: the article saves
+       itself, so the refusal is the line under the title, a second after the
+       typing stops, and nothing is sent. */
+    await page.locator("[data-blogbody]").click();
+    await page.keyboard.type("Текст без заголовка.");
+    const err = page.locator("#blogtitlehint .adm-ashint");
     await expect(err, "an untitled post saved without complaint").toBeVisible();
     expect(isRussian((await err.textContent()) || "")).toBe(true);
+    await page.keyboard.press("Control+A");
+    await page.keyboard.press("Delete");
     await assertClean(page, w, "blog, empty title");
 
     const marker = `Свип ${Date.now().toString().slice(-6)}`;
@@ -524,13 +528,14 @@ test.describe("sweep — blog", () => {
     expect(await page.locator("[data-blogbody] script").count(), "the editor ran the owner's paste").toBe(0);
     await page.locator('[data-blogf="seoTitle"]').fill(LONG);
     expect((await page.locator('[data-blogf="seoTitle"]').inputValue()).length).toBeLessThanOrEqual(70);
+    // «+ Товар» opens the search (1a)
+    await page.locator("[data-admblogprodadd]").click();
     await page.locator("[data-admblogq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admblogproductadd="${PRODUCT_2.id}"]`).click();
     await assertClean(page, w, "blog draft filled");
 
-    await page.locator("[data-admblogsave]").click();
-    expect(await toastText(page)).toMatch(/[Чч]ерновик|[Сс]охранен/);
-    await clearToast(page);
+    // it saved itself — the header says so only after the server did
+    await expect(page.locator("[data-admsavest]:visible").first()).toContainText("Сохранено ✓", { timeout: 15_000 });
     await assertClean(page, w, "blog draft saved");
 
     /* What the public feed itself carries. Asserting on the DOM alone is a
@@ -551,10 +556,10 @@ test.describe("sweep — blog", () => {
     /* Russian only, so the question about the two empty languages comes
        first — admin-blog.spec.ts holds it to naming them. */
     await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
+    // the state is the line at the foot of the editor
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
     await clearToast(page);
-    // the state is a sentence in the «Публикация» card now, not a chip
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
     await assertClean(page, w, "blog published");
     expect(await listed(), "a published post never reached the public blog").toBe(true);
 
@@ -571,19 +576,26 @@ test.describe("sweep — blog", () => {
     await assertClean(shop.page, shop.w, "public blog with the post");
     await shop.close();
 
+    // «Снять с публикации» is in «⋯» (1a)
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogunpublish]").click();
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Черновик — в магазине не видно");
     await clearToast(page);
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
     expect(await listed(), "an unpublished post stayed on the public blog").toBe(false);
 
-    // Delete asks first, and the answer is undoable only by re-publishing —
-    // docs/blog.md is explicit that posts skip the undo journal.
+    /* Delete asks first (README rule 4), and a confirmed delete is held for
+       as long as «Вернуть» is on the toast (Dim, q8) — posts skip the undo
+       journal (docs/blog.md), so the hold is the way back. */
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await expect(page.locator("[data-admblogdelno]")).toBeVisible();
-    await page.locator("[data-admblogdelno]").click();
-    await expect(page.locator("[data-admblogdelno]")).toHaveCount(0);
+    const sheet = page.locator(".adm-confirm");
+    await expect(sheet).toContainText("Удалить статью?");
+    await sheet.locator("[data-admcancel]").click();
+    await expect(sheet).toHaveCount(0);
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await page.locator("[data-admblogdelyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
+    await expect(page.getByRole("status")).toContainText("Статья удалена");
     await clearToast(page);
     await assertClean(page, w, "blog post deleted");
   });

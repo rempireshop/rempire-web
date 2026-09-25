@@ -322,25 +322,29 @@ test.describe("admin sections — Блог", () => {
     await page.keyboard.type("Проверка редактора после редизайна.");
     await page.locator('[data-blogf="excerpt"]').fill("Короткий анонс.");
 
-    // the right column: «Публикация» says what the state is, and publishes
-    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+    // 1a: the line at the foot says where the article stands; «Опубликовать» is the dark button
+    await expect(page.locator("[data-blogpubstate]")).not.toContainText("Опубликована");
     const slug = await page.locator("[data-blogslug]").inputValue();
     /* Written in Russian only, so «Опубликовать» first asks what the Estonian
-       and English readers will get — its own test is in admin-blog.spec.ts. */
+       and English readers will get — on the confirm sheet; its own test is in
+       admin-blog.spec.ts. */
     await page.locator("[data-admblogpublish]").click();
-    await page.locator("[data-admblogpublishyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
     await expect(page.getByRole("status")).toBeVisible();
-    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
 
     const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);
     expect(api.status(), "the published post is not on the public API").toBe(200);
 
-    // …and the list shows it with its badge
+    // …and the list shows it with its tag
     await page.locator("[data-admblogback]").click();
-    await expect(page.locator(".adm-row", { hasText: title }).first()).toBeVisible();
+    const row = page.locator(".adm-brow", { hasText: title }).first();
+    await expect(row).toBeVisible();
+    await expect(row).toContainText("Опубликована");
 
-    // leave the blog as it was found
-    await page.locator(`[data-admblogedit]`).first().click();
+    // leave the blog as it was found — «Снять с публикации» is in «⋯» (1a)
+    await row.click();
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogunpublish]").click();
     await expect(page.getByRole("status")).toBeVisible();
   });

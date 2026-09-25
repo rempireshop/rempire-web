@@ -81,6 +81,13 @@ function save(answer: Res): Promise<void> {
     "blogDraftSig",
     "blogMarkSaved",
     "blogForget",
+    /* 1a: a save is queued per article and the request is its own function
+       (blogSaveOnce); the list row it updates, the one-«Создать» key and the
+       page-closing variant are plumbing here, stubbed like their neighbours. */
+    "noop",
+    "blogListUpsert",
+    "idemNewKey",
+    "blogSendKeepalive",
     [
       sliceString("BLOG_SAVE_ERR"),
       sliceObject("BLOG_ERR_TEXT"),
@@ -88,6 +95,7 @@ function save(answer: Res): Promise<void> {
       slice("blogSaveErrText"),
       slice("blogFail"),
       slice("saveBlogFields"),
+      slice("blogSaveOnce"),
       "return function () { return saveBlogFields().catch(blogFail); };",
     ].join("\n"),
   )(
@@ -100,6 +108,10 @@ function save(answer: Res): Promise<void> {
     () => "sig",
     () => {},
     () => {},
+    () => {},
+    () => {},
+    () => "key",
+    () => Promise.resolve(answer),
   ) as () => Promise<void>;
   S.adminBlogEdit = { id: "p1", title: { RU: "Статья" } };
   return run();

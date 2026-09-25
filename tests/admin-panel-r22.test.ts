@@ -84,10 +84,11 @@ describe("«Аналитика»: the two blocks that were never money", () => {
     expect(src).toContain("Наборы и подарочные карты сюда не попадают — бренд у них не указан.");
   });
 
-  /* …and not one figure moved. The two `admPairsHTML` calls still read the
-     very same fields of the analytics answer. */
+  /* …and not one figure moved. The two lists still read the very same
+     fields of the analytics answer — «Топ товаров» drawn with a share bar
+     under each row since 1a (admShareRowsHTML, screen 17). */
   it("changes no number: the same two fields are still what is drawn", () => {
-    expect(src).toContain("admPairsHTML(a.topProductsByRevenue.map(prod)");
+    expect(src).toContain("admShareRowsHTML(a.topProductsByRevenue.map(prod)");
     expect(src).toContain("a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; })");
   });
 });
