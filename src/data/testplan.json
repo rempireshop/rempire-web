@@ -1334,17 +1334,18 @@
       "lang": "RU",
       "title": "Вход в панель",
       "steps": [
-        "Открыть адрес панели на телефоне.",
+        "Открыть адрес панели на телефоне, потом на компьютере.",
         "Посмотреть, что под карточкой входа.",
         "Ввести неверный пароль и нажать «Войти».",
         "Ввести верный пароль и нажать «Войти»."
       ],
       "expect": [
-        "На неверный пароль пишет «Неверный пароль».",
-        "Внутрь при этом не пускает.",
+        "На неверный пароль пишет «Неверный пароль» и внутрь не пускает.",
         "С верным паролем панель открывается.",
         "Внизу пять кнопок: «Обзор», «Заказы», «Товары», «Салон», «Ещё».",
-        "Под карточкой — RU · ET · EN и «Открыть магазин ↗»."
+        "Под карточкой — RU · ET · EN и «Открыть магазин ↗».",
+        "Под кнопкой: «На этом телефоне вход запомнится на 30 дней».",
+        "На компьютере справа тёмная половина: «Заказы, склад и салон — в одном месте»."
       ],
       "why": "Вход, пускающий без пароля, — это утечка адресов всех ваших покупателей.",
       "risk": "high",
@@ -1352,22 +1353,23 @@
       "en": {
         "title": "Signing into the panel",
         "steps": [
-          "Open the panel address on a phone.",
+          "Open the panel address on a phone, then on a computer.",
           "Look at what sits under the sign-in card.",
           "Enter a wrong password and press «Войти» (sign in).",
           "Enter the right password and press «Войти»."
         ],
         "expect": [
-          "A wrong password gets «Неверный пароль».",
-          "It does not let you in.",
+          "A wrong password gets «Неверный пароль» and does not let you in.",
           "The right password opens the panel.",
           "Five buttons along the bottom: «Обзор», «Заказы», «Товары», «Салон», «Ещё».",
-          "Under the card: RU · ET · EN and «Открыть магазин ↗» (open the shop)."
+          "Under the card: RU · ET · EN and «Открыть магазин ↗» (open the shop).",
+          "Under the button: this phone stays signed in for 30 days.",
+          "On a computer a dark half on the right: orders, stock and salon in one place."
         ],
         "why": "A sign-in that lets you past without a password leaks every buyer's address."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "panel-settings-fast",
@@ -5816,7 +5818,7 @@
       "lang": "RU",
       "title": "Уведомление магазину о новом заказе",
       "steps": [
-        "«Ещё» → «Подключения» → строка «Письмо магазину о заказе».",
+        "«Ещё» → «Подключения» → строка «Письмо магазину о заказе» (зелёная — в «Работает»).",
         "Если строка красная — сделать, что в ней написано, или переслать её Диму. Если зелёная — нажать «Отправить проверочное письмо».",
         "Открыть почту магазина shop@rempireshop.com.",
         "Оформить и оплатить любой заказ, телефон с оповещениями держать рядом.",
@@ -5838,7 +5840,7 @@
       "en": {
         "title": "The shop's own notice of a new order",
         "steps": [
-          "«Ещё» → «Подключения» → the «Письмо магазину о заказе» row.",
+          "«Ещё» → «Подключения» → the «Письмо магазину о заказе» row (green — under «Работает»).",
           "If the row is red, do what it says or forward it to Dim. If it is green, press «Отправить проверочное письмо».",
           "Open the shop mailbox shop@rempireshop.com.",
           "Place and pay for any order, with the notifying phone at hand.",
@@ -5857,7 +5859,7 @@
         "why": "Since 21.09 the shop's letter is the fallback: it goes only when the notification reached no phone, so it does not spend the daily letter allowance. Without RESEND_TO in Vercel it does not go either — and then you learn about such an order only from the panel."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T15:05:38.188Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "mail-not-spam",
@@ -7114,16 +7116,16 @@
         "Написать заголовок и одну строку текста, поставить обложку.",
         "Сразу после строки кнопкой «Картинка» → «Загрузить картинку» вставить фото с телефона.",
         "Дописать абзац и вставить в текст карточку товара кнопкой «Товар».",
-        "Нажать «Сохранить», вернуться в «Блог» и открыть статью снова.",
-        "Нажать «Удалить» под обложкой, затем поставить её снова.",
-        "Нажать «Опубликовать» и открыть статью в магазине."
+        "Подождать «Сохранено ✓» вверху, вернуться в «Блог» и открыть статью снова.",
+        "Под обложкой открыть «Как стоит обложка», нажать «Удалить обложку», потом «Вернуть» на плашке.",
+        "Нажать тёмную «Опубликовать», потом «Открыть в магазине ↗»."
       ],
       "expect": [
+        "Кнопки «Сохранить» нет: через секунду после набора вверху «Сохранено ✓».",
         "При вставке товара панель пишет, в какой язык он добавлен.",
-        "Фото с телефона встаёт в текст — ссылку на картинку искать не нужно.",
         "Открытая заново статья — тот же текст с фото, а не HTML-код.",
-        "С обложкой видно три рамки: в блоге, в статье и в соцсетях.",
-        "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
+        "В «Как стоит обложка» три рамки: в блоге, в статье и в соцсетях.",
+        "«Вернуть» ставит обложку на место; без обложки — пунктирное поле «+ Обложка».",
         "В магазине у статьи обложка и фото в тексте; карточка товара открывает товар."
       ],
       "why": "Неопубликованная статья не приводит из Google никого, а статья, открывшаяся HTML-кодом, теряет фото и текст.",
@@ -7137,21 +7139,21 @@
           "Write a title and one line of text, set a cover.",
           "Right after that line, with «Картинка» → «Загрузить картинку» put a photo from the phone into the text.",
           "Write another paragraph and insert a product card with the «Товар» button.",
-          "Press «Сохранить», go back to «Блог» and open the article again.",
-          "Press «Удалить» under the cover, then set it again.",
-          "Press «Опубликовать» and open the article in the shop."
+          "Wait for «Сохранено ✓» at the top, go back to «Блог» and open the article again.",
+          "Under the cover open «Как стоит обложка», press «Удалить обложку», then «Вернуть» on the toast.",
+          "Press the dark «Опубликовать», then «Открыть в магазине ↗»."
         ],
         "expect": [
+          "No «Сохранить» button: a second after typing, «Сохранено ✓» shows at the top.",
           "When a product is inserted the panel says which language it went into.",
-          "The phone's photo lands in the text — no picture link to find.",
           "Reopened, the article is the same text with its photo — not HTML code.",
-          "With a cover you see three frames: the blog, the article and social.",
-          "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
+          "In «Как стоит обложка» three frames: the blog, the article and social.",
+          "«Вернуть» puts the cover back; without one — the dashed «+ Обложка» zone.",
           "In the shop: cover and in-text photo shown; the product card opens the product."
         ],
         "why": "An article that did not publish brings nobody from Google, and one that reopens as HTML code loses its photo and its text."
       },
-      "markedAt": "2026-09-24T15:02:43.537Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "blog-cover-frame",
@@ -7162,20 +7164,20 @@
       "title": "Обложка статьи: три рамки, каждая отдельно",
       "steps": [
         "Открыть «Ещё» → «Блог» и любую статью с обложкой.",
-        "Под обложкой нажать «Заполнить рамку».",
+        "Под обложкой открыть «Как стоит обложка» и нажать «Заполнить рамку».",
         "Под рамкой «В начале статьи» сдвинуть ползунок вправо, потом потянуть фото пальцем — вверх-вниз и вбок.",
         "Под рамкой «В списке статей» сдвинуть ползунок, потом нажать «Сбросить» под ней.",
         "В квадрате «В соцсетях» развести два пальца на фото и потянуть его.",
-        "Посмотреть на плашку над статьёй и на кнопку «Сохранить» — на телефоне и на компьютере.",
-        "Сохранить и открыть эту статью в магазине, потом список статей.",
+        "Посмотреть на строку вверху — на телефоне и на компьютере.",
+        "Открыть эту статью в магазине, потом список статей.",
         "Сразу переключить магазин на EN и на ET.",
-        "Нажать «Вся фотография» и сохранить снова."
+        "Нажать «Вся фотография» и открыть статью в магазине снова."
       ],
       "expect": [
         "Каждая рамка двигается и сбрасывается (в центр, без увеличения) сама: другие стоят на месте.",
         "Ползунок или два пальца увеличивают фото только в этой рамке, до 3×.",
         "Увеличенное фото двигается в любую сторону, даже там, где было «двигать нечего».",
-        "До «Сохранить» над статьёй тёплая плашка и обведённая кнопка: после сохранения их нет.",
+        "Через секунду после движения вверху «Сохраняем…», потом «Сохранено ✓» — нажимать нечего.",
         "В магазине на RU, ET и EN обложка сразу стоит как в своих рамках.",
         "После «Вся фотография» список и статья показывают снимок целиком, как рамки в панели."
       ],
@@ -7183,25 +7185,25 @@
       "risk": "low",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-24T07:00:42.145Z",
+      "markedAt": "2026-09-25T12:34:46.779Z",
       "en": {
         "title": "An article's cover: three frames, each on its own",
         "steps": [
           "Open «Ещё» → «Блог» and any article that has a cover.",
-          "Under the cover press «Заполнить рамку» (fill the frame).",
+          "Under the cover open «Как стоит обложка» and press «Заполнить рамку» (fill the frame).",
           "Under the «В начале статьи» (top of the article) frame move the slider right, then drag the photo with a finger — up, down and sideways.",
           "Under the «В списке статей» (list) frame move the slider, then press «Сбросить» (reset) under it.",
           "In the «В соцсетях» (social media) square spread two fingers on the photo, then drag it.",
-          "Look at the notice above the article and at the «Сохранить» (save) button — on a phone and on a computer.",
-          "Save and open this article in the shop, then the blog list.",
+          "Look at the line at the top — on a phone and on a computer.",
+          "Open this article in the shop, then the blog list.",
           "Straight away switch the shop to EN and then to ET.",
-          "Press «Вся фотография» (the whole photo) and save again."
+          "Press «Вся фотография» (the whole photo) and open the article in the shop again."
         ],
         "expect": [
           "Each frame moves and resets (to the centre, no zoom) on its own: the others stay.",
           "The slider or two fingers zoom the photo in that frame only, up to 3×.",
           "A zoomed photo moves every way, even where it said «двигать нечего».",
-          "Before saving: a warm notice above the article and a ringed Save; after saving, both gone.",
+          "A second after a move the top says «Сохраняем…», then «Сохранено ✓» — nothing to press.",
           "In the shop in RU, ET and EN the cover sits as in its frames.",
           "After «Вся фотография» list and article show the whole photo, like the panel frames."
         ],
@@ -7219,17 +7221,17 @@
         "В «Блоге» нажать «+ Статья» и найти кнопки «Язык статьи».",
         "По-русски вписать заголовок «test», анонс и немного текста.",
         "Переключиться на английский и посмотреть на заголовок и анонс, ничего не трогая.",
-        "Написать английский текст, вернуться на русский и нажать «Сохранить».",
+        "Написать английский текст, вернуться на русский и подождать «Сохранено ✓» вверху.",
         "Выйти из статьи, открыть её заново и посмотреть все три языка.",
         "Нажать «Опубликовать», не заполнив эстонский.",
         "В «Рассылке» нажать «+ Письмо», вписать тему по-русски и переключиться на EN."
       ],
       "expect": [
         "На английском заголовок и анонс пустые: русский «test» туда не переходит.",
-        "У каждого языка свой текст — и после «Сохранить» с повторным открытием.",
+        "У каждого языка свой текст — и после повторного открытия.",
         "Английский не стал «test», эстонский так и остался пустым.",
-        "Пока не сохранили, над статьёй тёплая плашка «Есть несохранённые изменения».",
-        "При пустом эстонском панель один раз переспрашивает: эстонец увидит русский текст.",
+        "Статья сохраняется сама: через секунду после набора вверху «Сохранено ✓».",
+        "При пустом эстонском окно «Опубликовать без перевода?»: эстонец увидит русский текст.",
         "В рассылке тема на EN пустая, русская тема на месте на RU."
       ],
       "why": "Текст, пропавший из-за переключения языка, отбивает желание вести блог.",
@@ -7241,23 +7243,23 @@
           "In «Блог» press «+ Статья» and find the «Язык статьи» (article language) buttons.",
           "In Russian type the title «test», a lead and some text.",
           "Switch to English and look at the title and the lead without touching them.",
-          "Write English text, switch back to Russian and press «Сохранить».",
+          "Write English text, switch back to Russian and wait for «Сохранено ✓» at the top.",
           "Leave the article, open it again and look at all three languages.",
           "Without filling in Estonian, press «Опубликовать».",
           "In «Рассылка» press «+ Письмо», type a subject in Russian and switch to EN."
         ],
         "expect": [
           "In English the title and lead are empty: the Russian «test» does not carry over.",
-          "Each language keeps its own text — after «Сохранить» and reopening too.",
+          "Each language keeps its own text — after reopening too.",
           "English did not become «test»; Estonian is still empty.",
-          "Until saved, a warm «Есть несохранённые изменения» notice stands above the article.",
-          "With Estonian empty the panel asks once: an Estonian reader will see Russian.",
+          "The article saves itself: a second after typing, «Сохранено ✓» at the top.",
+          "With Estonian empty, «Опубликовать без перевода?» asks: Estonians see Russian.",
           "In the newsletter the EN subject is empty; the Russian one stays on RU."
         ],
         "why": "Text that vanishes when you switch language puts you off blogging."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T09:57:03.616Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "blog-delete",
@@ -7268,39 +7270,90 @@
       "title": "Удалить статью",
       "steps": [
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
-        "Написать заголовок «Проверка удаления» и пару слов текста, сохранить черновик.",
-        "Нажать «Удалить статью», прочитать вопрос и подтвердить «Да, удалить».",
-        "Посмотреть список статей.",
-        "Завести ещё одну статью с тем же заголовком «Проверка удаления» и сохранить."
+        "Написать заголовок «Проверка удаления» и пару слов, подождать «Сохранено ✓».",
+        "Нажать «⋯» → «Удалить статью», прочитать вопрос и нажать «Удалить».",
+        "Сразу нажать «Вернуть» на тёмной плашке внизу.",
+        "Удалить статью ещё раз и подождать, пока плашка уйдёт; посмотреть список.",
+        "Завести ещё одну статью с тем же заголовком «Проверка удаления»."
       ],
       "expect": [
-        "Вопрос говорит, что статья исчезнет из списка и из магазина и вернуть её будет нельзя.",
-        "После «Да, удалить» панель возвращает к списку и пишет «Статья удалена ✓».",
-        "Удалённой статьи в списке больше нет — ни как черновика, ни как-либо ещё.",
+        "Вопрос «Удалить статью?»: она исчезнет из блога на всех трёх языках.",
+        "После «Удалить» статьи нет в списке, внизу «Статья удалена» с «Вернуть».",
+        "«Вернуть» возвращает статью в список и открывает её снова.",
+        "После второго раза и ухода плашки статьи нет — ни как черновика.",
         "Новая статья с тем же заголовком заводится и получает свой адрес, а не чужой."
       ],
       "why": "Раньше «Удалить» просто переводило статью в черновики: она оставалась в списке навсегда, и удалить её было нельзя вообще ничем. Чужой адрес у новой статьи — это старая ссылка, которая открывает не тот текст.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-18T17:40:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z",
       "en": {
         "title": "Deleting an article",
         "steps": [
           "Open «Ещё» → «Блог» and press «+ Статья».",
-          "Write the title «Проверка удаления» and a couple of words, save the draft.",
-          "Press «Удалить статью», read the question and confirm with «Да, удалить».",
-          "Look at the list of articles.",
-          "Create another article with the same title «Проверка удаления» and save it."
+          "Write the title «Проверка удаления» and a couple of words, wait for «Сохранено ✓».",
+          "Press «⋯» → «Удалить статью», read the question and press «Удалить».",
+          "Straight away press «Вернуть» on the dark toast at the bottom.",
+          "Delete the article again and wait until the toast is gone; look at the list.",
+          "Create another article with the same title «Проверка удаления»."
         ],
         "expect": [
-          "The question says the article leaves the list and the shop and cannot be brought back.",
-          "After «Да, удалить» the panel returns to the list and says «Статья удалена ✓».",
-          "The deleted article has gone from the list — not even as a draft.",
+          "The question «Удалить статью?»: it leaves the blog in all three languages.",
+          "After «Удалить» the article is gone from the list; «Статья удалена» with «Вернуть».",
+          "«Вернуть» brings the article back to the list and opens it again.",
+          "After the second delete and the toast gone, no article — not even a draft.",
           "The new article of the same title gets its own address, not the old one."
         ],
         "why": "«Удалить» used to mean «back to drafts»: the article stayed in the list for ever and nothing could remove it. An address handed on to a new article is an old link opening the wrong text."
       }
+    },
+    {
+      "id": "blog-published-autosave",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Опубликованная статья сохраняется сама",
+      "steps": [
+        "«Ещё» → «Блог», открыть опубликованную статью.",
+        "Поправить слово в тексте и подождать «Сохранено ✓» вверху.",
+        "Открыть эту статью в магазине и обновить страницу.",
+        "В «Адрес, автор, теги и Google» поменять адрес статьи и нажать мимо поля.",
+        "В «✨ Помощник напишет статью» нажать «Перевести на ET и EN».",
+        "«⋯» → «Снять с публикации», потом «Вернуть» на плашке."
+      ],
+      "expect": [
+        "Поправленное слово видно в магазине, «Сохранить» нажимать не нужно.",
+        "Новый адрес не сохраняется сам: окно «Поменять адрес статьи?».",
+        "«Не надо» оставляет прежний адрес; старые ссылки работают.",
+        "Перед переводом окно «Переписать опубликованную статью?».",
+        "«Снять с публикации» убирает статью из магазина; «Вернуть» публикует снова."
+      ],
+      "why": "Опубликованная статья сохраняется прямо в магазин, поэтому смена адреса и текст от помощника сначала спрашивают: старая ссылка перестаёт открываться, а переписанный текст сразу видят покупатели.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "A published article saves itself",
+        "steps": [
+          "«Ещё» → «Блог», open a published article.",
+          "Change a word in the text and wait for «Сохранено ✓» at the top.",
+          "Open the article in the shop and reload the page.",
+          "In «Адрес, автор, теги и Google» change the article's address and tap outside the field.",
+          "In «✨ Помощник напишет статью» press «Перевести на ET и EN».",
+          "«⋯» → «Снять с публикации», then «Вернуть» on the toast."
+        ],
+        "expect": [
+          "The changed word shows in the shop; nothing had to be pressed.",
+          "A new address does not save by itself: «Поменять адрес статьи?» asks.",
+          "«Не надо» keeps the old address; old links still work.",
+          "Before translating, «Переписать опубликованную статью?» asks.",
+          "«Снять с публикации» takes it out of the shop; «Вернуть» publishes it again."
+        ],
+        "why": "A published article saves straight into the shop, so a new address and the assistant's text ask first: an old link stops opening, and rewritten text is seen by customers at once."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "people-list",
@@ -7753,7 +7806,7 @@
       "lang": "RU",
       "title": "План и целая статья от помощника",
       "steps": [
-        "«Блог» → «+ Статья».",
+        "«Блог» → «+ Статья», открыть «✨ Помощник напишет статью».",
         "Вписать тему и нажать «Только план по теме».",
         "Стереть и нажать «Написать статью целиком».",
         "Прочитать, что получилось."
@@ -7769,7 +7822,7 @@
       "en": {
         "title": "An outline and a whole article from the assistant",
         "steps": [
-          "«Блог» → «+ Статья».",
+          "«Блог» → «+ Статья», open «✨ Помощник напишет статью».",
           "Type a subject and press «Только план по теме» — outline only.",
           "Clear it and press «Написать статью целиком» — the whole article.",
           "Read what came out."
@@ -7780,7 +7833,9 @@
           "The last sentence is finished, not cut off."
         ],
         "why": "An article that stops mid-sentence makes the shop look abandoned."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "ai-blog-cards",
@@ -7790,7 +7845,7 @@
       "lang": "RU",
       "title": "Помощник сам ставит товары в статью",
       "steps": [
-        "«Блог» → «+ Статья».",
+        "«Блог» → «+ Статья», открыть «✨ Помощник напишет статью».",
         "Вписать тему про уход за волосами и нажать «Написать статью целиком».",
         "Дождаться готового текста и пролистать его.",
         "Нажать на карточку товара внутри текста.",
@@ -7802,7 +7857,7 @@
         "Карточек нет в заголовках и списках, две подряд не стоят.",
         "У карточки фотография, название и цена; она открывает страницу товара.",
         "Все товары в наличии и показаны в магазине.",
-        "Удалённая карточка исчезает, панель пишет про несохранённые изменения."
+        "Удалённая карточка исчезает, через секунду вверху «Сохранено ✓»."
       ],
       "why": "Раньше каждую карточку приходилось искать и вставлять руками кнопкой «Товар».",
       "risk": "med",
@@ -7810,7 +7865,7 @@
       "en": {
         "title": "The assistant places products in the article itself",
         "steps": [
-          "«Блог» → «+ Статья».",
+          "«Блог» → «+ Статья», open «✨ Помощник напишет статью».",
           "Type a hair-care topic and press «Написать статью целиком».",
           "Wait for the text and scroll through it.",
           "Tap a product card inside the text.",
@@ -7822,10 +7877,12 @@
           "No card sits inside a heading or a list, never two in a row.",
           "A card has a photo, the name and the price; it opens the product page.",
           "Every product is in stock and shown in the shop.",
-          "A deleted card disappears; the panel notes unsaved changes."
+          "A deleted card disappears; a second later «Сохранено ✓» at the top."
         ],
         "why": "Every card used to be hunted down and inserted by hand with the «Товар» button."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "ai-blog-translate",
@@ -7836,9 +7893,9 @@
       "title": "Статья от помощника: своя тема и перевод с товаром",
       "steps": [
         "В чате помощника написать «напиши статью про cool vibes» и подтвердить.",
-        "В открывшейся статье посмотреть на поле «Тема статьи» в карточке «Помощник».",
+        "В открывшейся статье посмотреть на поле «Тема статьи» в «✨ Помощник напишет статью».",
         "Вписать туда «летний образ» и нажать «Написать статью целиком».",
-        "В статье с карточкой товара нажать «Перевести на ET и EN».",
+        "В статье с карточкой товара нажать там же «Перевести на ET и EN».",
         "Открыть эстонский и найти в тексте этот товар.",
         "Опубликовать и открыть эстонскую статью в магазине."
       ],
@@ -7856,11 +7913,11 @@
       "en": {
         "title": "An assistant's article: your own topic, and a translation with a product",
         "steps": [
-          "In the assistant's chat write «напиши статью про cool vibes» (an article about cool vibes) and confirm.",
-          "In the article that opens, look at the «Тема статьи» (topic) box in the «Помощник» card.",
-          "Type «летний образ» (a summer look) there and press «Написать статью целиком».",
-          "In an article with a product card press «Перевести на ET и EN».",
-          "Switch to Estonian and find that product in the text.",
+          "In the assistant chat type «напиши статью про cool vibes» and confirm.",
+          "In the article that opens, look at the «Тема статьи» (topic) field in «✨ Помощник напишет статью».",
+          "Type «летний образ» there and press «Написать статью целиком».",
+          "In an article with a product card press «Перевести на ET и EN» in the same place.",
+          "Open the Estonian version and find that product in the text.",
           "Publish and open the Estonian article in the shop."
         ],
         "expect": [
@@ -7874,7 +7931,7 @@
         "why": "A translation that lost its product links turns a selling article into just text."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T12:16:57.240Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "ai-blog-photo",
@@ -8228,6 +8285,8 @@
       ],
       "expect": [
         "При смене периода цифры меняются.",
+        "Под каждым числом — сравнение словами: «к прошлой неделе», «к прошлому месяцу».",
+        "Четвёртое число называется «Покупают» — из 100 зашедших.",
         "Выручка за сегодня совпала с вашей суммой.",
         "Один оплаченный заказ посчитан один раз, а не дважды."
       ],
@@ -8242,12 +8301,16 @@
           "Add up today's paid orders and compare with today's revenue."
         ],
         "expect": [
-          "The numbers change when you switch the period.",
-          "Today's revenue matches the total you added up.",
+          "The figures change with the period.",
+          "Under each number a comparison in words: vs. the week before, the month before.",
+          "The fourth number is called «Покупают» — out of 100 visitors.",
+          "Today's revenue matches your own sum.",
           "One paid order is counted once, not twice."
         ],
         "why": "A sale counted three times makes you order three times too much."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "stats-search",
@@ -8255,10 +8318,10 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "«Искали, но не нашли»",
+      "title": "«Что искали и не нашли»",
       "steps": [
         "В магазине поискать «холодильник».",
-        "Открыть «Аналитика» и найти список «Искали, но не нашли».",
+        "Открыть «Аналитика» → «Ещё цифры» → «Что искали и не нашли».",
         "Поискать в магазине «перхоть» и вернуться к списку."
       ],
       "expect": [
@@ -8269,18 +8332,20 @@
       "risk": "low",
       "writes": false,
       "en": {
-        "title": "«Искали, но не нашли»",
+        "title": "«Что искали и не нашли» (searched, not found)",
         "steps": [
-          "In the shop search for «холодильник» — a fridge.",
-          "Open «Аналитика» and find the «Искали, но не нашли» list.",
-          "Search the shop for «перхоть» and come back to the list."
+          "In the shop search for «холодильник» (fridge).",
+          "Open «Аналитика» → «Ещё цифры» → «Что искали и не нашли».",
+          "Search the shop for «перхоть» (dandruff) and come back to the list."
         ],
         "expect": [
           "«Холодильник» is in the list.",
           "«Перхоть» is not — that search found products."
         ],
         "why": "If everything lands in this list, reading it is pointless."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "stats-google",
@@ -8290,7 +8355,7 @@
       "lang": "RU",
       "title": "«Магазин в поиске Google»",
       "steps": [
-        "«Ещё» → «Аналитика», пролистать вниз до Google.",
+        "«Ещё» → «Аналитика» → «Ещё цифры», открыть «Магазин в поиске Google».",
         "Прочитать верхнюю фразу и четыре числа под ней.",
         "Посмотреть список слов, которые люди искали в Google."
       ],
@@ -8299,7 +8364,7 @@
         "Под ней четыре числа, у каждого своя понятная подпись.",
         "Ниже — слова, которые люди печатали в Google.",
         "Или вместо всего этого — честная надпись, что Search Console не подключён.",
-        "Тогда это работа для Дима, а не поломка."
+        "Тогда там же кнопка «Открыть «Подключения»»: это работа для Дима."
       ],
       "why": "Без этих чисел работа над текстами товаров делается вслепую.",
       "risk": "low",
@@ -8307,19 +8372,60 @@
       "en": {
         "title": "The shop in Google search",
         "steps": [
-          "«Ещё» → «Аналитика», scroll down to the Google part.",
-          "Read the top sentence and the four numbers under it.",
-          "Look at the list of words people searched Google for."
+          "«Ещё» → «Аналитика» → «Ещё цифры», open «Магазин в поиске Google».",
+          "Read the sentence at the top and the four numbers under it.",
+          "Look at the list of words people searched for in Google."
         ],
         "expect": [
-          "The top sentence says where the shop sits in Google.",
-          "Four numbers sit under it, each with a plain caption.",
-          "Below them, the words people typed into Google.",
-          "Or an honest line saying Search Console is not connected.",
-          "That is a job for Dim, not a fault."
+          "The top sentence says where the shop ranks in Google.",
+          "Under it four numbers, each with its own plain caption.",
+          "Below — the words people typed into Google.",
+          "Or, instead of all that, an honest note that Search Console is not connected.",
+          "Then an «Открыть «Подключения»» button right there: that is Dim's job."
         ],
         "why": "Without these numbers, work on product texts is done blind."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T12:34:46.779Z"
+    },
+    {
+      "id": "stats-cart-returns",
+      "area": "reports",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "«Вернулись по письму»",
+      "steps": [
+        "В магазине войти по коду, положить товар в корзину и уйти.",
+        "Через три часа (или «Маркетинг» → «Письма» → «Запустить сейчас») дождаться письма о корзине.",
+        "Из письма вернуться в магазин и оформить заказ.",
+        "«Аналитика» → «Ещё цифры» → «Корзины, подарочные карты и чат»."
+      ],
+      "expect": [
+        "«Вернулись по письму» выросло на один.",
+        "Заказ без письма о корзине это число не меняет.",
+        "Число считается за выбранный период: «Сегодня», «7 дней», «30 дней»."
+      ],
+      "why": "Письмо о брошенной корзине тратит суточный лимит писем; это число показывает, приводит ли оно покупателей обратно.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "«Вернулись по письму» (came back from the letter)",
+        "steps": [
+          "In the shop sign in with a code, put a product in the basket and leave.",
+          "After three hours (or «Маркетинг» → «Письма» → «Запустить сейчас») wait for the basket letter.",
+          "Come back to the shop from the letter and place the order.",
+          "«Аналитика» → «Ещё цифры» → «Корзины, подарочные карты и чат»."
+        ],
+        "expect": [
+          "«Вернулись по письму» went up by one.",
+          "An order with no basket letter does not change that number.",
+          "The number counts the chosen period: today, 7 days, 30 days."
+        ],
+        "why": "The basket letter spends the daily letter allowance; this number shows whether it brings buyers back."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "report-accountant",
@@ -8542,16 +8648,16 @@
       "title": "«Подключения»",
       "steps": [
         "«Ещё» → «Подключения».",
-        "Прочитать каждую строку и цвет кружка слева.",
-        "Сверить с тем, что вы уже проверяли сами."
+        "Прочитать карточки сверху, потом открыть строку «Работает».",
+        "Сверить с тем, что вы уже проверяли сами, и нажать «Проверить ещё раз»."
       ],
       "expect": [
+        "Сверху «N требуют внимания» или «Всё работает ✓».",
+        "У каждой красной карточки одна кнопка: «Написать Диму», «Как включить» или «Проверить оплату».",
+        "Всё рабочее свёрнуто в «Работает · N»; помощник без ключа там, серый.",
         "Под каждой строкой — понятная фраза, а не код ошибки.",
-        "Красным горит только то, что действительно не работает.",
-        "Строка про письма говорит, дошёл ли тестовый лист.",
-        "У каждой красной строки есть кнопка «Написать Диму».",
-        "Строка «Ключи Montonio» зелёная; если нет — названо, какой из двух ключей не подошёл.",
-        "Есть строки про банковские ссылки, перевозчиков и посылки; строка про посылки печатает нужный адрес."
+        "«Ключи Montonio» зелёная; если нет — названо, какой из двух ключей не подошёл.",
+        "Есть строки про банковские ссылки, перевозчиков и посылки; строка про посылки печатает адрес."
       ],
       "why": "Зелёный кружок напротив неработающей оплаты откроет магазин неготовым.",
       "risk": "med",
@@ -8559,22 +8665,22 @@
       "en": {
         "title": "«Подключения»",
         "steps": [
-          "«Ещё» → «Подключения» — connections.",
-          "Read every line and the colour of its dot.",
-          "Check them against what you have already tested yourself."
+          "«Ещё» → «Подключения».",
+          "Read the cards at the top, then open the «Работает» row.",
+          "Compare with what you have already checked yourself, and press «Проверить ещё раз»."
         ],
         "expect": [
-          "Under each line is a plain sentence, not an error code.",
-          "Only what genuinely does not work shows red.",
-          "The mail line says whether a test letter got through.",
-          "Every red line carries a «Написать Диму» button.",
-          "The «Ключи Montonio» row is green; if not, it names which key was refused.",
-          "There are rows for bank links, carriers and parcels; the parcel row prints its address."
+          "At the top «N требуют внимания» (need attention) or «Всё работает ✓».",
+          "Every red card has one button: «Написать Диму», «Как включить» or «Проверить оплату».",
+          "Everything working is folded into «Работает · N»; the assistant with no key is there, grey.",
+          "Each row has a plain sentence under it, not an error code.",
+          "«Ключи Montonio» is green; if not, it names which of the two keys failed.",
+          "Rows for bank links, carriers and parcels; the parcels row prints the address."
         ],
         "why": "A green dot beside broken payment opens the shop unready."
       },
       "mark": "redo",
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
       "id": "live-banks-country",
