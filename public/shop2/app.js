@@ -46075,7 +46075,22 @@
      not change under the shopper when this script takes over a static page.
      `alt` is brand + name + price, the rung between the full sentence and the
      bare «— REMPIRE» (src/lib/seo-head.mjs fitTitle(), 07.09.2026). */
+  /* The site's name once: a title that already ends in it («… — REMPIRE»
+     from a translation, «| Rempire» typed by hand) loses that tail before one
+     is appended — the Estonian article's tab read «… — REMPIRE — REMPIRE»
+     (staging, 25.09.2026). Same two lines as src/lib/seo-head.mjs. */
+  function dropBrand(s) {
+    return String(s == null ? "" : s).replace(/(?:\s*[—–|:·-]\s*rempire(?:\s*shop)?(?:\.com)?)+\s*$/i, "").trim();
+  }
+  function brandOnce(s) {
+    if (!s) return s;
+    var bare = dropBrand(s);
+    return bare !== String(s).trim() ? bare + " — REMPIRE" : s;
+  }
   function fitTitle(core, full, alt) {
+    core = dropBrand(core);
+    full = brandOnce(full);
+    alt = brandOnce(alt);
     if (full && full.length <= 60) return full;
     if (alt && alt.length <= 60) return alt;
     if (core.length + 10 <= 60) return core + " — REMPIRE";

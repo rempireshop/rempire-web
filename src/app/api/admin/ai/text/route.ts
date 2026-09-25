@@ -67,6 +67,9 @@ import {
 import { extractJsonObject } from "@/lib/ai-json";
 import { catalogueRow, relevantProducts } from "@/lib/catalogue-slice";
 import { sanitizeHtml } from "@/lib/blog";
+/* A Google title never carries the shop's name: every page appends it itself
+   (fitTitle), so one the model wrote in anyway would stand there twice. */
+import { dropBrand } from "@/lib/seo-head.mjs";
 import { placeArticleCards, readCardPicks, type CardCandidate, type CardPick } from "@/lib/blog-cards";
 
 export const runtime = "nodejs";
@@ -164,7 +167,7 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
        gets the word the storefront itself uses for it — the same table the
        prompt was built from (seoProductName in src/lib/ai-prompts.ts). */
     const title = str(p.title, 70);
-    return { text: { title: seoProductName(title, lang).slice(0, 70), description: str(p.description, 170) } };
+    return { text: { title: dropBrand(seoProductName(title, lang)).slice(0, 70), description: str(p.description, 170) } };
   }
   if (task === "blog_outline") {
     const h2 = Array.isArray(p.h2) ? p.h2.map((h) => str(h, 80)).filter(Boolean).slice(0, 8) : [];
@@ -172,7 +175,7 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
       text: {
         title: str(p.title, 90),
         h2,
-        meta: { title: str(p.metaTitle, 70), description: str(p.metaDescription, 170) },
+        meta: { title: dropBrand(str(p.metaTitle, 70)), description: str(p.metaDescription, 170) },
       },
     };
   }
@@ -192,7 +195,7 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
       // was told the tags it may use, and this is what makes that true
       body: sanitizeHtml(str(p.body, 20_000)),
       tags,
-      seo: { title: str(p.seoTitle, 70), description: str(p.seoDescription ?? p.seoDesc, 170) },
+      seo: { title: dropBrand(str(p.seoTitle, 70)), description: str(p.seoDescription ?? p.seoDesc, 170) },
     };
     if (task === "post_full") {
       // ids, or {id, after} — whichever shape the model chose; placed and filtered below

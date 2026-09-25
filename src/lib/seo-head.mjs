@@ -178,7 +178,24 @@ export function clip(s, max) {
    name beside the title itself, from og:site_name and the WebSite block, so
    those ten characters bought a word the reader already had; a price is the
    one thing a shopping result can say that its neighbours often do not. */
+/* The site's name, once. A title written by the model or by hand can already
+   end in it — «Suvine välimus: hooldus ja stiil — REMPIRE» came back from an
+   article's Estonian translation — and every caller then appends its own
+   « — REMPIRE»: the Estonian page's <title> read «… — REMPIRE — REMPIRE»
+   (verification pass on staging, 25.09.2026). So a trailing brand, whatever
+   the separator — «— REMPIRE», «| Rempire», «- rempireshop.com» — is taken
+   off the core, and a rung that ends in it keeps exactly one, in the house
+   form. A brand inside the sentence («купить в Rempire · 9 €») or in front of
+   it («REMPIRE — магазин косметики») is not a tail and stays. app.js's
+   fitTitle() carries the same two lines. */
+const BRAND_TAIL = /(?:\s*[—–|:·-]\s*rempire(?:\s*shop)?(?:\.com)?)+\s*$/i;
+export const dropBrand = s => String(s == null ? "" : s).replace(BRAND_TAIL, "").trim();
+const brandOnce = s => (s && BRAND_TAIL.test(s) ? dropBrand(s) + " — REMPIRE" : s);
+
 export function fitTitle(core, full, alt) {
+  core = dropBrand(core);
+  full = brandOnce(full);
+  alt = brandOnce(alt);
   if (full && full.length <= 60) return full;
   if (alt && alt.length <= 60) return alt;
   if (core.length + 10 <= 60) return core + " — REMPIRE";

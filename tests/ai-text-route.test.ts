@@ -131,7 +131,8 @@ describe("POST /api/admin/ai/text", () => {
     const { POST } = await import("@/app/api/admin/ai/text/route");
     const res = await POST(req({ task: "seo", lang: "RU", input: { name: "Touchable" } }, { cookie: admin }));
     const body = await res.json();
-    expect(body.text).toEqual({ title: "Touchable — Rempire", description: "Купите Touchable в Таллинне." });
+    // the shop's name is every page's own suffix (fitTitle) — a title that carries it would show it twice
+    expect(body.text).toEqual({ title: "Touchable", description: "Купите Touchable в Таллинне." });
   });
 
   it("seo for a post: sends the article's own text, asks for the language wanted, shapes the same {text:{title,description}}", async () => {
@@ -231,7 +232,7 @@ describe("POST /api/admin/ai/text", () => {
     const body = await res.json();
     expect(body.text.title).toBe("Уход за бородой зимой");
     expect(body.text.h2).toHaveLength(6);
-    expect(body.text.meta.title).toBe("Уход за бородой зимой | Rempire");
+    expect(body.text.meta.title).toBe("Уход за бородой зимой");   // the page adds the name itself (fitTitle)
   });
 
   it("reply: the response text starts with the model's reply and always ends with the shop signature, never the model's own", async () => {
