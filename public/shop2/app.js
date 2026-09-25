@@ -41103,8 +41103,28 @@
      it and closes the topmost layer instead of leaving; if something is still
      open underneath, the entry is parked again, so Back walks out layer by
      layer. Closing with a button («← Заказы», «Отмена») spends the parked
-     entry itself, so the next Back is never a press that does nothing. */
+     entry itself, so the next Back is never a press that does nothing.
+
+     …and ONE entry was the flaw. Dim, 25.09.2026, on /test «panel-back»:
+     «Обзор → Заказы → Клиенты — IS OK. «Клиенты» → «Заказы» throws out.»
+     Re-parking meant a pushState() from inside the popstate handler, right
+     after a press of Back — and Chrome's history-manipulation intervention
+     stops honouring earlier taps for new entries after any same-document
+     back/forward, until the next tap. An entry made then marks EVERY entry
+     of the page «skip on the Back button», so the next press jumped over the
+     whole panel: out to the shop in a tab, out of the app on the home-screen
+     panel (docs/history_manipulation_intervention.md in Chromium; reproduced
+     in desktop Chrome with a one-button page). The suite never saw it:
+     Playwright's goBack() walks the list by index and skips nothing.
+
+     So now there is one entry per press of Back that is due — every section
+     on the trail, every card, sheet and question — each parked by the tap
+     that opened it (admSteps / admSyncHistory), and Back only ever spends
+     them. After a Back nothing is parked until the owner taps again
+     (ADM_HOLD): a card that opens by itself then simply has no entry, which
+     is what it would have had if Chrome had been allowed to skip it. */
   var ADM_POP = false;
+  var ADM_HOLD = false;   // a Back (or our own spend) came since the last tap: park nothing
   /* ---------- …and «Назад» at the top level of it -------------------------
      Renat, 12.09.2026: cards close the way they should now, but the floor
      they stand on does not. From «Клиенты» or «Настройки» one press left the
@@ -41144,15 +41164,18 @@
     ADM_SEEN = admSection();
     window.scrollTo({ top: 0 });
   }
-  /** Is an entry parked right now? Asked of the history stack itself, because
-      a flag beside it and the stack drifted apart and every drift ended the
-      same way — one «Назад» too many, out of the panel. The stack loses the
-      entry without telling anybody (navTo() and routeHome() replaceState over
-      it), and the flag used to be set from a place that did not always run.
-      history.state is the one answer that cannot be stale. */
-  function admParked() {
-    var s = history.state;
-    return !!(s && s.adm);
+  /** How many parked entries stand under the one the browser is on — the
+      entry's own `adm`, 1 for the first one parked above the panel's floor.
+      Asked of the history stack itself, because a flag beside it and the
+      stack drifted apart and every drift ended the same way — one «Назад» too
+      many, out of the panel. The stack loses an entry without telling anybody
+      (navTo() and routeHome() replaceState over it), and the flag used to be
+      set from a place that did not always run. history.state is the one
+      answer that cannot be stale. An entry parked before 25.09.2026 says
+      `adm: 1`, which reads the same. */
+  function admDepth(st) {
+    var n = st ? Number(st.adm) : 0;
+    return n > 0 ? Math.floor(n) : 0;
   }
   /** What is open over the panel right now, bottom layer first.
 
@@ -41172,23 +41195,31 @@
     /* The floor first, so it is the last thing Back takes: a card opened
        inside «Клиенты» closes before «Клиенты» itself gives way to «Обзор». */
     if (ADM_TRAIL.length) l.push("section");
-    if (S.adminEdit) l.push("edit");
-    else if (S.adminOrder) l.push("order");
-    else if (S.admCustOpen) l.push("customer");
-    else if (S.mailOpen) l.push("mail");
-    else if (S.admSetPage) l.push("setpage");
-    /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
-       question 6 was about cards, not about which section they belong to. */
-    else if (S.adminBlogEdit) l.push("blog");
-    /* …and the two sub-screens that were missing here, so the phone's Back
+    /* The cards, EVERY one that is open, the one Back closes first on top:
+       the product editor, then an order (drawn over a customer's card when it
+       was opened from one — Dim, 10.09.2026), the customer, a letter, a
+       settings page, an article, a newsletter, the stock history. Back takes
+       them one at a time in exactly that order, as it always has; they are
+       all listed now rather than only the top one because each of them is a
+       press of Back, and since 25.09.2026 each press has an entry of its own
+       parked for it (admSteps). */
+    /* …the two sub-screens that were missing here, so the phone's Back
        walked straight past them to the section before (Dim, 24.09.2026:
        «Using phone / back button should also go back from "История приёмок и
        продаж" currently it goes back to dashboard»): the stock history under
        «Склад» and a letter opened under «Рассылка». Each counts only on its
        own tab — neither is closed by a move to another section, and a layer
        nobody can see must not eat the Back meant for the section. */
-    else if (S.newsEdit && S.adminTab === "news") l.push("news");
-    else if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
+    if (S.stockMovesOpen && S.adminTab === "stock") l.push("moves");
+    if (S.newsEdit && S.adminTab === "news") l.push("news");
+    /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
+       question 6 was about cards, not about which section they belong to. */
+    if (S.adminBlogEdit) l.push("blog");
+    if (S.admSetPage) l.push("setpage");
+    if (S.mailOpen) l.push("mail");
+    if (S.admCustOpen) l.push("customer");
+    if (S.adminOrder) l.push("order");
+    if (S.adminEdit) l.push("edit");
     if (S.admMore) l.push("more");
     /* «Помощник» on a phone: a 75 % sheet with a scrim over whatever is open.
        Back used to walk the section trail UNDER it — the owner pressed Back
@@ -41205,6 +41236,24 @@
        browser, and there is nothing underneath to go back to. */
     if (S.scanOpen && !S.scanApp) l.push("scan");
     return l;
+  }
+  /* The editors that can answer Back with a question instead of closing —
+     «Правки не сохранены…» (admCloseTop). */
+  var ADM_ASKS = { edit: 1, blog: 1, mail: 1, news: 1 };
+  /** How many presses of Back the panel owes before it may leave: one per
+      section on the trail, one per card, sheet, question and scanner — and
+      two for an editor, whose first press may be spent on «Правки не
+      сохранены…» while the editor stays. That spare is parked with the editor
+      because nothing may be parked in answer to the Back that asks. Unused,
+      it is spent quietly when the editor closes. Parked entries are counted
+      against this (admSyncHistory). */
+  function admSteps() {
+    var l = admLayers(), n = 0;
+    for (var i = 0; i < l.length; i++) {
+      if (l[i] === "section") n += ADM_TRAIL.length;
+      else n += ADM_ASKS[l[i]] ? 2 : 1;
+    }
+    return n;
   }
   /** Closes the topmost layer. False when there was nothing to close. */
   function admCloseTop() {
@@ -41334,52 +41383,80 @@
     if (go.setpage && tab === "setup") S.admSetPage = go.setpage;
     window.scrollTo({ top: 0 }); render();
   }
-  /** One parked entry while anything is open, none while nothing is. Called
-      from every render(), so no opener has to remember to call it. */
+  /** As many parked entries as there are presses of Back due (admSteps), none
+      while nothing is open. Called from every render(), so no opener has to
+      remember to call it. */
   function admSyncHistory() {
     /* Where the owner is, before anything is decided about the stack — a
        section he has just moved to is a layer, and the lines below are the
        only ones that park and spend entries for layers. */
     admTrailSync();
-    /* A history.back() of our own is still on its way. history.back() is
-       asynchronous: until its popstate arrives the stack has not moved, so
-       everything below would read the entry we are already spending and spend
-       a SECOND one — which is the browser leaving the panel. Nothing is
-       decided in this window; the popstate that ends it runs this again, and
-       whatever opened or closed meanwhile is settled then. */
+    /* A history.go() of our own is still on its way. It is asynchronous:
+       until its popstate arrives the stack has not moved, so everything below
+       would read the entries we are already spending and spend them TWICE —
+       which is the browser leaving the panel. Nothing is decided in this
+       window; the popstate that ends it runs this again, and whatever opened
+       or closed meanwhile is settled then. */
     if (ADM_POP) return;
-    /* admLayers() is empty off the admin screen, so leaving the panel
-       («Открыть магазин», a product link) needs no case of its own: the entry
-       parked for the card sits BEHIND the one that navigation just pushed, and
-       neither side of this comparison names it any more. It is not spent —
-       Back simply returns to the panel, card and all, which is what Back
-       should do from the shop. */
-    var open = admLayers().length > 0;
-    if (open === admParked()) return;
-    if (open) {
+    /* admSteps() is 0 off the admin screen, so leaving the panel («Открыть
+       магазин», a product link) needs no case of its own: the entries parked
+       for it sit BEHIND the one that navigation just pushed, and neither side
+       of this comparison names them any more. They are not spent — Back
+       simply returns to the panel, card and all, which is what Back should do
+       from the shop. */
+    var want = admSteps(), have = admDepth(history.state);
+    if (want === have) return;
+    if (want > have) {
+      /* Only from a tap. After a Back Chrome would take the entry as one made
+         behind the owner's back and skip the whole panel on the next press;
+         the tap that ends the hold (admUnhold) parks what is owed. */
+      if (ADM_HOLD) return;
       stamp();
-      try { history.pushState({ y: window.scrollY, shown: S.shown, adm: 1 }, "", here()); } catch (e) {}
+      for (var d = have + 1; d <= want; d++) {
+        try { history.pushState({ y: window.scrollY, shown: S.shown, adm: d }, "", here()); } catch (e) { return; }
+      }
       return;
     }
-    // closed with a button: spend the entry we parked, quietly
+    // closed with a button, or a trail cut short: spend what is no longer due, quietly
     ADM_POP = true;
-    try { history.back(); } catch (e) { ADM_POP = false; }
+    try { history.go(want - have); } catch (e) { ADM_POP = false; }
   }
+  /** A tap or a key — what the browser counts as the owner's own hand — ends
+      the hold a Back put on parking, and pays back whatever the panel owes. The
+      tap's own handler usually renders and settles it first; this is for the
+      tap that opens nothing (a scroll's end is not a tap: the pointer was
+      cancelled). Escape is no activation to the browser, so it keeps the hold. */
+  function admUnhold(e) {
+    if (!ADM_HOLD) return;
+    if (e.type === "keydown" && (e.key === "Escape" || e.key === "Esc")) return;
+    if (e.type === "pointerdown" && e.pointerType !== "mouse") return;
+    if (e.type === "pointerup" && e.pointerType === "mouse") return;
+    ADM_HOLD = false;
+    setTimeout(admSyncHistory, 0);
+  }
+  window.addEventListener("pointerdown", admUnhold, true);
+  window.addEventListener("pointerup", admUnhold, true);
+  window.addEventListener("keydown", admUnhold, true);
+  window.addEventListener("click", admUnhold, true);
 
   window.addEventListener("popstate", function (e) {
     var st = e.state || {};
-    /* the entry the panel parked, spent by admSyncHistory() itself after a
+    /* Any move through the history — the owner's Back or our own spend —
+       and Chrome stops honouring the last tap for new entries: nothing is
+       parked until the next one (ADM_HOLD above). */
+    ADM_HOLD = true;
+    /* the entries the panel parked, spent by admSyncHistory() itself after a
        card was closed with a button — nothing moved, nothing to redraw. The
        sync runs again because only now does the stack have its new shape:
-       anything opened or closed while the back() was in flight was left
+       anything opened or closed while the go() was in flight was left
        untouched precisely so it could be decided here, once. */
     if (ADM_POP) { ADM_POP = false; admSyncHistory(); return; }
-    /* …and spent by the owner's own Back. Landing on an entry that is not a
-       parked one while the panel still has something open means this press was
-       aimed at the topmost layer, so close that and stay in the admin (see
-       admLayers above); admCloseTop() answers false everywhere else, including
-       every screen of the shop. */
-    if (!st.adm && admCloseTop()) { render(); return; }
+    /* …and spent by the owner's own Back. Landing below the depth the panel
+       still owes means this press was aimed at the topmost layer, so close
+       that — one layer per press — and stay in the admin (see admLayers
+       above). admSteps() is 0 everywhere else, including every screen of the
+       shop, and so is it on «Обзор» with nothing open: that press leaves. */
+    if (admDepth(st) < admSteps() && admCloseTop()) { render(); return; }
     // the phone's Back off «Мой кабинет» is no blur: send what was typed (acctFlush)
     acctFlush();
     S.histDrawer = !!st.drawer;
@@ -45874,11 +45951,21 @@
      browser has is routeHome(), which wipes the letter's address unread. */
   var resumed = resumeCart();
   routeFromPath();
+  /* A page that opens ON one of the panel's parked entries — a reload, or the
+     phone bringing back a panel it had put to sleep — has lost the trail and
+     the cards those entries were parked for, and the page it opens is
+     «Обзор». The entries under it belong to the page that is gone, so each
+     press of Back would load «Обзор» again and change nothing. They are left
+     at once instead: straight down to the entry the panel was opened on
+     (admDepth / admSyncHistory). */
+  var bootParked = 0;
+  try { bootParked = admDepth(history.state); } catch (e) {}
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */
   try {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     history.replaceState({ y: 0, shown: S.shown }, "", here());
+    if (bootParked && S.screen === "admin") history.go(-bootParked);
   } catch (e) {}
   render();
   trackNav();   // analytics agent: the very first view of this tab's session

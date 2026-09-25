@@ -1583,17 +1583,18 @@
         "Нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
         "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад».",
-        "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется."
+        "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется.",
+        "Ещё раз: «Ещё» → «Клиенты», затем «Заказы»; жать «Назад» подряд, не трогая экран, пока панель не закроется."
       ],
       "expect": [
         "Карточка заказа закрывается, а панель остаётся.",
         "Первое «Назад» убирает вопрос, второе — карточку.",
         "Редактор товара, «Ещё» и «Помощник» закрываются так же; раздел под ними остаётся.",
         "Сканер закрывается, камера гаснет, панель на месте.",
-        "«Назад» возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
+        "Каждое «Назад» подряд возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
         "Ни одно нажатие не проходит впустую."
       ],
-      "why": "Ренат жаловался, что «Назад» иногда выкидывало его из панели в магазин, а обратно приходилось идти через меню.",
+      "why": "Ренат жаловался, что «Назад» иногда выкидывало его из панели в магазин, а обратно приходилось идти через меню. 25.09 Дим: второе «Назад» подряд всё ещё выкидывало — «Клиенты» → «Заказы».",
       "risk": "med",
       "writes": false,
       "en": {
@@ -1605,20 +1606,21 @@
           "Press «Ещё», then back; open «Помощник» and press back again.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
           "Open a product for editing again, close it with «← Товары», then press back.",
-          "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes."
+          "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes.",
+          "Once more: «Ещё» → «Клиенты», then «Заказы»; press back in a row without touching the screen until the panel closes."
         ],
         "expect": [
           "The order card closes and the panel stays.",
           "The first back clears the question, the second the card.",
           "The product editor, «Ещё» and «Помощник» close the same way; the section under them stays.",
           "The scanner closes, the camera goes out, the panel stays.",
-          "Back returns to the previous section; only «Обзор» leaves the panel.",
+          "Each back in a row returns to the previous section; only «Обзор» leaves the panel.",
           "No press does nothing at all."
         ],
-        "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu."
+        "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu. On 25.09 Dim found the second back in a row still threw him out — «Клиенты» → «Заказы»."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:40:29.277Z"
+      "markedAt": "2026-09-25T07:53:58.321Z"
     },
     {
       "id": "panel-overview",
