@@ -257,7 +257,11 @@ describe("«Склад»: the barcode box — a refusal is explained under the b
     p.save("stockean:k", "4750323781389", "input", spec);
     p.save("stockean:k", undefined, "blur", spec);
     await flush();
-    expect(p.SAVE.state, "a refusal is neither «Сохранено ✓» nor «проверьте интернет»").toBe("idle");
+    /* neither «Сохранено ✓» nor «проверьте интернет»: the rust «Не сохранено —
+       проверьте поле» (integration 25.09.2026 — a refused box is not saved, and
+       the header says so while the box stands on the page; here there is no
+       page, so the box counts as shown) */
+    expect(p.SAVE.state, "a refusal is neither «Сохранено ✓» nor «проверьте интернет»").toBe("invalid");
     expect(p.AS["stockean:k"].failed).toBe(false);
     expect(p.AS["stockean:k"].dirty).toBe(false);
     expect(marks.at(-1)).toEqual(["stockean:k", "Этот штрихкод уже привязан к другому товару."]);

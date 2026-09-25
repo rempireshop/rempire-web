@@ -261,7 +261,12 @@ describe("a set that exists saves itself — the whole row, its order kept", () 
     f.cat = "hair"; s.touched("pick");
     await flush();
     expect(s.S.bundleFormErr).toBe("Набор должен стоить дешевле, чем те же товары по отдельности.");
-    expect(s.SAVE.state).toBe("idle");
+    /* not «Сохранено ✓», not «проверьте интернет». Without a page every box
+       counts as shown, so the header is the rust «Не сохранено — проверьте
+       поле» (admSaveEnd, integration 25.09.2026); on the page the set editor
+       has no autosave box of its key — its own line (data-bundleerr) speaks
+       and the header goes quiet. */
+    expect(s.SAVE.state).toBe("invalid");
   });
 });
 

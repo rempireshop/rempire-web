@@ -6330,7 +6330,7 @@
         "В истории строка «правка карточки · ваша причина», без числа справа.",
         "После числа сверху строка «ручная правка» с новым остатком.",
         "Метка у объёма становится «мало», когда остаток не выше порога.",
-        "Букву поле не отправляет: красная рамка и подсказка под полем."
+        "Букву поле не отправляет: красная рамка, подсказка и вверху «Не сохранено — проверьте поле»."
       ],
       "why": "Стёртый порог означает, что товар кончится, а вы об этом не узнаете.",
       "risk": "med",
@@ -6351,12 +6351,12 @@
           "The history shows «правка карточки · your reason», with no number on the right.",
           "After the number the top row reads «ручная правка» with the new stock.",
           "The size's tag turns «мало» when the stock is at or under its threshold.",
-          "The field does not send a letter: a red frame and a hint under it."
+          "A letter is not sent: red frame, hint, and «Не сохранено — проверьте поле» on top."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:17.769Z"
+      "markedAt": "2026-09-25T14:07:04.083Z"
     },
     {
       "id": "stock-history",

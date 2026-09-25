@@ -163,8 +163,10 @@ test.describe("sweep — warehouse", () => {
     const dupMsg = ((await dup.textContent()) || "").trim();
     expect(isRussian(dupMsg), `duplicate EAN message is not Russian — "${dupMsg}"`).toBe(true);
     expect(dupMsg, "the refusal does not say the code belongs to another product").toMatch(/штрихкод|код/i);
-    // the header may say nothing at all after a refusal — it must not say «Сохранено»
-    await expect(page.locator("[data-admsavest]:visible", { hasText: "Сохранено" }), "a refusal claimed «Сохранено ✓»").toHaveCount(0);
+    // the header must not claim «Сохранено ✓» after a refusal: it says the box is not saved
+    await expect(page.locator("[data-admsavest]:visible", { hasText: /Сохранено ✓/ }), "a refusal claimed «Сохранено ✓»").toHaveCount(0);
+    await expect(page.locator("[data-admsavest]:visible", { hasText: "Не сохранено — проверьте поле" }).first(),
+      "the header did not say the refused box is not saved").toBeVisible();
     await assertClean(page, w, "duplicate EAN refused");
 
     // Whatever the shop accepts as a barcode goes out whole; what it does not

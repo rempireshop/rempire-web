@@ -3329,6 +3329,7 @@
          admLangFallback) */
       "Не надо": "Loobu",
       "Не сохранилось — проверьте интернет": "Ei salvestunud — kontrolli internetiühendust",
+      "Не сохранено — проверьте поле": "Salvestamata — kontrolli välja",
       "Подсказка": "Vihje",
       "Язык панели": "Paneeli keel",
       "как русский": "nagu vene keeles",
@@ -6563,6 +6564,7 @@
          confirm's way out, and the English one says it the English way. */
       "Не надо": "Cancel",
       "Не сохранилось — проверьте интернет": "Not saved — check the internet connection",
+      "Не сохранено — проверьте поле": "Not saved — check the field",
       "Подсказка": "Hint",
       "Язык панели": "Panel language",
       "как русский": "as in Russian",
@@ -23282,7 +23284,11 @@
     spec = spec || ADM_AS_SPEC[key];
     if (spec) { f.kind = spec.kind; f.send = spec.send; f.validate = spec.validate || null; }
     if (!f.send) return false;
-    if ((ev === "input" || ev === "change") && value !== f.value) { f.value = value; f.dirty = true; }
+    if ((ev === "input" || ev === "change") && value !== f.value) {
+      f.value = value; f.dirty = true;
+      // a new value not sent yet: «Сохранено ✓» of the last one no longer holds (admSaveEnd)
+      if (ADM_SAVE.state === "saved") admSaveEnd(true);
+    }
     clearTimeout(f.timer); f.timer = 0;
     if (!f.dirty) return false;
     var policy = admAutosavePolicy(f.kind);
@@ -23296,11 +23302,13 @@
   function admAutosaveSend(f, opts) {
     var hint = "";
     try { hint = f.validate ? String(f.validate(f.value) || "") : ""; } catch (e) { hint = ""; }
+    var wasErr = f.err;
     if (hint !== f.err) { f.err = hint; admAutosaveMark(f.key, hint); }
-    if (hint) return false;                          // not sent: it goes once it is right
+    // not sent: it goes once it is right — and the header says it is not saved
+    if (hint) { admSaveEnd(true); return false; }
     if (f.busy) { f.again = true; return true; }     // the write in flight goes first
-    // typed back to what the server already holds: nothing to send
-    if (!f.failed && f.saved !== undefined && f.value === f.saved) { f.dirty = false; return false; }
+    // typed back to what the server already holds: nothing to send (and nothing wrong any more)
+    if (!f.failed && f.saved !== undefined && f.value === f.saved) { f.dirty = false; if (wasErr) admSaveEnd(true); return false; }
     var v = f.value, p;
     f.dirty = false; f.busy = true;
     admSaveBegin();
@@ -23363,7 +23371,7 @@
   }
 
   /* ---------- «Сохраняем… → Сохранено ✓», one status for the panel ---------
-     idle | saving | saved | error, painted IN PLACE into every
+     idle | saving | saved | invalid | error, painted IN PLACE into every
      [data-admsavest] slot — the phone's top bar and the desktop's page header
      both have one — so a write landing never re-renders the form under the
      caret. «Сохранено ✓» fades after ADM_SAVE_SHOWN_MS; an error stays until
@@ -23375,12 +23383,41 @@
      and it is announced when it is written into the slot (admSavePaint); the
      slot the viewport hides (display: none) is not read at all. */
   function admSaveBegin() { ADM_SAVE.busy++; clearTimeout(ADM_SAVE.fade); admSaveSet("saving"); }
-  function admSaveEnd() {
-    ADM_SAVE.busy = Math.max(0, ADM_SAVE.busy - 1);
+  /** A write ended — or, with `settle`, no write ended but what the status
+      stands on did: a box went wrong or right, a value was typed, a render
+      drew or took away a box. «Сохранено ✓» is said of the WHOLE page, so it
+      is never said while any box on it does not pass or was refused
+      (`invalid`: «Не сохранено — проверьте поле», in rust — the same thing
+      the leave question says, «Правки не сохранены»), nor while a value is
+      typed and not sent yet (quiet). Integration of the 1a screens,
+      25.09.2026: a save of one box lit «Сохранено ✓» over a rust price on
+      the product card. A rust box the page no longer shows (its card closed,
+      its row folded) holds nothing up; it comes back with its box. */
+  function admSaveEnd(settle) {
+    if (!settle) ADM_SAVE.busy = Math.max(0, ADM_SAVE.busy - 1);
     if (ADM_SAVE.busy) return;
     if (admSaveFailedN()) { admSaveSet("error"); return; }
-    // a refusal explained under its box (admAutosaveDone): nothing was saved, nothing is broken
-    if (ADM_SAVE.refused) { ADM_SAVE.refused = false; admSaveSet("idle"); return; }
+    var refused = ADM_SAVE.refused, owed = false;
+    ADM_SAVE.refused = false;
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k)) continue;
+      var af = ADM_AS[k];
+      if (af.err) {
+        var ak = String(k).replace(/["\\]/g, "\\$&");
+        if (typeof document === "undefined" ||
+            document.querySelector('[data-ashint="' + ak + '"],[data-autosave="' + ak + '"],[data-asfield="' + ak + '"]')) {
+          admSaveSet("invalid"); return;
+        }
+      }
+      else if (af.dirty) owed = true;
+    }
+    /* a refusal explained under a box that is gone, a value still owed, or a
+       second look with nothing new to report: no claim — «Сохранено ✓» of a
+       moment ago stays to fade only when nothing has changed under it */
+    if (refused || owed || settle) {
+      if (refused || owed || ADM_SAVE.state !== "saved") admSaveSet("idle");
+      return;
+    }
     admSaveSet("saved");
     clearTimeout(ADM_SAVE.fade);
     ADM_SAVE.fade = setTimeout(function () { if (ADM_SAVE.state === "saved") admSaveSet("idle"); }, ADM_SAVE_SHOWN_MS);
@@ -23394,6 +23431,9 @@
     var s = ADM_SAVE.state;
     if (s === "saving") return '<span class="adm-savest__t">Сохраняем…</span>';
     if (s === "saved") return '<span class="adm-savest__t adm-savest__t--ok">Сохранено ✓</span>';
+    /* a box on the page does not pass: rust, and quiet — the box carries
+       aria-invalid and its own line, which is what the owner reads first */
+    if (s === "invalid") return '<span class="adm-savest__t adm-savest__t--err">Не сохранено — проверьте поле</span>';
     if (s === "error") {
       return '<span class="adm-savest__t adm-savest__t--err" role="alert">Не сохранилось — проверьте интернет</span>' +
         '<button class="adm-savest__retry" type="button" data-admsaveretry>Повторить</button>';
@@ -43357,6 +43397,9 @@
     /* …and the ONE dark button pinned above the tab bar (admPinnedHTML): the
        page and the toast make room for it on a phone. */
     document.body.classList.toggle("adm-pinned", S.screen === "admin" && !!bodySlot.querySelector(".adm-pin"));
+    /* …and the save status looked at again now the page is drawn: a rust box
+       this render took away (a card closed) or brought back (admSaveEnd) */
+    if (S.screen === "admin") admSaveEnd(true);
     /* …and the assistant sheet, while it is open on a phone, is sized by
        the visual viewport — the keyboard is what it must keep clear of
        (admVvFollow, beside admBarTouch). Run here because the sheet

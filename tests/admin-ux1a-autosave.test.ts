@@ -60,6 +60,8 @@ type Panel = {
   slotHTML: (cls: string) => string;
   hintHTML: (key: string) => string;
   invalidAttr: (key: string) => string;
+  /** what a render does after drawing: the status looked at again, no write ended */
+  settle: () => void;
   SAVE: { state: string; busy: number };
   S: Record<string, unknown>;
   SRV: Record<string, unknown>;
@@ -69,7 +71,14 @@ type Panel = {
   counter: { renders: number };
 };
 
-function panel(): Panel {
+/** `onPage`: the autosave keys whose box (or hint line) the page still shows — a
+    stand-in `document` that answers querySelector for them. Left out, there is
+    no `document` at all, as in every other test here. */
+function panel(onPage?: Set<string>): Panel {
+  const doc = onPage && {
+    querySelector: (sel: string) => ([...onPage].some((k) => sel.includes(`"${k}"`)) ? {} : null),
+    querySelectorAll: () => [],
+  };
   const S: Record<string, unknown> = { lang: "RU", screen: "admin" };
   const SRV: Record<string, unknown> = { admin: true };
   const paints: string[] = [];
@@ -91,15 +100,16 @@ function panel(): Panel {
     return {
       autosave: admAutosave, spec: admAutosaveSpec, flush: admAutosaveFlush, retry: admSaveRetry,
       statusHTML: admSaveStatusHTML, slotHTML: admSaveSlotHTML, hintHTML: admAutosaveHintHTML,
-      invalidAttr: admAutosaveInvalidAttr, SAVE: ADM_SAVE,
+      invalidAttr: admAutosaveInvalidAttr, SAVE: ADM_SAVE, settle: function () { admSaveEnd(true); },
     };
   `;
-  const api = new Function("S", "SRV", "onPaint", "onMark", "onToast", "onRender", body)(
+  const api = new Function("S", "SRV", "onPaint", "onMark", "onToast", "onRender", "document", body)(
     S, SRV,
     (s: string) => paints.push(s),
     (k: string, h: string) => marks.push([k, h]),
     (t: string) => toasts.push(t),
     () => { counter.renders++; },
+    doc,
   );
   return Object.assign(api, { S, SRV, paints, marks, toasts, counter }) as Panel;
 }
@@ -356,6 +366,143 @@ describe("ADM_SAVE — «Сохранено ✓» only after the server said so"
     // «Повторить» stands beside the alert, not inside it: the sentence is what is read out
     expect(html).toMatch(/<\/span><button class="adm-savest__retry" type="button" data-admsaveretry>Повторить<\/button>$/);
     expect(p.slotHTML("adm-savest--page")).toContain('role="alert"');
+  });
+});
+
+/* Integration of the 1a screens, 25.09.2026 (reported by the «Товары» agent):
+   the header said «Сохранено ✓» — a save of another box, or one a moment
+   earlier — while a price that does not pass stood rust on the card and the
+   leave question said «Правки не сохранены». The status now tells the truth
+   about the whole page: a box that does not pass (or that the server refused
+   and said why, under it) is «Не сохранено — проверьте поле» in rust, and a
+   value typed and not sent yet is not «Сохранено ✓» either. */
+describe("ADM_SAVE — never «Сохранено ✓» while a box does not pass or is still owed", () => {
+  const price = (v: unknown) => (/^\d+([.,]\d{1,2})?$/.test(String(v).trim()) ? "" : "Цена — число, например 12,90");
+  const INVALID = "Не сохранено — проверьте поле";
+
+  it("a box that does not pass puts the rust line up at once — and it is not an announcement", () => {
+    const p = panel(), w = wire();
+    p.autosave("g:price", "12a", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "12a", "blur");
+    expect(p.SAVE.state).toBe("invalid");
+    const html = p.statusHTML();
+    expect(html).toBe(`<span class="adm-savest__t adm-savest__t--err">${INVALID}</span>`);
+    expect(html).not.toContain("Сохранено ✓");
+    expect(html, "the box itself carries the hint; the header does not talk over it").not.toMatch(/role=|aria-live/);
+    expect(p.paints).toEqual(["invalid"]);
+  });
+
+  it("a save of ANOTHER box does not claim «Сохранено ✓» over it", async () => {
+    const p = panel(), w = wire();
+    p.autosave("g:price", "12a", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "12a", "blur");
+    p.autosave("g:name", "Rose", "input", { kind: "name", send: w.send });
+    p.autosave("g:name", "Rose", "blur");
+    expect(p.SAVE.state, "a write in flight still says «Сохраняем…»").toBe("saving");
+    await w.answer(OK);
+    expect(w.sent.map((s) => s.value)).toEqual(["Rose"]);
+    expect(p.SAVE.state).toBe("invalid");
+    expect(p.statusHTML()).toContain(INVALID);
+    expect(p.statusHTML()).not.toContain("Сохранено ✓");
+  });
+
+  it("«Сохранено ✓» of a moment ago goes the moment a box goes wrong", async () => {
+    const p = panel(), w = wire();
+    p.autosave("g:name", "Rose", "input", { kind: "name", send: w.send });
+    p.autosave("g:name", "Rose", "blur");
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("saved");
+    p.autosave("g:price", "abc", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "abc", "enter");
+    expect(p.SAVE.state, "«Сохранено ✓» stood over a rust box until it faded").toBe("invalid");
+  });
+
+  it("a refusal the server explained under the box is the same rust line", async () => {
+    const p = panel(), w = wire();
+    p.autosave("stockean:x", "4740000000001", "input", { kind: "code", send: w.send });
+    p.autosave("stockean:x", "4740000000001", "enter");
+    await w.answer({ refused: "Этот штрихкод уже привязан к другому товару" } as unknown as Res);
+    expect(p.SAVE.state).toBe("invalid");
+    expect(p.statusHTML()).not.toContain("Сохранено");
+    expect(p.statusHTML()).not.toContain("проверьте интернет");
+  });
+
+  it("put right, it saves and the header says so; typed back to what the shop holds, it goes quiet", async () => {
+    const p = panel(), w = wire();
+    p.autosave("g:price", "12", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "12", "blur");
+    await w.answer(OK);
+    vi.advanceTimersByTime(2400);
+    p.autosave("g:price", "1x", "input");
+    p.autosave("g:price", "1x", "blur");
+    expect(p.SAVE.state).toBe("invalid");
+    // back to 12 — what the server already has: nothing goes, and nothing is wrong any more
+    p.autosave("g:price", "12", "input");
+    p.autosave("g:price", "12", "blur");
+    expect(w.sent).toHaveLength(1);
+    expect(p.SAVE.state).toBe("idle");
+    // a new right value: «Сохраняем…», then «Сохранено ✓»
+    p.autosave("g:price", "13", "input");
+    p.autosave("g:price", "13", "blur");
+    expect(p.SAVE.state).toBe("saving");
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("saved");
+  });
+
+  it("typing again after «Сохранено ✓» takes the claim down until the new value lands", async () => {
+    const p = panel(), w = wire();
+    p.autosave("g:price", "12", "input", { kind: "money", send: w.send });
+    p.autosave("g:price", "12", "blur");
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("saved");
+    p.autosave("g:price", "14", "input");
+    expect(p.SAVE.state, "«Сохранено ✓» stood over a price not sent yet").toBe("idle");
+    p.autosave("g:price", "14", "blur");
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("saved");
+  });
+
+  it("…and a field still waiting (another box typed, not left) keeps a save elsewhere from claiming it all", async () => {
+    const p = panel(), w = wire();
+    p.autosave("o:note", "позвонить", "input", { kind: "text", send: w.send });
+    p.autosave("o:note", "позвонить", "blur");
+    p.autosave("g:price", "14", "input", { kind: "money", send: w.send });
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("idle");
+    p.autosave("g:price", "14", "blur");
+    await w.answer(OK);
+    expect(p.SAVE.state).toBe("saved");
+  });
+
+  it("a network failure outranks it: «Не сохранилось — проверьте интернет · Повторить»", async () => {
+    const p = panel(), w = wire();
+    p.autosave("g:price", "x", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "x", "blur");
+    p.autosave("t", true, "change", { kind: "toggle", send: w.send });
+    await w.answer(null);
+    expect(p.SAVE.state).toBe("error");
+  });
+
+  it("a rust box the page no longer shows (its card closed) does not hold the line up", async () => {
+    const page = new Set(["g:price", "g:name"]);
+    const p = panel(page), w = wire();
+    p.autosave("g:price", "x", "input", { kind: "money", send: w.send, validate: price });
+    p.autosave("g:price", "x", "blur");
+    expect(p.SAVE.state).toBe("invalid");
+    // the card is closed: the box and its hint line are gone; the next settle (a render) goes quiet
+    page.delete("g:price");
+    p.settle();
+    expect(p.SAVE.state).toBe("idle");
+    // …and comes back with the card, the hint still under the box
+    page.add("g:price");
+    p.settle();
+    expect(p.SAVE.state).toBe("invalid");
+  });
+
+  it("a render settles the status (renderImpl) — after the page is drawn", () => {
+    const r = fn("renderImpl");
+    expect(r).toContain('if (S.screen === "admin") admSaveEnd(true);');
+    expect(r.indexOf('if (S.screen === "admin") admSaveEnd(true);')).toBeGreaterThan(r.indexOf("bodySlot"));
   });
 });
 
