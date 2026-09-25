@@ -22502,21 +22502,54 @@
       so a bank the owner has since switched off in «Доставка и оплата» keeps
       its name on the orders it already paid — then the checkout's list, the
       built-in five, the three international ones, and the code only when
-      nothing is known. */
-  function bankNameOf(code) {
+      nothing is known.
+
+      `detail` — the payment's own `payment.detail`. For a bank link Montonio
+      puts its name for the bank THIS payment went through in it: the order
+      token's `paymentProviderName`, «paymentInitiation · Revolut Poland»
+      (src/lib/payments/montonio.ts verifyToken). It matters for the banks
+      that sit in several countries under one BIC: Montonio lists one entry
+      per country («Revolut Estonia», «Revolut Poland», … all RVUALT2V), and
+      the first of them named a Polish payment «Revolut Estonia» (staging,
+      25.09.2026, R-100061). So: the payment's own name when it is one of this
+      BIC's names; else, for a BIC with several names, the bank without the
+      country («Revolut», or the words every name starts with); else the one
+      name. Anything else in `detail` («отмечено оплаченным в админке») is
+      not a bank and is not read. */
+  function bankNameOf(code, detail) {
+    var parts = typeof detail === "string" ? detail.split(" · ") : [];
+    var own = parts.length === 2 && parts[0] === "paymentInitiation" ? parts[1].trim() : "";
+    var brand = Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : "";
+    var names = [];
     var lists = [PAYMETHODS.all || [], PAYMETHODS.banks || []];
     for (var l = 0; l < lists.length; l++) {
-      for (var i = 0; i < lists[l].length; i++) if (lists[l][i].code === code) return lists[l][i].name || code;
+      for (var i = 0; i < lists[l].length; i++) {
+        var n = lists[l][i].code === code ? (lists[l][i].name || code) : "";
+        if (n && names.indexOf(n) < 0) names.push(n);
+      }
+    }
+    if (own && (names.indexOf(own) >= 0 || (brand && own.indexOf(brand) === 0))) return own;
+    if (names.length === 1) return names[0];
+    if (names.length > 1) {
+      if (brand) return brand;
+      // the words at the front every name shares: «Citadele» of «Citadele Latvia» and «Citadele Lithuania»
+      var head = String(names[0]).split(" ");
+      for (var m = 1; m < names.length; m++) {
+        var w = String(names[m]).split(" "), j = 0;
+        while (j < head.length && j < w.length && head[j] === w[j]) j++;
+        head = head.slice(0, j);
+      }
+      return head.join(" ") || names[0];
     }
     for (var k in BANK_CODES) if (BANK_CODES[k] === code) return k;
-    return Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : code;
+    return brand || code;
   }
   function admPaymentHTML(o) {
     var p = o && o.payment;
     if (!p || typeof p !== "object") return "";
     var method = PAY_METHOD_NAMES[p.method] || (p.method ? String(p.method) : "");
     // the bank's own name is a proper noun and travels beside the method, never inside it
-    var bank = p.method === "bank" && p.bank ? bankNameOf(String(p.bank)) : "";
+    var bank = p.method === "bank" && p.bank ? bankNameOf(String(p.bank), p.detail) : "";
     var state = p.status === "paid" ? "оплачен" : p.status === "failed" ? "не оплачен" : p.status === "pending" ? "ждёт оплаты" : "";
     var provider = PAY_PROVIDER_NAMES[p.provider] || (p.provider ? String(p.provider) : "");
     var head = payPiecesHTML([method || "—", bank]);

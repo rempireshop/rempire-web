@@ -3779,7 +3779,7 @@
         "Открыть заказ, оплаченный через Revolut, N26, Wise или банк Латвии, Литвы, Финляндии, если такой есть."
       ],
       "expect": [
-        "В «Доставка и оплата» написано, чем платили — и название банка, а не код.",
+        "В «Доставка и оплата» — чем платили и банк словами, без чужой страны у Revolut.",
         "Там же видно, прошёл платёж или нет.",
         "Нажатие на номер или на значок рядом копирует его: «Номер платежа скопирован ✓».",
         "В «Состав» те же товары, что покупали.",
@@ -3798,7 +3798,7 @@
           "Open an order paid through Revolut, N26, Wise or a Latvian, Lithuanian or Finnish bank, if there is one."
         ],
         "expect": [
-          "«Доставка и оплата» says what was paid with — the bank named, never a code.",
+          "«Доставка и оплата» says what paid and names the bank — no wrong country for Revolut.",
           "It also shows whether the payment went through.",
           "Tapping the number or the icon beside it copies it: «Номер платежа скопирован ✓».",
           "«Состав» holds the same products that were bought.",
@@ -3808,7 +3808,7 @@
         "why": "When a buyer argues about money, this screen is your only answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T22:55:46.771Z"
     },
     {
       "id": "order-paid-short",
