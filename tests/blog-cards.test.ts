@@ -273,3 +273,75 @@ describe("placeArticleCards — an article that came back without cards", () => 
     expect(four.cards).toHaveLength(4);
   });
 });
+
+/* ---- ai-blog-cards e3 (verification pass on staging, 25.09.2026) ----------
+   An article on «как ухаживать за сухими волосами осенью» came back with
+   two cards back to back — Bio Botanical Shampoo, then Bio Botanical Serum,
+   two card-only lines straight under the heading «Выбор средств для ухода».
+   The placement rules («never two in a row», «a card follows words, not a
+   heading») were only ever applied to the cards this module PLACES; the
+   cards the model wrote itself were kept wherever it put them. The same
+   pair also appears when a line between two cards held only a card for an
+   unknown id (dropped), or only a blank line — which the editor drops
+   (BLOG_DROP_EMPTY in public/shop2/app.js), so the owner saw the two cards
+   touch there as well. */
+describe("placeArticleCards — the model's own cards keep the same rules as the placed ones", () => {
+  const SERUM = "system-4-bio-botanical-serum";
+  const HAIR: CardCandidate[] = [
+    { id: SHAMPOO, brand: "System 4", name: "Bio Botanical Shampoo — шампунь", category: "hair" },
+    { id: SERUM, brand: "System 4", name: "Bio Botanical Serum — сыворотка", category: "hair" },
+    { id: OIL, brand: "Proraso", name: "Beard Oil Azur Lime — масло для бороды", category: "beard" },
+  ];
+  const HP0 = "<p>Осенью волосы сохнут: ветер на улице, батареи дома.</p>";
+  const HH1 = "<h2>Почему волосы сохнут</h2>";
+  const HP1 = "<p>Горячая вода и фен вымывают из волос влагу быстрее, чем летом.</p>";
+  const HH2 = "<h2>Выбор средств для ухода</h2>";
+  const HP2 = "<p>Мягкий шампунь без сульфатов очищает и не сушит кожу головы.</p>";
+  const HP3 = "<p>Сыворотка на кончики держит влагу до следующего мытья.</p>";
+  const HH3 = "<h2>Привычки</h2>";
+  const HP4 = "<p>Мойте голову тёплой водой, а не горячей.</p>";
+  const HP5 = "<p>Заходите на Mardi 1 — подберём уход под ваши волосы.</p>";
+  const cardAfterHeading = (html: string) => {
+    const blocks = splitBlocks(html);
+    for (let i = 1; i < blocks.length; i++) {
+      const head = blocks[i - 1].tag === "h2" || blocks[i - 1].tag === "h3";
+      expect(head && blocks[i].html.includes("data-product"), `a card straight under ${blocks[i - 1].html}`).toBe(false);
+    }
+  };
+
+  it("two cards the model wrote back to back under a heading: split, each after words of that section", () => {
+    const body = [HP0, HH1, HP1, HH2, card(SHAMPOO), card(SERUM), HP2, HP3, HH3, HP4, HP5].join("");
+    const out = placeArticleCards(body, [{ id: SHAMPOO }, { id: SERUM }], HAIR, { topic: "как ухаживать за сухими волосами осенью" });
+    expectRules(out.html);
+    cardAfterHeading(out.html);
+    expect(out.cards.slice(0, 2)).toEqual([SHAMPOO, SERUM]);
+    expect(blockAfter(out.html, "Мягкий шампунь без сульфатов")).toBe(card(SHAMPOO));
+    expect(blockAfter(out.html, "Сыворотка на кончики")).toBe(card(SERUM));
+  });
+
+  it("two cards the model wrote back to back after a paragraph: the first stays, the second moves on", () => {
+    const body = [HP0, HH1, HP1, HH2, HP2, card(SHAMPOO), card(SERUM), HP3, HH3, HP4, HP5].join("");
+    const out = placeArticleCards(body, [], HAIR, { topic: "сухие волосы" });
+    expectRules(out.html);
+    expect(blockAfter(out.html, "Мягкий шампунь без сульфатов")).toBe(card(SHAMPOO));
+    expect(blockAfter(out.html, "Сыворотка на кончики")).toBe(card(SERUM));
+  });
+
+  it("a line between them that held only an unknown card, or nothing at all, does not keep them apart", () => {
+    for (const between of ['<p><a data-product="system-4-invented-mask"></a></p>', "<p><br></p>", "<p>&nbsp;</p>"]) {
+      const body = [HP0, HH1, HP1, HH2, HP2, card(SHAMPOO), between, card(SERUM), HP3, HH3, HP4, HP5].join("");
+      const out = placeArticleCards(body, [], HAIR, { topic: "сухие волосы" });
+      expectRules(out.html);
+      expect(out.html, between).not.toMatch(/<p>(<br>|&nbsp;|\s)*<\/p>/);
+      expect(out.cards, between).toEqual(expect.arrayContaining([SHAMPOO, SERUM]));
+    }
+  });
+
+  it("a card the model opened the article with moves under words", () => {
+    const body = [card(SHAMPOO), HP0, HH1, HP1, HH2, HP2, HP3, HH3, HP4, HP5].join("");
+    const out = placeArticleCards(body, [], HAIR, { topic: "сухие волосы" });
+    expectRules(out.html);
+    expect(splitBlocks(out.html)[0].html).toBe(HP0);
+    expect(out.cards).toContain(SHAMPOO);
+  });
+});

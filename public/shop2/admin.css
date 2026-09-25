@@ -3396,6 +3396,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* The picture the bar belongs to. A ring, not a tint: the owner is judging
    the picture, so nothing may be laid over it. */
 .adm-canvas img.is-figon { outline: 2px solid var(--a-ink); outline-offset: 3px; }
+/* …and a product card tapped in the text (admCardOpen): the same ring, and a
+   bar with one button — the cross, the drawing beside its word, one row. */
+.adm-canvas a[data-product].is-figon { outline: 2px solid var(--a-ink); outline-offset: 3px; }
+.adm-fig--card .adm-fig__b { flex: 1 1 100%; flex-direction: row; gap: 8px; min-height: 44px; }
 /* The bar itself (admFigBarHTML): a layer over the text, pinned under the
    picture that was tapped and spanning the box, so there is no left/right to
    work out and nothing to fall off a 375 px screen. Its `top` is the one

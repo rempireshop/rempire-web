@@ -12,6 +12,7 @@
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
 import { listPublished, pickLang } from "@/lib/blog";
+import { pickTags } from "@/lib/seo-head.mjs";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request) {
@@ -33,7 +34,8 @@ export async function GET(req: Request) {
           /* The tile crops its cover the way the article does — same point,
              same rule, src/lib/blog-cover.mjs. */
           coverFocus: p.coverFocus,
-          tags: p.tags,
+          // this language's set — never a Russian chip on the Estonian list (pickTags)
+          tags: pickTags(p.tags, p.tagsI18n, lang),
           publishedAt: p.publishedAt,
         })),
         total,

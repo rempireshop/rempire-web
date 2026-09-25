@@ -1,0 +1,22 @@
+-- 209_blog_tags_i18n.sql — an article's tags in Estonian and English (migration range 200–209)
+--
+-- The Estonian article page showed Russian tag chips — «лето», «уход за
+-- волосами», «летний образ» (verification pass on staging, 25.09.2026).
+-- `tags` is one text[] per post, written in Russian, and every page in every
+-- language printed it as it was; the article's translation even came back
+-- with Estonian tags (post_translate filters them to the language) and the
+-- panel had nowhere to put them.
+--
+-- `tags` stays what it was — the Russian set, read by everything that reads
+-- it today. This column holds the other two: {"ET": [...], "EN": [...]}, each
+-- a list of short words in that language (src/lib/blog.ts cleans them on the
+-- way in and drops a Cyrillic one). pickTags() in src/lib/seo-head.mjs picks
+-- the set for a page; a language with none of its own shows only the Russian
+-- set's non-Russian words (a brand), never a Russian chip.
+--
+-- A save that does not carry the field keeps what is stored (coalesce in
+-- upsertPost), so the panel's older one-field PATCHes — a cover, a photo —
+-- cannot wipe it. The build's export reads it as to_jsonb(posts)->'tags_i18n'
+-- so that a prerender running before this migration (prebuild comes before
+-- postbuild's migrate) still writes its blog pages.
+alter table posts add column if not exists tags_i18n jsonb not null default '{}'::jsonb;

@@ -178,7 +178,24 @@ export function clip(s, max) {
    name beside the title itself, from og:site_name and the WebSite block, so
    those ten characters bought a word the reader already had; a price is the
    one thing a shopping result can say that its neighbours often do not. */
+/* The site's name, once. A title written by the model or by hand can already
+   end in it — «Suvine välimus: hooldus ja stiil — REMPIRE» came back from an
+   article's Estonian translation — and every caller then appends its own
+   « — REMPIRE»: the Estonian page's <title> read «… — REMPIRE — REMPIRE»
+   (verification pass on staging, 25.09.2026). So a trailing brand, whatever
+   the separator — «— REMPIRE», «| Rempire», «- rempireshop.com» — is taken
+   off the core, and a rung that ends in it keeps exactly one, in the house
+   form. A brand inside the sentence («купить в Rempire · 9 €») or in front of
+   it («REMPIRE — магазин косметики») is not a tail and stays. app.js's
+   fitTitle() carries the same two lines. */
+const BRAND_TAIL = /(?:\s*[—–|:·-]\s*rempire(?:\s*shop)?(?:\.com)?)+\s*$/i;
+export const dropBrand = s => String(s == null ? "" : s).replace(BRAND_TAIL, "").trim();
+const brandOnce = s => (s && BRAND_TAIL.test(s) ? dropBrand(s) + " — REMPIRE" : s);
+
 export function fitTitle(core, full, alt) {
+  core = dropBrand(core);
+  full = brandOnce(full);
+  alt = brandOnce(alt);
   if (full && full.length <= 60) return full;
   if (alt && alt.length <= 60) return alt;
   if (core.length + 10 <= 60) return core + " — REMPIRE";
@@ -558,6 +575,23 @@ export const CAT_NAMES_I18N = {
   perfume: { RU: "Парфюмерия", ET: "Parfüümid", EN: "Fragrance" },
   merch: { RU: "Мерч", ET: "Merch", EN: "Merch" }
 };
+/* ---------- an article's tags, in the language of its page ------------------
+   The Russian set is the post's `tags`; the Estonian and English sets are
+   `tagsI18n.ET` / `tagsI18n.EN` (db/migrations/209_blog_tags_i18n.sql),
+   written by the article's translation or typed on that language's tab. A
+   language with no set of its own shows only the Russian set's words that
+   are not Russian — a brand, «proraso» — and never a Russian chip on an
+   Estonian page (verification pass on staging, 25.09.2026). One function for
+   the request-time page, the build, and both public routes. */
+const CYRILLIC_RX = /[Ѐ-ӿ]/;
+export function pickTags(tags, tagsI18n, code) {
+  const ru = Array.isArray(tags) ? tags.filter((t) => typeof t === "string" && t.trim()) : [];
+  if (code !== "ET" && code !== "EN") return ru;
+  const set = tagsI18n && typeof tagsI18n === "object" ? tagsI18n[code] : null;
+  const own = Array.isArray(set) ? set.filter((t) => typeof t === "string" && t.trim() && !CYRILLIC_RX.test(t)) : [];
+  return own.length ? own : ru.filter((t) => !CYRILLIC_RX.test(t));
+}
+
 export const catName = (cat, code) => (CAT_NAMES_I18N[cat] && (CAT_NAMES_I18N[cat][code] || CAT_NAMES_I18N[cat].RU)) || "";
 
 /* ---------- OG cards ----------------------------------------------------- */

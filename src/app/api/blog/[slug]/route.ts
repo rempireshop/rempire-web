@@ -14,6 +14,7 @@
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
 import { getPublishedBySlug, pickLang, renderPostBody } from "@/lib/blog";
+import { pickTags } from "@/lib/seo-head.mjs";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -38,7 +39,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           coverUrl: post.coverUrl,
           coverAlt: pickLang(post.coverAlt, lang),
           coverFocus: post.coverFocus,
-          tags: post.tags,
+          tags: pickTags(post.tags, post.tagsI18n, lang),
           products: post.products,
           seoTitle: pickLang(post.seoTitle, lang),
           seoDesc: pickLang(post.seoDesc, lang),

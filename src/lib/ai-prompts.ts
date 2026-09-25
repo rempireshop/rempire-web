@@ -10,7 +10,8 @@
  * Nothing here calls fetch or touches OPENAI_API_KEY; the route
  * (src/app/api/admin/ai/text/route.ts) owns the actual call.
  */
-import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS } from "@/lib/product-name";
+import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
+import { CAT_NAMES_I18N } from "@/lib/seo-head.mjs";
 
 export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "copy", "newsletter"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
@@ -289,16 +290,68 @@ function cleanSeoInput(raw: unknown): SeoClean {
   };
 }
 
+/* A product's snippet is asked for one language at a time, and the goods
+   editor hands every language the same catalogue row — kept in Russian: the
+   name with its Russian type tail («Bio Botanical Shampoo — шампунь») and the
+   Russian section name (CAT_NAMES). Asked for Estonian with nothing but
+   Russian to go on, and shown a Russian title as the example of the shape,
+   the model wrote the Estonian pair in Russian: «Nook Bio Botanical Shampoo —
+   шампунь», and for a product with a Russian name the whole description
+   (verification pass on staging, 25.09.2026). So the row is put into the
+   language asked BEFORE the model sees it, by the shop's own tables — the
+   tail as the storefront translates it (src/lib/product-name.ts), the
+   section as the product page names it (CAT_NAMES_I18N) — the example is
+   written in that language, and the type word is named outright. */
+const SEO_TITLE_EXAMPLES: Record<Lang3, string> = {
+  RU: '"System 4 Bio Botanical Shampoo — шампунь", "Kevin.Murphy ANTI.GRAVITY.SPRAY — спрей для объёма"',
+  ET: '"System 4 Bio Botanical Shampoo — šampoon", "Kevin.Murphy ANTI.GRAVITY.SPRAY — kohevust andev sprei"',
+  EN: '"System 4 Bio Botanical Shampoo — shampoo", "Kevin.Murphy ANTI.GRAVITY.SPRAY — volumising spray"',
+};
+const HAS_CYRILLIC = /[а-яё]/i;
+
+/** The section in the language asked — given by its id or by its Russian name; one the tables do not know is left as it came. */
+function sectionIn(category: string, lang: Lang3): string {
+  if (!category) return "";
+  const names = CAT_NAMES_I18N as Record<string, Record<Lang3, string>>;
+  const low = category.toLowerCase();
+  for (const id of Object.keys(names)) {
+    if (id === low || names[id].RU.toLowerCase() === low) return names[id][lang] || category;
+  }
+  return category;
+}
+
+/** «шампунь» / «šampoon» / «shampoo» — the tail after « — », once it is in the language asked; "" when the shop cannot translate it. */
+function typeWordIn(localName: string, lang: Lang3): string {
+  const at = localName.lastIndexOf(" — ");
+  if (at < 0) return "";
+  const tail = localName.slice(at + 3).trim();
+  if (!tail || (lang !== "RU" && HAS_CYRILLIC.test(tail))) return "";
+  return tail;
+}
+
+/** The product's name as the snippet for `lang` should carry it — the storefront's own translation of the type tail. */
+export function seoProductName(name: string, lang: Lang3): string {
+  return lang === "RU" ? name : translateProductName(name, lang);
+}
+
 export function buildSeoPrompt(lang: Lang3, rawInput: unknown): PromptResult {
   const input = cleanSeoInput(rawInput);
   if (input.kind === "post") return buildPostSeoPrompt(lang, input);
 
+  const name = seoProductName(input.name, lang);
+  const type = typeWordIn(name, lang);
   const facts = [
-    `Product name: ${input.name}`,
+    `Product name: ${name}`,
     input.brand ? `Brand: ${input.brand}` : "",
-    input.category ? `Category: ${input.category}` : "",
+    input.category ? `Category: ${sectionIn(input.category, lang)}` : "",
     input.summary ? `Summary to work from, use only this, do not add more:\n${input.summary}` : "",
   ].filter(Boolean).join("\n");
+
+  const L = LANG_NAME[lang];
+  const own = lang === "RU"
+    ? ""
+    : ` Both fields are read on the ${L} page of the shop: write every word of them in ${L}, except the brand and the maker's own product name, which stay exactly as INPUT gives them. INPUT comes from the shop's catalogue, which is kept in Russian, so a word of it may still be Russian — the type of product above all: translate it, never copy it. Never copy a Russian word into either field.`;
+  const typeLine = type ? ` What this product is, in ${L}: «${type}» — that is the word the title ends with.` : "";
 
   const system = `${HOUSE_VOICE}
 
@@ -306,12 +359,32 @@ ${SEO_RULES}
 
 ${SEO_PRODUCT_RULES}
 
-TASK: write a Google search snippet for this product, in ${LANG_NAME[lang]}.
-- "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Brand, then the maker's name for the product, then what it is, in ${LANG_NAME[lang]}: "System 4 Bio Botanical Shampoo — шампунь", "Kevin.Murphy ANTI.GRAVITY.SPRAY — спрей для объёма".
-- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase. Nothing that is not in INPUT.
+TASK: write a Google search snippet for this product, in ${L}.${own}
+- "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Brand, then the maker's name for the product, then what it is, in ${L}: ${SEO_TITLE_EXAMPLES[lang]}.${typeLine}
+- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase. Nothing that is not in INPUT.${lang === "RU" ? "" : ` Written in ${L}, every sentence of it.`}
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
 
   return { system, user: `INPUT:\n${facts}` };
+}
+
+/**
+ * Is a product snippet written for `lang` still Russian somewhere outside
+ * the product's own name? The name is the owner's words and is copied as it
+ * stands («Claude test товар»), so its head — what comes before « — » — and
+ * the brand are taken out before the text is looked at. The tail after « — »
+ * is not: it is the type of product, and it has to be in `lang` like every
+ * other word. Russian answers are never «off»: the catalogue is Russian.
+ */
+export function seoOffLanguage(text: string, lang: Lang3, rawInput: unknown): boolean {
+  if (lang === "RU") return false;
+  const src = (rawInput && typeof rawInput === "object" ? rawInput : {}) as Record<string, unknown>;
+  const name = line(src.name, 140);
+  const keep = [name.split(" — ")[0], line(src.brand, 60)]
+    .filter((s) => s && HAS_CYRILLIC.test(s))
+    .sort((a, b) => b.length - a.length);
+  let rest = String(text || "");
+  for (const k of keep) rest = rest.split(k).join(" ");
+  return HAS_CYRILLIC.test(rest);
 }
 
 /* A post is trilingual, and the editor asks for the snippet of one language

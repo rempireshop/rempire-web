@@ -632,7 +632,8 @@ describe("GET /api/blog/", () => {
     expect(body.posts).toHaveLength(1);
     expect(body.posts[0].title).toBe("Pealkiri");
     expect(body.posts[0].excerpt).toBe("Анонс"); // ET excerpt not set -> RU fallback
-    expect(body.posts[0].tags).toEqual(["борода"]);
+    // no Estonian set: no chip, rather than the Russian one (pickTags — staging 25.09.2026)
+    expect(body.posts[0].tags).toEqual([]);
   });
 
   it("answers 503 ok:false (with an empty list) when the database is unreachable — an outage must look like one", async () => {

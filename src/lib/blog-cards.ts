@@ -17,7 +17,10 @@
  *     card inside a heading is lifted out and put under the section's first
  *     paragraph, one inside a list right after the list; an unknown or a
  *     repeated id loses its tag and keeps its words, so an invented product
- *     can never become a card;
+ *     can never become a card. A card of its own that stands straight under
+ *     a heading, before the first words or right behind another card is
+ *     lifted and placed like the ones below — the model's cards keep the
+ *     same rules as the placed ones;
  *   - the ids the model only *named* (its `products` — a string or an
  *     `{id, after}` each) get a card after the paragraph `after` points at,
  *     a heading's words or the paragraph's number, or, without a usable
@@ -429,9 +432,30 @@ export function placeArticleCards(
       return inner;
     });
   }
-  // a line that held nothing but a card that is gone now
-  const live = blocks.filter((b) => !(b.touched && b.tag === "p" && !b.html.replace(P_SHELL_RX, "").replace(BLANK_RX, "")));
+  /* a line that holds nothing — a card that is gone now, or a blank line the
+     model wrote. Blank lines go whoever wrote them: the editor drops an empty
+     paragraph when it cleans the body (BLOG_DROP_EMPTY in public/shop2/
+     app.js), so one standing between two cards here kept them apart only
+     until the owner opened the article — there they touched. */
+  const live = blocks.filter((b) => !(b.tag === "p" && !b.html.replace(P_SHELL_RX, "").replace(BLANK_RX, "")));
   let have = seen.size;
+
+  /* 1b. …and the model's cards keep the rules the placed ones keep: never
+     two in a row, never straight under a heading, never before the first
+     words (verification on staging, 25.09.2026: two cards back to back
+     under «Выбор средств для ухода»). A card that breaks one is lifted and
+     goes back in through the same door as the rest (step 4) — out from
+     under a heading to the section's first paragraph, out from behind
+     another card to the next paragraph that has room. */
+  for (let i = 0; i < live.length; i++) {
+    const id = cardAlone(live[i]);
+    if (!id) continue;
+    const prev = live[i - 1];
+    if (prev && prev.tag !== "h2" && prev.tag !== "h3" && !hasCard(prev)) continue;
+    live.splice(i, 1);
+    i--;
+    queue.push(prev ? { id, from: prev } : { id });
+  }
 
   /* 2. the products the model named but gave no card */
   for (const p of picks || []) {

@@ -35,6 +35,7 @@ const POST = {
   coverUrl: "/shop/img/night-rider-0.webp",
   coverAlt: { RU: "Паста", ET: "Pasta" },
   tags: ["борода", "зима"],
+  tagsI18n: { ET: ["habe", "talv"], EN: [] },
   products: ["system-4-bio-botanical-shampoo", "no-such-product"],
 };
 
@@ -140,7 +141,10 @@ describe("a post's page at request time", () => {
     expect(html).toContain('<h1 class="display h1">Kuidas hooldada habet talvel</h1>');
     expect(html).toContain('<img class="pre__img blog__cover" src="/shop/img/night-rider-0.webp" alt="Pasta"');
     expect(html).toContain("<h2>Talv</h2><p>Õli <strong>iga päev</strong>.</p>");
-    expect(html).toContain("<li>борода</li><li>зима</li>");
+    /* the tags are the Estonian set (POST.tagsI18n) — never the Russian one on an
+       Estonian page (staging 25.09.2026; pickTags in src/lib/seo-head.mjs) */
+    expect(html).toContain("<li>habe</li><li>talv</li>");
+    expect(html).not.toContain("<li>борода</li>");
     // «Tooted artiklist»: the catalogue product and the owner's own, never an id nobody has
     expect(html).toContain('<h2 class="display h1 blog__h2">Tooted artiklist</h2>');
     expect(html).toContain('href="/shop2/et/p/system-4-bio-botanical-shampoo/"');

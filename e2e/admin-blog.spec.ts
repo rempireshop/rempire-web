@@ -34,7 +34,7 @@ const IMAGE_URL = "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp";
    dark button and asks about an empty ET/EN on the confirm sheet; «Снять с
    публикации» is in «⋯»; the address, tags and Google lines, the assistant
    and the cover's frames are folds. */
-type Post = { id: string; slug: string; status: string; author: string; title: Record<string, string>; body: Record<string, string>; coverUrl: string | null };
+type Post = { id: string; slug: string; status: string; author: string; title: Record<string, string>; body: Record<string, string>; coverUrl: string | null; products: string[] };
 async function serverPost(page: Page, id: string): Promise<Post> {
   const r = await page.request.get(`/api/admin/blog/?id=${id}`);
   return (await r.json()).post as Post;
@@ -697,6 +697,8 @@ test.describe("blog — the whole article", () => {
     await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Habeme talvine hooldus ${marker}`);
     await expect(box.locator("h2")).toHaveText(`Õli igal õhtul ${marker}`);
     await expect(page.locator('[data-blogf="seoTitle"]')).toHaveValue(`ET Google ${marker}`);
+    // the tags box follows the tab: the Estonian set the translation came back with
+    await expect(page.locator("[data-blogtags]")).toHaveValue("habe, talv");
     await page.locator('[data-admbloglang="EN"]').click();
     await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Winter beard care ${marker}`);
     await expect(box.locator("h2")).toHaveText(`Oil every evening ${marker}`);
@@ -706,13 +708,15 @@ test.describe("blog — the whole article", () => {
     // saved by itself, as a draft — the owner has not pressed anything yet
     const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
     expect(saved.status(), "the article was not saved as a draft").toBe(200);
-    const post = (await saved.json()).post as { id: string; status: string; title: Record<string, string>; body: Record<string, string>; tags: string[]; products: string[]; seoTitle: Record<string, string> };
+    const post = (await saved.json()).post as { id: string; status: string; title: Record<string, string>; body: Record<string, string>; tags: string[]; tagsI18n: Record<string, string[]>; products: string[]; seoTitle: Record<string, string> };
     postId = post.id;
     try {
       expect(post.status).toBe("draft");
       expect(post.title).toEqual({ RU: `Уход за бородой зимой ${marker}`, ET: `Habeme talvine hooldus ${marker}`, EN: `Winter beard care ${marker}` });
       expect(post.body.ET).toContain(`<h2>Õli igal õhtul ${marker}</h2>`);
       expect(post.tags).toEqual(["борода", "зима", "уход"]);
+      // the translations' own tags are kept, each in its language (staging 25.09.2026: Russian chips on the ET page)
+      expect(post.tagsI18n).toEqual({ ET: ["habe", "talv"], EN: ["beard", "winter"] });
       expect(post.products).toEqual([PRODUCT.id]);
       expect(post.seoTitle.EN).toBe(`EN Google ${marker}`);
 
@@ -726,6 +730,7 @@ test.describe("blog — the whole article", () => {
       await expect(article.locator("ul li")).toHaveCount(2);
       await expect(shop.page.locator("h1")).toContainText(`Habeme talvine hooldus ${marker}`);
       await expect(shop.page).toHaveTitle(`ET Google ${marker} — REMPIRE`);
+      await expect(shop.page.locator("div.blog__tags .chip"), "the Estonian article's tag chips are not the Estonian set").toHaveText(["habe", "talv"]);
       await expect(shop.page.locator('meta[name="description"]')).toHaveAttribute("content", `ET kirjeldus ${marker}`);
       // «Товары из статьи»: the product the generator named is under the article
       await expect(shop.page.locator(`.card__go[data-go-product="${PRODUCT.id}"], [data-go-product="${PRODUCT.id}"]`).first()).toBeVisible();
@@ -861,6 +866,23 @@ test.describe("blog — the whole article", () => {
       await savedAs(page, postId, (p) => !p.body.RU.includes(`data-product="${PRODUCT.id}"`) && p.body.RU.includes(`data-product="${PRODUCT_2.id}"`),
         "deleting the card did not save itself");
       await assertClean(page, w, "a placed card taken out by hand");
+
+      /* ---- × in «Товары в статье» takes the product's cards out too ------
+         (staging, 25.09.2026: it took the product off the list and left its
+         card in the text) — in every language, saved, and «Вернуть» puts
+         them back */
+      await page.locator(`[data-admblogproductdel="${PRODUCT_2.id}"]`).click();
+      await expect(page.getByRole("status").first()).toContainText("Товар и его карточки убраны из статьи");
+      await expect(cards, "the product's card stayed in the text after its ×").toHaveCount(0);
+      await savedAs(page, postId, (p) => !p.products.includes(PRODUCT_2.id)
+        && !p.body.RU.includes(`data-product="${PRODUCT_2.id}"`) && !p.body.ET.includes(`data-product="${PRODUCT_2.id}"`)
+        && !p.body.EN.includes(`data-product="${PRODUCT_2.id}"`), "the × did not save the text without the product's cards");
+      await page.getByRole("status").locator("[data-admtoastundo]").click();
+      await expect(cards, "«Вернуть» did not bring the card back").toHaveCount(1);
+      await expect(cards.first()).toHaveAttribute("data-product", PRODUCT_2.id);
+      await savedAs(page, postId, (p) => p.products.includes(PRODUCT_2.id) && p.body.ET.includes(`data-product="${PRODUCT_2.id}"`),
+        "«Вернуть» did not save the cards back");
+      await assertClean(page, w, "a product and its cards taken out with ×, and put back");
     } finally {
       // this suite leaves the blog as it found it
       if (postId) await page.request.delete(`/api/admin/blog/?id=${postId}`);
@@ -901,16 +923,23 @@ test.describe("blog — the whole article", () => {
       await expect(card).toContainText("уход за бородой зимой");
       await card.locator("[data-admapply]").click();
 
-      // the editor opens on a new draft with the topic in the box, and the article fills in
+      /* the editor opens on a new draft and the article fills in. «Тема
+         статьи» stays empty: the box is the owner's own words, and the topic
+         line is the model's — it goes to the generator only (staging,
+         25.09.2026: the box was filled with it) */
       await expect(page.locator("[data-blogbody]")).toBeVisible();
-      await expect(page.locator("[data-admblogtopic]")).toHaveValue("уход за бородой зимой");
+      await expect(page.locator("[data-admblogtopic]")).toHaveValue("");
       await expect(page.locator("[data-admblogfull]")).toHaveText("…");
       await expect(page.getByRole("status").first()).toContainText("Статья готова на трёх языках", { timeout: 30_000 });
       await clearToast(page);
       await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Уход за бородой зимой ${marker}`);
       await expect(page.locator("[data-blogbody] h2")).toHaveText(`Масло каждый вечер ${marker}`);
+      // …and the box is still empty, the new title only its grey hint
+      await expect(page.locator("[data-admblogtopic]")).toHaveValue("");
+      await expect(page.locator("[data-admblogtopic]")).toHaveAttribute("placeholder", `Уход за бородой зимой ${marker}`);
       slug = await page.locator("[data-blogslug]").inputValue();
       expect(calls.map((c) => `${c.task}:${c.lang}`)).toEqual(["post_full:RU", "post_translate:ET", "post_translate:EN"]);
+      expect((calls[0].input as { topic?: string }).topic, "the generator was not given the topic").toBe("уход за бородой зимой");
       expect(asked[0].mode).toBe("admin");
       const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
       expect(saved.status(), "the assistant's article was not saved as a draft").toBe(200);

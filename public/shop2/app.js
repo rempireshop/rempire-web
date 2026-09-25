@@ -1825,6 +1825,7 @@
       "адрес, автор, теги, текст для Google": "aadress, autor, sildid, tekst Google'i jaoks",
       "Сначала напишите русский текст — переводим с него.": "Kirjutage esmalt venekeelne tekst — tõlgime sellest.",
       "Товар убран из статьи": "Toode eemaldati artiklist",
+      "Товар и его карточки убраны из статьи": "Toode ja selle kaardid eemaldati artiklist",
       "Обложка убрана": "Kaanepilt eemaldati",
       "Удалить статью?": "Kustutada artikkel?",
       "Статья исчезнет из блога на всех трёх языках.": "Artikkel kaob blogist kõigis kolmes keeles.",
@@ -2843,6 +2844,8 @@
       "Куда сдвинуть картинку": "Kuhu pilti nihutada",
       "Во всю ширину": "Üle kogu laiuse",
       "Слева": "Vasakul", "Справа": "Paremal", "Маленькая": "Väike",
+      /* …and the one button a product card in the text has (admCardBarHTML) */
+      "Карточка товара": "Tootekaart", "Убрать карточку": "Eemalda kaart",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "Foto telefonist või lõikelaualt, JPEG/PNG/WebP kuni 12 MB.",
       "вс": "P", "пн": "E", "вт": "T", "ср": "K", "чт": "N", "пт": "R", "сб": "L",
@@ -5327,6 +5330,7 @@
       "адрес, автор, теги, текст для Google": "address, author, tags, text for Google",
       "Сначала напишите русский текст — переводим с него.": "Write the Russian text first — we translate from it.",
       "Товар убран из статьи": "Product removed from the article",
+      "Товар и его карточки убраны из статьи": "Product and its cards removed from the article",
       "Обложка убрана": "Cover removed",
       "Удалить статью?": "Delete the article?",
       "Статья исчезнет из блога на всех трёх языках.": "The article disappears from the blog in all three languages.",
@@ -6340,6 +6344,8 @@
       "Куда сдвинуть картинку": "Where to move the picture",
       "Во всю ширину": "Full width",
       "Слева": "On the left", "Справа": "On the right", "Маленькая": "Small",
+      /* …and the one button a product card in the text has (admCardBarHTML) */
+      "Карточка товара": "Product card", "Убрать карточку": "Remove the card",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "A photo from your phone or the clipboard, JPEG/PNG/WebP up to 12 MB.",
       "вс": "Su", "пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa",
@@ -15756,7 +15762,12 @@
     var slugEl = document.querySelector("[data-blogslug]");
     if (slugEl && !d.slugAuto) d.slug = slugEl.value;
     var tagsEl = document.querySelector("[data-blogtags]");
-    if (tagsEl) d.tagsText = tagsEl.value;
+    if (tagsEl) {
+      // the tags box is the language's tab too: RU is `tagsText`, ET/EN their own set
+      var tagL = blogFieldLang(tagsEl) || "RU";
+      if (tagL === "RU") d.tagsText = tagsEl.value;
+      else { if (!d.tagsI18n) d.tagsI18n = { ET: "", EN: "" }; d.tagsI18n[tagL] = tagsEl.value; }
+    }
     var box = blogBox(), bl = blogBoxLang(box);
     if (box && bl) d.body[bl] = blogBoxHtml(box);
   }
@@ -15993,7 +16004,7 @@
       var on = box.querySelectorAll(".is-figon");
       for (i = 0; i < on.length; i++) on[i].removeAttribute("class");
     }
-    FIGSEL = null;
+    FIGSEL = null; CARDSEL = null;
   }
   function admFigOpen(img) {
     var box = blogBox();
@@ -16071,6 +16082,63 @@
     if (dir === "up") box.insertBefore(node, sib);
     else box.insertBefore(sib, node);
     admFigAgain();
+  }
+  /* ---- a product card in the text: tapped, it gets a bar with a cross -------
+     The assistant puts two to four cards into an article by itself
+     (src/lib/blog-cards.ts), and a card in this box is an underlined name:
+     the one way out of the text it had was the caret and backspace. The ×
+     under «Товары в статье» takes the product off that list, not the card out
+     of the words (verification on staging, 25.09.2026: «no × on inline
+     cards»). So a card is tapped the way a picture is — ringed, with a bar
+     under it on the same layer (data-figui, .is-figon) that blogBoxHtml()
+     keeps out of everything that reads the box — and the bar's one button
+     takes the card out, with the line it stood on when that line held nothing
+     else. The article then saves itself like any edit (blogSync). */
+  var CARDSEL = null;
+  function admCardBarHTML() {
+    return '<div class="adm-fig adm-fig--card" data-figui contenteditable="false">' +
+      '<div class="adm-fig__row" role="group" aria-label="Карточка товара">' +
+      '<button type="button" class="adm-fig__b adm-fig__b--x" data-cardx>' +
+        '<svg class="adm-fig__ico adm-fig__ico--mv" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>' +
+        "<span>Убрать карточку</span></button>" +
+      "</div></div>";
+  }
+  function admCardOpen(a) {
+    var box = blogBox();
+    if (!box || !a || !box.contains(a)) return;
+    var rd = richDraft();
+    if (!rd || rd.kind !== "blog") return;
+    admFigClose();
+    CARDSEL = a;
+    a.setAttribute("class", "is-figon");
+    var holder = document.createElement("div");
+    holder.innerHTML = admCardBarHTML();
+    var bar = holder.firstChild;
+    box.appendChild(bar);
+    // the same one number the picture bar is placed by — .adm-canvas is position:relative
+    bar.style.top = (a.offsetTop + a.offsetHeight + 8) + "px";
+    translateTree(bar);
+    /* Into view after a beat, and only while it is still this card's bar: the
+       page must not move under the second click of a double click — that
+       click is selecting words, and it closes the bar first. */
+    setTimeout(function () {
+      if (CARDSEL !== a || !bar.parentNode) return;
+      try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
+    }, 350);
+  }
+  function admCardRemove() {
+    var a = CARDSEL, box = blogBox();
+    admFigClose();
+    // a repaint since the tap rebuilt the box: that card is not in it any more
+    if (!a || !box || !box.contains(a) || !a.parentNode) return;
+    var host = a.parentNode;
+    host.removeChild(a);
+    if (host !== box && host.tagName === "P" && !host.querySelector("img") &&
+        !String(host.textContent || "").replace(/[\s ]/g, "")) {
+      host.parentNode.removeChild(host);
+    }
+    blogSync();
   }
   /** The «Товар» marker, written out for one language. blogBodyHTML() turns it
       into a real card in the shop; a crawler and a reader without JS follow it
@@ -16304,6 +16372,21 @@
      vanishing. In its own place when the model behaved, in the article
      either way: the answer was «carry them across every time» (Dim,
      08.09.2026), not «when the model cooperates». */
+  /** Every card of product `id` out of one text: the marker, with the line it
+      stood on when that line held nothing else, and the space the «Товар»
+      button put after it. A card in the middle of a sentence leaves the
+      sentence where it was. Written for the shapes this editor writes
+      (blogProductLinkHTML, blogCleanHtml) — attributes in any order. */
+  function blogDropCard(html, id) {
+    var s = String(html || "");
+    if (!id || s.indexOf("data-product") < 0) return s;
+    var q = String(id).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // up to ITS </a> and no further: a lazy [\s\S]*? would reach past it to a later link's
+    var a = '<a\\b[^>]*\\bdata-product="' + q + '"[^>]*>(?:(?!<\\/a>)[\\s\\S])*<\\/a>';
+    var pad = "(?:\\s|&nbsp;| |<br\\s*\\/?>)*";
+    return s.replace(new RegExp("<p>" + pad + a + pad + "<\\/p>", "g"), "")
+      .replace(new RegExp(a + "(?:&nbsp;| )?", "g"), "");
+  }
   function blogCardMark(n) { return "[[" + n + "]]"; }
   var BLOG_CARD_MARK_RX = /\[\[\d+\]\]/g;
   function blogCardsOut(html) {
@@ -16404,7 +16487,12 @@
       id: "", slug: "", slugAuto: true, status: "draft",
       title: { RU: "", ET: "", EN: "" }, excerpt: { RU: "", ET: "", EN: "" }, body: { RU: "", ET: "", EN: "" },
       coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" }, coverFocus: "",
-      tagsText: "", products: [],
+      /* `tagsText` is the Russian set; `tagsI18n` the Estonian and English
+         ones, each as the box shows it — words and commas. The ET/EN shop
+         shows its own set, never the Russian one (pickTags in
+         src/lib/seo-head.mjs; staging 25.09.2026: Russian chips on the
+         Estonian article). */
+      tagsText: "", tagsI18n: { ET: "", EN: "" }, products: [],
       seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" },
       author: "Rempire", publishedAt: null
     };
@@ -16417,7 +16505,9 @@
       body: blogBody3ToHtml(Object.assign({}, BLOG_EMPTY3, p.body)),
       coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
       coverFocus: p.coverFocus || "",
-      tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
+      tagsText: (p.tags || []).join(", "),
+      tagsI18n: { ET: ((p.tagsI18n && p.tagsI18n.ET) || []).join(", "), EN: ((p.tagsI18n && p.tagsI18n.EN) || []).join(", ") },
+      products: (p.products || []).slice(),
       seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
       author: p.author || "Rempire", publishedAt: p.publishedAt || null
     };
@@ -16476,6 +16566,12 @@
          as null, which is what a cover nobody has dragged already is. */
       coverFocus: d.coverFocus || null,
       tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      /* the Estonian and English sets; a draft without them sends nothing,
+         and the row keeps its own (upsertPost in src/lib/blog.ts) */
+      tagsI18n: d.tagsI18n ? {
+        ET: String(d.tagsI18n.ET || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+        EN: String(d.tagsI18n.EN || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean)
+      } : undefined,
       products: d.products,
       seoTitle: d.seoTitle, seoDesc: d.seoDesc,
       author: d.author
@@ -16563,10 +16659,10 @@
   /** Everything a save sends — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
     return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt, d.coverFocus,
-      d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
+      d.tagsText, d.tagsI18n, d.products, d.seoTitle, d.seoDesc, d.author]);
   }
   var BLOG_SIG_FIELDS = ["slug", "title", "excerpt", "body", "coverUrl", "coverAlt", "coverFocus",
-    "tagsText", "products", "seoTitle", "seoDesc", "author"];
+    "tagsText", "tagsI18n", "products", "seoTitle", "seoDesc", "author"];
   /** The same fields, detached from the draft — what a save compares against
       once the draft has moved on under it. See saveBlogFields(). */
   function blogDraftSnap(d) {
@@ -16726,7 +16822,8 @@
       title: pick(d.title),
       excerpt: pick(d.excerpt),
       body: stripTags(pick(d.body)).slice(0, 1500),
-      tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      // the language's own tags when it has them, like every other field here
+      tags: String((L !== "RU" && d.tagsI18n && d.tagsI18n[L]) || d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
       products: productsById(d.products).map(function (p) { return p.brand + " " + p.name; })
     };
   }
@@ -16883,6 +16980,13 @@
       if (txt(tx.body)) d.body[L] = blogCleanHtml(blogCardsIn(blogFigsIn(txt(tx.body), figs.figs), src.cards, L));
       if (tx.seo && txt(tx.seo.title)) d.seoTitle[L] = txt(tx.seo.title).slice(0, 70);
       if (tx.seo && txt(tx.seo.description)) d.seoDesc[L] = txt(tx.seo.description).slice(0, 170);
+      /* …and the tags, in that language (the route keeps only the ones written
+         in it — tagInLang). They used to be dropped here, and the Estonian
+         page printed the Russian set. */
+      if (Array.isArray(tx.tags) && tx.tags.length) {
+        if (!d.tagsI18n) d.tagsI18n = { ET: "", EN: "" };
+        d.tagsI18n[L] = tx.tags.map(String).join(", ");
+      }
     });
   }
   /* `ask` — the owner's own words when the chat assistant named the topic
@@ -25966,8 +26070,11 @@
       '<label class="adm-field">Адрес статьи' +
         '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
           esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '" autocapitalize="off" spellcheck="false"></label>' +
+      /* the language on the tab above, like the title: the Estonian page shows
+         the Estonian set and never the Russian one (pickTags) */
       '<label class="adm-field">Теги — через запятую' +
-        '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
+        '<input class="adm-input" data-blogtags data-blogl="' + L + '" value="' +
+          esc(L === "RU" || !L ? d.tagsText : ((d.tagsI18n && d.tagsI18n[L]) || "")) + '" placeholder="борода, зима"></label>' +
       '<label class="adm-field">Автор' +
         '<input class="adm-input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
       /* The pair below is the language the tab is on — so are the two
@@ -45627,8 +45734,13 @@
     // an article open in the editor sends what it owes before the new one takes its place (1a)
     if (S.adminBlogEdit && S.adminTab === "blog") { blogReadForm(); blogAutosave("change"); }
     S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    /* blogStartNew() leaves «Тема статьи» empty, and it stays empty: that box
+       is the owner's own words (admBlogTopicFieldHTML), and this topic line is
+       the model's. Written into it, it stood there as text the owner had to
+       clear before typing the next topic (verification pass on staging,
+       25.09.2026). It goes to the generator only; the article's title becomes
+       the box's grey hint once it is written. */
     blogStartNew();
-    S.adminBlogTopic = topic;
     S.admMore = false;
     window.scrollTo({ top: 0 });
     render();
@@ -46327,7 +46439,22 @@
      not change under the shopper when this script takes over a static page.
      `alt` is brand + name + price, the rung between the full sentence and the
      bare «— REMPIRE» (src/lib/seo-head.mjs fitTitle(), 07.09.2026). */
+  /* The site's name once: a title that already ends in it («… — REMPIRE»
+     from a translation, «| Rempire» typed by hand) loses that tail before one
+     is appended — the Estonian article's tab read «… — REMPIRE — REMPIRE»
+     (staging, 25.09.2026). Same two lines as src/lib/seo-head.mjs. */
+  function dropBrand(s) {
+    return String(s == null ? "" : s).replace(/(?:\s*[—–|:·-]\s*rempire(?:\s*shop)?(?:\.com)?)+\s*$/i, "").trim();
+  }
+  function brandOnce(s) {
+    if (!s) return s;
+    var bare = dropBrand(s);
+    return bare !== String(s).trim() ? bare + " — REMPIRE" : s;
+  }
   function fitTitle(core, full, alt) {
+    core = dropBrand(core);
+    full = brandOnce(full);
+    alt = brandOnce(alt);
     if (full && full.length <= 60) return full;
     if (alt && alt.length <= 60) return alt;
     if (core.length + 10 <= 60) return core + " — REMPIRE";
@@ -50444,6 +50571,8 @@
         { field: "title", text: bdTr.title[srcLang] },
         { field: "excerpt", text: bdTr.excerpt[srcLang] },
         { field: "body", text: blogHtmlToText(trFigs.html) },
+        // the tags too — each language shows its own set (pickTags), a comma list in, a comma list out
+        { field: "tags", text: srcLang === "RU" ? bdTr.tagsText : (bdTr.tagsI18n && bdTr.tagsI18n[srcLang]) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
       Promise.all(jobs.map(function (j) {
@@ -50468,6 +50597,12 @@
             targets.forEach(function (l) {
               var v = txt(res.r.body.texts[l]);
               if (!v) return;
+              if (res.field === "tags") {
+                if (l === "RU") bdTr.tagsText = v;
+                else { if (!bdTr.tagsI18n) bdTr.tagsI18n = { ET: "", EN: "" }; bdTr.tagsI18n[l] = v; }
+                got++;
+                return;
+              }
               bdTr[res.field][l] = res.field === "body"
                 ? blogCleanHtml(blogCardsIn(blogFigsIn(blogTextToHtml(v), trFigs.figs), trCards.cards, l))
                 : v;
@@ -50504,15 +50639,27 @@
       }
       S.adminBlogQ = ""; render(); refocus("[data-admblogq]"); return;
     }
+    /* …and its cards leave the text with it, in all three languages (staging,
+       25.09.2026: the × took the product off the list and left its card in
+       the article, still selling it). «Вернуть» brings the cards back into
+       every text nobody has touched since — never over words written after. */
     if (d.admblogproductdel) {
       var pdd = S.adminBlogEdit, gone = d.admblogproductdel;
       var at = pdd ? pdd.products.indexOf(gone) : -1;
       if (at >= 0) {
+        blogReadForm();   // the box's latest words first — they are what the cards come out of
+        var bodyWas = { RU: pdd.body.RU, ET: pdd.body.ET, EN: pdd.body.EN }, cardsGone = 0;
+        ["RU", "ET", "EN"].forEach(function (L) {
+          var next = blogDropCard(pdd.body[L], gone);
+          if (next !== pdd.body[L]) { pdd.body[L] = next; cardsGone++; }
+        });
+        var bodyNow = { RU: pdd.body.RU, ET: pdd.body.ET, EN: pdd.body.EN };
         pdd.products.splice(at, 1);
         blogAutosave("change");
-        toast("Товар убран из статьи", { prev: true, undo: function () {
+        toast(cardsGone ? "Товар и его карточки убраны из статьи" : "Товар убран из статьи", { prev: true, undo: function () {
           if (S.adminBlogEdit !== pdd || pdd.products.indexOf(gone) >= 0) return;
           pdd.products.splice(Math.min(at, pdd.products.length), 0, gone);
+          ["RU", "ET", "EN"].forEach(function (L) { if (pdd.body[L] === bodyNow[L]) pdd.body[L] = bodyWas[L]; });
           blogAutosave("change"); render();
         } });
       }
@@ -50993,7 +51140,12 @@
       }
     }
     else if (t.matches("[data-blogtags]")) {
-      if (S.adminBlogEdit) { S.adminBlogEdit.tagsText = t.value; blogAutosave("input"); }
+      var tgd = S.adminBlogEdit, tgL = blogFieldLang(t) || "RU";
+      if (tgd) {
+        if (tgL === "RU") tgd.tagsText = t.value;
+        else { if (!tgd.tagsI18n) tgd.tagsI18n = { ET: "", EN: "" }; tgd.tagsI18n[tgL] = t.value; }
+        blogAutosave("input");
+      }
     }
     else if (t.matches("[data-admblogq]")) {
       S.adminBlogQ = t.value;
@@ -51100,7 +51252,7 @@
      stays exactly where the owner left it. */
   document.addEventListener("mousedown", function (e) {
     var t = e.target;
-    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove]")) {
+    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove],[data-cardx]")) {
       e.preventDefault();
     }
   });
@@ -51125,7 +51277,16 @@
     var mv = t.closest("[data-figmove]");
     if (mv) { e.preventDefault(); if (!mv.disabled) admFigMove(mv.getAttribute("data-figmove")); return; }
     if (t.tagName === "IMG" && t.closest("[data-blogbody]")) { e.preventDefault(); admFigOpen(t); return; }
-    if (FIGSEL && !t.closest("[data-figui]")) admFigClose();
+    // a product card in the text: its bar has one button, the cross (admCardOpen)
+    if (t.closest("[data-cardx]")) { e.preventDefault(); admCardRemove(); return; }
+    var pcard = t.closest("a[data-product]");
+    if (pcard && pcard.closest("[data-blogbody]")) {
+      /* a double or triple click is the owner selecting the card's words, or
+         its whole line, to edit them like any other line — the bar makes way */
+      if (e.detail > 1) { admFigClose(); return; }
+      e.preventDefault(); admCardOpen(pcard); return;
+    }
+    if ((FIGSEL || CARDSEL) && !t.closest("[data-figui]")) admFigClose();
   });
 
   /* blog: a paste into the editor. Word and Google Docs put a whole styled

@@ -72,7 +72,10 @@ export interface Post {
       was anything to choose. The one reader is src/lib/blog-cover.mjs, whose
       header says what the words mean and why it is a point and not a crop. */
   coverFocus: string | null;
+  /** The Russian set — what `tags` has always been. */
   tags: string[];
+  /** The Estonian and English sets (db/migrations/209_blog_tags_i18n.sql); a page picks with pickTags(). */
+  tagsI18n: TagsI18n;
   products: string[];
   seoTitle: Trilingual;
   seoDesc: Trilingual;
@@ -96,6 +99,7 @@ interface PostRow {
   cover_alt: Trilingual | null;
   cover_focus: string | null;
   tags: string[] | null;
+  tags_i18n: Partial<Record<"ET" | "EN", unknown>> | null;
   products: string[] | null;
   seo_title: Trilingual | null;
   seo_desc: Trilingual | null;
@@ -123,6 +127,7 @@ function toPost(r: PostRow): Post {
        not have, reads back as null — which is what every old post is. */
     coverFocus: writeCoverFocus(r.cover_focus),
     tags: Array.isArray(r.tags) ? r.tags : [],
+    tagsI18n: readTagsI18n(r.tags_i18n),
     products: Array.isArray(r.products) ? r.products : [],
     seoTitle: { ...EMPTY3, ...(r.seo_title || {}) },
     seoDesc: { ...EMPTY3, ...(r.seo_desc || {}) },
@@ -139,7 +144,7 @@ function toSummary(r: PostRow): PostSummary {
 }
 
 const SUMMARY_COLS =
-  "id, slug, status, title, excerpt, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author, published_at, created_at, updated_at";
+  "id, slug, status, title, excerpt, cover_url, cover_alt, cover_focus, tags, tags_i18n, products, seo_title, seo_desc, author, published_at, created_at, updated_at";
 const FULL_COLS = SUMMARY_COLS.replace("excerpt,", "excerpt, body,");
 
 /** The language shown, falling back to Russian, then to whatever exists. */
@@ -277,6 +282,29 @@ function trilingual(raw: unknown, max: number, multiline = false, tooLong = ""):
   return out;
 }
 
+export interface TagsI18n {
+  ET: string[];
+  EN: string[];
+}
+const CYRILLIC = /[Ѐ-ӿ]/;
+/** A stored {ET, EN} as two lists — whatever an older row or a hand-written one holds. */
+function readTagsI18n(raw: unknown): TagsI18n {
+  const o = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  return { ET: cleanList(o.ET, 12, 30), EN: cleanList(o.EN, 12, 30) };
+}
+/**
+ * The Estonian and English tag sets a save carries, cleaned — or null when it
+ * carries none, which keeps what the row holds (a cover-only PATCH must not
+ * wipe them). A Russian word is not an Estonian or English tag: dropped, the
+ * same script test the article writer's tags go through (tagInLang in
+ * src/app/api/admin/ai/text/route.ts).
+ */
+function cleanTagsI18n(raw: unknown): TagsI18n | null {
+  if (raw === undefined || raw === null) return null;
+  const t = readTagsI18n(raw);
+  return { ET: t.ET.filter((x) => !CYRILLIC.test(x)), EN: t.EN.filter((x) => !CYRILLIC.test(x)) };
+}
+
 function cleanList(raw: unknown, maxItems: number, maxLen: number): string[] {
   if (!Array.isArray(raw)) return [];
   const out: string[] = [];
@@ -314,6 +342,8 @@ export interface PostInput {
   coverAlt?: unknown;
   coverFocus?: unknown;
   tags?: unknown;
+  /** {ET: [...], EN: [...]} — absent keeps what is stored. */
+  tagsI18n?: unknown;
   products?: unknown;
   seoTitle?: unknown;
   seoDesc?: unknown;
@@ -397,6 +427,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
   const seoTitle = trilingual(input.seoTitle, 70);
   const seoDesc = trilingual(input.seoDesc, 170);
   const tags = cleanList(input.tags, 12, 30);
+  const tagsI18n = cleanTagsI18n(input.tagsI18n);
   const products = cleanList(input.products, 12, 80);
   const coverUrl = cleanUrl(input.coverUrl);
   /* Deliberately not `undefined`-aware, unlike the title check below: a save
@@ -452,6 +483,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
     jsonbParam(seoTitle),
     jsonbParam(seoDesc),
     author,
+    tagsI18n ? jsonbParam(tagsI18n) : null,
   ];
 
   if (input.id) {
@@ -459,8 +491,9 @@ export async function upsertPost(input: PostInput): Promise<Post> {
       `update posts set
          slug = $1, title = $2::jsonb, excerpt = $3::jsonb, body = $4::jsonb,
          cover_url = $5, cover_alt = $6::jsonb, cover_focus = $7, tags = $8, products = $9,
-         seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12, updated_at = now()
-       where id = $13 and deleted_at is null
+         seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12,
+         tags_i18n = coalesce($13::jsonb, tags_i18n), updated_at = now()
+       where id = $14 and deleted_at is null
        returning ${FULL_COLS}`,
       [...params, input.id],
     );
@@ -469,8 +502,8 @@ export async function upsertPost(input: PostInput): Promise<Post> {
   }
 
   const rows = await query<PostRow>(
-    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author)
-     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10::jsonb, $11::jsonb, $12)
+    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author, tags_i18n)
+     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10::jsonb, $11::jsonb, $12, coalesce($13::jsonb, '{}'::jsonb))
      returning ${FULL_COLS}`,
     params,
   );
