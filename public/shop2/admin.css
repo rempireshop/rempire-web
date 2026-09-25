@@ -878,15 +878,16 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   .adm2 .adm-omenu__i--close { display: block; text-align: center; color: var(--a-muted); font-size: 15px; }
 }
 
-/* the progress line: four dots (two for a pickup) on a rule that is ink as
-   far as the order has come */
+/* the progress line: four square marks (two for a pickup) on a rule that is
+   ink as far as the order has come — square, as every corner in 1a is; the
+   «?» stays the one round thing */
 .adm-prog {
   position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
   list-style: none; margin: 0; padding: 0; max-width: 620px;
 }
 .adm-prog--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 320px; }
 .adm-prog__s { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; text-align: center; }
-.adm-prog__dot { width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--a-edge); background: var(--a-paper); }
+.adm-prog__dot { width: 12px; height: 12px; box-sizing: border-box; border: 2px solid var(--a-edge); background: var(--a-paper); }
 .adm-prog__s--done .adm-prog__dot { background: var(--a-ink); border-color: var(--a-ink); }
 .adm-prog__s--now .adm-prog__dot { border-color: var(--a-ink); }
 .adm-prog__s--skip .adm-prog__dot { border-style: dashed; border-color: var(--a-muted); }
