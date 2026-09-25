@@ -203,6 +203,25 @@ describe("runAbandonedCartsDiscount() — the wait after the first letter", () =
     expect(await cartCodes()).toHaveLength(1);
   });
 
+  /* 25.09.2026 on staging: the first letter went at 10:00:55 from the daily
+     run, and the next daily run starts at the same minute — seconds short of
+     a strict «N days», so the discount slipped a whole extra day. */
+  it("goes on the next daily run even when that run starts a few seconds early", async () => {
+    await on();
+    await cart("early@example.com", { remindedAgoMs: 3 * DAY - 40_000 });
+    const run = await runAbandonedCartsDiscount(NOW);
+    expect(run.sent).toBe(1);
+    expect(recipients()).toEqual(["early@example.com"]);
+  });
+
+  it("still waits when the day is clearly not over", async () => {
+    await on();
+    await cart("waits@example.com", { remindedAgoMs: 3 * DAY - 2 * HOUR });
+    const run = await runAbandonedCartsDiscount(NOW);
+    expect(run.sent).toBe(0);
+    expect(run.reason).toBe("too_fresh");
+  });
+
   it("says «no_reminder» for a basket the first letter has not reached yet", async () => {
     await on();
     await cart("fresh@example.com", { quietMs: 30 * 60_000 });

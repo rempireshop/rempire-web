@@ -888,6 +888,9 @@ async function dropCartPromo(code: string): Promise<void> {
  * switched off by hand, gets nothing — the same two sets the first letter
  * subtracts, read before any stamp goes down.
  */
+/** How early the second letter may go, so a daily run lands on its day (see the cutoff below). */
+export const DISCOUNT_RUN_SLACK_MS = 60 * 60 * 1000;
+
 export async function runAbandonedCartsDiscount(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled", skips: { disabled: 1 } };
@@ -895,7 +898,12 @@ export async function runAbandonedCartsDiscount(now: number = Date.now()): Promi
   let roomLeft = await marketingRoom();
   if (roomLeft <= 0) return { sent: 0, skipped: 0, reason: "no_budget", skips: { no_budget: 1 } };
 
-  const cutoff = new Date(now - flows.abandonedDiscountDays * 24 * 60 * 60 * 1000).toISOString();
+  /* One hour of slack. The first letter is stamped by the daily run itself
+     (10:00:55 on 25.09.2026), and the next daily run starts at the same
+     minute — so a strict «N days» was a few seconds short every time and the
+     discount slipped a whole extra day. With the slack, «через 1 день» is the
+     next daily run, which is what the owner set. */
+  const cutoff = new Date(now - flows.abandonedDiscountDays * 24 * 60 * 60 * 1000 + DISCOUNT_RUN_SLACK_MS).toISOString();
   const minTotal = flows.abandonedDiscountMinTotal;
   const rows = await query<{
     id: string;
