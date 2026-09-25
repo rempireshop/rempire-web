@@ -67,6 +67,7 @@ function history() {
   const run = new Function(
     "S", "STOCK", "SRV", "apiJson", "reloadStock",
     `var d;
+     var STOCK_HIST_LIMIT = 500;   // 1a: the newest lines of the whole ledger, filtered by the chips on screen
      function render() { if (S.stockMovesOpen) loadStockMoves(false); }   // what admStockMovesHTML() does
      ${slice("loadStockMoves")}
      ${slice("scanStockChanged")}

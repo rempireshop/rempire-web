@@ -238,9 +238,19 @@ function stockList(rows: Row[], state: Record<string, unknown> = {}) {
   const body = `
     ${constant("STOCK_PAGE")}
     var S = Object.assign({ stockLevels: ROWS, stockQ: "", stockFilter: "all", stockShown: 0 }, STATE);
+    var STOCK = { epoch: 0, rank: null, rankFor: "" };
     function esc(s) { return String(s); }
     function plural(n) { return n === 1 ? "товар" : "товаров"; }
+    function shopHidden() { return false; }
     function stockRowHTML(r) { return "<i data-row=\\"" + r.productId + "\\"></i>"; }
+    /* 1a: the rows come grouped by product (the name once, its sizes under
+       it) and a page holds whole products — here one size each, so a page of
+       60 products is 60 rows, as it always was */
+    function stockGroupHTML(g) { return '<b data-stockgroup="' + g.id + '">' + g.rows.map(stockRowHTML).join("") + "</b>"; }
+    ${slice("stockKey")}
+    ${slice("stockGroupOff")}
+    ${slice("stockGroups")}
+    ${slice("stockPage")}
     ${slice("scanFold")}
     ${slice("scanWordHas")}
     /* The chip rule moved out of stockFiltered into its own function so the

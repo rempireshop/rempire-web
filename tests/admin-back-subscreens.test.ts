@@ -112,6 +112,26 @@ describe("Back from «История приёмок и продаж» returns to
   });
 });
 
+describe("Back from an open set returns to «Наборы» (1a: the editor is its own view on a phone)", () => {
+  it("one Back closes the set and stays on «Товары → Наборы»", () => {
+    const p = panel();
+    p.S.adminTab = "goods"; p.S.goodsTab = "bundles"; p.paint();
+    p.S.bundleForm = { uid: "beard-start", id: "beard-start", editing: true }; p.paint();
+
+    expect(p.layers()).toContain("set");
+    expect(p.back()).toBe(true);
+    expect(p.S.bundleForm, "Back walked past the open set").toBeNull();
+    expect(p.S.adminTab).toBe("goods");
+  });
+
+  it("is a layer only on «Наборы» — a set left open behind «Каталог» does not eat Back", () => {
+    const p = panel();
+    p.S.adminTab = "goods"; p.S.goodsTab = "catalog"; p.paint();
+    p.S.bundleForm = { uid: "d1", id: "", editing: false };
+    expect(p.layers()).not.toContain("set");
+  });
+});
+
 describe("Back from a letter under «Рассылка» returns to the list", () => {
   it("closes a saved letter at once and stays on «Рассылка»", () => {
     const p = panel();
@@ -152,6 +172,8 @@ describe("every «← …» sub-screen of the panel is a Back layer", () => {
     ["data-admclose", "S.adminEdit"],
     ["data-newsback", "S.newsEdit"],
     ["data-stockmovesopen=\"\"", "S.stockMovesOpen"],
+    // 1a: an open set is its own view on a phone, «← Наборы»
+    ["data-bundlecancel", "S.bundleForm"],
   ])("%s → %s", (link, state) => {
     expect(src, `the panel no longer draws ${link}`).toContain(link);
     expect(layers, `${state} is not a Back layer`).toContain(state);

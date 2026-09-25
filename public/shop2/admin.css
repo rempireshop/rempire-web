@@ -2782,3 +2782,271 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 
 /* a status tag: the badge's colours, drawn small and firm (11 px, 600) */
 .adm-tag { height: 20px; padding: 0 6px; font-size: 11px; font-weight: 600; }
+/* ═══════════════════════════════════════════════════════════════════════
+   Direction 1a — «Склад», its history, the scanner and «Наборы»
+   (design_handoff_admin_ux: 11-stock-desktop, 11-stock-phone-v2,
+   06-scanner-phone, 12-sets-desktop). Appended here so the shared pieces
+   above stay as they are.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* the page header's right: «История» (outlined, desktop) beside the ONE dark
+   button, which a phone pins above the tab bar */
+.adm-headacts { display: flex; align-items: center; gap: 10px; }
+.adm-headacts__desk { height: 46px; padding: 0 18px; }
+@media (max-width: 899px) { .adm-headacts__desk { display: none; } }
+
+/* ---------- «Склад»: search, chips, the count and «История →» ----------- */
+.adm-stkbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.adm-stkbar__q { height: 46px; }
+@media (min-width: 900px) {
+  .adm-stkbar { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); align-items: center; gap: 16px; }
+  .adm-stkbar .adm-chips { grid-column: 1; grid-row: 1; }
+  .adm-stkbar__q { grid-column: 2; grid-row: 1; }
+}
+.adm-stkmeta { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 24px; margin-top: -8px; }
+.adm-stkmeta .adm-hint { font-size: 12.5px; }
+.adm-stkmeta__hist { font-size: 13.5px; white-space: nowrap; min-height: 44px; }
+@media (min-width: 900px) {
+  /* the header carries «История» on a desktop */
+  .adm-stkmeta__hist { display: none; }
+  .adm-stkmeta { justify-content: flex-end; margin-top: -12px; }
+}
+
+/* the desktop table: Товар | Объём · Статус · Остаток · «Мало» ≤ · Штрихкод */
+.adm-stkhead { display: none; }
+@media (min-width: 900px) {
+  .adm-stkhead, .adm-stk { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 5fr); column-gap: 14px; }
+  .adm-stkhead {
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+    padding: 8px 0; border-bottom: 1px solid var(--a-ink); margin-bottom: -20px;
+  }
+  .adm-stkhead__r { display: grid; grid-template-columns: 90px 110px 140px 100px minmax(0, 1fr); column-gap: 14px; align-items: center; }
+  .adm-stklist { border-top: 0; }
+}
+
+/* one product: the photo and the name once, its sizes under it (phone) —
+   the name in the first column of its first row (desktop) */
+.adm-stk { border-bottom: 1px solid var(--a-rule); padding: 14px 0 8px; }
+.adm-stk__h { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 4px; }
+.adm-stk__img {
+  position: relative; width: 40px; height: 40px; flex: none; overflow: hidden;
+  background: var(--a-field); border: 1px solid var(--a-rule);
+}
+.adm-stk__img .ph { position: absolute; inset: 2px; background-size: contain; background-position: center; background-repeat: no-repeat; }
+.adm-stk__t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.adm-stk__b { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-stk__n { font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-stk__h .adm-tag { flex: none; }
+.adm-stk__rows { min-width: 0; }
+@media (min-width: 900px) {
+  .adm-stk { padding: 0; }
+  .adm-stk__h { align-self: start; padding: 17px 0 0; margin: 0; }
+  .adm-stk__img { display: none; }
+  .adm-stk__t { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; font-weight: 600; }
+  .adm-stk__b, .adm-stk__n { display: inline; font-size: inherit; color: var(--a-ink); font-weight: 600; }
+  .adm-stk__b::after { content: " — "; }
+}
+
+/* one size: the size and its tag (the tap that opens the row), − count +,
+   and on a desktop «мало ≤» and the barcode as columns */
+.adm-row.adm-stk__r {
+  display: grid; grid-template-columns: minmax(0, 1fr) 136px; column-gap: 10px; row-gap: 4px; align-items: center;
+  flex-wrap: nowrap; min-height: 0; padding: 6px 0 6px 50px; border-bottom: 0; background: transparent;
+}
+.adm-row.adm-stk__r.is-open { background: var(--a-panel); box-shadow: -8px 0 0 var(--a-panel), 8px 0 0 var(--a-panel); }
+.adm-stk__sz {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; min-height: 44px;
+  border: 0; background: none; padding: 0; text-align: left; color: var(--a-ink); font: inherit;
+}
+.adm-stk__sz .adm-row__sz { border: 0; padding: 0; font-size: 15px; line-height: 20px; }
+.adm-stk__q { width: 136px; height: 46px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; border-color: var(--a-edge); background: var(--a-field); }
+.adm-stk__q button { width: 44px; height: 44px; font-size: 18px; background: none; }
+.adm-stk__q .adm-step-qty__v {
+  min-width: 0; width: 100%; height: 44px; border: 0; padding: 0; background: transparent; color: var(--a-ink);
+  font-family: "Golos Text", sans-serif; font-weight: 600; font-size: 16px;
+}
+.adm-stk__q .adm-step-qty__v--warn { color: var(--a-warn); }
+.adm-stk__q .adm-step-qty__v[aria-invalid="true"] { outline: 2px solid var(--a-warn); outline-offset: -2px; }
+.adm-stk__low, .adm-stk__ean { display: none; }
+.adm-stk__r > .adm-ashint, .adm-stk__x { grid-column: 1 / -1; }
+.adm-stk__scan {
+  width: 42px; height: 42px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--a-ink); background: transparent; color: var(--a-ink); padding: 0;
+}
+.adm-stk__scan:hover { background: var(--a-tint); }
+@media (min-width: 900px) {
+  /* the same five columns as the head (.adm-stkhead__r) — after the phone rule, which it overrides */
+  .adm-row.adm-stk__r { grid-template-columns: 90px 110px 140px 100px minmax(0, 1fr); column-gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--a-rule); }
+  .adm-stk__rows > .adm-stk__r:last-child { border-bottom: 0; }
+  .adm-stk__sz { grid-column: 1 / span 2; display: grid; grid-template-columns: 90px 110px; column-gap: 14px; min-height: 38px; }
+  .adm-stk__sz .adm-row__sz { font-size: 14px; }
+  .adm-stk__sz .adm-tag { justify-self: start; }
+  .adm-stk__q { width: 140px; height: 38px; grid-template-columns: 38px minmax(0, 1fr) 38px; }
+  .adm-stk__q button { width: 38px; height: 36px; }
+  .adm-stk__q .adm-step-qty__v { height: 36px; font-size: 15px; }
+  .adm-stk__low { display: block; font-size: 14.5px; padding-left: 10px; }
+  .adm-stk__ean { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
+  .adm-stk__ean .adm-mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-stk__none { color: var(--a-muted); }
+  .adm-stk__scan { width: 38px; height: 38px; margin-left: auto; }
+}
+/* the open row: the barcode with its scan button, «мало ≤», «Причина» */
+.adm-stk__x { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; padding: 6px 0 12px; }
+.adm-stk__xe, .adm-stk__xc { grid-column: 1 / -1; }
+.adm-stk__xl { font-size: 12px; color: var(--a-muted); }
+.adm-stk__eanrow { display: flex; gap: 6px; }
+.adm-stk__eanrow .adm-input { height: 44px; font-size: 14px; }
+.adm-stk__x .adm-input { height: 44px; }
+.adm-stk__xc { justify-self: end; min-height: 44px; font-size: 13.5px; }
+@media (min-width: 900px) {
+  .adm-stk__x { grid-template-columns: minmax(0, 1.2fr) 110px minmax(0, 1.4fr) auto; align-items: end; gap: 14px; padding: 4px 0 14px; }
+  .adm-stk__xe, .adm-stk__xc { grid-column: auto; }
+  .adm-stk__eanrow .adm-input, .adm-stk__x .adm-input { height: 40px; }
+  .adm-stk__x .adm-stk__scan { width: 40px; height: 40px; margin: 0; }
+  .adm-stk__xc { min-height: 40px; }
+}
+
+/* ---------- «История склада» ------------------------------------------- */
+.adm-stkhist__t { font-family: Oswald, sans-serif; font-weight: 600; font-size: 28px; line-height: 1.1; margin: 0; }
+@media (min-width: 900px) { .adm-stkhist__t { font-size: 34px; } }
+.adm-hhead { display: none; }
+.adm-row.adm-hrow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 11px 0; min-height: 0; border-bottom: 1px solid var(--a-rule); }
+.adm-hrow__nm { order: 1; flex: 1 1 calc(100% - 72px); min-width: 0; font-size: 14px; }
+.adm-hrow__d { order: 2; flex: none; width: 60px; font-size: 20px; }
+.adm-hrow__sz { order: 3; font-size: 12.5px; }
+.adm-hrow__sz .adm-row__sz { border: 0; padding: 0; color: var(--a-muted); font-size: 12.5px; }
+.adm-hrow__what { order: 4; font-size: 12.5px; color: var(--a-muted); }
+.adm-hrow__when { order: 5; font-size: 11.5px; color: var(--a-muted); }
+.adm-hrow__d.is-up { color: var(--a-green); }
+.adm-hrow__d.is-down { color: var(--a-rust); }
+@media (min-width: 900px) {
+  .adm-hhead, .adm-row.adm-hrow { display: grid; grid-template-columns: 130px minmax(0, 2fr) 90px minmax(0, 1fr) 70px; column-gap: 14px; align-items: center; }
+  .adm-hhead {
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+    padding: 16px 0 8px; border-bottom: 1px solid var(--a-ink);
+  }
+  .adm-hlist { border-top: 0; }
+  .adm-hrow__nm, .adm-hrow__d, .adm-hrow__sz, .adm-hrow__what, .adm-hrow__when { order: 0; width: auto; }
+  .adm-hrow__when { grid-column: 1; grid-row: 1; font-size: 12.5px; }
+  .adm-hrow__nm { font-size: 14.5px; }
+  .adm-hrow__sz .adm-row__sz { color: var(--a-ink); font-size: 14px; }
+  .adm-hrow__what { font-size: 13.5px; }
+  .adm-hrow__d { font-size: 19px; }
+}
+
+/* ---------- the scanner (1a: «Сканер · склад», one switch, one button) -- */
+.scan__title { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scan__title .scan__brand { font-size: 16px; }
+.scan__title .scan__mode { flex: none; font-size: inherit; line-height: inherit; color: inherit; text-align: left; }
+.scan__hbtn svg { display: block; }
+.scan__seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--a-ink); }
+.scan__seg button { height: 44px; border: 0; background: #fff; color: var(--a-ink); font-size: 14px; font-weight: 500; }
+.scan__seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.scan__for { margin: 0; text-align: center; font-size: 15px; font-weight: 600; line-height: 20px; }
+.scan__errbtns { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin-top: 10px; }
+.scan__btn--sm { height: 44px; padding: 0 16px; font-size: 14px; }
+.scan__card--err .scan__more { color: var(--a-muted); }
+/* «Готово» stands on the ink between codes now (1a: the card goes after a move),
+   so it takes a green that reads there; and the stepper's number is the big
+   Oswald it was meant to be — `.scanoverlay input` above outranked it */
+.scan__panel > .scan__ready { font-size: 14px; color: #a9d4b8; }
+.scanoverlay .scan__qty { font-family: Oswald, sans-serif; font-size: 48px; }
+/* «Сегодня», folded under the camera — the fold is a light-page piece, so it
+   is told it stands on ink here */
+.scan__today { border-top: 0; padding-top: 0; }
+.scan__today .adm-foldrow { border-top: 1px solid var(--a-muted); }
+.scan__today .adm-foldrow__h { color: #fff; border-bottom-color: var(--a-muted); min-height: 48px; padding: 10px 0; }
+.scan__today .adm-foldrow__t { font-size: 14px; }
+.scan__today .adm-foldrow__s { color: var(--a-dim); }
+.scan__today .adm-foldrow__b { border-bottom-color: var(--a-muted); padding: 6px 0 10px; gap: 0; }
+
+/* ---------- «Наборы» -------------------------------------------------- */
+@media (max-width: 899px) { .adm-sethead.is-ed .adm-pin { display: none; } }
+.adm-sets { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.adm-sets__pick { display: none; }
+@media (max-width: 899px) {
+  /* a set open on a phone is a view of its own («← Наборы» is its Back) */
+  .adm-sets--ed .adm-sets__list { display: none; }
+}
+@media (min-width: 900px) {
+  .adm-sets { grid-template-columns: minmax(0, 1fr) 440px; gap: 36px; align-items: start; }
+  .adm-sets__pick {
+    display: block; margin: 0; padding: 40px 20px; border: 1px dashed var(--a-rule);
+    text-align: center; font-size: 14px; color: var(--a-muted);
+  }
+}
+.adm-row.adm-setrow {
+  /* the name gets the row's whole width; the price and the controls share the line under it */
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "img main main" "img pr acts";
+  column-gap: 12px; row-gap: 2px; align-items: center; flex-wrap: nowrap; padding: 10px 0;
+}
+.adm-row.adm-setrow.is-sel { background: var(--a-panel); box-shadow: -8px 0 0 var(--a-panel), 8px 0 0 var(--a-panel); }
+.adm-setrow__img { grid-area: img; width: 52px; height: 52px; }
+.adm-setrow__open {
+  grid-area: main; min-width: 0; min-height: 40px; display: flex; flex-direction: column; justify-content: center;
+  border: 0; background: none; padding: 0; text-align: left; color: inherit; font: inherit;
+}
+.adm-setrow__open .adm-row__sub { margin-top: 1px; font-size: 12px; }
+.adm-setrow__pr { grid-area: pr; text-align: left; font-size: 16px; }
+.adm-setrow__acts { grid-area: acts; display: flex; align-items: center; gap: 2px; }
+@media (min-width: 900px) {
+  .adm-setrow__pr { font-size: 17px; }
+  .adm-setrow__acts .adm-link--move { min-width: 36px; min-height: 40px; }
+}
+
+/* the editor: a panel beside the list (desktop), its own view (phone) */
+.adm-seted { position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.adm-seted__close {
+  align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--a-ink);
+  font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px;
+}
+.adm-seted__x, .adm-seted__xl { display: none; }
+@media (min-width: 900px) {
+  .adm-seted { border: 1px solid var(--a-ink); padding: 20px 24px 24px; }
+  .adm-seted__close {
+    position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; text-decoration: none;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; line-height: 1;
+  }
+  .adm-seted__back { display: none; }
+  .adm-seted__x { display: inline; }
+  .adm-seted__xl { display: block; }
+  .adm-seted .adm-langbar { padding-right: 36px; }
+}
+.adm-seted__draft {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px 14px; flex-wrap: wrap;
+  padding: 10px 12px; background: var(--a-panel); font-size: 13px; line-height: 18px; color: var(--a-ink);
+}
+.adm-seted__err { margin: 0; }
+.adm2 .adm-seted__name {
+  height: 52px; padding: 0 2px; border: 0; border-bottom: 1px solid var(--a-ink); background: transparent;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 24px; line-height: 1.1;
+}
+.adm-seted__name[aria-invalid="true"] { border-bottom-color: var(--a-warn); }
+.adm-seted__name::placeholder { font-size: 18px; font-weight: 400; color: var(--a-muted); }
+.adm2 textarea.adm-seted__desc { min-height: 96px; }
+.adm-seted__ai { display: flex; gap: 8px 16px; flex-wrap: wrap; margin-top: -4px; }
+.adm-seted__few { margin: 0; }
+.adm-seted__q { height: 44px; }
+.adm-seted__money { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.adm-seted__warn { color: var(--a-warn); }
+.adm-seted__go { align-self: flex-start; min-height: 44px; }
+.adm-setitems { border-top: 0; }
+.adm-row.adm-setitem { flex-wrap: nowrap; gap: 10px; padding: 8px 0; min-height: 0; }
+.adm-setitem .adm-row__nm { font-size: 14px; }
+.adm-setitem .adm-row__sub { font-size: 12px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.adm2 select.adm-setitem__sz { width: auto; height: 32px; padding: 0 8px; font-size: 13px; }
+.adm-setitem .adm-step-qty button { width: 36px; height: 36px; font-size: 17px; }
+.adm-setitem .adm-step-qty__v { min-width: 30px; font-size: 16px; }
+.adm-setitem__x { width: 40px; height: 44px; flex: none; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0; }
+.adm-setitem__x:hover { color: var(--a-ink); }
+.adm-setpicks { display: flex; flex-direction: column; }
+.adm-setpicks:empty { display: none; }
+.adm-setpick { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-setpick__nm { font-size: 14px; line-height: 19px; }
+.adm-setpick__sz { display: flex; gap: 6px; flex-wrap: wrap; }
+.adm-chip.adm-setpick__add { height: 36px; padding: 0 10px; font-size: 13px; }
+@media (max-width: 899px) {
+  .adm-chip.adm-setpick__add { height: 44px; }
+  .adm-setitem .adm-step-qty button { width: 44px; height: 44px; }
+  .adm-setitem__x { width: 44px; }
+}

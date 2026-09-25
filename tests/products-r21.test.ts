@@ -446,11 +446,16 @@ describe("«Наборы» — the product picker inside the set editor", () => 
       "S",
       "heroFind",
       "admPickTile",
+      // 1a: the picker lists only once something is typed, a size chip per size
       `var HERO_NOHIT = "<p>none</p>";
+       var scanFold = function (s) { return String(s || "").trim().toLowerCase(); };
+       var esc = function (s) { return String(s); };
+       var eur = function (n) { return String(n); };
+       var sizePrice = function () { return 10; };
        ${slice("bundlePickRows")}
        return bundlePickRows();`,
     ) as (...a: unknown[]) => string;
-    return run({ bundleQ: "" }, () => found, (_attr: string, id: string) => `<b>${id}</b>`);
+    return run({ bundleQ: "a" }, () => found, (_attr: string, id: string) => `<b>${id}</b>`);
   }
 
   it("offers only what src/lib/bundles.ts can resolve", () => {

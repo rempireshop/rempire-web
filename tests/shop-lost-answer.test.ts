@@ -365,38 +365,65 @@ describe("a stock write that never answered releases the button", () => {
     expect(out.toasts).toEqual(["Не удалось сохранить"]);
   });
 
-  /* stockLevelSaveDetailed() catches its own failures; stockMoveSend() does
-     not. One rejecting job left Promise.all rejected, the form open and the
-     button disabled on «Сохраняем…» until the panel was reloaded. */
-  it("«Склад»: a rejected move re-renders instead of leaving «Сохраняем…»", async () => {
+  /* stockMoveSend() rejects whenever apiJson() does. «Править» → «Сохранить»
+     used to leave its button disabled on «Сохраняем…» when that happened.
+     1a: the row's own boxes save themselves, so a move that never answered
+     has to come back as «not saved» — false, which the autosave shows as
+     «Не сохранилось — Повторить» and keeps owed — and the taps of a ± burst
+     go back on the row instead of vanishing with the request. */
+  it("«Склад»: a typed count that never answered is owed again, not «Сохраняем…» for ever", async () => {
     const body = `
-      var out = { toasts: [], renders: 0, edit: "", saved: "x" };
-      var S = { stockEdit: "k", stockEditEan: "", stockEditLow: "", stockEditQty: "7", stockEditReason: "", stockSaved: "x", lang: "RU" };
-      var STOCK_SAVE_ERRS = {};
-      var document = { querySelector: function () { return null; } };
-      function stockFindRow() { return { productId: "p", variant: "", ean: "", lowThreshold: null, tracked: true, qty: 3 }; }
-      function stockLevelSaveDetailed() { return Promise.resolve({ ok: true }); }
+      var out = { answer: null, landed: 0 };
+      var STOCK_BURST = {}, STOCK_WHY = {}, STOCK_WHY_USED = {};
+      function stockFindRow() { return { productId: "p", variant: "", ean: "", lowThreshold: 2, tracked: true, qty: 3 }; }
       function stockMoveSend() { return Promise.reject(new Error("no-api")); }
       function stockMoveFailText(f) { return f; }
-      function stockSaveErrText() { return ""; }
-      function toast(m) { out.toasts.push(m); }
-      function render() { out.renders++; }
-      function refocus() {}
-      function reloadStock() {}
-      function trText(s) { return s; }
+      function toast() {}
+      function stockLanded() { out.landed++; }
+      ${slice("stockKey")}
+      ${slice("stockBurstDelta")}
+      ${slice("stockShownQty")}
+      ${slice("stockShownTracked")}
       ${slice("stockQtyValue")}
-      ${slice("stockCommit")}
-      stockCommit("k");
-      return Promise.resolve().then(function () {}).then(function () {}).then(function () {
-        out.edit = S.stockEdit; out.saved = S.stockSaved;
+      ${slice("stockWhyFor")}
+      ${slice("stockWhyUse")}
+      ${slice("stockWhyDrop")}
+      ${slice("stockQtyCommit")}
+      return stockQtyCommit("p ", "7").then(function (a) { out.answer = a; return out; });
+    `;
+    const out = (await new Function(body)()) as { answer: unknown; landed: number };
+    expect(out.answer).toBe(false);
+    expect(out.landed).toBe(0);
+  });
+
+  it("«Склад»: a ± burst that never answered puts its taps back on the row", async () => {
+    const body = `
+      var out = { answer: null, renders: 0 };
+      var STOCK_BURST = { "p ": { pending: 3, inflight: 0, started: true, from: 2, seq: 3, timer: 0 } };
+      var STOCK_WHY = {}, STOCK_WHY_USED = {};
+      var ROW = { productId: "p", variant: "", ean: "", lowThreshold: 2, tracked: true, qty: 2 };
+      function stockFindRow() { return ROW; }
+      function stockMoveSend() { return Promise.reject(new Error("no-api")); }
+      function stockMoveFailText(f) { return f; }
+      function toast() {}
+      function render() { out.renders++; }
+      function stockLanded() {}
+      ${slice("stockKey")}
+      ${slice("stockBurstDelta")}
+      ${slice("stockShownQty")}
+      ${slice("stockWhyFor")}
+      ${slice("stockWhyUse")}
+      ${slice("stockWhyDrop")}
+      ${slice("stockBurstSend")}
+      return stockBurstSend("p ").then(function (a) {
+        out.answer = a; out.shown = stockShownQty(ROW); out.pending = STOCK_BURST["p "].pending;
         return out;
       });
     `;
-    const out = (await new Function(body)()) as { toasts: string[]; renders: number; edit: string; saved: string };
-    expect(out.toasts).toEqual(["Не удалось сохранить"]);
+    const out = (await new Function(body)()) as { answer: unknown; renders: number; shown: number; pending: number };
+    expect(out.answer).toBe(false);
+    expect(out.pending, "the three taps vanished with the request").toBe(3);
+    expect(out.shown).toBe(5);
     expect(out.renders).toBeGreaterThan(0);
-    // the row stays open on the edit the owner has not saved yet
-    expect(out.edit).toBe("k");
-    expect(out.saved).toBe("");
   });
 });
