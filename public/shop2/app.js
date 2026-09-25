@@ -3180,6 +3180,17 @@
       "по умолчанию": "vaikimisi",
       "как в прошлый раз": "nagu eelmisel korral",
       "чаще всего": "kõige sagedamini",
+      /* direction 1a — the frame and the shared pieces (admTopHTML,
+         admMoreSheetHTML, admConfirmHTML, admSaveStatusHTML, admHelpBtnHTML,
+         admLangFallback) */
+      "Не надо": "Loobu",
+      "Не сохранилось — проверьте интернет": "Ei salvestunud — kontrolli internetiühendust",
+      "Подсказка": "Vihje",
+      "Язык панели": "Paneeli keel",
+      "как русский": "nagu vene keeles",
+      "статьи для покупателей": "artiklid ostjatele",
+      "продажи и посетители": "müük ja külastajad",
+      "оплата, доставка, почта, Google": "makse, tarne, e-post, Google",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -6209,12 +6220,37 @@
       "по умолчанию": "by default",
       "как в прошлый раз": "as last time",
       "чаще всего": "most often",
+      /* direction 1a — the frame and the shared pieces */
+      "Не надо": "Don't",
+      "Не сохранилось — проверьте интернет": "Not saved — check the internet connection",
+      "Подсказка": "Hint",
+      "Язык панели": "Panel language",
+      "как русский": "as in Russian",
+      "статьи для покупателей": "articles for shoppers",
+      "продажи и посетители": "sales and visitors",
+      "оплата, доставка, почта, Google": "payments, delivery, e-mail, Google",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* 1a, the phone's «Ещё» (admMoreLine): what is waiting under «Клиенты»,
+       and the week's takings under «Аналитика». Russian takes three forms
+       and gets one string each from pl(); Estonian and English take two, and
+       only a literal «1» is singular — «21 заявка» is «21 requests». */
+    [/^1 заявка$/, { ET: "1 taotlus", EN: "1 request" }],
+    [/^(\d+) заявк(?:а|и|ок)$/, { ET: "$1 taotlust", EN: "$1 requests" }],
+    [/^1 отзыв$/, { ET: "1 arvustus", EN: "1 review" }],
+    [/^(\d+) отзыв(?:а|ов)?$/, { ET: "$1 arvustust", EN: "$1 reviews" }],
+    // …and under «Блог» and «Подключения» (the counts of src/lib/overview-extras.ts)
+    [/^1 статья$/, { ET: "1 artikkel", EN: "1 article" }],
+    [/^(\d+) стат(?:ья|ьи|ей)$/, { ET: "$1 artiklit", EN: "$1 articles" }],
+    [/^1 черновик$/, { ET: "1 mustand", EN: "1 draft" }],
+    [/^(\d+) черновик(?:а|ов)?$/, { ET: "$1 mustandit", EN: "$1 drafts" }],
+    [/^1 требует внимания$/, { ET: "1 vajab tähelepanu", EN: "1 needs attention" }],
+    [/^(\d+) требу(?:ет|ют) внимания$/, { ET: "$1 vajavad tähelepanu", EN: "$1 need attention" }],
+    [/^([€\d][\d\s  .,]*(?:\s?€)?) за 7 дней$/, { ET: "$1 7 päevaga", EN: "$1 over 7 days" }],
     /* «Аналитика» → «Магазин в поиске Google»: the four sentences that carry a
        live figure. Everything else in that block is a plain key above — only
        the numbers Google reports have to be spliced in here. */
@@ -9314,8 +9350,9 @@
        is set it stops following the panel — see admVoiceLang(). */
     voiceLang: "",
     admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded
-    /* The assistant is a floating button now, not a permanent third column —
-       so it starts closed, and admPanesSave() remembers it per machine. */
+    /* The assistant is not a permanent third column: it starts closed (a
+       52-px strip on a desktop, an icon in the phone's top bar — 1a), and
+       admPanesSave() remembers it per machine. */
     admAi: false,
     size: 0,
     qty: 1,
@@ -18940,13 +18977,14 @@
   ];
   /* «Ещё»: a bottom sheet on a phone, an inline group under a rule in the
      desktop sidebar. The fourth column is the one-line description the sheet
-     shows under the name. */
+     shows under the name — the fixed line; admMoreLine() puts a live one in
+     its place where the panel already holds the numbers (1a, screen 14). */
   var ADM_MORE = [
     ["people", "Клиенты", "customers", "и отзывы"],
     ["promos", "Маркетинг", "marketing", "промокоды · подарочные карты · письма"],
-    ["blog", "Блог", "blog", ""],
-    ["stats", "Аналитика", "analytics", ""],
-    ["apps", "Подключения", "integrations", ""],
+    ["blog", "Блог", "blog", "статьи для покупателей"],
+    ["stats", "Аналитика", "analytics", "продажи и посетители"],
+    ["apps", "Подключения", "integrations", "оплата, доставка, почта, Google"],
     ["setup", "Настройки", "settings", "доставка · главная · компания · цены · языки · журнал"]
   ];
   var ADM_SECTION_OF = {
@@ -19006,25 +19044,31 @@
   /* `title` names which of the admin-session screens this is — «Админка» by
      default, «Сканер» on /shop2/scan/ (scanner app), which shares the very
      same wait/login cards. */
-  function admHeader(title) {
-    return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
-      '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
-      '<span class="cohdr__t">' + (title || "Админка") + "</span>" +
-      '<span class="cohdr__langs" role="group" aria-label="Язык"> ' + LANGS.map(function (l) {
-        return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
-      }).join("") + "</span>" +
-      '<button class="link" data-go="home">← В магазин</button></div></div>';
+  /* 1a (README § 4): the thin site bar that stood above these cards — the
+     checkout's own header (.cohdr--adm), logo · «Админка» · RU ET EN · «← В
+     магазин» — is gone from the panel; the checkout keeps its header. What it
+     did before the panel is open moves under the card (admGateFootHTML), and
+     the card wears the wordmark itself, the way the design's sign-in does. */
+  /** REMPIRE, and the name of the door when it is not the panel's («Сканер»). */
+  function admGateMarkHTML(title) {
+    return '<div class="adm-gate__mark">REMPIRE' + (title ? " <span>" + title + "</span>" : "") + "</div>";
+  }
+  /** Under the sign-in card: the panel's language and the way back to the
+      shop — the two jobs of the removed bar a signed-out visitor still needs
+      (gap analysis F2/V2, «likely approved»). One function and one call, so
+      taking it out is one line. */
+  function admGateFootHTML() {
+    return '<div class="adm-gate__foot">' + admLangsHTML() +
+      '<button class="adm-link" type="button" data-go="home">Открыть магазин ↗</button></div>';
   }
   function admWaitScreen(title) {
-    return admHeader(title) +
-      '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
-        '<div class="adm-gate"><div class="adm-skel"><i></i><i></i><i></i></div>' +
+    return '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+        '<div class="adm-gate">' + admGateMarkHTML(title) + '<div class="adm-skel"><i></i><i></i><i></i></div>' +
         '<p class="adm-hint">Проверяем…</p></div></div></div></div></div>';
   }
   function admLoginScreen(title) {
-    return admHeader(title) +
-      '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
-        '<div class="adm-gate">' +
+    return '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+        '<div class="adm-gate">' + admGateMarkHTML(title) +
           '<h1 class="adm-h1">Вход в админку</h1>' +
           '<p class="adm-hint">Пароль владельца. Магазин работает и без входа — здесь только управление.</p>' +
           '<label class="adm-field">Пароль' +
@@ -19032,6 +19076,7 @@
           (SRV.err ? '<div class="err adm-err" role="alert">' + esc(SRV.err) + "</div>" : "") +
           '<button class="adm-btn" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
             (SRV.busy ? "Проверяем…" : "Войти") + "</button>" +
+          admGateFootHTML() +
         "</div></div></div></div></div>";
   }
 
@@ -21549,9 +21594,11 @@
   }
   function admSideHTML(waiting) {
     var fold = S.admNav ? "Свернуть меню" : "Развернуть меню";
+    /* 1a: the wordmark alone at the top. «Админка» beside it was the thin
+       top bar's word, and the bar is gone (README § 4). */
     return '<aside class="adm-side">' +
       '<div class="adm-side__top">' +
-        '<div class="adm-side__mark">REMPIRE <span>Админка</span></div>' +
+        '<div class="adm-side__mark">REMPIRE</div>' +
         '<button class="adm-side__fold" data-admnav aria-expanded="' + S.admNav + '" title="' + fold +
           '" aria-label="' + fold + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
           'stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
@@ -21573,34 +21620,48 @@
       ADM_SECTIONS.map(function (t) {
         var on = admSection() === t[0];
         return '<button class="adm-bar__i" data-admtab="' + t[0] + '" aria-current="' + on + '" title="' + t[1] + '">' +
-          admIcon(t[2], on, 24) + '<span>' + t[1] + "</span>" +
+          admIcon(t[2], on, 22) + '<span>' + t[1] + "</span>" +
           (t[0] === "orders" && waiting ? '<span class="adm-bar__b">' + waiting + "</span>" : "") + "</button>";
       }).join("") +
       '<button class="adm-bar__i" data-admmore aria-current="' + moreOn + '" title="Ещё">' +
-        admIcon("more", moreOn, 24) + "<span>Ещё</span></button></nav>";
+        admIcon("more", moreOn, 22) + "<span>Ещё</span></button></nav>";
   }
+  /* «Ещё» on a phone (1a, screen 14): the six sections that are not on the
+     bar, each with ONE line of what is waiting there, then the panel's
+     language and the two ways out. Still a sheet — its scrim, Back, Escape
+     and the Back layer «more» are what they were — but it stands ON the
+     tab bar rather than over it, so «Ещё» stays lit under it and the other
+     four places are one tap away, as on the design's page. */
   function admMoreSheetHTML() {
-    return '<button class="adm-scrim adm-scrim--phone" data-admmoreclose aria-label="Закрыть"></button>' +
-      '<div class="adm-sheet adm-sheet--phone" role="dialog" aria-modal="true" aria-label="Ещё">' +
+    return '<button class="adm-scrim adm-scrim--phone adm-scrim--more" data-admmoreclose aria-label="Закрыть"></button>' +
+      '<div class="adm-sheet adm-sheet--phone adm-more" role="dialog" aria-modal="true" aria-label="Ещё">' +
         '<div class="adm-sheet__grab"><i></i></div>' +
-        '<div class="adm-sheet__body">' + ADM_MORE.map(function (t) {
-          // aria-current, like every other nav item: the sheet has to say
-          // which section you are already in, and it is what the suite reads
-          return '<button class="adm-sheet__row" data-admtab="' + t[0] + '" aria-current="' +
-            (admSection() === t[0]) + '" title="' + t[1] + '">' +
-            '<span><span class="adm-row__nm">' + t[1] + "</span>" +
-            (t[3] ? '<span class="adm-row__sub">' + t[3] + "</span>" : "") + "</span>" +
-            '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
-        }).join("") +
-          /* the assistant, for the screens that hide its floating button —
-             while a save bar is the phone's header (admin.css ≤ 767) */
-          '<button class="adm-sheet__row" data-admai aria-expanded="' + !!S.admAi + '" title="Помощник">' +
-            '<span><span class="adm-row__nm">Помощник</span></span>' +
-            '<span class="adm-row__chev" aria-hidden="true">›</span></button>' +
+        '<div class="adm-sheet__body">' +
+          '<h2 class="adm-more__t">Ещё</h2>' +
+          ADM_MORE.map(function (t) {
+            var line = admMoreLine(t[0]);
+            // aria-current, like every other nav item: the sheet has to say
+            // which section you are already in, and it is what the suite reads
+            return '<button class="adm-sheet__row" data-admtab="' + t[0] + '" aria-current="' +
+              (admSection() === t[0]) + '" title="' + t[1] + '">' +
+              admIcon(t[2], false, 22) +
+              '<span class="adm-more__txt"><span class="adm-row__nm">' + t[1] + "</span>" +
+              (line[0] ? '<span class="adm-row__sub' + (line[1] ? " adm-row__sub--warn" : "") + '">' +
+                (line[2] ? admPiecesHTML(line[0]) : line[0]) + "</span>" : "") + "</span>" +
+              '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+          }).join("") +
+          /* No «Помощник» row (Dim, 25.09.2026, q12): the assistant's icon is
+             in the phone's top bar. While a save bar is the phone's header
+             (≤ 767, a screen not yet on autosave) that bar is not drawn, and
+             the assistant waits until the form is closed — the save bars go
+             as their screens move to autosave. */
         "</div>" +
-        '<div class="adm-sheet__foot">' + admLangsHTML() +
-          '<button class="adm-link" data-go="home">Магазин ↗</button>' +
-          admLogoutHTML() +
+        '<div class="adm-sheet__foot">' +
+          '<div class="adm-more__lang"><span>Язык панели</span>' + admLangsHTML() + "</div>" +
+          '<div class="adm-more__acts">' +
+            '<button class="adm-btn adm-btn--ghost" type="button" data-go="home">Открыть магазин ↗</button>' +
+            admLogoutHTML() +
+          "</div>" +
         "</div></div>";
   }
 
@@ -21954,10 +22015,9 @@
             '<path d="M9 6l6 6-6 6"/></svg><span class="adm-asst__x" aria-hidden="true">×</span></button></div>' +
         admAsstBodyHTML() + "</div>";
   }
-  function admFabHTML() {
-    return '<button class="adm-fab" data-admai aria-expanded="false" title="Помощник" aria-label="Помощник">' +
-      admIcon("assistant", true, 20) + '<span class="adm-fab__lbl">Помощник</span></button>';
-  }
+  /* 1a: no floating button any more — it sat on prices and buttons (the
+     owner's audit). Folded, the assistant is a 52-px strip on a desktop
+     (admStripHTML) and an icon in the phone's top bar (admTopHTML). */
   /* ---- a composed sentence, as ELEMENTS ------------------------------------
      THE RULE, and it is the same one payPiecesHTML() follows (13.09.2026):
      a sentence the panel ASSEMBLES at runtime — a label, then live values,
@@ -21996,15 +22056,28 @@
   }
   /** The confirm card as an overlay — a card over the page on a desktop, a
       sheet at the bottom on a phone. Actions that touch the shop or the money
-      go through this before anything happens. */
+      go through this before anything happens.
+
+      Direction 1a (README rule 4) — ONE sheet for money, mass e-mail and
+      deletes, and every confirm the panel already has adopts it here: the
+      title is the question, one sentence says what follows, the verb is on
+      the LEFT and «Не надо» — outlined — on the right. The verb is rust when
+      the action is one that cannot be walked back (`danger`: a refund, a
+      cancelled order, a deleted promo code, a product taken off sale, a
+      refused partner) and ink otherwise («Оплачен», «Отправлен» without a
+      label): rust says «this costs something», and a sheet where every verb
+      is rust says nothing. Bottom sheet on a phone with the home-indicator
+      inset, a centred dialog on a desktop (admin.css). Every data-* hook and
+      the pendingAction flow are the ones it always had. */
   function admConfirmHTML(a) {
-    // modal: Tab stays inside, Escape is «Отмена», focus lands on the card and
-    // goes back to the control that opened it (settleModalFocus / keydown)
-    return '<div class="adm-confirm" role="dialog" aria-modal="true" aria-label="Подтвердите изменение">' +
+    // modal: Tab stays inside, Escape is «Не надо», focus lands on the card and
+    // goes back to the control that opened it (settleModalFocus / keydown);
+    // the title names the dialog, so a reader hears the question first
+    return '<div class="adm-confirm" role="dialog" aria-modal="true" aria-labelledby="admconfirm-t">' +
       '<div class="adm-confirm__card">' +
         // txt(): the overlay twin of confirmCard()'s heading — the same card
         // lifted onto a scrim, so the same door in front of a model's object
-        '<div class="adm-confirm__t">' + esc(txt(a.title) || "Подтвердите изменение") + "</div>" +
+        '<div class="adm-confirm__t" id="admconfirm-t">' + esc(txt(a.title) || "Подтвердите изменение") + "</div>" +
         // admDetailHTML(), not esc() straight: the detail is assembled, and a
         // glued sentence is one the dictionary cannot reach — see the rule above
         '<div class="adm-confirm__d">' + admDetailHTML(txt(a.detail) || actionText(a)) + "</div>" +
@@ -22022,8 +22095,423 @@
         '<div class="adm-confirm__acts">' +
           '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
             esc(a.ok || "Применить") + "</button>" +
-          '<button class="adm-btn adm-btn--ghost" data-admcancel>Отмена</button>' +
+          '<button class="adm-btn adm-btn--ghost" data-admcancel>Не надо</button>' +
         "</div></div></div>";
+  }
+
+  /* ======================================================================
+     Direction 1a — the shared pieces.
+     design_handoff_admin_ux/README.md § 1 (six rules), § 2 (autosave),
+     § 3 (visual system), § 4 (the frame). Each piece is what every other
+     component of this panel is: a function that returns markup, and the CSS
+     of the same name in admin.css. The screens adopt them one by one; until a
+     screen does, it keeps its own controls, so nothing here changes what an
+     unmigrated screen does.
+
+       ADM_SAVE_POLICY, ADM_SAVE_IDLE_MS    when each kind of field saves
+       admAutosave(…)                       a field that saves itself
+       admSaveSlotHTML / ADM_SAVE           «Сохраняем… / Сохранено ✓ / Не сохранилось»
+       ADM_UNDO_WORD, ADM_UNDO_MS           the toast's undo (toast(), paintToast())
+       admConfirmHTML (above)               the one confirm sheet
+       admSecHeadHTML, admHelp*HTML         section header and its «?»
+       admFoldHTML                          an optional part, folded
+       admLangBarHTML, admLangFallback      RU / ET / EN tabs of a customer text
+       admPinnedHTML                        the ONE dark button
+       admTagHTML, admSegHTML               status tag, segmented control
+     ====================================================================== */
+
+  /* ---- the answers still owed by Dim: one place each ----------------------
+     README § 2 says «~600 ms after the last keystroke» for every field. A
+     price typed with one thumb passes through «1» on its way to «12», and a
+     shop that sells at 1 € for a second is a shop that sold at 1 €, so the
+     proposal waiting for Dim's answer is: numbers, codes and names save when
+     the owner LEAVES the box (blur or Enter), running text after a pause,
+     switches and picks at once. Change a word here and every field of that
+     kind follows.
+       leave   — on blur, or Enter in a one-line box;
+       idle    — ADM_SAVE_IDLE_MS after the last keystroke, and on blur;
+       instant — the moment it changes. */
+  var ADM_SAVE_POLICY = { money: "leave", code: "leave", name: "leave", count: "leave", text: "idle", toggle: "instant", pick: "instant" };
+  var ADM_SAVE_IDLE_MS = 1000;
+  /* The toast's undo (README rule 3 says «Вернуть» for 5 s). Six seconds is
+     what the panel has always given it: Renat reads slowly and a toast can
+     be three lines. The word and the time wait for Dim, here and only here. */
+  var ADM_UNDO_WORD = "Вернуть";
+  var ADM_UNDO_MS = 6000;
+  /** How long «Сохранено ✓» stays before it fades (the fade itself is CSS). */
+  var ADM_SAVE_SHOWN_MS = 2400;
+
+  /* ---------- a field that saves itself (README § 2) ------------------------
+     One scheduler for every field a screen hands it, keyed by a name the
+     screen chooses («order:R-100042:note»). The screen says what KIND of
+     field it is (ADM_SAVE_POLICY decides when it goes), how to SEND a value
+     — its own existing write, through apiSend() to the route it already
+     uses; this adds no endpoint — and, if it wants, how to VALIDATE one.
+     The rest is here:
+       · a value that does not pass is not sent: the box gets the rust edge
+         (aria-invalid) and one line under it (admAutosaveHintHTML), and it
+         goes the moment it is right;
+       · one write per field at a time — a newer value waits for the one in
+         flight and follows it, so the server ends on the last thing typed;
+       · «Сохранено ✓» only after the server answered 2xx; a refusal or a dead
+         connection leaves the field owed and puts «Не сохранилось — проверьте
+         интернет · Повторить» in the header until a retry lands;
+       · whatever is still owed goes on Back (admCloseTop), on the nav
+         (admGoTab), when a card opens or closes (renderImpl notices the view
+         change) and when the page is hidden — then `keepalive`, for the
+         phone locked mid-word;
+       · a 401 is the session, not the internet: the login card, as srvSaved.
+     `send(value, opts)` returns what apiSend() returns (a promise of
+     {status, body}) or a promise of true/false; `opts.keepalive` is set when
+     the page is going away. */
+  var ADM_AS = {};        // key → the field's record
+  var ADM_AS_SPEC = {};   // key → { kind, send, validate } for a [data-autosave] box
+  var ADM_SAVE = { state: "idle", busy: 0, fade: 0 };
+
+  function admAutosavePolicy(kind) { return ADM_SAVE_POLICY[kind] || "leave"; }
+  /** A screen names a `data-autosave="key"` box while it draws it; the
+      listeners at the bottom of this block do the rest. Returns the key. */
+  function admAutosaveSpec(key, spec) { ADM_AS_SPEC[key] = spec; return key; }
+  /** The one entry point. `ev` is what just happened to the field: "input"
+      (a keystroke), "change" (a switch, a pick), "blur", "enter" or "flush".
+      Only "input" and "change" carry a new value; the others send what is
+      owed. Returns true when a write went out (or was queued behind one). */
+  function admAutosave(key, value, ev, spec) {
+    var f = ADM_AS[key];
+    if (!f) f = ADM_AS[key] = { key: key, value: undefined, saved: undefined, dirty: false, busy: false, again: false, failed: false, timer: 0, err: "" };
+    spec = spec || ADM_AS_SPEC[key];
+    if (spec) { f.kind = spec.kind; f.send = spec.send; f.validate = spec.validate || null; }
+    if (!f.send) return false;
+    if ((ev === "input" || ev === "change") && value !== f.value) { f.value = value; f.dirty = true; }
+    clearTimeout(f.timer); f.timer = 0;
+    if (!f.dirty) return false;
+    var policy = admAutosavePolicy(f.kind);
+    if (ev === "input" && policy === "leave") return false;   // waits for blur or Enter
+    if (ev === "input" && policy === "idle") {
+      f.timer = setTimeout(function () { f.timer = 0; admAutosaveSend(f, null); }, ADM_SAVE_IDLE_MS);
+      return false;
+    }
+    return admAutosaveSend(f, null);
+  }
+  function admAutosaveSend(f, opts) {
+    var hint = "";
+    try { hint = f.validate ? String(f.validate(f.value) || "") : ""; } catch (e) { hint = ""; }
+    if (hint !== f.err) { f.err = hint; admAutosaveMark(f.key, hint); }
+    if (hint) return false;                          // not sent: it goes once it is right
+    if (f.busy) { f.again = true; return true; }     // the write in flight goes first
+    // typed back to what the server already holds: nothing to send
+    if (!f.failed && f.saved !== undefined && f.value === f.saved) { f.dirty = false; return false; }
+    var v = f.value, p;
+    f.dirty = false; f.busy = true;
+    admSaveBegin();
+    try { p = f.send(v, opts || {}); } catch (e) { p = null; }
+    Promise.resolve(p).then(function (r) { admAutosaveDone(f, v, r); }, function () { admAutosaveDone(f, v, null); });
+    return true;
+  }
+  /** What counts as «saved»: a 2xx the route did not refuse in its body. */
+  function admAutosaveOk(r) {
+    if (r === true) return true;
+    return !!r && typeof r.status === "number" && r.status >= 200 && r.status < 300 && !(r.body && r.body.ok === false);
+  }
+  function admAutosaveDone(f, v, r) {
+    f.busy = false;
+    if (admAutosaveOk(r)) { f.saved = v; f.failed = false; }
+    else {
+      f.failed = true;
+      if (f.value === v) f.dirty = true;   // the same value is still owed
+      if (r && r.status === 401) { SRV.admin = false; toast("Нужен вход в админку — изменение не сохранилось"); render(); }
+    }
+    if (f.again) { f.again = false; if (f.dirty || f.value !== v) { f.dirty = true; admAutosaveSend(f, null); } }
+    admSaveEnd();
+  }
+  function admSaveFailedN() {
+    var n = 0;
+    for (var k in ADM_AS) if (Object.prototype.hasOwnProperty.call(ADM_AS, k) && ADM_AS[k].failed) n++;
+    return n;
+  }
+  /** «Повторить»: every write that did not land goes again, newest value first. */
+  function admSaveRetry() {
+    var n = 0;
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k) || !ADM_AS[k].failed) continue;
+      ADM_AS[k].dirty = true;
+      if (admAutosaveSend(ADM_AS[k], null)) n++;
+    }
+    return n;
+  }
+  /** Everything still owed goes now — Back, the nav, a card closing, the page
+      going away (`keepalive`). A value that does not pass stays where it is. */
+  function admAutosaveFlush(keepalive) {
+    var n = 0;
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k)) continue;
+      var f = ADM_AS[k];
+      clearTimeout(f.timer); f.timer = 0;
+      if (f.dirty && admAutosaveSend(f, keepalive ? { keepalive: true } : null)) n++;
+    }
+    return n;
+  }
+
+  /* ---------- «Сохраняем… → Сохранено ✓», one status for the panel ---------
+     idle | saving | saved | error, painted IN PLACE into every
+     [data-admsavest] slot — the phone's top bar and the desktop's page header
+     both have one — so a write landing never re-renders the form under the
+     caret. «Сохранено ✓» fades after ADM_SAVE_SHOWN_MS; an error stays until
+     «Повторить» (or a later write of the same field) lands. No live region:
+     the toast is the one thing in the panel that announces itself. */
+  function admSaveBegin() { ADM_SAVE.busy++; clearTimeout(ADM_SAVE.fade); admSaveSet("saving"); }
+  function admSaveEnd() {
+    ADM_SAVE.busy = Math.max(0, ADM_SAVE.busy - 1);
+    if (ADM_SAVE.busy) return;
+    if (admSaveFailedN()) { admSaveSet("error"); return; }
+    admSaveSet("saved");
+    clearTimeout(ADM_SAVE.fade);
+    ADM_SAVE.fade = setTimeout(function () { if (ADM_SAVE.state === "saved") admSaveSet("idle"); }, ADM_SAVE_SHOWN_MS);
+  }
+  function admSaveSet(state) {
+    if (ADM_SAVE.state === state) return;
+    ADM_SAVE.state = state;
+    admSavePaint();
+  }
+  function admSaveStatusHTML() {
+    var s = ADM_SAVE.state;
+    if (s === "saving") return '<span class="adm-savest__t">Сохраняем…</span>';
+    if (s === "saved") return '<span class="adm-savest__t adm-savest__t--ok">Сохранено ✓</span>';
+    if (s === "error") {
+      return '<span class="adm-savest__t adm-savest__t--err">Не сохранилось — проверьте интернет</span>' +
+        '<button class="adm-savest__retry" type="button" data-admsaveretry>Повторить</button>';
+    }
+    return "";
+  }
+  /** One slot of the status; `cls` says where it stands. */
+  function admSaveSlotHTML(cls) {
+    return '<span class="adm-savest ' + cls + '" data-admsavest data-st="' + ADM_SAVE.state + '">' + admSaveStatusHTML() + "</span>";
+  }
+  function admSavePaint() {
+    if (typeof document === "undefined") return;
+    var html = admSaveStatusHTML(), nodes = document.querySelectorAll("[data-admsavest]");
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].setAttribute("data-st", ADM_SAVE.state);
+      nodes[i].innerHTML = html;
+      translateTree(nodes[i]);
+    }
+  }
+  /** `[attr="key"]` for a key a screen chose. */
+  function admAsSel(attr, key) { return "[" + attr + '="' + String(key).replace(/["\\]/g, "\\$&") + '"]'; }
+  /** The rust edge and the one line under a box whose value was refused, in place. */
+  function admAutosaveMark(key, hint) {
+    if (typeof document === "undefined") return;
+    var el = document.querySelector(admAsSel("data-autosave", key));
+    if (el) { if (hint) el.setAttribute("aria-invalid", "true"); else el.removeAttribute("aria-invalid"); }
+    var h = document.querySelector(admAsSel("data-ashint", key));
+    if (h) { h.textContent = hint ? trText(hint, S.lang) : ""; h.hidden = !hint; }
+  }
+  /** …and the same two, drawn by the screen, so a render keeps them. */
+  function admAutosaveHintHTML(key) {
+    var f = ADM_AS[key], hint = f ? f.err : "";
+    return '<span class="adm-ashint" data-ashint="' + esc(key) + '"' + (hint ? "" : " hidden") + ">" + esc(hint) + "</span>";
+  }
+  function admAutosaveInvalidAttr(key) {
+    var f = ADM_AS[key];
+    return f && f.err ? ' aria-invalid="true"' : "";
+  }
+  /* The boxes a screen marked `data-autosave="key"` (and named with
+     admAutosaveSpec) are wired here, once, for the whole panel. */
+  function admAsTarget(e) {
+    var el = e && e.target;
+    if (!el || !el.getAttribute || S.screen !== "admin") return null;
+    var key = el.getAttribute("data-autosave");
+    return key && (ADM_AS_SPEC[key] || ADM_AS[key]) ? el : null;
+  }
+  function admAsValue(el) { return el.type === "checkbox" ? !!el.checked : el.value; }
+  if (typeof document !== "undefined") {
+    document.addEventListener("input", function (e) {
+      var el = admAsTarget(e);
+      if (el) admAutosave(el.getAttribute("data-autosave"), admAsValue(el), "input");
+    });
+    document.addEventListener("change", function (e) {
+      var el = admAsTarget(e);
+      if (el) admAutosave(el.getAttribute("data-autosave"), admAsValue(el), "change");
+    });
+    document.addEventListener("focusout", function (e) {
+      var el = admAsTarget(e);
+      if (el) admAutosave(el.getAttribute("data-autosave"), admAsValue(el), "blur");
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing) return;
+      var el = admAsTarget(e);
+      if (el && el.tagName === "INPUT") admAutosave(el.getAttribute("data-autosave"), admAsValue(el), "enter");
+    });
+    window.addEventListener("pagehide", function () { admAutosaveFlush(true); });
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") admAutosaveFlush(true);
+    });
+  }
+
+  /* ---------- «?» — the help behind a section title (README rule 5) --------
+     No grey paragraphs under every block: a round «?» beside the section's
+     title opens ONE short paragraph on the soft panel directly under it. Open
+     or shut is remembered for the session (sessionStorage), per key. The
+     button is 44 px on a phone around a 26-px circle. */
+  var ADM_HELP_SS = "rempire-admin-help", ADM_FOLD_SS = "rempire-admin-folds";
+  function admSessRead(name) {
+    try { var v = JSON.parse(sessionStorage.getItem(name) || "{}"); return v && typeof v === "object" ? v : {}; }
+    catch (e) { return {}; }
+  }
+  function admSessWrite(name, v) { try { sessionStorage.setItem(name, JSON.stringify(v)); } catch (e) {} }
+  var ADM_HELP = admSessRead(ADM_HELP_SS), ADM_FOLD = admSessRead(ADM_FOLD_SS);
+  /** An id for a key a screen chose, safe inside `id` and `aria-controls`. */
+  function admDomId(prefix, key) { return prefix + String(key).replace(/[^A-Za-z0-9_-]/g, "_"); }
+  function admHelpBtnHTML(key) {
+    var open = !!ADM_HELP[key];
+    return '<button class="adm-help" type="button" data-admhelp="' + esc(key) + '" aria-expanded="' + open +
+      '" aria-controls="' + admDomId("admhelp-", key) + '"><span class="adm-help__c" aria-hidden="true">?</span>' +
+      '<span class="vh">Подсказка</span></button>';
+  }
+  /** `text` is one short paragraph, Russian, a whole dictionary key. */
+  function admHelpHTML(key, text) {
+    return '<div class="adm-helpp" id="' + admDomId("admhelp-", key) + '"' + (ADM_HELP[key] ? "" : " hidden") + ">" + text + "</div>";
+  }
+  function admHelpToggle(key) {
+    if (ADM_HELP[key]) delete ADM_HELP[key]; else ADM_HELP[key] = 1;
+    admSessWrite(ADM_HELP_SS, ADM_HELP);
+    return !!ADM_HELP[key];
+  }
+  /** A section's header: 12-px capitals over a 1-px ink rule; with `helpKey`
+      the «?» stands at its right and the paragraph under the rule. `extra` is
+      markup for the row's right side (a link, a count). */
+  function admSecHeadHTML(title, helpKey, helpText, extra) {
+    return '<div class="adm-sech"><h2 class="adm-sech__t">' + title + "</h2>" + (extra || "") +
+      (helpKey ? admHelpBtnHTML(helpKey) : "") + "</div>" +
+      (helpKey ? admHelpHTML(helpKey, helpText) : "");
+  }
+
+  /* ---------- a fold: the optional part of a screen (README § 1) -----------
+     Title, a one-line summary of what is inside, a chevron. A <button> with
+     aria-expanded, so Enter and Space open it and a reader hears the state;
+     open or shut is remembered for the session, per key. Required parts are
+     never folded — that is the screen's choice, not this helper's. */
+  function admFoldHTML(key, title, summary, body) {
+    var open = !!ADM_FOLD[key], id = admDomId("admfold-", key);
+    return '<div class="adm-fold' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-fold__h" type="button" data-admfold="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
+        '<span class="adm-fold__t">' + title + "</span>" +
+        (summary ? '<span class="adm-fold__s">' + summary + "</span>" : "") +
+        '<svg class="adm-fold__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="1.8" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+      "</button>" +
+      '<div class="adm-fold__b" id="' + id + '"' + (open ? "" : " hidden") + ">" + body + "</div></div>";
+  }
+  function admFoldToggle(key) {
+    if (ADM_FOLD[key]) delete ADM_FOLD[key]; else ADM_FOLD[key] = 1;
+    admSessWrite(ADM_FOLD_SS, ADM_FOLD);
+    return !!ADM_FOLD[key];
+  }
+
+  /* ---------- the ONE dark button (README rule 2) --------------------------
+     A screen has at most one filled ink button — the next step. It is drawn
+     once, where the desktop wants it (the page header, right), and admin.css
+     pins the same element above the tab bar on a phone; renderImpl sets
+     body.adm-pinned so the page and the toast make room for it. `attrs` is
+     the screen's own data-* hook. Empty by default: no screen uses it yet. */
+  function admPinnedHTML(attrs, label) {
+    return '<div class="adm-pin"><button class="adm-btn adm-pin__btn" type="button"' + (attrs ? " " + attrs : "") + ">" + label + "</button></div>";
+  }
+
+  /* ---------- status tag (README § 3) -------------------------------------
+     A small outlined label: `ok` green (Доставлен, В наличии), `low` rust
+     outline (мало, возврат), `alert` rust fill (нет, нужно действие), `next`
+     ink fill (Отправить), `quiet` grey, `plain` ink outline. The words are the
+     caller's — a state is never told by colour alone. */
+  var ADM_TAG_KIND = { ok: "adm-badge--ok", low: "adm-badge--warn", alert: "adm-badge--warnfill", next: "adm-badge--ink", quiet: "adm-badge--quiet", plain: "" };
+  function admTagHTML(kind, text) {
+    var k = ADM_TAG_KIND[kind] || "";
+    return '<span class="adm-badge adm-tag' + (k ? " " + k : "") + '">' + text + "</span>";
+  }
+
+  /* ---------- the phone's frame: top bar and «Ещё» (README § 4) -------------
+     The thin site bar (logo · АДМИНКА · RU/ET/EN · ← В магазин) is gone: it
+     was the checkout's header reused and repeated the nav. On a phone its
+     place is taken by the panel's own bar — «← back» inside a card (the same
+     step the phone's Back takes, admCloseTop) or the wordmark, the save
+     status, and the assistant's icon. A desktop has the sidebar instead. */
+  /** What the top bar's «←» goes back to — the card on top, in the words its
+      own back link uses — or "" at a section's front door. */
+  var ADM_TOP_BACK = {
+    edit: "Товары", customer: "Все клиенты", mail: "Все письма", setpage: "Настройки",
+    blog: "Блог", news: "Рассылка", moves: "Склад"
+  };
+  function admTopBackLabel() {
+    var l = admLayers();
+    for (var i = l.length - 1; i >= 0; i--) {
+      if (l[i] === "section") return "";
+      if (l[i] === "order") return S.admCustOpen ? "К клиенту" : "Заказы";
+      if (ADM_TOP_BACK[l[i]]) return ADM_TOP_BACK[l[i]];
+    }
+    return "";
+  }
+  function admTopHTML() {
+    var back = admTopBackLabel();
+    return '<div class="adm-top">' +
+      (back
+        ? '<button class="adm-top__back" type="button" data-admtopback>← <span>' + back + "</span></button>"
+        : '<span class="adm-top__mark">REMPIRE</span>') +
+      admSaveSlotHTML("adm-savest--top") +
+      '<button class="adm-top__ai adm-aiopen" type="button" data-admai aria-expanded="' + !!S.admAi +
+        '" title="Помощник" aria-label="Помощник">' + admIcon("assistant", false, 18) + "</button>" +
+      "</div>";
+  }
+  /** The desktop's assistant, folded: a 52-px strip down the right edge — the
+      column never floats over the work, open or shut (README rule 6). */
+  function admStripHTML() {
+    return '<button class="adm-strip adm-aiopen" type="button" data-admai aria-expanded="false" title="Открыть помощника">' +
+      '<span class="adm-strip__i" aria-hidden="true">' + admIcon("assistant", false, 16) + "</span>" +
+      '<span class="adm-strip__l">Помощник</span></button>';
+  }
+  /** After the assistant opens or folds: the focus goes to its fold button
+      when it is open, and back to whichever opener this viewport shows when it
+      is shut. The first [data-admai] in the page is not it — on a desktop
+      that is the phone's top bar, which is not drawn. */
+  function admAiRefocus() {
+    var pick = function (sel) {
+      var list = document.querySelectorAll(sel);
+      for (var i = 0; i < list.length; i++) if (list[i].getClientRects().length) return list[i];
+      return null;
+    };
+    var el = (S.admAi && pick(".adm-asst__fold")) || pick(".adm-aiopen");
+    if (el) el.focus();
+  }
+  /** The line under each «Ещё» row, from what the panel has already loaded
+      (the «Обзор» summary is asked for at start-up — nothing is fetched for
+      this, see 7301d1d); where nothing is loaded, what the section holds.
+      Returns [text, needs attention, live] — a live line is composed, so it
+      reaches the page in pieces (admPiecesHTML); a fixed one is one key. */
+  function admMoreLine(key) {
+    var o = OVERVIEW.data, a = o && o.attention;
+    if (key === "people" && a && (a.proRequests || a.reviewsPending)) {
+      var bits = [];
+      if (a.proRequests) bits.push(a.proRequests + " " + pl(a.proRequests, "заявка", "заявки", "заявок"));
+      if (a.reviewsPending) bits.push(a.reviewsPending + " " + pl(a.reviewsPending, "отзыв", "отзыва", "отзывов"));
+      return [bits.join(" · "), true, true];
+    }
+    if (key === "stats" && o && o.revenue7d && typeof o.revenue7d.total === "number") {
+      return [eur(o.revenue7d.total) + " за 7 дней", false, true];
+    }
+    /* …and the two counts GET /api/admin/overview carries for this list
+       (src/lib/overview-extras.ts; Dim, 25.09.2026, q13) */
+    var b = o && o.blog;
+    if (key === "blog" && b && (b.published || b.drafts)) {
+      var posts = [];
+      if (b.published) posts.push(b.published + " " + pl(b.published, "статья", "статьи", "статей"));
+      if (b.drafts) posts.push(b.drafts + " " + pl(b.drafts, "черновик", "черновика", "черновиков"));
+      return [posts.join(" · "), false, true];
+    }
+    var ig = o && o.integrations;
+    if (key === "apps" && ig && ig.problems > 0) {
+      return [ig.problems + " " + pl(ig.problems, "требует внимания", "требуют внимания", "требуют внимания"), true, true];
+    }
+    for (var i = 0; i < ADM_MORE.length; i++) if (ADM_MORE[i][0] === key) return [ADM_MORE[i][3], false, false];
+    return ["", false, false];
   }
 
   /* The panel, in one shell: sections down the left (a 232-px sidebar that
@@ -22084,15 +22572,22 @@
     else if (tab === "setup") body = admSetupHTML();
     else body = admOverviewHTML();
 
-    return admHeader("Админка") +
-      '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") + '">' +
+    /* 1a (README § 4): no site bar above the panel. A phone gets the panel's
+       own top bar (admTopHTML — hidden by admin.css on a desktop, where the
+       sidebar carries the logo, the language and the ways out); the page
+       column carries the save status at its top right on a desktop
+       (.adm-pagest); the assistant is its pane or, folded, its strip. */
+    return '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") + '">' +
+        admTopHTML() +
         '<div class="adm2__frame">' +
           admSideHTML(waiting) +
-          '<div class="adm-main"><div class="adm-page' + (admEnterClass() ? " adm-page--enter" : "") + '">' + body + "</div></div>" +
+          '<div class="adm-main"><div class="adm-page' + (admEnterClass() ? " adm-page--enter" : "") + '">' +
+            '<div class="adm-pagest">' + admSaveSlotHTML("adm-savest--page") + "</div>" +
+            body + "</div></div>" +
         "</div>" +
         admBarHTML(waiting) +
         (S.admMore ? admMoreSheetHTML() : "") +
-        (S.admAi ? admAsstHTML() : admFabHTML()) +
+        (S.admAi ? admAsstHTML() : admStripHTML()) +
         (pendingAction && pendingAction.overlay ? admConfirmHTML(pendingAction) : "") +
       "</div>";
     // inventory: the scanner overlay is NOT part of this string — a <video>
@@ -22205,7 +22700,14 @@
       return "<span>" + w + "</span>";
     }).join("") + "</span>";
   }
-  function admLangBarHTML(attr, items, cur, label, stateOf, note) {
+  /* 1a (README § 1, «three languages for anything the customer reads»): the
+     same strip, drawn as three equal tabs in a 1-px ink frame with the state
+     word under each name — «есть текст» / «как русский» / «пусто»
+     (admLangFallback) — and, when the caller passes `opts.translate` (the
+     markup of its own «Перевести с русского» button, with its own data-*
+     hook), that button right under the tabs. Every existing caller keeps its
+     own state words and its own note; the look is admin.css's. */
+  function admLangBarHTML(attr, items, cur, label, stateOf, note, opts) {
     return '<div class="adm-langbar">' +
       '<div class="adm-langbar__l">' + label + "</div>" +
       '<div class="adm-seg adm-seg--lang" role="group" aria-label="' + label + '">' + items.map(function (x) {
@@ -22214,8 +22716,19 @@
           '<span class="adm-seg__slot" data-langst="' + esc(x[0]) + '">' +
             admLangStateHTML(stateOf ? stateOf(x[0]) : null) + "</span></button>";
       }).join("") + "</div>" +
+      (opts && opts.translate ? '<div class="adm-langbar__tr">' + opts.translate + "</div>" : "") +
       (note ? '<p class="adm-hint adm-langbar__n">' + note + "</p>" : "") +
       "</div>";
+  }
+  /** The state of one language of a text the customer reads. An empty
+      Estonian or English text is shown to the customer in Russian (README
+      § 1), so it is «как русский» — not «пусто» — while there is a Russian one
+      to fall back to; a copy of the Russian word for word is the same thing. */
+  function admLangFallback(code, text, ru) {
+    var t = String(text == null ? "" : text).trim(), r = String(ru == null ? "" : ru).trim();
+    if (String(code).toUpperCase() === "RU") return t ? ["есть текст"] : ["пусто"];
+    if (!t) return r ? ["как русский"] : ["пусто"];
+    return t === r ? ["как русский"] : ["есть текст"];
   }
   /** The one line every language strip outside the blog carries. */
   var LANG_BAR_NOTE = "Это язык текста, а не язык панели — у каждого языка свой текст.";
@@ -28238,14 +28751,21 @@
         '<span class="adm-hint" data-heromax' + (n >= 5 ? "" : " hidden") + ">Максимум 5 слайдов — удалите один, чтобы добавить новый</span>" +
         '<button class="adm-link adm-link--muted" data-heroreset>Сбросить к стандартному</button></div>';
   }
-  /** Bring an element up to just under the shop's sticky header — the header
-      is `position: sticky` at `--cohdrh`, so a plain scrollIntoView({block:
-      "start"}) parks the element's first line behind it. */
+  /** Bring an element up to just under the panel's sticky top bar — on a
+      phone `.adm-top` is `position: sticky` at the top, so a plain
+      scrollIntoView({block: "start"}) parks the element's first line behind
+      it. On a desktop the bar is not drawn and its bottom is 0. (It used to
+      read the height of the shop's header the panel wore until 1a.) */
   function admScrollUnderHeader(el, onlyIfHidden) {
     if (!el || !el.getBoundingClientRect) return;
     var hdr = 0;
-    try { hdr = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--cohdrh"), 10) || 0; }
-    catch (e) { hdr = 0; }
+    try {
+      var bar = document.querySelector(".adm-top");
+      hdr = bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0;
+      // …or the save bar, where it is the phone's header (≤ 767, admin.css)
+      var sb = document.querySelector(".adm-savebar"), sbr = sb && sb.getBoundingClientRect();
+      if (sbr && sbr.top <= 1 && sbr.bottom > hdr) hdr = Math.round(sbr.bottom);
+    } catch (e) { hdr = 0; }
     var r = el.getBoundingClientRect();
     // «it is already on screen» — never move a page that does not need moving
     if (onlyIfHidden && r.top >= hdr && r.bottom <= (window.innerHeight || 0)) return;
@@ -39853,8 +40373,19 @@
     for (i = n; i < tc.length; i++) from.appendChild(tc[i]);
   }
 
+  /* 1a autosave: the view the last render drew — a card opened or closed, a
+     section changed, the panel left. A change of it sends whatever a field
+     still owes (admAutosaveFlush) before the box it was typed in is gone. */
+  var admAsView = "";
+  function admAsViewKey() {
+    if (S.screen !== "admin") return S.screen;
+    return [S.adminTab, S.adminOrder || "", S.adminEdit || "", S.admCustOpen || "", S.mailOpen ? 1 : 0,
+      S.admSetPage || "", S.adminBlogEdit ? 1 : 0, S.newsEdit ? 1 : 0, S.stockMovesOpen ? 1 : 0].join("|");
+  }
   function renderImpl() {
     var body;
+    var asView = admAsViewKey();
+    if (asView !== admAsView) { admAsView = asView; admAutosaveFlush(); }
     syncAppManifest();
     // scanner app: decide (before the body is built) whether the standalone
     // scanner should be up — the mount hook at the bottom acts on the flag
@@ -40076,6 +40607,9 @@
        while it stands — admBarObserve(). */
     document.documentElement.classList.toggle("adm-saving", !!savebar);
     admBarObserve(savebar);
+    /* …and the ONE dark button pinned above the tab bar (admPinnedHTML): the
+       page and the toast make room for it on a phone. */
+    document.body.classList.toggle("adm-pinned", S.screen === "admin" && !!bodySlot.querySelector(".adm-pin"));
     /* …and the assistant sheet, while it is open on a phone, is sized by
        the visual viewport — the keyboard is what it must keep clear of
        (admVvFollow, beside admBarTouch). Run here because the sheet
@@ -40094,11 +40628,6 @@
     mountChat();
     translatePage();
     setHead();
-    // the scanner route wears the same header on its wait/login cards
-    if (S.screen === "admin" || S.screen === "scan") {
-      var coh = document.querySelector(".cohdr");
-      if (coh) document.documentElement.style.setProperty("--cohdrh", coh.offsetHeight + "px");
-    }
 
     if (S.screen === "catalog") observeSentinel();
     // features: real reviews and the moderation queue are fetched once each
@@ -40679,6 +41208,8 @@
   }
   /** Closes the topmost layer. False when there was nothing to close. */
   function admCloseTop() {
+    // whatever a field still owes goes before the screen it stands on (1a autosave)
+    admAutosaveFlush();
     var top = admLayers().pop();
     if (!top) return false;
     if (top === "section") admTrailBack();
@@ -40774,6 +41305,7 @@
       had (ADM_SECTION_OF) — the `data-admtab` handler, once nothing unsaved
       stands in the way. */
   function admGoTab(go) {
+    admAutosaveFlush();   // 1a: a field left owing goes before the section changes
     var tab = go.tab;
     // the product editor closes the way «← Товары» closes it: its drafts go with it
     if (S.adminEdit) {
@@ -40931,11 +41463,10 @@
     toastSlot.innerHTML = !S.toast ? ""
       : admin
         ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + esc(S.toast) + "</span>" +
-          (S.toastUndo ? '<button class="adm-toast__undo" data-admtoastundo>Отменить</button>' : "") +
+          // the word is ADM_UNDO_WORD — «Вернуть» (1a), one place to change it
+          (S.toastUndo ? '<button class="adm-toast__undo" data-admtoastundo>' + ADM_UNDO_WORD + "</button>" : "") +
           '<button class="adm-toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
         : '<div class="toast" role="status"><span>' + esc(S.toast) + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>';
-    // the assistant button steps aside while the bar is up — see admin.css
-    try { document.body.classList.toggle("adm-toasting", !!S.toast && admin); } catch (e) {}
     translateTree(toastSlot);
   }
   function refocus(sel) {
@@ -40953,7 +41484,7 @@
     S.toast = msg; S.toastUndo = undo && undo.prev ? undo : null;
     paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, S.toastUndo ? 6000 : 2600);
+    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, S.toastUndo ? ADM_UNDO_MS : 2600);
   }
   /** Take the standing toast down now, before its timer is up. */
   function toastOff() {
@@ -41205,7 +41736,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -41469,8 +42000,16 @@
     if (d.admai !== undefined) {
       S.admAi = !S.admAi;
       if (t.closest(".adm-sheet--phone")) S.admMore = false;   // opened from «Ещё»: the sheet gives way
-      admPanesSave(); render(); refocus("[data-admai]"); return;
+      admPanesSave(); render(); admAiRefocus(); return;
     }
+    /* 1a: the phone top bar's «← …» — the very step the phone's own Back
+       takes (admCloseTop), so the two can never disagree about where it goes */
+    if (d.admtopback !== undefined) { if (admCloseTop()) render(); return; }
+    // «Не сохранилось — проверьте интернет · Повторить»
+    if (d.admsaveretry !== undefined) { admSaveRetry(); return; }
+    // «?» beside a section title, and a fold row: open or shut, remembered for the session
+    if (d.admhelp !== undefined) { admHelpToggle(d.admhelp); render(); refocus(admAsSel("data-admhelp", d.admhelp)); return; }
+    if (d.admfold !== undefined) { admFoldToggle(d.admfold); render(); refocus(admAsSel("data-admfold", d.admfold)); return; }
     // the phone «Ещё» sheet
     if (d.admmore !== undefined) { S.admMore = true; render(); return; }
     if (d.admmoreclose !== undefined) { S.admMore = false; render(); return; }
@@ -44619,7 +45158,7 @@
          not put away a pane the owner keeps open while he works */
       else if (S.admAi && S.screen === "admin" && (admAsstSheet() ||
           (document.activeElement && document.activeElement.closest && document.activeElement.closest(".adm-asst")))) {
-        S.admAi = false; admPanesSave(); render(); refocus("[data-admai]");
+        S.admAi = false; admPanesSave(); render(); admAiRefocus();
       }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;

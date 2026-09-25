@@ -215,6 +215,8 @@ function panel(opts: { dirty: boolean; confirmBack?: boolean }): Layers {
     var ADM_TRAIL = [], pendingAction = null, BLOGSEL = {}, BLOGCARET = {}, AI_UNDO = null;
     var GAL = { id: "" };
     function admTrailBack() {}
+    // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+    function admAutosaveFlush() {}
     function closeScannerState() {}
     function goodsBackToRow() {}
     function vidReset() {}

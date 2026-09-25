@@ -55,6 +55,8 @@ function panel(): Panel {
     `var GAL = { id: "" }, AI_UNDO = null, BLOGSEL = null, BLOGCARET = null;
      function render() {}
      function refocus() {}
+     // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+     function admAutosaveFlush() {}
      function vidReset() {}
      function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
      function blogReadForm() {}

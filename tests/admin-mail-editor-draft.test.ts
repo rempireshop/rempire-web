@@ -93,6 +93,8 @@ function editor(loaded = true): Env {
      function refocus() {}
      function toast() {}
      function admPanesSave() {}
+     // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+     function admAutosaveFlush() {}
      function mailSendToast() {}
      function vidReset() {}
      function goodsEditDirty() { return false; }

@@ -67,6 +67,8 @@ function panel(opts: { dirtyNews?: boolean } = {}): Panel {
     var ADM_TRAIL = [], ADM_SEEN = "", pendingAction = null;
     ${decl("ADM_SECTION_OF")}
     function closeScannerState() {}
+    // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
+    function admAutosaveFlush() {}
     function goodsBackToRow() {}
     function newsDirty() { return DIRTY; }
     function newsCloseEditor() { S.newsEdit = null; S.newsConfirmBack = false; onClose(); }

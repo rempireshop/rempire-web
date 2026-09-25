@@ -13,14 +13,33 @@
    see is an invalid `calc()` — which drops the whole declaration and throws
    the bar off screen. Every name is `--a-*`, so nothing here can collide with
    the storefront's own tokens in styles.css. */
+/* ---------- direction 1a (design_handoff_admin_ux README § 3) ----------------
+   «Keep today's ink/paper look, calmer.» The named colours of the handoff are
+   the first block; the names every screen already uses are mapped onto them
+   below it, so a screen that has not been migrated yet takes the new palette
+   without an edit of its own.
+     · muted stays #6f6b57 — ink at ≈ 63 % over paper. The handoff says 60 %
+       (#767464), which falls to 4.2 : 1 on the soft panel and fails the AA
+       line the axe sweep holds every admin screen to; 63 % keeps 4.8 : 1.
+     · hairlines are ink at ≈ 12 % written out as a solid colour, because the
+       same token also fills (chart bars, a disabled glyph) and an rgba one
+       would change shade on every ground it lands on. */
 :root {
-  --a-paper: #ffffff;
-  --a-tint: #f6f4ee;
-  --a-rule: #e5e1d6;
   --a-ink: #1c1a00;
+  --a-paper: #fdfcf9;        /* the page */
+  --a-panel: #f4f2ec;        /* soft panel: the «?» help, a lit row, a quiet fill */
+  --a-canvas: #e6e3da;       /* bars, skeletons, the grab handle */
+  --a-rust: #8b4a2b;         /* danger and attention */
+  --a-green: #2f5b45;        /* ok and «Сохранено ✓» */
+  --a-onink: #fdfcf9;        /* words on an ink or a rust ground */
+  --a-field: #ffffff;        /* the inside of a box that is typed into */
+  --a-edge: #c5c3b9;         /* a box's border: ink at 25 % */
+  /* the names the screens use */
+  --a-tint: var(--a-panel);
+  --a-rule: #e2e0d8;         /* hairline: ink at ≈ 12 % */
   --a-muted: #6f6b57;
-  --a-ok: #2e5b45;
-  --a-warn: #8a4b2d;
+  --a-ok: var(--a-green);
+  --a-warn: var(--a-rust);
   --a-dim: #bdb9a8;          /* de-emphasised step numbers on ink */
   --a-scrim: rgba(28, 26, 0, .35);
   --a-bar: 64px;             /* phone bottom bar */
@@ -39,10 +58,18 @@
      here, a refusal row and all, so the page's top padding and the scroll
      padding always clear exactly what is on screen. */
   --a-hdrh: calc(52px + env(safe-area-inset-top, 0px));
+  /* the phone's own top bar (app.js admTopHTML): one 52-px row under the notch */
+  --a-toph: calc(52px + env(safe-area-inset-top, 0px));
   --a-side: 232px;           /* desktop sidebar */
   --a-side-min: 68px;
   --a-asst: 380px;
+  --a-strip: 52px;           /* the assistant folded to a strip (desktop) */
+  --a-pinh: 70px;            /* the pinned dark button's row above the tab bar */
 }
+/* The page behind the panel wears the panel's paper: the storefront shell
+   under `.adm2` (main.screen--co keeps a tall bottom padding for the shop's
+   own bars) would otherwise show a white band below a paper one. */
+body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper); }
 
 .adm2 {
   position: relative;
@@ -59,11 +86,11 @@
   line-height: 22px;
 }
 
-/* The panel owns the viewport below the admin header: the sidebar is a sticky
-   rail with its own scroll, the assistant is fixed to the right edge, and the
-   middle column scrolls with the document — so a long product list scrolls
-   without taking the navigation away with it. */
-.adm2__frame { display: flex; align-items: flex-start; min-height: calc(100vh - var(--cohdrh, 62px)); }
+/* The panel owns the whole viewport (1a: no site bar above it any more): the
+   sidebar is a sticky rail with its own scroll, the assistant is fixed to the
+   right edge, and the middle column scrolls with the document — so a long
+   product list scrolls without taking the navigation away with it. */
+.adm2__frame { display: flex; align-items: flex-start; min-height: 100vh; }
 
 @keyframes adm-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .adm2 button { font-family: inherit; cursor: pointer; }
@@ -73,75 +100,81 @@
 }
 .adm2 a { color: var(--a-ink); text-underline-offset: 3px; }
 
-/* ---------- sidebar (desktop) -------------------------------------------- */
+/* ---------- sidebar (desktop) --------------------------------------------
+   1a (screens 01/03 desktop): the wordmark and the fold chevron, the four
+   places, a hairline, the six more; at its foot the panel's language, «Открыть
+   магазин ↗» and «Выйти». Folds to icons (68 px), remembered per device. */
 
 .adm-side {
-  width: var(--a-side); flex: none; border-right: 1px solid var(--a-rule);
-  display: flex; flex-direction: column; overflow: hidden;
-  position: sticky; top: var(--cohdrh, 62px); height: calc(100vh - var(--cohdrh, 62px));
+  width: var(--a-side); flex: none; border-right: 1px solid var(--a-rule); box-sizing: border-box;
+  display: flex; flex-direction: column; overflow: hidden; padding: 16px 10px;
+  position: sticky; top: 0; height: 100vh;
   transition: width .2s;
 }
 .adm2--navmin .adm-side { width: var(--a-side-min); }
 .adm-side__top {
-  height: 64px; flex: none; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 14px 0 20px; border-bottom: 1px solid var(--a-rule);
+  min-height: 36px; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 0 2px 14px 6px;
 }
-.adm2--navmin .adm-side__top { padding: 0 16px; justify-content: center; }
+.adm2--navmin .adm-side__top { padding: 0 0 14px; justify-content: center; }
 .adm-side__mark {
-  font-family: Oswald, sans-serif; font-size: 15px; letter-spacing: .18em; white-space: nowrap;
-}
-.adm-side__mark span {
-  color: var(--a-muted); letter-spacing: 0; font-family: inherit; font-size: 12px; margin-left: 6px;
-  font-family: "Golos Text", sans-serif;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .3em; white-space: nowrap;
 }
 .adm2--navmin .adm-side__mark { display: none; }
 .adm-side__fold {
-  width: 36px; height: 36px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
-  display: flex; align-items: center; justify-content: center; padding: 0;
+  width: 34px; height: 34px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); display: flex; align-items: center; justify-content: center; padding: 0;
 }
+.adm-side__fold:hover { background: var(--a-panel); }
 .adm-side__fold svg { transition: transform .2s; }
 .adm2--navmin .adm-side__fold svg { transform: rotate(180deg); }
-.adm-side__nav { flex: 1; overflow: auto; padding: 12px 0; display: flex; flex-direction: column; }
-.adm-side__rule { height: 1px; background: var(--a-rule); margin: 12px 20px; flex: none; }
+.adm-side__nav { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.adm-side__rule { height: 1px; background: var(--a-rule); margin: 10px 6px; flex: none; }
 /* everything in the foot is centred on one axis — the language switch used to
    sit flush left under two centred links */
 .adm-side__foot {
-  padding: 16px 20px; border-top: 1px solid var(--a-rule);
-  display: flex; flex-direction: column; align-items: center; gap: 12px; white-space: nowrap; flex: none;
+  margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--a-rule);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; white-space: nowrap; flex: none;
 }
 .adm2--navmin .adm-side__foot { display: none; }
+.adm-side__foot .adm-btn--row { height: 36px; padding: 0 16px; font-size: 13px; }
 
 .adm-nav {
-  height: 44px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 20px;
-  border: 0; border-right: 2px solid transparent; background: var(--a-paper);
-  font-weight: 400; font-size: 15px; color: var(--a-ink); text-align: left; white-space: nowrap; width: 100%;
+  height: 40px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 10px;
+  border: 0; border-right: 2px solid transparent; background: transparent;
+  font-weight: 400; font-size: 14px; color: var(--a-ink); text-align: left; white-space: nowrap; width: 100%;
 }
-.adm-nav svg { flex: none; width: 22px; height: 22px; }
+.adm-nav svg { flex: none; width: 20px; height: 20px; }
 .adm-nav__lbl { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-.adm2--navmin .adm-nav { padding: 0 22px; }
+.adm2--navmin .adm-nav { padding: 0; justify-content: center; }
 .adm2--navmin .adm-nav__lbl, .adm2--navmin .adm-nav__badge { display: none; }
-.adm-nav:hover { background: var(--a-tint); }
-.adm-nav[aria-current="true"] { background: var(--a-tint); border-right-color: var(--a-ink); font-weight: 600; }
+.adm-nav:hover { background: var(--a-panel); }
+.adm-nav[aria-current="true"] { background: var(--a-panel); border-right-color: var(--a-ink); font-weight: 600; }
 .adm-nav__badge {
-  min-width: 20px; height: 20px; padding: 0 6px; background: var(--a-ink); color: #fff;
+  min-width: 20px; height: 20px; padding: 0 6px; background: var(--a-ink); color: var(--a-onink);
   font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;
 }
 
-/* language switch, «Открыть магазин ↗», «Выйти» */
-.adm-langs { display: flex; border: 1px solid var(--a-rule); width: fit-content; }
+/* the panel's language — the sidebar's foot, the phone's «Ещё», under the
+   sign-in card: RU · ET · EN, a segmented control (1 px frame, ink when on) */
+.adm-langs { display: flex; border: 1px solid var(--a-edge); width: fit-content; }
 .adm-langs button {
-  height: 32px; padding: 0 10px; display: inline-flex; align-items: center;
-  font-size: 13px; border: 0; background: var(--a-paper); color: var(--a-ink);
+  height: 30px; min-width: 38px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; border: 0; background: var(--a-paper); color: var(--a-ink);
 }
-.adm-langs button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-langs button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); }
 .adm-side__foot .adm-link, .adm-sheet__foot .adm-link { font-size: 13px; }
 
 /* ---------- main column --------------------------------------------------- */
 
 .adm-main { flex: 1; min-width: 0; }
-/* the assistant pane is fixed to the right edge — give the work column its
-   width back so nothing hides behind it */
-@media (min-width: 900px) { .adm2--asst .adm-main { padding-right: var(--a-asst); } }
+/* The assistant is docked on the right, open or shut — a 380-px pane, or a
+   52-px strip when folded (1a rule 6: it never floats over the work) — so the
+   work column gives it its width back either way. */
+@media (min-width: 900px) {
+  .adm-main { padding-right: var(--a-strip); }
+  .adm2--asst .adm-main { padding-right: var(--a-asst); }
+}
 .adm-page { max-width: 1000px; margin: 0 auto; padding: 32px 48px 140px; }
 .adm-screen { display: flex; flex-direction: column; gap: 28px; }
 /* The fade-in plays ONCE, when the owner moves to another section: app.js
@@ -160,7 +193,7 @@
 .adm-head__kicker { font-size: 13px; color: var(--a-muted); }
 .adm-head__kicker--code { font-family: "PT Mono", ui-monospace, monospace; }
 .adm-h1 {
-  font-family: Oswald, sans-serif; font-weight: 500; font-size: 30px; line-height: 34px; margin: 2px 0 0;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 34px; line-height: 38px; margin: 2px 0 0;
 }
 .adm-h1--flat { margin: 0; }
 .adm-h1 small { font-size: 16px; color: var(--a-muted); font-weight: 400; font-family: "Golos Text", sans-serif; }
@@ -188,7 +221,7 @@
 /* ---------- buttons ------------------------------------------------------- */
 
 .adm-btn {
-  height: 48px; padding: 0 20px; border: 1px solid var(--a-ink); background: var(--a-ink); color: #fff;
+  height: 48px; padding: 0 20px; border: 1px solid var(--a-ink); background: var(--a-ink); color: var(--a-onink);
   font-weight: 500; font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
   gap: 10px; white-space: nowrap;
 }
@@ -197,10 +230,10 @@
 .adm-btn--row { height: 40px; padding: 0 14px; font-size: 14px; }
 .adm-btn--wide { flex: 1; }
 .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
-.adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+.adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: var(--a-onink); }
 /* A button that is really a link — «Написать Диму» is a mailto. `.adm2 a`
    above paints every link ink, and ink on ink is a black rectangle. */
-.adm2 a.adm-btn { color: #fff; text-decoration: none; }
+.adm2 a.adm-btn { color: var(--a-onink); text-decoration: none; }
 .adm2 a.adm-btn--ghost { color: var(--a-ink); }
 .adm-link {
   border: 0; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--a-ink);
@@ -240,12 +273,12 @@
 /* ---------- inputs -------------------------------------------------------- */
 
 .adm-input, .adm2 select.adm-input {
-  height: 48px; border: 1px solid var(--a-rule); padding: 0 14px; width: 100%;
-  background: var(--a-paper); border-radius: 0; -webkit-appearance: none; appearance: none;
+  height: 48px; border: 1px solid var(--a-edge); padding: 0 14px; width: 100%;
+  background: var(--a-field); border-radius: 0; -webkit-appearance: none; appearance: none;
 }
 .adm-input--row { height: 40px; }
 .adm2 textarea.adm-input { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
-.adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--a-muted); min-width: 0; }
+.adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 16px; color: var(--a-muted); min-width: 0; }
 .adm-hint { font-size: 13px; color: var(--a-muted); line-height: 18px; }
 .adm-hint--warn { color: var(--a-warn); }
 /* one or two sentences under a screen title that say what the screen is for —
@@ -274,7 +307,7 @@
   height: 40px; padding: 0 14px; font-size: 14px; font-weight: 500; white-space: nowrap;
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule);
 }
-.adm-chip[aria-current="true"] { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+.adm-chip[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); border-color: var(--a-ink); }
 /* The placeholder chips under a letter's field: seven of them, three times
    over, so they get the narrower padding and the mono of the token they
    insert. Still 40 px tall — they are tapped on a phone like anything else. */
@@ -344,7 +377,7 @@
    specificity, later in the file, which is what makes it win. */
 @media (max-width: 899px) {
   html.adm2-on {
-    scroll-padding-top: calc(var(--cohdrh, 62px) + 12px);
+    scroll-padding-top: calc(var(--a-toph) + 12px);
     scroll-padding-bottom: calc(var(--a-barh) + 16px);
   }
 }
@@ -353,14 +386,14 @@
 
 .adm-badge {
   height: 24px; padding: 0 8px; display: inline-flex; align-items: center; white-space: nowrap;
-  font-size: 12px; font-weight: 500; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+  font-size: 12px; font-weight: 600; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
 }
 .adm-badge--big { height: 28px; padding: 0 10px; font-size: 13px; }
 .adm-badge--sm { height: 20px; padding: 0 6px; font-size: 11px; }
-.adm-badge--ink { background: var(--a-ink); color: #fff; }
+.adm-badge--ink { background: var(--a-ink); color: var(--a-onink); }
 .adm-badge--ok { border-color: var(--a-ok); color: var(--a-ok); }
 .adm-badge--warn { border-color: var(--a-warn); color: var(--a-warn); }
-.adm-badge--warnfill { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+.adm-badge--warnfill { background: var(--a-warn); border-color: var(--a-warn); color: var(--a-onink); }
 .adm-badge--quiet { border-color: var(--a-rule); color: var(--a-muted); }
 .adm-badge--tint { background: var(--a-tint); border-color: var(--a-tint); color: var(--a-muted); }
 
@@ -427,9 +460,9 @@
 .adm-row__sub--warn { color: var(--a-warn); }
 /* one line, cut with an ellipsis — for a sub-line that is a list of names */
 .adm-row__sub--one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.adm-row__amt { font-family: Oswald, sans-serif; font-size: 17px; text-align: right; white-space: nowrap; }
+.adm-row__amt { font-family: Oswald, sans-serif; font-weight: 600; font-size: 17px; text-align: right; white-space: nowrap; }
 .adm-row__chev { color: var(--a-muted); font-size: 20px; line-height: 1; }
-.adm-row__big { font-family: Oswald, sans-serif; font-size: 28px; line-height: 1; width: 34px; flex: none; }
+.adm-row__big { font-family: Oswald, sans-serif; font-weight: 600; font-size: 28px; line-height: 1; width: 34px; flex: none; }
 .adm-row__big--warn { color: var(--a-warn); }
 
 /* ---------- one shape for every list --------------------------------------
@@ -543,9 +576,9 @@
 .adm-sales { border-top: 1px solid var(--a-ink); margin-top: 10px; display: grid; grid-template-columns: 1fr; }
 .adm-sales__cell { padding: 14px 0; border-bottom: 1px solid var(--a-rule); }
 .adm-sales__l { font-size: 13px; color: var(--a-muted); }
-.adm-sales__v { font-family: Oswald, sans-serif; font-size: 32px; line-height: 1.1; margin-top: 4px; }
+.adm-sales__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; margin-top: 4px; }
 .adm-bars { display: flex; align-items: flex-end; gap: 4px; height: 36px; margin-top: 12px; }
-.adm-bars i { flex: 1; background: var(--a-rule); min-height: 2px; }
+.adm-bars i { flex: 1; background: var(--a-canvas); min-height: 2px; }
 .adm-bars i.is-today { background: var(--a-ink); }
 @media (max-width: 1180px) {
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -561,7 +594,7 @@
 .adm-step:last-child { border-right: 0; }
 .adm-step__n { font-size: 11px; color: var(--a-muted); }
 .adm-step__l { font-size: 14px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adm-step--done { background: var(--a-ink); color: #fff; }
+.adm-step--done { background: var(--a-ink); color: var(--a-onink); }
 .adm-step--done .adm-step__n { color: var(--a-dim); }
 .adm-step--now { background: var(--a-tint); color: var(--a-ink); }
 .adm-step--now .adm-step__l { font-weight: 600; }
@@ -689,7 +722,7 @@
 }
 .adm-pick__box {
   width: 22px; height: 22px; flex: none; border: 1px solid var(--a-ink); background: var(--a-paper);
-  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; color: var(--a-onink); font-size: 13px;
 }
 .adm-pick[aria-pressed="true"] .adm-pick__box { background: var(--a-ink); }
 .adm-pick__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -706,11 +739,11 @@
 .adm-bar__i[aria-current="true"] { color: var(--a-ink); font-weight: 600; }
 .adm-bar__b {
   position: absolute; top: 8px; left: 50%; margin-left: 8px; min-width: 16px; height: 16px; padding: 0 4px;
-  background: var(--a-ink); color: #fff; font-size: 10px; font-weight: 600;
+  background: var(--a-ink); color: var(--a-onink); font-size: 10px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ---------- overlays: scrim, sheet, confirm, toast, FAB -------------------- */
+/* ---------- overlays: scrim, sheet, confirm, toast ------------------------- */
 
 .adm-scrim { position: fixed; inset: 0; background: var(--a-scrim); z-index: 60; border: 0; padding: 0; width: 100%; }
 .adm-sheet {
@@ -719,7 +752,7 @@
   max-height: 90vh; display: flex; flex-direction: column;
 }
 .adm-sheet__grab { display: flex; justify-content: center; padding: 10px 0 2px; flex: none; }
-.adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-rule); }
+.adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-canvas); }
 .adm-sheet__body { overflow: auto; padding: 8px 20px 0; }
 /* The sheet stands on the bottom edge of the screen, so its last row clears
    the iPhone's home indicator the way the bar does (--a-barh) — 24 px on a
@@ -736,6 +769,36 @@
 }
 .adm-sheet__row .adm-row__sub { margin-top: 0; }
 
+/* «Ещё» on a phone (1a, screen 14). It stands ON the tab bar, not over it:
+   «Ещё» stays lit underneath and the other four places stay one tap away
+   (the scrim stops at the bar too). Its rows are the design's — the
+   section's icon, its name, one line of what is waiting (rust when it wants
+   him), a chevron — and its foot is «Язык панели» with RU · ET · EN, then
+   «Открыть магазин ↗» and «Выйти» side by side. The bar below already
+   clears the home indicator, so the foot does not add the inset again. */
+.adm-scrim--more { bottom: var(--a-barh); }
+.adm-more { bottom: var(--a-barh); max-height: calc(100% - var(--a-barh) - 24px); }
+.adm-more .adm-sheet__body { padding: 4px 16px 0; }
+.adm-more__t {
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 30px; line-height: 33px; margin: 4px 0 0;
+  padding-bottom: 12px; border-bottom: 1px solid var(--a-ink);
+}
+.adm-more .adm-sheet__row {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr) 14px; gap: 14px; align-items: center;
+  height: auto; min-height: 60px; padding: 10px 0;
+}
+.adm-more .adm-sheet__row > svg { width: 22px; height: 22px; }
+.adm-more__txt { min-width: 0; display: flex; flex-direction: column; }
+.adm-more .adm-row__nm { font-size: 16px; line-height: 22px; }
+.adm-more .adm-row__sub { font-size: 13px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-more .adm-sheet__row[aria-current="true"] .adm-row__nm { font-weight: 600; }
+.adm-more .adm-sheet__foot { padding: 20px 16px 16px; flex-direction: column; align-items: stretch; gap: 14px; }
+.adm-more__lang { display: flex; align-items: center; gap: 12px; }
+.adm-more__lang > span { flex: 1; font-size: 14px; }
+.adm-more__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adm-more__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; font-size: 14.5px; }
+.adm-more__acts [data-admlogout] { border-color: var(--a-edge); color: var(--a-muted); }
+
 /* «Ещё» and the assistant are bottom sheets only where there is a bottom bar;
    on a desktop the same sections live in the sidebar and the assistant is a
    380-px pane, so both sheets stay out of the way entirely. */
@@ -743,6 +806,12 @@
   .adm-sheet--phone, .adm-scrim--phone { display: none; }
 }
 
+/* ---------- the confirm sheet (1a rule 4) ----------------------------------
+   Money, mass e-mail, deletes — and every confirm the panel already had: the
+   title is the question, one sentence of what follows, the verb LEFT (rust
+   when it cannot be walked back, ink otherwise — app.js admConfirmHTML) and
+   «Не надо» outlined on the right. A centred dialog on a desktop, a bottom
+   sheet on a phone (the media block below). */
 .adm-confirm {
   position: fixed; inset: 0; background: var(--a-scrim); z-index: 70;
   display: flex; align-items: center; justify-content: center; padding: 24px;
@@ -754,39 +823,44 @@
    buttons below the bottom, with nothing to scroll. The title and the
    buttons keep their size; the detail between them gives way. */
 .adm-confirm__card {
-  width: 100%; max-width: 440px; background: var(--a-paper); border: 1px solid var(--a-ink); padding: 20px;
-  display: flex; flex-direction: column; gap: 14px; animation: adm-up .2s;
+  width: 100%; max-width: 440px; background: var(--a-paper); border: 1px solid var(--a-ink); padding: 24px;
+  display: flex; flex-direction: column; gap: 10px; animation: adm-up .2s;
   max-height: 100%;
 }
-.adm-confirm__t { font-weight: 600; font-size: 17px; flex: none; }
+.adm-confirm__t { font-weight: 600; font-size: 19px; line-height: 25px; flex: none; }
 .adm-confirm__d {
-  line-height: 22px; white-space: pre-line; overflow-wrap: anywhere;
+  font-size: 14px; line-height: 21px; white-space: pre-line; overflow-wrap: anywhere;
   min-height: 0; overflow-y: auto; overscroll-behavior: contain;
 }
 .adm-confirm__acts { flex: none; }
 /* a refused tariff save lists its cells one per line (admShipErrHTML) */
 .adm-err__list { margin: 6px 0; padding-left: 18px; font-weight: 400; }
 .adm-err__list li { margin: 2px 0; overflow-wrap: anywhere; }
-.adm-confirm__acts { display: flex; gap: 8px; }
-.adm-confirm__acts .adm-btn { flex: 1; }
+.adm-confirm__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.adm-confirm__acts .adm-btn { width: 100%; height: 46px; padding: 0 12px; font-weight: 600; white-space: normal; line-height: 18px; }
+.adm-confirm__acts .adm-btn--ghost { font-weight: 400; }
 
+/* ---------- the toast (1a rule 3) -------------------------------------------
+   Dark, short, with «Вернуть» (ADM_UNDO_WORD) for ADM_UNDO_MS when the change
+   can be walked back, and ✕ always. On a phone it rides above the tab bar —
+   and above the pinned dark button when a screen has one. */
 .adm-toast {
-  position: fixed; left: 20px; right: 20px; bottom: 28px; max-width: 520px; margin: 0 auto;
-  min-height: 56px; background: var(--a-ink); color: #fff; display: flex; align-items: center;
+  position: fixed; left: 20px; right: 20px; bottom: 24px; max-width: 520px; margin: 0 auto;
+  min-height: 52px; background: var(--a-ink); color: var(--a-onink); display: flex; align-items: center;
   justify-content: space-between; padding: 0 6px 0 16px; z-index: 80; animation: adm-up .2s; gap: 12px;
 }
 /* Up to three lines, then an ellipsis (12.09.2026). It was one line cut with
    an ellipsis, and a phone shows about thirty characters of that: «Микрофон
    не разрешён — разрешите его в…» lost the half that mattered, so the
    assistant's microphone said «Нет доступа» and nothing about where to fix
-   it. A one-line toast is drawn exactly as before (min-height 56, centred). */
+   it. A one-line toast is drawn exactly as before (centred). */
 .adm-toast__t {
-  flex: 1; min-width: 0; font-size: 15px; line-height: 20px; padding: 8px 0;
+  flex: 1; min-width: 0; font-size: 14px; line-height: 20px; padding: 8px 0;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
 .adm-toast__undo {
-  border: 0; background: none; color: #fff; font-weight: 600; text-decoration: underline;
-  text-underline-offset: 3px; font-size: 15px; height: 44px; padding: 0 8px; flex: none;
+  border: 0; background: none; color: var(--a-onink); font-weight: 600; text-decoration: underline;
+  text-underline-offset: 3px; font-size: 14px; height: 44px; padding: 0 8px; flex: none;
 }
 .adm-toast__x {
   border: 0; background: none; color: var(--a-dim); font-size: 16px; width: 44px; height: 44px; flex: none; padding: 0;
@@ -795,10 +869,86 @@
    bar has to clear it, exactly as the storefront toast does (styles.css) */
 body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
-.adm-fab {
-  position: fixed; right: 20px; bottom: 28px; height: 52px; padding: 0 18px 0 14px;
-  background: var(--a-ink); color: #fff; border: 0; display: flex; align-items: center; gap: 10px;
-  font-weight: 500; font-size: 15px; z-index: 55;
+/* ---------- the phone's top bar (1a § 4) ------------------------------------
+   «← back» inside a card, or the wordmark — the save status — the
+   assistant's icon. Sticky at the top, one 52-px row under the notch. It
+   gives way to a save bar while one is the phone's header (≤ 767, below):
+   the screens still on a save bar keep working exactly as before. */
+.adm-top { display: none; }
+@media (max-width: 899px) {
+  .adm-top {
+    display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 45;
+    height: var(--a-toph); box-sizing: border-box; padding: env(safe-area-inset-top, 0px) 12px 0 16px;
+    background: var(--a-paper); border-bottom: 1px solid var(--a-rule);
+  }
+  .adm-top__mark {
+    flex: none; font-family: Oswald, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .32em; white-space: nowrap;
+  }
+  .adm-top__back {
+    flex: 0 1 auto; max-width: 48%; min-width: 44px; min-height: 44px; margin-left: -4px; padding: 0 4px;
+    border: 0; background: none; color: var(--a-ink); font: inherit; font-size: 15px; text-align: left;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .adm-top .adm-savest { flex: 1 1 auto; justify-content: center; text-align: center; font-size: 12px; line-height: 14px; }
+  .adm-top__ai {
+    flex: none; margin-left: auto; width: 44px; height: 44px; padding: 0;
+    border: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .adm-top__ai[aria-expanded="true"] { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+}
+
+/* ---------- the assistant folded: a strip (desktop, 1a rule 6) -------------- */
+.adm-strip { display: none; }
+@media (min-width: 900px) {
+  .adm-strip {
+    position: fixed; right: 0; top: 0; bottom: 0; width: var(--a-strip); z-index: 40;
+    display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0 0; margin: 0;
+    border: 0; border-left: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink); font: inherit;
+  }
+  .adm-strip__i {
+    width: 36px; height: 36px; border: 1px solid var(--a-edge); display: flex; align-items: center; justify-content: center;
+  }
+  .adm-strip:hover .adm-strip__i { background: var(--a-panel); }
+  .adm-strip__l { writing-mode: vertical-rl; font-size: 12px; color: var(--a-muted); }
+}
+
+/* ---------- «Сохраняем… / Сохранено ✓ / Не сохранилось» (1a § 2) ------------
+   One status for the panel (app.js ADM_SAVE), painted in place into the
+   phone's top bar and at the top right of the desktop's page column. */
+.adm-savest { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; line-height: 16px; color: var(--a-muted); }
+.adm-savest__t--ok { color: var(--a-green); animation: adm-savefade .4s ease-in 2s forwards; }
+.adm-savest__t--err { color: var(--a-rust); font-weight: 500; }
+.adm-savest__retry {
+  flex: none; min-height: 32px; padding: 0 4px; border: 0; background: none; font: inherit; font-weight: 600;
+  color: var(--a-rust); text-decoration: underline; text-underline-offset: 3px;
+}
+@keyframes adm-savefade { to { opacity: 0; } }
+.adm-pagest { position: relative; height: 0; }
+.adm-savest--page { position: absolute; right: 0; top: -26px; }
+@media (max-width: 899px) {
+  .adm-pagest { display: none; }
+  .adm-savest__retry { min-height: 44px; min-width: 44px; }
+}
+/* a box whose value was not sent: the rust edge is aria-invalid's, and this
+   is its one line */
+.adm-ashint { display: block; font-size: 12px; line-height: 16px; color: var(--a-rust); }
+
+/* ---------- the ONE dark button (1a rule 2, app.js admPinnedHTML) -----------
+   Desktop: in the page header, on the right. Phone: pinned above the tab
+   bar, full width; renderImpl sets body.adm-pinned so the page's end and the
+   toast clear it, and it steps aside while the keyboard is up. */
+.adm-pin { margin-left: auto; flex: none; }
+.adm-pin__btn { height: 46px; padding: 0 24px; font-weight: 600; }
+@media (max-width: 899px) {
+  .adm-pin {
+    position: fixed; left: 0; right: 0; bottom: var(--a-barh); z-index: 49; margin: 0;
+    padding: 10px 16px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
+  }
+  .adm-pin__btn { width: 100%; height: 50px; }
+  body.adm-typing .adm-pin { display: none; }
+  body.adm-pinned .adm-page { padding-bottom: calc(var(--a-barh) + var(--a-pinh) + 32px); }
+  body.adm-pinned .adm-toast { bottom: calc(var(--a-barh) + var(--a-pinh) + 12px); }
 }
 
 /* ---------- assistant ------------------------------------------------------ */
@@ -809,7 +959,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-asst {
   width: var(--a-asst); background: var(--a-paper); border-left: 1px solid var(--a-rule);
   display: flex; flex-direction: column;
-  position: fixed; right: 0; top: var(--cohdrh, 62px); bottom: 0; z-index: 61;
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 61;
 }
 .adm-asst__x { display: none; }
 .adm-asst__head {
@@ -883,7 +1033,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   color: var(--a-ink); padding: 0; display: inline-flex; align-items: center; justify-content: center;
   position: relative;
 }
-.adm-asst__mic.is-on { background: var(--a-ink); border-color: var(--a-ink); color: #fff; }
+.adm-asst__mic.is-on { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
 .adm-asst__mic.is-on::after {
   content: ""; position: absolute; inset: -4px; border: 2px solid var(--a-ink); opacity: 0;
   animation: adm-listen 1.6s ease-out infinite; pointer-events: none;
@@ -922,8 +1072,20 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- login / waiting card ------------------------------------------- */
 
-.adm-gate { max-width: 420px; margin: 48px auto; display: flex; flex-direction: column; gap: 14px; }
+/* 1a (screen 19): the wordmark over the card, the password in a 52-px box,
+   one dark «Войти» the width of the card; under it the panel's language and
+   the way back to the shop — the jobs of the site bar that is gone. The
+   sign-in itself is today's: one password, no e-mail code. */
+.adm-gate { max-width: 400px; margin: 10vh auto 48px; display: flex; flex-direction: column; gap: 14px; }
 .adm-gate .adm-h1 { margin: 0; }
+.adm-gate__mark { font-family: Oswald, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .3em; }
+.adm-gate__mark span {
+  font-family: "Golos Text", sans-serif; font-weight: 400; font-size: 13px; letter-spacing: 0; color: var(--a-muted); margin-left: 6px;
+}
+.adm-gate .adm-input { height: 52px; }
+.adm-gate [data-admlogin] { width: 100%; height: 52px; font-weight: 600; }
+.adm-gate__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 10px; }
+.adm-gate__foot .adm-link { font-size: 13px; }
 
 /* ---------- phone --------------------------------------------------------- */
 
@@ -957,8 +1119,8 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-asst__chev { display: none; }
   .adm-asst__x { display: inline; font-size: 22px; line-height: 1; color: var(--a-muted); }
   .adm-asst__fold { width: 44px; height: 44px; border: 0; }
-  .adm-page { padding: 16px 20px calc(var(--a-barh) + 96px); }
-  .adm-h1 { font-size: 28px; line-height: 32px; }
+  .adm-page { padding: 20px 16px calc(var(--a-barh) + 96px); }
+  .adm-h1 { font-size: 30px; line-height: 33px; }
   .adm-bar {
     display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
     height: var(--a-barh);
@@ -966,39 +1128,15 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
     border-top: 1px solid var(--a-rule); background: var(--a-paper); z-index: 50;
   }
   .adm-confirm { align-items: flex-end; padding: 0; }
-  /* a bottom sheet here: «Отмена» and the verb clear the home indicator,
+  /* a bottom sheet here: «Не надо» and the verb clear the home indicator,
      and a field in the card (the refund's sum) sits on the keys without it */
   .adm-confirm__card {
-    max-width: none; border-left: 0; border-right: 0; border-bottom: 0;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    max-width: none; border: 0;
+    padding: 22px 16px calc(24px + env(safe-area-inset-bottom, 0px));
   }
   body.adm-typing .adm-confirm__card { padding-bottom: 20px; }
-  .adm-toast { bottom: calc(var(--a-barh) + 20px); }
-  .adm-fab { bottom: calc(var(--a-barh) + 20px); }
-  /* the toast owns the strip above the bar while it is up */
-  body.adm-toasting .adm-fab { bottom: calc(var(--a-barh) + 88px); }
-  .adm-fab__lbl { display: none; }
-  /* ---- the assistant's button gets out of the keyboard's way ---------------
-     It is the one fixed thing in the panel that floats OVER a form rather
-     than under it: `.adm-page` reserves the bar's height at its foot, so the
-     bar can never cover a field, while the button is pinned to the bottom
-     right of the screen with whatever is scrolled beneath it. And index.html
-     asks the browser for `interactive-widget=resizes-content`, so on Chrome
-     for Android the layout viewport shrinks when the keys come up and the
-     button lands squarely on the form.
-
-     Nobody opens the assistant in the middle of typing a price, so while a
-     field of the panel has the keyboard it is not drawn, and it is back on
-     blur. `display`, exactly as `body.adm-saving` already takes it away while
-     a save bar is the phone's header — a button that is merely transparent is
-     still a button a thumb can land on. app.js sets the class from
-     focusin/focusout.
-
-     The bar stays. On iOS it is under the keyboard and out of the way
-     already, and taking it away as well would make «the nav is at the bottom
-     of the screen» (e2e/admin-editor.spec.ts) false for as long as a field is
-     focused — that is a layout promise this panel means to keep. */
-  body.adm-typing .adm-fab { display: none; }
+  .adm-confirm__acts .adm-btn { height: 50px; }
+  .adm-toast { left: 12px; right: 12px; bottom: calc(var(--a-barh) + 12px); }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
   /* A thumb, not a pointer: every control the phone shows is at least 44 px
@@ -1197,7 +1335,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule); max-width: calc(100% - 16px);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.adm-photo__tag--ink { background: var(--a-ink); color: #fff; border-color: var(--a-ink); font-weight: 600; }
+.adm-photo__tag--ink { background: var(--a-ink); color: var(--a-onink); border-color: var(--a-ink); font-weight: 600; }
 /* flex-wrap, and min-width:0 so this strip can never be wider than the tile
    that owns it: the buttons are a fixed 36 px (44 on a phone) and flex:none,
    so without a wrap they simply run out of the square — which is what they
@@ -1241,7 +1379,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-vthumb[aria-current="true"] { border: 2px solid var(--a-ink); }
 
 .adm-vidrow { display: flex; align-items: center; gap: 12px; border: 1px solid var(--a-rule); padding: 10px 14px; font-size: 14px; }
-.adm-vidrow__play { width: 56px; height: 36px; background: var(--a-ink); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.adm-vidrow__play { width: 56px; height: 36px; background: var(--a-ink); color: var(--a-onink); display: flex; align-items: center; justify-content: center; flex: none; }
 .adm-vidrow__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--a-muted); }
 .adm-vidrow__x { width: 36px; height: 36px; border: 0; background: none; color: var(--a-muted); font-size: 18px; }
 
@@ -1249,9 +1387,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    fields one language shows on the Google tab */
 .adm-edbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .adm-edlang { display: flex; flex-direction: column; gap: 16px; }
-.adm-seg { display: flex; border: 1px solid var(--a-rule); }
+.adm-seg { display: flex; border: 1px solid var(--a-ink); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
-.adm-seg__b[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-seg__b[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 
 /* The save bar follows the page to the bottom of every tab. */
 .adm-savebar {
@@ -1284,11 +1422,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    here before — `.adm2:has(.adm-savebar) .adm-fab { bottom: bar + 88px }` —
    did hold wherever :has() exists (every phone the owner has); it was the
    idea that was wrong: it lifted the assistant's button clear of the bar and
-   straight onto the form's last rows («+ Размер», the size boxes). The
-   button now lives in the bar's own row, in its right-hand corner, and the
-   bar keeps that corner free for it: nothing floats over the form, nothing
-   over the nav. The toast rule above loses to this on purpose — while the
-   bar is up the button stays put and the toast passes over it.
+   straight onto the form's last rows («+ Размер», the size boxes). Since
+   1a there is no floating button at all (the assistant is an icon in the
+   phone's top bar): nothing floats over the form, nothing over the nav. The
+   toast rule above loses to this on purpose — while the bar is up the toast
+   passes over it.
 
    The bottom padding goes to exactly the nav's height while a bar is on
    screen. With the usual 96 px of breathing room (plus the 150 px
@@ -1302,16 +1440,13 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    140 px clears the bar at its tallest (two rows of buttons and the rule);
    over a one-row bar the toast simply floats a little higher. */
 @media (max-width: 899px) {
-  .adm-savebar { bottom: var(--a-barh); padding-right: 56px; }
-  /* the status line takes the row above the buttons — the assistant's
-     button sits in the buttons' row, so the words never run under it */
+  /* 1a: the assistant has no floating button any more, so the bar keeps no
+     corner free for one */
+  .adm-savebar { bottom: var(--a-barh); }
+  /* the status line takes the row above the buttons */
   .adm-savebar__note { flex-basis: 100%; order: -1; margin-left: 0; text-align: left; }
   body.adm-saving .screen--co { padding-bottom: 0; }
   body.adm-saving .adm-page { padding-bottom: var(--a-barh); }
-  body.adm-saving .adm-fab {
-    width: 48px; height: 48px; padding: 0; justify-content: center; right: 20px;
-    bottom: calc(var(--a-barh) + 12px);
-  }
   body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 140px); }
 }
 
@@ -1344,9 +1479,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    (.adm-danger). The refusal («Цена — число от 1 до 500 €…») is a second row
    under the header, full width, only while it stands. */
 @media (max-width: 767px) {
-  body.adm-saving .cohdr--adm { display: none; }
-  /* the assistant's button would sit on the form — «Ещё» keeps the assistant */
-  body.adm-saving .adm-fab { display: none; }
+  /* the panel's own top bar (1a) steps aside while the save bar is the header */
+  body.adm-saving .adm-top { display: none; }
   body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 20px); }
   body.adm-saving .adm-page { padding-top: calc(var(--a-hdrh) + 16px); padding-bottom: calc(var(--a-barh) + 24px); }
   html.adm-saving { scroll-padding-top: calc(var(--a-hdrh) + 12px); }
@@ -1388,7 +1522,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-savebar__main {
     order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 auto; font-size: 15px;
     border: 2px solid transparent; background-clip: padding-box;
-    background-color: var(--a-ink); color: #fff;
+    background-color: var(--a-ink); color: var(--a-onink);
   }
   .adm-savebar__main--quiet { background-color: var(--a-paper); color: var(--a-ink); box-shadow: inset 0 0 0 1px var(--a-ink); }
   .adm-savebar__main[disabled] { border-color: transparent; background-color: var(--a-tint); color: var(--a-muted); box-shadow: inset 0 0 0 1px var(--a-rule); }
@@ -1431,7 +1565,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* display:flex above beats the browser's own [hidden] rule — a saved form
    must not go on saying it is not saved */
 .adm-dirty[hidden] { display: none; }
-.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: #fff; font-weight: 600; padding: 2px 8px; }
+.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: var(--a-onink); font-weight: 600; padding: 2px 8px; }
 .adm-dirtyword { display: inline-block; font-size: 13px; line-height: 18px; }
 /* the ground bleeds past the column's edges, like a lit row, and the rule is
    the existing hairline recoloured and doubled inside — nothing in the bar
@@ -1441,7 +1575,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   box-shadow: inset 0 1px 0 var(--a-warn), -12px 0 0 var(--a-warmbg), 12px 0 0 var(--a-warmbg);
 }
 .adm-savebar.is-dirty .adm-savebar__main:not([disabled]), .adm-btn.is-dirty:not([disabled]) {
-  background-color: var(--a-ink); border-color: var(--a-ink); color: #fff;
+  background-color: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink);
   box-shadow: 0 0 0 3px var(--a-warn);
 }
 @media (max-width: 767px) {
@@ -1669,12 +1803,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 
 /* ---------- segmented control (RU · ET · EN) ------------------------------ */
 
-.adm-seg { display: flex; border: 1px solid var(--a-rule); width: fit-content; max-width: 100%; }
+.adm-seg { display: flex; border: 1px solid var(--a-ink); width: fit-content; max-width: 100%; }
 .adm-seg button {
   height: 40px; padding: 0 16px; font-size: 14px; font-weight: 400; border: 0;
   background: var(--a-paper); color: var(--a-ink); white-space: nowrap;
 }
-.adm-seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+.adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 /* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
 @media (max-width: 899px) { .adm-seg button { height: 44px; } }
 
@@ -1690,16 +1824,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-langbar { display: flex; flex-direction: column; gap: 8px; }
 .adm-langbar__l { font-size: 13px; font-weight: 600; color: var(--a-muted); }
 .adm-langbar__n { max-width: 62ch; margin: 0; }
+/* 1a (README § 1): three equal tabs in the ink frame of every segmented
+   control, the state word under each name — «есть текст» / «как русский» /
+   «пусто» — and the «Перевести с русского» slot under them (.adm-langbar__tr) */
+.adm-seg--lang { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; max-width: 480px; }
+.adm-langbar__tr { display: flex; flex-wrap: wrap; gap: 8px; }
 .adm-seg--lang button {
-  height: auto; min-height: 48px; padding: 7px 16px;
+  height: auto; min-height: 48px; padding: 7px 12px;
   display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
   text-align: left; line-height: 16px;
 }
-.adm-seg--lang .adm-seg__nm { font-size: 14px; }
+.adm-seg--lang .adm-seg__nm { font-size: 14px; font-weight: 600; }
 /* colour is never the only carrier: the filled tab and this word agree */
-.adm-seg--lang .adm-seg__st { font-size: 11px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
+.adm-seg--lang .adm-seg__st { font-size: 11.5px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
 .adm-seg--lang .adm-seg__st span + span::before { content: " · "; }
-.adm-seg--lang button[aria-current="true"] .adm-seg__st { color: rgba(255, 255, 255, .8); }
+.adm-seg--lang button[aria-current="true"] .adm-seg__st { color: rgba(253, 252, 249, .8); }
 /* an empty slot must not collapse the tab to one line while typing fills it */
 .adm-seg--lang .adm-seg__slot { min-height: 14px; display: block; }
 /* inside an editor's top bar (goods «Описание»/«Google», the banner slide) the
@@ -1707,8 +1846,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    note are a sentence, not a chip that can share a line with two buttons */
 .adm-edbar .adm-langbar { flex: 1 1 100%; }
 @media (max-width: 899px) {
-  .adm-seg--lang { width: 100%; }
-  .adm-seg--lang button { flex: 1 1 0; min-height: 52px; padding: 7px 10px; }
+  .adm-seg--lang { max-width: none; }
+  .adm-seg--lang button { min-height: 52px; padding: 7px 10px; }
   .adm-seg--lang .adm-seg__st { white-space: normal; }
 }
 
@@ -1747,19 +1886,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* off is quieter than on — but it is still a word, at 5.4:1 on paper */
 [role="switch"][aria-checked="false"] .adm-sw__w { color: var(--a-muted); }
 [role="switch"][aria-checked="true"] .adm-sw__w { font-weight: 600; }
+/* 1a (README § 3): square, 52 × 30, ink when on, a 1.5-px ink frame. The word
+   and the tick stay — the four cues above are Dim's decision, not a style. */
 .adm-sw__t {
-  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink);
+  width: 52px; height: 30px; flex: none; border: 1.5px solid var(--a-ink); box-sizing: border-box;
   background: var(--a-paper); position: relative; display: block;
 }
 .adm-sw__t i {
-  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  position: absolute; top: 3px; left: 3px; width: 21px; height: 21px;
   background: var(--a-ink); color: var(--a-ink);
   display: flex; align-items: center; justify-content: center;
   transition: left .18s ease-out, background .18s ease-out;
 }
 .adm-sw__t i svg { width: 13px; height: 13px; display: block; }
 [role="switch"][aria-checked="true"] .adm-sw__t { background: var(--a-ink); }
-[role="switch"][aria-checked="true"] .adm-sw__t i { left: 20px; background: #fff; }
+[role="switch"][aria-checked="true"] .adm-sw__t i { left: 25px; background: var(--a-onink); }
 .adm-sw:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
 /* the knob slides only for people who asked for motion */
 @media (prefers-reduced-motion: reduce) { .adm-sw__t i { transition: none; } }
@@ -1814,7 +1955,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-amts { display: flex; gap: 6px; flex-wrap: wrap; }
 .adm-amt {
   height: 48px; min-width: 72px; padding: 0 14px; font-family: Oswald, sans-serif; font-size: 18px;
-  background: var(--a-ink); color: #fff; border: 1px solid var(--a-ink);
+  background: var(--a-ink); color: var(--a-onink); border: 1px solid var(--a-ink);
 }
 .adm-amt[aria-pressed="false"] { background: var(--a-paper); color: var(--a-muted); border-color: var(--a-rule); }
 /* .adm-gift was a drawing of the gift card — a dark rectangle with the word
@@ -2062,7 +2203,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-kpi { padding: 16px; border-right: 1px solid var(--a-rule); border-bottom: 1px solid var(--a-rule); }
 .adm-kpi__l { font-size: 13px; color: var(--a-muted); }
-.adm-kpi__v { font-family: Oswald, sans-serif; font-size: 32px; line-height: 1.1; margin-top: 4px; }
+.adm-kpi__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; margin-top: 4px; }
 .adm-kpi__d { font-size: 13px; margin-top: 4px; color: var(--a-muted); }
 .adm-kpi__d--up { color: var(--a-ok); }
 .adm-kpi__d--down { color: var(--a-warn); }
@@ -2071,7 +2212,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: flex; align-items: flex-end; gap: 6px; height: 160px;
   border-top: 1px solid var(--a-ink); margin-top: 10px; padding: 12px 0 24px;
 }
-.adm-wbar { flex: 1; background: var(--a-rule); position: relative; min-height: 2px; }
+.adm-wbar { flex: 1; background: var(--a-canvas); position: relative; min-height: 2px; }
 .adm-wbar--now { background: var(--a-ink); }
 .adm-wbar span {
   position: absolute; bottom: -20px; left: 0; right: 0; text-align: center;
@@ -2164,7 +2305,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
 .adm-dot--warn { background: var(--a-warn); }
 /* known to be off, and not a fault — the assistant with no model behind it */
-.adm-dot--off { background: var(--a-rule); }
+.adm-dot--off { background: var(--a-canvas); }
 
 /* ---------- Настройки ----------------------------------------------------- */
 
@@ -2588,3 +2729,56 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-nbprev { margin-top: 24px; display: flex; flex-direction: column; gap: 8px; scroll-margin-top: calc(var(--a-hdrh) + 12px); }
 .adm-nbprev:focus { outline: none; }
 .adm-frame--news { height: 560px; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction 1a — the shared pieces (design_handoff_admin_ux README § 1–3).
+   app.js builds each of them (admSecHeadHTML, admHelp*HTML, admFoldHTML,
+   admTagHTML); the frame's own pieces — top bar, strip, «Ещё», save status,
+   pinned button, confirm sheet, toast — are with the overlays above.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* a section header: 12-px capitals, +0.1em, over a 1-px ink rule; the «?»
+   at its right when the section has something to explain */
+.adm-sech {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 26px; padding-bottom: 8px; border-bottom: 1px solid var(--a-ink);
+}
+.adm-sech__t {
+  margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--a-muted);
+}
+
+/* «?» — round, 26 px, the one round thing besides the status dots. A 32-px
+   target on a desktop, 44 on a phone (the negative margins keep the header
+   row the height of its words). Open: ink. */
+.adm-help {
+  flex: none; width: 32px; height: 32px; margin: -3px -3px -3px auto; padding: 0; border: 0; background: none;
+  color: var(--a-ink); display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-help__c {
+  width: 26px; height: 26px; box-sizing: border-box; border-radius: 50%; border: 1px solid var(--a-edge);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; line-height: 1;
+}
+.adm-help:hover .adm-help__c { background: var(--a-panel); }
+.adm-help[aria-expanded="true"] .adm-help__c { background: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink); }
+.adm-helpp { margin: 10px 0 0; padding: 10px 12px; background: var(--a-panel); font-size: 13px; line-height: 19px; color: var(--a-ink); }
+@media (max-width: 899px) { .adm-help { width: 44px; height: 44px; margin: -9px -9px -9px auto; } }
+
+/* a fold: title · one-line summary · chevron; the body under it while open */
+.adm-fold { border-top: 1px solid var(--a-rule); }
+.adm-fold__h {
+  width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 14px 0;
+  border: 0; border-bottom: 1px solid var(--a-rule); background: none; color: var(--a-ink); font: inherit; text-align: left;
+}
+.adm-fold__t { flex: none; font-size: 15px; font-weight: 600; }
+.adm-fold__s {
+  flex: 1 1 auto; min-width: 0; text-align: right; font-size: 13px; color: var(--a-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-fold__chev { flex: none; margin-left: auto; transition: transform .2s; }
+.adm-fold__s + .adm-fold__chev { margin-left: 0; }
+.adm-fold.is-open .adm-fold__chev { transform: rotate(180deg); }
+.adm-fold__b { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 16px; border-bottom: 1px solid var(--a-rule); }
+@media (prefers-reduced-motion: reduce) { .adm-fold__chev { transition: none; } }
+
+/* a status tag: the badge's colours, drawn small and firm (11 px, 600) */
+.adm-tag { height: 20px; padding: 0 6px; font-size: 11px; font-weight: 600; }
