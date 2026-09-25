@@ -10,6 +10,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { getOverviewSummary } from "@/lib/analytics";
+import { getOverviewExtras } from "@/lib/overview-extras";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,8 +22,11 @@ export async function GET(req: Request) {
   if (denied) return denied;
 
   try {
-    const data = await getOverviewSummary();
-    return Response.json({ ok: true, ...data }, { headers: NO_STORE });
+    /* …and the two counts the phone's «Ещё» prints under «Блог» and
+       «Подключения» (1a; getOverviewExtras never throws — each half is null
+       when it cannot say). */
+    const [data, extras] = await Promise.all([getOverviewSummary(), getOverviewExtras()]);
+    return Response.json({ ok: true, ...data, ...extras }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/overview] failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });

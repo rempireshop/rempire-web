@@ -294,6 +294,16 @@ function freshCache(raw: unknown, now: Date): GscSummary | null {
   return { ...(c as unknown as GscSummary), cached: true };
 }
 
+/**
+ * Would getSearchConsoleSummary() even try? A usable service-account key and
+ * a site url in the environment — the same two it checks first. No request,
+ * no database: «Обзор» asks it for the «Ещё» line of «Подключения»
+ * (src/lib/overview-extras.ts), where a missing key is a red row.
+ */
+export function gscConfigured(): boolean {
+  return !!serviceAccount() && !!(process.env.GSC_SITE_URL ?? "").trim();
+}
+
 export async function getSearchConsoleSummary(now: Date = new Date()): Promise<GscSummary | GscUnavailable> {
   const sa = serviceAccount();
   const siteUrl = (process.env.GSC_SITE_URL ?? "").trim();
