@@ -18,6 +18,7 @@
  * GET returns the same map as /api/overrides but uncached, for the panel.
  */
 import { requireAdmin } from "@/lib/auth";
+import { pendingStockAlertCounts } from "@/lib/customers";
 import { getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import {
   getDescriptionOverrides,
@@ -143,7 +144,16 @@ export async function GET(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   try {
-    const [overrides, descriptions, seos] = await Promise.all([getOverrides(), getDescriptionOverrides(), getSeoOverrides()]);
+    /* `waiting`: how many people wait for each product (the unsent «Сообщить о
+       наличии» rows) — the card prints «N человек ждут — получат письмо» beside
+       «Наличие» (q41). A failed count is no reason to refuse the rest. */
+    const [overrides, descriptions, seos, waiting] = await Promise.all([
+      getOverrides(), getDescriptionOverrides(), getSeoOverrides(),
+      pendingStockAlertCounts().catch((err) => {
+        console.error("[api/admin/overrides] waiting count failed:", err);
+        return {} as Record<string, number>;
+      }),
+    ]);
     const out: Record<string, OverrideOut> = overrides;
     for (const [id, description] of Object.entries(descriptions)) {
       out[id] = { ...(out[id] ?? emptyOverride()), description };
@@ -153,7 +163,7 @@ export async function GET(req: Request) {
     for (const [id, seo] of Object.entries(seos)) {
       out[id] = { ...(out[id] ?? emptyOverride()), seo };
     }
-    return Response.json({ ok: true, overrides: out }, { headers: { "cache-control": "no-store" } });
+    return Response.json({ ok: true, overrides: out, waiting }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/overrides] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

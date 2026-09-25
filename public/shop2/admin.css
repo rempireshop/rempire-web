@@ -1524,6 +1524,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-edshop .adm-seg button + button { border-left: 1px solid var(--a-ink); }
 .adm-edshop .adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 .adm-edshop .adm-switch { background: var(--a-paper); min-height: 46px; }
+/* q41: «N человек ждут — получат письмо» under «Наличие» — ink, not grey: it is news */
+.adm-edwait { display: block; margin-top: 6px; font-size: 13px; line-height: 18px; color: var(--a-ink); }
+.adm-edwait[hidden] { display: none; }
+/* «✨ Заполнить только по-…» — the one language of this pair, right above its two boxes */
+.adm-edseofill { display: flex; justify-content: flex-end; margin-bottom: 4px; }
 /* the name, its hint and «✨» on one line where they fit */
 .adm-edname { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 16px; flex-wrap: wrap; }
 .adm-edname__spark { flex: none; font-size: 13px; min-height: 32px; }

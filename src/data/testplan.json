@@ -6835,20 +6835,20 @@
       "steps": [
         "Взять товар, который на «Складе» ещё не считали.",
         "В карточке, в «В магазине», выбрать у «Наличия» «Нет».",
-        "Открыть товар в магазине.",
-        "Выбрать «Мало», потом «В наличии».",
+        "Открыть товар в магазине и оставить почту в «Сообщить о наличии».",
+        "Вернуться в панель, посмотреть под «Наличием», выбрать «Мало», потом «В наличии».",
         "Открыть товар с посчитанным остатком и включить «Не продавать».",
         "Открыть «Каталог», нажать чип «Кончаются» и прочитать значки строк."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
         "При «Нет» кнопка «В корзину» пропадает, появляется «Сообщить о наличии».",
-        "У посчитанного товара вместо трёх кнопок один переключатель «Не продавать».",
-        "«Не продавать» останавливает продажу; выключили — товар снова продаётся.",
+        "Под «Наличием» в панели: «1 человек ждёт — получит письмо» (или что письмо выключено).",
+        "У посчитанного товара — один переключатель «Не продавать»: он останавливает продажу.",
         "Под «Кончаются» — товары, у которых хоть один объём на исходе или закончился.",
         "Каждое нажатие сохраняется сразу; «Вернуть» на полоске внизу его отменяет."
       ],
-      "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали. У посчитанного «мало» и «в наличии» магазин пишет сам — по остатку.",
+      "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали. Строка «ждут» подсказывает, что вернуть товар стоит: люди узнают сами.",
       "risk": "med",
       "writes": true,
       "mark": "redo",
@@ -6857,22 +6857,22 @@
         "steps": [
           "Take a product nobody has counted on «Склад».",
           "In its card, under «В магазине», set «Наличие» to «Нет» (none).",
-          "Open the product in the shop.",
-          "Choose «Мало» (low), then «В наличии» (in stock).",
+          "Open the product in the shop and leave an address in «Сообщить о наличии».",
+          "Back in the panel, look under «Наличие», then choose «Мало» (low), then «В наличии».",
           "Open a product whose stock is counted and switch on «Не продавать» (do not sell).",
           "Open «Каталог», tap the «Кончаются» (running low) chip and read the rows' badges."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
           "With «Нет» the «В корзину» button goes; «Сообщить о наличии» appears.",
-          "A counted product has one switch, «Не продавать», not three buttons.",
-          "«Не продавать» stops the sale; switched off, the product sells again.",
+          "Under «Наличие»: «1 человек ждёт — получит письмо» (or that the letter is off).",
+          "A counted product has one switch, «Не продавать»: it stops the sale.",
           "Under «Кончаются»: products with any size running low or gone.",
           "Every tap saves at once; «Вернуть» on the strip below takes it back."
         ],
-        "why": "Without it you cannot stop sales of stock nobody has counted yet. On a counted product the shop writes «low» and «in stock» itself, from the count."
+        "why": "Without it you cannot stop sales of stock nobody has counted yet. The «waiting» line says bringing it back is worth it: those people hear by themselves."
       },
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T13:51:49.084Z"
     },
     {
       "id": "goods-photo",
@@ -7722,6 +7722,7 @@
         "Открыть товар и развернуть «Для Google» внизу.",
         "Нажать «✨ Заполнить автоматически · все три языка».",
         "Прочитать «Заголовок» и «Описание» на RU, ET и EN.",
+        "На вкладке English стереть заголовок и нажать «✨ Заполнить только по-английски».",
         "Посмотреть вверх: там «Сохранено ✓» — «Сохранить» больше нет."
       ],
       "expect": [
@@ -7729,7 +7730,8 @@
         "В заголовке есть название товара.",
         "Описание — одно-два предложения, не оборванных на середине.",
         "Цены в этих двух строчках нет.",
-        "Обещаний доставки в них тоже нет."
+        "Обещаний доставки в них тоже нет.",
+        "«Заполнить только по-английски» меняет лишь английскую пару."
       ],
       "why": "По этим строчкам человек в Google решает, зайти к вам или нет.",
       "risk": "low",
@@ -7740,6 +7742,7 @@
           "Open a product and unfold «Для Google» at the bottom.",
           "Press «✨ Заполнить автоматически · все три языка» — fill all three languages.",
           "Read «Заголовок» and «Описание» (title, description) in RU, ET and EN.",
+          "On the English tab clear the title and press «✨ Заполнить только по-английски» (English only).",
           "Look at the top: it says «Сохранено ✓» — there is no «Сохранить» any more."
         ],
         "expect": [
@@ -7747,12 +7750,13 @@
           "The title carries the product name.",
           "The description is one or two sentences, not cut off.",
           "Neither line names a price.",
-          "Neither line promises a delivery."
+          "Neither line promises a delivery.",
+          "«Заполнить только по-английски» changes the English pair alone."
         ],
         "why": "These are the lines a person in Google decides by."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T13:51:49.084Z"
     },
     {
       "id": "ai-blog-outline",

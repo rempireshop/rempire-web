@@ -1045,6 +1045,21 @@ export async function pendingStockAlerts(productId?: string): Promise<StockAlert
 }
 
 /**
+ * How many people wait for each product — the unsent «Сообщить о наличии»
+ * rows, by product (Dim 25.09.2026, q41: «N человек ждут — получат письмо»
+ * beside «Наличие» in the panel's product card). One grouped read over the
+ * pending index; a product nobody waits for is simply absent.
+ */
+export async function pendingStockAlertCounts(): Promise<Record<string, number>> {
+  const rows = await query<{ product_id: string; n: number }>(
+    "select product_id, count(*)::int as n from stock_alerts where sent_at is null group by product_id",
+  );
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.product_id] = Number(r.n) || 0;
+  return out;
+}
+
+/**
  * Stamps one alert spent — and says whether THIS call stamped it. Two runs
  * can read the same pending row at the same moment (the owner's «мало» and a
  * scanner count landing together, or either of them and the daily sweep);

@@ -1101,6 +1101,9 @@
       "Переведено с русского": "Tõlgitud vene keelest",
       "Предложили название — поправьте, если нужно": "Pakkusime nime — parandage, kui vaja",
       "Вернули как было": "Taastatud nii, nagu oli",
+      "✨ Заполнить только по-русски": "✨ Täida ainult vene keeles",
+      "✨ Заполнить только по-эстонски": "✨ Täida ainult eesti keeles",
+      "✨ Заполнить только по-английски": "✨ Täida ainult inglise keeles",
       "Вернуть фото из каталога": "Taasta kataloogi fotod",
       "Загрузка фото пока не настроена — нужно подключить хранилище.":
         "Fotode üleslaadimine pole veel seadistatud — hoidla tuleb ühendada.",
@@ -4252,6 +4255,9 @@
       "Переведено с русского": "Translated from Russian",
       "Предложили название — поправьте, если нужно": "A name is suggested — correct it if needed",
       "Вернули как было": "Put back as it was",
+      "✨ Заполнить только по-русски": "✨ Fill in Russian only",
+      "✨ Заполнить только по-эстонски": "✨ Fill in Estonian only",
+      "✨ Заполнить только по-английски": "✨ Fill in English only",
       "Вернуть фото из каталога": "Restore the catalogue photos",
       "Загрузка фото пока не настроена — нужно подключить хранилище.":
         "Photo uploads are not set up yet — the storage has to be connected.",
@@ -6946,6 +6952,13 @@
     [/^(\d+) из 3 языков$/, { ET: "$1 keelt 3-st", EN: "$1 of 3 languages" }],
     [/^салоны платят (.+)$/, { ET: "salongid maksavad $1", EN: "salons pay $1" }],
     [/^Черновик от (.+)$/, { ET: "Mustand $1", EN: "Draft of $1" }],
+    // q41: «N человек ждут» under «Наличие» in the product card (edWaitText)
+    [/^(\d+) человек ждёт — получит письмо$/, { ET: "$1 inimene ootab — saab kirja", EN: "$1 person waiting — will get the letter" }],
+    [/^(\d+) человека? ждут — получат письмо$/, { ET: "$1 inimest ootab — saavad kirja", EN: "$1 people waiting — will get the letter" }],
+    [/^(\d+) человек ждёт — но письмо «Товар снова в наличии» выключено$/,
+      { ET: "$1 inimene ootab — aga kiri «Toode on taas laos» on välja lülitatud", EN: "$1 person waiting — but the “Back in stock” letter is switched off" }],
+    [/^(\d+) человека? ждут — но письмо «Товар снова в наличии» выключено$/,
+      { ET: "$1 inimest ootab — aga kiri «Toode on taas laos» on välja lülitatud", EN: "$1 people waiting — but the “Back in stock” letter is switched off" }],
     [/^Объём (.+) убран$/, { ET: "Maht $1 eemaldatud", EN: "Size $1 removed" }],
     [/^Убрать (.+)\?$/, { ET: "Eemaldada $1?", EN: "Remove $1?" }],
     [/^Остаток: (\d+|—) → (\d+)$/, { ET: "Jääk: $1 → $2", EN: "Stock: $1 → $2" }],
@@ -21583,6 +21596,28 @@
   function proOvWrote(id) {
     if (PRO_OV.wrote) PRO_OV.wrote[id] = true;
   }
+  /* q41 (Dim 25.09.2026): how many people wait for each product — the unsent
+     «Сообщить о наличии» rows, which GET /api/admin/overrides/ counts beside
+     the map (pendingStockAlertCounts, src/lib/customers.ts). Read with the
+     salon prices on the way into «Каталог», again when a card opens (if the
+     count is older than WAIT_MS) and after the card changes the stock — the
+     letters go inside that very PUT (upsertOverride → runBackInStock), so the
+     count that comes back is the one after them. */
+  var WAIT = { at: 0, busy: false }, WAIT_MS = 15000;
+  function waitAdopt(w) {
+    if (!w || typeof w !== "object") return;
+    S.goodsWaiting = w; WAIT.at = Date.now();
+    edWaitPaint();
+  }
+  function loadWaiting(force) {
+    if (SRV.admin !== true || WAIT.busy) return;
+    if (!force && WAIT.at && Date.now() - WAIT.at < WAIT_MS) return;
+    WAIT.busy = true;
+    apiJson("/api/admin/overrides/").then(function (r) {
+      WAIT.busy = false;
+      if (r.status === 200 && r.body && r.body.ok) waitAdopt(r.body.waiting);
+    }, function () { WAIT.busy = false; });
+  }
   function loadProOverrides(force) {
     if (SRV.admin !== true) return;
     if (PRO_OV.asked && !force) return;
@@ -21592,6 +21627,7 @@
       if (PRO_OV.wrote === wrote) PRO_OV.wrote = null;
       if (r.status === 401) { SRV.admin = false; return; }
       if (r.status !== 200 || !r.body.ok || !r.body.overrides) return;
+      waitAdopt(r.body.waiting);
       var ov = r.body.overrides, moved = false;
       Object.keys(ov).forEach(function (id) {
         if (wrote[id]) return;
@@ -33140,7 +33176,9 @@
     if (!SRV.admin) return Promise.resolve(true);   // the demo: the copy is the shop
     if (a.type === "set_price") return edApi(ov, "PUT", { id: a.id, price: a.value }, ka);
     if (a.type === "set_pro_price") return edApi(ov, "PUT", { id: a.id, proPrice: a.value }, ka);
-    if (a.type === "set_stock") return edApi(ov, "PUT", { id: a.id, stock: a.value }, ka);
+    if (a.type === "set_stock") {
+      return edApi(ov, "PUT", { id: a.id, stock: a.value }, ka).then(function (r) { if (edOk(r)) loadWaiting(true); return r; });
+    }
     if (a.type === "set_sizes") return edApi(ov, "PUT", sizesBody(a), ka);
     if (a.type === "set_hidden") return edApi(ov, "PUT", { id: a.id, hidden: !!a.value }, ka);
     if (a.type === "set_seo") return edApi(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }, ka);
@@ -33678,6 +33716,35 @@
     for (var i = 0; i < rows.length; i++) if (rows[i].productId === p.id && rows[i].tracked) return true;
     return false;
   }
+  /** «N человек ждут — получат письмо», or — with «Товар снова в наличии»
+      switched off in «Письма» — that the letter will not go. Empty when nobody waits. */
+  function edWaitText(p) {
+    var n = p && !p.isNew && S.goodsWaiting ? Number(S.goodsWaiting[p.id]) || 0 : 0;
+    if (n <= 0) return "";
+    // whole lines per plural form, so each one is a single text the dictionary's rules read (UI_RX)
+    var k = pl(n, 1, 2, 5);
+    if (DEMO.flows && DEMO.flows.backstock) {
+      return k === 1 ? n + " человек ждёт — получит письмо"
+        : k === 2 ? n + " человека ждут — получат письмо" : n + " человек ждут — получат письмо";
+    }
+    return k === 1 ? n + " человек ждёт — но письмо «Товар снова в наличии» выключено"
+      : k === 2 ? n + " человека ждут — но письмо «Товар снова в наличии» выключено"
+        : n + " человек ждут — но письмо «Товар снова в наличии» выключено";
+  }
+  function edWaitHTML(p) {
+    var t = edWaitText(p);
+    return '<span class="adm-edwait" data-edwaiting="' + esc(p.id) + '"' + (t ? "" : " hidden") + ">" + t + "</span>";
+  }
+  /** …patched in place when a count arrives: the card may be mid-typing. */
+  function edWaitPaint() {
+    if (typeof document === "undefined") return;
+    var el = document.querySelector("[data-edwaiting]");
+    if (!el) return;
+    var p = admEditProduct(el.getAttribute("data-edwaiting"));
+    var t = p ? edWaitText(p) : "";
+    if (el.textContent !== t) { el.textContent = t; translateTree(el); }
+    el.hidden = !t;
+  }
   function edSecShop(p) {
     var own = !!p.custom;
     var shown = !goodsOffSale(p);
@@ -33694,7 +33761,7 @@
       admSecHeadHTML("В магазине", "ed-show", help) +
       '<div class="adm-edshop">' +
         '<div class="adm-edshop__c">' + admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", shown) + "</div>" +
-        '<div class="adm-edshop__c"><div class="adm-field"><span>Наличие</span>' + stock + "</div></div>" +
+        '<div class="adm-edshop__c"><div class="adm-field"><span>Наличие</span>' + stock + edWaitHTML(p) + "</div></div>" +
         (own ? "" : '<div class="adm-edshop__c">' + edSubcatField(p.cat, subcatOf(p), edAsAttr(p, "subcat")) + "</div>") +
       "</div></section>";
   }
@@ -33961,8 +34028,16 @@
   }
 
   /* ---- «Для Google» — folded; the summary says how many languages have one - */
+  /* «Только этот язык» (Dim 25.09.2026, «nothing gets lost»): the old
+     «Заполнить автоматически» of one language, back as a small link inside
+     each language's pair — «✨ … · все три языка» above stays the main button.
+     The same hook (data-admseogen) and the same handler; data-edseofill names
+     the language, so the link fills its own pair whatever tab is on. */
+  var ED_SEO_FILL = { ru: "✨ Заполнить только по-русски", et: "✨ Заполнить только по-эстонски", en: "✨ Заполнить только по-английски" };
   function edSeoPair(p, code, tHook, dHook, v, on) {
     return '<div class="adm-edlang" data-edseopair="' + code + '"' + (on ? "" : " hidden") + ">" +
+      '<div class="adm-edseofill"><button class="adm-link" type="button" data-admseogen="' + esc(p.id) + '" data-edseofill="' + code + '">' +
+        ED_SEO_FILL[code] + "</button></div>" +
       '<label class="adm-field"><span>Заголовок</span>' +
         '<input class="adm-input" ' + tHook + ' maxlength="70" value="' + esc(v.t || "") + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
       '<label class="adm-field"><span>Описание</span>' +
@@ -43492,6 +43567,7 @@
       // a fresh product opens at its top, in the language and the video kind
       // the design starts from — not on whatever the last one was left on
       S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      loadWaiting(false);   // q41: «N человек ждут» — a count older than WAIT_MS is asked again
       window.scrollTo({ top: 0 }); render(); return;
     }
     /* «Остаться» / «Выйти без сохранения» — the two halves of the question
@@ -43817,7 +43893,8 @@
     if (d.admseogen !== undefined || d.admseoall !== undefined) {
       var sp2 = admEditProduct(d.admseogen !== undefined ? d.admseogen : d.admseoall);
       admDescSnapshot(sp2);
-      admSeoFill(sp2, d.admseoall !== undefined ? ["RU", "ET", "EN"] : [(S.goodsSeoLang || "ru").toUpperCase()], t);
+      // one language: the link's own (data-edseofill), else the tab on screen
+      admSeoFill(sp2, d.admseoall !== undefined ? ["RU", "ET", "EN"] : [(t.getAttribute("data-edseofill") || S.goodsSeoLang || "ru").toUpperCase()], t);
       return;
     }
     /* «Написать черновик» writes the language on screen (B45: it used to be

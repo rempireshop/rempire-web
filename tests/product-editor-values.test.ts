@@ -202,6 +202,7 @@ describe("the salon price the panel could not see", () => {
       "S",
       "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("loadProOverrides")}
        loadProOverrides(false);`,
     );
@@ -226,6 +227,7 @@ describe("the salon price the panel could not see", () => {
       "S",
       "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("loadProOverrides")}
        loadProOverrides(false);`,
     );
@@ -251,6 +253,7 @@ describe("the salon price the panel could not see", () => {
     const api = new Function(
       "SRV", "DEMO", "apiJson", "applyDemoOverrides", "render", "S", "noop",
       `var PRO_OV = { asked: false };
+       function waitAdopt() {}   // q41's count rides on the same answer — tested in admin-ux1a-product-followup
        ${slice("proOvWrote")}
        ${slice("loadProOverrides")}
        return { load: loadProOverrides, wrote: proOvWrote };`,

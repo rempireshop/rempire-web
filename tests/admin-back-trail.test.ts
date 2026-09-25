@@ -72,6 +72,7 @@ const page = new Function(
    // …and the product card closing: its fields forget, «Новый товар» keeps its draft
    function edAsForget() {}
    function goodsNewSave() {}
+   function loadWaiting() {}   // q41: the card asks how many wait — not this test's business
    function vidReset() {}
    function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
    function blogReadForm() {}
