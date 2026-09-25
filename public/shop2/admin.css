@@ -1253,7 +1253,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-grid { display: flex; flex-direction: column; }
 .adm-grid__head, .adm-grid__row {
   display: grid; gap: 8px; align-items: start;
-  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .85fr) minmax(72px, .85fr) 132px minmax(160px, 2fr) 36px;
+  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .85fr) minmax(72px, .85fr) 148px minmax(160px, 2fr) 36px;
 }
 .adm-grid__head { font-size: 12px; color: var(--a-muted); padding: 4px 0 8px; }
 .adm-grid__row { padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
@@ -1261,7 +1261,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* «Партнёры и баллы» off: the «Салон, €» column is not drawn at all, so the
    remaining five share the width instead of leaving a gap where it was */
 .adm-grid__head--nosalon, .adm-grid__row--nosalon {
-  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .9fr) 132px minmax(160px, 2fr) 36px;
+  grid-template-columns: minmax(84px, 1.1fr) minmax(72px, .9fr) 148px minmax(160px, 2fr) 36px;
 }
 .adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 44px; font-weight: 600; }
 .adm-grid__szin { font-weight: 600; }
@@ -1282,12 +1282,12 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* «Остаток»: − · the count · + in one ink-edged box, 44 px tall */
 .adm-step3 { display: flex; align-items: stretch; height: 44px; border: 1px solid var(--a-edge); background: var(--a-field); }
 .adm-step3__b {
-  flex: none; width: 40px; border: 0; background: none; color: var(--a-ink); font-size: 18px; line-height: 1; padding: 0;
+  flex: none; width: 36px; border: 0; background: none; color: var(--a-ink); font-size: 18px; line-height: 1; padding: 0;
 }
 .adm-step3__b:hover:not([disabled]) { background: var(--a-panel); }
 .adm-step3__b[disabled] { color: var(--a-rule); cursor: default; }
 .adm2 .adm-step3__v { flex: 1 1 auto; min-width: 0; height: 42px; border: 0; padding: 0 4px; text-align: center; font-weight: 600; background: none; }
-.adm-step3__v::placeholder { font-weight: 400; }
+.adm-step3__v::placeholder { font-weight: 400; font-size: 13px; }
 .adm-step3:focus-within { outline: 2px solid var(--a-ink); outline-offset: -1px; }
 .adm2 .adm-step3__v:focus { outline: 0; }
 .adm-step3:has(.adm-step3__v[aria-invalid="true"]) { border-color: var(--a-rust); }
@@ -1330,6 +1330,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-grid__x { grid-area: x; width: 44px; border: 1px solid var(--a-rule); background: var(--a-paper); }
   .adm-grid__c--sz .adm-grid__l { display: none; }
   .adm-grid__l { display: block; }
+  /* 46 = two 1-px borders round a 44-px thumb target */
+  .adm-step3 { height: 46px; }
+  .adm2 .adm-step3__v { height: 44px; }
   .adm-step3__b { width: 52px; }
 }
 /* the two boxes a new product cannot do without */
@@ -1420,7 +1423,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-goodsbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
 .adm-seg--tabs { flex: 0 1 auto; }
 .adm-seg--tabs button {
-  height: 46px; min-width: 96px; padding: 0 20px; border: 0; background: var(--a-paper); color: var(--a-ink);
+  height: 46px; min-width: 96px; padding: 0 20px; margin: 0; border: 0; background: var(--a-paper); color: var(--a-ink);
   font-size: 14px; font-weight: 500; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
 }
 .adm-seg--tabs button + button { border-left: 1px solid var(--a-ink); }
@@ -1443,16 +1446,17 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-glist { display: flex; flex-direction: column; border-top: 1px solid var(--a-ink); }
 .adm-grow {
   position: relative; display: grid; align-items: center; column-gap: 16px; min-height: 72px; padding: 8px 0;
-  border-bottom: 1px solid var(--a-rule);
-  grid-template-columns: 52px minmax(0, 1fr) minmax(120px, 190px) 110px 110px 64px;
+  border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  /* every row is its own grid, so the columns are fixed: the price column
+     holds «7,90–19,90 €», the last one the switch with its «Вкл» word */
+  grid-template-columns: 52px minmax(0, 1fr) minmax(110px, 170px) 96px 124px 92px;
   grid-template-areas: "img open sz st pr vis";
 }
-.adm-grow:hover { background: var(--a-panel); }
+/* hover and keyboard: the panel's own band — .adm-row--open on the row (tint, bleed, ink bar) */
 .adm-grow--head {
   min-height: 0; padding: 10px 0 8px; border-bottom: 0; font-size: 12px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--a-muted);
 }
-.adm-grow--head:hover { background: none; }
 .adm-grow--head > span:first-child { grid-column: 1 / 3; }
 .adm-grow__img { grid-area: img; width: 52px; height: 52px; }
 .adm-grow__open {
@@ -1474,7 +1478,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-glist .adm-empty { border: 0; }
 @media (max-width: 899px) {
   .adm-goodsbar { flex-direction: column; align-items: stretch; }
-  .adm-seg--tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .adm-seg.adm-seg--tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
   .adm-seg--tabs button { min-width: 0; padding: 0 8px; }
   .adm-search { flex: none; min-width: 0; }
   .adm-grow--head { display: none; }
@@ -1483,6 +1487,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
     grid-template-columns: 52px minmax(0, 1fr) auto;
     grid-template-areas: "img open open" "img line pr";
   }
+  /* the row is the target (the button's ::after), and the button itself is a thumb's height too */
+  .adm-grow__open { min-height: 44px; justify-content: center; }
   .adm-grow__line { display: flex; align-items: center; gap: 8px; min-width: 0; grid-area: line; }
   .adm-grow__st { flex: none; }
   .adm-grow__pr { align-self: center; font-size: 17px; }
@@ -1513,7 +1519,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   padding: 16px 18px; background: var(--a-panel);
 }
 .adm-edshop .adm-field { gap: 6px; }
-.adm-edshop .adm-seg { background: var(--a-paper); }
+.adm-edshop .adm-seg { background: var(--a-paper); width: 100%; }
 .adm-edshop .adm-seg button { flex: 1 1 0; height: 46px; border: 0; background: var(--a-paper); color: var(--a-ink); font-size: 14px; padding: 0 8px; }
 .adm-edshop .adm-seg button + button { border-left: 1px solid var(--a-ink); }
 .adm-edshop .adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
@@ -1534,6 +1540,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-photo__addp { display: none; }
 .adm-photo__adds { font-size: 12px; font-weight: 400; color: var(--a-muted); }
 .adm-photos .adm-photo--add { border-color: var(--a-edge); }
+/* beside photos the row sets its height, and a square would take its width
+   from that height — 240 px in a 196-px column, over the page's edge */
+.adm-photo + .adm-photo--add { aspect-ratio: auto; }
 /* up to four tiles to a row on a desktop (screen 02): a tile is at least
    196 px, which is exactly what its five buttons need at 34 px each — ← → ★
    ✂ × on one line under the picture, never wrapped */

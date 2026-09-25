@@ -21387,15 +21387,15 @@
       assistant's «Открыть …» and the e2e suite reach them as before. */
   function admGoodsTabsHTML(tab, warn) {
     return '<div class="adm-seg adm-seg--tabs" role="group" aria-label="Что показываем">' +
-      '<button data-admtab="goods" aria-current="' + (tab === "catalog") + '">Каталог</button>' +
+      '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
       /* The zero is printed too, once the shelf list has actually arrived:
          «nothing to re-order» and «not loaded yet» looked identical, and the
          chips one row below print theirs on purpose. Blank only while the
          list is still coming. The design's rust count is for a number that
          asks for something; a zero stays quiet. */
-      '<button data-admtab="stock" aria-current="' + (tab === "stock") + '">Склад ' +
+      '<button class="adm-tab" data-admtab="stock" aria-current="' + (tab === "stock") + '" title="Склад">Склад ' +
         '<span class="adm-tab__warn' + (S.stockLevels && !warn ? " adm-tab__warn--zero" : "") + '">' + (S.stockLevels ? warn : "") + "</span></button>" +
-      '<button data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '">Наборы</button></div>';
+      '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button></div>';
   }
   function admProductsHTML() {
     var tab = admProductTab();
@@ -21726,7 +21726,8 @@
        inside a button. Brand over name, as the design draws it; the sizes,
        the stock tag and the price in their own columns on a desktop and on
        one third line on a phone. */
-    return '<div class="adm-grow" data-goodsrow="' + esc(p.id) + '">' +
+    // adm-row--open: the panel's one hover and keyboard band (tint + ink bar), as on every other list
+    return '<div class="adm-grow adm-row--open" data-goodsrow="' + esc(p.id) + '">' +
       '<span class="adm-thumb adm-grow__img">' + media(p, 0, "") + "</span>" +
       '<button class="adm-grow__open" type="button" data-admgoods="' + esc(p.id) + '">' +
         '<span class="adm-grow__br">' + esc(p.brand) + "</span>" +
@@ -32743,6 +32744,8 @@
     return (S.pricingLoaded && S.pricingLoaded.proDiscountPct != null) ? S.pricingLoaded.proDiscountPct : 20;
   }
   function edSalonOf(price) { return Math.round(price * (1 - edSalonPct() / 100) * 100) / 100; }
+  /** A money figure as the price boxes show it — «7,20», «20» (eur() without the sign). */
+  function edMoney(n) { return eur(n).replace(/\s?€$/, "").replace(/^€/, ""); }
   /** wholesale/loyalty: what a salon really pays for the rung on THIS row —
       the same arithmetic proUnitPrice() bills with (src/lib/loyalty.ts): the
       pro BASE (the owner's own salon price if he set one, otherwise the
@@ -32787,7 +32790,8 @@
      row is his, not the file's — and saves back to PUT /api/admin/products/<id>. */
   function goodsNewDraft() {
     var d = S.goodsNew || goodsNewBlank();
-    var g = function (sel, fb) { var e = document.querySelector(sel); return e ? e.value : fb; };
+    // right after «Начать заново» the boxes on screen are the OLD draft (ED.dropTyped)
+    var g = function (sel, fb) { var e = ED.dropTyped ? null : document.querySelector(sel); return e ? e.value : fb; };
     var cat = g("[data-edcat]", d.cat || "");
     var rows = Array.isArray(d.sizes) ? d.sizes : [];
     return { id: "new", isNew: true, custom: true, active: true,
@@ -33112,7 +33116,7 @@
      and its undo) once the server has taken it, so «Повторить» after a dead
      connection sends it again rather than finding nothing to send. A switch
      or a photo button moves the copy at once and the write follows. */
-  var ED = { id: "", j: {}, burst: {}, qtyT: {}, toastFor: {}, seq: 0 };
+  var ED = { id: "", j: {}, burst: {}, qtyT: {}, toastFor: {}, seq: 0, dropTyped: false, ladBad: "" };
   function edAsKey(p, field) { return "ed:" + p.id + ":" + field; }
   /** The owner came into another product's card: a fresh visit — the journal
       merges a field's lines per visit, not forever. */
@@ -33477,6 +33481,7 @@
       }
     }
     if (!bad && rows.length > 12) hint = CUSTOM_ERR.too_many_sizes[0];
+    ED.ladBad = bad || "";   // edSecSizes draws the mark too, so a render in between keeps it
     if (typeof document !== "undefined") {
       var cells = document.querySelectorAll("[data-edsz],[data-edpx]");
       for (var c = 0; c < cells.length; c++) cells[c].removeAttribute("aria-invalid");
@@ -33749,13 +33754,18 @@
        right. The stored pro price survives; the column comes back with it. */
     var salonCol = partnersOn();
     var ladKey = edAsKey(p, "ladder");
+    // the box the ladder's check pointed at keeps its rust border through a render
+    var ladMark = function (col, i) {
+      return ADM_AS[ladKey] && ADM_AS[ladKey].err && ED.ladBad === '[data-ed' + col + '="' + i + '"]' ? ' aria-invalid="true"' : "";
+    };
     var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Объём</span><span>Цена, €</span>' +
       (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
     var body = rows.map(function (r, i) {
       var variant = multi ? String(r.size || "") : "";
       var key = stockKey(p.id, variant);
       var lv = edStockFor(p, variant);
-      var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
+      // a saved price reads as the shop writes it («34,90», not «34.9»); a typed one as typed
+      var priceVal = r.price === "" || r.price == null ? "" : typeof r.price === "number" ? edMoney(r.price) : String(r.price);
       /* q19: the first size's salon price is the owner's (empty = the shop's
          discount, shown as the placeholder); the ones below are CALCULATED —
          that base plus their own premium, what proUnitPrice() bills — and
@@ -33763,13 +33773,16 @@
       var salon = i === 0
         ? edSalonOf(goodsPrice(priceVal) || 0)
         : edSalonRung(p, goodsPrice(rows[0].price) || 0, goodsPrice(priceVal) || 0);
+      // no figure from a price that is not one («abc» above read as 0 € and
+      // put the full price in the salon boxes below)
+      salon = goodsPrice(rows[0].price) === null || goodsPrice(priceVal) === null ? "" : edMoney(salon);
       return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
-          ? edCell("sz", "Объём", '<input class="adm-input adm-input--cell adm-grid__szin" data-edsz="' + i + '" value="' + esc(r.size) +
+          ? edCell("sz", "Объём", '<input class="adm-input adm-input--cell adm-grid__szin" data-edsz="' + i + '"' + ladMark("sz", i) + ' value="' + esc(r.size) +
             '" maxlength="30" placeholder="100 мл" aria-label="Объём">')
           : '<span class="adm-grid__sz">один объём</span>') +
-        edCell("px", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
-          '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
+        edCell("px", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i + '"' + ladMark("px", i) +
+          ' inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
         (salonCol
           ? edCell("salon", "Салон, €", i === 0
             ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") + '"' + edAsAttr(p, "pro") +
@@ -34336,7 +34349,9 @@
       the page is open (the same idea as the card: no render between keys). */
   function goodsNewSync() {
     var d = S.goodsNew;
-    if (!d || S.adminEdit !== "new" || typeof document === "undefined" || !document.querySelector('[data-edfor="new"]')) return d;
+    // ED.dropTyped: «Начать заново» emptied the draft and the page is not
+    // repainted yet — the boxes still show the old text, never read it back
+    if (!d || S.adminEdit !== "new" || ED.dropTyped || typeof document === "undefined" || !document.querySelector('[data-edfor="new"]')) return d;
     var g = function (sel, fb) { var e = document.querySelector(sel); return e ? e.value : fb; };
     d.brand = g("[data-edbrand]", d.brand); d.name = g("[data-edname]", d.name);
     d.cat = g("[data-edcat]", d.cat); d.subcat = g("[data-edsubcat]", d.subcat);
@@ -34371,6 +34386,15 @@
     goodsNewClear();
     S.goodsNew = goodsNewBlank(); S.goodsNewRestored = false; S.goodsSizes = null; S.goodsErr = "";
     UP.err = "";
+    ED.dropTyped = true;   // the next render must not put the typed boxes back (renderImpl)
+  }
+  /** The caret into «Бренд» — now, and again after the frame: render() folds a
+      second paint in one frame into the next, and a focus asked for before
+      that paint found no box (the list then never opened). */
+  function goodsNewFocus() {
+    var go = function () { if (S.adminEdit === "new") refocus("[data-edbrand]"); };
+    go();
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(go);
   }
   /** What still stands between the draft and «Добавить товар», in the words
       of the fields — each its own node, so the dictionary reaches every one. */
@@ -34614,7 +34638,13 @@
     for (var i = 0; i < keep.length; i++) {
       var k = keep[i], el = bodySlot.querySelector(k.sel);
       if (!el) continue;
-      if (el.tagName === "SELECT") { if (el.selectedIndex !== k.idx) el.selectedIndex = k.idx; continue; }
+      /* a <select> by its VALUE: the option list can change under it — «Раздел»
+         drops its «Выберите» line once a section is picked, and the old index
+         then pointed one section further on («Уход за бородой» saved as «лицо») */
+      if (el.tagName === "SELECT") {
+        if (el.value !== k.value) { el.value = k.value; if (el.value !== k.value) el.selectedIndex = k.idx; }
+        continue;
+      }
       if (el.value !== k.value) el.value = k.value;
       if (k.range && document.activeElement === el && (el.selectionStart !== k.range[0] || el.selectionEnd !== k.range[1])) {
         try { el.setSelectionRange(k.range[0], k.range[1]); } catch (e) {}
@@ -41556,7 +41586,8 @@
     var goodsKeep = null;
     if (S.screen === "admin" && S.adminEdit) {
       var openFor = bodySlot.querySelector("[data-edfor]");
-      if (openFor && openFor.getAttribute("data-edfor") === S.adminEdit) goodsKeep = edKeepTyped(openFor);
+      // …except once after «Начать заново»: those typed boxes are what it clears
+      if (openFor && openFor.getAttribute("data-edfor") === S.adminEdit && !ED.dropTyped) goodsKeep = edKeepTyped(openFor);
     }
 
     var bodyHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
@@ -41599,6 +41630,7 @@
     }
 
     if (goodsKeep) edKeepRestore(goodsKeep);
+    ED.dropTyped = false;   // the page is the reset draft now (goodsNewReset)
 
     if (refocusSel) {
       var nf = bodySlot.querySelector(refocusSel);
@@ -43574,7 +43606,12 @@
       S.adminTab = "goods"; S.adminEdit = "new";
       S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); ensureMedia();
       S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = ""; UP.err = "";
-      window.scrollTo({ top: 0 }); render(); refocus("[data-edbrand]"); return;
+      window.scrollTo({ top: 0 }); render();
+      /* a blank page starts in «Бренд» on a desktop; a restored draft does
+         not, and neither does a phone — there the focus raised the keyboard
+         and the brand list over the whole page (admAsstSheet: ≤ 899 px) */
+      if (!S.goodsNewRestored && !admAsstSheet()) goodsNewFocus();
+      return;
     }
     // «Начать заново» — the draft and its photos go, after the confirm sheet
     if (d.goodsnewreset !== undefined) {
@@ -43939,7 +43976,7 @@
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
         // «Товар» 1a: a size removed after its sheet, «Начать заново» on «Новый товар»
         if (pa.type === "ed_size_del") { edSizeDelApply(pa); return; }
-        if (pa.type === "goods_new_reset") { goodsNewReset(); render(); refocus("[data-edbrand]"); return; }
+        if (pa.type === "goods_new_reset") { goodsNewReset(); render(); goodsNewFocus(); return; }
         // «Рассылка»: the send is a loop of POSTs with its own progress card — nothing to undo
         if (pa.type === "newsletter_send") { newsSendStart(pa); return; }
         if (pa.type === "set_product_active") {
@@ -45334,7 +45371,7 @@
     else if (t.matches("[data-edprice]")) {
       var salonEl = document.querySelector("[data-edproprice]");
       var np0 = goodsPrice(t.value);
-      if (salonEl) salonEl.placeholder = String(edSalonOf(np0 === null ? 0 : np0));
+      if (salonEl) salonEl.placeholder = np0 === null ? "" : edMoney(edSalonOf(np0));
     }
     else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
     // the owner's product: the line under the name follows what is typed

@@ -412,6 +412,7 @@ describe("«Новый товар»: the draft saves itself, and «Добави�
       ${decl("GOODS_NEW_KEY")}
       ${decl("GOODS_NEW_MS")}
       var UP = { err: "" };
+      var ED = { dropTyped: false };
       var document = undefined;
       function idemNewKey() { return "6F9619FF-8B86-D011-B42D-00C04FC964FF"; }
       function galDrop(k) { dropped.push(k); }
@@ -458,6 +459,33 @@ describe("«Новый товар»: the draft saves itself, and «Добави�
     gn.reset();
     expect(gn.dropped).toEqual(["products/draft-x/b.webp"]);
     expect(gn.load(), "the draft outlived «Начать заново»").toBeNull();
+  });
+
+  it("a picked «Раздел» survives a render by its value — the list losing «Выберите» does not shift it", () => {
+    // before the render «Уход за бородой» was option 3 (after «Выберите»); after it, 3 is «face»
+    const opts = ["hair", "styling", "beard", "face"];
+    let idx = 3;
+    const sel = {
+      tagName: "SELECT",
+      get value() { return opts[idx] ?? ""; },
+      set value(v: string) { idx = opts.indexOf(v); },
+      get selectedIndex() { return idx; },
+      set selectedIndex(i: number) { idx = i; },
+    };
+    const run = new Function("bodySlot", "document",
+      `${fn("edKeepRestore")}\n edKeepRestore([{ sel: "select[data-edcat]", value: "beard", idx: 3, range: null }]);`);
+    run({ querySelector: () => sel }, { activeElement: null });
+    expect(sel.value, "the section moved one line down the list").toBe("beard");
+  });
+
+  it("«Начать заново» empties the boxes on screen too — the render does not put the typed text back", () => {
+    // renderImpl carries typed boxes across a render (edKeepTyped); the reset
+    // is the one render that must not, or the brand came back after it
+    expect(fn("goodsNewReset")).toContain("ED.dropTyped = true");
+    expect(app).toContain('=== S.adminEdit && !ED.dropTyped) goodsKeep = edKeepTyped(openFor);');
+    // …and the flag holds until the page is patched: the markup reads the draft (goodsNewDraft), not the old boxes
+    expect(app).toMatch(/if \(goodsKeep\) edKeepRestore\(goodsKeep\);\r?\n\s+ED\.dropTyped = false;/);
+    expect(fn("goodsNewDraft")).toContain("ED.dropTyped ? null : document.querySelector(sel)");
   });
 
   it("«Добавить товар» sends the draft's own Idempotency-Key and its photos as the gallery", () => {
