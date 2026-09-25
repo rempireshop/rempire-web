@@ -91,6 +91,17 @@ describe("the search box — one helper, one glass, centred", () => {
     });
   }
 
+  /* The box moved one level down, into the label: whatever found its
+     neighbours from `t.parentNode` found nothing — «Рассылка»'s picker typed
+     and never repainted its list (the e2e newsletter spec caught it). */
+  it("the newsletter picker repaints its list from the picker, not from the box's parent", () => {
+    const at = src.indexOf("S.newsPick.q = t.value;");
+    expect(at).toBeGreaterThan(0);
+    const chunk = src.slice(at, src.indexOf("return;", at));
+    expect(chunk).toContain('closest("[data-nbpick]")');
+    expect(chunk).not.toContain("t.parentNode");
+  });
+
   it("no screen draws a glass of its own any more", () => {
     // the helper is the one place the drawing lives
     const glass = src.match(/<circle cx="11" cy="11" r="(7|6\.5)"/g) || [];

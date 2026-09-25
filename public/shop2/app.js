@@ -27833,7 +27833,10 @@
       if (f === "q") {
         S.newsPick = S.newsPick || { k: k, q: "" };
         S.newsPick.q = t.value;
-        var list = t.parentNode && t.parentNode.querySelector("[data-nbpicklist]");
+        /* the picker, not the box's parent: the box sits in the search label
+           (admSearchHTML) since the polish pass, one level further down */
+        var pick = t.closest && t.closest("[data-nbpick]");
+        var list = pick && pick.querySelector("[data-nbpicklist]");
         if (list) { list.innerHTML = newsPickRows(S.newsPick.q, S.newsPick.only || ""); translateTree(list); }
         return;
       }
