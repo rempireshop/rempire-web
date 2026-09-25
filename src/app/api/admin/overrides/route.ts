@@ -18,7 +18,7 @@
  * GET returns the same map as /api/overrides but uncached, for the panel.
  */
 import { requireAdmin } from "@/lib/auth";
-import { getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
+import { getOverrideRow, getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import {
   getDescriptionOverrides,
   setDescriptionOverride,
@@ -189,6 +189,23 @@ export async function PUT(req: Request) {
       const raw = raw0 as Record<string, unknown>;
       const { id, patch } = normalise(raw);
       if (!id) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
+      /* The fields this patch is about to replace, as the row held them — the
+         audit's `prev` (db/migrations/207_audit_prev.sql), so «Вернуть» in the
+         journal works from any device (1a, Dim 25.09.2026, q7). Best effort:
+         a read that fails costs the row its way back, never the save. */
+      let before: { before: unknown } | undefined;
+      if (Object.keys(patch).length) {
+        try {
+          const old = await getOverrideRow(id);
+          const was: Record<string, unknown> = {};
+          for (const k of Object.keys(patch) as Array<keyof Override>) {
+            was[k] = old ? old[k] ?? (k === "hidden" ? false : null) : k === "hidden" ? false : null;
+          }
+          before = { before: was };
+        } catch {
+          before = undefined;
+        }
+      }
       const row: OverrideOut = await upsertOverride(id, patch);
       // assistant-work: description {RU,ET,EN} lives in its own column
       // (src/lib/product-descriptions.ts) — see the GET handler's comment.
@@ -206,7 +223,9 @@ export async function PUT(req: Request) {
         await writeAuditSafe("admin", "override.seo", { id });
       }
       saved[id] = row;
-      await writeAuditSafe("admin", "override.set", { id, patch });
+      // «Вернуть» on audit row N from the journal: that row reads «возвращено» everywhere
+      const undoOf = Number.isInteger(raw.undoOf) && (raw.undoOf as number) > 0 ? (raw.undoOf as number) : 0;
+      await writeAuditSafe("admin", "override.set", undoOf ? { id, patch, undoOf } : { id, patch }, before);
     }
   } catch (err) {
     if (err instanceof OrderError) return Response.json({ ok: false, error: err.code, detail: err.detail }, { status: 400 });
