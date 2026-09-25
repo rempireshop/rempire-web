@@ -14,7 +14,7 @@ import { assertClean, clearToast, isRussian, openAdmin, tab, toastText, watch } 
  * runs through (`handleScanCode()`).
  *
  * Both jobs the icon exists for, end to end:
- *   1. an unknown code → «К какому товару?» → search → one tap on product+size;
+ *   1. an unknown code → «К какому товару привязать?» → search → one tap on product+size;
  *   2. that same code again → the product card → +3 приход → the warehouse
  *      holds three more than it did.
  *
@@ -169,7 +169,7 @@ test.describe("scanner app", () => {
     await page.locator("[data-scanmanualsubmit]").click();
     // 1a: «Новый код · …» / «К какому товару привязать?»
     await expect(page.locator("#scanpanel")).toContainText("Новый код");
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await assertClean(page, w, "unknown code");
 
     // two or three letters is all it should take
@@ -270,11 +270,13 @@ test.describe("scanner app", () => {
     await expect(row).toContainText("не привязан");
     const before = (await stockQty(page, PRODUCT_2.id, variant)) ?? 0;
 
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanassignq]").fill("tangled");
     await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
     expect(await toastText(page)).toMatch(/привязан/i);
@@ -296,7 +298,9 @@ test.describe("scanner app", () => {
     await assertClean(page, w, "«Склад» list after the overlay");
 
     // ---- a wrong binding is undone on the card itself -----------------------
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
     await expect(page.locator('[data-scanmove="in"]')).toBeVisible();
@@ -304,7 +308,7 @@ test.describe("scanner app", () => {
     expect(await toastText(page), "unlinking said nothing").toMatch(/отвязан/i);
     await clearToast(page);
     // the code is free again, and the search card follows so it can be re-bound at once
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanclose]").click();
     await expect(page.locator(".scanoverlay")).toHaveCount(0);
     await expect(row).toContainText("не привязан");
@@ -340,11 +344,13 @@ test.describe("scanner app", () => {
       await route.continue();
     });
 
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     const search = page.locator("[data-scanassignq]");
     await search.fill("tangled");
     await search.evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
@@ -396,7 +402,7 @@ test.describe("scanner app", () => {
     // the very same code, straight away: the failure must not be cached
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     w.serverErrors.length = 0;   // the mocked 503 above, forgiven
     await assertClean(page, w, "lookup after a failure");
   });
@@ -422,7 +428,7 @@ test.describe("scanner app", () => {
     await waitForScreen(page, "scan");
     await page.locator("[data-scanmanual]").fill(codeB);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     const search = page.locator("[data-scanassignq]");
     const cands = page.locator(".scan__cand");
 
@@ -447,7 +453,7 @@ test.describe("scanner app", () => {
     const row = page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`);
     await row.click();
     await expect(row).toContainText("Заменить код?");
-    await expect(page.locator("#scanpanel"), "one tap replaced a bound code").toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel"), "one tap replaced a bound code").toContainText("К какому товару привязать?");
     await row.click();
     expect(await toastText(page)).toMatch(/привязан/i);
     await clearToast(page);
@@ -588,7 +594,7 @@ test.describe("scanner app", () => {
     const ean = `21${Date.now().toString().slice(-10)}`;
     await page.evaluate((code) => { (window as unknown as FakeWin).__scanFake.next = code; }, ean);
     await expect(page.locator("#scanpanel")).toContainText(ean, { timeout: 10_000 });
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     expect((await fake()).vibrated, "no vibration on the hit").toBeGreaterThan(0);
     await page.evaluate(() => { (window as unknown as FakeWin).__scanFake.next = ""; });
     await assertClean(page, w, "camera hit");
@@ -706,7 +712,10 @@ test.describe("scanner app", () => {
        — as this test caught the first time round — pull the very button out
        of the DOM in the middle of the press that asked for more. */
     await rows.first().evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
-    await more.click();
+    /* The press itself, sent to the button: scrolling it into view is the
+       other way the list grows (stockScrollMore), so a pointer click lands on
+       the rows that just arrived where the button was a frame ago. */
+    await more.dispatchEvent("click");
     await expect.poll(() => rows.count(), { timeout: 15_000, message: "«Показать ещё» added nothing" }).toBeGreaterThan(first);
     await expect(rows.first(), "the list was rebuilt from the top instead of grown").toHaveAttribute("data-mark", "kept");
     expect(await page.locator("[data-stockcount]").textContent(),
@@ -767,7 +776,9 @@ test.describe("scanner app", () => {
 
     // the same count is on the scanner itself, which is the screen he is
     // holding while he does it
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await expect(page.locator("#scanpanel"), "the scanner does not say how far the binding has got")
       .toContainText(`привязано ${boundWas} из ${totalWas}`);
@@ -775,7 +786,7 @@ test.describe("scanner app", () => {
     // bind one code: one more bottle done
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару привязать?");
     await page.locator("[data-scanassignq]").fill("tangled");
     await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
     expect(await toastText(page)).toMatch(/привязан/i);
@@ -890,7 +901,9 @@ test.describe("scanner app", () => {
 
     // …and the same code through the camera door: the card, then the basket
     await page.locator("[data-posq]").fill("");
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator(".scanoverlay")).toBeVisible();
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();

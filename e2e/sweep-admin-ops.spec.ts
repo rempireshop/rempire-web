@@ -163,7 +163,8 @@ test.describe("sweep — warehouse", () => {
     const dupMsg = ((await dup.textContent()) || "").trim();
     expect(isRussian(dupMsg), `duplicate EAN message is not Russian — "${dupMsg}"`).toBe(true);
     expect(dupMsg, "the refusal does not say the code belongs to another product").toMatch(/штрихкод|код/i);
-    await expect(page.locator("[data-admsavest]:visible").first(), "a refusal claimed «Сохранено ✓»").not.toContainText("Сохранено");
+    // the header may say nothing at all after a refusal — it must not say «Сохранено»
+    await expect(page.locator("[data-admsavest]:visible", { hasText: "Сохранено" }), "a refusal claimed «Сохранено ✓»").toHaveCount(0);
     await assertClean(page, w, "duplicate EAN refused");
 
     // Whatever the shop accepts as a barcode goes out whole; what it does not
@@ -196,7 +197,9 @@ test.describe("sweep — warehouse", () => {
     // Headless Chromium has no camera. The overlay must still open, say so in
     // Russian, and leave the manual field usable — that is the keyboard-wedge
     // path a USB scanner uses anyway (docs/inventory.md).
-    await page.locator("[data-scanopen]").first().click();
+    // a phone hides the pinned «Сканировать» while its keyboard is up (body.adm-typing)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.locator("[data-scanopen]:visible").first().click();
     await expect(page.locator("[data-scanmanual]")).toBeVisible();
     await assertClean(page, w, "scanner opened without a camera");
     await page.locator("[data-scanmanual]").fill("нет-такого-кода");
