@@ -16085,7 +16085,13 @@
     // the same one number the picture bar is placed by — .adm-canvas is position:relative
     bar.style.top = (a.offsetTop + a.offsetHeight + 8) + "px";
     translateTree(bar);
-    try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
+    /* Into view after a beat, and only while it is still this card's bar: the
+       page must not move under the second click of a double click — that
+       click is selecting words, and it closes the bar first. */
+    setTimeout(function () {
+      if (CARDSEL !== a || !bar.parentNode) return;
+      try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
+    }, 350);
   }
   function admCardRemove() {
     var a = CARDSEL, box = blogBox();
@@ -50817,7 +50823,12 @@
     // a product card in the text: its bar has one button, the cross (admCardOpen)
     if (t.closest("[data-cardx]")) { e.preventDefault(); admCardRemove(); return; }
     var pcard = t.closest("a[data-product]");
-    if (pcard && pcard.closest("[data-blogbody]")) { e.preventDefault(); admCardOpen(pcard); return; }
+    if (pcard && pcard.closest("[data-blogbody]")) {
+      /* a double or triple click is the owner selecting the card's words, or
+         its whole line, to edit them like any other line — the bar makes way */
+      if (e.detail > 1) { admFigClose(); return; }
+      e.preventDefault(); admCardOpen(pcard); return;
+    }
     if ((FIGSEL || CARDSEL) && !t.closest("[data-figui]")) admFigClose();
   });
 

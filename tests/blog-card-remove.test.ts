@@ -239,6 +239,14 @@ describe("a product card in the article's text has a cross", () => {
     // a card outside the editor (the shop's own article page) is not the editor's business
     click(card("x-outside"));
     expect(seen).toHaveLength(2);
+    /* a double or triple click on a card is the owner selecting its words or
+       its line — e2e/admin-blog.spec.ts deletes a placed card that way — so
+       the bar makes way and the browser's own selection is left alone */
+    prevented = 0;
+    listener!({ target: alone, detail: 2, preventDefault: () => { prevented++; } });
+    listener!({ target: alone, detail: 3, preventDefault: () => { prevented++; } });
+    expect(seen).toEqual(["card:system-4-bio-botanical-shampoo", "remove", "close", "close"]);
+    expect(prevented, "a multi-click was stopped — the line could not be selected").toBe(0);
   });
 
   it("pressing the cross does not take the caret out of the box (mousedown is stopped, like the picture bar's)", () => {
