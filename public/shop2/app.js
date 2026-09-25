@@ -45389,8 +45389,13 @@
     // an article open in the editor sends what it owes before the new one takes its place (1a)
     if (S.adminBlogEdit && S.adminTab === "blog") { blogReadForm(); blogAutosave("change"); }
     S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    /* blogStartNew() leaves «Тема статьи» empty, and it stays empty: that box
+       is the owner's own words (admBlogTopicFieldHTML), and this topic line is
+       the model's. Written into it, it stood there as text the owner had to
+       clear before typing the next topic (verification pass on staging,
+       25.09.2026). It goes to the generator only; the article's title becomes
+       the box's grey hint once it is written. */
     blogStartNew();
-    S.adminBlogTopic = topic;
     S.admMore = false;
     window.scrollTo({ top: 0 });
     render();

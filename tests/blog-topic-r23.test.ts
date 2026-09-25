@@ -153,6 +153,40 @@ describe("the chat assistant hands over the owner's own words", () => {
   it("the panel passes them to the article generator", () => {
     expect(slice("startArticleFromAssistant")).toContain("admBlogWriteFull(S.adminBlogEdit, topic, a.hint || \"\", a.ask || \"\")");
   });
+
+  /* ai-blog-translate e2 (verification pass on staging, 25.09.2026): after
+     «напиши статью про cool vibes» → «Применить», the article's «Тема
+     статьи» box was FILLED with the model's own topic line («Настроение и
+     стиль: как создать cool vibes в уходе за собой») — startArticleFromAssistant
+     wrote it into S.adminBlogTopic. The box is the owner's words only (the
+     24.09 rule above); the model's topic goes to the generator and nowhere
+     else, and once the article has its title the title is the grey hint. */
+  it("the article the chat starts leaves «Тема статьи» empty — the model's topic goes to the generator only", () => {
+    const TOPIC = "Настроение и стиль: как создать cool vibes в уходе за собой";
+    const S: Record<string, unknown> = { adminTab: "over", adminBlogEdit: null, adminBlogTopic: "" };
+    const sent: Array<{ topic: string; hint: string; ask: string }> = [];
+    const start = new Function(
+      "S", "txt", "blogReadForm", "blogAutosave", "blogStartNew", "window", "render", "admBlogWriteFull",
+      `${slice("startArticleFromAssistant")}\nreturn startArticleFromAssistant;`,
+    )(
+      S, (v: unknown) => (typeof v === "string" ? v : ""), () => {}, () => {},
+      () => { S.adminBlogEdit = { title: { RU: "", ET: "", EN: "" }, products: [] }; S.adminBlogTopic = ""; },
+      { scrollTo: () => {} }, () => {},
+      (_d: unknown, topic: string, hint: string, ask: string) => sent.push({ topic, hint, ask }),
+    ) as (a: unknown) => void;
+    start({ type: "draft_post", topic: TOPIC, hint: "", ask: "напиши статью про cool vibes" });
+
+    expect(sent).toEqual([{ topic: TOPIC, hint: "", ask: "напиши статью про cool vibes" }]);
+    expect(S.adminTab).toBe("blog");
+    expect(S.adminBlogTopic, "the model's topic line was put into the owner's box").toBe("");
+
+    // …and the box, once the article has come back with its title, shows that title as the hint only
+    (S.adminBlogEdit as { title: Record<string, string> }).title.RU = TOPIC;
+    const field = new Function("S", "esc", `${slice("blogTopicValue")}\n${slice("admBlogTopicFieldHTML")}\nreturn admBlogTopicFieldHTML;`);
+    const html = (field(S, esc) as (d: unknown, busy: boolean) => string)(S.adminBlogEdit, false);
+    expect(html).toMatch(/\bvalue=""/);
+    expect(html).toContain(`placeholder="${TOPIC}"`);
+  });
 });
 
 describe("the article generator is told the topic IS the subject", () => {

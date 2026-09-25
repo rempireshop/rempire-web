@@ -901,16 +901,23 @@ test.describe("blog — the whole article", () => {
       await expect(card).toContainText("уход за бородой зимой");
       await card.locator("[data-admapply]").click();
 
-      // the editor opens on a new draft with the topic in the box, and the article fills in
+      /* the editor opens on a new draft and the article fills in. «Тема
+         статьи» stays empty: the box is the owner's own words, and the topic
+         line is the model's — it goes to the generator only (staging,
+         25.09.2026: the box was filled with it) */
       await expect(page.locator("[data-blogbody]")).toBeVisible();
-      await expect(page.locator("[data-admblogtopic]")).toHaveValue("уход за бородой зимой");
+      await expect(page.locator("[data-admblogtopic]")).toHaveValue("");
       await expect(page.locator("[data-admblogfull]")).toHaveText("…");
       await expect(page.getByRole("status").first()).toContainText("Статья готова на трёх языках", { timeout: 30_000 });
       await clearToast(page);
       await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Уход за бородой зимой ${marker}`);
       await expect(page.locator("[data-blogbody] h2")).toHaveText(`Масло каждый вечер ${marker}`);
+      // …and the box is still empty, the new title only its grey hint
+      await expect(page.locator("[data-admblogtopic]")).toHaveValue("");
+      await expect(page.locator("[data-admblogtopic]")).toHaveAttribute("placeholder", `Уход за бородой зимой ${marker}`);
       slug = await page.locator("[data-blogslug]").inputValue();
       expect(calls.map((c) => `${c.task}:${c.lang}`)).toEqual(["post_full:RU", "post_translate:ET", "post_translate:EN"]);
+      expect((calls[0].input as { topic?: string }).topic, "the generator was not given the topic").toBe("уход за бородой зимой");
       expect(asked[0].mode).toBe("admin");
       const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
       expect(saved.status(), "the assistant's article was not saved as a draft").toBe(200);
