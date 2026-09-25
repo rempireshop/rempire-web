@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
 } from "./fixtures";
+import { closeCard } from "./goods-helpers";
 
 /**
  * «Назад» inside the panel — every card and every sheet.
@@ -82,9 +83,9 @@ test.describe("admin — «Назад» closes what is open", () => {
     // ---- the product editor ------------------------------------------------
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    await expect(page.locator("[data-edfor]")).toBeVisible();
     await back(page);
-    await expect(page.locator("[data-admsavegoods]"), "Back did not close the product editor").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "Back did not close the product editor").toHaveCount(0);
 
     // ---- the customer card -------------------------------------------------
     // a guest checkout leaves no customer row, so make one to open
@@ -229,11 +230,11 @@ test.describe("admin — «Назад» closes what is open", () => {
     await loginAsAdmin(page);
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    await expect(page.locator("[data-edfor]")).toBeVisible();
 
     // closed with «← Товары»: the entry the card parked is spent quietly…
-    await page.locator("[data-admclose]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await closeCard(page);
+    await expect(page.locator("[data-edfor]")).toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first()).toBeVisible();
 
     /* …so the NEXT Back moves for real. Round 15 changed where to: «Товары»
@@ -290,10 +291,10 @@ test.describe("admin — «Назад» closes what is open", () => {
       // …and in that same frame the owner taps a product
       document.querySelector<HTMLElement>("[data-admgoods]")!.click();
     });
-    await expect(page.locator("[data-admsavegoods]"), "the editor did not open").toBeVisible();
+    await expect(page.locator("[data-edfor]"), "the editor did not open").toBeVisible();
 
     await back(page);
-    await expect(page.locator("[data-admsavegoods]"),
+    await expect(page.locator("[data-edfor]"),
       "Back left the panel instead of closing the editor").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "the catalogue did not come back").toBeVisible();
   });
@@ -307,7 +308,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await loginAsAdmin(page);
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    await expect(page.locator("[data-edfor]")).toBeVisible();
 
     await page.evaluate(() => {
       // the sidebar's fold button redraws the panel — nothing opens or closes
@@ -315,7 +316,7 @@ test.describe("admin — «Назад» closes what is open", () => {
       // …and in that same frame the owner presses «← Товары»
       document.querySelector<HTMLElement>("[data-admclose]")!.click();
     });
-    await expect(page.locator("[data-admsavegoods]"), "the editor did not close").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "the editor did not close").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first()).toBeVisible();
 
     /* The entry the editor parked is gone, so this Back is a real navigation:

@@ -1,26 +1,30 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_BASE_URL } from "./env.mjs";
 import { eur, ipHeaders, LANGS, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import { openCard, settled, toSection, typeAndLeave } from "./goods-helpers";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
  * «+ Товар» — product creation (db/migrations/131_custom_products.sql,
- * src/lib/custom-products.ts, the goods editor's «new» mode in app.js).
+ * src/lib/custom-products.ts), on the one-page «Новый товар» of direction 1a
+ * (design_handoff_admin_ux README § 5, screen 13).
  *
  * What is pinned, end to end, because it is what the owner is actually doing:
- *   · the editor refuses an empty brand and a bad price OUT LOUD, next to the box;
- *   · «Сохранить товар» makes a row, opens the product on «Фото и видео» and
- *     the list shows it first with «новый»;
- *   · a photo uploaded there (the upload route is stubbed — no bucket in this
- *     suite) is the product's photo in the shop, and «Убрать фон» replaces it
- *     in the draft when the server says it can;
+ *   · «Добавить товар» refuses an empty brand and a bad price OUT LOUD, next
+ *     to the box; a photo picked first goes into the draft, not into a
+ *     product (Dim 25.09.2026, q23);
+ *   · «Добавить товар» makes ONE row — its request carries the draft's own
+ *     Idempotency-Key — the product is live at once, its card opens and the
+ *     list shows it first with «новый»;
+ *   · the card saves itself: «Убрать фон» and a price change reach the shop
+ *     with no «Сохранить»;
  *   · the product is in the shop in all three languages — its page, its
  *     category, search, the brand page, the cart and the checkout summary —
  *     and the price the checkout quotes is the row's;
- *   · a price change reaches the shop; «Снять с продажи» goes through the
- *     confirm card, the toast's undo puts it back, and hidden it really vanishes;
+ *   · «Показывать в магазине» off takes it off sale, the toast's «Вернуть»
+ *     puts it back, and hidden it really vanishes;
  *   · the assistant's create_product (the model stubbed at the network edge)
- *     lands in the same editor, on the same tab, as a real row;
+ *     opens the same card, as a real row;
  *   · the product's page is a real page before app.js runs — the server
  *     writes its head from the row (src/lib/product-page.ts), the app's own
  *     sitemap names it, «Сообщить о наличии» takes it, and once hidden the
@@ -69,23 +73,20 @@ async function stubMedia(page: Page, opts: { cutout: boolean }): Promise<string[
         body: JSON.stringify({ ok: true, key: "products/e2e/1-e2e-cutout.png", url: CUTOUT_URL, thumbUrl: CUTOUT_URL, bytes: 10 }) });
       return;
     }
-    uploads.push("upload");
+    // the product id the photo was filed under, as the form carries it
+    const owner = /name="productId"\r?\n\r?\n([^\r\n]*)/.exec(req.postDataBuffer()?.toString("latin1") || "")?.[1] || "";
+    uploads.push(`upload:${owner}`);
     await route.fulfill({ status: 200, contentType: "application/json",
       body: JSON.stringify({ ok: true, key: "products/e2e/1-e2e.webp", url: PHOTO_URL, thumbUrl: PHOTO_URL, width: 1, height: 1, bytes: 10, alt: "" }) });
   });
   return uploads;
 }
 
-type EdTab = "main" | "sizes" | "media" | "desc" | "seo";
-async function edTab(page: Page, key: EdTab): Promise<void> {
-  await page.locator(`[data-edtab="${key}"]`).click();
-  await expect(page.locator(`[data-edtab="${key}"][aria-current="true"]`)).toBeVisible();
-}
-async function openEditor(page: Page, id: string): Promise<void> {
-  await tab(page, "goods");
-  await page.locator("[data-goodsq]").fill(id);
-  await page.locator(`[data-admgoods="${id}"]`).click();
-  await expect(page.locator(`[data-admsavegoods="${id}"]`)).toBeVisible();
+/** The card of the product «Добавить товар» just made — its id, off the card itself. */
+async function openedCard(page: Page): Promise<string> {
+  const card = page.locator("[data-edfor]:not([data-edfor='new'])");
+  await expect(card, "«Добавить товар» did not open the product's card").toBeVisible();
+  return (await card.getAttribute("data-edfor")) || "";
 }
 
 async function customRow(page: Page, id: string): Promise<{ active: boolean; price: number; gallery?: string[] } | null> {
@@ -138,87 +139,93 @@ async function seeInShop(browser: Browser, id: string, opts: { brand: string; br
 test.describe("admin — product creation", () => {
   test.use({ extraHTTPHeaders: ipHeaders(173) });
 
-  test("«+ Товар»: refuses out loud, creates, takes a photo, is in the shop, changes price, hides with undo", async ({ page, browser }) => {
+  test("«+ Товар»: refuses out loud, keeps a photo in the draft, creates once, saves itself, is in the shop, hides with undo", async ({ page, browser }) => {
     test.setTimeout(240_000);
     const w = watch(page);
     const stamp = Date.now().toString().slice(-6);
     const BRAND = `E2E Brand ${stamp}`;
     const NAME = `Balm ${stamp} — бальзам для бороды`;
     const uploads = await stubMedia(page, { cutout: true });
+    const keys: string[] = [];
+    page.on("request", (r) => {
+      if (r.method() === "POST" && /\/api\/admin\/products\/$/.test(r.url())) keys.push(r.headers()["idempotency-key"] || "");
+    });
     let id = "";
 
     await openAdmin(page);
     await tab(page, "goods");
     await expect(page.locator("[data-admgoodsnew]"), "«+ Товар» is not offered").toBeEnabled();
     await page.locator("[data-admgoodsnew]").click();
-    await expect(page.locator(".adm-head__kicker")).toHaveText("Новый товар");
+    await expect(page.locator("h1.adm-h1")).toHaveText("Новый товар");
+    await expect(page.locator(".adm-ed__draft")).toContainText("Черновик сохраняется сам");
     await expect(page.locator("[data-edbrand]")).toBeVisible();
-    // the photo tile is there from the start — picking a photo saves the
-    // product first (the test below) — with the one line that says so
-    await edTab(page, "media");
+    // three numbered steps on one page, the photo step among them from the start
+    await expect(page.locator(".adm-gnstep__n")).toHaveText(["1", "2", "3"]);
     await expect(page.locator('[data-galup="new"]'), "no photo tile on a new product").toBeEnabled();
-    await expect(page.locator("[data-galwait]")).toContainText("товар сохранится сам");
-    await edTab(page, "main");
 
     try {
       // ---- refused out loud, next to the box ------------------------------
-      await page.locator('[data-admsavegoods="new"]').click();
+      const add = page.locator('[data-admsavegoods="new"]');
+      await expect(add, "«Добавить товар» is not dim while the form is empty").toHaveAttribute("aria-disabled", "true");
+      await add.click();
       await expect(page.locator("[data-goodserr]")).toContainText("Впишите бренд");
       await expect(page.locator("[data-edbrand]")).toBeFocused();
       await page.locator("[data-edbrand]").fill(BRAND);
-      await page.locator('[data-admsavegoods="new"]').click();
+      await add.click();
       await expect(page.locator("[data-goodserr]")).toContainText("Впишите название");
       await page.locator("[data-edname]").fill(NAME);
+      await add.click();
+      await expect(page.locator("[data-goodserr]"), "a product without a section was not refused").toContainText("Выберите раздел");
       await page.locator("[data-edcat]").selectOption("beard");
       // the subsection list follows the section
       await expect(page.locator("[data-edsubcat] option")).toHaveCount(5);
       await page.locator("[data-edsubcat]").selectOption("ba");
-      await page.locator('[data-admsavegoods="new"]').click();
+      await add.click();
       await expect(page.locator("[data-goodserr]")).toContainText("Цена — число");
-      await edTab(page, "sizes");
       await page.locator("[data-edprice]").fill("abc");
-      await page.locator('[data-admsavegoods="new"]').click();
+      await add.click();
       await expect(page.locator("[data-goodserr]")).toContainText("Цена — число");
       await expect(page.locator("[data-edprice]")).toBeFocused();
       await page.locator("[data-edprice]").fill("14,90");
-      // the brand the owner typed on «Основное» is still there after all that
-      await edTab(page, "main");
+      await expect(page.locator("[data-goodsnewmissing]")).toContainText("Всё готово");
+      await expect(add).not.toHaveAttribute("aria-disabled", "true");
       expect(await page.locator("[data-edbrand]").inputValue()).toBe(BRAND);
+      expect(keys, "a product was created by a refused press").toEqual([]);
+
+      // ---- a photo before the product exists: into the draft (q23) --------
+      await page.locator('[data-galfile="new"]').setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
+      await expect(page.locator(".adm-photo:not(.adm-photo--add)")).toHaveCount(1);
+      expect(uploads.find((u) => u.startsWith("upload:")), "the photo was not filed under the draft").toMatch(/^upload:draft-/);
+      expect(keys, "picking a photo made the product").toEqual([]);
       await assertClean(page, w, "the new-product form");
 
-      // ---- saved: a row, the editor on «Фото и видео», «новый» in the list --
-      await page.locator('[data-admsavegoods="new"]').click();
-      expect(await toastText(page)).toMatch(/Товар создан/);
+      // ---- «Добавить товар»: one row, the card open, «новый» in the list ---
+      await add.click();
+      expect(await toastText(page)).toMatch(/Товар добавлен/);
       await clearToast(page);
-      await expect(page.locator('[data-edtab="media"][aria-current="true"]')).toBeVisible();
-      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
-      expect(id, "the editor did not reopen on the created product").toMatch(/^c-e2e-brand-/);
-      await expect(page.locator(".adm-head__kicker")).toContainText("ваш товар");
+      id = await openedCard(page);
+      expect(id, "the card did not open on the created product").toMatch(/^c-e2e-brand-/);
+      expect(keys, "the POST carried no Idempotency-Key").toHaveLength(1);
+      expect(keys[0]).toMatch(/.{8,}/);
+      await expect(page.locator(".adm-head__kicker").first()).toContainText("ваш товар");
       expect(await customRow(page, id)).toMatchObject({ active: true, price: 14.9 });
+      await expect.poll(async () => (await customRow(page, id))?.gallery?.[0], { timeout: 15_000, message: "the draft's photo did not travel with the product" })
+        .toBe(PHOTO_URL);
       expect(await feedHas(page, id), "the public feed does not carry the new product").toBe(true);
       /* The dev server compiles a route on its first hit, and the row's own
-         route (PUT below) took 4.7 s cold on a fresh server — longer than
-         toastText() waits for «Сохранено». Warm it here, before the timing
-         matters; nothing about production needs this. */
+         route took 4.7 s cold on a fresh server. Warm it here, before the
+         timing matters; nothing about production needs this. */
       expect((await page.request.get(`/api/admin/products/${id}/`)).status()).toBe(200);
 
-      // ---- a photo, and «Убрать фон» when the server offers it -------------
-      await expect(page.locator(`[data-galup="${id}"]`)).toBeEnabled();
-      await page.locator(`[data-galfile="${id}"]`).setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
-      await expect(page.locator(".adm-photo:not(.adm-photo--add)")).toHaveCount(1);
-      expect(uploads).toContain("upload");
-      // the tile is on screen, the shop has not seen it yet — the toast says what makes it so
-      expect(await toastText(page), "no nudge to press «Сохранить» after the upload").toMatch(/Фото загружено/);
-      await clearToast(page);
+      // ---- «Убрать фон» on the card: saved at once, «Вернуть» on the toast -
+      await toSection(page, "photos");
       await expect(page.locator('[data-galcut="0"]'), "no «Убрать фон» although the server offers it").toBeVisible();
       await page.locator('[data-galcut="0"]').click();
       expect(await toastText(page)).toMatch(/Фон убран/);
+      await settled(page, "the cut-out");
       await clearToast(page);
       expect(uploads.some((u) => u.startsWith("cutout:") && u.includes(PHOTO_URL))).toBe(true);
       expect(await page.locator(".adm-photo__img").first().getAttribute("style")).toContain(CUTOUT_URL);
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.gallery?.[0], { timeout: 15_000 }).toBe(CUTOUT_URL);
       await assertClean(page, w, "photo saved");
 
@@ -231,13 +238,9 @@ test.describe("admin — product creation", () => {
       // ---- the shop, in three languages ---------------------------------------
       await seeInShop(browser, id, { brand: BRAND, brandSlug: `e2e-brand-${stamp}`, name: NAME, price: 14.9, photo: CUTOUT_URL });
 
-      // ---- the price changes on the row, and the shop follows ------------------
-      await openEditor(page, id);
-      await edTab(page, "sizes");
-      await page.locator("[data-edprice]").fill("19");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
+      // ---- the price changes on the row — when the box is left — and the shop follows
+      await openCard(page, id);
+      await typeAndLeave(page, page.locator("[data-edprice]"), "19");
       await expect.poll(async () => (await customRow(page, id))?.price, { timeout: 15_000 }).toBe(19);
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("", `/p/${id}/`));
@@ -253,38 +256,35 @@ test.describe("admin — product creation", () => {
       });
       expect(priced.status(), "the checkout refused the custom product").toBe(201);
 
-      // ---- «Снять с продажи»: the card, the undo, and the vanishing -------------
-      await openEditor(page, id);
-      await page.locator("[data-admgoodspull]").click();
-      const card = page.locator(".adm-confirm");
-      await expect(card).toContainText("Снять с продажи?");
-      await expect(card).toContainText("исчезнет из магазина");
-      await page.locator("[data-admcancel]").click();
-      await expect(card).toHaveCount(0);
-      await page.locator("[data-admgoodspull]").click();
-      await page.locator("[data-admapply]").click();
-      expect(await toastText(page)).toMatch(/Снято с продажи/);
+      // ---- «Показывать в магазине»: off at once, «Вернуть», and the vanishing ---
+      await openCard(page, id);
+      const sw = page.locator(`[data-edhidden="${id}"]`);
+      await expect(sw).toHaveAttribute("aria-checked", "true");
+      await sw.click();
+      expect(await toastText(page)).toMatch(/скрыт из магазина/);
       await expect.poll(async () => (await customRow(page, id))?.active, { timeout: 15_000 }).toBe(false);
+      await expect(page.locator(`[data-edfor="${id}"]`), "the switch closed the card it sits on").toBeVisible();
       await page.locator(".adm-toast__undo").click();
       await expect(page.getByRole("status")).toContainText("Отменено");
       await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.active, { timeout: 15_000 }).toBe(true);
       expect(await feedHas(page, id)).toBe(true);
 
-      await openEditor(page, id);
-      await page.locator("[data-admgoodspull]").click();
-      await page.locator("[data-admapply]").click();
+      await openCard(page, id);
+      await page.locator(`[data-edhidden="${id}"]`).click();
+      await settled(page, "the switch");
       await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.active, { timeout: 15_000 }).toBe(false);
       expect(await feedHas(page, id), "a hidden product is still in the public feed").toBe(false);
-      await expect(page.locator(`[data-admgoods="${id}"]`)).toContainText("Скрыт");
+      await tab(page, "goods");
+      await page.locator("[data-goodsq]").fill(id);
+      await expect(page.locator(`[data-goodsrow="${id}"]`)).toContainText("Скрыт");
       await assertClean(page, w, "hidden");
 
       const gone = await freshShop(browser);
       await gone.page.goto(shopUrl("", `/p/${id}/`));
       /* A product taken out of the shop leaves a dead address behind, and since
-         07.09.2026 a dead address says so rather than quietly showing the home
-         page (Dim: «make a page not found»). */
+         07.09.2026 a dead address says so (Dim: «make a page not found»). */
       await waitForScreen(gone.page, "notfound");
       await gone.page.goto(shopUrl("", `/search/?q=${encodeURIComponent(NAME.split(" ")[0])}`));
       await waitForScreen(gone.page, "search");
@@ -298,10 +298,11 @@ test.describe("admin — product creation", () => {
       expect(refused.status()).toBe(400);
       expect((await refused.json()).error).toBe("out_of_stock");
 
-      // …and «Вернуть в продажу» from the hidden product's own page works too
-      await openEditor(page, id);
-      await page.locator(`[data-admgoodsshow="${id}"]`).click();
-      expect(await toastText(page)).toMatch(/Снова в продаже/);
+      // …and the hidden product's own card switches it back on
+      await openCard(page, id);
+      await expect(page.locator(`[data-go-product="${id}"]`), "a link to a page that is gone").toHaveCount(0);
+      await page.locator(`[data-edhidden="${id}"]`).click();
+      expect(await toastText(page)).toMatch(/снова в магазине/);
       await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.active, { timeout: 15_000 }).toBe(true);
     } finally {
@@ -310,18 +311,12 @@ test.describe("admin — product creation", () => {
   });
 
   /**
-   * Round 12 (Dim, 10.09.2026): a photo on a NEW product. The media tab used
-   * to be a dead end — «Фото — после первого сохранения» and nothing to
-   * press — and an upload that failed on staging said only «попробуйте ещё
-   * раз». Pinned here:
-   *   · a photo picked with the form empty uploads nothing: the save bar
-   *     names the empty box and the tab that holds it opens by itself;
-   *   · with the form filled, the photo MAKES the product (the same POST the
-   *     save bar sends), lands on it, and «Сохранить» then puts it in the shop;
-   *   · a refused upload — no bucket, no connection, a body the platform
-   *     will not take — is a sentence in the pane every time.
+   * Round 12 (Dim, 10.09.2026) and 1a (q23): a photo on a NEW product. It
+   * used to create the product first; now it goes up at once, filed under
+   * the draft's own id, and waits in the draft — «Добавить товар» makes the
+   * product WITH it. An upload that fails says why, every time.
    */
-  test("a photo picked before the first save makes the product, and an upload that fails says why", async ({ page }) => {
+  test("a photo picked before «Добавить товар» travels with the product, and an upload that fails says why", async ({ page }) => {
     test.setTimeout(180_000);
     const w = watch(page);
     const stamp = Date.now().toString().slice(-6);
@@ -359,40 +354,28 @@ test.describe("admin — product creation", () => {
       await page.locator("[data-admgoodsnew]").click();
       await expect(page.locator("[data-edbrand]")).toBeVisible();
 
-      // ---- the form is empty: nothing is uploaded, the empty box gets the caret, on its own tab
-      await edTab(page, "media");
+      // ---- the form is empty: the photo goes into the draft all the same
       await page.locator('[data-galfile="new"]').setInputFiles(FILE);
-      await expect(page.locator("[data-goodserr]")).toContainText("Впишите бренд");
-      await expect(page.locator('[data-edtab="main"][aria-current="true"]'), "the refusal did not open the tab with the empty box").toBeVisible();
-      await expect(page.locator("[data-edbrand]")).toBeFocused();
-      expect(posted, "a photo was uploaded with no product to file it under").toEqual([]);
+      await expect(page.locator(".adm-photo:not(.adm-photo--add)"), "the photo did not land in the draft").toHaveCount(1);
+      expect(posted).toEqual(["ok"]);
+      await expect(page.locator('[data-edfor="new"]'), "picking a photo left «Новый товар»").toBeVisible();
 
-      // ---- filled in, the photo makes the product and lands on it
+      // ---- filled in, «Добавить товар» makes the product with it
       await page.locator("[data-edbrand]").fill(BRAND);
       await page.locator("[data-edname]").fill(NAME);
       await page.locator("[data-edcat]").selectOption("beard");
-      await edTab(page, "sizes");
       await page.locator("[data-edprice]").fill("9,90");
-      await edTab(page, "media");
-      await page.locator('[data-galfile="new"]').setInputFiles(FILE);
-      await expect(page.locator(".adm-photo:not(.adm-photo--add)"), "the photo did not land on the created product").toHaveCount(1);
-      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
-      expect(id, "the editor did not move onto the created product").toMatch(/^c-e2e-photo-/);
-      await expect(page.locator('[data-edtab="media"][aria-current="true"]')).toBeVisible();
-      expect(posted).toEqual(["ok"]);
+      await page.locator('[data-admsavegoods="new"]').click();
+      id = await openedCard(page);
+      expect(id, "the card did not open on the created product").toMatch(/^c-e2e-photo-/);
       expect(await customRow(page, id)).toMatchObject({ active: true, price: 9.9 });
-      await clearToast(page);
-      // «Сохранить» is what puts the photo in the shop — the pane says so, and it does
-      await expect(page.locator('[data-edpane="media"]')).toContainText("нажмите «Сохранить»");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.gallery?.[0], { timeout: 15_000 }).toBe(PHOTO_URL);
-      await assertClean(page, w, "created through the photo");
+      await expect(page.locator(".adm-photo:not(.adm-photo--add)")).toHaveCount(1);
+      await clearToast(page);
+      await assertClean(page, w, "created with the draft's photo");
 
-      // ---- every refusal is a sentence in the pane, never a silent stop
-      await openEditor(page, id);
-      await edTab(page, "media");
+      // ---- every refusal is a sentence under the photos, never a silent stop
+      await toSection(page, "photos");
       const refusal = page.locator("[data-uperr]");
       mode = "storage";
       await page.locator(`[data-galfile="${id}"]`).setInputFiles(FILE);
@@ -415,7 +398,7 @@ test.describe("admin — product creation", () => {
     }
   });
 
-  test("the assistant's create_product lands in the same editor, on «Фото и видео», as a real row", async ({ page }) => {
+  test("the assistant's create_product opens the same card, as a real row", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     const stamp = Date.now().toString().slice(-6);
@@ -457,13 +440,12 @@ test.describe("admin — product creation", () => {
       await card.locator("[data-admapply]").click();
       expect(await toastText(page)).toMatch(/Товар создан/);
       await clearToast(page);
-      await expect(page.locator('[data-edtab="media"][aria-current="true"]')).toBeVisible();
-      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+      id = await openedCard(page);
       expect(id).toMatch(/^c-proraso-assist-/);
       const row = await page.request.get(`/api/admin/products/${id}/`);
       expect((await row.json()).product).toMatchObject({ active: true, price: 12.5, cat: "beard", description: { RU: "Масло для бороды.", ET: "Habemeõli.", EN: "Beard oil." } });
-      // the description the assistant wrote is on the «Описание» tab
-      await edTab(page, "desc");
+      // the description the assistant wrote is in the card's «Описание»
+      await toSection(page, "desc");
       expect(await page.locator("[data-eddescru]").inputValue()).toBe("Масло для бороды.");
       await assertClean(page, w, "assistant-created product");
     } finally {
@@ -490,16 +472,15 @@ test.describe("admin — product creation", () => {
       await page.locator("[data-edbrand]").fill(BRAND);
       await page.locator("[data-edname]").fill(NAME);
       await page.locator("[data-edcat]").selectOption("beard");
-      await edTab(page, "sizes");
       await page.locator("[data-edprice]").fill("21,50");
       await page.locator('[data-admsavegoods="new"]').click();
-      expect(await toastText(page)).toMatch(/Товар создан/);
+      expect(await toastText(page)).toMatch(/Товар добавлен/);
       await clearToast(page);
-      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+      id = await openedCard(page);
       expect(id).toMatch(/^c-e2e-seo-/);
       await assertClean(page, w, "created");
       // the texts the head is built from — an Estonian description and a
-      // Russian Google pair — through the same PUT the editor's «Сохранить» sends
+      // Russian Google pair — through the same PUT the card's own boxes send
       const texts = await page.request.put(`/api/admin/products/${id}/`, {
         data: { description: { RU: "Тоник для бороды.", ET: "Habemetoonik." }, seo: { RU: { title: TITLE, desc: "Тоник в Rempire." } } },
       });

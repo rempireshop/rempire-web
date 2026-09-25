@@ -1,17 +1,19 @@
 import { expect, type Page, test } from "@playwright/test";
 import { ipHeaders, shopUrl, waitForScreen } from "./fixtures";
+import { openCard, settled, toSection, typeAndLeave } from "./goods-helpers";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
- * «Товар → Размеры и цены» — the three controls that were `disabled` until
- * db/migrations/147_override_sizes_hidden.sql: «+ Размер», «×» and
+ * «Товар → Объёмы и цены» — the three controls that were `disabled` until
+ * db/migrations/147_override_sizes_hidden.sql: «+ Объём», «×» and
  * «Показывать в магазине».
  *
  * Dim's answer was «we need the feature, so implement», so what is pinned
- * here is exactly what he asked for and nothing about the design around it:
+ * here is exactly what he asked for:
  *   · a volume Renat adds to a CATALOGUE product reaches the shop's product
- *     page and the public feed, at the price he typed;
- *   · «×» takes a volume away again;
+ *     page and the public feed, at the price he typed — and (1a) it is saved
+ *     the moment the ladder is whole, without «Сохранить»;
+ *   · «×» asks first (README rule 4) and then takes a volume away;
  *   · «Показывать в магазине» off really removes the product — the panel's
  *     own list still has it (marked «Скрыт»), the catalogue, the search and
  *     the shop's product page no longer do;
@@ -29,23 +31,21 @@ test.beforeEach(async ({}, testInfo) => {
     "product editor — desktop and mobile only, see docs/testing.md");
 });
 
-async function openEditor(page: Page, id: string): Promise<void> {
-  await tab(page, "goods");
-  await page.locator("[data-goodsq]").fill(id);
-  await page.locator(`[data-admgoods="${id}"]`).click();
-  await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-}
-async function edTab(page: Page, key: string): Promise<void> {
-  await page.locator(`[data-edtab="${key}"]`).click();
-  await expect(page.locator(`[data-edtab="${key}"][aria-current="true"]`)).toBeVisible();
-}
 /** What the public feed says about this product right now. */
 async function feedFor(page: Page, id: string): Promise<Record<string, unknown>> {
   const body = await (await page.request.get("/api/overrides/")).json();
   return ((body.overrides || {})[id] || {}) as Record<string, unknown>;
 }
 
-test.describe("admin — «+ Размер», «×» and «Показывать в магазине»", () => {
+/** «×» on a size that is in the shop: the sheet, then «Убрать». */
+async function removeSize(page: Page, i: number): Promise<void> {
+  await page.locator(`[data-edsizedel="${i}"]`).click();
+  const sheet = page.locator(".adm-confirm");
+  if (await sheet.count()) await page.locator("[data-admapply]").click();
+  await settled(page, "the shorter ladder");
+}
+
+test.describe("admin — «+ Объём», «×» and «Показывать в магазине»", () => {
   test.use({ extraHTTPHeaders: ipHeaders(176) });
 
   test("a volume Renat adds reaches the shop, and «×» takes it away again", async ({ page, browser }) => {
@@ -54,27 +54,25 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
     const id = azur.id;
 
     await openAdmin(page);
-    await openEditor(page, id);
-    await edTab(page, "sizes");
+    await openCard(page, id);
+    await toSection(page, "sizes");
 
-    // The two buttons that used to be dead are alive, and say what they do
-    // rather than «скоро» / «Объёмы заводит Дим».
-    await expect(page.locator("[data-edsizeadd]"), "«+ Размер» is still dead").toBeEnabled();
-    await expect(page.locator("[data-edsizeadd]")).toHaveText("+ Размер");
-    await expect(page.locator('[data-edpane="sizes"]')).not.toContainText("Объёмы заводит Дим");
+    await expect(page.locator("[data-edsizeadd]"), "«+ Объём» is still dead").toBeEnabled();
+    await expect(page.locator("[data-edsizeadd]")).toHaveText("+ Объём");
+    await expect(page.locator('[data-edsec="sizes"]')).not.toContainText("Объёмы заводит Дим");
 
     try {
-      // ---- «+ Размер»: one volume becomes two ------------------------------
+      // ---- «+ Объём»: one volume becomes two --------------------------------
       await page.locator("[data-edsizeadd]").click();
       await expect(page.locator('[data-edsz="0"]'), "the first row did not become a labelled volume").toBeVisible();
-      await page.locator('[data-edsz="0"]').fill("100 мл");
-      await page.locator('[data-edpx="0"]').fill("16");
-      await page.locator('[data-edsz="1"]').fill("400 мл");
-      await page.locator('[data-edpx="1"]').fill("29");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page)).toMatch(/Сохранено/);
-      await clearToast(page);
-      await assertClean(page, w, "editor saved a new size ladder");
+      await typeAndLeave(page, page.locator('[data-edsz="0"]'), "100 мл");
+      // the new row has no name yet: nothing went to the shop, and the box says why
+      expect((await feedFor(page, id)).sizes ?? null, "a ladder with a nameless size was saved").toBeNull();
+      await expect(page.locator('[data-edsz="1"]')).toHaveAttribute("aria-invalid", "true");
+      await typeAndLeave(page, page.locator('[data-edpx="0"]'), "16");
+      await typeAndLeave(page, page.locator('[data-edsz="1"]'), "400 мл");
+      await typeAndLeave(page, page.locator('[data-edpx="1"]'), "29");
+      await assertClean(page, w, "the card saved a new size ladder");
 
       // …the feed carries the whole ladder, and `price` still agrees with rung 0
       await expect.poll(async () => (await feedFor(page, id)).sizes,
@@ -90,16 +88,18 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
       await expect(shop.page.locator("[data-size]").nth(1)).toContainText("400 мл");
       await shop.page.locator("[data-size]").nth(1).click();
       await expect(shop.page.locator("[data-price]")).toContainText("29");
-      await assertClean(shop.page, shop.w, "product page after «+ Размер»");
+      await assertClean(shop.page, shop.w, "product page after «+ Объём»");
       await shop.close();
 
-      // ---- «×»: the second volume goes away --------------------------------
-      await openEditor(page, id);
-      await edTab(page, "sizes");
+      // ---- «×»: the second volume goes away — after the question ----------
+      await openCard(page, id);
+      await toSection(page, "sizes");
       await expect(page.locator('[data-edsz="1"]')).toHaveValue("400 мл");
       await page.locator('[data-edsizedel="1"]').click();
+      await expect(page.locator(".adm-confirm"), "a size in the shop went without a question").toContainText("Убрать 400 мл?");
+      await page.locator("[data-admapply]").click();
       await expect(page.locator('[data-edsz="1"]'), "«×» did not remove the row").toHaveCount(0);
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      await settled(page);
       await clearToast(page);
       await expect.poll(async () => (await feedFor(page, id)).sizes, { timeout: 15_000 })
         .toEqual([{ size: "100 мл", price: 16 }]);
@@ -115,33 +115,32 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
       expect(res.status(), "a removed volume was still sellable").toBeGreaterThanOrEqual(400);
     } finally {
       // back to the catalogue file's own single volume
-      await openEditor(page, id);
-      await edTab(page, "sizes");
+      await openCard(page, id);
+      await toSection(page, "sizes");
       const rows = await page.locator("[data-edpx]").count();
-      for (let i = rows - 1; i > 0; i -= 1) await page.locator(`[data-edsizedel="${i}"]`).click();
-      if (await page.locator('[data-edsz="0"]').count()) await page.locator('[data-edsz="0"]').fill("");
-      await page.locator('[data-edpx="0"]').fill(String(azur.price));
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      for (let i = rows - 1; i > 0; i -= 1) await removeSize(page, i);
+      if (await page.locator('[data-edsz="0"]').count()) await typeAndLeave(page, page.locator('[data-edsz="0"]'), "");
+      await typeAndLeave(page, page.locator('[data-edpx="0"]'), String(azur.price));
       await clearToast(page);
     }
   });
 
-  /* «+ Размер» and «×» rebuild the sizes pane in place rather than through a
-     render(), and only the size and the price travelled across the rebuild
-     (edSizeRowsRead). «Остаток», «Штрихкод» and «Салон, €» were re-drawn from
-     the warehouse and the saved row — so a count just typed and a code just
-     scanned were gone the moment a volume was added beside them, with nothing
-     on screen to say so. Nothing is saved here: what is being pinned is that
-     the owner's typing survives the button, and the editor is left as it was
-     found. */
-  test("«+ Размер» keeps the count and the code just typed beside it", async ({ page }) => {
+  /* «+ Объём» and «×» rebuild the sizes grid in place, and only the size and
+     the price travel across the rebuild (edSizeRowsRead). «Остаток»,
+     «Штрихкод» and «Салон, €» are re-drawn from the warehouse and the saved
+     row — so a count just typed and a code just scanned were once gone the
+     moment a volume was added beside them. 1a: leaving those boxes saves
+     them, and the rebuilt grid shows what was saved; a row added and taken
+     away again before it had a name never reaches the shop, and goes without
+     the question. The code is unbound again at the end. */
+  test("«+ Объём» keeps the count and the code just typed beside it", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     const id = azur.id;
 
     await openAdmin(page);
-    await openEditor(page, id);
-    await edTab(page, "sizes");
+    await openCard(page, id);
+    await toSection(page, "sizes");
 
     /* One unlabelled volume ⇒ the warehouse key is «<id> » with an empty
        tail. `.first()` because a volume added before either row has been
@@ -149,34 +148,42 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
        one that was typed into. */
     const qty = page.locator(`[data-edqty="${id} "]`).first();
     const ean = page.locator(`[data-edean="${id} "]`).first();
-    /* …and the box is dead until the warehouse list has landed: what
-       «Сохранить» sends is the difference between the number typed and the
-       count the row holds, and before the list there is no count — the whole
-       typed number used to go out as a move (a shelf of 7 became 10). */
+    /* …and the box is dead until the warehouse list has landed: a count is
+       sent as the difference from what the row holds, and before the list
+       there is no count — the whole typed number once went out as a move. */
     await expect(qty, "«Остаток» never came alive").toBeEnabled({ timeout: 20_000 });
 
-    await qty.fill("7");
-    await ean.fill("4820000000017");
-    // «Салон, €» is only a column while «Партнёры и баллы» is on
-    const salon = page.locator("[data-edproprice]");
-    const hasSalon = (await salon.count()) > 0;
-    if (hasSalon) await salon.fill("11.50");
+    try {
+      await qty.fill("7");
+      await ean.fill("4820000000017");
+      // «Салон, €» is only a column while «Партнёры и баллы» is on
+      const salon = page.locator("[data-edproprice]");
+      const hasSalon = (await salon.count()) > 0;
+      if (hasSalon) await salon.fill("11.50");
 
-    await page.locator("[data-edsizeadd]").click();
-    await expect(page.locator('[data-edsz="1"]'), "«+ Размер» added no row").toBeVisible();
+      await page.locator("[data-edsizeadd]").click();
+      await expect(page.locator('[data-edsz="1"]'), "«+ Объём» added no row").toBeVisible();
+      await settled(page, "the boxes left for «+ Объём»");
 
-    await expect(qty, "the count typed into «Остаток» was thrown away").toHaveValue("7");
-    await expect(ean, "the code typed into «Штрихкод» was thrown away").toHaveValue("4820000000017");
-    if (hasSalon) await expect(salon, "«Салон, €» was thrown away").toHaveValue("11.50");
+      await expect(qty, "the count typed into «Остаток» was thrown away").toHaveValue("7");
+      await expect(ean, "the code typed into «Штрихкод» was thrown away").toHaveValue("4820000000017");
+      if (hasSalon) await expect(salon, "«Салон, €» was thrown away").toHaveValue(/^11[.,]5/);
 
-    // …and «×» must not eat them either
-    await page.locator('[data-edsizedel="1"]').click();
-    await expect(page.locator('[data-edsz="1"]')).toHaveCount(0);
-    await expect(qty, "«×» threw the count away").toHaveValue("7");
-    await expect(ean, "«×» threw the code away").toHaveValue("4820000000017");
-
-    await assertClean(page, w, "«+ Размер» over a typed count and code");
-    // nothing pressed «Сохранить»: the product is exactly as it was found
+      // …and «×» on the row nobody named takes it away without a question, and eats nothing
+      await page.locator('[data-edsizedel="1"]').click();
+      await expect(page.locator(".adm-confirm"), "a row that is not in the shop asked to be removed from it").toHaveCount(0);
+      await expect(page.locator('[data-edsz="1"]')).toHaveCount(0);
+      await expect(qty, "«×» threw the count away").toHaveValue("7");
+      await expect(ean, "«×» threw the code away").toHaveValue("4820000000017");
+      await assertClean(page, w, "«+ Объём» over a typed count and code");
+    } finally {
+      // the code goes back to nobody; the salon price to the discount
+      await openCard(page, id);
+      const unbind = page.locator(`[data-edunbind="${id} "]`);
+      if (await unbind.count()) { await unbind.click(); await settled(page, "the unbound code"); }
+      if (await page.locator("[data-edproprice]").count()) await typeAndLeave(page, page.locator("[data-edproprice]"), "");
+      await clearToast(page);
+    }
   });
 
   test("«Показывать в магазине» takes a product out of the shop and puts it back", async ({ page, browser }) => {
@@ -185,8 +192,8 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
     const id = azur.id;
 
     await openAdmin(page);
-    await openEditor(page, id);
-    await edTab(page, "main");
+    await openCard(page, id);
+    await toSection(page, "shop");
 
     const sw = page.locator(`[data-edhidden="${id}"]`);
     await expect(sw, "«Показывать в магазине» is still a dead decoration").toBeEnabled();
@@ -194,7 +201,8 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
 
     try {
       await sw.click();
-      expect(await toastText(page)).toMatch(/убран из магазина/);
+      expect(await toastText(page)).toMatch(/скрыт из магазина/);
+      await settled(page, "the switch");
       await clearToast(page);
       await assertClean(page, w, "product hidden");
       await expect.poll(async () => (await feedFor(page, id)).hidden,
@@ -203,7 +211,7 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
       // the panel still has it — with «Скрыт» beside it, so it can be found again
       await tab(page, "goods");
       await page.locator("[data-goodsq]").fill(id);
-      const row = page.locator(`[data-admgoods="${id}"]`);
+      const row = page.locator(`[data-goodsrow="${id}"]`);
       await expect(row, "a hidden product disappeared from the panel too").toBeVisible();
       await expect(row).toContainText("Скрыт");
 
@@ -230,9 +238,10 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
       });
       expect(res.status(), "a hidden product was still sellable").toBeGreaterThanOrEqual(400);
     } finally {
-      await openEditor(page, id);
-      await edTab(page, "main");
+      await openCard(page, id);
+      await toSection(page, "shop");
       await page.locator(`[data-edhidden="${id}"]`).click();
+      await settled(page, "the switch back");
       await clearToast(page);
       await expect.poll(async () => (await feedFor(page, id)).hidden, { timeout: 15_000 })
         .not.toBe(true);

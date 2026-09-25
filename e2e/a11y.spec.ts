@@ -3,6 +3,7 @@ import { expect, type Page, test, type TestInfo } from "@playwright/test";
 import {
   continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
+import { closeCard } from "./goods-helpers";
 
 /**
  * Accessibility sweep — axe-core (WCAG 2.x A/AA + axe's best-practice rules,
@@ -286,23 +287,23 @@ test.describe("a11y admin", () => {
     await audit.check(page, "admin Товары");
     await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    for (const tab of ["main", "sizes", "media", "desc", "seo"]) {
-      await page.locator(`[data-edtab="${tab}"]`).click();
-      await expect(page.locator(`[data-edpane="${tab}"]`)).toBeVisible();
-      await audit.check(page, `admin editor · ${tab}`);
-    }
-    await page.locator("[data-admclose]").first().click();
-    // «+ Товар»: the three-step editor with the brand list open, and its photo step (round 12)
+    // 1a: the card is one page — every section, then the Google fold opened
+    await expect(page.locator(`[data-edfor="${PRODUCT_2.id}"]`)).toBeVisible();
+    await audit.check(page, "admin card");
+    await page.locator('[data-admfold="ed-seo"]').click();
+    await expect(page.locator("[data-edseot]")).toBeVisible();
+    await audit.check(page, "admin card · Для Google");
+    await closeCard(page);
+    // «+ Товар»: «Новый товар», one page, with the brand list open, then its folds (1a, screen 13)
     await page.locator("[data-admgoodsnew]").click();
     await expect(page.locator("[data-edbrand]")).toBeVisible();
     await page.locator("[data-edbrand]").focus();
     await expect(page.locator("#edbrandlist")).toBeVisible();
     await audit.check(page, "admin новый товар");
-    await page.locator('[data-edtab="media"]').click();
-    await expect(page.locator('[data-edpane="media"]')).toBeVisible();
-    await audit.check(page, "admin новый товар · фото");
-    await page.locator("[data-admclose]").first().click();
+    await page.locator('[data-admfold="gn-desc"]').click();
+    await expect(page.locator("[data-eddescru]")).toBeVisible();
+    await audit.check(page, "admin новый товар · описание");
+    await closeCard(page);
 
     await section("pos", /Продажа в салоне/);
     await expect(page.locator("[data-posq]")).toBeVisible();

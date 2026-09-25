@@ -611,13 +611,12 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await fitsThePhone(page, "Товары");
     await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
     await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    for (const tab of ["main", "sizes", "media", "desc", "seo"]) {
-      await page.locator(`[data-edtab="${tab}"]`).click();
-      await expect(page.locator(`[data-edpane="${tab}"]`)).toBeVisible();
-      await fitsThePhone(page, `Товар · ${tab}`);
-    }
-    await page.locator("[data-admclose]").first().click();
+    // 1a: the card is one page — it fits as a whole, and with the Google fold open
+    await expect(page.locator(`[data-edfor="${PRODUCT_2.id}"]`)).toBeVisible();
+    await fitsThePhone(page, "Товар");
+    await page.locator('[data-admfold="ed-seo"]').click();
+    await fitsThePhone(page, "Товар · Для Google");
+    await page.locator("[data-admtopback]:visible").first().click();
 
     await nav(page, "pos").click();
     await expect(page.locator("[data-posq]")).toBeVisible();

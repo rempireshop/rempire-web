@@ -4,6 +4,7 @@ import {
   payOrder, shopUrl, waitForScreen,
 } from "./fixtures";
 import { assertClean, watch } from "./sweep-helpers";
+import { toSection } from "./goods-helpers";
 
 /**
  * The third admin sweep (docs/audit/2026-09-06-admin-qa.md): the screens that
@@ -311,23 +312,23 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
        last of them leaves. What has to hold either way is that nothing breaks
        and that the half-typed price never reached the shop.
 
-       A price typed and not saved is exactly what Back must not throw away
-       in silence: since 19.09.2026 (edec888) the first Back over a touched
-       form asks — the same «Выйти без сохранения» card «← Товары» and
-       «Отмена» show — and the editor stays open under the question. The
-       second Back is the answer, like the second press of «← Товары». */
+       A price that could not be saved is exactly what Back must not throw
+       away in silence. Since 1a the card saves itself, so Back first sends
+       what the boxes owe — and a price over 500 € is not one it can send:
+       the first Back asks — the same «Выйти без сохранения» card «← Товары»
+       shows — and the card stays open under the question. The second Back is
+       the answer, like the second press of «← Товары». */
     await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
-    // «Сохранить» carries the open product's id — it is on both editors, the
-    // catalogue one and the owner's own (edPaneMain / edPaneMainOwn)
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator('[data-edtab="sizes"]').click();
+    // the card carries the open product's id (data-edfor) — the catalogue's and the owner's own alike
+    await expect(page.locator("[data-edfor]")).toBeVisible();
+    await toSection(page, "sizes");
     await page.locator("[data-edprice]").first().fill("999999999");
     await page.goBack();
     await expect(page.locator("[data-admbackyes]"), "Back threw a typed price away without asking").toBeVisible();
-    await expect(page.locator("[data-admsavegoods]"), "the question closed the editor under itself").toHaveCount(1);
+    await expect(page.locator("[data-edfor]"), "the question closed the card under itself").toHaveCount(1);
     await page.goBack();
-    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "Back did not close the card").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel too").toBeVisible();
     await assertClean(page, w, "goods: Back closes an open editor");
     /* …and the next ones hand «Товары» back to «Заказы», «Заказы» back to
@@ -352,7 +353,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await waitForScreen(page, "admin");
     await expect(page.locator("[data-admpw]")).toHaveCount(0, { timeout: 30_000 });
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await expect(page.locator("[data-edfor]")).toHaveCount(0);
     await assertClean(page, w, "the panel after coming back");
   });
 });

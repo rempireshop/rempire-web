@@ -618,8 +618,8 @@ test.describe("sweep — the change journal", () => {
 
     await page.locator("[data-goodsq]").fill(id);
     await page.locator(`[data-admgoods="${id}"]`).click();
-    // The price lives on the editor's «Размеры и цены» tab (ED_TABS in app.js).
-    await page.locator('[data-edtab="sizes"]').click();
+    // 1a: the price is in the card's «Объёмы и цены», and saves itself when the box is left
+    await expect(page.locator(`[data-edfor="${id}"]`)).toBeVisible();
     const original = await page.locator("[data-edprice]").inputValue();
     expect(Number(original)).toBeGreaterThan(0);
 
@@ -630,9 +630,7 @@ test.describe("sweep — the change journal", () => {
     };
 
     await page.locator("[data-edprice]").fill("99");
-    await page.locator(`[data-admsavegoods="${id}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    await page.locator("[data-edprice]").blur();
     await expect.poll(price, { timeout: 10_000, message: "the price change never reached the server" }).toBe(99);
 
     const shop = await freshShop(browser);
