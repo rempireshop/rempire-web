@@ -299,7 +299,8 @@ test.describe("admin — the order chips, and the steps behind them", () => {
        «Возвраты» is the request a customer made, which had no home before. */
     const chips = page.locator("[data-admfilter]");
     await expect(chips, "the chip strip is not the five of r16").toHaveCount(5);
-    await expect(chips.nth(0)).toHaveText("Все");
+    // 1a (screen 04): «Все» carries the number of orders the list holds, like its neighbours
+    await expect(chips.nth(0)).toHaveText(/^Все( \d+)?$/);
     await expect(chips.nth(1)).toContainText("Отправить");
     /* toContainText since 18.09.2026: «В пути» carries a count now, like the
        three queue chips beside it, so its text is «В пути» or «В пути N»
@@ -320,7 +321,8 @@ test.describe("admin — the order chips, and the steps behind them", () => {
     const countOn = async (f: string) => {
       await page.locator(`[data-admfilter="${f}"]`).click();
       await expect(page.locator(`[data-admfilter="${f}"][aria-current="true"]`)).toBeVisible();
-      return page.locator("[data-admorder]").count();
+      // the rows only — on «Отправить» the dark button «Открыть первый: …» opens an order too
+      return page.locator("#orderlist [data-admorder]").count();
     };
     const ship = await countOn("new");
     const transit = await countOn("shipped");
@@ -329,12 +331,14 @@ test.describe("admin — the order chips, and the steps behind them", () => {
     expect(all, "«Все» shows fewer orders than the chips beside it").toBeGreaterThanOrEqual(
       Math.max(ship, transit, invoice));
 
-    // the search really does look past the chip, and says so
+    /* the search really does look past the chip, and says so — since 1a (gap
+       L3) by lighting «Все» while text is in the box */
     await page.locator(`[data-admfilter="new"]`).click();
     await page.locator("[data-admorderq]").fill("R-");
-    await expect(page.locator("#orderlist"), "the search no longer explains the disabled chip")
-      .toContainText("фильтр сейчас не действует");
+    await expect(page.locator('[data-admfilter="all"]'), "the search no longer shows it looks past the chip")
+      .toHaveAttribute("aria-current", "true");
     await page.locator("[data-admorderq]").fill("");
+    await expect(page.locator('[data-admfilter="new"]')).toHaveAttribute("aria-current", "true");
     await assertClean(page, w, "orders search over a chip");
   });
 

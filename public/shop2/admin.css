@@ -928,6 +928,8 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-okv > br { display: none; }
 .adm2 .adm-okv a { color: var(--a-ink); text-decoration: none; align-self: flex-start; }
 .adm2 .adm-okv a:hover { text-decoration: underline; }
+/* the phone and the e-mail are links (tel: / mailto:) — a thumb's size on a phone */
+@media (max-width: 899px) { .adm2 .adm-okv a { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; } }
 .adm-okv__muted { font-size: 13px; color: var(--a-muted); }
 .adm-okv--company { display: block; padding-top: 12px; }
 .adm-okv--company span { color: var(--a-muted); font-size: 13px; }

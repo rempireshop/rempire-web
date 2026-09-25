@@ -201,6 +201,55 @@ async function oneShape(page: Page, sel: string, label: string): Promise<void> {
   }
 }
 
+/**
+ * «Заказы» has the 1a shape (design_handoff_admin_ux, screen 04), still one
+ * shape on every row: the customer and the sum on the first line; the
+ * number · day · what · where and the status tag on the second, the tag at
+ * the row's right edge on every row; the step buttons, when there are any,
+ * under both at the row's left edge; nothing under 44 px, nothing past the
+ * screen.
+ */
+async function orderShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => {
+    const box = (el: Element | null) => {
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, height: b.height };
+    };
+    return Array.from(document.querySelectorAll("#orderlist .adm-orow")).map((row) => ({
+      text: (row.querySelector(".adm-orow__who")?.textContent || "").trim(),
+      row: box(row)!,
+      who: box(row.querySelector(".adm-orow__who")),
+      what: box(row.querySelector(".adm-orow__what")),
+      tag: box(row.querySelector(":scope > .adm-orow__tag")),
+      amt: box(row.querySelector(":scope > .adm-row__amt")),
+      acts: box(row.querySelector(":scope > .adm-acts")),
+      small: Array.from(row.querySelectorAll<HTMLElement>(":scope > .adm-acts button, :scope > .adm-acts a"))
+        .map((el) => ({ el, b: el.getBoundingClientRect() }))
+        .filter(({ b }) => b.width && b.height && (b.width < 43.5 || b.height < 43.5))
+        .map(({ el, b }) => `«${(el.textContent || "").trim()}» ${Math.round(b.width)}×${Math.round(b.height)}`),
+    }));
+  });
+  expect(rows.length, `Заказы @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  for (const r of rows) {
+    const who = `Заказы @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.who!.height, `${who}: the name wraps onto a second line`).toBeLessThanOrEqual(24);
+    expect(Math.abs(r.amt!.top - r.who!.top), `${who}: the sum is not on the first line`).toBeLessThanOrEqual(4);
+    expect(Math.round(r.row.right - r.amt!.right), `${who}: the sum is not at the right edge`).toBe(0);
+    expect(r.what!.top, `${who}: number · day · what is not the second line`).toBeGreaterThanOrEqual(r.who!.bottom - 1);
+    expect(r.tag!.top, `${who}: the status tag is not on the second line`).toBeGreaterThanOrEqual(r.who!.bottom - 1);
+    expect(Math.round(r.row.right - r.tag!.right), `${who}: the status tag is not at the right edge`).toBe(0);
+    if (r.acts) {
+      expect(r.acts.top, `${who}: the steps sit beside the lines instead of under them`)
+        .toBeGreaterThanOrEqual(Math.max(r.tag!.bottom, r.what!.bottom) - 1);
+      expect(Math.round(r.acts.left - r.row.left), `${who}: the steps do not start at the row's left edge`).toBe(0);
+    }
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    expect(r.small, `${who}: controls under 44 px`).toEqual([]);
+  }
+}
+
 test.describe("admin — one shape per list on the phone", () => {
   test.use({ extraHTTPHeaders: ipHeaders(165) });
   test.beforeEach(async ({}, testInfo) => {
@@ -244,7 +293,7 @@ test.describe("admin — one shape per list on the phone", () => {
         await adminSection(page, "orders");
         await page.locator('[data-admfilter="all"]').click();
         await expect(page.locator("#orderlist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#orderlist .adm-row--lines", "Заказы");
+        await orderShape(page);
 
         await adminSection(page, "goods");
         await page.locator('[data-admgoodstab="bundles"]').click();
@@ -310,7 +359,8 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     await page.locator('[data-admfilter="all"]').click();
     const row = page.locator("#orderlist .adm-row--lines").filter({ hasText: number }).first();
     await expect(row).toBeVisible();
-    const card = page.locator('[data-admorder=""]');
+    // 1a: on a phone the card's «← Заказы» is the top bar's, drawn only while a card is open
+    const card = page.locator("[data-admtopback]");
 
     /** Opens the card from `where`, then shuts it again with its own «←». */
     async function opensFrom(where: Locator, what: string, position?: { x: number; y: number }) {

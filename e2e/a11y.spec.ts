@@ -275,11 +275,16 @@ test.describe("a11y admin", () => {
     await audit.check(page, "admin confirm card");
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    // an order card
+    // an order card — its «← Заказы» is the top bar's on a phone (1a) — and its «⋯»
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
-    await expect(page.locator('[data-admorder=""]')).toBeVisible();
+    const cardBack = page.locator('[data-admorder=""]:visible, [data-admtopback]:visible').first();
+    await expect(cardBack).toBeVisible();
     await audit.check(page, "admin order card");
-    await page.locator('[data-admorder=""]').click();
+    await page.locator("[data-admordermore]:visible").first().click();
+    await expect(page.locator('.adm-omenu__list[role="menu"]')).toBeVisible();
+    await audit.check(page, "admin order card · «⋯»");
+    await page.keyboard.press("Escape");
+    await cardBack.click();
 
     await section("goods", /Товары/);
     await expect(page.locator("#goodslist")).toBeVisible();
