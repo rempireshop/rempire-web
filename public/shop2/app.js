@@ -1021,6 +1021,86 @@
       "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.":
         "JPEG, PNG või WebP, kuni 12 MB. Foto vähendatakse ja tehakse kergemaks automaatselt.",
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "Lai foto — JPEG, PNG või WebP, kuni 12 MB.",
+      /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
+      "В магазине": "Poes", "Кончаются": "Lõpevad", "Объёмы": "Mahud", "Виден": "Nähtav",
+      "Ничего не нашли": "Midagi ei leitud",
+      "Товар снова в магазине": "Toode on jälle poes", "Товар скрыт из магазина": "Toode on poest peidetud",
+      "Заполнено на трёх языках": "Täidetud kolmes keeles",
+      "Черновик готов — прочитайте и поправьте": "Mustand on valmis — lugege läbi ja parandage",
+      "Фото добавлены": "Fotod lisatud", "Фото добавлено": "Foto lisatud", "Видео загружено": "Video on üles laaditud",
+      "Начните вводить — например, Proraso": "Hakake kirjutama — näiteks Proraso",
+      "Остаток — целое число от 0.": "Jääk on täisarv alates nullist.",
+      "Код считан и привязан": "Kood loetud ja seotud", "Код считан": "Kood loetud", "Код отвязан": "Kood lahti seotud",
+      "Линейка латиницей, тип по-русски. Эстонский и английский — сами.":
+        "Sari ladina tähtedega, tüüp vene keeles. Eesti- ja ingliskeelne tulevad ise.",
+      "Выберите": "Valige", "Что за товар": "Mis toode",
+      "Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.":
+        "See on teie toode: brändi, nime, jaotist, mahte ja fotosid muudate siin ise.",
+      "Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
+        "Nimi kirjutatakse üks kord: sari ladina tähtedega, tüüp vene keeles — näiteks «Beard Balm — бальзам для бороды». Tüübi tõlgib pood ise eesti ja inglise keelde.",
+      "Не продавать": "Ära müü",
+      "Выключите «Показывать в магазине» — товар исчезнет из магазина совсем: из каталога, поиска и наборов.":
+        "Lülitage «Näidata poes» välja — toode kaob poest täielikult: kataloogist, otsingust ja komplektidest.",
+      "Остаток посчитан, поэтому «в наличии» и «мало» магазин пишет сам. «Не продавать» останавливает продажу, а страница товара остаётся.":
+        "Jääk on loetud, seega «laos» ja «vähe» kirjutab pood ise. «Ära müü» peatab müügi, tootelehekülg jääb alles.",
+      "Чтобы страница осталась, но не продавалась, выберите «Нет».":
+        "Kui leht peab jääma, aga toodet ei müüda, valige «Otsas».",
+      "Убрать объём": "Eemalda maht", "Первый объём покупатель видит первым.": "Esimest mahtu näeb ostja esimesena.",
+      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).":
+        "Tühi jääk — «arvestamata»: seda mahtu pole veel loetud. Punane jääk — aeg juurde tellida: see pole suurem kui «vähe» lävi, vaikimisi 2 (muudetakse «Laos»).",
+      "Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.":
+        "Triipkoodi loeb välja kõrval olev skanneri nupp, või selle saab käsitsi sisestada.",
+      "× убирает объём из магазина вместе с его остатком и штрихкодом.":
+        "× eemaldab mahu poest koos selle jäägi ja triipkoodiga.",
+      "× убирает объём из магазина — его остаток и штрихкод останутся на «Складе».":
+        "× eemaldab mahu poest — selle jääk ja triipkood jäävad «Lattu».",
+      "Объёмы и цены": "Mahud ja hinnad", "+ Объём": "+ Maht", "Удалить фото": "Kustuta foto",
+      "или перетащите сюда": "või lohistage siia",
+      "Первое фото — главное: его видно в каталоге, поиске и письмах. ← → меняют порядок, ★ делает главным, × удаляет.":
+        "Esimene foto on peamine: seda näeb kataloogis, otsingus ja kirjades. ← → muudavad järjekorda, ★ teeb peamiseks, × kustutab.",
+      "Фото показываются как есть, на белом фоне.": "Fotosid näidatakse nii, nagu need on, valgel taustal.",
+      "Какое фото покупатель увидит, когда выберет объём.": "Millist fotot ostja näeb, kui valib mahu.",
+      "Вставьте ссылку на YouTube или Instagram, или загрузите своё видео. Пусто — блока с видео на странице товара нет.":
+        "Kleepige YouTube'i või Instagrami link või laadige üles oma video. Tühi — tootelehel videoplokki ei ole.",
+      "Выбрать видео · MP4 или MOV до 4 МБ": "Vali video · MP4 või MOV kuni 4 MB",
+      "У каждого языка свой текст. Пусто — на странице товара показывается стандартный текст магазина (он виден в поле серым).":
+        "Igal keelel on oma tekst. Tühi — tootelehel näidatakse poe standardteksti (see on väljal hallina näha).",
+      "Русский — основной, остальные переводятся одной кнопкой.": "Vene keel on põhiline, teised tõlgitakse ühe nupuga.",
+      "То, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.":
+        "See, mida inimene Google'i otsingus näeb — igas keeles oma. Tühi — võetakse venekeelne variant, ja kui ka seda pole, võtab Google teksti lehelt ise.",
+      "✨ Заполнить автоматически · все три языка": "✨ Täida automaatselt · kõik kolm keelt",
+      "пусто — магазин подставит сам": "tühi — pood paneb ise", "Для Google": "Google'i jaoks",
+      "Товар уже добавляется — подождите пару секунд": "Toodet juba lisatakse — oodake paar sekundit",
+      "Этот товар уже добавлен — проверьте список товаров": "See toode on juba lisatud — vaadake tootenimekirja",
+      "Товар добавлен ✓ — он уже в магазине": "Toode lisatud ✓ — see on juba poes",
+      "Это ваш товар: бренд, название и раздел меняются здесь же, в «Что за товар».":
+        "See on teie toode: brändi, nime ja jaotist muudetakse siinsamas, «Mis toode» all.",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное здесь меняете вы.":
+        "Nimi, bränd ja jaotis tulevad kataloogist — neid muudab Dim. Kõike muud muudate siin teie.",
+      "бренд": "bränd", "название": "nimi", "раздел": "jaotis", "цена": "hind", "объём": "maht",
+      "Осталось заполнить:": "Veel täita:", "Всё готово — можно добавлять": "Kõik on valmis — võib lisada",
+      "— можно потом": "— võib hiljem", "Начать заново": "Alusta uuesti", "Начать заново?": "Alustada uuesti?",
+      "Черновик сохраняется сам — можно выйти и вернуться позже.": "Mustand salvestub ise — võite lahkuda ja hiljem tagasi tulla.",
+      "После «Добавить товар» он сразу появится в магазине и откроется его карточка — там остатки, штрихкоды, видео и всё остальное.":
+        "Pärast «Lisa toode» ilmub see kohe poodi ja avaneb selle kaart — seal on jäägid, triipkoodid, video ja kõik muu.",
+      "Добавляем…": "Lisame…", "Добавить товар": "Lisa toode",
+      "Не удалось вернуть штрихкод": "Triipkoodi ei õnnestunud taastada", "отвязан": "lahti seotud",
+      "Видео убрано": "Video eemaldatud",
+      "Черновик и фото, которые вы в него загрузили, удалятся.": "Mustand ja sellesse üles laaditud fotod kustutatakse.",
+      "Продажа остановлена": "Müük on peatatud", "Снова продаётся": "Jälle müügil",
+      "Наличие: в наличии": "Saadavus: laos", "Наличие: мало": "Saadavus: vähe", "Наличие: нет": "Saadavus: otsas",
+      "этот объём": "see maht",
+      "Объём исчезнет из магазина вместе с его остатком и штрихкодом.": "Maht kaob poest koos oma jäägi ja triipkoodiga.",
+      "Объём исчезнет из магазина. Остаток и штрихкод останутся на складе.": "Maht kaob poest. Jääk ja triipkood jäävad lattu.",
+      "Новый объём — впишите объём и цену": "Uus maht — kirjutage maht ja hind",
+      "Фон убран · оригинал сохранён": "Taust eemaldatud · originaal on alles",
+      "Теперь это главное фото": "Nüüd on see peamine foto", "Порядок фото изменён": "Fotode järjekord muudetud",
+      "Фото удалено": "Foto kustutatud", "Фото из каталога вернулись": "Kataloogi fotod on tagasi",
+      "Черновик написан — прочитайте и поправьте": "Mustand on kirjutatud — lugege läbi ja parandage",
+      "Переведено на эстонский и английский": "Tõlgitud eesti ja inglise keelde",
+      "Переведено с русского": "Tõlgitud vene keelest",
+      "Предложили название — поправьте, если нужно": "Pakkusime nime — parandage, kui vaja",
+      "Вернули как было": "Taastatud nii, nagu oli",
       "Вернуть фото из каталога": "Taasta kataloogi fotod",
       "Загрузка фото пока не настроена — нужно подключить хранилище.":
         "Fotode üleslaadimine pole veel seadistatud — hoidla tuleb ühendada.",
@@ -4092,6 +4172,86 @@
       "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.":
         "JPEG, PNG or WebP, up to 12 MB. The photo is resized and made light automatically.",
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "A wide photo — JPEG, PNG or WebP, up to 12 MB.",
+      /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
+      "В магазине": "In the shop", "Кончаются": "Running low", "Объёмы": "Sizes", "Виден": "Visible",
+      "Ничего не нашли": "Nothing found",
+      "Товар снова в магазине": "The product is back in the shop", "Товар скрыт из магазина": "The product is hidden from the shop",
+      "Заполнено на трёх языках": "Filled in in three languages",
+      "Черновик готов — прочитайте и поправьте": "The draft is ready — read it and correct it",
+      "Фото добавлены": "Photos added", "Фото добавлено": "Photo added", "Видео загружено": "Video uploaded",
+      "Начните вводить — например, Proraso": "Start typing — for example, Proraso",
+      "Остаток — целое число от 0.": "Stock is a whole number from 0.",
+      "Код считан и привязан": "Code read and linked", "Код считан": "Code read", "Код отвязан": "Code unlinked",
+      "Линейка латиницей, тип по-русски. Эстонский и английский — сами.":
+        "The line in Latin letters, the type in Russian. Estonian and English follow by themselves.",
+      "Выберите": "Choose", "Что за товар": "What the product is",
+      "Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.":
+        "This is your own product: you change its brand, name, section, sizes and photos here yourself.",
+      "Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
+        "The name is written once: the line in Latin letters, the type in Russian — for example «Beard Balm — бальзам для бороды». The shop translates the type into Estonian and English itself.",
+      "Не продавать": "Don't sell",
+      "Выключите «Показывать в магазине» — товар исчезнет из магазина совсем: из каталога, поиска и наборов.":
+        "Switch «Show in the shop» off and the product leaves the shop entirely: the catalogue, the search and the sets.",
+      "Остаток посчитан, поэтому «в наличии» и «мало» магазин пишет сам. «Не продавать» останавливает продажу, а страница товара остаётся.":
+        "The stock is counted, so the shop writes «in stock» and «low» by itself. «Don't sell» stops the sale, and the product page stays.",
+      "Чтобы страница осталась, но не продавалась, выберите «Нет».":
+        "To keep the page but stop selling, choose «Out».",
+      "Убрать объём": "Remove the size", "Первый объём покупатель видит первым.": "The buyer sees the first size first.",
+      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).":
+        "An empty stock is «untracked»: nobody has counted this size yet. A red stock means time to reorder: it is at or below the «low» threshold, 2 by default (changed on «Stock»).",
+      "Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.":
+        "The scanner button beside the box reads the barcode, or you can type it in.",
+      "× убирает объём из магазина вместе с его остатком и штрихкодом.":
+        "× removes the size from the shop together with its stock and barcode.",
+      "× убирает объём из магазина — его остаток и штрихкод останутся на «Складе».":
+        "× removes the size from the shop — its stock and barcode stay on «Stock».",
+      "Объёмы и цены": "Sizes and prices", "+ Объём": "+ Size", "Удалить фото": "Delete the photo",
+      "или перетащите сюда": "or drag it here",
+      "Первое фото — главное: его видно в каталоге, поиске и письмах. ← → меняют порядок, ★ делает главным, × удаляет.":
+        "The first photo is the main one: it shows in the catalogue, the search and the e-mails. ← → change the order, ★ makes a photo the main one, × deletes it.",
+      "Фото показываются как есть, на белом фоне.": "Photos are shown as they are, on a white background.",
+      "Какое фото покупатель увидит, когда выберет объём.": "Which photo the buyer sees when choosing a size.",
+      "Вставьте ссылку на YouTube или Instagram, или загрузите своё видео. Пусто — блока с видео на странице товара нет.":
+        "Paste a YouTube or Instagram link, or upload your own video. Empty — the product page has no video block.",
+      "Выбрать видео · MP4 или MOV до 4 МБ": "Choose a video · MP4 or MOV up to 4 MB",
+      "У каждого языка свой текст. Пусто — на странице товара показывается стандартный текст магазина (он виден в поле серым).":
+        "Each language has its own text. Empty — the product page shows the shop's standard text (you can see it greyed out in the box).",
+      "Русский — основной, остальные переводятся одной кнопкой.": "Russian is the main one; the others are translated with one button.",
+      "То, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.":
+        "What a person sees in a Google search — its own in each language. Empty — the Russian version is used, and if there is none either, Google takes the text from the page itself.",
+      "✨ Заполнить автоматически · все три языка": "✨ Fill in automatically · all three languages",
+      "пусто — магазин подставит сам": "empty — the shop fills it in itself", "Для Google": "For Google",
+      "Товар уже добавляется — подождите пару секунд": "The product is already being added — wait a couple of seconds",
+      "Этот товар уже добавлен — проверьте список товаров": "This product has already been added — check the product list",
+      "Товар добавлен ✓ — он уже в магазине": "Product added ✓ — it is already in the shop",
+      "Это ваш товар: бренд, название и раздел меняются здесь же, в «Что за товар».":
+        "This is your own product: its brand, name and section are changed right here, under «What the product is».",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное здесь меняете вы.":
+        "The name, brand and section come from the catalogue — Dim changes those. Everything else here is yours to change.",
+      "бренд": "brand", "название": "name", "раздел": "section", "цена": "price", "объём": "size",
+      "Осталось заполнить:": "Still to fill in:", "Всё готово — можно добавлять": "All set — you can add it",
+      "— можно потом": "— can wait", "Начать заново": "Start over", "Начать заново?": "Start over?",
+      "Черновик сохраняется сам — можно выйти и вернуться позже.": "The draft saves itself — you can leave and come back later.",
+      "После «Добавить товар» он сразу появится в магазине и откроется его карточка — там остатки, штрихкоды, видео и всё остальное.":
+        "After «Add the product» it appears in the shop at once and its card opens — stock, barcodes, video and everything else are there.",
+      "Добавляем…": "Adding…", "Добавить товар": "Add the product",
+      "Не удалось вернуть штрихкод": "The barcode could not be put back", "отвязан": "unlinked",
+      "Видео убрано": "Video removed",
+      "Черновик и фото, которые вы в него загрузили, удалятся.": "The draft and the photos you uploaded into it will be deleted.",
+      "Продажа остановлена": "Sale stopped", "Снова продаётся": "On sale again",
+      "Наличие: в наличии": "Availability: in stock", "Наличие: мало": "Availability: low", "Наличие: нет": "Availability: out",
+      "этот объём": "this size",
+      "Объём исчезнет из магазина вместе с его остатком и штрихкодом.": "The size leaves the shop together with its stock and barcode.",
+      "Объём исчезнет из магазина. Остаток и штрихкод останутся на складе.": "The size leaves the shop. Its stock and barcode stay in the stock list.",
+      "Новый объём — впишите объём и цену": "New size — type in the size and the price",
+      "Фон убран · оригинал сохранён": "Background removed · the original is kept",
+      "Теперь это главное фото": "This is now the main photo", "Порядок фото изменён": "Photo order changed",
+      "Фото удалено": "Photo deleted", "Фото из каталога вернулись": "The catalogue photos are back",
+      "Черновик написан — прочитайте и поправьте": "The draft is written — read it and correct it",
+      "Переведено на эстонский и английский": "Translated into Estonian and English",
+      "Переведено с русского": "Translated from Russian",
+      "Предложили название — поправьте, если нужно": "A name is suggested — correct it if needed",
+      "Вернули как было": "Put back as it was",
       "Вернуть фото из каталога": "Restore the catalogue photos",
       "Загрузка фото пока не настроена — нужно подключить хранилище.":
         "Photo uploads are not set up yet — the storage has to be connected.",
@@ -6419,6 +6579,9 @@
     [/^Не учтено (\d+)$/, { ET: "Loendamata $1", EN: "Not counted $1" }],
     [/^В продаже (\d+)$/, { ET: "Müügil $1", EN: "On sale $1" }],
     [/^Скрытые (\d+)$/, { ET: "Peidetud $1", EN: "Hidden $1" }],
+    // 1a «Каталог» (q17): «В магазине» and «Кончаются» with their counts
+    [/^В магазине (\d+)$/, { ET: "Poes $1", EN: "In the shop $1" }],
+    [/^Кончаются (\d+)$/, { ET: "Lõpevad $1", EN: "Running low $1" }],
     [/^В пути (\d+)$/, { ET: "Teel $1", EN: "On the way $1" }],
     [/^Возвраты (\d+)$/, { ET: "Tagastused $1", EN: "Returns $1" }],
     // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
@@ -6771,6 +6934,21 @@
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
         EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }],
+    /* direction 1a — the product card and «Новый товар»: lines with a number
+       or a name inside */
+    [/^Пустая цена салона — на ([\d.,]+) % меньше обычной; у объёмов ниже она считается сама\.$/,
+      { ET: "Tühi salongihind on $1 % tavalisest väiksem; allpool olevatel mahtudel arvutatakse see ise.",
+        EN: "An empty salon price is $1 % below the normal one; for the sizes below it is worked out by itself." }],
+    [/^Первый объём покупатель видит первым\. Цена для салонов — на ([\d.,]+) % меньше, считается сама\.$/,
+      { ET: "Esimest mahtu näeb ostja esimesena. Salongihind on $1 % väiksem ja arvutatakse ise.",
+        EN: "The buyer sees the first size first. The salon price is $1 % less and is worked out by itself." }],
+    [/^(\d+) из 3 языков$/, { ET: "$1 keelt 3-st", EN: "$1 of 3 languages" }],
+    [/^салоны платят (.+)$/, { ET: "salongid maksavad $1", EN: "salons pay $1" }],
+    [/^Черновик от (.+)$/, { ET: "Mustand $1", EN: "Draft of $1" }],
+    [/^Объём (.+) убран$/, { ET: "Maht $1 eemaldatud", EN: "Size $1 removed" }],
+    [/^Убрать (.+)\?$/, { ET: "Eemaldada $1?", EN: "Remove $1?" }],
+    [/^Остаток: (\d+|—) → (\d+)$/, { ET: "Jääk: $1 → $2", EN: "Stock: $1 → $2" }],
+    [/^Штрихкод «(.+)»: (.+)$/, { ET: "Triipkood «$1»: $2", EN: "Barcode “$1”: $2" }],
     /* админка, редизайн (этап 2): «Товар», «Салон» и сканер — строки с числом
        или названием внутри. */
     [/^Цены и остатки — на вкладке «Размеры и цены»\. Салон платит на ([\d.,]+) % меньше, если для товара не задана своя цена\.$/,
@@ -21200,11 +21378,21 @@
     }
     return SRV.admin === true ? 0 : lowStock().length;
   }
-  /** What the header counts on each tab: the rows that tab is showing. */
-  function admProductsCount(tab) {
-    if (tab === "stock") return (S.stockLevels || []).length;
-    if (tab === "sets") return (S.admBundles || []).length;
-    return admCatalogList().length;
+  /** 1a (screen 10): the three shelves as ONE segmented control — Каталог ·
+      Склад N · Наборы — each still addressed by the key it has always had
+      (`data-admtab="goods"` / `"stock"`, `data-admgoodstab="bundles"`), so the
+      assistant's «Открыть …» and the e2e suite reach them as before. */
+  function admGoodsTabsHTML(tab, warn) {
+    return '<div class="adm-seg adm-seg--tabs" role="group" aria-label="Что показываем">' +
+      '<button data-admtab="goods" aria-current="' + (tab === "catalog") + '">Каталог</button>' +
+      /* The zero is printed too, once the shelf list has actually arrived:
+         «nothing to re-order» and «not loaded yet» looked identical, and the
+         chips one row below print theirs on purpose. Blank only while the
+         list is still coming. The design's rust count is for a number that
+         asks for something; a zero stays quiet. */
+      '<button data-admtab="stock" aria-current="' + (tab === "stock") + '">Склад ' +
+        '<span class="adm-tab__warn' + (S.stockLevels && !warn ? " adm-tab__warn--zero" : "") + '">' + (S.stockLevels ? warn : "") + "</span></button>" +
+      '<button data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '">Наборы</button></div>';
   }
   function admProductsHTML() {
     var tab = admProductTab();
@@ -21212,15 +21400,7 @@
     // tab — «Каталог» used to show the badge without ever asking
     loadStockLevels(false);
     var warn = admLowCount();
-    var tabs =
-      '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
-      /* The zero is printed too, once the shelf list has actually arrived:
-         «nothing to re-order» and «not loaded yet» looked identical, and the
-         chips one row below print theirs on purpose. Blank only while the
-         list is still coming. */
-      '<button class="adm-tab" data-admtab="stock" aria-current="' + (tab === "stock") + '" title="Склад">Склад ' +
-        '<span class="adm-tab__warn">' + (S.stockLevels ? warn : "") + "</span></button>" +
-      '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
+    var tabs = admGoodsTabsHTML(tab, warn);
     var add = tab === "sets"
       ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
       /* One action, one name. This header used to carry «Приёмка» over a
@@ -21232,17 +21412,17 @@
       : tab === "stock"
         ? ""
         /* product creation: a blank product the editor really can save —
-           custom_products on the server, CATALOGUE here (adoptCustom). */
-        : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
+           custom_products on the server, CATALOGUE here (adoptCustom).
+           1a: the screen's ONE dark button — header right on a desktop,
+           pinned above the tab bar on a phone (admPinnedHTML). */
+        : admPinnedHTML("data-admgoodsnew", "+ Товар");
     if (tab === "catalog") { loadCustomAll(false); loadProOverrides(false); }
     return '<div class="adm-screen adm-screen--tight">' +
-      /* The number follows the tab. It was CATALOGUE.length on all three —
-         the shop's catalogue, which leaves hidden products out — so the
-         header and the line at the foot of «Каталог» printed two different
-         totals on one screen, and on «Склад» and «Наборы» it counted
-         something the tab was not showing at all. */
-      admHead("", 'Товары <small>' + admProductsCount(tab) + "</small>", add) +
-      '<div class="adm-tabs" role="group" aria-label="Что показываем">' + tabs + "</div>" +
+      /* 1a (screen 10): «Товары» with no number beside it. The chips under
+         the tabs carry a count each (and «Склад» its own), so the header's
+         total was the same figure a third time. */
+      admHead("", "Товары", add) +
+      '<div class="adm-goodsbar">' + tabs + (tab === "catalog" ? admCatalogSearchHTML() : "") + "</div>" +
       (tab === "stock" ? admStockHTML() : tab === "sets" ? admSetsHTML() : admCatalogHTML()) +
       "</div>";
   }
@@ -21258,8 +21438,13 @@
 
      Same shape as «Заказы» and «Склад»: one .adm-chips row with the search
      box beside it, aria-current on the chip that is on. */
+  /* 1a (q17, Dim 25.09.2026): «Кончаются» takes the place of «Нет в
+     наличии» — every product in the shop with a size that is low or out, the
+     list the owner reorders from. «Нет» on its own is «Склад»'s chip. The
+     chip that shows the shop's products is «В магазине», the design's word
+     for it (the id stays "on"). */
   var ADM_GOODS_FILTERS = [
-    ["all", "Все"], ["on", "В продаже"], ["off", "Скрытые"], ["out", "Нет в наличии"]
+    ["all", "Все"], ["on", "В магазине"], ["off", "Скрытые"], ["low", "Кончаются"]
   ];
   function goodsOffSale(p) {
     return !!((p.custom && p.active === false) || shopHidden(p.id));
@@ -21310,17 +21495,43 @@
     if (counted && counted === all) return "out";
     return p.stock === "low" ? "low" : "in";
   }
+  /** «Кончаются»: the counted shelf says low or out for ANY size — the badge
+      reads the product as a whole (goodsStockWord), and a product whose
+      500 мл is gone while its 75 мл is full is still one to reorder — or the
+      product's own word is «мало» / «нет». */
+  function goodsRunsLow(p) {
+    if (goodsStockWord(p) !== "in") return true;
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].productId === p.id && rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) return true;
+    }
+    return false;
+  }
+  /** The chip on screen — "out" from before q17 lands on «Кончаются». */
+  function goodsFilterNow() {
+    var f = S.goodsFilter || "all";
+    return f === "out" ? "low" : f;
+  }
   function goodsMatchesFilter(p, f) {
     if (f === "off") return goodsOffSale(p);
     if (f === "on") return !goodsOffSale(p);
-    if (f === "out") return !goodsOffSale(p) && goodsIsOut(p);
+    if (f === "low" || f === "out") return !goodsOffSale(p) && goodsRunsLow(p);
     return true;
   }
+  /** The search box, beside the tabs on a desktop and under them on a phone.
+      It finds a product by its barcode too (1a): the codes are on the
+      warehouse rows, which every «Товары» tab loads for the «Склад» badge. */
+  function admCatalogSearchHTML() {
+    return '<label class="adm-search"><span class="vh">Поиск по товарам</span>' +
+      '<svg class="adm-search__i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+        '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>' +
+      '<input class="adm-input adm-input--row" data-goodsq value="' + esc(S.goodsQ || "") +
+        '" placeholder="Название, бренд или штрихкод" aria-label="Поиск по товарам"></label>';
+  }
   function admCatalogHTML() {
-    var f = S.goodsFilter || "all";
+    var f = goodsFilterNow();
     var all = admCatalogList();
-    return '<div class="adm-acts">' +
-        '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
+    return '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
           /* Every chip says how many rows are behind it, zeros included — the
              same rule «Склад» now follows, and for the same reason: three of
              these four said nothing at all, so the only way to learn whether
@@ -21331,16 +21542,7 @@
           return '<button class="adm-chip" data-goodsfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + " " + n + "</button>";
         }).join("") + "</div>" +
-        /* Not «штрихкод»: admCatalogRows() matches the query against
-           brand + name + id and nothing else. Barcodes live on the warehouse
-           rows (S.stockLevels[].ean), which this screen never loads — so a
-           code typed here answered «Таких товаров нет» for a product that is
-           right there. The screens that really do find a product by its code
-           are «Склад» and the scanner. */
-        '<input class="adm-input adm-input--row" data-goodsq value="' + esc(S.goodsQ || "") +
-          '" placeholder="Название или бренд" aria-label="Поиск по товарам" style="flex:1;min-width:180px">' +
-      "</div>" +
-      '<div class="adm-list adm-list--flat" id="goodslist">' + admCatalogRows() + "</div>";
+      '<div class="adm-glist" id="goodslist">' + admCatalogRows() + "</div>";
   }
   /** Its own function so typing in the search box can patch the list in place
       instead of re-rendering the screen out from under the caret. */
@@ -21426,10 +21628,20 @@
        narrows to the one bottle. */
     var q = scanFold(S.goodsQ);
     var words = q ? q.split(" ") : [];
-    var f = S.goodsFilter || "all";
+    var f = goodsFilterNow();
     var all = admCatalogList().filter(function (p) { return goodsMatchesFilter(p, f); });
+    /* …and the barcodes (1a): the warehouse rows carry them, and «Товары»
+       loads that list on every tab. A code matches from its start, as on
+       «Склад», so «4750» narrows while the rest is still being typed. */
+    var codes = {};
+    (S.stockLevels || []).forEach(function (r) {
+      if (r && r.ean) (codes[r.productId] = codes[r.productId] || []).push(String(r.ean).toLowerCase());
+    });
+    var rawQ = String(S.goodsQ || "").trim().toLowerCase();
     var list = words.length
       ? all.filter(function (p) {
+          var own = codes[p.id] || [];
+          if (rawQ.length >= 3 && own.some(function (c) { return c.indexOf(rawQ) === 0; })) return true;
           var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " + (p.sizes || []).join(" "));
           var hayWords = hay.split(" ");
           for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
@@ -21440,18 +21652,24 @@
     // but the owner must be able to scroll to any product without one
     var cap = S.goodsShown || 40;
     var shown = list.slice(0, cap);
-    return shown.map(admCatalogRow).join("") +
+    /* 1a (screen 10, desktop): one header over the columns — Товар ·
+       Объёмы · Наличие · Цена · Виден. The phone draws none: each row is
+       its own three lines there. The total under the list is gone (A10):
+       every chip above already says how many. */
+    return (shown.length
+        ? '<div class="adm-grow adm-grow--head" aria-hidden="true"><span>Товар</span><span>Объёмы</span>' +
+          "<span>Наличие</span><span>Цена</span><span>Виден</span></div>"
+        : "") +
+      shown.map(admCatalogRow).join("") +
       /* An empty answer with nothing to press is a dead end: the query stays
          in a box above the fold and the only way out is to find it and clear
          it by hand, on a phone, with the keyboard over half the screen. */
-      (shown.length ? "" : '<div class="adm-empty"><span>Таких товаров нет</span>' +
+      (shown.length ? "" : '<div class="adm-empty"><span>Ничего не нашли</span>' +
         ((S.goodsQ || "").trim() || f !== "all"
           ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-goodsclear>Сбросить поиск</button>'
           : "") + "</div>") +
-      '<p class="adm-hint" style="margin:10px 0 0">' +
-        (list.length > cap ? "Показаны первые " + cap + " из " + list.length : admItemsLabel(list.length)) + "</p>" +
       (list.length > cap
-        ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admgoodsmore style="margin-top:10px">Показать ещё</button>'
+        ? '<button class="adm-btn adm-btn--ghost adm-btn--row adm-glist__more" type="button" data-admgoodsmore>Показать ещё</button>'
         : "");
   }
   /* ---- back to the row he came from ---------------------------------------
@@ -21494,18 +21712,46 @@
     // — migration 147: and so does a catalogue product taken out of the shop
     // …and the stock word is the chip's own (goodsStockWord), not `p.stock` alone
     var word = goodsStockWord(p);
-    var badge = (p.custom && p.active === false) || shopHidden(p.id) ? ["Скрыт", "adm-badge--quiet"]
-      : word === "out" ? ["Нет", "adm-badge--warnfill"]
-      : word === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
+    var off = goodsOffSale(p);
+    var tag = off ? admTagHTML("quiet", "Скрыт")
+      : word === "out" ? admTagHTML("alert", "Нет")
+      : word === "low" ? admTagHTML("low", "Мало") : admTagHTML("ok", "В наличии");
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
-    return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admgoods="' + esc(p.id) + '">' +
-      '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) +
-        (fresh ? ' <span class="adm-badge adm-badge--sm adm-badge--ink" data-goodsfresh>новый</span>' : "") + "</span>" +
-        '<span class="adm-row__sub adm-row__sub--one">' + (p.sizes || []).map(function (s) { return "<span>" + esc(s) + "</span>"; }).join(" · ") + "</span></span>" +
-      // the state, then the price: the third line on a phone, the right end of the row on a desktop
-      '<span class="adm-row__line"><span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span>" +
-        '<span class="adm-row__amt">' + price + "</span></span></button>";
+    /* 1a (screen 10). The row is a <div> now: its name is the button that
+       opens the card (and, by its ::after, the whole row on a phone), and
+       the desktop's «Виден» switch stands beside it — a switch cannot live
+       inside a button. Brand over name, as the design draws it; the sizes,
+       the stock tag and the price in their own columns on a desktop and on
+       one third line on a phone. */
+    return '<div class="adm-grow" data-goodsrow="' + esc(p.id) + '">' +
+      '<span class="adm-thumb adm-grow__img">' + media(p, 0, "") + "</span>" +
+      '<button class="adm-grow__open" type="button" data-admgoods="' + esc(p.id) + '">' +
+        '<span class="adm-grow__br">' + esc(p.brand) + "</span>" +
+        '<span class="adm-grow__t">' + esc(p.name) +
+          (fresh ? ' <span class="adm-badge adm-badge--sm adm-badge--ink" data-goodsfresh>новый</span>' : "") + "</span></button>" +
+      '<span class="adm-grow__line"><span class="adm-grow__st">' + tag + "</span>" +
+        '<span class="adm-grow__sz">' + (p.sizes || []).map(function (s) { return "<span>" + esc(s) + "</span>"; }).join(" · ") + "</span></span>" +
+      '<span class="adm-grow__pr">' + price + "</span>" +
+      /* «Виден» — the same two server models as the card's own switch: a
+         catalogue product's `hidden`, the owner's own product's `active`.
+         Applied at once, «Вернуть» on the toast (goodsVisToggle). */
+      '<span class="adm-grow__vis">' + admSwitch('data-goodsvis="' + esc(p.id) + '"', !off,
+        "<span>Показывать в магазине</span> <span>" + esc(p.brand + " — " + p.name) + "</span>") + "</span>" +
+      "</div>";
+  }
+  /** «Виден» on a catalogue row: the product leaves the shop (or comes back)
+      now, the write goes through the autosave queue, the toast can take it
+      back. The owner's own product is its row's `active` (DELETE / PUT), a
+      catalogue product its override's `hidden`. */
+  function goodsVisToggle(id) {
+    var p = admEditProduct(id);
+    if (!p || p.isNew) return;
+    var off = goodsOffSale(p);
+    var nm = p.brand + " — " + p.name;
+    var a = p.custom
+      ? { type: "set_product_active", id: p.id, value: off, name: nm }
+      : { type: "set_hidden", id: p.id, value: !off, name: nm };
+    edInstant("ed:" + p.id + ":shown", a, off ? "Товар снова в магазине" : "Товар скрыт из магазина");
   }
 
   /* ---------- Товары → Наборы --------------------------------------------- */
@@ -31942,7 +32188,7 @@
   }
   /* Only one editor is open at a time, so one progress state serves both the
      goods editor and the banner. */
-  var UP = { busy: 0, total: 0, err: "", creating: false };   // creating: a new product being made for the photos just picked
+  var UP = { busy: 0, total: 0, err: "" };
   function upBusyText() {
     return UP.total > 1 ? "Загружаем… " + (UP.total - UP.busy + 1) + " из " + UP.total : "Загружаем…";
   }
@@ -32022,8 +32268,17 @@
     var done = function () {
       if (--left) return;
       btn.disabled = false; btn.textContent = label;
-      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
-      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      edLangStatePaint();
+      /* 1a: what the assistant wrote is saved like typed text, with
+         «Вернуть» on the toast once the server has it (edAsTextNow); a new
+         product's draft keeps it */
+      var okMsg = langs.length > 1 ? "Заполнено на трёх языках" : "Черновик готов — прочитайте и поправьте";
+      if (okN) {
+        if (S.adminEdit === "new") { goodsNewPaint(); toast(okMsg); }
+        else edAsTextNow("seo", okN === langs.length ? okMsg : "");
+      }
+      if (okN === langs.length) return;
+      if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
       else toast("Не получилось — попробуйте ещё раз");
     };
     langs.forEach(function (L) {
@@ -32125,10 +32380,14 @@
   }
   function galDraft(p) {
     if (GAL.id !== p.id) {
-      GAL.id = p.id; GAL.list = galPhotos(p); GAL.fresh = {}; GAL.reset = false; GAL.cutting = null;
+      GAL.id = p.id; GAL.fresh = {}; GAL.reset = false; GAL.cutting = null;
       GAL.picks = {};
       UP.busy = 0; UP.total = 0; UP.err = "";
     }
+    /* 1a: every photo button saves the list it leaves (edGallerySave), so
+       the list on screen IS the shop's — read again every time, which is
+       also what makes a «Вернуть» (toast or journal) show at once. */
+    GAL.list = galPhotos(p);
     return GAL.list;
   }
   function galDirty(p) {
@@ -32163,63 +32422,39 @@
     if (!key || MEDIA.on !== true) return;
     fetch("/api/admin/upload/?key=" + encodeURIComponent(key), { method: "DELETE" }).catch(noop);
   }
+  /* One file at a time, and each one SAVED the moment it is up (1a): the
+     list with the new photo at its end is the product's list — «Вернуть» on
+     the toast takes it back out. «Новый товар» has no product to file it
+     under yet: its photo goes up under the draft's own id (goodsNewUpload,
+     Dim 25.09.2026 q23) and travels with «Добавить товар». */
   function galUpload(files, p) {
-    if (p && p.isNew) { galNewUpload(files); return; }   // product creation: no id to file it under yet
+    if (p && p.isNew) { goodsNewUpload(files); return; }
     var queue = [];
     for (var i = 0; i < files.length; i++) queue.push(files[i]);
-    if (!queue.length) return;
+    if (!queue.length || !p) return;
     galDraft(p);
     if (GAL.list.length + queue.length > MAX_PHOTOS) {
       UP.err = "Больше " + MAX_PHOTOS + " фотографий на товар не нужно";
       toast(UP.err); render(); return;
     }
-    GAL.reset = false;
     UP.err = ""; UP.total = queue.length; UP.busy = queue.length; render();
-    var okN = 0;
+    var total = queue.length;
     var step = function () {
       var f = queue.shift();
-      if (!f) {
-        UP.busy = 0; UP.total = 0; render();
-        // the tile is on screen, the shop has not seen it yet — say what makes it so
-        if (okN) toast(okN > 1 ? "Фото загружены ✓ — нажмите «Сохранить»" : "Фото загружено ✓ — нажмите «Сохранить»");
-        return;
-      }
+      if (!f) { UP.busy = 0; UP.total = 0; render(); return; }
       uploadPhoto(f, "product", p.id).then(function (r) {
+        UP.busy = queue.length;
+        // the card may have been left meanwhile: the photo is still the product's
+        var cur = admEditProduct(p.id);
+        galDraft(cur);
+        GAL.reset = false;
         GAL.list.push({ url: r.url, thumb: r.thumbUrl || r.url, alt: "" });
         if (r.key) GAL.fresh[r.url] = r.key;
-        okN++;
-        UP.busy = queue.length;
-        render();
+        edGallerySave(cur, queue.length ? "" : (total > 1 ? "Фото добавлены" : "Фото добавлено"));
         step();
       }).catch(upFail);
     };
     step();
-  }
-  /* product creation: a photo picked before the first «Сохранить товар».
-     An upload is filed under the product's id and there is none yet, so the
-     row is made FIRST — the same POST the save bar makes, with the same
-     refusals (customRowFromForm names the empty box and goodsFail opens its
-     tab) — and the photos go up the moment the id is back (customCreate's
-     `files`). The tab used to be a dead end that said «после первого
-     сохранения» and offered nothing to press (Dim, 10.09.2026). */
-  function galNewUpload(files) {
-    var picked = [];
-    for (var i = 0; i < files.length; i++) picked.push(files[i]);
-    if (!picked.length || S.goodsBusy) return;
-    if (picked.length > MAX_PHOTOS) {
-      UP.err = "Больше " + MAX_PHOTOS + " фотографий на товар не нужно";
-      toast(UP.err); render(); return;
-    }
-    var row = customRowFromForm(admEditProduct("new"));
-    if (!row) return;   // the reason is in the save bar, and the box that needs filling has the caret
-    goodsErrClear();
-    UP.err = ""; UP.total = picked.length; UP.busy = picked.length; UP.creating = true; render();
-    customCreate(row, "photo", picked);
-  }
-  /** The «Сохраняем товар и загружаем фото…» tile is a button again when the row was refused. */
-  function upCreateReset() {
-    if (!UP.creating) return;
-    UP.creating = false; UP.busy = 0; UP.total = 0; render();
   }
   function heroUpload(files) {
     if (!files || !files.length) return;
@@ -32315,11 +32550,15 @@
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
     uploadVideo(files[0], p.id).then(function (r) {
       UP.busy = 0; UP.total = 0;
-      // Through the draft, not by poking the input: the render() below rebuilds
-      // the form, and a value written straight onto the element would be gone.
+      /* 1a: the uploaded clip is the product's video at once — saved like a
+         pasted link, «Вернуть» on the toast. Through the draft (VID) as well,
+         so the box shows the address while the write is out. */
       VID.id = p.id; VID.url = r.url;
+      var vKey = edAsKey(p, "video"), vSpec = edAsSpec(p.id, "video");
+      ED.toastFor[vKey] = "Видео загружено";
+      admAutosave(vKey, r.url, "input", vSpec);
+      admAutosave(vKey, r.url, "enter", vSpec);
       render();
-      toast("Видео загружено ✓");
     }).catch(vidFail);
   }
 
@@ -32394,29 +32633,25 @@
     S.goodsErr = msg;
     var slot = document.querySelector("[data-goodserr]");
     if (slot) { slot.textContent = msg; slot.hidden = false; translateTree(slot); }
-    if (focusSel) {
-      /* The box that needs fixing may sit on another tab: «Цена — число…»
-         used to be answered from «Основное» with the price box out of sight
-         (Dim, 10.09.2026). Its pane opens first, then the caret goes in. */
-      var fEl = document.querySelector(focusSel);
-      var fPane = fEl && fEl.closest ? fEl.closest("[data-edpane]") : null;
-      if (fPane && fPane.hidden) edShowTab(fPane.getAttribute("data-edpane"));
+    /* 1a: every section is on the one page, so the box that needs fixing is
+       simply scrolled to and given the caret — and the rust edge (README § 2:
+       «keep the field red-bordered with a one-line hint»). */
+    var fEl = focusSel ? document.querySelector(focusSel) : null;
+    var marked = document.querySelectorAll("[data-goodsbad]");
+    for (var mi = 0; mi < marked.length; mi++) { marked[mi].removeAttribute("aria-invalid"); marked[mi].removeAttribute("data-goodsbad"); }
+    if (fEl) {
+      fEl.setAttribute("aria-invalid", "true"); fEl.setAttribute("data-goodsbad", "");
       refocus(focusSel);
+      if (fEl.scrollIntoView) fEl.scrollIntoView({ block: "center" });
     }
   }
   function goodsErrClear() {
     S.goodsErr = "";
     var slot = document.querySelector("[data-goodserr]");
     if (slot) { slot.textContent = ""; slot.hidden = true; }
+    var marked = document.querySelectorAll("[data-goodsbad]");
+    for (var mi = 0; mi < marked.length; mi++) { marked[mi].removeAttribute("aria-invalid"); marked[mi].removeAttribute("data-goodsbad"); }
   }
-  /** Every field of the goods editor that holds typed text, in the order the
-      form shows them — read by renderImpl() to carry what is on screen across
-      a render() the owner did not ask for. */
-  var GOODS_FIELDS = ["[data-edprice]", "[data-edproprice]", "[data-edstock]", "[data-edsubcat]",
-    "[data-edseot]", "[data-edseod]", "[data-edseotet]", "[data-edseodet]", "[data-edseoten]", "[data-edseoden]",
-    "[data-edvideo]", "[data-eddescru]", "[data-eddescet]", "[data-eddescen]",
-    // product creation: the boxes only a custom product has
-    "[data-edbrand]", "[data-edname]", "[data-edcat]"];
   /** «12,50» → 12.5; empty, not a number, or outside 1–500 € → null.
       Number(), not parseFloat(): parseFloat("12abc") is 12, which is exactly
       the kind of half-read value this box must not accept. */
@@ -32427,27 +32662,27 @@
     if (!isFinite(n) || n < 1 || n > 500) return null;
     return Math.round(n * 100) / 100;
   }
-  /* ---------- Товар: the editor ------------------------------------------
-     Redesign phase 2 (docs/design/admin-handoff-README.md § «Товар (editor)»).
-     Five tabs over ONE form — Основное · Размеры и цены · Фото и видео ·
-     Описание · Google — with a sticky save bar under all of them.
+  /* ---------- Товар: the card ---------------------------------------------
+     Direction 1a (design_handoff_admin_ux README § 5 «Товар», screens 02).
+     What were five tabs over one form — Основное · Размеры и цены · Фото и
+     видео · Описание · Google — is ONE page in this order: В магазине →
+     Объёмы и цены → Фото → Фото по объёмам → Видео → Описание → Для Google
+     (folded). The owner's own product has its «Что за товар» block — brand,
+     name, section — at the top (Dim, 25.09.2026, q18).
 
-     All five panes are in the DOM at once; the inactive ones carry `hidden`.
-     This form is the only one in the panel with no draft in S: every field is
-     read straight off the DOM when «Сохранить» is pressed (see the
-     [data-admsavegoods] handler and GOODS_FIELDS), so a tab that unmounted
-     its inputs would silently throw away everything typed on it the moment
-     the owner looked at another tab. Switching tabs is therefore a DOM patch
-     (edShowTab below), not a render() — same reasoning as goodsFail().
+     There is no «Сохранить» any more (README § 2): every box saves itself
+     (edAs* below, on the shared admAutosave) — a price, a salon price, a
+     size's name, a barcode and a typed count when the owner LEAVES the box or
+     presses Enter; the descriptions and the Google texts a second after the
+     last keystroke; switches, picks and photo buttons at once, with «Вернуть»
+     on the toast. What cannot be sent yet (an empty price, a size with no
+     name) stays on screen with a rust edge and one line, and «← Товары» asks
+     about exactly that and nothing else.
 
      What the catalogue owns, the panel shows read-only with one line saying
-     so: the name, the brand, the section and the list of sizes live in
-     src/data/catalogue*.json and no admin route writes them. A box that
-     accepted a new name and dropped it on save would be the worst kind of
-     lie this editor can tell. */
-  var ED_TABS = [["main", "Основное"], ["sizes", "Размеры и цены"], ["media", "Фото и видео"],
-    ["desc", "Описание"], ["seo", "Google"]];
-  function edTab() { return S.goodsEditTab || "main"; }
+     so: the name, the brand and the section live in src/data/catalogue*.json
+     and no admin route writes them. A box that accepted a new name and
+     dropped it would be the worst kind of lie this editor can tell. */
   /** The stock row behind one size — null while «Склад» has not loaded, or
       when nobody has ever counted this variant (`tracked` false). */
   function edStockFor(p, variant) {
@@ -32506,22 +32741,24 @@
     if (url && !/youtu|vimeo/i.test(url)) return "up";
     return "yt";
   }
-  /* ---- product creation: the editor's «new» mode and the custom rows -----
-     S.adminEdit === "new" opens the same five tabs over a product that does
-     not exist yet: brand, name, section and a price are the essentials on
-     «Основное» and «Размеры и цены»; photos wait for the first «Сохранить»,
-     because an upload is filed under the product's id and there is none
-     yet. An existing custom product (`p.custom`) opens the same boxes
-     editable — the row is his, not the file's — and saves back to
-     PUT /api/admin/products/<id>. */
+  /* ---- product creation: «Новый товар» and the custom rows ----------------
+     S.adminEdit === "new" is the one-page «Новый товар» (goodsNewHTML): the
+     draft lives in S.goodsNew and in localStorage (goodsNewSave), and the
+     product is created only by «Добавить товар». An existing custom product
+     (`p.custom`) opens the card with its «Что за товар» boxes editable — the
+     row is his, not the file's — and saves back to PUT /api/admin/products/<id>. */
   function goodsNewDraft() {
-    var d = S.goodsNew || {};
+    var d = S.goodsNew || goodsNewBlank();
     var g = function (sel, fb) { var e = document.querySelector(sel); return e ? e.value : fb; };
-    var cat = g("[data-edcat]", d.cat || "hair");
+    var cat = g("[data-edcat]", d.cat || "");
+    var rows = Array.isArray(d.sizes) ? d.sizes : [];
     return { id: "new", isNew: true, custom: true, active: true,
       brand: g("[data-edbrand]", d.brand || ""), name: g("[data-edname]", d.name || ""),
-      cat: CAT_NAMES[cat] ? cat : "hair", subcatBase: g("[data-edsubcat]", d.subcat || ""),
-      price: d.price || 0, stock: "in", img: CUSTOM_PLACEHOLDER, photos: [], seoOv: null, descOv: null };
+      cat: CAT_NAMES[cat] ? cat : "", subcatBase: g("[data-edsubcat]", d.subcat || ""),
+      // the volumes typed so far, for the assistant's «Написать черновик»
+      sizes: rows.map(function (r) { return String(r.size || "").trim(); }).filter(Boolean),
+      price: (rows[0] && goodsPrice(rows[0].price)) || 0, stock: "in", img: CUSTOM_PLACEHOLDER,
+      photos: (d.photos || []).slice(), seoOv: null, descOv: null };
   }
   /** The product an editor id names: the draft for «new», a hidden custom
       product from the panel's own list, else the catalogue's (byId — which
@@ -32538,16 +32775,27 @@
     for (var i = 0; i < FILE_PRODUCTS.length; i++) if (FILE_PRODUCTS[i].id === id) return FILE_PRODUCTS[i];
     return byId(id);
   }
-  /** The size rows a custom product is edited with — {size, price} per row,
-      size "" for the single-price case. The list lives in S so «+ Размер»
-      and «×» can rebuild the grid; the values are read off the DOM first,
-      so a row added keeps what was typed in the others. */
+  /** The size rows a product is edited with — {size, price} per row, size ""
+      for the single-price case. The list lives in S so «+ Объём» and «×» can
+      rebuild the grid; the values are read off the DOM first, so a row added
+      keeps what was typed in the others.
+      1a: a DRAFT only while the ladder holds something not saved yet — a row
+      just added, a price still being typed, a name refused (`dirty`).
+      Otherwise the rows are read from the product again, so a «Вернуть» —
+      or anything else that moves the saved ladder — is what the grid shows.
+      «Новый товар»'s rows ARE its draft's (S.goodsNew.sizes). */
   function edSizeRows(p) {
-    if (S.goodsSizes && S.goodsSizes.id === p.id) return S.goodsSizes.rows;
+    if (p.isNew) {
+      var d = S.goodsNew || (S.goodsNew = goodsNewBlank());
+      if (!Array.isArray(d.sizes) || !d.sizes.length) d.sizes = [{ size: "", price: "" }];
+      S.goodsSizes = { id: "new", rows: d.sizes, dirty: true };
+      return d.sizes;
+    }
+    if (S.goodsSizes && S.goodsSizes.id === p.id && S.goodsSizes.dirty) return S.goodsSizes.rows;
     var rows = (p.sizes && p.sizes.length)
       ? p.sizes.map(function (sz, i) { return { size: sz, price: p.prices && p.prices[i] != null ? p.prices[i] : p.price }; })
-      : [{ size: "", price: p.isNew ? "" : p.price }];
-    S.goodsSizes = { id: p.id, rows: rows };
+      : [{ size: "", price: p.price }];
+    S.goodsSizes = { id: p.id, rows: rows, dirty: false };
     return rows;
   }
   function edSizeRowsRead(p) {
@@ -32609,14 +32857,14 @@
      focus and nobody closed it — so a render() landing in the background (the
      media probe's answer, a badge count) morphs it in place instead of
      shutting it under the owner's finger. */
-  function edBrandBoxHTML(value) {
+  function edBrandBoxHTML(value, extra) {
     var live = document.activeElement;
     var open = EDB.open && !!(live && live.matches && live.matches("[data-edbrand]"));
     var rows = open ? edBrandRows(value) : [];
     if (open) { EDB.rows = rows; EDB.ix = -1; }
     var shown = open && rows.length > 0;
     return '<div class="adm-combo" data-edbrandbox>' +
-      '<input class="adm-input" id="edbrand" data-edbrand value="' + esc(value) + '" maxlength="60" placeholder="Например, Proraso"' +
+      '<input class="adm-input" id="edbrand" data-edbrand' + (extra || "") + ' value="' + esc(value) + '" maxlength="60" placeholder="Начните вводить — например, Proraso"' +
         ' autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="' + shown + '" aria-controls="edbrandlist">' +
       '<div class="adm-combo__list" id="edbrandlist" role="listbox" aria-label="Бренды"' + (shown ? "" : " hidden") + ">" +
         (shown ? edBrandRowsHTML(rows, value) : "") + "</div>" +
@@ -32695,7 +32943,10 @@
     EDB.hush = true;   // the focus goes back to the box without the list opening again
     e.input.focus();
     EDB.hush = false;
-    edStepsPaint();
+    // a pick is a decision: the owner's product saves it now (edAsPoke), a
+    // new product's draft takes it and the «Осталось заполнить» line moves
+    edAsPoke(e.input, true);
+    goodsNewPaint();
   }
   document.addEventListener("focusin", function (e) {
     if (e.target && e.target.matches && e.target.matches("[data-edbrand]") && !EDB.hush) edBrandPaint();
@@ -32721,7 +32972,6 @@
     var t = e.target;
     if (!t || !t.matches) return;
     if (t.matches("[data-edbrand]")) edBrandPaint();
-    if (t.matches("[data-edbrand],[data-edname],[data-edpx]")) edStepsPaint();
   });
   document.addEventListener("keydown", function (e) {
     if (!e.target || !e.target.matches || !e.target.matches("[data-edbrand]")) return;
@@ -32740,314 +32990,812 @@
       edBrandClose();
     } else if (e.key === "Tab") { edBrandClose(); }
   }, true);
-  /* product creation: «Дальше — цена →» at the foot of «Основное». Its own
-     hook, not a second data-edtab: the specs address a step by that
-     attribute, and two elements answering to it would make the address
-     ambiguous. The price box gets the caret — that is what was asked for. */
-  document.addEventListener("click", function (e) {
-    var go = e.target && e.target.closest && e.target.closest("[data-edgo]");
-    if (!go) return;
-    edShowTab(go.getAttribute("data-edgo"));
-    refocus("[data-edprice]");
-  });
-  function edSubcatField(cat, cur) {
+  /* ---- the card's boxes that are not ONE box ------------------------------
+     The ladder (every name and price of the grid), the three descriptions
+     and the six Google boxes each save as one value, so they are wired here
+     rather than by `data-autosave` (which wires a single box — the brand,
+     the name, a count, a code, the salon price, the video link, the pickers).
+     «Новый товар» has no autosave at all: every change there goes into its
+     draft and repaints «Осталось заполнить» (goodsNewPaint). */
+  function edAsGroupOf(t) {
+    if (!t || !t.matches || S.screen !== "admin" || !S.adminEdit) return null;
+    if (t.matches("[data-edsz],[data-edpx]")) return "ladder";
+    if (t.matches("[data-eddescru],[data-eddescet],[data-eddescen]")) return "desc";
+    if (t.matches("[data-edseot],[data-edseod],[data-edseotet],[data-edseodet],[data-edseoten],[data-edseoden]")) return "seo";
+    return null;
+  }
+  function edAsGroupFire(t, ev) {
+    var g = edAsGroupOf(t);
+    if (!g || S.adminEdit === "new") return;
+    var p = admEditProduct(S.adminEdit);
+    if (!p || p.isNew) return;
+    if (g === "ladder" && ev === "input" && S.goodsSizes && S.goodsSizes.id === p.id) S.goodsSizes.dirty = true;
+    var v = g === "ladder" ? edLadderRaw() : g === "desc" ? edDescValue() : edSeoValue();
+    // a keystroke in the grid makes its rows a draft until they are saved (edSizeRows)
+    if (g === "ladder" && ev === "input" && S.goodsSizes && S.goodsSizes.id === p.id) S.goodsSizes.dirty = true;
+    admAutosave(edAsKey(p, g), v, ev, edAsSpec(p.id, g));
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("input", function (e) {
+      var t = e.target;
+      if (S.screen !== "admin" || S.adminEdit !== "new" || !t || !t.closest || !t.closest('[data-edfor="new"]')) {
+        edAsGroupFire(t, "input");
+        return;
+      }
+      // «Новый товар»: «салоны платят …» follows the price being typed
+      if (t.matches && t.matches("[data-edpx]")) {
+        var sal = document.querySelector('[data-gnsalon="' + t.getAttribute("data-edpx") + '"]');
+        if (sal) { sal.textContent = goodsNewSalonHTML(t.value); translateTree(sal); }
+      }
+      goodsNewPaint();
+    });
+    document.addEventListener("change", function (e) {
+      var t = e.target;
+      if (S.screen === "admin" && S.adminEdit === "new" && t && t.closest && t.closest('[data-edfor="new"]')) goodsNewPaint();
+    });
+    document.addEventListener("focusout", function (e) { edAsGroupFire(e.target, "blur"); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || e.isComposing || !e.target || e.target.tagName !== "INPUT") return;
+      edAsGroupFire(e.target, "enter");
+    });
+  }
+  /** «Подраздел» under a section. `asAttr` is the autosave hook the owner's
+      product card gives it (edAsAttr); a new product's draft has none. No
+      section chosen yet («Новый товар» starts at «Выберите») → a dead box
+      that says what comes first. */
+  function edSubcatField(cat, cur, asAttr) {
     var subs = SUBCATS[cat] || [];
-    return '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat' + (subs.length ? "" : " disabled") + ">" +
+    return '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat' + (asAttr || "") + (subs.length ? "" : " disabled") + ">" +
       (subs.length
         ? '<option value=""' + (cur ? "" : " selected") + '>Авто — по названию</option>' +
           subs.map(function (s2) { return '<option value="' + esc(s2.id) + '"' + (cur === s2.id ? " selected" : "") + ">" + esc(s2.name) + "</option>"; }).join("")
-        : '<option value="">у этого раздела нет подразделов</option>') +
+        : CAT_NAMES[cat]
+          ? '<option value="">у этого раздела нет подразделов</option>'
+          : '<option value="">Авто — по названию</option>') +
       "</select></label>";
   }
-  function edPaneMainOwn(p) {
-    var curSub = subcatOf(p);
-    return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
-      '<div class="adm-edcols">' +
-        '<div class="adm-edcol">' +
-          // the label text and its asterisk are one flex item of the column, so
-          // the asterisk stays on the label's line instead of taking a row
-          '<div class="adm-field"><label for="edbrand"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span></label>' +
-            edBrandBoxHTML(p.brand) + "</div>" +
-          '<label class="adm-field"><span>Название <span class="adm-req" aria-hidden="true">*</span></span>' +
-            '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
-          /* «✨»: the house pattern «Latin line name — русский хвост», with a
-             tail the storefront translates by itself; the line under it says
-             what the Estonian and English shop will show for it */
-          admSparkHTML("data-ednamespark", "✨ Подобрать название") +
-          '<p class="adm-hint" data-ednamehint>' + (p.name ? esc(edNameHintText(p.name)) : "") + "</p>" +
-          '<div class="adm-edpair">' +
-            '<label class="adm-field">Раздел<select class="adm-input" data-edcat>' +
-              CATS.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
-            "</select></label>" +
-            '<span data-edsubslot>' + edSubcatField(p.cat, curSub) + "</span>" +
-          "</div>" +
-          '<p class="adm-hint">Бренд можно выбрать из списка или вписать новый. Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.</p>' +
-          // product creation: the way on is a button, not a hunt through the tabs
-          (p.isNew ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edgo="sizes">Дальше — цена →</button></div>' : "") +
-        "</div>" +
-        '<div class="adm-edcol">' +
-          (p.isNew
-            /* what is required, what «Сохранить товар» does, where the photo
-               goes — the three things a first-time owner asked the screen */
-            ? '<p class="adm-hint"><b>Что нужно:</b> бренд, название, раздел — здесь; цена — на шаге «Цена».</p>' +
-              '<p class="adm-hint"><b>Что будет:</b> после «Сохранить товар» товар сразу появится в магазине, а редактор откроет шаг «Фото».</p>' +
-              '<p class="adm-hint"><b>Потом, по желанию:</b> описание и текст для Google.</p>'
-            : '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
-                [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
-                  return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
-                }).join("") + "</select></label>" +
-              (p.active === false
-                ? '<p class="adm-hint adm-hint--warn">Товар снят с продажи — в магазине его нет.</p>' +
-                  '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admgoodsshow="' + esc(p.id) + '">Вернуть в продажу</button></div>'
-                : '<p class="adm-hint">Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.</p>') +
-              '<p class="adm-hint">' + (partnersOn()
-                ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
-                : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>") +
-        "</div>" +
-      "</div></div>";
+  /* ---------- 1a: the product card saves itself -----------------------------
+     README § 2, on the shared admAutosave (ADM_SAVE_POLICY, Dim 25.09.2026 q1):
+       · a price, the salon price, a size's name, a barcode and a typed count
+         go when the owner LEAVES the box or presses Enter — «1 €» on the way
+         to «15 €» must never be the shop's price, a half-typed code must never
+         be bound, and a half-typed size name would leave a shelf line behind;
+       · the descriptions and the Google texts a second after the last key;
+       · switches, picks and the photo buttons at once, «Вернуть» on the toast.
+     Every write goes through the route it always went through — PUT
+     /api/admin/overrides/ for a catalogue product (partial per column; the
+     three descriptions and the three Google pairs travel whole, because the
+     server replaces those objects whole), PUT /api/admin/products/<id>/ for
+     the owner's own row, the inventory routes for a count or a code. «Сохранено
+     ✓» is the shared status's, and it waits for the server's 2xx.
+
+     One field, one key: "ed:<product>:<field>". A typed field is SENT first
+     and written into the shop's copy (demoApply(a, true) — the journal line
+     and its undo) once the server has taken it, so «Повторить» after a dead
+     connection sends it again rather than finding nothing to send. A switch
+     or a photo button moves the copy at once and the write follows. */
+  var ED = { id: "", j: {}, burst: {}, qtyT: {}, toastFor: {}, seq: 0 };
+  function edAsKey(p, field) { return "ed:" + p.id + ":" + field; }
+  /** The owner came into another product's card: a fresh visit — the journal
+      merges a field's lines per visit, not forever. */
+  function edVisit(id) {
+    if (ED.id === id) return;
+    ED.id = id; ED.j = {}; ED.burst = {}; ED.toastFor = {};
   }
-  function edPaneMain(p) {
-    if (p.custom) return edPaneMainOwn(p);   // product creation
-    var subs = SUBCATS[p.cat] || [];
-    var curSub = subcatOf(p);
-    return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
-      '<div class="adm-edcols">' +
-        '<div class="adm-edcol">' +
-          '<label class="adm-field">Название' +
-            '<input class="adm-input" value="' + esc(p.brand + " — " + p.name) + '" readonly></label>' +
-          '<label class="adm-field">Бренд' +
-            '<input class="adm-input" value="' + esc(p.brand) + '" readonly></label>' +
-          '<div class="adm-edpair">' +
-            '<label class="adm-field">Раздел<select class="adm-input" disabled>' +
-              CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
-            "</select></label>" +
-            (subs.length
-              ? '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat>' +
-                '<option value=""' + (curSub ? "" : " selected") + '>Авто — по названию</option>' +
-                subs.map(function (s2) { return '<option value="' + esc(s2.id) + '"' + (curSub === s2.id ? " selected" : "") + ">" + esc(s2.name) + "</option>"; }).join("") +
-                "</select></label>"
-              : '<label class="adm-field">Подраздел<input class="adm-input" value="" readonly placeholder="у этого раздела нет подразделов"></label>') +
-          "</div>" +
-          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.</p>' +
-        "</div>" +
-        '<div class="adm-edcol">' +
-          '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
-            [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
-              return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
-            }).join("") + "</select></label>" +
-          /* product_overrides.hidden (migration 147). Off = the product is
-             gone from the shop, the search, the sets and the sitemap — not
-             the same thing as «нет в наличии», which is a page a customer may
-             still land on and wait at. Applied on the spot with the toast's
-             undo, like every other reversible switch. */
-          admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", !shopHidden(p.id)) +
-          '<p class="adm-hint">' + (shopHidden(p.id)
-            ? "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть."
-            : "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.") + "</p>" +
-          '<p class="adm-hint">' + (partnersOn()
-            ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
-            : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>" +
-        "</div>" +
-      "</div></div>";
+  /** What admAutosave counts as landed (the shared rule). */
+  function edOk(r) { return admAutosaveOk(r); }
+  /** The same call apiSend() makes — with `keepalive` when the page is going
+      away (admAutosaveFlush(true): the phone locked mid-word). */
+  function edApi(url, method, body, keepalive) {
+    if (!keepalive) return apiSend(url, method, body);
+    return apiJson(url, { method: method, headers: { "content-type": "application/json" },
+      body: JSON.stringify(body || {}), keepalive: true });
   }
-  /* product creation: a custom product's own ladder — every size and every
-     price editable, «+ Размер» and «×» real. One row with no size label is
-     the single-price case (the catalogue's «один объём»); the first
-     «+ Размер» turns it into a labelled row and adds a second. Salon price,
-     stock and barcode keep their columns once the product has an id. */
+  /** One product action as its server write — the bodies srvPush() sends,
+      but with the promise handed back, so «Сохранено ✓» can wait for it. */
+  function edWrite(a, o) {
+    var ka = !!(o && o.keepalive), ov = "/api/admin/overrides/";
+    if (!SRV.admin) return Promise.resolve(true);   // the demo: the copy is the shop
+    if (a.type === "set_price") return edApi(ov, "PUT", { id: a.id, price: a.value }, ka);
+    if (a.type === "set_pro_price") return edApi(ov, "PUT", { id: a.id, proPrice: a.value }, ka);
+    if (a.type === "set_stock") return edApi(ov, "PUT", { id: a.id, stock: a.value }, ka);
+    if (a.type === "set_sizes") return edApi(ov, "PUT", sizesBody(a), ka);
+    if (a.type === "set_hidden") return edApi(ov, "PUT", { id: a.id, hidden: !!a.value }, ka);
+    if (a.type === "set_seo") return edApi(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }, ka);
+    if (a.type === "set_subcat") return edApi(ov, "PUT", { id: a.id, subcat: a.value || null }, ka);
+    if (a.type === "set_varimg") return edApi(ov, "PUT", { id: a.id, varImg: a.map }, ka);
+    if (a.type === "set_gallery") return edApi(ov, "PUT", { id: a.id, gallery: a.list }, ka);
+    if (a.type === "set_description") return edApi(ov, "PUT", { id: a.id, description: a.value || null }, ka);
+    if (a.type === "set_video") return edApi(ov, "PUT", { product_id: a.id, video_url: a.value }, ka);
+    if (a.type === "set_product_gallery") return edOwnPut(a.id, { gallery: a.list || [] }, ka);
+    if (a.type === "set_product_active") {
+      var au = "/api/admin/products/" + encodeURIComponent(a.id) + "/";
+      return (a.value ? edApi(au, "PUT", { active: true }, ka) : apiJson(au, { method: "DELETE" }))
+        .then(function (r) { if (edOk(r)) loadCustomAll(true); return r; });
+    }
+    return Promise.resolve(false);
+  }
+  /** A field's line in the journal. The same field changed again in the same
+      visit is ONE line (the journal keeps 40, in this browser): the newest
+      words, and the undo that goes back to how the field was when the visit
+      began. A change made by a button (`fresh`) is a line of its own — its
+      «Вернуть» on the toast goes back one step, not to the start. */
+  function edJournal(key, entry, fresh) {
+    if (!entry) return entry;
+    var old = ED.j[key];
+    if (!fresh && old && DEMO.log[0] === entry && DEMO.log[1] === old && old.prev && old.a && entry.a && old.a.type === entry.a.type) {
+      entry.prev = old.prev;
+      DEMO.log.splice(1, 1);
+      demoSave();
+    }
+    ED.j[key] = fresh ? null : entry;
+    return entry;
+  }
+  /** A typed field has landed: the shop's copy and the journal follow, and a
+      button that asked for a toast («Черновик написан…») gets it now, with
+      «Вернуть» — not before the server said yes. */
+  function edCommit(key, a) {
+    var toastText = ED.toastFor[key];
+    delete ED.toastFor[key];
+    var entry = edJournal(key, demoApply(a, true), !!toastText);
+    if (toastText) toast(toastText, entry);
+    render();
+    return entry;
+  }
+  function edTyped(key, a, o) {
+    return edWrite(a, o).then(function (r) {
+      if (edOk(r)) edCommit(key, a);
+      return r;
+    });
+  }
+  /** A switch, a pick, a photo button: the shop's copy moves now, «Вернуть»
+      on the toast, and the write goes out through the autosave queue under
+      `key` — so the header says «Сохраняем… → Сохранено ✓», and «Повторить»
+      sends it again if it did not land. The value is new every time: the
+      queue skips a value it has sent before, and after a «Вернуть» the same
+      switch pressed again IS a new write. */
+  function edInstant(key, a, toastText) {
+    var entry = edJournal(key, demoApply(a, true), true);
+    render();
+    if (toastText) toast(toastText, entry);
+    admAutosave(key, "#" + (++ED.seq), "change", { kind: "toggle", send: function (v, o) { return edWrite(a, o); } });
+    return entry;
+  }
+
+  /* ---- the owner's own row: one write in flight per product --------------
+     PUT /api/admin/products/<id>/ reads the row, merges the patch and writes
+     the whole row back with no version check (updateCustomProduct), so two of
+     them in the air can undo each other. They queue here, per product, and
+     patches that wait are merged into the next one. A price never travels
+     alone for a product with sizes: the ladder always sends sizes AND prices. */
+  var ED_OWN = {};
+  function edOwnPut(id, patch, keepalive) {
+    var q = ED_OWN[id] || (ED_OWN[id] = { busy: false, next: null });
+    return new Promise(function (resolve) {
+      if (!q.next) q.next = { patch: {}, waiters: [], keepalive: false };
+      for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) q.next.patch[k] = patch[k];
+      if (keepalive) q.next.keepalive = true;
+      q.next.waiters.push(resolve);
+      edOwnPump(id);
+    });
+  }
+  function edOwnPump(id) {
+    var q = ED_OWN[id];
+    if (!q || q.busy || !q.next) return;
+    var job = q.next;
+    q.next = null; q.busy = true;
+    var done = function (r) {
+      q.busy = false;
+      if (r && r.status === 200 && r.body && r.body.ok && r.body.product) {
+        var product = r.body.product;
+        /* a price override the assistant wrote earlier would sit on top of
+           the new row price and hide it — the row is the truth now */
+        if (DEMO.price[id] != null && Number(product.price) !== Number(DEMO.price[id])) {
+          delete DEMO.price[id];
+          apiSend("/api/admin/overrides/", "PUT", { id: id, price: null }).catch(noop);
+        }
+        customAdopt(product);
+      } else if (r && r.status === 401) SRV.admin = false;
+      for (var i = 0; i < job.waiters.length; i++) job.waiters[i](r);
+      edOwnPump(id);
+    };
+    edApi("/api/admin/products/" + encodeURIComponent(id) + "/", "PUT", job.patch, job.keepalive)
+      .then(done, function () { done(null); });
+  }
+  /** What the journal's «Вернуть» puts back: only the fields this patch
+      moves — the whole row as it was would also take back every other field
+      saved since. */
+  function edOwnPrev(before, patch) {
+    var prev = { type: "update_product", id: before.id };
+    ["brand", "name", "cat"].forEach(function (k) { if (k in patch) prev[k] = before[k]; });
+    if ("subcat" in patch) prev.subcat = before.subcat || "";
+    if ("sizes" in patch || "prices" in patch) {
+      prev.sizes = (before.sizes || []).slice();
+      prev.prices = (before.prices && before.prices.length ? before.prices : [before.price]).slice();
+    }
+    if ("description" in patch) prev.description = before.description || null;
+    if ("gallery" in patch) prev.gallery = galUrlsOf(before.gallery && before.gallery.length ? before.gallery : before.photos);
+    if ("seo" in patch) prev.seo = before.seo || null;
+    return prev;
+  }
+  /** One field of the owner's row, through the queue; the journal line and a
+      button's toast once the server has the row. */
+  function edOwnField(key, id, patch, o) {
+    var before = findCustom(id);
+    var act = updateActionOf(id, patch);
+    var txt = before ? actionText(act) : "";
+    var prev = before ? edOwnPrev(before, patch) : null;
+    return edOwnPut(id, patch, o && o.keepalive).then(function (r) {
+      if (!(r && r.status === 200 && r.body && r.body.ok)) {
+        if (r && r.status === 400 && r.body && r.body.error) customFail(r.body.error);
+        return r;
+      }
+      var toastText = ED.toastFor[key];
+      delete ED.toastFor[key];
+      var entry = null;
+      if (txt) {
+        entry = { t: journalStamp(), txt: txt, a: act, prev: prev };
+        DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+        entry = edJournal(key, entry, !!toastText);
+      }
+      if (toastText) toast(toastText, entry);
+      render();
+      return r;
+    });
+  }
+
+  /* ---- the fields, one spec each -------------------------------------------
+     edAsSpec() answers for a key when it is sent — reading the product by
+     its id THEN, not as it was when the card was drawn. */
+  function edAsSpec(id, field) {
+    var key = "ed:" + id + ":" + field;
+    var P = function () { return admEditProduct(id); };
+    if (field === "brand" || field === "name") {
+      return { kind: "name",
+        validate: function (v) {
+          if (String(v || "").trim()) return "";
+          return field === "brand" ? "Впишите бренд — например, Proraso." : "Впишите название товара.";
+        },
+        send: function (v, o) {
+          var t = String(v || "").trim().slice(0, field === "brand" ? 60 : 120);
+          var c = findCustom(id);
+          if (c && c[field] === t) return Promise.resolve(true);
+          var patch = {}; patch[field] = t;
+          return edOwnField(key, id, patch, o);
+        } };
+    }
+    if (field === "cat") {
+      return { kind: "pick",
+        validate: function (v) { return CAT_NAMES[v] ? "" : "Выберите раздел."; },
+        send: function (v, o) {
+          var c = findCustom(id);
+          if (c && c.cat === v) return Promise.resolve(true);
+          // the subsections are the section's own: a new section starts at «Авто»
+          return edOwnField(key, id, { cat: v, subcat: "" }, o);
+        } };
+    }
+    if (field === "subcat") {
+      return { kind: "pick",
+        send: function (v, o) {
+          var p = P(), val = String(v || "");
+          if (p.custom) {
+            var c = findCustom(id);
+            if (c && (c.subcat || "") === val) return Promise.resolve(true);
+            return edOwnField(key, id, { subcat: val }, o);
+          }
+          if ((DEMO.subcat[id] || "") === val) return Promise.resolve(true);
+          return edTyped(key, { type: "set_subcat", id: id, value: val }, o);
+        } };
+    }
+    if (field === "pro") {
+      return { kind: "money",
+        validate: function (v) {
+          var raw = String(v || "").trim();
+          if (!raw) return "";
+          var n = goodsPrice(raw);
+          if (n === null) return "Цена для салонов — число от 1 до 500 €.";
+          var pe = document.querySelector("[data-edprice]");
+          var retail = pe ? goodsPrice(pe.value) : P().price;
+          if (retail !== null && retail !== undefined && n > retail) return "Цена для салонов не может быть выше розничной.";
+          return "";
+        },
+        send: function (v, o) {
+          var raw = String(v || "").trim();
+          var n = raw ? goodsPrice(raw) : null;
+          var cur = DEMO.proPrice[id] != null ? DEMO.proPrice[id] : null;
+          if ((n === null && cur === null) || (n !== null && cur !== null && Math.abs(n - cur) < 0.001)) return Promise.resolve(true);
+          return edTyped(key, { type: "set_pro_price", id: id, value: n }, o);
+        } };
+    }
+    if (field === "video") {
+      return { kind: "code",
+        validate: function (v) {
+          var t = String(v || "").trim();
+          return !t || parseVideo(t) ? "" : "Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.";
+        },
+        send: function (v, o) {
+          var t = String(v || "").trim(), p = P();
+          var cur = (DEMO.video && DEMO.video[id]) || p.video || "";
+          if (t === cur) { vidReset(); return Promise.resolve(true); }
+          return edTyped(key, { type: "set_video", id: id, value: t }, o).then(function (r) { if (edOk(r)) vidReset(); return r; });
+        } };
+    }
+    if (field === "ladder") {
+      return { kind: "money", validate: function (v) { return edLadderCheck(v); }, send: function (v, o) { return edLadderSend(id, v, o); } };
+    }
+    if (field === "desc") {
+      return { kind: "text",
+        send: function (v, o) {
+          var d = edTextsOf(v), p = P();
+          var val = d.RU || d.ET || d.EN ? d : null;
+          if (p.custom) {
+            var c = findCustom(id);
+            if (c && descKey(c.description) === descKey(val)) return Promise.resolve(true);
+            return edOwnField(key, id, { description: val }, o);
+          }
+          if (descKey(p.descOv) === descKey(val)) return Promise.resolve(true);
+          return edTyped(key, { type: "set_description", id: id, value: { RU: d.RU, ET: d.ET, EN: d.EN } }, o);
+        } };
+    }
+    if (field === "seo") {
+      return { kind: "text",
+        send: function (v, o) {
+          var s = edTextsOf(v), p = P();
+          var norm = seoNorm(s);
+          if (p.custom) {
+            var c = findCustom(id);
+            if (c && JSON.stringify(seoNorm(c.seo)) === JSON.stringify(norm)) return Promise.resolve(true);
+            return edOwnField(key, id, { seo: seoToServer(norm) }, o);
+          }
+          if (JSON.stringify(norm) === JSON.stringify(seoNorm(p.seoOv))) return Promise.resolve(true);
+          return edTyped(key, { type: "set_seo", id: id, value: s, title: (s.RU || {}).t || "", description: (s.RU || {}).d || "" }, o);
+        } };
+    }
+    if (field.indexOf("qty:") === 0) {
+      var qv = field.slice(4);
+      return { kind: "count",
+        validate: function (v) { return !String(v || "").trim() || stockQtyValue(v) !== null ? "" : "Остаток — целое число от 0."; },
+        send: function (v, o) { return edQtySend(key, id, qv, v); } };
+    }
+    if (field.indexOf("ean:") === 0) {
+      var ev = field.slice(4);
+      return { kind: "code",
+        validate: function (v) { return edEanCheck(stockKey(id, ev), v); },
+        send: function (v, o) { return edEanSend(key, id, ev, v); } };
+    }
+    return { kind: "pick", send: function () { return Promise.resolve(true); } };
+  }
+  /** ` data-autosave="key"` for a box, its spec registered as it is drawn. */
+  function edAsAttr(p, field) {
+    var key = edAsKey(p, field);
+    admAutosaveSpec(key, edAsSpec(p.id, field));
+    return ' data-autosave="' + esc(key) + '"' + admAutosaveInvalidAttr(key);
+  }
+  /** A box the panel itself filled (a pick from the brand list, a code from
+      the scanner, the assistant's text): it is a change like a typed one, so
+      it goes through the same door — and `now` sends it without waiting for
+      the owner to leave the box. */
+  function edAsPoke(el, now) {
+    var key = el && el.getAttribute && el.getAttribute("data-autosave");
+    if (!key) return false;
+    admAutosave(key, el.value, "input");
+    if (now) admAutosave(key, el.value, "enter");
+    return true;
+  }
+  /** Three texts as one value: {RU, ET, EN} for the descriptions, the three
+      {t, d} pairs for Google — the server replaces either object whole, so
+      all three languages travel every time. */
+  function edTextsOf(v) {
+    try { var o = JSON.parse(v); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; }
+  }
+  function edDescValue() {
+    return JSON.stringify({ RU: edFieldVal(DESC_HOOKS.RU).trim(), ET: edFieldVal(DESC_HOOKS.ET).trim(), EN: edFieldVal(DESC_HOOKS.EN).trim() });
+  }
+  function edSeoValue() {
+    var out = {};
+    ["RU", "ET", "EN"].forEach(function (L) {
+      out[L] = { t: edFieldVal(SEO_HOOKS[L][0]).trim(), d: edFieldVal(SEO_HOOKS[L][1]).trim() };
+    });
+    return JSON.stringify(out);
+  }
+  /** The descriptions or the Google texts, now — after a button filled them
+      (the assistant's draft, a translation), with the toast it asked for. */
+  function edAsTextNow(field, toastText) {
+    var p = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
+    if (!p) return;
+    var key = edAsKey(p, field);
+    var spec = edAsSpec(p.id, field);
+    var v = field === "desc" ? edDescValue() : edSeoValue();
+    if (toastText) ED.toastFor[key] = toastText;
+    admAutosave(key, v, "input", spec);
+    admAutosave(key, v, "blur", spec);
+  }
+
+  /* ---- Объёмы и цены: the ladder is ONE field -----------------------------
+     Every size's name and price travel together (a catalogue product's
+     `sizes` override, the owner's row's sizes + prices), so the grid is one
+     autosave key: leaving any of its boxes sends the ladder as the form has
+     it — or, when a price is not a price or a size has no name, marks that
+     box and sends nothing until it is right. */
+  function edLadderRaw() {
+    var p = S.adminEdit ? admEditProduct(S.adminEdit) : null;
+    if (!p) return "[]";
+    var rows = edSizeRowsRead(p);
+    return JSON.stringify(rows.map(function (r) { return { size: String(r.size == null ? "" : r.size), price: String(r.price == null ? "" : r.price) }; }));
+  }
+  /** "" when the ladder can be sent; otherwise the one line to show, with the
+      box it is about marked. */
+  function edLadderCheck(v) {
+    var rows = []; try { rows = JSON.parse(v) || []; } catch (e) { rows = []; }
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    var seen = {}, bad = null, hint = "";
+    for (var i = 0; i < rows.length && !bad; i++) {
+      if (goodsPrice(rows[i].price) === null) { bad = '[data-edpx="' + i + '"]'; hint = CUSTOM_ERR.bad_price[0]; break; }
+      if (multi) {
+        var label = String(rows[i].size || "").trim();
+        if (!label) { bad = '[data-edsz="' + i + '"]'; hint = CUSTOM_ERR.bad_size[0]; break; }
+        if (seen[label.toLowerCase()]) { bad = '[data-edsz="' + i + '"]'; hint = CUSTOM_ERR.sizes_duplicate[0]; break; }
+        seen[label.toLowerCase()] = true;
+      }
+    }
+    if (!bad && rows.length > 12) hint = CUSTOM_ERR.too_many_sizes[0];
+    if (typeof document !== "undefined") {
+      var cells = document.querySelectorAll("[data-edsz],[data-edpx]");
+      for (var c = 0; c < cells.length; c++) cells[c].removeAttribute("aria-invalid");
+      var b = bad ? document.querySelector(bad) : null;
+      if (b) b.setAttribute("aria-invalid", "true");
+    }
+    return hint;
+  }
+  function edLadderSend(id, v, o) {
+    var p = admEditProduct(id);
+    var rows = []; try { rows = JSON.parse(v) || []; } catch (e) { rows = []; }
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    var lad = rows.map(function (r) { return { size: multi ? String(r.size || "").trim() : "", price: goodsPrice(r.price) }; });
+    var was = edLadderNow(p);
+    var key = "ed:" + id + ":ladder";
+    var moved = edLadderMoved(was, lad), first = Math.abs(Number(was[0].price) - lad[0].price) > 0.001;
+    var settle = function (r) {
+      // the grid follows the product again once what is on screen is what is saved
+      if (edOk(r) && S.goodsSizes && S.goodsSizes.id === id && ADM_AS[key] && !ADM_AS[key].dirty) S.goodsSizes.dirty = false;
+      return r;
+    };
+    if (!moved && !first) return Promise.resolve(settle(true));
+    if (p.custom) {
+      return edOwnField(key, id, { sizes: multi ? lad.map(function (x) { return x.size; }) : [],
+        prices: multi ? lad.map(function (x) { return x.price; }) : [lad[0].price] }, o).then(settle);
+    }
+    var a = moved ? { type: "set_sizes", id: id, value: lad, name: p.brand + " — " + p.name } : { type: "set_price", id: id, value: lad[0].price };
+    return edTyped(key, a, o).then(settle);
+  }
+
+  /* ---- Остаток: a typed count, or − / + ----------------------------------
+     A count typed into the box goes when the box is left; the − and + beside
+     it change the box and a burst of taps goes as ONE move 0.8 s after the
+     last (q25), with one journal line and one «Вернуть». A size nobody has
+     counted takes its first number as a count (stock_set), a counted one as
+     a move (stock_adjust) — the only shape two phones can race safely. */
+  var ED_BURST_MS = 800;
+  function edQtyStep(skey, step) {
+    var box = document.querySelector(admAsSel("data-edqty", skey));
+    if (!box || box.disabled) return;
+    var asKey = box.getAttribute("data-autosave");
+    if (!asKey) return;
+    var row = stockFindRow(skey), tracked = !!(row && row.tracked);
+    var typed = String(box.value).trim();
+    // «не учтено» has no number to take one from: − waits for a first count
+    if (!typed && !tracked && step < 0) return;
+    var base = typed ? stockQtyValue(typed) : (tracked ? row.qty : 0);
+    if (base === null) base = tracked ? row.qty : 0;
+    if (!(skey in ED.burst)) ED.burst[skey] = tracked ? row.qty : null;
+    box.value = String(Math.max(0, base + step));
+    admAutosave(asKey, box.value, "input");
+    clearTimeout(ED.qtyT[asKey]);
+    ED.qtyT[asKey] = setTimeout(function () { admAutosave(asKey, box.value, "blur"); }, ED_BURST_MS);
+  }
+  function edQtySend(key, id, variant, v) {
+    var raw = String(v || "").trim(), want = stockQtyValue(raw);
+    var skey = stockKey(id, variant), row = stockFindRow(skey);
+    var from = skey in ED.burst ? ED.burst[skey] : undefined;
+    delete ED.burst[skey];
+    if (!raw || want === null) return Promise.resolve(true);   // empty: the count stays as it is
+    var tracked = !!(row && row.tracked), has = tracked ? row.qty : 0;
+    if (tracked && want === has) return Promise.resolve(true);
+    var vr = row ? row.variant : variant;
+    var a = tracked
+      ? { type: "stock_adjust", product_id: id, variant: vr, delta: want - has, reason: "adjust" }
+      : { type: "stock_set", product_id: id, variant: vr, qty: want };
+    var body = tracked
+      ? { productId: id, variant: vr || "", delta: a.delta, reason: "adjust", ref: "панель" }
+      : { productId: id, variant: vr || "", qty: want, reason: "adjust", ref: "панель" };
+    if (!SRV.admin) return Promise.resolve(true);
+    return stockMoveSend(body).then(function (res) {
+      if (!res) { toast(stockMoveFailText("Склад не принял правку")); return false; }
+      var entry = demoApply(a, true);   // the journal line and, for a move, its opposite
+      stockUndoApplied(a, res);
+      reloadStock();
+      if (from !== undefined) toast("Остаток: " + (from == null ? "—" : from) + " → " + want, entry);
+      return true;
+    }, function () { return false; });
+  }
+
+  /* ---- Штрихкод: bound when the box is left, or the moment it is scanned ---
+     The same rule the server has (normEan in src/lib/inventory.ts): 8–14
+     digits, or a code of the shop's own — letters, digits and a dash, 4–32.
+     A code another size already carries is refused here, naming that size,
+     before anything travels. Emptying the box unbinds, and so does «Отвязать
+     код» — at once, with «Вернуть» (q20). */
+  function edEanNorm(v) {
+    var s = String(v == null ? "" : v).replace(/\s+/g, "").trim().toUpperCase();
+    if (/^[0-9]+$/.test(s)) return s.length >= 8 && s.length <= 14 ? s : "";
+    return /^[A-Z0-9-]{4,32}$/.test(s) ? s : "";
+  }
+  function edEanCheck(skey, v) {
+    var raw = String(v || "").trim();
+    if (!raw) return "";
+    var code = edEanNorm(raw);
+    if (!code) return STOCK_SAVE_ERRS.bad_ean;
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (r.ean && String(r.ean).toUpperCase() === code && stockKey(r.productId, r.variant) !== skey) {
+        return stockSaveErrText({ error: "ean_taken", takenBy: { productId: r.productId, variant: r.variant } });
+      }
+    }
+    return "";
+  }
+  function edEanSend(key, id, variant, v) {
+    var skey = stockKey(id, variant), row = stockFindRow(skey);
+    var code = String(v || "").trim() ? edEanNorm(v) : "";
+    var was = (row && row.ean) || "";
+    if (code === String(was).toUpperCase()) return Promise.resolve(true);
+    var p = admEditProduct(id);
+    var a = { type: "set_ean", product_id: id, variant: row ? row.variant : variant, value: code || null, was: was || null,
+      name: p ? p.brand + " — " + p.name : id };
+    if (!SRV.admin) return Promise.resolve(true);
+    return stockLevelSaveDetailed({ productId: id, variant: a.variant || "", ean: code || null }).then(function (res) {
+      if (!res.ok) {
+        var t = stockSaveErrText(res);
+        if (t) { var f = ADM_AS[key]; if (f) f.err = t; admAutosaveMark(key, t); }
+        return false;
+      }
+      edCommit(key, a);
+      reloadStock();
+      return true;
+    });
+  }
+  /** A code the scanner read for this size's box (scanToEditor): bound now. */
+  function edEanScanned(box) {
+    var key = box && box.getAttribute("data-autosave");
+    if (!key) return false;
+    ED.toastFor[key] = "Код считан и привязан";
+    return edAsPoke(box, true);
+  }
+
+  /* ---- the photos: every button saves the list it leaves ------------------
+     ← → ★ ✂ ×, an upload and «Вернуть фото из каталога» each write the list
+     at once (set_gallery, or the owner's row's gallery) with «Вернуть» on the
+     toast — and the photo each size points at goes with its photo, so a
+     reorder never leaves a size showing another picture. */
+  function edGallerySave(p, toastText) {
+    if (!p || p.isNew) return;
+    var list = galSaveList();
+    // before the list changes: galSizePick() reads the SAVED list to find each size's photo
+    var map = p.sizes && p.sizes.length > 1 ? p.sizes.map(function (sz, si) { return galSizePick(p, si); }) : null;
+    var a = p.custom
+      ? { type: "set_product_gallery", id: p.id, list: list.slice() }
+      : { type: "set_gallery", id: p.id, list: list.slice(), name: p.brand + " — " + p.name };
+    edInstant(edAsKey(p, "gallery"), a, toastText);
+    GAL.reset = false; GAL.picks = {};
+    if (map && varImgChanged(map, p.varImg)) edInstant(edAsKey(p, "varimg"), { type: "set_varimg", id: p.id, map: map }, "");
+  }
+
+  /* ---- «Что за товар»: the owner's own product (Dim 25.09.2026, q18) -------
+     The same block «Новый товар» opens with — brand from the shop's list with
+     counts or a new one, the name with «✨ Подобрать название» and the line
+     that says what the Estonian and English shop will call it, the section
+     and its subsection — at the top of the card, every box saving itself. */
+  function edWhatFields(p, own) {
+    var curSub = p.isNew ? (p.subcatBase || "") : subcatOf(p);
+    var as = function (f) { return own ? edAsAttr(p, f) : ""; };
+    var hint = function (f) { return own ? admAutosaveHintHTML(edAsKey(p, f)) : ""; };
+    return '<div class="adm-field"><label for="edbrand"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span></label>' +
+        edBrandBoxHTML(p.brand, as("brand")) + hint("brand") + "</div>" +
+      '<div class="adm-field"><label for="edname"><span>Название <span class="adm-req" aria-hidden="true">*</span></span></label>' +
+        '<input class="adm-input" id="edname" data-edname' + as("name") + ' value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды">' +
+        hint("name") +
+        '<span class="adm-edname"><span class="adm-hint">Линейка латиницей, тип по-русски. Эстонский и английский — сами.</span>' +
+          '<button class="adm-link adm-edname__spark" type="button" data-ednamespark>✨ Подобрать название</button></span>' +
+        '<span class="adm-hint" data-ednamehint>' + (p.name ? esc(edNameHintText(p.name)) : "") + "</span></div>" +
+      '<div class="adm-edpair">' +
+        '<label class="adm-field"><span>Раздел <span class="adm-req" aria-hidden="true">*</span></span><select class="adm-input" data-edcat' + as("cat") + ">" +
+          (CAT_NAMES[p.cat] ? "" : '<option value="" selected>Выберите</option>') +
+          CATS.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
+        "</select>" + hint("cat") + "</label>" +
+        '<span data-edsubslot>' + edSubcatField(p.cat, curSub, as("subcat")) + "</span>" +
+      "</div>";
+  }
+  function edSecWhat(p) {
+    return '<section class="adm-edsec" data-edsec="what">' +
+      admSecHeadHTML("Что за товар", "ed-what",
+        "<span>Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.</span> " +
+        "<span>Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.</span>") +
+      '<div class="adm-edsec__b">' + edWhatFields(p, true) + "</div></section>";
+  }
+
+  /* ---- «В магазине» ---------------------------------------------------------
+     «Показывать в магазине» is one switch over two server models: a
+     catalogue product's `hidden` override (migration 147), the owner's own
+     row's `active`. «Наличие» is three words for a product nobody counts;
+     once a size is counted the count says «в наличии» and «мало» by itself,
+     so a counted product gets only «Не продавать» — the one word a count
+     cannot say (Dim 25.09.2026, q22). */
+  function edCounted(p) {
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) if (rows[i].productId === p.id && rows[i].tracked) return true;
+    return false;
+  }
+  function edSecShop(p) {
+    var own = !!p.custom;
+    var shown = !goodsOffSale(p);
+    var counted = edCounted(p);
+    var stopped = p.stock === "out";
+    var stock = counted
+      ? admLabelledSwitch('data-edstock="' + (stopped ? "in" : "out") + '"', "Не продавать", stopped)
+      : admSegHTML("data-edstock", [["in", "В наличии"], ["low", "Мало"], ["out", "Нет"]], p.stock || "in", "Наличие");
+    var help = "<span>Выключите «Показывать в магазине» — товар исчезнет из магазина совсем: из каталога, поиска и наборов.</span> " +
+      (counted
+        ? "<span>Остаток посчитан, поэтому «в наличии» и «мало» магазин пишет сам. «Не продавать» останавливает продажу, а страница товара остаётся.</span>"
+        : "<span>Чтобы страница осталась, но не продавалась, выберите «Нет».</span>");
+    return '<section class="adm-edsec" data-edsec="shop">' +
+      admSecHeadHTML("В магазине", "ed-show", help) +
+      '<div class="adm-edshop">' +
+        '<div class="adm-edshop__c">' + admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", shown) + "</div>" +
+        '<div class="adm-edshop__c"><div class="adm-field"><span>Наличие</span>' + stock + "</div></div>" +
+        (own ? "" : '<div class="adm-edshop__c">' + edSubcatField(p.cat, subcatOf(p), edAsAttr(p, "subcat")) + "</div>") +
+      "</div></section>";
+  }
+  /* ---- «Объёмы и цены» -------------------------------------------------------
+     Объём · Цена · Салон · Остаток − / + · Штрихкод + сканер · × — one grid
+     for a catalogue product and the owner's own (migration 147 made a
+     catalogue product's ladder the owner's too). One row with no name is the
+     single-price case, «один объём», with its × dead. */
   /** One cell of the sizes grid. The column's name inside it is drawn only on
       a phone, where the header row is hidden and three bare boxes in a row
       gave the owner no way to tell the price from the salon price. */
   function edCell(cls, label, html) {
     return '<span class="adm-grid__c' + (cls ? " adm-grid__c--" + cls : "") + '"><span class="adm-grid__l">' + label + "</span>" + html + "</span>";
   }
-  /* inventory: the «Штрихкод» column of the sizes grid. An empty box said
-     nothing — the owner could not tell a size no code has ever been bound to
-     from one whose code simply had not loaded yet, which is half of «it
-     seemed to be impossible for existing products to scan the code» (Dim).
-     A bound size now shows its code with «Отвязать» beside it; one without
-     says so in the box. «Отвязать» only empties the box — the code is freed
-     by «Сохранить», like every other change in this form, so a mis-tap on a
-     phone costs nothing. */
   /* inventory: the «Остаток» column of the sizes grid.
-     Dead until the warehouse list has landed. What «Сохранить» sends is a
-     RELATIVE move — `delta = typed − what the row says now`, the only shape
-     two clients can race safely — and with no list there is no «now»:
-     stockFindRow() answers null, the save loop read that as 0, and the whole
-     typed number went out as the move. A shelf of 7 recounted as 3 became 10.
-     Nothing on screen told the two states apart: an empty box under «не
-     учтено» looks the same while /api/admin/inventory/ is in flight as it
-     does for a volume nobody has ever counted, and the editor opens the load
-     itself, so the first seconds in this pane are exactly that window. The
-     box lights up by itself — loadStockLevels()'s answer ends in a render().
-     If the warehouse never answers it stays dead, which is the right answer
-     too: a move computed against a count we have never seen is a guess at the
-     owner's shelf. */
-  function edQtyCell(key, lv, low) {
+     Dead until the warehouse list has landed. A count is sent as a RELATIVE
+     move against what the row says now — and with no list there is no «now»:
+     a shelf of 7 recounted as 3 once became 10. The box lights up by itself —
+     loadStockLevels()'s answer ends in a render(). If the warehouse never
+     answers it stays dead, which is the right answer too.
+     1a: − and + beside it (screen 02), a burst of taps one move (edQtyStep). */
+  function edQtyCell(p, key, variant, lv, low) {
     var ready = !!S.stockLevels;
-    return edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") +
-      '" data-edqty="' + esc(key) + '" inputmode="numeric" value="' + (lv && lv.tracked ? String(lv.qty) : "") +
-      '" placeholder="' + (ready ? (lv && lv.tracked ? "0" : "не учтено") : "…") + '"' +
-      (ready ? "" : " disabled") + ' aria-label="Остаток">');
+    var dis = ready ? "" : " disabled";
+    return edCell("qty", "Остаток", '<span class="adm-step3">' +
+      '<button class="adm-step3__b" type="button" data-edqtystep="-1" data-edqtykey="' + esc(key) + '"' + dis + ' aria-label="Меньше">−</button>' +
+      '<input class="adm-input adm-input--cell adm-step3__v' + (low ? " adm-input--warn" : "") +
+        '" data-edqty="' + esc(key) + '"' + (ready ? edAsAttr(p, "qty:" + variant) : "") + ' inputmode="numeric" value="' + (lv && lv.tracked ? String(lv.qty) : "") +
+        '" placeholder="' + (ready ? (lv && lv.tracked ? "0" : "не учтено") : "…") + '"' + dis + ' aria-label="Остаток">' +
+      '<button class="adm-step3__b" type="button" data-edqtystep="1" data-edqtykey="' + esc(key) + '"' + dis + ' aria-label="Больше">+</button>' +
+      "</span>" + (ready ? admAutosaveHintHTML(edAsKey(p, "qty:" + variant)) : ""));
   }
-  function edEanCell(key, ean) {
+  /* inventory: the «Штрихкод» column of the sizes grid. A bound size shows
+     its code with «Отвязать код» under it; one without says so in the box.
+     1a: the code is bound the moment the box is left or the scanner reads it,
+     and «Отвязать код» frees it at once — «Вернуть» on the toast puts it back
+     (Dim 25.09.2026, q20; it used to wait for «Сохранить»). */
+  function edEanCell(p, key, variant, ean) {
+    var ready = !!S.stockLevels;
     return edCell("ean", "Штрихкод",
-      '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' + esc(ean || "") +
-        '" placeholder="не привязан" aria-label="Штрихкод">' +
+      '<span class="adm-grid__eanrow">' +
+      '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '"' + (ready ? edAsAttr(p, "ean:" + variant) : " disabled") +
+        ' value="' + esc(ean || "") + '" placeholder="не привязан" autocomplete="off" aria-label="Штрихкод">' +
       /* the scanner for THIS size: the code it reads lands in the box beside
-         the button and nowhere else (openScannerFor / scanToEditor). The
-         placeholder used to promise «сканер ›» with nothing to press — the
-         owner tapped the box and got a keyboard (Renat, 10.09.2026). */
+         the button and nowhere else (openScannerFor / scanToEditor) */
       '<button class="adm-grid__scan" type="button" data-edscan="' + esc(key) + '" aria-label="Сканер штрихкода" title="Сканер штрихкода">' +
-        admIcon("scan", false, 18) + '<span class="adm-grid__scan__lbl">Сканер</span></button>' +
-      (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать</button>' : ""));
+        admIcon("scan", false, 18) + '<span class="adm-grid__scan__lbl">Сканер</span></button></span>' +
+      (ready ? admAutosaveHintHTML(edAsKey(p, "ean:" + variant)) : "") +
+      (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать код</button>' : ""));
   }
-  /** The one line under the grid that says where a barcode comes from. */
-  function edEanHint() {
-    return '<p class="adm-hint">Штрихкод можно считать прямо здесь: нажмите «Сканер» рядом с полем и наведите камеру на упаковку — код встанет в это поле. ' +
-      "Или впишите его руками. «Отвязать» убирает код с объёма — он освободится после «Сохранить».</p>";
-  }
-  function edPaneSizesOwn(p) {
-    if (!p.isNew) loadStockLevels(false);
+  function edSecSizes(p) {
+    loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
-    var multi = n > 1 || (n === 1 && !!rows[0].size);
+    var multi = n > 1 || (n === 1 && !!String(rows[0].size || "").trim());
     /* «Партнёры и баллы» off (Dim, 07.09.2026): no «Салон, €» column at all —
        a price for a tier the shop does not have is a box that cannot be
        right. The stored pro price survives; the column comes back with it. */
     var salonCol = partnersOn();
-    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
-      (p.isNew ? "" : (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
+    var ladKey = edAsKey(p, "ladder");
+    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Объём</span><span>Цена, €</span>' +
+      (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
     var body = rows.map(function (r, i) {
-      var variant = multi ? r.size : "";
+      var variant = multi ? String(r.size || "") : "";
       var key = stockKey(p.id, variant);
-      var lv = p.isNew ? null : edStockFor(p, variant);
-      var low = edStockLow(lv);
+      var lv = edStockFor(p, variant);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
-      // row 0 is the editable pro price and its placeholder is the «auto»
-      // value; every row below it is read-only and carries its own premium
+      /* q19: the first size's salon price is the owner's (empty = the shop's
+         discount, shown as the placeholder); the ones below are CALCULATED —
+         that base plus their own premium, what proUnitPrice() bills — and
+         read grey, never typed */
       var salon = i === 0
         ? edSalonOf(goodsPrice(priceVal) || 0)
         : edSalonRung(p, goodsPrice(rows[0].price) || 0, goodsPrice(priceVal) || 0);
       return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
-          ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
+          ? edCell("sz", "Объём", '<input class="adm-input adm-input--cell adm-grid__szin" data-edsz="' + i + '" value="' + esc(r.size) +
+            '" maxlength="30" placeholder="100 мл" aria-label="Объём">')
           : '<span class="adm-grid__sz">один объём</span>') +
-        edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+        edCell("px", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
           '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
-        (p.isNew ? "" :
-          (salonCol
-            ? edCell("", "Салон, €", i === 0
-              ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-                '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
-              : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
-            : "") +
-          edQtyCell(key, lv, low) +
-          edEanCell(key, lv && lv.ean)) +
-        '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
-          ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
-      "</div>";
-    }).join("");
-    return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
-      '<div class="adm-grid' + (p.isNew ? " adm-grid--new" : "") + '">' + head + body + "</div>" +
-      '<button class="adm-btn adm-btn--dash" type="button" data-edsizeadd>+ Размер</button>' +
-      '<p class="adm-hint">' + (multi
-        ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
-        : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? '<p class="adm-hint">Готово? Нажмите «Сохранить товар» внизу — товар появится в магазине, и откроется шаг «Фото».</p>'
-        : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
-      "</div>";
-  }
-  /* «+ Размер» and «×» for a CATALOGUE product (migration 147). The volumes
-     used to be the generated file's alone, so both buttons were dead and only
-     the first price was editable. Now the whole ladder is the owner's: the
-     rows below are the same {size, price} list the owner's own products are
-     edited with (edSizeRows / S.goodsSizes), saved as product_overrides.sizes,
-     and «Сохранить» writes it whole — which is the only shape in which «this
-     volume is gone» can be said at all. The «Остаток» and «Штрихкод» columns
-     stay the warehouse's, keyed by the volume's label, so renaming a volume
-     starts a new shelf line rather than silently moving the old one. */
-  function edPaneSizes(p) {
-    if (p.custom) return edPaneSizesOwn(p);   // product creation
-    loadStockLevels(false);
-    var rows0 = edSizeRows(p), n = rows0.length;
-    var multi = n > 1 || (n === 1 && !!rows0[0].size);
-    var salonCol = partnersOn();   // «Партнёры и баллы» — see edPaneSizesOwn
-    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
-      (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
-    var rows = rows0.map(function (r, i) {
-      var sz = multi ? r.size : "";
-      var lv = edStockFor(p, sz);
-      var price = r.price === "" || r.price == null ? "" : String(r.price);
-      var key = stockKey(p.id, sz);
-      var low = edStockLow(lv);
-      // see edPaneSizesOwn: the first row's box is the pro price itself, the
-      // rows below it show what that base plus their own premium comes to
-      var salon = i === 0
-        ? edSalonOf(goodsPrice(price) || 0)
-        : edSalonRung(p, goodsPrice(rows0[0].price) || 0, goodsPrice(price) || 0);
-      return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
-        (multi
-          ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) +
-            '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
-          : '<span class="adm-grid__sz">один объём</span>') +
-        edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
-          '" inputmode="decimal" value="' + esc(price) + '" placeholder="12,50" aria-label="Цена, €">') +
         (salonCol
-          ? edCell("", "Салон, €", i === 0
-            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
-              '" placeholder="' + salon + '" aria-label="Салон, €">'
-            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
+          ? edCell("salon", "Салон, €", i === 0
+            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") + '"' + edAsAttr(p, "pro") +
+              ' inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">' +
+              admAutosaveHintHTML(edAsKey(p, "pro"))
+            : '<input class="adm-input adm-input--cell adm-input--calc" value="' + salon + '" readonly tabindex="-1" aria-label="Салон, €">')
           : "") +
-        edQtyCell(key, lv, low) +
-        edEanCell(key, lv && lv.ean) +
+        edQtyCell(p, key, variant, lv, edStockLow(lv)) +
+        edEanCell(p, key, variant, lv && lv.ean) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
-          ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
+          ' aria-label="Убрать объём" title="Убрать объём">×</button>' +
       "</div>";
     }).join("");
-    return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
-      '<div class="adm-grid">' + head + rows + "</div>" +
-      '<button class="adm-btn adm-btn--dash" type="button" data-edsizeadd>+ Размер</button>' +
-      '<p class="adm-hint">' + (multi
-        ? "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе»."
-        : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
-      edEanHint() +
-      "</div>";
+    var help = "<span>Первый объём покупатель видит первым.</span> " +
+      (salonCol ? "<span>Пустая цена салона — на " + edSalonPct() + " % меньше обычной; у объёмов ниже она считается сама.</span> " : "") +
+      "<span>Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).</span> " +
+      "<span>Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.</span> " +
+      (p.custom
+        ? "<span>× убирает объём из магазина вместе с его остатком и штрихкодом.</span>"
+        : "<span>× убирает объём из магазина — его остаток и штрихкод останутся на «Складе».</span>");
+    return '<section class="adm-edsec" data-edsec="sizes">' +
+      admSecHeadHTML("Объёмы и цены", "ed-sizes", help) +
+      '<div class="adm-grid">' + head + body + "</div>" +
+      admAutosaveHintHTML(ladKey) +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row adm-grid__add" type="button" data-edsizeadd>+ Объём</button>' +
+      "</section>";
   }
-  function edPaneMedia(p) {
-    /* product creation: no id yet, so nothing to file a photo under — the
-       tab says what to do instead of showing a button that cannot work */
-    if (p.isNew) {
-      /* …so the tile is there from the start and picking a photo saves the
-         product first (galNewUpload) — the pane says so in one line */
-      return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
-        '<div class="adm-sec"><span class="adm-sec__t">Фото</span></div>' +
-        '<div class="adm-photos" data-galdrop="new">' +
-          '<button class="adm-photo adm-photo--add" data-galup="new"' + (UP.busy || MEDIA.on === false ? " disabled" : "") + '><span class="adm-photo__plus">+</span>' +
-            (UP.busy && UP.creating ? "Сохраняем товар и загружаем фото…" : "Фото с телефона") + "</button>" +
-          '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="new" aria-label="Загрузить фото">' +
-        "</div>" +
-        '<p class="adm-hint" data-galwait>Выберите фото — товар сохранится сам, и фото встанет на него. Нужны бренд, название и цена.</p>' +
-        (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
-        (UP.err ? '<p class="adm-hint adm-hint--warn" role="alert" data-uperr>' + esc(UP.err) + "</p>" : "") +
-        "</div>";
-    }
+  // the names the unit tests and the older call sites know the grid by
+  function edPaneSizes(p) { return edSecSizes(p); }
+  function edPaneSizesOwn(p) { return edSecSizes(p); }
+
+  /* ---- «Фото» -------------------------------------------------------------- */
+  function edPhotoOpsHTML(i, n, busy, cut) {
+    return '<span class="adm-photo__ops">' +
+      '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее" title="Левее">←</button>' +
+      '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее" title="Правее">→</button>' +
+      '<button class="adm-photo__op" data-galmain="' + i + '"' + (i === 0 ? " disabled" : "") + ' aria-label="Сделать главным" title="Сделать главным">★</button>' +
+      /* «Убрать фон» — only when the server said it can (MEDIA.cutout,
+         src/lib/photo-cutout.ts); the original photo stays in the bucket */
+      (cut ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
+      '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Удалить фото" title="Удалить фото">×</button>' +
+      "</span>";
+  }
+  /** The «+» tile: «Фото с телефона» on a phone, «Добавить фото или
+      перетащите сюда» on a desktop (screen 02), the progress while it works. */
+  function edPhotoAddHTML(target) {
+    var dis = UP.busy || MEDIA.on === false;
+    return '<button class="adm-photo adm-photo--add" data-galup="' + esc(target) + '"' + (dis ? " disabled" : "") + '>' +
+        '<span class="adm-photo__plus" aria-hidden="true">+</span>' +
+        (UP.busy ? "<span>" + esc(upBusyText()) + "</span>"
+          : '<span class="adm-photo__addp">Фото с телефона</span>' +
+            '<span class="adm-photo__addd">Добавить фото</span><span class="adm-photo__adds">или перетащите сюда</span>') +
+      "</button>" +
+      '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="' + esc(target) + '" aria-label="Загрузить фото">';
+  }
+  function edSecPhotos(p) {
     var list = galDraft(p), n = list.length;
-    var g = list.map(function (ph) { return ph.thumb || ph.url; });
-    var vurl = vidValue(p), vk = edVideoKind(vurl);
     var tiles = list.map(function (ph, i) {
       /* Whether THIS photo is the one the server is working on — asked of the
-         photo, not of its position, so the «Убираем фон…» label follows the
-         picture when the owner moves it or makes it the main one instead of
-         staying behind on whatever slid into its slot (galCutIndex). The tile
-         is dimmed and says aria-busy while it waits: the work takes as long
-         as it takes, and watching a picture change under you with nothing
-         marked is what made it look like a photo had been swapped. */
+         photo, not of its position, so «Убираем фон…» follows the picture
+         when the owner moves it (galCutIndex). */
       var busy = galCutBusy(ph);
       /* «главное» is a word and its own node, so translateTree() carries it;
-         the sizes beside it are names and travel as they are. One tag, two
-         pieces — the main photo says both what it is and which sizes use it. */
+         the sizes beside it are names and travel as they are. */
       var sizes = busy ? "" : edPhotoSizes(p, i);
       var tagInner = busy
         ? esc("Убираем фон…")
@@ -33056,73 +33804,78 @@
         (busy ? ' aria-busy="true"' : "") + ">" +
         '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
         (tagInner ? '<span class="adm-photo__tag' + (busy || i === 0 ? " adm-photo__tag--ink" : "") + '">' + tagInner + "</span>" : "") +
-        '<span class="adm-photo__ops">' +
-          '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее" title="Левее">←</button>' +
-          '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее" title="Правее">→</button>' +
-          (i === 0 ? "" : '<button class="adm-photo__op" data-galmain="' + i + '" aria-label="Сделать главным" title="Сделать главным">★</button>') +
-          /* «Убрать фон» — only when the server said it can (MEDIA.cutout,
-             src/lib/photo-cutout.ts); the original photo stays, the cut-out
-             takes its place in this list until «Сохранить» */
-          (MEDIA.cutout ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
-          '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото" title="Убрать фото">×</button>' +
-        "</span></div>";
+        edPhotoOpsHTML(i, n, busy, !!MEDIA.cutout) + "</div>";
     }).join("");
-    return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
-      '<div class="adm-sec"><span class="adm-sec__t">Фото</span></div>' +
-      '<div class="adm-photos" data-galdrop="' + esc(p.id) + '">' + tiles +
-        '<button class="adm-photo adm-photo--add" data-galup="' + esc(p.id) + '"' +
-          (UP.busy || MEDIA.on === false ? " disabled" : "") + '><span class="adm-photo__plus">+</span>' +
-          (UP.busy ? esc(upBusyText()) : "Фото с телефона") + "</button>" +
-        '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="' + esc(p.id) + '" aria-label="Загрузить фото">' +
-      "</div>" +
-      // a refusal stands right under the tiles, where the eye is — not below the hints
+    var help = "<span>Первое фото — главное: его видно в каталоге, поиске и письмах. ← → меняют порядок, ★ делает главным, × удаляет.</span> " +
+      (MEDIA.cutout ? "<span>✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.</span> " : "") +
+      "<span>Фото показываются как есть, на белом фоне.</span>";
+    return '<section class="adm-edsec" data-edsec="photos">' +
+      admSecHeadHTML("Фото", "ed-photo", help) +
+      '<div class="adm-photos" data-galdrop="' + esc(p.id) + '">' + tiles + edPhotoAddHTML(p.id) + "</div>" +
+      // a refusal stands right under the tiles, where the eye is
       (UP.err ? '<p class="adm-hint adm-hint--warn" role="alert" data-uperr>' + esc(UP.err) + "</p>" : "") +
-      '<p class="adm-hint">Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Фото показываются как есть, на белом фоне.</p>' +
-      (MEDIA.cutout ? '<p class="adm-hint">✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.</p>' : "") +
       (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
-      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset && !p.custom
-        ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
+      /* q6 / B37: the design dropped it; the owner keeps it, as a link */
+      (DEMO.gallery && DEMO.gallery[p.id] && !p.custom
+        ? '<button class="adm-link adm-link--muted adm-edsec__link" type="button" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button>'
         : "") +
-      (galDirty(p) ? admDirtyNoteHTML("data-galdirty", true) : "") +
-      (p.sizes && p.sizes.length > 1 && g.length > 1
-        ? '<div class="adm-sec"><span class="adm-sec__t">Фото по объёмам</span></div>' +
-          '<p class="adm-hint">Какое фото показывать для каждого объёма.</p>' +
-          p.sizes.map(function (sz, si) {
-            var cur = galSizePick(p, si);
-            return '<div class="adm-vrow" data-vrow="' + si + '"><span class="adm-vrow__sz">' + esc(sz) + "</span>" +
-              g.map(function (u, gi) {
-                return '<button class="adm-vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) +
-                  '" style="background-image:url(\'' + esc(u) + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
-              }).join("") + "</div>";
-          }).join("")
-        : "") +
-      '<div class="adm-sec"><span class="adm-sec__t">Видео</span></div>' +
-      '<div class="adm-chips" role="group" aria-label="Откуда видео">' +
+      "</section>";
+  }
+  /** «Фото по объёмам»: which photo a shopper sees when a size is picked. */
+  function edSecVarPhotos(p) {
+    var g = galDraft(p).map(function (ph) { return ph.thumb || ph.url; });
+    if (!(p.sizes && p.sizes.length > 1 && g.length > 1)) return "";
+    return '<section class="adm-edsec" data-edsec="bysize">' +
+      admSecHeadHTML("Фото по объёмам", "ed-bysize", "Какое фото покупатель увидит, когда выберет объём.") +
+      p.sizes.map(function (sz, si) {
+        var cur = galSizePick(p, si);
+        return '<div class="adm-vrow" data-vrow="' + si + '"><span class="adm-vrow__sz">' + esc(sz) + "</span>" +
+          g.map(function (u, gi) {
+            return '<button class="adm-vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) +
+              '" style="background-image:url(\'' + esc(u) + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
+          }).join("") + "</div>";
+      }).join("") + "</section>";
+  }
+  /** «Видео»: YouTube · Instagram · Загрузить over ONE field — on the product
+      page it is one video either way, so an uploaded file comes back as an
+      address and lands in the same box a pasted link does (docs/media.md). */
+  function edSecVideo(p) {
+    var vurl = vidValue(p), vk = edVideoKind(vurl);
+    return '<section class="adm-edsec" data-edsec="video">' +
+      admSecHeadHTML("Видео", "ed-video", "Вставьте ссылку на YouTube или Instagram, или загрузите своё видео. Пусто — блока с видео на странице товара нет.") +
+      '<div class="adm-seg adm-seg--3" role="group" aria-label="Откуда видео">' +
         [["yt", "YouTube"], ["ig", "Instagram"], ["up", "Загрузить"]].map(function (k) {
-          return '<button class="adm-chip" data-edvidkind="' + k[0] + '" aria-current="' + (vk === k[0]) + '">' + k[1] + "</button>";
+          return '<button type="button" data-edvidkind="' + k[0] + '" aria-current="' + (vk === k[0]) + '">' + k[1] + "</button>";
         }).join("") + "</div>" +
-      /* One field for all three, because on the product page it is one video
-         either way: an uploaded file comes back as an address and lands in
-         the same box a pasted link does (docs/media.md). */
-      '<label class="adm-field"' + (vk === "up" ? " hidden" : "") + '>' + (vk === "ig" ? "Ссылка на reel или пост" : "Ссылка на видео") +
-        '<input class="adm-input adm-mono" data-edvideo value="' + esc(vurl) + '" placeholder="' +
-        (vk === "ig" ? "https://www.instagram.com/reel/…" : "https://youtu.be/… · https://vimeo.com/…") + '"></label>' +
+      '<label class="adm-field"' + (vk === "up" ? " hidden" : "") + "><span>" + (vk === "ig" ? "Ссылка на reel или пост" : "Ссылка на видео") + "</span>" +
+        '<input class="adm-input adm-mono" data-edvideo' + edAsAttr(p, "video") + ' value="' + esc(vurl) + '" placeholder="' +
+        (vk === "ig" ? "https://www.instagram.com/reel/…" : "https://youtu.be/… · https://vimeo.com/…") + '">' +
+        admAutosaveHintHTML(edAsKey(p, "video")) + "</label>" +
       (vk === "up"
-        ? '<button class="adm-btn adm-btn--dash adm-btn--tall" data-vidup="' + esc(p.id) + '"' +
+        /* q21: «до 4 МБ» — the platform refuses a bigger body (VIDEO_SEND_MAX) */
+        ? '<button class="adm-btn adm-btn--dash adm-btn--tall" type="button" data-vidup="' + esc(p.id) + '"' +
             (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
-            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 4 МБ") + "</button>" +
+            (UP.busy ? esc(upBusyText()) : "Выбрать видео · MP4 или MOV до 4 МБ") + "</button>" +
           '<input class="adm-photo__file" type="file" accept="video/mp4,video/quicktime" data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
           (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "")
         : "") +
       (vurl
         ? '<div class="adm-vidrow"><span class="adm-vidrow__play" aria-hidden="true">▶</span>' +
           '<span class="adm-vidrow__nm">' + esc(vurl) + "</span>" +
-          '<button class="adm-vidrow__x" data-edvidclear aria-label="Убрать видео">×</button></div>'
+          '<button class="adm-vidrow__x" type="button" data-edvidclear aria-label="Убрать видео">×</button></div>'
         : "") +
-      '<p class="adm-hint">Пусто — блока с видео на странице товара нет.</p>' +
-      "</div>";
+      "</section>";
   }
-  function edPaneDesc(p) {
+  /* the name the video-limit test knows the photo-and-video block by */
+  function edPaneMedia(p) { return edSecPhotos(p) + edSecVarPhotos(p) + edSecVideo(p); }
+
+  /* ---- «Описание» ------------------------------------------------------------
+     RU / ET / EN — the language of the TEXT, not of the panel — with what each
+     already holds under its name. «Написать черновик» writes the language on
+     screen (the route takes `lang`); «Перевести с русского» is ET + EN from the
+     Russian tab and that one language from its own. */
+  function edTrLabel(lang) { return lang === "ru" ? "Перевести на ET и EN" : "Перевести с русского"; }
+  function edDescBody(p, id) {
     var dov = p.descOv || {};
     var lang = S.goodsDescLang || "ru";
     var hint = "Текста пока нет — можно написать вручную или сгенерировать с ИИ";
@@ -33135,58 +33888,60 @@
     };
     var box = function (code, hook, value) {
       return '<textarea class="adm-input adm-area" rows="8" maxlength="4000" ' + hook +
-        ' placeholder="' + esc(ph[code]) + '"' + (lang === code ? "" : " hidden") + ">" + esc(value || "") + "</textarea>";
+        ' aria-label="Описание" placeholder="' + esc(ph[code]) + '"' + (lang === code ? "" : " hidden") + ">" + esc(value || "") + "</textarea>";
     };
-    return '<div class="adm-edpane" data-edpane="desc"' + (edTab() === "desc" ? "" : " hidden") + ">" +
-      '<div class="adm-edbar">' +
-        /* Same labelled strip the blog and the letters got: which of the
-           three descriptions is in the box, and whether the other two are
-           written — see admLangBarHTML(). */
+    return '<div class="adm-edbar">' +
         admLangBarHTML("data-eddesclang", ED_LANGS, lang, "Язык описания", function (code) {
           return admLangHas(dov[code.toUpperCase()]);
-        }, LANG_BAR_NOTE) +
+        }, "") +
         '<div class="adm-acts">' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admdescgen="' + esc(p.id) + '">Написать черновик</button>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admtranslate="' + esc(p.id) + '">Перевести с русского</button>' +
-          '<span data-descundoslot>' + (AI_UNDO && AI_UNDO.id === p.id ? '<button class="adm-link" data-admdescundo>Отменить</button>' : "") + "</span>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescgen="' + esc(id) + '">Написать черновик</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admtranslate="' + esc(id) + '" data-edtrlabel>' + edTrLabel(lang) + "</button>" +
         "</div>" +
       "</div>" +
-      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
-      '<p class="adm-hint">Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).</p>' +
-      "</div>";
+      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN);
   }
-  /* «Google»: one pair of fields per language behind the same segmented
-     control the description tab has. The Russian pair keeps the hooks the
-     panel always had (data-edseot / data-edseod — seo_title / seo_desc on the
-     server); Estonian and English are their own values, and a page whose
-     language has none falls back to the Russian pair (seoFor()). */
+  function edSecDesc(p) {
+    return '<section class="adm-edsec" data-edsec="desc">' +
+      admSecHeadHTML("Описание", "ed-desc",
+        "<span>У каждого языка свой текст. Пусто — на странице товара показывается стандартный текст магазина (он виден в поле серым).</span> " +
+        "<span>Русский — основной, остальные переводятся одной кнопкой.</span> <span>" + LANG_BAR_NOTE + "</span>") +
+      edDescBody(p, p.id) + "</section>";
+  }
+
+  /* ---- «Для Google» — folded; the summary says how many languages have one - */
   function edSeoPair(p, code, tHook, dHook, v, on) {
     return '<div class="adm-edlang" data-edseopair="' + code + '"' + (on ? "" : " hidden") + ">" +
-      '<label class="adm-field">Заголовок для Google' +
+      '<label class="adm-field"><span>Заголовок</span>' +
         '<input class="adm-input" ' + tHook + ' maxlength="70" value="' + esc(v.t || "") + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
-      '<label class="adm-field">Описание для Google' +
+      '<label class="adm-field"><span>Описание</span>' +
         '<textarea class="adm-input adm-area adm-area--sm" ' + dHook + ' rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(v.d || "") + "</textarea></label>" +
       "</div>";
   }
-  function edPaneSeo(p) {
+  function edSeoBody(p, id) {
     var ov = p.seoOv || {};
     var lang = S.goodsSeoLang || "ru";
-    return '<div class="adm-edpane" data-edpane="seo"' + (edTab() === "seo" ? "" : " hidden") + ">" +
+    return '<p class="adm-hint">То, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.</p>' +
       '<div class="adm-edbar">' +
         admLangBarHTML("data-edseolang", ED_LANGS, lang, "Язык для Google", function (code) {
           var v = ov[code.toUpperCase()] || {};
           return admLangHas(String(v.t || "") + String(v.d || ""));
-        }, LANG_BAR_NOTE) +
-        '<div class="adm-acts">' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admseogen="' + esc(p.id) + '">Заполнить автоматически</button>' +
-          '<button class="adm-link adm-link--muted" data-admseoall="' + esc(p.id) + '">все три языка</button>' +
-        "</div>" +
+        }, "") +
+        // B50: one button — the three languages at once (the design's)
+        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admseoall="' + esc(id) + '">✨ Заполнить автоматически · все три языка</button></div>' +
       "</div>" +
       edSeoPair(p, "ru", "data-edseot", "data-edseod", ov.RU || {}, lang === "ru") +
       edSeoPair(p, "et", "data-edseotet", "data-edseodet", ov.ET || {}, lang === "et") +
-      edSeoPair(p, "en", "data-edseoten", "data-edseoden", ov.EN || {}, lang === "en") +
-      '<p class="adm-hint">Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.</p>' +
-      "</div>";
+      edSeoPair(p, "en", "data-edseoten", "data-edseoden", ov.EN || {}, lang === "en");
+  }
+  /** «2 из 3 языков» — a count, so it goes through its own UI_RX rule. */
+  function edSeoSummary(ov) {
+    var n = ["RU", "ET", "EN"].filter(function (L) { var v = (ov || {})[L] || {}; return !!(String(v.t || "").trim() || String(v.d || "").trim()); }).length;
+    return n ? n + " из 3 языков" : "пусто — магазин подставит сам";
+  }
+  function edSecSeo(p) {
+    return '<section class="adm-edsec adm-edsec--fold" data-edsec="seo">' +
+      admFoldHTML("ed-seo", "Для Google", edSeoSummary(p.seoOv), edSeoBody(p, p.id)) + "</section>";
   }
   /* ---- product creation: what «Сохранить» does for the owner's own row ---
      The form is read straight off the DOM like the rest of the editor, and
@@ -33315,37 +34070,52 @@
       line said nothing about what moved, nothing about what it moved from,
       and carried no «Вернуть» at all, because journalNote() files an entry
       with no `prev`. A save on an existing row is journalled as the
-      update_product action it really is — see customUpdate(). */
+      update_product action it really is — see edOwnField(). */
   function productJournalLine(product) {
     return "Новый товар «" + product.brand + " — " + product.name + "»";
   }
-  /** POST — a new row. `from` says who asked: the form or the assistant;
-      either way the editor opens on the product, on «Фото и видео», and a
-      journal line is left whose undo is «снять с продажи». */
-  function customCreate(patch, from, files) {
+  /** POST — a new row. `from` says who asked: «Добавить товар» ("form") or
+      the assistant; either way the product is live, its card opens, and a
+      journal line is left whose undo is «снять с продажи» — the toast's
+      «Вернуть».
+      `idemKey`: «Новый товар» sends its draft's own Idempotency-Key (the
+      route has taken one since DEF14 #10 — a lost answer used to become a
+      second live product), so a double tap, or a retry after a dead
+      connection, is the same product. The assistant's card mints one. */
+  function customCreate(patch, from, idemKey) {
     if (S.goodsBusy) return;
     S.goodsBusy = true;
-    apiSend("/api/admin/products/", "POST", patch).then(function (r) {
+    render();   // «Добавляем…» on the button, while the POST is out
+    apiSend("/api/admin/products/", "POST", patch, idemKey || idemNewKey()).then(function (r) {
       S.goodsBusy = false;
-      if (!(r.status === 201 && r.body.ok && r.body.product)) { upCreateReset(); customErrToast(r); return; }
+      if (!(r.status === 201 && r.body.ok && r.body.product)) {
+        /* the owner's first tap is still being carried out — not a failure */
+        if (r.status === 409 && r.body && r.body.error === "in_progress") { toast("Товар уже добавляется — подождите пару секунд"); render(); return; }
+        /* this draft's key already made a product: the answer was lost on the
+           way back and the draft changed since. The product is in the list —
+           a new key would be a twin of it. */
+        if (r.status === 409 && r.body && r.body.error === "key_reused") {
+          loadCustomAll(true);
+          toast("Этот товар уже добавлен — проверьте список товаров");
+          render(); return;
+        }
+        render(); customErrToast(r); return;
+      }
       var product = r.body.product;
+      if (from === "form") goodsNewClear();
       customAdopt(product);
       S.goodsFresh = S.goodsFresh || {}; S.goodsFresh[product.id] = true;
       var entry = { t: journalStamp(), txt: productJournalLine(product),
         a: { type: "create_product", id: product.id }, prev: { type: "set_product_active", id: product.id, value: false, name: product.brand + " — " + product.name } };
       DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
-      S.adminTab = "goods"; S.adminEdit = product.id; S.goodsNew = null; S.goodsSizes = null; S.goodsErr = "";
-      GAL.id = ""; AI_UNDO = null; S.goodsEditTab = "media"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      S.adminTab = "goods"; S.adminEdit = product.id; S.goodsNew = null; S.goodsNewRestored = false; S.goodsSizes = null; S.goodsErr = "";
+      GAL.id = ""; AI_UNDO = null; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       pendingAction = null;
       ensureMedia();
       window.scrollTo({ top: 0 });
-      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото"
-        : from === "photo" ? "Товар создан ✓ — загружаем фото" : "Товар создан ✓ — теперь добавьте фото", entry);
+      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото" : "Товар добавлен ✓ — он уже в магазине", entry);
       render();
-      // product creation: the photos picked before there was an id go up now, onto the row that just got one
-      UP.creating = false;
-      if (files && files.length) galUpload(files, admEditProduct(product.id));
-    }).catch(function () { S.goodsBusy = false; upCreateReset(); toast("Сервер не отвечает — попробуйте ещё раз"); });
+    }).catch(function () { S.goodsBusy = false; render(); toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
   /** The row patch the goods form built, as the `update_product` action the
       journal speaks — the very shape the assistant's own proposal arrives in,
@@ -33361,44 +34131,7 @@
     else if (patch.prices && patch.prices.length) a.price = patch.prices[0];
     return a;
   }
-  /** PUT — the row's own fields; the override-owned ones (stock, salon price,
-      video, counts, barcodes) went through demoApply() before this. */
-  function customUpdate(p, patch) {
-    if (S.goodsBusy) return;
-    /* The journal entry is built BEFORE the write, against the row as the
-       panel still has it: this is the only moment the old price is knowable,
-       so it is the only moment «цена: 14,90 € → 9,90 €» — and the «Вернуть»
-       that puts it back — can be made at all (Renat, 13.09.2026). A save that
-       moved nothing leaves no line: an entry that says «изменён» and names
-       nothing is noise the owner cannot act on. */
-    var before = findCustom(p.id);
-    var act = updateActionOf(p.id, patch);
-    var txt = before ? actionText(act) : "";
-    var prev = before ? productUndoOf(before) : null;
-    S.goodsBusy = true;
-    apiSend("/api/admin/products/" + encodeURIComponent(p.id) + "/", "PUT", patch).then(function (r) {
-      S.goodsBusy = false;
-      if (!(r.status === 200 && r.body.ok && r.body.product)) { customErrToast(r); return; }
-      var product = r.body.product;
-      /* a price override the assistant wrote earlier would sit on top of the
-         new row price and hide it — the row is the truth now */
-      if (DEMO.price[p.id] != null && Number(product.price) !== Number(DEMO.price[p.id])) {
-        delete DEMO.price[p.id];
-        apiSend("/api/admin/overrides/", "PUT", { id: p.id, price: null }).catch(noop);
-      }
-      customAdopt(product);
-      var entry = null;
-      if (txt) {
-        entry = { t: journalStamp(), txt: txt, a: act, prev: prev };
-        DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
-      }
-      AI_UNDO = null; S.adminEdit = ""; S.goodsSizes = null; GAL.id = ""; UP.err = ""; vidReset();
-      S.goodsConfirmBack = false;   // saved: there is nothing left to warn about
-      toast(entry ? "Сохранено ✓" : "Изменений нет", entry);
-      render();
-      goodsBackToRow(product.id);
-    }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
-  }
+
   /** The assistant's create_product, once the owner pressed «Применить». */
   function applyCreateProduct(a) {
     customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "",
@@ -33442,21 +34175,18 @@
     S.goodsBusy = true;
     // "" when the proposal moves nothing — no journal line, same as a form save
     var txt = actionText(a), prev = productUndoOf(cur);
-    apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", updatePatchOf(a)).then(function (r) {
+    /* through the row's own queue (edOwnPut): the card may be saving a field
+       of the same product this very moment, and the route merges into the
+       row it reads — two PUTs in the air can undo each other. The queue
+       adopts the answer and clears a stale price override itself. */
+    edOwnPut(a.id, updatePatchOf(a)).then(function (r) {
       S.goodsBusy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (!r) { toast("Сервер не отвечает — попробуйте ещё раз"); return; }
+      if (r.status === 401) { render(); return; }
       if (!(r.status === 200 && r.body.ok && r.body.product)) {
         toast(((r.body && CUSTOM_ERR[r.body.error]) || ["Не удалось сохранить товар"])[0]);
         return;
       }
-      var product = r.body.product;
-      // a price override the assistant wrote earlier would sit on top of
-      // the new row price and hide it — the row is the truth now
-      if (DEMO.price[a.id] != null && Number(product.price) !== Number(DEMO.price[a.id])) {
-        delete DEMO.price[a.id];
-        apiSend("/api/admin/overrides/", "PUT", { id: a.id, price: null }).catch(noop);
-      }
-      customAdopt(product);
       var entry = null;
       if (txt) {
         entry = { t: journalStamp(), txt: txt, a: a, prev: prev };
@@ -33466,105 +34196,392 @@
       render();
     }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
-  /* product creation: the three steps a new product is made in — the main
-     boxes, the price, the photos — as the strip an order card wears (Dim,
-     10.09.2026: five equal tabs, two of them off a phone's screen, said
-     nothing about what is required or in what order). Each cell opens its
-     pane through data-edtab, exactly like a tab, so the specs' path and the
-     owner's are the same; «Описание» and «Google» wait under the strip as
-     two words, because they are optional and not steps. */
-  var ED_STEPS = [["main", "Основное", "бренд, название, раздел"], ["sizes", "Цена", "и объёмы"], ["media", "Фото", "после сохранения"]];
-  function edStepsHTML(t) {
-    return '<div class="adm-steps adm-steps--3 adm-steps--ed" role="group" aria-label="Шаги">' +
-      ED_STEPS.map(function (s, i) {
-        return '<button type="button" class="adm-step adm-step--btn" data-edtab="' + s[0] + '" data-edstep="' + s[0] +
-          '" aria-current="' + (t === s[0]) + '"><span class="adm-step__n">' + (i + 1) + "</span>" +
-          '<span class="adm-step__l">' + s[1] + '</span><span class="adm-step__s">' + s[2] + "</span></button>";
-      }).join("") + "</div>" +
-      '<p class="adm-hint adm-edopt">Описание и текст для Google — необязательно, можно потом: ' +
-        '<button type="button" class="adm-link adm-link--muted" data-edtab="desc">Описание</button> · ' +
-        '<button type="button" class="adm-link adm-link--muted" data-edtab="seo">Google</button></p>';
-  }
-  /** The steps already done go ink — read off the form, like everything else in this editor. */
-  function edStepsPaint() {
-    var steps = document.querySelectorAll("[data-edstep]");
-    if (!steps.length) return;
-    var g = function (sel) { var el = document.querySelector(sel); return el ? el.value.trim() : ""; };
-    var done = { main: !!(g("[data-edbrand]") && g("[data-edname]")), sizes: goodsPrice(g("[data-edprice]")) !== null };
-    for (var i = 0; i < steps.length; i++) {
-      var k = steps[i].getAttribute("data-edstep");
-      steps[i].classList.toggle("adm-step--done", !!done[k] && steps[i].getAttribute("aria-current") !== "true");
-    }
-  }
+  /* ---------- the card: one page (1a, screen 02) ------------------------------
+     «← Товары» and the save status on one line (the phone's top bar carries
+     both there), the product with its photo, and the ONE dark button —
+     «Открыть в магазине ↗», header right on a desktop, pinned on a phone;
+     not drawn for a product the shop is not showing, where it would lead to
+     «Страница не найдена». Then every section, one under the other. */
   function goodsEditor(p) {
-    loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
-    var t = edTab();
-    var isNew = !!p.isNew;   // product creation
-    return '<div class="adm-screen adm-screen--tight">' +
-      '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
-      /* This form keeps no draft in S: every field is read off the DOM when
-         «Сохранить» is pressed. So «← Товары», «Отмена» and the phone's back
-         gesture each threw away a price, three descriptions, six SEO boxes,
-         the size ladder and any reordered photos — silently, on one mis-tap
-         at the top of a five-pane form. The blog editor and the newsletter
-         have asked first since 12.09.2026; this one is the last that did not.
-         Same card, same two buttons, same words. */
+    if (p.isNew) return goodsNewHTML(p);
+    loadAdminPricing(false);   // wholesale/loyalty: the salon column's discount
+    edVisit(p.id);
+    var live = !goodsOffSale(p);
+    var kicker = esc(p.brand) + " · <span>" + esc(CAT_NAMES[p.cat] || p.cat) + "</span>" + (p.custom ? " · <span>ваш товар</span>" : "");
+    return '<div class="adm-screen adm-screen--tight adm-ed" data-edfor="' + esc(p.id) + '">' +
+      '<button class="adm-link adm-link--back adm-ed__back" data-admclose>← Товары</button>' +
+      /* What «← Товары» still asks: a box whose value could not be sent —
+         an empty price, a size with no name (goodsEditDirty). Everything
+         else has saved itself by the time the owner leaves. */
       (S.goodsConfirmBack
         ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admbackyes>Выйти без сохранения</button>' +
           '<button class="adm-link adm-link--muted" data-admbackno>Остаться</button></div>'
         : "") +
-      '<div class="adm-head"><div>' +
-        '<div class="adm-head__kicker">' + (isNew ? "Новый товар"
-          : esc(p.brand) + " · <span>" + esc(CAT_NAMES[p.cat] || p.cat) + "</span>" + (p.custom ? " · <span>ваш товар</span>" : "")) + "</div>" +
-        '<h1 class="adm-h1 adm-h1--flat">' + (isNew ? "Что добавляем?" : esc(p.name)) + "</h1></div>" +
-        (isNew || p.active === false ? "" : '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button>') + "</div>" +
-      (isNew ? edStepsHTML(t)
-        : '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
-          ED_TABS.map(function (x) {
-            return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
-          }).join("") + "</div>") +
-      edPaneMain(p) + edPaneSizes(p) + edPaneMedia(p) + edPaneDesc(p) + edPaneSeo(p) +
-      /* The destructive slot of the design — the end of the form, on its own
-         row (.adm-danger), outside the panes so it is there from any tab, on
-         both widths: the bar became the phone's header and has no slot for
-         it. There is no DELETE for a catalogue product — the catalogue is a
-         file, not a table — so the button does the strongest thing the shop
-         really has, says exactly that, and goes through the confirm card
-         with an undo like every other money-side change. For the owner's own
-         product the same button really takes it off the shelf (active=false),
-         undo included; a new product has nothing to take off yet. */
-      /* Two different words for two different things. For the owner's OWN
-         product this really takes it off the shelf. For a catalogue product
-         there is no DELETE — the catalogue is a file — so it does the
-         strongest thing that exists, «нет в наличии», and now says so: it
-         said «Снять с продажи» while the switch three panes up, which really
-         removes the product from the shop, said nothing of the sort. */
-      (isNew || p.active === false ? "" : '<div class="adm-danger"><button class="adm-link adm-link--warn" data-admgoodspull="' + esc(p.id) + '">' +
-        (p.custom ? "Снять с продажи" : "Отметить «нет в наличии»") + "</button></div>") +
-      // goodsFail() fills this in place, so the message appears without a
-      // render() taking the caret out of whatever field is being fixed — and
-      // it sits in the sticky save bar, outside the panes, so a refusal is on
-      // screen from any tab and on a phone, right above the button that was
-      // just pressed, rather than somewhere below the fold.
-      '<div class="adm-savebar' + admDirtyCls(admBarNoteState("touch") === "dirty") + '">' +
-        '<p class="adm-err adm-savebar__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
-        '<button class="adm-btn adm-savebar__main" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
-        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admclose>Отмена</button>' +
-        admBarNoteHTML("touch") +
-      "</div></div>";
+      '<div class="adm-edhead">' +
+        '<span class="adm-thumb adm-edhead__img">' + media(p, 0, "") + "</span>" +
+        '<div class="adm-edhead__t"><div class="adm-edhead__k"><span class="adm-head__kicker">' + kicker + "</span>" + admHelpBtnHTML("ed-lock") + "</div>" +
+          '<h1 class="adm-h1 adm-h1--flat">' + esc(p.name) + "</h1></div>" +
+        (live ? admPinnedHTML('data-go-product="' + esc(p.id) + '"', "Открыть в магазине ↗") : "") +
+      "</div>" +
+      admHelpHTML("ed-lock", p.custom
+        ? "Это ваш товар: бренд, название и раздел меняются здесь же, в «Что за товар»."
+        : "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное здесь меняете вы.") +
+      (p.custom ? edSecWhat(p) : "") +
+      edSecShop(p) + edSecSizes(p) + edSecPhotos(p) +
+      '<div class="adm-edpair2">' + edSecVarPhotos(p) + edSecVideo(p) + "</div>" +
+      edSecDesc(p) + edSecSeo(p) +
+      '<p class="adm-err adm-ed__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
+      "</div>";
   }
-  /** Tabs are a DOM patch, never a render(): the panes hold everything the
-      owner has typed and no draft of it exists anywhere else. */
-  function edShowTab(key) {
-    S.goodsEditTab = key;
-    var panes = document.querySelectorAll("[data-edpane]");
-    for (var i = 0; i < panes.length; i++) panes[i].hidden = panes[i].getAttribute("data-edpane") !== key;
-    var tabs = document.querySelectorAll("[data-edtab]");
-    for (var j = 0; j < tabs.length; j++) {
-      tabs[j].setAttribute("aria-current", String(tabs[j].getAttribute("data-edtab") === key));
+  /** The section an old tab key named — the assistant's «Открыть …» and a
+      refusal can still point at «Фото и видео» or «Google». */
+  var ED_SEC_OF = { main: "shop", sizes: "sizes", media: "photos", desc: "desc", seo: "seo" };
+  function edScrollTo(key) {
+    var sec = document.querySelector('[data-edsec="' + (ED_SEC_OF[key] || key) + '"]');
+    if (!sec) return;
+    if (key === "seo" && !ADM_FOLD["ed-seo"]) { admFoldToggle("ed-seo"); render(); sec = document.querySelector('[data-edsec="seo"]'); }
+    if (sec && sec.scrollIntoView) sec.scrollIntoView({ block: "start" });
+  }
+
+  /* ---------- «Новый товар» (1a, screen 13) -----------------------------------
+     One page in three numbered steps instead of the three-step wizard, and
+     everything the wizard had: 1 «Что за товар» (the brand list with counts
+     and a new brand allowed, the name with «✨» and the line saying what the
+     Estonian and English shop will call it, section and subsection «Авто»),
+     2 «Объёмы и цены» (several sizes, the salon price under each), 3 «Фото»
+     (can wait). Описание and Google fold away, «можно потом».
+     The draft saves itself (README § 2, «creation forms are the exception»):
+     S.goodsNew, and localStorage under GOODS_NEW_KEY a moment after the last
+     keystroke, so the owner can leave and come back. A photo picked before
+     the product exists goes up at once, filed under the draft's own id, and
+     the product is created with it (Dim 25.09.2026, q23). «Добавить товар» is
+     the one dark button, and the only thing that creates. */
+  var GOODS_NEW_KEY = "rmp-goods-new-draft";
+  var GOODS_NEW_MS = 600;
+  var GN = { mem: null, t: 0 };   // mem: the draft where storage is refused
+  function goodsNewBlank() {
+    var k = String(idemNewKey());
+    return { brand: "", name: "", cat: "", subcat: "", sizes: [{ size: "", price: "" }],
+      desc: { RU: "", ET: "", EN: "" }, seo: {}, photos: [], idemKey: k,
+      draftId: "draft-" + k.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40), savedAt: 0 };
+  }
+  /** Anything worth offering back? A key and an id alone are not a draft. */
+  function goodsNewHasContent(d) {
+    if (!d) return false;
+    var any = function (o) {
+      for (var k in o) {
+        if (!Object.prototype.hasOwnProperty.call(o, k)) continue;
+        var v = o[k];
+        if (v && typeof v === "object" ? any(v) : String(v || "").trim()) return true;
+      }
+      return false;
+    };
+    return !!(String(d.brand || "").trim() || String(d.name || "").trim() || CAT_NAMES[d.cat] ||
+      (d.sizes || []).some(function (r) { return String(r.size || "").trim() || String(r.price || "").trim(); }) ||
+      (d.photos || []).length || any(d.desc || {}) || any(d.seo || {}));
+  }
+  function goodsNewLoad() {
+    var raw = null;
+    try { raw = localStorage.getItem(GOODS_NEW_KEY); } catch (e) { raw = null; }
+    var d = null;
+    if (raw) { try { d = JSON.parse(raw); } catch (e) { d = null; } }
+    if (!d || typeof d !== "object") d = GN.mem;
+    if (!d || typeof d !== "object" || !d.idemKey || !d.draftId) return null;
+    if (!Array.isArray(d.sizes) || !d.sizes.length) d.sizes = [{ size: "", price: "" }];
+    if (!Array.isArray(d.photos)) d.photos = [];
+    if (!d.desc || typeof d.desc !== "object") d.desc = { RU: "", ET: "", EN: "" };
+    if (!d.seo || typeof d.seo !== "object") d.seo = {};
+    return d;
+  }
+  /** What is on screen goes into the draft — the boxes are the truth while
+      the page is open (the same idea as the card: no render between keys). */
+  function goodsNewSync() {
+    var d = S.goodsNew;
+    if (!d || S.adminEdit !== "new" || typeof document === "undefined" || !document.querySelector('[data-edfor="new"]')) return d;
+    var g = function (sel, fb) { var e = document.querySelector(sel); return e ? e.value : fb; };
+    d.brand = g("[data-edbrand]", d.brand); d.name = g("[data-edname]", d.name);
+    d.cat = g("[data-edcat]", d.cat); d.subcat = g("[data-edsubcat]", d.subcat);
+    edSizeRowsRead(goodsNewDraft());
+    d.desc = { RU: g("[data-eddescru]", d.desc.RU || ""), ET: g("[data-eddescet]", d.desc.ET || ""), EN: g("[data-eddescen]", d.desc.EN || "") };
+    ["RU", "ET", "EN"].forEach(function (L) { d.seo[L] = { t: g(SEO_HOOKS[L][0], (d.seo[L] || {}).t || ""), d: g(SEO_HOOKS[L][1], (d.seo[L] || {}).d || "") }; });
+    return d;
+  }
+  function goodsNewSave() {
+    clearTimeout(GN.t); GN.t = 0;
+    var d = goodsNewSync();
+    if (!d) return;
+    d.savedAt = Date.now();
+    GN.mem = d;
+    try { localStorage.setItem(GOODS_NEW_KEY, JSON.stringify(d)); } catch (e) { /* kept in memory (GN.mem) */ }
+  }
+  function goodsNewSaveSoon() {
+    clearTimeout(GN.t);
+    GN.t = setTimeout(goodsNewSave, GOODS_NEW_MS);
+  }
+  /** The product exists: the draft is done with. Its photos are the
+      product's now, so they stay in the bucket. */
+  function goodsNewClear() {
+    clearTimeout(GN.t); GN.t = 0; GN.mem = null;
+    try { localStorage.removeItem(GOODS_NEW_KEY); } catch (e) {}
+  }
+  /** «Начать заново»: the draft and the photos it uploaded go (after the
+      confirm — its photos cannot be brought back). */
+  function goodsNewReset() {
+    var d = S.goodsNew;
+    (d && d.photos || []).forEach(function (ph) { if (ph && ph.key) galDrop(ph.key); });
+    goodsNewClear();
+    S.goodsNew = goodsNewBlank(); S.goodsNewRestored = false; S.goodsSizes = null; S.goodsErr = "";
+    UP.err = "";
+  }
+  /** What still stands between the draft and «Добавить товар», in the words
+      of the fields — each its own node, so the dictionary reaches every one. */
+  function goodsNewMissing() {
+    var p = goodsNewDraft(), out = [];
+    if (!String(p.brand || "").trim()) out.push("бренд");
+    if (!String(p.name || "").trim()) out.push("название");
+    if (!CAT_NAMES[p.cat]) out.push("раздел");
+    var rows = (S.goodsNew && S.goodsNew.sizes) || [];
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    if (rows.some(function (r) { return goodsPrice(r.price) === null; })) out.push("цена");
+    if (multi && rows.some(function (r) { return !String(r.size || "").trim(); })) out.push("объём");
+    return out;
+  }
+  function goodsNewMissingHTML() {
+    var m = goodsNewMissing();
+    return m.length
+      ? "<span>Осталось заполнить:</span> " + m.map(function (w) { return "<span>" + w + "</span>"; }).join(", ")
+      : '<span class="adm-hint--ok">Всё готово — можно добавлять</span>';
+  }
+  /** In place, under the caret: the line, the button's dim state, the draft. */
+  function goodsNewPaint() {
+    if (S.adminEdit !== "new" || typeof document === "undefined") return;
+    goodsNewSync();
+    var line = document.querySelector("[data-goodsnewmissing]");
+    if (line) { line.innerHTML = goodsNewMissingHTML(); translateTree(line); }
+    var btn = document.querySelector('[data-admsavegoods="new"]');
+    if (btn) { if (goodsNewMissing().length) btn.setAttribute("aria-disabled", "true"); else btn.removeAttribute("aria-disabled"); }
+    goodsNewSaveSoon();
+  }
+  /** «салоны платят 12,80 €» under a price — «Партнёры и баллы» off: nothing. */
+  function goodsNewSalonHTML(price) {
+    var n = goodsPrice(price);
+    if (!partnersOn() || n === null) return "";
+    return "салоны платят " + eur(edSalonOf(n));
+  }
+  function goodsNewSizesHTML(p) {
+    var rows = edSizeRows(p), n = rows.length;
+    return '<div class="adm-gnsizes">' +
+      '<div class="adm-gnsizes__head" aria-hidden="true"><span>Объём</span><span>Цена, € <span class="adm-req">*</span></span><span></span></div>' +
+      rows.map(function (r, i) {
+        var price = r.price === "" || r.price == null ? "" : String(r.price);
+        return '<div class="adm-gnsizes__row">' +
+          '<label class="adm-field"><span class="adm-gnsizes__l">Объём</span><input class="adm-input" data-edsz="' + i + '" value="' + esc(r.size || "") +
+            '" maxlength="30" placeholder="100 мл" aria-label="Объём"></label>' +
+          '<label class="adm-field"><span class="adm-gnsizes__l">Цена, €</span><input class="adm-input"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+            '" inputmode="decimal" value="' + esc(price) + '" placeholder="16" aria-label="Цена, €">' +
+            '<span class="adm-hint adm-gnsizes__salon" data-gnsalon="' + i + '">' + goodsNewSalonHTML(price) + "</span></label>" +
+          '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (n > 1 ? "" : " disabled") +
+            ' aria-label="Убрать объём" title="Убрать объём">×</button>' +
+        "</div>";
+      }).join("") +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row adm-grid__add" type="button" data-edsizeadd>+ Объём</button>' +
+      '<p class="adm-hint">' + (partnersOn()
+        ? "Первый объём покупатель видит первым. Цена для салонов — на " + edSalonPct() + " % меньше, считается сама."
+        : "Первый объём покупатель видит первым.") + "</p>" +
+      "</div>";
+  }
+  function goodsNewPhotosHTML() {
+    var list = (S.goodsNew && S.goodsNew.photos) || [], n = list.length;
+    return '<div class="adm-photos adm-photos--new" data-galdrop="new">' +
+      list.map(function (ph, i) {
+        return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + '">' +
+          '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
+          (i === 0 ? '<span class="adm-photo__tag adm-photo__tag--ink"><span>главное</span></span>' : "") +
+          edPhotoOpsHTML(i, n, false, false) + "</div>";
+      }).join("") + edPhotoAddHTML("new") + "</div>" +
+      (UP.err ? '<p class="adm-hint adm-hint--warn" role="alert" data-uperr>' + esc(UP.err) + "</p>" : "") +
+      (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "");
+  }
+  function goodsNewStepHTML(n, title, opt) {
+    return '<div class="adm-gnstep"><span class="adm-gnstep__n" aria-hidden="true">' + n + "</span>" +
+      '<h2 class="adm-gnstep__t"><span>' + title + "</span>" + (opt ? ' <span class="adm-gnstep__o">— можно потом</span>' : "") + "</h2></div>";
+  }
+  function goodsNewDescSummary(d) {
+    var has = ["RU", "ET", "EN"].filter(function (L) { return String((d.desc || {})[L] || "").trim(); });
+    return has.length ? has.join(" · ") : "пусто";
+  }
+  function goodsNewHTML(p) {
+    var d = S.goodsNew || (S.goodsNew = goodsNewBlank());
+    var stamp = d.savedAt ? new Date(d.savedAt).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" }) : "";
+    var pd = { id: "new", brand: p.brand, name: p.name, descOv: d.desc, seoOv: seoNorm(d.seo) };
+    var missing = goodsNewMissing();
+    return '<div class="adm-screen adm-screen--tight adm-ed adm-ed--new" data-edfor="new">' +
+      '<button class="adm-link adm-link--back adm-ed__back" data-admclose>← Товары</button>' +
+      '<h1 class="adm-h1 adm-h1--flat">Новый товар</h1>' +
+      '<p class="adm-ed__draft">' + (S.goodsNewRestored && stamp
+        ? "<span>Черновик от " + stamp + "</span> · " +
+          '<button class="adm-link adm-link--muted" type="button" data-goodsnewreset>Начать заново</button>'
+        : "<span>Черновик сохраняется сам — можно выйти и вернуться позже.</span>") + "</p>" +
+      '<section class="adm-gnsec" data-edsec="what">' + goodsNewStepHTML(1, "Что за товар") +
+        '<div class="adm-edsec__b">' + edWhatFields(p, false) + "</div></section>" +
+      '<section class="adm-gnsec" data-edsec="sizes">' + goodsNewStepHTML(2, "Объёмы и цены") + goodsNewSizesHTML(p) + "</section>" +
+      '<section class="adm-gnsec" data-edsec="photos">' + goodsNewStepHTML(3, "Фото", true) + goodsNewPhotosHTML() + "</section>" +
+      '<div class="adm-gnfolds">' +
+        admFoldHTML("gn-desc", '<span>Описание</span> <span class="adm-gnstep__o">— можно потом</span>', goodsNewDescSummary(d), edDescBody(pd, "new")) +
+        admFoldHTML("gn-seo", '<span>Для Google</span> <span class="adm-gnstep__o">— можно потом</span>', edSeoSummary(seoNorm(d.seo)), edSeoBody(pd, "new")) +
+      "</div>" +
+      '<p class="adm-hint">После «Добавить товар» он сразу появится в магазине и откроется его карточка — там остатки, штрихкоды, видео и всё остальное.</p>' +
+      '<p class="adm-err adm-ed__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
+      '<div class="adm-gnfoot"><p class="adm-ed__missing" data-goodsnewmissing aria-live="polite">' + goodsNewMissingHTML() + "</p>" +
+        admPinnedHTML('data-admsavegoods="new"' + (missing.length ? ' aria-disabled="true"' : "") + (S.goodsBusy ? " disabled" : ""),
+          S.goodsBusy ? "Добавляем…" : "Добавить товар") + "</div>" +
+      "</div>";
+  }
+  /** A photo picked for the draft: up at once, filed under the draft's own
+      id (the upload route files a product photo under an id, and the product
+      has none yet); the POST then carries the list as the product's gallery. */
+  function goodsNewUpload(files) {
+    var d = S.goodsNew;
+    if (!d) return;
+    var queue = [];
+    for (var i = 0; i < files.length; i++) queue.push(files[i]);
+    if (!queue.length) return;
+    if (d.photos.length + queue.length > MAX_PHOTOS) {
+      UP.err = "Больше " + MAX_PHOTOS + " фотографий на товар не нужно";
+      toast(UP.err); render(); return;
     }
-    edStepsPaint();   // product creation: the strip's done/now state follows the form
+    goodsNewSync();
+    UP.err = ""; UP.total = queue.length; UP.busy = queue.length; render();
+    var step = function () {
+      var f = queue.shift();
+      if (!f) { UP.busy = 0; UP.total = 0; render(); return; }
+      uploadPhoto(f, "product", d.draftId).then(function (r) {
+        d.photos.push({ url: r.url, thumb: r.thumbUrl || r.url, key: r.key || "" });
+        goodsNewSave();
+        UP.busy = queue.length;
+        render();
+        step();
+      }).catch(upFail);
+    };
+    step();
+  }
+  /** ← → ★ × on «Новый товар»'s own photos: the draft's list, saved at
+      once. A photo taken out of a draft is taken out of the bucket too —
+      nothing else points at it. */
+  function goodsNewPhotoOp(d) {
+    var g = S.goodsNew;
+    if (!g) return;
+    goodsNewSync();
+    var list = g.photos || (g.photos = []);
+    if (d.galmove !== undefined) {
+      var mv = String(d.galmove).split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
+      if (!(mj >= 0 && mj < list.length && list[mi])) return;
+      list.splice(mj, 0, list.splice(mi, 1)[0]);
+    } else if (d.galmain !== undefined) {
+      var mn = Number(d.galmain);
+      if (!(mn > 0 && mn < list.length)) return;
+      list.unshift(list.splice(mn, 1)[0]);
+    } else {
+      var di = Number(d.galdel);
+      if (!(di >= 0 && di < list.length)) return;
+      var gone = list.splice(di, 1)[0];
+      if (gone && gone.key) galDrop(gone.key);
+    }
+    goodsNewSave();
+    render();
+  }
+  /** The sizes grid rebuilt in place after «+ Объём» / «×»: the rows are
+      positions, and a morph that shifted them would hand one size's typing
+      to its neighbour. What the owner typed into the count, code and salon
+      boxes rides across (edSizePaneKeep). */
+  function edSizesRepaint(p) {
+    var sec = document.querySelector('[data-edsec="sizes"]');
+    if (!sec) { render(); return; }
+    var keep = edSizePaneKeep(sec);
+    var tpl = document.createElement("template");
+    tpl.innerHTML = p.isNew
+      ? '<section class="adm-gnsec" data-edsec="sizes">' + goodsNewStepHTML(2, "Объёмы и цены") + goodsNewSizesHTML(p) + "</section>"
+      : edSecSizes(p);
+    var fresh = tpl.content.firstElementChild;
+    translateTree(fresh);
+    sec.replaceWith(fresh);
+    edSizePaneRestore(fresh, keep);
+  }
+  /** «Убрать» on the size's sheet: the row goes, and the ladder is saved at
+      once with «Вернуть» on the toast — unless another row still has no
+      name, in which case it waits for that, marked. */
+  function edSizeDelApply(pa) {
+    var p = admEditProduct(pa.id);
+    render();   // the sheet goes
+    if (!p || p.isNew || S.adminEdit !== pa.id) return;
+    var rows = edSizeRowsRead(p);
+    if (rows.length < 2 || !rows[pa.index]) return;
+    rows.splice(pa.index, 1);
+    if (S.goodsSizes) S.goodsSizes.dirty = true;
+    edSizesRepaint(p);
+    var key = edAsKey(p, "ladder"), spec = edAsSpec(p.id, "ladder");
+    var v = edLadderRaw();
+    ED.toastFor[key] = "Объём " + pa.size + " убран";
+    admAutosave(key, v, "input", spec);
+    if (!admAutosave(key, v, "enter", spec)) delete ED.toastFor[key];
+  }
+  /** The card closes: its fields' records go with it — except a write still
+      in the air, or one that did not land and waits for «Повторить». */
+  function edAsForget(id) {
+    if (!id) return;
+    var pre = "ed:" + id + ":";
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k) || k.indexOf(pre) !== 0) continue;
+      var f = ADM_AS[k];
+      if (f.busy || f.failed) continue;
+      clearTimeout(f.timer);
+      delete ADM_AS[k];
+    }
+  }
+  /* ---- a render under the owner's typing (renderImpl) ----------------------
+     Every box of the card the owner has typed into — its value is not what
+     the last render wrote (an input's `value` attribute, a textarea's text,
+     a select's `selected` option) — is written down with its caret, by the
+     data-* attributes that name it, and put back after the patch. A box the
+     render itself changed while nobody typed in it is left alone: that is a
+     save landing, or a «Вернуть». */
+  function edKeepSel(el) {
+    var parts = [];
+    for (var i = 0; i < el.attributes.length; i++) {
+      var a = el.attributes[i];
+      if (a.name.indexOf("data-") !== 0 || a.name === "data-edauto" || a.name === "data-sx" || a.name === "data-goodsbad") continue;
+      parts.push("[" + a.name + '="' + String(a.value).replace(/["\\]/g, "\\$&") + '"]');
+    }
+    return parts.length ? el.tagName.toLowerCase() + parts.join("") : "";
+  }
+  function edKeepTyped(root) {
+    var out = [], els = root.querySelectorAll("input,textarea,select");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], tag = el.tagName, typed;
+      if (el.type === "file" || el.type === "checkbox") continue;
+      if (tag === "SELECT") typed = el.selectedIndex !== admSelectedIdx(el);
+      else if (tag === "TEXTAREA") typed = el.value !== el.defaultValue;
+      else typed = el.value !== (el.getAttribute("value") || "");
+      if (!typed) continue;
+      var sel = edKeepSel(el);
+      if (!sel) continue;
+      var k = { sel: sel, value: el.value, idx: el.selectedIndex, range: null };
+      if (el === document.activeElement && tag !== "SELECT") { try { k.range = [el.selectionStart, el.selectionEnd]; } catch (e) {} }
+      out.push(k);
+    }
+    return out;
+  }
+  function edKeepRestore(keep) {
+    for (var i = 0; i < keep.length; i++) {
+      var k = keep[i], el = bodySlot.querySelector(k.sel);
+      if (!el) continue;
+      if (el.tagName === "SELECT") { if (el.selectedIndex !== k.idx) el.selectedIndex = k.idx; continue; }
+      if (el.value !== k.value) el.value = k.value;
+      if (k.range && document.activeElement === el && (el.selectionStart !== k.range[0] || el.selectionEnd !== k.range[1])) {
+        try { el.setSelectionRange(k.range[0], k.range[1]); } catch (e) {}
+      }
+    }
   }
   /* ---------- inventory: «Склад» — numeric stock, EAN, the moves ledger ---
      Real quantities live in stock_levels/stock_moves (src/lib/inventory.ts,
@@ -34492,14 +35509,13 @@
     SCAN.zoomCaps = null; SCAN.pinchFrom = 0;
     scanSetEngine("");
   }
-  /* The one code the product editor asked for (openScannerFor). Written into
+  /* The one code the product card asked for (openScannerFor). Written into
      the size's box exactly as a typed one would be — the value, not the
      attribute, so renderImpl's goodsKeep carries it across the repaint the
-     close causes, and «Сохранить» sees a box that differs from the warehouse
-     copy and binds it. Nothing is written to the warehouse here, and no card
-     is shown: the code is the answer, not a question. The box is not
-     focused — on a phone that raises the keyboard over the very code the
-     owner wants to look at — but it is brought into view. */
+     close causes — and bound at once, as the box would be when it is left
+     (1a). No card is shown: the code is the answer, not a question. The box
+     is not focused — on a phone that raises the keyboard over the very code
+     the owner wants to look at — but it is brought into view. */
   function scanToEditor(code) {
     var key = S.scanFor;
     var box = key ? document.querySelector('[data-edean="' + key + '"]') : null;
@@ -34510,9 +35526,11 @@
     render();
     var after = document.querySelector('[data-edean="' + key + '"]');
     if (after && after.scrollIntoView) after.scrollIntoView({ block: "center" });
-    // «Код», not «Штрихкод»: the toast is one line with an ellipsis, and the
-    // longer word cost it the «Сохранить» it is asking for on a 375-px phone
-    toast("Код считан — нажмите «Сохранить»");
+    /* 1a (the product card saves itself): the code read is BOUND now, and
+       the toast says so with «Вернуть» once the warehouse has it
+       (edEanScanned). A code that is not a code, or one another size
+       carries, stays in the box with its rust line instead. */
+    if (!edEanScanned(after || box)) toast("Код считан");
   }
   function handleScanCode(code) {
     var now = Date.now();
@@ -36939,13 +37957,22 @@
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
     else if (a.type === "set_gallery") srvSaved(apiSend(ov, "PUT", { id: a.id, gallery: a.list }));
-    // …and the owner's own product keeps its photos in its row
+    /* …and the owner's own product keeps its photos in its row — through the
+       row's queue (edOwnPut), which adopts the answer: the card may be saving
+       another field of the same row this very moment */
     else if (a.type === "set_product_gallery") {
-      apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", { gallery: a.list || [] })
-        .then(function (r) {
-          if (r.status === 200 && r.body.ok && r.body.product) customAdopt(r.body.product);
-          else toast("Не удалось сохранить фото товара");
-        }).catch(noop);
+      edOwnPut(a.id, { gallery: a.list || [] }).then(function (r) {
+        if (!(r && r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить фото товара");
+        render();
+      });
+    }
+    /* inventory, 1a: a size's barcode, put back by «Вернуть» (or freed) —
+       the warehouse row's own PUT, then the list again */
+    else if (a.type === "set_ean") {
+      stockLevelSaveDetailed({ productId: a.product_id, variant: a.variant || "", ean: a.value || null }).then(function (res) {
+        if (!res.ok) toast(stockSaveErrText(res) || "Не удалось вернуть штрихкод");
+        reloadStock();
+      });
     }
     // a post's cover: read the post, write it back with the cover changed
     else if (a.type === "set_post_cover") {
@@ -37075,12 +38102,11 @@
        fields as they were go back through the same PUT (applyUpdateProduct
        made the forward call itself), and the answer is the shop's copy */
     else if (a.type === "update_product") {
-      apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", updatePatchOf(a))
-        .then(function (r) {
-          if (r.status === 200 && r.body.ok && r.body.product) customAdopt(r.body.product);
-          else toast("Не удалось сохранить товар");
-          render();
-        }).catch(noop);
+      // the row's queue (edOwnPut) — it adopts the answer itself
+      edOwnPut(a.id, updatePatchOf(a)).then(function (r) {
+        if (!(r && r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить товар");
+        render();
+      });
     }
     else if (a.type === "adjust_points") {
       // integration: the assistant may propose an e-mail instead of a uuid
@@ -38180,6 +39206,12 @@
       return "Товар «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
         (a.value ? "убрать из магазина" : "показывать в магазине");
     }
+    // inventory, 1a: a size's barcode from the product card — bound, or freed
+    if (a.type === "set_ean") {
+      var ep = a.product_id && byIdOrNull(a.product_id);
+      var epName = (a.name || (ep ? ep.brand + " — " + ep.name : a.product_id)) + (a.variant ? " (" + a.variant + ")" : "");
+      return "Штрихкод «" + epName + "»: " + (a.was ? a.was + " → " : "") + (a.value || "отвязан");
+    }
     // inventory: numeric stock — a.id is empty for these (they key off product_id, not id)
     if (a.type === "stock_adjust" || a.type === "stock_set") {
       var sp = a.product_id && byId(a.product_id);
@@ -38530,7 +39562,11 @@
     var head = a.full ? "Тарифы доставки: " : "Доставка: ";
     return head + (parts.length <= 4 ? parts.join(" · ") : parts.slice(0, 4).join(" · ") + " и ещё " + (parts.length - 4));
   }
-  function demoApply(a) {
+  /** `own`: the caller makes the server write itself and wants its promise
+      — the 1a autosave, whose «Сохранено ✓» waits for the 2xx (edWrite). The
+      copy, the journal line and its undo are made here as always; only
+      srvPush() (and set_video's own write) is left out. */
+  function demoApply(a, own) {
     var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: actionText(a), a: a, prev: null };
     var p = a.id && byId(a.id);
     if (a.type === "set_price") { entry.prev = { type: "set_price", id: a.id, value: DEMO.price[a.id] != null ? DEMO.price[a.id] : p.price }; DEMO.price[a.id] = a.value; }
@@ -38641,7 +39677,14 @@
     else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     // features
-    else if (a.type === "set_video") { entry.prev = { type: "set_video", id: a.id, value: (DEMO.video[a.id] != null ? DEMO.video[a.id] : (p.video || "")) }; DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }
+    else if (a.type === "set_video") { entry.prev = { type: "set_video", id: a.id, value: (DEMO.video[a.id] != null ? DEMO.video[a.id] : (p.video || "")) }; DEMO.video[a.id] = a.value; if (!own) pushOverride(a.id, { video_url: a.value }); }
+    /* inventory, 1a: a size's barcode bound or freed in the product card
+       (q20: «Отвязать код» at once, with «Вернуть»). The code lives on the
+       warehouse row, not here — the entry is the journal line and, in `prev`,
+       the code to put back; srvPush() carries it to PUT /api/admin/inventory. */
+    else if (a.type === "set_ean") {
+      entry.prev = { type: "set_ean", product_id: a.product_id, variant: a.variant, value: a.was || null, was: a.value || null, name: a.name };
+    }
     // media: an empty list means «back to the catalogue photos», and undo puts
     // the previous list back — including that empty one
     else if (a.type === "set_gallery") {
@@ -38773,10 +39816,12 @@
     }
     /* product creation: «снять с продажи» and its undo — the row's active
        flag on the local copies here, DELETE/PUT on the server in srvPush() */
+    /* 1a: the card stays open — «Показывать в магазине» is a switch on it
+       now, and a switch does not close what it sits on (the old «Снять с
+       продажи» card closes the editor itself, in its own branch) */
     else if (a.type === "set_product_active") {
       entry.prev = { type: "set_product_active", id: a.id, value: !a.value, name: a.name };
       customSetActive(a.id, a.value);
-      if (!a.value && S.adminEdit === a.id) S.adminEdit = "";
     }
     else return;
     DEMO.log.unshift(entry);
@@ -38785,7 +39830,7 @@
     applyDemoOverrides();
     // and through to the server when the owner is signed in — with the line
     // just written, so a refusal can take it back out again (journalDrop)
-    srvPush(a, entry);
+    if (!own) srvPush(a, entry);
     return entry;   // so a toast can offer to take exactly this line back
   }
   function demoUndo(i) {
@@ -38855,7 +39900,9 @@
     // the switch on screen moves with it straight away (demoApply's own note)
     else if (a.type === "set_tier") { admTierLocal(a.id, a.email, a.value); }
     // product creation: the row comes back on (or goes off) the shelf
-    else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
+    else if (a.type === "set_product_active") { customSetActive(a.id, a.value); }
+    // inventory, 1a: the code goes back on its size — srvPush() below is the write
+    else if (a.type === "set_ean") noop();
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -40447,15 +41494,16 @@
       try { refocusRange = [af.selectionStart, af.selectionEnd]; } catch (e) {}
     })();
 
-    /* Same problem, one screen over, with a worse ending. The goods editor is
-       the only admin form with no draft in S at all: every field is read
-       straight off the DOM when «Сохранить» is pressed. So a background probe
-       landing mid-edit — ensureMedia(), loadAdminPricing(), the analytics
-       warm-up in probeAdmin(), each of which ends in render() — rebuilt the
-       form from the SAVED product and silently threw away everything typed
-       since; the next «Сохранить» then stored the old values back and said
-       «Изменений нет». Carry what is on screen across the swap, but only when
-       the same product is still open (data-admsavegoods carries its id). */
+    /* Same problem, one screen over, with a worse ending. The product card
+       keeps no draft in S: what is typed lives in the boxes until it saves
+       itself. So a background probe landing mid-edit — ensureMedia(),
+       loadAdminPricing(), the analytics warm-up, each of which ends in
+       render() — must not put the SAVED value back over a box being typed
+       in, nor move the caret of the description a save just landed under.
+       What the owner has typed (and only that: a box still holding what the
+       last render wrote is left to the render, so a «Вернуть» shows) rides
+       across the swap, while the same card is open (data-edfor carries its
+       id) — edKeepTyped / edKeepRestore. */
     /* The login card has the same problem in miniature and a worse ending:
        it is rebuilt by every render, its <input type="password"> deliberately
        carries no value attribute (a password does not belong in the markup),
@@ -40469,35 +41517,8 @@
     }
     var goodsKeep = null;
     if (S.screen === "admin" && S.adminEdit) {
-      var openFor = bodySlot.querySelector("[data-admsavegoods]");
-      if (openFor && openFor.getAttribute("data-admsavegoods") === S.adminEdit) {
-        goodsKeep = {};
-        for (var gi = 0; gi < GOODS_FIELDS.length; gi++) {
-          var gel = bodySlot.querySelector(GOODS_FIELDS[gi]);
-          if (gel) goodsKeep[GOODS_FIELDS[gi]] = gel.value;
-        }
-        /* The «Размеры и цены» grid has one Остаток and one Штрихкод box per
-           size, keyed by «productId variant» — a fixed selector list cannot
-           name them, so they are collected by the key they carry. */
-        // product creation: the same for a custom product's own size rows
-        var gcells = bodySlot.querySelectorAll("[data-edqty],[data-edean],[data-edsz],[data-edpx]");
-        for (var gc = 0; gc < gcells.length; gc++) {
-          var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty"
-            : gcells[gc].hasAttribute("data-edean") ? "data-edean"
-            : gcells[gc].hasAttribute("data-edsz") ? "data-edsz" : "data-edpx";
-          /* inventory: …but only where the owner has actually typed. The
-             warehouse list lands AFTER the editor opens (loadStockLevels
-             fires from the pane itself), and carrying an untouched empty box
-             across that render pinned «Остаток» and «Штрихкод» empty for good
-             — a size with a code looked exactly like a size with none, until
-             the editor was closed and opened again. A box still holding
-             exactly what the last render wrote into it (its value attribute)
-             has not been touched. */
-          var gwas = gcells[gc].getAttribute("value");
-          if (gwas !== null && gcells[gc].value === gwas) continue;
-          goodsKeep['[' + attr + '="' + gcells[gc].getAttribute(attr) + '"]'] = gcells[gc].value;
-        }
-      }
+      var openFor = bodySlot.querySelector("[data-edfor]");
+      if (openFor && openFor.getAttribute("data-edfor") === S.adminEdit) goodsKeep = edKeepTyped(openFor);
     }
 
     var bodyHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
@@ -40539,13 +41560,7 @@
       if (pwEl1) pwEl1.value = pwKeep;
     }
 
-    if (goodsKeep) {
-      for (var gk in goodsKeep) {
-        if (!Object.prototype.hasOwnProperty.call(goodsKeep, gk)) continue;
-        var gn = bodySlot.querySelector(gk);
-        if (gn) gn.value = goodsKeep[gk];
-      }
-    }
+    if (goodsKeep) edKeepRestore(goodsKeep);
 
     if (refocusSel) {
       var nf = bodySlot.querySelector(refocusSel);
@@ -41285,10 +42300,12 @@
          all. The layer stays open, so admSyncHistory() parks a fresh entry
          and the next Back closes for real — exactly as it works for the blog
          two branches up. */
+      if (S.adminEdit === "new") goodsNewSave();   // «Новый товар»: its draft stays for next time
       if (goodsEditDirty() && !S.goodsConfirmBack) { S.goodsConfirmBack = true; return true; }
       var backId = S.adminEdit;
+      edAsForget(backId);
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
-      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+      S.goodsSizes = null; S.goodsNew = null; S.goodsVidKind = "";
       S.goodsConfirmBack = false;
       goodsBackToRow(backId);
     } else if (top === "order") {
@@ -41325,6 +42342,9 @@
      anything else that clears the flag — forgets it. A second tap on the nav
      while the question is up goes, as a second «←» or Back does. */
   function admLeaveAsks(go) {
+    /* 1a: the card's boxes save themselves — what they still owe goes now,
+       and only a box that COULD not go (an empty price) is asked about */
+    if (S.adminEdit) { admAutosaveFlush(); if (S.adminEdit === "new") goodsNewSave(); }
     if (S.adminEdit && goodsEditDirty()) {
       if (S.goodsConfirmBack) return false;
       S.goodsConfirmBack = go;
@@ -41356,10 +42376,12 @@
   function admGoTab(go) {
     admAutosaveFlush();   // 1a: a field left owing goes before the section changes
     var tab = go.tab;
-    // the product editor closes the way «← Товары» closes it: its drafts go with it
+    // the product card closes the way «← Товары» closes it («Новый товар» keeps its draft)
     if (S.adminEdit) {
+      if (S.adminEdit === "new") goodsNewSave();
+      edAsForget(S.adminEdit);
       S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
-      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+      S.goodsSizes = null; S.goodsNew = null; S.goodsVidKind = "";
     }
     // a letter left through the nav after its question: its unsaved words go, as the question said
     if (S.mailOpen && S.mailConfirmBack) mailRevertOne(mailTpl());
@@ -41813,7 +42835,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -42390,33 +43412,36 @@
       S.goodsConfirmBack = false;   // a fresh card never opens mid-question
       S.goodsSizes = null; S.goodsNew = null;   // product creation: the size rows start from what is saved
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
-      // a fresh product opens on «Основное», in the language and the video
-      // kind the design starts from — not on whatever the last one was left on
-      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      // a fresh product opens at its top, in the language and the video kind
+      // the design starts from — not on whatever the last one was left on
+      S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
     /* «Остаться» / «Выйти без сохранения» — the two halves of the question
-       «← Товары» now asks when there is something to lose. */
+       «← Товары» asks when a box holds what could not be sent. */
     if (d.admbackno !== undefined) { S.goodsConfirmBack = false; render(); return; }
     if (d.admclose !== undefined || d.admbackyes !== undefined) {
+      // whatever a box still owes goes first (1a autosave) — what cannot go is the question
+      admAutosaveFlush();
+      if (S.adminEdit === "new") goodsNewSave();   // «Новый товар»: the draft is kept, nothing to ask
       if (d.admbackyes === undefined && goodsEditDirty() && !S.goodsConfirmBack) {
-        S.goodsConfirmBack = true; render(); return;
+        S.goodsConfirmBack = true; render(); window.scrollTo({ top: 0 }); return;
       }
       // the question came from the nav: «Выйти без сохранения» goes where it was going
       if (d.admbackyes !== undefined && S.goodsConfirmBack && S.goodsConfirmBack.tab) {
+        edAsForget(S.adminEdit);
         admGoTab(S.goodsConfirmBack); return;
       }
       var closeId = S.adminEdit;
+      edAsForget(closeId);
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null;   // product creation
-      S.goodsEditTab = "main"; S.goodsVidKind = ""; S.goodsConfirmBack = false; render();
+      S.goodsVidKind = ""; S.goodsConfirmBack = false; render();
       goodsBackToRow(closeId); return;
     }
-    /* ---- Товар: the five tabs -------------------------------------------
-       A DOM patch, never a render(): every pane is in the page at once
-       precisely because this form keeps no draft in S, and rebuilding it
-       would put the SAVED values back over whatever is being typed. */
-    if (d.edtab !== undefined) { edShowTab(d.edtab); return; }
+    /* The old tab keys still name a place on the one page: «Фото и видео»,
+       «Google» … scroll there (and the Google fold opens). */
+    if (d.edtab !== undefined) { edScrollTo(d.edtab); return; }
     // the same control on «Описание» and on «Google»: one language on screen
     if (d.eddesclang !== undefined || d.edseolang !== undefined) {
       var seoSeg = d.edseolang !== undefined, pickL = seoSeg ? d.edseolang : d.eddesclang;
@@ -42434,6 +43459,12 @@
       for (var si2 = 0; si2 < segs.length; si2++) {
         segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute(segAttr) === pickL));
       }
+      /* «Перевести на ET и EN» from the Russian tab, «Перевести с русского»
+         (that one language) from the other two — the word follows the tab */
+      if (!seoSeg) {
+        var trB = document.querySelector("[data-edtrlabel]");
+        if (trB && !trB.disabled) { trB.textContent = edTrLabel(pickL); translateTree(trB); }
+      }
       edLangStatePaint();   // …and what the two languages you left behind hold
       return;
     }
@@ -42444,32 +43475,40 @@
       if (vidKeep) { VID.id = S.adminEdit; VID.url = vidKeep.value; }
       S.goodsVidKind = d.edvidkind; render(); return;
     }
+    // «×» on the video row: gone from the page at once, «Вернуть» on the toast
     if (d.edvidclear !== undefined) {
-      VID.id = S.adminEdit; VID.url = "";
-      var vidEl0 = document.querySelector("[data-edvideo]");
-      if (vidEl0) vidEl0.value = "";
-      render(); return;
+      var vcP = admEditProduct(S.adminEdit);
+      if (!vcP || vcP.isNew) return;
+      vidReset();
+      var vcBox = document.querySelector("[data-edvideo]");
+      if (vcBox) vcBox.value = "";
+      var vcKey = edAsKey(vcP, "video");
+      ED.toastFor[vcKey] = "Видео убрано";
+      admAutosave(vcKey, "", "input", edAsSpec(vcP.id, "video"));
+      admAutosave(vcKey, "", "enter", edAsSpec(vcP.id, "video"));
+      return;
     }
-    /* inventory: «Отвязать» in the «Размеры и цены» grid. The box is emptied
-       here and nothing else — the code is actually freed by «Сохранить»
-       (the same PUT the column has always made), so a mis-tap on a phone is
-       undone by simply not saving. No render(): the row would be redrawn
-       from the warehouse copy, which still carries the code. */
+    /* inventory: «Отвязать код» in the «Объёмы и цены» grid. 1a (q20): the
+       code is freed at once, and «Вернуть» on the toast binds it back — it
+       used to wait for «Сохранить», so a mis-tap cost nothing; now the undo
+       is what makes a mis-tap cost nothing. */
     if (d.edunbind !== undefined) {
-      var unEl = document.querySelector('[data-edean="' + d.edunbind + '"]');
-      if (unEl) { admFill(unEl, ""); unEl.focus(); }
+      var unEl = document.querySelector(admAsSel("data-edean", d.edunbind));
+      if (!unEl) return;
+      var unKey = unEl.getAttribute("data-autosave");
+      unEl.value = "";
+      if (unKey) {
+        ED.toastFor[unKey] = "Код отвязан";
+        admAutosave(unKey, "", "input");
+        admAutosave(unKey, "", "enter");
+      }
       t.hidden = true;
-      toast("Штрихкод убран — нажмите «Сохранить»");
       return;
     }
     /* inventory: the scanner, opened from a size's own «Штрихкод» box. The
-       code it reads goes into that box (scanToEditor) and NOT to the
-       warehouse: like a typed one it is bound by «Сохранить», so a mis-scan
-       costs a tap on the box rather than a wrong code on the shelf. */
+       code it reads goes into that box (scanToEditor) and is bound at once,
+       «Вернуть» on the toast (edEanScanned). */
     if (d.edscan !== undefined) { openScannerFor(d.edscan); return; }
-    /* product creation: «+ Товар» opens the editor over a product that does
-       not exist yet; «Вернуть в продажу» is the undo of the hide, applied at
-       once (nothing destructive about it) with the toast's own undo. */
     // «Показать ещё»: the next 40 rows of the catalogue list
     if (d.admgoodsmore !== undefined) { S.goodsShown = (S.goodsShown || 40) + 40; render(); return; }
     // «Какие товары»: the same chips «Заказы» and «Склад» have, and the same
@@ -42479,116 +43518,139 @@
        filter both. The box itself is repainted by render(), so there is
        nothing to clear by hand afterwards. */
     if (d.goodsclear !== undefined) { S.goodsQ = ""; S.goodsFilter = "all"; S.goodsShown = 40; render(); return; }
+    // «Виден» on a catalogue row (desktop)
+    if (d.goodsvis !== undefined) { goodsVisToggle(d.goodsvis); return; }
+    /* «+ Товар»: «Новый товар» — the draft left last time, if there is one,
+       with «Черновик от … · Начать заново» over it; a blank one otherwise. */
     if (d.admgoodsnew !== undefined) {
-      S.adminTab = "goods"; S.adminEdit = "new"; S.goodsNew = { brand: "", name: "", cat: "hair", subcat: "" };
+      var gnWas = goodsNewLoad();
+      S.goodsNewRestored = goodsNewHasContent(gnWas);
+      S.goodsNew = S.goodsNewRestored ? gnWas : goodsNewBlank();
+      S.adminTab = "goods"; S.adminEdit = "new";
       S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); ensureMedia();
-      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = ""; UP.err = "";
       window.scrollTo({ top: 0 }); render(); refocus("[data-edbrand]"); return;
+    }
+    // «Начать заново» — the draft and its photos go, after the confirm sheet
+    if (d.goodsnewreset !== undefined) {
+      pendingAction = { type: "goods_new_reset", title: "Начать заново?", ok: "Начать заново", danger: true, overlay: true,
+        detail: "Черновик и фото, которые вы в него загрузили, удалятся." };
+      render(); return;
     }
     if (d.admgoodsshow !== undefined) {
       var showP = admEditProduct(d.admgoodsshow);
       if (!showP || !showP.custom) return;
-      var showEntry = demoApply({ type: "set_product_active", id: showP.id, value: true, name: showP.brand + " — " + showP.name });
-      S.goodsSizes = null;
-      toast("Снова в продаже ✓", showEntry); render(); return;
-    }
-    /* «Показывать в магазине» (migration 147). Reversible and instant, like
-       every other switch: the toast's «Отменить» and the journal's «Вернуть»
-       are the way back, no confirm card. */
-    if (d.edhidden !== undefined) {
-      var hidP = admEditProduct(d.edhidden);
-      if (!hidP || hidP.custom) return;
-      var hidWant = shopHidden(hidP.id);   // pressed while hidden = show again
-      var hidEntry = demoApply({ type: "set_hidden", id: hidP.id, value: !hidWant,
-        name: hidP.brand + " — " + hidP.name });
-      render();
-      toast(hidWant ? "Товар снова в магазине ✓" : "Товар убран из магазина ✓", hidEntry);
+      edInstant("ed:" + showP.id + ":shown", { type: "set_product_active", id: showP.id, value: true, name: showP.brand + " — " + showP.name }, "Товар снова в магазине");
       return;
     }
+    /* «Показывать в магазине» — one switch over two models: a catalogue
+       product's `hidden` (migration 147), the owner's own row's `active`.
+       Reversible and instant, like every other switch: the toast's
+       «Вернуть» and the journal are the way back, no confirm card. */
+    if (d.edhidden !== undefined) { goodsVisToggle(d.edhidden); return; }
+    /* «Наличие»: the three words for a product nobody counts, «Не продавать»
+       for a counted one (q22) — at once, «Вернуть» on the toast. */
+    if (d.edstock !== undefined) {
+      var skP = admEditProduct(S.adminEdit);
+      if (!skP || skP.isNew || !/^(in|low|out)$/.test(d.edstock) || d.edstock === skP.stock) return;
+      var skWord = edCounted(skP)
+        ? (d.edstock === "out" ? "Продажа остановлена" : "Снова продаётся")
+        : { in: "Наличие: в наличии", low: "Наличие: мало", out: "Наличие: нет" }[d.edstock];
+      edInstant(edAsKey(skP, "stock"), { type: "set_stock", id: skP.id, value: d.edstock }, skWord);
+      return;
+    }
+    // «Остаток» − / +: a burst of taps is one move (edQtyStep)
+    if (d.edqtystep !== undefined) { edQtyStep(d.edqtykey || "", Number(d.edqtystep) || 0); return; }
+    /* «+ Объём» and «×». «+» adds a row with the last price copied and no
+       name yet — nothing is sent until it has one. «×» asks first (README
+       rule 4: a delete is confirmed), then saves at once with «Вернуть». */
     if (d.edsizeadd !== undefined || d.edsizedel !== undefined) {
       var szP = admEditProduct(S.adminEdit);
-      if (!szP || szP.isNew && !szP.custom) return;
+      if (!szP) return;
       var szRows = edSizeRowsRead(szP);
-      if (d.edsizeadd !== undefined) {
+      if (d.edsizedel !== undefined) {
+        var delI = Number(d.edsizedel);
+        if (szRows.length < 2 || !szRows[delI]) return;
+        /* A row that is not in the shop yet — added with «+ Объём» after the
+           ones the product has — goes without the question: there is nothing
+           to take out of the shop */
+        var inShop = !szP.isNew && delI < edLadderNow(szP).length;
+        if (inShop) {
+          var delLabel = String(szRows[delI].size || "").trim() || "этот объём";
+          pendingAction = { type: "ed_size_del", id: szP.id, index: delI, size: delLabel, overlay: true, danger: true, ok: "Убрать",
+            title: "Убрать " + delLabel + "?",
+            detail: szP.custom
+              ? "Объём исчезнет из магазина вместе с его остатком и штрихкодом."
+              : "Объём исчезнет из магазина. Остаток и штрихкод останутся на складе." };
+          render(); return;
+        }
+        szRows.splice(delI, 1);
+      } else {
         if (szRows.length >= 12) { goodsFail("Больше 12 объёмов не нужно."); return; }
         szRows.push({ size: "", price: szRows.length ? szRows[szRows.length - 1].price : "" });
-      } else {
-        szRows.splice(Number(d.edsizedel), 1);
-        if (!szRows.length) szRows.push({ size: "", price: "" });
       }
+      if (S.goodsSizes) S.goodsSizes.dirty = true;
       goodsErrClear();
-      // the grid is rebuilt in place — a render() would put the saved values
-      // back over everything typed on the other four tabs
-      var szPane = document.querySelector('[data-edpane="sizes"]');
-      if (szPane) {
-        // inventory: Остаток / Штрихкод / Салон, € are re-rendered from the
-        // warehouse and the saved row, so whatever the owner typed into them
-        // rides across the replacement (edSizePaneKeep)
-        var szKeep = edSizePaneKeep(szPane);
-        var szTpl = document.createElement("template");
-        szTpl.innerHTML = szP.custom ? edPaneSizesOwn(szP) : edPaneSizes(szP);
-        var szFresh = szTpl.content.firstElementChild;
-        translateTree(szFresh);
-        szPane.replaceWith(szFresh);
-        edSizePaneRestore(szFresh, szKeep);
+      edSizesRepaint(szP);
+      if (szP.isNew) goodsNewPaint();
+      else {
+        // the new row has no name yet — the ladder waits for it; a row taken
+        // away is checked at once, so its rust line goes with it
+        var szKey = edAsKey(szP, "ladder"), szSpec = edAsSpec(szP.id, "ladder"), szV = edLadderRaw();
+        admAutosave(szKey, szV, "input", szSpec);
+        if (d.edsizedel !== undefined) admAutosave(szKey, szV, "blur", szSpec);
+        else toast("Новый объём — впишите объём и цену");
       }
-      /* The ladder changed, so the bar says «Не сохранено» — for the deletion
-         as well as for the addition. It used to say it only for the addition,
-         and only by accident: «+ Размер» ends by putting the caret in the new
-         box, and the owner's next keystroke is the `input` admBarTouch
-         listens for. «×» types nothing, so a real, savable change went
-         unannounced and could be walked away from (Renat, 12.09.2026). */
-      admBarTouched();
       if (d.edsizeadd !== undefined) refocus('[data-edsz="' + (szRows.length - 1) + '"]');
       return;
     }
-    /* «Убрать фон»: the cut-out replaces the photo in the draft list; the
-       original stays in the bucket, and «Сохранить» is what makes it so.
-       The cut-out is a model round trip and the server gives it up to 90
-       seconds (src/lib/photo-cutout.ts), which is a long time to be standing
-       in a gallery with five buttons on every tile. */
+    /* «Убрать фон»: the cut-out takes the photo's place in the list, which is
+       saved at once — the original stays in the bucket, and «Вернуть» puts it
+       back. The cut-out is a model round trip the server gives up to 90
+       seconds (src/lib/photo-cutout.ts); the tile says so meanwhile. */
     if (d.galcut !== undefined) {
       var cutP = admEditProduct(S.adminEdit);
+      if (!cutP || cutP.isNew) return;
       var cutI = Number(d.galcut);
       galDraft(cutP);
       var cutPh = GAL.list[cutI];
       if (!cutPh || GAL.cutting) return;
-      /* WHICH PHOTO, not which slot. This used to remember the index the ✂
-         was pressed on and write the answer back to that index — so pressing
-         ★ on the same photo while the server worked (which is exactly what
-         the owner did) shifted the list under the answer: the cut-out landed
-         on whatever photo had moved into the old slot and **replaced** it,
-         the photo he had made the main one still had its background, and the
-         picture he lost was gone with no word said. Renat, 12.09.2026:
-         «actually the photo which it replaced is lost». */
+      /* WHICH PHOTO, not which slot (Renat, 12.09.2026: «actually the photo
+         which it replaced is lost»): the answer is written to the photo with
+         this address, wherever it has moved to meanwhile (galCutIndex). */
       var cutJob = { id: GAL.id, url: cutPh.url, alt: cutPh.alt || "" };
       GAL.cutting = cutJob; render();
       apiSend("/api/admin/upload/cutout/", "POST", { url: cutJob.url }).then(function (r) {
         GAL.cutting = null;
         if (r.status === 401) { SRV.admin = false; render(); return; }
         if (r.status === 200 && r.body.ok && r.body.url) {
+          var cp = admEditProduct(cutJob.id);
+          if (S.adminEdit === cutJob.id) galDraft(cp);
           var at = galCutIndex(cutJob);
-          if (at < 0) {
-            /* Not in this draft any anymore — removed with ×, replaced by
-               «Вернуть фото из каталога», or another product's editor is
-               open. Nothing is written over anything; the original and the
-               cut-out both sit in the bucket, and the photo that is on
-               screen is the photo that stays. */
+          if (at < 0 || S.adminEdit !== cutJob.id) {
+            /* Not in this list any more — removed with ×, replaced by «Вернуть
+               фото из каталога», or another product's card is open. Nothing is
+               written over anything; the photo on screen is the photo that
+               stays. */
             toast("Этого фото уже нет в списке — вырезанное фото никуда не поставлено");
+            render();
           } else {
             GAL.list[at] = { url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: cutJob.alt };
-            if (r.body.key) GAL.fresh[r.body.url] = r.body.key;
-            toast("Фон убран ✓ — проверьте и нажмите «Сохранить»");
+            edGallerySave(cp, "Фон убран · оригинал сохранён");
           }
-        } else toast("Не получилось убрать фон — фото осталось как было");
+          return;
+        }
+        toast("Не получилось убрать фон — фото осталось как было");
         render();
       }).catch(function () { GAL.cutting = null; toast("Не получилось убрать фон — фото осталось как было"); render(); });
       return;
     }
+    /* «Снять с продажи» / «Отметить «нет в наличии»» moved into «В магазине»
+       (1a): the switch and «Наличие». The hook keeps its old meaning for
+       anything that still sends it — the same confirm card as before. */
     if (d.admgoodspull !== undefined) {
       var pullP = admEditProduct(d.admgoodspull);
       if (!pullP) return;
-      // product creation: the owner's own product really leaves the shelf
       if (pullP.custom) {
         pendingAction = { type: "set_product_active", id: pullP.id, value: false, name: pullP.brand + " — " + pullP.name,
           title: "Снять с продажи?", ok: "Снять", danger: true, overlay: true,
@@ -42601,8 +43663,8 @@
       render(); return;
     }
     /* ---- media: the «Фото» block ----------------------------------------
-       Everything here edits the draft list only; «Сохранить» is what turns it
-       into a set_gallery action, so «Отмена» really cancels. */
+       1a: every button here saves the list it leaves (edGallerySave), with
+       «Вернуть» on the toast. «Новый товар»'s photos are its draft's. */
     if (d.galup !== undefined) {
       var upIn = document.querySelector('[data-galfile="' + (d.galup || "").replace(/"/g, "") + '"]');
       if (upIn) upIn.click();
@@ -42614,109 +43676,102 @@
       if (vidIn) vidIn.click();
       return;
     }
-    if (d.galmove !== undefined) {
-      var mv = d.galmove.split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
-      if (mj >= 0 && mj < GAL.list.length) {
-        var moved = GAL.list.splice(mi, 1)[0];
-        GAL.list.splice(mj, 0, moved);
-        GAL.reset = false;
-        /* «Every button that edits the draft should say so here» — the rule
-           written above admBarTouched() when «×» on a size was fixed. Three of
-           the four buttons in this strip broke it: only «★» said anything, so
-           a reordered or deleted photo could be walked away from with the
-           header still blank. */
-        admBarTouched();
-        render();
+    if (d.galmove !== undefined || d.galmain !== undefined || d.galdel !== undefined) {
+      if (S.adminEdit === "new") { goodsNewPhotoOp(d); return; }
+      var gP = admEditProduct(S.adminEdit);
+      if (!gP) return;
+      var gl = galDraft(gP), gMsg = "";
+      if (d.galmove !== undefined) {
+        var mv = d.galmove.split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
+        if (!(mj >= 0 && mj < gl.length && gl[mi])) return;
+        gl.splice(mj, 0, gl.splice(mi, 1)[0]);
+        gMsg = mj === 0 ? "Теперь это главное фото" : "Порядок фото изменён";
+      } else if (d.galmain !== undefined) {
+        var mn = Number(d.galmain);
+        if (!(mn > 0 && mn < gl.length)) return;
+        gl.unshift(gl.splice(mn, 1)[0]);
+        gMsg = "Теперь это главное фото";
+      } else {
+        var di = Number(d.galdel);
+        if (!(di >= 0 && di < gl.length)) return;
+        /* The file stays in the bucket: «Вернуть» — on the toast now, in the
+           journal later — has to be able to bring the photo back. */
+        gl.splice(di, 1);
+        gMsg = "Фото удалено";
       }
-      return;
-    }
-    if (d.galmain !== undefined) {
-      var mn = Number(d.galmain);
-      if (mn > 0 && mn < GAL.list.length) {
-        GAL.list.unshift(GAL.list.splice(mn, 1)[0]);
-        GAL.reset = false;
-        toast("Главная фотография выбрана — нажмите «Сохранить»");
-        render();
-      }
-      return;
-    }
-    if (d.galdel !== undefined) {
-      var di = Number(d.galdel);
-      if (di >= 0 && di < GAL.list.length) {
-        var gone = GAL.list.splice(di, 1)[0];
-        // only a photo uploaded in this sitting is removed from the bucket —
-        // an older one has to survive so undo can bring it back
-        if (gone && GAL.fresh[gone.url]) { galDrop(GAL.fresh[gone.url]); delete GAL.fresh[gone.url]; }
-        GAL.reset = false;
-        admBarTouched();
-        render();
-      }
+      edGallerySave(gP, gMsg);
       return;
     }
     if (d.galreset !== undefined) {
+      var grP = admEditProduct(d.galreset);
+      if (!grP || grP.isNew) return;
+      galDraft(grP);
       GAL.list = baseGallery(d.galreset);
       GAL.reset = true;
-      /* Putting the photos back is an edit too: it differs from what is saved
-         the moment anything else in this sitting moved them. */
-      admBarTouched();
-      render(); return;
-    }
-    if (d.vpick !== undefined) {
-      // select a photo for one size inside the editor (applied on Save)
-      var pk = d.vpick.split(":");
-      /* Into the draft as well as into the DOM — see galSizePick(). The DOM
-         is still patched rather than rendered, because a render() here would
-         rebuild the whole editor from what is SAVED and take the price, the
-         SEO boxes and the descriptions being typed on the other tabs with it. */
-      var pkPhoto = GAL.list[Number(pk[1])];
-      if (pkPhoto) GAL.picks[Number(pk[0])] = pkPhoto.url;
-      var row = document.querySelector('[data-vrow="' + pk[0] + '"]');
-      if (row) row.querySelectorAll("[data-vpick]").forEach(function (b2) {
-        b2.setAttribute("aria-current", String(b2 === t));
-      });
-      admBarPaintNote();   // the pick is a draft edit: the bar asks edMediaDirty()
+      edGallerySave(grP, "Фото из каталога вернулись");
       return;
     }
-    /* ---- assistant-work: goods-editor AI buttons --------------------------
-       Deliberately no render() anywhere in these four handlers: the editor
-       has several other unsaved fields (price, SEO, the other description
-       textareas) that a full re-render would reset to their last-saved
-       value, wiping whatever the owner was mid-typing. Every DOM change
-       here — the busy label, the filled-in text, the «Отменить» button — is
-       therefore a direct, targeted patch, same idiom as toast()/patchNav(). */
-    // «Заполнить автоматически» writes the language the Google tab is on —
-    // it used to send Russian whatever was shown; «все три языка» asks thrice
+    /* «Фото по объёмам»: a pick is saved at once. The choice is written down
+       as the photo's ADDRESS first (galSizePick), then as the position the
+       saved list has it at — which is what the shop reads. */
+    if (d.vpick !== undefined) {
+      var vpP = admEditProduct(S.adminEdit);
+      if (!vpP || vpP.isNew || !vpP.sizes || vpP.sizes.length < 2) return;
+      var pk = d.vpick.split(":");
+      var pkPhoto = galDraft(vpP)[Number(pk[1])];
+      if (!pkPhoto) return;
+      GAL.picks[Number(pk[0])] = pkPhoto.url;
+      var vmap = vpP.sizes.map(function (sz, si) { return galSizePick(vpP, si); });
+      GAL.picks = {};
+      if (varImgChanged(vmap, vpP.varImg)) edInstant(edAsKey(vpP, "varimg"), { type: "set_varimg", id: vpP.id, map: vmap }, "");
+      return;
+    }
+    /* ---- assistant-work: the card's AI buttons ----------------------------
+       What they write goes into the box on screen and is SAVED like a typed
+       change (edAsTextNow), with «Вернуть» on the toast once the server has
+       it. «Новый товар» keeps it in its draft. No render() while the answer
+       is on its way: the boxes being typed in elsewhere keep their words. */
+    // «✨ Заполнить автоматически · все три языка»
     if (d.admseogen !== undefined || d.admseoall !== undefined) {
       var sp2 = admEditProduct(d.admseogen !== undefined ? d.admseogen : d.admseoall);
       admDescSnapshot(sp2);
       admSeoFill(sp2, d.admseoall !== undefined ? ["RU", "ET", "EN"] : [(S.goodsSeoLang || "ru").toUpperCase()], t);
       return;
     }
+    /* «Написать черновик» writes the language on screen (B45: it used to be
+       Russian whatever tab was open). */
     if (d.admdescgen !== undefined) {
       var dp = admEditProduct(d.admdescgen);   // product creation: the draft's own brand/name/section for «new»
       admDescSnapshot(dp);
+      var dL = String(S.goodsDescLang || "ru").toUpperCase();
       var descBtn = t, descLabel = t.textContent; t.disabled = true; t.textContent = "…";
       apiSend("/api/admin/ai/text/", "POST", {
-        task: "describe", lang: "RU",
+        task: "describe", lang: dL,
         input: { name: dp.name, brand: dp.brand, category: CAT_NAMES[dp.cat] || dp.cat, sizes: dp.sizes || [] },
       }).then(function (r) {
         descBtn.disabled = false; descBtn.textContent = descLabel;
         if (r.status === 200 && r.body.ok && r.body.text) {
-          var ru = document.querySelector("[data-eddescru]");
+          var box = document.querySelector(DESC_HOOKS[dL] || DESC_HOOKS.RU);
           var body = txt(r.body.text.description);
           var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
-          admFill(ru, bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body);
-          toast("Черновик готов — проверьте и сохраните");
+          admFill(box, bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body);
+          edLangStatePaint();
+          if (S.adminEdit === "new") { goodsNewPaint(); toast("Черновик написан — прочитайте и поправьте"); }
+          else edAsTextNow("desc", "Черновик написан — прочитайте и поправьте");
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { descBtn.disabled = false; descBtn.textContent = descLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* «Перевести на ET и EN» on the Russian tab, «Перевести с русского» — that
+       one language — on its own tab (B46). */
     if (d.admtranslate !== undefined) {
       var tp = admEditProduct(d.admtranslate);
       admDescSnapshot(tp);
       var trBtn = t, trLabel = t.textContent;
+      var trTab = String(S.goodsDescLang || "ru").toUpperCase();
+      var trTo = trTab === "RU" ? ["ET", "EN"] : [trTab];
       var ruEl = document.querySelector("[data-eddescru]");
       var srcText = (ruEl && ruEl.value.trim()) ||
         stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[tp.id]) || (typeof CONTENT !== "undefined" && CONTENT[tp.id]) || "");
@@ -42724,14 +43779,18 @@
       t.disabled = true; t.textContent = "…";
       apiSend("/api/admin/ai/text/", "POST", {
         task: "translate", lang: "RU",
-        input: { text: srcText, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: [tp.brand, tp.name] },
+        input: { text: srcText, sourceLang: "RU", targetLangs: trTo, keepNames: [tp.brand, tp.name] },
       }).then(function (r) {
         trBtn.disabled = false; trBtn.textContent = trLabel;
         if (r.status === 200 && r.body.ok && r.body.texts) {
-          var etEl = document.querySelector("[data-eddescet]"), enEl = document.querySelector("[data-eddescen]");
-          if (etEl && r.body.texts.ET) admFill(etEl, r.body.texts.ET);
-          if (enEl && r.body.texts.EN) admFill(enEl, r.body.texts.EN);
-          toast("Черновик готов — проверьте и сохраните");
+          trTo.forEach(function (L) {
+            var el = document.querySelector(DESC_HOOKS[L]);
+            if (el && r.body.texts[L]) admFill(el, r.body.texts[L]);
+          });
+          edLangStatePaint();
+          var trMsg = trTo.length > 1 ? "Переведено на эстонский и английский" : "Переведено с русского";
+          if (S.adminEdit === "new") { goodsNewPaint(); toast(trMsg); }
+          else edAsTextNow("desc", trMsg);
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
         else toast("Не получилось — попробуйте ещё раз");
@@ -42770,6 +43829,8 @@
        The assistant itself lost nothing: it still writes all four through its
        own set_content / create_promo actions, where the owner sees what is
        about to change before he applies it. */
+    /* «✨ Подобрать название» — the owner's product saves the answer like a
+       typed name (with «Вернуть»), «Новый товар» keeps it in its draft. */
     if (d.ednamespark !== undefined) {
       var nbEl = document.querySelector("[data-edbrand]"), nnEl = document.querySelector("[data-edname]"), ncEl = document.querySelector("[data-edcat]");
       var typedName = nnEl ? nnEl.value.trim() : "";
@@ -42780,9 +43841,16 @@
         if (!tx.name) return;
         admFill(nnEl, txt(tx.name).slice(0, 120));
         edNameHintPaint(txt(tx.name));
+        var nKey = nnEl && nnEl.getAttribute("data-autosave");
+        if (nKey) ED.toastFor[nKey] = "Предложили название — поправьте, если нужно";
+        if (!edAsPoke(nnEl, true)) goodsNewPaint();
       });
       return;
     }
+    /* The assistant's «Отменить» of the phase-2 editor. 1a gives every AI
+       fill its own «Вернуть» on the toast (and a line in the journal), so
+       the card no longer draws this; the hook keeps working for a snapshot
+       taken this visit — and what it puts back is saved like the rest. */
     if (d.admdescundo !== undefined) {
       if (!AI_UNDO) return;
       var setv = function (sel, v) { admFill(document.querySelector(sel), v || ""); };
@@ -42791,233 +43859,28 @@
       setv("[data-edseotet]", AI_UNDO.seoTet); setv("[data-edseodet]", AI_UNDO.seoDet);
       setv("[data-edseoten]", AI_UNDO.seoTen); setv("[data-edseoden]", AI_UNDO.seoDen);
       AI_UNDO = null;
-      var slot2 = document.querySelector("[data-descundoslot]");
-      if (slot2) slot2.innerHTML = "";
-      toast("Отменено ✓");
+      edLangStatePaint();
+      if (S.adminEdit === "new") goodsNewPaint();
+      else { edAsTextNow("desc", ""); edAsTextNow("seo", ""); }
+      toast("Вернули как было");
       return;
     }
+    /* «Добавить товар» — «Новый товар»'s one dark button, and the only thing
+       on that page that creates. Dim while something required is missing
+       (aria-disabled), but still pressable: the press names the box, marks it
+       and puts the caret in it — a refusal out loud, never a dead button.
+       1a: the card of an existing product has no «Сохранить» — every box
+       saves itself — so this hook is «Новый товар»'s alone. */
     if (d.admsavegoods !== undefined) {
-      var gp = admEditProduct(d.admsavegoods);
-      /* product creation: the owner's own row — brand, name, section, sizes,
-         photos and texts go to its own route (customRowFromForm → PUT/POST);
-         what is override-owned (stock, salon price, video, counts, barcodes)
-         keeps the path below, so the two never disagree about who owns what. */
-      var ownRow = gp.custom ? customRowFromForm(gp) : null;
-      if (gp.custom && !ownRow) return;
-      if (gp.isNew) { goodsErrClear(); customCreate(ownRow, "form"); return; }
-      var priceEl = document.querySelector("[data-edprice]");
-      var stockEl = document.querySelector("[data-edstock]");
-      var priceProEl = document.querySelector("[data-edproprice]");
-      var videoEl = document.querySelector("[data-edvideo]");
-      /* Everything is checked BEFORE anything is written. A half-applied save
-         — new price stored, bad video quietly dropped — is the one outcome a
-         non-technical owner cannot untangle afterwards, and the journal would
-         show only the half that went through. */
-      var np = priceEl ? goodsPrice(priceEl.value) : gp.price;
-      if (priceEl && np === null) {
-        goodsFail("Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"); return;
-      }
-      /* migration 147: the whole size ladder of a catalogue product. Read and
-         checked here, before any write, like everything else in this handler —
-         a half-saved ladder is the one thing the owner could not untangle. */
-      var edLadder = null, edLadderChanged = false;
-      if (!gp.custom && document.querySelector("[data-edpx]")) {
-        edLadder = edLadderFromForm(gp);
-        if (!edLadder) return;
-        edLadderChanged = edLadderMoved(edLadderNow(gp), edLadder);
-      }
-      /* A salon price the field only *followed* (data-edauto="1" — nothing
-         typed by hand, the value is price × (1 − discount) painted by the
-         input handler) is not an override. Saving it as one would freeze the
-         salon price at this moment's 80 % and it would stop following the
-         retail price from then on — and leave a second journal line the owner
-         never asked for. */
-      var rawPP = priceProEl && priceProEl.getAttribute("data-edauto") === "0" ? priceProEl.value.trim() : "";
-      var npp = rawPP ? goodsPrice(rawPP) : null;
-      if (rawPP && npp === null) {
-        goodsFail("Цена для салонов — число от 1 до 500 €.", "[data-edproprice]"); return;
-      }
-      // A salon paying more than the shelf price is a typo every single time,
-      // and a silent one costs money on every wholesale order.
-      if (npp !== null && np !== null && npp > np) {
-        goodsFail("Цена для салонов не может быть выше розничной.", "[data-edproprice]"); return;
-      }
-      var nv = videoEl ? videoEl.value.trim() : "";
-      if (nv && !parseVideo(nv)) {
-        goodsFail("Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.", "[data-edvideo]"); return;
-      }
-      /* inventory: the «Остаток» column of the sizes grid. A shelf count is a
-         whole number or nothing at all — «abc» must not travel as a null the
-         moves route would read as 0 and wipe the shelf with (see
-         stockQtyValue's own comment). Checked here, before any write. */
-      var qtyCells = [].slice.call(document.querySelectorAll("[data-edqty]"));
-      for (var qc = 0; qc < qtyCells.length; qc++) {
-        var qRaw = qtyCells[qc].value.trim();
-        if (qRaw && stockQtyValue(qRaw) === null) {
-          goodsFail("Остаток — целое число от 0. Пусто — оставить как есть.",
-            '[data-edqty="' + qtyCells[qc].getAttribute("data-edqty") + '"]');
-          return;
-        }
-      }
+      if (d.admsavegoods !== "new" || S.adminEdit !== "new" || S.goodsBusy) return;
+      goodsNewSave();
+      var gp = admEditProduct("new");
+      var ownRow = customRowFromForm(gp);
+      if (!ownRow) return;
+      var gnPhotos = (S.goodsNew && S.goodsNew.photos) || [];
+      if (gnPhotos.length) ownRow.gallery = gnPhotos.map(function (ph) { return { url: ph.url, thumb: ph.thumb || ph.url, alt: "" }; });
       goodsErrClear();
-
-      var changed = false;
-      /* A ladder whose volumes moved travels whole (set_sizes, which carries
-         the first price with it); a plain price change on an untouched ladder
-         stays the one-line set_price it has always been, so the journal keeps
-         saying «Цена …» for what is a price change. */
-      if (edLadderChanged) {
-        demoApply({ type: "set_sizes", id: gp.id, value: edLadder,
-          name: gp.brand + " — " + gp.name }); changed = true;
-      } else if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
-        demoApply({ type: "set_price", id: gp.id, value: np }); changed = true;
-      }
-      // wholesale/loyalty: salon/pro price — empty field clears the override
-      if (priceProEl) {
-        var curPP = gp.proPrice != null ? gp.proPrice : null;
-        if (!rawPP) {
-          if (curPP != null) { demoApply({ type: "set_pro_price", id: gp.id, value: null }); changed = true; }
-        } else if (curPP == null || Math.abs(npp - curPP) > 0.001) {
-          demoApply({ type: "set_pro_price", id: gp.id, value: npp }); changed = true;
-        }
-      }
-      if (stockEl && stockEl.value !== gp.stock) {
-        demoApply({ type: "set_stock", id: gp.id, value: stockEl.value }); changed = true;
-      }
-      var subEl = document.querySelector("[data-edsubcat]");
-      if (!gp.custom && subEl && subEl.value !== (DEMO.subcat[gp.id] || "")) {
-        demoApply({ type: "set_subcat", id: gp.id, value: subEl.value }); changed = true;
-      }
-      /* ---- media: the photo list ----------------------------------------
-         Before the per-size map, so the map is compared against the list that
-         is about to be in force rather than the one being replaced. */
-      if (!gp.custom && galDirty(gp)) {
-        demoApply({ type: "set_gallery", id: gp.id, list: galSaveList() });
-        changed = true;
-      }
-      GAL.id = ""; UP.err = ""; vidReset();
-      /* ---- /media ---------------------------------------------------------- */
-      var rowsV = [...document.querySelectorAll("[data-vrow]")];
-      if (rowsV.length) {
-        var map2 = rowsV.map(function (r2) {
-          var sel2 = r2.querySelector('[data-vpick][aria-current="true"]');
-          return sel2 ? Number(sel2.dataset.vpick.split(":")[1]) : -1;
-        });
-        if (varImgChanged(map2, gp.varImg)) {
-          demoApply({ type: "set_varimg", id: gp.id, map: map2 }); changed = true;
-        }
-      }
-      /* Three languages, three pairs. Every pair empty means «снова как в
-         каталоге» and removes the override — with an «is anything typed»
-         guard, emptying the boxes was the one edit the form could not make,
-         and the only way back was the database. */
-      var seoRead = function (tSel, dSel) {
-        var te = document.querySelector(tSel), de2 = document.querySelector(dSel);
-        return { t: te ? te.value.trim() : "", d: de2 ? de2.value.trim() : "" };
-      };
-      var seoNew = { RU: seoRead("[data-edseot]", "[data-edseod]"), ET: seoRead("[data-edseotet]", "[data-edseodet]"), EN: seoRead("[data-edseoten]", "[data-edseoden]") };
-      if (!gp.custom && JSON.stringify(seoNorm(seoNew)) !== JSON.stringify(seoNorm(gp.seoOv))) {
-        demoApply({ type: "set_seo", id: gp.id, value: seoNew, title: seoNew.RU.t, description: seoNew.RU.d }); changed = true;
-      }
-      /* ---- features: the video link -------------------------------------- */
-      if (videoEl) {
-        var curV = (DEMO.video && DEMO.video[gp.id]) || gp.video || "";
-        // demoApply() writes the demo layer, the log and the server copy —
-        // srvPush() deliberately leaves set_video to us. `nv` was validated
-        // against parseVideo() at the top of this handler.
-        if (nv !== curV) { demoApply({ type: "set_video", id: gp.id, value: nv }); changed = true; }
-      }
-      /* ---- /features ------------------------------------------------------ */
-      /* ---- assistant-work: the trilingual description override ----------- */
-      var druEl = document.querySelector("[data-eddescru]"), detEl = document.querySelector("[data-eddescet]"), denEl = document.querySelector("[data-eddescen]");
-      if (!gp.custom && (druEl || detEl || denEl)) {
-        var ndesc = { RU: druEl ? druEl.value.trim() : "", ET: detEl ? detEl.value.trim() : "", EN: denEl ? denEl.value.trim() : "" };
-        var curDesc = gp.descOv || {};
-        if (ndesc.RU !== (curDesc.RU || "") || ndesc.ET !== (curDesc.ET || "") || ndesc.EN !== (curDesc.EN || "")) {
-          demoApply({ type: "set_description", id: gp.id, value: ndesc }); changed = true;
-        }
-      }
-      /* ---- /assistant-work -------------------------------------------------- */
-      /* ---- inventory: the sizes grid's own two columns --------------------
-         Остаток and Штрихкод are not overrides — they are the warehouse
-         (stock_levels / stock_moves), the same rows «Склад» and the scanner
-         write. The quantity travels as a RELATIVE move, because that is the
-         only shape the route takes and the only one two clients can race
-         safely; the barcode is a plain PUT whose refusal («этот код уже
-         занят») is the server's to word. */
-      for (var qi = 0; qi < qtyCells.length; qi++) {
-        var qKey = qtyCells[qi].getAttribute("data-edqty");
-        var qRow = stockFindRow(qKey);
-        var qVal = qtyCells[qi].value.trim();
-        if (!qVal) continue;
-        var qWant = stockQtyValue(qVal);
-        var qTracked = !!(qRow && qRow.tracked);
-        var qHas = qTracked ? qRow.qty : 0;
-        if (qWant === qHas && qTracked) continue;
-        var qVariant = qRow ? qRow.variant : qKey.slice(gp.id.length + 1);
-        /* The first count of a never-counted size is an ABSOLUTE number, not a
-           move: «шкаф пустой» is a delta of 0, which the route rightly refuses
-           as bad_delta, so the one count that matters most came back as «Склад
-           не принял правку». stock_set carries the number itself. A size that
-           is already counted keeps the relative move — that is the only shape
-           two clients can race safely. */
-        demoApply(qTracked
-          ? { type: "stock_adjust", product_id: gp.id, variant: qVariant, delta: qWant - qHas, reason: "adjust" }
-          : { type: "stock_set", product_id: gp.id, variant: qVariant, qty: qWant });
-        changed = true;
-      }
-      var eanCells = document.querySelectorAll("[data-edean]");
-      var eanJobs = [];
-      for (var ei = 0; ei < eanCells.length; ei++) {
-        var eKey = eanCells[ei].getAttribute("data-edean");
-        var eRow = stockFindRow(eKey);
-        var eVal = eanCells[ei].value.trim();
-        if (eVal === ((eRow && eRow.ean) || "")) continue;
-        changed = true;
-        /* Collected, not fired and forgotten. Every other check in this
-           handler runs BEFORE anything is written; the barcode was the
-           exception, so a refusal — «этот код уже привязан к другому товару»
-           — arrived as a toast over the product LIST, after «Сохранено ✓»,
-           with the editor closed and the typed code gone. The key travels
-           with the promise so the answer can point at the box it belongs to
-           (the sizes grid has one per rung). */
-        eanJobs.push((function (key) {
-          return stockLevelSaveDetailed({
-            productId: gp.id, variant: eRow ? eRow.variant : key.slice(gp.id.length + 1),
-            ean: eVal || null
-          }).then(function (res) { return { res: res, key: key }; });
-        })(eKey));
-      }
-      // product creation: the row itself goes last, and its answer closes the editor
-      if (gp.custom) { customUpdate(gp, ownRow); return; }
-      var doneSaving = function () {
-        AI_UNDO = null;
-        S.adminEdit = "";
-        S.goodsConfirmBack = false;
-        toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
-        render();
-        goodsBackToRow(gp.id);
-      };
-      if (!eanJobs.length) { doneSaving(); return; }
-      /* …and «Сохранено ✓» waits for the barcodes, because a refused one is
-         the owner's to fix and he can only fix it while the box is still on
-         the screen with what he typed in it. */
-      S.goodsBusy = true;
-      Promise.all(eanJobs).then(function (out) {
-        S.goodsBusy = false;
-        reloadStock();
-        var bad = null;
-        for (var bi = 0; bi < out.length; bi++) if (!out[bi].res.ok) { bad = out[bi]; break; }
-        if (bad) {
-          goodsFail(stockSaveErrText(bad.res) || "Не удалось привязать штрихкод",
-            '[data-edean="' + bad.key + '"]');
-          return;
-        }
-        doneSaving();
-      }).catch(function () {
-        S.goodsBusy = false;
-        goodsFail("Сервер не отвечает — попробуйте ещё раз", "");
-      });
+      customCreate(ownRow, "form", S.goodsNew && S.goodsNew.idemKey);
       return;
     }
     if (d.admapply !== undefined) {
@@ -43029,6 +43892,9 @@
         if (pa.type === "create_product") { applyCreateProduct(pa); return; }
         // …and a change to one of those rows: a PUT, journalled with the row as it was
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
+        // «Товар» 1a: a size removed after its sheet, «Начать заново» on «Новый товар»
+        if (pa.type === "ed_size_del") { edSizeDelApply(pa); return; }
+        if (pa.type === "goods_new_reset") { goodsNewReset(); render(); refocus("[data-edbrand]"); return; }
         // «Рассылка»: the send is a loop of POSTs with its own progress card — nothing to undo
         if (pa.type === "newsletter_send") { newsSendStart(pa); return; }
         if (pa.type === "set_product_active") {
@@ -44415,17 +45281,14 @@
     else if (t.matches("[data-stocklowinput]")) { S.stockEditLow = t.value; }
     else if (t.matches("[data-stockqtyinput]")) { S.stockEditQty = t.value; }
     else if (t.matches("[data-stockreasoninput]")) { S.stockEditReason = t.value; }
-    /* «Размеры и цены»: the salon column follows the price — the design's
+    /* «Объёмы и цены»: the salon price follows the price — the design's
        «auto = price × 0.8», with the shop's own discount instead of the
-       prototype's flat number. It stops following the moment the owner types
-       a salon price of their own (data-edauto="0"), so a deliberate wholesale
-       price is never quietly rewritten by a retail edit. */
+       prototype's flat number. 1a: as the box's PLACEHOLDER only — an empty
+       salon box is «the discount», and a value written into it would be
+       saved as the owner's own price (it saves itself now). */
     else if (t.matches("[data-edprice]")) {
       var salonEl = document.querySelector("[data-edproprice]");
       var np0 = goodsPrice(t.value);
-      if (salonEl && np0 !== null && salonEl.getAttribute("data-edauto") !== "0") {
-        salonEl.value = String(edSalonOf(np0));
-      }
       if (salonEl) salonEl.placeholder = String(edSalonOf(np0 === null ? 0 : np0));
     }
     else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
@@ -44888,7 +45751,9 @@
     // patch, like every other change on the goods editor's form
     else if (t.matches("[data-edcat]")) {
       var subSlot = document.querySelector("[data-edsubslot]");
-      if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, ""); translateTree(subSlot); }
+      // the owner's product: the new box saves itself too (a new section starts at «Авто»)
+      var subP = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
+      if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, "", subP ? edAsAttr(subP, "subcat") : ""); translateTree(subSlot); }
     }
     // the card's size picker — state first, then patch the price in place
     /* «Бренд» — a native <select> of twenty-six names, so the phone's own
@@ -45586,22 +46451,9 @@
     // a box filled after its form was closed marks nothing
     if (el.isConnected !== false) admBarTouched();
   }
-  function edMediaDirty() {
-    var p = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
-    if (!p || p.isNew) return false;
-    if (galDirty(p)) return true;
-    // a size's photo picked by hand — compared the way «Сохранить» compares it
-    if (GAL.id === p.id && GAL.picks && Object.keys(GAL.picks).length && p.sizes && p.sizes.length > 1) {
-      var picked = p.sizes.map(function (sz, si) { return galSizePick(p, si); });
-      if (varImgChanged(picked, p.varImg)) return true;
-    }
-    // the video: a draft address that is not the saved one (VID.url null = no draft)
-    if (VID.id === p.id && VID.url !== null) {
-      var savedVid = (DEMO.video && DEMO.video[p.id]) || p.video || "";
-      if (String(VID.url).trim() !== savedVid) return true;
-    }
-    return false;
-  }
+  /** The product card has no draft of its media any more (1a): every photo
+      button, a size's photo, the video's upload and its × save at once. */
+  function edMediaDirty() { return false; }
   /* The yardstick of a form with a draft in S is the draft as it was when the
      form's bar was first drawn — the render that opened it — so no opener has
      to remember to take it. `lang` is which language is on screen, not
@@ -45622,12 +46474,19 @@
     if (S.adminEdit) return edMediaDirty();
     return admDraftDiffers();
   }
-  /** Is there anything in the open product editor worth asking about?
-      The same flag the save bar reads, so «Не сохранено» in the header and
-      the question on the way out can never disagree — one of them appearing
-      without the other is how the owner learns not to trust either. */
+  /** Is there anything in the open product card worth asking about? 1a:
+      only a box whose value COULD NOT be sent — an empty price, a size with
+      no name, a code that is not a code (its autosave record carries the
+      refusal). Everything else has saved itself, or is on its way, or waits
+      for «Повторить» in the header. «Новый товар» keeps its draft, so it
+      never asks. */
   function goodsEditDirty() {
-    return !!(S.adminEdit || S.goodsNew) && admFormDirty();
+    if (!S.adminEdit || S.adminEdit === "new") return false;
+    var pre = "ed:" + S.adminEdit + ":";
+    for (var k in ADM_AS) {
+      if (Object.prototype.hasOwnProperty.call(ADM_AS, k) && k.indexOf(pre) === 0 && ADM_AS[k].err && ADM_AS[k].dirty) return true;
+    }
+    return false;
   }
   document.addEventListener("input", admBarTouch);
   document.addEventListener("change", admBarTouch);

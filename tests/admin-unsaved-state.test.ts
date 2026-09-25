@@ -94,7 +94,9 @@ describe("the notice over the form", () => {
     // the component's own copy is the only one left
     expect(src.match(/Есть несохранённые изменения — нажмите «Сохранить»\.<\/p>/g) ?? [], "a hand-drawn copy is left").toHaveLength(1);
     expect(slice("admDirtyNoteHTML")).toContain("Есть несохранённые изменения — нажмите «Сохранить».</p>");
-    expect(src, "the photo strip's notice is drawn by hand").toContain('admDirtyNoteHTML("data-galdirty"');
+    /* 1a: the product card's photos save at once (edGallerySave), so its strip
+       has nothing unsaved to announce — and no hand-drawn notice either */
+    expect(src, "the photo strip still announces an unsaved draft").not.toContain("data-galdirty");
   });
 
   /* display:flex on a class beats the UA's [hidden] rule — a notice that is

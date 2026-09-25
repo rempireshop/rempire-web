@@ -95,6 +95,9 @@ function editor(loaded = true): Env {
      function admPanesSave() {}
      // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
      function admAutosaveFlush() {}
+     // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+     function edAsForget() {}
+     function goodsNewSave() {}
      function mailSendToast() {}
      function vidReset() {}
      function goodsEditDirty() { return false; }

@@ -69,6 +69,9 @@ function panel(opts: { dirtyNews?: boolean } = {}): Panel {
     function closeScannerState() {}
     // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here
     function admAutosaveFlush() {}
+    // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+    function edAsForget() {}
+    function goodsNewSave() {}
     function goodsBackToRow() {}
     function newsDirty() { return DIRTY; }
     function newsCloseEditor() { S.newsEdit = null; S.newsConfirmBack = false; onClose(); }

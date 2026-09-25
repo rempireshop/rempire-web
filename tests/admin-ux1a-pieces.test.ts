@@ -235,7 +235,10 @@ describe("the look the handoff fixed (admin.css § 3)", () => {
   it("the «?» is the one round control; it is a thumb's size on a phone", () => {
     expect(css).toContain("border-radius: 50%; border: 1px solid var(--a-edge);");
     expect(css).toContain("@media (max-width: 899px) { .adm-help { width: 44px; height: 44px;");
-    expect(css.match(/border-radius: (?!0)[^;]+;/g), "something else went round").toEqual(["border-radius: 50%;"]);
+    /* README § 3: «no radius except the round «?» and status dots» — the one
+       dot so far is «Новый товар»'s step number (screen 13, .adm-gnstep__n) */
+    expect(css.match(/border-radius: (?!0)[^;]+;/g), "something else went round").toEqual(["border-radius: 50%;", "border-radius: 50%;"]);
+    expect(css).toMatch(/\.adm-gnstep__n \{[^}]*border-radius: 50%;/);
   });
 
   it("codes stay in PT Mono (Dim, 25.09.2026, q42)", () => {

@@ -58,6 +58,7 @@ function matches(p: Product, f: string, levels: Shelf[] = [], hidden: string[] =
     ${slice("goodsOffSale")}
     ${slice("goodsIsOut")}
     ${slice("goodsStockWord")}
+    ${slice("goodsRunsLow")}
     ${slice("goodsMatchesFilter")}
     return goodsMatchesFilter(P, F);
   `;
@@ -67,29 +68,45 @@ function matches(p: Product, f: string, levels: Shelf[] = [], hidden: string[] =
 
 const BOTTLE: Product = { id: "p1", brand: "Kevin.Murphy", name: "Un.Tangled", stock: "in" };
 
-describe("«Каталог» and «Склад» count the same shelf", () => {
-  it("calls a product out of stock when the counted shelf says so", () => {
+/* 1a (Dim, 25.09.2026, q17): «Кончаются» took the place of «Нет в наличии»
+   — every product in the shop with a size that is low or out. It reads the
+   same shelf «Склад» does, so the promise below is unchanged: the chip and
+   the warehouse cannot disagree about a bottle. */
+describe("«Каталог» («Кончаются») and «Склад» count the same shelf", () => {
+  it("calls a product running low when the counted shelf says so", () => {
     /* The bottle's manual «Наличие» still says «in» — the warehouse is the
        one that sells, so the warehouse wins. */
-    expect(matches(BOTTLE, "out", [{ productId: "p1", tracked: true, state: "out" }])).toBe(true);
-    expect(matches(BOTTLE, "out", [{ productId: "p1", tracked: true, state: "in" }])).toBe(false);
+    expect(matches(BOTTLE, "low", [{ productId: "p1", tracked: true, state: "out" }])).toBe(true);
+    expect(matches(BOTTLE, "low", [{ productId: "p1", tracked: true, state: "low" }])).toBe(true);
+    expect(matches(BOTTLE, "low", [{ productId: "p1", tracked: true, state: "in" }])).toBe(false);
+  });
+
+  it("one size gone is enough, though the product as a whole still sells", () => {
+    expect(matches(BOTTLE, "low", [
+      { productId: "p1", variant: "75 мл", tracked: true, state: "in" },
+      { productId: "p1", variant: "500 мл", tracked: true, state: "out" },
+    ])).toBe(true);
   });
 
   it("falls back to the manual flag for a product nobody counts", () => {
-    expect(matches({ ...BOTTLE, stock: "out" }, "out", [])).toBe(true);
-    expect(matches({ ...BOTTLE, stock: "out" }, "out", [{ productId: "p1", tracked: false, state: "in" }])).toBe(true);
-    expect(matches(BOTTLE, "out", [])).toBe(false);
+    expect(matches({ ...BOTTLE, stock: "out" }, "low", [])).toBe(true);
+    expect(matches({ ...BOTTLE, stock: "low" }, "low", [{ productId: "p1", tracked: false, state: "in" }])).toBe(true);
+    expect(matches(BOTTLE, "low", [])).toBe(false);
   });
 
   it("finds a custom product, which hard-codes stock: «in» and could never appear", () => {
     const own: Product = { id: "c-own", brand: "Rempire", name: "Soap", stock: "in", custom: true };
-    expect(matches(own, "out", [{ productId: "c-own", tracked: true, state: "out" }])).toBe(true);
+    expect(matches(own, "low", [{ productId: "c-own", tracked: true, state: "out" }])).toBe(true);
   });
 
-  it("keeps a hidden product out of «Нет в наличии» — it is not for sale at all", () => {
-    expect(matches(BOTTLE, "out", [{ productId: "p1", tracked: true, state: "out" }], ["p1"])).toBe(false);
+  it("keeps a hidden product out of «Кончаются» — it is not for sale at all", () => {
+    expect(matches(BOTTLE, "low", [{ productId: "p1", tracked: true, state: "out" }], ["p1"])).toBe(false);
     expect(matches(BOTTLE, "off", [], ["p1"])).toBe(true);
     expect(matches(BOTTLE, "on", [], ["p1"])).toBe(false);
+  });
+
+  it("a filter left on the old «out» lands on «Кончаются»", () => {
+    expect(matches(BOTTLE, "out", [{ productId: "p1", tracked: true, state: "out" }])).toBe(true);
   });
 });
 
@@ -109,15 +126,14 @@ describe("what the source says about the callers", () => {
   });
 
   it("the «Склад» tab badge prints its zero once the shelf has arrived", () => {
-    expect(body("admProductsHTML")).toContain("(S.stockLevels ? warn : \"\")");
+    expect(body("admProductsHTML")).toContain("admGoodsTabsHTML(tab, warn)");
+    expect(body("admGoodsTabsHTML")).toContain("(S.stockLevels ? warn : \"\")");
   });
 
-  it("the header counts the tab the owner is looking at", () => {
-    expect(body("admProductsHTML")).toContain("admProductsCount(tab)");
-    const count = body("admProductsCount");
-    expect(count).toContain("S.stockLevels");
-    expect(count).toContain("S.admBundles");
-    expect(count).toContain("admCatalogList().length");
+  it("the header is «Товары» with no number — every chip under it carries its own (1a, A2)", () => {
+    const html = body("admProductsHTML");
+    expect(html).toContain('admHead("", "Товары", add)');
+    expect(html).not.toContain("<small>");
   });
 
   it("«Каталог» searches the way the owner types, like «Склад» does", () => {
@@ -140,38 +156,19 @@ describe("what the source says about the callers", () => {
   });
 });
 
-describe("the product editor stops throwing work away", () => {
-  function dirty(open: string, touched: string | null): boolean {
-    const bodySrc = `
-      var S = { adminEdit: OPEN, goodsNew: null, barTouched: TOUCHED, bundleForm: null, promoForm: null, partnerForm: null };
-      // the drafts a button changes are tests/admin-button-edits-dirty.test.ts — untouched here
-      function edMediaDirty() { return false; }
-      function admDraftDiffers() { return false; }
-      ${slice("admBarIdent")}
-      ${slice("admFormDirty")}
-      ${slice("goodsEditDirty")}
-      return goodsEditDirty();
-    `;
-    return (new Function("OPEN", "TOUCHED", bodySrc) as (...a: unknown[]) => boolean)(open, touched);
-  }
-
-  it("is dirty only while the open product is the one that was typed in", () => {
-    expect(dirty("p1", "p1")).toBe(true);
-    expect(dirty("p1", null)).toBe(false);
-    // a flag left over from the form before it must not speak for this one
-    expect(dirty("p1", "p2")).toBe(false);
-    expect(dirty("", "p1")).toBe(false);
-  });
-
-  it("asks before every exit, not just the button", () => {
-    /* Three ways out and all three used to clear S.adminEdit outright: the
-       back link, «Отмена» (both `data-admclose`) and the phone's back
-       gesture (admCloseTop's «edit» branch). */
-    expect(src).toContain('if (d.admclose !== undefined || d.admbackyes !== undefined)');
+/* 1a: the card has no «Сохранить» — every box saves itself (README § 2) —
+   so «← Товары», the phone's Back and the nav ask about one thing only: a box
+   whose value could not be sent (tests/admin-ux1a-product.test.ts drives it). */
+describe("the product card never throws work away", () => {
+  it("sends what is owed before it closes, then asks about what could not go", () => {
+    const branch = src.slice(src.indexOf("if (d.admclose !== undefined || d.admbackyes !== undefined)"));
+    expect(branch.slice(0, 600)).toContain("admAutosaveFlush();");
     expect(src).toContain("goodsEditDirty() && !S.goodsConfirmBack");
-    // the gesture branch asks the same question
+    // the gesture branch sends and asks the same way
     const back = slice("admCloseTop");
+    expect(back).toContain("admAutosaveFlush();");
     expect(back).toContain("goodsEditDirty() && !S.goodsConfirmBack");
+    expect(slice("goodsEditDirty")).toContain("ADM_AS[k].err && ADM_AS[k].dirty");
   });
 
   it("offers both answers, and the delegate can hear them", () => {
@@ -182,22 +179,22 @@ describe("the product editor stops throwing work away", () => {
     expect(src).toContain("if (d.admbackno !== undefined)");
   });
 
-  it("is quiet again once the editor is saved or reopened", () => {
-    expect(src).toContain("S.goodsConfirmBack = false;   // saved");
+  it("is quiet again once the card is reopened", () => {
     expect(src).toContain("S.goodsConfirmBack = false;   // a fresh card");
   });
 
   /* «Every button that edits the draft should say so here» — the rule above
      admBarTouched(), written when «×» on a size was fixed for Renat on
-     12.09.2026. Only «★» in the photo strip obeyed it. */
-  it("every photo button says the product is unsaved, not only «★»", () => {
-    const handler = src.slice(src.indexOf("if (d.galmove !== undefined)"), src.indexOf("if (d.vpick !== undefined)"));
+     12.09.2026. 1a: every photo button SAVES the list it leaves, with
+     «Вернуть» on the toast (edGallerySave). */
+  it("every photo button saves the list at once, with a toast that can take it back", () => {
+    const handler = src.slice(src.indexOf("if (d.galmove !== undefined || d.galmain !== undefined || d.galdel !== undefined)"),
+      src.indexOf("if (d.vpick !== undefined)"));
     for (const branch of ["galmove", "galmain", "galdel", "galreset"]) {
-      const at = handler.indexOf(`d.${branch} !== undefined`);
-      expect(at, branch).toBeGreaterThan(-1);
-      const next = handler.slice(at, at + 900);
-      const says = next.includes("admBarTouched()") || next.includes("toast(");
-      expect(says, `${branch} edits the draft and says nothing`).toBe(true);
+      expect(handler.indexOf(`d.${branch} !== undefined`), branch).toBeGreaterThan(-1);
     }
+    expect(handler).toContain('edGallerySave(gP, gMsg)');
+    expect(handler).toContain('edGallerySave(grP, "Фото из каталога вернулись")');
+    for (const msg of ["Порядок фото изменён", "Теперь это главное фото", "Фото удалено"]) expect(handler).toContain(msg);
   });
 });
