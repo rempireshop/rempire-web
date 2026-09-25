@@ -108,6 +108,12 @@ function overview(lang: Lang): string {
     function admDateLine() { return ""; }
     function admOrdersLabel(n) { return String(n); }
     function admRecentRow() { return ""; }
+    // 1a: the section headers, the one dark button and the first-open bars
+    function admSecHeadHTML(t, k, h, extra) { return "<h2>" + t + "</h2>" + (extra || ""); }
+    function admPinnedHTML(a, l) { return "<button " + a + ">" + l + "</button>"; }
+    function admShipAllLabel(n) { return "Отправить " + n; }
+    function admSkelHTML() { return ""; }
+    function admReviewWho(r) { return r.name; }
     ${slice("admProdName")}
     ${slice("admTaskRow")}
     ${slice("admOverviewHTML")}

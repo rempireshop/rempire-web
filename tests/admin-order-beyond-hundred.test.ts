@@ -102,6 +102,7 @@ function panel(opts: { orders: Order[]; found?: { q: string; rows: Order[] }; wa
     function apiJson(url) { return env.ask(url, "GET"); }
     function apiSend(url, method, body) { return env.ask(url, method, body); }
     function render() {}
+    function refocus() {}
     function toast(m) { env.toast(m); }
     function demoApply(a) { env.applied.push(a); if (a.type === "order_status") srvPush(a, { a: a }); return { a: a }; }
     function journalDrop() {}

@@ -2084,6 +2084,37 @@
       "продажа в салоне": "müük salongis",
       /* the order card's own language line — admOrderLangHTML */
       "Язык писем:": "Kirjade keel:", "русский": "vene keel",
+      /* direction 1a — «Обзор», «Заказы», «Заказ» (admOverviewHTML,
+         admOrdersHTML, admOrderCardHTML and the held letters, q3) */
+      "Открыть первый:": "Ava esimene:",
+      "Имя, номер, телефон или почта": "Nimi, number, telefon või e-post",
+      "Номер": "Number", "Дата": "Kuupäev", "Что и куда": "Mis ja kuhu",
+      "Показать все заказы": "Näita kõiki tellimusi",
+      "Посылка": "Pakk", "Следующий шаг": "Järgmine samm", "Ещё действия": "Veel toiminguid",
+      "Выдан клиенту — всё сделано ✓": "Kliendile üle antud — kõik tehtud ✓",
+      "Доставлен — всё сделано ✓": "Kohale toimetatud — kõik tehtud ✓",
+      "Проверьте платёж в Montonio": "Kontrollige makset Montonios",
+      "Карта ушла на почту ✓": "Kaart läks e-postiga teele ✓",
+      "Выдать в салоне": "Anna salongis üle",
+      "«Отправить заново» — Montonio повторит это же отправление.": "«Saada uuesti» — Montonio kordab sama saadetist.",
+      "Отправлен без этикетки": "Teele saadetud ilma sildita",
+      "Отправлен без этикетки?": "Teele saadetud ilma sildita?",
+      "Отнести посылку": "Vii pakk ära",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.": "Vajutage «Teele saadetud» — klient saab kirja jälgimiskoodiga.",
+      "Ждём доставки": "Ootame kättetoimetamist",
+      "Последний шаг, без письма.": "Viimane samm, ilma kirjata.",
+      "Отметить оплаченным вручную": "Märgi käsitsi makstuks",
+      "Отметить возврат (без денег)": "Märgi tagastuseks (ilma rahata)",
+      "Сохраняется само": "Salvestub ise",
+      "Письма по-русски": "Kirjad vene keeles", "Письма по-эстонски": "Kirjad eesti keeles", "Письма по-английски": "Kirjad inglise keeles",
+      "Письмо уйдёт через 10 секунд — до этого его можно вернуть.": "Kiri läheb teele 10 sekundi pärast — seni saab selle tagasi võtta.",
+      "Письмо уйдёт через 10 секунд": "Kiri läheb teele 10 sekundi pärast",
+      "Счёт уйдёт через 10 секунд": "Arve läheb teele 10 sekundi pärast",
+      "Счёт не отправлен": "Arvet ei saadetud",
+      "Письмо не отправлено — текст снова в поле": "Kirja ei saadetud — tekst on jälle väljal",
+      "Письмо уже ушло — вернуть его нельзя": "Kiri on juba läinud — seda ei saa tagasi võtta",
+      "Не удалось остановить письмо": "Kirja ei õnnestunud peatada",
+      "Письмо не ушло — текст снова в поле, попробуйте ещё раз": "Kiri ei läinud — tekst on jälle väljal, proovige uuesti",
       /* «Вернуть деньги» — the button, the card with the amount in it, and
          the ledger the order card shows underneath (docs/payments.md § 11) */
       "Возвращаем…": "Tagastame…", "Сумма возврата, €": "Tagastatav summa, €",
@@ -5131,6 +5162,36 @@
       "продажа в салоне": "salon sale",
       /* the order card's own language line — admOrderLangHTML */
       "Язык писем:": "Letter language:", "русский": "Russian",
+      /* direction 1a — «Обзор», «Заказы», «Заказ» and the held letters (q3) */
+      "Открыть первый:": "Open the first:",
+      "Имя, номер, телефон или почта": "Name, number, phone or e-mail",
+      "Номер": "Number", "Дата": "Date", "Что и куда": "What and where",
+      "Показать все заказы": "Show all orders",
+      "Посылка": "Parcel", "Следующий шаг": "Next step", "Ещё действия": "More actions",
+      "Выдан клиенту — всё сделано ✓": "Handed to the customer — all done ✓",
+      "Доставлен — всё сделано ✓": "Delivered — all done ✓",
+      "Проверьте платёж в Montonio": "Check the payment in Montonio",
+      "Карта ушла на почту ✓": "The card has gone by e-mail ✓",
+      "Выдать в салоне": "Hand over in the salon",
+      "«Отправить заново» — Montonio повторит это же отправление.": "«Send again» — Montonio repeats the same shipment.",
+      "Отправлен без этикетки": "Shipped without a label",
+      "Отправлен без этикетки?": "Shipped without a label?",
+      "Отнести посылку": "Take the parcel in",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.": "Press «Shipped» — the customer gets a letter with the tracking number.",
+      "Ждём доставки": "Waiting for delivery",
+      "Последний шаг, без письма.": "The last step, no letter.",
+      "Отметить оплаченным вручную": "Mark as paid by hand",
+      "Отметить возврат (без денег)": "Mark as refunded (no money)",
+      "Сохраняется само": "Saves by itself",
+      "Письма по-русски": "Letters in Russian", "Письма по-эстонски": "Letters in Estonian", "Письма по-английски": "Letters in English",
+      "Письмо уйдёт через 10 секунд — до этого его можно вернуть.": "The letter leaves in 10 seconds — until then you can take it back.",
+      "Письмо уйдёт через 10 секунд": "The letter leaves in 10 seconds",
+      "Счёт уйдёт через 10 секунд": "The invoice leaves in 10 seconds",
+      "Счёт не отправлен": "The invoice was not sent",
+      "Письмо не отправлено — текст снова в поле": "The letter was not sent — the text is back in the box",
+      "Письмо уже ушло — вернуть его нельзя": "The letter has already gone — it cannot be taken back",
+      "Не удалось остановить письмо": "Could not stop the letter",
+      "Письмо не ушло — текст снова в поле, попробуйте ещё раз": "The letter did not go — the text is back in the box, try again",
       // see the ET table above for what these belong to
       "Возвращаем…": "Refunding…", "Сумма возврата, €": "Refund amount, €",
       "Вернуть деньги?": "Refund the money?",
@@ -6445,6 +6506,14 @@
     [/^(.+) в день$/, { ET: "$1 päevas", EN: "$1 per day" }],
     [/^Показаны первые (\d+) из (\d+)$/,
       { ET: "Kuvatud esimesed $1 / $2", EN: "First $1 of $2 shown" }],
+    /* 1a: «Отправить 3 заказа» — the one dark button of «Обзор» and «Заказы»
+       — and the toasts of the two held letters (q3) */
+    [/^Отправить 1 заказ$/, { ET: "Saada 1 tellimus", EN: "Ship 1 order" }],
+    [/^Отправить (\d+) заказ(?:|а|ов)$/, { ET: "Saada $1 tellimust", EN: "Ship $1 orders" }],
+    [/^(.+) отправлен · письмо уйдёт через 10 с$/,
+      { ET: "$1 teele saadetud · kiri läheb 10 s pärast", EN: "$1 shipped · the letter leaves in 10 s" }],
+    [/^(.+) отменён · письмо уйдёт через 10 с$/,
+      { ET: "$1 tühistatud · kiri läheb 10 s pärast", EN: "$1 cancelled · the letter leaves in 10 s" }],
     [/^(.+) отправлен · письмо ушло$/,
       { ET: "$1 saadetud · kiri läks välja", EN: "$1 shipped · the letter has gone" }],
     [/^(.+) отменён$/, { ET: "$1 tühistatud", EN: "$1 cancelled" }],
@@ -19554,29 +19623,38 @@
   function admInvoiceDate(ymd) {
     return String(ymd || "").slice(0, 10).split("-").reverse().join(".");
   }
+  /* 1a (README § 3): the status as a small tag — green = done or on its way,
+     rust outline = a return, rust FILL = something only the owner can end,
+     ink fill = waiting for him to send it, grey = nothing to do. The eleven
+     words stay the ones the panel has always used (Dim, 25.09.2026, q16);
+     the prototype's six would have lost «Салон», «Заплатили меньше», the two
+     invoice states, «Доставлен», «Отменён», «Этикетка готова» and «Возврат
+     обработан». The big one beside the name on the card keeps its size. */
   function admOrderBadge(v, big) {
-    var c = "adm-badge" + (big ? " adm-badge--big" : " ");
+    var c = "adm-badge" + (big ? " adm-badge--big" : " adm-tag");
     if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
     /* Before every other reading of the order: money arrived and it was not
        enough, so nothing has been fulfilled and the owner is the only one who
        can end it. Above «Салон»? No — a till sale is never held. Above the
        rest, because «Ждёт оплаты» on an order somebody HAS paid is the one
        badge here that is actively wrong. */
-    if (v.held) return '<span class="' + c + ' adm-badge--warn">Заплатили меньше</span>';
+    if (v.held) return '<span class="' + c + ' adm-badge--warnfill">Заплатили меньше</span>';
     // an invoice order waits for a transfer; past its due date the badge turns to the warning ink
     if (v.invoice && v.unpaid) {
-      return '<span class="' + c + (v.overdue ? " adm-badge--warn" : "") + '">' + (v.overdue ? "Счёт просрочен" : "Ждёт оплаты по счёту") + "</span>";
+      return '<span class="' + c + (v.overdue ? " adm-badge--warnfill" : "") + '">' + (v.overdue ? "Счёт просрочен" : "Ждёт оплаты по счёту") + "</span>";
     }
     if (v.delivered) return '<span class="' + c + ' adm-badge--ok">Доставлен</span>';
     if (v.shipped) return '<span class="' + c + ' adm-badge--ok">Отправлен</span>';
     if (v.status === "paid") {
+      // ink fill only where a parcel is waiting for him; a paid gift card has nothing to send
+      var ink = v.toShip ? " adm-badge--ink" : "";
       return v.labeled
-        ? '<span class="' + c + ' adm-badge--ink">Этикетка готова</span>'
-        : '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+        ? '<span class="' + c + ink + '">Этикетка готова</span>'
+        : '<span class="' + c + ink + '">Оплачен</span>';
     }
     if (v.status === "cancelled") return '<span class="' + c + ' adm-badge--quiet">Отменён</span>';
     if (v.status === "refunded") return '<span class="' + c + ' adm-badge--quiet">Возврат</span>';
-    return '<span class="' + c + '">Ждёт оплаты</span>';
+    return '<span class="' + c + ' adm-badge--quiet">Ждёт оплаты</span>';
   }
   /** returns: the second chip on a row whose customer has asked to send the
       order back. The order's own badge still says where the parcel is; this
@@ -19590,8 +19668,8 @@
        and the owner who comes back to it a week later must be able to see at a
        glance that he has already been here (r22). */
     return v.returnDoneAt
-      ? '<span class="adm-badge adm-badge--quiet">Возврат обработан</span>'
-      : '<span class="adm-badge adm-badge--warn">Просит возврат</span>';
+      ? '<span class="adm-badge adm-tag adm-badge--quiet">Возврат обработан</span>'
+      : '<span class="adm-badge adm-tag adm-badge--warn">Просит возврат</span>';
   }
   function admItemsLabel(n) { return n + " " + pl(n, "товар", "товара", "товаров"); }
   /** «2 заказа» — the same word the queue rows use, in one place. */
@@ -19689,21 +19767,43 @@
     s = String(s == null ? "" : s);
     return S.lang === "ET" || S.lang === "EN" ? trName(s, S.lang) : s;
   }
+  /* 1a (screen 03): a row of «Сделать сегодня» — the big number (rust when it
+     is something only he can end), what it is, whose, and the chevron. The
+     whole row is the door; `attrs` is the section and the chip it opens. */
   function admTaskRow(n, label, detail, attrs, warn) {
-    return '<button class="adm-row adm-row--click" ' + attrs + '>' +
+    return '<button class="adm-row adm-row--click adm-todo" ' + attrs + '>' +
       '<span class="adm-row__big' + (warn ? " adm-row__big--warn" : "") + '">' + n + "</span>" +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + label + "</span>" +
-      (detail ? '<span class="adm-row__sub">' + esc(detail) + "</span>" : "") + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm adm-todo__t">' + label + "</span>" +
+      (detail ? '<span class="adm-row__sub adm-row__sub--one">' + esc(detail) + "</span>" : "") + "</span>" +
       '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
   }
-  /** «Последние заказы» and the queue rows both link into the same card —
-      the same three lines as a row of «Заказы» (admOrderRowHTML), minus the
-      actions: the overview is for looking, the list is for doing. */
+  /** «Марина К. · ★★★★★» — a pending review's author and her stars (q41). */
+  function admReviewWho(r) {
+    var n = Math.max(0, Math.min(5, Number(r && r.rating) || 0)), stars = "";
+    for (var i = 0; i < n; i++) stars += "★";
+    return String((r && r.name) || "") + (stars ? " · " + stars : "");
+  }
+  /** «Последние заказы» — the same two lines as a row of «Заказы»
+      (admOrderRowHTML): the name and the sum, the number · day · goods ·
+      delivery and the status tag; minus the steps — the overview is for
+      looking, the list is for doing. */
   function admRecentRow(v) {
-    return '<button class="adm-row adm-row--click adm-row--lines" data-admorder="' + esc(v.id) + '">' +
-      '<span class="adm-row__body">' + admOrderRowBodyHTML(v) + "</span>" +
-      '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
+    return '<button class="adm-row adm-row--click adm-orow" data-admorder="' + esc(v.id) + '">' +
+      '<span class="adm-row__body adm-orow__body">' + admOrderRowBodyHTML(v) + "</span>" +
+      '<span class="adm-row__line adm-orow__tag">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span></button>";
+  }
+  /** «Отправить 3 заказа» — the one dark button of «Обзор» and «Заказы». */
+  function admShipAllLabel(n) {
+    // one text node, «Отправить 3 заказа» — the UI_RX rules beside «Отправить N» translate it whole
+    return "Отправить " + admOrdersLabel(n);
+  }
+  /** Grey bars where a figure will be, while the first answer is on its way —
+      not «Всё в порядке» and «0 €» over numbers nobody has read yet. */
+  function admSkelHTML(rows) {
+    var out = "";
+    for (var i = 0; i < (rows || 3); i++) out += "<i></i>";
+    return '<div class="adm-skel adm-skel--rows" aria-busy="true">' + out + "</div>";
   }
   function admOverviewHTML() {
     /* ONE call. Until 13.09.2026 this screen also asked for
@@ -19745,9 +19845,14 @@
        their own since this morning and were missing from the number above it:
        «Сделать сегодня 4» over five rows is a number nobody can trust. */
     var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
-    var taskN = shipN + lowN + hidLow + revN + proN + retN + overN + heldN + (noIban ? 1 : 0);
+    /* No total beside «Сделать сегодня» any more (Dim, 25.09.2026, q15): it
+       added orders to bottles to reviews, and the rows say each number on
+       their own. */
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
+    /* …and who is waiting under the review and partner rows (q41): the
+       first few names travel with the summary (src/lib/overview-names.ts) */
+    var who = (o && o.attentionNames) || {};
     var tasks = "";
     if (shipN) tasks += admTaskRow(shipN,
       pl(shipN, "заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"),
@@ -19793,10 +19898,10 @@
       'data-admtab="goods" data-admfilter="off"', true);
     if (revN) tasks += admTaskRow(revN,
       pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
-      "", 'data-admtab="reviews"');
+      names(who.reviews || [], admReviewWho), 'data-admtab="reviews"');
     if (proN) tasks += admTaskRow(proN,
       pl(proN, "заявка на партнёрство", "заявки на партнёрство", "заявок на партнёрство"),
-      "", 'data-admtab="people" data-admfilter="pending"');
+      names(who.partners || [], function (p) { return p && p.name; }), 'data-admtab="people" data-admfilter="pending"');
     /* returns: the tick from «Кабинет → Мои заказы» arrives here, in the same
        queue a new review and a partner request arrive in — the shop has one
        way of telling Renat that somebody is waiting for him, and this is it.
@@ -19807,7 +19912,12 @@
       pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
       names(retList, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="returns"', true);
-    if (!tasks) tasks = '<div class="adm-empty"><div class="adm-empty__t">Всё в порядке</div>' +
+    /* The first open: until the summary has answered, the rows it feeds are
+       not known — grey bars, not «Всё в порядке» (1a, gap F10). A summary
+       that failed says so above, and what the order list can tell is shown. */
+    var loading = SRV.admin === true && !o && !OVERVIEW.err;
+    if (loading) tasks = admSkelHTML(4);
+    else if (!tasks) tasks = '<div class="adm-empty"><div class="adm-empty__t">Всё в порядке</div>' +
       '<div class="adm-empty__s">Отправлять нечего, остатки в норме, отзывы проверены</div></div>';
 
     /* «Продажи». Today's takings are summed from the orders the panel already
@@ -19853,25 +19963,16 @@
       }
     }
 
-    return '<div class="adm-screen">' +
-      admHead(admDateLine(), "Обзор", shipN
-        ? '<button class="adm-btn adm-btn--head" data-admtab="orders" data-admfilter="new">Отправить ' + shipN + "</button>"
-        : "") +
-      (OVERVIEW.err && SRV.admin === true
-        ? '<div class="adm-error"><span>Сводка не отвечает — цифры могут быть неполными.</span>' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="overview">Повторить</button></div>'
-        : "") +
-      '<div class="adm-cols"><div class="adm-stack">' +
-        '<div><div class="adm-sec"><div class="adm-sec__t">Сделать сегодня</div>' +
-          '<div class="adm-sec__x">' + taskN + "</div></div>" +
-          '<div class="adm-list">' + tasks + "</div></div>" +
-        '<div><div class="adm-sec"><div class="adm-sec__t">Последние заказы</div>' +
-          '<button class="adm-link" data-admtab="orders" data-admfilter="all">Все заказы</button></div>' +
-          (vms.length
-            ? '<div class="adm-list">' + vms.slice(0, 4).map(admRecentRow).join("") + "</div>"
-            : '<div class="adm-empty">Заказов пока нет — первый появится здесь сразу после оплаты.</div>') + "</div>" +
-      "</div>" +
-      '<div><div class="adm-sec__t">Продажи</div><div class="adm-sales">' +
+    /* The recent orders: bars while the list has not come, the honest empty
+       line once it has. */
+    var recentLoading = SRV.admin === true && !SRV.orders && !SRV.ordersErr;
+    var recent = recentLoading ? admSkelHTML(3)
+      : vms.length
+        ? '<div class="adm-list adm-list--sech adm-olist">' + vms.slice(0, 4).map(admRecentRow).join("") + "</div>"
+        : '<div class="adm-empty">Заказов пока нет — первый появится здесь сразу после оплаты.</div>';
+    var sales = loading
+      ? admSkelHTML(3)
+      : '<div class="adm-sales">' +
         '<div class="adm-sales__cell"><div class="adm-sales__l">Сегодня</div>' +
           '<div class="adm-sales__v">' + eur(todaySum) + "</div>" +
           '<div class="adm-sales__l"><span>' + admOrdersLabel(todayN) + "</span> · <span>" +
@@ -19881,7 +19982,30 @@
           '<div class="adm-sales__l"><span>' + admOrdersLabel(week ? week.orders : 0) +
             "</span> · <span>" + eur(week ? week.perDay : 0) + " в день</span></div>" +
           (bars ? '<div class="adm-bars">' + bars + "</div>" : "") + "</div>" +
-      "</div></div></div></div>";
+        "</div>";
+
+    /* 1a (screen 03, README § 5): the date and «Обзор»; the one dark button —
+       «Отправить N заказа», pinned above the tab bar on a phone — opens
+       «Заказы» on the «Отправить» chip, as it always has (Dim, 25.09.2026,
+       q14; not the first order, as the prototype had it). «Сделать сегодня»
+       and «Последние заказы» on the left, «Продажи» on the right; on a
+       phone the sales come between the two, as drawn. */
+    return '<div class="adm-screen adm-ov">' +
+      admHead(admDateLine(), "Обзор", shipN
+        ? admPinnedHTML('data-admtab="orders" data-admfilter="new"', admShipAllLabel(shipN))
+        : "") +
+      (OVERVIEW.err && SRV.admin === true
+        ? '<div class="adm-error"><span>Сводка не отвечает — цифры могут быть неполными.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="overview">Повторить</button></div>'
+        : "") +
+      '<div class="adm-ov__grid">' +
+        '<section class="adm-ov__todo">' + admSecHeadHTML("Сделать сегодня") +
+          '<div class="adm-list adm-list--sech">' + tasks + "</div></section>" +
+        '<section class="adm-ov__sales">' + admSecHeadHTML("Продажи") + sales + "</section>" +
+        '<section class="adm-ov__recent">' + admSecHeadHTML("Последние заказы", "", "",
+          '<button class="adm-link adm-sech__link" data-admtab="orders" data-admfilter="all">Все заказы</button>') +
+          recent + "</section>" +
+      "</div></div>";
   }
 
   /* ---------- Заказы ------------------------------------------------------ */
@@ -19996,41 +20120,85 @@
   }
   /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
   var ORDERS_PAGE = 40;
+  /* The magnifier in the search box (1a, screens 04) — drawn, not a glyph. */
+  var ADM_SEARCH_SVG = '<svg class="adm-search__i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>';
+  /** Which chip is lit on screen. While a search is typed it is «Все»: the
+      search looks through every order the shop has (r22, Dim 17.09.2026), so
+      the chip says so rather than a line under it (gap L3, recommended). The
+      chosen chip is kept and comes back when the box is emptied. */
+  function admOrderChipLit() {
+    return String(S.admOrderQ || "").trim() ? "all" : admOrderFilter();
+  }
+  /** The one dark button of «Заказы» (1a): «Отправить N заказа» lights the
+      «Отправить» chip; on that chip it opens the first order waiting — the
+      parcel that has waited longest is the one to pack (the prototype's own
+      rule). Nothing waiting, no button. */
+  function admOrdersPinHTML() {
+    var f = admOrderChipLit(), shipN = admWaitingCount();
+    if (!shipN) return "";
+    /* its own hook, not a second `data-admfilter="new"`: that key names the
+       chip — the assistant and the suite press it — and it must stay one */
+    if (f !== "new") return admPinnedHTML("data-admshipall", admShipAllLabel(shipN));
+    // SRV.orders is newest first, so the last one waiting has waited longest
+    var first = admLiveToShip().slice(-1)[0];
+    return first ? admPinnedHTML('data-admorder="' + esc(first.id) + '"',
+      "<span>Открыть первый:</span> <span>" + esc(first.who) + "</span>") : "";
+  }
+  /** The chips, and the «?» of «Возвраты» when that chip is on. */
+  function admOrderChipsHTML() {
+    var f = admOrderChipLit();
+    var split = admWaitingSplit();
+    var shipN = split.fresh + split.labeled;
+    var chips = '<div class="adm-chips adm-ochips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
+      /* «Все N» — the loaded list (the newest hundred); «Отправить N»
+         everything still on the shelf, labelled or not; «В пути N» the
+         parcels that have left and not arrived (admOnTheWay); «Возвраты N»
+         the requests nobody has answered yet (admReturnsAsked). «В пути» had
+         no number at all until 18.09.2026 — four chips, three of them
+         counting, and the one the owner watches a parcel on was the silent
+         one. The label and the number are two nodes: the label is a
+         dictionary word, the number is not. */
+      var n = x[0] === "all" ? admOrders().length
+        : x[0] === "new" ? shipN
+        : x[0] === "shipped" ? admOnTheWay().length
+        : x[0] === "invoice" ? admInvoicesWaiting().length
+        : x[0] === "returns" ? admReturnsAsked().length
+        : x[0] === "held" ? admHeldOrders().length : 0;
+      /* …and «Придержаны» is the one chip that hides when it is empty:
+         see ADM_ORDER_FILTERS. It stays while it is the chosen filter, so
+         answering the last one does not take the screen out from under
+         him. «По счёту» and «Придержаны» are Dim's own (07.09 and 19.09),
+         kept against the prototype's four. */
+      if (x[0] === "held" && !n && f !== "held") return "";
+      return '<button class="adm-chip" type="button" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
+        "<span>" + x[1] + "</span>" + (n ? ' <b class="adm-chip__n">' + n + "</b>" : "") + "</button>";
+    }).join("") + "</div>";
+    /* «Возвраты» counts what is still waiting and lists every request — the
+       one line that says so went behind «?» (1a rule 5). */
+    var retHelp = f === "returns";
+    return '<div class="adm-ochips__row">' + chips + (retHelp ? admHelpBtnHTML("orders-returns") : "") + "</div>" +
+      (retHelp ? admHelpHTML("orders-returns",
+        "Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.") : "");
+  }
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
-    var f = admOrderFilter();
-    var split = admWaitingSplit();
-    return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Заказы", "") +
-      '<div class="adm-acts">' +
-        '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          /* «Отправить N» counts everything still on the shelf, labelled or not;
-             «В пути N» the parcels that have left and not arrived (admOnTheWay);
-             «Возвраты N» the requests nobody has answered yet (admReturnsAsked).
-             «В пути» had no number at all until 18.09.2026 — four chips, three
-             of them counting, and the one the owner watches a parcel on was the
-             silent one. */
-          var n = x[0] === "new" ? split.fresh + split.labeled
-            : x[0] === "shipped" ? admOnTheWay().length
-            : x[0] === "invoice" ? admInvoicesWaiting().length
-            : x[0] === "returns" ? admReturnsAsked().length
-            : x[0] === "held" ? admHeldOrders().length : 0;
-          /* …and «Придержаны» is the one chip that hides when it is empty:
-             see ADM_ORDER_FILTERS. It stays while it is the chosen filter, so
-             answering the last one does not take the screen out from under
-             him. */
-          if (x[0] === "held" && !n && f !== "held") return "";
-          return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-            x[1] + (n ? " " + n : "") + "</button>";
-        }).join("") + "</div>" +
-        '<input class="adm-input adm-input--row" data-admorderq value="' + esc(S.admOrderQ || "") +
-          '" placeholder="Номер, имя, телефон, почта" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
-      "</div>" +
+    return '<div class="adm-screen adm-screen--tight adm-orders">' +
+      admHead("", "Заказы",
+        '<div class="adm-orders__acts">' +
+          '<label class="adm-search">' + ADM_SEARCH_SVG +
+            '<input class="adm-input adm-search__in" type="search" data-admorderq value="' + esc(S.admOrderQ || "") +
+              '" placeholder="Имя, номер, телефон или почта" aria-label="Поиск по заказам" autocomplete="off"></label>' +
+          '<span class="adm-orders__pin" data-admorderpin>' + admOrdersPinHTML() + "</span>" +
+        "</div>") +
+      '<div data-admorderchips>' + admOrderChipsHTML() + "</div>" +
       (SRV.admin === true && SRV.ordersErr
         ? '<div class="adm-error"><span>Сервер заказов не отвечает — попробуйте ещё раз.</span>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="orders">Повторить</button></div>'
         : "") +
-      '<div class="adm-list adm-list--flat" id="orderlist">' + admOrderRows() + "</div>" +
+      '<div class="adm-olist__head" aria-hidden="true"><span>Номер</span><span>Дата</span><span>Покупатель</span>' +
+        "<span>Что и куда</span><span>Статус</span><span>Сумма</span><span></span></div>" +
+      '<div class="adm-list adm-list--flat adm-olist adm-olist--table" id="orderlist">' + admOrderRows() + "</div>" +
       "</div>";
   }
   /** The rows alone, so the search box can patch them in place. A typed
@@ -20057,37 +20225,26 @@
         return (v.number + " " + v.who + " " + phone + " " + mail).toLowerCase().indexOf(q) >= 0;
       });
     // still loading: bars, not «Таких заказов нет» over a list that has not arrived
-    if (!list.length && srv && !on && !SRV.orders && !SRV.ordersErr) {
-      return '<div class="adm-skel"><i></i><i></i><i></i></div>';
-    }
+    if (!list.length && srv && !on && !SRV.orders && !SRV.ordersErr) return admSkelHTML(3);
     // …and the same for the very first search, which has no rows to keep
-    if (!list.length && srv && q && !FOUND.rows && !FOUND.err) {
-      return '<div class="adm-skel"><i></i><i></i><i></i></div>';
-    }
+    if (!list.length && srv && q && !FOUND.rows && !FOUND.err) return admSkelHTML(3);
     /* In flight. The rows underneath are the answer to the PREVIOUS question
        and he is looking at them right now, so they stay — on mobile data a
        list that blanks itself between keystrokes is worse than a list one word
        behind. This line is the whole difference between the two: while it is
        there, what is below it is not yet his answer. */
     var waiting = admOrderSearching()
-      ? '<div class="adm-hint" style="margin:0 0 8px">Ищем…</div>' : "";
+      ? '<div class="adm-hint adm-olist__note">Ищем…</div>' : "";
     /* …and a search the server refused says so, in the place «Ищем…» was. */
     if (FOUND.err && q) {
       waiting = '<div class="adm-error"><span>Поиск не сработал — попробуйте ещё раз.</span>' +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="search">Повторить</button></div>';
     }
-    /* The chip stays lit while a search is typed — it is the filter the owner
-       will come back to — but the search really does look through every order,
-       so the list says so. Without this line the screen was one chip saying
-       «Новые» over a list of shipped orders, with nothing to explain it. */
-    var over = waiting || (q && f !== "all"
-      ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
-      /* returns: the chip counts what is still waiting, the list keeps every
-         request — so an order being dealt with does not disappear from under
-         the owner's thumb. One line, only on this chip, says so. */
-      : f === "returns" && !q
-        ? '<div class="adm-hint" style="margin:0 0 8px">Все заказы, по которым просили возврат. В счётчике — те, на которые вы ещё не ответили.</div>'
-        : "");
+    /* 1a: while a search is typed the lit chip is «Все» (admOrderChipLit), so
+       the line that used to explain a chip that did not apply — «Ищем по всем
+       заказам — фильтр сейчас не действует» — has nothing left to explain.
+       The «Возвраты» line went behind that chip's «?» (admOrderChipsHTML). */
+    var over = waiting;
     /* Speed, 07.09.2026. «Все» was the one list in the panel that drew
        everything it had: «Товары» pages at 40 and «Склад» at 60, but 100 orders
        meant 100 rows — 1 500 elements — rebuilt as a string, parsed and diffed
@@ -20097,11 +20254,10 @@
     var cap = S.ordersShown || ORDERS_PAGE;
     var shown = list.slice(0, cap);
     return over + shown.map(admOrderRowHTML).join("") +
-      (list.length ? "" : admOrderEmptyHTML(q, waiting)) +
+      (list.length ? "" : admOrderEmptyHTML(q, waiting, f)) +
       (list.length > cap
-        ? '<p class="adm-hint" style="margin:10px 0 0">Показаны первые ' + cap + " из " + list.length + "</p>" +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admordersmore ' +
-            'style="margin-top:10px">Показать ещё</button>'
+        ? '<div class="adm-olist__more"><p class="adm-hint">Показаны первые ' + cap + " из " + list.length + "</p>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admordersmore>Показать ещё</button></div>'
         : "");
   }
   /**
@@ -20124,20 +20280,34 @@
    * dictionary cannot reach. The box holding the query is 44 px above this line
    * anyway.
    */
-  function admOrderEmptyHTML(q, waiting) {
+  function admOrderEmptyHTML(q, waiting, f) {
     if (waiting) return "";
-    if (!q) return '<div class="adm-empty">Таких заказов нет</div>';
-    return '<div class="adm-empty"><span>Ничего не нашли.</span> ' +
-      "<span>Ищем по номеру заказа, имени, телефону и почте.</span></div>";
+    /* 1a (screen 04): the one way out of an empty answer — every order, no
+       search, «Все» — under it (data-admorderreset). On «Все» with nothing
+       typed there is nowhere wider to go, so no button. */
+    var reset = q || (f && f !== "all")
+      ? '<button class="adm-link" type="button" data-admorderreset>Показать все заказы</button>' : "";
+    if (!q) return '<div class="adm-empty"><span>Таких заказов нет</span>' + reset + "</div>";
+    return '<div class="adm-empty"><span><span>Ничего не нашли.</span> ' +
+      "<span>Ищем по номеру заказа, имени, телефону и почте.</span></span>" + reset + "</div>";
   }
   /** The rows in place, without a render() — the owner is typing in the search
       box and a render would take the caret out of it (same reasoning as
-      paintOrderNote and paintShipPreview). */
+      paintOrderNote and paintShipPreview). The chips (their lit one follows
+      the box, admOrderChipLit) and the dark button beside the box go with
+      them; the box itself is never touched. */
   function paintOrderRows() {
     var list = document.getElementById("orderlist");
     if (!list) return;
     list.innerHTML = admOrderRows();
     translateTree(list);
+    var chips = document.querySelector("[data-admorderchips]");
+    if (chips) { chips.innerHTML = admOrderChipsHTML(); translateTree(chips); }
+    var pin = document.querySelector("[data-admorderpin]");
+    if (pin) {
+      pin.innerHTML = admOrdersPinHTML(); translateTree(pin);
+      document.body.classList.toggle("adm-pinned", !!document.querySelector(".adm-pin"));
+    }
   }
   /**
    * One request per pause, not one per keystroke.
@@ -20163,7 +20333,11 @@
   /** The one step an order is at, as a button — the same primary action the
       card leads with, so the row can do it without opening the card. */
   function admOrderStepBtn(v, row) {
-    var cls = "adm-btn" + (row ? " adm-btn--row" : "");
+    /* 1a: in a list row the step is a secondary, outlined button — the one
+       dark button of «Заказы» is «Отправить N заказа» (README rule 2); on
+       the card it is the dark one (admOrderNext). Kept on the rows by Renat's
+       own use of them (13.09 and 23.09.2026, gap L1). */
+    var cls = "adm-btn" + (row ? " adm-btn--row adm-btn--ghost" : " adm-pin__btn");
     var busy = SRV.shipBusy ? " disabled" : "";
     /* Renat, 13.09.2026, on «Выдан клиенту» in a list row: «Worked only on
        second click.» It worked on the first — but a status has no local copy
@@ -20284,21 +20458,30 @@
        is shown, and «Другая коробка» is one tap away — for THIS parcel,
        saving nothing, changing no setting. Ренат, 18.09.2026: «In any case if
        needed we have the possibility to override and adjust along the way.» */
-    var boxBlock = '<div class="adm-ship__row"><span class="adm-sec__t">Коробка</span>' +
-      '<span class="adm-hint">' + admBoxLine(box.length, box.width, box.height, parcelDeclaredKg(box)) + "</span></div>" +
+    /* 1a: inside the «Следующий шаг» card, as its second line — the design's
+       «Коробка 25 × 18 × 8 см · около 0,9 кг» — with «Другая коробка» for
+       THIS parcel beside it (Renat, 18.09.2026, gap C2: kept against the
+       design's «Другая коробка — в «Доставке»»). A side the carrier cannot
+       take is not sent: the box gets the rust edge and one line under the
+       three fields (S.boxErr), and the label goes with the last good size. */
+    var boxBlock = '<div class="adm-ship__row adm-next__box"><span class="adm-next__boxk">Коробка</span>' +
+      '<span class="adm-next__boxv">' + admBoxLine(box.length, box.width, box.height, parcelDeclaredKg(box)) + "</span>" +
+      (S.boxOpen ? "" : '<button class="adm-link" type="button" data-shipboxopen>Другая коробка</button>') + "</div>" +
       (S.boxOpen
         ? '<div class="adm-parcel">' +
             ["length", "width", "height"].map(function (f, i) {
               return '<label class="adm-field"><span>' + ["Длина, см", "Ширина, см", "Высота, см"][i] + "</span>" +
                 '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
-                  'data-shipbox="' + f + '" value="' + esc(String(box[f])) + '"></label>';
+                  'data-shipbox="' + f + '" value="' + esc(String(box[f])) + '"' +
+                  (S.boxErr === f ? ' aria-invalid="true"' : "") + "></label>";
             }).join("") +
           "</div>" +
+          '<span class="adm-ashint" data-shipboxerr' + (S.boxErr ? "" : " hidden") + ">Сторона коробки — от 1 до 200 см.</span>" +
           '<div class="adm-hint">Это только для этой посылки — коробка магазина не меняется.</div>'
-        : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-shipboxopen>Другая коробка</button>');
-    return '<div class="adm-locker">' + boxBlock +
+        : "");
+    return '<div class="adm-locker adm-next__prep">' + boxBlock +
       (admLockerOrder(v)
-        ? '<div class="adm-ship__row" style="margin-top:4px"><span class="adm-sec__t">Размер ячейки</span>' +
+        ? '<div class="adm-ship__row adm-next__door"><span class="adm-next__boxk">Размер ячейки</span>' +
             '<span class="adm-hint">' + lockerReason() + "</span></div>" +
           '<div class="adm-chips" role="group" aria-label="Размер ячейки">' +
             LOCKER_SIZES.map(function (k) {
@@ -20309,7 +20492,7 @@
           '<div class="adm-hint">Нажмите «Создать этикетку» — поедет ячейка ' + esc(pick) +
             ". Другой размер — нажмите на него.</div>"
         : admLockerSilent(v)
-          ? '<div class="adm-hint" style="margin-top:8px">Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.</div>'
+          ? '<div class="adm-hint">Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.</div>'
           : "") +
       "</div>";
   }
@@ -20328,13 +20511,14 @@
     // a step in flight owns the whole line: «Сохраняем…» and nothing beside it
     if (SRV.stepBusy === v.id) acts = admOrderStepBtn(v, true);
     else if (v.pos) acts = admReceiptLink(v, true);
-    else if (v.paid && !v.labeled && !v.pickup && !v.digital) acts =
-      // no label yet: the label leads, «Отправлен» stays a quiet second (a courier collecting, a hand-over)
-      admOrderStepBtn(v, true) +
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    /* 1a: ONE action per row, and it is the card's dark button — «Создать
+       этикетку», then «Отправлен», then «Доставлен»; «Выдан клиенту» for a
+       pickup. «Отправлен без этикетки» (a courier collecting, a hand-over)
+       lives in the card only, under its «Следующий шаг»: as a second button
+       here it doubled every row that still waited for a label. */
     else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     // an invoice order's one step is the transfer arriving — the row can record it without opening the card
-    else if (v.unpaid && v.invoice) acts = admInvPaidBtnHTML(v, "adm-btn adm-btn--row");
+    else if (v.unpaid && v.invoice) acts = admInvPaidBtnHTML(v, "adm-btn adm-btn--row adm-btn--ghost");
     /* …but not on a held order. «Написать» here means «ask him to pay», and
        he has paid — just not enough. The row has no action of its own: the
        badge says what happened, and what to do about it is two figures and a
@@ -20345,26 +20529,43 @@
        buttons of their own. The body is the button (the whole text opens the
        card), the chip has the third line, the sum the top right, and the
        actions a full-width line under everything on a phone — the same
-       place on every row, whether the row offers «Создать этикетку» and
-       «Отправлен», one «Чек ↗» or nothing (admin.css, .adm-row--lines).
+       place on every row, whether the row offers its step, one «Чек ↗» or
+       nothing (admin.css, .adm-row--lines).
        The wrapper opens the card too (ADM_ROW_OPEN): the chip, the sum and
        the blank beside the actions were dead until round 15. */
-    return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines"' + ADM_ROW_OPEN + ">" +
-      '<button class="adm-row__body adm-row--click" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
-      '<span class="adm-row__line">' + admOrderBadge(v) + admReturnBadge(v) + "</span>" +
+    /* 1a (screen 04): the customer and the sum on the first line; the
+       number · the day · what · where, and the status tag, on the second; the
+       step under both, at the right (admin.css .adm-orow). On a desktop the
+       same DOM is a one-line table row — Номер · Дата · Покупатель · Что и
+       куда · Статус · Сумма · the step in a column of its own. */
+    return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines adm-orow"' + ADM_ROW_OPEN + ">" +
+      '<button class="adm-row__body adm-row--click adm-orow__body" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
+      '<span class="adm-row__line adm-orow__tag">' + admOrderBadge(v) + admReturnBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span>" +
-      (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
+      (acts ? '<div class="adm-acts adm-orow__acts">' + acts + "</div>" : "") +
     "</div>";
   }
-  /** The two text lines of an order in a list — «Заказы» and «Обзор» share
-      them (Dim, 11.09.2026: one shape per list, and one shape for the lists
-      of orders): the number and the day on the first, the customer, the
-      count and the delivery on the second, one line each, cut with an
-      ellipsis. Spans, not divs: the body is a <button>'s content. */
+  /** «24.09» for an order of this year, «24.09.2025» for an older one — the
+      rows are the newest hundred, and a year is only worth its width once it
+      is not this one. `v.date` is «24.09.2026» (srvRow). */
+  function admOrderShortDate(d) {
+    var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(d || ""));
+    if (!m) return String(d || "");
+    return String(new Date().getFullYear()) === m[3] ? m[1] + "." + m[2] : d;
+  }
+  /** The text of an order in a list — «Заказы» and «Обзор» share it (Dim,
+      11.09.2026: one shape for the lists of orders). Four cells, in the
+      order of the desktop table: the number (mono), the day, the customer,
+      what and where. On a phone the customer is the first line and the other
+      three the second, one line, cut with an ellipsis (gap L5: the number and
+      the day stay on the phone). Spans, not divs: the body is a <button>'s
+      content; the « · » between cells is admin.css's, not text. */
   function admOrderRowBodyHTML(v) {
-    return '<span class="adm-row__nm"><span class="adm-mono">' + esc(v.number) + "</span> · " + esc(v.date) + "</span>" +
-      '<span class="adm-row__sub adm-row__sub--one"><span class="adm-row__who">' + esc(v.who) + "</span> · <span>" +
-        admItemsLabel(v.items) + "</span> · <span>" + esc(v.ship) + "</span></span>";
+    return '<span class="adm-mono adm-orow__num">' + esc(v.number) + "</span>" +
+      '<span class="adm-orow__date">' + esc(admOrderShortDate(v.date)) + "</span>" +
+      '<span class="adm-row__nm adm-orow__who">' + esc(v.who) + "</span>" +
+      '<span class="adm-row__sub adm-orow__what"><span>' + admItemsLabel(v.items) + "</span> · <span>" +
+        esc(v.ship) + "</span></span>";
   }
 
   /* ---------- Заказ (карточка) -------------------------------------------- */
@@ -20421,18 +20622,10 @@
     return v.number + " · " + v.who + "\n" + v.ship +
       "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
-  /* «Написать клиенту» → «Отправить». Audit 06.09.2026 question 9; Dim's
-     answer: yes, ask first. The letter cannot be recalled and every cheaper
-     action in this panel already goes through the card, so this one does too —
-     with the address it is going to and the first lines of what is going, so
-     the question is worth answering rather than clicking through. */
-  function admMailConfirmText(v) {
-    var mail = (v.srv && v.srv.email) || "";
-    // two straight chains, same reason as admShipConfirmText(): each is one
-    // text node, and the letter itself goes in the card's own preview box
-    if (mail) return v.number + " · " + mail + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
-    return v.number + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
-  }
+  /* («Написать клиенту» → «Отправить» asked here until 25.09.2026 — «Письмо
+     уйдёт сразу, отозвать его нельзя». It stopped being true the day the
+     server started holding the letter ten seconds, and the question went
+     with it: see the [data-admordersend] handler.) */
   /* «Отменить заказ» — what actually happens, not what would be nice. The
      server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
      counted shelf back; since 07.09.2026 it also writes to the customer
@@ -20522,13 +20715,16 @@
     }
     return media(p, gi, "");
   }
-  /* ---- the fulfilment strip ------------------------------------------------
-     Four steps for a parcel — Оплачен · Этикетка · Отправлен · Доставлен —
-     and two for a pickup order, whose only step after payment is the hand-over
-     at the counter. Each step has one of four looks: done (ink), now (tint,
-     bold — the one the primary button below does), todo (paper), or skipped
-     (an order that left without a Montonio label — the step was never done and
-     never will be, and drawing it as done would be a lie about the sticker). */
+  /* ---- the progress line (1a, README § 5 «Заказ») --------------------------
+     Four dots for a parcel — Оплачен → Этикетка → Отправлен → Доставлен —
+     joined by a rule that is ink as far as the order has come; two for a
+     pickup order, whose only step after payment is the hand-over at the
+     counter. It replaces the 2×2 grid of boxes. Each step has one of four
+     looks: done (a filled dot), now (a ring and a bold word — the step the
+     dark button does), todo (a grey ring), or skipped (an order that left
+     without a Montonio label: the step was never done and never will be, and
+     drawing it as done would be a lie about the sticker — it keeps its words
+     «без этикетки» under it, as «готова» stays under a label that is). */
   function admOrderSteps(v) {
     var paidish = v.paid || v.shipped || v.delivered;
     var steps;
@@ -20548,11 +20744,18 @@
         ["Доставлен", v.delivered ? "done" : v.shipped ? "now" : "todo", ""]
       ];
     }
-    return '<div class="adm-steps adm-steps--' + steps.length + '" aria-label="Шаги заказа">' + steps.map(function (s, i) {
-      return '<div class="adm-step adm-step--' + s[1] + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
-        '<div class="adm-step__l">' + s[0] + "</div>" +
-        (s[2] ? '<div class="adm-step__s">' + s[2] + "</div>" : "") + "</div>";
-    }).join("") + "</div>";
+    // the ink runs to the furthest step that is not still to do
+    var reach = 0;
+    for (var i = 0; i < steps.length; i++) if (steps[i][1] !== "todo") reach = i;
+    var pct = steps.length > 1 ? Math.round(reach / (steps.length - 1) * 100) : 0;
+    return '<ol class="adm-prog adm-prog--' + steps.length + '" aria-label="Шаги заказа">' +
+      steps.map(function (s) {
+        return '<li class="adm-prog__s adm-prog__s--' + s[1] + '"' + (s[1] === "now" ? ' aria-current="step"' : "") + ">" +
+          '<span class="adm-prog__dot" aria-hidden="true"></span>' +
+          '<span class="adm-prog__l">' + s[0] + "</span>" +
+          (s[2] ? '<span class="adm-prog__c">' + s[2] + "</span>" : "") + "</li>";
+      }).join("") +
+      '<li class="adm-prog__rule" aria-hidden="true"><i style="width:' + pct + '%"></i></li></ol>';
   }
   /** The carrier's name as the owner knows it, from the code Montonio uses. */
   /* venipak is not offered since 14.09.2026 and stays in this map on purpose:
@@ -20597,22 +20800,26 @@
     var base = "/api/admin/shipments/" + encodeURIComponent(v.id) + "/label/";
     var who = carrierWord(mont.carrier || (o.shipping && o.shipping.carrier));
     var where = o.shipping && o.shipping.pointName ? o.shipping.pointName : srvAddrLine(o.shipping);
+    /* 1a (gap C1, recommended): «Посылка» — a section of its own right under
+       the next-step card, everything after the label that the design never
+       drew: carrier and point, the tracking code with its copy, the drop-off
+       PIN, «Открыть PDF (A4) ↗» as an outlined button (the dark one is then
+       «Отправлен»), the A6 and «Отследить ↗» links, the refused parcel and
+       the label set aside. */
     if (mont.dismissed) {
-      return '<div class="adm-ship adm-ship--off">' +
-        '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
-          '<span class="adm-badge adm-badge--quiet">Этикетка отложена</span></div>' +
+      return '<section class="adm-osec adm-ship adm-ship--off">' +
+        admSecHeadHTML("Посылка", "", "", admTagHTML("quiet", "Этикетка отложена")) +
         '<div class="adm-hint">Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; ' +
           "чтобы снова пользоваться этой этикеткой, верните её.</div>" +
         '<div class="adm-ship__links"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
           (SRV.shipBusy ? " disabled" : "") + ">Вернуть этикетку</button></div>" +
-        "</div>";
+        "</section>";
     }
     var code = String(mont.trackingCode || "");
     var failed = shipRegFailed(mont.status);
-    return '<div class="adm-ship">' +
-      '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
-        (failed ? '<span class="adm-badge adm-badge--warn">Перевозчик не принял</span>' : "") +
-        '<span class="adm-hint">' + esc((who ? who + " · " : "") + (where || "")) + "</span></div>" +
+    return '<section class="adm-osec adm-ship">' +
+      admSecHeadHTML("Посылка", "", "", failed ? admTagHTML("alert", "Перевозчик не принял") : "") +
+      '<div class="adm-ship__where">' + esc((who ? who + " · " : "") + (where || "")) + "</div>" +
       /* A refused registration first, because the two sentences under it are
          both false about one: there is no tracking code coming, and the
          parcel is not «waiting for the carrier». */
@@ -20643,11 +20850,252 @@
         (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
           ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
       "</div>") +
+      "</section>";
+  }
+  /* ---------- Заказ — the card, direction 1a ------------------------------
+     README § 5 «Заказ», «Admin Unified Directions» #1a, screens 01. The
+     prototype draws one case — a paid courier parcel before its label — and
+     the gap analysis (§ E: 35 of the card's 61 functions undrawn) placed the
+     rest; every one of them is here, each in the section it belongs to:
+       · the header: the number and the day, the customer, the status; on the
+         right the ONE dark button — the next step — then «Написать клиенту»
+         outlined and «⋯»; on a phone the dark button and «⋯» are pinned above
+         the tab bar and «Написать клиенту» moves into «⋯» (as drawn);
+       · the progress line — four dots, two for a pickup, none for a salon
+         sale, a gift card or a closed order;
+       · a customer's return request: a rust notice with «Обработано» (C8);
+       · «Сообщение клиенту» under the header — a full-height sheet on a
+         phone (C13) — with «Переписка», the pasted message and «Черновик
+         помощника»;
+       · «Следующий шаг»: what to do, in one line, today's hint behind «?»,
+         and what is decided at label time — the box for THIS parcel and the
+         locker door (Renat, 18.09.2026: C2, C3) — plus «Отправлен без
+         этикетки» (C4); or the done card;
+       · «Посылка» once there is a label (C1, admShipmentBoxHTML);
+       · «Состав» with the discount and points rows; «Покупатель» with the
+         company; «Доставка и оплата» with every payment warning as a rust
+         block (C9), the gift cards and the payment number; «Заметка», which
+         saves itself.
+     The rare actions are in «⋯»: «Скачать счёт», «Отправить счёт ещё раз»,
+     «Вернуть деньги», the two statuses set by hand, «Отменить заказ». Every
+     data-* hook is the one the card always had. */
+
+  /**
+   * What the card says the owner does next — `{ key, title, sub, help, body,
+   * after, btn }` for a step, `{ key, done }` for an order with nothing left
+   * to do. `btn` is the dark button (the header's, pinned on a phone); the
+   * titles are made from the card's own hint lines, in the Glossary's words
+   * («Создать этикетку», «Отправлен», «Доставлен», «Выдан клиенту» — not the
+   * prototype's «Отметить отправленным», gap C12). `help` is today's hint,
+   * behind «?».
+   */
+  function admOrderNext(v) {
+    var pin = "adm-btn adm-pin__btn";
+    if (v.status === "cancelled") return { key: "cancelled", done: "Заказ отменён" };
+    if (v.status === "refunded") return { key: "refunded", done: "Деньги возвращены" };
+    if (v.pos) return { key: "pos", done: "Продажа в салоне" };
+    if (v.delivered) return { key: "delivered", done: v.pickup ? "Выдан клиенту — всё сделано ✓" : "Доставлен — всё сделано ✓" };
+    /* Money came and it was not enough: nothing was fulfilled, and marking it
+       paid is the one thing that ends it — the rust block under «Оплата»
+       says «нажмите «Оплачен»», and this is that button (C9). It still asks
+       first (admManualStatusAction). */
+    if (v.held) {
+      return { key: "held", title: "Заплатили меньше", sub: "Проверьте платёж в Montonio",
+        btn: '<button class="' + pin + '" type="button" data-admstatus="paid">Отметить оплаченным</button>' };
+    }
+    // «По счёту»: the transfer is the step, and the invoice line is the card's body (C7)
+    if (v.unpaid && v.invoice) {
+      return { key: "invoice", title: "Ждёт оплаты по счёту", body: admInvoiceStateHTML(v),
+        help: "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.",
+        btn: admInvPaidBtnHTML(v, pin) };
+    }
+    if (v.unpaid) return { key: "unpaid", title: "Ждёт оплаты", sub: "Заказ ещё не оплачен — отправлять нечего." };
+    // an all-gift-card order: the card is in the inbox the moment it is paid
+    if (v.digital) return { key: "digital", done: "Карта ушла на почту ✓" };
+    if (v.paid && v.pickup) {
+      return { key: "pickup", title: "Выдать в салоне", sub: "Клиент забирает заказ в салоне. Письмо не отправляется.",
+        btn: admOrderStepBtn(v, false) };
+    }
+    if (v.paid && !v.labeled) {
+      return {
+        key: v.shipRefused ? "refused" : "label",
+        title: v.shipRefused ? "Перевозчик не принял посылку" : "Создать этикетку",
+        sub: v.shipRefused ? "«Отправить заново» — Montonio повторит это же отправление." : "",
+        help: v.shipRefused ? "" : "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.",
+        body: admShipPrepHTML(v),
+        /* «Отправлен» with no label — a courier collecting, a hand-over. It
+           asks first: the letter goes with no tracking number (C4). */
+        after: '<button class="adm-link adm-next__alt" type="button" data-admshipnow="' + esc(v.id) + '">Отправлен без этикетки</button>',
+        btn: admOrderStepBtn(v, false)
+      };
+    }
+    if (v.paid) {
+      return { key: "ship", title: "Отнести посылку", sub: "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.",
+        help: "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.",
+        btn: admOrderStepBtn(v, false) };
+    }
+    if (v.shipped) {
+      return { key: "delivery", title: "Ждём доставки", sub: "Последний шаг, без письма.",
+        help: "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.",
+        btn: admOrderStepBtn(v, false) };
+    }
+    return { key: "none", done: "" };
+  }
+  /** «Следующий шаг» — or the done card. */
+  function admOrderNextHTML(v, nx) {
+    if (nx.done != null) {
+      return nx.done ? '<section class="adm-next adm-next--done"><div class="adm-next__t">' + nx.done + "</div></section>" : "";
+    }
+    var hk = "order-next-" + nx.key;
+    return '<section class="adm-next" aria-labelledby="admnext-k">' +
+      '<div class="adm-next__h"><span class="adm-next__k" id="admnext-k">Следующий шаг</span>' +
+        (nx.help ? admHelpBtnHTML(hk) : "") + "</div>" +
+      '<div class="adm-next__t">' + nx.title + "</div>" +
+      (nx.sub ? '<div class="adm-next__s">' + nx.sub + "</div>" : "") +
+      (nx.help ? admHelpHTML(hk, nx.help) : "") +
+      (nx.body || "") + (nx.after || "") + "</section>";
+  }
+  /** The rare actions (1a «⋯»), each with the hook it always had and its own
+      confirm behind it. «Написать клиенту» is here on a phone only — a
+      desktop has it outlined in the header. */
+  function admOrderMenuItems(v, nx) {
+    var o = v.srv, items = [];
+    var it = function (attrs, label, cls) {
+      return '<button class="adm-omenu__i' + (cls ? " " + cls : "") + '" type="button" role="menuitem" ' + attrs + ">" + label + "</button>";
+    };
+    if (nx.btn && (!v.pos || (o && o.email))) items.push(it("data-admorderreply", "Написать клиенту", "adm-omenu__i--phone"));
+    /* «По счёту»: the invoice stays downloadable for as long as the order
+       exists, and can be sent again while it is unpaid (C7). */
+    if (v.invoice) {
+      items.push('<a class="adm-omenu__i" role="menuitem" href="/api/admin/orders/' + encodeURIComponent(v.id) +
+        '/invoice/" target="_blank" rel="noopener" data-adminvpdf="' + esc(v.invoice.number) + '">Скачать счёт</a>');
+    }
+    if (v.invoice && v.unpaid) {
+      items.push(it('data-adminvresend="' + esc(v.id) + '"' + (SRV.invoiceBusy ? " disabled" : ""),
+        SRV.invoiceBusy ? "Отправляем…" : "Отправить счёт ещё раз"));
+    }
+    /* «Вернуть деньги» — the money goes back through the same provider that
+       took it (POST /api/admin/orders/<id>/refund/). Offered only while there
+       is something left to send back, and only on an order a provider is
+       actually holding: an order marked paid by hand, or one a gift card
+       covered, has no payment to reverse and the server would say so. */
+    if (v.refundable > 0.004) {
+      items.push(it('data-admrefund="' + esc(v.id) + '"' + (SRV.refundBusy ? " disabled" : ""),
+        SRV.refundBusy ? "Возвращаем…" : "Вернуть деньги"));
+    }
+    /* Every status the panel could always set stays settable — the two the
+       steps never reach, each behind its question (admManualStatusAction).
+       Not «оплачен» where it is already the dark button: an awaited invoice
+       and a held order have one door for the money, not two. */
+    if (o) {
+      ["paid", "refunded"].forEach(function (k) {
+        if (o.status === k) return;
+        if (k === "paid" && ((v.invoice && v.unpaid) || v.held)) return;
+        items.push(it('data-admstatus="' + k + '"', k === "paid" ? "Отметить оплаченным вручную" : "Отметить возврат (без денег)"));
+      });
+    }
+    if (!v.pos && (v.paid || v.unpaid)) {
+      items.push(it('data-admordercancel="' + esc(v.id) + '"', "Отменить заказ", "adm-omenu__i--warn"));
+    }
+    return items;
+  }
+  /** Is «⋯» open on the card on screen? The flag names the order it was
+      opened on, so another order — however it was reached — opens shut. */
+  function admOrderMoreOpen() {
+    return !!S.adminOrder && !!S.admOrderMore && S.admOrderMore === String(S.adminOrder);
+  }
+  /* «⋯» and «Показать все заказы» answer here, beside the card and the list
+     they belong to, rather than in the long selector of the panel's one click
+     delegate below — and so does the rule that any other tap shuts «⋯»: an
+     item's own hook (data-admrefund, data-admstatus, …) still runs in that
+     delegate, which renders the card without the list; a tap that nothing
+     answers (the list's own «Скачать счёт» link, the page's blank) gets a
+     render of its own. Registered before the delegate, so it runs first. */
+  if (typeof document !== "undefined") {
+    document.addEventListener("click", function (e) {
+      if (S.screen !== "admin") return;
+      var el = e.target && e.target.closest ? e.target.closest("[data-admordermore],[data-admorderreset],[data-admshipall]") : null;
+      if (el && el.hasAttribute("data-admordermore")) {
+        var opening = !admOrderMoreOpen();
+        S.admOrderMore = opening ? String(S.adminOrder) : "";
+        render();
+        refocus(opening ? '.adm-omenu__list [role="menuitem"]' : "[data-admordermore]");
+        return;
+      }
+      // «Отправить N заказа» on «Заказы»: the «Отправить» chip, with no search over it
+      if (el && el.hasAttribute("data-admshipall")) {
+        S.admOrderQ = ""; S.admOrderFilter = "new"; S.ordersShown = ORDERS_PAGE;
+        loadOrderSearch("");
+        // the focus goes to the chip now lit — not the search box, which would raise a phone's keyboard
+        render(); refocus('[data-admfilter="new"]');
+        return;
+      }
+      if (el) {
+        // «Показать все заказы» under an empty answer: no search, «Все», the first page
+        S.admOrderQ = ""; S.admOrderFilter = "all"; S.ordersShown = ORDERS_PAGE;
+        loadOrderSearch("");
+        render(); refocus("[data-admorderq]");
+        return;
+      }
+      if (admOrderMoreOpen()) {
+        S.admOrderMore = "";
+        setTimeout(function () { if (!S.admOrderMore) render(); }, 0);
+      }
+    });
+  }
+  /** «⋯» and, while it is open, its list: a dropdown under the button on a
+      desktop, a sheet from the bottom on a phone (admin.css .adm-omenu). */
+  function admOrderMoreHTML(items) {
+    if (!items.length) return "";
+    var open = admOrderMoreOpen();
+    return '<div class="adm-omenu' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-btn adm-btn--ghost adm-omenu__btn" type="button" data-admordermore aria-haspopup="menu" aria-expanded="' + open +
+        '" aria-label="Ещё действия" title="Ещё действия"><span aria-hidden="true">⋯</span></button>' +
+      (open
+        ? '<button class="adm-omenu__scrim" type="button" data-admordermore tabindex="-1" aria-label="Закрыть"></button>' +
+          '<div class="adm-omenu__list" role="menu" aria-label="Ещё действия">' + items.join("") +
+            '<button class="adm-omenu__i adm-omenu__i--close" type="button" role="menuitem" data-admordermore>Закрыть</button></div>'
+        : "") +
       "</div>";
+  }
+  /** The header's right side: the dark button, «Написать клиенту», «⋯» — the
+      same element pinned above the tab bar on a phone (admPinnedHTML's
+      `.adm-pin`, so renderImpl makes the page room for it). With no step to
+      take, «Написать клиенту» is the bar's button on a phone as well. The
+      class `adm-ordacts` is the one the card's actions always had. */
+  function admOrderActsHTML(v, nx, items) {
+    var o = v.srv;
+    var canWrite = !v.pos || !!(o && o.email);
+    var write = canWrite
+      ? '<button class="adm-btn adm-btn--ghost adm-opin__write' + (nx.btn ? "" : " adm-opin__write--all") + '" type="button" data-admorderreply' +
+        ' aria-expanded="' + !!S.orderReplyOpen + '">Написать клиенту</button>'
+      : "";
+    var inner = (nx.btn || "") + (v.pos ? admReceiptLink(v, false) : "") + write + admOrderMoreHTML(items);
+    return inner ? '<div class="adm-pin adm-opin adm-ordacts' + (admOrderMoreOpen() ? " is-menu" : "") + '">' + inner + "</div>" : "";
+  }
+  /** The order's note: its autosave key, and the write it rides on — the
+      PATCH { note } the card has always made, partial on the server. */
+  function admOrderNoteKey(o) { return "order:" + o.id + ":note"; }
+  function admOrderNoteSend(id, note, opts) {
+    return apiJson("/api/admin/orders/" + encodeURIComponent(id) + "/", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ note: note }),
+      keepalive: !!(opts && opts.keepalive)
+    }).then(function (r) {
+      /* the copy every list holds follows, so a reload of the card before
+         the next poll draws what the server has — no toast and no reload of
+         the hundred orders: the status in the header is the whole answer */
+      if (r.status === 200 && r.body && r.body.ok) admOrderLand({ id: id, notes: note });
+      return r;
+    });
   }
   function admOrderCardHTML() {
     var v = admCurOrder();
-    if (!v) return admOrderMissingHTML('<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>');
+    // opened from a customer's card: the way back is that customer, not the list
+    var back = '<div class="adm-ohead__back">' +
+      (S.admCustOpen ? admBackHTML('data-admorder=""', "К клиенту") : '<button class="adm-link" data-admorder="">← Заказы</button>') + "</div>";
+    if (!v) return admOrderMissingHTML('<div class="adm-screen adm-screen--card adm-ocard">' + back);
     var o = v.srv;
     /* «Оплата» names the bank from Montonio's list (bankNameOf), which the
        panel otherwise asks for only on «Подключения» and «Доставка и оплата» —
@@ -20656,63 +21104,19 @@
     if (SRV.admin === true && o && o.payment && o.payment.method === "bank" && o.payment.bank) loadPayMethods();
     var closed = v.status === "cancelled" || v.status === "refunded";
     var showSteps = !v.pos && !v.digital && !closed;
+    var nx = admOrderNext(v);
+    var items = admOrderMenuItems(v, nx);
 
-    /* One primary per state (admOrderStepBtn), everything else quiet: the
-       label as a ghost second when the parcel is leaving without one, the
-       letter, and «Отменить заказ» at the end in its warning ink. */
-    var primary = showSteps ? admOrderStepBtn(v, false) : "";
-    var acts = primary;
-    if (v.pos) acts += admReceiptLink(v, false);
-    /* «По счёту»: while the transfer is awaited the primary is «Отметить
-       оплаченным»; the invoice itself stays downloadable for as long as the
-       order exists, and can be sent again while it is unpaid. */
-    if (v.invoice && v.unpaid) acts += admInvPaidBtnHTML(v, "adm-btn");
-    if (v.invoice) acts +=
-      '<a class="adm-btn adm-btn--ghost" href="/api/admin/orders/' + encodeURIComponent(v.id) + '/invoice/" target="_blank" rel="noopener" data-adminvpdf="' + esc(v.invoice.number) + '">Скачать счёт</a>';
-    if (v.invoice && v.unpaid) acts +=
-      '<button class="adm-btn adm-btn--ghost" data-adminvresend="' + esc(v.id) + '"' + (SRV.invoiceBusy ? " disabled" : "") + ">" +
-        (SRV.invoiceBusy ? "Отправляем…" : "Отправить счёт ещё раз") + "</button>";
-    if (showSteps && v.paid && !v.labeled && !v.pickup) acts +=
-      '<button class="adm-btn adm-btn--ghost" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
-    if (!v.pos || (o && o.email)) acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
-    /* «Вернуть деньги» — the money goes back through the same provider that
-       took it (POST /api/admin/orders/<id>/refund/). Offered only while there
-       is something left to send back, and only on an order a provider is
-       actually holding: an order marked paid by hand, or one a gift card
-       covered, has no payment to reverse and the server would say so. */
-    if (v.refundable > 0.004) acts +=
-      '<button class="adm-btn adm-btn--ghost" data-admrefund="' + esc(v.id) + '"' + (SRV.refundBusy ? " disabled" : "") + ">" +
-        (SRV.refundBusy ? "Возвращаем…" : "Вернуть деньги") + "</button>";
-    if (!v.pos && (v.paid || v.unpaid)) acts +=
-      '<button class="adm-del" data-admordercancel="' + esc(v.id) + '">Отменить заказ</button>';
-
-    /* One sentence under the buttons that says what the primary one does —
-       the owner's own complaint was a button that did more than it said. */
-    var hint = "";
-    if (showSteps && v.unpaid && v.invoice) hint = "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.";
-    else if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
-    else if (showSteps && v.paid && v.pickup) hint = "Клиент забирает заказ в салоне. Письмо не отправляется.";
-    else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
-    else if (showSteps && v.paid && v.labeled) hint = "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
-    else if (showSteps && v.shipped) hint = "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.";
-    /* …and the one that is not about the steps at all: why «Вернуть деньги»
-       is not here. It is missing because the money is already going back, and
-       nothing said so where he was looking. */
-    if (!(v.refundable > 0.004) && v.refund && v.refund.pending > 0.004) {
-      hint = "Возвращать больше нечего: " + eur(v.refund.pending) + " уже отправлено, Montonio подтвердит в течение рабочего дня.";
-    }
-
-    /* Every status the panel could always set stays settable — the actions row
-       above is the everyday path, this line is the rest of them. */
-    var manual = o ? ["paid", "refunded"].filter(function (k) {
-      // an awaited invoice has its own «Отметить оплаченным» above — one door for the money, not two
-      return o.status !== k && !(k === "paid" && v.invoice && v.unpaid);
-    }).map(function (k) {
-      return '<button class="adm-link adm-link--muted" data-admstatus="' + k + '">' + SRV_STATES[k][1] + "</button>";
-    }).join(" · ") : "";
+    /* …and the one line that is not about the steps at all: why «Вернуть
+       деньги» is not in «⋯». It is missing because the money is already
+       going back, and nothing said so where he was looking. A state, so it
+       stays on screen. */
+    var pending = !(v.refundable > 0.004) && v.refund && v.refund.pending > 0.004
+      ? '<p class="adm-hint adm-opend">Возвращать больше нечего: ' + eur(v.refund.pending) + " уже отправлено, Montonio подтвердит в течение рабочего дня.</p>"
+      : "";
 
     var lines = o ? (o.items || []).map(function (l) {
-      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
+      return '<div class="adm-row adm-oline"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + admProdName(l.title || l.id)) + "</span>" +
         // the volume and the count are two text nodes, not one: glued, «75 мл ·
         // 1 товар» is a string no dictionary has and an English panel read it
@@ -20720,56 +21124,69 @@
         '<span class="adm-row__sub">' + (l.variant ? "<span>" + esc(l.variant) + "</span> · " : "") +
           "<span>" + admItemsLabel(l.qty) + "</span></span></span>" +
         '<span class="adm-row__amt">' + eur(l.sum) + "</span></div>";
-    }).join("") : '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
+    }).join("") : '<div class="adm-row adm-oline"><span class="adm-row__body"><span class="adm-row__nm">' +
       admItemsLabel(v.items) + '</span></span><span class="adm-row__amt">' + eur(v.sum) + "</span></div>";
+    /* features: no delivery line at all on an electronic order — there is no
+       parcel, so «бесплатно» would be an answer to a question nobody asked.
+       src/lib/orders.ts prices it 0 and the accountant export carries the
+       method in its own column. */
+    var shipLine = o && !srvDigital(o)
+      ? '<div class="adm-row adm-ominor"><span class="adm-row__body"><span class="adm-row__sub">' + esc(v.ship) + "</span></span>" +
+        '<span class="adm-row__sub">' + (o.shippingPrice ? eur(o.shippingPrice) : "бесплатно") + "</span></div>"
+      : "";
 
-    return '<div class="adm-screen adm-screen--card">' +
-      // opened from a customer's card: the way back is that customer, not the list
-      (S.admCustOpen ? admBackHTML('data-admorder=""', "К клиенту") : '<button class="adm-link" data-admorder="">← Заказы</button>') +
-      admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
+    var tel = o && o.phone ? String(o.phone).replace(/[^\d+]/g, "") : "";
+    var buyer = '<section class="adm-osec">' + admSecHeadHTML("Покупатель") +
+      '<div class="adm-okv adm-kv"><span class="adm-okv__who">' + esc(v.who) + "</span>" +
+        (o && o.phone ? '<a href="tel:' + esc(tel) + '">' + esc(o.phone) + "</a>" : "") +
+        (o && o.email ? '<a href="mailto:' + esc(o.email) + '">' + esc(o.email) + "</a>" : "") +
+        admOrderLangHTML(o) + "</div>" +
+      admCompanyHTML(v.company) + "</section>";
+    // features: an electronic order has no address — where the card went is
+    // an e-mail, and that is what belongs on this line
+    var where = o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "";
+    var delivery = '<section class="adm-osec">' + admSecHeadHTML("Доставка и оплата") +
+      '<div class="adm-okv adm-kv"><span><span>' + esc(v.ship) + "</span>" + (where ? " · <span>" + esc(where) + "</span>" : "") + "</span></div>" +
+      admGiftCardsHTML(o) +
+      admPaymentHTML(o) +
+      // the invoice line of a paid or closed invoice order; an awaited one is the «Следующий шаг» card's
+      (v.invoice && nx.key !== "invoice" ? admInvoiceStateHTML(v) : "") +
+      "</section>";
+    /* The note saves itself (1a rule 1; ADM_SAVE_POLICY.text — a second after
+       the last key, and on leaving the box). Its draft lives in S
+       (orderNoteValue), so a list reload drawing the card again under the
+       caret never wipes what is being typed. The server keeps 2 000
+       characters and cut the rest silently; the box stops there itself. */
+    var noteKey = o ? admOrderNoteKey(o) : "";
+    if (o) {
+      var noteId = o.id;
+      admAutosaveSpec(noteKey, { kind: "text", send: function (text, opts) { return admOrderNoteSend(noteId, text, opts); } });
+    }
+    var note = o ? '<section class="adm-osec">' + admSecHeadHTML("Заметка") +
+      '<textarea class="adm-input adm-onote__in" rows="3" maxlength="2000" data-admnote data-autosave="' + esc(noteKey) + '"' +
+        admAutosaveInvalidAttr(noteKey) + ' placeholder="Только для вас" aria-label="Заметка">' + esc(orderNoteValue(o)) + "</textarea>" +
+      '<div class="adm-hint adm-onote__st">Сохраняется само</div></section>' : "";
+
+    return '<div class="adm-screen adm-screen--card adm-ocard">' +
+      back +
+      '<div class="adm-head adm-ohead"><div class="adm-ohead__who">' +
+        '<div class="adm-head__kicker adm-head__kicker--code">' + esc(v.number) + " · " + esc(v.date) + "</div>" +
+        '<div class="adm-ohead__name"><h1 class="adm-h1">' + esc(v.who) + "</h1>" + admOrderBadge(v, true) + "</div></div>" +
+        admOrderActsHTML(v, nx, items) +
+      "</div>" +
       (showSteps ? admOrderSteps(v) : "") +
       admReturnStateHTML(v) +
-      admInvoiceStateHTML(v) +
-      (showSteps ? admShipPrepHTML(v) : "") +
-      (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
-      (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
-      (showSteps ? admShipmentBoxHTML(v) : "") +
-      (manual ? '<div class="adm-hint"><span>Изменить статус вручную:</span> ' + manual + "</div>" : "") +
       (S.orderReplyOpen ? admOrderMsgHTML(v) : "") +
-      '<div class="adm-cols"><div>' +
-        '<div class="adm-sec__t">Состав</div><div class="adm-list">' + lines +
-          /* features: no delivery line at all on an electronic order — there
-             is no parcel, so «бесплатно» would be an answer to a question
-             nobody asked. src/lib/orders.ts prices it 0 and the accountant
-             export carries the method in its own column. */
-          (o && !srvDigital(o) ? '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub" style="margin:0">' +
-            esc(v.ship) + "</span></span>" +
-            '<span class="adm-row__sub" style="margin:0">' + (o.shippingPrice ? eur(o.shippingPrice) : "бесплатно") + "</span></div>" : "") +
-          admOrderDiscountHTML(o) +
-          '<div class="adm-total"><span>Итого</span><span class="adm-total__v">' + eur(v.sum) + "</span></div>" +
-        "</div></div>" +
-      '<div class="adm-stack adm-stack--tight">' +
-        '<div><div class="adm-sec__t">Покупатель</div><div class="adm-kv">' + esc(v.who) + "<br>" +
-          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span>" +
-          admOrderLangHTML(o) + "</div>" +
-          admCompanyHTML(v.company) + "</div>" +
-        '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
-          // features: an electronic order has no address — where the card
-          // went is an e-mail, and that is what belongs on this line
-          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span></div>" +
-          admGiftCardsHTML(o) + "</div>" +
-        admPaymentHTML(o) +
-        /* The note. Its draft lives in S (orderNoteValue), so the order
-           poll's renders never wipe what is being typed, and the button says
-           where things stand — quiet while nothing differs, ink the moment
-           something does, «Сохранено ✓» once it is back in step (r12; the
-           cabinet's paintAcctBar idiom). Ctrl+Enter saves: this is a
-           textarea, so plain Enter stays a new line. */
-        (o ? '<div><div class="adm-sec__t">Заметка</div>' +
-          '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
-          esc(orderNoteValue(o)) + "</textarea>" +
-          '<div class="adm-acts" style="margin-top:8px" data-admnoteacts>' + orderNoteActsHTML(o) + "</div></div>" : "") +
-      "</div></div></div>";
+      '<div class="adm-cols adm-ocols"><div class="adm-stack adm-stack--tight">' +
+        admOrderNextHTML(v, nx) + pending +
+        (showSteps ? admShipmentBoxHTML(v) : "") +
+        '<section class="adm-osec">' + admSecHeadHTML("Состав") +
+          '<div class="adm-list adm-list--sech">' + lines + shipLine + admOrderDiscountHTML(o) +
+            '<div class="adm-total"><span>Итого</span><span class="adm-total__v">' + eur(v.sum) + "</span></div>" +
+          "</div></section>" +
+      "</div>" +
+      '<div class="adm-stack adm-stack--tight adm-oside">' + buyer + delivery + note + "</div>" +
+      "</div></div>";
   }
   /* What came off the goods, on the order card's «Состав» — the code, the euro
      it took, and (for a code narrowed to one brand or one product) what it
@@ -20917,7 +21334,10 @@
       // …and the part that went back onto the gift card that paid, as balance
       else if (r.to === "giftcard") notes += '<br><span>На подарочную карту ' + esc(admRefundCode(r)) + " вернулось " + eur(r.amount) + "</span>";
     });
-    return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + head + "<br>" +
+    /* 1a: part of «Доставка и оплата» (the design merges the two), so no
+       title of its own; every warning above is a rust block of its own (C9,
+       admin.css .adm-opay .adm-err), not a grey line among grey lines. */
+    return '<div class="adm-opay"><div class="adm-okv adm-okv--pay adm-kv"><span class="adm-okv__pay">' + head + "</span>" +
       "<span>" + sub + "</span>" + notes + "</div>" + admPayRefHTML(p) + "</div>";
   }
   /* ---- the payment's own number -------------------------------------------
@@ -20945,13 +21365,21 @@
     if (!ref || ref === "manual") return "";
     var provider = String(p.provider || "");
     if (provider !== "montonio" && provider !== "mock") return "";
-    return '<div class="adm-ship__row adm-ship__row--code" style="margin-top:12px">' +
-      '<span><span class="adm-hint">Номер платежа в Montonio</span><br>' +
-        '<span class="adm-ship__code" data-payref data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓">' +
-          esc(ref) + "</span></span>" +
-      '<button class="adm-copy" data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓"' +
-        ' aria-label="Скопировать номер платежа">Скопировать</button></div>' +
-      '<p class="adm-hint" style="margin:6px 0 0">Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.</p>';
+    /* 1a (screen 01): the number in mono with a copy icon beside it, and the
+       one line about where to paste it behind «?» (README rule 5). */
+    return '<div class="adm-payref">' +
+      '<span class="adm-payref__k">Номер платежа в Montonio</span>' +
+      '<span class="adm-payref__row">' +
+        '<span class="adm-ship__code adm-payref__code" data-payref data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓">' +
+          esc(ref) + "</span>" +
+        '<button class="adm-copy" data-admcopy="' + esc(ref) + '" data-admcopymsg="Номер платежа скопирован ✓"' +
+          ' aria-label="Скопировать номер платежа" title="Скопировать номер платежа">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="8" y="8" width="12" height="12"></rect><path d="M16 8V4H4v12h4"></path></svg></button>' +
+        admHelpBtnHTML("order-payref") +
+      "</span>" +
+      admHelpHTML("order-payref", "Найдите платёж в панели Montonio по этому номеру или по номеру заказа — прямой ссылки на него банк не даёт.") +
+      "</div>";
   }
   /* ---------- returns: «Покупатель просит вернуть заказ» -------------------
      The tick from «Кабинет → Мои заказы», with the day it was put there, at
@@ -20984,7 +21412,10 @@
     if (!v.returnAskedAt) return "";
     var busy = SRV.returnBusy === v.id;
     var done = !!v.returnDoneAt;
-    return '<div class="adm-hint" data-admreturn>' +
+    /* 1a (gap C8, recommended): a rust notice at the top of the card with
+       «Обработано» outlined in it; once answered, the same notice goes quiet.
+       What «Обработано» does and does not do is behind «?». */
+    return '<section class="adm-onotice' + (done ? " adm-onotice--done" : "") + '" data-admreturn>' +
       (done
         ? '<span>Возврат обработан</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnDoneAt)) + "</span><br>" +
           // the date is its own node: translateTree() rewrites whole text
@@ -20995,14 +21426,15 @@
           (admReturnCarrierNovaPost(v)
             ? "<span>Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.</span>"
             : "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span>")) +
-      '<div class="adm-acts" style="margin-top:10px">' +
-        '<button class="adm-btn adm-btn--row' + (done ? " adm-btn--ghost" : "") + '" ' +
+      '<div class="adm-acts adm-onotice__acts">' +
+        '<button class="adm-btn adm-btn--row adm-btn--ghost" ' +
           'data-admreturndone="' + esc(v.id) + '" data-admreturnval="' + (done ? "0" : "1") + '"' +
           (busy ? " disabled" : "") + ">" +
           (busy ? "Сохраняем…" : done ? "Вернуть в «Возвраты»" : "Обработано") + "</button>" +
+        (done ? "" : admHelpBtnHTML("order-return")) +
       "</div>" +
-      (done ? "" : '<p class="adm-hint" style="margin:6px 0 0">«Обработано» убирает заказ из счётчика «Возвраты». Деньги не уходят и письмо не отправляется — это отметка для вас.</p>') +
-      "</div>";
+      (done ? "" : admHelpHTML("order-return", "«Обработано» убирает заказ из счётчика «Возвраты». Деньги не уходят и письмо не отправляется — это отметка для вас.")) +
+      "</section>";
   }
 
   /* ---------- «По счёту — для компаний» on the card ------------------------
@@ -21063,15 +21495,19 @@
      on) and every letter about it renders from that and from nothing else
      (langOf, src/lib/mail-hooks.ts) — so the card now says it out loud, and
      the next such question is one look away. */
+  /* 1a (screen 01): «Письма по-русски» — one whole phrase per language, so
+     each is one dictionary key (gap C-54), where the card used to say «Язык
+     писем: русский» in two pieces. */
+  var LETTER_LANG_LINE = { RU: "Письма по-русски", ET: "Письма по-эстонски", EN: "Письма по-английски" };
   function admOrderLangHTML(o) {
-    var word = LANG_WORDS[String((o && o.lang) || "").toUpperCase().slice(0, 2)];
-    if (!word) return "";
-    return "<br><span>Язык писем:</span> <span>" + esc(word) + "</span>";
+    var line = LETTER_LANG_LINE[String((o && o.lang) || "").toUpperCase().slice(0, 2)];
+    return line ? '<span class="adm-okv__muted">' + line + "</span>" : "";
   }
   /** The company an invoice order was placed by — under the buyer's own lines. */
   function admCompanyHTML(c) {
     if (!c) return "";
-    return '<div class="adm-kv" style="margin-top:8px" data-admcompany>' + esc(c.name) + "<br><span>" +
+    // 1a: under «Покупатель» (gap C7), in the same quiet lines as the buyer's own
+    return '<div class="adm-okv adm-okv--company adm-kv" data-admcompany>' + esc(c.name) + "<br><span>" +
       [c.regCode ? "рег. " + c.regCode : "", c.vatNumber ? "KMKR " + c.vatNumber : ""].filter(Boolean).map(esc).join(" · ") +
       (c.address ? "<br>" + esc(c.address) : "") + (c.email ? "<br>" + esc(c.email) : "") + "</span></div>";
   }
@@ -21153,24 +21589,48 @@
         }).join("") + "</div>"
       : "") + "</div>";
   }
-  /** «Написать клиенту» — the inline card with the assistant's draft in it. */
+  /**
+   * «Написать клиенту» — «Сообщение клиенту», with the assistant's draft in it.
+   *
+   * 1a (gap C13, recommended): a panel under the card's header on a desktop,
+   * a full-height sheet on a phone (admin.css .adm-reply) — ✕ and the phone's
+   * Back close it (the Back layer «reply»). «Переписка» above, the customer's
+   * pasted message, the letter, «Отправить» and «Черновик помощника».
+   *
+   * «Отправить» no longer asks first. The confirm was Dim's answer to audit
+   * question 9 (06.09.2026) — «yes, ask first» — because the letter could not
+   * be recalled; since 25.09.2026 it can: the server holds it ten seconds
+   * (src/lib/letter-hold.ts, q3) and the toast's «Вернуть» stops it, which is
+   * what the gap analysis tied the confirm to. The address is in this panel's
+   * head and the whole letter is in the box, so what the confirm showed is on
+   * screen already.
+   *
+   * What is typed is kept per order (S.orderDrafts), so Back, the nav or a
+   * reload of the list under the caret never throws it away.
+   */
   function admOrderMsgHTML(v) {
     var o = v.srv;
-    return '<div class="adm-card">' +
-      '<div class="adm-card__head"><div class="adm-sec__t">Сообщение клиенту</div>' +
+    var d = (S.orderDrafts && S.orderDrafts[String(v.id)]) || {};
+    return '<section class="adm-reply" aria-labelledby="admreply-t">' +
+      '<div class="adm-reply__head"><div class="adm-reply__who">' +
+        '<h2 class="adm-sech__t" id="admreply-t">Сообщение клиенту</h2>' +
         '<div class="adm-hint">' + esc((o && o.email) || "") + "</div></div>" +
-      admOrderThreadHTML(o) +
-      (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
-        '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' : "") +
-      '<textarea class="adm-input" rows="4" data-orderreplydraft aria-label="Текст письма клиенту">' +
-        esc(S.orderReplyDraft || admOrderDraft(v)) + "</textarea>" +
-      '<div class="adm-acts">' +
-        '<button class="adm-btn adm-btn--head" data-admordersend>Отправить</button>' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--head" data-admorderreply>Отмена</button>' +
-        (o ? '<button class="adm-link adm-link--muted" data-admordercompose>Черновик помощника</button>' : "") +
-        '<div style="flex:1"></div>' +
-        '<span class="adm-hint">Черновик подготовил помощник</span>' +
-      "</div></div>";
+        '<button class="adm-reply__x" type="button" data-admorderreply aria-label="Закрыть">✕</button></div>' +
+      '<div class="adm-reply__body">' +
+        admOrderThreadHTML(o) +
+        (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
+          '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель">' +
+            esc(d.cust || "") + "</textarea></label>" : "") +
+        '<textarea class="adm-input" rows="5" data-orderreplydraft aria-label="Текст письма клиенту">' +
+          esc(S.orderReplyDraft || d.reply || admOrderDraft(v)) + "</textarea>" +
+      "</div>" +
+      '<div class="adm-reply__acts">' +
+        '<button class="adm-btn" type="button" data-admordersend' + (S.orderSendBusy ? " disabled" : "") + ">" +
+          (S.orderSendBusy ? "Отправляем…" : "Отправить") + "</button>" +
+        (o ? '<button class="adm-btn adm-btn--ghost" type="button" data-admordercompose>Черновик помощника</button>' : "") +
+        '<button class="adm-link adm-link--muted" type="button" data-admorderreply>Отмена</button>' +
+        '<span class="adm-hint adm-reply__note">Письмо уйдёт через 10 секунд — до этого его можно вернуть.</span>' +
+      "</div></section>";
   }
 
   /* ---------- Товары: Каталог · Склад · Наборы ---------------------------- */
@@ -36961,6 +37421,24 @@
        is nothing left to send here; the undo sets the shipment aside with
        labelStep:false (Montonio keeps the parcel), and «Вернуть этикетку» on a
        set-aside one goes through the POST again, which brings it back. */
+    /* 1a (q3): a held letter — sent already (the journal line came after the
+       server's answer); its «Вернуть» stops it while the server still holds
+       it, and says so plainly when it is too late. */
+    else if (a.type === "order_letter") return;
+    else if (a.type === "order_letter_cancel") {
+      ADM_LETTER_UNDONE[a.token] = true;
+      apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { letterCancel: a.token })
+        .then(function (r) {
+          if (r.status === 401) { SRV.admin = false; render(); return; }
+          if (r.status === 200 && r.body && r.body.cancelled) {
+            toast(a.kind === "invoice" ? "Счёт не отправлен" : "Письмо не отправлено — текст снова в поле");
+            if (a.kind === "reply") admReplyRestore({ id: a.id, reply: a.reply, customerMessage: a.customerMessage });
+            else admOrderListsReload();
+          } else if (r.status === 200) toast("Письмо уже ушло — вернуть его нельзя");
+          else toast("Не удалось остановить письмо");
+          render();
+        }).catch(function () { toast("Не удалось остановить письмо"); });
+    }
     else if (a.type === "order_label") {
       if (a.done) return;
       if (a.value) { srvCreateShipment(a.id); return; }
@@ -37507,43 +37985,18 @@
       else toast("Не удалось сохранить");
     }).catch(function () { toast("Сервер не отвечает"); });
   }
-  /* ---- the order card's note (r12) ------------------------------------------
+  /* ---- the order card's note (r12; saves itself since 1a) -------------------
      The draft is kept in S rather than read off the textarea alone: the card
      is redrawn on every order poll, and a draft that lives only in the DOM
-     survives a morph but not a reopened card. `saved` is what lets the
-     button say «Сохранено ✓» until the next keystroke. */
+     survives a morph but not a reopened card. The save itself is the panel's
+     one autosave (admAutosave, text: a second after the last key and on
+     leaving the box — admOrderNoteSend beside the card): «Сохранить
+     заметку», «Не сохранено» and the toast after every save are gone, and the
+     status in the header says «Сохраняем… → Сохранено ✓» only once the server
+     has taken it (README § 2). */
   function orderNoteValue(o) {
     var d = S.orderNote;
     return d && d.id === String(o.id) ? d.text : (o.notes || "");
-  }
-  function orderNoteDirty(o) { return orderNoteValue(o) !== (o.notes || ""); }
-  function orderNoteActsHTML(o) {
-    var dirty = orderNoteDirty(o);
-    var saved = !dirty && S.orderNote && S.orderNote.id === String(o.id) && S.orderNote.saved;
-    return '<button class="adm-btn adm-btn--row' + (dirty ? "" : " adm-btn--ghost") + '" data-admnotesave' + (dirty ? "" : " disabled") + ">" +
-      (saved ? "Сохранено ✓" : "Сохранить заметку") + "</button>" +
-      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Не сохранено</span>";
-  }
-  /** In place, while the owner types — a render() would take the caret. */
-  function paintOrderNote() {
-    var v = admCurOrder(), o = v && v.srv, acts = document.querySelector("[data-admnoteacts]");
-    if (!o || !acts) return;
-    acts.innerHTML = orderNoteActsHTML(o); translateTree(acts);
-  }
-  function srvOrderNoteSave(id, note) {
-    var btn = document.querySelector("[data-admnotesave]");
-    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
-    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", { note: note }).then(function (r) {
-      if (r.status === 200 && r.body.ok) {
-        // the card's own copy follows at once — «Сохранено ✓» now, the poll confirms later
-        var v = admCurOrder();
-        if (v && v.srv && String(v.srv.id) === String(id)) v.srv.notes = note;
-        S.orderNote = { id: String(id), text: note, saved: true };
-        toast("Заметка сохранена ✓"); render(); loadSrvOrders(true);
-      }
-      else if (r.status === 401) { SRV.admin = false; render(); }
-      else { toast("Не удалось сохранить"); render(); }
-    }).catch(function () { toast("Сервер не отвечает"); render(); });
   }
 
   /* ---------- «По счёту — для компаний»: the card's two server calls ------
@@ -37555,27 +38008,71 @@
   function admInvoiceConfirmText(v) {
     return v.number + " · " + eur(v.sum) + "\nДеньги по счёту №" + v.invoice.number + " пришли на счёт? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят».";
   }
-  /* «Написать клиенту» → «Отправить», once the confirm card said yes. The
-     letter cannot be recalled, so nothing about this goes through demoApply()
-     — the journal gets a plain note and the toast offers no «Отменить». */
+  /* «Написать клиенту» → «Отправить». Since 25.09.2026 the server holds the
+     letter ten seconds (src/lib/letter-hold.ts, Dim's q3), so the toast
+     carries «Вернуть» — a journal line whose way back is PATCH { letterCancel }
+     (srvPush «order_letter_cancel») — and the box is emptied at once; the
+     thread is read again once the letter has had its time to go. A server
+     that answers without a hold (it could not write one) sent it the old
+     way, and the toast says so with no «Вернуть». */
+  var ADM_LETTER_UNDONE = {};   // token → true once «Вернуть» went out for it
   function srvOrderMailSend(pa) {
+    if (S.orderSendBusy) return;
+    S.orderSendBusy = true;
+    render();
     apiSend("/api/admin/mail/send/", "POST", {
       orderId: pa.id, reply: pa.reply, customerMessage: pa.customerMessage || ""
     }).then(function (r) {
+      S.orderSendBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.orderReplyDraft = "";
+        if (S.orderDrafts) delete S.orderDrafts[String(pa.id)];
         S.orderMsgs = r.body.messages || null; S.orderMsgsFor = pa.id;
         /* the customer's words are in the thread above now (admOrderThreadHTML);
            left in their box, the next «Отправить» would file them a second time */
         var askedEl = document.querySelector("[data-ordercustmsg]");
         if (askedEl) askedEl.value = "";
-        journalNote("Письмо клиенту · заказ " + pa.number);
-        toast("Письмо отправлено ✓");
+        var draftEl = document.querySelector("[data-orderreplydraft]");
+        if (draftEl) draftEl.value = "";
+        if (r.body.held && r.body.token) {
+          var entry = demoApply({
+            type: "order_letter", kind: "reply", id: String(pa.id), number: pa.number, token: String(r.body.token),
+            reply: pa.reply, customerMessage: pa.customerMessage || ""
+          });
+          toast("Письмо уйдёт через 10 секунд", entry);
+          setTimeout(function () { admReplyFollow(pa, String(r.body.token)); }, (Number(r.body.ms) || 10000) + 1500);
+        } else {
+          journalNote("Письмо клиенту · заказ " + pa.number);
+          toast("Письмо отправлено ✓");
+        }
       } else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
       else toast("Не удалось отправить письмо");
       render();
-    }).catch(function () { toast("Не удалось отправить письмо"); render(); });
+    }).catch(function () { S.orderSendBusy = false; toast("Не удалось отправить письмо"); render(); });
+  }
+  /** After the hold: the thread again — the letter is in it now, both sides
+      of it — and, if it is not and nobody pressed «Вернуть», the owner is told
+      it did not go and gets his words back in the box. */
+  function admReplyFollow(pa, token) {
+    apiJson("/api/admin/orders/" + encodeURIComponent(pa.id) + "/messages/").then(function (r) {
+      if (!(r.status === 200 && r.body && r.body.ok)) return;
+      var list = r.body.messages || [];
+      if (String(S.adminOrder) === String(pa.id) || S.orderMsgsFor === pa.id) { S.orderMsgs = list; S.orderMsgsFor = pa.id; }
+      var went = list.some(function (m) { return m && m.direction === "out" && String(m.body) === String(pa.reply); });
+      if (!went && !ADM_LETTER_UNDONE[token]) {
+        toast("Письмо не ушло — текст снова в поле, попробуйте ещё раз");
+        admReplyRestore(pa);
+      }
+      render();
+    }).catch(noop);
+  }
+  /** The letter's words back where they were typed — «Вернуть» in time, or a
+      letter the provider refused after the hold. */
+  function admReplyRestore(pa) {
+    if (!S.orderDrafts) S.orderDrafts = {};
+    S.orderDrafts[String(pa.id)] = { reply: pa.reply || "", cust: pa.customerMessage || "" };
+    if (String(S.adminOrder) === String(pa.id)) { S.orderReplyDraft = pa.reply || ""; S.orderReplyOpen = true; }
   }
   /** «Отметить оплаченным» — in a row of «Заказы» and on the card; «Сохраняем…»
       while that order's POST is out, so a second tap cannot ask twice. */
@@ -37833,6 +38330,19 @@
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "resend" }).then(function (r) {
       SRV.invoiceBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
+      /* Held ten seconds on the server (q3): «Вернуть» on the toast stops it,
+         and the card's invoice line is read again once it has gone — sent, or
+         refused with its reason. */
+      if (r.status === 200 && r.body.ok && r.body.held && r.body.token) {
+        var entry = demoApply({
+          type: "order_letter", kind: "invoice", id: String(id), number: row ? row.number : String(id),
+          invoice: row && row.invoice ? row.invoice.number : "", token: String(r.body.token)
+        });
+        toast("Счёт уйдёт через 10 секунд", entry);
+        setTimeout(admOrderListsReload, (Number(r.body.ms) || 10000) + 1500);
+        render();
+        return;
+      }
       if (r.status === 200 && r.body.ok) {
         if (row && row.invoice) journalNote("Счёт " + row.invoice.number + " (" + row.number + "): отправлен ещё раз");
         toast(r.body.sent ? "Счёт отправлен ещё раз ✓" : r.body.skipped ? "Почта не подключена — письмо не ушло" : "Письмо не ушло — попробуйте позже");
@@ -37902,6 +38412,7 @@
     S.lockerSize = "";
     S.boxOpen = false;
     S.boxOverride = null;
+    S.boxErr = "";
   }
   /** The label is made: the same reset, plus a re-read — the suggestion has
       just learned this size and the server, not the panel, decides what
@@ -38233,6 +38744,13 @@
     }
     if (a.type === "order_label") {
       return "Этикетка " + (a.number || a.id) + ": " + (a.value ? "создана" : "отложена — отправление у Montonio остаётся");
+    }
+    // the two held letters (q3) — the same lines the journal had for them
+    if (a.type === "order_letter") {
+      // two straight chains: each is one text node the rules translate whole
+      var letterInv = a.invoice || "", letterNum = a.number || a.id;
+      if (a.kind === "invoice") return "Счёт " + letterInv + " (" + letterNum + "): отправлен ещё раз";
+      return "Письмо клиенту · заказ " + letterNum;
     }
     if (a.type === "set_seo") {
       var sv = seoOfAction(a) || {}, sru = sv.RU || {};
@@ -38619,6 +39137,14 @@
     else if (a.type === "order_label") {
       entry.prev = { type: "order_label", id: a.id, number: a.number, value: !a.value };
     }
+    /* 1a (q3): a letter the server is holding for ten seconds — the invoice
+       sent again, a reply from «Написать клиенту». It has already been handed
+       to the server (the line is written after its answer); the way back is
+       the token, which stops it while it waits. */
+    else if (a.type === "order_letter") {
+      entry.prev = { type: "order_letter_cancel", id: a.id, number: a.number, kind: a.kind, token: a.token,
+        reply: a.reply || "", customerMessage: a.customerMessage || "" };
+    }
     // both fields empty = «снова как в каталоге», so the override is removed
     // rather than stored as a pair of empty strings that would hide it
     else if (a.type === "set_seo") {
@@ -38841,7 +39367,7 @@
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
-    else if (a.type === "stock_adjust" || a.type === "stock_set" || a.type === "order_status" || a.type === "order_label") noop();
+    else if (a.type === "stock_adjust" || a.type === "stock_set" || a.type === "order_status" || a.type === "order_label" || a.type === "order_letter_cancel") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
@@ -41257,6 +41783,11 @@
     if (S.mailOpen) l.push("mail");
     if (S.admCustOpen) l.push("customer");
     if (S.adminOrder) l.push("order");
+    /* 1a: on the order card, «Сообщение клиенту» (a full-height sheet on a
+       phone) and the «⋯» list are each one press of Back, before the card */
+    if (S.adminOrder && S.orderReplyOpen) l.push("reply");
+    // (admOrderMoreOpen() spelled out: this function is cut out whole by the suite)
+    if (S.adminOrder && S.admOrderMore && S.admOrderMore === String(S.adminOrder)) l.push("ordermore");
     if (S.adminEdit) l.push("edit");
     if (S.admMore) l.push("more");
     /* «Помощник» on a phone: a 75 % sheet with a scrim over whatever is open.
@@ -41330,9 +41861,12 @@
       S.goodsConfirmBack = false;
       goodsBackToRow(backId);
     } else if (top === "order") {
-      S.adminOrder = 0;
+      S.adminOrder = 0; S.admOrderMore = "";
+      // the unsent words stay in S.orderDrafts for when the card opens again
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
-    } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
+    } else if (top === "reply") S.orderReplyOpen = false;
+    else if (top === "ordermore") S.admOrderMore = "";
+    else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; S.admCustDetailErr = ""; }
     /* the letter: the question «← Все письма» asks — the first Back asks,
        the next one leaves and its unsaved words go (map #14) */
     else if (top === "mail") {
@@ -42184,8 +42718,10 @@
          is drawn over the customer's (admCustOrderCardHTML), so «←» and the
          browser's Back land on that customer again (Dim, 10.09.2026) */
       S.adminTab = S.admCustOpen ? "people" : "orders";
-      // assistant-work: a fresh order gets a fresh reply panel
+      // assistant-work: a fresh order gets a fresh reply panel — its own
+      // unsent words, if any, wait in S.orderDrafts (admOrderMsgHTML)
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      S.admOrderMore = "";
       /* …and a fresh parcel. The locker door and «Другая коробка» are about
          the box in his hands right now: carrying either to the next order
          would book that one with the previous parcel's measurements. */
@@ -42246,8 +42782,9 @@
     }
     if (d.admcopy) { admCopyText(d.admcopy, t.getAttribute("data-admcopymsg") || ""); return; }
     if (d.admwrite) {
-      S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true;
-      S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true; S.admOrderMore = "";
+      S.orderReplyDraft = ((S.orderDrafts && S.orderDrafts[String(d.admwrite)]) || {}).reply || "";
+      S.orderMsgs = null; S.orderMsgsFor = "";
       srvLoadOrderMessages(d.admwrite);
       window.scrollTo({ top: 0 }); render(); return;
     }
@@ -42265,17 +42802,22 @@
           value: "shipped", prev: shipRow.status
         });
         render();
-        toast(shipRow.number + " отправлен · письмо ушло", shipEntry);
+        /* …and the letter waits ten seconds on the server (q3), so the
+           toast's «Вернуть» — six of them — really stops it */
+        toast(shipRow.number + " отправлен · письмо уйдёт через 10 с", shipEntry);
         return;
       }
+      /* «Отправлен без этикетки» (1a: the text link under the step, gap C4).
+         The question is ink, not rust — nothing is lost — and in the
+         Glossary's words, not «Отметить отправленным». */
       pendingAction = {
         type: "order_status", overlay: true, id: shipRow.id, number: shipRow.number,
         value: "shipped", prev: shipRow.status,
-        title: "Отметить отправленным?",
+        title: "Отправлен без этикетки?",
         detail: admShipConfirmText(shipRow),
         ok: "Отправлен"
       };
-      render(); return;
+      render(); refocus("[data-admapply]"); return;
     }
     /* «По счёту»: the transfer arrived — money, so the confirm card asks
        first; «ещё раз» sends the same letter again and asks nothing. */
@@ -42346,16 +42888,18 @@
       toast(admStockToastText(stRow, was + stDelta), stEntry);
       return;
     }
-    if (d.admnotesave !== undefined) {
-      var noteEl = document.querySelector("[data-admnote]");
-      srvOrderNoteSave(S.adminOrder, noteEl ? noteEl.value : "");
-      return;
-    }
     /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() -------- */
     if (d.admorderreply !== undefined) {
       S.orderReplyOpen = !S.orderReplyOpen;
-      if (S.orderReplyOpen) srvLoadOrderMessages(S.adminOrder);
-      render(); return;
+      if (S.orderReplyOpen) {
+        // what was typed into it last time, for this order (S.orderDrafts)
+        var rd = (S.orderDrafts && S.orderDrafts[String(S.adminOrder)]) || {};
+        if (!S.orderReplyDraft && rd.reply) S.orderReplyDraft = rd.reply;
+        srvLoadOrderMessages(S.adminOrder);
+      }
+      render();
+      refocus(S.orderReplyOpen ? "[data-orderreplydraft]" : '.adm-ordacts [data-admorderreply], [data-admordermore]');
+      return;
     }
     if (d.admordercompose !== undefined) {
       // no render() while composing — see the goods-editor AI handlers'
@@ -42399,6 +42943,8 @@
         composeBtn.disabled = false; composeBtn.textContent = composeLabel;
         if (r.status === 200 && r.body.ok && typeof r.body.text === "string") {
           S.orderReplyDraft = r.body.text;
+          if (!S.orderDrafts) S.orderDrafts = {};
+          S.orderDrafts[String(ordRow.id)] = { reply: r.body.text, cust: custMsg };
           var draftEl0 = document.querySelector("[data-orderreplydraft]");
           if (draftEl0) draftEl0.value = S.orderReplyDraft;
           toast("Черновик готов — проверьте и сохраните");
@@ -42408,27 +42954,26 @@
       }).catch(function () { composeBtn.disabled = false; composeBtn.textContent = composeLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
-    /* The one action that used to send at once with no confirm and no undo,
-       while «Отправлен» — a cheaper, reversible step — asked (audit q9; Dim:
-       yes). The typed text goes into S first, so the card's own render cannot
-       lose it, and the customer's pasted message travels on the action. */
+    /* «Отправить». It used to go through the confirm card (audit q9, Dim:
+       «yes, ask first») because a letter could not be recalled; since
+       25.09.2026 the server holds it ten seconds and the toast's «Вернуть»
+       stops it (q3) — so it goes at once, as every other step does, with the
+       address in the panel's head and the whole letter in the box above the
+       button. The typed text goes into S first, so the card's own render
+       cannot lose it, and the customer's pasted message travels with it. */
     if (d.admordersend !== undefined) {
       if (t.disabled) return;
       var ordRow2 = currentAdminOrderRow();
       var draftEl = document.querySelector("[data-orderreplydraft]");
       var custEl2 = document.querySelector("[data-ordercustmsg]");
       var draft = draftEl ? draftEl.value.trim() : "";
-      if (!ordRow2 || !draft) return;
+      if (!ordRow2 || !draft) { if (draftEl) draftEl.focus(); return; }
       S.orderReplyDraft = draft;
-      pendingAction = {
-        type: "order_mail", overlay: true, id: ordRow2.srv.id, number: ordRow2.number,
-        reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : "",
-        title: "Отправить письмо клиенту?",
-        detail: admMailConfirmText(ordRow2),
-        preview: draft.length > 400 ? draft.slice(0, 400) + "…" : draft,
-        ok: "Отправить"
-      };
-      render(); refocus("[data-admapply]"); return;
+      srvOrderMailSend({
+        type: "order_mail", id: ordRow2.srv.id, number: ordRow2.number,
+        reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : ""
+      });
+      return;
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; ensureMedia();   // media
@@ -43127,9 +43672,10 @@
            journal keeps the way back — so the toast can offer «Отменить». */
         else if (pa.type === "order_status") {
           var oEntry = demoApply(pa);
+          // both letters wait ten seconds on the server (q3) — «Вернуть» stops them
           toast(pa.value === "shipped"
-            ? pa.number + " отправлен · письмо ушло"
-            : pa.number + " отменён", oEntry);
+            ? pa.number + " отправлен · письмо уйдёт через 10 с"
+            : pa.number + " отменён · письмо уйдёт через 10 с", oEntry);
         }
         // «По счёту»: the server settles the payment (src/lib/invoices.ts markInvoicePaid) — no undo, money came
         else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
@@ -44398,9 +44944,21 @@
     else if (t.matches("[data-admcustnote]")) { S.admCustNote = t.value; }
     // the two notes: the draft, then the button lit in place (r12)
     else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; S.custNoteSaved = false; paintCustNote(); }
+    /* the order's note: the draft only — the save is admAutosave's, wired by
+       the box's own data-autosave (1a) */
     else if (t.matches("[data-admnote]")) {
       var noteOrd = admCurOrder();
-      if (noteOrd && noteOrd.srv) { S.orderNote = { id: String(noteOrd.srv.id), text: t.value, saved: false }; paintOrderNote(); }
+      if (noteOrd && noteOrd.srv) S.orderNote = { id: String(noteOrd.srv.id), text: t.value };
+    }
+    /* «Сообщение клиенту»: what is typed is kept per order, so Back, the nav
+       and a list reload under the caret never lose it (gap E.3) */
+    else if (t.matches("[data-orderreplydraft]") || t.matches("[data-ordercustmsg]")) {
+      if (S.adminOrder) {
+        if (!S.orderDrafts) S.orderDrafts = {};
+        var dk = String(S.adminOrder), dd = S.orderDrafts[dk] || (S.orderDrafts[dk] = { reply: "", cust: "" });
+        if (t.matches("[data-orderreplydraft]")) { dd.reply = t.value; S.orderReplyDraft = t.value; }
+        else dd.cust = t.value;
+      }
     }
     else if (t.matches("[data-notifyf]")) { S.notifyEmail = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
@@ -44876,11 +45434,21 @@
        этикетку» and are gone the moment the label is made. */
     else if (t.matches("[data-shipbox]")) {
       var sbNum = Number(String(t.value).replace(",", "."));
+      var sbSide = t.getAttribute("data-shipbox");
+      /* 1a (README § 2): a side the carrier cannot take is not used — the box
+         keeps its rust edge and the one line under the three fields says why,
+         in place, where the toast used to come and go. The label goes with the
+         last good size until it is right. */
       if (!isFinite(sbNum) || sbNum <= 0 || sbNum > 200) {
-        render(); toast("Сторона коробки — от 1 до 200 см."); return;
+        S.boxErr = sbSide;
+        t.setAttribute("aria-invalid", "true");
+        var sbHint = document.querySelector("[data-shipboxerr]");
+        if (sbHint) sbHint.hidden = false;
+        return;
       }
+      if (S.boxErr === sbSide) S.boxErr = "";
       if (!S.boxOverride) S.boxOverride = { length: 0, width: 0, height: 0 };
-      S.boxOverride[t.getAttribute("data-shipbox")] = Math.round(sbNum * 10) / 10;
+      S.boxOverride[sbSide] = Math.round(sbNum * 10) / 10;
       render(); return;
     }
     /* «Коробка магазина» — settings.shipping_parcel, saved on `change` (the
@@ -45275,6 +45843,10 @@
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
       // the phone's «Ещё» page: back to the screen it was opened over
       else if (S.admMore) { S.admMore = false; render(); }
+      // the order card's «⋯» (1a)
+      else if (S.screen === "admin" && S.adminOrder && S.admOrderMore && S.admOrderMore === String(S.adminOrder)) {
+        S.admOrderMore = ""; render(); refocus("[data-admordermore]");
+      }
       /* «Помощник»: the phone's sheet like any other sheet; the desktop's
          docked column only from inside it — Escape pressed over a form must
          not put away a pane the owner keeps open while he works */
@@ -45880,11 +46452,11 @@
         render(); admAsk(q); refocus("[data-admq]");
       }
     }
-    // the order card's note is a textarea — Ctrl/Cmd+Enter saves it, plain Enter is a new line
+    // the order card's note is a textarea — Ctrl/Cmd+Enter saves it now, plain Enter is a new line
     if (t && t.matches && t.matches("[data-admnote]") && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      var noteBtn = document.querySelector("[data-admnotesave]");
-      if (noteBtn && !noteBtn.disabled) noteBtn.click();
+      var noteKey = t.getAttribute("data-autosave");
+      if (noteKey) admAutosave(noteKey, t.value, "flush");
       return;
     }
     if (t && t.matches && t.tagName === "INPUT" && S.screen === "admin") {

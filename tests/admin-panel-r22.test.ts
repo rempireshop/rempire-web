@@ -333,6 +333,7 @@ function rowsHTML(state: {
     ${slice("admOrderQOn")}
     ${slice("admOrderSearching")}
     ${slice("admOrderEmptyHTML")}
+    ${slice("admSkelHTML")}
     ${slice("admOrderRows")}
     function admOrderVM(o) { return { id: o.id, number: o.number, toShip: true, delivered: false }; }
     function admOrderRowHTML(v) { return "<row>" + v.number + "</row>"; }
@@ -401,13 +402,27 @@ describe("«Заказы»: what the list itself says while a search is out", ()
     expect(rowsHTML({ orders: [] })).not.toContain("Ничего не нашли.");
   });
 
-  it("a search looks past the lit chip, and the line above says so", () => {
+  /* 1a (gap L3, recommended — Dim, 25.09.2026): the search still looks
+     through every order, and it is the lit chip that says so now — «Все»
+     while text is in the box, the chosen chip again once it is emptied —
+     rather than a line explaining a chip that did not apply. */
+  it("a search looks past the chosen chip, and the lit chip says «Все» while it does", () => {
     const html = rowsHTML({
       q: "R-1004",
       filter: "new",
       found: { q: "R-1004", rows: ["R-100423"] },
     });
-    expect(html).toContain("Ищем по всем заказам — фильтр сейчас не действует.");
+    // the order found is listed although «Отправить» is the chosen chip
+    expect(html).toContain("R-100423");
+    const lit = (q: string, filter: string) => new Function("S", `
+      ${decl("ADM_ORDER_FILTERS")}
+      ${slice("admOrderFilter")}
+      ${slice("admOrderChipLit")}
+      return admOrderChipLit();
+    `)({ admOrderQ: q, admOrderFilter: filter }) as string;
+    expect(lit("R-1004", "new")).toBe("all");
+    expect(lit("  ", "new"), "an empty box gives the chosen chip back").toBe("new");
+    expect(lit("", "returns")).toBe("returns");
   });
 });
 

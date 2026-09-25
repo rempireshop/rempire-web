@@ -17,7 +17,7 @@ import { assertClean, watch } from "./sweep-helpers";
  *     card has none either — one tap used to mail «Заказ отправлен», with a
  *     tracking number it does not have, about nothing;
  *   - the orders search says out loud that the chip filter is off while it
- *     searches every order;
+ *     searches every order — since 1a by lighting «Все» while text is typed;
  *   - «Письма»: «Товар снова в наличии» starts off, like the sender reads it,
  *     and the birthday row says the day it actually sends on;
  *   - «Салон» points at the receipt link instead of a receipt letter nothing
@@ -109,6 +109,8 @@ test.describe("admin sweep 3 — «Отменить заказ» says what reall
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
     await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
 
+    // 1a: «Отменить заказ» is one of the rare actions in «⋯»
+    await page.locator("[data-admordermore]:visible").first().click();
     await page.locator("[data-admordercancel]").click();
     const card = page.locator(".adm-confirm");
     await expect(card.locator(".adm-confirm__t")).toHaveText("Отменить заказ?");
@@ -124,12 +126,15 @@ test.describe("admin sweep 3 — «Отменить заказ» says what reall
     await expect(detail).not.toContainText("Письмо не уходит");
     await expect(detail).not.toContainText("Деньги вернутся клиенту");
 
-    // and that button is really there, on a paid order with money left to send back
-    await expect(page.locator("[data-admrefund]")).toBeVisible();
-
-    // «Отмена» leaves the order where it was
+    // «Не надо» leaves the order where it was
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
+
+    // and that button is really there, in «⋯», on a paid order with money left to send back
+    await page.locator("[data-admordermore]:visible").first().click();
+    await expect(page.locator("[data-admrefund]")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-admrefund]")).toHaveCount(0);
     const status = async () =>
       (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.status as string;
     expect(await status()).toBe("paid");
@@ -173,7 +178,7 @@ test.describe("admin sweep 3 — a gift-card order has no parcel step", () => {
 test.describe("admin sweep 3 — the orders search says the filter is off", () => {
   test.use({ extraHTTPHeaders: ipHeaders(198) });
 
-  test("a typed search admits it looks past the chip, and stops saying so when cleared", async ({ page }, testInfo) => {
+  test("a typed search looks past the chip, and the lit chip says so until the box is cleared", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one viewport is enough for a filter");
     test.setTimeout(120_000);
     const number = await placeOrder(page, freshEmail("sweep3-filter"));
@@ -187,22 +192,19 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     const hint = searchLine(page);
     await expect(hint).toHaveCount(0);
 
-    // typing finds it anyway — and the list says why the chip stopped mattering
+    /* typing finds it anyway — and since 1a (gap L3, Dim 25.09.2026) the chip
+       says why the filter stopped mattering: «Все» is lit while text is in the
+       box, rather than a line explaining a chip that did not apply */
     await page.locator("[data-admorderq]").fill(number);
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
-    await expect(hint).toHaveText("Ищем по всем заказам — фильтр сейчас не действует.");
-    // the chip is still the one the owner will come back to
-    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="all"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "false");
+    await expect(hint).toHaveCount(0);
 
-    // clearing the box puts the filter back, and takes the line away with it
+    // clearing the box gives the chosen chip back, and its list with it
     await page.locator("[data-admorderq]").fill("");
-    await expect(hint).toHaveCount(0);
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
-
-    // «Все» + a search needs no line: nothing is being overridden
-    await page.locator('[data-admfilter="all"]').click();
-    await page.locator("[data-admorderq]").fill(number);
-    await expect(hint).toHaveCount(0);
   });
 });
 

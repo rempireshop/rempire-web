@@ -1535,7 +1535,7 @@
         "Нажать «Ещё» — открывается страница — и прочитать строку под каждым разделом.",
         "Нажать значок «Помощник» вверху справа, потом закрыть его.",
         "На компьютере свернуть «Помощник» стрелкой «›» и развернуть полосой справа.",
-        "Открыть вопрос «Отменить заказ» в карточке заказа и нажать «Не надо»."
+        "В карточке заказа открыть «⋯» → «Отменить заказ» и нажать «Не надо»."
       ],
       "expect": [
         "Вверху: REMPIRE и значок помощника справа; полоски «← В магазин» больше нет.",
@@ -1556,7 +1556,7 @@
           "Press «Ещё» — a page opens — and read the line under each section.",
           "Press the «Помощник» icon at the top right, then close it.",
           "On a computer fold «Помощник» with «›» and open it again from the strip on the right.",
-          "Open the «Отменить заказ» question on an order card and press «Не надо» (cancel)."
+          "On an order card open «⋯» → «Отменить заказ» and press «Не надо» (cancel)."
         ],
         "expect": [
           "At the top: REMPIRE and the assistant's icon on the right; no «← В магазин» bar.",
@@ -1569,7 +1569,7 @@
         "why": "The frame is shared by every screen in the new look: if something in it breaks, it shows everywhere."
       },
       "mark": "new",
-      "markedAt": "2026-09-25T10:00:13.467Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "panel-back",
@@ -1580,7 +1580,7 @@
       "title": "«Назад» закрывает то, что открыто в панели",
       "steps": [
         "В «Заказах» открыть карточку заказа и нажать «Назад» телефона.",
-        "Открыть её снова, нажать «Отправлен» и на вопросе нажать «Назад» дважды.",
+        "Открыть её снова, нажать «Отправлен без этикетки» и на вопросе нажать «Назад» дважды.",
         "В «Товарах» открыть товар на правку и нажать «Назад».",
         "В «Заказах» нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
@@ -1603,7 +1603,7 @@
         "title": "Back closes whatever is open in the panel",
         "steps": [
           "In «Заказы» open an order card and press the phone's back button.",
-          "Open it again, press «Отправлен», and press back twice on the question.",
+          "Open it again, press «Отправлен без этикетки», and press back twice on the question.",
           "In «Товары» open a product for editing and press back.",
           "In «Заказы» press «Ещё», then back; open «Помощник» and press back again.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
@@ -1622,7 +1622,7 @@
         "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu. On 25.09 Dim found the second back in a row still threw him out — «Клиенты» → «Заказы»."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:00:13.467Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "panel-overview",
@@ -1633,17 +1633,18 @@
       "title": "«Сделать сегодня» на «Обзоре»",
       "steps": [
         "Открыть «Обзор».",
-        "Прочитать блок «Сделать сегодня».",
+        "Прочитать блок «Сделать сегодня» и строки про отзывы и заявки партнёров.",
         "Нажать на каждую строку в нём.",
         "Нажать строку про скрытые товары и посмотреть, какой список открылся.",
+        "Нажать тёмную кнопку «Отправить N заказа».",
         "Переключить панель на английский, потом на эстонский, и снова прочитать блок."
       ],
       "expect": [
-        "Написано, сколько заказов ждут отправки.",
+        "Написано, сколько заказов ждут отправки; общего числа над блоком нет.",
         "Написано, какие товары заканчиваются; на английском и эстонском — без русских слов.",
-        "Написано, сколько отзывов ждёт проверки.",
+        "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
         "Числа совпадают с тем, что есть на самом деле.",
-        "Каждая строка открывает свой раздел.",
+        "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить».",
         "Скрытый товар считается отдельной строкой, и она открывает «Каталог → Скрытые»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
@@ -1653,23 +1654,24 @@
         "title": "«Сделать сегодня» on «Обзор»",
         "steps": [
           "Open «Обзор» (overview).",
-          "Read the «Сделать сегодня» (to do today) block.",
+          "Read the «Сделать сегодня» (to do today) block and the review and partner rows.",
           "Tap every line in it.",
           "Press the row about hidden products and look at the list it opens.",
+          "Press the dark «Отправить N заказа» button.",
           "Switch the panel to English, then to Estonian, and read the block again."
         ],
         "expect": [
-          "It says how many orders wait to be sent.",
+          "It says how many orders wait to be sent; no total above the block.",
           "It says which products are running out; in English and Estonian with no Russian words.",
-          "It says how many reviews wait for a check.",
+          "Under reviews, who wrote and the stars; under a request, the salon's name.",
           "The numbers match what is really there.",
-          "Each line opens its own section.",
+          "Each line opens its own section; the dark button opens «Заказы» on «Отправить».",
           "A hidden product gets a line of its own, and it opens «Каталог → Скрытые»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T12:09:33.930Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "panel-partners-switch",
@@ -3532,7 +3534,8 @@
       "steps": [
         "Открыть «Заказы» и посмотреть, какой чип горит.",
         "Нажать по очереди «Отправить», «В пути», «По счёту» и «Возвраты».",
-        "Ввести в поиск номер одного из своих заказов."
+        "Ввести в поиск номер одного из своих заказов.",
+        "Стереть поиск и нажать тёмную кнопку «Отправить N заказа», потом ещё раз."
       ],
       "expect": [
         "Список открылся на «Все» — фильтр никто не выбирал.",
@@ -3540,7 +3543,7 @@
         "В «Отправить» только оплаченные заказы, которые ещё не уехали.",
         "Заказа на одну подарочную карту в «Отправить» нет.",
         "Поиск находит заказ из любого списка, не только текущего.",
-        "Над списком написано, что фильтр сейчас не действует."
+        "Пока в поиске текст, горит «Все»; очистили поле — вернулся выбранный чип."
       ],
       "why": "Лишний заказ в очереди «Отправить» вы будете собирать зря.",
       "risk": "med",
@@ -3550,7 +3553,8 @@
         "steps": [
           "Open «Заказы» and see which chip is lit.",
           "Press «Отправить», «В пути», «По счёту» and «Возвраты» in turn.",
-          "Type the number of one of your own orders into the search."
+          "Type the number of one of your own orders into the search.",
+          "Clear the search and press the dark «Отправить N заказа» button, then press it again."
         ],
         "expect": [
           "The list opens on «Все» — nobody chose a filter.",
@@ -3558,10 +3562,12 @@
           "«Отправить» holds only paid orders that have not left yet.",
           "An order for a gift card alone is not there.",
           "Search finds an order from any list, not just this one.",
-          "A line above the list says the filter is off."
+          "While there is text in the search «Все» is lit; empty it and your chip returns."
         ],
         "why": "An extra order in the «Отправить» queue is one you pack for nothing."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-onway-chip",
@@ -3659,44 +3665,44 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Карточка заказа: блок «Оплата»",
+      "title": "Карточка заказа: оплата в «Доставка и оплата»",
       "steps": [
         "Открыть «Заказы» и нажать на оплаченный заказ.",
-        "Найти «Оплата» и нажать на номер платежа под ней — прямой ссылки на платёж Montonio не даёт.",
-        "Пролистать карточку до «Состав», «Покупатель», «Доставка».",
+        "Найти «Доставка и оплата» и нажать на номер платежа — прямой ссылки на платёж Montonio не даёт.",
+        "Пролистать карточку до «Состав» и «Покупатель».",
         "Открыть заказ, оплаченный через Revolut, N26, Wise или банк Латвии, Литвы, Финляндии, если такой есть."
       ],
       "expect": [
-        "В «Оплата» написано, чем платили: картой или банком — и название банка, не код.",
+        "В «Доставка и оплата» написано, чем платили — и название банка, а не код.",
         "Там же видно, прошёл платёж или нет.",
-        "Нажатие на номер платежа копирует его: «Номер платежа скопирован ✓».",
+        "Нажатие на номер или на значок рядом копирует его: «Номер платежа скопирован ✓».",
         "В «Состав» те же товары, что покупали.",
         "Сумма в «Состав» совпадает с суммой в корзине.",
-        "Если денег пришло меньше, чем стоит заказ, в «Оплате» стоит предупреждение и заказ НЕ оплачен."
+        "Если денег пришло меньше, чем стоит заказ, там рыжее предупреждение и заказ НЕ оплачен."
       ],
       "why": "Когда покупатель спорит про деньги, ответить ему можно только с этого экрана.",
       "risk": "med",
       "writes": false,
       "en": {
-        "title": "The order card: the «Оплата» block",
+        "title": "The order card: the payment in «Доставка и оплата»",
         "steps": [
           "Open «Заказы» and tap a paid order.",
-          "Find «Оплата» and tap the payment number under it — Montonio offers no direct link to a payment.",
-          "Scroll the card down to «Состав», «Покупатель» and «Доставка».",
+          "Find «Доставка и оплата» and tap the payment number — Montonio offers no direct link to a payment.",
+          "Scroll the card down to «Состав» and «Покупатель».",
           "Open an order paid through Revolut, N26, Wise or a Latvian, Lithuanian or Finnish bank, if there is one."
         ],
         "expect": [
-          "«Оплата» says what was paid with: card or bank — named, never a code.",
+          "«Доставка и оплата» says what was paid with — the bank named, never a code.",
           "It also shows whether the payment went through.",
-          "Tapping the payment number copies it: «Номер платежа скопирован ✓».",
+          "Tapping the number or the icon beside it copies it: «Номер платежа скопирован ✓».",
           "«Состав» holds the same products that were bought.",
           "The total in «Состав» matches the cart's total.",
-          "If less money arrived than the order costs, «Оплата» warns and the order is NOT paid."
+          "If less arrived than the order costs, a rust warning shows and it is NOT paid."
         ],
         "why": "When a buyer argues about money, this screen is your only answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T14:50:46.012Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-paid-short",
@@ -3711,14 +3717,14 @@
         "Посмотреть «Склад»: товар из этого заказа должен быть на месте.",
         "Проверить, что подарочные карты по этому заказу не выпущены и письмо покупателю не ушло.",
         "Найти платёж в Montonio по номеру из карточки заказа.",
-        "Если всё в порядке — нажать «Оплачен».",
+        "Если всё в порядке — нажать тёмную «Отметить оплаченным» и в вопросе «Оплачен».",
         "Найти заказ в «Заказах», не открывая его: по значку и по чипу «Придержаны»."
       ],
       "expect": [
         "Заказ не был оплачен сам: ничего не списалось, карты не выпущены, письмо не ушло.",
         "Предупреждение называет обе суммы: сколько пришло и сколько стоит заказ.",
         "После «Оплачен» предупреждение исчезло, товар списался, письмо ушло.",
-        "Кнопка «Вернуть деньги» работает — номер платежа Montonio не потерялся.",
+        "«Вернуть деньги» в «⋯» работает — номер платежа Montonio не потерялся.",
         "Покупатель увидел «Платёж обрабатывается», а не «Заказ оплачен».",
         "В списке значок «Заплатили меньше», а не «Ждёт оплаты»."
       ],
@@ -3726,7 +3732,7 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-19T13:21:13.000Z",
+      "markedAt": "2026-09-25T10:26:11.189Z",
       "en": {
         "title": "An order somebody paid short",
         "steps": [
@@ -3735,14 +3741,14 @@
           "Look at «Склад»: the goods from that order must still be there.",
           "Check that no gift cards were issued for it and no letter went to the customer.",
           "Find the payment in Montonio by the number on the order card.",
-          "If it is fine, press «Оплачен».",
+          "If it is fine, press the dark «Отметить оплаченным», then «Оплачен» in the question.",
           "Find the order in «Заказы» without opening it: by its badge and the «Придержаны» chip."
         ],
         "expect": [
           "The order did not pay itself: no stock moved, no cards, no letter.",
           "The warning names both figures: what arrived and what the order costs.",
           "After «Оплачен» the warning is gone, the stock moved and the letter went.",
-          "«Вернуть деньги» works — the Montonio payment number was not lost.",
+          "«Вернуть деньги» in «⋯» works — the Montonio payment number was not lost.",
           "The customer saw the payment being processed, not «Заказ оплачен».",
           "The row's badge says «Заплатили меньше», not «Ждёт оплаты»."
         ],
@@ -3759,8 +3765,8 @@
       "steps": [
         "Оплатить заказ, в котором есть набор.",
         "Записать остатки товаров из набора на «Складе».",
-        "Отменить заказ и посмотреть «Склад».",
-        "Вернуть заказ в «оплачен» через «Изменить статус вручную».",
+        "Отменить заказ («⋯» → «Отменить заказ») и посмотреть «Склад».",
+        "Вернуть заказ в «оплачен»: «⋯» → «Отметить оплаченным вручную».",
         "Посмотреть «Склад» ещё раз."
       ],
       "expect": [
@@ -3773,14 +3779,14 @@
       "risk": "high",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-09-19T00:00:00.000Z",
+      "markedAt": "2026-09-25T10:26:11.189Z",
       "en": {
         "title": "Cancel an order with a set, then put it back",
         "steps": [
           "Pay an order that contains a set.",
           "Write down the stock of the products in that set.",
-          "Cancel the order and look at «Склад».",
-          "Put the order back to paid with «Изменить статус вручную».",
+          "Cancel the order («⋯» → «Отменить заказ») and look at «Склад».",
+          "Put the order back to paid: «⋯» → «Отметить оплаченным вручную».",
           "Look at «Склад» again."
         ],
         "expect": [
@@ -3886,10 +3892,10 @@
         "Вернуться и нажать «A6 для термопринтера ↗».",
         "Посмотреть вес на этикетке: 0,9 кг при любом числе товаров, даже с «Другой коробкой».",
         "Открыть PDF A4 и посмотреть полосу под этикеткой: она не должна быть пустой.",
-        "До создания этикетки открыть оплаченный заказ в пакомат SmartPosti или Unisend, потом в Omniva или Польшу, и посмотреть блок над кнопкой. Коробку можно поменять у любого оплаченного заказа — так задумано."
+        "До создания этикетки открыть оплаченный заказ в пакомат SmartPosti или Unisend, потом в Omniva или Польшу, и посмотреть «Следующий шаг». Коробку можно поменять у любого оплаченного заказа — так задумано."
       ],
       "expect": [
-        "Появилось «Отправление»: перевозчик, пакомат и трек-номер.",
+        "Появилась «Посылка»: перевозчик, пакомат и трек-номер.",
         "Рядом с трек-номером есть кнопка «Скопировать».",
         "На листе A4 под этикеткой — номер заказа крупными цифрами.",
         "Там же написано, куда и кому едет посылка и что внутри.",
@@ -3908,10 +3914,10 @@
           "Go back and press «A6 для термопринтера ↗».",
           "Look at the weight on the label: 0.9 kg whatever the item count, even with «Другая коробка».",
           "Open the A4 PDF and check the band under the label is not empty.",
-          "Before creating a label, open a paid order to a SmartPosti or Unisend locker, then one to Omniva or Poland, and look above the button. The box can be changed on any paid order — that is by design."
+          "Before creating a label, open a paid order to a SmartPosti or Unisend locker, then one to Omniva or Poland, and look at «Следующий шаг». The box can be changed on any paid order — that is by design."
         ],
         "expect": [
-          "«Отправление» appears: carrier, locker and tracking number.",
+          "«Посылка» appears: carrier, locker and tracking number.",
           "Next to the tracking number is a «Скопировать» button.",
           "Under the label on A4: the order number in big figures.",
           "The same band says where and to whom it goes and what is inside.",
@@ -3921,7 +3927,7 @@
         "why": "A label that will not print is a parcel you cannot hand over today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T16:37:14.361Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-shipped",
@@ -3931,16 +3937,18 @@
       "lang": "RU",
       "title": "Отметить заказ отправленным",
       "steps": [
-        "В карточке того же заказа нажать «Отправлен».",
-        "Прочитать подсказку под кнопками, до нажатия.",
+        "В карточке того же заказа нажать тёмную кнопку «Отправлен».",
+        "До нажатия открыть «?» в «Следующий шаг» и прочитать подсказку.",
         "Прочитать полоску, которая всплыла внизу.",
-        "Открыть «Заказы» и найти заказ в «В пути»."
+        "Открыть «Заказы» и найти заказ в «В пути».",
+        "На другом заказе с этикеткой нажать «Отправлен» и сразу «Вернуть»."
       ],
       "expect": [
         "В подсказке сказано отнести посылку в пакомат, курьер — из панели Montonio.",
-        "Внизу появилась полоска с номером заказа.",
-        "В ней написано, что письмо покупателю ушло.",
+        "Внизу полоска: номер заказа и «письмо уйдёт через 10 с».",
         "Рядом кнопка «Вернуть», она живёт шесть секунд.",
+        "Письмо «Заказ отправлен» приходит через десять секунд, а не сразу.",
+        "После «Вернуть» заказ снова «Оплачен», и письмо не приходит.",
         "Заказ переехал в список «В пути»."
       ],
       "why": "Молчание после отправки — самая частая причина вопросов о заказе.",
@@ -3949,22 +3957,24 @@
       "en": {
         "title": "Marking an order dispatched",
         "steps": [
-          "In the same order press «Отправлен» (dispatched).",
-          "Read the hint under the buttons before pressing anything.",
+          "In the same order press the dark «Отправлен» (dispatched) button.",
+          "Before pressing, open «?» in «Следующий шаг» and read the hint.",
           "Read the bar that pops up at the bottom.",
-          "Open «Заказы» and find the order under «В пути»."
+          "Open «Заказы» and find the order under «В пути».",
+          "On another labelled order press «Отправлен» and at once «Вернуть»."
         ],
         "expect": [
           "The hint says to take the parcel to a machine; couriers come from Montonio.",
-          "A bar appears at the bottom with the order number.",
-          "It says the letter to the buyer has gone.",
+          "A bar at the bottom: the order number and «письмо уйдёт через 10 с».",
           "An «Вернуть» button sits there for six seconds.",
+          "The «Заказ отправлен» letter arrives ten seconds later, not at once.",
+          "After «Вернуть» the order is «Оплачен» again and no letter comes.",
           "The order has moved to the «В пути» list."
         ],
         "why": "Silence after dispatch is the commonest reason buyers ask where their order is."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-shipped-nolabel",
@@ -3975,11 +3985,13 @@
       "title": "Отправлен без этикетки",
       "steps": [
         "Взять другой оплаченный заказ, у которого этикетки нет.",
-        "Нажать «Отправлен».",
-        "Прочитать окошко и нажать «Отправлен» ещё раз."
+        "Сначала посмотреть его строку в «Заказах», потом открыть карточку.",
+        "В «Следующий шаг» нажать ссылку «Отправлен без этикетки».",
+        "Прочитать окошко и нажать «Отправлен»."
       ],
       "expect": [
-        "Магазин сначала переспрашивает — сразу ничего не происходит.",
+        "В строке списка одна кнопка — «Создать этикетку», без «Отправлен» рядом.",
+        "Магазин сначала переспрашивает: «Отправлен без этикетки?» — сразу ничего не происходит.",
         "В окошке сказано, что письмо уйдёт без трек-номера.",
         "Заказ отмечается отправленным только после второго нажатия."
       ],
@@ -3990,16 +4002,20 @@
         "title": "Dispatched with no label",
         "steps": [
           "Take another paid order that has no label.",
-          "Press «Отправлен».",
-          "Read the box that opens and press «Отправлен» again."
+          "First look at its row in «Заказы», then open the card.",
+          "In «Следующий шаг» press the «Отправлен без этикетки» link.",
+          "Read the box that opens and press «Отправлен»."
         ],
         "expect": [
-          "The shop asks first — nothing happens straight away.",
+          "The list row has one button — «Создать этикетку», no «Отправлен» beside it.",
+          "The shop asks first: «Отправлен без этикетки?» — nothing happens straight away.",
           "The box says the letter will go without a tracking number.",
           "The order is marked dispatched only on the second press."
         ],
         "why": "A dispatch letter with no tracking number means calls you cannot answer."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T11:55:24.381Z"
     },
     {
       "id": "order-delivered",
@@ -4094,16 +4110,17 @@
       "title": "Написать клиенту",
       "steps": [
         "Открыть любой заказ с почтой покупателя.",
-        "Нажать «Написать клиенту».",
+        "Нажать «Написать клиенту» (на телефоне — в «⋯»).",
         "В поле сверху вставить выдуманный вопрос клиента.",
         "Поправить черновик ответа.",
-        "Нажать «Отправить» и подтвердить в окошке.",
+        "Нажать «Отправить» и прочитать полоску внизу.",
+        "Написать ещё одно письмо, нажать «Отправить» и сразу «Вернуть».",
         "Вернуться к списку, снова открыть заказ и нажать «Написать клиенту»."
       ],
       "expect": [
-        "Перед отправкой магазин показывает адрес покупателя и текст письма.",
-        "Там же предупреждение: отправленное письмо назад не вернуть.",
-        "После отправки в карточке блок «Переписка»: вопрос клиента и ваше письмо.",
+        "Окошка больше нет: письмо уходит через 10 секунд, внизу «Вернуть».",
+        "После «Вернуть» текст снова в поле, и письмо не приходит.",
+        "Через десять секунд в «Переписке»: вопрос клиента и ваше письмо.",
         "Поле для вопроса клиента после отправки пустое.",
         "После нового открытия «Переписка» на месте.",
         "Письмо пришло на почту покупателя."
@@ -4115,24 +4132,25 @@
         "title": "Writing to the customer",
         "steps": [
           "Open any order that has the buyer's e-mail.",
-          "Press «Написать клиенту» (write to the customer).",
+          "Press «Написать клиенту» (write to the customer; on a phone it is in «⋯»).",
           "Paste a made-up customer question into the top field.",
           "Edit the draft reply.",
-          "Press «Отправить» and confirm in the box.",
+          "Press «Отправить» and read the bar at the bottom.",
+          "Write one more letter, press «Отправить» and at once «Вернуть».",
           "Go back to the list, open the order again and press «Написать клиенту»."
         ],
         "expect": [
-          "Before sending, the shop shows the address and the text.",
-          "It warns that a sent letter cannot be taken back.",
-          "After sending the card shows «Переписка»: the customer's question and your letter.",
+          "No box to confirm: the letter leaves in 10 seconds, «Вернуть» at the bottom.",
+          "After «Вернуть» the text is back in the box and no letter comes.",
+          "Ten seconds later «Переписка» shows the customer's question and your letter.",
           "The box for the customer's question is empty after sending.",
           "Opened again, «Переписка» is still there.",
           "The letter arrives in the buyer's mailbox."
         ],
-        "why": "A letter sent to the wrong person cannot be taken back."
+        "why": "A letter sent to the wrong person can only be stopped in its first ten seconds."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:31:40.229Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-invoice-card",
@@ -4144,7 +4162,7 @@
       "steps": [
         "Открыть «Заказы» → «По счёту» и нажать на заказ.",
         "Прочитать строку вверху карточки.",
-        "Нажать «Скачать счёт»."
+        "Нажать «⋯» → «Скачать счёт»."
       ],
       "expect": [
         "Вверху написано, что заказ ждёт оплаты по счёту.",
@@ -4162,7 +4180,7 @@
         "steps": [
           "Open «Заказы» → «По счёту» and tap an order.",
           "Read the line at the top of the card.",
-          "Press «Скачать счёт» (download invoice)."
+          "Press «⋯» → «Скачать счёт» (download invoice)."
         ],
         "expect": [
           "The top says the order is waiting for invoice payment.",
@@ -4173,7 +4191,9 @@
           "The shop's IBAN and the payment term are there."
         ],
         "why": "A mistake here comes back through the buyer's accountant and the tax office."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-invoice-resend",
@@ -4183,7 +4203,7 @@
       "lang": "RU",
       "title": "Отправить счёт ещё раз",
       "steps": [
-        "В том же заказе нажать «Отправить счёт ещё раз».",
+        "В том же заказе нажать «⋯» → «Отправить счёт ещё раз».",
         "Проверить почту, на которую выписан счёт.",
         "Прочитать строку про счёт в карточке заказа.",
         "Пока IBAN пуст, открыть «Обзор» и нажать строку «Заполните IBAN»."
@@ -4193,7 +4213,8 @@
         "К письму приложен PDF счёта.",
         "Без IBAN карточка пишет, что счёт не отправлен и где его заполнить.",
         "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз.",
-        "Строка «Заполните IBAN» открывает «Настройки → О компании», а не «Обзор» снова."
+        "Строка «Заполните IBAN» открывает «Настройки → О компании», а не «Обзор» снова.",
+        "Внизу полоска «Счёт уйдёт через 10 секунд» — её «Вернуть» его останавливает."
       ],
       "why": "Компания, не получившая счёт, не заплатит, а вы будете думать, что она тянет.",
       "risk": "med",
@@ -4201,7 +4222,7 @@
       "en": {
         "title": "Sending the invoice again",
         "steps": [
-          "In the same order press «Отправить счёт ещё раз» (send the invoice again).",
+          "In the same order press «⋯» → «Отправить счёт ещё раз» (send the invoice again).",
           "Check the mailbox the invoice was made out to.",
           "Read the invoice line on the order card.",
           "While the IBAN is empty, open «Обзор» and tap the «Заполните IBAN» row."
@@ -4211,12 +4232,13 @@
           "The invoice PDF is attached to it.",
           "With no IBAN the card says the invoice was not sent, and where to fix it.",
           "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз».",
-          "The «Заполните IBAN» row opens «Настройки → О компании», not «Обзор» again."
+          "The «Заполните IBAN» row opens «Настройки → О компании», not «Обзор» again.",
+          "A bar says the invoice leaves in 10 seconds — its «Вернуть» stops it."
         ],
         "why": "A company that never got the invoice will not pay — and you blame them."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:27:32.176Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-invoice-paid",
@@ -4273,7 +4295,7 @@
       "expect": [
         "У чипа «Возвраты» стоит число.",
         "Заказ с просьбой о возврате в этом списке.",
-        "Над списком написано: в счётчике те, на кого ещё не ответили.",
+        "Рядом с чипами «?»: в счётчике те, на кого ещё не ответили.",
         "В списке «Все» у строки этого заказа стоит метка «Просит возврат».",
         "Строка с «Обзора» ведёт в «Возвраты», а не в «В пути»."
       ],
@@ -4291,12 +4313,14 @@
         "expect": [
           "The «Возвраты» chip carries a number.",
           "The order the return was asked for is in that list.",
-          "A line above says: the count is those nobody has answered.",
+          "A «?» beside the chips says the count is those nobody has answered.",
           "In the «Все» list that order's row is marked «Просит возврат».",
           "The row from «Обзор» leads to «Возвраты», not to «В пути»."
         ],
         "why": "A return request with nowhere to look for it comes back as a complaint."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-return-handled",
@@ -4308,12 +4332,12 @@
       "steps": [
         "Запомнить число у чипа «Возвраты» и число в строке про возврат на «Обзоре».",
         "Открыть заказ, по которому просили возврат.",
-        "Нажать «Обработано».",
+        "Нажать «Обработано» в рыжей полосе вверху карточки.",
         "Вернуться на «Заказы» и на «Обзор».",
         "Снова открыть этот заказ и нажать «Вернуть в «Возвраты»»."
       ],
       "expect": [
-        "Под кнопкой написано, что деньги не уходят и письмо не отправляется.",
+        "За «?» рядом с кнопкой: деньги не уходят и письмо не отправляется.",
         "Оба числа стали на один меньше.",
         "Заказ остался в списке «Возвраты», но метка на строке теперь «Возврат обработан».",
         "Деньги не вернулись и покупателю ничего не пришло.",
@@ -4323,18 +4347,18 @@
       "risk": "med",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-09-17T13:58:37.000Z",
+      "markedAt": "2026-09-25T10:26:11.189Z",
       "en": {
         "title": "A return: the «Обработано» button",
         "steps": [
           "Note the number on the «Возвраты» chip and the number in the return row on «Обзор».",
           "Open the order the return was asked for.",
-          "Press «Обработано» (dealt with).",
+          "Press «Обработано» (dealt with) in the rust band at the top of the card.",
           "Go back to «Заказы» and to «Обзор».",
           "Open that order again and press «Вернуть в «Возвраты»»."
         ],
         "expect": [
-          "The line under the button says no money moves and no letter goes out.",
+          "Behind the «?» beside the button: no money moves and no letter goes out.",
           "Both numbers have gone down by one.",
           "The order is still in the «Возвраты» list, but its row is now marked «Возврат обработан».",
           "No money came back and the customer got nothing.",
@@ -4352,13 +4376,13 @@
       "title": "Вернуть деньги целиком",
       "steps": [
         "Открыть небольшой заказ, оплаченный картой или банком.",
-        "Нажать «Вернуть деньги».",
+        "Нажать «⋯» → «Вернуть деньги».",
         "Проверить сумму в окошке — там весь остаток — и подтвердить.",
         "Обновить карточку через минуту, а с настоящим банком — когда он подтвердит.",
         "Открыть кабинет этого покупателя и найти блок с баллами."
       ],
       "expect": [
-        "Под «Оплата» появилась строка «Возвращено X из Y».",
+        "В «Доставка и оплата» появилась строка «Возвращено X из Y».",
         "Покупателю сразу ушло письмо «Деньги возвращены».",
         "С настоящим банком там же написано «Возврат … в обработке у Montonio».",
         "Когда банк подтвердил возврат, у заказа стоит «возврат».",
@@ -4373,13 +4397,13 @@
         "title": "Refunding the whole amount",
         "steps": [
           "Open a small order paid by card or by bank.",
-          "Press «Вернуть деньги» (refund).",
+          "Press «⋯» → «Вернуть деньги» (refund).",
           "Check the amount in the box — the whole balance — and confirm.",
           "Refresh the card a minute later — with the real bank, once it confirms.",
           "Open that buyer's account and find the points block."
         ],
         "expect": [
-          "A «Возвращено X из Y» line appears under «Оплата».",
+          "A «Возвращено X из Y» line appears in «Доставка и оплата».",
           "The buyer gets the «Деньги возвращены» letter straight away.",
           "With the real bank it also says «Возврат … в обработке у Montonio».",
           "Once the bank confirms the refund, the order carries «возврат».",
@@ -4388,7 +4412,7 @@
         ],
         "why": "A mistake here costs exactly what is typed in the amount field."
       },
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-refund-retry",
@@ -4398,10 +4422,10 @@
       "lang": "RU",
       "title": "Нажать «Вернуть деньги» второй раз",
       "steps": [
-        "Открыть оплаченный заказ и нажать «Вернуть деньги» на часть суммы.",
+        "Открыть оплаченный заказ и нажать «⋯» → «Вернуть деньги» на часть суммы.",
         "Прочитать ответ: он должен быть по-русски и сказать, списано что-нибудь или нет.",
-        "Нажать «Вернуть деньги» ещё раз на ту же сумму.",
-        "Открыть «Оплата» и посчитать строки в списке возвратов.",
+        "Нажать «⋯» → «Вернуть деньги» ещё раз на ту же сумму.",
+        "Открыть «Доставка и оплата» и посчитать строки в списке возвратов.",
         "Если заказ был оплачен подарочной картой — открыть эту карту."
       ],
       "expect": [
@@ -4415,14 +4439,14 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-19T12:00:00.000Z",
+      "markedAt": "2026-09-25T10:26:11.189Z",
       "en": {
         "title": "Press «Вернуть деньги» a second time",
         "steps": [
-          "Open a paid order and press «Вернуть деньги» for part of the amount.",
+          "Open a paid order and press «⋯» → «Вернуть деньги» for part of the amount.",
           "Read the answer: it must be in plain words and say whether anything was taken.",
-          "Press «Вернуть деньги» again for the same amount.",
-          "Open «Оплата» and count the rows in the refund list.",
+          "Press «⋯» → «Вернуть деньги» again for the same amount.",
+          "Open «Доставка и оплата» and count the rows in the refund list.",
           "If the order was paid with a gift card, open that card."
         ],
         "expect": [
@@ -4444,7 +4468,7 @@
       "title": "Отменить заказ",
       "steps": [
         "Открыть неоплаченный или ошибочный заказ.",
-        "Нажать «Отменить заказ» и прочитать окошко.",
+        "Нажать «⋯» → «Отменить заказ» и прочитать окошко.",
         "Подтвердить.",
         "Посмотреть остатки товаров из этого заказа."
       ],
@@ -4452,7 +4476,7 @@
         "В окошке написано, что отмена деньги не возвращает.",
         "Там же сказано, что для возврата есть отдельная кнопка.",
         "После отмены товары вернулись на склад.",
-        "Покупателю ушло письмо «Заказ отменён»."
+        "Письмо «Заказ отменён» уходит через десять секунд; «Вернуть» на полоске его останавливает."
       ],
       "why": "Если бы окошко обещало возврат, покупатель остался бы без денег и без товара.",
       "risk": "high",
@@ -4461,7 +4485,7 @@
         "title": "Cancelling an order",
         "steps": [
           "Open an unpaid or mistaken order.",
-          "Press «Отменить заказ» (cancel order) and read the box.",
+          "Press «⋯» → «Отменить заказ» (cancel order) and read the box.",
           "Confirm.",
           "Look at the stock of the products from that order."
         ],
@@ -4469,10 +4493,12 @@
           "The box says outright that cancelling returns no money.",
           "It says a separate button does the refund.",
           "After cancelling, the goods are back in stock.",
-          "The buyer has had the «Заказ отменён» letter."
+          "The «Заказ отменён» letter leaves ten seconds later; «Вернуть» on the bar stops it."
         ],
         "why": "If the box promised a refund, the buyer would lose both money and goods."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-giftcard-pdf",
@@ -4516,14 +4542,14 @@
       "title": "Заметка к заказу: видно, что сохранено",
       "steps": [
         "В «Заказах» открыть заказ и вписать заметку.",
-        "Нажать «Сохранить заметку».",
+        "Подождать секунду, ничего не нажимая, и посмотреть вверх экрана.",
         "Закрыть карточку и открыть снова.",
         "Открыть карточку клиента и так же поменять заметку о клиенте."
       ],
       "expect": [
-        "Пока текст не тронут, кнопка серая и выключена.",
-        "При правке рядом написано «Не сохранено».",
-        "После сохранения на кнопке «Сохранено ✓».",
+        "Кнопки «Сохранить заметку» у заказа больше нет; под полем «Сохраняется само».",
+        "Вверху «Сохраняем…», потом «Сохранено ✓».",
+        "Без интернета — «Не сохранилось — проверьте интернет» и «Повторить».",
         "Заметка на месте после повторного открытия.",
         "У заметки о клиенте те же три состояния; Enter сохраняет."
       ],
@@ -4534,19 +4560,21 @@
         "title": "Order note: you can see it is saved",
         "steps": [
           "In «Заказы» open an order and type a note.",
-          "Press «Сохранить заметку».",
+          "Wait a second without pressing anything and look at the top of the screen.",
           "Close the card and open it again.",
           "Open a customer card and change the customer note the same way."
         ],
         "expect": [
-          "Until you type, the button is grey and off.",
-          "While editing, «Не сохранено» stands beside it.",
-          "After saving the button reads «Сохранено ✓».",
+          "The order has no «Сохранить заметку» button; under the box, «Сохраняется само».",
+          "At the top «Сохраняем…», then «Сохранено ✓».",
+          "Offline, «Не сохранилось — проверьте интернет» and «Повторить».",
           "The note is still there when the card is reopened.",
           "The customer note has the same three states; Enter saves."
         ],
         "why": "The button used to look the same always, so you could not tell whether it saved."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "order-refund-giftcard",
@@ -4556,17 +4584,17 @@
       "lang": "RU",
       "title": "«Вернуть деньги» с подарочной картой",
       "steps": [
-        "Шаги 1–3 — для уже частично потраченной карты: ею целиком оплачен другой заказ. Открыть заказ, где карту купили, нажать «Вернуть деньги» и подтвердить.",
-        "Открыть заказ, оплаченный этой картой, и нажать «Вернуть деньги».",
+        "Шаги 1–3 — для уже частично потраченной карты: ею целиком оплачен другой заказ. Открыть заказ, где карту купили, нажать «⋯» → «Вернуть деньги» и подтвердить.",
+        "Открыть заказ, оплаченный этой картой, и нажать «⋯» → «Вернуть деньги».",
         "Прочитать окошко и подтвердить.",
-        "Снова открыть заказ, где купили карту, и нажать «Вернуть деньги»: предупреждение должно назвать подтверждение банка.",
+        "Снова открыть заказ, где купили карту, и нажать «⋯» → «Вернуть деньги»: предупреждение должно назвать подтверждение банка.",
         "Дальше только на боевом магазине — в песочнице Montonio возвраты не проводит. Подтвердить возврат и сразу ввести код карты на кассе.",
         "Когда Montonio подтвердил возврат, снова ввести код на кассе."
       ],
       "expect": [
         "Первый возврат отказан: «…уже потрачена на … — вернуть заказ целиком нельзя».",
         "Окошко показывает «Вернём на подарочную карту» всю сумму, «на счёт покупателя: 0 €».",
-        "Заказ стал «возврат», в «Оплата» — «На подарочную карту … вернулось …».",
+        "Заказ стал «возврат», в «Доставка и оплата» — «На подарочную карту … вернулось …».",
         "Покупателю ушло письмо «Деньги возвращены» с названием карты.",
         "Только вживую, пока возврат в пути: у кода «Заморожена», касса карту не принимает.",
         "Только вживую, после подтверждения: у кода «Аннулирована», «Карта PDF» пропала, код не принимается."
@@ -4578,24 +4606,24 @@
       "en": {
         "title": "«Вернуть деньги» with a gift card",
         "steps": [
-          "Steps 1–3 need a card that is already partly spent: another order was paid in full with it. Open the order that bought the card, press «Вернуть деньги» and confirm.",
-          "Open the order paid with that card and press «Вернуть деньги».",
+          "Steps 1–3 need a card that is already partly spent: another order was paid in full with it. Open the order that bought the card, press «⋯» → «Вернуть деньги» and confirm.",
+          "Open the order paid with that card and press «⋯» → «Вернуть деньги».",
           "Read the box and confirm.",
-          "Open the card's order again and press «Вернуть деньги»: the warning must mention the bank's confirmation.",
+          "Open the card's order again and press «⋯» → «Вернуть деньги»: the warning must mention the bank's confirmation.",
           "From here on the live shop only — Montonio makes no refunds in the sandbox. Confirm the refund and enter the card code at the checkout straight away.",
           "Once Montonio has confirmed the refund, enter the code at the checkout again."
         ],
         "expect": [
           "The first refund is refused: «…уже потрачена на … — вернуть заказ целиком нельзя».",
           "The box shows the whole sum under «Вернём на подарочную карту», «на счёт покупателя: 0 €».",
-          "The order is «возврат», and «Оплата» says «На подарочную карту … вернулось …».",
+          "The order is «возврат», and «Доставка и оплата» says «На подарочную карту … вернулось …».",
           "The buyer got the «Деньги возвращены» letter naming the card.",
           "Live only, while the refund is pending: «Заморожена» on the code, the checkout refuses it.",
           "Live only, once confirmed: «Аннулирована», no «Карта PDF», and the checkout refuses the code."
         ],
         "why": "A refund onto a card already spent is double money; a card never refunded is money lost."
       },
-      "markedAt": "2026-09-23T12:18:21.818Z"
+      "markedAt": "2026-09-25T10:26:11.189Z"
     },
     {
       "id": "acct-code-login",

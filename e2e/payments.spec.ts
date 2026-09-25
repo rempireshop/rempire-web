@@ -381,6 +381,8 @@ test.describe("payments — the money goes back", () => {
     await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
 
     // the confirm card is the only one with a field in it: the whole remainder
+    await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
     await page.locator("[data-admrefund]").click();
     const card = page.locator(".adm-confirm");
     await expect(card.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");

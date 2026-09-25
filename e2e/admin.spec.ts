@@ -135,9 +135,9 @@ test.describe("admin", () => {
       // the redesigned card: mono `id · time` kicker, the customer as the title
       await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
       await expect(page.locator("h1.adm-h1")).toContainText("E2E Buyer");
-      // the 4-step fulfilment strip: «Оплачен» done, «Этикетка» is the step to do
-      await expect(page.locator(".adm-step--done")).toHaveCount(1);
-      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      // the 4-dot progress line (1a): «Оплачен» done, «Этикетка» is the step to do
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(1);
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Этикетка");
       const status = async () =>
         (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.status as string;
 
@@ -153,8 +153,8 @@ test.describe("admin", () => {
       await page.locator("[data-closetoast]").click();
 
       await expect(page.locator(".adm-badge--big")).toHaveText("Этикетка готова");
-      await expect(page.locator(".adm-step--done")).toHaveCount(2);
-      await expect(page.locator(".adm-step--now")).toContainText("Отправлен");
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(2);
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Отправлен");
       expect(await status()).toBe("paid");
       // the shipment box: a copyable tracking code, both label sizes — and the A4 one really is a PDF
       const code = ((await page.locator("[data-trackingcode]").textContent()) || "").trim();
@@ -183,7 +183,9 @@ test.describe("admin", () => {
       const sink = async () =>
         (await (await page.request.get(`/api/e2e/mail/?template=order-shipped&to=${encodeURIComponent(email)}`)).json())
           .mails as Array<{ links: string[] }>;
-      await expect.poll(async () => (await sink()).length).toBe(1);
+      /* 1a (q3): the letter waits ten seconds on the server, so «Вернуть» can
+         still stop it — it arrives after the hold, not with the PATCH */
+      await expect.poll(async () => (await sink()).length, { timeout: 25_000 }).toBe(1);
       expect((await sink())[0].links.some((l) => l.endsWith(code))).toBe(true);
 
       /* «Доставлен» — the owner's last step: applied at once, no letter, an
@@ -192,7 +194,7 @@ test.describe("admin", () => {
       await expect(page.getByRole("status")).toContainText(`${number} доставлен`);
       await page.locator("[data-closetoast]").click();
       await expect(page.locator(".adm-badge--big")).toHaveText("Доставлен");
-      await expect(page.locator(".adm-step--done")).toHaveCount(4);
+      await expect(page.locator(".adm-prog__s--done")).toHaveCount(4);
       await expect.poll(status).toBe("delivered");
       expect((await sink()).length).toBe(1);
 
@@ -218,7 +220,7 @@ test.describe("admin", () => {
       await page.locator('[data-admfilter="new"]').click();
       await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
       await expect(page.locator(".adm-badge--big")).toHaveText("Оплачен");
-      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      await expect(page.locator(".adm-prog__s--now")).toContainText("Этикетка");
       await expect(page.locator(".adm-ship--off")).toContainText("Отправление у Montonio остаётся");
       await expect(page.locator(".adm-ordacts [data-admlabel]")).toHaveText("Создать этикетку");
     });

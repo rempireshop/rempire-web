@@ -686,6 +686,340 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-kv { border-top: 1px solid var(--a-ink); margin-top: 10px; padding-top: 12px; line-height: 22px; }
 .adm-kv span { color: var(--a-muted); }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction 1a — «Обзор», «Заказы», «Заказ» (design_handoff_admin_ux README
+   § 5, screens 01, 03, 04). The shared pieces (section header «?», tag, the
+   pinned dark button, the confirm sheet) are at the end of this file; this
+   block is only what these three screens draw with them.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* a list under a section header: the header already carries the ink rule */
+.adm-list--sech { border-top: 0; margin-top: 0; }
+/* «Все заказы» at the right of the «Последние заказы» header */
+.adm-sech__link { margin-left: auto; font-size: 13px; font-weight: 500; }
+/* grey bars where the numbers will be, on the first open */
+.adm-skel--rows { margin-top: 16px; gap: 16px; }
+.adm-skel--rows i { height: 20px; }
+
+/* ---------- Обзор ---------------------------------------------------------- */
+
+/* «Сделать сегодня» and «Последние заказы» on the left, «Продажи» on the
+   right; one column on a phone, the sales between the two (screen 03) */
+.adm-ov__grid {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-template-areas: "todo sales" "recent sales"; gap: 32px 44px; align-items: start;
+}
+.adm-ov__todo { grid-area: todo; min-width: 0; }
+.adm-ov__sales { grid-area: sales; min-width: 0; }
+.adm-ov__recent { grid-area: recent; min-width: 0; }
+@media (max-width: 1180px) {
+  .adm-ov__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "sales" "recent"; gap: 28px; }
+}
+/* a row of «Сделать сегодня»: the big number, the words and whose, the chevron */
+.adm2 .adm-todo {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 14px; gap: 12px; align-items: center;
+  padding: 14px 0; min-height: 0; flex-wrap: nowrap;
+}
+.adm-todo .adm-row__big { width: auto; font-size: 30px; }
+.adm-todo__t { display: block; font-size: 15px; line-height: 20px; }
+.adm-todo .adm-row__sub { margin-top: 1px; }
+.adm-ov .adm-sales { border-top: 0; margin-top: 0; grid-template-columns: 1fr; }
+.adm-ov .adm-sales__cell:last-child { border-bottom: 0; }
+@media (max-width: 1180px) {
+  .adm-ov .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .adm-ov .adm-sales__cell { border-bottom: 0; padding-top: 12px; }
+}
+@media (max-width: 899px) {
+  .adm2 .adm-todo { grid-template-columns: 40px minmax(0, 1fr) 14px; gap: 10px; padding: 13px 0; }
+  .adm-todo .adm-row__big { font-size: 28px; }
+  .adm-ov .adm-sales__v { font-size: 28px; }
+}
+
+/* ---------- Заказы --------------------------------------------------------- */
+
+/* the search and the dark button on the header's right (desktop); under the
+   title, full width, on a phone — where the button is pinned instead */
+.adm-orders__acts {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 320px; justify-content: flex-end; min-width: 0;
+}
+.adm-orders__pin { display: contents; }
+.adm-orders__acts .adm-pin { margin-left: 0; }
+.adm-search { position: relative; display: block; flex: 0 1 300px; min-width: 200px; }
+.adm-search__i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--a-muted); pointer-events: none; }
+.adm2 .adm-search__in.adm-input { height: 46px; padding-left: 38px; }
+.adm-search__in::-webkit-search-cancel-button { cursor: pointer; }
+@media (max-width: 899px) {
+  .adm-orders .adm-head { flex-direction: column; align-items: stretch; gap: 14px; }
+  .adm-orders__acts { flex: none; justify-content: stretch; }
+  .adm-search { flex: 1 1 auto; min-width: 0; }
+  .adm2 .adm-search__in.adm-input { height: 48px; }
+}
+/* the chips: one row that scrolls sideways on a phone, never wrapping; the
+   count bold beside its word; «?» after them on «Возвраты» */
+.adm-ochips__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.adm-ochips { flex: 0 1 auto; min-width: 0; }
+.adm-ochips .adm-chip { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.adm-chip__n { font-weight: 600; }
+.adm-ochips__row .adm-help { margin: 0; }
+.adm-olist__note { margin: 8px 0; }
+.adm-olist__more { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 12px; }
+.adm-olist__more .adm-hint { margin: 0; }
+.adm-olist__head { display: none; }
+
+/* an order in a list — «Заказы» and «Последние заказы» on «Обзор»: the
+   customer and the sum on the first line, number · day · what · where and
+   the status tag on the second, the step (a secondary button) under both */
+.adm2 .adm-orow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "body amt" "body tag" "acts acts";
+  column-gap: 12px; row-gap: 4px; align-items: center; padding: 12px 0; min-height: 0;
+}
+.adm2 .adm-orow > .adm-orow__body {
+  grid-area: body; display: grid; grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-areas: "who who who" "num date what"; align-items: baseline; row-gap: 3px; min-width: 0;
+}
+.adm-orow__who { grid-area: who; font-size: 15px; font-weight: 600; }
+.adm-orow__num { grid-area: num; font-size: 12px; line-height: 18px; color: var(--a-muted); white-space: nowrap; }
+.adm-orow__date { grid-area: date; font-size: 13px; line-height: 18px; color: var(--a-muted); white-space: nowrap; }
+.adm2 .adm-orow__what { grid-area: what; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.adm-orow__date::before, .adm-orow__what::before { content: "\00a0·\00a0"; }
+.adm2 .adm-orow > .adm-row__amt { grid-area: amt; min-width: 0; font-size: 17px; }
+.adm2 .adm-orow > .adm-orow__tag { grid-area: tag; justify-self: end; flex-wrap: nowrap; gap: 6px; }
+.adm2 .adm-orow > .adm-orow__acts { grid-area: acts; margin-top: 6px; }
+/* …and on a wide screen «Заказы» is a table, one line per order: Номер ·
+   Дата · Покупатель · Что и куда · Статус · Сумма · the step (when there is
+   one — never more than one) in a column of its own, centred on the line.
+   The header row has the same seven columns as the rows; the step's has no
+   word. The step's column is the widest step label (EN «Handed to the
+   customer», 181 px at 13 px) — so the table needs 1200 px: below that the
+   buyer and «Что и куда» would be squeezed to nothing. */
+@media (min-width: 1200px) {
+  .adm-olist__head {
+    display: grid; grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr) 136px 96px 184px; column-gap: 12px;
+    padding: 12px 0 8px; border-bottom: 1px solid var(--a-ink);
+    font-size: 12px; line-height: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
+  }
+  .adm-olist__head span:nth-child(6) { text-align: right; }
+  .adm2 .adm-olist--table { border-top: 0; }
+  .adm2 .adm-olist--table .adm-orow {
+    grid-template-columns: minmax(0, 1fr) 136px 96px 184px; grid-template-areas: "body tag amt acts";
+    column-gap: 12px; row-gap: 0; padding: 10px 0; min-height: 57px;
+  }
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__body {
+    grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "num date who what";
+    column-gap: 12px; align-items: center;
+  }
+  .adm-olist--table .adm-orow__date::before, .adm-olist--table .adm-orow__what::before { content: none; }
+  .adm-olist--table .adm-orow__num { font-size: 12.5px; }
+  .adm2 .adm-olist--table .adm-orow__what { font-size: 13.5px; }
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__tag { justify-self: start; flex-wrap: wrap; }
+  .adm2 .adm-olist--table .adm-orow > .adm-row__amt { text-align: right; }
+}
+/* …a narrower desktop keeps the two lines of the phone, and the step stands
+   beside them in a column of its own (one width for every row, so the sums
+   still line up), centred — no third line under the row */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .adm2 .adm-olist--table .adm-orow {
+    grid-template-columns: minmax(0, 1fr) auto 184px; grid-template-areas: "body amt acts" "body tag acts";
+  }
+}
+@media (min-width: 900px) {
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__acts {
+    align-self: center; justify-content: flex-end; flex-wrap: nowrap; margin-top: 0; min-width: 0;
+  }
+  /* the row's step is the secondary one — smaller than the page's dark button */
+  .adm2 .adm-olist--table .adm-orow__acts .adm-btn--row { height: 36px; font-size: 13px; }
+}
+
+/* ---------- Заказ ---------------------------------------------------------- */
+
+.adm-ocard { gap: 24px; }
+/* the two columns breathe like the design's: 28 px between the blocks */
+.adm-ocols > .adm-stack { gap: 28px; }
+.adm-ocols > .adm-oside { gap: 26px; }
+/* «← Заказы» / «← К клиенту» — a phone has it in its top bar */
+.adm-ohead__back { margin-bottom: -10px; }
+@media (max-width: 899px) { .adm-ohead__back { display: none; } }
+.adm-ohead { align-items: flex-end; }
+.adm-ohead__who { min-width: 0; }
+.adm-ohead__name { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+.adm-ohead__name .adm-h1 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 899px) {
+  .adm-ohead__name { justify-content: space-between; flex-wrap: nowrap; }
+  .adm-ohead__name .adm-badge { flex: none; }
+}
+
+/* the actions: the dark step, «Написать клиенту», «⋯» — on the header's
+   right on a desktop; the pinned bar above the tab bar on a phone, where
+   «Написать клиенту» goes into «⋯» unless there is no step to take */
+/* The group also carries `.adm-ordacts` (the class e2e and the assistant have
+   always found the card's actions by), whose old ≤ 480 rule stacked every
+   button full width — one row here, always. */
+.adm-pin.adm-opin { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; }
+.adm2 .adm-opin .adm-btn { height: 46px; width: auto; min-height: 0; }
+.adm2 .adm-opin .adm-pin__btn { padding: 0 24px; }
+.adm2 .adm-opin .adm-opin__write { padding: 0 18px; }
+.adm-omenu { position: relative; flex: none; }
+.adm2 .adm-omenu__btn { width: 46px; padding: 0; font-size: 20px; line-height: 1; }
+.adm-omenu__scrim { position: fixed; inset: 0; z-index: 64; border: 0; padding: 0; margin: 0; background: transparent; cursor: default; }
+.adm-omenu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 65; min-width: 240px;
+  display: flex; flex-direction: column; background: var(--a-paper); border: 1px solid var(--a-ink); animation: adm-up .15s;
+}
+.adm2 .adm-omenu__i {
+  display: block; width: 100%; min-height: 44px; padding: 12px 14px; margin: 0; text-align: left;
+  border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  font: inherit; font-size: 14px; line-height: 20px; color: var(--a-ink); text-decoration: none; white-space: nowrap;
+}
+.adm2 .adm-omenu__i:last-child { border-bottom: 0; }
+.adm2 .adm-omenu__i:hover, .adm2 .adm-omenu__i:focus-visible { background: var(--a-panel); }
+.adm2 .adm-omenu__i[disabled] { color: var(--a-muted); cursor: default; }
+.adm2 .adm-omenu__i--warn { color: var(--a-rust); }
+.adm2 .adm-omenu__i--phone, .adm2 .adm-omenu__i--close { display: none; }
+@media (max-width: 899px) {
+  .adm2 .adm-opin .adm-pin__btn { flex: 1 1 auto; height: 50px; min-width: 0; }
+  .adm2 .adm-opin .adm-opin__write { display: none; }
+  .adm2 .adm-opin .adm-opin__write--all, .adm2 .adm-opin > a.adm-btn { display: inline-flex; flex: 1 1 auto; height: 50px; min-width: 0; }
+  .adm2 .adm-opin .adm-omenu__btn { width: 50px; height: 50px; }
+  /* open: above the tab bar, so its scrim covers the whole screen */
+  .adm-pin.adm-opin.is-menu { z-index: 72; }
+  .adm-omenu__scrim { z-index: 1; background: var(--a-scrim); }
+  .adm-omenu__list {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 2; min-width: 0;
+    border: 0; border-top: 1px solid var(--a-rule); padding: 6px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    animation: adm-up .2s;
+  }
+  .adm2 .adm-omenu__i { min-height: 54px; padding: 16px; font-size: 16px; white-space: normal; }
+  .adm2 .adm-omenu__i--phone { display: block; }
+  .adm2 .adm-omenu__i--close { display: block; text-align: center; color: var(--a-muted); font-size: 15px; }
+}
+
+/* the progress line: four square marks (two for a pickup) on a rule that is
+   ink as far as the order has come — square, as every corner in 1a is; the
+   «?» stays the one round thing */
+.adm-prog {
+  position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none; margin: 0; padding: 0; max-width: 620px;
+}
+.adm-prog--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 320px; }
+.adm-prog__s { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; text-align: center; }
+.adm-prog__dot { width: 12px; height: 12px; box-sizing: border-box; border: 2px solid var(--a-edge); background: var(--a-paper); }
+.adm-prog__s--done .adm-prog__dot { background: var(--a-ink); border-color: var(--a-ink); }
+.adm-prog__s--now .adm-prog__dot { border-color: var(--a-ink); }
+.adm-prog__s--skip .adm-prog__dot { border-style: dashed; border-color: var(--a-muted); }
+.adm-prog__l { max-width: 100%; font-size: 13px; line-height: 16px; color: var(--a-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-prog__s--done .adm-prog__l { color: var(--a-ink); }
+.adm-prog__s--now .adm-prog__l { color: var(--a-ink); font-weight: 600; }
+.adm-prog__c { margin-top: -5px; font-size: 11px; line-height: 14px; color: var(--a-muted); }
+.adm-prog__rule { position: absolute; z-index: 0; top: 5px; left: 12.5%; right: 12.5%; height: 2px; background: var(--a-rule); list-style: none; }
+.adm-prog--2 .adm-prog__rule { left: 25%; right: 25%; }
+.adm-prog__rule i { display: block; height: 100%; background: var(--a-ink); }
+@media (max-width: 899px) { .adm-prog__l { font-size: 12px; } }
+
+/* «Следующий шаг»: one bordered card — what to do, one line, «?»; the box
+   and the locker door of this parcel; «Отправлен без этикетки» */
+.adm-next { border: 1px solid var(--a-ink); padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adm-next__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 26px; }
+.adm-next__k { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--a-muted); }
+.adm-next__t { margin-top: 2px; font-size: 19px; line-height: 25px; font-weight: 600; }
+.adm-next__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-next .adm-helpp { margin-top: 8px; }
+.adm-next--done .adm-next__t { margin: 0; font-size: 16px; line-height: 22px; }
+.adm2 .adm-next__prep { border: 0; padding: 0; margin-top: 2px; gap: 10px; }
+.adm-next__box { justify-content: flex-start; gap: 2px 10px; font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-next__boxk { color: var(--a-muted); }
+.adm-next__box .adm-link { font-size: 13px; }
+.adm-next__door { justify-content: flex-start; gap: 2px 10px; font-size: 13px; margin-top: 6px; }
+.adm-next__alt { align-self: flex-start; margin-top: 8px; font-size: 13px; font-weight: 400; }
+.adm-next [data-adminvstate] { margin-top: 4px; font-size: 13px; line-height: 19px; }
+.adm-opend { margin: -8px 0 0; }
+@media (max-width: 899px) {
+  .adm-next { padding: 16px; }
+  .adm-next__t { font-size: 18px; line-height: 24px; }
+}
+
+/* the sections of the card: «Посылка», «Состав», «Покупатель», «Доставка и
+   оплата», «Заметка» — a 12-px header over an ink rule, quiet lines under it */
+.adm-osec { display: flex; flex-direction: column; min-width: 0; }
+.adm-okv { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; font-size: 14px; line-height: 20px; }
+.adm-okv > br { display: none; }
+.adm2 .adm-okv a { color: var(--a-ink); text-decoration: none; align-self: flex-start; }
+.adm2 .adm-okv a:hover { text-decoration: underline; }
+/* the phone and the e-mail are links (tel: / mailto:) — a thumb's size on a phone */
+@media (max-width: 899px) { .adm2 .adm-okv a { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; } }
+.adm-okv__muted { font-size: 13px; color: var(--a-muted); }
+.adm-okv--company { display: block; padding-top: 12px; }
+.adm-okv--company span { color: var(--a-muted); font-size: 13px; }
+.adm-okv--pay { padding-top: 12px; }
+.adm-okv--pay > span:not(.adm-okv__pay):not(.adm-err) { font-size: 13px; color: var(--a-muted); }
+/* the blocks keep `.adm-kv` (the suite and the assistant find them by it)
+   without its old top rule and its all-grey spans */
+.adm2 .adm-ocard .adm-kv { border-top: 0; margin-top: 0; line-height: 20px; }
+.adm2 .adm-ocard .adm-kv span { color: inherit; }
+.adm2 .adm-ocard .adm-okv .adm-okv__muted,
+.adm2 .adm-ocard .adm-okv--company span,
+.adm2 .adm-ocard .adm-okv--pay > span:not(.adm-okv__pay):not(.adm-err) { color: var(--a-muted); }
+.adm2 .adm-ocard .adm-opay .adm-err { color: var(--a-rust); }
+/* every payment warning is a rust block of its own (gap C9) */
+.adm-opay .adm-err:not(.adm-err--block) {
+  display: block; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--a-warn); border-left-width: 4px;
+  background: color-mix(in srgb, var(--a-warn) 6%, var(--a-paper)); line-height: 19px;
+}
+.adm-payref { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+.adm-payref__k { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-payref__row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.adm2 .adm-payref__code { font-size: 13px; line-height: 18px; letter-spacing: 0; color: var(--a-muted); cursor: copy; overflow-wrap: anywhere; min-width: 0; }
+.adm2 .adm-payref .adm-copy { width: 32px; height: 32px; padding: 0; border: 0; background: none; display: inline-flex; align-items: center; justify-content: center; }
+.adm2 .adm-payref .adm-copy:hover { background: var(--a-panel); }
+.adm-payref .adm-help { margin: 0; }
+@media (max-width: 899px) { .adm2 .adm-payref .adm-copy { width: 44px; height: 44px; } }
+.adm-ocard .adm-gifts { margin-top: 12px; }
+/* «Посылка» — the parcel, once there is a label */
+.adm2 .adm-ocard .adm-ship { border: 0; padding: 0; gap: 10px; }
+.adm-ship__where { padding-top: 10px; font-size: 14px; line-height: 20px; }
+/* «Состав»: the lines, the delivery, the discount and points, «Итого» */
+.adm2 .adm-oline { padding: 10px 0; min-height: 0; flex-wrap: nowrap; }
+.adm2 .adm-ominor { padding: 10px 0; min-height: 0; }
+.adm-ominor .adm-row__sub { margin: 0; }
+.adm-ocard .adm-total { align-items: baseline; padding: 12px 0 0; }
+.adm-ocard .adm-total__v { font-size: 26px; }
+/* «Заметка» — saves itself; the line under it says so */
+.adm2 .adm-onote__in { margin-top: 10px; min-height: 80px; }
+.adm-onote__st { margin-top: 4px; font-size: 12px; }
+
+/* a customer's return request — a rust notice at the top of the card, quiet
+   once it is answered (gap C8) */
+.adm-onotice {
+  border: 1px solid var(--a-rust); border-left-width: 4px; padding: 14px 16px;
+  background: color-mix(in srgb, var(--a-rust) 6%, var(--a-paper));
+  display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px; color: var(--a-ink);
+}
+.adm-onotice--done { border-color: var(--a-rule); background: var(--a-panel); }
+.adm-onotice .adm-hint--warn { color: var(--a-rust); font-weight: 600; }
+.adm-onotice__acts .adm-help { margin: 0; }
+
+/* «Сообщение клиенту»: a panel under the header on a desktop, a full-height
+   sheet on a phone (gap C13) */
+.adm-reply { border: 1px solid var(--a-ink); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; background: var(--a-paper); }
+.adm-reply__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.adm-reply__who { min-width: 0; overflow-wrap: anywhere; }
+.adm2 .adm-reply__x {
+  flex: none; width: 36px; height: 36px; padding: 0; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-reply__body { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.adm-reply__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.adm-reply__note { flex-basis: 100%; font-size: 12px; }
+@media (max-width: 899px) {
+  .adm-reply {
+    position: fixed; inset: 0; z-index: 75; border: 0; overflow: hidden;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .adm-reply__body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
+  .adm2 .adm-reply__x { width: 44px; height: 44px; }
+  .adm-reply__acts .adm-btn { flex: 1 1 auto; height: 50px; }
+}
+
 /* ---------- Склад stepper -------------------------------------------------- */
 
 /* «Склад» and its history: the volume in a box of its own. It used to open

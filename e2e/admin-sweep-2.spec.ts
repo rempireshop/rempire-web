@@ -86,6 +86,7 @@ test.describe("admin sweep 2 — the order card", () => {
     /* «Отменить заказ» → the card → «Отменить» on the toast. The undo used to
        answer ok and change nothing: the order stayed cancelled while the
        journal line disappeared. */
+    await page.locator("[data-admordermore]:visible").first().click();   // 1a: the rare actions are in «⋯»
     await page.locator("[data-admordercancel]").click();
     await expect(page.locator(".adm-confirm__t")).toHaveText("Отменить заказ?");
     await page.locator("[data-admapply]").click();
@@ -99,12 +100,14 @@ test.describe("admin sweep 2 — the order card", () => {
     expect((await order()).payment.at).toBe(settledAt);
 
     /* «Изменить статус вручную: возврат» — money going back, so it asks; «Отмена» leaves everything. */
+    await page.locator("[data-admordermore]:visible").first().click();   // 1a: the rare actions are in «⋯»
     await page.locator('[data-admstatus="refunded"]').click();
     await expect(page.locator(".adm-confirm__t")).toHaveText("Оформить возврат?");
     await expect(page.locator(".adm-confirm__d")).toContainText(number);
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
     expect(await status()).toBe("paid");
+    await page.locator("[data-admordermore]:visible").first().click();   // 1a: the rare actions are in «⋯»
     await page.locator('[data-admstatus="refunded"]').click();
     await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toContainText("Сохранено");
@@ -114,6 +117,7 @@ test.describe("admin sweep 2 — the order card", () => {
     /* …and «оплачен» on a refunded order is the step back — the card says the
        money is left alone (the payment record proves it) and that the goods
        the refund put back on the shelf are taken off it again. */
+    await page.locator("[data-admordermore]:visible").first().click();   // 1a: the rare actions are in «⋯»
     await page.locator('[data-admstatus="paid"]').click();
     await expect(page.locator(".adm-confirm__t")).toHaveText("Отметить оплаченным?");
     await expect(page.locator(".adm-confirm__d")).toContainText("Деньги не трогаем");
