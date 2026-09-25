@@ -15,7 +15,12 @@
  * the legacy seo_title/seo_desc columns, which `seoTitle`/`seoDesc` still
  * read and write on their own for anything that predates it.
  *
- * GET returns the same map as /api/overrides but uncached, for the panel.
+ * GET returns the same map as /api/overrides but uncached, for the panel —
+ * with the salon prices, the «ждут» counts and the owner's own active
+ * products (`custom`, the feed's shape): everything the panel edits, read
+ * past the edge. The public feed is cached for up to ~150 s, and a panel
+ * that reloaded onto its copy showed the SEO texts it had just saved as
+ * «пусто» (verification pass 25.09.2026).
  */
 import { requireAdmin } from "@/lib/auth";
 import { pendingStockAlertCounts } from "@/lib/customers";
@@ -26,6 +31,7 @@ import {
   type DescriptionOverride,
 } from "@/lib/product-descriptions";
 import { getSeoOverrides, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
+import { listCustomProducts, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
 
 type OverrideOut = Override & { description?: DescriptionOverride | null; seo?: SeoOverride | null };
 
@@ -147,12 +153,21 @@ export async function GET(req: Request) {
     /* `waiting`: how many people wait for each product (the unsent «Сообщить о
        наличии» rows) — the card prints «N человек ждут — получат письмо» beside
        «Наличие» (q41). A failed count is no reason to refuse the rest. */
-    const [overrides, descriptions, seos, waiting] = await Promise.all([
+    const [overrides, descriptions, seos, waiting, custom] = await Promise.all([
       getOverrides(), getDescriptionOverrides(), getSeoOverrides(),
       pendingStockAlertCounts().catch((err) => {
         console.error("[api/admin/overrides] waiting count failed:", err);
         return {} as Record<string, number>;
       }),
+      /* the same list the public feed carries (active ones, catalogue shape):
+         the panel takes its products from here, not from the edge. Null when
+         it cannot be read — the panel then keeps the list it has. */
+      listCustomProducts({ activeOnly: true })
+        .then((list): CatalogueProduct[] | null => list.map(toCatalogueProduct))
+        .catch((err) => {
+          console.error("[api/admin/overrides] custom products unavailable:", err);
+          return null;
+        }),
     ]);
     const out: Record<string, OverrideOut> = overrides;
     for (const [id, description] of Object.entries(descriptions)) {
@@ -163,7 +178,7 @@ export async function GET(req: Request) {
     for (const [id, seo] of Object.entries(seos)) {
       out[id] = { ...(out[id] ?? emptyOverride()), seo };
     }
-    return Response.json({ ok: true, overrides: out, waiting }, { headers: { "cache-control": "no-store" } });
+    return Response.json({ ok: true, overrides: out, custom, waiting }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/overrides] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

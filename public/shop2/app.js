@@ -24417,6 +24417,8 @@
     var gate = admGateView();
     if (gate === "wait") return admWaitScreen();
     if (gate === "login") return admLoginScreen();
+    // the products this panel edits: its own no-store read, not the edge copy
+    loadAdminOverrides(false);
     var tab = S.adminTab;
     // account-flows: the queue sizes under the three switches, once
     if (tab === "mail" && SRV.admin === true) loadFlowCounts();
@@ -38264,6 +38266,8 @@
   /** The answer's product becomes the shop's copy — the feed's list, the
       panel's full list, CATALOGUE — with the overrides re-applied on top. */
   function customAdopt(product) {
+    // the server's answer to this page's own write: newer than any read in the air (OV_LOCAL)
+    ovWrote(product.id);
     var replaced = false;
     for (var i = 0; i < DEMO.custom.length; i++) if (DEMO.custom[i].id === product.id) { DEMO.custom[i] = product; replaced = true; }
     if (!replaced) DEMO.custom.unshift(product);
@@ -42298,6 +42302,8 @@
      own stale copy is taken out of the path. */
   var FEED_FETCH = { cache: "no-store" };
   function apiJson(url, opts) {
+    // a product write, whichever door it leaves by — see OV_LOCAL
+    if (opts && opts.method && opts.method !== "GET") ovWroteReq(url, opts.body);
     return fetch(url, opts || {}).then(function (res) {
       var ct = res.headers.get("content-type") || "";
       if (ct.indexOf("json") < 0) throw new Error("no-api");
@@ -42367,13 +42373,136 @@
     return queued;
   }
 
-  function adoptServer(j) {
+  /* ---- the products the panel edits: read past the edge -----------------
+     /api/overrides/ is the SHOP's feed: public and cached at the edge
+     (s-maxage 30, stale-while-revalidate 120 — an answer up to ~150 s old).
+     The panel read it too, at boot, and edited what it said. Verification
+     pass on staging, 25.09.2026: the Google texts saved in all three
+     languages, the panel reloaded a minute later, and the fold said «пусто»
+     in each — the edge had handed back its copy from before the save
+     (x-vercel-cache STALE, age 86 s), and typing into those boxes would
+     have written over the saved text. So:
+       · signed in, the products come from GET /api/admin/overrides/ —
+         no-store, with the salon prices, the «ждут» counts and the owner's
+         own products — and the public feed's product half is not taken at
+         all (its settings half still is, key by key: adoptServer's `fed`);
+       · on the panel's screen, while it is not yet known whether this
+         browser is the owner's, the public answer's product half waits in
+         OV_PUB: it is taken the moment the answer is «no» (or the admin
+         read fails — a copy ~150 s old beats none on a new phone);
+       · a product this page has written (any write to the product routes,
+         stamped in apiJson) keeps its local values against an answer the
+         server read before the write: the admin read that was in the air
+         (ADM_OV.wrote), or a public copy up to OV_LOCAL_MS old. The same
+         idea as ADM_SET_AT for the settings. The shop's own screens still
+         read the cached feed — the edge is there for the shoppers. */
+  var OV_LOCAL = {}, OV_LOCAL_MS = 180000;
+  var ADM_OV = { at: 0, busy: false, again: false, failedAt: 0, wrote: null };
+  var ADM_OV_RETRY_MS = 30000;
+  var OV_PUB = null;
+  var OV_MAPS = ["price", "stock", "seo", "subcat", "varimg", "video", "stockVar", "gallery", "desc", "proPrice", "sizes", "hidden"];
+  function ovWrote(id) {
+    if (id == null || id === "") return;
+    id = String(id);
+    OV_LOCAL[id] = Date.now();
+    if (ADM_OV.wrote) ADM_OV.wrote[id] = true;
+  }
+  /** The product ids a request writes: the path's own for /api/admin/products/<id>/,
+      the body's `id` / `product_id` / `items[].id` for /api/admin/overrides/. */
+  function ovWroteReq(url, body) {
+    var m = /^\/api\/admin\/(overrides|products)\/([^\/?#]*)/.exec(String(url || ""));
+    if (!m) return;
+    if (m[1] === "products") { if (m[2]) ovWrote(decodeURIComponent(m[2])); return; }
+    var b = body;
+    try { if (typeof b === "string") b = JSON.parse(b); } catch (e) { return; }
+    var list = b && Array.isArray(b.items) ? b.items : Array.isArray(b) ? b : [b];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && typeof list[i] === "object") ovWrote(list[i].id != null ? list[i].id : list[i].product_id);
+    }
+  }
+  /** The products a public answer must not touch: written here in the last OV_LOCAL_MS. */
+  function ovLocalKeep() {
+    var out = {}, now = Date.now();
+    for (var id in OV_LOCAL) {
+      if (Object.prototype.hasOwnProperty.call(OV_LOCAL, id) && now - OV_LOCAL[id] < OV_LOCAL_MS) out[id] = true;
+    }
+    return out;
+  }
+  /** What a public answer's product half is for: "take" it (a shopper), "hold"
+      it (the panel, owner or not still unknown) or leave it to the "admin" read. */
+  function ovPublicWay() {
+    if (SRV.admin === true) return "admin";
+    if (S.screen === "admin" && SRV.admin === null && !SRV.meDone) return "hold";
+    return "take";
+  }
+  /** The held public answer, taken now that the panel's own read will not come. */
+  function ovReleasePub() {
+    var j = OV_PUB;
+    OV_PUB = null;
+    if (!j) return;
+    adoptProducts(j, ovLocalKeep());
+    demoSave();
+    applyDemoOverrides();
+    if (!bootHeld) render();
+  }
+  /* The panel's own read of the products — once when the panel opens signed
+     in, again whenever the shop's feed would have been read (a journal undo,
+     the storefront opened in this tab). One at a time; one asked for while
+     another is out follows it, because the one out may have been read
+     before the change it was asked for. */
+  function loadAdminOverrides(force) {
+    if (SRV.admin !== true) return;
+    if (ADM_OV.busy) { if (force) ADM_OV.again = true; return; }
+    if (!force && (ADM_OV.at || (ADM_OV.failedAt && Date.now() - ADM_OV.failedAt < ADM_OV_RETRY_MS))) return;
+    ADM_OV.busy = true;
+    var wrote = ADM_OV.wrote = {};
+    var done = function (r) {
+      ADM_OV.busy = false;
+      if (ADM_OV.wrote === wrote) ADM_OV.wrote = null;
+      if (r && r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r && r.status === 200 && r.body && r.body.ok === true && r.body.overrides)) {
+        ADM_OV.failedAt = Date.now();
+        ovReleasePub();
+      } else {
+        ADM_OV.at = Date.now(); ADM_OV.failedAt = 0; OV_PUB = null;
+        waitAdopt(r.body.waiting);
+        adoptProducts(r.body, wrote);
+        demoSave();
+        applyDemoOverrides();
+        if (!bootHeld) render();
+      }
+      if (ADM_OV.again) { ADM_OV.again = false; loadAdminOverrides(true); }
+    };
+    apiJson("/api/admin/overrides/", FEED_FETCH).then(done, function () { done(null); });
+  }
+  /** The product half of an answer — the public feed's or the panel's own
+      read. `keep`: { id: true } for the products this page wrote after the
+      server read that answer; their local values stand. */
+  function adoptProducts(j, keep) {
     var ov = j.overrides || {};
+    keep = keep || {};
+    var mine = [];
+    for (var kid in keep) {
+      if (!Object.prototype.hasOwnProperty.call(keep, kid) || !keep[kid]) continue;
+      var held = { id: kid, v: {}, custom: null };
+      for (var mi = 0; mi < OV_MAPS.length; mi++) {
+        var map = DEMO[OV_MAPS[mi]];
+        if (map && Object.prototype.hasOwnProperty.call(map, kid)) held.v[OV_MAPS[mi]] = map[kid];
+      }
+      for (var ci = 0; ci < (DEMO.custom || []).length; ci++) {
+        if (DEMO.custom[ci] && String(DEMO.custom[ci].id) === kid) held.custom = DEMO.custom[ci];
+      }
+      mine.push(held);
+    }
     // product creation: the feed's own products replace the offline copy —
     // and a cart line pointing at one the feed no longer carries (hidden
     // since, or a server that predates the table) is dropped here, the one
     // place that can honestly say so (see the cart restore near the top)
-    if (Array.isArray(j.custom)) { DEMO.custom = j.custom; adoptCustom(DEMO.custom); }
+    if (Array.isArray(j.custom)) {
+      var custom = j.custom.filter(function (p) { return !(p && keep[String(p.id)]); });
+      for (var hi = 0; hi < mine.length; hi++) if (mine[hi].custom) custom.push(mine[hi].custom);
+      DEMO.custom = custom; adoptCustom(DEMO.custom);
+    }
     S.cart = S.cart.filter(function (l) {
       return l.type === "bundle" || l.type === "gift" || String(l.id).indexOf("c-") !== 0 || !!byIdOrNull(l.id);
     });
@@ -42409,6 +42538,14 @@
         DEMO.desc[id] = o.description;
       }
     });
+    // …and a product written here since that answer was read stays as this page has it
+    for (var ri = 0; ri < mine.length; ri++) {
+      for (var rj = 0; rj < OV_MAPS.length; rj++) {
+        var rm = OV_MAPS[rj];
+        if (Object.prototype.hasOwnProperty.call(mine[ri].v, rm)) DEMO[rm][mine[ri].id] = mine[ri].v[rm];
+        else delete DEMO[rm][mine[ri].id];
+      }
+    }
     /* «Показывать в магазине»: the hidden map is only known now, so the shop's
        product list is rebuilt after it — and a basket holding something the
        owner has just taken out of the shop loses that line, the same rule the
@@ -42427,6 +42564,11 @@
     S.cart = S.cart.filter(function (l) {
       return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
+  }
+  /** A public feed answer. `skipProducts`: its product half is not this
+      page's to take (ovPublicWay) — only the settings are. */
+  function adoptServer(j, skipProducts) {
+    if (!skipProducts) adoptProducts(j, ovLocalKeep());
     var s = j.settings || {};
     /* A key this page has written since it loaded is the owner's, not the
        feed's: /api/overrides/ is edge-cached for up to 30 s, and since 1a a
@@ -42533,7 +42675,13 @@
       // …counted here and not before the fetch: the shopper goes on shopping
       // while it is in flight, and only adoptServer's own filters count
       var cartWas = S.cart.length;
-      adoptServer(r.body);
+      /* The product half is the shop's, not the panel's: signed in, the
+         panel's own read takes its place (see OV_LOCAL). */
+      var way = ovPublicWay();
+      OV_PUB = way === "hold" ? r.body : null;
+      adoptServer(r.body, way !== "take");
+      // (asked again only once it has answered: at boot the sign-in check has usually asked already)
+      if (way === "admin") loadAdminOverrides(ADM_OV.at > 0);
       demoSave();
       applyDemoOverrides();
       /* per-size stock (r23): the shelf's per-size word arrives with THIS
@@ -42574,8 +42722,15 @@
       SRV.on = true;
       SRV.meDone = true;
       SRV.admin = r.status === 200 && r.body.ok === true;
+      ovAdminKnown();
       return SRV.admin;
-    }).catch(function () { SRV.meDone = true; SRV.admin = null; return null; });
+    }).catch(function () { SRV.meDone = true; SRV.admin = null; ovAdminKnown(); return null; });
+  }
+  /** Owner or not is known now: the products come from the panel's own read,
+      or the public answer held for that question is taken after all. */
+  function ovAdminKnown() {
+    if (SRV.admin === true) loadAdminOverrides(false);
+    else ovReleasePub();
   }
   /** One of the two boot questions came back without a render of its own:
       the panel's door may have to change from «Проверяем…» (admGateView). */
@@ -43003,6 +43158,7 @@
       SRV.busy = false;
       if (r.status === 200 && r.body.ok) {
         SRV.admin = true; SRV.err = "";
+        ADM_OV.at = 0;   // the products are read again, past the edge (loadAdminOverrides)
         loadSrvOrders(true);
       } else if (r.status === 429) SRV.err = "Слишком много попыток — подождите минуту.";
       else if (r.body.error === "not_configured") SRV.err = "Пароль ещё не настроен на сервере.";
@@ -43019,6 +43175,7 @@
     custHoldsFire();
     apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
       SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
+      ADM_OV.at = 0;
       ORDER_ONE.rows = []; ORDER_ONE.gone = ""; ORDER_ONE.err = "";
       // …and the summary goes with them, so signing back in asks again
       OVERVIEW.data = null; OVERVIEW.err = null; OVERVIEW.asked = false;

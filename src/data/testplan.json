@@ -6843,12 +6843,14 @@
         "Открыть «Товары» → «Каталог» и нажать на строку товара.",
         "В «Объёмы и цены» изменить «Цена, €» у первого объёма.",
         "Нажать мимо поля — кнопки «Сохранить» больше нет.",
+        "Сразу обновить страницу и снова открыть этот товар.",
         "Открыть товар в магазине, посмотреть цену и положить его в корзину.",
         "В панели вписать в цену «abc» и нажать «← Товары».",
         "Нажать «Остаться», исправить цену и снова нажать «← Товары»."
       ],
       "expect": [
         "Вверху: «Сохраняем…», потом «Сохранено ✓».",
+        "После обновления в поле уже новая цена, а не прежняя.",
         "В магазине и в корзине одна и та же новая цена.",
         "«abc» не сохраняется: рыжая рамка и строка-подсказка под полем.",
         "С такой ценой «← Товары» спрашивает, выйти ли без сохранения.",
@@ -6863,12 +6865,14 @@
           "Open «Товары» → «Каталог» and tap the product's row.",
           "In «Объёмы и цены» (sizes and prices) change «Цена, €» for the first size.",
           "Tap outside the box — there is no «Сохранить» button any more.",
+          "Reload the page at once and open the same product again.",
           "Open the product in the shop, look at the price and put it in the cart.",
           "In the panel type «abc» as the price and press «← Товары».",
           "Press «Остаться» (stay), fix the price and press «← Товары» again."
         ],
         "expect": [
           "At the top: «Сохраняем…» (saving), then «Сохранено ✓» (saved).",
+          "After the reload the box already shows the new price, not the old one.",
           "The shop and the cart show the same new price.",
           "«abc» is not saved: a rust border and a hint line under the box.",
           "With that price «← Товары» asks whether to leave without saving.",
@@ -6877,7 +6881,7 @@
         "why": "A price that differs in the cart costs you money or a complaint. The price now saves itself as soon as you leave the box."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T22:28:23.727Z"
     },
     {
       "id": "goods-sizes",
