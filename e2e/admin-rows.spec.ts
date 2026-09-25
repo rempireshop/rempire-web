@@ -102,6 +102,7 @@ test.describe("admin — the row under the pointer", () => {
       await page.locator('[data-promof="code"]').fill(code + suffix);
       await page.locator('[data-promokind="percent"]').click();
       await page.locator('[data-promof="value"]').fill("5");
+      await page.locator('[data-promof="value"]').blur();
       await page.locator("[data-admpromosave]").click();
       await expect(page.locator(`[data-admpromotoggle="${code}${suffix}"]`)).toBeVisible();
     }
@@ -133,7 +134,8 @@ test.describe("admin — the row under the pointer", () => {
  * under both and starting at the same x on every row, the actions under the
  * chips at the row's left edge, the sum on the first line at the right edge.
  *
- * This measures exactly that on the six lists that have the shape, with the
+ * This measures exactly that on the five lists that have the shape (the
+ * letters have their own since 1a — mailShape below), with the
  * longest name the panel should ever meet on one row of each (60 characters),
  * and at 360 px as well as 375 — the phone Renat actually holds. Phone only:
  * a desktop lays the same rows out in one line, and that is its own layout.
@@ -201,6 +203,48 @@ async function oneShape(page: Page, sel: string, label: string): Promise<void> {
   }
 }
 
+/**
+ * «Письма» since 1a (README § 5): not the three-line row any more but the
+ * design's own — the letter's name and what it does on the left, its switch
+ * (or «›», or the pair's «вместе с первым») at the right edge. The same
+ * promise as the other lists, measured on that shape: every row starts its
+ * words at one x and ends its control at one x, nothing runs past the screen,
+ * nothing is cut sideways, and every switch is a thumb's size.
+ */
+async function mailShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll(".adm-mrow")).map((row) => {
+    const box = (el: Element | null) => {
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, width: b.width, height: b.height };
+    };
+    const nm = row.querySelector(".adm-row__nm") as HTMLElement | null;
+    const sw = row.querySelector(":scope > .adm-sw");
+    return {
+      text: (nm?.textContent || "").trim(),
+      row: box(row)!,
+      body: box(row.querySelector(":scope > .adm-row__body")),
+      end: box(row.lastElementChild),
+      sw: box(sw),
+      cut: !!nm && nm.scrollWidth > nm.clientWidth + 1,
+    };
+  }));
+  expect(rows.length, `Письма @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].body ? rows[0].body.left : NaN;
+  const endX = rows[0].end ? rows[0].end.right : NaN;
+  for (const r of rows) {
+    const who = `Письма @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.body, `${who}: the row has no text body`).not.toBeNull();
+    expect(Math.round(r.body!.left - x), `${who}: the words start at another x than the first row's`).toBe(0);
+    expect(Math.round(r.end!.right - endX), `${who}: the switch does not end where the first row's does`).toBe(0);
+    expect(r.end!.left, `${who}: the switch sits under the words instead of beside them`).toBeGreaterThanOrEqual(r.body!.right - 1);
+    expect(r.cut, `${who}: the name is cut off sideways`).toBe(false);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    if (r.sw) expect(Math.min(r.sw.width, r.sw.height), `${who}: the switch is under 44 px`).toBeGreaterThanOrEqual(43.5);
+  }
+}
+
 test.describe("admin — one shape per list on the phone", () => {
   test.use({ extraHTTPHeaders: ipHeaders(165) });
   test.beforeEach(async ({}, testInfo) => {
@@ -265,7 +309,8 @@ test.describe("admin — one shape per list on the phone", () => {
 
         await adminSection(page, "promos", "mail");
         await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
-        await oneShape(page, ".adm-row--lines:has(> [data-mailtpl])", "Письма");
+        // 1a: a letter is one row of its own shape — words left, switch right
+        await mailShape(page);
       }
     } finally {
       await page.request.delete(`/api/admin/bundles/?id=${encodeURIComponent(setId)}`);
@@ -338,20 +383,20 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
   });
 
-  test("«Письма»: the gap between the switch and «Изменить» opens the letter", async ({ page }) => {
+  test("«Письма»: the blank beside the switch opens the letter", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "promos", "mail");
 
     const sw = page.locator('[data-admflow="backstock"]');
-    const row = page.locator(".adm-row--lines").filter({ has: sw }).first();
+    const row = page.locator(".adm-row--open").filter({ has: sw }).first();
     await expect(row).toBeVisible();
     const was = await sw.getAttribute("aria-checked");
-    const line = row.locator(".adm-row__line--split");
-    const box = (await line.boundingBox())!;
-    // dead centre of the split line: the switch is at its left end, «Изменить»
-    // at its right, and what is between them belonged to nobody
-    await line.click({ position: { x: box.width / 2, y: box.height / 2 } });
+    /* 1a: the letter's words and its switch on one row. The row's own
+       padding above the switch belonged to nobody — it opens the letter */
+    const box = (await row.boundingBox())!;
+    const swBox = (await sw.boundingBox())!;
+    await row.click({ position: { x: swBox.x - box.x - 8, y: 4 } });
     await expect(page.locator("[data-mailback]"), "the gap on the letter's row opened nothing").toBeVisible();
     await page.locator("[data-mailback]").click();
     // …and the letter itself was not switched on the way in

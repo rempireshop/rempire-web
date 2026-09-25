@@ -445,9 +445,11 @@ test.describe("sweep — promo codes", () => {
     for (const bad of ["0", "100", "150", "-10", "abc"]) {
       await page.locator('[data-promof="value"]').fill(bad);
       await page.locator("[data-admpromosave]").click();
-      // the form is adm- markup since the phase-3 redesign
-      const err = page.locator(".adm-err[role=alert]");
+      /* 1a: the refused box's own one-line rust hint under it (the shared
+         autosave hint), not a line at the foot of the form — nothing is sent */
+      const err = page.locator('[data-promohint="value"]');
       await expect(err, `percent "${bad}" was accepted`).toBeVisible();
+      await expect(page.locator('[data-promof="value"]')).toHaveAttribute("aria-invalid", "true");
       expect(isRussian((await err.textContent()) || ""), `percent "${bad}" message is not Russian`).toBe(true);
       await assertClean(page, w, `promo percent "${bad}"`);
     }
@@ -468,7 +470,7 @@ test.describe("sweep — promo codes", () => {
     await page.locator('[data-promof="minSubtotal"]').fill("abc");
     await page.locator('[data-promof="code"]').fill(good);
     await page.locator("[data-admpromosave]").click();
-    const minErr = page.locator(".adm-err[role=alert]");
+    const minErr = page.locator('[data-promohint="minSubtotal"]');
     await expect(minErr, "an unreadable minimum order was accepted").toHaveText(/[Мм]инимальн/);
     expect(isRussian((await minErr.textContent()) || ""), "the minimum-order message is not Russian").toBe(true);
     await expect(page.locator(`[data-admpromoedit="${good}"]`),
@@ -494,7 +496,9 @@ test.describe("sweep — promo codes", () => {
     await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("50");
     // the rarer conditions sit in a fold-out under the four fields the spec asks for
-    await page.locator("[data-promomore]").click();
+    // (1a: the shared fold «Срок, лимит и заметка»; it remembers being open, so open it only if shut)
+    const more = page.locator('[data-admfold="promo-more"]');
+    if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
     await page.locator('[data-promof="endsAt"]').fill("2020-01-01");
     await page.locator("[data-admpromosave]").click();
     await clearToast(page);

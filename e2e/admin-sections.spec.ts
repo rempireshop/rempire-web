@@ -43,7 +43,8 @@ test.describe("admin sections — every screen draws on both viewports", () => {
     const screens: Array<[string, string | undefined, string]> = [
       ["people", undefined, "Все клиенты"],
       ["people", "reviews", "Отзывы"],
-      ["promos", undefined, "Промокоды"],
+      // 1a: the tab says «Промо» on a phone; the screen's one dark button is on both
+      ["promos", undefined, "+ Промокод"],
       ["promos", "gift", "Номиналы в магазине"],
       ["promos", "mail", "Заказ принят"],
       ["blog", undefined, "Блог"],
@@ -286,15 +287,17 @@ test.describe("admin sections — Маркетинг", () => {
     await page.locator('[data-mailtpl="order-shipped"]').first().click();
     await expect(page.locator('[data-mailtxt="subject"]')).toBeVisible();
     const subject = `E2E тема ${Date.now().toString().slice(-6)} {order}`;
+    /* 1a: the letter saves itself a second after the last keystroke (Dim,
+       q6) — no «Сохранить», and no «Применить» behind one (Renat, 13.09.2026) */
+    const write = page.waitForResponse(
+      (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT" &&
+        (r.request().postData() || "").includes("mail_texts"));
     await page.locator('[data-mailtxt="subject"]').fill(subject);
     // the preview beside the fields is live — it shows the letter, not the template
     await expect(page.locator('[data-mailprev="subject"]')).toContainText("R-100042");
     try {
-      // one press, not «Сохранить» arming an «Применить» (Renat, 13.09.2026)
-      const write = page.waitForResponse(
-        (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-      await page.locator("[data-mailsave]").click();
       expect((await write).ok()).toBe(true);
+      await expect(page.locator("[data-mailsave]"), "a «Сохранить» is back on a letter that saves itself").toHaveCount(0);
       await expect(page.locator("[data-admapply]")).toHaveCount(0);
 
       const saved = await (await page.request.get("/api/admin/settings/")).json();
