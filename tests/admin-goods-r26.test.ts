@@ -122,7 +122,8 @@ describe("what the source says about the callers", () => {
     /* `(n ? " " + n : "")` is the old form and hides a zero, which makes
        «Скрытые» before the list loads look like «Скрытые» with nothing in it. */
     expect(html).not.toContain('(n ? " " + n : "")');
-    expect(html).toContain('x[1] + " " + n');
+    // the number is printed unconditionally — its own bold node since the polish pass (25.09.2026)
+    expect(html).toContain('<b class="adm-chip__n">\' + n + "</b>');
   });
 
   it("the «Склад» tab badge prints its zero once the shelf has arrived", () => {
