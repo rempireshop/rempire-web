@@ -166,24 +166,25 @@ test.describe("admin — product creation", () => {
     try {
       // ---- refused out loud, next to the box ------------------------------
       const add = page.locator('[data-admsavegoods="new"]');
+      // dim (aria-disabled) while something is missing, and still pressable: the press names what — Playwright counts aria-disabled as disabled, hence force
       await expect(add, "«Добавить товар» is not dim while the form is empty").toHaveAttribute("aria-disabled", "true");
-      await add.click();
+      await add.click({ force: true });
       await expect(page.locator("[data-goodserr]")).toContainText("Впишите бренд");
       await expect(page.locator("[data-edbrand]")).toBeFocused();
       await page.locator("[data-edbrand]").fill(BRAND);
-      await add.click();
+      await add.click({ force: true });
       await expect(page.locator("[data-goodserr]")).toContainText("Впишите название");
       await page.locator("[data-edname]").fill(NAME);
-      await add.click();
+      await add.click({ force: true });
       await expect(page.locator("[data-goodserr]"), "a product without a section was not refused").toContainText("Выберите раздел");
       await page.locator("[data-edcat]").selectOption("beard");
       // the subsection list follows the section
       await expect(page.locator("[data-edsubcat] option")).toHaveCount(5);
       await page.locator("[data-edsubcat]").selectOption("ba");
-      await add.click();
+      await add.click({ force: true });
       await expect(page.locator("[data-goodserr]")).toContainText("Цена — число");
       await page.locator("[data-edprice]").fill("abc");
-      await add.click();
+      await add.click({ force: true });
       await expect(page.locator("[data-goodserr]")).toContainText("Цена — число");
       await expect(page.locator("[data-edprice]")).toBeFocused();
       await page.locator("[data-edprice]").fill("14,90");

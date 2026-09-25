@@ -160,7 +160,8 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
         if (mobile && MORE.indexOf(section) >= 0) await page.locator("[data-admmore]").click();
         await page.locator(`[data-admtab="${section}"][aria-current]:visible`).first().click();
       }
-      if (key !== section) await page.locator(`.adm-tabs [data-admtab="${key}"]`).click();
+      // «Товары» draws its three as a segmented strip (1a, screen 10)
+      if (key !== section) await page.locator(`.adm-tabs [data-admtab="${key}"], .adm-seg--tabs [data-admtab="${key}"]`).click();
 
       /* What is marked current: the section's own control where the viewport
          has one — on a phone the six «Ещё» sections have no bar item of their

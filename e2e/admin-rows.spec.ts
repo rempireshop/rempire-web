@@ -88,7 +88,8 @@ test.describe("admin — the row under the pointer", () => {
 
     // «Товары» — the row IS the button here, so the same rules have to reach it
     await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
-    const goods = page.locator("#goodslist .adm-row--click");
+    // 1a (screen 10): a catalogue row is a wrapper — the name is its button, the «Виден» switch sits beside it
+    const goods = page.locator("#goodslist .adm-row--open");
     await expect(goods.nth(1)).toBeVisible();
     await expectHoverLights(page, goods.nth(0), goods.nth(1), "products");
 
@@ -174,6 +175,26 @@ async function rowShapes(page: Page, sel: string): Promise<RowShape[]> {
   }, sel);
 }
 
+/** «Каталог» on the phone (1a, screen 10): its own two-line row — brand and name on top,
+ *  the stock tag and the volumes under them from one x, the price at the right edge. */
+async function catalogueShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll("#goodslist .adm-grow[data-goodsrow]")).map((row) => {
+    const b = (sel: string) => { const e = row.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; };
+    return { id: row.getAttribute("data-goodsrow") || "", row: (() => { const r = row.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; })(), open: b(".adm-grow__open"), line: b(".adm-grow__line"), pr: b(".adm-grow__pr") };
+  }));
+  expect(rows.length, `Каталог @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].line ? rows[0].line.left : NaN;
+  for (const r of rows) {
+    const who = `Каталог @${vw} · ${r.id}`;
+    expect(r.open && r.line && r.pr, `${who}: a part of the row is missing`).toBeTruthy();
+    expect(r.line!.top, `${who}: the tag line sits beside the name instead of under it`).toBeGreaterThanOrEqual(r.open!.bottom - 1);
+    expect(Math.round(r.line!.left - x), `${who}: the tag line starts at another x than the first row's`).toBe(0);
+    expect(r.pr!.right, `${who}: the price runs past the row`).toBeLessThanOrEqual(r.row.right + 0.5);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+  }
+}
+
 /** Every row of `sel` has the shape, and the same shape as the first row. */
 async function oneShape(page: Page, sel: string, label: string): Promise<void> {
   const rows = await rowShapes(page, sel);
@@ -252,8 +273,8 @@ test.describe("admin — one shape per list on the phone", () => {
         await oneShape(page, ".adm-row--lines:has([data-bundleedit])", "Наборы");
 
         await page.locator('.adm-tab[data-admtab="goods"]').click();
-        await expect(page.locator("#goodslist .adm-row--lines").nth(1)).toBeVisible();
-        await oneShape(page, "#goodslist .adm-row--lines", "Каталог");
+        await expect(page.locator("#goodslist .adm-grow[data-goodsrow]").nth(1)).toBeVisible();
+        await catalogueShape(page);
 
         await page.locator('.adm-tab[data-admtab="stock"]').click();
         await expect(page.locator("#stocklist .adm-row--lines").nth(1)).toBeVisible();
