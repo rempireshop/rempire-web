@@ -7093,13 +7093,15 @@
         "Нажать мимо поля и открыть товар в магазине.",
         "Нажать на видео.",
         "В «Видео» нажать «Загрузить» и выбрать ролик больше 4 МБ.",
-        "Нажать «Убрать видео», потом «Вернуть» на полоске внизу."
+        "Нажать «Убрать видео», потом «Вернуть» на полоске внизу.",
+        "Снова нажать «Убрать видео», обновить страницу и открыть этот товар."
       ],
       "expect": [
         "Видео видно на странице товара.",
         "По нажатию оно начинает играть.",
         "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему.",
-        "«Вернуть» ставит ту же ссылку обратно."
+        "«Вернуть» ставит ту же ссылку обратно.",
+        "Второй раз видео тоже убирается: после обновления поле «Видео» пустое."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -7111,18 +7113,20 @@
           "Tap outside the box and open the product in the shop.",
           "Press the video.",
           "Under «Видео» press «Загрузить» (upload) and pick a clip over 4 MB.",
-          "Press «Убрать видео» (remove), then «Вернуть» (undo) on the strip below."
+          "Press «Убрать видео» (remove), then «Вернуть» (undo) on the strip below.",
+          "Press «Убрать видео» again, reload the page and open the same product."
         ],
         "expect": [
           "The video is there on the product page.",
           "Pressing it starts the video playing.",
           "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason.",
-          "«Вернуть» puts the same link back."
+          "«Вернуть» puts the same link back.",
+          "The second removal holds too: after the reload the «Видео» box is empty."
         ],
         "why": "A styling video sells a wax better than any description."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T22:31:49.626Z"
     },
     {
       "id": "goods-new",

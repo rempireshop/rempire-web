@@ -24020,6 +24020,24 @@
     if (f.again) { f.again = false; if (f.dirty || f.value !== v) { f.dirty = true; admAutosaveSend(f, null); } }
     admSaveEnd();
   }
+  /** «Вернуть» put back what a field's last write had replaced: the server
+      no longer holds the value this record says it saved. So the next change
+      is a real write even when it is that same value again — the video's «×»
+      pressed a second time after «Вернуть» used to send nothing (the record
+      still said "" was saved), and the link came back on the next reload
+      (verification pass 25.09.2026, goods-video). `prefix`: every field
+      whose key starts so — an undo from another device's journal row knows
+      the product, not the field. */
+  function admAutosaveReopen(key, prefix) {
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k)) continue;
+      if (prefix ? k.indexOf(key) !== 0 : k !== key) continue;
+      var f = ADM_AS[k];
+      f.saved = undefined;
+      // nothing owed: whatever comes next is a change; something owed still goes as it is
+      if (!f.dirty) f.value = undefined;
+    }
+  }
   function admSaveFailedN() {
     var n = 0;
     for (var k in ADM_AS) if (Object.prototype.hasOwnProperty.call(ADM_AS, k) && ADM_AS[k].failed) n++;
@@ -31168,6 +31186,7 @@
         if (r.status === 401) { SRV.admin = false; render(); return; }
         if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); return; }
         if (local) { local.undone = true; demoSave(); }
+        admAutosaveReopen("ed:" + u.id + ":", true);   // the card's fields: what they saved is not on the server now
         toast("Вернули ✓");
         loadServerOverrides(); loadAudit(true);
       }).catch(function () { toast("Сервер не отвечает — изменение не сохранилось"); });
@@ -37305,6 +37324,7 @@
       demoSave();
     }
     ED.j[key] = fresh ? null : entry;
+    entry.asKey = key;   // its «Вернуть» reopens this field's record (admAutosaveReopen)
     return entry;
   }
   /** A typed field has landed: the shop's copy and the journal follow, and a
@@ -45023,6 +45043,8 @@
        — the record that it was taken back. (`typeof`: the test harnesses that
        run demoUndo on its own have no journal to keep.) */
     if (typeof jentryGone === "function") jentryGone(entry);
+    // the field's autosave record no longer describes the server (admAutosaveReopen)
+    if (entry.asKey && typeof admAutosaveReopen === "function") admAutosaveReopen(entry.asKey);
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
