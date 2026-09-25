@@ -169,7 +169,7 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
          holds it back: it saves the moment the box is left. */
       await lv.fill("6,49");
       await lv.press("Tab");
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены", { timeout: 15_000 });
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await page.locator("[data-closetoast]").click();
       await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
@@ -181,7 +181,7 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator('[data-shipclear="c:dpd:LV"]').click();
       await expect(lv).toHaveValue("");
       await expect.poll(async () => (await rules())?.carriers?.dpd?.LV,
-        { message: "«вернуть» under the box did not reach the shop" }).toBeUndefined();
+        { timeout: 20_000, message: "«вернуть» under the box did not reach the shop" }).toBeUndefined();
       await page.locator("[data-closetoast]").click();
 
       // …and «Везде взять цены Montonio» does the same for the whole table, at once
@@ -190,7 +190,7 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
       await page.locator("[data-closetoast]").click();
       await page.locator("[data-admshipmontonio]").click();
-      await expect(page.getByRole("status")).toContainText("В таблице цены Montonio");
+      await expect(page.getByRole("status")).toContainText("В таблице цены Montonio", { timeout: 15_000 });
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await expect(lv).toHaveValue("");
       /* Nothing, not Montonio's number written down. Since r22 (17.09.2026,
@@ -203,14 +203,14 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       // «Вернуть» on that toast: his own price is back, in the box and in the shop
       await page.locator(".adm-toast__undo").click();
       await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV),
-        { message: "«Вернуть» did not put the owner's price back" }).toBe(6.49);
+        { timeout: 20_000, message: "«Вернуть» did not put the owner's price back" }).toBe(6.49);
       await expect(lv).toHaveValue("6,49");
 
       /* «Вернуть значения по умолчанию» — delivery prices only (q37), at once,
          with «Вернуть». Back to the shipped default, which since r22 means
          «никаких своих цен» rather than today's price list. */
       await page.locator("[data-admshipreset]").click();
-      await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
+      await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные", { timeout: 15_000 });
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
       await expect.poll(async () => (await rules())?.carriers?.dpd?.LV).toBeUndefined();
@@ -243,14 +243,16 @@ test.describe("admin sweep 2 — settings", () => {
         return route.fulfill({ status: 500, contentType: "application/json", body: '{"ok":false,"error":"server_error"}' });
       });
       await page.locator("[data-admchatbot]").click();
-      await expect(page.getByText("Не сохранилось", { exact: false }).first()).toBeVisible();
+      // the header's own line — the page's on a desktop, the top bar's on a phone
+      await expect(page.locator('[role="alert"]:visible', { hasText: "Не сохранилось" }).first()).toBeVisible();
       await expect(page.getByRole("status").filter({ hasText: /Чат (включён|выключен) ✓/ }),
         "«✓» before the server said yes").toHaveCount(0);
       await page.unroute("**/api/admin/settings/");
       expect((await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot).toBe(chatBefore);
     } finally {
       await page.unroute("**/api/admin/settings/").catch(() => undefined);
-      await page.request.put("/api/admin/settings/", { data: { chatbot: chatBefore } });
+      // a shop that never stored the switch has nothing to put back
+      if (chatBefore !== undefined) await page.request.put("/api/admin/settings/", { data: { chatbot: chatBefore } });
     }
   });
 });

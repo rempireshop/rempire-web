@@ -51,7 +51,9 @@ test.describe("the panel's composed lines answer in the panel's own language", (
 
         const pct = page.locator('[data-pricingf="proDiscountPct"]');
         await expect(pct).toBeVisible();
-        await pct.fill("25");
+        // a number the shop does not hold yet — the same one again is nothing to save
+        const target = Number(was.proDiscountPct) === 25 ? "24" : "25";
+        await pct.fill(target);
         const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await pct.press("Tab");
         expect((await put).ok()).toBe(true);
@@ -63,12 +65,12 @@ test.describe("the panel's composed lines answer in the panel's own language", (
         const text = (await line.innerText()).trim();
         if (lang === "RU") {
           expect(text).toContain("Цены и лояльность · ");
-          expect(text).toContain("скидка для салонов 25%");
+          expect(text).toContain(`скидка для салонов ${target}%`);
         } else {
           expect(text, `the line stayed Russian on a ${lang} panel: ${text}`).not.toMatch(CYRILLIC);
         }
         // …and it really is the pricing line, not some other one
-        expect(text.toLowerCase()).toMatch(/25\s*%/);
+        expect(text.toLowerCase()).toMatch(new RegExp(target + "\\s*%"));
 
         /* One element per fact is what makes that possible — assert the shape,
            not only the words, so a future glue-up fails here and not in the

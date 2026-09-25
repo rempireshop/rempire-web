@@ -145,8 +145,10 @@ test.describe("admin — a price change on the owner's own product is in the jou
          is shown once, as that line — so the shop's-log half is checked on a
          change this browser never saw, made straight through the route
          (before the price change, so the price stays the newest line). */
-      const chat = (await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot;
-      expect((await page.request.put("/api/admin/settings/", { data: { chatbot: chat } })).ok()).toBe(true);
+      // the suite's shop always has its pricing stored (e2e bootstrap) — written back as it is
+      const pricing = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing;
+      expect(pricing, "the suite's shop has no stored pricing to write back").toBeTruthy();
+      expect((await page.request.put("/api/admin/settings/", { data: { pricing } })).ok()).toBe(true);
 
       await page.locator('[data-edtab="sizes"]').click();
       await page.locator("[data-edprice]").fill("9,90");

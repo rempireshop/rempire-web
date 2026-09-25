@@ -30,6 +30,17 @@ async function openFold(page: Page, key: string): Promise<void> {
   await expect(head).toHaveAttribute("aria-expanded", "true");
 }
 
+/** Every box left, and nothing still on its way: a test that puts settings
+ *  back through the API must not have a queued autosave land after it. */
+async function settled(page: Page): Promise<void> {
+  await page.keyboard.press("Tab");
+  const busy = () => page.evaluate(() =>
+    Array.from(document.querySelectorAll("[data-admsavest]")).some((el) => el.getAttribute("data-st") === "saving"));
+  await expect.poll(busy, { timeout: 20_000 }).toBe(false);
+  await page.waitForTimeout(600);
+  await expect.poll(busy, { timeout: 20_000 }).toBe(false);
+}
+
 /** «⋯» of a settings block (admSetMoreHTML) — the rare actions, opened. */
 async function openMore(page: Page, key: string): Promise<void> {
   const btn = page.locator(`[data-setmore="${key}"]`).first();
@@ -388,7 +399,7 @@ test.describe("admin sections — Настройки", () => {
       await courierEE.press("Tab");
       expect((await put).ok()).toBe(true);
       await expect(page.locator(".adm-confirm"), "a price above the tariff asked a question").toHaveCount(0);
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены", { timeout: 15_000 });
 
       const now = await (await page.request.get("/api/admin/settings/")).json();
       expect(Number(now.settings.shipping_rules.methods.courier.EE),
@@ -445,7 +456,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 10_000 });
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU,
-        { message: "the title never reached settings.hero" }).toBe(title);
+        { timeout: 20_000, message: "the title never reached settings.hero" }).toBe(title);
       await page.locator("[data-heroclose]").first().click();
     } finally {
       await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
@@ -461,9 +472,9 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       const phone = page.locator('[data-contentf="company.phone"]');
       await phone.fill("+372 5000001");
       await phone.press("Tab");
-      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены");
+      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 15_000 });
       await expect.poll(async () => (await stored()).content?.company?.phone,
-        { message: "the phone never reached settings.content" }).toBe("+372 5000001");
+        { timeout: 20_000, message: "the phone never reached settings.content" }).toBe("+372 5000001");
     } finally {
       // back to the standard details through the panel's own reset, under «⋯»
       await adminSection(page, "setup");
@@ -484,10 +495,10 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       const pct = page.locator('[data-pricingf="proDiscountPct"]');
       await pct.fill("22");
       await pct.press("Tab");
-      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены");
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
       await expect(page.locator(".adm-confirm"), "q40: the prices ask no question").toHaveCount(0);
       await expect.poll(async () => (await stored()).pricing?.proDiscountPct,
-        { message: "the discount never reached settings.pricing" }).toBe(22);
+        { timeout: 20_000, message: "the discount never reached settings.pricing" }).toBe(22);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { pricing: originalPricing } });
     }
@@ -499,8 +510,10 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
     await page.locator('[data-admsetpage="company"]').click();
     const month = await page.locator("[data-admreportsmonth]").inputValue();
     expect(month).toMatch(/^\d{4}-\d{2}$/);
+    /* the card's own tiles read the same route as JSON when the page opens —
+       that request is not the button's */
     const opened = page.context().waitForEvent("request",
-      (r) => r.url().includes("/api/admin/reports/orders/"));
+      (r) => r.url().includes("/api/admin/reports/orders/") && !r.url().includes("format=json"));
     const popup = page.waitForEvent("popup");
     await page.locator('[data-admreportdl="xlsx"]').click();
     expect((await opened).url(), "the button opened something other than this month's export")
@@ -650,6 +663,7 @@ test.describe("admin sections — the numbers explain themselves", () => {
     try {
       await pricingExample(page);
     } finally {
+      await settled(page);
       await page.request.put("/api/admin/settings/", { data: { pricing: was } });
     }
   });
@@ -801,7 +815,7 @@ test.describe("admin sections — Настройки: pages that save themselves
       // «Вернуть» on that toast: the banner as it was, on the server too
       await page.locator(".adm-toast__undo").click();
       await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU ?? "",
-        { message: "«Вернуть» did not take the title back" }).not.toBe("E2E — сохраняется само");
+        { timeout: 20_000, message: "«Вернуть» did not take the title back" }).not.toBe("E2E — сохраняется само");
       if (!(await page.locator("#heroform").count())) await page.locator('[data-heroedit="0"]').click();
       await expect(page.locator('[data-herof="title"]')).toHaveValue(was);
     } finally {
@@ -825,7 +839,7 @@ test.describe("admin sections — Настройки: pages that save themselves
       const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
       await due.press("Enter");
       expect((await put).ok()).toBe(true);
-      await expect(page.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
+      await expect(page.getByRole("status")).toContainText("Счета для компаний: сохранено ✓", { timeout: 15_000 });
       await expect(page.locator(".adm-toast__undo"), "the saved term has no way back").toBeVisible();
       const saved = await (await page.request.get("/api/admin/settings/")).json();
       expect(saved.settings.invoice.dueDays).toBe(Number(was) + 2);

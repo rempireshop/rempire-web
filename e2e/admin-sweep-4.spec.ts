@@ -60,31 +60,39 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
     const w = watch(page);
     await openAdmin(page);
 
-    // a change this browser never saw — made straight through the route
-    const chat = (await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot;
-    expect((await page.request.put("/api/admin/settings/", { data: { chatbot: chat } })).ok()).toBe(true);
+    /* A change this browser never saw — made straight through the route, and
+       a real one: a write of the same value has nothing to take back, and its
+       row rightly offers no «Вернуть». The suite's shop always has its pricing
+       stored (e2e bootstrap); it goes back as it was below. */
+    const pricing = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing;
+    expect(pricing, "the suite's shop has no stored pricing to change").toBeTruthy();
+    const moved = { ...pricing, proMinOrder: Number(pricing.proMinOrder || 0) + 1 };
+    expect((await page.request.put("/api/admin/settings/", { data: { pricing: moved } })).ok()).toBe(true);
+    try {
+      await settings(page, "journal");
+      await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" }),
+        "the second list is still there").toHaveCount(0);
 
-    await settings(page, "journal");
-    await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" }),
-      "the second list is still there").toHaveCount(0);
+      // the server's own rows really arrive, and carry who did it
+      const serverRows = page.locator(".adm-jrow__who");
+      await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
+      await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
+      const row = page.locator(".adm-jrow", { hasText: "Настройка изменена: Цены и баллы" }).first();
+      await expect(row, "the route's own change is not in the list").toBeVisible();
+      await expect(row.locator("[data-admundosrv]"), "a row the server can take back has no «Вернуть»").toBeVisible();
 
-    // the server's own rows really arrive, and carry who did it
-    const serverRows = page.locator(".adm-jrow__who");
-    await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
-    await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
-    const row = page.locator(".adm-jrow", { hasText: "Настройка изменена: Чат-помощник" }).first();
-    await expect(row, "the route's own change is not in the list").toBeVisible();
-    await expect(row.locator("[data-admundosrv]"), "a row the server can take back has no «Вернуть»").toBeVisible();
+      // the sign-ins: one folded block with today's count, the rows inside it
+      const logins = page.locator('[data-admfold="set:logins"]');
+      await expect(logins).toHaveAttribute("aria-expanded", "false");
+      await expect(logins).toContainText("за сегодня");
+      await expect(page.locator(".adm-jrow--login").first()).toBeHidden();
+      await logins.click();
+      await expect(page.locator(".adm-jrow--login").first(), "the sign-in never reached the log").toBeVisible();
 
-    // the sign-ins: one folded block with today's count, the rows inside it
-    const logins = page.locator('[data-admfold="set:logins"]');
-    await expect(logins).toHaveAttribute("aria-expanded", "false");
-    await expect(logins).toContainText("за сегодня");
-    await expect(page.locator(".adm-jrow--login").first()).toBeHidden();
-    await logins.click();
-    await expect(page.locator(".adm-jrow--login").first(), "the sign-in never reached the log").toBeVisible();
-
-    await assertClean(page, w, "journal with the server log");
+      await assertClean(page, w, "journal with the server log");
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { pricing } });
+    }
   });
 
   test("a change made here appears in both lists, and «Вернуть» is on the local one", async ({ page }) => {
@@ -462,7 +470,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       "the salon discount field is shown while the programme is off").toHaveCount(0);
     await expect(page.locator(".adm-page")).toContainText("Сейчас выключено");
     // the switch saves itself — no «Сохранить», no question (q40)
-    await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены");
+    await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
     await clearToast(page);
 

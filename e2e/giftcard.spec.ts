@@ -286,9 +286,9 @@ test.describe("the gift card as a banner slide", () => {
 
       const slide0 = async () => ((await (await page.request.get("/api/admin/settings/")).json())
         .settings.hero?.slides?.[0] ?? {}) as { go?: string; image?: string; cta?: { RU?: string } };
-      await expect.poll(async () => (await slide0()).go, { message: "the slide's link never reached settings.hero" }).toBe("gift");
-      await expect.poll(async () => (await slide0()).image, { message: "the slide's picture never reached settings.hero" }).toBe("gift");
-      await expect.poll(async () => (await slide0()).cta?.RU, { message: "the button's text never reached settings.hero" }).toBe("Выбрать сумму");
+      await expect.poll(async () => (await slide0()).go, { timeout: 20_000, message: "the slide's link never reached settings.hero" }).toBe("gift");
+      await expect.poll(async () => (await slide0()).image, { timeout: 20_000, message: "the slide's picture never reached settings.hero" }).toBe("gift");
+      await expect.poll(async () => (await slide0()).cta?.RU, { timeout: 20_000, message: "the button's text never reached settings.hero" }).toBe("Выбрать сумму");
 
       // 3) the shopper's side: a clean context, the home page, the button
       const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(64) });

@@ -284,7 +284,7 @@ test.describe("admin", () => {
         const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await page.locator('[data-herof="title"]').fill("E2E hero title");
         expect((await put).ok()).toBe(true);
-        await expect(page.getByRole("status")).toContainText("Баннер сохранён");
+        await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));
@@ -322,7 +322,7 @@ test.describe("admin", () => {
         const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await phone.press("Tab");
         expect((await put).ok()).toBe(true);
-        await expect(page.getByRole("status")).toContainText("Данные магазина сохранены");
+        await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));

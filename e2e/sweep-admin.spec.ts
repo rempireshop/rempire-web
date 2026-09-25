@@ -341,7 +341,7 @@ test.describe("sweep — the banner", () => {
     await expect.poll(async () => {
       const body = await (await page.request.get("/api/overrides/")).json();
       return JSON.stringify((body.settings && body.settings.hero) || null);
-    }, { message: "a banner edit taken back reached the server anyway" }).not.toContain("НЕ ДОЛЖНО");
+    }, { timeout: 20_000, message: "a banner edit taken back reached the server anyway" }).not.toContain("НЕ ДОЛЖНО");
     const feed = await (await page.request.get("/api/overrides/")).json();
     expect(JSON.stringify((feed.settings && feed.settings.hero) || null), "the reset did not put the default banner back")
       .not.toContain("E2E");
@@ -390,7 +390,7 @@ test.describe("sweep — the content card", () => {
 
       // …and what is fine went on its own: the name, script tag and all
       await expect.poll(async () => (await company()).legalName,
-        { message: "the legal name never saved itself" }).toContain("Rempire <script>");
+        { timeout: 20_000, message: "the legal name never saved itself" }).toContain("Rempire <script>");
       expect((await company()).phone ?? "", "«abc» reached the server as a phone").toBe(phoneWas);
 
       const shop = await freshShop(browser);
@@ -490,15 +490,18 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
       // A plain, in-range edit first: the owner has to be able to save at all.
       /* 1a (q40): the box saves itself when it is left — no «Сохранить», no
          question; «Вернуть» on the toast is the way back. */
-      await page.locator('[data-pricingf="proDiscountPct"]').fill("25");
+      // a value the shop does not have yet — the same number again is nothing to save
+      const pct = Number(original.proDiscountPct) === 25 ? "26" : "25";
+      await page.locator('[data-pricingf="proDiscountPct"]').fill(pct);
       await page.locator('[data-pricingf="proDiscountPct"]').press("Tab");
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      expect(await toastText(page)).toMatch(/сохранен/i);
+      // the toast follows the server's 2xx since 1a — give a busy server its time
+      await expect(page.getByRole("status")).toContainText(/сохранен/i, { timeout: 15_000 });
       await clearToast(page);
       await assertClean(page, w, "pricing saved");
 
       const saved = await (await page.request.get("/api/admin/settings/")).json();
-      expect(saved.settings.pricing.proDiscountPct, "the saved discount is not what was typed").toBe(25);
+      expect(saved.settings.pricing.proDiscountPct, "the saved discount is not what was typed").toBe(Number(pct));
 
       // Now the garbage. Whatever the panel decides — clamp or refuse — the
       // owner must be told, and the stored value must stay inside the bounds

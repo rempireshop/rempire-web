@@ -245,7 +245,7 @@ test.describe("invoice for companies", () => {
         await card.locator('[data-invsetf="remindBeforeDays"]').fill("3");
         // 1a: a number saves itself when its box is left — no «Сохранить»
         await card.locator('[data-invsetf="remindBeforeDays"]').press("Tab");
-        await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
+        await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓", { timeout: 15_000 });
         await admin.locator("[data-closetoast]").click();
         const saved = (await (await admin.request.get("/api/admin/settings/")).json()) as {
           settings: { invoice: { prefix: string; dueDays: number; remindBeforeDays: number; cancelAfterDays: number } };

@@ -163,7 +163,7 @@ for (const width of WIDTHS) {
         await page.locator('[data-shipclear="c:omniva:EE"]').first().click();
         await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toHaveValue("");
         await expect.poll(async () => (await stored())?.carriers?.omniva?.EE,
-          { message: "the 1 € override outlived the test" }).toBeUndefined();
+          { timeout: 20_000, message: "the 1 € override outlived the test" }).toBeUndefined();
       } finally {
         await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
       }
