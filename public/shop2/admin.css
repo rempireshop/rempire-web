@@ -786,31 +786,47 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm2 .adm-orow > .adm-row__amt { grid-area: amt; min-width: 0; font-size: 17px; }
 .adm2 .adm-orow > .adm-orow__tag { grid-area: tag; justify-self: end; flex-wrap: nowrap; gap: 6px; }
 .adm2 .adm-orow > .adm-orow__acts { grid-area: acts; margin-top: 6px; }
-/* …and on a desktop «Заказы» is a table: Номер · Дата · Покупатель · Что и
-   куда · Статус · Сумма, the step (when there is one) right under its row's
-   status. The header row has the same six columns as the rows. */
-@media (min-width: 900px) {
+/* …and on a wide screen «Заказы» is a table, one line per order: Номер ·
+   Дата · Покупатель · Что и куда · Статус · Сумма · the step (when there is
+   one — never more than one) in a column of its own, centred on the line.
+   The header row has the same seven columns as the rows; the step's has no
+   word. The step's column is the widest step label (EN «Handed to the
+   customer», 181 px at 13 px) — so the table needs 1200 px: below that the
+   buyer and «Что и куда» would be squeezed to nothing. */
+@media (min-width: 1200px) {
   .adm-olist__head {
-    display: grid; grid-template-columns: 100px 56px minmax(0, 1fr) minmax(0, 1.4fr) 170px 96px; column-gap: 14px;
+    display: grid; grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr) 136px 96px 184px; column-gap: 12px;
     padding: 12px 0 8px; border-bottom: 1px solid var(--a-ink);
     font-size: 12px; line-height: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--a-muted);
   }
-  .adm-olist__head span:last-child { text-align: right; }
+  .adm-olist__head span:nth-child(6) { text-align: right; }
   .adm2 .adm-olist--table { border-top: 0; }
   .adm2 .adm-olist--table .adm-orow {
-    grid-template-columns: minmax(0, 1fr) 170px 96px; grid-template-areas: "body tag amt" "acts acts acts";
-    column-gap: 14px; row-gap: 8px; padding: 13px 0;
+    grid-template-columns: minmax(0, 1fr) 136px 96px 184px; grid-template-areas: "body tag amt acts";
+    column-gap: 12px; row-gap: 0; padding: 10px 0; min-height: 57px;
   }
   .adm2 .adm-olist--table .adm-orow > .adm-orow__body {
-    grid-template-columns: 100px 56px minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "num date who what";
-    column-gap: 14px; align-items: center;
+    grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr); grid-template-areas: "num date who what";
+    column-gap: 12px; align-items: center;
   }
   .adm-olist--table .adm-orow__date::before, .adm-olist--table .adm-orow__what::before { content: none; }
   .adm-olist--table .adm-orow__num { font-size: 12.5px; }
   .adm2 .adm-olist--table .adm-orow__what { font-size: 13.5px; }
   .adm2 .adm-olist--table .adm-orow > .adm-orow__tag { justify-self: start; flex-wrap: wrap; }
   .adm2 .adm-olist--table .adm-orow > .adm-row__amt { text-align: right; }
-  .adm2 .adm-olist--table .adm-orow > .adm-orow__acts { justify-content: flex-end; margin-top: 0; }
+}
+/* …a narrower desktop keeps the two lines of the phone, and the step stands
+   beside them in a column of its own (one width for every row, so the sums
+   still line up), centred — no third line under the row */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .adm2 .adm-olist--table .adm-orow {
+    grid-template-columns: minmax(0, 1fr) auto 184px; grid-template-areas: "body amt acts" "body tag acts";
+  }
+}
+@media (min-width: 900px) {
+  .adm2 .adm-olist--table .adm-orow > .adm-orow__acts {
+    align-self: center; justify-content: flex-end; flex-wrap: nowrap; margin-top: 0; min-width: 0;
+  }
   /* the row's step is the secondary one — smaller than the page's dark button */
   .adm2 .adm-olist--table .adm-orow__acts .adm-btn--row { height: 36px; font-size: 13px; }
 }

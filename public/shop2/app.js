@@ -20197,7 +20197,7 @@
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="orders">Повторить</button></div>'
         : "") +
       '<div class="adm-olist__head" aria-hidden="true"><span>Номер</span><span>Дата</span><span>Покупатель</span>' +
-        "<span>Что и куда</span><span>Статус</span><span>Сумма</span></div>" +
+        "<span>Что и куда</span><span>Статус</span><span>Сумма</span><span></span></div>" +
       '<div class="adm-list adm-list--flat adm-olist adm-olist--table" id="orderlist">' + admOrderRows() + "</div>" +
       "</div>";
   }
@@ -20511,10 +20511,11 @@
     // a step in flight owns the whole line: «Сохраняем…» and nothing beside it
     if (SRV.stepBusy === v.id) acts = admOrderStepBtn(v, true);
     else if (v.pos) acts = admReceiptLink(v, true);
-    else if (v.paid && !v.labeled && !v.pickup && !v.digital) acts =
-      // no label yet: the label leads, «Отправлен» stays a quiet second (a courier collecting, a hand-over)
-      admOrderStepBtn(v, true) +
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    /* 1a: ONE action per row, and it is the card's dark button — «Создать
+       этикетку», then «Отправлен», then «Доставлен»; «Выдан клиенту» for a
+       pickup. «Отправлен без этикетки» (a courier collecting, a hand-over)
+       lives in the card only, under its «Следующий шаг»: as a second button
+       here it doubled every row that still waited for a label. */
     else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     // an invoice order's one step is the transfer arriving — the row can record it without opening the card
     else if (v.unpaid && v.invoice) acts = admInvPaidBtnHTML(v, "adm-btn adm-btn--row adm-btn--ghost");
@@ -20528,15 +20529,15 @@
        buttons of their own. The body is the button (the whole text opens the
        card), the chip has the third line, the sum the top right, and the
        actions a full-width line under everything on a phone — the same
-       place on every row, whether the row offers «Создать этикетку» and
-       «Отправлен», one «Чек ↗» or nothing (admin.css, .adm-row--lines).
+       place on every row, whether the row offers its step, one «Чек ↗» or
+       nothing (admin.css, .adm-row--lines).
        The wrapper opens the card too (ADM_ROW_OPEN): the chip, the sum and
        the blank beside the actions were dead until round 15. */
     /* 1a (screen 04): the customer and the sum on the first line; the
        number · the day · what · where, and the status tag, on the second; the
-       step under both (admin.css .adm-orow). On a desktop the same DOM is a
-       table row — Номер · Дата · Покупатель · Что и куда · Статус · Сумма —
-       with the step under its status. */
+       step under both, at the right (admin.css .adm-orow). On a desktop the
+       same DOM is a one-line table row — Номер · Дата · Покупатель · Что и
+       куда · Статус · Сумма · the step in a column of its own. */
     return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines adm-orow"' + ADM_ROW_OPEN + ">" +
       '<button class="adm-row__body adm-row--click adm-orow__body" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
       '<span class="adm-row__line adm-orow__tag">' + admOrderBadge(v) + admReturnBadge(v) + "</span>" +

@@ -205,9 +205,9 @@ async function oneShape(page: Page, sel: string, label: string): Promise<void> {
  * «Заказы» has the 1a shape (design_handoff_admin_ux, screen 04), still one
  * shape on every row: the customer and the sum on the first line; the
  * number · day · what · where and the status tag on the second, the tag at
- * the row's right edge on every row; the step buttons, when there are any,
- * under both at the row's left edge; nothing under 44 px, nothing past the
- * screen.
+ * the row's right edge on every row; the step, when there is one — never
+ * more than one — under both, the row's full width; nothing under 44 px,
+ * nothing past the screen.
  */
 async function orderShape(page: Page): Promise<void> {
   const vw = page.viewportSize()!.width;
@@ -225,6 +225,7 @@ async function orderShape(page: Page): Promise<void> {
       tag: box(row.querySelector(":scope > .adm-orow__tag")),
       amt: box(row.querySelector(":scope > .adm-row__amt")),
       acts: box(row.querySelector(":scope > .adm-acts")),
+      steps: row.querySelectorAll(":scope > .adm-acts button, :scope > .adm-acts a").length,
       small: Array.from(row.querySelectorAll<HTMLElement>(":scope > .adm-acts button, :scope > .adm-acts a"))
         .map((el) => ({ el, b: el.getBoundingClientRect() }))
         .filter(({ b }) => b.width && b.height && (b.width < 43.5 || b.height < 43.5))
@@ -245,6 +246,7 @@ async function orderShape(page: Page): Promise<void> {
         .toBeGreaterThanOrEqual(Math.max(r.tag!.bottom, r.what!.bottom) - 1);
       expect(Math.round(r.acts.left - r.row.left), `${who}: the steps do not start at the row's left edge`).toBe(0);
     }
+    expect(r.steps, `${who}: more than one action on the row`).toBeLessThanOrEqual(1);
     expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
     expect(r.small, `${who}: controls under 44 px`).toEqual([]);
   }
@@ -327,7 +329,7 @@ test.describe("admin — one shape per list on the phone", () => {
  * The whole row opens, except the controls on it.
  *
  * Renat, 12.09.2026, on «Заказы»: only the words of a row opened the order.
- * The row also carries a «Доставлен» (or «Создать этикетку · Отправлен»), and
+ * The row also carries a «Доставлен» (or «Создать этикетку»), and
  * everything from that button to the right edge answered nothing at all — on a
  * phone that is half of what a thumb lands on. Since round 15 the opener sits
  * on the row itself (`data-admrowopen`, app.js admRowOpenAttr) and the click
@@ -342,7 +344,7 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     test.skip(testInfo.project.name !== "mobile", "the dead patch is under the actions line, which only a phone draws");
   });
 
-  test("«Заказы»: the chip, the sum and the blank beside «Отправлен» all open the order", async ({ page }) => {
+  test("«Заказы»: the chip and the sum open the order; the one step fills its line", async ({ page }) => {
     test.setTimeout(180_000);
 
     // one paid order, so the row has both its actions and something to open
@@ -374,18 +376,28 @@ test.describe("admin — a list row opens from anywhere but its buttons", () => 
     await opensFrom(row.locator(".adm-row__line"), "the chip line");
     await opensFrom(row.locator(".adm-row__amt"), "the sum");
 
-    // the blank after the last action — the patch the owner reported
+    /* the blank after the last action — the patch the owner reported. 1a has
+       ONE action per row, and a lone action takes the whole line (admin.css
+       .adm-row--lines > .adm-acts > .adm-btn:only-child), so there is no
+       blank left beside it to land in by mistake. */
     const acts = row.locator(".adm-acts");
     await expect(acts).toBeVisible();
+    await expect(acts.locator("button, a"), "a row carries more than one action").toHaveCount(1);
+    const step = row.locator("[data-admlabel]");
     const box = (await acts.boundingBox())!;
-    await opensFrom(acts, "the blank beside the actions", { x: box.width - 6, y: box.height / 2 });
+    const btn = (await step.boundingBox())!;
+    expect(Math.round(box.width - btn.width), "the lone step leaves a dead patch beside it").toBeLessThanOrEqual(1);
 
-    // …and the action itself is still the action, not a way into the card
-    await row.locator("[data-admshipnow]").click();
-    await expect(page.locator(".adm-confirm"), "«Отправлен» stopped asking").toBeVisible();
-    await expect(card, "«Отправлен» opened the order card as well").toHaveCount(0);
-    await page.locator("[data-admcancel]").click();
-    await expect(page.locator(".adm-confirm")).toHaveCount(0);
+    /* …and the action itself is still the action: the tap asks for the label.
+       (It then shows the card on purpose — the label, the box and the PDF are
+       there; the click handler sets S.adminOrder. The request is stopped at
+       the network, so no label is made.) */
+    const labelUrl = (u: URL) => u.pathname.startsWith("/api/admin/shipments");
+    await page.route(labelUrl, (r) => r.abort());
+    const asked = page.waitForRequest((r) => r.url().includes("/api/admin/shipments") && r.method() === "POST");
+    await step.click();
+    await asked;
+    await page.unroute(labelUrl);
   });
 
   test("«Письма»: the gap between the switch and «Изменить» opens the letter", async ({ page }) => {

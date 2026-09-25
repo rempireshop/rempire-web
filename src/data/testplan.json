@@ -3985,10 +3985,12 @@
       "title": "Отправлен без этикетки",
       "steps": [
         "Взять другой оплаченный заказ, у которого этикетки нет.",
+        "Сначала посмотреть его строку в «Заказах», потом открыть карточку.",
         "В «Следующий шаг» нажать ссылку «Отправлен без этикетки».",
         "Прочитать окошко и нажать «Отправлен»."
       ],
       "expect": [
+        "В строке списка одна кнопка — «Создать этикетку», без «Отправлен» рядом.",
         "Магазин сначала переспрашивает: «Отправлен без этикетки?» — сразу ничего не происходит.",
         "В окошке сказано, что письмо уйдёт без трек-номера.",
         "Заказ отмечается отправленным только после второго нажатия."
@@ -4000,10 +4002,12 @@
         "title": "Dispatched with no label",
         "steps": [
           "Take another paid order that has no label.",
+          "First look at its row in «Заказы», then open the card.",
           "In «Следующий шаг» press the «Отправлен без этикетки» link.",
           "Read the box that opens and press «Отправлен»."
         ],
         "expect": [
+          "The list row has one button — «Создать этикетку», no «Отправлен» beside it.",
           "The shop asks first: «Отправлен без этикетки?» — nothing happens straight away.",
           "The box says the letter will go without a tracking number.",
           "The order is marked dispatched only on the second press."
@@ -4011,7 +4015,7 @@
         "why": "A dispatch letter with no tracking number means calls you cannot answer."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T11:55:24.381Z"
     },
     {
       "id": "order-delivered",

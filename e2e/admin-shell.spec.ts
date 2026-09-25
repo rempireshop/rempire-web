@@ -443,9 +443,15 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await page.locator("[data-admorderq]").fill(number);
     await expect(page.locator("[data-admorder]")).toHaveCount(1);
 
-    /* «Отправлен» from the row: the confirm card first (it moves the money's
+    /* «Отправлен» with no label: the confirm card first (it moves the money's
        status and sends the customer a letter), then a toast that offers to
-       take it back, and a journal line either way. */
+       take it back, and a journal line either way. 1a: a row carries one
+       action — «Создать этикетку» here — so «Отправлен без этикетки» is the
+       card's, under its «Следующий шаг». */
+    await expect(page.locator("#orderlist [data-admshipnow]"), "a row still offers «Отправлен» beside its label").toHaveCount(0);
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    const back = page.locator('[data-admorder=""]');
+    await expect(back).toBeVisible();
     await page.locator("[data-admshipnow]").click();
     const card = page.locator(".adm-confirm");
     // (1a: in the Glossary's words — «Отметить отправленным» is struck out there)
@@ -453,13 +459,15 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await expect(card.locator(".adm-confirm__d")).toContainText(number);
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
+    await expect(back, "«Отмена» took the order card away too").toBeVisible();
 
     await page.locator("[data-admshipnow]").click();
     await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toContainText(`${number} отправлен`);
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await page.locator("[data-closetoast]").click();
+    await back.click();                                   // «← Заказы»
+    await expect(page.locator("#orderlist")).toBeVisible();
 
     // …and the chip and the badge follow the shipped order down at once
     const left = waiting - 1;

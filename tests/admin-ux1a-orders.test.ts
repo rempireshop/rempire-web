@@ -472,4 +472,57 @@ describe("«Заказы»", () => {
     expect(fn("admOrdersHTML")).toContain('placeholder="Имя, номер, телефон или почта"');
     expect(fn("admOrdersHTML")).toContain("data-admorderq");
   });
+
+  /* The coordinator's review of 25.09.2026: a row that still waited for a
+     label carried «Создать этикетку» AND «Отправлен», stacked — two actions,
+     a row twice the height of its neighbours. One action per row, and it is
+     the card's dark button. */
+  const row = new Function(`
+    var SRV = { shipBusy: false, stepBusy: "", invPaidBusy: "" };
+    var ADM_ROW_OPEN = "";
+    function esc(s) { return String(s == null ? "" : s); }
+    function eur(n) { return n + " €"; }
+    function admOrderRowBodyHTML(v) { return "<body " + v.id + ">"; }
+    function admOrderBadge(v) { return "<tag>"; }
+    function admReturnBadge(v) { return ""; }
+    function admShipPrepHTML(v) { return ""; }
+    function admInvoiceStateHTML(v) { return ""; }
+    ${fn("admReceiptLink")}
+    ${fn("admInvPaidBtnHTML")}
+    ${fn("admOrderStepBtn")}
+    ${fn("admOrderNext")}
+    ${fn("admOrderRowHTML")}
+    return { row: admOrderRowHTML, next: admOrderNext };
+  `)() as { row: (v: V) => string; next: (v: V) => Record<string, string> };
+  const acts = (v: V) => {
+    const html = row.row(v), at = html.indexOf('<div class="adm-acts adm-orow__acts">');
+    return at < 0 ? "" : html.slice(at);
+  };
+  const hook = (html: string) => (/ (data-adm[a-z]+)="/.exec(html) || [])[1];
+
+  it("a row carries at most ONE action — the card's own next step", () => {
+    const states: V[] = [
+      order(),                                                         // «Создать этикетку»
+      order({ labeled: true }),                                        // «Отправлен»
+      order({ status: "shipped", paid: false, shipped: true }),        // «Доставлен»
+      order({ pickup: true }),                                         // «Выдан клиенту»
+      order({ shipRefused: true }),                                    // «Отправить заново»
+      order({ status: "new", paid: false, unpaid: true, invoice: { number: "A-1" } }),
+    ];
+    for (const v of states) {
+      const a = acts(v);
+      expect(a.match(/<button /g), JSON.stringify(v)).toHaveLength(1);
+      expect(hook(a), JSON.stringify(v)).toBe(hook(row.next(v).btn));
+    }
+    expect(acts(order())).toContain(">Создать этикетку<");
+    expect(acts(order({ pickup: true }))).toContain(">Выдан клиенту<");
+  });
+
+  it("«Отправлен без этикетки» is the card's only — never a second button in the row", () => {
+    expect(acts(order())).not.toContain("data-admshipnow");
+    expect(row.next(order()).after).toContain('data-admshipnow="o1"');
+    // an unpaid order keeps its one «Написать»; a held one has none
+    expect(acts(order({ status: "new", paid: false, unpaid: true }))).toContain('data-admwrite="o1"');
+    expect(acts(order({ status: "new", paid: false, unpaid: true, held: true }))).toBe("");
+  });
 });
