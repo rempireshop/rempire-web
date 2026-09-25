@@ -44,6 +44,8 @@ export interface OrderItem {
   price?: Money;
   /** Line total as stored by checkout; wins over qty × price when present. */
   sum?: Money;
+  /** "product" | "bundle" | "gift", as src/lib/orders.ts stores it. */
+  kind?: string | null;
 }
 
 export interface OrderShipping {

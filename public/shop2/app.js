@@ -703,6 +703,7 @@
       "Оформляем заказ…": "Vormistame tellimust…",
       "Заказ оплачен": "Tellimus makstud",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui pakk läheb vedajale, saadame jälgimisnumbri.",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui tellimusele saab järele tulla, anname teada.",
       "Оплата не прошла": "Makse ebaõnnestus",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "Raha ei võetud. Tellimus on alles — proovi uuesti maksta või vali teine makseviis.",
       "Заказ не оплачен": "Tellimus on maksmata",
@@ -1119,6 +1120,8 @@
 
       // i18n pass 2: checkout field errors — the shopper meets these mid-address
       "Впишите имя и фамилию — их напечатают на посылке.": "Kirjuta ees- ja perekonnanimi — need trükitakse pakile.",
+      "Впишите имя и фамилию — ими подпишем подарочную карту.": "Kirjuta ees- ja perekonnanimi — nendega allkirjastame kinkekaardi.",
+      "Впишите имя и фамилию — по ним выдадим заказ.": "Kirjuta ees- ja perekonnanimi — nende järgi anname tellimuse üle.",
       "Впишите улицу и дом.": "Kirjuta tänav ja maja number.",
       "Впишите индекс.": "Kirjuta postiindeks.",
       "Впишите город.": "Kirjuta linn.",
@@ -4227,6 +4230,7 @@
       "Оформляем заказ…": "Placing your order…",
       "Заказ оплачен": "Order paid",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Thank you. The confirmation and receipt are on their way to your inbox; you will get a tracking number when the parcel is handed to the carrier.",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.": "Thank you. The confirmation and receipt are on their way to your inbox; we will write when the order is ready to collect.",
       "Оплата не прошла": "Payment did not go through",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "No money was taken. The order is saved — try paying again or choose another method.",
       "Заказ не оплачен": "The order is not paid",
@@ -4640,6 +4644,8 @@
 
       // i18n pass 2: checkout field errors — the shopper meets these mid-address
       "Впишите имя и фамилию — их напечатают на посылке.": "Enter your first and last name — they are printed on the parcel.",
+      "Впишите имя и фамилию — ими подпишем подарочную карту.": "Enter your first and last name — we sign the gift card with them.",
+      "Впишите имя и фамилию — по ним выдадим заказ.": "Enter your first and last name — the order is handed over under that name.",
       "Впишите улицу и дом.": "Enter your street and house number.",
       "Впишите индекс.": "Enter your postcode.",
       "Впишите город.": "Enter your town or city.",
@@ -7375,6 +7381,12 @@
     // …and the journal line it leaves behind
     [/^Письмо клиенту · заказ (.+)$/,
       { ET: "Kiri kliendile · tellimus $1", EN: "Letter to the customer · order $1" }],
+    /* One order is «1 order», «1 tellimus» — the general rules below said
+       «1 orders» on «Обзор» (staging, 25.09.2026). The same shape as «(1) шт»:
+       the singular first, anchored, so «21 заказ» still reads «21 orders». */
+    [/^(1) заказ · (\d+) в салоне$/, { ET: "$1 tellimus · $2 salongis", EN: "$1 order · $2 in the salon" }],
+    [/^(1) заказ · (.+) в день$/, { ET: "$1 tellimus · $2 päevas", EN: "$1 order · $2 per day" }],
+    [/^(1) заказ$/, { ET: "$1 tellimus", EN: "$1 order" }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -18668,6 +18680,15 @@
   function shipBad(key) { return S.shipTouched && shipRequired(key) && shipEmpty(key); }
   function shipMsg(key) {
     if (key === "phone" && S.ship.phone.trim()) return "Проверьте номер — похоже, в нём не хватает цифр.";
+    /* The name is printed on a parcel only when there is one. A gift-card
+       order has none — the name signs the card («От: …», src/lib/giftcard-
+       pdf.ts) — and a self-pickup is handed over at the counter by it
+       (staging, 25.09.2026: the gift checkout said «напечатают на посылке»). */
+    if (key === "name") {
+      var m = shipMethod();
+      if (m === "digital") return "Впишите имя и фамилию — ими подпишем подарочную карту.";
+      if (m === "pickup") return "Впишите имя и фамилию — по ним выдадим заказ.";
+    }
     return SHIP_MSG[key];
   }
 
@@ -45474,6 +45495,9 @@
     var owing = s === "failed" || s === "pending";
     S.done = {
       status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g),
+      /* `d=pickup` — a paid self-pickup order: no parcel, so no tracking
+         number to promise (donePaidNote). */
+      pickup: s === "paid" && q.d === "pickup",
       /* `o` — the order's id: what «Оплатить ещё раз» sends back to re-create
          the payment for the same order. */
       order: owing && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
@@ -45839,15 +45863,25 @@
       '<h1 class="display h1">' + (d.status === "paid" ? "Заказ оплачен" : "Заказ оформлен") + "</h1>" + num +
       '<p class="muted" style="margin-bottom:22px">' +
         (d.status === "paid"
-          ? (d.gift && d.gift.length
-            /* features: nothing is being posted, so the parcel sentence would
-               be a promise the shop is not making. */
-            ? "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда."
-            : "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.")
+          ? donePaidNote(d)
           : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
       "</p>" +
       doneGiftHTML(d.gift) +
       '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+  }
+
+  /** The paid receipt's one sentence — what happens next, and only what the
+      shop will really do. A gift card is mailed, a parcel gets a tracking
+      number, and a self-pickup gets neither: the shop writes when it can be
+      collected (the same promise «Доставка и оплата» makes). Staging,
+      25.09.2026: a self-pickup order (R-100083) was promised a tracking
+      number. `d.pickup` rides on the receipt URL (src/lib/payments/receipt.ts). */
+  function donePaidNote(d) {
+    /* features: nothing is being posted, so the parcel sentence would
+       be a promise the shop is not making. */
+    if (d.gift && d.gift.length) return "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда.";
+    if (d.pickup) return "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.";
+    return "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.";
   }
 
   // ---------- overlays ----------

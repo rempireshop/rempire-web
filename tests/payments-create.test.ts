@@ -244,8 +244,9 @@ describe("POST /api/payments/create", () => {
       expect(res.body.ok).toBe(true);
       expect(res.body.paid).toBe(true);
       expect(res.body.provider).toBe("none");
-      // the same receipt a provider's return lands on — paid, with the total for the funnel beacon
-      expect(res.body.redirectUrl).toBe(`${ORIGIN}/shop2/done/?n=${o.number}&s=paid&t=0.00`);
+      // the same receipt a provider's return lands on — paid, with the total for the funnel beacon,
+      // and `d=pickup`: a self-pickup is promised a letter, not a tracking number (25.09.2026)
+      expect(res.body.redirectUrl).toBe(`${ORIGIN}/shop2/done/?n=${o.number}&s=paid&t=0.00&d=pickup`);
 
       const r = await row(o.orderId);
       expect(r.status).toBe("paid");

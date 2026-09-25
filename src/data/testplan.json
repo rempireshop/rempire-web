@@ -1643,7 +1643,7 @@
       ],
       "expect": [
         "Написано, сколько заказов ждут отправки; общего числа над блоком нет.",
-        "Написано, какие товары заканчиваются; на английском и эстонском — без русских слов.",
+        "Названы заканчивающиеся товары; по-английски и по-эстонски без русских слов и без «1 orders».",
         "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
         "Числа совпадают с тем, что есть на самом деле.",
         "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить».",
@@ -1664,7 +1664,7 @@
         ],
         "expect": [
           "It says how many orders wait to be sent; no total above the block.",
-          "It says which products are running out; in English and Estonian with no Russian words.",
+          "Running-out products are named; English and Estonian show no Russian words and no «1 orders».",
           "Under reviews, who wrote and the stars; under a request, the salon's name.",
           "The numbers match what is really there.",
           "Each line opens its own section; the dark button opens «Заказы» on «Отправить».",
@@ -1673,7 +1673,7 @@
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T22:50:03.653Z"
     },
     {
       "id": "panel-partners-switch",
@@ -2502,11 +2502,14 @@
       "steps": [
         "На стенде: набрать корзину.",
         "На шаге доставки выбрать «Самовывоз — Mardi 1, Таллинн».",
-        "Оформить заказ."
+        "Оставить имя пустым, нажать «Далее — оплата» и прочитать подсказку у имени.",
+        "Вписать имя, оформить и оплатить заказ тестовой оплатой."
       ],
       "expect": [
         "Доставка 0 €.",
         "Адрес не спрашивают.",
+        "Подсказка у имени: «…по ним выдадим заказ» — не «напечатают на посылке».",
+        "После оплаты: «Когда заказ можно будет забрать, мы напишем», без трек-номера.",
         "В панели у заказа два шага: «Оплачен» и «Выдан»."
       ],
       "why": "Лишний шаг или лишняя плата на самовывозе отпугивают ваших же соседей.",
@@ -2517,17 +2520,20 @@
         "steps": [
           "On staging: fill the cart.",
           "At the delivery step choose «Самовывоз — Mardi 1, Таллинн» (collection).",
-          "Place the order."
+          "Leave the name empty, press «Далее — оплата» and read the hint under the name.",
+          "Type the name, place the order and pay with the test payment."
         ],
         "expect": [
           "Delivery is 0 €.",
           "No address is asked for.",
+          "The name hint says «…по ним выдадим заказ», not «напечатают на посылке».",
+          "After paying: «Когда заказ можно будет забрать, мы напишем», no tracking number.",
           "In the panel the order has two steps: «Оплачен» and «Выдан»."
         ],
         "why": "An extra step or charge on collection puts off your own neighbours."
       },
-      "mark": "reworded",
-      "markedAt": "2026-09-23T13:36:32.960Z"
+      "mark": "redo",
+      "markedAt": "2026-09-25T22:50:03.653Z"
     },
     {
       "id": "checkout-lv-parcel",
@@ -2895,6 +2901,47 @@
       },
       "mark": "reworded",
       "markedAt": "2026-09-23T13:36:32.960Z"
+    },
+    {
+      "id": "checkout-giftcard-words",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Слова в заказе одной подарочной карты",
+      "steps": [
+        "Положить в корзину только подарочную карту и нажать «Оформить».",
+        "Оставить имя пустым, нажать «Далее — оплата» и прочитать подсказку у имени.",
+        "Вписать имя и оплатить тестовой оплатой.",
+        "Открыть письмо «Заказ принят»."
+      ],
+      "expect": [
+        "Подсказка у имени: «…ими подпишем подарочную карту» — ни слова о посылке.",
+        "В письме нет «уже собираем» и «передадим посылку в доставку».",
+        "Способ получения в письме — «Электронная доставка».",
+        "В письме сказано, что карта придёт отдельным письмом."
+      ],
+      "why": "Покупатель карты, которому пишут про посылку, ждёт посылку.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "The words on an order of one gift card",
+        "steps": [
+          "Put only a gift card in the cart and press «Оформить».",
+          "Leave the name empty, press «Далее — оплата» and read the hint under the name.",
+          "Type the name and pay with the test payment.",
+          "Open the «Заказ принят» letter."
+        ],
+        "expect": [
+          "The name hint says «…ими подпишем подарочную карту» — nothing about a parcel.",
+          "The letter has no «уже собираем» and no «передадим посылку в доставку».",
+          "The letter's delivery method reads «Электронная доставка».",
+          "The letter says the card arrives in a separate e-mail."
+        ],
+        "why": "A card buyer told about a parcel waits for a parcel."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T22:50:03.653Z"
     },
     {
       "id": "checkout-pay-with-giftcard",

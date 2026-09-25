@@ -84,6 +84,21 @@ export interface ReceiptParams {
    * behaviour rather than to a wrong country.
    */
   country?: string;
+  /**
+   * `d=pickup` — a paid self-pickup order. The paid receipt's sentence used
+   * to promise every order a tracking number «когда посылку передадут
+   * перевозчику», and a self-pickup has no parcel and no carrier (staging,
+   * 25.09.2026, R-100083). With this the screen says the shop will write when
+   * the order can be collected instead (donePaidNote in public/shop2/app.js).
+   * Paid receipts only; nothing about the order a stranger could use.
+   */
+  pickup?: boolean;
+}
+
+/** A self-pickup order — the shape createOrder() stores (`shipping.method`). */
+export function isPickupOrder(order: unknown): boolean {
+  const s = (order as { shipping?: { method?: unknown } } | null | undefined)?.shipping;
+  return !!s && typeof s === "object" && String(s.method ?? "").toLowerCase() === "pickup";
 }
 
 /** The three the checkout's radio has, and the only values `m` may carry. */
@@ -99,6 +114,7 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   params.set("s", p.state);
   if (p.state === "paid" && p.total != null && Number.isFinite(p.total)) params.set("t", p.total.toFixed(2));
   if (p.state === "paid" && p.gift) params.set("g", p.gift);
+  if (p.state === "paid" && p.pickup) params.set("d", "pickup");
   /* Everything below is the "this order still owes money" payload — a paid
      receipt carries none of it, and the caller only passes an order id when it
      actually looked the order up and found it unpaid. */
