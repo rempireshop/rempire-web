@@ -5944,15 +5944,15 @@
         "Открыть иконку «Сканер» и войти по паролю.",
         "Навести камеру на штрихкод товара, у которого код уже привязан.",
         "Нажать «+» до нужного числа и нажать «Принять +N».",
-        "Нажать «Принять +N» второй раз подряд, быстро.",
+        "Сразу нажать «Вернуть» в сообщении внизу, потом принять ещё раз.",
         "Сканировать следующий товар."
       ],
       "expect": [
         "Появилась карточка «Найдено» с названием и объёмом.",
         "Рядом остаток — или «не учтено», если этот объём ещё не считали.",
-        "После приёмки внизу выскочило подтверждение.",
-        "Остаток вырос ровно на N, а не на два раза по N.",
-        "Число рядом с «+» снова стало 1."
+        "После приёмки карточка закрылась, внизу «Принято +N · теперь M шт».",
+        "«Вернуть» убрал ровно N, в «Истории склада» две строки.",
+        "Сканер сам готов к следующему коду, нажимать ничего не нужно."
       ],
       "why": "Приёмка руками по одной баночке съедает вечер.",
       "risk": "med",
@@ -5964,19 +5964,19 @@
           "Open the «Сканер» (scanner) icon and sign in with the password.",
           "Point the camera at the barcode of a product whose code is already bound.",
           "Press «+» up to the number you need and press «Принять +N» (take in +N).",
-          "Press «Принять +N» a second time straight away.",
+          "Press «Вернуть» (undo) in the message at the bottom at once, then take in again.",
           "Scan the next product."
         ],
         "expect": [
           "The «Найдено» card shows the name and the size.",
           "Beside them the stock — or «не учтено» if nobody has counted that size.",
-          "A confirmation pops up at the bottom after taking in.",
-          "The stock has gone up by exactly N, not by twice N.",
-          "The number next to «+» is back to 1."
+          "After taking in the card closes; at the bottom «Принято +N · теперь M шт».",
+          "«Вернуть» took exactly N away; «История склада» shows two lines.",
+          "The scanner is ready for the next code by itself, nothing to press."
         ],
         "why": "Taking goods in by hand, one bottle at a time, eats an evening."
       },
-      "markedAt": "2026-09-19T06:45:00.000Z"
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-scan-bind",
@@ -5987,13 +5987,13 @@
       "title": "Привязать новый штрихкод",
       "steps": [
         "В сканере навести камеру на товар, код которого ещё не привязан.",
-        "Нажать «К какому товару?» на карточке «Код не привязан».",
-        "Ввести две-три буквы названия и нажать на строку с нужным объёмом.",
+        "На карточке «Новый код» ввести две-три буквы названия.",
+        "Нажать на строку с нужным объёмом.",
         "Отсканировать этот же код ещё раз.",
         "Найти товар, у которого код уже есть, и попробовать привязать к нему второй."
       ],
       "expect": [
-        "Появилось подтверждение, что код привязан.",
+        "Появилось «Код привязан ✓» с кнопкой «Вернуть».",
         "В строке «Штрихкоды: привязано N из M» число выросло на один.",
         "Тот же код со второго раза сразу находит товар.",
         "У занятого объёма написано, что код уже есть.",
@@ -6006,20 +6006,22 @@
         "title": "Binding a new barcode",
         "steps": [
           "In the scanner point the camera at a product whose code is not bound yet.",
-          "Press «К какому товару?» (which product?) on the «Код не привязан» card.",
-          "Type two or three letters of the name and tap the row with the right size.",
+          "On the «Новый код» (new code) card type two or three letters of the name.",
+          "Tap the row with the right size.",
           "Scan the same code again.",
           "Find a product that already has a code and try to bind a second one to it."
         ],
         "expect": [
-          "A confirmation says the code is bound.",
+          "«Код привязан ✓» appears, with a «Вернуть» (undo) button.",
           "The «Штрихкоды: привязано N из M» line is up by one.",
           "Scanning the same code again finds the product straight away.",
           "A size that already has a code says so.",
           "Overwriting an existing code takes a second press."
         ],
         "why": "Until the codes are bound the scanner is useless."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-scan-crooked",
@@ -6103,14 +6105,15 @@
       "lang": "RU",
       "title": "Ввести код руками",
       "steps": [
-        "Найти в сканере поле «или введите код вручную».",
-        "Набрать цифры со стёртой этикетки и нажать «Найти».",
+        "Найти в сканере поле «или введите код».",
+        "Набрать код со стёртой этикетки — цифры или свой код вроде RMP-0042 — и нажать «Найти».",
         "Принять один товар."
       ],
       "expect": [
-        "Товар нашёлся по набранным цифрам.",
+        "Товар нашёлся по набранному коду.",
         "Принять его можно так же, как по камере.",
-        "Клавиатура не закрывается сама, пока вы набираете."
+        "Клавиатура не закрывается сама, пока вы набираете.",
+        "Буквы и дефис набираются — клавиатура обычная, не только цифры."
       ],
       "why": "Без ручного ввода товар с потёртой этикеткой на склад не попадёт.",
       "risk": "low",
@@ -6118,17 +6121,20 @@
       "en": {
         "title": "Typing a code by hand",
         "steps": [
-          "In the scanner find the «или введите код вручную» (or type the code by hand) field.",
-          "Type the digits off a rubbed-out label and press «Найти» (find).",
+          "In the scanner find the «или введите код» (or type the code) field.",
+          "Type the code off a rubbed-out label — digits, or an own code like RMP-0042 — and press «Найти» (find).",
           "Take one item in."
         ],
         "expect": [
-          "The product is found from the digits you typed.",
+          "The product is found from the code you typed.",
           "You can take it in just as by camera.",
-          "The keyboard does not close by itself while you type."
+          "The keyboard does not close by itself while you type.",
+          "Letters and a dash can be typed — a normal keyboard, not digits only."
         ],
         "why": "Without typing by hand, a bottle with a worn label never gets counted."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-scan-writeoff",
@@ -6138,15 +6144,17 @@
       "lang": "RU",
       "title": "Списать испорченный товар",
       "steps": [
-        "В сканере найти товар.",
-        "Нажать «−» до нужного числа и нажать «Списать −N».",
-        "Открыть «Товары» → «Склад» и найти этот товар.",
+        "В сканере найти товар и переключить карточку на «Списание».",
+        "Нажать «+» до нужного числа и нажать «Списать −N».",
+        "Открыть «Товары» → «Склад» → «История →» и найти эту строку.",
         "Проделать то же самое с объёмом, которого никто не считал."
       ],
       "expect": [
-        "Внизу появилось подтверждение «Списание −N ✓».",
-        "В списке склада остаток уменьшился ровно на N.",
-        "У непосчитанного объёма внизу написано, что его ещё не считали.",
+        "Внизу появилось «Списано −N · теперь M шт» с кнопкой «Вернуть».",
+        "На «Складе» остаток уменьшился ровно на N.",
+        "В истории строка «списание · сканер», а не продажа в салоне.",
+        "Чип «Списание» появился в истории и показывает только списания.",
+        "У непосчитанного объёма написано, что его ещё не считали.",
         "Остаток у него при этом не изменился."
       ],
       "why": "Списание — это брак или потеря; проведённая так продажа пропадёт из отчётов.",
@@ -6156,19 +6164,22 @@
       "en": {
         "title": "Writing off damaged goods",
         "steps": [
-          "Find the product in the scanner.",
-          "Press «−» down to the number you need and press «Списать −N» (write off −N).",
-          "Open «Товары» → «Склад» and find that product.",
+          "Find the product in the scanner and switch the card to «Списание» (write-off).",
+          "Press «+» up to the number you need and press «Списать −N» (write off −N).",
+          "Open «Товары» → «Склад» → «История →» (history) and find that line.",
           "Do the same on a size nobody has counted."
         ],
         "expect": [
-          "A «Списание −N ✓» confirmation appears at the bottom.",
+          "At the bottom «Списано −N · теперь M шт», with a «Вернуть» (undo) button.",
           "On «Склад» the stock is down by exactly N.",
+          "The history line reads «списание · сканер», not a salon sale.",
+          "A «Списание» chip appears in the history and shows write-offs only.",
           "For an uncounted size the line says nobody has counted it yet.",
           "Its own stock did not move at all."
         ],
         "why": "A write-off is breakage or loss; a sale run this way vanishes from reports."
-      }
+      },
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-scan-repeat",
@@ -6226,16 +6237,16 @@
         "Открыть «Товары» → «Склад».",
         "Нажать по очереди «Все», «Мало», «Нет», «Не учтено».",
         "Пролистать список до конца, нажимая «Показать ещё».",
-        "Нажать у одного товара «−», потом сразу «Вернуть» внизу экрана.",
-        "Найти на «Складе» объём, который убрали из карточки товара.",
+        "У одного объёма нажать «+» три раза подряд и подождать секунду.",
+        "Нажать «Вернуть» в сообщении внизу.",
         "Посмотреть на кнопки «Все», «Мало», «Нет», «Не учтено», не нажимая их."
       ],
       "expect": [
-        "Каждая кнопка сверху оставляет в списке только свои товары.",
-        "«Показать ещё» дописывает следующие строки в конец.",
-        "Список не прыгает в начало.",
+        "Название и фото товара один раз, объёмы — короткими строками под ним.",
+        "Сверху товары, у которых что-то кончается; скрытые — в конце с меткой «скрыт».",
+        "Три нажатия дали одно сообщение «было → стало» и одну строку истории.",
         "«Вернуть» возвращает остаток обратно.",
-        "Объём, убранный из карточки товара, остаётся на «Складе» своей строкой.",
+        "«Показать ещё» дописывает строки в конец, список не прыгает в начало.",
         "На каждой кнопке число — сколько строк за ней, включая ноль."
       ],
       "why": "Список, который прыгает в начало, не даёт пересчитать склад с телефона.",
@@ -6248,21 +6259,21 @@
           "Open «Товары» → «Склад».",
           "Press «Все», «Мало», «Нет» and «Не учтено» in turn.",
           "Scroll the list to the end, pressing «Показать ещё» (show more).",
-          "On one product press «−», then «Вернуть» at the bottom straight away.",
-          "Find on «Склад» a size that was removed from the product card.",
+          "On one size press «+» three times in a row and wait a second.",
+          "Press «Вернуть» (undo) in the message at the bottom.",
           "Look at the «Все», «Мало», «Нет», «Не учтено» buttons without pressing them."
         ],
         "expect": [
-          "Each button at the top leaves only its own products.",
-          "«Показать ещё» adds the next rows at the end.",
-          "The list does not jump back to the top.",
+          "The product's name and photo once, its sizes as short rows under it.",
+          "Products running out come first; hidden ones last, tagged «скрыт».",
+          "Three presses gave one «before → after» message and one history line.",
           "«Вернуть» puts the stock back.",
-          "A size removed from the product card stays on «Склад» as its own row.",
+          "«Показать ещё» adds rows at the end; the list does not jump to the top.",
           "Each button carries a number — how many rows are behind it, zero included."
         ],
         "why": "A list that jumps back to the top makes a phone stock-take impossible."
       },
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-edit",
@@ -6270,48 +6281,48 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Поправить остаток и порог «мало»",
+      "title": "Поправить остаток, штрихкод и порог «мало»",
       "steps": [
-        "На «Складе» открыть «История приёмок и продаж →» и вернуться кнопкой «Назад» телефона.",
-        "Нажать «Править» у товара.",
-        "Поменять только порог «мало» и вписать причину.",
-        "Сохранить и снова открыть «История приёмок и продаж →».",
-        "Вернуться, поменять остаток и штрихкод, вписать другую причину, снова сохранить и открыть историю.",
+        "На «Складе» открыть «История →» и вернуться кнопкой «Назад» телефона.",
+        "Нажать на объём товара — строка раскроется.",
+        "Вписать причину, потом поменять порог «мало ≤» и нажать «Готово» на клавиатуре.",
+        "Открыть «История →» и вернуться.",
+        "Вписать число прямо между «−» и «+», поменять штрихкод и снова открыть историю.",
         "Попробовать вписать в порог букву вместо числа."
       ],
       "expect": [
-        "Всё, что вписали, сохранилось.",
+        "Кнопки «Сохранить» нет: вверху «Сохранено ✓» после каждого поля.",
         "«Назад» телефона из истории возвращает на «Склад», а не на «Обзор».",
-        "Первая строка истории: «правка карточки · ваша причина», без числа справа.",
-        "После второй правки сверху строка «ручная правка · другая причина».",
-        "Строка краснеет, когда остаток ниже своего порога.",
-        "Букву вместо числа поле не принимает, старое число остаётся на месте."
+        "В истории строка «правка карточки · ваша причина», без числа справа.",
+        "После числа сверху строка «ручная правка» с новым остатком.",
+        "Метка у объёма становится «мало», когда остаток не выше порога.",
+        "Букву поле не отправляет: красная рамка и подсказка под полем."
       ],
       "why": "Стёртый порог означает, что товар кончится, а вы об этом не узнаете.",
       "risk": "med",
       "writes": true,
       "en": {
-        "title": "Correcting the stock and the «low» threshold",
+        "title": "Correcting the stock, the barcode and the «low» threshold",
         "steps": [
-          "On «Склад» open «История приёмок и продаж →» (the history) and come back with the phone's Back button.",
-          "Press «Править» (edit) on a product.",
-          "Change only the «low» threshold and type a reason.",
-          "Save, then open «История приёмок и продаж →» again.",
-          "Go back, change the stock and the barcode, type another reason, save and open the history.",
+          "On «Склад» open «История →» (history) and come back with the phone's Back button.",
+          "Tap a product's size — the row opens.",
+          "Type a reason, then change the «мало ≤» (low) threshold and press Done on the keyboard.",
+          "Open «История →» and come back.",
+          "Type a number straight between «−» and «+», change the barcode and open the history again.",
           "Try typing a letter instead of a number into the threshold."
         ],
         "expect": [
-          "Everything you typed has been saved.",
+          "There is no «Сохранить» button: «Сохранено ✓» shows at the top after each field.",
           "The phone's Back from the history returns to «Склад», not to «Обзор».",
-          "The history's first row: «правка карточки · your reason», with no number on the right.",
-          "After the second change the top row reads «ручная правка · the other reason».",
-          "A row turns red when its stock is below the threshold.",
-          "The field refuses a letter where a number belongs; the old number stays."
+          "The history shows «правка карточки · your reason», with no number on the right.",
+          "After the number the top row reads «ручная правка» with the new stock.",
+          "The size's tag turns «мало» when the stock is at or under its threshold.",
+          "The field does not send a letter: a red frame and a hint under it."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T14:48:44.241Z"
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-history",
@@ -6319,40 +6330,42 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "История приёмок и продаж",
+      "title": "История склада",
       "steps": [
-        "Нажать на «Складе» кнопку «История приёмок и продаж →».",
+        "Нажать на «Складе» «История →».",
         "Найти сегодняшнюю приёмку и сегодняшнее списание.",
         "Найти продажу через сайт.",
-        "Нажать чип «Правка карточки» и посмотреть эти строки."
+        "Нажать по очереди чипы «Продажи», «Вручную», «Правка карточки», «Списание»."
       ],
       "expect": [
         "У каждой строки видно, когда и на сколько изменился остаток.",
-        "Рядом написана причина: приёмка, продажа, поправка или правка карточки.",
-        "Продажи из салона и с сайта различаются.",
-        "У правки карточки числа нет — на полке ничего не двигалось.",
-        "Чипы сверху отбирают строки по причине."
+        "Рядом причина: приёмка, продажа, ручная правка, списание или правка карточки.",
+        "На чипах числа; «Продажи» — это сайт и салон вместе.",
+        "Чип «Списание» есть, только если что-то списывали.",
+        "У правки карточки числа нет — на полке ничего не двигалось."
       ],
       "why": "Когда остаток не сходится, это единственное место, где видно, кто его изменил.",
       "risk": "low",
       "writes": false,
       "en": {
-        "title": "The history of goods in and sales",
+        "title": "The stock history",
         "steps": [
-          "On «Склад» press «История приёмок и продаж →» (history of goods in and sales).",
+          "On «Склад» press «История →» (history).",
           "Find today's intake and today's write-off.",
           "Find a sale made through the website.",
-          "Press the «Правка карточки» chip and look at those rows."
+          "Press the «Продажи», «Вручную», «Правка карточки» and «Списание» chips in turn."
         ],
         "expect": [
           "Every row shows when the stock changed and by how much.",
-          "The reason is written next to it: intake, sale, correction or a card change.",
-          "Salon sales and website sales are told apart.",
-          "A card change carries no number — nothing moved on the shelf.",
-          "The chips at the top pick rows by reason."
+          "The reason beside it: intake, sale, manual fix, write-off or a card change.",
+          "The chips carry counts; «Продажи» is the website and the salon together.",
+          "The «Списание» chip is there only once something was written off.",
+          "A card change carries no number — nothing moved on the shelf."
         ],
         "why": "When the stock does not add up, only this shows who changed it."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "stock-web-sale",
@@ -7020,21 +7033,21 @@
       "lang": "RU",
       "title": "Собрать набор",
       "steps": [
-        "Открыть «Товары» → «Наборы» и нажать «Новый набор».",
-        "Дать название и добавить два-три товара из каталога.",
-        "Вписать цену набора и посмотреть подсказку с суммой товаров.",
-        "Сохранить и открыть набор в магазине.",
-        "Посмотреть на «Наборы» до создания: сколько их и сколько скрыто.",
-        "Открыть «Новый набор»: спросить должны название, а не адрес.",
-        "Адрес ниже должен заполниться из названия сам, пока его печатают."
+        "Открыть «Товары» → «Наборы» и нажать «+ Набор».",
+        "Дать название, найти в поиске два-три товара и нажать на нужный объём.",
+        "Вписать цену набора или скидку в процентах и нажать «Готово» на клавиатуре.",
+        "Нажать «?» у «Раздела магазина» и посмотреть адрес.",
+        "Включить «Показывать в магазине» и открыть набор в магазине.",
+        "Нажать «+ Набор», вписать одно название и уйти на «Каталог».",
+        "Снова нажать «+ Набор»."
       ],
       "expect": [
+        "Кнопки «Сохранить» нет — набор сохранился сам, скрытым, когда хватило данных.",
         "Под ценой видно, сколько стоят товары по отдельности.",
-        "Набор дороже этой суммы сохранить не дают.",
-        "Сохранённый набор виден в магазине на главной и в «Наборах».",
-        "В корзину он ложится одной строкой.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; «Удалить набор» — в конце формы.",
-        "В подборщике товара виден бренд, и написано, сколько найдено всего."
+        "Цену дороже этой суммы набор не принимает — подсказка краснеет.",
+        "Адрес написан сам из названия латиницей, придумывать его не нужно.",
+        "Включённый набор виден в магазине и ложится в корзину одной строкой.",
+        "Недописанный черновик ждёт: «+ Набор» открывает его снова."
       ],
       "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине. Свои товары в набор пока не добавить — только из каталога.",
       "risk": "med",
@@ -7043,25 +7056,25 @@
       "en": {
         "title": "Building a set",
         "steps": [
-          "«Товары» → the «Наборы» tab → «Новый набор» (new set).",
-          "Give it a name and add two or three catalogue products.",
-          "Type in the set price and look at the hint with the sum of the products.",
-          "Save and open the set in the shop.",
-          "Look at «Наборы» before creating one: how many there are and how many are hidden.",
-          "Open «Новый набор»: it must ask for the name, not the address.",
-          "The address below must fill itself from the name as it is typed."
+          "Open «Товары» → «Наборы» and press «+ Набор» (new set).",
+          "Give it a name, find two or three products in the search and tap the size you want.",
+          "Type the set price or a discount in per cent and press Done on the keyboard.",
+          "Press «?» by «Раздел магазина» (shop section) and look at the address.",
+          "Turn on «Показывать в магазине» (show in the shop) and open the set in the shop.",
+          "Press «+ Набор», type only a name and go to «Каталог».",
+          "Press «+ Набор» again."
         ],
         "expect": [
+          "There is no «Сохранить» — the set saved itself, hidden, once it had enough.",
           "Under the price you see what the products cost separately.",
-          "A set dearer than that sum will not save.",
-          "The saved set shows on the home page and under «Наборы».",
-          "It goes into the cart as a single line.",
-          "On the phone «Сохранить» and «Отмена» sit in the header; «Удалить набор» ends the form.",
-          "The picker shows the brand and says how many were found in all."
+          "A price above that sum is refused — the hint turns red.",
+          "The address wrote itself from the name in Latin letters; nothing to invent.",
+          "The switched-on set shows in the shop and goes into the cart as one line.",
+          "An unfinished draft waits: «+ Набор» opens it again."
         ],
         "why": "A set dearer than its parts turns the buyer away. Your own products cannot go into a set yet — catalogue ones only."
       },
-      "markedAt": "2026-09-24T17:30:55.116Z"
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "bundles-hide",
@@ -7069,15 +7082,18 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Спрятать набор и выключить наборы целиком",
+      "title": "Спрятать и удалить набор, выключить наборы целиком",
       "steps": [
-        "Нажать «Скрыть» у одного набора и открыть магазин.",
+        "Выключить переключатель у одного набора и открыть магазин.",
+        "Нажать «Вернуть» в сообщении внизу.",
+        "Открыть набор, нажать «Удалить набор» → «Удалить» и сразу «Вернуть».",
         "Выключить «Показывать наборы» в «Ещё» → «Настройки» → «Главная страница».",
         "Открыть магазин и посмотреть меню и главную.",
         "Вернуть всё обратно."
       ],
       "expect": [
-        "Скрытый набор пропал из магазина.",
+        "Скрытый набор пропал из магазина, «Вернуть» показывает его снова.",
+        "Удаление сначала спрашивает, а «Вернуть» возвращает набор на место.",
         "С выключенными наборами пункт «Наборы» исчез из меню.",
         "«Подарочная карта» осталась на месте."
       ],
@@ -7085,20 +7101,25 @@
       "risk": "low",
       "writes": true,
       "en": {
-        "title": "Hiding a set, and switching sets off entirely",
+        "title": "Hiding and deleting a set, switching sets off entirely",
         "steps": [
-          "In the set list press «Скрыть» (hide) on one set and open the shop.",
+          "Switch one set off with its switch and open the shop.",
+          "Press «Вернуть» (undo) in the message at the bottom.",
+          "Open a set, press «Удалить набор» → «Удалить» (delete) and «Вернуть» at once.",
           "Switch «Показывать наборы» (show sets) off in «Ещё» → «Настройки» → «Главная страница».",
           "Open the shop and look at the menu and the home page.",
           "Put everything back."
         ],
         "expect": [
-          "The hidden set has gone from the shop.",
+          "The hidden set has gone from the shop; «Вернуть» shows it again.",
+          "Deleting asks first, and «Вернуть» puts the set back in its place.",
           "With sets switched off the «Наборы» menu item is gone.",
           "«Подарочная карта» is still where it was."
         ],
         "why": "A withdrawn set still on sale brings an order you cannot fill."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "blog-new-post",
@@ -8064,12 +8085,12 @@
       "steps": [
         "Написать помощнику «собери набор для бороды».",
         "Нажать «Применить» на его карточке.",
-        "Вписать цену набора и сохранить."
+        "Вписать цену набора и нажать «Готово» на клавиатуре."
       ],
       "expect": [
         "Открылся редактор набора с уже подставленными товарами.",
         "Название набора тоже подставлено.",
-        "Адрес набора заполнился сам из названия.",
+        "Набор сохранился сам, скрытым, как только появилась цена.",
         "Цену вписываете вы — сам он её не ставит.",
         "Цену дороже суммы товаров по отдельности магазин не принимает."
       ],
@@ -8081,17 +8102,19 @@
         "steps": [
           "Write to the assistant «собери набор для бороды» — a beard set.",
           "Press «Применить» on the card it shows.",
-          "Type the price of the set and save."
+          "Type the set price and press Done on the keyboard."
         ],
         "expect": [
           "The set editor opens with the products already in it.",
           "The set's name is filled in too.",
-          "The set's address filled itself in from the name.",
+          "The set saved itself, hidden, as soon as it had a price.",
           "You type the price — it does not set one.",
           "The shop refuses a price above the parts bought separately."
         ],
         "why": "Building a set by hand out of two hundred products takes long."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:17.769Z"
     },
     {
       "id": "ai-assistant-promo",
