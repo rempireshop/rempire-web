@@ -141,6 +141,52 @@ describe("inventory", () => {
     });
   });
 
+  /* «Списание» (206_stock_move_writeoff.sql; Dim, 25.09.2026, q41): the
+     scanner's «Списать» used to be filed as 'sale_pos', so a broken bottle
+     read «продажа в салоне» in the history and sat under «Продажи». */
+  describe("move() — «Списание», a reason of its own", () => {
+    it("takes bottles off a counted shelf and is filed as 'writeoff', not as a sale", async () => {
+      await move({ productId: plain.id, delta: 5, reason: "goods_in" });
+      const r = await move({ productId: plain.id, delta: -2, reason: "writeoff", ref: "сканер" });
+      expect(r.appliedDelta).toBe(-2);
+      expect(r.qtyAfter).toBe(3);
+      const [last] = await listMoves({ productId: plain.id });
+      expect(last).toMatchObject({ reason: "writeoff", delta: -2, ref: "сканер" });
+      // the ledger's own filter can ask for write-offs alone, and a sale filter does not see one
+      expect(await listMoves({ productId: plain.id, reason: "writeoff" })).toHaveLength(1);
+      expect(await listMoves({ productId: plain.id, reason: "sale_pos" })).toHaveLength(0);
+    });
+
+    it("refuses a write-off that would ADD bottles", async () => {
+      await move({ productId: plain.id, delta: 5, reason: "goods_in" });
+      await expect(move({ productId: plain.id, delta: 2, reason: "writeoff" })).rejects.toMatchObject({ code: "bad_delta" });
+      expect((await getLevel(plain.id, ""))?.qty).toBe(5);
+    });
+
+    it("is skipped on a size nobody has counted — it must not flip it to «нет в наличии»", async () => {
+      const r = await move({ productId: plain.id, delta: -1, reason: "writeoff" });
+      expect(r.skipped).toBe(true);
+      expect(r.appliedDelta).toBe(0);
+      expect(await isTracked(plain.id, "")).toBe(false);
+      expect(await listMoves({ productId: plain.id })).toHaveLength(0);
+    });
+
+    it("stops at 0 like any other move", async () => {
+      await move({ productId: plain.id, delta: 1, reason: "goods_in" });
+      const r = await move({ productId: plain.id, delta: -4, reason: "writeoff" });
+      expect(r.appliedDelta).toBe(-1);
+      expect(r.clampedNegative).toBe(true);
+    });
+
+    it("an absolute count is never filed as a write-off", async () => {
+      await move({ productId: plain.id, delta: 2, reason: "goods_in" });
+      const r = await setQty(plain.id, "", 7, { reason: "writeoff" });
+      expect(r.appliedDelta).toBe(5);
+      const [last] = await listMoves({ productId: plain.id });
+      expect(last.reason).toBe("adjust");
+    });
+  });
+
   describe("setQty() — the absolute set", () => {
     it("computes the delta from the current qty and writes one move", async () => {
       await move({ productId: plain.id, delta: 4, reason: "goods_in" });

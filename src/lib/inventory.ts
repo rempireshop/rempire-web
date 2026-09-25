@@ -35,8 +35,21 @@ import type { Querier } from "@/lib/db";
 
 export type StockState = "in" | "low" | "out";
 
-export const MOVE_REASONS = ["sale_web", "sale_pos", "goods_in", "adjust", "return"] as const;
+/**
+ * 'writeoff' — «Списание» (db/migrations/206_stock_move_writeoff.sql; Dim,
+ * 25.09.2026, q41): a bottle that left the shelf without being sold — broken,
+ * expired, opened as a tester. The scanner's «Списать» wrote it as 'sale_pos'
+ * until then, so «История склада» showed it as «продажа в салоне · сканер» and
+ * nothing could tell the two apart. It behaves like a sale in the two ways
+ * that matter to the shelf: it only ever takes goods away (move() refuses a
+ * positive one), and it is skipped on a size nobody has counted yet — a
+ * write-off must not flip an uncounted bottle to «нет в наличии» any more
+ * than a sale may (module doc). It is NOT a sale anywhere else: no order, no
+ * money, no «Продажи» chip.
+ */
+export const MOVE_REASONS = ["sale_web", "sale_pos", "goods_in", "adjust", "return", "writeoff"] as const;
 export type MoveReason = (typeof MOVE_REASONS)[number];
+export const WRITEOFF_REASON = "writeoff" as const;
 
 /**
  * 'edit' is a ledger reason nobody may ask for — setLevel() writes it itself
@@ -330,6 +343,11 @@ const TRACKING_SQL = "('goods_in','adjust','return')";
 export function isSaleReason(reason: MoveReason): boolean {
   return reason === "sale_web" || reason === "sale_pos";
 }
+/** A move that takes goods away without counting the shelf: a sale, or a
+    write-off. Skipped on a size nobody has counted (see the module doc). */
+function skipsUntracked(reason: MoveReason): boolean {
+  return isSaleReason(reason) || reason === WRITEOFF_REASON;
+}
 
 /** Runs inside an existing transaction — shared by move() and setQty(). */
 async function applyMove(
@@ -539,11 +557,13 @@ export async function move(input: MoveInput): Promise<MoveResult> {
     throw new InventoryError("bad_delta");
   }
   if (!MOVE_REASONS.includes(input.reason)) throw new InventoryError("bad_reason", String(input.reason));
+  // a write-off only ever takes bottles away — «списание +3» is not a thing
+  if (input.reason === WRITEOFF_REASON && delta > 0) throw new InventoryError("bad_delta", "writeoff_positive");
   const ref = cleanRef(input.ref);
   const actor = cleanActor(input.actor);
 
   const r = await withTx(async (q) => {
-    if (isSaleReason(input.reason)) {
+    if (skipsUntracked(input.reason)) {
       const t = await q<{ ok: number }>(
         `select 1 as ok from stock_moves where product_id = $1 and variant = $2 and reason in ${TRACKING_SQL} limit 1`,
         [productId, variant],
@@ -583,7 +603,10 @@ export async function setQty(
   const v = normVariant(variant);
   const target = Math.trunc(Number(qty));
   if (!Number.isFinite(target) || target < 0 || target > MAX_QTY) throw new InventoryError("bad_qty");
-  const reason = opts.reason && MOVE_REASONS.includes(opts.reason) ? opts.reason : "adjust";
+  /* A count is a count: «останется 10» can move the shelf either way, and a
+     write-off only ever goes down (move() above), so it is never the reason
+     an absolute set is filed under. */
+  const reason = opts.reason && MOVE_REASONS.includes(opts.reason) && opts.reason !== WRITEOFF_REASON ? opts.reason : "adjust";
   const ref = cleanRef(opts.ref);
   const actor = cleanActor(opts.actor);
 
