@@ -178,14 +178,14 @@
       "who": [
         "dim"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
       "outside": "Montonio",
       "needs": [
         "montonio-keys"
       ],
       "title": "Настроить боевой кабинет Montonio",
-      "detail": "Смотрено 23.09.2026. Оплаты: банки и карты готовы, возвраты — «In review». Payment links (10 €/мес) и BLIK (только злотые) не нужны: магазин их не использует. Доставка: Omniva, DPD, SmartPosti и International Shipping (Nova Post) включены; Unisend выключен, а магазин его предлагает — включить: сдача в пакомат, размер по умолчанию S, SMS-код возврата включён. Коды возврата включить и у Omniva и DPD. Из дополнений полезно «Parcel delay and risk notifications» — о посылке, которую не забирают; страница и письма отслеживания не нужны: письма шлёт магазин. Адрес отправителя — Mardi 1, туда же приходят возвраты. Проверка 23.09: все 105 маршрутов кассы оформляются, Unisend включён. Осталось: коды возврата у Omniva и DPD, уведомления о задержках, размер S по умолчанию.",
+      "detail": "Смотрено 23.09.2026. Оплаты: банки и карты готовы, возвраты — «In review». Payment links (10 €/мес) и BLIK (только злотые) не нужны: магазин их не использует. Доставка: Omniva, DPD, SmartPosti и International Shipping (Nova Post) включены; Unisend выключен, а магазин его предлагает — включить: сдача в пакомат, размер по умолчанию S, SMS-код возврата включён. Коды возврата включить и у Omniva и DPD. Из дополнений полезно «Parcel delay and risk notifications» — о посылке, которую не забирают; страница и письма отслеживания не нужны: письма шлёт магазин. Адрес отправителя — Mardi 1, туда же приходят возвраты. Проверка 23.09: все 105 маршрутов кассы оформляются, Unisend включён. Осталось: коды возврата у Omniva и DPD, уведомления о задержках, размер S по умолчанию. Проверено 25.09.2026 в боевом кабинете: коды возврата по SMS включены у Omniva, DPD и Unisend; у Unisend сдача в пакомат и размер по умолчанию S (у Omniva, DPD и SmartPosti настройки размера нет); «Parcel delay and risk notifications» активен.",
       "en": {
         "title": "Set up the live Montonio account",
         "detail": "Looked at 23.09.2026. Payments: bank links and cards ready, refunds «In review». Payment links (10 €/month) and BLIK (zloty only) are not needed: the shop uses neither. Shipping: Omniva, DPD, SmartPosti and International Shipping (Nova Post) are on; Unisend is off although the shop offers it — turn it on: parcel-machine hand-over, default size S, SMS return code on. Turn return codes on for Omniva and DPD too. Of the add-ons, «Parcel delay and risk notifications» is worth having — it flags a parcel nobody collects; the tracking page and tracking e-mails are not needed: the shop sends its own letters. Sender address is Mardi 1, which is also where returns come back. Check of 23.09: all 105 checkout routes can be booked, Unisend is on. Left: return codes on Omniva and DPD, delay notifications, default size S."
