@@ -3,14 +3,31 @@
  * is mocked (fetch stub, same idiom as tests/mail.test.ts); this file is
  * about auth, validation, and that a successful send stores both sides of
  * the exchange in order_messages.
+ *
+ * Since 25.09.2026 the letter is HELD ten seconds (admin redesign 1a, q3;
+ * src/lib/letter-hold.ts): the route answers at once and sends from after().
+ * The hold runs on a fake clock here — `settle()` steps it past the ten
+ * seconds and waits for the send — and tests/letter-hold.test.ts covers the
+ * hold itself («Вернуть», two letters at once).
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createOrder } from "@/lib/orders";
 import { query } from "@/lib/db";
+import { LETTER_HOLD_MS, letterClock, lettersSettled } from "@/lib/letter-hold";
 import { listMessages } from "@/lib/order-messages";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
+
+/* the fake clock the hold waits on: every sleeper wakes when settle() says so */
+let sleepers: Array<() => void> = [];
+const realSleep = letterClock.sleep;
+async function settle() {
+  const wake = sleepers;
+  sleepers = [];
+  wake.forEach((w) => w());
+  await lettersSettled();
+}
 
 type Min = { id: string; s: string };
 const product = (catalogueMin as Min[]).find((p) => p.s === "in")!;
@@ -47,6 +64,7 @@ describe("POST /api/admin/mail/send", () => {
     admin = `${ADMIN_COOKIE}=${makeSessionToken()}`;
   });
   afterAll(async () => {
+    letterClock.sleep = realSleep;
     await teardownDb();
     if (savedKey === undefined) delete process.env.RESEND_API_KEY;
     else process.env.RESEND_API_KEY = savedKey;
@@ -55,8 +73,13 @@ describe("POST /api/admin/mail/send", () => {
     resetRateLimits();
     await truncateAll();
     process.env.RESEND_API_KEY = "re_test_key";
+    letterClock.sleep = (ms: number) => {
+      expect(ms).toBe(LETTER_HOLD_MS);
+      return new Promise<void>((wake) => sleepers.push(wake));
+    };
   });
-  afterEach(() => {
+  afterEach(async () => {
+    await settle();   // nothing left waiting into the next test
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -100,13 +123,16 @@ describe("POST /api/admin/mail/send", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
-    expect(body.messageId).toBe("re_test_123");
-    expect(body.messages).toHaveLength(1);
-    expect(body.messages[0].direction).toBe("out");
-    expect(body.messages[0].body).toBe("Ваш заказ уже собран.");
+    // held: the answer comes at once, with the thread as it was
+    expect(body).toMatchObject({ held: true, kind: "reply", ms: LETTER_HOLD_MS });
+    expect(body.messages).toHaveLength(0);
+    expect(fetch).not.toHaveBeenCalled();
 
+    await settle();
     const thread = await listMessages(order.id);
     expect(thread).toHaveLength(1);
+    expect(thread[0].direction).toBe("out");
+    expect(thread[0].body).toBe("Ваш заказ уже собран.");
 
     // the request actually went to Resend, addressed to the order's e-mail
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -122,6 +148,7 @@ describe("POST /api/admin/mail/send", () => {
     const { POST } = await import("@/app/api/admin/mail/send/route");
 
     await POST(post({ orderId: order.id, customerMessage: "Когда придёт?", reply: "Уже в пути." }, admin));
+    await settle();
 
     const thread = await listMessages(order.id);
     expect(thread).toHaveLength(2);
@@ -143,7 +170,10 @@ describe("POST /api/admin/mail/send", () => {
     expect(body.error).toBe("no_customer_email");
   });
 
-  it("502s when Resend refuses the send, and stores nothing", async () => {
+  /* Resend's refusal now comes ten seconds after the answer, so the answer
+     cannot carry it: nothing is stored, and the panel — which reads the
+     thread again after the hold — says the letter did not go. */
+  it("when Resend refuses the held send, stores nothing", async () => {
     const order = await makeOrder();
     vi.stubGlobal(
       "fetch",
@@ -151,7 +181,9 @@ describe("POST /api/admin/mail/send", () => {
     );
     const { POST } = await import("@/app/api/admin/mail/send/route");
     const res = await POST(post({ orderId: order.id, reply: "hi" }, admin));
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(200);
+    await settle();
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(await listMessages(order.id)).toHaveLength(0);
   });
 

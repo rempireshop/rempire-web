@@ -16,14 +16,32 @@
  *
  * NB trailing slash: next.config has trailingSlash: true — POST to
  * "/api/admin/mail/send/" or the request 308s and the body is dropped.
+ *
+ * HELD TEN SECONDS since 25.09.2026 (admin redesign 1a, Dim's q3 — every
+ * customer letter the owner's tap sends waits so «Вернуть» can stop it; see
+ * src/lib/letter-hold.ts). Everything that can refuse the letter up front
+ * still does — the rate limit, the text, the mail key, the order and its
+ * address — and then the route answers at once:
+ *
+ *   → { ok: true, held: true, kind: "reply", token, ms, messages }
+ *
+ * `messages` is the thread as it stands (the new letter is not in it yet).
+ * Ten seconds later, unless PATCH /api/admin/orders/<id>/ { letterCancel:
+ * token } took it back, the letter goes and both sides of the exchange are
+ * stored, exactly as they were stored before; a letter Resend refuses then
+ * stores nothing, and the panel — which reads the thread again after the
+ * hold — says it did not go.
  */
 import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
+import { holdAndSend } from "@/lib/letter-hold";
 import { mailConfigured, sendMail } from "@/lib/mail";
 import { addMessage, listMessages, type OrderMessage } from "@/lib/order-messages";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// the letter leaves from after(), ten seconds after the answer
+export const maxDuration = 60;
 
 const MAX_BYTES = 20_000;
 const RATE_MAX = 30;
@@ -108,30 +126,36 @@ export async function POST(req: Request) {
   if (!order) return bad("order_not_found", 404);
   if (!order.email) return bad("no_customer_email");
 
-  const mail = renderReplyMail(reply, order.number);
-  const res = await sendMail({
-    to: order.email,
-    subject: `Re: заказ ${order.number}`,
-    html: mail.html,
-    text: mail.text,
-    tags: { type: "admin-reply", order: order.number.replace(/[^A-Za-z0-9_-]/g, "") },
-  });
+  /** The send itself — now, when the hold could not be written, or ten
+      seconds from now. The address is the order's as it is THEN. */
+  let sentNow: { ok: boolean; id: string | null; error?: string } | null = null;
+  const deliver = async (now: { id: string; number: string; email: string }) => {
+    if (!now.email) return;
+    const mail = renderReplyMail(reply, now.number);
+    const res = await sendMail({
+      to: now.email,
+      subject: `Re: заказ ${now.number}`,
+      html: mail.html,
+      text: mail.text,
+      tags: { type: "admin-reply", order: now.number.replace(/[^A-Za-z0-9_-]/g, "") },
+    });
+    sentNow = { ok: res.ok, id: res.id ?? null, error: res.error };
+    if (!res.ok) {
+      console.error("[admin/mail/send] send failed", now.number, res.error);
+      return;
+    }
+    try {
+      if (customerMessage) await addMessage(now.id, "in", customerMessage);
+      await addMessage(now.id, "out", reply, { subject: `Re: заказ ${now.number}`, resendId: res.id ?? null });
+    } catch (err) {
+      // The letter is already sent — losing the thread row must not look like
+      // the reply itself failed, so this is logged, not surfaced as an error.
+      console.error("[admin/mail/send] storing the thread failed", now.number, err);
+    }
+    await writeAuditSafe("admin", "mail.send", { orderId: now.id, number: now.number, resendId: res.id ?? null });
+  };
 
-  if (!res.ok) {
-    console.error("[admin/mail/send] send failed", order.number, res.error);
-    return Response.json({ ok: false, error: res.error || "send_failed" }, { status: 502 });
-  }
-
-  try {
-    if (customerMessage) await addMessage(order.id, "in", customerMessage);
-    await addMessage(order.id, "out", reply, { subject: `Re: заказ ${order.number}`, resendId: res.id ?? null });
-  } catch (err) {
-    // The letter is already sent — losing the thread row must not look like
-    // the reply itself failed, so this is logged, not surfaced as an error.
-    console.error("[admin/mail/send] storing the thread failed", order.number, err);
-  }
-
-  await writeAuditSafe("admin", "mail.send", { orderId: order.id, number: order.number, resendId: res.id ?? null });
+  const letter = await holdAndSend(order.id, "reply", deliver);
 
   let messages: OrderMessage[];
   try {
@@ -141,7 +165,15 @@ export async function POST(req: Request) {
     messages = [];
   }
 
-  return Response.json({ ok: true, messageId: res.id ?? null, messages }, { headers: { "cache-control": "no-store" } });
+  if (!letter.held) {
+    // the old way: it has just gone (or not) inside this request
+    const sent = sentNow as { ok: boolean; id: string | null; error?: string } | null;
+    if (!sent || !sent.ok) {
+      return Response.json({ ok: false, error: (sent && sent.error) || "send_failed" }, { status: 502 });
+    }
+    return Response.json({ ok: true, messageId: sent.id, messages }, { headers: { "cache-control": "no-store" } });
+  }
+  return Response.json({ ok: true, ...letter, messages }, { headers: { "cache-control": "no-store" } });
 }
 
 export function GET(): Response {

@@ -14,6 +14,12 @@
  *           a no-op (paid is a floor). Lands in admin_audit as `invoice.paid`.
  *   resend  «Отправить счёт ещё раз» — the same letter with the same PDF to
  *           the invoice's e-mail; `invoice.sent` in the audit either way.
+ *           Since 25.09.2026 (admin redesign 1a, Dim's q3) it leaves TEN
+ *           SECONDS later (src/lib/letter-hold.ts): the answer is
+ *           `{ held: true, token, ms }` and «Вернуть» on the toast — PATCH
+ *           /api/admin/orders/<id>/ { letterCancel: token } — stops it. With
+ *           no mail key there is nothing to hold: the letter is skipped at
+ *           once, exactly as before, and the card says so.
  *
  * The PDF is rendered on demand from the order row and the live seller
  * details — nothing is stored in the bucket. At this shop's volume a render
@@ -23,10 +29,14 @@
 import { requireAdmin } from "@/lib/auth";
 import { buildInvoicePdf, invoicePdfFilename } from "@/lib/invoice-pdf";
 import { invoiceOf, markInvoicePaid, resendInvoice } from "@/lib/invoices";
+import { holdAndSend } from "@/lib/letter-hold";
+import { mailConfigured } from "@/lib/mail";
 import { getOrder, getOrderByNumber, OrderError, setOrderPayment, setOrderStatus } from "@/lib/orders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// the held «resend» leaves from after(), ten seconds after the answer
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -108,6 +118,26 @@ export async function POST(req: Request, ctx: Ctx) {
           sent: outcome.mail?.sent ?? false,
           skipped: outcome.mail?.skipped ?? false,
         },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
+
+    /* Held for ten seconds when there is a mail key to send it with. The
+       invoice may have been paid or the order closed in the meantime; the
+       letter then has nothing to ask for and does not go. */
+    if (mailConfigured()) {
+      const letter = await holdAndSend(order.id, "invoice", async (now) => {
+        if (!invoiceOf(now) || !(now.status === "new" || now.status === "failed")) return;
+        await resendInvoice(now, "admin");
+      });
+      if (letter.held) {
+        return Response.json({ ok: true, order, ...letter }, { headers: { "cache-control": "no-store" } });
+      }
+      // not held (the hold could not be written): it has just been sent the old way
+      const now = (await getOrder(order.id)) ?? order;
+      const inv = invoiceOf(now);
+      return Response.json(
+        { ok: true, order: now, sent: !!inv && !inv.sendError, skipped: false },
         { headers: { "cache-control": "no-store" } },
       );
     }
